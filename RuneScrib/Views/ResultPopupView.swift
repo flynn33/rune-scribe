@@ -44,7 +44,7 @@ struct ResultPopupView: View {
             RuneHeader(
                 runic: headerRunic,
                 subtitle: headerSubtitle,
-                trailingButton: RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() }
+                trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() }]
             )
 
             VStack(spacing: RuneMetrics.sectionGap) {
@@ -54,9 +54,7 @@ struct ResultPopupView: View {
                           systemImage: panelIcon,
                           accent: showingRunes ? .runeGold : .runeSilver) {
                     ScrollView {
-                        Text(displayedText)
-                            .font(showingRunes ? .runic(24) : .system(size: 22, design: .monospaced))
-                            .foregroundColor(showingRunes ? .runeGold : .runeSilver)
+                        runeText
                             .textSelection(.enabled)
                             .lineSpacing(7)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -92,6 +90,24 @@ struct ResultPopupView: View {
         }
         .runeSheetFrame()
         .background(Color.runeNavy)
+    }
+
+    // MARK: - Output Text
+
+    /// The output glyphs. When showing runes, a faint Metal glow blooms around
+    /// them; the plain-text side renders without the effect.
+    @ViewBuilder
+    private var runeText: some View {
+        if showingRunes {
+            Text(displayedText)
+                .font(.runic(24))
+                .foregroundColor(.runeGold)
+                .runeGlow()
+        } else {
+            Text(displayedText)
+                .font(.system(size: 22, design: .monospaced))
+                .foregroundColor(.runeSilver)
+        }
     }
 
     // MARK: - Actions

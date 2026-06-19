@@ -1,7 +1,8 @@
 // RuneScrib/Metal/Shaders.metal
-// Norse-inspired animated background shader.
+// Norse-inspired animated background shader + a stitchable rune-glow layer effect.
 
 #include <metal_stdlib>
+#include <SwiftUI/SwiftUI_Metal.h>
 using namespace metal;
 
 // MARK: - Vertex Stage
@@ -87,4 +88,48 @@ fragment float4 fragment_rune_background(
     base += float3(shimmer);
 
     return float4(saturate(base), 1.0);
+}
+
+// MARK: - Rune Glow (SwiftUI layer effect)
+
+/// A faint coloured halo around rune glyphs. Used via SwiftUI's
+/// `.layerEffect(ShaderLibrary.runeGlow(...))`. For each pixel it samples the
+/// glyph coverage (alpha) on two concentric rings and blooms a soft, tinted glow
+/// into the surrounding transparent area, leaving the glyph itself unchanged.
+///
+/// Arguments (after the implicit `position` + `layer`):
+///   glowColor — halo tint, straight (non-premultiplied) alpha; its alpha caps the
+///               halo opacity (pass a SwiftUI `Color`)
+///   radius    — glow reach in points (must be ≤ the modifier's maxSampleOffset)
+///   intensity — overall halo strength
+///
+/// `layer.sample` returns premultiplied colour, and the return value must also be
+/// premultiplied, so the tint is premultiplied by its alpha before compositing.
+[[ stitchable ]] half4 runeGlow(float2 position,
+                                SwiftUI::Layer layer,
+                                half4 glowColor,
+                                float radius,
+                                float intensity) {
+    half4 src = layer.sample(position);
+
+    // Accumulate glyph coverage on two rings around this pixel.
+    const int kSamples = 12;
+    float coverage = 0.0;
+    for (int i = 0; i < kSamples; ++i) {
+        float angle = (float(i) + 0.5) / float(kSamples) * 6.28318530718;
+        float2 dir = float2(cos(angle), sin(angle));
+        coverage += float(layer.sample(position + dir * radius).a);
+        coverage += float(layer.sample(position + dir * (radius * 0.5)).a);
+    }
+    coverage /= float(kSamples * 2);
+
+    half halo = half(saturate(coverage * intensity));
+
+    // The halo only shows where the glyph itself is (semi-)transparent. RGB and
+    // alpha are scaled together so the premultiplied invariant holds.
+    half spill = halo * (1.0h - src.a);
+    half3 tint = glowColor.rgb * glowColor.a;          // premultiply the tint
+    half3 outRGB = src.rgb + tint * spill;
+    half outA = max(src.a, glowColor.a * halo);
+    return half4(outRGB, outA);
 }

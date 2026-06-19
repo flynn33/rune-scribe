@@ -35,9 +35,19 @@ struct RuneKey: Codable, Equatable {
         precondition(mapping.count == 89,
                      "RuneKey requires exactly 89 mapping entries, got \(mapping.count)")
 
+        self.init(keyId: UUID().uuidString, createdAt: Date(), mapping: mapping)
+    }
+
+    /// Reconstructs a RuneKey while preserving an existing identity and creation
+    /// date (used when importing a decoder file so the original key id/date are
+    /// retained). The reverse mapping is always re-derived from `mapping`.
+    init(keyId: String, createdAt: Date, mapping: [String: String]) {
+        precondition(mapping.count == 89,
+                     "RuneKey requires exactly 89 mapping entries, got \(mapping.count)")
+
         self.version = 1
-        self.keyId = UUID().uuidString
-        self.createdAt = Date()
+        self.keyId = keyId
+        self.createdAt = createdAt
         self.mapping = mapping
         self.reverseMapping = Dictionary(
             uniqueKeysWithValues: mapping.map { inputChar, runeChar in
