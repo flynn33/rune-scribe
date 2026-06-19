@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.2] - 2026-06-19
+
+- Add app icon and developer-team signing for iOS (#2) by @flynn33
+
 ## [1.0.1] - 2026-06-19
 
 - Single-file decoder export, plus decoder import and a Decode tab (#1) by @flynn33
