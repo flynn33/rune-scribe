@@ -50,6 +50,7 @@ final class KeychainService: Sendable {
     private let service = "com.runescrib.keystore"
     private let symmetricKeyAccount = "symmetricKey"
     private let cipherMappingAccount = "cipherMapping"
+    private let importedDecoderAccount = "importedDecoder"
 
     // MARK: - Generic Store / Retrieve
 
@@ -80,6 +81,19 @@ final class KeychainService: Sendable {
         let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
         guard addStatus == errSecSuccess else {
             throw KeychainError.storeFailed(addStatus)
+        }
+    }
+
+    /// Deletes any item stored under the given account (no-op if absent).
+    private func delete(account: String) throws {
+        let query: [String: Any] = [
+            kSecClass as String:       kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        let status = SecItemDelete(query as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw KeychainError.deleteFailed(status)
         }
     }
 
@@ -134,5 +148,23 @@ final class KeychainService: Sendable {
     /// Returns nil if no mapping has been stored yet.
     func retrieveEncryptedMapping() throws -> Data? {
         try retrieve(account: cipherMappingAccount)
+    }
+
+    // MARK: - Public API: Imported Decoder
+
+    /// Stores the AES-GCM–encrypted imported decoder (combined Data) in Keychain.
+    func storeEncryptedDecoder(_ data: Data) throws {
+        try store(data: data, account: importedDecoderAccount)
+    }
+
+    /// Retrieves the AES-GCM–encrypted imported decoder from Keychain.
+    /// Returns nil if none has been imported.
+    func retrieveEncryptedDecoder() throws -> Data? {
+        try retrieve(account: importedDecoderAccount)
+    }
+
+    /// Removes the imported decoder from Keychain.
+    func deleteImportedDecoder() throws {
+        try delete(account: importedDecoderAccount)
     }
 }

@@ -4,16 +4,37 @@ import SwiftUI
 
 struct ResultPopupView: View {
 
+    /// Which way the conversion went, deciding which side is the primary result.
+    enum Direction { case encode, decode }
+
     // MARK: - Input
 
-    let encodedText: String
-    let originalText: String
+    let runes: String
+    let plain: String
+    var direction: Direction = .encode
 
     // MARK: - State
 
-    @State private var showDecoded: Bool = false
+    /// When false, the view shows the direction's primary side (runes for encode,
+    /// plain text for decode); when true, it shows the other side.
+    @State private var showingAlternate: Bool = false
     @State private var copyConfirmed: Bool = false
     @Environment(\.dismiss) private var dismiss
+
+    // MARK: - Derived
+
+    private var showingRunes: Bool {
+        (direction == .encode && !showingAlternate) || (direction == .decode && showingAlternate)
+    }
+    private var displayedText: String { showingRunes ? runes : plain }
+    private var headerRunic: String { direction == .encode ? "ᛖᚾᚲᛟᛞᛖᛞ" : "ᛞᛖᚲᛟᛞᛖᛞ" }
+    private var headerSubtitle: String { direction == .encode ? "Encoded Runes" : "Decoded Text" }
+    private var panelTitle: String { showingRunes ? "Rune Output" : "Plain Text" }
+    private var panelIcon: String { showingRunes ? "sparkles" : "text.alignleft" }
+    private var toggleLabel: String { showingRunes ? "Show Text" : "Show Runes" }
+    private var toggleIcon: String { showingRunes ? "text.alignleft" : "eye" }
+    private var copyValue: String { direction == .encode ? runes : plain }
+    private var copyLabel: String { direction == .encode ? "Copy Runes" : "Copy Text" }
 
     // MARK: - Body
 
@@ -21,26 +42,26 @@ struct ResultPopupView: View {
         VStack(spacing: 0) {
 
             RuneHeader(
-                runic: "ᛖᚾᚲᛟᛞᛖᛞ",
-                subtitle: "Encoded Runes",
+                runic: headerRunic,
+                subtitle: headerSubtitle,
                 trailingButton: RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() }
             )
 
             VStack(spacing: RuneMetrics.sectionGap) {
 
                 // ── Output display ────────────────────────────────────────────
-                RunePanel(title: showDecoded ? "Decoded Preview" : "Rune Output",
-                          systemImage: showDecoded ? "eye" : "sparkles",
-                          accent: showDecoded ? .runeSilver : .runeGold) {
+                RunePanel(title: panelTitle,
+                          systemImage: panelIcon,
+                          accent: showingRunes ? .runeGold : .runeSilver) {
                     ScrollView {
-                        Text(showDecoded ? originalText : encodedText)
-                            .font(showDecoded ? .system(size: 22, design: .monospaced) : .runic(24))
-                            .foregroundColor(showDecoded ? .runeSilver : .runeGold)
+                        Text(displayedText)
+                            .font(showingRunes ? .runic(24) : .system(size: 22, design: .monospaced))
+                            .foregroundColor(showingRunes ? .runeGold : .runeSilver)
                             .textSelection(.enabled)
                             .lineSpacing(7)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.vertical, 2)
-                            .animation(.easeInOut(duration: 0.2), value: showDecoded)
+                            .animation(.easeInOut(duration: 0.2), value: showingAlternate)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
@@ -49,10 +70,9 @@ struct ResultPopupView: View {
                 // ── Balanced control row ──────────────────────────────────────
                 HStack(spacing: 14) {
                     Button {
-                        showDecoded.toggle()
+                        showingAlternate.toggle()
                     } label: {
-                        Label(showDecoded ? "Show Runes" : "Preview Decoded",
-                              systemImage: showDecoded ? "character" : "eye")
+                        Label(toggleLabel, systemImage: toggleIcon)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(RuneSecondaryButtonStyle())
@@ -60,7 +80,7 @@ struct ResultPopupView: View {
                     Button {
                         copyToClipboard()
                     } label: {
-                        Label(copyConfirmed ? "Copied!" : "Copy Runes",
+                        Label(copyConfirmed ? "Copied!" : copyLabel,
                               systemImage: copyConfirmed ? "checkmark.circle.fill" : "doc.on.clipboard")
                             .frame(maxWidth: .infinity)
                     }
@@ -77,7 +97,7 @@ struct ResultPopupView: View {
     // MARK: - Actions
 
     private func copyToClipboard() {
-        Clipboard.copy(encodedText)
+        Clipboard.copy(copyValue)
 
         withAnimation {
             copyConfirmed = true

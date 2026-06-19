@@ -2,23 +2,29 @@
 
 import SwiftUI
 
-/// A live row of small "stat chips" beneath the input: total characters,
-/// how many will encode to runes, and how many pass through unchanged.
+/// A live row of small "stat chips" beneath the input: total characters, how many
+/// are recognised (encodable to runes, or decodable from runes), and how many pass
+/// through unchanged.
 struct CharacterCountView: View {
 
     let text: String
-    let limit: Int = 4000
+    /// The set of characters the current operation recognises (input chars for
+    /// encoding, or known runes for decoding).
+    let recognized: Set<String>
+    /// Label for the recognised count, e.g. "encodable" or "decodable".
+    let recognizedLabel: String
+    var recognizedAccent: Color = .runeBlue
 
     private var count: Int { text.count }
-    private var encodableCount: Int {
-        text.filter { RuneCharacterSet.inputCharacterSet.contains(String($0)) }.count
+    private var recognizedCount: Int {
+        text.filter { recognized.contains(String($0)) }.count
     }
-    private var passthroughCount: Int { count - encodableCount }
+    private var passthroughCount: Int { count - recognizedCount }
 
     var body: some View {
         HStack(spacing: 8) {
             chip(value: count, label: "chars", icon: "textformat", accent: .runeSilver)
-            chip(value: encodableCount, label: "encodable", icon: "checkmark.seal", accent: .runeBlue)
+            chip(value: recognizedCount, label: recognizedLabel, icon: "checkmark.seal", accent: recognizedAccent)
             if passthroughCount > 0 {
                 chip(value: passthroughCount, label: "pass-through", icon: "arrow.uturn.right", accent: .runeGold)
             }
