@@ -1,0 +1,79 @@
+name: RuneScrib
+options:
+  bundleIdPrefix: com.runescrib
+  deploymentTarget:
+    macOS: "15.0"
+    iOS: "17.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    GENERATE_INFOPLIST_FILE: YES
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    PRODUCT_BUNDLE_IDENTIFIER: com.runescrib.app
+    INFOPLIST_KEY_CFBundleDisplayName: Rune-Scrib
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    ENABLE_HARDENED_RUNTIME: NO
+    # Personal, non-distributed app — sign to run locally (ad-hoc), no team required.
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    DEVELOPMENT_TEAM: ""
+targets:
+  RuneScrib-macOS:
+    type: application
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: RuneScrib
+    settings:
+      base:
+        PRODUCT_NAME: RuneScrib
+        INFOPLIST_KEY_NSHumanReadableCopyright: "RuneScrib — Personal Use"
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        COMBINE_HIDPI_IMAGES: YES
+        ENABLE_PREVIEWS: YES
+  RuneScrib-iOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: RuneScrib
+    settings:
+      base:
+        PRODUCT_NAME: RuneScrib
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UIStatusBarStyle: UIStatusBarStyleLightContent
+        ENABLE_PREVIEWS: YES
+        # Ad-hoc sign (inherited "-" identity) so the keychain-access-groups
+        # entitlement is applied — iOS Keychain access fails without it. For a
+        # physical device, set your own DEVELOPMENT_TEAM / automatic signing.
+        CODE_SIGN_ENTITLEMENTS: Config/RuneScrib-iOS.entitlements
+  RuneScribTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: RuneScribTests
+    dependencies:
+      - target: RuneScrib-macOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.runescrib.app.tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/Contents/MacOS/RuneScrib"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+schemes:
+  RuneScrib-macOS:
+    build:
+      targets:
+        RuneScrib-macOS: all
+    test:
+      targets:
+        - RuneScribTests
+  RuneScrib-iOS:
+    build:
+      targets:
+        RuneScrib-iOS: all
