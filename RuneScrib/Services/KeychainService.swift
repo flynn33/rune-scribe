@@ -32,7 +32,7 @@ enum KeychainError: Error, LocalizedError {
 // MARK: - KeychainService
 
 /// Low-level Keychain read/write service.
-/// All data stored under service "com.runescrib.keystore".
+/// All data stored under service "com.runescribe.keystore".
 /// Two accounts are used: "symmetricKey" and "cipherMapping".
 ///
 /// `Sendable`: this type is `final` and holds only immutable `let` properties,
@@ -47,7 +47,7 @@ final class KeychainService: Sendable {
 
     // MARK: - Constants
 
-    private let service = "com.runescrib.keystore"
+    private let service = "com.runescribe.keystore"
     private let symmetricKeyAccount = "symmetricKey"
     private let cipherMappingAccount = "cipherMapping"
     private let importedDecoderAccount = "importedDecoder"

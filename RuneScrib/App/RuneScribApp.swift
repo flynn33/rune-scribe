@@ -44,6 +44,6 @@ struct RuneScribApp: App {
 
 // MARK: - Notification Names
 extension Notification.Name {
-    static let exportKeyRequested = Notification.Name("com.runescrib.exportKeyRequested")
-    static let rotateKeyRequested = Notification.Name("com.runescrib.rotateKeyRequested")
+    static let exportKeyRequested = Notification.Name("com.runescribe.exportKeyRequested")
+    static let rotateKeyRequested = Notification.Name("com.runescribe.rotateKeyRequested")
 }

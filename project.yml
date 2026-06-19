@@ -1,6 +1,6 @@
 name: RuneScrib
 options:
-  bundleIdPrefix: com.runescrib
+  bundleIdPrefix: com.runescribe
   deploymentTarget:
     macOS: "15.0"
     iOS: "17.0"
@@ -11,7 +11,7 @@ settings:
     GENERATE_INFOPLIST_FILE: YES
     MARKETING_VERSION: "1.0.3"
     CURRENT_PROJECT_VERSION: "4"
-    PRODUCT_BUNDLE_IDENTIFIER: com.runescrib.app
+    PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app
     INFOPLIST_KEY_CFBundleDisplayName: Rune-Scrib
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
@@ -69,7 +69,7 @@ targets:
       - target: RuneScrib-macOS
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.runescrib.app.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.tests
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/Contents/MacOS/RuneScrib"
         BUNDLE_LOADER: "$(TEST_HOST)"
 schemes:
