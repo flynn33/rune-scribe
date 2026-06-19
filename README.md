@@ -16,8 +16,10 @@ for decoding) or rotated on demand.
   to runes; everything else (newlines, emoji, accents) passes through unchanged.
 - **Key in the Keychain** — the mapping is AES-256-GCM encrypted; the symmetric key
   never leaves the device and never rotates (only the mapping does).
-- **Export** the key as a machine-readable `.json` and a human-readable `.md` table,
-  bundled with the **Noto Sans Runic** font so every rune renders for the recipient.
+- **Export** the decoder as a single `.json` file — import it into RuneScrib to
+  decode, or share it with an AI model (Claude, ChatGPT, Grok) to read the table.
+- **Import** a decoder file (Key Management → Import Decoder), then switch to the
+  **Decode** tab and paste runes to turn them back into text.
 - **Rotate** the mapping (with a warning — old messages become undecodable).
 - **Universal UI** — one SwiftUI codebase, native on Mac and iPhone/iPad, with an
   animated Metal header and a consistent design system.

@@ -18,6 +18,12 @@ struct CipherEngine {
         self.key = key
     }
 
+    /// Builds an engine for decoding rune messages with an imported decoder key.
+    /// (The forward mapping is enough to reconstruct the same reverse mapping.)
+    init(decoder: ImportedDecoder) {
+        self.key = RuneKey(mapping: decoder.mapping)
+    }
+
     // MARK: - Encode
 
     /// Encodes a plain-text String into a rune String.

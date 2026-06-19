@@ -2,9 +2,9 @@
 
 import Foundation
 
-/// The structure written to disk when the user exports the cipher key.
-/// This is what gets shared with AI models (Claude, ChatGPT, Grok, etc.)
-/// for pre-loading the decryption table.
+/// The single decoder/decrypter file written on export. It can be imported back
+/// into RuneScrib (Key Management → Import Decoder) to decode messages, or shared
+/// with an AI model (Claude, ChatGPT, Grok, etc.) which reads the table directly.
 struct RuneKeyExport: Codable {
     let applicationName: String
     let version: Int
@@ -26,10 +26,12 @@ struct RuneKeyExport: Codable {
                          "maps to a unique Unicode Runic character (U+16A0–U+16F8). " +
                          "The mapping is a random bijection generated and stored " +
                          "encrypted on the originating device.",
-            usageInstructions: "To decode a RuneScrib message: for each rune character " +
-                                "in the encoded string, look up the rune in 'reverseMapping' " +
-                                "to find the original character. Characters not in the " +
-                                "mapping pass through unchanged (e.g. newlines, emoji).",
+            usageInstructions: "To decode in the RuneScrib app: Key Management → Import " +
+                                "Decoder, choose this file, then paste the runes into the " +
+                                "Decode tab. To decode by hand or with an AI model: for each " +
+                                "rune in the message, look it up in 'reverseMapping' to get the " +
+                                "original character. Characters absent from the mapping pass " +
+                                "through unchanged (e.g. newlines, emoji).",
             characterSetSize: 89,
             mapping: key.mapping,
             reverseMapping: key.reverseMapping
