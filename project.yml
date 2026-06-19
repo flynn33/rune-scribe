@@ -34,6 +34,13 @@ targets:
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         COMBINE_HIDPI_IMAGES: YES
         ENABLE_PREVIEWS: YES
+        # App Sandbox is mandatory for the Mac App Store. The user-selected
+        # read-write entitlement lets the decoder export/import file panels work
+        # inside the sandbox. Signed with the developer team's automatic signing.
+        CODE_SIGN_ENTITLEMENTS: Config/RuneScrib-macOS.entitlements
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: "9AQ2C2838M"
   RuneScrib-iOS:
     type: application
     platform: iOS
