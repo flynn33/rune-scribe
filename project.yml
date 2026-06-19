@@ -48,10 +48,13 @@ targets:
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
         INFOPLIST_KEY_UIStatusBarStyle: UIStatusBarStyleLightContent
         ENABLE_PREVIEWS: YES
-        # Ad-hoc sign (inherited "-" identity) so the keychain-access-groups
-        # entitlement is applied — iOS Keychain access fails without it. For a
-        # physical device, set your own DEVELOPMENT_TEAM / automatic signing.
         CODE_SIGN_ENTITLEMENTS: Config/RuneScrib-iOS.entitlements
+        # Signed with the developer team's automatic signing. Xcode provisions the
+        # keychain-access-groups entitlement automatically; $(AppIdentifierPrefix)
+        # in the entitlements file resolves to this team's prefix.
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: "9AQ2C2838M"
   RuneScribTests:
     type: bundle.unit-test
     platform: macOS
