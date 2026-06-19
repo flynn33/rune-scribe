@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.3] - 2026-06-19
+
+- Fix Xcode warnings: iPad orientations and MTKView main-actor isolation (#3) by @flynn33
+
 ## [1.0.2] - 2026-06-19
 
 - Add app icon and developer-team signing for iOS (#2) by @flynn33
