@@ -4,7 +4,7 @@
 <dict>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>$(AppIdentifierPrefix)com.runescrib.app</string>
+		<string>$(AppIdentifierPrefix)com.runescribe.app</string>
 	</array>
 </dict>
 </plist>
