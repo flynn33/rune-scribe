@@ -16,6 +16,9 @@ struct RuneMetalView {
     }
 
     /// Builds and configures the MTKView. Shared by both platform representations.
+    /// `@MainActor` because `MTKView` (an NS/UIView) is main-actor-isolated and this
+    /// is only ever called from the main-actor `make…View(context:)` methods.
+    @MainActor
     fileprivate func makeMetalView(_ coordinator: MetalRenderer) -> MTKView {
         let view = MTKView()
 
