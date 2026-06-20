@@ -16,22 +16,25 @@ struct ContentView: View {
         var id: String { rawValue }
     }
 
-    /// Identifiable payload carried into the result sheet (avoids SwiftUI's
-    /// `.sheet(isPresented:)` stale-capture bug).
-    private struct ResultPayload: Identifiable {
-        let id = UUID()
-        let runes: String
-        let plain: String
-        let direction: ResultPopupView.Direction
-    }
+    /// Drives the in-place transformation: the text box edits, then plays the
+    /// inscription animation, then rests on the result.
+    private enum BoxPhase { case editing, transforming, result }
 
     // MARK: - State
 
     @State private var mode: Mode = .encode
     @State private var inputText: String = ""
-    @State private var result: ResultPayload?
+    @State private var boxPhase: BoxPhase = .editing
+    @State private var sourceSnapshot: String = ""
+    @State private var targetSnapshot: String = ""
+    @State private var transformStart: Date = .distantPast
+    @State private var transformDirection: RuneInscriptionText.Direction = .encode
+    @State private var settleTask: Task<Void, Never>?
+    @State private var copyConfirmed = false
     @State private var showLibrary: Bool = false
     @State private var showSettings: Bool = false
+
+    private var isEditing: Bool { boxPhase == .editing }
 
     // MARK: - Derived
 
@@ -69,6 +72,7 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
 
                     activeCipherBar
+                        .disabled(!isEditing)
 
                     // ── Mode toggle ───────────────────────────────────────────
                     Picker("Mode", selection: $mode) {
@@ -76,49 +80,27 @@ struct ContentView: View {
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
+                    .disabled(!isEditing)
 
-                    // ── Input ─────────────────────────────────────────────────
+                    // ── Text frame (edits, then transforms in place) ──────────
                     VStack(alignment: .leading, spacing: 10) {
-                        RuneEyebrow(title: mode == .encode ? "Plain Text" : "Rune Text",
-                                    systemImage: mode == .encode ? "text.alignleft" : "wand.and.rays",
-                                    accent: .runeSilver)
+                        RuneEyebrow(title: eyebrowTitle,
+                                    systemImage: eyebrowIcon,
+                                    accent: boxPhase == .editing ? .runeSilver : .runeGold)
 
-                        ZStack(alignment: .topLeading) {
-                            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                                .fill(Color.runeParchment)
+                        textFrame
 
-                            TextEditor(text: $inputText)
-                                .font(.system(size: 15, design: .monospaced))
-                                .foregroundColor(.white)
-                                .scrollContentBackground(.hidden)
-                                .padding(10)
-
-                            if inputText.isEmpty {
-                                Text(mode == .encode ? "Type or paste your message here…"
-                                                     : "Paste runes to decode…")
-                                    .font(.system(size: 15, design: .monospaced))
-                                    .foregroundColor(.runeSilver.opacity(0.45))
-                                    .padding(.horizontal, 15)
-                                    .padding(.vertical, 18)
-                                    .allowsHitTesting(false)
-                            }
+                        if isEditing {
+                            CharacterCountView(text: inputText,
+                                               recognized: recognizedSet,
+                                               recognizedLabel: mode == .encode ? "encodable" : "decodable",
+                                               recognizedAccent: mode == .encode ? .runeBlue : .runeGold)
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .clipShape(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                                .strokeBorder(Color.runeBlue.opacity(0.35), lineWidth: 1)
-                        )
-
-                        CharacterCountView(text: inputText,
-                                           recognized: recognizedSet,
-                                           recognizedLabel: mode == .encode ? "encodable" : "decodable",
-                                           recognizedAccent: mode == .encode ? .runeBlue : .runeGold)
                     }
                     .frame(maxHeight: .infinity)
 
-                    // ── Decode hint ───────────────────────────────────────────
-                    if mode == .decode {
+                    // ── Decode hint (editing only) ────────────────────────────
+                    if isEditing && mode == .decode {
                         HStack(spacing: 8) {
                             Image(systemName: "info.circle").foregroundColor(.runeBlue)
                             Text("Decoding uses the active cipher. To read someone else's runes, "
@@ -130,8 +112,8 @@ struct ContentView: View {
                         }
                     }
 
-                    // ── Error display ─────────────────────────────────────────
-                    if let error = keyManager.lastError {
+                    // ── Error display (editing only) ──────────────────────────
+                    if isEditing, let error = keyManager.lastError {
                         HStack(spacing: 8) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundColor(.orange)
@@ -142,29 +124,9 @@ struct ContentView: View {
                         }
                     }
 
-                    // ── Primary action (centered) ─────────────────────────────
-                    HStack {
-                        Spacer()
-                        if keyManager.isLoading {
-                            HStack(spacing: 8) {
-                                ProgressView().scaleEffect(0.8)
-                                Text("Loading cipher…")
-                                    .font(.system(size: 13, design: .monospaced))
-                                    .foregroundColor(.runeSilver)
-                            }
-                        } else {
-                            Button {
-                                performAction()
-                            } label: {
-                                Label(mode == .encode ? "RUNE SCRIBE" : "DECODE",
-                                      systemImage: mode == .encode ? "bolt.fill" : "wand.and.rays")
-                            }
-                            .buttonStyle(RuneScribButtonStyle())
-                            .keyboardShortcut(.return, modifiers: [.command])
-                            .disabled(actionDisabled)
-                        }
-                        Spacer()
-                    }
+                    // ── Action area (phase-dependent) ─────────────────────────
+                    actionArea
+                        .frame(minHeight: 46)
                 }
                 .padding(RuneMetrics.pad)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -172,22 +134,118 @@ struct ContentView: View {
         }
         .runeRootFrame()
         .preferredColorScheme(.dark)
-        // ── Sheets ────────────────────────────────────────────────────────────
-        .sheet(item: $result) { payload in
-            ResultPopupView(runes: payload.runes, plain: payload.plain, direction: payload.direction)
-        }
         .sheet(isPresented: $showLibrary) {
             CipherLibraryView().environmentObject(keyManager)
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
-        // ── Menu-command notification listeners ───────────────────────────────
         .onReceive(NotificationCenter.default.publisher(for: .openLibraryRequested)) { _ in
             showLibrary = true
         }
         .onReceive(NotificationCenter.default.publisher(for: .openSettingsRequested)) { _ in
             showSettings = true
+        }
+    }
+
+    // MARK: - Text Frame
+
+    private var textFrame: some View {
+        ZStack(alignment: .topLeading) {
+            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                .fill(Color.runeParchment)
+
+            switch boxPhase {
+            case .editing:
+                TextEditor(text: $inputText)
+                    .font(.system(size: 15, design: .monospaced))
+                    .foregroundColor(.white)
+                    .scrollContentBackground(.hidden)
+                    .padding(10)
+
+                if inputText.isEmpty {
+                    Text(mode == .encode ? "Type or paste your message here…"
+                                         : "Paste runes to decode…")
+                        .font(.system(size: 15, design: .monospaced))
+                        .foregroundColor(.runeSilver.opacity(0.45))
+                        .padding(.horizontal, 15)
+                        .padding(.vertical, 18)
+                        .allowsHitTesting(false)
+                }
+
+            case .transforming, .result:
+                ScrollView {
+                    RuneInscriptionText(source: sourceSnapshot,
+                                        target: targetSnapshot,
+                                        start: transformStart,
+                                        direction: transformDirection,
+                                        settled: boxPhase == .result)
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .clipShape(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                .strokeBorder((boxPhase == .editing ? Color.runeBlue : Color.runeGold).opacity(0.35),
+                              lineWidth: 1)
+        )
+    }
+
+    // MARK: - Action Area
+
+    @ViewBuilder
+    private var actionArea: some View {
+        switch boxPhase {
+        case .editing:
+            HStack {
+                Spacer()
+                if keyManager.isLoading {
+                    HStack(spacing: 8) {
+                        ProgressView().scaleEffect(0.8)
+                        Text("Loading cipher…")
+                            .font(.system(size: 13, design: .monospaced))
+                            .foregroundColor(.runeSilver)
+                    }
+                } else {
+                    Button {
+                        performAction()
+                    } label: {
+                        Label(mode == .encode ? "RUNE SCRIBE" : "DECODE",
+                              systemImage: mode == .encode ? "bolt.fill" : "wand.and.rays")
+                    }
+                    .buttonStyle(RuneScribButtonStyle())
+                    .keyboardShortcut(.return, modifiers: [.command])
+                    .disabled(actionDisabled)
+                }
+                Spacer()
+            }
+
+        case .transforming:
+            // No spinner or indicator — the inscription in the frame is the feedback.
+            Color.clear
+
+        case .result:
+            HStack(spacing: 14) {
+                Button {
+                    returnToEditing()
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(RuneSecondaryButtonStyle())
+
+                Button {
+                    confirmCopy()
+                } label: {
+                    Label(copyConfirmed ? "Copied!" : (transformDirection == .encode ? "Copy Runes" : "Copy Text"),
+                          systemImage: copyConfirmed ? "checkmark.circle.fill" : "doc.on.clipboard")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(RuneScribButtonStyle())
+            }
         }
     }
 
@@ -240,18 +298,66 @@ struct ContentView: View {
             .strokeBorder(Color.runeGold.opacity(0.22), lineWidth: 1))
     }
 
+    // MARK: - Copy
+
+    private var eyebrowTitle: String {
+        switch boxPhase {
+        case .editing:      return mode == .encode ? "Plain Text" : "Rune Text"
+        case .transforming: return mode == .encode ? "Inscribing…" : "Deciphering…"
+        case .result:       return mode == .encode ? "Rune Output" : "Plain Text"
+        }
+    }
+
+    private var eyebrowIcon: String {
+        switch boxPhase {
+        case .editing:      return mode == .encode ? "text.alignleft" : "wand.and.rays"
+        case .transforming: return "sparkles"
+        case .result:       return mode == .encode ? "sparkles" : "text.alignleft"
+        }
+    }
+
     // MARK: - Actions
 
     private func performAction() {
-        guard let cipher = keyManager.activeCipher else { return }
+        guard boxPhase == .editing, let cipher = keyManager.activeCipher else { return }
+        let source = inputText
         let engine = CipherEngine(key: cipher.key)
+        let target: String
         switch mode {
         case .encode:
-            let encoded = engine.encode(inputText)
-            result = ResultPayload(runes: encoded, plain: inputText, direction: .encode)
+            target = engine.encode(source)
+            transformDirection = .encode
         case .decode:
-            let decoded = engine.decode(inputText)
-            result = ResultPayload(runes: inputText, plain: decoded, direction: .decode)
+            target = engine.decode(source)
+            transformDirection = .decode
+        }
+
+        sourceSnapshot = source
+        targetSnapshot = target
+        transformStart = Date()
+        copyConfirmed = false
+        boxPhase = .transforming
+
+        settleTask?.cancel()
+        let duration = RuneInscriptionText.totalDuration(count: Array(target).count)
+        settleTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeOut(duration: 0.25)) { boxPhase = .result }
+        }
+    }
+
+    private func returnToEditing() {
+        settleTask?.cancel()
+        copyConfirmed = false
+        boxPhase = .editing
+    }
+
+    private func confirmCopy() {
+        Clipboard.copy(targetSnapshot)
+        withAnimation { copyConfirmed = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            withAnimation { copyConfirmed = false }
         }
     }
 }
