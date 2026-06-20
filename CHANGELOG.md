@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.12] - 2026-06-20
+
+- Rebrand to "Rune Scribe" and refresh the README + docs (#12) by @flynn33
+
 ## [1.0.11] - 2026-06-20
 
 - Add cross-person decoder round-trip tests (#11) by @flynn33
