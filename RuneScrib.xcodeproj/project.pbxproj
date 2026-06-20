@@ -63,6 +63,7 @@
 		B1BD766416360737E09888AC /* CipherLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */; };
 		B4F8144B90E37A2B69CF4F17 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23D157957EEFB14E8CB7147 /* AppDelegate.swift */; };
 		B7CD1CE0E7E485F14E5C88CB /* CipherEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CC98818174FC25A813E2C53 /* CipherEngine.swift */; };
+		BA96B80988B7C04093BC6A28 /* FriendDecodeRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15B84C42FF728AC45D4DDB66 /* FriendDecodeRoundTripTests.swift */; };
 		BF865C8F7AC22840D94B464C /* CipherEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CC98818174FC25A813E2C53 /* CipherEngine.swift */; };
 		C1A6CF8336377BFF19B73290 /* RuneMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C804E8889A60C1394E8D3841 /* RuneMetalView.swift */; };
 		CEC9C8FD3A0AE90684413AF5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2631879B41FCA864DDE6E7 /* ContentView.swift */; };
@@ -92,6 +93,7 @@
 /* Begin PBXFileReference section */
 		098511B1E52AF229830C74E4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribButtonStyle.swift; sourceTree = "<group>"; };
+		15B84C42FF728AC45D4DDB66 /* FriendDecodeRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendDecodeRoundTripTests.swift; sourceTree = "<group>"; };
 		236AB4A6CB356708A2A004EE /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		289AA0236910C21C79D71A7E /* PINFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINFlowView.swift; sourceTree = "<group>"; };
 		29341AC7EDF3058C96DD83C0 /* LicenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseView.swift; sourceTree = "<group>"; };
@@ -262,6 +264,7 @@
 				4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */,
 				4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */,
 				88D25CB73E2E5E32F643BC18 /* DecoderImportTests.swift */,
+				15B84C42FF728AC45D4DDB66 /* FriendDecodeRoundTripTests.swift */,
 				CAD31D611732C03413A3F3D8 /* RuneScribTests.swift */,
 			);
 			path = RuneScribTests;
@@ -399,6 +402,7 @@
 				B0614EBD257EEA0A80FA1862 /* AppLockTests.swift in Sources */,
 				D8B2571F4B7BF5D06739FFA8 /* CipherLibraryTests.swift in Sources */,
 				215EB362159B130F2A94AFE6 /* DecoderImportTests.swift in Sources */,
+				BA96B80988B7C04093BC6A28 /* FriendDecodeRoundTripTests.swift in Sources */,
 				A52AFD106332F8C377E2DF0E /* RuneScribTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
