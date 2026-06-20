@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.7] - 2026-06-20
+
+- Animate text-to-rune conversion in place (rune-by-rune inscription) (#7) by @flynn33
+
 ## [1.0.6] - 2026-06-20
 
 - PIN app lock, multi-cipher library, settings, and rune glow (#6) by @flynn33
