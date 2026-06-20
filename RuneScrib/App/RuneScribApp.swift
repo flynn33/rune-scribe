@@ -1,5 +1,5 @@
 // RuneScrib/App/RuneScribApp.swift
-// Rune-Scribe — Norse Runic Substitution Cipher
+// Rune Scribe — Norse Runic Substitution Cipher
 // Universal app: macOS 15.0+ and iOS 17.0+ | Swift 6.0 | SwiftUI
 
 import SwiftUI

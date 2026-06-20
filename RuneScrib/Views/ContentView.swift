@@ -55,8 +55,8 @@ struct ContentView: View {
             VStack(spacing: 0) {
 
                 RuneHeader(
-                    runic: "ᚱᚢᚾᛖ ᛋᚲᚱᛁᛒ",
-                    subtitle: "Rune · Scribe",
+                    runic: "ᚱᚢᚾᛖ ᛋᚲᚱᛁᛒᛖ",
+                    subtitle: "Rune Scribe",
                     trailingButtons: [
                         RuneHeaderButton(systemImage: "gearshape.fill",
                                          help: "Settings") { showSettings = true },
