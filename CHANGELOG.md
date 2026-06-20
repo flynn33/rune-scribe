@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.10] - 2026-06-20
+
+- Lock the text frame height during the transformation (#10) by @flynn33
+
 ## [1.0.9] - 2026-06-20
 
 - Keep runes norse and the text frame fixed; remove info chips (#9) by @flynn33
