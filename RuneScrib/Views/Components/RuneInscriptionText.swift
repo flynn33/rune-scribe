@@ -6,8 +6,12 @@ import Foundation
 /// The in-place transformation animation: the output is inscribed one glyph at a
 /// time, left to right. Each landing glyph flares bright, then dims to its resting
 /// colour; positions that haven't been reached yet still show the original source
-/// character. Encoding settles into glowing gold runes; decoding settles into pale
-/// plain text. When `settled` is true it renders the final, static result.
+/// character. Encoding settles into gold runes, decoding into pale plain text.
+///
+/// When `settled` is true it renders the final, static result as plain selectable
+/// text — no Metal effect — so the runes stay sharp and individual glyphs can be
+/// selected and copied. The flare is a pure colour flash (also sharp); there is no
+/// rasterising glow.
 ///
 /// Rendered as a single `AttributedString` per frame so the text wraps naturally
 /// while each character keeps its own font (runic vs. monospaced) and colour.
@@ -44,12 +48,13 @@ struct RuneInscriptionText: View {
         self.settled = settled
     }
 
-    // MARK: - Timing
+    // MARK: - Timing (fast)
 
-    private static let startDelay = 0.10
-    private static let flareDecay = 0.34
-    private static let maxTotal   = 1.9
-    private static let perCharCap = 0.085
+    private static let startDelay = 0.0
+    private static let flareDecay = 0.13
+    private static let maxTotal   = 0.5
+    private static let perCharCap = 0.028
+    private static let settleBuffer = 0.05
 
     static func perChar(count: Int) -> Double {
         count > 0 ? Swift.min(perCharCap, maxTotal / Double(count)) : perCharCap
@@ -59,7 +64,7 @@ struct RuneInscriptionText: View {
     /// glyph (index count-1) lands at `startDelay + (count-1)*perChar`, its flare
     /// finishes `flareDecay` later, plus a small settle buffer.
     static func totalDuration(count: Int) -> Double {
-        startDelay + Double(Swift.max(count - 1, 0)) * perChar(count: count) + flareDecay + 0.12
+        startDelay + Double(Swift.max(count - 1, 0)) * perChar(count: count) + flareDecay + settleBuffer
     }
 
     private func inscribeTime(_ index: Int) -> Double {
@@ -70,31 +75,21 @@ struct RuneInscriptionText: View {
 
     var body: some View {
         if settled {
-            styled(finalAttributed, glow: 1.5, isSettled: true)
+            glyphText(finalAttributed)
+                .textSelection(.enabled)
         } else {
             TimelineView(.animation) { timeline in
                 let t = timeline.date.timeIntervalSince(start)
-                styled(attributed(at: t), glow: glowIntensity(at: t), isSettled: false)
+                glyphText(attributed(at: t))
             }
         }
     }
 
-    @ViewBuilder
-    private func styled(_ string: AttributedString, glow: CGFloat, isSettled: Bool) -> some View {
-        let text = Text(string)
+    private func glyphText(_ string: AttributedString) -> some View {
+        Text(string)
             .lineSpacing(7)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 2)
-
-        if direction == .encode {
-            if isSettled {
-                text.runeGlow()
-            } else {
-                text.runeGlow(intensity: glow, animated: false)
-            }
-        } else {
-            text
-        }
     }
 
     // MARK: - Attributed Builders
@@ -130,17 +125,6 @@ struct RuneInscriptionText: View {
         return result
     }
 
-    // MARK: - Glow
-
-    private func glowIntensity(at t: Double) -> CGFloat {
-        var inscribed = 0
-        while inscribed < targetChars.count && t >= inscribeTime(inscribed) { inscribed += 1 }
-        guard inscribed > 0 else { return 1.2 }
-        let age = t - inscribeTime(inscribed - 1)
-        let flare = Swift.max(0, 1 - age / Self.flareDecay)
-        return 1.5 + 1.1 * CGFloat(flare)   // surge as each glyph lands, ease between
-    }
-
     // MARK: - Glyph Styling
 
     private func font(for character: Character) -> Font {
@@ -165,7 +149,7 @@ struct RuneInscriptionText: View {
 
     private static let goldRGB: (Double, Double, Double)          = (0.831, 0.592, 0.102)
     private static let settledDecodeRGB: (Double, Double, Double)  = (0.86, 0.88, 0.93)
-    private static let flareRGB: (Double, Double, Double)          = (1.0, 0.94, 0.72)
+    private static let flareRGB: (Double, Double, Double)          = (1.0, 0.97, 0.84)
 
     private static func lerp(_ a: (Double, Double, Double),
                              _ b: (Double, Double, Double),
