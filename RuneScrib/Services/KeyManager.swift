@@ -134,6 +134,21 @@ final class KeyManager: ObservableObject {
         return cipher
     }
 
+    /// Imports a cipher delivered over the wire (deep link, QR code, or clipboard)
+    /// as a compact 89-byte permutation. Reuses the exact same validated funnel as
+    /// file import by reconstituting the decoder JSON first, so there's one import
+    /// path and one set of validation rules.
+    @discardableResult
+    func importCipher(fromPermutation perm: [UInt8], label: String?) throws -> NamedCipher {
+        let json = try RuneCipherLink.exportJSONData(forPermutation: perm)
+        return try importCipher(data: json, label: label)
+    }
+
+    /// Whether a cipher with the given key id is already present in the library.
+    func libraryContainsKeyId(_ keyId: String) -> Bool {
+        library.ciphers.contains { $0.key.keyId == keyId }
+    }
+
     /// Renames the cipher with the given id.
     func renameCipher(id: UUID, to newLabel: String) {
         guard let existing = library.ciphers.first(where: { $0.id == id }) else { return }
