@@ -47,8 +47,8 @@ struct SettingsView: View {
         RunePanel(title: "App Lock", systemImage: "lock.fill", accent: .runeBlue) {
             VStack(alignment: .leading, spacing: 12) {
                 Text(appLock.isPINSet
-                     ? "A 4-digit PIN is required each time Rune-Scribe launches or returns from the background."
-                     : "Protect Rune-Scribe with a 4-digit PIN, required on launch and when returning from the background.")
+                     ? "A 4-digit PIN is required each time Rune Scribe launches or returns from the background."
+                     : "Protect Rune Scribe with a 4-digit PIN, required on launch and when returning from the background.")
                     .font(.system(size: 12))
                     .foregroundColor(.runeSilver)
                     .lineSpacing(2)
@@ -89,7 +89,7 @@ struct SettingsView: View {
         RunePanel(title: "About", systemImage: "info.circle", accent: .runeGold) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text("Rune-Scribe")
+                    Text("Rune Scribe")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
                     Spacer()
@@ -102,7 +102,7 @@ struct SettingsView: View {
                     .font(.system(size: 12, weight: .semibold, design: .monospaced))
                     .foregroundColor(.runeGold)
 
-                Text("Rune-Scribe turns your messages into Norse runes with a private substitution cipher that stays encrypted on your device.")
+                Text("Rune Scribe turns your messages into Norse runes with a private substitution cipher that stays encrypted on your device.")
                     .font(.system(size: 12))
                     .foregroundColor(.runeSilver)
                     .lineSpacing(2)
@@ -124,7 +124,7 @@ struct SettingsView: View {
     private var licensePanel: some View {
         RunePanel(title: "License", systemImage: "doc.text", accent: .runeSilver) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Rune-Scribe is licensed, not sold. Your use is governed by the End-User License Agreement.")
+                Text("Rune Scribe is licensed, not sold. Your use is governed by the End-User License Agreement.")
                     .font(.system(size: 12))
                     .foregroundColor(.runeSilver)
                     .lineSpacing(2)

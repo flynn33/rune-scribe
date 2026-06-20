@@ -1,10 +1,10 @@
-# Rune-Scribe — End-User License Agreement
+# Rune Scribe — End-User License Agreement
 
 _Last updated: June 2026_
 
 This End-User License Agreement ("Agreement") is a binding agreement between you
 ("You" or "Licensee") and **Raven Forge Software** ("Licensor", "we", "us", or
-"our"). It governs your use of the **Rune-Scribe** software application, together
+"our"). It governs your use of the **Rune Scribe** software application, together
 with all associated documentation, updates, and content (collectively, the
 "Application").
 

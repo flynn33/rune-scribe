@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to RuneScrib are recorded here. New entries are added
+All notable changes to Rune Scribe are recorded here. New entries are added
 automatically when a pull request is merged into `main` (see
 `.github/workflows/version-bump.yml`). The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses

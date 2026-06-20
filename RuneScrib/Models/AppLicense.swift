@@ -11,12 +11,12 @@ import Foundation
 /// is mirrored in `EULA.md` at the repository root for App Store Connect.
 enum AppLicense {
 
-    static let appName = "Rune-Scribe"
+    static let appName = "Rune Scribe"
     static let company = "Raven Forge Software"
     static let lastUpdated = "June 2026"
 
     static let text: String = """
-    RUNE-SCRIBE
+    RUNE SCRIBE
     END-USER LICENSE AGREEMENT
 
     Last updated: \(lastUpdated)

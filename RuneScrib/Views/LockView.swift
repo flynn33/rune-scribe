@@ -22,7 +22,7 @@ struct LockView: View {
 
                 PINPadView(
                     title: "Enter PIN",
-                    subtitle: "Enter your 4-digit PIN to unlock Rune-Scribe.",
+                    subtitle: "Enter your 4-digit PIN to unlock Rune Scribe.",
                     error: error,
                     shakeToken: shakeToken
                 ) { pin in
