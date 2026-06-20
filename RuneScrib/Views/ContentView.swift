@@ -80,8 +80,12 @@ struct ContentView: View {
                     textFrame
                         .frame(maxHeight: .infinity)
 
+                    // Locked to a fixed height so it never competes with the text
+                    // frame for vertical space. The button row is 46pt tall; the
+                    // transforming phase's empty placeholder must match exactly,
+                    // otherwise it would grab space and shrink the frame mid-animation.
                     actionArea
-                        .frame(minHeight: 46)
+                        .frame(height: 46)
                 }
                 .padding(RuneMetrics.pad)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
