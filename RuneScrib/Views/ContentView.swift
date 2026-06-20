@@ -30,23 +30,21 @@ struct ContentView: View {
     @State private var mode: Mode = .encode
     @State private var inputText: String = ""
     @State private var result: ResultPayload?
-    @State private var showKeyManagement: Bool = false
+    @State private var showLibrary: Bool = false
+    @State private var showSettings: Bool = false
 
     // MARK: - Derived
 
     private var recognizedSet: Set<String> {
         switch mode {
         case .encode: return RuneCharacterSet.inputCharacterSet
-        case .decode: return keyManager.importedDecoder.map { Set($0.reverseMapping.keys) } ?? []
+        case .decode: return keyManager.activeCipher.map { Set($0.key.reverseMapping.keys) } ?? []
         }
     }
 
     private var actionDisabled: Bool {
         if inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
-        switch mode {
-        case .encode: return keyManager.currentKey == nil
-        case .decode: return keyManager.importedDecoder == nil
-        }
+        return keyManager.activeCipher == nil
     }
 
     // MARK: - Body
@@ -59,14 +57,18 @@ struct ContentView: View {
 
                 RuneHeader(
                     runic: "ᚱᚢᚾᛖ ᛋᚲᚱᛁᛒ",
-                    subtitle: "Rune · Scrib",
-                    trailingButton: RuneHeaderButton(
-                        systemImage: "key.fill",
-                        help: "Manage, rotate, export, and import keys"
-                    ) { showKeyManagement = true }
+                    subtitle: "Rune · Scribe",
+                    trailingButtons: [
+                        RuneHeaderButton(systemImage: "gearshape.fill",
+                                         help: "Settings") { showSettings = true },
+                        RuneHeaderButton(systemImage: "key.fill",
+                                         help: "Manage your cipher library") { showLibrary = true }
+                    ]
                 )
 
                 VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
+
+                    activeCipherBar
 
                     // ── Mode toggle ───────────────────────────────────────────
                     Picker("Mode", selection: $mode) {
@@ -115,18 +117,16 @@ struct ContentView: View {
                     }
                     .frame(maxHeight: .infinity)
 
-                    // ── Decode hint when no decoder is imported ───────────────
-                    if mode == .decode && keyManager.importedDecoder == nil {
+                    // ── Decode hint ───────────────────────────────────────────
+                    if mode == .decode {
                         HStack(spacing: 8) {
                             Image(systemName: "info.circle").foregroundColor(.runeBlue)
-                            Text("Import a decoder to read runes.")
+                            Text("Decoding uses the active cipher. To read someone else's runes, "
+                                 + "select their imported decoder above.")
                                 .font(.system(size: 12, design: .monospaced))
                                 .foregroundColor(.runeSilver)
+                                .fixedSize(horizontal: false, vertical: true)
                             Spacer()
-                            Button("Import…") { showKeyManagement = true }
-                                .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                                .foregroundColor(.runeGold)
-                                .buttonStyle(.plain)
                         }
                     }
 
@@ -148,7 +148,7 @@ struct ContentView: View {
                         if keyManager.isLoading {
                             HStack(spacing: 8) {
                                 ProgressView().scaleEffect(0.8)
-                                Text("Loading key…")
+                                Text("Loading cipher…")
                                     .font(.system(size: 13, design: .monospaced))
                                     .foregroundColor(.runeSilver)
                             }
@@ -156,7 +156,7 @@ struct ContentView: View {
                             Button {
                                 performAction()
                             } label: {
-                                Label(mode == .encode ? "RUNE SCRIB" : "DECODE",
+                                Label(mode == .encode ? "RUNE SCRIBE" : "DECODE",
                                       systemImage: mode == .encode ? "bolt.fill" : "wand.and.rays")
                             }
                             .buttonStyle(RuneScribButtonStyle())
@@ -176,30 +176,81 @@ struct ContentView: View {
         .sheet(item: $result) { payload in
             ResultPopupView(runes: payload.runes, plain: payload.plain, direction: payload.direction)
         }
-        .sheet(isPresented: $showKeyManagement) {
-            KeyManagementView()
-                .environmentObject(keyManager)
+        .sheet(isPresented: $showLibrary) {
+            CipherLibraryView().environmentObject(keyManager)
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
         // ── Menu-command notification listeners ───────────────────────────────
-        .onReceive(NotificationCenter.default.publisher(for: .exportKeyRequested)) { _ in
-            showKeyManagement = true
+        .onReceive(NotificationCenter.default.publisher(for: .openLibraryRequested)) { _ in
+            showLibrary = true
         }
-        .onReceive(NotificationCenter.default.publisher(for: .rotateKeyRequested)) { _ in
-            showKeyManagement = true
+        .onReceive(NotificationCenter.default.publisher(for: .openSettingsRequested)) { _ in
+            showSettings = true
         }
+    }
+
+    // MARK: - Active Cipher Bar
+
+    private var activeCipherBar: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "key.fill")
+                .font(.system(size: 12))
+                .foregroundColor(.runeGold)
+
+            Menu {
+                ForEach(keyManager.ciphers) { cipher in
+                    Button { keyManager.setActive(id: cipher.id) } label: {
+                        if cipher.id == keyManager.activeCipher?.id {
+                            Label(cipher.label, systemImage: "checkmark")
+                        } else {
+                            Text(cipher.label)
+                        }
+                    }
+                }
+                Divider()
+                Button { showLibrary = true } label: {
+                    Label("Manage Ciphers…", systemImage: "books.vertical")
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Text(keyManager.activeCipher?.label ?? "No Cipher")
+                        .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 10))
+                        .foregroundColor(.runeSilver)
+                }
+            }
+            .menuIndicator(.hidden)
+            .fixedSize()
+
+            Spacer()
+
+            Text("\(keyManager.ciphers.count) cipher\(keyManager.ciphers.count == 1 ? "" : "s")")
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(.runeSilver)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous).fill(Color.runeParchment))
+        .overlay(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+            .strokeBorder(Color.runeGold.opacity(0.22), lineWidth: 1))
     }
 
     // MARK: - Actions
 
     private func performAction() {
+        guard let cipher = keyManager.activeCipher else { return }
+        let engine = CipherEngine(key: cipher.key)
         switch mode {
         case .encode:
-            guard let key = keyManager.currentKey else { return }
-            let encoded = CipherEngine(key: key).encode(inputText)
+            let encoded = engine.encode(inputText)
             result = ResultPayload(runes: encoded, plain: inputText, direction: .encode)
         case .decode:
-            guard let decoder = keyManager.importedDecoder else { return }
-            let decoded = CipherEngine(decoder: decoder).decode(inputText)
+            let decoded = engine.decode(inputText)
             result = ResultPayload(runes: inputText, plain: decoded, direction: .decode)
         }
     }

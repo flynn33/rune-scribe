@@ -83,9 +83,11 @@ struct RuneEyebrow: View {
 
 // MARK: - Header
 
-/// A circular header action (close on sheets, key on the main view). Placed at the
-/// header's top-right on every platform — clear of the macOS window controls.
-struct RuneHeaderButton {
+/// A circular header action (close on sheets, settings/library on the main view).
+/// Placed at the header's top-right on every platform — clear of the macOS window
+/// controls (which sit top-left).
+struct RuneHeaderButton: Identifiable {
+    let id = UUID()
     let systemImage: String
     let help: String
     let action: () -> Void
@@ -98,7 +100,7 @@ struct RuneHeader: View {
     let runic: String
     let subtitle: String
     var height: CGFloat = RuneMetrics.headerHeight
-    var trailingButton: RuneHeaderButton? = nil
+    var trailingButtons: [RuneHeaderButton] = []
 
     var body: some View {
         ZStack {
@@ -122,20 +124,22 @@ struct RuneHeader: View {
                     .foregroundColor(.runeSilver)
             }
 
-            if let trailingButton {
+            if !trailingButtons.isEmpty {
                 VStack {
-                    HStack {
+                    HStack(spacing: 10) {
                         Spacer()
-                        Button(action: trailingButton.action) {
-                            Image(systemName: trailingButton.systemImage)
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(.runeSilver)
-                                .frame(width: 28, height: 28)
-                                .background(Circle().fill(Color.runeNavy.opacity(0.55)))
-                                .overlay(Circle().strokeBorder(Color.runeSilver.opacity(0.30), lineWidth: 1))
+                        ForEach(trailingButtons) { button in
+                            Button(action: button.action) {
+                                Image(systemName: button.systemImage)
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.runeSilver)
+                                    .frame(width: 28, height: 28)
+                                    .background(Circle().fill(Color.runeNavy.opacity(0.55)))
+                                    .overlay(Circle().strokeBorder(Color.runeSilver.opacity(0.30), lineWidth: 1))
+                            }
+                            .buttonStyle(.plain)
+                            .help(button.help)
                         }
-                        .buttonStyle(.plain)
-                        .help(trailingButton.help)
                     }
                     Spacer()
                 }

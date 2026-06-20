@@ -12,21 +12,21 @@ enum KeyManagerError: Error, LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .encryptionFailed: return "Failed to encrypt the cipher mapping."
-        case .decryptionFailed: return "Failed to decrypt the cipher mapping."
-        case .noKeyAvailable:   return "No cipher key is currently loaded."
+        case .encryptionFailed: return "Failed to encrypt the cipher library."
+        case .decryptionFailed: return "Failed to decrypt the cipher library."
+        case .noKeyAvailable:   return "No cipher is currently available."
         }
     }
 }
 
 // MARK: - KeyManager
 
-/// Manages the full lifecycle of the cipher key: load from Keychain, generate on
-/// first launch, rotate, export (as a single decoder file), and import a decoder
-/// used to decode incoming rune messages.
+/// Owns the user's cipher library: a list of labelled `NamedCipher` pairs plus the
+/// active selection. The whole library is persisted AES-GCM-encrypted in the
+/// Keychain. One symmetric AES key (also in the Keychain) protects it.
 ///
-/// Published as a singleton and injected as an @EnvironmentObject. All published
-/// property mutations occur on the main actor.
+/// Published as a singleton and injected as an `@EnvironmentObject`. All published
+/// state mutates on the main actor.
 @MainActor
 final class KeyManager: ObservableObject {
 
@@ -36,12 +36,17 @@ final class KeyManager: ObservableObject {
 
     // MARK: - Published State
 
-    /// The device's own key, used to encode plain text into runes.
-    @Published private(set) var currentKey: RuneKey?
-    /// A decoder imported from a file, used to decode pasted rune messages.
-    @Published private(set) var importedDecoder: ImportedDecoder?
+    @Published private(set) var library: CipherLibrary = .empty
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var lastError: String?
+
+    // MARK: - Derived
+
+    /// All ciphers in library order.
+    var ciphers: [NamedCipher] { library.ciphers }
+
+    /// The active cipher, used for both encoding and decoding.
+    var activeCipher: NamedCipher? { library.activeCipher }
 
     // MARK: - Private Dependencies
 
@@ -50,14 +55,15 @@ final class KeyManager: ObservableObject {
     // MARK: - Init
 
     private init() {
-        Task { await loadOrCreateKey() }
+        Task { await load() }
     }
 
-    // MARK: - Load or Create
+    // MARK: - Load / Migrate
 
-    /// Loads the existing cipher key (and any imported decoder) from Keychain.
-    /// On first launch, generates a new random key and stores it.
-    func loadOrCreateKey() async {
+    /// Loads the cipher library from the Keychain. On first launch under the
+    /// library model, migrates any legacy single key / imported decoder, and
+    /// guarantees at least one cipher exists.
+    func load() async {
         isLoading = true
         lastError = nil
         defer { isLoading = false }
@@ -65,82 +71,127 @@ final class KeyManager: ObservableObject {
         do {
             let aesKey = try loadOrCreateSymmetricKey()
 
-            if let encryptedMapping = try keychain.retrieveEncryptedMapping() {
-                currentKey = try decrypt(RuneKey.self, from: encryptedMapping, using: aesKey)
+            if let data = try keychain.retrieveEncryptedLibrary() {
+                library = try decrypt(CipherLibrary.self, from: data, using: aesKey)
             } else {
-                try generateAndStoreNewKey(using: aesKey)
+                library = migrateLegacy(using: aesKey)
+                try persist(using: aesKey)
+                // Migration succeeded and is now the source of truth — remove the
+                // legacy entries so this path doesn't run again.
+                try? keychain.deleteEncryptedMapping()
+                try? keychain.deleteImportedDecoder()
             }
 
-            if let encryptedDecoder = try keychain.retrieveEncryptedDecoder() {
-                importedDecoder = try? decrypt(ImportedDecoder.self, from: encryptedDecoder, using: aesKey)
+            if library.ciphers.isEmpty {
+                let first = NamedCipher.generated(label: "My Cipher")
+                library = CipherLibrary(ciphers: [first], activeID: first.id)
+                try persist(using: aesKey)
             }
         } catch {
             lastError = error.localizedDescription
         }
     }
 
-    // MARK: - Rotate Key
+    /// Builds the initial library from any pre-library Keychain data so existing
+    /// users keep their cipher and any imported decoder across the upgrade. If the
+    /// legacy blobs are absent or unreadable, a fresh cipher is seeded (the old
+    /// data, if present-but-undecryptable, is unrecoverable regardless).
+    private func migrateLegacy(using aesKey: SymmetricKey) -> CipherLibrary {
+        let legacyKey: RuneKey? = (try? keychain.retrieveEncryptedMapping())
+            .flatMap { $0 }
+            .flatMap { try? decrypt(RuneKey.self, from: $0, using: aesKey) }
 
-    /// Generates a new random cipher mapping and stores it, overwriting the
-    /// previous one. The AES key is preserved.
-    ///
-    /// ⚠️ After rotation, any previously encoded messages are permanently undecodable.
-    func rotateKey() async throws {
-        isLoading = true
-        lastError = nil
-        defer { isLoading = false }
+        let legacyDecoder: ImportedDecoder? = (try? keychain.retrieveEncryptedDecoder())
+            .flatMap { $0 }
+            .flatMap { try? decrypt(ImportedDecoder.self, from: $0, using: aesKey) }
+
+        return CipherLibrary.fromLegacy(key: legacyKey, decoder: legacyDecoder)
+    }
+
+    // MARK: - Mutations
+
+    /// Creates a new random cipher, appends it, and makes it active.
+    @discardableResult
+    func addCipher(label: String) -> NamedCipher? {
+        let cipher = NamedCipher.generated(label: cleanLabel(label, fallback: "New Cipher"))
+        library = library.adding(cipher)
+        persist()
+        return lastError == nil ? cipher : nil
+    }
+
+    /// Imports a decoder file as a new cipher, appends it, and makes it active.
+    @discardableResult
+    func importCipher(data: Data, label: String?) throws -> NamedCipher {
+        let decoder = try ImportedDecoder.parse(data)
+        let key = RuneKey(keyId: decoder.keyId, createdAt: decoder.createdAt, mapping: decoder.mapping)
+        let name = cleanLabel(label ?? "", fallback: "Imported \(decoder.keyId.prefix(6))")
+        let cipher = NamedCipher(label: name, origin: .imported, key: key)
 
         let aesKey = try loadOrCreateSymmetricKey()
-        try generateAndStoreNewKey(using: aesKey)
+        library = library.adding(cipher)
+        try persist(using: aesKey)
+        lastError = nil
+        return cipher
     }
 
-    // MARK: - Export (single decoder file)
+    /// Renames the cipher with the given id.
+    func renameCipher(id: UUID, to newLabel: String) {
+        guard let existing = library.ciphers.first(where: { $0.id == id }) else { return }
+        library = library.renamingCipher(id: id, to: cleanLabel(newLabel, fallback: existing.label))
+        persist()
+    }
 
-    /// Builds the single decoder/decrypter file (JSON) for the current key. This
-    /// one file contains the full mapping + reverse mapping and is what the app
-    /// imports and what AI models read to decode.
-    func decoderExportData() throws -> Data {
-        guard let key = currentKey else { throw KeyManagerError.noKeyAvailable }
+    /// Deletes the cipher with the given id. Never leaves the library empty: if the
+    /// last cipher is removed, a fresh one is generated.
+    func deleteCipher(id: UUID) {
+        library = library.removingCipher(id: id)
+        persist()
+    }
+
+    /// Selects the active cipher used for encoding and decoding.
+    func setActive(id: UUID) {
+        library = library.settingActive(id: id)
+        persist()
+    }
+
+    // MARK: - Export
+
+    /// Builds the single decoder/decrypter JSON file for the given cipher.
+    func exportData(for id: UUID) throws -> Data {
+        guard let cipher = library.ciphers.first(where: { $0.id == id }) else {
+            throw KeyManagerError.noKeyAvailable
+        }
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try encoder.encode(RuneKeyExport.from(key))
+        return try encoder.encode(RuneKeyExport.from(cipher.key))
     }
 
-    /// Suggested filename (without extension) for the exported decoder file.
-    var decoderExportFilename: String {
+    /// Suggested filename (without extension) for the given cipher's decoder file.
+    func exportFilename(for id: UUID) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        let stamp = currentKey.map { formatter.string(from: $0.createdAt) } ?? "key"
-        return "RuneScrib-Decoder-\(stamp)"
+        let cipher = library.ciphers.first(where: { $0.id == id })
+        let base = cipher.map { sanitizeForFilename($0.label) } ?? "decoder"
+        let stamp = cipher.map { formatter.string(from: $0.createdAt) } ?? "key"
+        return "RuneScrib-\(base)-\(stamp)"
     }
 
-    // MARK: - Import decoder
+    // MARK: - Persistence Helpers
 
-    /// Imports a decoder file and makes it the active decoder for decoding pasted
-    /// rune messages. Validated on parse and persisted (encrypted) in Keychain so
-    /// it survives relaunch.
-    @discardableResult
-    func importDecoder(data: Data) throws -> ImportedDecoder {
-        let decoder = try ImportedDecoder.parse(data)
-        importedDecoder = decoder
-
-        // Best-effort persistence — the import still works in-memory if this fails.
-        if let aesData = try? keychain.retrieveSymmetricKeyData() {
-            let aesKey = SymmetricKey(data: aesData)
-            if let encrypted = try? encrypt(decoder, using: aesKey) {
-                try? keychain.storeEncryptedDecoder(encrypted)
-            }
+    private func persist() {
+        do {
+            let aesKey = try loadOrCreateSymmetricKey()
+            try persist(using: aesKey)
+            lastError = nil
+        } catch {
+            lastError = error.localizedDescription
         }
-        return decoder
     }
 
-    /// Removes the active imported decoder.
-    func clearImportedDecoder() {
-        importedDecoder = nil
-        try? keychain.deleteImportedDecoder()
+    private func persist(using aesKey: SymmetricKey) throws {
+        let data = try encrypt(library, using: aesKey)
+        try keychain.storeEncryptedLibrary(data)
     }
-
-    // MARK: - Private Helpers
 
     /// Loads the AES symmetric key from Keychain, creating and storing one if absent.
     private func loadOrCreateSymmetricKey() throws -> SymmetricKey {
@@ -150,14 +201,6 @@ final class KeyManager: ObservableObject {
         let key = SymmetricKey(size: .bits256)
         try keychain.storeSymmetricKeyData(key.withUnsafeBytes { Data($0) })
         return key
-    }
-
-    /// Generates a new random RuneKey, encrypts it, persists it, and publishes it.
-    private func generateAndStoreNewKey(using aesKey: SymmetricKey) throws {
-        let newKey = RuneKey(mapping: RuneCharacterSet.generateRandomMapping())
-        let encrypted = try encrypt(newKey, using: aesKey)
-        try keychain.storeEncryptedMapping(encrypted)
-        currentKey = newKey
     }
 
     /// AES-GCM-encrypts any Codable value to combined Data.
@@ -176,5 +219,22 @@ final class KeyManager: ObservableObject {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(T.self, from: plaintext)
+    }
+
+    // MARK: - Label Helpers
+
+    /// Trims a user label and caps its length; falls back when empty.
+    private func cleanLabel(_ raw: String, fallback: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let value = trimmed.isEmpty ? fallback : trimmed
+        return String(value.prefix(40))
+    }
+
+    /// Reduces a label to a filename-safe slug.
+    private func sanitizeForFilename(_ label: String) -> String {
+        let allowed = CharacterSet.alphanumerics
+        let slug = String(label.unicodeScalars.map { allowed.contains($0) ? Character($0) : "-" })
+        let collapsed = slug.split(separator: "-").joined(separator: "-")
+        return collapsed.isEmpty ? "decoder" : String(collapsed.prefix(32))
     }
 }

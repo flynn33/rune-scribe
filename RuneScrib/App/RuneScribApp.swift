@@ -1,5 +1,5 @@
 // RuneScrib/App/RuneScribApp.swift
-// RuneScrib — Norse Runic Substitution Cipher
+// Rune-Scribe — Norse Runic Substitution Cipher
 // Universal app: macOS 15.0+ and iOS 17.0+ | Swift 6.0 | SwiftUI
 
 import SwiftUI
@@ -15,35 +15,38 @@ struct RuneScribApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
                 .environmentObject(KeyManager.shared)
+                .environmentObject(AppLock.shared)
         }
         #if os(macOS)
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 600, height: 680)
+        .defaultSize(width: 600, height: 720)
         .windowResizability(.contentMinSize)
         #endif
         .commands {
             #if os(macOS)
             CommandGroup(replacing: .newItem) { }
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings…") {
+                    NotificationCenter.default.post(name: .openSettingsRequested, object: nil)
+                }
+                .keyboardShortcut(",", modifiers: [.command])
+            }
             #endif
-            CommandMenu("Rune Key") {
-                Button("Export Key…") {
-                    NotificationCenter.default.post(name: .exportKeyRequested, object: nil)
+            CommandMenu("Cipher") {
+                Button("Cipher Library…") {
+                    NotificationCenter.default.post(name: .openLibraryRequested, object: nil)
                 }
-                .keyboardShortcut("e", modifiers: [.command, .shift])
-
-                Button("Rotate Key…") {
-                    NotificationCenter.default.post(name: .rotateKeyRequested, object: nil)
-                }
-                .keyboardShortcut("r", modifiers: [.command, .shift])
+                .keyboardShortcut("l", modifiers: [.command, .shift])
             }
         }
     }
 }
 
 // MARK: - Notification Names
+
 extension Notification.Name {
-    static let exportKeyRequested = Notification.Name("com.runescribe.exportKeyRequested")
-    static let rotateKeyRequested = Notification.Name("com.runescribe.rotateKeyRequested")
+    static let openLibraryRequested  = Notification.Name("com.runescribe.openLibraryRequested")
+    static let openSettingsRequested = Notification.Name("com.runescribe.openSettingsRequested")
 }

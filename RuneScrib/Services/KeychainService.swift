@@ -49,8 +49,11 @@ final class KeychainService: Sendable {
 
     private let service = "com.runescribe.keystore"
     private let symmetricKeyAccount = "symmetricKey"
-    private let cipherMappingAccount = "cipherMapping"
-    private let importedDecoderAccount = "importedDecoder"
+    private let cipherMappingAccount = "cipherMapping"      // legacy (pre-library) single key
+    private let importedDecoderAccount = "importedDecoder"  // legacy (pre-library) single decoder
+    private let cipherLibraryAccount = "cipherLibrary"
+    private let pinAccount = "appPin"
+    private let pinThrottleAccount = "pinThrottle"
 
     // MARK: - Generic Store / Retrieve
 
@@ -150,6 +153,11 @@ final class KeychainService: Sendable {
         try retrieve(account: cipherMappingAccount)
     }
 
+    /// Removes the legacy single cipher mapping (used after migration).
+    func deleteEncryptedMapping() throws {
+        try delete(account: cipherMappingAccount)
+    }
+
     // MARK: - Public API: Imported Decoder
 
     /// Stores the AES-GCM–encrypted imported decoder (combined Data) in Keychain.
@@ -166,5 +174,52 @@ final class KeychainService: Sendable {
     /// Removes the imported decoder from Keychain.
     func deleteImportedDecoder() throws {
         try delete(account: importedDecoderAccount)
+    }
+
+    // MARK: - Public API: Cipher Library
+
+    /// Stores the AES-GCM–encrypted cipher library (all labelled ciphers + active id).
+    func storeEncryptedLibrary(_ data: Data) throws {
+        try store(data: data, account: cipherLibraryAccount)
+    }
+
+    /// Retrieves the AES-GCM–encrypted cipher library, or nil if none stored yet.
+    func retrieveEncryptedLibrary() throws -> Data? {
+        try retrieve(account: cipherLibraryAccount)
+    }
+
+    // MARK: - Public API: App-Lock PIN
+
+    /// Stores the salted-hash PIN record (already non-reversible; Keychain adds
+    /// at-rest protection). Replaces any existing record.
+    func storePINRecord(_ data: Data) throws {
+        try store(data: data, account: pinAccount)
+    }
+
+    /// Retrieves the salted-hash PIN record, or nil if no PIN is set.
+    func retrievePINRecord() throws -> Data? {
+        try retrieve(account: pinAccount)
+    }
+
+    /// Removes the PIN record (disables the app lock).
+    func deletePINRecord() throws {
+        try delete(account: pinAccount)
+    }
+
+    // MARK: - Public API: PIN Throttle State
+
+    /// Stores the failed-attempt throttle record so the lockout survives relaunch.
+    func storePINThrottle(_ data: Data) throws {
+        try store(data: data, account: pinThrottleAccount)
+    }
+
+    /// Retrieves the throttle record, or nil if there have been no failures.
+    func retrievePINThrottle() throws -> Data? {
+        try retrieve(account: pinThrottleAccount)
+    }
+
+    /// Clears the throttle record (on successful unlock or PIN disable).
+    func deletePINThrottle() throws {
+        try delete(account: pinThrottleAccount)
     }
 }
