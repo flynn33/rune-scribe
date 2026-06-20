@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.6] - 2026-06-20
+
+- PIN app lock, multi-cipher library, settings, and rune glow (#6) by @flynn33
+
 ## [1.0.5] - 2026-06-19
 
 - Enable App Sandbox for the macOS app (Mac App Store) (#5) by @flynn33
