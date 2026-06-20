@@ -17,7 +17,8 @@ struct ContentView: View {
     }
 
     /// Drives the in-place transformation: the text box edits, then plays the
-    /// inscription animation, then rests on the result.
+    /// inscription animation, then rests on the result — all in the same frame,
+    /// which never changes size.
     private enum BoxPhase { case editing, transforming, result }
 
     // MARK: - State
@@ -34,16 +35,11 @@ struct ContentView: View {
     @State private var showLibrary: Bool = false
     @State private var showSettings: Bool = false
 
+    /// One glyph size shared by the editor and the inscription so the text never
+    /// changes size when it transforms — only the glyphs change.
+    private let glyphSize: CGFloat = 20
+
     private var isEditing: Bool { boxPhase == .editing }
-
-    // MARK: - Derived
-
-    private var recognizedSet: Set<String> {
-        switch mode {
-        case .encode: return RuneCharacterSet.inputCharacterSet
-        case .decode: return keyManager.activeCipher.map { Set($0.key.reverseMapping.keys) } ?? []
-        }
-    }
 
     private var actionDisabled: Bool {
         if inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
@@ -69,62 +65,21 @@ struct ContentView: View {
                     ]
                 )
 
+                // Fixed layout — only the content inside `textFrame` changes when
+                // converting. Nothing here appears, disappears, or resizes.
                 VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
 
                     activeCipherBar
-                        .disabled(!isEditing)
 
-                    // ── Mode toggle ───────────────────────────────────────────
                     Picker("Mode", selection: $mode) {
                         ForEach(Mode.allCases) { Text($0.rawValue).tag($0) }
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
-                    .disabled(!isEditing)
 
-                    // ── Text frame (edits, then transforms in place) ──────────
-                    VStack(alignment: .leading, spacing: 10) {
-                        RuneEyebrow(title: eyebrowTitle,
-                                    systemImage: eyebrowIcon,
-                                    accent: boxPhase == .editing ? .runeSilver : .runeGold)
+                    textFrame
+                        .frame(maxHeight: .infinity)
 
-                        textFrame
-
-                        if isEditing {
-                            CharacterCountView(text: inputText,
-                                               recognized: recognizedSet,
-                                               recognizedLabel: mode == .encode ? "encodable" : "decodable",
-                                               recognizedAccent: mode == .encode ? .runeBlue : .runeGold)
-                        }
-                    }
-                    .frame(maxHeight: .infinity)
-
-                    // ── Decode hint (editing only) ────────────────────────────
-                    if isEditing && mode == .decode {
-                        HStack(spacing: 8) {
-                            Image(systemName: "info.circle").foregroundColor(.runeBlue)
-                            Text("Decoding uses the active cipher. To read someone else's runes, "
-                                 + "select their imported decoder above.")
-                                .font(.system(size: 12, design: .monospaced))
-                                .foregroundColor(.runeSilver)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Spacer()
-                        }
-                    }
-
-                    // ── Error display (editing only) ──────────────────────────
-                    if isEditing, let error = keyManager.lastError {
-                        HStack(spacing: 8) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.orange)
-                            Text(error)
-                                .font(.system(size: 12, design: .monospaced))
-                                .foregroundColor(.orange)
-                            Spacer()
-                        }
-                    }
-
-                    // ── Action area (phase-dependent) ─────────────────────────
                     actionArea
                         .frame(minHeight: 46)
                 }
@@ -146,9 +101,13 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openSettingsRequested)) { _ in
             showSettings = true
         }
+        // Changing the mode or the active cipher invalidates a shown result, so
+        // drop back to editing rather than leaving stale output on screen.
+        .onChange(of: mode) { _, _ in if !isEditing { returnToEditing() } }
+        .onChange(of: keyManager.activeCipher?.id) { _, _ in if !isEditing { returnToEditing() } }
     }
 
-    // MARK: - Text Frame
+    // MARK: - Text Frame (fixed size; only the inner content changes)
 
     private var textFrame: some View {
         ZStack(alignment: .topLeading) {
@@ -158,15 +117,16 @@ struct ContentView: View {
             switch boxPhase {
             case .editing:
                 TextEditor(text: $inputText)
-                    .font(.system(size: 15, design: .monospaced))
+                    .font(.system(size: glyphSize, design: .monospaced))
                     .foregroundColor(.white)
                     .scrollContentBackground(.hidden)
-                    .padding(10)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
 
                 if inputText.isEmpty {
                     Text(mode == .encode ? "Type or paste your message here…"
                                          : "Paste runes to decode…")
-                        .font(.system(size: 15, design: .monospaced))
+                        .font(.system(size: glyphSize, design: .monospaced))
                         .foregroundColor(.runeSilver.opacity(0.45))
                         .padding(.horizontal, 15)
                         .padding(.vertical, 18)
@@ -179,8 +139,10 @@ struct ContentView: View {
                                         target: targetSnapshot,
                                         start: transformStart,
                                         direction: transformDirection,
+                                        fontSize: glyphSize,
                                         settled: boxPhase == .result)
-                        .padding(10)
+                        .padding(.horizontal, 15)
+                        .padding(.vertical, 15)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
@@ -189,8 +151,7 @@ struct ContentView: View {
         .clipShape(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                .strokeBorder((boxPhase == .editing ? Color.runeBlue : Color.runeGold).opacity(0.35),
-                              lineWidth: 1)
+                .strokeBorder(Color.runeBlue.opacity(0.35), lineWidth: 1)
         )
     }
 
@@ -298,24 +259,6 @@ struct ContentView: View {
             .strokeBorder(Color.runeGold.opacity(0.22), lineWidth: 1))
     }
 
-    // MARK: - Copy
-
-    private var eyebrowTitle: String {
-        switch boxPhase {
-        case .editing:      return mode == .encode ? "Plain Text" : "Rune Text"
-        case .transforming: return mode == .encode ? "Inscribing…" : "Deciphering…"
-        case .result:       return mode == .encode ? "Rune Output" : "Plain Text"
-        }
-    }
-
-    private var eyebrowIcon: String {
-        switch boxPhase {
-        case .editing:      return mode == .encode ? "text.alignleft" : "wand.and.rays"
-        case .transforming: return "sparkles"
-        case .result:       return mode == .encode ? "sparkles" : "text.alignleft"
-        }
-    }
-
     // MARK: - Actions
 
     private func performAction() {
@@ -343,7 +286,7 @@ struct ContentView: View {
         settleTask = Task { @MainActor in
             try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
             guard !Task.isCancelled else { return }
-            withAnimation(.easeOut(duration: 0.25)) { boxPhase = .result }
+            boxPhase = .result
         }
     }
 

@@ -86,10 +86,14 @@ struct RuneInscriptionText: View {
     }
 
     private func glyphText(_ string: AttributedString) -> some View {
+        // The runic font is applied as a view modifier (not a per-run attribute):
+        // runtime-registered fonts resolve reliably this way, so the runes render
+        // in bundled Noto Sans Runic. Latin (the unrevealed tail / decoded text)
+        // falls back to the system font. Per-run colour still drives the flare.
         Text(string)
+            .font(.runic(fontSize))
             .lineSpacing(7)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 2)
     }
 
     // MARK: - Attributed Builders
@@ -100,7 +104,6 @@ struct RuneInscriptionText: View {
             let landed = t >= inscribeTime(index)
             let character = landed ? targetChars[index] : sourceChars[index]
             var piece = AttributedString(String(character))
-            piece.font = font(for: character)
             if landed {
                 let age = t - inscribeTime(index)
                 let flare = Swift.max(0, 1 - age / Self.flareDecay)
@@ -118,7 +121,6 @@ struct RuneInscriptionText: View {
         let base: Color = direction == .encode ? Self.gold : Self.settledDecode
         for character in targetChars {
             var piece = AttributedString(String(character))
-            piece.font = font(for: character)
             piece.foregroundColor = base
             result += piece
         }
@@ -126,15 +128,6 @@ struct RuneInscriptionText: View {
     }
 
     // MARK: - Glyph Styling
-
-    private func font(for character: Character) -> Font {
-        isRune(character) ? .runic(fontSize) : .system(size: fontSize, design: .monospaced)
-    }
-
-    private func isRune(_ character: Character) -> Bool {
-        guard character.unicodeScalars.count == 1, let scalar = character.unicodeScalars.first else { return false }
-        return (0x16A0...0x16F8).contains(Int(scalar.value))
-    }
 
     private func settledColor(flare: Double) -> Color {
         let base = direction == .encode ? Self.goldRGB : Self.settledDecodeRGB

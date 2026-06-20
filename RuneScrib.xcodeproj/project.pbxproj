@@ -47,7 +47,6 @@
 		817CB2732E8A24EBC3E0F3F5 /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */; };
 		86EC8F977E7E340F16A64EA2 /* DecoderDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D15D6F87C83071DA639125F /* DecoderDocument.swift */; };
 		8760249472534AD89E15AF62 /* FontRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C0006860B59E0906493050 /* FontRegistration.swift */; };
-		87BC4FDB571E00C3839DEA96 /* CharacterCountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DB7C18ADFE0E96B8117A09 /* CharacterCountView.swift */; };
 		87C653A1A5B292FB7831DB22 /* KeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA657AA7320B6333C8D191BD /* KeyManager.swift */; };
 		8E820672C49B7E3C933036F8 /* RuneScribButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */; };
 		90967110D847AD379BCB6EDB /* KeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA657AA7320B6333C8D191BD /* KeyManager.swift */; };
@@ -76,7 +75,6 @@
 		E86F474B5165185D3A657E4C /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236AB4A6CB356708A2A004EE /* KeychainService.swift */; };
 		ED9A3B29C5ED7535452420E4 /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A31FF059DEEC7C01229CF75 /* Clipboard.swift */; };
 		EDC58C55E2D5154B15A0A5B6 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */; };
-		EDCE644A363813C03000F100 /* CharacterCountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DB7C18ADFE0E96B8117A09 /* CharacterCountView.swift */; };
 		F98B6935CCC807A13270F6EA /* AppLicense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CBE938486EB9A2F975D48A /* AppLicense.swift */; };
 		FAE1E2AAB9525E7A3C4E51DC /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
 /* End PBXBuildFile section */
@@ -114,7 +112,6 @@
 		8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalRenderer.swift; sourceTree = "<group>"; };
 		9996D784E5F2DBDC015F81B1 /* RuneKeyExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneKeyExport.swift; sourceTree = "<group>"; };
 		9CC98818174FC25A813E2C53 /* CipherEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherEngine.swift; sourceTree = "<group>"; };
-		A0DB7C18ADFE0E96B8117A09 /* CharacterCountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterCountView.swift; sourceTree = "<group>"; };
 		A23D157957EEFB14E8CB7147 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A2C0006860B59E0906493050 /* FontRegistration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontRegistration.swift; sourceTree = "<group>"; };
 		A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneInscriptionText.swift; sourceTree = "<group>"; };
@@ -194,7 +191,6 @@
 		587741695BBC8E01B5722A5E /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				A0DB7C18ADFE0E96B8117A09 /* CharacterCountView.swift */,
 				7D15D6F87C83071DA639125F /* DecoderDocument.swift */,
 				39CE669299B8B857610BAA76 /* PINPadView.swift */,
 				A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */,
@@ -414,7 +410,6 @@
 				7506B7BCCE0B9D508FC13B2D /* AppDelegate.swift in Sources */,
 				F98B6935CCC807A13270F6EA /* AppLicense.swift in Sources */,
 				0DEE180E6F0CC7A45A7043A4 /* AppLock.swift in Sources */,
-				EDCE644A363813C03000F100 /* CharacterCountView.swift in Sources */,
 				BF865C8F7AC22840D94B464C /* CipherEngine.swift in Sources */,
 				B1BD766416360737E09888AC /* CipherLibrary.swift in Sources */,
 				80AB19E15DBCFE8401431CDD /* CipherLibraryView.swift in Sources */,
@@ -452,7 +447,6 @@
 				B4F8144B90E37A2B69CF4F17 /* AppDelegate.swift in Sources */,
 				3367F4DE31A8BFA2F5A8955B /* AppLicense.swift in Sources */,
 				0FE15DBC0B9074385443CEE2 /* AppLock.swift in Sources */,
-				87BC4FDB571E00C3839DEA96 /* CharacterCountView.swift in Sources */,
 				B7CD1CE0E7E485F14E5C88CB /* CipherEngine.swift in Sources */,
 				32052333DC272F9086A942D4 /* CipherLibrary.swift in Sources */,
 				7612DFED0FFD7CCE5F51CACB /* CipherLibraryView.swift in Sources */,
