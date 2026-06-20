@@ -35,6 +35,13 @@ struct CipherLibraryView: View {
     @State private var deleteTarget: NamedCipher?
     @State private var showDelete = false
 
+    // Share via QR
+    @State private var qrCipher: NamedCipher?
+
+    // In-app QR scanner (iOS) → confirm
+    @State private var showScanner = false
+    @State private var pendingScan: ImportCoordinator.PendingImport?
+
     @State private var status: Status = .idle
 
     enum Status: Equatable {
@@ -81,6 +88,23 @@ struct CipherLibraryView: View {
                       allowedContentTypes: [.json],
                       allowsMultipleSelection: false) { result in
             handleImportSelection(result)
+        }
+        .sheet(item: $qrCipher) { cipher in
+            if let url = try? RuneCipherLink.encodeURL(for: cipher.key, name: cipher.label) {
+                QRDisplaySheet(url: url, label: cipher.label)
+            }
+        }
+        .sheet(isPresented: $showScanner) { scannerSheet }
+        .sheet(item: $pendingScan) { pending in
+            ImportConfirmView(pending: pending) { result in
+                switch result {
+                case .success(let cipher):
+                    status = .success("Imported “\(cipher.label)” and made it active.")
+                case .failure(let error):
+                    status = .failure(error.localizedDescription)
+                }
+            }
+            .environmentObject(keyManager)
         }
         // New cipher
         .alert("New Cipher", isPresented: $showNewCipher) {
@@ -129,18 +153,28 @@ struct CipherLibraryView: View {
     // MARK: - Actions Bar
 
     private var actionsBar: some View {
-        HStack(spacing: 12) {
-            Button { newLabel = ""; showNewCipher = true } label: {
-                Label("New Cipher", systemImage: "plus.circle.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(RuneScribButtonStyle())
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                Button { newLabel = ""; showNewCipher = true } label: {
+                    Label("New Cipher", systemImage: "plus.circle.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(RuneScribButtonStyle())
 
-            Button { showImporter = true } label: {
-                Label("Import…", systemImage: "square.and.arrow.down")
+                Button { showImporter = true } label: {
+                    Label("Import…", systemImage: "square.and.arrow.down")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(RuneSecondaryButtonStyle())
+            }
+
+            #if os(iOS)
+            Button { showScanner = true } label: {
+                Label("Scan QR Code", systemImage: "qrcode.viewfinder")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(RuneSecondaryButtonStyle())
+            #endif
         }
         .padding(.horizontal, RuneMetrics.pad)
         .padding(.top, RuneMetrics.pad)
@@ -181,7 +215,27 @@ struct CipherLibraryView: View {
 
                 Spacer()
 
-                cardIconButton("square.and.arrow.up", help: "Export decoder") { beginExport(cipher) }
+                if let shareURL = try? RuneCipherLink.encodeURL(for: cipher.key, name: cipher.label) {
+                    ShareLink(item: shareURL,
+                              subject: Text(cipher.label),
+                              message: Text("Import my Rune Scribe cipher")) {
+                        cardIconChrome("square.and.arrow.up")
+                    }
+                    .buttonStyle(.plain)
+                    .help("Share via Messages, Mail…")
+
+                    cardIconButton("qrcode", help: "Show QR code") { qrCipher = cipher }
+                } else {
+                    // Exotic imported ciphers (runes outside the canonical pool) can't
+                    // be expressed as a link/QR. Show the affordances disabled with an
+                    // explanation rather than silently dropping them.
+                    cardIconChrome("square.and.arrow.up", tint: .runeSilver.opacity(0.3))
+                        .help("Hand-crafted ciphers can't be shared as a link or QR code.")
+                    cardIconChrome("qrcode", tint: .runeSilver.opacity(0.3))
+                        .help("Hand-crafted ciphers can't be shared as a link or QR code.")
+                }
+
+                cardIconButton("arrow.down.doc", help: "Export decoder file") { beginExport(cipher) }
                 cardIconButton("pencil", help: "Rename") {
                     renameTarget = cipher; renameLabel = cipher.label; showRename = true
                 }
@@ -227,18 +281,22 @@ struct CipherLibraryView: View {
         }
     }
 
+    /// The square-icon chrome shared by the card's icon buttons and the ShareLink
+    /// (which isn't a plain Button, so it can't use `cardIconButton`).
+    private func cardIconChrome(_ systemImage: String, tint: Color = .runeSilver) -> some View {
+        Image(systemName: systemImage)
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundColor(tint)
+            .frame(width: 30, height: 30)
+            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.runeNavy.opacity(0.45)))
+            .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(tint.opacity(0.3), lineWidth: 1))
+    }
+
     private func cardIconButton(_ systemImage: String,
                                 help: String,
                                 tint: Color = .runeSilver,
                                 action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: systemImage)
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(tint)
-                .frame(width: 30, height: 30)
-                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.runeNavy.opacity(0.45)))
-                .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(tint.opacity(0.3), lineWidth: 1))
-        }
+        Button(action: action) { cardIconChrome(systemImage, tint: tint) }
         .buttonStyle(.plain)
         .help(help)
     }
@@ -312,6 +370,38 @@ struct CipherLibraryView: View {
             status = .success("Imported “\(cipher.label)” and made it active.")
         } catch {
             status = .failure(error.localizedDescription)
+        }
+    }
+
+    // MARK: - QR Scanning (iOS)
+
+    @ViewBuilder
+    private var scannerSheet: some View {
+        #if os(iOS)
+        QRScannerView { scanned in
+            showScanner = false
+            handleScanned(scanned)
+        }
+        #else
+        EmptyView()
+        #endif
+    }
+
+    /// Decodes a scanned QR string and routes it into the confirm sheet, or reports
+    /// why it couldn't be read.
+    private func handleScanned(_ string: String) {
+        let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: trimmed) else {
+            status = .failure("That QR code isn't a Rune Scribe cipher.")
+            return
+        }
+        do {
+            let (perm, name) = try RuneCipherLink.decodeURL(url)
+            pendingScan = ImportCoordinator.PendingImport(perm: perm,
+                                                          suggestedName: name ?? "Imported Cipher")
+        } catch {
+            status = .failure((error as? LocalizedError)?.errorDescription
+                              ?? "That QR code isn't a Rune Scribe cipher.")
         }
     }
 }
