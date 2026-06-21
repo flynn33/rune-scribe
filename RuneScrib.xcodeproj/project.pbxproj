@@ -7,15 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01B519047CF6CF039DE1671C /* RuneCipherLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36164F1540ACE3953D71CCBB /* RuneCipherLink.swift */; };
 		01C55610EF12C17DA83396B2 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
+		036F7BB7BA50F4AAE1F1DE48 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */; };
 		03BBB0908752F6A1F5111265 /* RuneKeyExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9996D784E5F2DBDC015F81B1 /* RuneKeyExport.swift */; };
 		05564C21ED178128F862F4F3 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236AB4A6CB356708A2A004EE /* KeychainService.swift */; };
 		059BA5D329AA9280083DF044 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		0D96E8574B629ECC51ED1B35 /* RuneKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE3312C83789A20D0C4E8FB /* RuneKey.swift */; };
 		0DEE180E6F0CC7A45A7043A4 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8437A6505FB44F89EEE9D9B /* AppLock.swift */; };
+		0E7EE57FCC7EF36C764D4C9C /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D37342DC065A1648904DC62 /* QRScannerView.swift */; };
 		0F375290B9932F3D5C1F8956 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098511B1E52AF229830C74E4 /* SettingsView.swift */; };
 		0FE15DBC0B9074385443CEE2 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8437A6505FB44F89EEE9D9B /* AppLock.swift */; };
 		15777090BCB442077B87397A /* PINPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CE669299B8B857610BAA76 /* PINPadView.swift */; };
+		1C40AF7646BB5DF33FB2FD52 /* RuneCipherLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36164F1540ACE3953D71CCBB /* RuneCipherLink.swift */; };
 		1DF4DEAAB181AD335313F763 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD00524F7CD74AD5EE0D8121 /* LockView.swift */; };
 		215EB362159B130F2A94AFE6 /* DecoderImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D25CB73E2E5E32F643BC18 /* DecoderImportTests.swift */; };
 		2C63520D30D4605995F598DB /* RuneCharacterSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */; };
@@ -32,9 +36,12 @@
 		3FDE51AADDBEA7CB2C35BDF3 /* RuneScribButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */; };
 		45113334F4CA66360C41C767 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2631879B41FCA864DDE6E7 /* ContentView.swift */; };
 		4582CC9CE71ADB1635028699 /* LicenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29341AC7EDF3058C96DD83C0 /* LicenseView.swift */; };
+		49352218624B7663754F6B52 /* QRDisplaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */; };
+		4F4668CE7576A83D775D37BE /* QRDisplaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */; };
 		50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
 		51F8FC3FC311B598FA5E74B6 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
 		584241169D94C9A2AA41FD95 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
+		62276BA1FCA311A976C6BE13 /* ImportConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646E63DF1024E9E21119084D /* ImportConfirmView.swift */; };
 		6A740828E14C15E8F49A666F /* ImportedDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 587C981F6276B41E0B68DB2B /* ImportedDecoder.swift */; };
 		6B22D46F33484FFF56504076 /* PINPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CE669299B8B857610BAA76 /* PINPadView.swift */; };
 		701C3AD554E79E1CDED99C6C /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */; };
@@ -57,27 +64,33 @@
 		97C78EAF515BE1E3A98A4A6F /* RuneTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */; };
 		97EF5114B83A1EEAD03D8E46 /* RuneKeyExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9996D784E5F2DBDC015F81B1 /* RuneKeyExport.swift */; };
 		9F95A099D27690B6214A6DE9 /* PINFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289AA0236910C21C79D71A7E /* PINFlowView.swift */; };
+		A423CCB19FF0CA97AF6BAFC0 /* RuneCipherLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDD882E639646D40469E666 /* RuneCipherLinkTests.swift */; };
 		A52AFD106332F8C377E2DF0E /* RuneScribTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAD31D611732C03413A3F3D8 /* RuneScribTests.swift */; };
 		A8860E28862BB912A033B9A9 /* VideoSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203BB2198F06103565DD4D26 /* VideoSplashView.swift */; };
 		AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
 		AC48C208CB75245D0DE515DD /* NamedCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA12713BD457FAF98DCFB6D /* NamedCipher.swift */; };
 		B0614EBD257EEA0A80FA1862 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */; };
 		B1392DA2C015B3668BE44D4A /* FontRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2C0006860B59E0906493050 /* FontRegistration.swift */; };
+		B1A33C13DEDE49385C78E523 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D37342DC065A1648904DC62 /* QRScannerView.swift */; };
 		B1BD766416360737E09888AC /* CipherLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */; };
 		B4F8144B90E37A2B69CF4F17 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23D157957EEFB14E8CB7147 /* AppDelegate.swift */; };
 		B7CD1CE0E7E485F14E5C88CB /* CipherEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CC98818174FC25A813E2C53 /* CipherEngine.swift */; };
+		B7DB4883F7A2A96A58E543EA /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */; };
 		BA96B80988B7C04093BC6A28 /* FriendDecodeRoundTripTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15B84C42FF728AC45D4DDB66 /* FriendDecodeRoundTripTests.swift */; };
 		BF865C8F7AC22840D94B464C /* CipherEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CC98818174FC25A813E2C53 /* CipherEngine.swift */; };
 		C1A6CF8336377BFF19B73290 /* RuneMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C804E8889A60C1394E8D3841 /* RuneMetalView.swift */; };
 		CEC9C8FD3A0AE90684413AF5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2631879B41FCA864DDE6E7 /* ContentView.swift */; };
 		D510973FADAD8196543583E7 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD00524F7CD74AD5EE0D8121 /* LockView.swift */; };
 		D719FF1B2410C74EE3A7B1C5 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8D5A799A33DED366C377F6 /* RootView.swift */; };
+		D78630CCAAB450865DA20EA1 /* ImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */; };
 		D8AFBCE3366CC1C34C988AA8 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		D8B2571F4B7BF5D06739FFA8 /* CipherLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */; };
 		DBDD94B49FF113EC9A8F5D43 /* RuneKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE3312C83789A20D0C4E8FB /* RuneKey.swift */; };
 		DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		DD3F914F90546898BD31D151 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098511B1E52AF229830C74E4 /* SettingsView.swift */; };
+		E75D12CA83AAD2428F022AD1 /* ImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */; };
 		E86F474B5165185D3A657E4C /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236AB4A6CB356708A2A004EE /* KeychainService.swift */; };
+		EC9E355ADDCB1E429EB55082 /* ImportConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646E63DF1024E9E21119084D /* ImportConfirmView.swift */; };
 		ED9A3B29C5ED7535452420E4 /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A31FF059DEEC7C01229CF75 /* Clipboard.swift */; };
 		EDC58C55E2D5154B15A0A5B6 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */; };
 		F98B6935CCC807A13270F6EA /* AppLicense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CBE938486EB9A2F975D48A /* AppLicense.swift */; };
@@ -102,13 +115,17 @@
 		236AB4A6CB356708A2A004EE /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		289AA0236910C21C79D71A7E /* PINFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINFlowView.swift; sourceTree = "<group>"; };
 		29341AC7EDF3058C96DD83C0 /* LicenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseView.swift; sourceTree = "<group>"; };
+		2D37342DC065A1648904DC62 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		33965AD6B626161B2307C925 /* RuneScribTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		36164F1540ACE3953D71CCBB /* RuneCipherLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCipherLink.swift; sourceTree = "<group>"; };
 		38CBE938486EB9A2F975D48A /* AppLicense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLicense.swift; sourceTree = "<group>"; };
 		39CE669299B8B857610BAA76 /* PINPadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINPadView.swift; sourceTree = "<group>"; };
 		4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibraryTests.swift; sourceTree = "<group>"; };
+		4FDD882E639646D40469E666 /* RuneCipherLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCipherLinkTests.swift; sourceTree = "<group>"; };
 		4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
 		587C981F6276B41E0B68DB2B /* ImportedDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportedDecoder.swift; sourceTree = "<group>"; };
 		5EA12713BD457FAF98DCFB6D /* NamedCipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamedCipher.swift; sourceTree = "<group>"; };
+		646E63DF1024E9E21119084D /* ImportConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportConfirmView.swift; sourceTree = "<group>"; };
 		70806C8FC5D83F211738FAAD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */ = {isa = PBXFileReference; path = "raven-forge-spp-splash.mp4"; sourceTree = "<group>"; };
 		7556775133D15B619AD67B09 /* RuneScrib-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RuneScrib-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -129,14 +146,17 @@
 		B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibrary.swift; sourceTree = "<group>"; };
 		B6164CCB0C4A4342270DC5CA /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		B8437A6505FB44F89EEE9D9B /* AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLock.swift; sourceTree = "<group>"; };
+		B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRDisplaySheet.swift; sourceTree = "<group>"; };
 		BA657AA7320B6333C8D191BD /* KeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManager.swift; sourceTree = "<group>"; };
 		C804E8889A60C1394E8D3841 /* RuneMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneMetalView.swift; sourceTree = "<group>"; };
 		CAD31D611732C03413A3F3D8 /* RuneScribTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribTests.swift; sourceTree = "<group>"; };
 		CF2631879B41FCA864DDE6E7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		E91D52C55B3AEDED27523270 /* RuneScrib-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "RuneScrib-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneTheme.swift; sourceTree = "<group>"; };
 		EC8D5A799A33DED366C377F6 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportCoordinator.swift; sourceTree = "<group>"; };
 		FD00524F7CD74AD5EE0D8121 /* LockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -148,8 +168,10 @@
 				9CC98818174FC25A813E2C53 /* CipherEngine.swift */,
 				7A31FF059DEEC7C01229CF75 /* Clipboard.swift */,
 				A2C0006860B59E0906493050 /* FontRegistration.swift */,
+				F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */,
 				236AB4A6CB356708A2A004EE /* KeychainService.swift */,
 				BA657AA7320B6333C8D191BD /* KeyManager.swift */,
+				DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -162,6 +184,7 @@
 				587C981F6276B41E0B68DB2B /* ImportedDecoder.swift */,
 				5EA12713BD457FAF98DCFB6D /* NamedCipher.swift */,
 				AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */,
+				36164F1540ACE3953D71CCBB /* RuneCipherLink.swift */,
 				AFE3312C83789A20D0C4E8FB /* RuneKey.swift */,
 				9996D784E5F2DBDC015F81B1 /* RuneKeyExport.swift */,
 			);
@@ -202,6 +225,7 @@
 			children = (
 				7D15D6F87C83071DA639125F /* DecoderDocument.swift */,
 				39CE669299B8B857610BAA76 /* PINPadView.swift */,
+				2D37342DC065A1648904DC62 /* QRScannerView.swift */,
 				A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */,
 				0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */,
 				EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */,
@@ -246,9 +270,11 @@
 			children = (
 				83E215F3EF5FE734CB87EA5C /* CipherLibraryView.swift */,
 				CF2631879B41FCA864DDE6E7 /* ContentView.swift */,
+				646E63DF1024E9E21119084D /* ImportConfirmView.swift */,
 				29341AC7EDF3058C96DD83C0 /* LicenseView.swift */,
 				FD00524F7CD74AD5EE0D8121 /* LockView.swift */,
 				289AA0236910C21C79D71A7E /* PINFlowView.swift */,
+				B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */,
 				EC8D5A799A33DED366C377F6 /* RootView.swift */,
 				098511B1E52AF229830C74E4 /* SettingsView.swift */,
 				587741695BBC8E01B5722A5E /* Components */,
@@ -273,6 +299,7 @@
 				4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */,
 				88D25CB73E2E5E32F643BC18 /* DecoderImportTests.swift */,
 				15B84C42FF728AC45D4DDB66 /* FriendDecodeRoundTripTests.swift */,
+				4FDD882E639646D40469E666 /* RuneCipherLinkTests.swift */,
 				CAD31D611732C03413A3F3D8 /* RuneScribTests.swift */,
 			);
 			path = RuneScribTests;
@@ -413,6 +440,7 @@
 				D8B2571F4B7BF5D06739FFA8 /* CipherLibraryTests.swift in Sources */,
 				215EB362159B130F2A94AFE6 /* DecoderImportTests.swift in Sources */,
 				BA96B80988B7C04093BC6A28 /* FriendDecodeRoundTripTests.swift in Sources */,
+				A423CCB19FF0CA97AF6BAFC0 /* RuneCipherLinkTests.swift in Sources */,
 				A52AFD106332F8C377E2DF0E /* RuneScribTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -431,6 +459,8 @@
 				CEC9C8FD3A0AE90684413AF5 /* ContentView.swift in Sources */,
 				7BA7569056634A2C5C04D4C6 /* DecoderDocument.swift in Sources */,
 				8760249472534AD89E15AF62 /* FontRegistration.swift in Sources */,
+				EC9E355ADDCB1E429EB55082 /* ImportConfirmView.swift in Sources */,
+				E75D12CA83AAD2428F022AD1 /* ImportCoordinator.swift in Sources */,
 				3F122BD26A08F7522A6F31C7 /* ImportedDecoder.swift in Sources */,
 				87C653A1A5B292FB7831DB22 /* KeyManager.swift in Sources */,
 				05564C21ED178128F862F4F3 /* KeychainService.swift in Sources */,
@@ -440,8 +470,12 @@
 				AC48C208CB75245D0DE515DD /* NamedCipher.swift in Sources */,
 				9F95A099D27690B6214A6DE9 /* PINFlowView.swift in Sources */,
 				6B22D46F33484FFF56504076 /* PINPadView.swift in Sources */,
+				B7DB4883F7A2A96A58E543EA /* QRCodeGenerator.swift in Sources */,
+				49352218624B7663754F6B52 /* QRDisplaySheet.swift in Sources */,
+				B1A33C13DEDE49385C78E523 /* QRScannerView.swift in Sources */,
 				D719FF1B2410C74EE3A7B1C5 /* RootView.swift in Sources */,
 				2C63520D30D4605995F598DB /* RuneCharacterSet.swift in Sources */,
+				1C40AF7646BB5DF33FB2FD52 /* RuneCipherLink.swift in Sources */,
 				51F8FC3FC311B598FA5E74B6 /* RuneInscriptionText.swift in Sources */,
 				DBDD94B49FF113EC9A8F5D43 /* RuneKey.swift in Sources */,
 				97EF5114B83A1EEAD03D8E46 /* RuneKeyExport.swift in Sources */,
@@ -469,6 +503,8 @@
 				45113334F4CA66360C41C767 /* ContentView.swift in Sources */,
 				86EC8F977E7E340F16A64EA2 /* DecoderDocument.swift in Sources */,
 				B1392DA2C015B3668BE44D4A /* FontRegistration.swift in Sources */,
+				62276BA1FCA311A976C6BE13 /* ImportConfirmView.swift in Sources */,
+				D78630CCAAB450865DA20EA1 /* ImportCoordinator.swift in Sources */,
 				6A740828E14C15E8F49A666F /* ImportedDecoder.swift in Sources */,
 				90967110D847AD379BCB6EDB /* KeyManager.swift in Sources */,
 				E86F474B5165185D3A657E4C /* KeychainService.swift in Sources */,
@@ -478,8 +514,12 @@
 				747BECB5355C3777ED63AB1D /* NamedCipher.swift in Sources */,
 				7BF138CAE8F17D14882A4596 /* PINFlowView.swift in Sources */,
 				15777090BCB442077B87397A /* PINPadView.swift in Sources */,
+				036F7BB7BA50F4AAE1F1DE48 /* QRCodeGenerator.swift in Sources */,
+				4F4668CE7576A83D775D37BE /* QRDisplaySheet.swift in Sources */,
+				0E7EE57FCC7EF36C764D4C9C /* QRScannerView.swift in Sources */,
 				3734D1550897FAC020B54AE2 /* RootView.swift in Sources */,
 				80E4EDFC691AB83CE9B78E5E /* RuneCharacterSet.swift in Sources */,
+				01B519047CF6CF039DE1671C /* RuneCipherLink.swift in Sources */,
 				AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */,
 				0D96E8574B629ECC51ED1B35 /* RuneKey.swift in Sources */,
 				03BBB0908752F6A1F5111265 /* RuneKeyExport.swift in Sources */,
@@ -560,7 +600,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = "";
@@ -580,7 +620,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.12;
+				MARKETING_VERSION = 1.0.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.runescribe.app;
@@ -617,11 +657,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9AQ2C2838M;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/RuneScrib-iOS-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -672,7 +709,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = "";
@@ -698,7 +735,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.12;
+				MARKETING_VERSION = 1.0.13;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -719,11 +756,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9AQ2C2838M;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/RuneScrib-iOS-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -745,7 +779,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9AQ2C2838M;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "© Raven Forge Software";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/RuneScrib-macOS-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -766,7 +801,8 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9AQ2C2838M;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "© Raven Forge Software";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Config/RuneScrib-macOS-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
