@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.15] - 2026-06-21
+
+- Refresh the README for v1.0.14 — cipher sharing & cold-launch splash (#16) by @flynn33
+
 ## [1.0.14] - 2026-06-21
 
 - Video splash screen on cold launch (#15) by @flynn33
