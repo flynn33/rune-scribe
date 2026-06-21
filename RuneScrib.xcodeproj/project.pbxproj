@@ -23,12 +23,14 @@
 		1DF4DEAAB181AD335313F763 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD00524F7CD74AD5EE0D8121 /* LockView.swift */; };
 		215EB362159B130F2A94AFE6 /* DecoderImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D25CB73E2E5E32F643BC18 /* DecoderImportTests.swift */; };
 		2C63520D30D4605995F598DB /* RuneCharacterSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */; };
+		312A8A3914A0A1B0B36124BC /* VideoSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203BB2198F06103565DD4D26 /* VideoSplashView.swift */; };
 		32052333DC272F9086A942D4 /* CipherLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */; };
 		3216BD9FD4314395132F51BB /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A31FF059DEEC7C01229CF75 /* Clipboard.swift */; };
 		3367F4DE31A8BFA2F5A8955B /* AppLicense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CBE938486EB9A2F975D48A /* AppLicense.swift */; };
 		34A07D593701D17AEC1FC143 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
 		35C98AE00276C7655C193856 /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */; };
 		3734D1550897FAC020B54AE2 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8D5A799A33DED366C377F6 /* RootView.swift */; };
+		38049FACD09DEBB67B1C6DAF /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		3D38B09452746F6509C37C02 /* RuneTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */; };
 		3F122BD26A08F7522A6F31C7 /* ImportedDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 587C981F6276B41E0B68DB2B /* ImportedDecoder.swift */; };
 		3FDE51AADDBEA7CB2C35BDF3 /* RuneScribButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */; };
@@ -64,6 +66,7 @@
 		9F95A099D27690B6214A6DE9 /* PINFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289AA0236910C21C79D71A7E /* PINFlowView.swift */; };
 		A423CCB19FF0CA97AF6BAFC0 /* RuneCipherLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDD882E639646D40469E666 /* RuneCipherLinkTests.swift */; };
 		A52AFD106332F8C377E2DF0E /* RuneScribTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAD31D611732C03413A3F3D8 /* RuneScribTests.swift */; };
+		A8860E28862BB912A033B9A9 /* VideoSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203BB2198F06103565DD4D26 /* VideoSplashView.swift */; };
 		AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
 		AC48C208CB75245D0DE515DD /* NamedCipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA12713BD457FAF98DCFB6D /* NamedCipher.swift */; };
 		B0614EBD257EEA0A80FA1862 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */; };
@@ -83,6 +86,7 @@
 		D8AFBCE3366CC1C34C988AA8 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		D8B2571F4B7BF5D06739FFA8 /* CipherLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */; };
 		DBDD94B49FF113EC9A8F5D43 /* RuneKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE3312C83789A20D0C4E8FB /* RuneKey.swift */; };
+		DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		DD3F914F90546898BD31D151 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098511B1E52AF229830C74E4 /* SettingsView.swift */; };
 		E75D12CA83AAD2428F022AD1 /* ImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */; };
 		E86F474B5165185D3A657E4C /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236AB4A6CB356708A2A004EE /* KeychainService.swift */; };
@@ -107,6 +111,7 @@
 		098511B1E52AF229830C74E4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribButtonStyle.swift; sourceTree = "<group>"; };
 		15B84C42FF728AC45D4DDB66 /* FriendDecodeRoundTripTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendDecodeRoundTripTests.swift; sourceTree = "<group>"; };
+		203BB2198F06103565DD4D26 /* VideoSplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoSplashView.swift; sourceTree = "<group>"; };
 		236AB4A6CB356708A2A004EE /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		289AA0236910C21C79D71A7E /* PINFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINFlowView.swift; sourceTree = "<group>"; };
 		29341AC7EDF3058C96DD83C0 /* LicenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseView.swift; sourceTree = "<group>"; };
@@ -122,6 +127,7 @@
 		5EA12713BD457FAF98DCFB6D /* NamedCipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamedCipher.swift; sourceTree = "<group>"; };
 		646E63DF1024E9E21119084D /* ImportConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportConfirmView.swift; sourceTree = "<group>"; };
 		70806C8FC5D83F211738FAAD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */ = {isa = PBXFileReference; path = "raven-forge-spp-splash.mp4"; sourceTree = "<group>"; };
 		7556775133D15B619AD67B09 /* RuneScrib-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RuneScrib-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansRunic-Regular.ttf"; sourceTree = "<group>"; };
 		7A31FF059DEEC7C01229CF75 /* Clipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clipboard.swift; sourceTree = "<group>"; };
@@ -189,6 +195,7 @@
 			isa = PBXGroup;
 			children = (
 				D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */,
+				73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */,
 				7C5FDB5E16F112EAD70C17D8 /* Fonts */,
 			);
 			path = Resources;
@@ -222,6 +229,7 @@
 				A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */,
 				0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */,
 				EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */,
+				203BB2198F06103565DD4D26 /* VideoSplashView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -406,6 +414,7 @@
 				973EBAFA7B1E6A25FAE46B58 /* Assets.xcassets in Resources */,
 				059BA5D329AA9280083DF044 /* NotoSansRunic-Regular.ttf in Resources */,
 				FAE1E2AAB9525E7A3C4E51DC /* OFL.txt in Resources */,
+				DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -416,6 +425,7 @@
 				584241169D94C9A2AA41FD95 /* Assets.xcassets in Resources */,
 				D8AFBCE3366CC1C34C988AA8 /* NotoSansRunic-Regular.ttf in Resources */,
 				34A07D593701D17AEC1FC143 /* OFL.txt in Resources */,
+				38049FACD09DEBB67B1C6DAF /* raven-forge-spp-splash.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -475,6 +485,7 @@
 				3D38B09452746F6509C37C02 /* RuneTheme.swift in Sources */,
 				DD3F914F90546898BD31D151 /* SettingsView.swift in Sources */,
 				01C55610EF12C17DA83396B2 /* Shaders.metal in Sources */,
+				A8860E28862BB912A033B9A9 /* VideoSplashView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -518,6 +529,7 @@
 				97C78EAF515BE1E3A98A4A6F /* RuneTheme.swift in Sources */,
 				0F375290B9932F3D5C1F8956 /* SettingsView.swift in Sources */,
 				50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */,
+				312A8A3914A0A1B0B36124BC /* VideoSplashView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
