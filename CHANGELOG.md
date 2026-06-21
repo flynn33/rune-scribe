@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.14] - 2026-06-21
+
+- Video splash screen on cold launch (#15) by @flynn33
+
 ## [1.0.13] - 2026-06-20
 
 - Share ciphers via iMessage, QR code, and deep-link auto-import (#14) by @flynn33
