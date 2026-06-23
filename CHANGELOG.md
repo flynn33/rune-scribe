@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.16] - 2026-06-23
+
+- Phase 1: real message encryption (replace substitution cipher) (#17) by @flynn33
+
 ## [1.0.15] - 2026-06-21
 
 - Refresh the README for v1.0.14 — cipher sharing & cold-launch splash (#16) by @flynn33
