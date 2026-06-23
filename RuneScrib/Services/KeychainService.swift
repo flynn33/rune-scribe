@@ -49,8 +49,6 @@ final class KeychainService: Sendable {
 
     private let service = "com.runescribe.keystore"
     private let symmetricKeyAccount = "symmetricKey"
-    private let cipherMappingAccount = "cipherMapping"      // legacy (pre-library) single key
-    private let importedDecoderAccount = "importedDecoder"  // legacy (pre-library) single decoder
     private let cipherLibraryAccount = "cipherLibrary"
     private let pinAccount = "appPin"
     private let pinThrottleAccount = "pinThrottle"
@@ -138,42 +136,6 @@ final class KeychainService: Sendable {
     /// Returns nil if no key has been stored yet.
     func retrieveSymmetricKeyData() throws -> Data? {
         try retrieve(account: symmetricKeyAccount)
-    }
-
-    // MARK: - Public API: Cipher Mapping
-
-    /// Stores the AES-GCM–encrypted cipher mapping (combined Data) in Keychain.
-    func storeEncryptedMapping(_ data: Data) throws {
-        try store(data: data, account: cipherMappingAccount)
-    }
-
-    /// Retrieves the AES-GCM–encrypted cipher mapping from Keychain.
-    /// Returns nil if no mapping has been stored yet.
-    func retrieveEncryptedMapping() throws -> Data? {
-        try retrieve(account: cipherMappingAccount)
-    }
-
-    /// Removes the legacy single cipher mapping (used after migration).
-    func deleteEncryptedMapping() throws {
-        try delete(account: cipherMappingAccount)
-    }
-
-    // MARK: - Public API: Imported Decoder
-
-    /// Stores the AES-GCM–encrypted imported decoder (combined Data) in Keychain.
-    func storeEncryptedDecoder(_ data: Data) throws {
-        try store(data: data, account: importedDecoderAccount)
-    }
-
-    /// Retrieves the AES-GCM–encrypted imported decoder from Keychain.
-    /// Returns nil if none has been imported.
-    func retrieveEncryptedDecoder() throws -> Data? {
-        try retrieve(account: importedDecoderAccount)
-    }
-
-    /// Removes the imported decoder from Keychain.
-    func deleteImportedDecoder() throws {
-        try delete(account: importedDecoderAccount)
     }
 
     // MARK: - Public API: Cipher Library
