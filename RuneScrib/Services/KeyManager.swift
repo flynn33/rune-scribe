@@ -107,11 +107,6 @@ final class KeyManager: ObservableObject {
         return cipher
     }
 
-    /// Whether a cipher with the given public id is already present in the library.
-    func libraryContains(publicID: Data) -> Bool {
-        library.ciphers.contains { $0.publicID == publicID }
-    }
-
     /// Renames the cipher with the given id.
     func renameCipher(id: UUID, to newLabel: String) {
         guard let existing = library.ciphers.first(where: { $0.id == id }) else { return }

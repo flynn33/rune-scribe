@@ -24,4 +24,10 @@ final class MessageServiceTests: XCTestCase {
         let runes = try svc.compose("nope", with: Cipher.generated(label: "a"))
         XCTAssertThrowsError(try svc.read(runes, tryingCiphers: [Cipher.generated(label: "b")]))
     }
+    func testReadToleratesSurroundingWhitespace() throws {
+        let c = Cipher.generated(label: "x")
+        let runes = try svc.compose("hi there", with: c)
+        let messy = "\n  \(runes)\n"   // as if pasted from a chat app
+        XCTAssertEqual(try svc.read(messy, tryingCiphers: [c]).plaintext, "hi there")
+    }
 }

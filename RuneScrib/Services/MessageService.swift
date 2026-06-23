@@ -26,8 +26,12 @@ struct MessageService {
     /// Rune string → (plaintext, cipher) by trying each candidate. Exactly one cipher's
     /// key authenticates the message; everything else fails to open.
     func read(_ runes: String, tryingCiphers ciphers: [Cipher]) throws -> (plaintext: String, cipher: Cipher) {
+        // Tolerate whitespace, newlines, or surrounding text around a pasted rune
+        // message (e.g. copied from Messages/Mail) by keeping only the decorative runes.
+        let alphabet = Set(RuneCharacterSet.decorativeAlphabet)
+        let cleaned = String(runes.filter(alphabet.contains))
         for cipher in ciphers {
-            guard let bytes = try? codec.decode(runes, with: cipher),
+            guard let bytes = try? codec.decode(cleaned, with: cipher),
                   let sealed = try? MessageEnvelope.unwrap(bytes),
                   let text = try? cryptor.open(sealed, with: cipher)
             else { continue }
