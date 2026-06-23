@@ -22,6 +22,7 @@
 		1C40AF7646BB5DF33FB2FD52 /* RuneCipherLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36164F1540ACE3953D71CCBB /* RuneCipherLink.swift */; };
 		1DF4DEAAB181AD335313F763 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD00524F7CD74AD5EE0D8121 /* LockView.swift */; };
 		215EB362159B130F2A94AFE6 /* DecoderImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D25CB73E2E5E32F643BC18 /* DecoderImportTests.swift */; };
+		2B3A29FAFF2CF3E931C055DF /* RuneCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */; };
 		2C63520D30D4605995F598DB /* RuneCharacterSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */; };
 		312A8A3914A0A1B0B36124BC /* VideoSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203BB2198F06103565DD4D26 /* VideoSplashView.swift */; };
 		32052333DC272F9086A942D4 /* CipherLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */; };
@@ -68,6 +69,7 @@
 		973EBAFA7B1E6A25FAE46B58 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
 		97C78EAF515BE1E3A98A4A6F /* RuneTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */; };
 		97EF5114B83A1EEAD03D8E46 /* RuneKeyExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9996D784E5F2DBDC015F81B1 /* RuneKeyExport.swift */; };
+		9D7FEA16DD78184E7FE55034 /* RuneCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */; };
 		9F95A099D27690B6214A6DE9 /* PINFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289AA0236910C21C79D71A7E /* PINFlowView.swift */; };
 		A423CCB19FF0CA97AF6BAFC0 /* RuneCipherLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDD882E639646D40469E666 /* RuneCipherLinkTests.swift */; };
 		A52AFD106332F8C377E2DF0E /* RuneScribTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAD31D611732C03413A3F3D8 /* RuneScribTests.swift */; };
@@ -149,6 +151,7 @@
 		A23D157957EEFB14E8CB7147 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A2C0006860B59E0906493050 /* FontRegistration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontRegistration.swift; sourceTree = "<group>"; };
 		A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneInscriptionText.swift; sourceTree = "<group>"; };
+		A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCodec.swift; sourceTree = "<group>"; };
 		AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCharacterSet.swift; sourceTree = "<group>"; };
 		AFE3312C83789A20D0C4E8FB /* RuneKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneKey.swift; sourceTree = "<group>"; };
 		B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribApp.swift; sourceTree = "<group>"; };
@@ -185,6 +188,7 @@
 				BA657AA7320B6333C8D191BD /* KeyManager.swift */,
 				ED388EE7376C2E10FDCCBAF0 /* MessageCryptor.swift */,
 				DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */,
+				A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -498,6 +502,7 @@
 				D719FF1B2410C74EE3A7B1C5 /* RootView.swift in Sources */,
 				2C63520D30D4605995F598DB /* RuneCharacterSet.swift in Sources */,
 				1C40AF7646BB5DF33FB2FD52 /* RuneCipherLink.swift in Sources */,
+				2B3A29FAFF2CF3E931C055DF /* RuneCodec.swift in Sources */,
 				51F8FC3FC311B598FA5E74B6 /* RuneInscriptionText.swift in Sources */,
 				DBDD94B49FF113EC9A8F5D43 /* RuneKey.swift in Sources */,
 				97EF5114B83A1EEAD03D8E46 /* RuneKeyExport.swift in Sources */,
@@ -544,6 +549,7 @@
 				3734D1550897FAC020B54AE2 /* RootView.swift in Sources */,
 				80E4EDFC691AB83CE9B78E5E /* RuneCharacterSet.swift in Sources */,
 				01B519047CF6CF039DE1671C /* RuneCipherLink.swift in Sources */,
+				9D7FEA16DD78184E7FE55034 /* RuneCodec.swift in Sources */,
 				AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */,
 				0D96E8574B629ECC51ED1B35 /* RuneKey.swift in Sources */,
 				03BBB0908752F6A1F5111265 /* RuneKeyExport.swift in Sources */,
