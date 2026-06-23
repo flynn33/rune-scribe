@@ -57,6 +57,15 @@ enum RuneCharacterSet {
         return pool
     }()
 
+    // MARK: - Decorative Alphabet (32 runes for message encoding)
+
+    /// The 32-rune alphabet used by the DECORATIVE base-32 message encoding (not the
+    /// cipher). Drawn from U+16A0…U+16BF — core Elder Futhark, broadly covered by
+    /// system fonts so messages render consistently even outside Rune Scribe.
+    static let decorativeAlphabet: [Character] = (0x16A0...0x16BF).map {
+        Character(Unicode.Scalar($0)!)
+    }
+
     // MARK: - Set for O(1) Lookup
 
     /// Set of all input character strings, used by CipherEngine for fast membership testing.

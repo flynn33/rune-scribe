@@ -85,6 +85,7 @@
 		D78630CCAAB450865DA20EA1 /* ImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */; };
 		D8AFBCE3366CC1C34C988AA8 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		D8B2571F4B7BF5D06739FFA8 /* CipherLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */; };
+		DA56A46F02A37D239461F8C8 /* RuneCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */; };
 		DBDD94B49FF113EC9A8F5D43 /* RuneKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE3312C83789A20D0C4E8FB /* RuneKey.swift */; };
 		DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		DD3F914F90546898BD31D151 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098511B1E52AF229830C74E4 /* SettingsView.swift */; };
@@ -126,6 +127,7 @@
 		587C981F6276B41E0B68DB2B /* ImportedDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportedDecoder.swift; sourceTree = "<group>"; };
 		5EA12713BD457FAF98DCFB6D /* NamedCipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamedCipher.swift; sourceTree = "<group>"; };
 		646E63DF1024E9E21119084D /* ImportConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportConfirmView.swift; sourceTree = "<group>"; };
+		6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCodecTests.swift; sourceTree = "<group>"; };
 		70806C8FC5D83F211738FAAD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */ = {isa = PBXFileReference; path = "raven-forge-spp-splash.mp4"; sourceTree = "<group>"; };
 		7556775133D15B619AD67B09 /* RuneScrib-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RuneScrib-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -300,6 +302,7 @@
 				88D25CB73E2E5E32F643BC18 /* DecoderImportTests.swift */,
 				15B84C42FF728AC45D4DDB66 /* FriendDecodeRoundTripTests.swift */,
 				4FDD882E639646D40469E666 /* RuneCipherLinkTests.swift */,
+				6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */,
 				CAD31D611732C03413A3F3D8 /* RuneScribTests.swift */,
 			);
 			path = RuneScribTests;
@@ -441,6 +444,7 @@
 				215EB362159B130F2A94AFE6 /* DecoderImportTests.swift in Sources */,
 				BA96B80988B7C04093BC6A28 /* FriendDecodeRoundTripTests.swift in Sources */,
 				A423CCB19FF0CA97AF6BAFC0 /* RuneCipherLinkTests.swift in Sources */,
+				DA56A46F02A37D239461F8C8 /* RuneCodecTests.swift in Sources */,
 				A52AFD106332F8C377E2DF0E /* RuneScribTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
