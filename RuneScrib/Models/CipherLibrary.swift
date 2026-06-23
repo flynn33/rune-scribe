@@ -11,16 +11,16 @@ struct CipherLibrary: Codable, Equatable {
     var version: Int = 1
 
     /// All ciphers the user has created or imported.
-    var ciphers: [NamedCipher]
+    var ciphers: [Cipher]
 
-    /// The id of the active cipher (used for both encoding and decoding).
+    /// The id of the active cipher (the default used when composing a message).
     var activeID: UUID?
 
     static let empty = CipherLibrary(ciphers: [], activeID: nil)
 
     /// The active cipher, falling back to the first entry when the stored
     /// `activeID` is missing or no longer present.
-    var activeCipher: NamedCipher? {
+    var activeCipher: Cipher? {
         if let activeID, let match = ciphers.first(where: { $0.id == activeID }) {
             return match
         }
@@ -41,7 +41,7 @@ struct CipherLibrary: Codable, Equatable {
 extension CipherLibrary {
 
     /// Appends a cipher and makes it active.
-    func adding(_ cipher: NamedCipher) -> CipherLibrary {
+    func adding(_ cipher: Cipher) -> CipherLibrary {
         var copy = self
         copy.ciphers.append(cipher)
         copy.activeID = cipher.id
@@ -55,7 +55,7 @@ extension CipherLibrary {
         copy.ciphers.removeAll { $0.id == id }
         if copy.activeID == id { copy.activeID = copy.ciphers.first?.id }
         if copy.ciphers.isEmpty {
-            let fresh = NamedCipher.generated(label: regeneratedLabel)
+            let fresh = Cipher.generated(label: regeneratedLabel)
             copy.ciphers = [fresh]
             copy.activeID = fresh.id
         }
@@ -77,26 +77,5 @@ extension CipherLibrary {
         var copy = self
         copy.activeID = id
         return copy
-    }
-
-    /// Builds the initial library from decrypted legacy data, preserving the
-    /// imported decoder's original key id/date. Guarantees at least one cipher.
-    static func fromLegacy(key: RuneKey?,
-                           decoder: ImportedDecoder?,
-                           defaultLabel: String = "My Cipher") -> CipherLibrary {
-        var ciphers: [NamedCipher] = []
-        if let key {
-            ciphers.append(NamedCipher(label: "My Cipher", origin: .generated, key: key))
-        }
-        if let decoder {
-            let decoderKey = RuneKey(keyId: decoder.keyId,
-                                     createdAt: decoder.createdAt,
-                                     mapping: decoder.mapping)
-            ciphers.append(NamedCipher(label: "Imported Decoder", origin: .imported, key: decoderKey))
-        }
-        if ciphers.isEmpty {
-            ciphers.append(NamedCipher.generated(label: defaultLabel))
-        }
-        return CipherLibrary(ciphers: ciphers, activeID: ciphers.first?.id)
     }
 }

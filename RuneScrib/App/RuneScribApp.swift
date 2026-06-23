@@ -15,13 +15,7 @@ struct RuneScribApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(KeyManager.shared)
-                .environmentObject(AppLock.shared)
-                .environmentObject(ImportCoordinator.shared)
-                // A tapped runescribe://import link (Messages, Mail, Camera-app QR,
-                // etc.) lands here on both platforms, even from a cold launch.
-                .onOpenURL { ImportCoordinator.shared.ingest(url: $0) }
+            rootContent
         }
         #if os(macOS)
         .windowStyle(.hiddenTitleBar)
@@ -44,6 +38,25 @@ struct RuneScribApp: App {
                 }
                 .keyboardShortcut("l", modifiers: [.command, .shift])
             }
+        }
+    }
+
+    /// Under XCTest the app-hosted test host renders nothing and touches none of the
+    /// Keychain-backed singletons (`KeyManager`/`AppLock`) or the splash/Metal UI, so
+    /// unit tests launch instantly and non-interactively — no Keychain authorization
+    /// prompt — in a headless context. The real UI is exercised by the user and UI tests.
+    @ViewBuilder
+    private var rootContent: some View {
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+            EmptyView()
+        } else {
+            RootView()
+                .environmentObject(KeyManager.shared)
+                .environmentObject(AppLock.shared)
+                .environmentObject(ImportCoordinator.shared)
+                // A tapped runescribe://import link (Messages, Mail, Camera-app QR,
+                // etc.) lands here on both platforms, even from a cold launch.
+                .onOpenURL { ImportCoordinator.shared.ingest(url: $0) }
         }
     }
 }

@@ -34,6 +34,7 @@ struct ContentView: View {
     @State private var copyConfirmed = false
     @State private var showLibrary: Bool = false
     @State private var showSettings: Bool = false
+    @State private var decodeError: String?
 
     /// One glyph size shared by the editor and the inscription so the text never
     /// changes size when it transforms — only the glyphs change.
@@ -98,6 +99,14 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()
+        }
+        .alert("Couldn't Complete", isPresented: Binding(
+            get: { decodeError != nil },
+            set: { if !$0 { decodeError = nil } }
+        )) {
+            Button("OK") { decodeError = nil }
+        } message: {
+            Text(decodeError ?? "")
         }
         .onReceive(NotificationCenter.default.publisher(for: .openLibraryRequested)) { _ in
             showLibrary = true
@@ -266,17 +275,22 @@ struct ContentView: View {
     // MARK: - Actions
 
     private func performAction() {
-        guard boxPhase == .editing, let cipher = keyManager.activeCipher else { return }
+        guard boxPhase == .editing, let activeCipher = keyManager.activeCipher else { return }
         let source = inputText
-        let engine = CipherEngine(key: cipher.key)
+        let service = MessageService()
         let target: String
-        switch mode {
-        case .encode:
-            target = engine.encode(source)
-            transformDirection = .encode
-        case .decode:
-            target = engine.decode(source)
-            transformDirection = .decode
+        do {
+            switch mode {
+            case .encode:
+                target = try service.compose(source, with: activeCipher)
+                transformDirection = .encode
+            case .decode:
+                target = try service.read(source, tryingCiphers: keyManager.ciphers).plaintext
+                transformDirection = .decode
+            }
+        } catch {
+            decodeError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            return
         }
 
         sourceSnapshot = source
