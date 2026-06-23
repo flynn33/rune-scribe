@@ -15,7 +15,7 @@ struct ImportConfirmView: View {
     @Environment(\.dismiss) private var dismiss
 
     let pending: ImportCoordinator.PendingImport
-    var onResult: ((Result<NamedCipher, Error>) -> Void)? = nil
+    var onResult: ((Result<Cipher, Error>) -> Void)? = nil
 
     @State private var name: String = ""
 
@@ -84,7 +84,7 @@ struct ImportConfirmView: View {
     private func confirm() {
         let label = trimmedName.isEmpty ? nil : trimmedName
         do {
-            let cipher = try keyManager.importCipher(fromPermutation: pending.perm, label: label)
+            let cipher = try keyManager.importCipher(pending.payload, label: label)
             onResult?(.success(cipher))
         } catch {
             onResult?(.failure(error))

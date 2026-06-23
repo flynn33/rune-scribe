@@ -29,7 +29,7 @@ final class ImportCoordinator: ObservableObject {
 
     struct PendingImport: Identifiable, Equatable {
         let id = UUID()
-        let perm: [UInt8]
+        let payload: CipherSharePayload
         let suggestedName: String
     }
 
@@ -41,9 +41,9 @@ final class ImportCoordinator: ObservableObject {
         if key == lastHandledURL, pending != nil { return }
         lastHandledURL = key
         do {
-            let (perm, name) = try RuneCipherLink.decodeURL(url)
+            let payload = try CipherSharePayload(url: url)
             errorMessage = nil
-            pending = PendingImport(perm: perm, suggestedName: name ?? "Imported Cipher")
+            pending = PendingImport(payload: payload, suggestedName: payload.parsedName ?? "Imported Cipher")
         } catch {
             pending = nil
             errorMessage = (error as? LocalizedError)?.errorDescription
@@ -57,7 +57,7 @@ final class ImportCoordinator: ObservableObject {
     /// `RuneCipherLink.decodeURL`.
     func ingest(urlString: String) {
         let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.hasPrefix("\(RuneCipherLink.scheme):"), let url = URL(string: trimmed) else { return }
+        guard trimmed.hasPrefix("\(CipherSharePayload.scheme):"), let url = URL(string: trimmed) else { return }
         ingest(url: url)
     }
 }

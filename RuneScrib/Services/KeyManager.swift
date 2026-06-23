@@ -21,9 +21,9 @@ enum KeyManagerError: Error, LocalizedError {
 
 // MARK: - KeyManager
 
-/// Owns the user's cipher library: a list of labelled `NamedCipher` pairs plus the
-/// active selection. The whole library is persisted AES-GCM-encrypted in the
-/// Keychain. One symmetric AES key (also in the Keychain) protects it.
+/// Owns the user's cipher library: a list of labelled `Cipher`s plus the active
+/// selection. The whole library is persisted AES-GCM-encrypted in the Keychain.
+/// One symmetric AES key (also in the Keychain) protects it.
 ///
 /// Published as a singleton and injected as an `@EnvironmentObject`. All published
 /// state mutates on the main actor.
@@ -43,10 +43,10 @@ final class KeyManager: ObservableObject {
     // MARK: - Derived
 
     /// All ciphers in library order.
-    var ciphers: [NamedCipher] { library.ciphers }
+    var ciphers: [Cipher] { library.ciphers }
 
-    /// The active cipher, used for both encoding and decoding.
-    var activeCipher: NamedCipher? { library.activeCipher }
+    /// The active cipher, used as the default when composing a message.
+    var activeCipher: Cipher? { library.activeCipher }
 
     // MARK: - Private Dependencies
 
@@ -58,11 +58,10 @@ final class KeyManager: ObservableObject {
         Task { await load() }
     }
 
-    // MARK: - Load / Migrate
+    // MARK: - Load
 
-    /// Loads the cipher library from the Keychain. On first launch under the
-    /// library model, migrates any legacy single key / imported decoder, and
-    /// guarantees at least one cipher exists.
+    /// Loads the cipher library from the Keychain, guaranteeing at least one cipher
+    /// exists on first launch.
     func load() async {
         isLoading = true
         lastError = nil
@@ -73,17 +72,10 @@ final class KeyManager: ObservableObject {
 
             if let data = try keychain.retrieveEncryptedLibrary() {
                 library = try decrypt(CipherLibrary.self, from: data, using: aesKey)
-            } else {
-                library = migrateLegacy(using: aesKey)
-                try persist(using: aesKey)
-                // Migration succeeded and is now the source of truth — remove the
-                // legacy entries so this path doesn't run again.
-                try? keychain.deleteEncryptedMapping()
-                try? keychain.deleteImportedDecoder()
             }
 
             if library.ciphers.isEmpty {
-                let first = NamedCipher.generated(label: "My Cipher")
+                let first = Cipher.generated(label: "My Cipher")
                 library = CipherLibrary(ciphers: [first], activeID: first.id)
                 try persist(using: aesKey)
             }
@@ -92,41 +84,22 @@ final class KeyManager: ObservableObject {
         }
     }
 
-    /// Builds the initial library from any pre-library Keychain data so existing
-    /// users keep their cipher and any imported decoder across the upgrade. If the
-    /// legacy blobs are absent or unreadable, a fresh cipher is seeded (the old
-    /// data, if present-but-undecryptable, is unrecoverable regardless).
-    private func migrateLegacy(using aesKey: SymmetricKey) -> CipherLibrary {
-        let legacyKey: RuneKey? = (try? keychain.retrieveEncryptedMapping())
-            .flatMap { $0 }
-            .flatMap { try? decrypt(RuneKey.self, from: $0, using: aesKey) }
-
-        let legacyDecoder: ImportedDecoder? = (try? keychain.retrieveEncryptedDecoder())
-            .flatMap { $0 }
-            .flatMap { try? decrypt(ImportedDecoder.self, from: $0, using: aesKey) }
-
-        return CipherLibrary.fromLegacy(key: legacyKey, decoder: legacyDecoder)
-    }
-
     // MARK: - Mutations
 
     /// Creates a new random cipher, appends it, and makes it active.
     @discardableResult
-    func addCipher(label: String) -> NamedCipher? {
-        let cipher = NamedCipher.generated(label: cleanLabel(label, fallback: "New Cipher"))
+    func addCipher(label: String) -> Cipher? {
+        let cipher = Cipher.generated(label: cleanLabel(label, fallback: "New Cipher"))
         library = library.adding(cipher)
         persist()
         return lastError == nil ? cipher : nil
     }
 
-    /// Imports a decoder file as a new cipher, appends it, and makes it active.
+    /// Imports a shared cipher (from a deep link, QR code, file, or clipboard) as a
+    /// new cipher, appends it, and makes it active.
     @discardableResult
-    func importCipher(data: Data, label: String?) throws -> NamedCipher {
-        let decoder = try ImportedDecoder.parse(data)
-        let key = RuneKey(keyId: decoder.keyId, createdAt: decoder.createdAt, mapping: decoder.mapping)
-        let name = cleanLabel(label ?? "", fallback: "Imported \(decoder.keyId.prefix(6))")
-        let cipher = NamedCipher(label: name, origin: .imported, key: key)
-
+    func importCipher(_ payload: CipherSharePayload, label: String?) throws -> Cipher {
+        let cipher = payload.cipher(label: cleanLabel(label ?? "", fallback: "Imported Cipher"))
         let aesKey = try loadOrCreateSymmetricKey()
         library = library.adding(cipher)
         try persist(using: aesKey)
@@ -134,19 +107,9 @@ final class KeyManager: ObservableObject {
         return cipher
     }
 
-    /// Imports a cipher delivered over the wire (deep link, QR code, or clipboard)
-    /// as a compact 89-byte permutation. Reuses the exact same validated funnel as
-    /// file import by reconstituting the decoder JSON first, so there's one import
-    /// path and one set of validation rules.
-    @discardableResult
-    func importCipher(fromPermutation perm: [UInt8], label: String?) throws -> NamedCipher {
-        let json = try RuneCipherLink.exportJSONData(forPermutation: perm)
-        return try importCipher(data: json, label: label)
-    }
-
-    /// Whether a cipher with the given key id is already present in the library.
-    func libraryContainsKeyId(_ keyId: String) -> Bool {
-        library.ciphers.contains { $0.key.keyId == keyId }
+    /// Whether a cipher with the given public id is already present in the library.
+    func libraryContains(publicID: Data) -> Bool {
+        library.ciphers.contains { $0.publicID == publicID }
     }
 
     /// Renames the cipher with the given id.
@@ -163,30 +126,36 @@ final class KeyManager: ObservableObject {
         persist()
     }
 
-    /// Selects the active cipher used for encoding and decoding.
+    /// Selects the active cipher used as the default when composing.
     func setActive(id: UUID) {
         library = library.settingActive(id: id)
         persist()
     }
 
-    // MARK: - Export
+    // MARK: - Export / Share
 
-    /// Builds the single decoder/decrypter JSON file for the given cipher.
+    /// The compact share payload bytes for the given cipher (the file-export form).
     func exportData(for id: UUID) throws -> Data {
         guard let cipher = library.ciphers.first(where: { $0.id == id }) else {
             throw KeyManagerError.noKeyAvailable
         }
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        return try encoder.encode(RuneKeyExport.from(cipher.key))
+        return CipherSharePayload(cipher: cipher).encoded()
     }
 
-    /// Suggested filename (without extension) for the given cipher's decoder file.
+    /// The `runescribe://import` share URL for the given cipher (QR / deep-link form).
+    func shareURL(for id: UUID, name: String?) throws -> URL {
+        guard let cipher = library.ciphers.first(where: { $0.id == id }) else {
+            throw KeyManagerError.noKeyAvailable
+        }
+        return try CipherSharePayload(cipher: cipher).url(name: name)
+    }
+
+    /// Suggested filename (without extension) for the given cipher's share file.
     func exportFilename(for id: UUID) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
         let cipher = library.ciphers.first(where: { $0.id == id })
-        let base = cipher.map { sanitizeForFilename($0.label) } ?? "decoder"
+        let base = cipher.map { sanitizeForFilename($0.label) } ?? "cipher"
         let stamp = cipher.map { formatter.string(from: $0.createdAt) } ?? "key"
         return "RuneScrib-\(base)-\(stamp)"
     }
@@ -250,6 +219,6 @@ final class KeyManager: ObservableObject {
         let allowed = CharacterSet.alphanumerics
         let slug = String(label.unicodeScalars.map { allowed.contains($0) ? Character($0) : "-" })
         let collapsed = slug.split(separator: "-").joined(separator: "-")
-        return collapsed.isEmpty ? "decoder" : String(collapsed.prefix(32))
+        return collapsed.isEmpty ? "cipher" : String(collapsed.prefix(32))
     }
 }

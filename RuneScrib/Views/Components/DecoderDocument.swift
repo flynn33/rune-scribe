@@ -7,7 +7,7 @@ import UniformTypeIdentifiers
 /// `.fileExporter`. The whole decoder/decrypter — the cipher mapping and its
 /// metadata — is exactly one `.json` file.
 struct DecoderDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.json] }
+    static var readableContentTypes: [UTType] { [.data] }
 
     var data: Data
 

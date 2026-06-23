@@ -27,16 +27,16 @@ struct CipherLibraryView: View {
     @State private var newLabel = ""
 
     // Rename
-    @State private var renameTarget: NamedCipher?
+    @State private var renameTarget: Cipher?
     @State private var renameLabel = ""
     @State private var showRename = false
 
     // Delete
-    @State private var deleteTarget: NamedCipher?
+    @State private var deleteTarget: Cipher?
     @State private var showDelete = false
 
     // Share via QR
-    @State private var qrCipher: NamedCipher?
+    @State private var qrCipher: Cipher?
 
     // In-app QR scanner (iOS) → confirm
     @State private var showScanner = false
@@ -77,7 +77,7 @@ struct CipherLibraryView: View {
         .preferredColorScheme(.dark)
         .fileExporter(isPresented: $showExporter,
                       document: exportDocument,
-                      contentType: .json,
+                      contentType: .data,
                       defaultFilename: exportFilename) { result in
             switch result {
             case .success(let url): status = .success("Saved \(url.lastPathComponent)")
@@ -85,12 +85,12 @@ struct CipherLibraryView: View {
             }
         }
         .fileImporter(isPresented: $showImporter,
-                      allowedContentTypes: [.json],
+                      allowedContentTypes: [.data],
                       allowsMultipleSelection: false) { result in
             handleImportSelection(result)
         }
         .sheet(item: $qrCipher) { cipher in
-            if let url = try? RuneCipherLink.encodeURL(for: cipher.key, name: cipher.label) {
+            if let url = try? keyManager.shareURL(for: cipher.id, name: cipher.label) {
                 QRDisplaySheet(url: url, label: cipher.label)
             }
         }
@@ -182,7 +182,7 @@ struct CipherLibraryView: View {
 
     // MARK: - Cipher Card
 
-    private func cipherCard(_ cipher: NamedCipher) -> some View {
+    private func cipherCard(_ cipher: Cipher) -> some View {
         let isActive = cipher.id == keyManager.activeCipher?.id
 
         return VStack(alignment: .leading, spacing: 12) {
@@ -198,7 +198,7 @@ struct CipherLibraryView: View {
             }
 
             HStack(spacing: 14) {
-                metaLabel("ID", cipher.shortKeyId)
+                metaLabel("ID", cipher.shortPublicID)
                 metaLabel("CREATED", cipher.createdAt.formatted(.dateTime.day().month(.abbreviated).year()))
             }
 
@@ -215,7 +215,7 @@ struct CipherLibraryView: View {
 
                 Spacer()
 
-                if let shareURL = try? RuneCipherLink.encodeURL(for: cipher.key, name: cipher.label) {
+                if let shareURL = try? keyManager.shareURL(for: cipher.id, name: cipher.label) {
                     ShareLink(item: shareURL,
                               subject: Text(cipher.label),
                               message: Text("Import my Rune Scribe cipher")) {
@@ -333,7 +333,7 @@ struct CipherLibraryView: View {
         status = keyManager.lastError.map { .failure($0) } ?? .success("Created and activated.")
     }
 
-    private func beginExport(_ cipher: NamedCipher) {
+    private func beginExport(_ cipher: Cipher) {
         do {
             exportDocument = DecoderDocument(data: try keyManager.exportData(for: cipher.id))
             exportFilename = keyManager.exportFilename(for: cipher.id)
@@ -366,7 +366,8 @@ struct CipherLibraryView: View {
         guard let data = pendingImportData else { return }
         defer { pendingImportData = nil; importLabel = "" }
         do {
-            let cipher = try keyManager.importCipher(data: data, label: importLabel)
+            let payload = try CipherSharePayload(decoding: data)
+            let cipher = try keyManager.importCipher(payload, label: importLabel)
             status = .success("Imported “\(cipher.label)” and made it active.")
         } catch {
             status = .failure(error.localizedDescription)
@@ -396,9 +397,9 @@ struct CipherLibraryView: View {
             return
         }
         do {
-            let (perm, name) = try RuneCipherLink.decodeURL(url)
-            pendingScan = ImportCoordinator.PendingImport(perm: perm,
-                                                          suggestedName: name ?? "Imported Cipher")
+            let payload = try CipherSharePayload(url: url)
+            pendingScan = ImportCoordinator.PendingImport(payload: payload,
+                                                          suggestedName: payload.parsedName ?? "Imported Cipher")
         } catch {
             status = .failure((error as? LocalizedError)?.errorDescription
                               ?? "That QR code isn't a Rune Scribe cipher.")
