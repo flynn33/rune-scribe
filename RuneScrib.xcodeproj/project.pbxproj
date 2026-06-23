@@ -27,6 +27,7 @@
 		32052333DC272F9086A942D4 /* CipherLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */; };
 		3216BD9FD4314395132F51BB /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A31FF059DEEC7C01229CF75 /* Clipboard.swift */; };
 		3367F4DE31A8BFA2F5A8955B /* AppLicense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CBE938486EB9A2F975D48A /* AppLicense.swift */; };
+		3447330F5168705303052836 /* CipherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46F63FD575D0B3CC9087D99F /* CipherTests.swift */; };
 		34A07D593701D17AEC1FC143 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
 		35C98AE00276C7655C193856 /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */; };
 		3734D1550897FAC020B54AE2 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8D5A799A33DED366C377F6 /* RootView.swift */; };
@@ -37,8 +38,10 @@
 		45113334F4CA66360C41C767 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2631879B41FCA864DDE6E7 /* ContentView.swift */; };
 		4582CC9CE71ADB1635028699 /* LicenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29341AC7EDF3058C96DD83C0 /* LicenseView.swift */; };
 		49352218624B7663754F6B52 /* QRDisplaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */; };
+		4D4586FA9B5495EE9D02CDA8 /* Cipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C811485E565AD02AF0B21DD8 /* Cipher.swift */; };
 		4F4668CE7576A83D775D37BE /* QRDisplaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */; };
 		50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
+		503C91F791F1A5E3940868FF /* Cipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C811485E565AD02AF0B21DD8 /* Cipher.swift */; };
 		51F8FC3FC311B598FA5E74B6 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
 		584241169D94C9A2AA41FD95 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
 		62276BA1FCA311A976C6BE13 /* ImportConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646E63DF1024E9E21119084D /* ImportConfirmView.swift */; };
@@ -121,6 +124,7 @@
 		36164F1540ACE3953D71CCBB /* RuneCipherLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCipherLink.swift; sourceTree = "<group>"; };
 		38CBE938486EB9A2F975D48A /* AppLicense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLicense.swift; sourceTree = "<group>"; };
 		39CE669299B8B857610BAA76 /* PINPadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINPadView.swift; sourceTree = "<group>"; };
+		46F63FD575D0B3CC9087D99F /* CipherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherTests.swift; sourceTree = "<group>"; };
 		4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibraryTests.swift; sourceTree = "<group>"; };
 		4FDD882E639646D40469E666 /* RuneCipherLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCipherLinkTests.swift; sourceTree = "<group>"; };
 		4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
@@ -151,6 +155,7 @@
 		B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRDisplaySheet.swift; sourceTree = "<group>"; };
 		BA657AA7320B6333C8D191BD /* KeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManager.swift; sourceTree = "<group>"; };
 		C804E8889A60C1394E8D3841 /* RuneMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneMetalView.swift; sourceTree = "<group>"; };
+		C811485E565AD02AF0B21DD8 /* Cipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cipher.swift; sourceTree = "<group>"; };
 		CAD31D611732C03413A3F3D8 /* RuneScribTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribTests.swift; sourceTree = "<group>"; };
 		CF2631879B41FCA864DDE6E7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -182,6 +187,7 @@
 			isa = PBXGroup;
 			children = (
 				38CBE938486EB9A2F975D48A /* AppLicense.swift */,
+				C811485E565AD02AF0B21DD8 /* Cipher.swift */,
 				B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */,
 				587C981F6276B41E0B68DB2B /* ImportedDecoder.swift */,
 				5EA12713BD457FAF98DCFB6D /* NamedCipher.swift */,
@@ -299,6 +305,7 @@
 			children = (
 				4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */,
 				4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */,
+				46F63FD575D0B3CC9087D99F /* CipherTests.swift */,
 				88D25CB73E2E5E32F643BC18 /* DecoderImportTests.swift */,
 				15B84C42FF728AC45D4DDB66 /* FriendDecodeRoundTripTests.swift */,
 				4FDD882E639646D40469E666 /* RuneCipherLinkTests.swift */,
@@ -441,6 +448,7 @@
 			files = (
 				B0614EBD257EEA0A80FA1862 /* AppLockTests.swift in Sources */,
 				D8B2571F4B7BF5D06739FFA8 /* CipherLibraryTests.swift in Sources */,
+				3447330F5168705303052836 /* CipherTests.swift in Sources */,
 				215EB362159B130F2A94AFE6 /* DecoderImportTests.swift in Sources */,
 				BA96B80988B7C04093BC6A28 /* FriendDecodeRoundTripTests.swift in Sources */,
 				A423CCB19FF0CA97AF6BAFC0 /* RuneCipherLinkTests.swift in Sources */,
@@ -456,6 +464,7 @@
 				7506B7BCCE0B9D508FC13B2D /* AppDelegate.swift in Sources */,
 				F98B6935CCC807A13270F6EA /* AppLicense.swift in Sources */,
 				0DEE180E6F0CC7A45A7043A4 /* AppLock.swift in Sources */,
+				503C91F791F1A5E3940868FF /* Cipher.swift in Sources */,
 				BF865C8F7AC22840D94B464C /* CipherEngine.swift in Sources */,
 				B1BD766416360737E09888AC /* CipherLibrary.swift in Sources */,
 				80AB19E15DBCFE8401431CDD /* CipherLibraryView.swift in Sources */,
@@ -500,6 +509,7 @@
 				B4F8144B90E37A2B69CF4F17 /* AppDelegate.swift in Sources */,
 				3367F4DE31A8BFA2F5A8955B /* AppLicense.swift in Sources */,
 				0FE15DBC0B9074385443CEE2 /* AppLock.swift in Sources */,
+				4D4586FA9B5495EE9D02CDA8 /* Cipher.swift in Sources */,
 				B7CD1CE0E7E485F14E5C88CB /* CipherEngine.swift in Sources */,
 				32052333DC272F9086A942D4 /* CipherLibrary.swift in Sources */,
 				7612DFED0FFD7CCE5F51CACB /* CipherLibraryView.swift in Sources */,
