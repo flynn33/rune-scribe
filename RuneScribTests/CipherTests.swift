@@ -28,3 +28,19 @@ final class CipherTests: XCTestCase {
         XCTAssertEqual(raw, c.keyMaterial)
     }
 }
+
+extension CipherTests {
+    func testGeneratedCipherUsesBundledFont() {
+        XCTAssertEqual(Cipher.generated(label: "x").fontRef, .bundled)
+    }
+    func testDecodingALegacyCipherWithoutFontRefDefaultsToBundled() throws {
+        // Simulate a Phase-1 stored cipher: a JSON object with no fontRef key.
+        let json = """
+        {"id":"\(UUID().uuidString)","label":"old","origin":"generated","createdAt":0,
+         "formatVersion":1,"publicID":"AAAAAAAAAAA=","keyMaterial":"\(Data(repeating:1,count:32).base64EncodedString())",
+         "decorativeMapping":[\((0..<32).map(String.init).joined(separator: ","))]}
+        """
+        let c = try JSONDecoder().decode(Cipher.self, from: Data(json.utf8))
+        XCTAssertEqual(c.fontRef, .bundled)
+    }
+}
