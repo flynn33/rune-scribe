@@ -74,8 +74,11 @@ final class FontStore: @unchecked Sendable {
         return base.appendingPathComponent("RuneScribFonts", isDirectory: true)
     }
 
+    /// Content-addressed by the font's SHA-256 hex so an attacker-controlled `ref.id`
+    /// (parsed from a shared cipher) can't escape the fonts directory via path components.
     private func importedFontURL(_ ref: FontRef) -> URL {
-        importedFontsDirectory().appendingPathComponent("\(ref.id)-v\(ref.version).ttf")
+        let name = ref.sha256.map { String(format: "%02x", $0) }.joined()
+        return importedFontsDirectory().appendingPathComponent("\(name).ttf")
     }
 
     static func postScriptName(of data: Data) -> String? {
