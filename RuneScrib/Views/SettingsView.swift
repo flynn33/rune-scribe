@@ -7,6 +7,8 @@ import SwiftUI
 struct SettingsView: View {
 
     @EnvironmentObject private var appLock: AppLock
+    @EnvironmentObject private var contactManager: ContactManager
+    @EnvironmentObject private var keyManager: KeyManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var pinFlow: PINFlowView.Mode?
@@ -41,7 +43,11 @@ struct SettingsView: View {
         .sheet(isPresented: $showLicense) {
             LicenseView()
         }
-        .sheet(isPresented: $showContacts) { ContactsView() }
+        .sheet(isPresented: $showContacts) {
+            ContactsView()
+                .environmentObject(contactManager)
+                .environmentObject(keyManager)
+        }
     }
 
     // MARK: - App Lock
