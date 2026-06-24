@@ -11,6 +11,7 @@ struct SettingsView: View {
 
     @State private var pinFlow: PINFlowView.Mode?
     @State private var showLicense = false
+    @State private var showContacts = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,6 +24,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
                     appLockPanel
+                    contactsPanel
                     aboutPanel
                     licensePanel
                 }
@@ -39,6 +41,7 @@ struct SettingsView: View {
         .sheet(isPresented: $showLicense) {
             LicenseView()
         }
+        .sheet(isPresented: $showContacts) { ContactsView() }
     }
 
     // MARK: - App Lock
@@ -79,6 +82,25 @@ struct SettingsView: View {
                     }
                     .buttonStyle(RuneScribButtonStyle())
                 }
+            }
+        }
+    }
+
+    // MARK: - Contacts
+
+    private var contactsPanel: some View {
+        RunePanel(title: "Contacts", systemImage: "person.2.fill", accent: .runeBlue) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Organize your ciphers by contact. Import people from Apple Contacts or add them manually. Contacts stay encrypted on this device.")
+                    .font(.system(size: 12))
+                    .foregroundColor(.runeSilver)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button { showContacts = true } label: {
+                    Label("Manage Contacts", systemImage: "person.2")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(RuneScribButtonStyle())
             }
         }
     }

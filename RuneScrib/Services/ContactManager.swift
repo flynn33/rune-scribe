@@ -19,6 +19,20 @@ final class ContactManager: ObservableObject {
     func add(_ c: Contact) { persist(book().adding(c)) }
     func update(_ c: Contact) { persist(book().updating(c)) }
 
+    /// Adds imported snapshots, skipping any whose Apple identifier is already present —
+    /// deduping against existing contacts AND within the batch. Manual snapshots (nil
+    /// identifier) are always added.
+    func addImported(_ snapshots: [Contact]) {
+        var seen = Set(contacts.compactMap(\.appleContactID))
+        for snap in snapshots {
+            if let id = snap.appleContactID {
+                if seen.contains(id) { continue }
+                seen.insert(id)
+            }
+            add(snap)
+        }
+    }
+
     /// Deletes a contact and unlinks (never deletes) its ciphers.
     func delete(id: UUID) {
         keyManager.unlinkContact(id)
