@@ -57,7 +57,7 @@ final class ImportCoordinator: ObservableObject {
     /// `RuneCipherLink.decodeURL`.
     func ingest(urlString: String) {
         let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.hasPrefix("\(CipherSharePayload.scheme):"), let url = URL(string: trimmed) else { return }
+        guard CipherSharePayload.isShareURL(trimmed), let url = URL(string: trimmed) else { return }
         ingest(url: url)
     }
 }

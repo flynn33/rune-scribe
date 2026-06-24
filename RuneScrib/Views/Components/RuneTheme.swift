@@ -54,10 +54,21 @@ extension View {
 // MARK: - Runic Font
 
 extension Font {
-    /// Bundled Noto Sans Runic — covers the entire Unicode Runic block, so no rune
-    /// renders as a missing-glyph box (default system fonts lack U+16F1–U+16F8).
-    /// Registered at launch via `FontRegistration`; falls back to the system font.
-    static func runic(_ size: CGFloat) -> Font { .custom("Noto Sans Runic", size: size) }
+    /// A rune font at `size`. Defaults to the bundled Noto Sans Runic — which covers the
+    /// entire Unicode Runic block, so no rune renders as a missing-glyph box (default system
+    /// fonts lack U+16F1–U+16F8) — but accepts a cipher's resolved font name. Registered at
+    /// launch via `FontStore`; falls back to the system font.
+    static func runic(_ size: CGFloat, fontName: String = "Noto Sans Runic") -> Font {
+        .custom(fontName, size: size)
+    }
+}
+
+/// Resolves the rune font name a cipher renders with (its `FontRef` via `FontStore`),
+/// falling back to the bundled font name.
+enum RuneFont {
+    static func name(for cipher: Cipher?) -> String {
+        cipher.flatMap { FontStore.shared.resolve($0.fontRef) } ?? "Noto Sans Runic"
+    }
 }
 
 // MARK: - Eyebrow Label

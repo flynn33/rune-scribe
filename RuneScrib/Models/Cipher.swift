@@ -28,13 +28,16 @@ struct Cipher: Codable, Equatable, Identifiable {
     /// `RuneCharacterSet.decorativeAlphabet` that represents that 5-bit value.
     let decorativeMapping: [Int]
 
+    /// The rune font this cipher uses for display. Defaults to the bundled font.
+    let fontRef: FontRef
+
     var symmetricKey: SymmetricKey { SymmetricKey(data: keyMaterial) }
 
     var shortPublicID: String { publicID.map { String(format: "%02x", $0) }.joined().prefix(8).description }
 
     init(id: UUID = UUID(), label: String, origin: Origin, createdAt: Date = Date(),
          formatVersion: Int = Cipher.currentVersion, publicID: Data, keyMaterial: Data,
-         decorativeMapping: [Int]) {
+         decorativeMapping: [Int], fontRef: FontRef = .bundled) {
         self.id = id
         self.label = label
         self.origin = origin
@@ -43,6 +46,24 @@ struct Cipher: Codable, Equatable, Identifiable {
         self.publicID = publicID
         self.keyMaterial = keyMaterial
         self.decorativeMapping = decorativeMapping
+        self.fontRef = fontRef
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, label, origin, createdAt, formatVersion, publicID, keyMaterial, decorativeMapping, fontRef
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        label = try c.decode(String.self, forKey: .label)
+        origin = try c.decode(Origin.self, forKey: .origin)
+        createdAt = try c.decode(Date.self, forKey: .createdAt)
+        formatVersion = try c.decode(Int.self, forKey: .formatVersion)
+        publicID = try c.decode(Data.self, forKey: .publicID)
+        keyMaterial = try c.decode(Data.self, forKey: .keyMaterial)
+        decorativeMapping = try c.decode([Int].self, forKey: .decorativeMapping)
+        fontRef = try c.decodeIfPresent(FontRef.self, forKey: .fontRef) ?? .bundled
     }
 
     /// A brand-new locally-generated cipher with a random key, id, and decorative mapping.

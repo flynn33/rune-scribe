@@ -106,3 +106,16 @@ final class CipherLibraryTests: XCTestCase {
         XCTAssertEqual(try MessageService().read(runes, tryingCiphers: [rebuilt]).plaintext, "yo")
     }
 }
+
+extension CipherLibraryTests {
+    func testImportFromFileFormValidatesFontAndRebuildsCipher() throws {
+        let original = Cipher.generated(label: "Friend")
+        let file = CipherSharePayload(cipher: original).encodedFile(fontBytes: FontRef.bundledFontData())
+        let (payload, fontBytes) = try CipherSharePayload.decodeFile(file)
+        if let fontBytes { try FontStore.shared.importFont(fontBytes, expecting: payload.fontRef) }
+        let rebuilt = payload.cipher(label: "Imported")
+        XCTAssertEqual(rebuilt.fontRef, original.fontRef)
+        let runes = try MessageService().compose("hi", with: original)
+        XCTAssertEqual(try MessageService().read(runes, tryingCiphers: [rebuilt]).plaintext, "hi")
+    }
+}

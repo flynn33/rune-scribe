@@ -57,6 +57,10 @@ struct RuneScribApp: App {
                 // A tapped runescribe://import link (Messages, Mail, Camera-app QR,
                 // etc.) lands here on both platforms, even from a cold launch.
                 .onOpenURL { ImportCoordinator.shared.ingest(url: $0) }
+                // A tapped https Universal Link arrives as a web-browsing NSUserActivity.
+                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                    if let url = activity.webpageURL { ImportCoordinator.shared.ingest(url: url) }
+                }
         }
     }
 }

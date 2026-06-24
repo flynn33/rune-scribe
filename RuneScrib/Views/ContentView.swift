@@ -153,6 +153,7 @@ struct ContentView: View {
                                         start: transformStart,
                                         direction: transformDirection,
                                         fontSize: glyphSize,
+                                        fontName: RuneFont.name(for: keyManager.activeCipher),
                                         settled: boxPhase == .result)
                         .padding(.horizontal, 15)
                         .padding(.vertical, 15)

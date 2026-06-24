@@ -47,6 +47,6 @@ enum Clipboard {
         #endif
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         // Accept both host form (runescribe://import) and path form (runescribe:import).
-        return trimmed.hasPrefix("\(CipherSharePayload.scheme):") ? trimmed : nil
+        return CipherSharePayload.isShareURL(trimmed) ? trimmed : nil
     }
 }

@@ -13,7 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSWindow.allowsAutomaticWindowTabbing = false
-        FontRegistration.registerBundledFonts()
+        FontStore.shared.registerBundledAndImportedFonts()
     }
 
     /// Handles runescribe:// links on macOS, including cold launch — where SwiftUI's
@@ -30,7 +30,7 @@ import UIKit
 final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        FontRegistration.registerBundledFonts()
+        FontStore.shared.registerBundledAndImportedFonts()
         return true
     }
 }
