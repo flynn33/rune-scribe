@@ -16,36 +16,41 @@ enum CipherShareError: Error, LocalizedError {
 }
 
 /// The compact, validated wire format for sharing a cipher (QR / deep-link / file).
-/// Replaces `RuneCipherLink`. Carries the real key + public id + decorative mapping;
-/// the rune FONT is added to this package in Phase 2.
+/// v3 layout (129 bytes):
+///   version(1) | publicID(8) | keyMaterial(32) | decorativeMapping(32)
+///   | fontId(16, utf8 zero-padded) | fontVersion(4, big-endian) | fontSha256(32)
+///   | checksum(4)
 struct CipherSharePayload: Equatable {
-    static let version: UInt8 = 2
+    static let version: UInt8 = 3
     static let scheme = "runescribe"
     static let host = "import"
-    static let byteCount = 1 + 8 + 32 + 32 + 4   // 77
+    static let byteCount = 1 + 8 + 32 + 32 + 16 + 4 + 32 + 4   // 129
 
     let publicID: Data        // 8
     let keyMaterial: Data     // 32
     let decorativeMapping: [Int]  // 32, permutation of 0..<32
+    let fontRef: FontRef      // 16 + 4 + 32
 
     /// The display name parsed from a URL (nil for binary/file decode).
     private(set) var parsedName: String?
 
-    init(publicID: Data, keyMaterial: Data, decorativeMapping: [Int]) {
+    init(publicID: Data, keyMaterial: Data, decorativeMapping: [Int], fontRef: FontRef) {
         self.publicID = publicID
         self.keyMaterial = keyMaterial
         self.decorativeMapping = decorativeMapping
+        self.fontRef = fontRef
     }
 
     init(cipher: Cipher) {
         self.init(publicID: cipher.publicID, keyMaterial: cipher.keyMaterial,
-                  decorativeMapping: cipher.decorativeMapping)
+                  decorativeMapping: cipher.decorativeMapping, fontRef: cipher.fontRef)
     }
 
     /// Reconstructs an importable `Cipher` (fresh id, `.imported`).
     func cipher(label: String) -> Cipher {
         Cipher(label: label, origin: .imported, publicID: publicID,
-               keyMaterial: keyMaterial, decorativeMapping: decorativeMapping)
+               keyMaterial: keyMaterial, decorativeMapping: decorativeMapping,
+               fontRef: fontRef)
     }
 
     // MARK: binary
@@ -55,6 +60,10 @@ struct CipherSharePayload: Equatable {
         body.append(publicID)
         body.append(keyMaterial)
         body.append(Data(decorativeMapping.map { UInt8($0) }))
+        body.append(Self.fixedID(fontRef.id))                       // 16 bytes
+        var v = UInt32(fontRef.version).bigEndian
+        body.append(Data(bytes: &v, count: 4))                      // 4 bytes
+        body.append(fontRef.sha256)                                 // 32 bytes
         body.append(Self.checksum(of: body))
         return body
     }
@@ -71,11 +80,28 @@ struct CipherSharePayload: Equatable {
         let key  = data.subdata(in: i ..< data.index(i, offsetBy: 32)); i = data.index(i, offsetBy: 32)
         let map  = data.subdata(in: i ..< data.index(i, offsetBy: 32)).map { Int($0) }
         guard Set(map) == Set(0..<32) else { throw CipherShareError.notAMapping }
-        self.init(publicID: pid, keyMaterial: key, decorativeMapping: map)
+        i = data.index(i, offsetBy: 32)
+        let fontIdData   = data.subdata(in: i ..< data.index(i, offsetBy: 16)); i = data.index(i, offsetBy: 16)
+        let fontVerData  = data.subdata(in: i ..< data.index(i, offsetBy: 4));  i = data.index(i, offsetBy: 4)
+        let fontSha      = data.subdata(in: i ..< data.index(i, offsetBy: 32))
+        let fontId      = Self.parseID(fontIdData)
+        let fontVersion = Int(fontVerData.reduce(0) { ($0 << 8) | UInt32($1) })
+        let ref = FontRef(id: fontId, version: fontVersion, sha256: fontSha)
+        self.init(publicID: pid, keyMaterial: key, decorativeMapping: map, fontRef: ref)
     }
 
     private static func checksum(of data: Data) -> Data {
         Data(SHA256.hash(data: data).prefix(4))
+    }
+
+    private static func fixedID(_ id: String) -> Data {
+        var d = Data(id.utf8).prefix(16)
+        d.append(Data(repeating: 0, count: 16 - d.count))
+        return Data(d)
+    }
+
+    private static func parseID(_ d: Data) -> String {
+        String(decoding: Data(d.prefix { $0 != 0 }), as: UTF8.self)
     }
 
     // MARK: URL
@@ -103,7 +129,8 @@ struct CipherSharePayload: Equatable {
         let items = comps.queryItems ?? []
         guard let p = items.first(where: { $0.name == "p" })?.value, !p.isEmpty else { throw CipherShareError.missingPayload }
         let decoded = try CipherSharePayload(decoding: Self.bytesFromBase64url(p))
-        self.init(publicID: decoded.publicID, keyMaterial: decoded.keyMaterial, decorativeMapping: decoded.decorativeMapping)
+        self.init(publicID: decoded.publicID, keyMaterial: decoded.keyMaterial,
+                  decorativeMapping: decoded.decorativeMapping, fontRef: decoded.fontRef)
         self.parsedName = items.first(where: { $0.name == "n" })?.value?.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 

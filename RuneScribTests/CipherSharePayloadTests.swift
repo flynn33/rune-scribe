@@ -36,3 +36,17 @@ final class CipherSharePayloadTests: XCTestCase {
         XCTAssertThrowsError(try CipherSharePayload(decoding: bytes))
     }
 }
+
+extension CipherSharePayloadTests {
+    func testV3CompactRoundTripIncludesFontRef() throws {
+        let c = Cipher.generated(label: "Alice")
+        let back = try CipherSharePayload(decoding: CipherSharePayload(cipher: c).encoded())
+        XCTAssertEqual(back.keyMaterial, c.keyMaterial)
+        XCTAssertEqual(back.fontRef, c.fontRef)
+        XCTAssertEqual(back.cipher(label: "in").fontRef, .bundled)
+    }
+    func testV3ByteCount() {
+        XCTAssertEqual(CipherSharePayload(cipher: .generated(label: "x")).encoded().count, 129)
+        XCTAssertEqual(CipherSharePayload.byteCount, 129)
+    }
+}
