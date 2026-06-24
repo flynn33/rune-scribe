@@ -9,6 +9,7 @@ import UniformTypeIdentifiers
 struct CipherLibraryView: View {
 
     @EnvironmentObject private var keyManager: KeyManager
+    @EnvironmentObject private var contactManager: ContactManager
     @Environment(\.dismiss) private var dismiss
 
     // Export
@@ -43,6 +44,15 @@ struct CipherLibraryView: View {
     @State private var pendingScan: ImportCoordinator.PendingImport?
 
     @State private var status: Status = .idle
+
+    // Contact linking
+    @State private var pendingReassign: (cipherID: UUID, contactID: UUID?)?
+    @State private var showReassignConfirm = false
+
+    // One-time contacts import prompt (first time the library opens)
+    @AppStorage("rf.contacts.importPrompted") private var contactsPrompted = false
+    @State private var showContactsPrompt = false
+    @State private var showContactsManager = false
 
     enum Status: Equatable {
         case idle
@@ -99,7 +109,7 @@ struct CipherLibraryView: View {
             ImportConfirmView(pending: pending) { result in
                 switch result {
                 case .success(let cipher):
-                    status = .success("Imported “\(cipher.label)” and made it active.")
+                    status = .success("Imported \u{201C}\(cipher.label)\u{201D} and made it active.")
                 case .failure(let error):
                     status = .failure(error.localizedDescription)
                 }
@@ -132,7 +142,7 @@ struct CipherLibraryView: View {
             Button("Cancel", role: .cancel) { renameTarget = nil }
         }
         // Delete
-        .alert(deleteTarget.map { "Delete “\($0.label)”?" } ?? "Delete Cipher?",
+        .alert(deleteTarget.map { "Delete \u{201C}\($0.label)\u{201D}?" } ?? "Delete Cipher?",
                isPresented: $showDelete) {
             Button("Export First…") {
                 if let target = deleteTarget { beginExport(target) }
@@ -147,6 +157,37 @@ struct CipherLibraryView: View {
         } message: {
             Text("Messages encoded with this cipher can no longer be decoded once it is "
                  + "deleted. Export its decoder first if you need a record.")
+        }
+        // Reassign confirmation — changing an already-linked cipher to a different contact.
+        .alert("Reassign Cipher?", isPresented: $showReassignConfirm) {
+            Button("Reassign", role: .destructive) {
+                if let pending = pendingReassign {
+                    keyManager.setContact(cipherID: pending.cipherID, contactID: pending.contactID)
+                }
+                pendingReassign = nil
+            }
+            Button("Cancel", role: .cancel) { pendingReassign = nil }
+        } message: {
+            Text(reassignMessage())
+        }
+        // One-time prompt offering contacts import the first time the library opens.
+        .onAppear {
+            if !contactsPrompted {
+                contactsPrompted = true
+                showContactsPrompt = true
+            }
+        }
+        .confirmationDialog("Organize ciphers by contact?", isPresented: $showContactsPrompt, titleVisibility: .visible) {
+            Button("Import from Contacts") { showContactsManager = true }
+            Button("Add Manually") { showContactsManager = true }
+            Button("Not Now", role: .cancel) { }
+        } message: {
+            Text("Link ciphers to people to keep them organized. You can also do this anytime in Settings → Contacts.")
+        }
+        .sheet(isPresented: $showContactsManager) {
+            ContactsView()
+                .environmentObject(contactManager)
+                .environmentObject(keyManager)
         }
     }
 
@@ -202,6 +243,8 @@ struct CipherLibraryView: View {
                 metaLabel("CREATED", cipher.createdAt.formatted(.dateTime.day().month(.abbreviated).year()))
             }
 
+            contactControl(cipher)
+
             Divider().overlay(Color.runeSilver.opacity(0.15))
 
             HStack(spacing: 10) {
@@ -254,6 +297,61 @@ struct CipherLibraryView: View {
                 .strokeBorder((isActive ? Color.runeGold : Color.runeSilver).opacity(isActive ? 0.45 : 0.15),
                               lineWidth: 1)
         )
+    }
+
+    // MARK: - Contact Control
+
+    /// The per-card control to link / change / remove the cipher's contact. Reassigning an
+    /// already-linked cipher to a DIFFERENT contact asks for confirmation first; removing the
+    /// link (No contact) or making a first link does not.
+    private func contactControl(_ cipher: Cipher) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "person.crop.circle")
+                .font(.system(size: 12))
+                .foregroundColor(.runeBlue)
+            Menu {
+                Button { requestSetContact(cipher, to: nil) } label: {
+                    if cipher.contactID == nil { Label("No contact", systemImage: "checkmark") }
+                    else { Text("No contact") }
+                }
+                if !contactManager.contacts.isEmpty { Divider() }
+                ForEach(contactManager.contacts) { contact in
+                    Button { requestSetContact(cipher, to: contact.id) } label: {
+                        if contact.id == cipher.contactID { Label(contact.displayName, systemImage: "checkmark") }
+                        else { Text(contact.displayName) }
+                    }
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Text(contactManager.contact(id: cipher.contactID)?.displayName ?? "No contact")
+                        .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                        .foregroundColor(cipher.contactID == nil ? .runeSilver : .white)
+                        .lineLimit(1)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.system(size: 9))
+                        .foregroundColor(.runeSilver)
+                }
+            }
+            .menuIndicator(.hidden)
+            Spacer()
+        }
+    }
+
+    private func requestSetContact(_ cipher: Cipher, to contactID: UUID?) {
+        if let current = cipher.contactID, contactID != nil, current != contactID {
+            pendingReassign = (cipher.id, contactID)
+            showReassignConfirm = true
+        } else {
+            keyManager.setContact(cipherID: cipher.id, contactID: contactID)
+        }
+    }
+
+    private func reassignMessage() -> String {
+        guard let pending = pendingReassign,
+              let cipher = keyManager.ciphers.first(where: { $0.id == pending.cipherID }) else { return "" }
+        let from = contactManager.contact(id: cipher.contactID)?.displayName ?? "a contact"
+        let to = contactManager.contact(id: pending.contactID)?.displayName ?? "another contact"
+        return "This cipher is linked to \(from). Reassign it to \(to)?"
     }
 
     // MARK: - Small Components
@@ -367,7 +465,7 @@ struct CipherLibraryView: View {
         defer { pendingImportData = nil; importLabel = "" }
         do {
             let cipher = try keyManager.importCipher(fileData: data, label: importLabel)
-            status = .success("Imported “\(cipher.label)” and made it active.")
+            status = .success("Imported \u{201C}\(cipher.label)\u{201D} and made it active.")
         } catch {
             status = .failure(error.localizedDescription)
         }

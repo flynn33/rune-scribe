@@ -54,6 +54,7 @@ struct RuneScribApp: App {
                 .environmentObject(KeyManager.shared)
                 .environmentObject(AppLock.shared)
                 .environmentObject(ImportCoordinator.shared)
+                .environmentObject(ContactManager.shared)
                 // A tapped runescribe://import link (Messages, Mail, Camera-app QR,
                 // etc.) lands here on both platforms, even from a cold launch.
                 .onOpenURL { ImportCoordinator.shared.ingest(url: $0) }

@@ -141,6 +141,21 @@ final class KeyManager: ObservableObject {
         persist()
     }
 
+    /// Links (or clears, with nil) a cipher's contact. Never changes key material.
+    func setContact(cipherID: UUID, contactID: UUID?) {
+        library = library.settingContact(cipherID: cipherID, contactID: contactID)
+        persist()
+    }
+
+    /// Clears the link on every cipher of a contact (used when the contact is deleted). Keeps ciphers.
+    func unlinkContact(_ contactID: UUID) {
+        library = library.unlinkingContact(contactID: contactID)
+        persist()
+    }
+
+    /// The ciphers currently linked to `contactID`.
+    func ciphers(forContact contactID: UUID) -> [Cipher] { library.ciphers.filter { $0.contactID == contactID } }
+
     // MARK: - Export / Share
 
     /// The self-contained file-form package for the given cipher: the compact payload plus the

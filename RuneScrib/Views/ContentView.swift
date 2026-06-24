@@ -7,6 +7,7 @@ struct ContentView: View {
     // MARK: - Environment
 
     @EnvironmentObject private var keyManager: KeyManager
+    @EnvironmentObject private var contactManager: ContactManager
 
     // MARK: - Types
 
@@ -72,6 +73,10 @@ struct ContentView: View {
 
                     activeCipherBar
 
+                    if let contact = contactManager.contact(id: keyManager.activeCipher?.contactID) {
+                        composeRecipient(contact)
+                    }
+
                     Picker("Mode", selection: $mode) {
                         ForEach(Mode.allCases) { Text($0.rawValue).tag($0) }
                     }
@@ -95,7 +100,7 @@ struct ContentView: View {
         .runeRootFrame()
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showLibrary) {
-            CipherLibraryView().environmentObject(keyManager)
+            CipherLibraryView().environmentObject(keyManager).environmentObject(contactManager)
         }
         .sheet(isPresented: $showSettings) {
             SettingsView()
@@ -271,6 +276,22 @@ struct ContentView: View {
         .background(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous).fill(Color.runeParchment))
         .overlay(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
             .strokeBorder(Color.runeGold.opacity(0.22), lineWidth: 1))
+    }
+
+    // MARK: - Compose Recipient
+
+    /// Shows who the active cipher is organized under, so the user knows the recipient.
+    private func composeRecipient(_ contact: Contact) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: "person.crop.circle.fill")
+                .font(.system(size: 11))
+                .foregroundColor(.runeBlue)
+            Text("To: \(contact.displayName)")
+                .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                .foregroundColor(.runeSilver)
+            Spacer()
+        }
+        .padding(.horizontal, 4)
     }
 
     // MARK: - Actions

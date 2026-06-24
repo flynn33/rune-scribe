@@ -78,4 +78,19 @@ extension CipherLibrary {
         copy.activeID = id
         return copy
     }
+
+    /// Sets (or clears, with nil) a cipher's contact link. Never touches key material.
+    func settingContact(cipherID: UUID, contactID: UUID?) -> CipherLibrary {
+        var copy = self
+        if let i = copy.ciphers.firstIndex(where: { $0.id == cipherID }) { copy.ciphers[i].contactID = contactID }
+        return copy
+    }
+
+    /// Clears the link on every cipher pointing at `contactID` (used when a contact is deleted).
+    /// Never removes a cipher.
+    func unlinkingContact(contactID: UUID) -> CipherLibrary {
+        var copy = self
+        for i in copy.ciphers.indices where copy.ciphers[i].contactID == contactID { copy.ciphers[i].contactID = nil }
+        return copy
+    }
 }

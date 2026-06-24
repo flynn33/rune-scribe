@@ -42,6 +42,7 @@ targets:
         CFBundleDisplayName: "Rune Scribe"
         LSApplicationCategoryType: public.app-category.lifestyle
         NSHumanReadableCopyright: "© Raven Forge Software"
+        NSContactsUsageDescription: "Rune Scribe can organize your ciphers by contact. Contacts stay on your device, encrypted, and are never uploaded."
         CFBundleURLTypes:
           - CFBundleURLName: com.runescribe.import
             CFBundleURLSchemes: [runescribe]
@@ -91,6 +92,7 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         NSCameraUsageDescription: "Rune Scribe uses the camera to scan a cipher QR code so you can import it. Frames are processed on-device and never saved or sent anywhere."
+        NSContactsUsageDescription: "Rune Scribe can organize your ciphers by contact. Contacts stay on your device, encrypted, and are never uploaded."
         CFBundleURLTypes:
           - CFBundleURLName: com.runescribe.import
             CFBundleURLSchemes: [runescribe]

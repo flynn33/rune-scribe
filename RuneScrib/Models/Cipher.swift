@@ -31,13 +31,18 @@ struct Cipher: Codable, Equatable, Identifiable {
     /// The rune font this cipher uses for display. Defaults to the bundled font.
     let fontRef: FontRef
 
+    /// The contact this cipher is organized under, if any. Purely organizational metadata —
+    /// setting or clearing it never affects `keyMaterial`. Codable default nil so Phase-1/2
+    /// ciphers (which predate this field) load unchanged.
+    var contactID: UUID?
+
     var symmetricKey: SymmetricKey { SymmetricKey(data: keyMaterial) }
 
     var shortPublicID: String { publicID.map { String(format: "%02x", $0) }.joined().prefix(8).description }
 
     init(id: UUID = UUID(), label: String, origin: Origin, createdAt: Date = Date(),
          formatVersion: Int = Cipher.currentVersion, publicID: Data, keyMaterial: Data,
-         decorativeMapping: [Int], fontRef: FontRef = .bundled) {
+         decorativeMapping: [Int], fontRef: FontRef = .bundled, contactID: UUID? = nil) {
         self.id = id
         self.label = label
         self.origin = origin
@@ -47,10 +52,11 @@ struct Cipher: Codable, Equatable, Identifiable {
         self.keyMaterial = keyMaterial
         self.decorativeMapping = decorativeMapping
         self.fontRef = fontRef
+        self.contactID = contactID
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, label, origin, createdAt, formatVersion, publicID, keyMaterial, decorativeMapping, fontRef
+        case id, label, origin, createdAt, formatVersion, publicID, keyMaterial, decorativeMapping, fontRef, contactID
     }
 
     init(from decoder: Decoder) throws {
@@ -64,6 +70,7 @@ struct Cipher: Codable, Equatable, Identifiable {
         keyMaterial = try c.decode(Data.self, forKey: .keyMaterial)
         decorativeMapping = try c.decode([Int].self, forKey: .decorativeMapping)
         fontRef = try c.decodeIfPresent(FontRef.self, forKey: .fontRef) ?? .bundled
+        contactID = try c.decodeIfPresent(UUID.self, forKey: .contactID)
     }
 
     /// A brand-new locally-generated cipher with a random key, id, and decorative mapping.
