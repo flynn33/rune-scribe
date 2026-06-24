@@ -44,3 +44,15 @@ extension CipherTests {
         XCTAssertEqual(c.fontRef, .bundled)
     }
 }
+
+extension CipherTests {
+    func testNewCipherHasNoContact() { XCTAssertNil(Cipher.generated(label: "x").contactID) }
+    func testLegacyCipherWithoutContactIDDecodesNil() throws {
+        let json = """
+        {"id":"\(UUID().uuidString)","label":"old","origin":"generated","createdAt":0,
+         "formatVersion":1,"publicID":"AAAAAAAAAAA=","keyMaterial":"\(Data(repeating:1,count:32).base64EncodedString())",
+         "decorativeMapping":[\((0..<32).map(String.init).joined(separator: ","))]}
+        """
+        XCTAssertNil(try JSONDecoder().decode(Cipher.self, from: Data(json.utf8)).contactID)
+    }
+}

@@ -119,3 +119,27 @@ extension CipherLibraryTests {
         XCTAssertEqual(try MessageService().read(runes, tryingCiphers: [rebuilt]).plaintext, "hi")
     }
 }
+
+extension CipherLibraryTests {
+    func testSettingAndClearingContactKeepsTheCipher() {
+        let cid = UUID()
+        let c = Cipher.generated(label: "A")
+        var lib = CipherLibrary(ciphers: [c], activeID: c.id).settingContact(cipherID: c.id, contactID: cid)
+        XCTAssertEqual(lib.ciphers[0].contactID, cid)
+        XCTAssertEqual(lib.ciphers[0].keyMaterial, c.keyMaterial, "linking never changes the key")
+        lib = lib.settingContact(cipherID: c.id, contactID: nil)
+        XCTAssertNil(lib.ciphers[0].contactID)
+        XCTAssertEqual(lib.ciphers.count, 1, "unlink keeps the cipher")
+    }
+    func testUnlinkingAContactClearsOnlyItsCiphersAndKeepsThem() {
+        let cid = UUID(), otherCID = UUID()
+        let a = Cipher.generated(label: "A"), b = Cipher.generated(label: "B")
+        var lib = CipherLibrary(ciphers: [a, b], activeID: a.id)
+            .settingContact(cipherID: a.id, contactID: cid)
+            .settingContact(cipherID: b.id, contactID: otherCID)
+        lib = lib.unlinkingContact(contactID: cid)
+        XCTAssertNil(lib.ciphers.first { $0.id == a.id }?.contactID)
+        XCTAssertEqual(lib.ciphers.first { $0.id == b.id }?.contactID, otherCID, "unlinking one contact must not affect ciphers linked to a different contact")
+        XCTAssertEqual(lib.ciphers.count, 2, "deleting a contact never deletes ciphers")
+    }
+}
