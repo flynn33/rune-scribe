@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.18] - 2026-06-24
+
+- Phase 3: Contacts & per-contact ciphers (#19) by @flynn33
+
 ## [1.0.17] - 2026-06-24
 
 - Phase 2: font travels with the cipher + https Universal-Link sharing (#18) by @flynn33
