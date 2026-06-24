@@ -25,6 +25,8 @@ struct CipherSharePayload: Equatable {
     static let scheme = "runescribe"
     static let host = "import"
     static let byteCount = 1 + 8 + 32 + 32 + 16 + 4 + 32 + 4   // 129
+    static let webHost = "ravenforgesoftware.com"
+    static let webPath = "/rune-scribe/import"
 
     let publicID: Data        // 8
     let keyMaterial: Data     // 32
@@ -90,6 +92,27 @@ struct CipherSharePayload: Equatable {
         self.init(publicID: pid, keyMaterial: key, decorativeMapping: map, fontRef: ref)
     }
 
+    // MARK: file form
+
+    /// Self-contained file form: the 129-byte compact payload followed by the raw font bytes.
+    func encodedFile(fontBytes: Data) -> Data { encoded() + fontBytes }
+
+    /// Splits a file form into (payload, fontBytes?). A file exactly `byteCount` long has no font.
+    static func decodeFile(_ data: Data) throws -> (CipherSharePayload, Data?) {
+        guard data.count >= byteCount else { throw CipherShareError.wrongSize }
+        let payload = try CipherSharePayload(decoding: data.prefix(byteCount))
+        let rest = data.count == byteCount ? nil
+            : Data(data.suffix(from: data.index(data.startIndex, offsetBy: byteCount)))
+        return (payload, rest)
+    }
+
+    /// True for a Rune Scribe share link in either the https or legacy custom-scheme form.
+    static func isShareURL(_ string: String) -> Bool {
+        let s = string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if s.hasPrefix("runescribe:") { return true }
+        return s.hasPrefix("https://\(webHost)\(webPath)") || s.hasPrefix("https://www.\(webHost)\(webPath)")
+    }
+
     private static func checksum(of data: Data) -> Data {
         Data(SHA256.hash(data: data).prefix(4))
     }
@@ -108,8 +131,7 @@ struct CipherSharePayload: Equatable {
 
     func url(name: String?) throws -> URL {
         var comps = URLComponents()
-        comps.scheme = Self.scheme
-        comps.host = Self.host
+        comps.scheme = "https"; comps.host = Self.webHost; comps.path = Self.webPath
         var items = [URLQueryItem(name: "v", value: String(Self.version)),
                      URLQueryItem(name: "p", value: Self.base64url(encoded()))]
         if let name = name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
@@ -120,12 +142,15 @@ struct CipherSharePayload: Equatable {
         return url
     }
 
-    /// Parse `runescribe://import?...`; tolerate the `runescribe:import?...` path form.
+    /// Parse a Rune Scribe share URL in either the https universal-link or legacy `runescribe://import` form.
     init(url: URL) throws {
-        guard url.scheme?.lowercased() == Self.scheme,
-              let comps = URLComponents(url: url, resolvingAgainstBaseURL: false) else { throw CipherShareError.invalidURL }
-        let marker = (comps.host ?? comps.path).lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        guard marker == Self.host else { throw CipherShareError.invalidURL }
+        guard let comps = URLComponents(url: url, resolvingAgainstBaseURL: false) else { throw CipherShareError.invalidURL }
+        let isHTTPS = url.scheme?.lowercased() == "https"
+            && (comps.host?.lowercased() == Self.webHost || comps.host?.lowercased() == "www.\(Self.webHost)")
+            && comps.path.lowercased().hasPrefix("/rune-scribe/import")
+        let isScheme = url.scheme?.lowercased() == "runescribe"
+            && ((comps.host ?? comps.path).lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "/")) == "import")
+        guard isHTTPS || isScheme else { throw CipherShareError.invalidURL }
         let items = comps.queryItems ?? []
         guard let p = items.first(where: { $0.name == "p" })?.value, !p.isEmpty else { throw CipherShareError.missingPayload }
         let decoded = try CipherSharePayload(decoding: Self.bytesFromBase64url(p))
