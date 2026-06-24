@@ -29,4 +29,21 @@ final class ContactImporterTests: XCTestCase {
         XCTAssertEqual(c.phones, [])
         XCTAssertEqual(c.emails, [])
     }
+
+    func testSnapshotIsIndependentOfLaterCNContactChanges() {
+        let cn = CNMutableContact()
+        cn.givenName = "Idunn"
+        cn.phoneNumbers = [CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: "+15550111"))]
+        let original = ContactImporter.snapshot(from: cn)
+
+        // Simulate the user editing the Apple contact afterwards.
+        cn.givenName = "Changed"
+        cn.phoneNumbers = []
+
+        // The already-taken snapshot is an independent point-in-time copy — unaffected.
+        XCTAssertEqual(original.displayName, "Idunn")
+        XCTAssertEqual(original.phones, ["+15550111"])
+        // A fresh snapshot reflects the new state, proving snapshots never auto-resync.
+        XCTAssertNotEqual(ContactImporter.snapshot(from: cn).displayName, original.displayName)
+    }
 }

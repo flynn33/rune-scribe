@@ -24,13 +24,16 @@ final class ContactManager: ObservableObject {
     /// identifier) are always added.
     func addImported(_ snapshots: [Contact]) {
         var seen = Set(contacts.compactMap(\.appleContactID))
+        var added: [Contact] = []
         for snap in snapshots {
             if let id = snap.appleContactID {
                 if seen.contains(id) { continue }
                 seen.insert(id)
             }
-            add(snap)
+            added.append(snap)
         }
+        guard !added.isEmpty else { return }
+        persist(ContactBook(contacts: contacts + added))
     }
 
     /// Deletes a contact and unlinks (never deletes) its ciphers.

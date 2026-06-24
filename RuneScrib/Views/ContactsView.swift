@@ -26,8 +26,44 @@ struct ContactsView: View {
     @State private var importing = false
     @State private var importError: String?
     @State private var showImportError = false
+    @State private var showSaveError = false
 
     var body: some View {
+        base
+            .alert("New Contact", isPresented: $showAddManual) {
+                TextField("Name", text: $newName)
+                TextField("Phone (optional)", text: $newPhone)
+                TextField("Email (optional)", text: $newEmail)
+                Button("Add") { addManual() }
+                Button("Cancel", role: .cancel) { resetManual() }
+            } message: {
+                Text("Add a person to organize ciphers by. Stored only on this device.")
+            }
+            .alert("Rename Contact", isPresented: $showEdit) {
+                TextField("Name", text: $editName)
+                Button("Save") { commitEdit() }
+                Button("Cancel", role: .cancel) { editTarget = nil }
+            }
+            .alert(deleteTarget.map { "Delete \u{201c}\($0.displayName)\u{201d}?" } ?? "", isPresented: $showDelete) {
+                Button("Delete", role: .destructive) { commitDelete() }
+                Button("Cancel", role: .cancel) { deleteTarget = nil }
+            } message: {
+                if let target = deleteTarget { deleteMessageText(for: target) }
+            }
+            .alert("Import Failed", isPresented: $showImportError) {
+                Button("OK") { importError = nil }
+            } message: { Text(importError ?? "") }
+            .onChange(of: contactManager.lastError) { _, newValue in
+                showSaveError = (newValue != nil)
+            }
+            .alert("Couldn't Save", isPresented: $showSaveError) {
+                Button("OK") { }
+            } message: {
+                Text(contactManager.lastError ?? "")
+            }
+    }
+
+    private var base: some View {
         VStack(spacing: 0) {
             RuneHeader(
                 runic: "ᚲᛟᚾᛏᚪᚲᛏᛋ",
@@ -55,29 +91,6 @@ struct ContactsView: View {
             ContactPicker { contactManager.addImported($0) }.ignoresSafeArea()
         }
         #endif
-        .alert("New Contact", isPresented: $showAddManual) {
-            TextField("Name", text: $newName)
-            TextField("Phone (optional)", text: $newPhone)
-            TextField("Email (optional)", text: $newEmail)
-            Button("Add") { addManual() }
-            Button("Cancel", role: .cancel) { resetManual() }
-        } message: {
-            Text("Add a person to organize ciphers by. Stored only on this device.")
-        }
-        .alert("Rename Contact", isPresented: $showEdit) {
-            TextField("Name", text: $editName)
-            Button("Save") { commitEdit() }
-            Button("Cancel", role: .cancel) { editTarget = nil }
-        }
-        .alert(deleteTarget.map { "Delete \u{201c}\($0.displayName)\u{201d}?" } ?? "", isPresented: $showDelete) {
-            Button("Delete", role: .destructive) { commitDelete() }
-            Button("Cancel", role: .cancel) { deleteTarget = nil }
-        } message: {
-            if let target = deleteTarget { deleteMessageText(for: target) }
-        }
-        .alert("Import Failed", isPresented: $showImportError) {
-            Button("OK") { importError = nil }
-        } message: { Text(importError ?? "") }
     }
 
     private var actionsBar: some View {
