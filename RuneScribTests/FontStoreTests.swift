@@ -23,4 +23,10 @@ final class FontStoreTests: XCTestCase {
         let wrongRef = FontRef(id: "noto-sans-runic", version: 1, sha256: Data(repeating: 0xAB, count: 32))
         XCTAssertThrowsError(try store.importFont(FontRef.bundledFontData(), expecting: wrongRef))
     }
+
+    func testRuneFontResolvesToBundledName() {
+        FontStore.shared.registerBundledAndImportedFonts()
+        XCTAssertEqual(RuneFont.name(for: nil), "Noto Sans Runic")
+        XCTAssertEqual(RuneFont.name(for: Cipher.generated(label: "x")), "Noto Sans Runic")
+    }
 }

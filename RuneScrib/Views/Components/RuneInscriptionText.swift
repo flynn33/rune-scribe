@@ -26,6 +26,7 @@ struct RuneInscriptionText: View {
     let start: Date
     let direction: Direction
     var fontSize: CGFloat = 24
+    var fontName: String = "Noto Sans Runic"
     var settled: Bool = false
 
     init(source: String,
@@ -33,6 +34,7 @@ struct RuneInscriptionText: View {
          start: Date,
          direction: Direction,
          fontSize: CGFloat = 24,
+         fontName: String = "Noto Sans Runic",
          settled: Bool = false) {
         // The cipher maps one character to one character, so source and target are
         // always the same length. Pad with spaces (a no-op glyph) only as defensive
@@ -45,6 +47,7 @@ struct RuneInscriptionText: View {
         self.start = start
         self.direction = direction
         self.fontSize = fontSize
+        self.fontName = fontName
         self.settled = settled
     }
 
@@ -91,7 +94,7 @@ struct RuneInscriptionText: View {
         // in bundled Noto Sans Runic. Latin (the unrevealed tail / decoded text)
         // falls back to the system font. Per-run colour still drives the flare.
         Text(string)
-            .font(.runic(fontSize))
+            .font(.runic(fontSize, fontName: fontName))
             .lineSpacing(7)
             .frame(maxWidth: .infinity, alignment: .leading)
     }
