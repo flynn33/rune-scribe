@@ -17,6 +17,7 @@
 		0F375290B9932F3D5C1F8956 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098511B1E52AF229830C74E4 /* SettingsView.swift */; };
 		0FE15DBC0B9074385443CEE2 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8437A6505FB44F89EEE9D9B /* AppLock.swift */; };
 		12027B50430F47B08FC91BEC /* FontStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B77A2EAB94A310BB3110C79 /* FontStore.swift */; };
+		14C70DB6B47EB309C69D2024 /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B05B133702211E19EC95A5A /* Contact.swift */; };
 		15777090BCB442077B87397A /* PINPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CE669299B8B857610BAA76 /* PINPadView.swift */; };
 		1DF4DEAAB181AD335313F763 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD00524F7CD74AD5EE0D8121 /* LockView.swift */; };
 		2534F5D451B13B24B4A64A9B /* FontStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B77A2EAB94A310BB3110C79 /* FontStore.swift */; };
@@ -31,11 +32,13 @@
 		35C98AE00276C7655C193856 /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */; };
 		3734D1550897FAC020B54AE2 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8D5A799A33DED366C377F6 /* RootView.swift */; };
 		38049FACD09DEBB67B1C6DAF /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
+		3B800BA0C9FF8BC9800E7E8E /* ContactTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6175FFF53B5C206A832ECEE8 /* ContactTests.swift */; };
 		3D38B09452746F6509C37C02 /* RuneTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */; };
 		3FDE51AADDBEA7CB2C35BDF3 /* RuneScribButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */; };
 		40E94BF207A2E3593747F2D3 /* MessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC921700CE142D04727FE6CF /* MessageService.swift */; };
 		45113334F4CA66360C41C767 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2631879B41FCA864DDE6E7 /* ContentView.swift */; };
 		4582CC9CE71ADB1635028699 /* LicenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29341AC7EDF3058C96DD83C0 /* LicenseView.swift */; };
+		46E7C851C6AF62FB5647521F /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B05B133702211E19EC95A5A /* Contact.swift */; };
 		49352218624B7663754F6B52 /* QRDisplaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */; };
 		4D4586FA9B5495EE9D02CDA8 /* Cipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C811485E565AD02AF0B21DD8 /* Cipher.swift */; };
 		4F4668CE7576A83D775D37BE /* QRDisplaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */; };
@@ -117,6 +120,7 @@
 		010A368AFC48F1D89E72560F /* FontRefTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontRefTests.swift; sourceTree = "<group>"; };
 		098511B1E52AF229830C74E4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribButtonStyle.swift; sourceTree = "<group>"; };
+		1B05B133702211E19EC95A5A /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
 		203BB2198F06103565DD4D26 /* VideoSplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoSplashView.swift; sourceTree = "<group>"; };
 		236AB4A6CB356708A2A004EE /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		289AA0236910C21C79D71A7E /* PINFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINFlowView.swift; sourceTree = "<group>"; };
@@ -130,6 +134,7 @@
 		46F63FD575D0B3CC9087D99F /* CipherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherTests.swift; sourceTree = "<group>"; };
 		4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibraryTests.swift; sourceTree = "<group>"; };
 		4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
+		6175FFF53B5C206A832ECEE8 /* ContactTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactTests.swift; sourceTree = "<group>"; };
 		646E63DF1024E9E21119084D /* ImportConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportConfirmView.swift; sourceTree = "<group>"; };
 		6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCodecTests.swift; sourceTree = "<group>"; };
 		70806C8FC5D83F211738FAAD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
@@ -196,6 +201,7 @@
 				C811485E565AD02AF0B21DD8 /* Cipher.swift */,
 				B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */,
 				F7009AA365459E8B4CE80758 /* CipherSharePayload.swift */,
+				1B05B133702211E19EC95A5A /* Contact.swift */,
 				F0EBAF25DA0BBDE5890321BB /* FontRef.swift */,
 				74F8D1CCEB6A36CFD48A9808 /* MessageEnvelope.swift */,
 				AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */,
@@ -311,6 +317,7 @@
 				4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */,
 				9D12001A373854AF1280772E /* CipherSharePayloadTests.swift */,
 				46F63FD575D0B3CC9087D99F /* CipherTests.swift */,
+				6175FFF53B5C206A832ECEE8 /* ContactTests.swift */,
 				010A368AFC48F1D89E72560F /* FontRefTests.swift */,
 				34818326B3EDB2664B91AA90 /* FontStoreTests.swift */,
 				FE45258617B63F3648F061B2 /* MessageCryptorTests.swift */,
@@ -456,6 +463,7 @@
 				D8B2571F4B7BF5D06739FFA8 /* CipherLibraryTests.swift in Sources */,
 				6931263401DCF6FEA4E9DA28 /* CipherSharePayloadTests.swift in Sources */,
 				3447330F5168705303052836 /* CipherTests.swift in Sources */,
+				3B800BA0C9FF8BC9800E7E8E /* ContactTests.swift in Sources */,
 				61D64E792969FDFF3BE22D51 /* FontRefTests.swift in Sources */,
 				5D39D2881EC32AB8C2E09098 /* FontStoreTests.swift in Sources */,
 				8ADCE74E2F709CC5E0820566 /* MessageCryptorTests.swift in Sources */,
@@ -477,6 +485,7 @@
 				80AB19E15DBCFE8401431CDD /* CipherLibraryView.swift in Sources */,
 				6A8EB25787C0164E0004149F /* CipherSharePayload.swift in Sources */,
 				ED9A3B29C5ED7535452420E4 /* Clipboard.swift in Sources */,
+				14C70DB6B47EB309C69D2024 /* Contact.swift in Sources */,
 				CEC9C8FD3A0AE90684413AF5 /* ContentView.swift in Sources */,
 				7BA7569056634A2C5C04D4C6 /* DecoderDocument.swift in Sources */,
 				BD5917F1551D8490BBABE0D0 /* FontRef.swift in Sources */,
@@ -522,6 +531,7 @@
 				7612DFED0FFD7CCE5F51CACB /* CipherLibraryView.swift in Sources */,
 				C7A7CBB0509B37B3561EE324 /* CipherSharePayload.swift in Sources */,
 				3216BD9FD4314395132F51BB /* Clipboard.swift in Sources */,
+				46E7C851C6AF62FB5647521F /* Contact.swift in Sources */,
 				45113334F4CA66360C41C767 /* ContentView.swift in Sources */,
 				86EC8F977E7E340F16A64EA2 /* DecoderDocument.swift in Sources */,
 				008FD6B6415CDE82EE157B84 /* FontRef.swift in Sources */,
