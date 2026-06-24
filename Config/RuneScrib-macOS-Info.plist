@@ -33,6 +33,8 @@
 	<string>1</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.lifestyle</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Rune Scribe can organize your ciphers by contact. Contacts stay on your device, encrypted, and are never uploaded.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© Raven Forge Software</string>
 </dict>
