@@ -366,8 +366,7 @@ struct CipherLibraryView: View {
         guard let data = pendingImportData else { return }
         defer { pendingImportData = nil; importLabel = "" }
         do {
-            let payload = try CipherSharePayload(decoding: data)
-            let cipher = try keyManager.importCipher(payload, label: importLabel)
+            let cipher = try keyManager.importCipher(fileData: data, label: importLabel)
             status = .success("Imported “\(cipher.label)” and made it active.")
         } catch {
             status = .failure(error.localizedDescription)

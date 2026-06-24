@@ -107,6 +107,20 @@ final class KeyManager: ObservableObject {
         return cipher
     }
 
+    /// Imports a cipher from a file-form package (compact payload + optional font bytes).
+    /// Validates and stores the font; requires the font to be present (supplied in the file, or
+    /// already local) before the cipher is added.
+    @discardableResult
+    func importCipher(fileData data: Data, label: String?) throws -> Cipher {
+        let (payload, fontBytes) = try CipherSharePayload.decodeFile(data)
+        if let fontBytes {
+            try FontStore.shared.importFont(fontBytes, expecting: payload.fontRef)
+        } else if FontStore.shared.resolve(payload.fontRef) == nil {
+            throw FontStoreError.unreadableFont
+        }
+        return try importCipher(payload, label: label)
+    }
+
     /// Renames the cipher with the given id.
     func renameCipher(id: UUID, to newLabel: String) {
         guard let existing = library.ciphers.first(where: { $0.id == id }) else { return }
@@ -129,12 +143,14 @@ final class KeyManager: ObservableObject {
 
     // MARK: - Export / Share
 
-    /// The compact share payload bytes for the given cipher (the file-export form).
+    /// The self-contained file-form package for the given cipher: the compact payload plus the
+    /// cipher's font bytes, so a recipient who lacks the font still receives it.
     func exportData(for id: UUID) throws -> Data {
         guard let cipher = library.ciphers.first(where: { $0.id == id }) else {
             throw KeyManagerError.noKeyAvailable
         }
-        return CipherSharePayload(cipher: cipher).encoded()
+        let fontBytes = FontStore.shared.fontData(for: cipher.fontRef) ?? Data()
+        return CipherSharePayload(cipher: cipher).encodedFile(fontBytes: fontBytes)
     }
 
     /// The `runescribe://import` share URL for the given cipher (QR / deep-link form).

@@ -32,6 +32,14 @@ final class FontStore: @unchecked Sendable {
         return Self.postScriptName(of: data)
     }
 
+    /// The raw bytes of the font a ref points to (bundled or imported), or nil if absent.
+    func fontData(for ref: FontRef) -> Data? {
+        if ref == .bundled { return FontRef.bundledFontData() }
+        let url = importedFontURL(ref)
+        guard let data = try? Data(contentsOf: url), Data(SHA256.hash(data: data)) == ref.sha256 else { return nil }
+        return data
+    }
+
     /// Validates font bytes against `ref`, stores them in app-support, and registers them.
     /// Throws (changing nothing) on invalid font or hash mismatch.
     func importFont(_ bytes: Data, expecting ref: FontRef) throws {
