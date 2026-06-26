@@ -46,7 +46,9 @@ enum Clipboard {
         let raw = ""
         #endif
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Accept both host form (runescribe://import) and path form (runescribe:import).
-        return CipherSharePayload.isShareURL(trimmed) ? trimmed : nil
+        // Accept cipher-import links (host or path form) AND message links.
+        let recognised = CipherSharePayload.isShareURL(trimmed)
+            || MessageSharePayload.isMessageURL(trimmed)
+        return recognised ? trimmed : nil
     }
 }

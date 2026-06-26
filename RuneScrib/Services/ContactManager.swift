@@ -21,7 +21,8 @@ final class ContactManager: ObservableObject {
 
     /// Adds imported snapshots, skipping any whose Apple identifier is already present —
     /// deduping against existing contacts AND within the batch. Manual snapshots (nil
-    /// identifier) are always added.
+    /// identifier) are always added. Each newly-added contact is given one auto-assigned,
+    /// non-activating cipher (import-only; manual `add(_:)` never auto-generates).
     func addImported(_ snapshots: [Contact]) {
         var seen = Set(contacts.compactMap(\.appleContactID))
         var added: [Contact] = []
@@ -34,6 +35,9 @@ final class ContactManager: ObservableObject {
         }
         guard !added.isEmpty else { return }
         persist(ContactBook(contacts: contacts + added))
+        for contact in added {
+            keyManager.ensureLinkedCipher(forImportedContact: contact)
+        }
     }
 
     /// Deletes a contact and unlinks (never deletes) its ciphers.
