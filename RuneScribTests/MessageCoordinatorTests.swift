@@ -123,4 +123,34 @@ final class MessageCoordinatorTests: XCTestCase {
         XCTAssertEqual(coordinator.pending?.id, firstPendingID)
         XCTAssertEqual(cm.contacts.count, contactsAfterFirst)
     }
+
+    // MARK: - a key re-sent across distinct messages dedups by publicID and never hijacks active
+
+    func testReingestingSameEmbeddedKeyDeduplicatesAndKeepsActiveCipher() throws {
+        let km = KeyManager.shared
+        let coordinator = MessageCoordinator(keyManager: km, contactManager: freshContactManager())
+
+        // Establish a known active cipher the user is "composing with".
+        let mine = try km.importCipher(CipherSharePayload(cipher: Cipher.generated(label: "Mine")), label: "Mine")
+        XCTAssertEqual(km.activeCipher?.id, mine.id)
+
+        // The same sender cipher embedded in two DISTINCT messages (different plaintext →
+        // different URLs, so URL-level dedup doesn't apply; the publicID dedup is what's tested).
+        let senderCipher = Cipher.generated(label: "Sender")
+        let embed = CipherSharePayload(cipher: senderCipher)
+        let url1 = try MessageSharePayload(senderName: "Astrid",
+                                           envelope: try envelope("first", with: senderCipher),
+                                           embeddedCipher: embed).url()
+        let url2 = try MessageSharePayload(senderName: "Astrid",
+                                           envelope: try envelope("second", with: senderCipher),
+                                           embeddedCipher: embed).url()
+
+        coordinator.ingest(url: url1)
+        coordinator.ingest(url: url2)
+
+        // Imported exactly once — a re-sent key must not pile up duplicates.
+        XCTAssertEqual(km.ciphers.filter { $0.publicID == senderCipher.publicID }.count, 1)
+        // Receiving messages must not change the cipher the user is composing with.
+        XCTAssertEqual(km.activeCipher?.id, mine.id)
+    }
 }

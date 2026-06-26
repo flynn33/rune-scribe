@@ -90,6 +90,16 @@ struct RootView: View {
         } message: {
             Text(coordinator.errorMessage ?? "")
         }
+        // A tapped/pasted message link that can't be read (corrupt link or no matching
+        // cipher) surfaces here, with the same splash/lock gating as the import error.
+        .alert("Couldn't Read Message", isPresented: Binding(
+            get: { messageCoordinator.errorMessage != nil && !appLock.isLocked && !showSplash },
+            set: { if !$0 && !appLock.isLocked && !showSplash { messageCoordinator.errorMessage = nil } }
+        )) {
+            Button("OK") { messageCoordinator.errorMessage = nil }
+        } message: {
+            Text(messageCoordinator.errorMessage ?? "")
+        }
     }
 
     /// On returning to the foreground, offer to import a `runescribe://` cipher

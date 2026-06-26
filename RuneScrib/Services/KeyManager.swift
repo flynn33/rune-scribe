@@ -107,6 +107,31 @@ final class KeyManager: ObservableObject {
         return cipher
     }
 
+    /// Imports a cipher that arrived *inside a message* (not a deliberate cipher share).
+    /// Unlike `importCipher` it (1) deduplicates by `publicID`, so a key re-sent on every
+    /// message never piles up duplicates, and (2) uses `addingWithoutActivating`, so merely
+    /// receiving a message never hijacks the cipher the user is composing with (Reply switches
+    /// the active cipher explicitly). Always returns a usable decrypt candidate: the stored
+    /// copy when we already hold this key, the freshly persisted cipher otherwise, or — if the
+    /// Keychain is unavailable — an in-memory copy so the current message still decrypts.
+    @discardableResult
+    func ingestMessageCipher(_ payload: CipherSharePayload, label: String) -> Cipher {
+        if let existing = library.ciphers.first(where: { $0.publicID == payload.publicID }) {
+            return existing
+        }
+        let cipher = payload.cipher(label: cleanLabel(label, fallback: "Imported Cipher"))
+        do {
+            let aesKey = try loadOrCreateSymmetricKey()
+            library = library.addingWithoutActivating(cipher)
+            try persist(using: aesKey)
+            lastError = nil
+        } catch {
+            // Keychain unavailable: return the in-memory cipher unsaved so THIS message still
+            // opens; it simply won't persist for later (the same best-effort as before).
+        }
+        return cipher
+    }
+
     /// Imports a cipher from a file-form package (compact payload + optional font bytes).
     /// Validates and stores the font; requires the font to be present (supplied in the file, or
     /// already local) before the cipher is added.

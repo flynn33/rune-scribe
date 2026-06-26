@@ -57,20 +57,13 @@ final class MessageCoordinator: ObservableObject {
         do {
             let payload = try MessageSharePayload(url: url)
 
-            // If the sender embedded their key, import (persist) it so it's saved for future
-            // messages and selectable when the user taps Reply. Prefer the persisted library
-            // cipher; if persisting fails but a stored cipher already holds the same key, use
-            // that; only if the Keychain is wholly unavailable fall back to an in-memory copy
-            // so THIS message still opens instead of failing with "no matching cipher".
+            // If the sender embedded their key, ingest it as a decrypt candidate. This
+            // deduplicates by publicID (a key re-sent on every message never piles up
+            // duplicates) and does NOT change the active cipher — merely receiving a message
+            // must not hijack the one the user is composing with; Reply switches it explicitly.
             var candidate: Cipher?
             if let embedded = payload.embeddedCipher {
-                if let imported = try? keyManager.importCipher(embedded, label: payload.senderName) {
-                    candidate = imported
-                } else if let stored = keyManager.ciphers.first(where: { $0.keyMaterial == embedded.keyMaterial }) {
-                    candidate = stored
-                } else {
-                    candidate = embedded.cipher(label: payload.senderName)
-                }
+                candidate = keyManager.ingestMessageCipher(embedded, label: payload.senderName)
             }
 
             // Try the freshly-imported key first, then every cipher already in the library.
