@@ -1,6 +1,6 @@
 # Rune Scribe — Phase 4: Apple Messages Send & Key Auto-Exchange
 
-**Status:** Draft for review
+**Status:** Reviewed — owner decisions captured 2026-06-26; ready to plan
 **Date:** 2026-06-25
 **Phase:** 4 of 4 (Phases 1 — encryption — 2 — font package + Universal Links — 3 — Contacts — are merged / PR'd.)
 
@@ -20,6 +20,26 @@ plaintext → AES-GCM seal (`MessageCryptor`, pre-shared cipher key) → 1-byte 
 of their own — they are a reversible, cosmetic rendering of the encrypted envelope; the
 security is the pre-shared symmetric cipher key. This phase is **transmission + key delivery +
 receive-side auto-import**, wiring the existing pieces into Messages.
+
+## Confirmed decisions (2026-06-26)
+
+Reconciled with the owner's requirements:
+
+1. **Per-contact key — on import.** Importing a contact (Import All, the picker, or Add)
+   auto-assigns it a freshly-generated cipher (key-delivered marker unset), labelled with the
+   contact's name and linked via `contactID`. Contacts that are **not** imported, and the plain
+   non-contact compose flow, stay **manual** (create/select a cipher as today).
+2. **Rune fidelity — tap-to-open restores it.** The bubble shows runes in the recipient's
+   system font; full Noto Sans Runic fidelity returns when they open the app (Phase 2 font
+   package). No image-rendering path is added.
+3. **Universal Links + website — in scope (app + site)** this phase (see *Universal Links +
+   website*).
+4. **Key delivery — embed-on-first-message default.** Convenient auto-exchange; out-of-band
+   QR/file sharing remains the fully-private alternative. The app surfaces, lightly, whether a
+   message carried the key ("key included" vs "uses your shared key").
+5. **Silent one-tap iMessage — not possible.** No public API sends iMessage without user
+   confirmation; the send action opens a pre-filled `MFMessageComposeViewController` (iOS) the
+   user taps Send on (reaffirmed under Non-goals).
 
 ## What gets sent (the core model)
 
@@ -47,6 +67,10 @@ extends it to carry a **message** in addition to a **cipher**.
 ## Key lifecycle (no crypto change; tracks delivery)
 
 - A cipher = one pre-shared AES-256 key (Phase 1), linked to at most one contact (Phase 3).
+- **Per-contact key on import** (new): importing a contact (Import All, picker, or Add)
+  auto-generates a cipher for it — marker unset, labelled with the contact name, linked via
+  `contactID`. Import All makes one cipher per imported contact. The non-imported / plain-compose
+  path stays **manual** (create or select a cipher as today).
 - **First message to a contact** (the cipher's "key delivered" marker is unset) embeds the key
   in the link and sets the marker. Every message after that carries **just the message**, using
   the same key.
@@ -105,15 +129,34 @@ extends it to carry a **message** in addition to a **cipher**.
   name when known) and the decrypted text; offers Reply.
 - **Cipher library / compose** continue to show the linked contact ("To: …", Phase 3).
 
+## Universal Links + website (in scope this phase)
+
+Tap-to-open and the no-app fallback need link infrastructure that does not yet exist (no
+`associated-domains` entitlement, no AASA file):
+
+- **App:** add `associated-domains` = `applinks:ravenforgesoftware.com` to both the iOS and
+  macOS targets via `project.yml` (alongside the existing `Config/RuneScrib-*.entitlements`).
+- **Site:** publish `https://ravenforgesoftware.com/.well-known/apple-app-site-association` —
+  JSON, no file extension, served as `application/json` — declaring appID
+  `9AQ2C2838M.com.runescribe.app` with `applinks` paths covering the cipher link
+  (`/rune-scribe/import`) and the message link (`/rune-scribe/m`). Edited via the Claude Bridge.
+- **No-app fallback:** the `/rune-scribe/` page already exists; make it cleanly handle a visitor
+  who tapped a link without the app — show the Rune Scribe product info and a link to the
+  **company page** (the App Store page does not exist yet). No per-message payload is rendered on
+  the web (it is meaningless without the app's key).
+- Cross-repo: the app changes live in this repo; the AASA file + page live on the website.
+
 ## Non-goals (out of scope)
 
-- **Silent / background iMessage monitoring** — impossible via public APIs (no read access to
-  the Messages database or incoming texts). Sending is user-initiated via the compose UI.
+- **Silent / one-tap-without-confirmation iMessage send, and background message monitoring** —
+  impossible via public APIs: no programmatic iMessage send, no read access to the Messages
+  database. Sending is user-initiated — the app opens a pre-filled `MFMessageComposeViewController`
+  (iOS) the user taps Send on; macOS uses the native Share sheet.
 - **A macOS Messages compose sheet** — `MFMessageComposeViewController` is iOS-only; macOS uses
   the native Share sheet.
 - **Changing the encryption or the rune encoding** — Phases 1–2 stand unchanged.
-- **Website work** — the AASA file and the "get the app" product page exist / are external
-  (flagged since Phase 2).
+- **(Now in scope this phase)** the AASA file + `/rune-scribe/` no-app fallback — see
+  *Universal Links + website* above.
 
 ## Testing
 
