@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.21] - 2026-06-26
+
+- Messages: inbound/outbound flow, Swift 6 fixes, updated splash (#22) by @flynn33
+
 ## [1.0.20] - 2026-06-26
 
 - Phase 4: Apple Messages send + cipher key auto-exchange (#21) by @flynn33
