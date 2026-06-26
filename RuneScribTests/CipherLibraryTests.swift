@@ -121,6 +121,45 @@ extension CipherLibraryTests {
 }
 
 extension CipherLibraryTests {
+
+    func testMarkingDeliveredFlipsOnlyTheTarget() {
+        let a = Cipher.generated(label: "A")
+        let b = Cipher.generated(label: "B")
+        let library = CipherLibrary(ciphers: [a, b], activeID: a.id)
+
+        let after = library.markingDelivered(cipherID: b.id)
+
+        XCTAssertFalse(after.ciphers.first { $0.id == a.id }!.delivered)
+        XCTAssertTrue(after.ciphers.first { $0.id == b.id }!.delivered)
+        XCTAssertEqual(after.activeID, a.id, "marking delivered must not change the active cipher")
+    }
+
+    func testMarkingDeliveredUnknownIDIsNoOp() {
+        let a = Cipher.generated(label: "A")
+        let library = CipherLibrary(ciphers: [a], activeID: a.id)
+        XCTAssertEqual(library.markingDelivered(cipherID: UUID()), library)
+    }
+
+    func testAddingWithoutActivatingAppendsAndKeepsActive() {
+        let a = Cipher.generated(label: "A")
+        let b = Cipher.generated(label: "B")
+        let library = CipherLibrary(ciphers: [a], activeID: a.id)
+
+        let after = library.addingWithoutActivating(b)
+
+        XCTAssertEqual(after.ciphers.map(\.id), [a.id, b.id])
+        XCTAssertEqual(after.activeID, a.id, "must not steal the active selection")
+    }
+
+    func testAddingWithoutActivatingSeedsActiveWhenNil() {
+        let a = Cipher.generated(label: "A")
+        let library = CipherLibrary(ciphers: [], activeID: nil)
+        let after = library.addingWithoutActivating(a)
+        XCTAssertEqual(after.activeID, a.id, "first cipher into an empty library becomes active")
+    }
+}
+
+extension CipherLibraryTests {
     func testSettingAndClearingContactKeepsTheCipher() {
         let cid = UUID()
         let c = Cipher.generated(label: "A")

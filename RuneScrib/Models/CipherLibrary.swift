@@ -93,4 +93,20 @@ extension CipherLibrary {
         for i in copy.ciphers.indices where copy.ciphers[i].contactID == contactID { copy.ciphers[i].contactID = nil }
         return copy
     }
+
+    /// Marks the cipher with `cipherID` as delivered (no-op if not found). Touches nothing else.
+    func markingDelivered(cipherID: UUID) -> CipherLibrary {
+        var copy = self
+        if let i = copy.ciphers.firstIndex(where: { $0.id == cipherID }) { copy.ciphers[i].delivered = true }
+        return copy
+    }
+
+    /// Appends a cipher without changing the active selection. If the library had no active
+    /// cipher (empty library), the new one becomes active so the invariant holds.
+    func addingWithoutActivating(_ cipher: Cipher) -> CipherLibrary {
+        var copy = self
+        copy.ciphers.append(cipher)
+        if copy.activeID == nil { copy.activeID = cipher.id }
+        return copy
+    }
 }
