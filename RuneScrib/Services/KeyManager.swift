@@ -164,6 +164,19 @@ final class KeyManager: ObservableObject {
     /// The ciphers currently linked to `contactID`.
     func ciphers(forContact contactID: UUID) -> [Cipher] { library.ciphers.filter { $0.contactID == contactID } }
 
+    /// Ensures an imported contact has at least one linked cipher, generating and linking one
+    /// (without changing the active selection) when it has none. Returns the new cipher, or
+    /// `nil` when the contact already has a linked cipher. Import-only by design.
+    @discardableResult
+    func ensureLinkedCipher(forImportedContact contact: Contact) -> Cipher? {
+        guard ciphers(forContact: contact.id).isEmpty else { return nil }
+        var cipher = Cipher.generated(label: cleanLabel(contact.displayName, fallback: "Imported Cipher"))
+        cipher.contactID = contact.id
+        library = library.addingWithoutActivating(cipher)
+        persist()
+        return cipher
+    }
+
     // MARK: - Export / Share
 
     /// The self-contained file-form package for the given cipher: the compact payload plus the

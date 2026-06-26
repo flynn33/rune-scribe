@@ -84,6 +84,7 @@
 		9CB1A311A27D330B1AE3726D /* ContactStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89650C349BCE670EBDDEF2D2 /* ContactStore.swift */; };
 		9D7FEA16DD78184E7FE55034 /* RuneCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */; };
 		9F95A099D27690B6214A6DE9 /* PINFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289AA0236910C21C79D71A7E /* PINFlowView.swift */; };
+		A86A326BDA398A9366838BCB /* KeyManagerLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */; };
 		A8860E28862BB912A033B9A9 /* VideoSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203BB2198F06103565DD4D26 /* VideoSplashView.swift */; };
 		AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
 		B0614EBD257EEA0A80FA1862 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */; };
@@ -139,6 +140,7 @@
 		236AB4A6CB356708A2A004EE /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		289AA0236910C21C79D71A7E /* PINFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINFlowView.swift; sourceTree = "<group>"; };
 		29341AC7EDF3058C96DD83C0 /* LicenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseView.swift; sourceTree = "<group>"; };
+		2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManagerLinkTests.swift; sourceTree = "<group>"; };
 		2D37342DC065A1648904DC62 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
 		33965AD6B626161B2307C925 /* RuneScribTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		34818326B3EDB2664B91AA90 /* FontStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStoreTests.swift; sourceTree = "<group>"; };
@@ -349,6 +351,7 @@
 				6175FFF53B5C206A832ECEE8 /* ContactTests.swift */,
 				010A368AFC48F1D89E72560F /* FontRefTests.swift */,
 				34818326B3EDB2664B91AA90 /* FontStoreTests.swift */,
+				2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */,
 				FE45258617B63F3648F061B2 /* MessageCryptorTests.swift */,
 				D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */,
 				9FF432A970A6B11D44198C59 /* MessageServiceTests.swift */,
@@ -498,6 +501,7 @@
 				3B800BA0C9FF8BC9800E7E8E /* ContactTests.swift in Sources */,
 				61D64E792969FDFF3BE22D51 /* FontRefTests.swift in Sources */,
 				5D39D2881EC32AB8C2E09098 /* FontStoreTests.swift in Sources */,
+				A86A326BDA398A9366838BCB /* KeyManagerLinkTests.swift in Sources */,
 				8ADCE74E2F709CC5E0820566 /* MessageCryptorTests.swift in Sources */,
 				F2701FE600A43C4D66968B53 /* MessageEnvelopeTests.swift in Sources */,
 				EDD9F1C27E7005B8FE8A9949 /* MessageServiceTests.swift in Sources */,
