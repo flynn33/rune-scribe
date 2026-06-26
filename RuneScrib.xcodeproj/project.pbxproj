@@ -22,6 +22,7 @@
 		12027B50430F47B08FC91BEC /* FontStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B77A2EAB94A310BB3110C79 /* FontStore.swift */; };
 		14C70DB6B47EB309C69D2024 /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B05B133702211E19EC95A5A /* Contact.swift */; };
 		15777090BCB442077B87397A /* PINPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CE669299B8B857610BAA76 /* PINPadView.swift */; };
+		176EFC88D4B1F5D8D2B296DA /* MessageSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86342C6D604E4F987CEEE2A /* MessageSend.swift */; };
 		1DF4DEAAB181AD335313F763 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD00524F7CD74AD5EE0D8121 /* LockView.swift */; };
 		21390D5D4A291C44897D708E /* ContactBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C9649F3A635A72F42E0378F /* ContactBook.swift */; };
 		2534F5D451B13B24B4A64A9B /* FontStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B77A2EAB94A310BB3110C79 /* FontStore.swift */; };
@@ -77,6 +78,7 @@
 		80AB19E15DBCFE8401431CDD /* CipherLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E215F3EF5FE734CB87EA5C /* CipherLibraryView.swift */; };
 		80E4EDFC691AB83CE9B78E5E /* RuneCharacterSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */; };
 		817CB2732E8A24EBC3E0F3F5 /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */; };
+		822609291F0EDC271B157343 /* MessageSendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C9A3D8B0BF6AA4A96C227D /* MessageSendTests.swift */; };
 		86EC8F977E7E340F16A64EA2 /* DecoderDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D15D6F87C83071DA639125F /* DecoderDocument.swift */; };
 		87C653A1A5B292FB7831DB22 /* KeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA657AA7320B6333C8D191BD /* KeyManager.swift */; };
 		8ADCE74E2F709CC5E0820566 /* MessageCryptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE45258617B63F3648F061B2 /* MessageCryptorTests.swift */; };
@@ -102,6 +104,7 @@
 		B4F8144B90E37A2B69CF4F17 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23D157957EEFB14E8CB7147 /* AppDelegate.swift */; };
 		B7DB4883F7A2A96A58E543EA /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */; };
 		B82752C4229DA7F2A18BF1D9 /* ContactManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50CBAAF3486CBF7224F4CDD /* ContactManager.swift */; };
+		BA66D328CF6D3F70A3E7281B /* MessageSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86342C6D604E4F987CEEE2A /* MessageSend.swift */; };
 		BD5917F1551D8490BBABE0D0 /* FontRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0EBAF25DA0BBDE5890321BB /* FontRef.swift */; };
 		C1A6CF8336377BFF19B73290 /* RuneMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C804E8889A60C1394E8D3841 /* RuneMetalView.swift */; };
 		C1C0B6E37E3C2EA178DB28FF /* ContactBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C9649F3A635A72F42E0378F /* ContactBook.swift */; };
@@ -206,6 +209,7 @@
 		D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageEnvelopeTests.swift; sourceTree = "<group>"; };
 		DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
 		E12A33AC824869AC62776BF8 /* MessageSharePayloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSharePayloadTests.swift; sourceTree = "<group>"; };
+		E8C9A3D8B0BF6AA4A96C227D /* MessageSendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSendTests.swift; sourceTree = "<group>"; };
 		E91D52C55B3AEDED27523270 /* RuneScrib-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "RuneScrib-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneTheme.swift; sourceTree = "<group>"; };
 		EC8D5A799A33DED366C377F6 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -214,6 +218,7 @@
 		F0EBAF25DA0BBDE5890321BB /* FontRef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontRef.swift; sourceTree = "<group>"; };
 		F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportCoordinator.swift; sourceTree = "<group>"; };
 		F7009AA365459E8B4CE80758 /* CipherSharePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherSharePayload.swift; sourceTree = "<group>"; };
+		F86342C6D604E4F987CEEE2A /* MessageSend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSend.swift; sourceTree = "<group>"; };
 		FD00524F7CD74AD5EE0D8121 /* LockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockView.swift; sourceTree = "<group>"; };
 		FE45258617B63F3648F061B2 /* MessageCryptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCryptorTests.swift; sourceTree = "<group>"; };
 		FFCEB5C9419CC1BB56239537 /* MessageCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCoordinatorTests.swift; sourceTree = "<group>"; };
@@ -235,6 +240,7 @@
 				98578E247AB4ADA6313E4448 /* LinkRouter.swift */,
 				2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */,
 				ED388EE7376C2E10FDCCBAF0 /* MessageCryptor.swift */,
+				F86342C6D604E4F987CEEE2A /* MessageSend.swift */,
 				EC921700CE142D04727FE6CF /* MessageService.swift */,
 				DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */,
 				A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */,
@@ -381,6 +387,7 @@
 				FFCEB5C9419CC1BB56239537 /* MessageCoordinatorTests.swift */,
 				FE45258617B63F3648F061B2 /* MessageCryptorTests.swift */,
 				D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */,
+				E8C9A3D8B0BF6AA4A96C227D /* MessageSendTests.swift */,
 				9FF432A970A6B11D44198C59 /* MessageServiceTests.swift */,
 				E12A33AC824869AC62776BF8 /* MessageSharePayloadTests.swift */,
 				6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */,
@@ -535,6 +542,7 @@
 				D6FF3E61093B3453CF127E3E /* MessageCoordinatorTests.swift in Sources */,
 				8ADCE74E2F709CC5E0820566 /* MessageCryptorTests.swift in Sources */,
 				F2701FE600A43C4D66968B53 /* MessageEnvelopeTests.swift in Sources */,
+				822609291F0EDC271B157343 /* MessageSendTests.swift in Sources */,
 				EDD9F1C27E7005B8FE8A9949 /* MessageServiceTests.swift in Sources */,
 				6F5A8557401233BC22918304 /* MessageSharePayloadTests.swift in Sources */,
 				DA56A46F02A37D239461F8C8 /* RuneCodecTests.swift in Sources */,
@@ -573,6 +581,7 @@
 				A6C686B66946360588DED3C0 /* MessageCoordinator.swift in Sources */,
 				509573937921C44707A045BE /* MessageCryptor.swift in Sources */,
 				E7F15014B8213E8936B6FC1C /* MessageEnvelope.swift in Sources */,
+				BA66D328CF6D3F70A3E7281B /* MessageSend.swift in Sources */,
 				60C298F14A6E6FC30EFE21DE /* MessageService.swift in Sources */,
 				A472D43E5F8F1163E7746623 /* MessageSharePayload.swift in Sources */,
 				817CB2732E8A24EBC3E0F3F5 /* MetalRenderer.swift in Sources */,
@@ -628,6 +637,7 @@
 				A89334636625EA839DDFC991 /* MessageCoordinator.swift in Sources */,
 				C7C2D5659A4FC1DEE373BCD3 /* MessageCryptor.swift in Sources */,
 				B2A85D13B6EC9173917D5A44 /* MessageEnvelope.swift in Sources */,
+				176EFC88D4B1F5D8D2B296DA /* MessageSend.swift in Sources */,
 				40E94BF207A2E3593747F2D3 /* MessageService.swift in Sources */,
 				D0BFADBB943FAA7F8810D803 /* MessageSharePayload.swift in Sources */,
 				35C98AE00276C7655C193856 /* MetalRenderer.swift in Sources */,
