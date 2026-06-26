@@ -56,3 +56,28 @@ extension CipherTests {
         XCTAssertNil(try JSONDecoder().decode(Cipher.self, from: Data(json.utf8)).contactID)
     }
 }
+
+extension CipherTests {
+    func testNewCipherIsNotDelivered() {
+        XCTAssertFalse(Cipher.generated(label: "x").delivered)
+    }
+
+    func testDeliveredSurvivesCodableRoundTrip() throws {
+        var c = Cipher.generated(label: "Bob")
+        c.delivered = true
+        let data = try JSONEncoder().encode(c)
+        let back = try JSONDecoder().decode(Cipher.self, from: data)
+        XCTAssertTrue(back.delivered)
+        XCTAssertEqual(c, back)
+    }
+
+    func testLegacyCipherWithoutDeliveredDecodesFalse() throws {
+        // Simulate a Phase-1/2/3 stored cipher: JSON object with no `delivered` key.
+        let json = """
+        {"id":"\(UUID().uuidString)","label":"old","origin":"generated","createdAt":0,
+         "formatVersion":1,"publicID":"AAAAAAAAAAA=","keyMaterial":"\(Data(repeating:1,count:32).base64EncodedString())",
+         "decorativeMapping":[\((0..<32).map(String.init).joined(separator: ","))]}
+        """
+        XCTAssertFalse(try JSONDecoder().decode(Cipher.self, from: Data(json.utf8)).delivered)
+    }
+}

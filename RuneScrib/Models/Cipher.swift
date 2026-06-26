@@ -36,13 +36,19 @@ struct Cipher: Codable, Equatable, Identifiable {
     /// ciphers (which predate this field) load unchanged.
     var contactID: UUID?
 
+    /// Whether this cipher's key has been delivered to its linked contact at least once.
+    /// Drives Phase-4 key auto-exchange: a key is embedded in an outgoing message only while
+    /// this is false. Codable default false so pre-Phase-4 ciphers load unchanged.
+    var delivered: Bool
+
     var symmetricKey: SymmetricKey { SymmetricKey(data: keyMaterial) }
 
     var shortPublicID: String { publicID.map { String(format: "%02x", $0) }.joined().prefix(8).description }
 
     init(id: UUID = UUID(), label: String, origin: Origin, createdAt: Date = Date(),
          formatVersion: Int = Cipher.currentVersion, publicID: Data, keyMaterial: Data,
-         decorativeMapping: [Int], fontRef: FontRef = .bundled, contactID: UUID? = nil) {
+         decorativeMapping: [Int], fontRef: FontRef = .bundled, contactID: UUID? = nil,
+         delivered: Bool = false) {
         self.id = id
         self.label = label
         self.origin = origin
@@ -53,10 +59,11 @@ struct Cipher: Codable, Equatable, Identifiable {
         self.decorativeMapping = decorativeMapping
         self.fontRef = fontRef
         self.contactID = contactID
+        self.delivered = delivered
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, label, origin, createdAt, formatVersion, publicID, keyMaterial, decorativeMapping, fontRef, contactID
+        case id, label, origin, createdAt, formatVersion, publicID, keyMaterial, decorativeMapping, fontRef, contactID, delivered
     }
 
     init(from decoder: Decoder) throws {
@@ -71,6 +78,7 @@ struct Cipher: Codable, Equatable, Identifiable {
         decorativeMapping = try c.decode([Int].self, forKey: .decorativeMapping)
         fontRef = try c.decodeIfPresent(FontRef.self, forKey: .fontRef) ?? .bundled
         contactID = try c.decodeIfPresent(UUID.self, forKey: .contactID)
+        delivered = try c.decodeIfPresent(Bool.self, forKey: .delivered) ?? false
     }
 
     /// A brand-new locally-generated cipher with a random key, id, and decorative mapping.
