@@ -91,7 +91,7 @@ extension MessageSharePayloadTests {
         let payload = MessageSharePayload(senderName: "Sam",
                                           envelope: env,
                                           embeddedCipher: CipherSharePayload(cipher: cipher))
-        let url = try payload.url(name: "Sam")
+        let url = try payload.url()
         XCTAssertEqual(url.scheme, "https")
         XCTAssertEqual(url.host, "ravenforgesoftware.com")
         XCTAssertEqual(url.path, "/rune-scribe/m")
@@ -126,5 +126,37 @@ extension MessageSharePayloadTests {
         // junk
         XCTAssertFalse(MessageSharePayload.isMessageURL("https://example.com/x"))
         XCTAssertFalse(MessageSharePayload.isMessageURL("hello world"))
+    }
+}
+
+extension MessageSharePayloadTests {
+    /// Appends a valid 4-byte checksum so decoding reaches the bounds guards rather
+    /// than failing on the checksum.
+    private func withChecksum(_ body: Data) -> Data {
+        body + Data(SHA256.hash(data: body).prefix(4))
+    }
+
+    func testTruncatedNameRejected() {
+        // version=1, flags=0, nameLen=200 (far more than the 0 name bytes present), envLen=0.
+        let bytes = withChecksum(Data([1, 0, 200, 0, 0]))
+        XCTAssertThrowsError(try MessageSharePayload(decoding: bytes)) { error in
+            XCTAssertEqual(error as? MessageShareError, .tooShort)
+        }
+    }
+
+    func testTruncatedEnvelopeRejected() {
+        // version=1, flags=0, nameLen=0, envLen=0xFFFF (65535) but no envelope bytes follow.
+        let bytes = withChecksum(Data([1, 0, 0, 0xFF, 0xFF]))
+        XCTAssertThrowsError(try MessageSharePayload(decoding: bytes)) { error in
+            XCTAssertEqual(error as? MessageShareError, .tooShort)
+        }
+    }
+
+    func testTruncatedEmbeddedCipherRejected() {
+        // hasCipher flag set, nameLen=0, envLen=0, but no room for the 129-byte embedded cipher.
+        let bytes = withChecksum(Data([1, 1, 0, 0, 0]))
+        XCTAssertThrowsError(try MessageSharePayload(decoding: bytes)) { error in
+            XCTAssertEqual(error as? MessageShareError, .tooShort)
+        }
     }
 }

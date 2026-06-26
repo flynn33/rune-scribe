@@ -104,15 +104,13 @@ struct MessageSharePayload: Equatable {
         return false
     }
 
-    func url(name: String?) throws -> URL {
+    /// The sender name travels inside the binary body, so the URL carries no `n=` item;
+    /// `init(url:)` never reads one back.
+    func url() throws -> URL {
         var comps = URLComponents()
         comps.scheme = "https"; comps.host = Self.webHost; comps.path = Self.webPath
-        var items = [URLQueryItem(name: "v", value: String(Self.version)),
-                     URLQueryItem(name: "p", value: Self.base64url(encoded()))]
-        if let name = name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
-            items.append(URLQueryItem(name: "n", value: name))
-        }
-        comps.queryItems = items
+        comps.queryItems = [URLQueryItem(name: "v", value: String(Self.version)),
+                            URLQueryItem(name: "p", value: Self.base64url(encoded()))]
         guard let url = comps.url else { throw MessageShareError.invalidURL }
         return url
     }
