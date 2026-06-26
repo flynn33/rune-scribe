@@ -26,23 +26,23 @@ struct MessageComposeView: UIViewControllerRepresentable {
 
     func updateUIViewController(_ vc: MFMessageComposeViewController, context: Context) {}
 
-    final class Coordinator: NSObject, MFMessageComposeViewControllerDelegate {
+    // MFMessageComposeViewControllerDelegate predates Swift concurrency and is not
+    // annotated @MainActor in the SDK, yet UIKit always invokes it on the main thread.
+    // Isolating the coordinator to @MainActor and marking the conformance @preconcurrency
+    // lets a @MainActor method satisfy the nonisolated requirement — the compiler inserts
+    // a runtime main-thread check at the call boundary — so we can touch the
+    // @MainActor-isolated `dismiss` and the non-Sendable `onFinish` directly, with no
+    // cross-actor send.
+    @MainActor
+    final class Coordinator: NSObject, @preconcurrency MFMessageComposeViewControllerDelegate {
         let onFinish: (() -> Void)?
         init(onFinish: (() -> Void)?) { self.onFinish = onFinish }
 
         func messageComposeViewController(_ controller: MFMessageComposeViewController,
                                           didFinishWith result: MessageComposeResult) {
-            // UIKit always delivers this delegate callback on the main thread, but the
-            // protocol requirement is nonisolated — so assume main-actor isolation to
-            // touch the main-actor-isolated `dismiss` and `onFinish` without a hop.
-            MainActor.assumeIsolated {
-                // Only treat an actual send as delivery; cancelled/failed leave state alone.
-                // Call onFinish synchronously here rather than from the dismiss completion —
-                // passing a closure that captures the non-Sendable onFinish into dismiss's
-                // completion is a Swift 6 data-race error.
-                if result == .sent { onFinish?() }
-                controller.dismiss(animated: true)
-            }
+            // Only treat an actual send as delivery; cancelled/failed leave state alone.
+            if result == .sent { onFinish?() }
+            controller.dismiss(animated: true)
         }
     }
 }
