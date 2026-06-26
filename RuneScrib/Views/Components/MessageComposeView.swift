@@ -33,8 +33,12 @@ struct MessageComposeView: UIViewControllerRepresentable {
         func messageComposeViewController(_ controller: MFMessageComposeViewController,
                                           didFinishWith result: MessageComposeResult) {
             // Only treat an actual send as delivery; cancelled/failed leave state alone.
-            let sent = (result == .sent)
-            controller.dismiss(animated: true) { if sent { self.onFinish?() } }
+            // Call onFinish synchronously here (this delegate callback is already on the
+            // main actor) rather than from the dismiss completion — passing a closure that
+            // captures the non-Sendable onFinish into dismiss's completion is a Swift 6
+            // data-race error.
+            if result == .sent { onFinish?() }
+            controller.dismiss(animated: true)
         }
     }
 }
