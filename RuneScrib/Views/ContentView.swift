@@ -104,10 +104,10 @@ struct ContentView: View {
                     textFrame
                         .frame(maxHeight: .infinity)
 
-                    // Locked to a fixed height so it never competes with the text
-                    // frame for vertical space. The button row is 46pt tall; the
-                    // transforming phase's empty placeholder must match exactly,
-                    // otherwise it would grab space and shrink the frame mid-animation.
+                    // At least the 46pt button-row height. The transforming-phase
+                    // placeholder is pinned to exactly 46pt so the parchment text frame
+                    // keeps its size through the inscription animation; only the taller
+                    // .result row (Share/iMessage + key indicator) is allowed to grow.
                     actionArea
                         .frame(minHeight: 46)
                 }
@@ -239,7 +239,8 @@ struct ContentView: View {
 
         case .transforming:
             // No spinner or indicator — the inscription in the frame is the feedback.
-            Color.clear
+            // Pinned to the button-row height so the text frame doesn't resize mid-animation.
+            Color.clear.frame(height: 46)
 
         case .result:
             VStack(spacing: 8) {
@@ -438,9 +439,14 @@ struct ContentView: View {
         return all.isEmpty ? nil : all
     }
 
-    /// Called when Apple's compose sheet reports an actual send: mark the key delivered.
+    /// Called when Apple's compose sheet reports an actual send: mark the key delivered —
+    /// but only when this message actually embedded the key (a contact-linked, not-yet-
+    /// delivered cipher). `delivered` means "key handed to the contact", not "ever sent",
+    /// so an unlinked send must not flip it and skip a later first-delivery bootstrap.
     private func handleMessageSent() {
-        if let cipher = resultCipher { keyManager.markDelivered(cipherID: cipher.id) }
+        if let cipher = resultCipher, MessageSend.shouldIncludeKey(cipher) {
+            keyManager.markDelivered(cipherID: cipher.id)
+        }
     }
     #endif
 }

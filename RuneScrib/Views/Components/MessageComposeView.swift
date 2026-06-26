@@ -10,7 +10,9 @@ struct MessageComposeView: UIViewControllerRepresentable {
     var onFinish: (() -> Void)?
 
     /// Whether this device can send texts at all (no SIM / Simulator → false).
-    static var canSend: Bool { MFMessageComposeViewController.canSendText() }
+    /// `canSendText()` is main-actor-isolated (MFMessageComposeViewController is a
+    /// UIViewController), so this accessor is too; it is only read from the view body.
+    @MainActor static var canSend: Bool { MFMessageComposeViewController.canSendText() }
 
     func makeCoordinator() -> Coordinator { Coordinator(onFinish: onFinish) }
 
