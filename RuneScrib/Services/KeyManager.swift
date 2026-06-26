@@ -153,6 +153,14 @@ final class KeyManager: ObservableObject {
         persist()
     }
 
+    /// Marks the cipher with `cipherID` as having had its key delivered, then persists.
+    /// Idempotent and never touches key material. Called by the send flow after a message
+    /// that embedded this cipher's key has been handed off to Messages.
+    func markDelivered(cipherID: UUID) {
+        library = library.markingDelivered(cipherID: cipherID)
+        persist()
+    }
+
     /// The ciphers currently linked to `contactID`.
     func ciphers(forContact contactID: UUID) -> [Cipher] { library.ciphers.filter { $0.contactID == contactID } }
 
