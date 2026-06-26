@@ -39,6 +39,7 @@
 		3782081107E06E0D3CAAF015 /* ContactImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EB26ADD23F56433988EDC2 /* ContactImporter.swift */; };
 		38049FACD09DEBB67B1C6DAF /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		3B800BA0C9FF8BC9800E7E8E /* ContactTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6175FFF53B5C206A832ECEE8 /* ContactTests.swift */; };
+		3D100436F2A2562A94DD7040 /* LinkRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCAC6AA1D8EDD7C7ACF3953A /* LinkRouterTests.swift */; };
 		3D38B09452746F6509C37C02 /* RuneTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */; };
 		3FDE51AADDBEA7CB2C35BDF3 /* RuneScribButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */; };
 		40E94BF207A2E3593747F2D3 /* MessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC921700CE142D04727FE6CF /* MessageService.swift */; };
@@ -71,6 +72,7 @@
 		76B55D28EAD870E258B0AF67 /* LicenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29341AC7EDF3058C96DD83C0 /* LicenseView.swift */; };
 		7BA7569056634A2C5C04D4C6 /* DecoderDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D15D6F87C83071DA639125F /* DecoderDocument.swift */; };
 		7BF138CAE8F17D14882A4596 /* PINFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289AA0236910C21C79D71A7E /* PINFlowView.swift */; };
+		80A1AC959D6C3F0A06ADC959 /* LinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98578E247AB4ADA6313E4448 /* LinkRouter.swift */; };
 		80AB19E15DBCFE8401431CDD /* CipherLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E215F3EF5FE734CB87EA5C /* CipherLibraryView.swift */; };
 		80E4EDFC691AB83CE9B78E5E /* RuneCharacterSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */; };
 		817CB2732E8A24EBC3E0F3F5 /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */; };
@@ -117,6 +119,7 @@
 		E75D12CA83AAD2428F022AD1 /* ImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */; };
 		E7F15014B8213E8936B6FC1C /* MessageEnvelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F8D1CCEB6A36CFD48A9808 /* MessageEnvelope.swift */; };
 		E86F474B5165185D3A657E4C /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236AB4A6CB356708A2A004EE /* KeychainService.swift */; };
+		E9F2F0B69E2840171D762FE0 /* LinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98578E247AB4ADA6313E4448 /* LinkRouter.swift */; };
 		EC9E355ADDCB1E429EB55082 /* ImportConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646E63DF1024E9E21119084D /* ImportConfirmView.swift */; };
 		ED9A3B29C5ED7535452420E4 /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A31FF059DEEC7C01229CF75 /* Clipboard.swift */; };
 		EDC58C55E2D5154B15A0A5B6 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */; };
@@ -176,6 +179,7 @@
 		83E215F3EF5FE734CB87EA5C /* CipherLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibraryView.swift; sourceTree = "<group>"; };
 		89650C349BCE670EBDDEF2D2 /* ContactStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactStore.swift; sourceTree = "<group>"; };
 		8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalRenderer.swift; sourceTree = "<group>"; };
+		98578E247AB4ADA6313E4448 /* LinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkRouter.swift; sourceTree = "<group>"; };
 		9C9649F3A635A72F42E0378F /* ContactBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactBook.swift; sourceTree = "<group>"; };
 		9D12001A373854AF1280772E /* CipherSharePayloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherSharePayloadTests.swift; sourceTree = "<group>"; };
 		9FF432A970A6B11D44198C59 /* MessageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageServiceTests.swift; sourceTree = "<group>"; };
@@ -191,6 +195,7 @@
 		B8437A6505FB44F89EEE9D9B /* AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLock.swift; sourceTree = "<group>"; };
 		B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRDisplaySheet.swift; sourceTree = "<group>"; };
 		BA657AA7320B6333C8D191BD /* KeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManager.swift; sourceTree = "<group>"; };
+		BCAC6AA1D8EDD7C7ACF3953A /* LinkRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkRouterTests.swift; sourceTree = "<group>"; };
 		C804E8889A60C1394E8D3841 /* RuneMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneMetalView.swift; sourceTree = "<group>"; };
 		C811485E565AD02AF0B21DD8 /* Cipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cipher.swift; sourceTree = "<group>"; };
 		CF2631879B41FCA864DDE6E7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -224,6 +229,7 @@
 				F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */,
 				236AB4A6CB356708A2A004EE /* KeychainService.swift */,
 				BA657AA7320B6333C8D191BD /* KeyManager.swift */,
+				98578E247AB4ADA6313E4448 /* LinkRouter.swift */,
 				2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */,
 				ED388EE7376C2E10FDCCBAF0 /* MessageCryptor.swift */,
 				EC921700CE142D04727FE6CF /* MessageService.swift */,
@@ -367,6 +373,7 @@
 				010A368AFC48F1D89E72560F /* FontRefTests.swift */,
 				34818326B3EDB2664B91AA90 /* FontStoreTests.swift */,
 				2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */,
+				BCAC6AA1D8EDD7C7ACF3953A /* LinkRouterTests.swift */,
 				FFCEB5C9419CC1BB56239537 /* MessageCoordinatorTests.swift */,
 				FE45258617B63F3648F061B2 /* MessageCryptorTests.swift */,
 				D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */,
@@ -520,6 +527,7 @@
 				61D64E792969FDFF3BE22D51 /* FontRefTests.swift in Sources */,
 				5D39D2881EC32AB8C2E09098 /* FontStoreTests.swift in Sources */,
 				A86A326BDA398A9366838BCB /* KeyManagerLinkTests.swift in Sources */,
+				3D100436F2A2562A94DD7040 /* LinkRouterTests.swift in Sources */,
 				D6FF3E61093B3453CF127E3E /* MessageCoordinatorTests.swift in Sources */,
 				8ADCE74E2F709CC5E0820566 /* MessageCryptorTests.swift in Sources */,
 				F2701FE600A43C4D66968B53 /* MessageEnvelopeTests.swift in Sources */,
@@ -556,6 +564,7 @@
 				87C653A1A5B292FB7831DB22 /* KeyManager.swift in Sources */,
 				05564C21ED178128F862F4F3 /* KeychainService.swift in Sources */,
 				76B55D28EAD870E258B0AF67 /* LicenseView.swift in Sources */,
+				80A1AC959D6C3F0A06ADC959 /* LinkRouter.swift in Sources */,
 				1DF4DEAAB181AD335313F763 /* LockView.swift in Sources */,
 				A6C686B66946360588DED3C0 /* MessageCoordinator.swift in Sources */,
 				509573937921C44707A045BE /* MessageCryptor.swift in Sources */,
@@ -609,6 +618,7 @@
 				90967110D847AD379BCB6EDB /* KeyManager.swift in Sources */,
 				E86F474B5165185D3A657E4C /* KeychainService.swift in Sources */,
 				4582CC9CE71ADB1635028699 /* LicenseView.swift in Sources */,
+				E9F2F0B69E2840171D762FE0 /* LinkRouter.swift in Sources */,
 				D510973FADAD8196543583E7 /* LockView.swift in Sources */,
 				A89334636625EA839DDFC991 /* MessageCoordinator.swift in Sources */,
 				C7C2D5659A4FC1DEE373BCD3 /* MessageCryptor.swift in Sources */,
