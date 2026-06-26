@@ -15,6 +15,9 @@ final class MessageCoordinatorTests: XCTestCase {
         preexistingCipherIDs = Set(KeyManager.shared.ciphers.map(\.id))
     }
 
+    // `autoAssociate` is always exercised through an injected `freshContactManager()`
+    // (never `ContactManager.shared`), so contacts stay isolated per test and tearDown
+    // only needs to restore the shared `KeyManager`, not contact state.
     override func tearDown() async throws {
         for cipher in KeyManager.shared.ciphers where !preexistingCipherIDs.contains(cipher.id) {
             KeyManager.shared.deleteCipher(id: cipher.id)

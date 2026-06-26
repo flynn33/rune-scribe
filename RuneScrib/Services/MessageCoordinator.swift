@@ -47,17 +47,24 @@ final class MessageCoordinator: ObservableObject {
     /// Decodes a message URL and, on success, surfaces the decrypted text for viewing;
     /// on failure, surfaces a readable error and leaves `pending` untouched-to-nil.
     func ingest(url: URL) {
-        // Drop a duplicate delivery of the same link while one is already pending.
+        // Drop a duplicate delivery of the *same* link only while a message is still
+        // pending — e.g. the macOS `AppDelegate.application(_:open:)` and SwiftUI's
+        // `.onOpenURL` both firing for one link. Once that message is dismissed, or a
+        // prior ingest failed (`pending == nil`), re-ingesting the same link is allowed.
         let key = url.absoluteString
         if key == lastHandledURL, pending != nil { return }
         lastHandledURL = key
         do {
             let payload = try MessageSharePayload(url: url)
 
-            // If the sender embedded their key, import it first so it's a decrypt candidate.
-            var candidate: Cipher? = nil
+            // If the sender embedded their key, import (persist) it so it's saved for future
+            // messages. Even if persisting fails (e.g. the Keychain is unavailable), keep an
+            // in-memory copy as a decrypt candidate so THIS message still opens instead of
+            // failing with a misleading "no matching cipher" error.
+            var candidate: Cipher?
             if let embedded = payload.embeddedCipher {
-                candidate = try? keyManager.importCipher(embedded, label: payload.senderName)
+                candidate = (try? keyManager.importCipher(embedded, label: payload.senderName))
+                            ?? embedded.cipher(label: payload.senderName)
             }
 
             // Try the freshly-imported key first, then every cipher already in the library.
