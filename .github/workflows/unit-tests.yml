@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  macos-unit-tests:
+  macos:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
@@ -18,7 +18,6 @@ jobs:
       - name: Select newest available Xcode
         run: |
           latest="$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)"
-          echo "Available Xcodes:"; ls -d /Applications/Xcode_*.app 2>/dev/null || true
           if [ -n "$latest" ]; then sudo xcode-select -s "$latest"; fi
           xcodebuild -version
 
@@ -38,3 +37,10 @@ jobs:
             -destination 'platform=macOS' test \
             CODE_SIGN_IDENTITY="-" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" CODE_SIGN_ENTITLEMENTS="" \
             2>&1 | tail -120
+
+      - name: Build iOS target (simulator, compile-check iOS-only code)
+        run: |
+          set -o pipefail
+          xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-iOS \
+            -destination 'generic/platform=iOS Simulator' build \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tail -80
