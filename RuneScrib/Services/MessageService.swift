@@ -1,6 +1,6 @@
 import Foundation
 
-enum MessageError: Error, LocalizedError {
+enum MessageError: Error, LocalizedError, Equatable {
     case noMatchingCipher
     var errorDescription: String? {
         switch self {
@@ -33,6 +33,20 @@ struct MessageService {
         for cipher in ciphers {
             guard let bytes = try? codec.decode(cleaned, with: cipher),
                   let sealed = try? MessageEnvelope.unwrap(bytes),
+                  let text = try? cryptor.open(sealed, with: cipher)
+            else { continue }
+            return (text, cipher)
+        }
+        throw MessageError.noMatchingCipher
+    }
+
+    /// Raw `MessageEnvelope` bytes → (plaintext, cipher) by trying each candidate.
+    /// Used by message intake, which already holds a decoded envelope (no rune layer).
+    /// Unwraps the framing once per cipher and lets the AEAD tag pick the right key;
+    /// a wrong key or any tampering throws rather than returning bogus plaintext.
+    func read(envelope: Data, tryingCiphers ciphers: [Cipher]) throws -> (plaintext: String, cipher: Cipher) {
+        for cipher in ciphers {
+            guard let sealed = try? MessageEnvelope.unwrap(envelope),
                   let text = try? cryptor.open(sealed, with: cipher)
             else { continue }
             return (text, cipher)

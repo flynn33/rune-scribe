@@ -31,3 +31,40 @@ final class MessageServiceTests: XCTestCase {
         XCTAssertEqual(try svc.read(messy, tryingCiphers: [c]).plaintext, "hi there")
     }
 }
+
+extension MessageServiceTests {
+    /// Builds the on-the-wire envelope (version byte ‖ AES-GCM sealed box) for `cipher`,
+    /// the same bytes a `MessageSharePayload.envelope` carries.
+    private func envelope(_ plaintext: String, with cipher: Cipher) throws -> Data {
+        let sealed = try MessageCryptor().seal(plaintext, with: cipher)
+        return MessageEnvelope.wrap(sealed)
+    }
+
+    func testReadEnvelopeRecoversUnderCorrectCipherAmongCandidates() throws {
+        let a = Cipher.generated(label: "a")
+        let b = Cipher.generated(label: "b")
+        let env = try envelope("rendezvous at dusk", with: a)
+        // Wrong cipher first, correct one second: only A's key authenticates.
+        let result = try svc.read(envelope: env, tryingCiphers: [b, a])
+        XCTAssertEqual(result.plaintext, "rendezvous at dusk")
+        XCTAssertEqual(result.cipher, a)
+    }
+
+    func testReadEnvelopeThrowsWhenNoCipherMatches() throws {
+        let env = try envelope("nope", with: Cipher.generated(label: "a"))
+        XCTAssertThrowsError(try svc.read(envelope: env, tryingCiphers: [Cipher.generated(label: "b")])) { error in
+            XCTAssertEqual(error as? MessageError, .noMatchingCipher)
+        }
+    }
+
+    func testReadEnvelopeRejectsTamperedBytesNoFalsePositive() throws {
+        let a = Cipher.generated(label: "a")
+        var env = try envelope("authentic", with: a)
+        // Flip a byte inside the sealed box (skip the version byte at index 0) so the
+        // GCM tag no longer verifies — the correct cipher must still refuse to open it.
+        env[env.count - 1] ^= 0xFF
+        XCTAssertThrowsError(try svc.read(envelope: env, tryingCiphers: [a])) { error in
+            XCTAssertEqual(error as? MessageError, .noMatchingCipher)
+        }
+    }
+}
