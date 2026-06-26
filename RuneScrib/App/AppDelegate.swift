@@ -18,9 +18,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Handles runescribe:// links on macOS, including cold launch — where SwiftUI's
     /// `.onOpenURL` can miss a URL that arrives before the scene is ready.
-    /// `ImportCoordinator` dedupes if `.onOpenURL` also delivers the same link.
+    /// `LinkRouter` dispatches to the right coordinator, which dedupes if
+    /// `.onOpenURL` also delivers the same link.
     func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls { ImportCoordinator.shared.ingest(url: url) }
+        for url in urls { LinkRouter.route(url) }
     }
 }
 

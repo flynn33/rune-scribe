@@ -86,7 +86,7 @@ struct RootView: View {
         guard count != lastClipboardChangeCount else { return }
         lastClipboardChangeCount = count
         if let urlString = Clipboard.runeScribeURLString() {
-            coordinator.ingest(urlString: urlString)
+            LinkRouter.route(urlString: urlString)
         }
     }
 }

@@ -54,13 +54,15 @@ struct RuneScribApp: App {
                 .environmentObject(KeyManager.shared)
                 .environmentObject(AppLock.shared)
                 .environmentObject(ImportCoordinator.shared)
+                .environmentObject(MessageCoordinator.shared)
                 .environmentObject(ContactManager.shared)
-                // A tapped runescribe://import link (Messages, Mail, Camera-app QR,
-                // etc.) lands here on both platforms, even from a cold launch.
-                .onOpenURL { ImportCoordinator.shared.ingest(url: $0) }
+                // A tapped runescribe:// link (cipher import or message) lands here on
+                // both platforms, even from a cold launch. LinkRouter decides which
+                // coordinator owns it.
+                .onOpenURL { LinkRouter.route($0) }
                 // A tapped https Universal Link arrives as a web-browsing NSUserActivity.
                 .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
-                    if let url = activity.webpageURL { ImportCoordinator.shared.ingest(url: url) }
+                    if let url = activity.webpageURL { LinkRouter.route(url) }
                 }
         }
     }
