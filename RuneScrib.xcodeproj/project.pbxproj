@@ -114,6 +114,7 @@
 		EC9E355ADDCB1E429EB55082 /* ImportConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646E63DF1024E9E21119084D /* ImportConfirmView.swift */; };
 		ED9A3B29C5ED7535452420E4 /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A31FF059DEEC7C01229CF75 /* Clipboard.swift */; };
 		EDC58C55E2D5154B15A0A5B6 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */; };
+		EDD0C98D860D01DC95DEAB01 /* ContactManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 315C7696C8620553F107C26D /* ContactManagerTests.swift */; };
 		EDD9F1C27E7005B8FE8A9949 /* MessageServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF432A970A6B11D44198C59 /* MessageServiceTests.swift */; };
 		F2701FE600A43C4D66968B53 /* MessageEnvelopeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */; };
 		F98B6935CCC807A13270F6EA /* AppLicense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CBE938486EB9A2F975D48A /* AppLicense.swift */; };
@@ -142,6 +143,7 @@
 		29341AC7EDF3058C96DD83C0 /* LicenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseView.swift; sourceTree = "<group>"; };
 		2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManagerLinkTests.swift; sourceTree = "<group>"; };
 		2D37342DC065A1648904DC62 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
+		315C7696C8620553F107C26D /* ContactManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactManagerTests.swift; sourceTree = "<group>"; };
 		33965AD6B626161B2307C925 /* RuneScribTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		34818326B3EDB2664B91AA90 /* FontStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStoreTests.swift; sourceTree = "<group>"; };
 		38CBE938486EB9A2F975D48A /* AppLicense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLicense.swift; sourceTree = "<group>"; };
@@ -347,6 +349,7 @@
 				46F63FD575D0B3CC9087D99F /* CipherTests.swift */,
 				B2E9E5E5423CA74FB4A85DC8 /* ContactBookTests.swift */,
 				6C002B92A1AA0BBB489CC32F /* ContactImporterTests.swift */,
+				315C7696C8620553F107C26D /* ContactManagerTests.swift */,
 				4448FA2A77E4B258694B3CC4 /* ContactStoreTests.swift */,
 				6175FFF53B5C206A832ECEE8 /* ContactTests.swift */,
 				010A368AFC48F1D89E72560F /* FontRefTests.swift */,
@@ -497,6 +500,7 @@
 				3447330F5168705303052836 /* CipherTests.swift in Sources */,
 				325932978CA48BA181A0D39B /* ContactBookTests.swift in Sources */,
 				073B6A7EF02F502983F82D09 /* ContactImporterTests.swift in Sources */,
+				EDD0C98D860D01DC95DEAB01 /* ContactManagerTests.swift in Sources */,
 				047CAFD7FCD06597F042E57E /* ContactStoreTests.swift in Sources */,
 				3B800BA0C9FF8BC9800E7E8E /* ContactTests.swift in Sources */,
 				61D64E792969FDFF3BE22D51 /* FontRefTests.swift in Sources */,
