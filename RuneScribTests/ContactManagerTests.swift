@@ -5,9 +5,23 @@ import CryptoKit
 @MainActor
 final class ContactManagerTests: XCTestCase {
 
+    /// Contacts whose auto-assigned ciphers landed in the shared `KeyManager`; torn down
+    /// after each test so leftover Keychain state cannot make later tests flaky.
+    private var createdContactIDs: [UUID] = []
+
     override func setUp() async throws {
         // Ensure the singleton's async load completes so activeID is set before tests run.
         await KeyManager.shared.load()
+    }
+
+    override func tearDown() async throws {
+        // Remove ciphers this test auto-assigned in the shared singleton. Robust to already-gone.
+        for contactID in createdContactIDs {
+            for cipher in KeyManager.shared.ciphers(forContact: contactID) {
+                KeyManager.shared.deleteCipher(id: cipher.id)
+            }
+        }
+        createdContactIDs.removeAll()
     }
 
     private func makeManager() -> (ContactManager, URL) {
@@ -16,14 +30,15 @@ final class ContactManagerTests: XCTestCase {
         return (ContactManager(store: store, keyManager: .shared), dir)
     }
 
-    func testAddImportedAutoLinksExactlyOneCipher() {
+    func testAddImportedAutoLinksExactlyOneCipher() throws {
         let (manager, dir) = makeManager()
         defer { try? FileManager.default.removeItem(at: dir) }
 
         let snapshot = Contact(displayName: "Sten", appleContactID: "imp-1", source: .imported)
         manager.addImported([snapshot])
 
-        let stored = try! XCTUnwrap(manager.contacts.first { $0.appleContactID == "imp-1" })
+        let stored = try XCTUnwrap(manager.contacts.first { $0.appleContactID == "imp-1" })
+        createdContactIDs.append(stored.id)
         let linked = KeyManager.shared.ciphers(forContact: stored.id)
         XCTAssertEqual(linked.count, 1, "an imported contact gets exactly one auto-assigned cipher")
         XCTAssertEqual(linked.first?.label, "Sten", "the auto-assigned cipher is named for the contact")
@@ -32,13 +47,14 @@ final class ContactManagerTests: XCTestCase {
                           "import must not change the active cipher")
     }
 
-    func testReimportingSameAppleIDDoesNotAddSecondCipher() {
+    func testReimportingSameAppleIDDoesNotAddSecondCipher() throws {
         let (manager, dir) = makeManager()
         defer { try? FileManager.default.removeItem(at: dir) }
 
         let snapshot = Contact(displayName: "Vala", appleContactID: "imp-2", source: .imported)
         manager.addImported([snapshot])
-        let stored = try! XCTUnwrap(manager.contacts.first { $0.appleContactID == "imp-2" })
+        let stored = try XCTUnwrap(manager.contacts.first { $0.appleContactID == "imp-2" })
+        createdContactIDs.append(stored.id)
 
         manager.addImported([snapshot]) // dedup by appleContactID — no new contact, no new cipher
 
@@ -48,14 +64,14 @@ final class ContactManagerTests: XCTestCase {
                        "and no second cipher is auto-assigned")
     }
 
-    func testManualAddDoesNotAutoGenerateCipher() {
+    func testManualAddDoesNotAutoGenerateCipher() throws {
         let (manager, dir) = makeManager()
         defer { try? FileManager.default.removeItem(at: dir) }
 
         let manual = Contact(displayName: "Orm", source: .manual)
         manager.add(manual)
 
-        let stored = try! XCTUnwrap(manager.contacts.first { $0.id == manual.id })
+        let stored = try XCTUnwrap(manager.contacts.first { $0.id == manual.id })
         XCTAssertTrue(KeyManager.shared.ciphers(forContact: stored.id).isEmpty,
                       "manual add is import-only-exempt: no cipher is auto-generated")
     }
