@@ -120,7 +120,10 @@ struct ContentView: View {
             showSettings = true
         }
         .onReceive(NotificationCenter.default.publisher(for: .replyToMessageRequested)) { note in
-            guard let cipherID = note.object as? UUID else { return }
+            // Only switch if the message's cipher is actually in the library; otherwise
+            // setActive would be a silent no-op and the reply would use the wrong key.
+            guard let cipherID = note.object as? UUID,
+                  keyManager.ciphers.contains(where: { $0.id == cipherID }) else { return }
             keyManager.setActive(id: cipherID)
             mode = .encode
             if !isEditing { returnToEditing() }
