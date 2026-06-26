@@ -73,4 +73,5 @@ struct RuneScribApp: App {
 extension Notification.Name {
     static let openLibraryRequested  = Notification.Name("com.runescribe.openLibraryRequested")
     static let openSettingsRequested = Notification.Name("com.runescribe.openSettingsRequested")
+    static let replyToMessageRequested = Notification.Name("com.runescribe.replyToMessageRequested")
 }

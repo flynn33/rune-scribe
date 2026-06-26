@@ -119,6 +119,12 @@ struct ContentView: View {
         .onReceive(NotificationCenter.default.publisher(for: .openSettingsRequested)) { _ in
             showSettings = true
         }
+        .onReceive(NotificationCenter.default.publisher(for: .replyToMessageRequested)) { note in
+            guard let cipherID = note.object as? UUID else { return }
+            keyManager.setActive(id: cipherID)
+            mode = .encode
+            if !isEditing { returnToEditing() }
+        }
         // Changing the mode or the active cipher invalidates a shown result, so
         // drop back to editing rather than leaving stale output on screen.
         .onChange(of: mode) { _, _ in if !isEditing { returnToEditing() } }

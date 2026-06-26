@@ -48,6 +48,7 @@
 		46E7C851C6AF62FB5647521F /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B05B133702211E19EC95A5A /* Contact.swift */; };
 		49352218624B7663754F6B52 /* QRDisplaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */; };
 		4AA210342C0819378107412D /* ContactManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50CBAAF3486CBF7224F4CDD /* ContactManager.swift */; };
+		4CEC9F890801975A75463D58 /* ReceivedMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B046BB4EA0B953E787BC40CD /* ReceivedMessageView.swift */; };
 		4D4586FA9B5495EE9D02CDA8 /* Cipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C811485E565AD02AF0B21DD8 /* Cipher.swift */; };
 		4F4668CE7576A83D775D37BE /* QRDisplaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */; };
 		50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
@@ -94,6 +95,7 @@
 		A89334636625EA839DDFC991 /* MessageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */; };
 		AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
 		B0614EBD257EEA0A80FA1862 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */; };
+		B111BA7E2C381C641BA4989F /* ReceivedMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B046BB4EA0B953E787BC40CD /* ReceivedMessageView.swift */; };
 		B1A33C13DEDE49385C78E523 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D37342DC065A1648904DC62 /* QRScannerView.swift */; };
 		B1BD766416360737E09888AC /* CipherLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */; };
 		B2A85D13B6EC9173917D5A44 /* MessageEnvelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F8D1CCEB6A36CFD48A9808 /* MessageEnvelope.swift */; };
@@ -187,6 +189,7 @@
 		A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneInscriptionText.swift; sourceTree = "<group>"; };
 		A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCodec.swift; sourceTree = "<group>"; };
 		AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCharacterSet.swift; sourceTree = "<group>"; };
+		B046BB4EA0B953E787BC40CD /* ReceivedMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedMessageView.swift; sourceTree = "<group>"; };
 		B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribApp.swift; sourceTree = "<group>"; };
 		B2E9E5E5423CA74FB4A85DC8 /* ContactBookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactBookTests.swift; sourceTree = "<group>"; };
 		B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibrary.swift; sourceTree = "<group>"; };
@@ -341,6 +344,7 @@
 				FD00524F7CD74AD5EE0D8121 /* LockView.swift */,
 				289AA0236910C21C79D71A7E /* PINFlowView.swift */,
 				B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */,
+				B046BB4EA0B953E787BC40CD /* ReceivedMessageView.swift */,
 				EC8D5A799A33DED366C377F6 /* RootView.swift */,
 				098511B1E52AF229830C74E4 /* SettingsView.swift */,
 				587741695BBC8E01B5722A5E /* Components */,
@@ -577,6 +581,7 @@
 				B7DB4883F7A2A96A58E543EA /* QRCodeGenerator.swift in Sources */,
 				49352218624B7663754F6B52 /* QRDisplaySheet.swift in Sources */,
 				B1A33C13DEDE49385C78E523 /* QRScannerView.swift in Sources */,
+				B111BA7E2C381C641BA4989F /* ReceivedMessageView.swift in Sources */,
 				D719FF1B2410C74EE3A7B1C5 /* RootView.swift in Sources */,
 				2C63520D30D4605995F598DB /* RuneCharacterSet.swift in Sources */,
 				2B3A29FAFF2CF3E931C055DF /* RuneCodec.swift in Sources */,
@@ -631,6 +636,7 @@
 				036F7BB7BA50F4AAE1F1DE48 /* QRCodeGenerator.swift in Sources */,
 				4F4668CE7576A83D775D37BE /* QRDisplaySheet.swift in Sources */,
 				0E7EE57FCC7EF36C764D4C9C /* QRScannerView.swift in Sources */,
+				4CEC9F890801975A75463D58 /* ReceivedMessageView.swift in Sources */,
 				3734D1550897FAC020B54AE2 /* RootView.swift in Sources */,
 				80E4EDFC691AB83CE9B78E5E /* RuneCharacterSet.swift in Sources */,
 				9D7FEA16DD78184E7FE55034 /* RuneCodec.swift in Sources */,
