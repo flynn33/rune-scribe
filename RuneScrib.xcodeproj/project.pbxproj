@@ -63,6 +63,7 @@
 		6AC3F38E914DAC3AFD88C7A2 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 095E5000C8D5BD26F0C60F3B /* ContactsView.swift */; };
 		6B22D46F33484FFF56504076 /* PINPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CE669299B8B857610BAA76 /* PINPadView.swift */; };
 		6C90DCFCA2ACF228146666A5 /* ContactStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89650C349BCE670EBDDEF2D2 /* ContactStore.swift */; };
+		6F5A8557401233BC22918304 /* MessageSharePayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12A33AC824869AC62776BF8 /* MessageSharePayloadTests.swift */; };
 		701C3AD554E79E1CDED99C6C /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */; };
 		73F9B7D0C0E9652541C30B76 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 095E5000C8D5BD26F0C60F3B /* ContactsView.swift */; };
 		7506B7BCCE0B9D508FC13B2D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23D157957EEFB14E8CB7147 /* AppDelegate.swift */; };
@@ -84,6 +85,7 @@
 		9CB1A311A27D330B1AE3726D /* ContactStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89650C349BCE670EBDDEF2D2 /* ContactStore.swift */; };
 		9D7FEA16DD78184E7FE55034 /* RuneCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */; };
 		9F95A099D27690B6214A6DE9 /* PINFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289AA0236910C21C79D71A7E /* PINFlowView.swift */; };
+		A472D43E5F8F1163E7746623 /* MessageSharePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588F8820EBD1E78EAAD0F980 /* MessageSharePayload.swift */; };
 		A86A326BDA398A9366838BCB /* KeyManagerLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */; };
 		A8860E28862BB912A033B9A9 /* VideoSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203BB2198F06103565DD4D26 /* VideoSplashView.swift */; };
 		AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
@@ -100,6 +102,7 @@
 		C7A7CBB0509B37B3561EE324 /* CipherSharePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7009AA365459E8B4CE80758 /* CipherSharePayload.swift */; };
 		C7C2D5659A4FC1DEE373BCD3 /* MessageCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED388EE7376C2E10FDCCBAF0 /* MessageCryptor.swift */; };
 		CEC9C8FD3A0AE90684413AF5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2631879B41FCA864DDE6E7 /* ContentView.swift */; };
+		D0BFADBB943FAA7F8810D803 /* MessageSharePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588F8820EBD1E78EAAD0F980 /* MessageSharePayload.swift */; };
 		D510973FADAD8196543583E7 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD00524F7CD74AD5EE0D8121 /* LockView.swift */; };
 		D719FF1B2410C74EE3A7B1C5 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8D5A799A33DED366C377F6 /* RootView.swift */; };
 		D78630CCAAB450865DA20EA1 /* ImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */; };
@@ -154,6 +157,7 @@
 		46F63FD575D0B3CC9087D99F /* CipherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherTests.swift; sourceTree = "<group>"; };
 		4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibraryTests.swift; sourceTree = "<group>"; };
 		4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
+		588F8820EBD1E78EAAD0F980 /* MessageSharePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSharePayload.swift; sourceTree = "<group>"; };
 		6175FFF53B5C206A832ECEE8 /* ContactTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactTests.swift; sourceTree = "<group>"; };
 		646E63DF1024E9E21119084D /* ImportConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportConfirmView.swift; sourceTree = "<group>"; };
 		6C002B92A1AA0BBB489CC32F /* ContactImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImporterTests.swift; sourceTree = "<group>"; };
@@ -189,6 +193,7 @@
 		D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageEnvelopeTests.swift; sourceTree = "<group>"; };
 		DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
+		E12A33AC824869AC62776BF8 /* MessageSharePayloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSharePayloadTests.swift; sourceTree = "<group>"; };
 		E91D52C55B3AEDED27523270 /* RuneScrib-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "RuneScrib-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneTheme.swift; sourceTree = "<group>"; };
 		EC8D5A799A33DED366C377F6 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -233,6 +238,7 @@
 				9C9649F3A635A72F42E0378F /* ContactBook.swift */,
 				F0EBAF25DA0BBDE5890321BB /* FontRef.swift */,
 				74F8D1CCEB6A36CFD48A9808 /* MessageEnvelope.swift */,
+				588F8820EBD1E78EAAD0F980 /* MessageSharePayload.swift */,
 				AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */,
 			);
 			path = Models;
@@ -358,6 +364,7 @@
 				FE45258617B63F3648F061B2 /* MessageCryptorTests.swift */,
 				D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */,
 				9FF432A970A6B11D44198C59 /* MessageServiceTests.swift */,
+				E12A33AC824869AC62776BF8 /* MessageSharePayloadTests.swift */,
 				6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */,
 			);
 			path = RuneScribTests;
@@ -509,6 +516,7 @@
 				8ADCE74E2F709CC5E0820566 /* MessageCryptorTests.swift in Sources */,
 				F2701FE600A43C4D66968B53 /* MessageEnvelopeTests.swift in Sources */,
 				EDD9F1C27E7005B8FE8A9949 /* MessageServiceTests.swift in Sources */,
+				6F5A8557401233BC22918304 /* MessageSharePayloadTests.swift in Sources */,
 				DA56A46F02A37D239461F8C8 /* RuneCodecTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -544,6 +552,7 @@
 				509573937921C44707A045BE /* MessageCryptor.swift in Sources */,
 				E7F15014B8213E8936B6FC1C /* MessageEnvelope.swift in Sources */,
 				60C298F14A6E6FC30EFE21DE /* MessageService.swift in Sources */,
+				A472D43E5F8F1163E7746623 /* MessageSharePayload.swift in Sources */,
 				817CB2732E8A24EBC3E0F3F5 /* MetalRenderer.swift in Sources */,
 				9F95A099D27690B6214A6DE9 /* PINFlowView.swift in Sources */,
 				6B22D46F33484FFF56504076 /* PINPadView.swift in Sources */,
@@ -595,6 +604,7 @@
 				C7C2D5659A4FC1DEE373BCD3 /* MessageCryptor.swift in Sources */,
 				B2A85D13B6EC9173917D5A44 /* MessageEnvelope.swift in Sources */,
 				40E94BF207A2E3593747F2D3 /* MessageService.swift in Sources */,
+				D0BFADBB943FAA7F8810D803 /* MessageSharePayload.swift in Sources */,
 				35C98AE00276C7655C193856 /* MetalRenderer.swift in Sources */,
 				7BF138CAE8F17D14882A4596 /* PINFlowView.swift in Sources */,
 				15777090BCB442077B87397A /* PINPadView.swift in Sources */,
