@@ -36,6 +36,7 @@ struct ContentView: View {
     @State private var showLibrary: Bool = false
     @State private var showSettings: Bool = false
     @State private var decodeError: String?
+    @State private var showMessageCompose = false
 
     /// One glyph size shared by the editor and the inscription so the text never
     /// changes size when it transforms — only the glyphs change.
@@ -46,6 +47,23 @@ struct ContentView: View {
     private var actionDisabled: Bool {
         if inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
         return keyManager.activeCipher == nil
+    }
+
+    /// The cipher used to produce the current result snapshot (encode only).
+    private var resultCipher: Cipher? {
+        transformDirection == .encode ? keyManager.activeCipher : nil
+    }
+
+    /// Builds the share payload URL for the current runes; nil when not on an encode result.
+    private func messageShareURL() -> URL? {
+        guard transformDirection == .encode, let cipher = resultCipher else { return nil }
+        let include = MessageSend.shouldIncludeKey(cipher)
+        guard let payload = try? MessageSend.payload(runes: targetSnapshot,
+                                                     senderName: cipher.label,
+                                                     cipher: cipher,
+                                                     includeKey: include),
+              let url = try? payload.url() else { return nil }
+        return url
     }
 
     // MARK: - Body
@@ -91,7 +109,7 @@ struct ContentView: View {
                     // transforming phase's empty placeholder must match exactly,
                     // otherwise it would grab space and shrink the frame mid-animation.
                     actionArea
-                        .frame(height: 46)
+                        .frame(minHeight: 46)
                 }
                 .padding(RuneMetrics.pad)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -105,6 +123,13 @@ struct ContentView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
+        #if os(iOS)
+        .sheet(isPresented: $showMessageCompose) {
+            MessageComposeView(messageText: messageBody(),
+                               recipients: messageRecipients(),
+                               onFinish: handleMessageSent)
+        }
+        #endif
         .alert("Couldn't Complete", isPresented: Binding(
             get: { decodeError != nil },
             set: { if !$0 { decodeError = nil } }
@@ -217,23 +242,51 @@ struct ContentView: View {
             Color.clear
 
         case .result:
-            HStack(spacing: 14) {
-                Button {
-                    returnToEditing()
-                } label: {
-                    Label("Edit", systemImage: "pencil")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(RuneSecondaryButtonStyle())
+            VStack(spacing: 8) {
+                HStack(spacing: 14) {
+                    Button {
+                        returnToEditing()
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(RuneSecondaryButtonStyle())
 
-                Button {
-                    confirmCopy()
-                } label: {
-                    Label(copyConfirmed ? "Copied!" : (transformDirection == .encode ? "Copy Runes" : "Copy Text"),
-                          systemImage: copyConfirmed ? "checkmark.circle.fill" : "doc.on.clipboard")
-                        .frame(maxWidth: .infinity)
+                    Button {
+                        confirmCopy()
+                    } label: {
+                        Label(copyConfirmed ? "Copied!" : (transformDirection == .encode ? "Copy Runes" : "Copy Text"),
+                              systemImage: copyConfirmed ? "checkmark.circle.fill" : "doc.on.clipboard")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(RuneScribButtonStyle())
                 }
-                .buttonStyle(RuneScribButtonStyle())
+
+                if transformDirection == .encode, let url = messageShareURL() {
+                    HStack(spacing: 14) {
+                        ShareLink(item: url,
+                                  subject: Text("Rune Scribe message"),
+                                  message: Text("A message in runes — open in Rune Scribe to read.")) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(RuneSecondaryButtonStyle())
+
+                        #if os(iOS)
+                        if MessageComposeView.canSend {
+                            Button {
+                                showMessageCompose = true
+                            } label: {
+                                Label("Send via iMessage", systemImage: "message.fill")
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(RuneScribButtonStyle())
+                        }
+                        #endif
+                    }
+
+                    keyIndicator(for: resultCipher)
+                }
             }
         }
     }
@@ -352,4 +405,42 @@ struct ContentView: View {
             withAnimation { copyConfirmed = false }
         }
     }
+
+    /// A light line telling the sender whether this message carries the cipher key.
+    @ViewBuilder
+    private func keyIndicator(for cipher: Cipher?) -> some View {
+        if let cipher {
+            let included = MessageSend.shouldIncludeKey(cipher)
+            HStack(spacing: 6) {
+                Image(systemName: included ? "key.fill" : "lock.fill")
+                    .font(.system(size: 10))
+                    .foregroundColor(included ? .runeGold : .runeBlue)
+                Text(included ? "Key included" : "Uses your shared key")
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundColor(.runeSilver)
+                Spacer()
+            }
+            .padding(.horizontal, 4)
+        }
+    }
+
+    #if os(iOS)
+    /// Body for the system Messages sheet: the runes, a blank line, then the link.
+    private func messageBody() -> String {
+        guard let url = messageShareURL() else { return targetSnapshot }
+        return "\(targetSnapshot)\n\n\(url.absoluteString)"
+    }
+
+    /// Phone numbers + emails of the active cipher's linked contact, if any.
+    private func messageRecipients() -> [String]? {
+        guard let contact = contactManager.contact(id: resultCipher?.contactID) else { return nil }
+        let all = contact.phones + contact.emails
+        return all.isEmpty ? nil : all
+    }
+
+    /// Called when Apple's compose sheet reports an actual send: mark the key delivered.
+    private func handleMessageSent() {
+        if let cipher = resultCipher { keyManager.markDelivered(cipherID: cipher.id) }
+    }
+    #endif
 }

@@ -20,6 +20,7 @@
 		0F375290B9932F3D5C1F8956 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098511B1E52AF229830C74E4 /* SettingsView.swift */; };
 		0FE15DBC0B9074385443CEE2 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8437A6505FB44F89EEE9D9B /* AppLock.swift */; };
 		12027B50430F47B08FC91BEC /* FontStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B77A2EAB94A310BB3110C79 /* FontStore.swift */; };
+		12B61513617B7DB4D76580E1 /* MessageComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 695DD706F34F8FB5F20C1080 /* MessageComposeView.swift */; };
 		14C70DB6B47EB309C69D2024 /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B05B133702211E19EC95A5A /* Contact.swift */; };
 		15777090BCB442077B87397A /* PINPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CE669299B8B857610BAA76 /* PINPadView.swift */; };
 		176EFC88D4B1F5D8D2B296DA /* MessageSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86342C6D604E4F987CEEE2A /* MessageSend.swift */; };
@@ -106,6 +107,7 @@
 		B82752C4229DA7F2A18BF1D9 /* ContactManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50CBAAF3486CBF7224F4CDD /* ContactManager.swift */; };
 		BA66D328CF6D3F70A3E7281B /* MessageSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86342C6D604E4F987CEEE2A /* MessageSend.swift */; };
 		BD5917F1551D8490BBABE0D0 /* FontRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0EBAF25DA0BBDE5890321BB /* FontRef.swift */; };
+		BDEE0FF98DA731D5504F9135 /* MessageComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 695DD706F34F8FB5F20C1080 /* MessageComposeView.swift */; };
 		C1A6CF8336377BFF19B73290 /* RuneMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C804E8889A60C1394E8D3841 /* RuneMetalView.swift */; };
 		C1C0B6E37E3C2EA178DB28FF /* ContactBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C9649F3A635A72F42E0378F /* ContactBook.swift */; };
 		C7A7CBB0509B37B3561EE324 /* CipherSharePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7009AA365459E8B4CE80758 /* CipherSharePayload.swift */; };
@@ -172,6 +174,7 @@
 		588F8820EBD1E78EAAD0F980 /* MessageSharePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSharePayload.swift; sourceTree = "<group>"; };
 		6175FFF53B5C206A832ECEE8 /* ContactTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactTests.swift; sourceTree = "<group>"; };
 		646E63DF1024E9E21119084D /* ImportConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportConfirmView.swift; sourceTree = "<group>"; };
+		695DD706F34F8FB5F20C1080 /* MessageComposeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageComposeView.swift; sourceTree = "<group>"; };
 		6C002B92A1AA0BBB489CC32F /* ContactImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImporterTests.swift; sourceTree = "<group>"; };
 		6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCodecTests.swift; sourceTree = "<group>"; };
 		70806C8FC5D83F211738FAAD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
@@ -298,6 +301,7 @@
 			isa = PBXGroup;
 			children = (
 				7D15D6F87C83071DA639125F /* DecoderDocument.swift */,
+				695DD706F34F8FB5F20C1080 /* MessageComposeView.swift */,
 				39CE669299B8B857610BAA76 /* PINPadView.swift */,
 				2D37342DC065A1648904DC62 /* QRScannerView.swift */,
 				A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */,
@@ -578,6 +582,7 @@
 				76B55D28EAD870E258B0AF67 /* LicenseView.swift in Sources */,
 				80A1AC959D6C3F0A06ADC959 /* LinkRouter.swift in Sources */,
 				1DF4DEAAB181AD335313F763 /* LockView.swift in Sources */,
+				BDEE0FF98DA731D5504F9135 /* MessageComposeView.swift in Sources */,
 				A6C686B66946360588DED3C0 /* MessageCoordinator.swift in Sources */,
 				509573937921C44707A045BE /* MessageCryptor.swift in Sources */,
 				E7F15014B8213E8936B6FC1C /* MessageEnvelope.swift in Sources */,
@@ -634,6 +639,7 @@
 				4582CC9CE71ADB1635028699 /* LicenseView.swift in Sources */,
 				E9F2F0B69E2840171D762FE0 /* LinkRouter.swift in Sources */,
 				D510973FADAD8196543583E7 /* LockView.swift in Sources */,
+				12B61513617B7DB4D76580E1 /* MessageComposeView.swift in Sources */,
 				A89334636625EA839DDFC991 /* MessageCoordinator.swift in Sources */,
 				C7C2D5659A4FC1DEE373BCD3 /* MessageCryptor.swift in Sources */,
 				B2A85D13B6EC9173917D5A44 /* MessageEnvelope.swift in Sources */,
