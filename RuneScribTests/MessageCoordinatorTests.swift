@@ -51,9 +51,8 @@ final class MessageCoordinatorTests: XCTestCase {
             senderName: "Astrid",
             envelope: env,
             embeddedCipher: CipherSharePayload(cipher: senderCipher))
-        let url = try payload.url()
 
-        coordinator.ingest(url: url)
+        coordinator.ingest(fileData: payload.encoded())
 
         XCTAssertNil(coordinator.errorMessage)
         let pending = try XCTUnwrap(coordinator.pending)
@@ -79,7 +78,7 @@ final class MessageCoordinatorTests: XCTestCase {
         let env = try envelope("the eagle has landed", with: shared)
         let payload = MessageSharePayload(senderName: "Bjorn", envelope: env, embeddedCipher: nil)
 
-        coordinator.ingest(url: try payload.url())
+        coordinator.ingest(fileData: payload.encoded())
 
         XCTAssertNil(coordinator.errorMessage)
         let pending = try XCTUnwrap(coordinator.pending)
@@ -90,7 +89,8 @@ final class MessageCoordinatorTests: XCTestCase {
 
     func testIngestJunkSetsErrorAndLeavesPendingNil() {
         let coordinator = MessageCoordinator(keyManager: .shared, contactManager: freshContactManager())
-        coordinator.ingest(url: URL(string: "https://ravenforgesoftware.com/rune-scribe/m?v=1&p=not-base64!!")!)
+        // Leading message-version byte but otherwise garbage -> decode fails.
+        coordinator.ingest(fileData: Data([MessageSharePayload.version, 0x00, 0xFF, 0xFF, 0xFF]))
         XCTAssertNil(coordinator.pending)
         XCTAssertNotNil(coordinator.errorMessage)
     }
@@ -100,25 +100,25 @@ final class MessageCoordinatorTests: XCTestCase {
         let stranger = Cipher.generated(label: "Stranger")
         let env = try envelope("you cannot read this", with: stranger)
         let payload = MessageSharePayload(senderName: "Ghost", envelope: env, embeddedCipher: nil)
-        coordinator.ingest(url: try payload.url())
+        coordinator.ingest(fileData: payload.encoded())
         XCTAssertNil(coordinator.pending)
         XCTAssertNotNil(coordinator.errorMessage)
     }
 
-    func testSameURLIngestedTwiceIsDeduped() throws {
+    func testSameFileIngestedTwiceIsDeduped() throws {
         let cm = freshContactManager()
         let coordinator = MessageCoordinator(keyManager: .shared, contactManager: cm)
         let cipher = Cipher.generated(label: "Dup")
         let env = try envelope("once only", with: cipher)
-        let url = try MessageSharePayload(
+        let file = MessageSharePayload(
             senderName: "Eira", envelope: env,
-            embeddedCipher: CipherSharePayload(cipher: cipher)).url()
+            embeddedCipher: CipherSharePayload(cipher: cipher)).encoded()
 
-        coordinator.ingest(url: url)
+        coordinator.ingest(fileData: file)
         let firstPendingID = try XCTUnwrap(coordinator.pending).id
         let contactsAfterFirst = cm.contacts.count
 
-        coordinator.ingest(url: url)   // duplicate delivery
+        coordinator.ingest(fileData: file)   // duplicate delivery
 
         XCTAssertEqual(coordinator.pending?.id, firstPendingID)
         XCTAssertEqual(cm.contacts.count, contactsAfterFirst)
@@ -135,18 +135,19 @@ final class MessageCoordinatorTests: XCTestCase {
         XCTAssertEqual(km.activeCipher?.id, mine.id)
 
         // The same sender cipher embedded in two DISTINCT messages (different plaintext →
-        // different URLs, so URL-level dedup doesn't apply; the publicID dedup is what's tested).
+        // different file bytes, so content-hash dedup doesn't apply; the publicID dedup is
+        // what's tested).
         let senderCipher = Cipher.generated(label: "Sender")
         let embed = CipherSharePayload(cipher: senderCipher)
-        let url1 = try MessageSharePayload(senderName: "Astrid",
-                                           envelope: try envelope("first", with: senderCipher),
-                                           embeddedCipher: embed).url()
-        let url2 = try MessageSharePayload(senderName: "Astrid",
-                                           envelope: try envelope("second", with: senderCipher),
-                                           embeddedCipher: embed).url()
+        let file1 = MessageSharePayload(senderName: "Astrid",
+                                        envelope: try envelope("first", with: senderCipher),
+                                        embeddedCipher: embed).encoded()
+        let file2 = MessageSharePayload(senderName: "Astrid",
+                                        envelope: try envelope("second", with: senderCipher),
+                                        embeddedCipher: embed).encoded()
 
-        coordinator.ingest(url: url1)
-        coordinator.ingest(url: url2)
+        coordinator.ingest(fileData: file1)
+        coordinator.ingest(fileData: file2)
 
         // Imported exactly once — a re-sent key must not pile up duplicates.
         XCTAssertEqual(km.ciphers.filter { $0.publicID == senderCipher.publicID }.count, 1)

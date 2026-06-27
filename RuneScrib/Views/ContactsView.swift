@@ -20,6 +20,11 @@ struct ContactsView: View {
     @State private var deleteTarget: Contact?
     @State private var showDelete = false
 
+    @State private var selecting = false
+    @State private var selection: Set<UUID> = []
+    @State private var showBulkDelete = false
+    @State private var showRemoveAllImported = false
+
     #if os(iOS)
     @State private var showPicker = false
     #endif
@@ -49,6 +54,18 @@ struct ContactsView: View {
                 Button("Cancel", role: .cancel) { deleteTarget = nil }
             } message: {
                 if let target = deleteTarget { deleteMessageText(for: target) }
+            }
+            .alert("Remove \(selection.count) Contact\(selection.count == 1 ? "" : "s")?", isPresented: $showBulkDelete) {
+                Button("Remove", role: .destructive) { commitBulkDelete() }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("\(selection.count) contact\(selection.count == 1 ? "" : "s") will be removed. Any linked ciphers are unlinked but kept — ciphers are never deleted.")
+            }
+            .alert("Remove All Imported Contacts?", isPresented: $showRemoveAllImported) {
+                Button("Remove", role: .destructive) { commitRemoveAllImported() }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("\(contactManager.importedCount) imported contact\(contactManager.importedCount == 1 ? "" : "s") will be removed; manual contacts are kept. Any linked ciphers are unlinked but kept — ciphers are never deleted.")
             }
             .alert("Import Failed", isPresented: $showImportError) {
                 Button("OK") { importError = nil }
@@ -116,6 +133,33 @@ struct ContactsView: View {
             }
             .buttonStyle(RuneSecondaryButtonStyle())
             .disabled(importing)
+            if !contactManager.contacts.isEmpty {
+                HStack(spacing: 12) {
+                    Button { toggleSelecting() } label: {
+                        Label(selecting ? "Done" : "Select", systemImage: selecting ? "checkmark.circle" : "checkmark.circle.badge.questionmark")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(RuneSecondaryButtonStyle())
+                    Button(role: .destructive) { showRemoveAllImported = true } label: {
+                        Label("Remove All Imported", systemImage: "person.crop.circle.badge.xmark").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(RuneSecondaryButtonStyle())
+                    .disabled(contactManager.importedCount == 0)
+                }
+                if selecting {
+                    HStack(spacing: 12) {
+                        Button("Select All") { selection = Set(contactManager.contacts.map(\.id)) }
+                            .buttonStyle(RuneSecondaryButtonStyle())
+                        Button("Clear") { selection.removeAll() }
+                            .buttonStyle(RuneSecondaryButtonStyle())
+                        Button(role: .destructive) { showBulkDelete = true } label: {
+                            Text("Remove Selected (\(selection.count))").frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(RuneScribButtonStyle())
+                        .disabled(selection.isEmpty)
+                    }
+                }
+            }
         }
         .padding(.horizontal, RuneMetrics.pad)
         .padding(.top, RuneMetrics.pad)
@@ -135,6 +179,10 @@ struct ContactsView: View {
         let linked = keyManager.ciphers(forContact: contact.id).count
         return VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
+                if selecting {
+                    Image(systemName: selection.contains(contact.id) ? "checkmark.circle.fill" : "circle")
+                        .foregroundColor(selection.contains(contact.id) ? .runeBlue : .runeSilver)
+                }
                 Text(contact.displayName).font(.system(size: 15, weight: .bold)).foregroundColor(.white).lineLimit(1)
                 Spacer()
                 badge(contact.source == .imported ? "IMPORTED" : "MANUAL",
@@ -151,18 +199,22 @@ struct ContactsView: View {
                 Text("\(linked) cipher\(linked == 1 ? "" : "s")")
                     .font(.system(size: 11, design: .monospaced)).foregroundColor(.runeSilver)
                 Spacer()
-                Button { editTarget = contact; editName = contact.displayName; showEdit = true } label: {
-                    Image(systemName: "pencil").foregroundColor(.runeSilver)
-                }.buttonStyle(.plain).help("Rename")
-                Button { deleteTarget = contact; showDelete = true } label: {
-                    Image(systemName: "trash").foregroundColor(.red.opacity(0.85))
-                }.buttonStyle(.plain).help("Delete")
+                if !selecting {
+                    Button { editTarget = contact; editName = contact.displayName; showEdit = true } label: {
+                        Image(systemName: "pencil").foregroundColor(.runeSilver)
+                    }.buttonStyle(.plain).help("Rename")
+                    Button { deleteTarget = contact; showDelete = true } label: {
+                        Image(systemName: "trash").foregroundColor(.red.opacity(0.85))
+                    }.buttonStyle(.plain).help("Delete")
+                }
             }
         }
         .padding(16)
         .background(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous).fill(Color.runeParchment))
         .overlay(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
             .strokeBorder(Color.runeSilver.opacity(0.15), lineWidth: 1))
+        .contentShape(Rectangle())
+        .onTapGesture { if selecting { toggleSelection(contact.id) } }
     }
 
     private func metaLine(_ icon: String, _ value: String) -> some View {
@@ -205,6 +257,23 @@ struct ContactsView: View {
     private func commitDelete() {
         if let target = deleteTarget { contactManager.delete(id: target.id) }
         deleteTarget = nil
+    }
+    private func toggleSelecting() {
+        selecting.toggle()
+        if !selecting { selection.removeAll() }
+    }
+    private func toggleSelection(_ id: UUID) {
+        if selection.contains(id) { selection.remove(id) } else { selection.insert(id) }
+    }
+    private func commitBulkDelete() {
+        contactManager.delete(ids: selection)
+        selection.removeAll()
+        selecting = false
+    }
+    private func commitRemoveAllImported() {
+        contactManager.deleteAllImported()
+        selection.removeAll()
+        selecting = false
     }
     private func importAll() {
         importing = true

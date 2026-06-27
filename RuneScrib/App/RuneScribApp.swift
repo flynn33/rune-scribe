@@ -56,13 +56,16 @@ struct RuneScribApp: App {
                 .environmentObject(ImportCoordinator.shared)
                 .environmentObject(MessageCoordinator.shared)
                 .environmentObject(ContactManager.shared)
-                // A tapped runescribe:// link (cipher import or message) lands here on
-                // both platforms, even from a cold launch. LinkRouter decides which
-                // coordinator owns it.
-                .onOpenURL { LinkRouter.route($0) }
-                // A tapped https Universal Link arrives as a web-browsing NSUserActivity.
-                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
-                    if let url = activity.webpageURL { LinkRouter.route(url) }
+                // An inbound URL lands here on both platforms, even from a cold launch.
+                // A `.runescribe` *file* (opened attachment / AirDrop / Open in…) goes to
+                // FileRouter (message vs. cipher by version byte); a runescribe:// *link*
+                // (cipher QR/import) goes to LinkRouter.
+                .onOpenURL { url in
+                    if url.isFileURL {
+                        FileRouter.route(fileURL: url)
+                    } else {
+                        LinkRouter.route(url)
+                    }
                 }
         }
     }

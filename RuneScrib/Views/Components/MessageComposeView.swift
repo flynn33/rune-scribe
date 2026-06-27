@@ -7,6 +7,7 @@ import MessageUI
 struct MessageComposeView: UIViewControllerRepresentable {
     var messageText: String
     var recipients: [String]?
+    var attachmentData: Data?
     var onFinish: (() -> Void)?
 
     /// Whether this device can send texts at all (no SIM / Simulator → false).
@@ -21,6 +22,11 @@ struct MessageComposeView: UIViewControllerRepresentable {
         vc.messageComposeDelegate = context.coordinator
         vc.body = messageText
         if let recipients { vc.recipients = recipients }
+        if let attachmentData {
+            _ = vc.addAttachmentData(attachmentData,
+                                     typeIdentifier: RuneScribeShare.uti,
+                                     filename: "message.\(RuneScribeShare.fileExtension)")
+        }
         return vc
     }
 

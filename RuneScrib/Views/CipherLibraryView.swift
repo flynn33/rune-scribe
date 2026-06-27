@@ -87,7 +87,7 @@ struct CipherLibraryView: View {
         .preferredColorScheme(.dark)
         .fileExporter(isPresented: $showExporter,
                       document: exportDocument,
-                      contentType: .data,
+                      contentType: .runeScribe,
                       defaultFilename: exportFilename) { result in
             switch result {
             case .success(let url): status = .success("Saved \(url.lastPathComponent)")
@@ -95,7 +95,7 @@ struct CipherLibraryView: View {
             }
         }
         .fileImporter(isPresented: $showImporter,
-                      allowedContentTypes: [.data],
+                      allowedContentTypes: [.runeScribe],
                       allowsMultipleSelection: false) { result in
             handleImportSelection(result)
         }
@@ -258,10 +258,14 @@ struct CipherLibraryView: View {
 
                 Spacer()
 
-                if let shareURL = try? keyManager.shareURL(for: cipher.id, name: cipher.label) {
-                    ShareLink(item: shareURL,
-                              subject: Text(cipher.label),
-                              message: Text("Import my Rune Scribe cipher")) {
+                // A canonical cipher (runes within the shareable pool) can be expressed
+                // as a link/QR; reuse that as the shareability check, but share the
+                // self-contained `.runescribe` file (key + font), not the URL.
+                if (try? keyManager.shareURL(for: cipher.id, name: cipher.label)) != nil,
+                   let file = try? RuneScribeShareFile(data: keyManager.exportData(for: cipher.id),
+                                                       filename: keyManager.exportFilename(for: cipher.id)) {
+                    ShareLink(item: file,
+                              preview: SharePreview(cipher.label)) {
                         cardIconChrome("square.and.arrow.up")
                     }
                     .buttonStyle(.plain)
@@ -496,7 +500,8 @@ struct CipherLibraryView: View {
         do {
             let payload = try CipherSharePayload(url: url)
             pendingScan = ImportCoordinator.PendingImport(payload: payload,
-                                                          suggestedName: payload.parsedName ?? "Imported Cipher")
+                                                          suggestedName: payload.parsedName ?? "Imported Cipher",
+                                                          fontBytes: nil)
         } catch {
             status = .failure((error as? LocalizedError)?.errorDescription
                               ?? "That QR code isn't a Rune Scribe cipher.")

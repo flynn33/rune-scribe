@@ -25,4 +25,10 @@ extension ContactBook {
     func removing(id: UUID) -> ContactBook {
         var copy = self; copy.contacts.removeAll { $0.id == id }; return copy
     }
+    func removing(ids: Set<UUID>) -> ContactBook {
+        var copy = self; copy.contacts.removeAll { ids.contains($0.id) }; return copy
+    }
+    func removingImported() -> ContactBook {
+        var copy = self; copy.contacts.removeAll { $0.source == .imported }; return copy
+    }
 }

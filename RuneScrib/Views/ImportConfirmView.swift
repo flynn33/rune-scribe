@@ -84,6 +84,11 @@ struct ImportConfirmView: View {
     private func confirm() {
         let label = trimmedName.isEmpty ? nil : trimmedName
         do {
+            // When the cipher arrived as a file with its font, install the font first so
+            // the imported cipher renders correctly; both succeed or the import fails.
+            if let fontBytes = pending.fontBytes {
+                try FontStore.shared.importFont(fontBytes, expecting: pending.payload.fontRef)
+            }
             let cipher = try keyManager.importCipher(pending.payload, label: label)
             onResult?(.success(cipher))
         } catch {

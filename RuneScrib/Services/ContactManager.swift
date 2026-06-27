@@ -46,6 +46,26 @@ final class ContactManager: ObservableObject {
         persist(book().removing(id: id))
     }
 
+    /// Bulk-deletes contacts and unlinks (never deletes) their ciphers in one batched persist.
+    func delete(ids: Set<UUID>) {
+        guard !ids.isEmpty else { return }
+        keyManager.unlinkContacts(ids)
+        persist(book().removing(ids: ids))
+    }
+
+    /// Removes every imported contact (sparing manual ones) and unlinks their ciphers, keeping
+    /// them. Undoes an accidental import; it is not a block list — a later inbound message from a
+    /// removed sender legitimately re-creates that contact (see `MessageCoordinator.autoAssociate`).
+    func deleteAllImported() {
+        let importedIDs = contacts.filter { $0.source == .imported }.map(\.id)
+        guard !importedIDs.isEmpty else { return }
+        keyManager.unlinkContacts(Set(importedIDs))
+        persist(book().removingImported())
+    }
+
+    /// The number of imported contacts currently held.
+    var importedCount: Int { contacts.lazy.filter { $0.source == .imported }.count }
+
     func contact(id: UUID?) -> Contact? { id.flatMap { id in contacts.first { $0.id == id } } }
 
     private func book() -> ContactBook { ContactBook(contacts: contacts) }

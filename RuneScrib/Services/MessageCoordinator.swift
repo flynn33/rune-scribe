@@ -1,14 +1,15 @@
 // RuneScrib/Services/MessageCoordinator.swift
 
 import Foundation
+import CryptoKit
 
-/// App-wide intake for *messages* arriving over the wire — deep links (`.onOpenURL`),
-/// scanned QR codes, the clipboard, and Universal Links. It decodes a
-/// `runescribe://m` / `https://ravenforgesoftware.com/rune-scribe/m` URL to a
-/// `MessageSharePayload`, opportunistically imports an embedded cipher, decrypts the
-/// envelope by trying every candidate key, auto-associates the matching cipher with a
-/// contact (by sender name), and publishes a `PendingMessage`; `RootView` observes it
-/// and shows the decrypted-message sheet (gated so it never appears over the lock screen).
+/// App-wide intake for *messages* arriving over the wire — a tapped `.runescribe`
+/// attachment, an AirDrop/Finder-opened file, or a scanned QR. It decodes the file's
+/// bytes to a `MessageSharePayload`, opportunistically imports an embedded cipher (and
+/// its font, if one rode along), decrypts the envelope by trying every candidate key,
+/// auto-associates the matching cipher with a contact (by sender name), and publishes a
+/// `PendingMessage`; `RootView` observes it and shows the decrypted-message sheet (gated
+/// so it never appears over the lock screen).
 ///
 /// Mirrors `ImportCoordinator`. Published as a singleton and injected as an
 /// `@EnvironmentObject`; all state mutates on the main actor. Dependencies are
@@ -24,10 +25,10 @@ final class MessageCoordinator: ObservableObject {
     /// A human-readable reason a link couldn't be read.
     @Published var errorMessage: String?
 
-    /// The most recently ingested URL, used to drop a duplicate delivery — e.g. the
-    /// macOS AppDelegate's `application(_:open:)` and SwiftUI's `.onOpenURL` both
-    /// firing for the same link.
-    private var lastHandledURL: String?
+    /// Content hash of the most recently ingested file, used to drop a duplicate
+    /// delivery — e.g. the macOS AppDelegate's `application(_:open:)` and SwiftUI's
+    /// `.onOpenURL` both firing for the same file.
+    private var lastHandledKey: String?
 
     private let keyManager: KeyManager
     private let contactManager: ContactManager
@@ -44,18 +45,18 @@ final class MessageCoordinator: ObservableObject {
         let cipher: Cipher
     }
 
-    /// Decodes a message URL and, on success, surfaces the decrypted text for viewing;
+    /// Decodes message file bytes and, on success, surfaces the decrypted text for viewing;
     /// on failure, surfaces a readable error and leaves `pending` untouched-to-nil.
-    func ingest(url: URL) {
-        // Drop a duplicate delivery of the *same* link only while a message is still
+    func ingest(fileData data: Data) {
+        // Drop a duplicate delivery of the *same* file only while a message is still
         // pending — e.g. the macOS `AppDelegate.application(_:open:)` and SwiftUI's
-        // `.onOpenURL` both firing for one link. Once that message is dismissed, or a
-        // prior ingest failed (`pending == nil`), re-ingesting the same link is allowed.
-        let key = url.absoluteString
-        if key == lastHandledURL, pending != nil { return }
-        lastHandledURL = key
+        // `.onOpenURL` both firing for one file. Once that message is dismissed, or a
+        // prior ingest failed (`pending == nil`), re-ingesting the same file is allowed.
+        let key = Data(SHA256.hash(data: data)).base64EncodedString()
+        if key == lastHandledKey, pending != nil { return }
+        lastHandledKey = key
         do {
-            let payload = try MessageSharePayload(url: url)
+            let (payload, fontBytes) = try MessageSharePayload.decodeFile(data)
 
             // If the sender embedded their key, ingest it as a decrypt candidate. This
             // deduplicates by publicID (a key re-sent on every message never piles up
@@ -63,6 +64,11 @@ final class MessageCoordinator: ObservableObject {
             // must not hijack the one the user is composing with; Reply switches it explicitly.
             var candidate: Cipher?
             if let embedded = payload.embeddedCipher {
+                // If the embedded cipher's font rode along and we don't already hold it,
+                // install it best-effort so the imported cipher renders correctly.
+                if let fontBytes, FontStore.shared.resolve(embedded.fontRef) == nil {
+                    try? FontStore.shared.importFont(fontBytes, expecting: embedded.fontRef)
+                }
                 candidate = keyManager.ingestMessageCipher(embedded, label: payload.senderName)
             }
 
@@ -81,17 +87,11 @@ final class MessageCoordinator: ObservableObject {
         }
     }
 
-    /// Same as `ingest(url:)` but from a raw string (clipboard / scanned payload).
-    /// Silently ignores anything that isn't one of our message links.
-    func ingest(urlString: String) {
-        let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard MessageSharePayload.isMessageURL(trimmed), let url = URL(string: trimmed) else { return }
-        ingest(url: url)
-    }
-
     /// Files the matching cipher under a contact named after the sender: reuses an existing
     /// contact whose display name matches, else creates an `.imported` one, then links the
     /// cipher to it unless it's already linked. Never changes key material.
+    /// By design this re-creates a contact a bulk-remove had deleted — bulk-remove undoes an
+    /// accidental import, it is not a block list.
     private func autoAssociate(_ cipher: Cipher, senderName: String) {
         let contact: Contact
         if let existing = contactManager.contacts.first(where: { $0.displayName == senderName }) {

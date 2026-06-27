@@ -6,6 +6,21 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Rune Scribe</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Rune Scribe File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.runescribe.runescribe</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -37,5 +52,25 @@
 	<string>Rune Scribe can organize your ciphers by contact. Contacts stay on your device, encrypted, and are never uploaded.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© Raven Forge Software</string>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Rune Scribe Cipher/Message</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.runescribe.runescribe</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>runescribe</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>
