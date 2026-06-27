@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.23] - 2026-06-27
+
+- feat: file-based, server-free cipher and message sharing (#23) by @flynn33
+
 ## [1.0.21] - 2026-06-26
 
 - Messages: inbound/outbound flow, Swift 6 fixes, updated splash (#22) by @flynn33
