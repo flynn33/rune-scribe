@@ -178,6 +178,14 @@ final class KeyManager: ObservableObject {
         persist()
     }
 
+    /// Clears the link on every cipher of each of `contactIDs` in one library assignment and a
+    /// single `persist()`, so a bulk contact removal triggers one Keychain write, not N. Keeps ciphers.
+    func unlinkContacts(_ contactIDs: Set<UUID>) {
+        guard !contactIDs.isEmpty else { return }
+        library = contactIDs.reduce(library) { $0.unlinkingContact(contactID: $1) }
+        persist()
+    }
+
     /// Marks the cipher with `cipherID` as having had its key delivered, then persists.
     /// Idempotent and never touches key material. Called by the send flow after a message
     /// that embedded this cipher's key has been handed off to Messages.

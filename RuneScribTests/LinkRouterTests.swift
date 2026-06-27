@@ -19,22 +19,6 @@ final class LinkRouterTests: XCTestCase {
         }
     }
 
-    // MARK: message links
-
-    func testClassifiesHTTPSMessageAsMessage() throws {
-        let url = try XCTUnwrap(URL(string: "https://ravenforgesoftware.com/rune-scribe/m?v=1&p=AAAA"))
-        guard case .message = LinkRouter.classify(url) else {
-            return XCTFail("expected .message for \(url.absoluteString)")
-        }
-    }
-
-    func testClassifiesCustomSchemeMessageAsMessage() throws {
-        let url = try XCTUnwrap(URL(string: "runescribe://m?v=1&p=AAAA"))
-        guard case .message = LinkRouter.classify(url) else {
-            return XCTFail("expected .message for \(url.absoluteString)")
-        }
-    }
-
     // MARK: unknown
 
     func testClassifiesUnrelatedHTTPSAsUnknown() throws {
@@ -46,21 +30,21 @@ final class LinkRouterTests: XCTestCase {
 
     // MARK: router-level discrimination invariants (hardening)
 
-    /// The `www.` message host is a distinct branch in `isMessageURL`; pin it at the router level too.
-    func testClassifiesWWWHostMessageAsMessage() throws {
-        let url = try XCTUnwrap(URL(string: "https://www.ravenforgesoftware.com/rune-scribe/m?v=1&p=AAAA"))
-        guard case .message = LinkRouter.classify(url) else {
-            return XCTFail("expected .message for \(url.absoluteString)")
-        }
-    }
-
-    /// The reason LinkRouter exists: a cipher-import https link must NOT be swallowed by the
-    /// `/rune-scribe/m` message check. Asserted at the router level with a literal URL so a future
-    /// webPath change can't silently regress the import-vs-message discrimination.
-    func testClassifiesHTTPSImportAsCipherNotMessage() throws {
+    /// A cipher-import https link still classifies as `.cipher` now that messages are
+    /// file-based and no longer compete for the URL rail.
+    func testClassifiesHTTPSImportAsCipher() throws {
         let url = try XCTUnwrap(URL(string: "https://ravenforgesoftware.com/rune-scribe/import?v=3&p=AAAA"))
         guard case .cipher = LinkRouter.classify(url) else {
             return XCTFail("expected .cipher for \(url.absoluteString)")
+        }
+    }
+
+    /// A leftover `runescribe://m` message link is no longer routed as a cipher (it was
+    /// never a cipher) — it is simply `.unknown` on the URL rail.
+    func testClassifiesLegacyMessageURLAsUnknown() throws {
+        let url = try XCTUnwrap(URL(string: "https://example.com/rune-scribe/m?v=1&p=AAAA"))
+        guard case .unknown = LinkRouter.classify(url) else {
+            return XCTFail("expected .unknown for \(url.absoluteString)")
         }
     }
 }

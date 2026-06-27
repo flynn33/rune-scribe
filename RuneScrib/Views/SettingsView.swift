@@ -136,7 +136,7 @@ struct SettingsView: View {
                     .lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
 
-                if let url = URL(string: "https://ravenforgesoftware.com") {
+                if let url = URL(string: RuneScribeShare.productLink) {
                     Link(destination: url) {
                         Label("ravenforgesoftware.com", systemImage: "globe")
                             .font(.system(size: 12, weight: .semibold, design: .monospaced))

@@ -85,47 +85,62 @@ extension MessageSharePayloadTests {
 }
 
 extension MessageSharePayloadTests {
-    func testHTTPSURLRoundTripPreservesEverything() throws {
-        let cipher = Cipher.generated(label: "Sam")
-        let env = MessageEnvelope.wrap(try MessageCryptor().seal("url me", with: cipher))
-        let payload = MessageSharePayload(senderName: "Sam",
-                                          envelope: env,
+    /// `decodeConsuming` reports exactly the encoded length and rebuilds the payload.
+    func testDecodeConsumingReportsExactLength() throws {
+        let cipher = Cipher.generated(label: "Con")
+        let env = try envelope("consumed", with: cipher)
+        let encoded = MessageSharePayload(senderName: "Con", envelope: env,
+                                          embeddedCipher: CipherSharePayload(cipher: cipher)).encoded()
+
+        let (payload, consumed) = try MessageSharePayload.decodeConsuming(encoded)
+        XCTAssertEqual(consumed, encoded.count)
+        XCTAssertEqual(payload.senderName, "Con")
+        XCTAssertEqual(payload.envelope, env)
+        XCTAssertEqual(payload.embeddedCipher?.keyMaterial, cipher.keyMaterial)
+    }
+
+    /// Strict `init(decoding:)` must reject any trailing bytes the encoder didn't write.
+    func testInitDecodingRejectsTrailingBytes() throws {
+        let cipher = Cipher.generated(label: "Trail")
+        let env = try envelope("no extras", with: cipher)
+        let encoded = MessageSharePayload(senderName: "Trail", envelope: env, embeddedCipher: nil).encoded()
+        let withTrailer = encoded + Data([0xDE, 0xAD, 0xBE, 0xEF])
+        XCTAssertThrowsError(try MessageSharePayload(decoding: withTrailer)) { error in
+            XCTAssertEqual(error as? MessageShareError, .tooShort)
+        }
+    }
+
+    /// File form with a trailing font blob: `decodeFile` splits payload from font.
+    func testEncodedFileRoundTripsWithTrailingFont() throws {
+        let cipher = Cipher.generated(label: "WithFont")
+        let env = try envelope("font rides along", with: cipher)
+        let payload = MessageSharePayload(senderName: "WithFont", envelope: env,
                                           embeddedCipher: CipherSharePayload(cipher: cipher))
-        let url = try payload.url()
-        XCTAssertEqual(url.scheme, "https")
-        XCTAssertEqual(url.host, "ravenforgesoftware.com")
-        XCTAssertEqual(url.path, "/rune-scribe/m")
+        let font = Data((0..<200).map { UInt8($0 & 0xFF) })   // synthetic font blob
 
-        let parsed = try MessageSharePayload(url: url)
-        XCTAssertEqual(parsed.senderName, "Sam")
-        XCTAssertEqual(parsed.envelope, env)
-        XCTAssertEqual(parsed.embeddedCipher?.keyMaterial, cipher.keyMaterial)
+        let file = payload.encodedFile(fontBytes: font)
+        XCTAssertEqual(file.count, payload.encoded().count + font.count)
+
+        let (back, fontBytes) = try MessageSharePayload.decodeFile(file)
+        XCTAssertEqual(back.senderName, "WithFont")
+        XCTAssertEqual(back.envelope, env)
+        XCTAssertEqual(back.embeddedCipher?.keyMaterial, cipher.keyMaterial)
+        XCTAssertEqual(fontBytes, font)
     }
 
-    func testLegacyCustomSchemeURLParses() throws {
-        let cipher = Cipher.generated(label: "Leg")
-        let env = MessageEnvelope.wrap(try MessageCryptor().seal("legacy", with: cipher))
-        let payload = MessageSharePayload(senderName: "Leg", envelope: env, embeddedCipher: nil)
-        let p = payload.encoded().base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
-        let legacy = URL(string: "runescribe://m?v=1&p=\(p)")!
-        let parsed = try MessageSharePayload(url: legacy)
-        XCTAssertEqual(parsed.senderName, "Leg")
-        XCTAssertEqual(parsed.envelope, env)
-    }
+    /// File form without a font: `encodedFile(fontBytes: nil)` equals `encoded()`,
+    /// and `decodeFile` reports no trailing font.
+    func testEncodedFileRoundTripsWithoutFont() throws {
+        let cipher = Cipher.generated(label: "NoFont")
+        let env = try envelope("plain message", with: cipher)
+        let payload = MessageSharePayload(senderName: "NoFont", envelope: env, embeddedCipher: nil)
 
-    func testIsMessageURLClassifies() {
-        // message URLs
-        XCTAssertTrue(MessageSharePayload.isMessageURL("https://ravenforgesoftware.com/rune-scribe/m?v=1&p=AAA"))
-        XCTAssertTrue(MessageSharePayload.isMessageURL("runescribe://m?v=1&p=AAA"))
-        // a cipher import URL must NOT be classified as a message
-        XCTAssertFalse(MessageSharePayload.isMessageURL("https://ravenforgesoftware.com/rune-scribe/import?v=3&p=AAA"))
-        XCTAssertFalse(MessageSharePayload.isMessageURL("runescribe://import?v=3&p=AAA"))
-        // junk
-        XCTAssertFalse(MessageSharePayload.isMessageURL("https://example.com/x"))
-        XCTAssertFalse(MessageSharePayload.isMessageURL("hello world"))
+        XCTAssertEqual(payload.encodedFile(fontBytes: nil), payload.encoded())
+        XCTAssertEqual(payload.encodedFile(fontBytes: Data()), payload.encoded())
+
+        let (back, fontBytes) = try MessageSharePayload.decodeFile(payload.encodedFile(fontBytes: nil))
+        XCTAssertEqual(back.envelope, env)
+        XCTAssertNil(fontBytes)
     }
 }
 

@@ -54,16 +54,15 @@ struct ContentView: View {
         transformDirection == .encode ? keyManager.activeCipher : nil
     }
 
-    /// Builds the share payload URL for the current runes; nil when not on an encode result.
-    private func messageShareURL() -> URL? {
+    /// The self-contained `.runescribe` attachment bytes for the current runes (envelope,
+    /// plus the cipher key on a first delivery); nil when not on an encode result.
+    private func messageFileData() -> Data? {
         guard transformDirection == .encode, let cipher = resultCipher else { return nil }
         let include = MessageSend.shouldIncludeKey(cipher)
-        guard let payload = try? MessageSend.payload(runes: targetSnapshot,
-                                                     senderName: cipher.label,
-                                                     cipher: cipher,
-                                                     includeKey: include),
-              let url = try? payload.url() else { return nil }
-        return url
+        return try? MessageSend.fileData(runes: targetSnapshot,
+                                         senderName: cipher.label,
+                                         cipher: cipher,
+                                         includeKey: include)
     }
 
     // MARK: - Body
@@ -127,6 +126,7 @@ struct ContentView: View {
         .sheet(isPresented: $showMessageCompose) {
             MessageComposeView(messageText: messageBody(),
                                recipients: messageRecipients(),
+                               attachmentData: messageFileData(),
                                onFinish: handleMessageSent)
         }
         #endif
@@ -263,11 +263,11 @@ struct ContentView: View {
                     .buttonStyle(RuneScribButtonStyle())
                 }
 
-                if transformDirection == .encode, let url = messageShareURL() {
+                if transformDirection == .encode, let fileData = messageFileData() {
                     HStack(spacing: 14) {
-                        ShareLink(item: url,
-                                  subject: Text("Rune Scribe message"),
-                                  message: Text("A message in runes — open in Rune Scribe to read.")) {
+                        ShareLink(item: RuneScribeShareFile(data: fileData,
+                                                            filename: MessageSend.filename(senderName: resultCipher?.label ?? "")),
+                                  preview: SharePreview("Rune Scribe message")) {
                             Label("Share", systemImage: "square.and.arrow.up")
                                 .frame(maxWidth: .infinity)
                         }
@@ -426,10 +426,10 @@ struct ContentView: View {
     }
 
     #if os(iOS)
-    /// Body for the system Messages sheet: the runes, a blank line, then the link.
+    /// Body for the system Messages sheet: the runes, a blank line, then a plain
+    /// "get the app" link (no payload — the envelope rides in the attachment).
     private func messageBody() -> String {
-        guard let url = messageShareURL() else { return targetSnapshot }
-        return "\(targetSnapshot)\n\n\(url.absoluteString)"
+        "\(targetSnapshot)\n\n\(RuneScribeShare.productLink)"
     }
 
     /// Phone numbers + emails of the active cipher's linked contact, if any.

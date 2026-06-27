@@ -9,8 +9,8 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     GENERATE_INFOPLIST_FILE: YES
-    MARKETING_VERSION: "1.0.21"
-    CURRENT_PROJECT_VERSION: "22"
+    MARKETING_VERSION: "1.0.22"
+    CURRENT_PROJECT_VERSION: "23"
     PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app
     INFOPLIST_KEY_CFBundleDisplayName: "Rune Scribe"
     INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.lifestyle
@@ -46,6 +46,17 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.runescribe.import
             CFBundleURLSchemes: [runescribe]
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.runescribe.runescribe
+            UTTypeDescription: "Rune Scribe Cipher/Message"
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification:
+              public.filename-extension: [runescribe]
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: "Rune Scribe File"
+            LSItemContentTypes: [com.runescribe.runescribe]
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Owner
     settings:
       base:
         PRODUCT_NAME: RuneScrib
@@ -93,9 +104,24 @@ targets:
           - UIInterfaceOrientationLandscapeRight
         NSCameraUsageDescription: "Rune Scribe uses the camera to scan a cipher QR code so you can import it. Frames are processed on-device and never saved or sent anywhere."
         NSContactsUsageDescription: "Rune Scribe can organize your ciphers by contact. Contacts stay on your device, encrypted, and are never uploaded."
+        # An incoming .runescribe file is copied in (not opened in place): the app reads
+        # its bytes and imports, never editing the sender's original. Declaring this
+        # resolves the iOS "supports opening files in place?" build advisory.
+        LSSupportsOpeningDocumentsInPlace: false
         CFBundleURLTypes:
           - CFBundleURLName: com.runescribe.import
             CFBundleURLSchemes: [runescribe]
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.runescribe.runescribe
+            UTTypeDescription: "Rune Scribe Cipher/Message"
+            UTTypeConformsTo: [public.data]
+            UTTypeTagSpecification:
+              public.filename-extension: [runescribe]
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: "Rune Scribe File"
+            LSItemContentTypes: [com.runescribe.runescribe]
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Owner
     settings:
       base:
         PRODUCT_NAME: RuneScrib

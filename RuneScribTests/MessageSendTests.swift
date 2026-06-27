@@ -56,4 +56,23 @@ extension MessageSendTests {
         XCTAssertEqual(with.embeddedCipher?.keyMaterial, cipher.keyMaterial)
         XCTAssertEqual(with.embeddedCipher?.publicID, cipher.publicID)
     }
+
+    // fileData is the file form of payload(...). A bundled-font cipher never appends font
+    // bytes, so the file form equals the bare encoded payload and decodes back cleanly.
+    func testFileDataMatchesEncodedPayloadForBundledFont() throws {
+        let cipher = Cipher.generated(label: "File")   // fontRef == .bundled
+        XCTAssertEqual(cipher.fontRef, .bundled)
+        let runes = try MessageService().compose("hi there", with: cipher)
+
+        let file = try MessageSend.fileData(runes: runes, senderName: "Freya",
+                                            cipher: cipher, includeKey: true)
+        let expected = try MessageSend.payload(runes: runes, senderName: "Freya",
+                                               cipher: cipher, includeKey: true).encoded()
+        XCTAssertEqual(file, expected, "bundled font must not be appended")
+
+        let (back, fontBytes) = try MessageSharePayload.decodeFile(file)
+        XCTAssertEqual(back.senderName, "Freya")
+        XCTAssertNil(fontBytes)
+        XCTAssertEqual(back.embeddedCipher?.keyMaterial, cipher.keyMaterial)
+    }
 }

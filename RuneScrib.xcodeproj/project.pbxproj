@@ -73,6 +73,7 @@
 		7506B7BCCE0B9D508FC13B2D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23D157957EEFB14E8CB7147 /* AppDelegate.swift */; };
 		7612DFED0FFD7CCE5F51CACB /* CipherLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E215F3EF5FE734CB87EA5C /* CipherLibraryView.swift */; };
 		76B55D28EAD870E258B0AF67 /* LicenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29341AC7EDF3058C96DD83C0 /* LicenseView.swift */; };
+		7B39C4181A95092F95729DCF /* FileRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C260892CA3A3EDA4F31C1AFF /* FileRouter.swift */; };
 		7BA7569056634A2C5C04D4C6 /* DecoderDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D15D6F87C83071DA639125F /* DecoderDocument.swift */; };
 		7BF138CAE8F17D14882A4596 /* PINFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289AA0236910C21C79D71A7E /* PINFlowView.swift */; };
 		80A1AC959D6C3F0A06ADC959 /* LinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98578E247AB4ADA6313E4448 /* LinkRouter.swift */; };
@@ -88,9 +89,11 @@
 		95A79F56B2567C326B47A6C8 /* RuneMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C804E8889A60C1394E8D3841 /* RuneMetalView.swift */; };
 		973EBAFA7B1E6A25FAE46B58 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
 		97C78EAF515BE1E3A98A4A6F /* RuneTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */; };
+		9C1AFA5A5FD5B9FC6C7EE00F /* FileRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C260892CA3A3EDA4F31C1AFF /* FileRouter.swift */; };
 		9CB1A311A27D330B1AE3726D /* ContactStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89650C349BCE670EBDDEF2D2 /* ContactStore.swift */; };
 		9D7FEA16DD78184E7FE55034 /* RuneCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */; };
 		9F95A099D27690B6214A6DE9 /* PINFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289AA0236910C21C79D71A7E /* PINFlowView.swift */; };
+		A2AD7F0E94799F4DFD6D8AD8 /* FileRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04291E986B3D03ED1648EB3C /* FileRouterTests.swift */; };
 		A472D43E5F8F1163E7746623 /* MessageSharePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588F8820EBD1E78EAAD0F980 /* MessageSharePayload.swift */; };
 		A6C686B66946360588DED3C0 /* MessageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */; };
 		A86A326BDA398A9366838BCB /* KeyManagerLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */; };
@@ -149,6 +152,7 @@
 
 /* Begin PBXFileReference section */
 		010A368AFC48F1D89E72560F /* FontRefTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontRefTests.swift; sourceTree = "<group>"; };
+		04291E986B3D03ED1648EB3C /* FileRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileRouterTests.swift; sourceTree = "<group>"; };
 		095E5000C8D5BD26F0C60F3B /* ContactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
 		098511B1E52AF229830C74E4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribButtonStyle.swift; sourceTree = "<group>"; };
@@ -205,6 +209,7 @@
 		B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRDisplaySheet.swift; sourceTree = "<group>"; };
 		BA657AA7320B6333C8D191BD /* KeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManager.swift; sourceTree = "<group>"; };
 		BCAC6AA1D8EDD7C7ACF3953A /* LinkRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkRouterTests.swift; sourceTree = "<group>"; };
+		C260892CA3A3EDA4F31C1AFF /* FileRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileRouter.swift; sourceTree = "<group>"; };
 		C804E8889A60C1394E8D3841 /* RuneMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneMetalView.swift; sourceTree = "<group>"; };
 		C811485E565AD02AF0B21DD8 /* Cipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cipher.swift; sourceTree = "<group>"; };
 		CF2631879B41FCA864DDE6E7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -236,6 +241,7 @@
 				38EB26ADD23F56433988EDC2 /* ContactImporter.swift */,
 				B50CBAAF3486CBF7224F4CDD /* ContactManager.swift */,
 				89650C349BCE670EBDDEF2D2 /* ContactStore.swift */,
+				C260892CA3A3EDA4F31C1AFF /* FileRouter.swift */,
 				3B77A2EAB94A310BB3110C79 /* FontStore.swift */,
 				F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */,
 				236AB4A6CB356708A2A004EE /* KeychainService.swift */,
@@ -384,6 +390,7 @@
 				315C7696C8620553F107C26D /* ContactManagerTests.swift */,
 				4448FA2A77E4B258694B3CC4 /* ContactStoreTests.swift */,
 				6175FFF53B5C206A832ECEE8 /* ContactTests.swift */,
+				04291E986B3D03ED1648EB3C /* FileRouterTests.swift */,
 				010A368AFC48F1D89E72560F /* FontRefTests.swift */,
 				34818326B3EDB2664B91AA90 /* FontStoreTests.swift */,
 				2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */,
@@ -539,6 +546,7 @@
 				EDD0C98D860D01DC95DEAB01 /* ContactManagerTests.swift in Sources */,
 				047CAFD7FCD06597F042E57E /* ContactStoreTests.swift in Sources */,
 				3B800BA0C9FF8BC9800E7E8E /* ContactTests.swift in Sources */,
+				A2AD7F0E94799F4DFD6D8AD8 /* FileRouterTests.swift in Sources */,
 				61D64E792969FDFF3BE22D51 /* FontRefTests.swift in Sources */,
 				5D39D2881EC32AB8C2E09098 /* FontStoreTests.swift in Sources */,
 				A86A326BDA398A9366838BCB /* KeyManagerLinkTests.swift in Sources */,
@@ -573,6 +581,7 @@
 				73F9B7D0C0E9652541C30B76 /* ContactsView.swift in Sources */,
 				CEC9C8FD3A0AE90684413AF5 /* ContentView.swift in Sources */,
 				7BA7569056634A2C5C04D4C6 /* DecoderDocument.swift in Sources */,
+				9C1AFA5A5FD5B9FC6C7EE00F /* FileRouter.swift in Sources */,
 				BD5917F1551D8490BBABE0D0 /* FontRef.swift in Sources */,
 				12027B50430F47B08FC91BEC /* FontStore.swift in Sources */,
 				EC9E355ADDCB1E429EB55082 /* ImportConfirmView.swift in Sources */,
@@ -630,6 +639,7 @@
 				6AC3F38E914DAC3AFD88C7A2 /* ContactsView.swift in Sources */,
 				45113334F4CA66360C41C767 /* ContentView.swift in Sources */,
 				86EC8F977E7E340F16A64EA2 /* DecoderDocument.swift in Sources */,
+				7B39C4181A95092F95729DCF /* FileRouter.swift in Sources */,
 				008FD6B6415CDE82EE157B84 /* FontRef.swift in Sources */,
 				2534F5D451B13B24B4A64A9B /* FontStore.swift in Sources */,
 				62276BA1FCA311A976C6BE13 /* ImportConfirmView.swift in Sources */,
@@ -734,7 +744,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = "";
@@ -754,7 +764,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.21;
+				MARKETING_VERSION = 1.0.22;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.runescribe.app;
@@ -843,7 +853,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 23;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = "";
@@ -869,7 +879,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.21;
+				MARKETING_VERSION = 1.0.22;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

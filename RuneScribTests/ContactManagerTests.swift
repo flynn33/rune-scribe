@@ -75,4 +75,60 @@ final class ContactManagerTests: XCTestCase {
         XCTAssertTrue(KeyManager.shared.ciphers(forContact: stored.id).isEmpty,
                       "manual add is import-only-exempt: no cipher is auto-generated")
     }
+
+    func testBulkDeleteUnlinksCiphersButKeepsThem() throws {
+        let (manager, dir) = makeManager()
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        manager.addImported([
+            Contact(displayName: "Sten", appleContactID: "bulk-1", source: .imported),
+            Contact(displayName: "Vala", appleContactID: "bulk-2", source: .imported)
+        ])
+        let one = try XCTUnwrap(manager.contacts.first { $0.appleContactID == "bulk-1" })
+        let two = try XCTUnwrap(manager.contacts.first { $0.appleContactID == "bulk-2" })
+        createdContactIDs.append(contentsOf: [one.id, two.id])
+        let cipherIDs = (KeyManager.shared.ciphers(forContact: one.id)
+            + KeyManager.shared.ciphers(forContact: two.id)).map(\.id)
+        XCTAssertEqual(cipherIDs.count, 2, "each imported contact starts with one linked cipher")
+
+        manager.delete(ids: [one.id, two.id])
+
+        XCTAssertNil(manager.contacts.first { $0.id == one.id }, "the contacts are removed")
+        XCTAssertNil(manager.contacts.first { $0.id == two.id })
+        for id in cipherIDs {
+            let cipher = try XCTUnwrap(KeyManager.shared.ciphers.first { $0.id == id },
+                                       "the cipher is kept, never deleted")
+            XCTAssertNil(cipher.contactID, "but its contact link is cleared")
+        }
+    }
+
+    func testDeleteAllImportedSparesManual() throws {
+        let (manager, dir) = makeManager()
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        let manual = Contact(displayName: "Orm", source: .manual)
+        manager.add(manual)
+        manager.addImported([Contact(displayName: "Sten", appleContactID: "all-1", source: .imported)])
+        let imported = try XCTUnwrap(manager.contacts.first { $0.appleContactID == "all-1" })
+        createdContactIDs.append(imported.id)
+        let cipherID = try XCTUnwrap(KeyManager.shared.ciphers(forContact: imported.id).first?.id)
+
+        manager.deleteAllImported()
+
+        XCTAssertEqual(manager.contacts.map(\.id), [manual.id], "manual contacts survive; imported are removed")
+        let cipher = try XCTUnwrap(KeyManager.shared.ciphers.first { $0.id == cipherID }, "the cipher is kept")
+        XCTAssertNil(cipher.contactID, "and unlinked")
+    }
+
+    func testBulkDeleteEmptySetIsNoOp() throws {
+        let (manager, dir) = makeManager()
+        defer { try? FileManager.default.removeItem(at: dir) }
+
+        let manual = Contact(displayName: "Orm", source: .manual)
+        manager.add(manual)
+
+        manager.delete(ids: [])
+
+        XCTAssertEqual(manager.contacts.map(\.id), [manual.id], "deleting an empty set removes nothing")
+    }
 }

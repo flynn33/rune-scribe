@@ -3,11 +3,18 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// A single-file decoder document (JSON) used by SwiftUI's cross-platform
-/// `.fileExporter`. The whole decoder/decrypter — the cipher mapping and its
-/// metadata — is exactly one `.json` file.
+/// The app's exported document type — the single `.runescribe` UTI shared by
+/// ciphers and messages (disambiguated by leading version byte, never by type).
+/// Matches `UTExportedTypeDeclarations` in `project.yml` and `RuneScribeShare.uti`.
+extension UTType {
+    static let runeScribe = UTType(exportedAs: "com.runescribe.runescribe")
+}
+
+/// A single-file decoder document used by SwiftUI's cross-platform
+/// `.fileExporter`. The whole decoder/decrypter — the cipher mapping, metadata,
+/// and font bytes — is exactly one `.runescribe` file.
 struct DecoderDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.data] }
+    static var readableContentTypes: [UTType] { [.runeScribe] }
 
     var data: Data
 
@@ -19,5 +26,30 @@ struct DecoderDocument: FileDocument {
 
     func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
         FileWrapper(regularFileWithContents: data)
+    }
+}
+
+/// A `Transferable` `.runescribe` file for `ShareLink`, used by the cipher library
+/// (exported cipher) and the encode result (outbound message). It materializes the
+/// bytes into a temp file with a `.runescribe` extension so the share sheet hands
+/// other apps a real, correctly-typed file rather than a raw data blob.
+struct RuneScribeShareFile: Transferable {
+    let data: Data
+    /// Base filename without extension; the `.runescribe` extension is always appended.
+    let filename: String
+
+    init(data: Data, filename: String) {
+        self.data = data
+        self.filename = filename
+    }
+
+    static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(exportedContentType: .runeScribe) { file in
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent(file.filename)
+                .appendingPathExtension(RuneScribeShare.fileExtension)
+            try file.data.write(to: url, options: .atomic)
+            return SentTransferredFile(url)
+        }
     }
 }

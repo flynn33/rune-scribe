@@ -61,4 +61,19 @@ extension KeyManagerLinkTests {
         XCTAssertEqual(keyManager.ciphers(forContact: contact.id).count, 1,
                        "still exactly one cipher linked after re-ensuring")
     }
+
+    func testUnlinkContactsClearsAllLinksAndKeepsAllCiphers() throws {
+        let one = Contact(displayName: "Ingrid", appleContactID: "ul-1", source: .imported)
+        let two = Contact(displayName: "Soren", appleContactID: "ul-2", source: .imported)
+        createdContactIDs.append(contentsOf: [one.id, two.id])
+        let c1 = try XCTUnwrap(keyManager.ensureLinkedCipher(forImportedContact: one))
+        let c2 = try XCTUnwrap(keyManager.ensureLinkedCipher(forImportedContact: two))
+
+        keyManager.unlinkContacts([one.id, two.id])
+
+        XCTAssertTrue(keyManager.ciphers(forContact: one.id).isEmpty, "no cipher remains linked to the first contact")
+        XCTAssertTrue(keyManager.ciphers(forContact: two.id).isEmpty, "nor the second")
+        XCTAssertNotNil(keyManager.ciphers.first { $0.id == c1.id }, "but both ciphers are kept")
+        XCTAssertNotNil(keyManager.ciphers.first { $0.id == c2.id })
+    }
 }

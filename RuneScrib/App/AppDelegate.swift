@@ -16,12 +16,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         FontStore.shared.registerBundledAndImportedFonts()
     }
 
-    /// Handles runescribe:// links on macOS, including cold launch — where SwiftUI's
-    /// `.onOpenURL` can miss a URL that arrives before the scene is ready.
-    /// `LinkRouter` dispatches to the right coordinator, which dedupes if
-    /// `.onOpenURL` also delivers the same link.
+    /// Handles inbound URLs on macOS, including cold launch — where SwiftUI's
+    /// `.onOpenURL` can miss a URL that arrives before the scene is ready. A
+    /// `.runescribe` file routes through `FileRouter` (message vs. cipher by version
+    /// byte); a runescribe:// link routes through `LinkRouter`. Both coordinators
+    /// dedupe if `.onOpenURL` also delivers the same item.
     func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls { LinkRouter.route(url) }
+        for url in urls {
+            if url.isFileURL {
+                FileRouter.route(fileURL: url)
+            } else {
+                LinkRouter.route(url)
+            }
+        }
     }
 }
 
