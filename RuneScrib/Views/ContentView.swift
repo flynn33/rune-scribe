@@ -234,6 +234,14 @@ struct ContentView: View {
         switch boxPhase {
         case .editing:
             HStack {
+                if !inputText.isEmpty && !keyManager.isLoading {
+                    Button {
+                        reset()
+                    } label: {
+                        Label("Clear", systemImage: "xmark.circle")
+                    }
+                    .buttonStyle(RuneSecondaryButtonStyle())
+                }
                 Spacer()
                 if keyManager.isLoading {
                     HStack(spacing: 8) {
@@ -275,7 +283,7 @@ struct ContentView: View {
                     Button {
                         confirmCopy()
                     } label: {
-                        Label(copyConfirmed ? "Copied!" : (transformDirection == .encode ? "Copy Runes" : "Copy Text"),
+                        Label(copyButtonTitle,
                               systemImage: copyConfirmed ? "checkmark.circle.fill" : "doc.on.clipboard")
                             .frame(maxWidth: .infinity)
                     }
@@ -286,27 +294,48 @@ struct ContentView: View {
                     HStack(spacing: 14) {
                         ShareLink(item: RuneScribeShareFile(data: fileData,
                                                             filename: MessageSend.filename(senderName: resultCipher?.label ?? "")),
-                                  preview: SharePreview("Rune Scribe message")) {
+                                  preview: SharePreview("Rune Scribe message",
+                                                        image: Image(systemName: "doc.fill"))) {
                             Label("Share", systemImage: "square.and.arrow.up")
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(RuneSecondaryButtonStyle())
 
                         #if os(iOS)
-                        if MessageComposeView.canSend {
-                            Button {
-                                showMessageCompose = true
-                            } label: {
-                                Label("Send via iMessage", systemImage: "message.fill")
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .buttonStyle(RuneScribButtonStyle())
+                        // Always present so it's never "missing"; disabled (not hidden) when
+                        // the device can't send (Simulator / no iMessage account).
+                        Button {
+                            showMessageCompose = true
+                        } label: {
+                            Label("Send via iMessage", systemImage: "message.fill")
+                                .frame(maxWidth: .infinity)
                         }
+                        .buttonStyle(RuneScribButtonStyle())
+                        .disabled(!MessageComposeView.canSend)
+                        #elseif os(macOS)
+                        // macOS has no MFMessageComposeViewController; hand the file to the
+                        // system Messages composer via NSSharingService instead.
+                        Button {
+                            MacMessageComposer.send(body: messageBody(), attachmentData: messageFileData())
+                        } label: {
+                            Label("Send via Messages", systemImage: "message.fill")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(RuneScribButtonStyle())
+                        .disabled(!MacMessageComposer.canSend)
                         #endif
                     }
 
                     keyIndicator(for: resultCipher)
                 }
+
+                Button {
+                    reset()
+                } label: {
+                    Label("Clear", systemImage: "trash")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(RuneSecondaryButtonStyle())
             }
         }
     }
@@ -450,8 +479,45 @@ struct ContentView: View {
         boxPhase = .editing
     }
 
+    /// Wipes the composer back to a pristine, empty editing state (the user changed their
+    /// mind). Cancels any in-flight inscription and clears the text and result snapshots.
+    private func reset() {
+        settleTask?.cancel()
+        inputText = ""
+        sourceSnapshot = ""
+        targetSnapshot = ""
+        copyConfirmed = false
+        decodeError = nil
+        boxPhase = .editing
+    }
+
+    /// Whether the current encode result is a first delivery that still needs to hand the
+    /// recipient the cipher key (so a plain rune copy alone wouldn't be decryptable).
+    private var copyIncludesKey: Bool {
+        guard transformDirection == .encode, let cipher = resultCipher else { return false }
+        return MessageSend.shouldIncludeKey(cipher)
+    }
+
+    private var copyButtonTitle: String {
+        if copyConfirmed { return "Copied!" }
+        if transformDirection == .decode { return "Copy Text" }
+        return copyIncludesKey ? "Copy Message" : "Copy Runes"
+    }
+
+    /// What Copy puts on the clipboard. For a first message — the recipient doesn't hold the
+    /// key yet — it appends the cipher import link so they can unlock the runes; bare runes
+    /// would be undecryptable to a new contact. The recipient's Decode reads only decorative
+    /// runes (it ignores the trailing link), and the link imports the cipher.
+    private func copyText() -> String {
+        guard copyIncludesKey, let cipher = resultCipher,
+              let link = try? keyManager.shareURL(for: cipher.id, name: cipher.label) else {
+            return targetSnapshot
+        }
+        return "\(targetSnapshot)\n\n\(link.absoluteString)"
+    }
+
     private func confirmCopy() {
-        Clipboard.copy(targetSnapshot)
+        Clipboard.copy(copyText())
         withAnimation { copyConfirmed = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             withAnimation { copyConfirmed = false }
@@ -494,13 +560,14 @@ struct ContentView: View {
         }
     }
 
-    #if os(iOS)
-    /// Body for the system Messages sheet: the runes, a blank line, then a plain
-    /// "get the app" link (no payload — the envelope rides in the attachment).
+    /// Body for the system Messages composer (iOS sheet / macOS NSSharingService): the runes,
+    /// a blank line, then a plain "get the app" link (no payload — the envelope rides in the
+    /// attachment).
     private func messageBody() -> String {
         "\(targetSnapshot)\n\n\(RuneScribeShare.productLink)"
     }
 
+    #if os(iOS)
     /// Phone numbers + emails of the active cipher's linked contact, if any.
     private func messageRecipients() -> [String]? {
         guard let contact = contactManager.contact(id: resultCipher?.contactID) else { return nil }

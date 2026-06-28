@@ -15,6 +15,7 @@
 		059BA5D329AA9280083DF044 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		073B6A7EF02F502983F82D09 /* ContactImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C002B92A1AA0BBB489CC32F /* ContactImporterTests.swift */; };
 		0AA2A1B762BAD94CF4973189 /* ContactImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EB26ADD23F56433988EDC2 /* ContactImporter.swift */; };
+		0DE50063F2743F7C971F8259 /* MessageComposeView+macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0D56A4CC2FF4754CC81E001 /* MessageComposeView+macOS.swift */; };
 		0DEE180E6F0CC7A45A7043A4 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8437A6505FB44F89EEE9D9B /* AppLock.swift */; };
 		0E7EE57FCC7EF36C764D4C9C /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D37342DC065A1648904DC62 /* QRScannerView.swift */; };
 		0F375290B9932F3D5C1F8956 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098511B1E52AF229830C74E4 /* SettingsView.swift */; };
@@ -101,6 +102,7 @@
 		A8860E28862BB912A033B9A9 /* VideoSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203BB2198F06103565DD4D26 /* VideoSplashView.swift */; };
 		A89334636625EA839DDFC991 /* MessageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */; };
 		AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
+		AC28D968D5EB5850300054BE /* MessageComposeView+macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0D56A4CC2FF4754CC81E001 /* MessageComposeView+macOS.swift */; };
 		B0614EBD257EEA0A80FA1862 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */; };
 		B111BA7E2C381C641BA4989F /* ReceivedMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B046BB4EA0B953E787BC40CD /* ReceivedMessageView.swift */; };
 		B1A33C13DEDE49385C78E523 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D37342DC065A1648904DC62 /* QRScannerView.swift */; };
@@ -219,6 +221,7 @@
 		D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageEnvelopeTests.swift; sourceTree = "<group>"; };
 		DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
+		E0D56A4CC2FF4754CC81E001 /* MessageComposeView+macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MessageComposeView+macOS.swift"; sourceTree = "<group>"; };
 		E12A33AC824869AC62776BF8 /* MessageSharePayloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSharePayloadTests.swift; sourceTree = "<group>"; };
 		E8C9A3D8B0BF6AA4A96C227D /* MessageSendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSendTests.swift; sourceTree = "<group>"; };
 		E91D52C55B3AEDED27523270 /* RuneScrib-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "RuneScrib-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -311,6 +314,7 @@
 			children = (
 				7D15D6F87C83071DA639125F /* DecoderDocument.swift */,
 				695DD706F34F8FB5F20C1080 /* MessageComposeView.swift */,
+				E0D56A4CC2FF4754CC81E001 /* MessageComposeView+macOS.swift */,
 				39CE669299B8B857610BAA76 /* PINPadView.swift */,
 				2D37342DC065A1648904DC62 /* QRScannerView.swift */,
 				A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */,
@@ -596,6 +600,7 @@
 				76B55D28EAD870E258B0AF67 /* LicenseView.swift in Sources */,
 				80A1AC959D6C3F0A06ADC959 /* LinkRouter.swift in Sources */,
 				1DF4DEAAB181AD335313F763 /* LockView.swift in Sources */,
+				0DE50063F2743F7C971F8259 /* MessageComposeView+macOS.swift in Sources */,
 				BDEE0FF98DA731D5504F9135 /* MessageComposeView.swift in Sources */,
 				A6C686B66946360588DED3C0 /* MessageCoordinator.swift in Sources */,
 				509573937921C44707A045BE /* MessageCryptor.swift in Sources */,
@@ -655,6 +660,7 @@
 				4582CC9CE71ADB1635028699 /* LicenseView.swift in Sources */,
 				E9F2F0B69E2840171D762FE0 /* LinkRouter.swift in Sources */,
 				D510973FADAD8196543583E7 /* LockView.swift in Sources */,
+				AC28D968D5EB5850300054BE /* MessageComposeView+macOS.swift in Sources */,
 				12B61513617B7DB4D76580E1 /* MessageComposeView.swift in Sources */,
 				A89334636625EA839DDFC991 /* MessageCoordinator.swift in Sources */,
 				C7C2D5659A4FC1DEE373BCD3 /* MessageCryptor.swift in Sources */,
