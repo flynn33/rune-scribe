@@ -22,8 +22,9 @@ enum ContactImporter {
     }
 
     /// Requests Contacts access and returns snapshots of every contact that has a usable name.
+    /// The caller decides what to do with them (import all, or let the user pick a subset).
     /// Works on iOS and macOS. Throws `ContactImportError.accessDenied` if the user denies access.
-    static func importAll() async throws -> [Contact] {
+    static func fetchAll() async throws -> [Contact] {
         let store = CNContactStore()
         let granted = (try? await store.requestAccess(for: .contacts)) ?? false
         guard granted else { throw ContactImportError.accessDenied }
