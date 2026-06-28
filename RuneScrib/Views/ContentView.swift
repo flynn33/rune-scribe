@@ -303,7 +303,9 @@ struct ContentView: View {
 
                         #if os(iOS)
                         // Always present so it's never "missing"; disabled (not hidden) when
-                        // the device can't send (Simulator / no iMessage account).
+                        // the device can't send (Simulator / no iMessage account). macOS sends
+                        // through the native Share sheet above (Messages/Mail/AirDrop) — no
+                        // separate button, so we don't reinvent what the share sheet provides.
                         Button {
                             showMessageCompose = true
                         } label: {
@@ -312,17 +314,6 @@ struct ContentView: View {
                         }
                         .buttonStyle(RuneScribButtonStyle())
                         .disabled(!MessageComposeView.canSend)
-                        #elseif os(macOS)
-                        // macOS has no MFMessageComposeViewController; hand the file to the
-                        // system Messages composer via NSSharingService instead.
-                        Button {
-                            MacMessageComposer.send(body: messageBody(), attachmentData: messageFileData())
-                        } label: {
-                            Label("Send via Messages", systemImage: "message.fill")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(RuneScribButtonStyle())
-                        .disabled(!MacMessageComposer.canSend)
                         #endif
                     }
 
@@ -491,33 +482,15 @@ struct ContentView: View {
         boxPhase = .editing
     }
 
-    /// Whether the current encode result is a first delivery that still needs to hand the
-    /// recipient the cipher key (so a plain rune copy alone wouldn't be decryptable).
-    private var copyIncludesKey: Bool {
-        guard transformDirection == .encode, let cipher = resultCipher else { return false }
-        return MessageSend.shouldIncludeKey(cipher)
-    }
-
     private var copyButtonTitle: String {
         if copyConfirmed { return "Copied!" }
-        if transformDirection == .decode { return "Copy Text" }
-        return copyIncludesKey ? "Copy Message" : "Copy Runes"
-    }
-
-    /// What Copy puts on the clipboard. For a first message — the recipient doesn't hold the
-    /// key yet — it appends the cipher import link so they can unlock the runes; bare runes
-    /// would be undecryptable to a new contact. The recipient's Decode reads only decorative
-    /// runes (it ignores the trailing link), and the link imports the cipher.
-    private func copyText() -> String {
-        guard copyIncludesKey, let cipher = resultCipher,
-              let link = try? keyManager.shareURL(for: cipher.id, name: cipher.label) else {
-            return targetSnapshot
-        }
-        return "\(targetSnapshot)\n\n\(link.absoluteString)"
+        return transformDirection == .encode ? "Copy Runes" : "Copy Text"
     }
 
     private func confirmCopy() {
-        Clipboard.copy(copyText())
+        // Copy is plain runes only. A first-message cipher rides in the `.runescribe` file
+        // (Share / Send via iMessage), never as a link inside copied text.
+        Clipboard.copy(targetSnapshot)
         withAnimation { copyConfirmed = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             withAnimation { copyConfirmed = false }
@@ -560,14 +533,14 @@ struct ContentView: View {
         }
     }
 
-    /// Body for the system Messages composer (iOS sheet / macOS NSSharingService): the runes,
-    /// a blank line, then a plain "get the app" link (no payload — the envelope rides in the
-    /// attachment).
+    #if os(iOS)
+    /// Body for the iOS Messages compose sheet: the runes, a blank line, then a plain
+    /// "get the app" link so a recipient *without* Rune Scribe knows where to get it. The
+    /// cipher + message ride in the attached file, never in this link.
     private func messageBody() -> String {
         "\(targetSnapshot)\n\n\(RuneScribeShare.productLink)"
     }
 
-    #if os(iOS)
     /// Phone numbers + emails of the active cipher's linked contact, if any.
     private func messageRecipients() -> [String]? {
         guard let contact = contactManager.contact(id: resultCipher?.contactID) else { return nil }

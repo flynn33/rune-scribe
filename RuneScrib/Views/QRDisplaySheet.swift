@@ -2,10 +2,10 @@
 
 import SwiftUI
 
-/// Shows a cipher as a scannable QR code (point the iPhone Camera app at it to
-/// import) and offers a Share button that sends the same `runescribe://import`
-/// link via Messages, Mail, AirDrop, etc. The QR and the shared link carry the
-/// identical payload.
+/// Shows a cipher as a scannable QR code — the only way a cipher is shared. Point the
+/// iPhone Camera (or Rune Scribe's in-app scanner) at it to import; the QR carries the whole
+/// cipher as an offline `runescribe://import` payload, so nothing leaves the device and no
+/// server is involved. There is deliberately no shareable link.
 struct QRDisplaySheet: View {
 
     @Environment(\.dismiss) private var dismiss
@@ -31,20 +31,12 @@ struct QRDisplaySheet: View {
 
                     qrImage
 
-                    Text("Point another iPhone's Camera at this code to import the cipher, "
-                         + "or use Share to send the link in Messages.")
+                    Text("Point another iPhone's Camera at this code — or use Scan in Rune "
+                         + "Scribe — to import the cipher. It never leaves your devices.")
                         .font(.system(size: 12))
                         .foregroundColor(.runeSilver)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
-
-                    ShareLink(item: url,
-                              subject: Text(label),
-                              message: Text("Import my Rune Scribe cipher")) {
-                        Label("Share Link", systemImage: "square.and.arrow.up")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(RuneScribButtonStyle())
                 }
                 .padding(RuneMetrics.pad)
             }
