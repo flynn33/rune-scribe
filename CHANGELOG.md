@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.26] - 2026-06-28
+
+- Fix Share-to-Messages, add macOS/iOS Messages send, copy carries cipher key, add Clear (#26) by @flynn33
+
 ## [1.0.25] - 2026-06-28
 
 - Selective contacts import; fix Share, first-message key, and remove-contacts (#25) by @flynn33
