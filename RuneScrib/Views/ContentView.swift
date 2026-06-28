@@ -38,6 +38,12 @@ struct ContentView: View {
     @State private var decodeError: String?
     @State private var showMessageCompose = false
 
+    // Linking the active cipher to a recipient so its first message carries the key.
+    @State private var showNewContact = false
+    @State private var newContactName = ""
+    @State private var newContactPhone = ""
+    @State private var newContactEmail = ""
+
     /// One glyph size shared by the editor and the inscription so the text never
     /// changes size when it transforms — only the glyphs change.
     private let glyphSize: CGFloat = 20
@@ -90,8 +96,12 @@ struct ContentView: View {
 
                     activeCipherBar
 
-                    if let contact = contactManager.contact(id: keyManager.activeCipher?.contactID) {
-                        composeRecipient(contact)
+                    if let active = keyManager.activeCipher {
+                        if let contact = contactManager.contact(id: active.contactID) {
+                            composeRecipient(contact)
+                        } else {
+                            recipientPicker(for: active)
+                        }
                     }
 
                     Picker("Mode", selection: $mode) {
@@ -137,6 +147,15 @@ struct ContentView: View {
             Button("OK") { decodeError = nil }
         } message: {
             Text(decodeError ?? "")
+        }
+        .alert("New Contact", isPresented: $showNewContact) {
+            TextField("Name", text: $newContactName)
+            TextField("Phone (optional)", text: $newContactPhone)
+            TextField("Email (optional)", text: $newContactEmail)
+            Button("Add") { addAndAssignContact() }
+            Button("Cancel", role: .cancel) { resetNewContact() }
+        } message: {
+            Text("Link this cipher to a person so your first message shares the key with them.")
         }
         .onReceive(NotificationCenter.default.publisher(for: .openLibraryRequested)) { _ in
             showLibrary = true
@@ -357,6 +376,38 @@ struct ContentView: View {
         .padding(.horizontal, 4)
     }
 
+    /// Shown when the active cipher isn't linked to anyone yet: pick (or add) the
+    /// recipient so the first message to them carries the cipher key.
+    private func recipientPicker(for cipher: Cipher) -> some View {
+        Menu {
+            ForEach(contactManager.contacts) { contact in
+                Button(contact.displayName) {
+                    keyManager.setContact(cipherID: cipher.id, contactID: contact.id)
+                }
+            }
+            if !contactManager.contacts.isEmpty { Divider() }
+            Button {
+                resetNewContact(); showNewContact = true
+            } label: {
+                Label("New Contact…", systemImage: "person.badge.plus")
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "person.crop.circle.badge.plus")
+                    .font(.system(size: 11))
+                    .foregroundColor(.runeBlue)
+                Text("Set recipient to include the key")
+                    .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.runeBlue)
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 9))
+                    .foregroundColor(.runeBlue)
+                Spacer()
+            }
+            .padding(.horizontal, 4)
+        }
+    }
+
     // MARK: - Actions
 
     private func performAction() {
@@ -405,6 +456,24 @@ struct ContentView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             withAnimation { copyConfirmed = false }
         }
+    }
+
+    /// Adds a manual contact from the New Contact fields and links the active cipher to
+    /// it, so the next message bootstraps the key to that person.
+    private func addAndAssignContact() {
+        defer { resetNewContact() }
+        guard let active = keyManager.activeCipher else { return }
+        let name = newContactName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        let phones = [newContactPhone.trimmingCharacters(in: .whitespacesAndNewlines)].filter { !$0.isEmpty }
+        let emails = [newContactEmail.trimmingCharacters(in: .whitespacesAndNewlines)].filter { !$0.isEmpty }
+        let contact = Contact(displayName: name, phones: phones, emails: emails, source: .manual)
+        contactManager.add(contact)
+        keyManager.setContact(cipherID: active.id, contactID: contact.id)
+    }
+
+    private func resetNewContact() {
+        newContactName = ""; newContactPhone = ""; newContactEmail = ""
     }
 
     /// A light line telling the sender whether this message carries the cipher key.

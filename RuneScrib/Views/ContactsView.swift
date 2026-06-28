@@ -28,6 +28,8 @@ struct ContactsView: View {
     #if os(iOS)
     @State private var showPicker = false
     #endif
+    // macOS has no system contact picker, so selective import uses an in-app picker.
+    @State private var showInAppPicker = false
     @State private var importing = false
     @State private var importError: String?
     @State private var showImportError = false
@@ -107,32 +109,37 @@ struct ContactsView: View {
         .sheet(isPresented: $showPicker) {
             ContactPicker { contactManager.addImported($0) }.ignoresSafeArea()
         }
+        #else
+        .sheet(isPresented: $showInAppPicker) {
+            ContactImportPicker().environmentObject(contactManager)
+        }
         #endif
     }
 
     private var actionsBar: some View {
         VStack(spacing: 12) {
+            Button { resetManual(); showAddManual = true } label: {
+                Label("Add Manually", systemImage: "person.badge.plus").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(RuneScribButtonStyle())
+
             HStack(spacing: 12) {
-                Button { resetManual(); showAddManual = true } label: {
-                    Label("Add Manually", systemImage: "person.badge.plus").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(RuneScribButtonStyle())
-                #if os(iOS)
-                Button { showPicker = true } label: {
-                    Label("Choose…", systemImage: "person.crop.circle.badge.plus").frame(maxWidth: .infinity)
+                Button { importAll() } label: {
+                    HStack {
+                        if importing { ProgressView().scaleEffect(0.8) }
+                        Label("Import All", systemImage: "square.and.arrow.down.on.square")
+                    }
+                    .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(RuneSecondaryButtonStyle())
-                #endif
-            }
-            Button { importAll() } label: {
-                HStack {
-                    if importing { ProgressView().scaleEffect(0.8) }
-                    Label("Import All from Contacts", systemImage: "square.and.arrow.down.on.square")
+                .disabled(importing)
+
+                Button { beginSelectiveImport() } label: {
+                    Label("Import Selected…", systemImage: "checklist").frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
+                .buttonStyle(RuneSecondaryButtonStyle())
+                .disabled(importing)
             }
-            .buttonStyle(RuneSecondaryButtonStyle())
-            .disabled(importing)
             if !contactManager.contacts.isEmpty {
                 HStack(spacing: 12) {
                     Button { toggleSelecting() } label: {
@@ -199,14 +206,14 @@ struct ContactsView: View {
                 Text("\(linked) cipher\(linked == 1 ? "" : "s")")
                     .font(.system(size: 11, design: .monospaced)).foregroundColor(.runeSilver)
                 Spacer()
-                if !selecting {
-                    Button { editTarget = contact; editName = contact.displayName; showEdit = true } label: {
-                        Image(systemName: "pencil").foregroundColor(.runeSilver)
-                    }.buttonStyle(.plain).help("Rename")
-                    Button { deleteTarget = contact; showDelete = true } label: {
-                        Image(systemName: "trash").foregroundColor(.red.opacity(0.85))
-                    }.buttonStyle(.plain).help("Delete")
-                }
+                // Per-card rename/delete stay available in both normal and Select modes so
+                // removing a contact is always discoverable.
+                Button { editTarget = contact; editName = contact.displayName; showEdit = true } label: {
+                    Image(systemName: "pencil").foregroundColor(.runeSilver)
+                }.buttonStyle(.plain).help("Rename")
+                Button { deleteTarget = contact; showDelete = true } label: {
+                    Image(systemName: "trash").foregroundColor(.red.opacity(0.85))
+                }.buttonStyle(.plain).help("Delete")
             }
         }
         .padding(16)
@@ -275,11 +282,19 @@ struct ContactsView: View {
         selection.removeAll()
         selecting = false
     }
+    private func beginSelectiveImport() {
+        #if os(iOS)
+        showPicker = true        // out-of-process system picker (no Contacts permission needed)
+        #else
+        showInAppPicker = true   // in-app multi-select (macOS has no system picker)
+        #endif
+    }
+
     private func importAll() {
         importing = true
         Task {
             do {
-                let snaps = try await ContactImporter.importAll()
+                let snaps = try await ContactImporter.fetchAll()
                 contactManager.addImported(snaps)
                 importing = false
             } catch {

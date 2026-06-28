@@ -44,12 +44,23 @@ struct RuneScribeShareFile: Transferable {
     }
 
     static var transferRepresentation: some TransferRepresentation {
+        // A real, correctly-typed file (preferred by AirDrop / Save to Files).
         FileRepresentation(exportedContentType: .runeScribe) { file in
-            let url = FileManager.default.temporaryDirectory
+            // Unique subdirectory so repeated/concurrent shares never collide on the name.
+            let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            let url = dir
                 .appendingPathComponent(file.filename)
                 .appendingPathExtension(RuneScribeShare.fileExtension)
             try file.data.write(to: url, options: .atomic)
             return SentTransferredFile(url)
         }
+        .suggestedFileName { "\($0.filename).\(RuneScribeShare.fileExtension)" }
+
+        // Fallback: several destinations (Messages, Mail) silently drop a lone
+        // app-internal FileRepresentation under iOS 17's Transferable behavior, so
+        // they fall through to this data representation and actually receive the file.
+        DataRepresentation(exportedContentType: .runeScribe) { $0.data }
+            .suggestedFileName { "\($0.filename).\(RuneScribeShare.fileExtension)" }
     }
 }
