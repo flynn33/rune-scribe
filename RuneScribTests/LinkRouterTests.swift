@@ -5,7 +5,8 @@ final class LinkRouterTests: XCTestCase {
 
     // MARK: cipher links
 
-    func testClassifiesHTTPSCipherImportAsCipher() throws {
+    func testClassifiesGeneratedShareURLAsCipher() throws {
+        // url(name:) now generates the offline runescribe:// form; it must classify as cipher.
         let url = try CipherSharePayload(cipher: .generated(label: "A")).url(name: nil)
         guard case .cipher = LinkRouter.classify(url) else {
             return XCTFail("expected .cipher for \(url.absoluteString)")

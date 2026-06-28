@@ -41,5 +41,19 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         FontStore.shared.registerBundledAndImportedFonts()
         return true
     }
+
+    /// Handles a `.runescribe` file tapped in Messages/Mail/Files (or a runescribe:// link),
+    /// including cold launch. SwiftUI's `.onOpenURL` alone is unreliable for document opens
+    /// on iOS, so the UIKit entry point routes them too — the same belt-and-suspenders the
+    /// macOS delegate uses. `FileRouter`/`LinkRouter` dedupe if `.onOpenURL` also fires.
+    func application(_ app: UIApplication, open url: URL,
+                     options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+        if url.isFileURL {
+            FileRouter.route(fileURL: url)
+        } else {
+            LinkRouter.route(url)
+        }
+        return true
+    }
 }
 #endif

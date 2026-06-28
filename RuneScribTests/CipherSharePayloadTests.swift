@@ -66,12 +66,25 @@ extension CipherSharePayloadTests {
         XCTAssertEqual(payload.publicID, c.publicID)
         XCTAssertNil(bytes)
     }
-    func testHTTPSURLRoundTrip() throws {
+    func testShareURLUsesOfflineCustomScheme() throws {
         let c = Cipher.generated(label: "Dee")
         let url = try CipherSharePayload(cipher: c).url(name: "Dee")
-        XCTAssertEqual(url.scheme, "https")
-        XCTAssertEqual(url.host, "ravenforgesoftware.com")
+        // Generated links are offline: they open the app from the Camera/scanner with no
+        // server or Universal-Link hosting. (The legacy https form is still *accepted* on
+        // input — see testLegacyHTTPSURLStillParses.)
+        XCTAssertEqual(url.scheme, "runescribe")
         let parsed = try CipherSharePayload(url: url)
+        XCTAssertEqual(parsed.keyMaterial, c.keyMaterial)
+        XCTAssertEqual(parsed.parsedName, "Dee")
+    }
+
+    func testLegacyHTTPSURLStillParses() throws {
+        let c = Cipher.generated(label: "Dee")
+        let p = CipherSharePayload(cipher: c).encoded()
+            .base64EncodedString().replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
+        let https = URL(string: "https://ravenforgesoftware.com/rune-scribe/import?v=3&p=\(p)&n=Dee")!
+        let parsed = try CipherSharePayload(url: https)
         XCTAssertEqual(parsed.keyMaterial, c.keyMaterial)
         XCTAssertEqual(parsed.parsedName, "Dee")
     }

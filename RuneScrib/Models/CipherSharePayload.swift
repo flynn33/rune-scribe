@@ -106,7 +106,8 @@ struct CipherSharePayload: Equatable {
         return (payload, rest)
     }
 
-    /// True for a Rune Scribe share link in either the https or legacy custom-scheme form.
+    /// True for a Rune Scribe share link in either the offline `runescribe:` custom-scheme
+    /// form (what we generate now) or the legacy https universal-link form (still accepted).
     static func isShareURL(_ string: String) -> Bool {
         let s = string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if s.hasPrefix("runescribe:") { return true }
@@ -131,7 +132,10 @@ struct CipherSharePayload: Equatable {
 
     func url(name: String?) throws -> URL {
         var comps = URLComponents()
-        comps.scheme = "https"; comps.host = Self.webHost; comps.path = Self.webPath
+        // Offline custom scheme: the iPhone Camera and the in-app scanner open the app from
+        // this directly — no server, no Universal-Link association file. `init(url:)` and
+        // `isShareURL` still accept the legacy https form for any links made before this.
+        comps.scheme = Self.scheme; comps.host = Self.host
         var items = [URLQueryItem(name: "v", value: String(Self.version)),
                      URLQueryItem(name: "p", value: Self.base64url(encoded()))]
         if let name = name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
@@ -142,7 +146,8 @@ struct CipherSharePayload: Equatable {
         return url
     }
 
-    /// Parse a Rune Scribe share URL in either the https universal-link or legacy `runescribe://import` form.
+    /// Parse a Rune Scribe share URL in either the offline `runescribe://import` form (what we
+    /// generate now) or the legacy https universal-link form (accepted for older links).
     init(url: URL) throws {
         guard let comps = URLComponents(url: url, resolvingAgainstBaseURL: false) else { throw CipherShareError.invalidURL }
         let isHTTPS = url.scheme?.lowercased() == "https"
