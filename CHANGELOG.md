@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.25] - 2026-06-28
+
+- Selective contacts import; fix Share, first-message key, and remove-contacts (#25) by @flynn33
+
 ## [1.0.24] - 2026-06-28
 
 - Fix Info.plist version and match build number to version (#24) by @flynn33
