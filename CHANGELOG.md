@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.28] - 2026-06-29
+
+- fix(messaging): scope cipher file and product link to first message only (#28) by @flynn33
+
 ## [1.0.27] - 2026-06-28
 
 - Offline cipher/message sharing: tap-to-import, iMessage button, macOS share, QR-only (#27) by @flynn33
