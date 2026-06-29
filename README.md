@@ -12,7 +12,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-111%20passing-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-126%20passing-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -35,13 +35,13 @@ A product of **Raven Forge Software**.
   fresh cipher, so every conversation has its own key.
 - **💬 Send over iMessage & Share** — encode a message and send it straight through
   **iMessage** (iOS) or the **system Share sheet** (both platforms). The runes ride
-  in the bubble; a companion link carries the sealed message. On the **first**
-  message to a contact, the key travels too — so they can read it with one tap and
-  never see a key-exchange step.
-- **🤝 Share a cipher, any way** — hand someone a cipher by **QR code**, by
-  **link** (a tappable `runescribe://` or `https://` Universal Link), or as a
-  portable **decoder file**. Every channel carries the same validated key and font
-  reference, isn't tied to your device, and works across installs.
+  in the bubble; on the **first** message to a contact a `.runescribe` file carries the
+  sealed message and the cipher key, so the recipient reads it with one tap and never
+  sees a key-exchange step. Every later message is runes only — they already hold the key.
+- **🤝 Share a cipher, two ways** — hand someone a cipher by **QR code** (an offline
+  `runescribe://` payload, scanned by the Camera or the in-app scanner) or as a portable
+  **`.runescribe` decoder file**. Both carry the same validated key and font reference,
+  aren't tied to your device, and work across installs — no server, no Universal Link.
 - **🔒 App lock** — an optional **4-digit PIN** gates the app on launch and when it
   returns from the background. The PIN is never stored: a salted
   **PBKDF2-HMAC-SHA256** hash lives in the Keychain, and repeated wrong guesses
@@ -120,28 +120,27 @@ simply tries each cipher it holds until exactly one succeeds.
 ## 🤝 Sharing a cipher
 
 A cipher is the shared secret: whoever holds it can read — and write — your runes.
-Rune Scribe gives three ways to hand one to a friend, all funnelling through the
-**same validated import path**.
+Rune Scribe gives two ways to hand one to a friend, both funnelling through the
+**same validated import path**, and both fully offline.
 
-- **QR code or link.** A cipher is packed into a compact **129-byte record** (version,
-  an 8-byte public ID, the 32-byte key, the 32-glyph permutation, the font
-  reference, and a SHA-256 checksum) carried as base64url inside a
-  `runescribe://import` deep link or an `https://ravenforgesoftware.com/rune-scribe/import`
-  **Universal Link** — small enough to become a QR code or a tappable link over
-  iMessage, Mail, or AirDrop. Your friend taps (or scans, on iOS) and Rune Scribe
-  offers a **one-tap import**; they name it and it's saved.
-- **Decoder file.** The portable fallback — a small binary package (the same 129-byte
-  record) written via the system file exporter and imported from **Cipher Library →
-  Import**. The file form additionally carries the **font bytes**, so a recipient who
-  lacks the bundled font still renders the runes correctly. Not tied to your device,
-  so it works across installs.
+- **QR code.** A cipher is packed into a compact **129-byte record** (version, an
+  8-byte public ID, the 32-byte key, the 32-glyph permutation, the font reference, and
+  a SHA-256 checksum) carried as base64url inside an offline `runescribe://import`
+  link and rendered as a QR code. Point another iPhone's Camera — or Rune Scribe's
+  in-app scanner — at it and Rune Scribe offers a **one-tap import**; you name it and
+  it's saved. Nothing leaves your devices: no server, no Universal Link.
+- **Decoder file.** A portable `.runescribe` package (the same 129-byte record) written
+  via the system Share sheet / file exporter and imported from **Cipher Library →
+  Import** or by tapping the received file. It additionally carries the **font bytes**,
+  so a recipient who lacks the bundled font still renders the runes correctly. Not tied
+  to your device, so it works across installs.
 
-Every channel — link, QR, clipboard, file — is validated on arrival: the record must
-be the right version, the right length, a true 0–31 permutation, and pass its
-checksum, or the import is rejected with a friendly message. The in-app **QR scanner
-is iOS-only**; on macOS you import via a tapped link, a pasted link, or the file.
+Every channel — QR, file, or a pasted `runescribe://` link — is validated on arrival:
+the record must be the right version and length, a true 0–31 permutation, and pass its
+checksum, or the import is rejected with a friendly message. The in-app **QR scanner is
+iOS-only**; on macOS you import via the file or a pasted link.
 
-> **Guard the cipher.** A shared QR image, link, or `.json` file carries the actual
+> **Guard the cipher.** A shared QR image or `.runescribe` file carries the actual
 > **256-bit key** — anyone who has it can read your runes, so hand it over privately
 > and don't post it publicly.
 
@@ -150,17 +149,22 @@ is iOS-only**; on macOS you import via a tapped link, a pasted link, or the file
 ## 💬 Sending a message
 
 Encode a message and Rune Scribe makes sending the obvious next step — **Send via
-iMessage** (iOS) or **Share** (both platforms). What goes out is two things in one
-message:
+iMessage** (iOS) or **Share** (both platforms). On the **first** message to a contact,
+what goes out is:
 
-1. **The runes, as plain text** — what a human sees in the bubble. Meaningless
-   without the key, so they leak nothing.
-2. **A Universal Link** (`…/rune-scribe/m`) carrying the **sealed envelope** and the
-   sender's display name. On the **first** message to a contact — when the cipher is
-   linked to that contact and hasn't yet been delivered — the **key is embedded too**,
-   so the recipient decodes instantly. Every later message carries just the envelope,
-   under the key they now hold. The compose screen says which: **“Key included”** vs
-   **“Uses your shared key.”**
+1. **The runes, as plain text** — what a human sees in the bubble. Meaningless without
+   the key, so they leak nothing.
+2. **A `.runescribe` file attachment** carrying the **sealed envelope** and the
+   sender's display name — and, on this first message (when the cipher is linked to the
+   contact and hasn't been delivered yet), the **cipher key** itself, so the recipient
+   decodes instantly. The compose screen says which: **“Key included”** vs **“Uses your
+   shared key.”**
+3. **A plain “get the app” link** to the Rune Scribe page, for a recipient who doesn't
+   have the app yet.
+
+Every **later** message to that contact is **runes only** — no file, no key, no link.
+The recipient already holds the cipher and reads the runes directly. No Universal
+Links, no server.
 
 ```mermaid
 sequenceDiagram
@@ -174,26 +178,26 @@ sequenceDiagram
     Alice->>App1: Type “Meet at dawn”, press Rune Scribe
     App1-->>Alice: Runes  ᛗᛖᛖᛏ ᚨᛏ ᛞᚨᚹᚾ  ·  “Key included”
     Alice->>App1: Send via iMessage / Share
-    App1-->>Msg: Runes (bubble) + Universal Link (sealed envelope + key)
+    App1-->>Msg: Runes (bubble) + .runescribe file (envelope + key) + get-the-app link
     Alice->>Bob: iMessage
-    Bob->>App2: Tap the link
+    Bob->>App2: Open the .runescribe file
     App2-->>App2: Import key · open envelope · file under “Alice”
     App2-->>Bob: “Meet at dawn”  → Reply
 ```
 
-**Recipient with the app** taps the link: Rune Scribe imports the embedded key (if
-present), opens the envelope by trying its ciphers (the AEAD tag picks exactly one),
-shows the decrypted message in a sheet, and **auto-files the cipher under a contact**
-named after the sender — then offers **Reply**. **Recipient without the app** just
-follows the same `https://` link to the Rune Scribe page on the website. Rotating a
-key is manual: make a new cipher for that contact, and its next message re-embeds the
-new key, which the other side auto-imports.
+**Recipient with the app** opens the `.runescribe` attachment: Rune Scribe imports the
+embedded key (if present), opens the envelope by trying its ciphers (the AEAD tag picks
+exactly one), shows the decrypted message in a sheet, and **auto-files the cipher under
+a contact** named after the sender — then offers **Reply**. **Recipient without the
+app** taps the plain "get the app" link to the Rune Scribe page. Rotating a key is
+manual: make a new cipher for that contact, and its next message re-embeds the new key,
+which the other side auto-imports.
 
 > The wire formats are pinned by tests: `CipherSharePayloadTests` and
 > `MessageSharePayloadTests` (encode, decode, round-trip, embedded-key,
-> version/checksum rejection), `LinkRouterTests` (cipher-vs-message classification),
-> and `MessageServiceTests` / `MessageCoordinatorTests` (try-all decryption + contact
-> auto-association).
+> version/checksum rejection), `FileRouterTests` (cipher-vs-message classification by
+> the leading version byte), and `MessageServiceTests` / `MessageCoordinatorTests`
+> (try-all decryption + contact auto-association).
 
 ---
 
@@ -317,8 +321,8 @@ flowchart TD
 - **Honest scope.** Rune Scribe is a personal-privacy tool: strong, standard
   encryption with a **manual, peer-to-peer key hand-off** and a fun Norse aesthetic.
   It is *not* a vetted secure messenger — there's no forward secrecy, no server-side
-  verification, and no protection once a key is shared. A cipher — `.json` file, QR
-  image, or link — **is** the key; guard it accordingly and don't post it publicly.
+  verification, and no protection once a key is shared. A cipher — `.runescribe` file,
+  QR image, or link — **is** the key; guard it accordingly and don't post it publicly.
 
 ---
 
@@ -342,8 +346,8 @@ RuneScrib/
 │                    DecoderDocument
 ├── Metal/        RuneMetalView, MetalRenderer, Shaders.metal
 └── Resources/    Assets, Noto Sans Runic font, raven-forge-spp-splash.mp4
-RuneScribTests/   111 unit tests (encryption, codec, library, contacts, PIN,
-                  share payloads, link routing, message intake)
+RuneScribTests/   126 unit tests (encryption, codec, library, contacts, PIN,
+                  share payloads, file/link routing, message intake)
 ```
 
 The Xcode project is generated from `project.yml` with
@@ -374,17 +378,18 @@ share one source tree behind `#if os(macOS)` / `#if os(iOS)` splits, built in
 **Swift 6** language mode. The macOS target ships with App Sandbox + Hardened Runtime
 enabled for Mac App Store distribution.
 
-Both targets register the **`runescribe://`** URL scheme and the
-**`applinks:ravenforgesoftware.com`** associated domain (for tap-to-import links and
-message Universal Links), and declare Contacts and (iOS) camera usage strings. Those
-Info.plist keys and entitlements — and the bundled splash video — are configured in
-`project.yml` and `Config/`, the source of truth.
+Both targets register the **`runescribe://`** URL scheme and a single exported
+**`com.runescribe.runescribe`** document type — the `.runescribe` cipher/message file,
+disambiguated by its leading version byte — and declare Contacts and (iOS) camera usage
+strings. Sharing is fully offline: there are no associated domains or Universal Links.
+Those Info.plist keys and entitlements — and the bundled splash video — are configured
+in `project.yml` and `Config/`, the source of truth.
 
 ---
 
 ## ✅ Testing
 
-**111 unit tests** (XCTest), run as a macOS unit-test bundle. The suite proves the
+**126 unit tests** (XCTest), run as a macOS unit-test bundle. The suite proves the
 load-bearing promises end to end — that a sealed message round-trips, that a friend
 can decrypt yours, and that every wire format rejects corruption:
 
@@ -397,7 +402,7 @@ can decrypt yours, and that every wire format rejects corruption:
 | `CipherTests` · `CipherLibraryTests` | the cipher model, library mutations, migration |
 | `CipherSharePayloadTests` | the 129-byte cipher record — encode, decode, checksum |
 | `MessageSharePayloadTests` | the message wire format + embedded key |
-| `LinkRouterTests` | cipher-vs-message URL classification |
+| `LinkRouterTests` · `FileRouterTests` | cipher-link routing · cipher-vs-message file classification |
 | `MessageCoordinatorTests` · `KeyManagerLinkTests` | intake, contact auto-association |
 | `Contact*Tests` (book, store, manager, importer) | contacts model, encrypted store, import |
 | `FontRefTests` · `FontStoreTests` | font reference, hash-verified font import |
