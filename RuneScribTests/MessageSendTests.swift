@@ -1,4 +1,5 @@
 import XCTest
+import CryptoKit
 @testable import RuneScrib
 
 final class MessageSendTests: XCTestCase {
@@ -74,5 +75,44 @@ extension MessageSendTests {
         XCTAssertEqual(back.senderName, "Freya")
         XCTAssertNil(fontBytes)
         XCTAssertEqual(back.embeddedCipher?.keyMaterial, cipher.keyMaterial)
+    }
+}
+
+extension MessageSendTests {
+    // A cipher whose font is NOT the bundled one rides its font bytes along ONLY on the first
+    // (key-bearing) message; a keyless follow-up file carries no font. Pins the
+    // `(includeKey && cipher.fontRef != .bundled)` branch of MessageSend.fileData, which the
+    // bundled-font test cannot reach.
+    func testFileDataAppendsCustomFontBytesOnlyWithKey() throws {
+        // Register a non-bundled font: reuse the real bundled font bytes under a custom ref so
+        // FontStore validates and stores them (valid font + matching hash).
+        let fontData = FontRef.bundledFontData()
+        XCTAssertFalse(fontData.isEmpty, "bundled font bytes must be available for this test")
+        let customRef = FontRef(id: "custom-test", version: 1,
+                                sha256: Data(SHA256.hash(data: fontData)))
+        XCTAssertNotEqual(customRef, .bundled)
+        try FontStore.shared.importFont(fontData, expecting: customRef)
+
+        // A cipher that references the custom (non-bundled) font.
+        let g = Cipher.generated(label: "Custom")
+        let cipher = Cipher(label: "Custom", origin: .generated, publicID: g.publicID,
+                            keyMaterial: g.keyMaterial, decorativeMapping: g.decorativeMapping,
+                            fontRef: customRef)
+        XCTAssertNotEqual(cipher.fontRef, .bundled)
+        let runes = try MessageService().compose("meet at dawn", with: cipher)
+
+        // First message (key included) → the custom font's bytes are appended.
+        let withKey = try MessageSend.fileData(runes: runes, senderName: "S",
+                                               cipher: cipher, includeKey: true)
+        let (p1, fontBytes) = try MessageSharePayload.decodeFile(withKey)
+        XCTAssertEqual(fontBytes, fontData, "the non-bundled font rides the first key-bearing message")
+        XCTAssertEqual(p1.embeddedCipher?.keyMaterial, cipher.keyMaterial)
+
+        // Follow-up (no key) → no font bytes appended.
+        let noKey = try MessageSend.fileData(runes: runes, senderName: "S",
+                                             cipher: cipher, includeKey: false)
+        let (p2, none) = try MessageSharePayload.decodeFile(noKey)
+        XCTAssertNil(none, "a keyless follow-up file carries no font bytes")
+        XCTAssertNil(p2.embeddedCipher)
     }
 }

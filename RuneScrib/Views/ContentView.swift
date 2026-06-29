@@ -37,6 +37,10 @@ struct ContentView: View {
     @State private var showSettings: Bool = false
     @State private var decodeError: String?
     @State private var showMessageCompose = false
+    /// The outgoing file captured when Send via iMessage is tapped — snapshotted *with* the
+    /// key (on a first message to a contact) before the cipher is marked delivered, so this
+    /// one message carries the key and the next one never does.
+    @State private var pendingMessageFile: Data?
 
     // Linking the active cipher to a recipient so its first message carries the key.
     @State private var showNewContact = false
@@ -60,15 +64,38 @@ struct ContentView: View {
         transformDirection == .encode ? keyManager.activeCipher : nil
     }
 
-    /// The self-contained `.runescribe` attachment bytes for the current runes (envelope,
-    /// plus the cipher key on a first delivery); nil when not on an encode result.
+    /// The self-contained `.runescribe` attachment bytes for the FIRST message to a contact —
+    /// the envelope plus the cipher key. Returns nil once the key has been delivered (and for
+    /// unlinked ciphers), so follow-up messages carry no file at all: only the runes (which a
+    /// holder of the cipher decodes) and the product link travel in the message text. The key
+    /// therefore rides exactly one message; re-sharing a cipher afterward is manual (QR / file).
     private func messageFileData() -> Data? {
-        guard transformDirection == .encode, let cipher = resultCipher else { return nil }
-        let include = MessageSend.shouldIncludeKey(cipher)
+        guard transformDirection == .encode, let cipher = resultCipher,
+              MessageSend.shouldIncludeKey(cipher) else { return nil }
         return try? MessageSend.fileData(runes: targetSnapshot,
                                          senderName: cipher.label,
                                          cipher: cipher,
-                                         includeKey: include)
+                                         includeKey: true)
+    }
+
+    /// Marks the active cipher delivered iff the current message embedded its key (a first
+    /// message to a linked contact). Used by every send/share path so the cipher attaches at
+    /// most once — never on a repeat. Deferred to the next runloop so an in-flight share keeps
+    /// the key-bearing file it already captured; only later messages drop the key.
+    private func consumeKeyIfNeeded() {
+        guard let cipher = resultCipher, MessageSend.shouldIncludeKey(cipher) else { return }
+        DispatchQueue.main.async { keyManager.markDelivered(cipherID: cipher.id) }
+    }
+
+    /// The text Rune Scribe sends for a message: always the runes. The plain "get the app"
+    /// product link is appended ONLY when this message also carries the cipher file (the first
+    /// message to a contact), so a recipient who lacks the app can find it. Follow-up messages —
+    /// which go to someone who already has the app and the cipher — send the runes alone, with
+    /// no link. The key itself never travels in this text; it rides only the first message's file.
+    private func outgoingMessageText(includeProductLink: Bool) -> String {
+        includeProductLink
+            ? "\(targetSnapshot)\n\n\(RuneScribeShare.productLink)"
+            : targetSnapshot
     }
 
     // MARK: - Body
@@ -134,9 +161,9 @@ struct ContentView: View {
         }
         #if os(iOS)
         .sheet(isPresented: $showMessageCompose) {
-            MessageComposeView(messageText: messageBody(),
+            MessageComposeView(messageText: outgoingMessageText(includeProductLink: pendingMessageFile != nil),
                                recipients: messageRecipients(),
-                               attachmentData: messageFileData(),
+                               attachmentData: pendingMessageFile,
                                onFinish: handleMessageSent)
         }
         #endif
@@ -290,16 +317,14 @@ struct ContentView: View {
                     .buttonStyle(RuneScribButtonStyle())
                 }
 
-                if transformDirection == .encode, let fileData = messageFileData() {
+                if transformDirection == .encode, let cipher = resultCipher {
+                    // The `.runescribe` file (carrying the cipher key) is attached ONLY on the
+                    // first message to a contact; `messageFileData()` returns nil thereafter, so
+                    // follow-up messages send just the runes + product link in the text. The
+                    // Send / Share buttons stay available either way.
+                    let fileData = messageFileData()
                     HStack(spacing: 14) {
-                        ShareLink(item: RuneScribeShareFile(data: fileData,
-                                                            filename: MessageSend.filename(senderName: resultCipher?.label ?? "")),
-                                  preview: SharePreview("Rune Scribe message",
-                                                        image: Image(systemName: "doc.fill"))) {
-                            Label("Share", systemImage: "square.and.arrow.up")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(RuneSecondaryButtonStyle())
+                        shareButton(fileData: fileData)
 
                         #if os(iOS)
                         // Always present so it's never "missing"; disabled (not hidden) when
@@ -307,6 +332,11 @@ struct ContentView: View {
                         // through the native Share sheet above (Messages/Mail/AirDrop) — no
                         // separate button, so we don't reinvent what the share sheet provides.
                         Button {
+                            // Snapshot the file (key-bearing on a first message, nil afterward)
+                            // for this send. Delivery is marked only when Messages reports an
+                            // actual send (handleMessageSent), never on tap — so cancelling the
+                            // compose sheet does not burn the one-time key bootstrap.
+                            pendingMessageFile = fileData
                             showMessageCompose = true
                         } label: {
                             Label("Send via iMessage", systemImage: "message.fill")
@@ -317,7 +347,7 @@ struct ContentView: View {
                         #endif
                     }
 
-                    keyIndicator(for: resultCipher)
+                    keyIndicator(for: cipher)
                 }
 
                 Button {
@@ -515,6 +545,38 @@ struct ContentView: View {
         newContactName = ""; newContactPhone = ""; newContactEmail = ""
     }
 
+    /// The Share button. On the first message to a contact it shares the self-contained
+    /// `.runescribe` file (envelope + key) and marks the cipher delivered; on every later
+    /// message there is no file, so it shares the runes alone (no product link — the link rides
+    /// only with the cipher file) — which a recipient who already holds the cipher decodes in
+    /// the Decode tab.
+    @ViewBuilder
+    private func shareButton(fileData: Data?) -> some View {
+        if let fileData {
+            ShareLink(item: RuneScribeShareFile(data: fileData,
+                                                filename: MessageSend.filename(senderName: resultCipher?.label ?? "")),
+                      preview: SharePreview("Rune Scribe message",
+                                            image: Image(systemName: "doc.fill"))) {
+                Label("Share", systemImage: "square.and.arrow.up")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(RuneSecondaryButtonStyle())
+            // The cipher key rides only this FIRST message. The moment the user hands it to the
+            // share sheet, mark it delivered so no later message re-attaches the key (re-sharing
+            // afterward is manual: QR or file). `fileData` was already captured into the share
+            // item above, so this message still carries the key; only subsequent ones won't.
+            .simultaneousGesture(TapGesture().onEnded { consumeKeyIfNeeded() })
+        } else {
+            // No cipher file on this message → share the runes alone. The product link rides
+            // only with the cipher file (the first message to a contact), never on follow-ups.
+            ShareLink(item: outgoingMessageText(includeProductLink: false)) {
+                Label("Share", systemImage: "square.and.arrow.up")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(RuneSecondaryButtonStyle())
+        }
+    }
+
     /// A light line telling the sender whether this message carries the cipher key.
     @ViewBuilder
     private func keyIndicator(for cipher: Cipher?) -> some View {
@@ -534,13 +596,6 @@ struct ContentView: View {
     }
 
     #if os(iOS)
-    /// Body for the iOS Messages compose sheet: the runes, a blank line, then a plain
-    /// "get the app" link so a recipient *without* Rune Scribe knows where to get it. The
-    /// cipher + message ride in the attached file, never in this link.
-    private func messageBody() -> String {
-        "\(targetSnapshot)\n\n\(RuneScribeShare.productLink)"
-    }
-
     /// Phone numbers + emails of the active cipher's linked contact, if any.
     private func messageRecipients() -> [String]? {
         guard let contact = contactManager.contact(id: resultCipher?.contactID) else { return nil }

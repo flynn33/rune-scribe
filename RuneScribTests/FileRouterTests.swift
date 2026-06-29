@@ -38,3 +38,39 @@ final class FileRouterTests: XCTestCase {
         XCTAssertNotEqual(MessageSharePayload.version, CipherSharePayload.version)
     }
 }
+
+extension FileRouterTests {
+    // A tapped `.runescribe` MESSAGE file routed through `FileRouter.route(fileURL:)` — the exact
+    // call the SceneDelegate / `.onOpenURL` make for an opened attachment — must reach
+    // `MessageCoordinator` (NOT the cipher `ImportCoordinator`). With no matching cipher held,
+    // MessageCoordinator surfaces an error rather than a pending import; that the error lands on
+    // MessageCoordinator while ImportCoordinator stays untouched proves the message branch routed.
+    // Complements `InboundFileRoutingTests`, which covers the tapped CIPHER file.
+    @MainActor
+    func testTappedMessageFileRoutesToMessageCoordinator() throws {
+        MessageCoordinator.shared.pending = nil
+        MessageCoordinator.shared.errorMessage = nil
+        ImportCoordinator.shared.pending = nil
+        ImportCoordinator.shared.errorMessage = nil
+
+        // A well-formed message file (leading 0x01) for a cipher nobody holds, no embedded key.
+        let stranger = Cipher.generated(label: "Stranger")
+        let env = MessageEnvelope.wrap(try MessageCryptor().seal("you can't read this", with: stranger))
+        let bytes = MessageSharePayload(senderName: "Tester", envelope: env, embeddedCipher: nil).encoded()
+        XCTAssertEqual(bytes.first, MessageSharePayload.version, "a message file leads with the message version byte")
+
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension(RuneScribeShare.fileExtension)
+        try bytes.write(to: url)
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        FileRouter.route(fileURL: url)
+
+        XCTAssertNil(ImportCoordinator.shared.pending,
+                     "a message file must NOT be handed to the cipher import coordinator")
+        XCTAssertNotNil(MessageCoordinator.shared.errorMessage,
+                        "the message routed to MessageCoordinator, which reports no-matching-cipher")
+        XCTAssertNil(MessageCoordinator.shared.pending)
+    }
+}
