@@ -57,15 +57,19 @@ struct RuneScribApp: App {
                 .environmentObject(MessageCoordinator.shared)
                 .environmentObject(ContactManager.shared)
                 // An inbound URL lands here on both platforms, even from a cold launch.
-                // A `.runescribe` *file* (opened attachment / AirDrop / Open in…) goes to
+                // Everything — this, the app-delegate opens, and (on iOS) the scene
+                // delegate's URL contexts — funnels through the one canonical router:
+                // a `.runescribe` *file* (opened attachment / AirDrop / Open in…) goes to
                 // FileRouter (message vs. cipher by version byte); a runescribe:// *link*
                 // (cipher QR/import) goes to LinkRouter.
                 .onOpenURL { url in
-                    if url.isFileURL {
-                        FileRouter.route(fileURL: url)
-                    } else {
-                        LinkRouter.route(url)
-                    }
+                    InboundOpenRouter.route(url: url)
+                }
+                // A legacy https import link (still accepted by CipherSharePayload) is
+                // delivered as a web-browsing user activity rather than a URL open, so it
+                // needs its own handler; it routes to LinkRouter through the same canonical path.
+                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                    InboundOpenRouter.route(userActivity: activity)
                 }
         }
     }
