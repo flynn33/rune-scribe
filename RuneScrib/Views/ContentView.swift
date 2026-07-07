@@ -332,9 +332,18 @@ struct ContentView: View {
                         // through the native Share sheet above (Messages/Mail/AirDrop) — no
                         // separate button, so we don't reinvent what the share sheet provides.
                         Button {
+                            // A first message must actually be able to attach the key file. If
+                            // this device/account can't attach it, don't quietly send a keyless
+                            // message that would strand the recipient — tell them to use Share.
+                            if fileData != nil,
+                               !MessageComposeView.canSend(requiredAttachment: true) {
+                                decodeError = "This device can’t attach Rune Scribe files to Messages. Use Share to send the key instead."
+                                return
+                            }
                             // Snapshot the file (key-bearing on a first message, nil afterward)
                             // for this send. Delivery is marked only when Messages reports an
-                            // actual send (handleMessageSent), never on tap — so cancelling the
+                            // actual send AND the key attachment was accepted (handleMessageSent
+                            // via the composer's delivery gate), never on tap — so cancelling the
                             // compose sheet does not burn the one-time key bootstrap.
                             pendingMessageFile = fileData
                             showMessageCompose = true
@@ -343,7 +352,7 @@ struct ContentView: View {
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(RuneScribButtonStyle())
-                        .disabled(!MessageComposeView.canSend)
+                        .disabled(!MessageComposeView.canSend(requiredAttachment: false))
                         #endif
                     }
 
