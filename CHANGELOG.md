@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.31] - 2026-07-07
+
+- fix(ios): reliably import .runescribe files opened from Messages (#30) by @flynn33
+
 ## [1.0.29] - 2026-06-29
 
 - docs(readme): describe file-based offline sharing; test count 111 -> 126 (#29) by @flynn33
