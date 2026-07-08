@@ -1,14 +1,14 @@
 name: Version Bump and Changelog
 
-# When a pull request is merged into main, bump the app version (MARKETING_VERSION
-# patch + CURRENT_PROJECT_VERSION build number) in project.yml and the committed
-# Xcode project, prepend a CHANGELOG.md entry, commit, and tag the release.
+# When a pull request is merged into main, bump the app version
+# (MARKETING_VERSION patch + CURRENT_PROJECT_VERSION build number) in project.yml
+# and the committed Xcode project, prepend a CHANGELOG.md entry, and commit the
+# version update.
 #
 # Bump size is driven by PR labels: "major" / "minor" / "patch" (default patch).
 # Add a "skip-release" label to merge without bumping. Versioning and changelog
 # live in one workflow so the change is atomic and to avoid GitHub's rule that a
-# GITHUB_TOKEN push does not trigger another workflow (a separate changelog
-# workflow keyed on the tag/commit would never fire).
+# GITHUB_TOKEN push does not trigger another workflow.
 
 on:
   pull_request:
@@ -95,13 +95,11 @@ jobs:
           sed -i "/<!-- NEW ENTRIES BELOW -->/r $TMP" CHANGELOG.md
           rm -f "$TMP"
 
-          # --- Commit, tag, push ----------------------------------------------
+          # --- Commit and push ------------------------------------------------
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add project.yml CHANGELOG.md "$PBX" 2>/dev/null || git add project.yml CHANGELOG.md
-          git commit -m "chore(release): v$NEW (build $NEWB) [skip ci]"
-          git tag "v$NEW" || true
+          git commit -m "chore(version): v$NEW (build $NEWB) [skip ci]"
           git push origin HEAD:main
-          git push origin "v$NEW" || true
 
-          echo "Released v$NEW (build $NEWB)."
+          echo "Updated version to v$NEW (build $NEWB)."
