@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [Unreleased]
+
+- docs: clarify that automatic cipher import from Messages is not supported on macOS.
+
 ## [1.0.31] - 2026-07-07
 
 - fix(ios): reliably import .runescribe files opened from Messages (#30) by @flynn33

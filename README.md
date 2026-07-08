@@ -140,6 +140,10 @@ the record must be the right version and length, a true 0–31 permutation, and 
 checksum, or the import is rejected with a friendly message. The in-app **QR scanner is
 iOS-only**; on macOS you import via the file or a pasted link.
 
+> **macOS note.** Automatic cipher import from Messages is not supported on Mac.
+> On macOS, import a received cipher manually from **Cipher Library → Import**, by
+> opening the `.runescribe` file, or by pasting a `runescribe://` import link.
+
 > **Guard the cipher.** A shared QR image or `.runescribe` file carries the actual
 > **256-bit key** — anyone who has it can read your runes, so hand it over privately
 > and don't post it publicly.
@@ -192,6 +196,10 @@ a contact** named after the sender — then offers **Reply**. **Recipient withou
 app** taps the plain "get the app" link to the Rune Scribe page. Rotating a key is
 manual: make a new cipher for that contact, and its next message re-embeds the new key,
 which the other side auto-imports.
+
+Automatic cipher import from Messages is an iOS flow. macOS users can still exchange
+the same `.runescribe` cipher files, but must import them manually before using the
+new key. See [Platform notes](docs/platform-notes.md) for the supported import paths.
 
 > The wire formats are pinned by tests: `CipherSharePayloadTests` and
 > `MessageSharePayloadTests` (encode, decode, round-trip, embedded-key,
