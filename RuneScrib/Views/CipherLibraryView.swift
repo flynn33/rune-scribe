@@ -258,14 +258,17 @@ struct CipherLibraryView: View {
 
                 Spacer()
 
-                // A canonical cipher (runes within the shareable pool) can be expressed
-                // as a link/QR; reuse that as the shareability check, but share the
-                // self-contained `.runescribe` file (key + font), not the URL.
-                if (try? keyManager.shareURL(for: cipher.id, name: cipher.label)) != nil,
-                   let file = try? RuneScribeShareFile(data: keyManager.exportData(for: cipher.id),
-                                                       filename: keyManager.exportFilename(for: cipher.id)) {
-                    ShareLink(item: file,
-                              preview: SharePreview(cipher.label)) {
+                // Share the offline `runescribe://import?…` deep link — the same payload
+                // as the QR. Recipients tapping the link in Messages / Mail / Notes open
+                // the app and land on the import sheet via LinkRouter. (A `.runescribe`
+                // *file* is still available from Export; files do not single-tap-launch
+                // third-party apps from Messages, so sharing a file here broke auto-import.)
+                if let shareURL = try? keyManager.shareURL(for: cipher.id, name: cipher.label) {
+                    ShareLink(
+                        item: shareURL,
+                        subject: Text("Rune Scribe cipher: \(cipher.label)"),
+                        message: Text("Tap to open in Rune Scribe and import this cipher so you can decode my messages.")
+                    ) {
                         cardIconChrome("square.and.arrow.up")
                     }
                     .buttonStyle(.plain)

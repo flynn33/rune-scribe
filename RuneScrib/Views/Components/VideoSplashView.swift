@@ -10,9 +10,43 @@ import AppKit
 #endif
 
 /// The bundled splash video, or nil if the asset is missing (in which case the
-/// app skips the splash entirely).
+/// app skips the splash entirely). Also owns the “play at most once every 30 days”
+/// schedule so cold launches after the first stay quiet until the interval elapses.
 enum SplashAsset {
     static let url = Bundle.main.url(forResource: "raven-forge-spp-splash", withExtension: "mp4")
+
+    /// UserDefaults key storing the `Date` the intro was last presented.
+    static let lastShownDefaultsKey = "rf.splash.lastShownAt"
+
+    /// Minimum time between intro presentations (30 days).
+    static let replayInterval: TimeInterval = 30 * 24 * 60 * 60
+
+    /// Whether this cold launch should present the intro video.
+    ///
+    /// Returns `true` when the asset is present and either the intro has never
+    /// been shown on this install, or at least `replayInterval` has passed since
+    /// the last presentation. Background→foreground resumes never re-evaluate
+    /// this; only a new process (cold launch) builds `RootView` again.
+    static func shouldShow(
+        now: Date = Date(),
+        defaults: UserDefaults = .standard
+    ) -> Bool {
+        guard url != nil else { return false }
+        guard let lastShown = defaults.object(forKey: lastShownDefaultsKey) as? Date else {
+            return true
+        }
+        return now.timeIntervalSince(lastShown) >= replayInterval
+    }
+
+    /// Records that the intro was presented so the next cold launches stay quiet
+    /// until `replayInterval` elapses. Call when the splash is dismissed (finish,
+    /// skip, or timeout) so a killed mid-play still re-offers the intro once.
+    static func markShown(
+        now: Date = Date(),
+        defaults: UserDefaults = .standard
+    ) {
+        defaults.set(now, forKey: lastShownDefaultsKey)
+    }
 }
 
 // MARK: - Playback model
