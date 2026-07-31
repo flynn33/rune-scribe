@@ -4,7 +4,7 @@ import SwiftUI
 
 /// Hosts the main interface and overlays the lock screen whenever the app is
 /// locked. Re-locks (if a PIN is set) when the app moves to the background, and
-/// plays the launch splash on a cold start.
+/// plays the launch splash on a cold start when the 30-day intro schedule allows.
 struct RootView: View {
 
     @EnvironmentObject private var appLock: AppLock
@@ -17,11 +17,13 @@ struct RootView: View {
     /// clipboard (which can briefly notify the user on iOS) when its contents change.
     @State private var lastClipboardChangeCount = 0
 
-    /// Shown once per process. Because this `@State` is created when the scene is
-    /// first built (a cold launch) and persists across background/foreground
-    /// cycles, the splash plays on first open and on the first open after the app
-    /// has been fully closed — but not when merely resuming from the background.
-    @State private var showSplash = (SplashAsset.url != nil)
+    /// Shown at most once per process, and only when `SplashAsset.shouldShow` is
+    /// true (asset present and ≥ 30 days since last intro). Because this `@State`
+    /// is created when the scene is first built (a cold launch) and persists across
+    /// background/foreground cycles, the splash never restarts when merely
+    /// resuming from the background — only a full quit/relaunch re-evaluates the
+    /// 30-day schedule.
+    @State private var showSplash = SplashAsset.shouldShow()
 
     var body: some View {
         ZStack {
@@ -35,6 +37,9 @@ struct RootView: View {
 
             if showSplash, let url = SplashAsset.url {
                 VideoSplashView(videoURL: url) {
+                    // Record presentation so the next cold launches skip until the
+                    // 30-day window elapses (finish, skip, and timeout all land here).
+                    SplashAsset.markShown()
                     withAnimation(.easeInOut(duration: 0.45)) { showSplash = false }
                 }
                 .transition(.opacity)

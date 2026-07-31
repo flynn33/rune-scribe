@@ -7,13 +7,14 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.33] - 2026-07-31
+
+- Play the cold-launch intro at most once every 30 days.
+- Share ciphers from the Cipher Library as `runescribe://import` deep links so recipients can tap to open the app and import (file export remains available separately).
+
 ## [1.0.32] - 2026-07-08
 
 - docs: clarify macOS cipher import support (#31) by @flynn33
-
-## [Unreleased]
-
-- docs: clarify that automatic cipher import from Messages is not supported on macOS.
 
 ## [1.0.31] - 2026-07-07
 

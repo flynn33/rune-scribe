@@ -12,7 +12,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-126%20passing-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-130%20passing-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -38,10 +38,10 @@ A product of **Raven Forge Software**.
   in the bubble; on the **first** message to a contact a `.runescribe` file carries the
   sealed message and the cipher key, so the recipient reads it with one tap and never
   sees a key-exchange step. Every later message is runes only — they already hold the key.
-- **🤝 Share a cipher, two ways** — hand someone a cipher by **QR code** (an offline
-  `runescribe://` payload, scanned by the Camera or the in-app scanner) or as a portable
-  **`.runescribe` decoder file**. Both carry the same validated key and font reference,
-  aren't tied to your device, and work across installs — no server, no Universal Link.
+- **🤝 Share a cipher, two ways** — hand someone a cipher by **Share** / **QR** (an offline
+  `runescribe://import` deep link the recipient taps to open the app and import) or as a
+  portable **`.runescribe` decoder file** from Export. Both carry the same validated key;
+  the file also carries font bytes. No server, no Universal Link.
 - **🔒 App lock** — an optional **4-digit PIN** gates the app on launch and when it
   returns from the background. The PIN is never stored: a salted
   **PBKDF2-HMAC-SHA256** hash lives in the Keychain, and repeated wrong guesses
@@ -53,8 +53,8 @@ A product of **Raven Forge Software**.
   **Noto Sans Runic** font so every rune renders sharply, and one cohesive design
   system across both platforms.
 - **🎬 Cold-launch intro** — a short, skippable Raven Forge splash video plays on
-  first open (tap anywhere or **Skip**), bypassed automatically if the video asset
-  isn't bundled.
+  first open and at most once every **30 days** thereafter (tap anywhere or **Skip**),
+  bypassed automatically if the video asset isn't bundled.
 
 ---
 
@@ -123,19 +123,21 @@ A cipher is the shared secret: whoever holds it can read — and write — your 
 Rune Scribe gives two ways to hand one to a friend, both funnelling through the
 **same validated import path**, and both fully offline.
 
-- **QR code.** A cipher is packed into a compact **129-byte record** (version, an
-  8-byte public ID, the 32-byte key, the 32-glyph permutation, the font reference, and
-  a SHA-256 checksum) carried as base64url inside an offline `runescribe://import`
-  link and rendered as a QR code. Point another iPhone's Camera — or Rune Scribe's
-  in-app scanner — at it and Rune Scribe offers a **one-tap import**; you name it and
-  it's saved. Nothing leaves your devices: no server, no Universal Link.
-- **Decoder file.** A portable `.runescribe` package (the same 129-byte record) written
-  via the system Share sheet / file exporter and imported from **Cipher Library →
-  Import** or by tapping the received file. It additionally carries the **font bytes**,
-  so a recipient who lacks the bundled font still renders the runes correctly. Not tied
-  to your device, so it works across installs.
+- **Share link / QR code.** A cipher is packed into a compact **129-byte record**
+  (version, an 8-byte public ID, the 32-byte key, the 32-glyph permutation, the font
+  reference, and a SHA-256 checksum) carried as base64url inside an offline
+  `runescribe://import` deep link. **Cipher Library → Share** sends that link through
+  the system share sheet (Messages, Mail, Notes, …); the same link is also rendered as
+  a **QR code**. The recipient taps the link (or scans the QR with Camera / the in-app
+  scanner) and Rune Scribe opens with a **one-tap import**. Nothing leaves your devices:
+  no server, no Universal Link.
+- **Decoder file.** A portable `.runescribe` package (the same 129-byte record plus
+  optional **font bytes**) from **Cipher Library → Export** (or the file exporter).
+  Import from **Cipher Library → Import**, or open the file with Rune Scribe. Use this
+  when you need the font bytes to travel with the key; message attachments still use
+  `.runescribe` files for first-message key delivery.
 
-Every channel — QR, file, or a pasted `runescribe://` link — is validated on arrival:
+Every channel — Share link, QR, file, or a pasted `runescribe://` link — is validated on arrival:
 the record must be the right version and length, a true 0–31 permutation, and pass its
 checksum, or the import is rejected with a friendly message. The in-app **QR scanner is
 iOS-only**; on macOS you import via the file or a pasted link.
