@@ -475,7 +475,7 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         XCTAssertEqual(summary.assignedContactID, ContactID(rawValue: contactID))
     }
 
-    func testUnavailableFileImportEmitsFailedImportStateBeforeThrowing() async throws {
+    func testMissingFileImportEmitsProtectedFileFailureBeforeReturning() async throws {
         let store = InMemorySecureValueStore()
         try await Self.seedLegacyLibrary(in: store)
         let service = RuneScribeCoreApplicationService(
@@ -501,19 +501,26 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         )
         do {
             _ = try await service.importFile(input)
-            XCTFail("Expected P4B import to be unavailable")
+            XCTFail("Expected the missing file to fail")
         } catch let error as RuneScribeProductError {
             XCTAssertEqual(
                 error,
-                .failure(RuneScribeFailureDTO(code: .temporarilyUnavailable))
+                .failure(RuneScribeFailureDTO(code: .protectedFileUnavailable))
             )
         }
 
-        let failedValue = await iterator.next()
-        let failed = try XCTUnwrap(failedValue)
+        var failedSnapshot: RuneScribeApplicationSnapshot?
+        for _ in 0..<2 {
+            let candidate = await iterator.next()
+            if candidate?.importState.phase == .failed {
+                failedSnapshot = candidate
+                break
+            }
+        }
+        let failed = try XCTUnwrap(failedSnapshot)
         XCTAssertEqual(failed.importState.phase, .failed)
-        XCTAssertEqual(failed.importState.lastFailure?.code, .temporarilyUnavailable)
-        XCTAssertEqual(failed.lastFailure?.code, .temporarilyUnavailable)
+        XCTAssertEqual(failed.importState.lastFailure?.code, .protectedFileUnavailable)
+        XCTAssertEqual(failed.lastFailure?.code, .protectedFileUnavailable)
     }
 
     // MARK: - Frozen migration fixture

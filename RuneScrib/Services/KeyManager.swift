@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import RuneScribeContracts
+import RuneScribeUIRuntime
 
 /// Key-free view state used by the hosted SwiftUI screens during the module migration.
 ///
@@ -38,10 +39,15 @@ final class KeyManager: ObservableObject {
     @Published private(set) var lastError: String?
 
     private let service: any RuneScribeApplicationService
+    private let sharePresentation: OpaqueSharePresentationProvider
     private var stateTask: Task<Void, Never>?
 
-    init(service: any RuneScribeApplicationService) {
+    init(
+        service: any RuneScribeApplicationService,
+        sharePresentation: OpaqueSharePresentationProvider = .unavailable
+    ) {
         self.service = service
+        self.sharePresentation = sharePresentation
         stateTask = Task { [weak self, service] in
             for await state in service.stateStream() {
                 guard !Task.isCancelled else { return }
@@ -132,33 +138,6 @@ final class KeyManager: ObservableObject {
         }
     }
 
-    func unlinkContact(_ contactID: UUID) async throws {
-        try await unlinkContacts([contactID])
-    }
-
-    func unlinkContacts(_ contactIDs: Set<UUID>) async throws {
-        let affected = ciphers.filter { cipher in
-            cipher.contactID.map(contactIDs.contains) == true
-        }
-        for cipher in affected {
-            try await setContact(cipherID: cipher.id, contactID: nil)
-        }
-    }
-
-    /// Preserves the legacy imported-contact behavior without exposing Core models:
-    /// create one linked cipher, then restore the prior active selection.
-    @discardableResult
-    func ensureLinkedCipher(forImportedContact contact: Contact) async throws -> CipherViewState? {
-        guard ciphers(forContact: contact.id).isEmpty else { return nil }
-        let priorActiveID = activeCipher?.id
-        let created = try await addCipher(label: contact.displayName)
-        try await setContact(cipherID: created.id, contactID: contact.id)
-        if let priorActiveID {
-            try await setActive(id: priorActiveID)
-        }
-        return ciphers.first(where: { $0.id == created.id }) ?? created
-    }
-
     func encode(_ plaintext: String, cipherID: UUID?) async throws -> EncodedMessageResult {
         try await perform {
             try await service.encode(
@@ -221,6 +200,10 @@ final class KeyManager: ObservableObject {
 
     func releaseShareArtifact(id: ShareArtifactID) async {
         await service.releaseShareArtifact(id: id)
+    }
+
+    func shareTransfer(for id: ShareArtifactID) async throws -> OpaqueShareTransfer {
+        try await sharePresentation.transfer(for: id)
     }
 
     func importFile(

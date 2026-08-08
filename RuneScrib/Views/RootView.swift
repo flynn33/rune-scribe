@@ -3,18 +3,13 @@
 import SwiftUI
 
 /// Hosts the main interface and overlays the lock screen whenever the app is
-/// locked. Re-locks (if a PIN is set) when the app moves to the background, and
-/// plays the launch splash on a cold start when the 30-day intro schedule allows.
+/// locked. The Core lifecycle path re-locks on background, while this view plays
+/// the launch splash on a cold start when the 30-day intro schedule allows.
 struct RootView: View {
 
     @EnvironmentObject private var appLock: AppLock
     @EnvironmentObject private var coordinator: ImportCoordinator
     @EnvironmentObject private var messageCoordinator: MessageCoordinator
-    @Environment(\.scenePhase) private var scenePhase
-
-    /// The pasteboard change counter last inspected, so a foreground only reads the
-    /// clipboard (which can briefly notify the user on iOS) when its contents change.
-    @State private var lastClipboardChangeCount = 0
 
     /// Shown at most once per process, and only when `SplashAsset.shouldShow` is
     /// true (asset present and ≥ 30 days since last intro). Because this `@State`
@@ -47,13 +42,6 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: appLock.isLocked)
-        .onChange(of: scenePhase) { _, newPhase in
-            switch newPhase {
-            case .background: appLock.lockIfEnabled()
-            case .active:     checkClipboardForCipher()
-            default:          break
-            }
-        }
         // Import confirmation. The `get` returns nil while the splash is up or the
         // app is locked, so a deep link or clipboard cipher waits and presents the
         // moment the splash ends and the app unlocks.
@@ -120,15 +108,4 @@ struct RootView: View {
         }
     }
 
-    /// On returning to the foreground, offer to import a `runescribe://` cipher
-    /// sitting on the clipboard (e.g. a link a friend texted and the user copied).
-    private func checkClipboardForCipher() {
-        guard !showSplash, !appLock.isLocked, coordinator.pending == nil else { return }
-        let count = Clipboard.changeCount
-        guard count != lastClipboardChangeCount else { return }
-        lastClipboardChangeCount = count
-        if let urlString = Clipboard.runeScribeURLString() {
-            LinkRouter.route(urlString: urlString, coordinator: coordinator)
-        }
-    }
 }

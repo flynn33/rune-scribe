@@ -235,8 +235,8 @@ end
 module_import_policy = {
   "RuneScribeContracts" => %w[Foundation],
   "RuneScribeRuntimeCore" => %w[Foundation RuneScribeContracts],
-  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore],
-  "RuneScribePlatform" => %w[Foundation RuneScribeContracts Security Contacts CoreText AppKit UIKit],
+  "RuneScribeUIRuntime" => %w[Foundation SwiftUI CoreImage CoreTransferable AppKit UIKit RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribePlatform" => %w[Foundation Darwin RuneScribeContracts Security Contacts CoreText AppKit UIKit],
   "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto RuneScribeContracts RuneScribeRuntimeCore],
   "RuneScribeUIModule" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIRuntime AppKit UIKit MessageUI Metal MetalKit CoreImage AVFoundation ContactsUI UniformTypeIdentifiers]
 }
@@ -349,7 +349,7 @@ host_files.each do |path|
     next unless match
     allowed = %w[
       Foundation SwiftUI AppKit UIKit RuneScribeContracts RuneScribeRuntimeCore
-      RuneScribePlatform RuneScribeCoreModule RuneScribeUIModule
+      RuneScribePlatform RuneScribeCoreModule RuneScribeUIModule RuneScribeUIRuntime
     ]
     errors << "#{relative(path, root)}:#{index + 1}: host may not import #{match[1]}" unless allowed.include?(match[1])
   end

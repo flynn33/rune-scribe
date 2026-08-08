@@ -1,5 +1,6 @@
 // RuneScrib/Views/QRDisplaySheet.swift
 
+import RuneScribeUIRuntime
 import SwiftUI
 
 /// Shows a cipher as a scannable QR code — the only way a cipher is shared. Point the
@@ -10,7 +11,7 @@ struct QRDisplaySheet: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    let url: URL
+    let transfer: OpaqueShareTransfer
     let label: String
 
     var body: some View {
@@ -49,7 +50,7 @@ struct QRDisplaySheet: View {
 
     @ViewBuilder
     private var qrImage: some View {
-        if let image = QRCodeGenerator.image(for: url) {
+        if let image = transfer.qrCodeImage() {
             image
                 .interpolation(.none)
                 .resizable()

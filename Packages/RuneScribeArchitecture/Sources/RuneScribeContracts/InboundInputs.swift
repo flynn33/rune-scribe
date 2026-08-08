@@ -125,6 +125,7 @@ public enum InboundInputDispositionDTO: String, Codable, Hashable, Sendable {
     case accepted
     case duplicate
     case ignored
+    case rejected
 }
 
 public protocol RuneScribeInboundInputService: Sendable {

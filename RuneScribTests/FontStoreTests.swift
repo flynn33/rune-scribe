@@ -1,40 +1,55 @@
+import CryptoKit
+import Foundation
 import RuneScribeContracts
-import RuneScribePlatform
 import XCTest
 @testable import RuneScrib
 
+@MainActor
 final class FontStoreTests: XCTestCase {
-    func testLaunchRegistrationToleratesMissingImportedFontDirectory() {
-        let root = temporaryDirectory(named: "MissingImportedFonts")
-        defer { try? FileManager.default.removeItem(at: root) }
-        let store = FontStore(
-            files: AppleProtectedFileStore(applicationSupportDirectory: root)
-        )
+    func testLaunchBridgeTriggersCoreRegistrationWithoutCreatingImportedDirectory() async throws {
+        let context = try TestApplicationFactory.makeIntegratedContext()
+        let store = FontStore(applicationService: context.service)
 
         store.registerBundledAndImportedFonts()
+        await waitUntil {
+            await context.fontRegistrar.isRegistered(context.bundledFontData)
+        }
 
-        XCTAssertFalse(
-            FileManager.default.fileExists(
-                atPath: root.appendingPathComponent("RuneScribFonts").path
-            )
+        let directoryExists = try await context.protectedFiles.exists(
+            relativePath: .fontsDirectory
         )
+        XCTAssertFalse(directoryExists)
     }
 
-    func testLaunchRegistrationDoesNotMutatePersistedFontBytes() throws {
-        let root = temporaryDirectory(named: "PersistedImportedFont")
-        defer { try? FileManager.default.removeItem(at: root) }
-        let files = AppleProtectedFileStore(applicationSupportDirectory: root)
-        let path = try ProtectedPath.fontsDirectory.appending("fixture.ttf")
-        let bytes = Data([0x00, 0x01, 0x00, 0x00, 0x52, 0x46])
-        try files.writeSynchronously(bytes, relativePath: path)
+    func testLaunchBridgeRegistersButDoesNotMutatePersistedCustomFontBytes() async throws {
+        let bytes = Data("persisted-font-fixture".utf8)
+        let digest = Data(SHA256.hash(data: bytes))
+        let name = digest.map { String(format: "%02x", $0) }.joined() + ".ttf"
+        let path = try ProtectedPath.fontsDirectory.appending(name)
+        let context = try TestApplicationFactory.makeIntegratedContext(
+            protectedFiles: [path: bytes],
+            additionalFontNames: [bytes: "PersistedFixture"]
+        )
+        let store = FontStore(applicationService: context.service)
 
-        FontStore(files: files).registerBundledAndImportedFonts()
+        store.registerBundledAndImportedFonts()
+        await waitUntil {
+            await context.fontRegistrar.isRegistered(bytes)
+        }
 
-        XCTAssertEqual(try files.readSynchronously(relativePath: path), bytes)
+        let persisted = try await context.protectedFiles.read(relativePath: path)
+        XCTAssertEqual(persisted, bytes)
     }
 
-    private func temporaryDirectory(named name: String) -> URL {
-        FileManager.default.temporaryDirectory
-            .appendingPathComponent("FontStoreTests-\(name)-\(UUID().uuidString)")
+    private func waitUntil(
+        _ condition: @escaping () async -> Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
+        for _ in 0..<500 {
+            if await condition() { return }
+            try? await Task.sleep(for: .milliseconds(2))
+        }
+        XCTFail("Timed out waiting for font registration", file: file, line: line)
     }
 }

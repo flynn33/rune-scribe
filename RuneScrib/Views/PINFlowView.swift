@@ -46,7 +46,7 @@ struct PINFlowView: View {
                 error: error,
                 shakeToken: shakeToken
             ) { pin in
-                handle(pin)
+                Task { await handle(pin) }
             }
             .padding(.horizontal, RuneMetrics.pad)
 
@@ -59,14 +59,22 @@ struct PINFlowView: View {
 
     // MARK: - Step Handling
 
-    private func handle(_ pin: String) {
+    private func handle(_ pin: String) async {
         error = nil
         switch step {
         case .current:
-            guard appLock.verify(pin) else { fail("Incorrect PIN."); return }
+            do {
+                guard try await appLock.verify(pin) else {
+                    fail("Incorrect PIN.")
+                    return
+                }
+            } catch {
+                fail(error.localizedDescription)
+                return
+            }
             currentPIN = pin
             if mode == .disable {
-                finishDisable()
+                await finishDisable()
             } else {
                 step = .create
             }
@@ -83,16 +91,16 @@ struct PINFlowView: View {
                 fail("PINs didn't match. Start again.")
                 return
             }
-            finishSet()
+            await finishSet()
         }
     }
 
-    private func finishSet() {
+    private func finishSet() async {
         do {
             if mode == .change {
-                try appLock.changePIN(current: currentPIN, new: firstPIN)
+                try await appLock.changePIN(current: currentPIN, new: firstPIN)
             } else {
-                try appLock.setPIN(firstPIN)
+                try await appLock.setPIN(firstPIN)
             }
             dismiss()
         } catch {
@@ -102,9 +110,9 @@ struct PINFlowView: View {
         }
     }
 
-    private func finishDisable() {
+    private func finishDisable() async {
         do {
-            try appLock.disablePIN(current: currentPIN)
+            try await appLock.disablePIN(current: currentPIN)
             dismiss()
         } catch {
             fail(error.localizedDescription)

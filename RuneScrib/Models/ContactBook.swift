@@ -1,34 +1,44 @@
 import Foundation
 
-/// The persisted collection of the user's contacts. Stored AES-GCM-encrypted in a file
-/// (see `ContactStore`). Pure mutations return a new book and are unit-testable.
-struct ContactBook: Codable, Equatable {
+/// Presentation-only collection retained until the hosted contact views move to
+/// snapshot DTOs. It is never persisted and is not an authoritative repository.
+struct ContactBook: Codable, Equatable, Sendable {
     var version: Int = 1
     var contacts: [Contact]
 
     static let empty = ContactBook(contacts: [])
 
-    private enum CodingKeys: String, CodingKey { case version, contacts }
-}
-
-extension ContactBook {
-    func contact(id: UUID) -> Contact? { contacts.first { $0.id == id } }
-
-    func adding(_ c: Contact) -> ContactBook {
-        var copy = self; copy.contacts.append(c); return copy
+    func contact(id: UUID) -> Contact? {
+        contacts.first { $0.id == id }
     }
-    func updating(_ c: Contact) -> ContactBook {
+
+    func adding(_ contact: Contact) -> ContactBook {
         var copy = self
-        if let i = copy.contacts.firstIndex(where: { $0.id == c.id }) { copy.contacts[i] = c }
+        copy.contacts.append(contact)
         return copy
     }
+
+    func updating(_ contact: Contact) -> ContactBook {
+        var copy = self
+        if let index = copy.contacts.firstIndex(where: { $0.id == contact.id }) {
+            copy.contacts[index] = contact
+        }
+        return copy
+    }
+
     func removing(id: UUID) -> ContactBook {
-        var copy = self; copy.contacts.removeAll { $0.id == id }; return copy
+        removing(ids: [id])
     }
+
     func removing(ids: Set<UUID>) -> ContactBook {
-        var copy = self; copy.contacts.removeAll { ids.contains($0.id) }; return copy
+        var copy = self
+        copy.contacts.removeAll { ids.contains($0.id) }
+        return copy
     }
+
     func removingImported() -> ContactBook {
-        var copy = self; copy.contacts.removeAll { $0.source == .imported }; return copy
+        var copy = self
+        copy.contacts.removeAll { $0.source == .imported }
+        return copy
     }
 }

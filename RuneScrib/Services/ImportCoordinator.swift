@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import RuneScribeContracts
 
@@ -11,9 +12,17 @@ final class ImportCoordinator: ObservableObject {
 
     private let keyManager: KeyManager
     private var lastHandledKey: String?
+    private var snapshotCancellable: AnyCancellable?
 
-    init(keyManager: KeyManager) {
+    init(
+        keyManager: KeyManager,
+        snapshotPublisher: AnyPublisher<RuneScribeApplicationSnapshot?, Never>? = nil
+    ) {
         self.keyManager = keyManager
+        let snapshots = snapshotPublisher ?? keyManager.$snapshot.eraseToAnyPublisher()
+        snapshotCancellable = snapshots.sink { [weak self] snapshot in
+            self?.apply(snapshot?.importState)
+        }
     }
 
     func ingest(
@@ -69,7 +78,7 @@ final class ImportCoordinator: ObservableObject {
         source: InboundDeliverySourceDTO = .clipboard
     ) {
         let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let url = URL(string: trimmed), LinkRouter.isCipherImportURL(url) else { return }
+        guard let url = URL(string: trimmed) else { return }
         ingest(url: url, source: source)
     }
 
@@ -88,5 +97,23 @@ final class ImportCoordinator: ObservableObject {
         guard let id = pending?.id else { return }
         pending = nil
         Task { await keyManager.cancelImport(id: id) }
+    }
+
+    private func apply(_ state: ImportStateDTO?) {
+        pending = state?.pending
+        guard let state, state.phase == .failed, let failure = state.lastFailure else {
+            if state?.phase != .failed { errorMessage = nil }
+            return
+        }
+        switch failure.code {
+        case .invalidInput, .unsupportedFormat, .corruptedContent:
+            errorMessage = "This isn't a valid Rune Scribe import."
+        case .protectedFileUnavailable:
+            errorMessage = "Rune Scribe could not open this file."
+        case .noMatchingCipher:
+            errorMessage = "This message couldn't be read with your ciphers."
+        default:
+            errorMessage = "Rune Scribe could not complete the import."
+        }
     }
 }

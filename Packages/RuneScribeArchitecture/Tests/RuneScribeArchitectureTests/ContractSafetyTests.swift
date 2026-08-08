@@ -8,6 +8,8 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertEqual(RuneScribeServiceIDs.inboundInput.rawValue, "RuneScribeInboundInputService")
         XCTAssertEqual(RuneScribeServiceIDs.secureValueStore.rawValue, "SecureValueStore")
         XCTAssertEqual(RuneScribeServiceIDs.protectedFileStore.rawValue, "ProtectedFileStore")
+        XCTAssertEqual(RuneScribeServiceIDs.inboundFileReader.rawValue, "InboundFileReader")
+        XCTAssertEqual(RuneScribeServiceIDs.shareArtifactStore.rawValue, "ShareArtifactStore")
         XCTAssertEqual(RuneScribeServiceIDs.applicationResourceLocator.rawValue, "ApplicationResourceLocator")
         XCTAssertEqual(RuneScribeServiceIDs.systemFontRegistrar.rawValue, "SystemFontRegistrar")
         XCTAssertEqual(RuneScribeServiceIDs.contactAccess.rawValue, "ContactAccessService")
@@ -18,7 +20,7 @@ final class ContractSafetyTests: XCTestCase {
         )
         XCTAssertEqual(RuneScribeServiceIDs.clock.rawValue, "ClockService")
         XCTAssertEqual(RuneScribeServiceIDs.uuid.rawValue, "UUIDService")
-        XCTAssertEqual(RuneScribeServiceIDs.all.count, 11)
+        XCTAssertEqual(RuneScribeServiceIDs.all.count, 13)
         XCTAssertEqual(
             RuneScribeServiceKeys.application.identifier,
             RuneScribeServiceIDs.application
@@ -34,6 +36,14 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertEqual(
             RuneScribeServiceKeys.protectedFileStore.identifier,
             RuneScribeServiceIDs.protectedFileStore
+        )
+        XCTAssertEqual(
+            RuneScribeServiceKeys.inboundFileReader.identifier,
+            RuneScribeServiceIDs.inboundFileReader
+        )
+        XCTAssertEqual(
+            RuneScribeServiceKeys.shareArtifactStore.identifier,
+            RuneScribeServiceIDs.shareArtifactStore
         )
         XCTAssertEqual(
             RuneScribeServiceKeys.applicationResourceLocator.identifier,
@@ -73,6 +83,12 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertEqual(RuneScribeWireFormat.messageVersion, 1)
         XCTAssertTrue(RuneScribeCapabilities.all.contains(RuneScribeCapabilities.clockRead))
         XCTAssertTrue(RuneScribeCapabilities.all.contains(RuneScribeCapabilities.uuidGenerate))
+        XCTAssertTrue(
+            RuneScribeCapabilities.all.contains(RuneScribeCapabilities.shareArtifactStorage)
+        )
+        XCTAssertTrue(
+            RuneScribeCapabilities.all.contains(RuneScribeCapabilities.inboundFileRead)
+        )
     }
 
     func testResourceHandlesMatchShippingRootBundleLookups() {
@@ -117,6 +133,7 @@ final class ContractSafetyTests: XCTestCase {
         assertSendable(EncodeMessageCommand.self)
         assertSendable(DecodedMessageResult.self)
         assertSendable(ShareArtifactDTO.self)
+        assertSendable(ScopedShareFile.self)
         assertSendable(CompleteShareArtifactCommand.self)
         assertSendable(RuneScribeInboundInput.self)
         assertSendable(ApplicationSnapshotChangedEvent.self)

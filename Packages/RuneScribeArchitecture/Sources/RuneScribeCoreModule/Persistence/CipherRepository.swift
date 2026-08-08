@@ -21,6 +21,11 @@ enum MessageCipherIngestionResult: Equatable, Sendable {
     case transient(cipher: Cipher, failure: CipherRepositoryError)
 }
 
+struct ImportedContactCipherSeed: Equatable, Sendable {
+    let contactID: UUID
+    let displayName: String
+}
+
 /// Owns the encrypted cipher library and serializes every read-modify-write cycle.
 /// Key-bearing values never leave the Core target.
 actor CipherRepository {
@@ -179,6 +184,133 @@ actor CipherRepository {
         try await persist(candidate)
         library = candidate
         return CipherRepositoryMutation(value: existed, library: candidate)
+    }
+
+    /// Idempotently records successful first-delivery handoff without changing
+    /// the key, contact association, active selection, or any other cipher.
+    func markDelivered(cipherID: UUID) async throws -> CipherRepositoryMutation<Bool> {
+        await acquireMutationPermit()
+        defer { releaseMutationPermit() }
+
+        let current = try await snapshot()
+        guard let cipher = current.ciphers.first(where: { $0.id == cipherID }) else {
+            return CipherRepositoryMutation(value: false, library: current)
+        }
+        guard !cipher.delivered else {
+            return CipherRepositoryMutation(value: true, library: current)
+        }
+        let candidate = current.markingDelivered(cipherID: cipherID)
+        try await persist(candidate)
+        library = candidate
+        return CipherRepositoryMutation(value: true, library: candidate)
+    }
+
+    /// Ensures every newly imported contact has a linked cipher. All additions are
+    /// committed in one encrypted-library write and never change the active cipher.
+    func ensureLinkedCiphers(
+        for contacts: [ImportedContactCipherSeed]
+    ) async throws -> CipherRepositoryMutation<[Cipher]> {
+        await acquireMutationPermit()
+        defer { releaseMutationPermit() }
+
+        let current = try await snapshot()
+        var candidate = current
+        var added: [Cipher] = []
+        for contact in contacts where !candidate.ciphers.contains(where: {
+            $0.contactID == contact.contactID
+        }) {
+            var cipher = Self.generatedCipher(
+                label: Self.cleanLabel(contact.displayName, fallback: "Imported Cipher"),
+                clock: clock,
+                uuid: uuid
+            )
+            cipher.contactID = contact.contactID
+            candidate = candidate.addingWithoutActivating(cipher)
+            added.append(cipher)
+        }
+        guard !added.isEmpty else {
+            return CipherRepositoryMutation(value: [], library: current)
+        }
+        try await persist(candidate)
+        library = candidate
+        return CipherRepositoryMutation(value: added, library: candidate)
+    }
+
+    /// Clears every association in one encrypted-library write. Delivery state is
+    /// intentionally preserved so unlinking or reassignment never resets history.
+    func unlinkContacts(
+        _ contactIDs: Set<UUID>
+    ) async throws -> CipherRepositoryMutation<Int> {
+        await acquireMutationPermit()
+        defer { releaseMutationPermit() }
+
+        let current = try await snapshot()
+        guard !contactIDs.isEmpty else {
+            return CipherRepositoryMutation(value: 0, library: current)
+        }
+        let linkedCount = current.ciphers.filter { cipher in
+            cipher.contactID.map(contactIDs.contains) ?? false
+        }.count
+        guard linkedCount > 0 else {
+            return CipherRepositoryMutation(value: 0, library: current)
+        }
+        let candidate = contactIDs.reduce(current) { library, contactID in
+            library.unlinkingContact(contactID: contactID)
+        }
+        try await persist(candidate)
+        library = candidate
+        return CipherRepositoryMutation(value: linkedCount, library: candidate)
+    }
+
+    /// Repairs cross-store contact/cipher invariants from one library snapshot and
+    /// one encrypted commit. Active selection, keys, and delivery history survive.
+    func reconcileContactAssociations(
+        systemImportedSeeds: [ImportedContactCipherSeed],
+        validContactIDs: Set<UUID>
+    ) async throws -> CipherRepositoryMutation<Int> {
+        await acquireMutationPermit()
+        defer { releaseMutationPermit() }
+
+        let current = try await snapshot()
+        var candidate = current
+        var changes = 0
+
+        for index in candidate.ciphers.indices {
+            if let contactID = candidate.ciphers[index].contactID,
+               !validContactIDs.contains(contactID) {
+                candidate.ciphers[index].contactID = nil
+                changes += 1
+            }
+        }
+
+        var processed = Set<UUID>()
+        for seed in systemImportedSeeds where processed.insert(seed.contactID).inserted {
+            let linked = candidate.ciphers.indices.filter {
+                candidate.ciphers[$0].contactID == seed.contactID
+            }
+            if linked.isEmpty {
+                var cipher = Self.generatedCipher(
+                    label: Self.cleanLabel(seed.displayName, fallback: "Imported Cipher"),
+                    clock: clock,
+                    uuid: uuid
+                )
+                cipher.contactID = seed.contactID
+                candidate = candidate.addingWithoutActivating(cipher)
+                changes += 1
+            } else if linked.count > 1 {
+                for index in linked.dropFirst() {
+                    candidate.ciphers[index].contactID = nil
+                    changes += 1
+                }
+            }
+        }
+
+        guard candidate != current else {
+            return CipherRepositoryMutation(value: 0, library: current)
+        }
+        try await persist(candidate)
+        library = candidate
+        return CipherRepositoryMutation(value: changes, library: candidate)
     }
 
     /// Deliberate imports append and activate, exactly like the legacy share flow.

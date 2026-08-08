@@ -1,4 +1,5 @@
 import Combine
+import Foundation
 import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
@@ -7,6 +8,13 @@ import XCTest
 
 @MainActor
 enum TestApplicationFactory {
+    struct IntegratedContext {
+        let service: RuneScribeCoreApplicationService
+        let protectedFiles: InMemoryProtectedFileStore
+        let fontRegistrar: InMemoryFontRegistrar
+        let bundledFontData: Data
+    }
+
     static func makeKeyManager() -> KeyManager {
         let service = RuneScribeCoreApplicationService(
             secureValueStore: InMemorySecureValueStore(),
@@ -15,6 +23,53 @@ enum TestApplicationFactory {
         )
         return KeyManager(service: service)
     }
+
+    static func makeIntegratedContext(
+        protectedFiles initialFiles: [ProtectedPath: Data] = [:],
+        additionalFontNames: [Data: String] = [:]
+    ) throws -> IntegratedContext {
+        let testBundle = Bundle(for: TestApplicationBundleAnchor.self)
+        guard let fontURL = testBundle.url(
+            forResource: "NotoSansRunic-Regular",
+            withExtension: "ttf"
+        ) ?? Bundle.main.url(
+            forResource: "NotoSansRunic-Regular",
+            withExtension: "ttf"
+        ) else {
+            throw TestApplicationFactoryError.missingBundledFont
+        }
+        let bundledFontData = try Data(contentsOf: fontURL)
+        let protectedFiles = InMemoryProtectedFileStore(files: initialFiles)
+        var fontNames = additionalFontNames
+        fontNames[bundledFontData] = "Noto Sans Runic"
+        let fontRegistrar = InMemoryFontRegistrar(namesByData: fontNames)
+        let service = RuneScribeCoreApplicationService(
+            secureValueStore: InMemorySecureValueStore(),
+            protectedFileStore: protectedFiles,
+            inboundFileReader: InMemoryInboundFileReader(),
+            shareArtifactStore: InMemoryShareArtifactStore(),
+            applicationResourceLocator: MappedApplicationResourceLocator(
+                locations: [.bundledRuneFont: fontURL]
+            ),
+            systemFontRegistrar: fontRegistrar,
+            contactAccess: InMemoryContactAccessService(authorizationStatus: .authorized),
+            clipboardReading: InMemoryClipboardService(),
+            clock: SystemClock(),
+            uuid: SystemUUIDProvider()
+        )
+        return IntegratedContext(
+            service: service,
+            protectedFiles: protectedFiles,
+            fontRegistrar: fontRegistrar,
+            bundledFontData: bundledFontData
+        )
+    }
+}
+
+private final class TestApplicationBundleAnchor: NSObject {}
+
+private enum TestApplicationFactoryError: Error {
+    case missingBundledFont
 }
 
 @MainActor

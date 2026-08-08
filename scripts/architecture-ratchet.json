@@ -59,15 +59,15 @@
       "removalPhase": "P5"
     },
     "appOwnedSingletonDeclarations": {
-      "maximum": 8,
+      "maximum": 0,
       "owner": "CoreMigration",
-      "reason": "Eight legacy app-owned services still expose shared instances.",
+      "reason": "Core services are scoped behind runtime contracts; app-owned global instances are prohibited.",
       "removalPhase": "P4B"
     },
     "appOwnedSingletonReferences": {
-      "maximum": 25,
+      "maximum": 0,
       "owner": "ModuleMigration",
-      "reason": "Legacy Core, UI, and host call sites still resolve app-owned services globally.",
+      "reason": "Hosted bridges receive scoped dependencies and may not resolve app-owned globals.",
       "removalPhase": "P5"
     },
     "featureNotificationCenterCalls": {

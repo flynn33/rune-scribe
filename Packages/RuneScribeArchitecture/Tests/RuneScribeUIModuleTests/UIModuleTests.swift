@@ -1,3 +1,4 @@
+import RuneScribeContracts
 import RuneScribeRuntimeCore
 import RuneScribeUIModule
 import RuneScribeUIRuntime
@@ -48,5 +49,47 @@ final class UIModuleTests: XCTestCase {
                 ])
             )
         }
+    }
+
+    @MainActor
+    func testOpaqueSharePresentationResolvesOnlyWhileLeased() async throws {
+        let artifactID = ShareArtifactID(rawValue: UUID())
+        let link = try XCTUnwrap(
+            URL(string: "runescribe://import?v=3&p=synthetic")
+        )
+        let vault = TestOpaqueLinkVault(link: link)
+        let provider = OpaqueSharePresentationProvider { requestedID in
+            try await vault.load(requestedID)
+        }
+
+        let transfer = try await provider.transfer(for: artifactID)
+        XCTAssertEqual(transfer.artifactID, artifactID)
+        XCTAssertNotNil(transfer.qrCodeImage())
+
+        await vault.revoke()
+        do {
+            _ = try await provider.transfer(for: artifactID)
+            XCTFail("A revoked opaque link must not resolve again")
+        } catch {
+            XCTAssertEqual(error as? TestOpaqueLinkVault.Error, .unavailable)
+        }
+    }
+}
+
+private actor TestOpaqueLinkVault {
+    enum Error: Swift.Error, Equatable { case unavailable }
+    private var link: URL?
+
+    init(link: URL) {
+        self.link = link
+    }
+
+    func load(_ artifactID: ShareArtifactID) throws -> URL {
+        guard let link else { throw Error.unavailable }
+        return link
+    }
+
+    func revoke() {
+        link = nil
     }
 }

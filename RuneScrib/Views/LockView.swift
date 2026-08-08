@@ -26,15 +26,22 @@ struct LockView: View {
                     error: error,
                     shakeToken: shakeToken
                 ) { pin in
-                    switch appLock.attemptUnlock(pin) {
-                    case .success:
-                        error = nil
-                    case .incorrect:
-                        error = "Incorrect PIN. Try again."
-                        shakeToken += 1
-                    case .lockedOut(let seconds):
-                        error = "Too many attempts. Try again in \(seconds)s."
-                        shakeToken += 1
+                    Task {
+                        do {
+                            switch try await appLock.attemptUnlock(pin) {
+                            case .success:
+                                error = nil
+                            case .incorrect:
+                                error = "Incorrect PIN. Try again."
+                                shakeToken += 1
+                            case .lockedOut(let seconds):
+                                error = "Too many attempts. Try again in \(seconds)s."
+                                shakeToken += 1
+                            }
+                        } catch let unlockError {
+                            error = unlockError.localizedDescription
+                            shakeToken += 1
+                        }
                     }
                 }
                 .padding(.horizontal, RuneMetrics.pad)

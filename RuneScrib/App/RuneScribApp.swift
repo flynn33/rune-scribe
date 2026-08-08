@@ -1,3 +1,4 @@
+import RuneScribeContracts
 import SwiftUI
 
 @main
@@ -20,6 +21,7 @@ struct RuneScribApp: App {
             CommandGroup(replacing: .newItem) { }
             CommandGroup(replacing: .appSettings) {
                 Button("Settings…") {
+                    appDelegate.receive(menu: .openSettings)
                     NotificationCenter.default.post(name: .openSettingsRequested, object: nil)
                 }
                 .keyboardShortcut(",", modifiers: [.command])
@@ -27,13 +29,13 @@ struct RuneScribApp: App {
             #endif
             CommandMenu("Cipher") {
                 Button("Cipher Library…") {
+                    appDelegate.receive(menu: .openCipherLibrary)
                     NotificationCenter.default.post(name: .openLibraryRequested, object: nil)
                 }
                 .keyboardShortcut("l", modifiers: [.command, .shift])
             }
         }
     }
-
     @ViewBuilder
     private var rootContent: some View {
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
@@ -41,22 +43,10 @@ struct RuneScribApp: App {
         } else {
             RootView()
                 .environmentObject(appDelegate.keyManager)
-                .environmentObject(AppLock.shared)
+                .environmentObject(appDelegate.appLock)
                 .environmentObject(appDelegate.importCoordinator)
                 .environmentObject(appDelegate.messageCoordinator)
                 .environmentObject(appDelegate.contactManager)
-                .onOpenURL {
-                    InboundOpenRouter.route(
-                        url: $0,
-                        coordinator: appDelegate.importCoordinator
-                    )
-                }
-                .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) {
-                    InboundOpenRouter.route(
-                        userActivity: $0,
-                        coordinator: appDelegate.importCoordinator
-                    )
-                }
         }
     }
 }

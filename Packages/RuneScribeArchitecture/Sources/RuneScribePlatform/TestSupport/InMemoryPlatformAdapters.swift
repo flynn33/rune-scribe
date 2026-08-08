@@ -78,6 +78,116 @@ public actor InMemoryProtectedFileStore: ProtectedFileStore {
     }
 }
 
+public actor InMemoryInboundFileReader: InboundFileReader {
+    private var files: [URL: Data]
+    private var permitsSecurityScope: Bool
+
+    public init(
+        files: [URL: Data] = [:],
+        permitsSecurityScope: Bool = true
+    ) {
+        self.files = files
+        self.permitsSecurityScope = permitsSecurityScope
+    }
+
+    public func read(
+        _ fileURL: URL,
+        requiresSecurityScope: Bool,
+        maximumByteCount: Int
+    ) async throws -> Data {
+        guard fileURL.isFileURL else { throw InboundFileReaderError.notFileURL }
+        guard !requiresSecurityScope || permitsSecurityScope else {
+            throw InboundFileReaderError.securityScopeDenied
+        }
+        guard let data = files[fileURL] else {
+            throw InboundFileReaderError.unavailable
+        }
+        guard data.count <= maximumByteCount else {
+            throw InboundFileReaderError.contentTooLarge
+        }
+        return data
+    }
+
+    public func set(_ data: Data, for fileURL: URL) {
+        files[fileURL] = data
+    }
+
+    public func setSecurityScopePermitted(_ permitted: Bool) {
+        permitsSecurityScope = permitted
+    }
+}
+
+public enum InMemoryShareArtifactStoreError: Error, Equatable, Sendable {
+    case duplicateIdentifier
+    case unknownArtifact
+}
+
+public actor InMemoryShareArtifactStore: ShareArtifactStore {
+    private struct Entry: Sendable {
+        let file: ScopedShareFile
+        let data: Data
+    }
+
+    private var entries: [ShareArtifactID: Entry] = [:]
+    private var links: [ShareArtifactID: URL] = [:]
+
+    public init() {}
+
+    public func create(
+        _ data: Data,
+        artifactID: ShareArtifactID,
+        filename: String,
+        fileExtension: String
+    ) async throws -> ScopedShareFile {
+        guard entries[artifactID] == nil, links[artifactID] == nil else {
+            throw InMemoryShareArtifactStoreError.duplicateIdentifier
+        }
+        let file = ScopedShareFile(
+            artifactID: artifactID,
+            fileURL: URL(fileURLWithPath: "/in-memory-share/\(artifactID.rawValue.uuidString)/\(filename).\(fileExtension)")
+        )
+        entries[artifactID] = Entry(file: file, data: data)
+        return file
+    }
+
+    public func remove(_ file: ScopedShareFile) async throws {
+        guard entries[file.artifactID]?.file == file else {
+            throw InMemoryShareArtifactStoreError.unknownArtifact
+        }
+        entries.removeValue(forKey: file.artifactID)
+    }
+
+    public func storeLink(_ url: URL, artifactID: ShareArtifactID) async throws {
+        guard entries[artifactID] == nil, links[artifactID] == nil else {
+            throw InMemoryShareArtifactStoreError.duplicateIdentifier
+        }
+        links[artifactID] = url
+    }
+
+    public func removeLink(artifactID: ShareArtifactID) async throws {
+        guard links.removeValue(forKey: artifactID) != nil else {
+            throw InMemoryShareArtifactStoreError.unknownArtifact
+        }
+    }
+
+    public func removeAll() async throws {
+        entries.removeAll()
+        links.removeAll()
+    }
+
+    public func data(for artifactID: ShareArtifactID) -> Data? {
+        entries[artifactID]?.data
+    }
+
+    public func contains(_ artifactID: ShareArtifactID) -> Bool {
+        entries[artifactID] != nil || links[artifactID] != nil
+    }
+
+    public func link(for artifactID: ShareArtifactID) -> URL? {
+        links[artifactID]
+    }
+}
+
 public actor InMemoryContactAccessService: ContactAccessService {
     private var status: ContactAuthorizationDTO
     private let requestResult: Bool

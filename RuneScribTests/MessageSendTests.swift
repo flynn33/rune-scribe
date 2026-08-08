@@ -2,34 +2,6 @@ import XCTest
 @testable import RuneScrib
 
 final class MessageSendTests: XCTestCase {
-
-    // includeKey iff the cipher is contact-linked AND not yet delivered.
-    func testShouldIncludeKeyTruthTable() {
-        let contactID = UUID()
-
-        let linkedUndelivered = cipher(contactID: contactID, delivered: false)
-        XCTAssertTrue(MessageSend.shouldIncludeKey(linkedUndelivered))
-
-        let linkedDelivered = cipher(contactID: contactID, delivered: true)
-        XCTAssertFalse(MessageSend.shouldIncludeKey(linkedDelivered))
-
-        let unlinked = cipher(contactID: nil, delivered: false)
-        XCTAssertFalse(MessageSend.shouldIncludeKey(unlinked))
-    }
-
-    private func cipher(contactID: UUID?, delivered: Bool) -> CipherViewState {
-        CipherViewState(
-            id: UUID(),
-            label: "Fixture",
-            origin: .generated,
-            createdAt: Date(timeIntervalSinceReferenceDate: 0),
-            isActive: true,
-            contactID: contactID,
-            delivered: delivered,
-            publicIdentifier: "00000000",
-            fontName: "Noto Sans Runic"
-        )
-    }
 }
 
 // MARK: - Outbound attachment policy (F-003 / AC-011, AC-012, AC-014)

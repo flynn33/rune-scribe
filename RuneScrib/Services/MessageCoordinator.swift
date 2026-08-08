@@ -3,7 +3,7 @@ import Foundation
 import RuneScribeContracts
 
 /// Temporary UI presenter for Core-owned inbound-message state. It observes only
-/// key-free snapshots and keeps contact presentation compatibility until P4B/P5.
+/// key-free snapshots; decrypt/import/contact association all remain in Core.
 @MainActor
 final class MessageCoordinator: ObservableObject {
     struct PendingMessage: Identifiable, Equatable {
@@ -18,18 +18,14 @@ final class MessageCoordinator: ObservableObject {
     @Published var errorMessage: String?
 
     private let keyManager: KeyManager
-    private let contactManager: ContactManager
     private var lastHandledKey: String?
-    private var lastAssociatedMessageID: MessageID?
     private var snapshotCancellable: AnyCancellable?
 
     init(
         keyManager: KeyManager,
-        contactManager: ContactManager,
         snapshotPublisher: AnyPublisher<RuneScribeApplicationSnapshot?, Never>? = nil
     ) {
         self.keyManager = keyManager
-        self.contactManager = contactManager
         let snapshots = snapshotPublisher
             ?? keyManager.$snapshot.eraseToAnyPublisher()
         snapshotCancellable = snapshots.sink { [weak self] snapshot in
@@ -78,23 +74,5 @@ final class MessageCoordinator: ObservableObject {
             cipherID: message.cipherID.rawValue,
             cipherName: message.cipherName
         )
-        guard message.id != lastAssociatedMessageID else { return }
-        lastAssociatedMessageID = message.id
-        autoAssociate(cipherID: message.cipherID.rawValue, senderName: message.senderName)
-    }
-
-    private func autoAssociate(cipherID: UUID, senderName: String) {
-        let contact: Contact
-        if let existing = contactManager.contacts.first(where: { $0.displayName == senderName }) {
-            contact = existing
-        } else {
-            let made = Contact(displayName: senderName, source: .imported)
-            contactManager.add(made)
-            contact = made
-        }
-        guard keyManager.ciphers.first(where: { $0.id == cipherID })?.contactID != contact.id else {
-            return
-        }
-        Task { try? await keyManager.setContact(cipherID: cipherID, contactID: contact.id) }
     }
 }

@@ -1,4 +1,5 @@
 import RuneScribeCoreModule
+import RuneScribeContracts
 import RuneScribeRuntimeCore
 import XCTest
 
@@ -13,5 +14,13 @@ final class CoreModuleTests: XCTestCase {
         XCTAssertEqual(manifest.moduleVersion, descriptor.moduleVersion)
         XCTAssertEqual(manifest.entryPoint, descriptor.entryPoint)
         XCTAssertEqual(Set(manifest.capabilitiesRequested), descriptor.requestedCapabilities)
+        XCTAssertEqual(
+            Set(manifest.runtimeRequirements.requiredServices),
+            descriptor.requiredServices
+        )
+        XCTAssertEqual(
+            descriptor.publishedServices,
+            [RuneScribeServiceIDs.application, RuneScribeServiceIDs.inboundInput]
+        )
     }
 }

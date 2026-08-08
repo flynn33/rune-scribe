@@ -244,6 +244,108 @@ final class PlatformAdapterTests: XCTestCase {
         XCTAssertFalse(memoryFontExists)
     }
 
+    func testInboundFileReaderUsesBalancedScopeAndEnforcesByteBound() async throws {
+        let root = temporaryDirectory(named: "InboundReader")
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let file = root.appendingPathComponent("message.runescribe")
+        let fixture = Data([0x01, 0x02, 0x03, 0x04])
+        try fixture.write(to: file)
+        let access = OSAllocatedUnfairLock(
+            initialState: (begins: 0, ends: 0, permits: true)
+        )
+        let reader = AppleInboundFileReader(
+            beginAccess: { _ in
+                access.withLock { state in
+                    state.begins += 1
+                    return state.permits
+                }
+            },
+            endAccess: { _ in access.withLock { $0.ends += 1 } }
+        )
+
+        let data = try await reader.read(
+            file,
+            requiresSecurityScope: true,
+            maximumByteCount: fixture.count
+        )
+        XCTAssertEqual(data, fixture)
+        XCTAssertEqual(access.withLock { $0.begins }, 1)
+        XCTAssertEqual(access.withLock { $0.ends }, 1)
+
+        do {
+            _ = try await reader.read(
+                file,
+                requiresSecurityScope: true,
+                maximumByteCount: fixture.count - 1
+            )
+            XCTFail("Oversized inbound files must be rejected")
+        } catch {
+            XCTAssertEqual(error as? InboundFileReaderError, .contentTooLarge)
+        }
+        XCTAssertEqual(access.withLock { $0.begins }, 2)
+        XCTAssertEqual(access.withLock { $0.ends }, 2)
+
+        access.withLock { $0.permits = false }
+        do {
+            _ = try await reader.read(
+                file,
+                requiresSecurityScope: true,
+                maximumByteCount: fixture.count
+            )
+            XCTFail("Denied security scope must fail closed")
+        } catch {
+            XCTAssertEqual(error as? InboundFileReaderError, .securityScopeDenied)
+        }
+        XCTAssertEqual(access.withLock { $0.begins }, 3)
+        XCTAssertEqual(access.withLock { $0.ends }, 2)
+    }
+
+    func testInboundFileReaderRejectsDotSegmentsAndSymlinkComponents() async throws {
+        let root = temporaryDirectory(named: "InboundReaderLinks")
+        let outside = temporaryDirectory(named: "InboundReaderOutside")
+        defer {
+            try? FileManager.default.removeItem(at: root)
+            try? FileManager.default.removeItem(at: outside)
+        }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
+        let outsideFile = outside.appendingPathComponent("outside.runescribe")
+        try Data([0x44]).write(to: outsideFile)
+        let leafLink = root.appendingPathComponent("leaf.runescribe")
+        let ancestorLink = root.appendingPathComponent("linked-directory")
+        try FileManager.default.createSymbolicLink(at: leafLink, withDestinationURL: outsideFile)
+        try FileManager.default.createSymbolicLink(at: ancestorLink, withDestinationURL: outside)
+        let reader = AppleInboundFileReader()
+
+        for url in [leafLink, ancestorLink.appendingPathComponent("outside.runescribe")] {
+            do {
+                _ = try await reader.read(
+                    url,
+                    requiresSecurityScope: false,
+                    maximumByteCount: 16
+                )
+                XCTFail("No inbound path component may be a symbolic link")
+            } catch {
+                XCTAssertEqual(error as? InboundFileReaderError, .unsupportedFileType)
+            }
+        }
+
+        let dotSegmentURL = try XCTUnwrap(
+            URL(string: root.appendingPathComponent("missing/../leaf.runescribe").absoluteString)
+        )
+        do {
+            _ = try await reader.read(
+                dotSegmentURL,
+                requiresSecurityScope: false,
+                maximumByteCount: 16
+            )
+            XCTFail("Non-canonical dot-segment paths must be rejected")
+        } catch {
+            XCTAssertEqual(error as? InboundFileReaderError, .invalidPath)
+        }
+    }
+
     func testContactAdapterMapsMinimalValuesAndExcludesUnnamedContacts() async throws {
         let service = SystemContactAccessService(
             operations: ContactOperations(
@@ -399,6 +501,176 @@ final class PlatformAdapterTests: XCTestCase {
         XCTAssertEqual(try locator.dataSynchronously(for: resource), expectedData)
         let asyncURL = try await locator.url(for: resource)
         XCTAssertEqual(asyncURL, expectedURL)
+    }
+
+    func testShareArtifactStoreScopesWritesAndCleanup() async throws {
+        let root = temporaryDirectory(named: "ShareArtifacts")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = AppleShareArtifactStore(temporaryDirectory: root)
+        let artifactID = ShareArtifactID(rawValue: UUID())
+        let payload = Data([0x52, 0x53])
+
+        let file = try await store.create(
+            payload,
+            artifactID: artifactID,
+            filename: "RuneScrib-Message",
+            fileExtension: "runescribe"
+        )
+
+        XCTAssertEqual(file.artifactID, artifactID)
+        XCTAssertEqual(file.fileURL.lastPathComponent, "RuneScrib-Message.runescribe")
+        XCTAssertEqual(try Data(contentsOf: file.fileURL), payload)
+        do {
+            _ = try await store.create(
+                payload,
+                artifactID: artifactID,
+                filename: "duplicate",
+                fileExtension: "runescribe"
+            )
+            XCTFail("Duplicate artifact identifiers must be rejected")
+        } catch {
+            XCTAssertEqual(error as? AppleShareArtifactStoreError, .duplicateIdentifier)
+        }
+        do {
+            _ = try await store.create(
+                payload,
+                artifactID: ShareArtifactID(rawValue: UUID()),
+                filename: "../escape",
+                fileExtension: "runescribe"
+            )
+            XCTFail("Path-bearing filenames must be rejected")
+        } catch {
+            XCTAssertEqual(error as? AppleShareArtifactStoreError, .invalidFilename)
+        }
+
+        try await store.remove(file)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.fileURL.path))
+        do {
+            try await store.remove(file)
+            XCTFail("An already removed artifact must be rejected")
+        } catch {
+            XCTAssertEqual(error as? AppleShareArtifactStoreError, .unknownArtifact)
+        }
+
+        let second = try await store.create(
+            payload,
+            artifactID: ShareArtifactID(rawValue: UUID()),
+            filename: "RuneScrib-Message",
+            fileExtension: "runescribe"
+        )
+        try await store.removeAll()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: second.fileURL.path))
+    }
+
+    func testShareArtifactStorePurgesStaleSymlinkedRootWithoutFollowingIt() async throws {
+        let base = temporaryDirectory(named: "ShareArtifactSymlinkRoot")
+        let outside = temporaryDirectory(named: "ShareArtifactSymlinkOutside")
+        defer {
+            try? FileManager.default.removeItem(at: base)
+            try? FileManager.default.removeItem(at: outside)
+        }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
+        let sentinel = outside.appendingPathComponent("sentinel")
+        try Data([0x7A]).write(to: sentinel)
+        try FileManager.default.createSymbolicLink(
+            at: base.appendingPathComponent("RuneScribeShareArtifacts"),
+            withDestinationURL: outside
+        )
+        let store = AppleShareArtifactStore(temporaryDirectory: base)
+        let file = try await store.create(
+            Data([0x01]),
+            artifactID: ShareArtifactID(rawValue: UUID()),
+            filename: "RuneScrib-Message",
+            fileExtension: "runescribe"
+        )
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: file.fileURL.path))
+        XCTAssertEqual(try Data(contentsOf: sentinel), Data([0x7A]))
+    }
+
+    func testShareArtifactStorePurgesStaleKeyBearingFilesOnConstruction() throws {
+        let base = temporaryDirectory(named: "ShareArtifactStaleRoot")
+        defer { try? FileManager.default.removeItem(at: base) }
+        let ownedRoot = base.appendingPathComponent("RuneScribeShareArtifacts")
+        let staleDirectory = ownedRoot.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(
+            at: staleDirectory,
+            withIntermediateDirectories: true
+        )
+        let staleFile = staleDirectory.appendingPathComponent("stale.runescribe")
+        try Data([0x52, 0x53]).write(to: staleFile)
+
+        _ = AppleShareArtifactStore(temporaryDirectory: base)
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: staleFile.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: ownedRoot.path))
+    }
+
+    func testShareArtifactStoreRejectsRootReplacedAfterPreparation() async throws {
+        let base = temporaryDirectory(named: "ShareArtifactRootReplacement")
+        let outside = temporaryDirectory(named: "ShareArtifactReplacementOutside")
+        defer {
+            try? FileManager.default.removeItem(at: base)
+            try? FileManager.default.removeItem(at: outside)
+        }
+        try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
+        let store = AppleShareArtifactStore(temporaryDirectory: base)
+        _ = try await store.create(
+            Data([0x01]),
+            artifactID: ShareArtifactID(rawValue: UUID()),
+            filename: "first",
+            fileExtension: "runescribe"
+        )
+
+        let ownedRoot = base.appendingPathComponent("RuneScribeShareArtifacts")
+        try FileManager.default.removeItem(at: ownedRoot)
+        try FileManager.default.createSymbolicLink(at: ownedRoot, withDestinationURL: outside)
+
+        do {
+            _ = try await store.create(
+                Data([0x02]),
+                artifactID: ShareArtifactID(rawValue: UUID()),
+                filename: "second",
+                fileExtension: "runescribe"
+            )
+            XCTFail("A replaced temporary root must be rejected")
+        } catch {
+            XCTAssertEqual(
+                error as? AppleShareArtifactStoreError,
+                .symbolicLinkNotAllowed
+            )
+        }
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: outside.path), [])
+    }
+
+    func testShareArtifactStoreKeepsOpaqueLinksInMemoryUntilRevoked() async throws {
+        let root = temporaryDirectory(named: "ShareArtifactLinks")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = AppleShareArtifactStore(temporaryDirectory: root)
+        let artifactID = ShareArtifactID(rawValue: UUID())
+        let link = try XCTUnwrap(URL(string: "runescribe://import?v=3&p=synthetic"))
+
+        try await store.storeLink(link, artifactID: artifactID)
+        let stored = try await store.link(for: artifactID)
+        XCTAssertEqual(stored, link)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: root.path + "/RuneScribeShareArtifacts"))
+
+        do {
+            try await store.storeLink(link, artifactID: artifactID)
+            XCTFail("Duplicate opaque link identifiers must be rejected")
+        } catch {
+            XCTAssertEqual(error as? AppleShareArtifactStoreError, .duplicateIdentifier)
+        }
+
+        try await store.removeLink(artifactID: artifactID)
+        do {
+            _ = try await store.link(for: artifactID)
+            XCTFail("Revoked opaque links must be unavailable")
+        } catch {
+            XCTAssertEqual(error as? AppleShareArtifactStoreError, .unknownArtifact)
+        }
     }
 
     private func temporaryDirectory(named name: String) -> URL {

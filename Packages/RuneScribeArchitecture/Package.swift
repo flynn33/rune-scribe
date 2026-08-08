@@ -59,6 +59,7 @@ let package = Package(
         .testTarget(
             name: "RuneScribeUIModuleTests",
             dependencies: [
+                "RuneScribeContracts",
                 "RuneScribeRuntimeCore",
                 "RuneScribeUIRuntime",
                 "RuneScribeUIModule",

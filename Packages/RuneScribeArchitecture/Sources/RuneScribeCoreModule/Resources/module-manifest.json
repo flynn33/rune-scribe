@@ -19,18 +19,23 @@
     "runtime.events.publish",
     "storage.keychain",
     "storage.protected-files",
+    "files.inbound.read",
+    "storage.share-artifacts",
     "resources.read",
     "fonts.register",
     "contacts.read",
     "clipboard.read",
     "clock.read",
-    "uuid.generate"
+    "uuid.generate",
+    "application.inbound-input"
   ],
   "entryPoint": "RuneScribeCoreModule",
   "runtimeRequirements": {
     "requiredServices": [
       "SecureValueStore",
       "ProtectedFileStore",
+      "InboundFileReader",
+      "ShareArtifactStore",
       "ApplicationResourceLocator",
       "SystemFontRegistrar",
       "ContactAccessService",

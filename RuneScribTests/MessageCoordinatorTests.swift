@@ -1,5 +1,4 @@
 import Combine
-import CryptoKit
 import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
@@ -10,15 +9,12 @@ import XCTest
 final class MessageCoordinatorTests: XCTestCase {
     private struct Context {
         let keyManager: KeyManager
-        let contactManager: ContactManager
         let coordinator: MessageCoordinator
         let snapshots: CurrentValueSubject<RuneScribeApplicationSnapshot?, Never>
-        let directory: URL
     }
 
-    func testKeyFreeSnapshotSurfacesPendingMessageAndAssociatesContact() async throws {
+    func testKeyFreeSnapshotSurfacesPendingMessage() async throws {
         let context = await makeContext()
-        defer { try? FileManager.default.removeItem(at: context.directory) }
         let cipher = try await context.keyManager.addCipher(label: "Sender")
         await waitUntil { context.keyManager.ciphers.contains { $0.id == cipher.id } }
 
@@ -36,22 +32,10 @@ final class MessageCoordinatorTests: XCTestCase {
         XCTAssertEqual(context.coordinator.pending?.senderName, "Astrid")
         XCTAssertEqual(context.coordinator.pending?.cipherID, cipher.id)
         XCTAssertEqual(context.coordinator.pending?.cipherName, "Sender")
-
-        await waitUntil {
-            context.contactManager.contacts.contains { $0.displayName == "Astrid" }
-        }
-        let contact = try XCTUnwrap(
-            context.contactManager.contacts.first { $0.displayName == "Astrid" }
-        )
-        XCTAssertEqual(contact.source, .imported)
-        await waitUntil {
-            context.keyManager.ciphers.first { $0.id == cipher.id }?.contactID == contact.id
-        }
     }
 
-    func testRepeatingSameMessageDoesNotDuplicateContact() async throws {
+    func testRepeatingSameMessageKeepsOnePresentationProjection() async throws {
         let context = await makeContext()
-        defer { try? FileManager.default.removeItem(at: context.directory) }
         let cipher = try await context.keyManager.addCipher(label: "Sender")
         let message = ReceivedMessageDTO(
             id: MessageID(rawValue: UUID()),
@@ -63,19 +47,16 @@ final class MessageCoordinatorTests: XCTestCase {
         let state = snapshot(from: try XCTUnwrap(context.keyManager.snapshot), message: message)
 
         context.snapshots.send(state)
-        await waitUntil { context.contactManager.contacts.contains { $0.displayName == "Eira" } }
+        await waitUntil { context.coordinator.pending?.id == message.id }
         context.snapshots.send(state)
         await Task.yield()
 
-        XCTAssertEqual(
-            context.contactManager.contacts.filter { $0.displayName == "Eira" }.count,
-            1
-        )
+        XCTAssertEqual(context.coordinator.pending?.id, message.id)
+        XCTAssertEqual(context.coordinator.pending?.senderName, "Eira")
     }
 
     func testNilMessageStateClearsPendingPresentation() async throws {
         let context = await makeContext()
-        defer { try? FileManager.default.removeItem(at: context.directory) }
         let cipher = try await context.keyManager.addCipher(label: "Sender")
         let message = ReceivedMessageDTO(
             id: MessageID(rawValue: UUID()),
@@ -100,24 +81,15 @@ final class MessageCoordinatorTests: XCTestCase {
         )
         let keyManager = KeyManager(service: service)
         await waitUntil { keyManager.snapshot != nil && !keyManager.isLoading }
-        let directory = FileManager.default.temporaryDirectory
-            .appendingPathComponent("MessageCoordinatorTests-\(UUID().uuidString)", isDirectory: true)
-        let contactManager = ContactManager(
-            store: ContactStore(key: SymmetricKey(size: .bits256), directory: directory),
-            keyManager: keyManager
-        )
         let snapshots = CurrentValueSubject<RuneScribeApplicationSnapshot?, Never>(nil)
         let coordinator = MessageCoordinator(
             keyManager: keyManager,
-            contactManager: contactManager,
             snapshotPublisher: snapshots.eraseToAnyPublisher()
         )
         return Context(
             keyManager: keyManager,
-            contactManager: contactManager,
             coordinator: coordinator,
-            snapshots: snapshots,
-            directory: directory
+            snapshots: snapshots
         )
     }
 

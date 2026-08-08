@@ -58,6 +58,8 @@ final class ArchitectureIntegrationTests: XCTestCase {
     ) async throws {
         let secureValues: any SecureValueStore = InMemorySecureValueStore()
         let protectedFiles: any ProtectedFileStore = InMemoryProtectedFileStore()
+        let inboundFiles: any InboundFileReader = InMemoryInboundFileReader()
+        let shareArtifacts: any ShareArtifactStore = InMemoryShareArtifactStore()
         let resources: any ApplicationResourceLocator = MappedApplicationResourceLocator(
             locations: [:]
         )
@@ -78,6 +80,14 @@ final class ArchitectureIntegrationTests: XCTestCase {
         try await runtime.registerHostService(
             protectedFiles,
             for: RuneScribeServiceKeys.protectedFileStore
+        )
+        try await runtime.registerHostService(
+            inboundFiles,
+            for: RuneScribeServiceKeys.inboundFileReader
+        )
+        try await runtime.registerHostService(
+            shareArtifacts,
+            for: RuneScribeServiceKeys.shareArtifactStore
         )
         try await runtime.registerHostService(
             resources,

@@ -58,6 +58,8 @@ public actor RuneScribeRuntime {
     private var activationOrder: [ModuleIdentifier] = []
     private var activeUIModuleID: ModuleIdentifier?
     private var status: RuntimeStatus = .idle
+    private var stopRequestedWhileStarting = false
+    private var stopWaiters: [CheckedContinuation<Void, Never>] = []
 
     public init(
         runtimeVersion: SemanticVersion,
@@ -142,11 +144,16 @@ public actor RuneScribeRuntime {
         }
 
         status = .starting
+        stopRequestedWhileStarting = false
         activeUIModuleID = nil
         activationOrder = []
 
         do {
             let eligible = await eligibleRegistrations()
+            if stopRequestedWhileStarting {
+                await finishInterruptedStart()
+                return
+            }
             let uiModules = eligible.filter { $0.manifest.moduleType == .ui }
             guard !uiModules.isEmpty else {
                 throw RuneScribeRuntimeError.noEligibleUIModule
@@ -161,13 +168,30 @@ public actor RuneScribeRuntime {
             let plan = try activationPlan(for: eligible)
             for registration in plan {
                 try await activate(registration)
+                if stopRequestedWhileStarting {
+                    await finishInterruptedStart()
+                    return
+                }
             }
             status = .running
         } catch {
+            if stopRequestedWhileStarting {
+                await finishInterruptedStart()
+                return
+            }
             await stopActivatedModules(markFailed: true)
+            if stopRequestedWhileStarting {
+                activeUIModuleID = nil
+                activationOrder = []
+                stopRequestedWhileStarting = false
+                status = .stopped
+                resumeStopWaiters()
+                return
+            }
             activeUIModuleID = nil
             activationOrder = []
             status = .failed
+            resumeStopWaiters()
             throw error
         }
     }
@@ -177,7 +201,14 @@ public actor RuneScribeRuntime {
             status = .stopped
             return
         }
-        guard status != .starting, status != .stopping else {
+        if status == .starting {
+            stopRequestedWhileStarting = true
+            status = .stopping
+            await waitForStopCompletion()
+            return
+        }
+        if status == .stopping {
+            await waitForStopCompletion()
             return
         }
 
@@ -185,6 +216,7 @@ public actor RuneScribeRuntime {
         await stopActivatedModules(markFailed: false)
         activeUIModuleID = nil
         status = .stopped
+        resumeStopWaiters()
     }
 
     public func snapshot() -> RuntimeSnapshot {
@@ -321,6 +353,30 @@ public actor RuneScribeRuntime {
             moduleStates[moduleID] = markFailed ? .failed : .stopped
         }
         activeModules.removeAll()
+    }
+
+    private func finishInterruptedStart() async {
+        status = .stopping
+        await stopActivatedModules(markFailed: false)
+        activeUIModuleID = nil
+        activationOrder = []
+        stopRequestedWhileStarting = false
+        status = .stopped
+        resumeStopWaiters()
+    }
+
+    private func waitForStopCompletion() async {
+        await withCheckedContinuation { continuation in
+            stopWaiters.append(continuation)
+        }
+    }
+
+    private func resumeStopWaiters() {
+        let waiters = stopWaiters
+        stopWaiters.removeAll()
+        for waiter in waiters {
+            waiter.resume()
+        }
     }
 
     private func registrationOrder(_ lhs: Registration, _ rhs: Registration) -> Bool {

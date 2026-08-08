@@ -20,16 +20,21 @@ public enum RuneScribeCoreModuleBootstrap {
             RuneScribeCapabilities.publishEvents,
             RuneScribeCapabilities.keychainStorage,
             RuneScribeCapabilities.protectedFileStorage,
+            RuneScribeCapabilities.inboundFileRead,
+            RuneScribeCapabilities.shareArtifactStorage,
             RuneScribeCapabilities.resourceRead,
             RuneScribeCapabilities.fontRegistration,
             RuneScribeCapabilities.contactRead,
             RuneScribeCapabilities.clipboardRead,
             RuneScribeCapabilities.clockRead,
             RuneScribeCapabilities.uuidGenerate,
+            RuneScribeCapabilities.inboundInput,
         ],
         requiredServices: [
             RuneScribeServiceIDs.secureValueStore,
             RuneScribeServiceIDs.protectedFileStore,
+            RuneScribeServiceIDs.inboundFileReader,
+            RuneScribeServiceIDs.shareArtifactStore,
             RuneScribeServiceIDs.applicationResourceLocator,
             RuneScribeServiceIDs.systemFontRegistrar,
             RuneScribeServiceIDs.contactAccess,
@@ -37,7 +42,10 @@ public enum RuneScribeCoreModuleBootstrap {
             RuneScribeServiceIDs.clock,
             RuneScribeServiceIDs.uuid,
         ],
-        publishedServices: [RuneScribeServiceIDs.application]
+        publishedServices: [
+            RuneScribeServiceIDs.application,
+            RuneScribeServiceIDs.inboundInput,
+        ]
     )
 
     public static func manifestData() throws -> Data {
@@ -55,7 +63,7 @@ public enum RuneScribeCoreModuleBootstrap {
     }
 
     public static func factory(
-        applicationService: (any RuneScribeApplicationService)? = nil
+        applicationService: RuneScribeCoreApplicationService? = nil
     ) -> AnyModuleFactory {
         AnyModuleFactory(descriptor: descriptor) {
             RuneScribeCoreModule(applicationService: applicationService)
@@ -65,9 +73,10 @@ public enum RuneScribeCoreModuleBootstrap {
 
 public struct RuneScribeCoreModule: RuneScribeModule {
     public let descriptor = RuneScribeCoreModuleBootstrap.descriptor
-    private let applicationService: (any RuneScribeApplicationService)?
+    private let applicationService: RuneScribeCoreApplicationService?
+    private let lifecycle = RuneScribeCoreModuleLifecycle()
 
-    public init(applicationService: (any RuneScribeApplicationService)? = nil) {
+    public init(applicationService: RuneScribeCoreApplicationService? = nil) {
         self.applicationService = applicationService
     }
 
@@ -75,19 +84,25 @@ public struct RuneScribeCoreModule: RuneScribeModule {
         let secureValueStore: any SecureValueStore = try await context.resolveService(
             RuneScribeServiceKeys.secureValueStore
         )
-        let _: any ProtectedFileStore = try await context.resolveService(
+        let protectedFileStore: any ProtectedFileStore = try await context.resolveService(
             RuneScribeServiceKeys.protectedFileStore
         )
-        let _: any ApplicationResourceLocator = try await context.resolveService(
+        let inboundFileReader: any InboundFileReader = try await context.resolveService(
+            RuneScribeServiceKeys.inboundFileReader
+        )
+        let shareArtifactStore: any ShareArtifactStore = try await context.resolveService(
+            RuneScribeServiceKeys.shareArtifactStore
+        )
+        let applicationResourceLocator: any ApplicationResourceLocator = try await context.resolveService(
             RuneScribeServiceKeys.applicationResourceLocator
         )
-        let _: any SystemFontRegistrar = try await context.resolveService(
+        let systemFontRegistrar: any SystemFontRegistrar = try await context.resolveService(
             RuneScribeServiceKeys.systemFontRegistrar
         )
-        let _: any ContactAccessService = try await context.resolveService(
+        let contactAccess: any ContactAccessService = try await context.resolveService(
             RuneScribeServiceKeys.contactAccess
         )
-        let _: any ClipboardReading = try await context.resolveService(
+        let clipboardReading: any ClipboardReading = try await context.resolveService(
             RuneScribeServiceKeys.clipboardRead
         )
         let clock: any ClockProviding = try await context.resolveService(
@@ -98,11 +113,43 @@ public struct RuneScribeCoreModule: RuneScribeModule {
         )
         let service = applicationService ?? RuneScribeCoreApplicationService(
             secureValueStore: secureValueStore,
+            protectedFileStore: protectedFileStore,
+            inboundFileReader: inboundFileReader,
+            shareArtifactStore: shareArtifactStore,
+            applicationResourceLocator: applicationResourceLocator,
+            systemFontRegistrar: systemFontRegistrar,
+            contactAccess: contactAccess,
+            clipboardReading: clipboardReading,
             clock: clock,
             uuid: uuid
         )
-        try await context.publishService(service, for: RuneScribeServiceKeys.application)
+        try await context.publishService(
+            service as any RuneScribeApplicationService,
+            for: RuneScribeServiceKeys.application
+        )
+        try await context.publishService(
+            service as any RuneScribeInboundInputService,
+            for: RuneScribeServiceKeys.inboundInput
+        )
+        await lifecycle.store(service)
+        await service.startInboundProcessing()
     }
 
-    public func stop() async {}
+    public func stop() async {
+        await lifecycle.stop()
+    }
+}
+
+private actor RuneScribeCoreModuleLifecycle {
+    private var service: RuneScribeCoreApplicationService?
+
+    func store(_ service: RuneScribeCoreApplicationService) {
+        self.service = service
+    }
+
+    func stop() async {
+        guard let service else { return }
+        self.service = nil
+        await service.stopInboundProcessing()
+    }
 }

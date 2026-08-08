@@ -287,6 +287,7 @@ final class RuntimeLifecycleTests: XCTestCase {
                 )
             )
         }
+
     }
 
     func testClipboardRoleSpecificServicesResolveAllowedOperations() async throws {
@@ -400,6 +401,48 @@ final class RuntimeLifecycleTests: XCTestCase {
                 )
             )
         }
+    }
+
+    func testShareArtifactStorageRequiresItsOwnCapability() async throws {
+        let deniedDescriptor = descriptor(
+            id: "com.runescribe.module.share-with-protected-files",
+            kind: .service,
+            entryPoint: "ShareWithProtectedFilesModule",
+            role: RuneScribeRoles.core,
+            capabilities: [RuneScribeCapabilities.protectedFileStorage],
+            requiredServices: [RuneScribeServiceIDs.shareArtifactStore]
+        )
+        let runtime = makeRuntime()
+
+        do {
+            try await runtime.register(
+                manifest: manifest(for: deniedDescriptor),
+                factory: factory(for: deniedDescriptor)
+            )
+            XCTFail("Protected-file access must not authorize temporary share artifacts.")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .serviceCapabilityMissing(
+                    moduleID: deniedDescriptor.moduleID,
+                    service: RuneScribeServiceIDs.shareArtifactStore
+                )
+            )
+        }
+
+        let allowedDescriptor = descriptor(
+            id: "com.runescribe.module.share-with-scoped-capability",
+            kind: .service,
+            entryPoint: "ShareWithScopedCapabilityModule",
+            role: RuneScribeRoles.core,
+            capabilities: [RuneScribeCapabilities.shareArtifactStorage],
+            requiredServices: [RuneScribeServiceIDs.shareArtifactStore]
+        )
+        let allowedRuntime = makeRuntime()
+        try await allowedRuntime.register(
+            manifest: manifest(for: allowedDescriptor),
+            factory: factory(for: allowedDescriptor)
+        )
     }
 
     func testRuntimeStampsEventsAndDirectedMessages() async throws {

@@ -498,7 +498,6 @@ public struct PrepareMessageShareCommand: Sendable {
 public enum ShareArtifactReference: Codable, Equatable, Hashable, Sendable {
     case file(URL)
     case opaque(ShareArtifactID)
-    case link(URL)
 }
 
 public enum ShareArtifactLifetime: Codable, Equatable, Hashable, Sendable {
@@ -652,6 +651,7 @@ public protocol RuneScribeApplicationService: Sendable {
     func dismissReceivedMessage(id: MessageID) async
 
     func lock() async
+    func verifyPIN(_ input: PINInput) async throws -> Bool
     func unlock(_ command: UnlockCommand) async throws -> UnlockResultDTO
     func setPIN(_ command: SetPINCommand) async throws
     func changePIN(_ command: ChangePINCommand) async throws

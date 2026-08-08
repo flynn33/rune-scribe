@@ -1,6 +1,7 @@
 // RuneScrib/Views/CipherLibraryView.swift
 
 import RuneScribeContracts
+import RuneScribeUIRuntime
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -11,10 +12,15 @@ struct CipherLibraryView: View {
 
     private struct CipherQRShare: Identifiable {
         let artifact: ShareArtifactDTO
-        let url: URL
+        let transfer: OpaqueShareTransfer
         let label: String
 
         var id: ShareArtifactID { artifact.id }
+    }
+
+    private struct CipherLinkShare {
+        let artifact: ShareArtifactDTO
+        let transfer: OpaqueShareTransfer
     }
 
     @EnvironmentObject private var keyManager: KeyManager
@@ -45,7 +51,7 @@ struct CipherLibraryView: View {
 
     // Share via QR
     @State private var qrShare: CipherQRShare?
-    @State private var linkArtifacts: [UUID: ShareArtifactDTO] = [:]
+    @State private var linkArtifacts: [UUID: CipherLinkShare] = [:]
 
     // In-app QR scanner (iOS) → confirm
     @State private var showScanner = false
@@ -114,7 +120,7 @@ struct CipherLibraryView: View {
             handleImportSelection(result)
         }
         .sheet(item: $qrShare, onDismiss: releaseQRShare) { share in
-            QRDisplaySheet(url: share.url, label: share.label)
+            QRDisplaySheet(transfer: share.transfer, label: share.label)
         }
         .sheet(isPresented: $showScanner) { scannerSheet }
         .sheet(item: $pendingScan) { pending in
@@ -286,29 +292,33 @@ struct CipherLibraryView: View {
 
                 // Share the offline `runescribe://import?…` deep link — the same payload
                 // as the QR. Recipients tapping the link in Messages / Mail / Notes open
-                // the app and land on the import sheet via LinkRouter. (A `.runescribe`
+                // the app and land on the import sheet through the Core input service. (A `.runescribe`
                 // *file* is still available from Export; files do not single-tap-launch
                 // third-party apps from Messages, so sharing a file here broke auto-import.)
-                if let artifact = linkArtifacts[cipher.id],
-                   case .link(let shareURL) = artifact.reference {
+                if let share = linkArtifacts[cipher.id],
+                   case .opaque = share.artifact.reference {
                     ShareLink(
-                        item: shareURL,
+                        item: share.transfer,
                         subject: Text("Rune Scribe cipher: \(cipher.label)"),
-                        message: Text("Tap to open in Rune Scribe and import this cipher so you can decode my messages.")
+                        message: Text("Tap to open in Rune Scribe and import this cipher so you can decode my messages."),
+                        preview: SharePreview(
+                            "Rune Scribe cipher: \(cipher.label)",
+                            image: Image(systemName: "link")
+                        )
                     ) {
                         cardIconChrome("square.and.arrow.up")
                     }
                     .buttonStyle(.plain)
                     .help("Share via Messages, Mail…")
                     .simultaneousGesture(TapGesture().onEnded {
-                        completeLinkShare(cipherID: cipher.id, artifact: artifact)
+                        completeLinkShare(cipherID: cipher.id, artifact: share.artifact)
                     })
 
                     cardIconButton("qrcode", help: "Show QR code") {
                         linkArtifacts.removeValue(forKey: cipher.id)
                         qrShare = CipherQRShare(
-                            artifact: artifact,
-                            url: shareURL,
+                            artifact: share.artifact,
+                            transfer: share.transfer,
                             label: cipher.label
                         )
                     }
@@ -540,8 +550,8 @@ struct CipherLibraryView: View {
     private func prepareLinkArtifacts() async {
         let liveIDs = Set(keyManager.ciphers.map(\.id))
         let stale = linkArtifacts.filter { !liveIDs.contains($0.key) }
-        for artifact in stale.values {
-            await keyManager.releaseShareArtifact(id: artifact.id)
+        for share in stale.values {
+            await keyManager.releaseShareArtifact(id: share.artifact.id)
         }
         linkArtifacts = linkArtifacts.filter { liveIDs.contains($0.key) }
 
@@ -552,11 +562,15 @@ struct CipherLibraryView: View {
                     displayName: cipher.label,
                     representation: .link
                 )
-                guard case .link = artifact.reference else {
+                guard case .opaque = artifact.reference else {
                     await keyManager.releaseShareArtifact(id: artifact.id)
                     continue
                 }
-                linkArtifacts[cipher.id] = artifact
+                let transfer = try await keyManager.shareTransfer(for: artifact.id)
+                linkArtifacts[cipher.id] = CipherLinkShare(
+                    artifact: artifact,
+                    transfer: transfer
+                )
             } catch {
                 // Unsupported hand-crafted ciphers retain the disabled affordance.
             }
@@ -581,7 +595,7 @@ struct CipherLibraryView: View {
     }
 
     private func releaseLinkArtifacts() {
-        let artifacts = Array(linkArtifacts.values)
+        let artifacts = linkArtifacts.values.map(\.artifact)
         linkArtifacts.removeAll()
         Task {
             for artifact in artifacts {
@@ -609,10 +623,6 @@ struct CipherLibraryView: View {
     private func handleScanned(_ string: String) {
         let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let url = URL(string: trimmed) else {
-            status = .failure("That QR code isn't a Rune Scribe cipher.")
-            return
-        }
-        guard LinkRouter.isCipherImportURL(url) else {
             status = .failure("That QR code isn't a Rune Scribe cipher.")
             return
         }

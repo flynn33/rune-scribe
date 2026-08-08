@@ -458,15 +458,11 @@ struct ContentView: View {
                 let result = try await keyManager.encode(source, cipherID: activeCipher.id)
                 target = result.runes
                 transformDirection = .encode
-                if MessageSend.shouldIncludeKey(activeCipher) {
-                    pendingMessageArtifact = try await keyManager.prepareMessageShare(
-                        runes: result.runes,
-                        senderName: activeCipher.label,
-                        cipherID: activeCipher.id
-                    )
-                } else {
-                    releaseMessageArtifact()
-                }
+                pendingMessageArtifact = try await keyManager.prepareMessageShare(
+                    runes: result.runes,
+                    senderName: activeCipher.label,
+                    cipherID: activeCipher.id
+                )
             case .decode:
                 target = try await keyManager.decode(source).plaintext
                 transformDirection = .decode
@@ -537,8 +533,10 @@ struct ContentView: View {
         let phones = [newContactPhone.trimmingCharacters(in: .whitespacesAndNewlines)].filter { !$0.isEmpty }
         let emails = [newContactEmail.trimmingCharacters(in: .whitespacesAndNewlines)].filter { !$0.isEmpty }
         let contact = Contact(displayName: name, phones: phones, emails: emails, source: .manual)
-        contactManager.add(contact)
-        Task { try? await keyManager.setContact(cipherID: active.id, contactID: contact.id) }
+        Task {
+            guard let persisted = try? await contactManager.create(contact) else { return }
+            try? await keyManager.setContact(cipherID: active.id, contactID: persisted.id)
+        }
     }
 
     private func resetNewContact() {
@@ -564,7 +562,7 @@ struct ContentView: View {
             .simultaneousGesture(TapGesture().onEnded {
                 Task { await completePreparedArtifact(outcome: .handedOff) }
             })
-        } else if resultCipher.map(MessageSend.shouldIncludeKey) == true {
+        } else if pendingMessageArtifact == nil {
             Button { } label: {
                 Label("Preparing…", systemImage: "clock")
                     .frame(maxWidth: .infinity)
@@ -585,8 +583,8 @@ struct ContentView: View {
     /// A light line telling the sender whether this message carries the cipher key.
     @ViewBuilder
     private func keyIndicator(for cipher: CipherViewState?) -> some View {
-        if let cipher {
-            let included = MessageSend.shouldIncludeKey(cipher)
+        if cipher != nil {
+            let included = pendingMessageArtifact?.requiresKeyDelivery == true
             HStack(spacing: 6) {
                 Image(systemName: included ? "key.fill" : "lock.fill")
                     .font(.system(size: 10))
