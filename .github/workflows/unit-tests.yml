@@ -21,6 +21,9 @@ jobs:
           if [ -n "$latest" ]; then sudo xcode-select -s "$latest"; fi
           xcodebuild -version
 
+      - name: Run architecture guardrails
+        run: bash scripts/check-architecture.sh
+
       - name: Install Metal toolchain if missing
         run: xcodebuild -downloadComponent MetalToolchain 2>&1 | tail -2 || true
 
