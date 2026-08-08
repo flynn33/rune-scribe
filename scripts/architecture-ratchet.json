@@ -53,9 +53,9 @@
       "removalPhase": "P2"
     },
     "monolithicAppTargets": {
-      "maximum": 2,
+      "maximum": 0,
       "owner": "ModuleMigration",
-      "reason": "Both application targets currently compile the complete shared RuneScrib source tree.",
+      "reason": "Application targets compile only host, resource, and Metal-shader inputs.",
       "removalPhase": "P5"
     },
     "appOwnedSingletonDeclarations": {
@@ -71,27 +71,27 @@
       "removalPhase": "P5"
     },
     "featureNotificationCenterCalls": {
-      "maximum": 6,
+      "maximum": 0,
       "owner": "UIMigration",
-      "reason": "Three navigation and reply flows still post or subscribe through NotificationCenter.",
+      "reason": "Feature routing uses typed application and UI-session streams.",
       "removalPhase": "P5"
     },
     "featureNotificationNames": {
-      "maximum": 3,
+      "maximum": 0,
       "owner": "UIMigration",
-      "reason": "The P0 UI declares three app-specific notification names.",
+      "reason": "No application-specific notification channel remains.",
       "removalPhase": "P5"
     },
     "notificationCenterDefaultUses": {
-      "maximum": 8,
+      "maximum": 2,
       "owner": "UIMigration",
-      "reason": "P0 contains six feature-channel uses and two local media-finish observer operations.",
+      "reason": "Only the local media-finish observer registration and removal remain.",
       "removalPhase": "P5"
     },
     "temporaryApplicationSessionAdapters": {
-      "maximum": 1,
+      "maximum": 0,
       "owner": "UIMigration",
-      "reason": "One key-free hosted-view adapter bridges the application service until the single UI module owns observation.",
+      "reason": "The UI module owns the sole observable application session.",
       "removalPhase": "P5"
     },
     "hostLegacyBoundaryReferences": {

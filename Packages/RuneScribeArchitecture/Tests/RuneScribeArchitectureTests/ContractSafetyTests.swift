@@ -98,6 +98,9 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertEqual(ApplicationResource.splashVideo.name, "raven-forge-spp-splash")
         XCTAssertEqual(ApplicationResource.splashVideo.fileExtension, "mp4")
         XCTAssertNil(ApplicationResource.splashVideo.subdirectory)
+        XCTAssertEqual(ApplicationResource.defaultMetalLibrary.name, "default")
+        XCTAssertEqual(ApplicationResource.defaultMetalLibrary.fileExtension, "metallib")
+        XCTAssertNil(ApplicationResource.defaultMetalLibrary.subdirectory)
     }
 
     func testProtectedPathRejectsTraversalAndBuildsValidatedFontPaths() throws {

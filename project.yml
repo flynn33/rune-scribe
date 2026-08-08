@@ -37,7 +37,9 @@ targets:
     platform: macOS
     deploymentTarget: "15.0"
     sources:
-      - path: RuneScrib
+      - path: RuneScrib/App
+      - path: RuneScrib/Metal/Shaders.metal
+      - path: RuneScrib/Resources
     dependencies:
       - package: RuneScribeArchitecture
         product: RuneScribeContracts
@@ -117,7 +119,9 @@ targets:
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - path: RuneScrib
+      - path: RuneScrib/App
+      - path: RuneScrib/Metal/Shaders.metal
+      - path: RuneScrib/Resources
     dependencies:
       - package: RuneScribeArchitecture
         product: RuneScribeContracts

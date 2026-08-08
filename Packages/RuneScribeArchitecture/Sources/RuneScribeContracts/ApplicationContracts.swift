@@ -621,6 +621,7 @@ public enum UnlockResultDTO: Equatable, Sendable {
 
 public protocol RuneScribeApplicationService: Sendable {
     func stateStream() -> AsyncStream<RuneScribeApplicationSnapshot>
+    func menuCommandStream() -> AsyncStream<ApplicationMenuCommandDTO>
 
     func encode(_ command: EncodeMessageCommand) async throws -> EncodedMessageResult
     func decode(_ command: DecodeMessageCommand) async throws -> DecodedMessageResult
@@ -636,6 +637,7 @@ public protocol RuneScribeApplicationService: Sendable {
     func deleteContacts(ids: Set<ContactID>) async throws
     func deleteAllImportedContacts() async throws
     func importContacts(_ command: ImportContactsCommand) async throws -> [ContactSummary]
+    func requestSystemContacts() async throws -> [SystemContactDTO]
 
     func prepareCipherShare(_ command: PrepareCipherShareCommand) async throws -> ShareArtifactDTO
     func prepareMessageShare(_ command: PrepareMessageShareCommand) async throws -> ShareArtifactDTO

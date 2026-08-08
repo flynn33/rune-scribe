@@ -4,7 +4,7 @@ import RuneScribeRuntimeCore
 import RuneScribeUIRuntime
 import SwiftUI
 
-public enum UIModuleResourceError: Error, Equatable, Sendable {
+enum UIModuleResourceError: Error, Equatable, Sendable {
     case manifestMissing
 }
 
@@ -21,10 +21,17 @@ public enum RuneScribeUIModuleBootstrap {
             RuneScribeCapabilities.resolveService,
             RuneScribeCapabilities.applicationCommands,
             RuneScribeCapabilities.applicationStateRead,
-            RuneScribeCapabilities.subscribeEvents,
             RuneScribeCapabilities.rootUI,
+            RuneScribeCapabilities.resourceRead,
+            RuneScribeCapabilities.clipboardWrite,
+            RuneScribeCapabilities.shareUI,
+            RuneScribeCapabilities.messagesUI,
         ],
-        requiredServices: [RuneScribeServiceIDs.application],
+        requiredServices: [
+            RuneScribeServiceIDs.application,
+            RuneScribeServiceIDs.applicationResourceLocator,
+            RuneScribeServiceIDs.clipboardWrite,
+        ],
         requiredModuleRoles: [RuneScribeRoles.core]
     )
 
@@ -42,34 +49,76 @@ public enum RuneScribeUIModuleBootstrap {
         try ModuleManifestDecoder.decode(manifestData())
     }
 
-    public static func factory() -> AnyModuleFactory {
-        AnyModuleFactory(descriptor: descriptor) {
-            RuneScribeUIModule()
-        }
+    public static func factory(
+        dependencies: RuneScribeUIDependencies
+    ) -> AnyModuleFactory {
+        let module = RuneScribeUIModule(dependencies: dependencies)
+        return AnyModuleFactory(descriptor: descriptor) { module }
     }
 }
 
-public struct RuneScribeUIModule: RuneScribeUIContributingModule {
-    public let descriptor = RuneScribeUIModuleBootstrap.descriptor
+@MainActor
+public final class RuneScribeUIModule: RuneScribeUIContributingModule {
+    public nonisolated let descriptor = RuneScribeUIModuleBootstrap.descriptor
 
-    public init() {}
+    private nonisolated let dependencies: RuneScribeUIDependencies
+    private var session: RuneScribeUISession?
+
+    public nonisolated init(dependencies: RuneScribeUIDependencies) {
+        self.dependencies = dependencies
+    }
 
     public func start(context: ModuleContext) async throws {
-        let _: any RuneScribeApplicationService = try await context.resolveService(
+        let applicationService: any RuneScribeApplicationService = try await context.resolveService(
             RuneScribeServiceKeys.application
         )
+        let resources: any ApplicationResourceLocator = try await context.resolveService(
+            RuneScribeServiceKeys.applicationResourceLocator
+        )
+        let clipboardWriting: any ClipboardWriting = try await context.resolveService(
+            RuneScribeServiceKeys.clipboardWrite
+        )
+
+        async let splashVideoURL: URL? = try? await resources.url(for: .splashVideo)
+        async let metalLibraryURL: URL? = try? await resources.url(for: .defaultMetalLibrary)
+        let resolvedResources = await (splashVideoURL, metalLibraryURL)
+
+        let session = RuneScribeUISession(
+            applicationService: applicationService,
+            clipboardWriting: clipboardWriting,
+            sharePresentation: dependencies.sharePresentation,
+            splashVideoURL: resolvedResources.0,
+            metalLibraryURL: resolvedResources.1,
+            productMetadata: dependencies.productMetadata
+        )
+
+        do {
+            try session.start()
+            let contribution = RootViewContribution(moduleID: descriptor.moduleID) {
+                AnyView(RootView(session: session))
+            }
+            try dependencies.rootPresentationStore.present(contribution)
+            self.session = session
+        } catch {
+            await session.stop()
+            throw error
+        }
     }
 
-    public func stop() async {}
+    public func stop() async {
+        let session = self.session
+        self.session = nil
+        await session?.stop()
+        dependencies.rootPresentationStore.dismiss(moduleID: descriptor.moduleID)
+    }
 
-    @MainActor
     public func makeRootView() -> AnyView {
-        AnyView(EmptyView())
+        AnyView(RuntimePresentedRootView(store: self.dependencies.rootPresentationStore))
     }
 
-    public func rootContribution() -> RootViewContribution {
+    public nonisolated func rootContribution() -> RootViewContribution {
         RootViewContribution(moduleID: descriptor.moduleID) {
-            AnyView(EmptyView())
+            AnyView(RuntimePresentedRootView(store: self.dependencies.rootPresentationStore))
         }
     }
 }

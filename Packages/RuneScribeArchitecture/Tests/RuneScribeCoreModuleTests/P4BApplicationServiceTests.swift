@@ -906,6 +906,94 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(reloadedContact.linkedCipherCount, 1)
     }
 
+    func testSystemContactRequestUsesApplicationFacadeAndPublishesAuthorization() async throws {
+        let expected = [
+            SystemContactDTO(
+                systemIdentifier: "system-facade-contact",
+                displayName: "Facade Contact"
+            )
+        ]
+        let authorized = fullService(
+            secure: P4BSecureStore(),
+            protected: P4BProtectedStore(),
+            contactAccess: P4BContactAccess(
+                status: .authorized,
+                requestResult: true,
+                contacts: expected
+            )
+        )
+        await authorized.startInboundProcessing()
+
+        let contacts = try await authorized.requestSystemContacts()
+
+        XCTAssertEqual(contacts, expected)
+        let authorizedSnapshot = try await currentSnapshot(from: authorized)
+        XCTAssertEqual(authorizedSnapshot.contactLibrary.authorization, .authorized)
+
+        let denied = fullService(
+            secure: P4BSecureStore(),
+            protected: P4BProtectedStore(),
+            contactAccess: P4BContactAccess(
+                status: .denied,
+                requestResult: false
+            )
+        )
+        await denied.startInboundProcessing()
+
+        do {
+            _ = try await denied.requestSystemContacts()
+            XCTFail("Denied contact access must surface a typed product error")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeProductError,
+                .failure(RuneScribeFailureDTO(code: .authorizationDenied))
+            )
+        }
+        let deniedSnapshot = try await currentSnapshot(from: denied)
+        XCTAssertEqual(deniedSnapshot.contactLibrary.authorization, .denied)
+    }
+
+    func testColdQueuedMenuCommandsReachFirstUISubscriberInOrder() async throws {
+        let service = fullService(
+            secure: P4BSecureStore(),
+            protected: P4BProtectedStore()
+        )
+        let commands: [ApplicationMenuCommandDTO] = [
+            .openSettings,
+            .openCipherLibrary,
+        ]
+        for (offset, command) in commands.enumerated() {
+            let input = RuneScribeInboundInput.menu(
+                InboundMenuCommandDTO(
+                    metadata: InboundInputMetadataDTO(
+                        id: InboundInputID(
+                            rawValue: UUID(
+                                uuidString: String(
+                                    format: "00000000-0000-0000-0000-%012d",
+                                    offset + 1
+                                )
+                            )!
+                        ),
+                        receivedAt: Date(timeIntervalSince1970: 1_750_000_000 + Double(offset)),
+                        source: .applicationOpen,
+                        isColdStart: true
+                    ),
+                    command: command
+                )
+            )
+            let disposition = try await service.receive(input)
+            XCTAssertEqual(disposition, .accepted)
+        }
+
+        await service.startInboundProcessing()
+        var iterator = service.menuCommandStream().makeAsyncIterator()
+        let first = await iterator.next()
+        let second = await iterator.next()
+
+        XCTAssertEqual(first, .openSettings)
+        XCTAssertEqual(second, .openCipherLibrary)
+    }
+
     func testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete() async throws {
         let service = fullService(
             secure: P4BSecureStore(),
@@ -1511,7 +1599,8 @@ final class P4BApplicationServiceTests: XCTestCase {
         protected: P4BProtectedStore,
         clipboard: P4BClipboard = P4BClipboard(),
         artifacts: P4BShareStore = P4BShareStore(),
-        registrar: any SystemFontRegistrar = P4BUnavailableFontRegistrar()
+        registrar: any SystemFontRegistrar = P4BUnavailableFontRegistrar(),
+        contactAccess: any ContactAccessService = P4BContactAccess()
     ) -> RuneScribeCoreApplicationService {
         RuneScribeCoreApplicationService(
             secureValueStore: secure,
@@ -1520,7 +1609,7 @@ final class P4BApplicationServiceTests: XCTestCase {
             shareArtifactStore: artifacts,
             applicationResourceLocator: P4BUnavailableResources(),
             systemFontRegistrar: registrar,
-            contactAccess: P4BContactAccess(),
+            contactAccess: contactAccess,
             clipboardReading: clipboard,
             clock: P4BClock(),
             uuid: P4BUUIDs()
@@ -1858,9 +1947,23 @@ private actor P4BGatedFontRegistrar: SystemFontRegistrar {
 }
 
 private struct P4BContactAccess: ContactAccessService {
-    func authorizationStatus() async -> ContactAuthorizationDTO { .authorized }
-    func requestAccess() async throws -> Bool { true }
-    func fetchContacts() async throws -> [SystemContactDTO] { [] }
+    let status: ContactAuthorizationDTO
+    let requestResult: Bool
+    let contacts: [SystemContactDTO]
+
+    init(
+        status: ContactAuthorizationDTO = .authorized,
+        requestResult: Bool = true,
+        contacts: [SystemContactDTO] = []
+    ) {
+        self.status = status
+        self.requestResult = requestResult
+        self.contacts = contacts
+    }
+
+    func authorizationStatus() async -> ContactAuthorizationDTO { status }
+    func requestAccess() async throws -> Bool { requestResult }
+    func fetchContacts() async throws -> [SystemContactDTO] { contacts }
 }
 
 private actor P4BClipboard: ClipboardReading {

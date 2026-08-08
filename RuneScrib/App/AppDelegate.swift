@@ -1,17 +1,11 @@
 #if os(macOS)
 import AppKit
 import RuneScribeContracts
+import RuneScribeUIRuntime
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let runtime = RuneScribeRuntimeComposition()
-    lazy var keyManager = KeyManager(
-        service: runtime.applicationService,
-        sharePresentation: runtime.sharePresentation
-    )
-    lazy var appLock = AppLock(service: runtime.applicationService)
-    lazy var contactManager = ContactManager(applicationService: runtime.applicationService)
-    lazy var importCoordinator = ImportCoordinator(keyManager: keyManager)
-    lazy var messageCoordinator = MessageCoordinator(keyManager: keyManager)
+    var rootPresentationStore: RootViewPresentationStore { runtime.rootPresentationStore }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSWindow.allowsAutomaticWindowTabbing = false
@@ -29,18 +23,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 #elseif os(iOS)
 import RuneScribeContracts
+import RuneScribeUIRuntime
 import UIKit
 @MainActor
 final class AppDelegate: NSObject, UIApplicationDelegate {
     private let runtime = RuneScribeRuntimeComposition()
-    lazy var keyManager = KeyManager(
-        service: runtime.applicationService,
-        sharePresentation: runtime.sharePresentation
-    )
-    lazy var appLock = AppLock(service: runtime.applicationService)
-    lazy var contactManager = ContactManager(applicationService: runtime.applicationService)
-    lazy var importCoordinator = ImportCoordinator(keyManager: keyManager)
-    lazy var messageCoordinator = MessageCoordinator(keyManager: keyManager)
+    var rootPresentationStore: RootViewPresentationStore { runtime.rootPresentationStore }
     func application(_ application: UIApplication, didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil { Task { await runtime.start() } }
         return true

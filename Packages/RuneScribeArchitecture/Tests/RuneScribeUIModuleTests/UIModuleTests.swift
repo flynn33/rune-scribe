@@ -1,9 +1,10 @@
 import RuneScribeContracts
 import RuneScribeRuntimeCore
-import RuneScribeUIModule
+@testable import RuneScribeUIModule
 import RuneScribeUIRuntime
 import XCTest
 
+@MainActor
 final class UIModuleTests: XCTestCase {
     func testBundledManifestMatchesFactoryDescriptor() throws {
         let manifest = try RuneScribeUIModuleBootstrap.manifest()
@@ -21,9 +22,8 @@ final class UIModuleTests: XCTestCase {
         )
     }
 
-    @MainActor
-    func testSkeletonProvidesExactlyOneEmptyRootContribution() throws {
-        let module = RuneScribeUIModule()
+    func testModuleProvidesExactlyOneRuntimePresentedRootContribution() throws {
+        let module = RuneScribeUIModule(dependencies: dependencies())
         let contribution = module.rootContribution()
         let selected = try RootContributionSelector.select(from: [contribution])
 
@@ -37,7 +37,7 @@ final class UIModuleTests: XCTestCase {
             XCTAssertEqual(error as? RootContributionError, RootContributionError.none)
         }
 
-        let contribution = RuneScribeUIModule().rootContribution()
+        let contribution = RuneScribeUIModule(dependencies: dependencies()).rootContribution()
         XCTAssertThrowsError(
             try RootContributionSelector.select(from: [contribution, contribution])
         ) { error in
@@ -51,7 +51,6 @@ final class UIModuleTests: XCTestCase {
         }
     }
 
-    @MainActor
     func testOpaqueSharePresentationResolvesOnlyWhileLeased() async throws {
         let artifactID = ShareArtifactID(rawValue: UUID())
         let link = try XCTUnwrap(
@@ -73,6 +72,12 @@ final class UIModuleTests: XCTestCase {
         } catch {
             XCTAssertEqual(error as? TestOpaqueLinkVault.Error, .unavailable)
         }
+    }
+
+    private func dependencies() -> RuneScribeUIDependencies {
+        RuneScribeUIDependencies(
+            rootPresentationStore: RootViewPresentationStore()
+        )
     }
 }
 

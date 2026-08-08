@@ -18,13 +18,18 @@
     "runtime.service.resolve",
     "application.commands",
     "application.state.read",
-    "runtime.events.subscribe",
-    "ui.root"
+    "ui.root",
+    "resources.read",
+    "clipboard.write",
+    "ui.share",
+    "ui.messages"
   ],
   "entryPoint": "RuneScribeUIModule",
   "runtimeRequirements": {
     "requiredServices": [
-      "RuneScribeApplicationService"
+      "RuneScribeApplicationService",
+      "ApplicationResourceLocator",
+      "ClipboardWriteService"
     ],
     "requiredModuleRoles": [
       "runescribe.core"

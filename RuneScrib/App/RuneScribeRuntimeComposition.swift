@@ -21,9 +21,10 @@ final class RuneScribeRuntimeComposition {
     private let clock: any ClockProviding
     private let uuid: any UUIDProviding
     private let inputForwarder: SerialInboundInputForwarder
+    private let uiDependencies: RuneScribeUIDependencies
     private var isConfigured = false
     let applicationService: RuneScribeCoreApplicationService
-    let sharePresentation: OpaqueSharePresentationProvider
+    let rootPresentationStore: RootViewPresentationStore
     private(set) var startupFailed = false
     var inputDeliveryFailed: Bool { inputForwarder.hasDeliveryFailures }
     init(bundle: Bundle = .main, injectedApplicationService: RuneScribeCoreApplicationService? = nil) {
@@ -48,6 +49,23 @@ final class RuneScribeRuntimeComposition {
         self.clipboardWrite = clipboardWrite
         self.clock = clock
         self.uuid = uuid
+        let rootPresentationStore = RootViewPresentationStore()
+        let sharePresentation = OpaqueSharePresentationProvider { artifactID in
+            try await shareArtifacts.link(for: artifactID)
+        }
+        self.rootPresentationStore = rootPresentationStore
+        uiDependencies = RuneScribeUIDependencies(
+            rootPresentationStore: rootPresentationStore,
+            sharePresentation: sharePresentation,
+            productMetadata: RuneScribeUIProductMetadata(
+                version: bundle.object(
+                    forInfoDictionaryKey: "CFBundleShortVersionString"
+                ) as? String ?? "—",
+                buildNumber: bundle.object(
+                    forInfoDictionaryKey: "CFBundleVersion"
+                ) as? String ?? "—"
+            )
+        )
         let applicationService = injectedApplicationService ?? RuneScribeCoreApplicationService(
             secureValueStore: secureValues,
             protectedFileStore: protectedFiles,
@@ -62,9 +80,6 @@ final class RuneScribeRuntimeComposition {
         )
         self.applicationService = applicationService
         inputForwarder = SerialInboundInputForwarder(service: applicationService)
-        sharePresentation = OpaqueSharePresentationProvider { artifactID in
-            try await shareArtifacts.link(for: artifactID)
-        }
         runtime = RuneScribeRuntime(
             runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)),
             platform: Self.platform
@@ -80,6 +95,7 @@ final class RuneScribeRuntimeComposition {
             startupFailed = false
         } catch {
             startupFailed = true
+            rootPresentationStore.recover(message: "Please quit and reopen Rune Scribe.")
         }
     }
     func stop() async {
@@ -109,7 +125,7 @@ final class RuneScribeRuntimeComposition {
         )
         try await runtime.register(
             manifest: RuneScribeUIModuleBootstrap.manifest(),
-            factory: RuneScribeUIModuleBootstrap.factory()
+            factory: RuneScribeUIModuleBootstrap.factory(dependencies: uiDependencies)
         )
         try await runtime.registerHostService(secureValues, for: RuneScribeServiceKeys.secureValueStore)
         try await runtime.registerHostService(protectedFiles, for: RuneScribeServiceKeys.protectedFileStore)

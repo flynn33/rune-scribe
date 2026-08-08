@@ -36,7 +36,7 @@ struct CipherLibrary: Codable, Equatable, Sendable {
 //
 // These return a new library rather than mutating in place, and contain no
 // Keychain or actor dependencies, so the invariants (always non-empty, active id
-// always valid) are unit-testable. `KeyManager` delegates to them and persists.
+// always valid) are unit-testable. The cipher repository applies and persists them.
 
 extension CipherLibrary {
 

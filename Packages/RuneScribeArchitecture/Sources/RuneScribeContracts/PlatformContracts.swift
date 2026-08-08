@@ -259,6 +259,12 @@ public struct ApplicationResource: Codable, Equatable, Hashable, Sendable {
         fileExtension: "mp4",
         subdirectory: nil
     )
+
+    public static let defaultMetalLibrary = ApplicationResource(
+        name: "default",
+        fileExtension: "metallib",
+        subdirectory: nil
+    )
 }
 
 public protocol ApplicationResourceLocator: Sendable {

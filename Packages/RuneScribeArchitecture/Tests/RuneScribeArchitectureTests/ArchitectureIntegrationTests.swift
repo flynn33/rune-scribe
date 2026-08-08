@@ -9,6 +9,7 @@ import XCTest
 
 final class ArchitectureIntegrationTests: XCTestCase {
     func testBundledSkeletonBootsNonUIBeforeExactlyOneUI() async throws {
+        let rootStore = await MainActor.run { RootViewPresentationStore() }
         let runtime = RuneScribeRuntime(
             runtimeVersion: SemanticVersion(
                 major: UInt(1),
@@ -20,7 +21,11 @@ final class ArchitectureIntegrationTests: XCTestCase {
 
         try await runtime.register(
             manifest: RuneScribeUIModuleBootstrap.manifest(),
-            factory: RuneScribeUIModuleBootstrap.factory()
+            factory: RuneScribeUIModuleBootstrap.factory(
+                dependencies: RuneScribeUIDependencies(
+                    rootPresentationStore: rootStore
+                )
+            )
         )
         try await runtime.register(
             manifest: RuneScribeCoreModuleBootstrap.manifest(),
@@ -38,12 +43,19 @@ final class ArchitectureIntegrationTests: XCTestCase {
         XCTAssertEqual(running.activeUIModuleID, RuneScribeModuleIDs.primaryUI)
         XCTAssertEqual(running.moduleStates[RuneScribeModuleIDs.core], .active)
         XCTAssertEqual(running.moduleStates[RuneScribeModuleIDs.primaryUI], .active)
+        let runningRootState = await MainActor.run { rootStore.state }
+        XCTAssertEqual(
+            runningRootState,
+            .ready(moduleID: RuneScribeModuleIDs.primaryUI)
+        )
 
         await runtime.stop()
         let stopped = await runtime.snapshot()
         XCTAssertEqual(stopped.status, .stopped)
         XCTAssertEqual(stopped.moduleStates[RuneScribeModuleIDs.core], .stopped)
         XCTAssertEqual(stopped.moduleStates[RuneScribeModuleIDs.primaryUI], .stopped)
+        let stoppedRootState = await MainActor.run { rootStore.state }
+        XCTAssertEqual(stoppedRootState, .booting)
     }
 
     func testProductDependencySurfacesRemainIndependentlyImportable() {
@@ -61,7 +73,10 @@ final class ArchitectureIntegrationTests: XCTestCase {
         let inboundFiles: any InboundFileReader = InMemoryInboundFileReader()
         let shareArtifacts: any ShareArtifactStore = InMemoryShareArtifactStore()
         let resources: any ApplicationResourceLocator = MappedApplicationResourceLocator(
-            locations: [:]
+            locations: [
+                .splashVideo: URL(fileURLWithPath: "/fixture/splash.mp4"),
+                .defaultMetalLibrary: URL(fileURLWithPath: "/fixture/default.metallib"),
+            ]
         )
         let fonts: any SystemFontRegistrar = InMemoryFontRegistrar(namesByData: [:])
         let contacts: any ContactAccessService = InMemoryContactAccessService()

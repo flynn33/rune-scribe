@@ -235,10 +235,10 @@ end
 module_import_policy = {
   "RuneScribeContracts" => %w[Foundation],
   "RuneScribeRuntimeCore" => %w[Foundation RuneScribeContracts],
-  "RuneScribeUIRuntime" => %w[Foundation SwiftUI CoreImage CoreTransferable AppKit UIKit RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore],
   "RuneScribePlatform" => %w[Foundation Darwin RuneScribeContracts Security Contacts CoreText AppKit UIKit],
   "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto RuneScribeContracts RuneScribeRuntimeCore],
-  "RuneScribeUIModule" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIRuntime AppKit UIKit MessageUI Metal MetalKit CoreImage AVFoundation ContactsUI UniformTypeIdentifiers]
+  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIRuntime AppKit UIKit MessageUI Metal MetalKit CoreImage CoreTransferable AVFoundation Contacts ContactsUI UniformTypeIdentifiers]
 }
 
 module_import_policy.each do |product, allowed_imports|

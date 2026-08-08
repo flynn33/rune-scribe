@@ -81,6 +81,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     private var nextMenuSubscriberID: UInt64 = 0
     private var menuSubscribers:
         [UInt64: AsyncStream<ApplicationMenuCommandDTO>.Continuation] = [:]
+    private var pendingMenuCommands: [ApplicationMenuCommandDTO] = []
 
     private var nextSubscriberID: UInt64 = 0
     private var subscribers: [UInt64: AsyncStream<RuneScribeApplicationSnapshot>.Continuation] = [:]
@@ -426,6 +427,28 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             if contactCommitMayHaveOccurred {
                 await repairContactAssociationsIndependently()
             }
+            throw record(error)
+        }
+    }
+
+    public func requestSystemContacts() async throws -> [SystemContactDTO] {
+        await acquireUseCasePermit()
+        defer { releaseUseCasePermit() }
+        do {
+            try await requireUnlocked()
+            guard let contactManager else { throw unavailableError() }
+            let granted = try await contactManager.requestAccess()
+            contactAuthorization = await contactManager.authorizationStatus()
+            guard granted else {
+                throw RuneScribeProductError.failure(
+                    RuneScribeFailureDTO(code: .authorizationDenied)
+                )
+            }
+            let contacts = try await contactManager.fetchSystemContacts()
+            revision &+= 1
+            broadcast(makeSnapshot(isLoading: false))
+            return contacts
+        } catch {
             throw record(error)
         }
     }
@@ -983,7 +1006,8 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
     /// Hosted navigation can subscribe without giving Core any presentation API.
     public nonisolated func menuCommandStream() -> AsyncStream<ApplicationMenuCommandDTO> {
-        AsyncStream(bufferingPolicy: .bufferingNewest(8)) { continuation in
+        AsyncStream(bufferingPolicy: .bufferingOldest(Self.maximumPendingMenuCommands)) {
+            continuation in
             Task { await self.attachMenuSubscriber(continuation) }
         }
     }
@@ -1014,10 +1038,25 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             }
             return .accepted
         case .menu(let menu):
-            for continuation in menuSubscribers.values {
-                continuation.yield(menu.command)
+            guard !menuSubscribers.isEmpty else {
+                guard pendingMenuCommands.count < Self.maximumPendingMenuCommands else {
+                    return rejectInbound(code: .temporarilyUnavailable)
+                }
+                pendingMenuCommands.append(menu.command)
+                return .accepted
             }
-            return .accepted
+            var delivered = false
+            for continuation in menuSubscribers.values {
+                switch continuation.yield(menu.command) {
+                case .enqueued:
+                    delivered = true
+                case .dropped, .terminated:
+                    break
+                @unknown default:
+                    break
+                }
+            }
+            return delivered ? .accepted : rejectInbound(code: .temporarilyUnavailable)
         }
     }
 
@@ -1141,7 +1180,23 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         continuation.onTermination = { @Sendable [weak self] _ in
             Task { await self?.detachMenuSubscriber(id) }
         }
+        let isFirstSubscriber = menuSubscribers.isEmpty
         menuSubscribers[id] = continuation
+        guard isFirstSubscriber, !pendingMenuCommands.isEmpty else { return }
+
+        var deliveredCount = 0
+        for command in pendingMenuCommands {
+            switch continuation.yield(command) {
+            case .enqueued:
+                deliveredCount += 1
+            case .dropped, .terminated:
+                break
+            @unknown default:
+                break
+            }
+            if deliveredCount == 0 { break }
+        }
+        pendingMenuCommands.removeFirst(deliveredCount)
     }
 
     private func detachMenuSubscriber(_ id: UInt64) {
@@ -1171,6 +1226,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
     private static let maximumQueuedInputs = 512
     private static let maximumQueuedDataInputs = 496
+    private static let maximumPendingMenuCommands = 16
     private static let maximumInboundFileURLByteCount = 4_096
     private static let maximumDeclaredContentTypeByteCount = 256
 

@@ -1,5 +1,6 @@
 import XCTest
 import CryptoKit
+import Metal
 @testable import RuneScrib
 
 final class CompatibilityBaselineTests: XCTestCase {
@@ -19,6 +20,29 @@ final class CompatibilityBaselineTests: XCTestCase {
         let digest = Data(SHA256.hash(data: try Data(contentsOf: fontURL)))
 
         XCTAssertEqual(digest, Self.bundledFontSHA256)
+    }
+
+    func testSplashAndMetalLibraryRemainHostResources() throws {
+        let testBundle = Bundle(for: CompatibilityBaselineTests.self)
+        let splashURL = try XCTUnwrap(
+            testBundle.url(
+                forResource: "raven-forge-spp-splash",
+                withExtension: "mp4"
+            ) ?? Bundle.main.url(
+                forResource: "raven-forge-spp-splash",
+                withExtension: "mp4"
+            )
+        )
+        XCTAssertGreaterThan(try Data(contentsOf: splashURL).count, 0)
+
+        let libraryURL = try XCTUnwrap(
+            testBundle.url(forResource: "default", withExtension: "metallib")
+                ?? Bundle.main.url(forResource: "default", withExtension: "metallib")
+        )
+        let device = try XCTUnwrap(MTLCreateSystemDefaultDevice())
+        let library = try device.makeLibrary(URL: libraryURL)
+        XCTAssertNotNil(library.makeFunction(name: "vertex_fullscreen"))
+        XCTAssertNotNil(library.makeFunction(name: "fragment_rune_background"))
     }
 
 }
