@@ -62,23 +62,18 @@ public enum RuneScribeCoreModuleBootstrap {
         try ModuleManifestDecoder.decode(manifestData())
     }
 
-    public static func factory(
-        applicationService: RuneScribeCoreApplicationService? = nil
-    ) -> AnyModuleFactory {
+    public static func factory() -> AnyModuleFactory {
         AnyModuleFactory(descriptor: descriptor) {
-            RuneScribeCoreModule(applicationService: applicationService)
+            RuneScribeCoreModule()
         }
     }
 }
 
 public struct RuneScribeCoreModule: RuneScribeModule {
     public let descriptor = RuneScribeCoreModuleBootstrap.descriptor
-    private let applicationService: RuneScribeCoreApplicationService?
     private let lifecycle = RuneScribeCoreModuleLifecycle()
 
-    public init(applicationService: RuneScribeCoreApplicationService? = nil) {
-        self.applicationService = applicationService
-    }
+    public init() {}
 
     public func start(context: ModuleContext) async throws {
         let secureValueStore: any SecureValueStore = try await context.resolveService(
@@ -111,7 +106,7 @@ public struct RuneScribeCoreModule: RuneScribeModule {
         let uuid: any UUIDProviding = try await context.resolveService(
             RuneScribeServiceKeys.uuid
         )
-        let service = applicationService ?? RuneScribeCoreApplicationService(
+        let service = RuneScribeCoreApplicationService(
             secureValueStore: secureValueStore,
             protectedFileStore: protectedFileStore,
             inboundFileReader: inboundFileReader,

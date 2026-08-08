@@ -95,15 +95,21 @@
       "removalPhase": "P5"
     },
     "hostLegacyBoundaryReferences": {
-      "maximum": 17,
+      "maximum": 0,
       "owner": "HostMigration",
-      "reason": "The hosts still compose shared services, post UI notifications, and invoke the legacy input router.",
+      "reason": "Host lifecycle and inbound routing use runtime contracts; legacy singletons, notifications, and routers are prohibited.",
+      "removalPhase": "P6"
+    },
+    "hostRuntimeBypassReferences": {
+      "maximum": 0,
+      "owner": "HostMigration",
+      "reason": "Hosts must resolve the application facade through the runtime and may not construct or retain the concrete Core application service.",
       "removalPhase": "P6"
     },
     "hostPhysicalLines": {
       "maximum": 300,
       "owner": "HostMigration",
-      "reason": "The P3 production composition root temporarily coexists with the legacy app and delegate bootstrap until runtime activation becomes authoritative.",
+      "reason": "The host is limited to composition, runtime activation, typed OS input conversion, and neutral root presentation.",
       "removalPhase": "P6"
     }
   }

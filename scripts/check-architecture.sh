@@ -336,11 +336,13 @@ temporary_application_session_adapters = production_text.scan(
   /Architecture ratchet: temporary-application-session-adapter\./
 ).length
 
-host_files = Dir.glob(root.join("RuneScrib/App/*.swift").to_s)
+host_files = Dir.glob(root.join("RuneScrib/AppHost/**/*.swift").to_s).sort
+errors << "application host must contain Swift sources in RuneScrib/AppHost" if host_files.empty?
 host_text = without_comments(host_files.map { |path| File.read(path) }.join("\n"))
 host_legacy_boundary_references = host_text.scan(singleton_reference_pattern).length +
   host_text.scan(/\bInboundOpenRouter\b/).length +
   host_text.scan(/NotificationCenter\.default\b/).length
+host_runtime_bypass_references = host_text.scan(/\bRuneScribeCoreApplicationService\b/).length
 host_physical_lines = host_files.sum { |path| File.readlines(path).length }
 
 host_files.each do |path|
@@ -374,6 +376,7 @@ metrics = {
   "notificationCenterDefaultUses" => notification_center_default_uses,
   "temporaryApplicationSessionAdapters" => temporary_application_session_adapters,
   "hostLegacyBoundaryReferences" => host_legacy_boundary_references,
+  "hostRuntimeBypassReferences" => host_runtime_bypass_references,
   "hostPhysicalLines" => host_physical_lines
 }
 

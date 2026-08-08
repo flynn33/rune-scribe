@@ -2,7 +2,6 @@ import RuneScribeContracts
 import RuneScribeUIModule
 import RuneScribeUIRuntime
 import SwiftUI
-
 @main
 struct RuneScribApp: App {
     #if os(macOS)
@@ -10,7 +9,6 @@ struct RuneScribApp: App {
     #elseif os(iOS)
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     #endif
-
     var body: some Scene {
         WindowGroup { rootContent }
         #if os(macOS)

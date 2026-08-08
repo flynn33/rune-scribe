@@ -1,7 +1,8 @@
-#if os(macOS)
-import AppKit
 import RuneScribeContracts
 import RuneScribeUIRuntime
+
+#if os(macOS)
+import AppKit
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let runtime = RuneScribeRuntimeComposition()
@@ -22,8 +23,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func receive(menu: ApplicationMenuCommandDTO) { runtime.receive(menu: menu) }
 }
 #elseif os(iOS)
-import RuneScribeContracts
-import RuneScribeUIRuntime
 import UIKit
 @MainActor
 final class AppDelegate: NSObject, UIApplicationDelegate {
@@ -50,15 +49,14 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         receive(urls: [url], source: .applicationOpen)
         return true
     }
-    func receive(urls: [URL], source: InboundDeliverySourceDTO, isColdStart: Bool = false) {
+    func receive(urls: [URL], source: InboundDeliverySourceDTO, isColdStart: Bool? = nil) {
         runtime.receive(urls: urls, source: source, isColdStart: isColdStart)
     }
-    func receive(userActivity: NSUserActivity, isColdStart: Bool = false) {
+    func receive(userActivity: NSUserActivity, isColdStart: Bool? = nil) {
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
               let url = userActivity.webpageURL else { return }
         receive(urls: [url], source: .webBrowsingActivity, isColdStart: isColdStart)
     }
-    func receive(menu: ApplicationMenuCommandDTO) { runtime.receive(menu: menu) }
 }
 @MainActor
 final class RuneScribeSceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -75,8 +73,6 @@ final class RuneScribeSceneDelegate: UIResponder, UIWindowSceneDelegate {
         let urls = contexts.map(\.url).sorted { $0.absoluteString < $1.absoluteString }
         appDelegate?.receive(urls: urls, source: .sceneOpen)
     }
-    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
-        appDelegate?.receive(userActivity: userActivity)
-    }
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) { appDelegate?.receive(userActivity: userActivity) }
 }
 #endif
