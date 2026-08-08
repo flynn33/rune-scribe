@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0",
+  "policyProfile": "forsetti-pattern-b-standalone",
+  "runtimeVersion": "1.0.0",
+  "moduleID": "com.runescribe.module.core",
+  "displayName": "Rune Scribe Core",
+  "moduleVersion": "1.0.33",
+  "moduleType": "service",
+  "supportedPlatforms": [
+    "iOS",
+    "macOS"
+  ],
+  "minimumOS": {
+    "iOS": "17.0",
+    "macOS": "15.0"
+  },
+  "capabilitiesRequested": [
+    "runtime.events.publish"
+  ],
+  "entryPoint": "RuneScribeCoreModule",
+  "runtimeRequirements": {
+    "requiredServices": [],
+    "requiredModuleRoles": []
+  },
+  "defaultRole": "runescribe.core",
+  "entitlementRequirement": null,
+  "diagnosticsVisibleInProduction": false
+}

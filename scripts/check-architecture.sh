@@ -12,6 +12,9 @@ require "open3"
 require "pathname"
 require "yaml"
 
+Encoding.default_external = Encoding::UTF_8
+Encoding.default_internal = Encoding::UTF_8
+
 root = Pathname(ARGV.fetch(0)).realpath
 ratchet_path = Pathname(ARGV.fetch(1)).realpath
 errors = []

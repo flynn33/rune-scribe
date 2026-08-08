@@ -50,6 +50,17 @@
                ReferencedContainer = "container:RuneScrib.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9DC46FB3B5C4089358C387BB"
+               BuildableName = "RuneScribArchitectureTests.xctest"
+               BlueprintName = "RuneScribArchitectureTests"
+               ReferencedContainer = "container:RuneScrib.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

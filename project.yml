@@ -27,6 +27,9 @@ settings:
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "-"
     DEVELOPMENT_TEAM: ""
+packages:
+  RuneScribeArchitecture:
+    path: Packages/RuneScribeArchitecture
 targets:
   RuneScrib-macOS:
     type: application
@@ -35,6 +38,19 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: RuneScrib
+    dependencies:
+      - package: RuneScribeArchitecture
+        product: RuneScribeContracts
+      - package: RuneScribeArchitecture
+        product: RuneScribeRuntimeCore
+      - package: RuneScribeArchitecture
+        product: RuneScribeUIRuntime
+      - package: RuneScribeArchitecture
+        product: RuneScribePlatform
+      - package: RuneScribeArchitecture
+        product: RuneScribeCoreModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeUIModule
     # An explicit, XcodeGen-managed Info.plist is required because the
     # runescribe:// URL scheme is a nested array that GENERATE_INFOPLIST_FILE can't
     # express. Keys previously set via INFOPLIST_KEY_* are migrated here.
@@ -102,6 +118,19 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: RuneScrib
+    dependencies:
+      - package: RuneScribeArchitecture
+        product: RuneScribeContracts
+      - package: RuneScribeArchitecture
+        product: RuneScribeRuntimeCore
+      - package: RuneScribeArchitecture
+        product: RuneScribeUIRuntime
+      - package: RuneScribeArchitecture
+        product: RuneScribePlatform
+      - package: RuneScribeArchitecture
+        product: RuneScribeCoreModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeUIModule
     # An explicit, XcodeGen-managed Info.plist is required because the
     # runescribe:// URL scheme is a nested array that GENERATE_INFOPLIST_FILE can't
     # express, and the camera scanner needs NSCameraUsageDescription. Keys
@@ -192,6 +221,18 @@ targets:
           CODE_SIGN_STYLE: Manual
           CODE_SIGN_IDENTITY: "-"
           DEVELOPMENT_TEAM: ""
+  RuneScribArchitectureTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: RuneScribArchitectureTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.architecture-tests
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
 schemes:
   RuneScrib-macOS:
     build:
@@ -200,6 +241,7 @@ schemes:
     test:
       targets:
         - RuneScribTests
+        - RuneScribArchitectureTests
   RuneScrib-iOS:
     build:
       targets:
