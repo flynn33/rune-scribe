@@ -332,6 +332,9 @@ app_owned_singleton_references = production_text.scan(singleton_reference_patter
 feature_notification_calls = production_text.scan(/NotificationCenter\.default\.(?:post|publisher)\b/).length
 feature_notification_names = production_text.scan(/Notification\.Name\("com\.runescribe\./).length
 notification_center_default_uses = production_text.scan(/NotificationCenter\.default\b/).length
+temporary_application_session_adapters = production_text.scan(
+  /Architecture ratchet: temporary-application-session-adapter\./
+).length
 
 host_files = Dir.glob(root.join("RuneScrib/App/*.swift").to_s)
 host_text = without_comments(host_files.map { |path| File.read(path) }.join("\n"))
@@ -369,6 +372,7 @@ metrics = {
   "featureNotificationCenterCalls" => feature_notification_calls,
   "featureNotificationNames" => feature_notification_names,
   "notificationCenterDefaultUses" => notification_center_default_uses,
+  "temporaryApplicationSessionAdapters" => temporary_application_session_adapters,
   "hostLegacyBoundaryReferences" => host_legacy_boundary_references,
   "hostPhysicalLines" => host_physical_lines
 }

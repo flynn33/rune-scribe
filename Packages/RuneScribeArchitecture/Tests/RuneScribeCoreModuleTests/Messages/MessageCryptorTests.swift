@@ -1,5 +1,5 @@
 import XCTest
-@testable import RuneScrib
+@testable import RuneScribeCoreModule
 
 final class MessageCryptorTests: XCTestCase {
     private let cryptor = MessageCryptor()

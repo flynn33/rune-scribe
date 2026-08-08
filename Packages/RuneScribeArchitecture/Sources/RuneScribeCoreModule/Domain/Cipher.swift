@@ -1,11 +1,19 @@
 import Foundation
 import CryptoKit
 
+enum CipherValidationError: Error, Equatable, Sendable {
+    case unsupportedFormatVersion(Int)
+    case invalidPublicIDLength
+    case invalidKeyMaterialLength
+    case invalidDecorativeMapping
+    case invalidFontReference
+}
+
 /// A Rune Scribe cipher: real symmetric encryption key material plus the
 /// decorative rune presentation. Replaces the old permutation-based `RuneKey`/`NamedCipher`.
-struct Cipher: Codable, Equatable, Identifiable {
+struct Cipher: Codable, Equatable, Identifiable, Sendable {
 
-    enum Origin: String, Codable { case generated, imported }
+    enum Origin: String, Codable, Sendable { case generated, imported }
 
     /// Current on-disk schema version for a cipher.
     static let currentVersion = 1
@@ -79,6 +87,7 @@ struct Cipher: Codable, Equatable, Identifiable {
         fontRef = try c.decodeIfPresent(FontRef.self, forKey: .fontRef) ?? .bundled
         contactID = try c.decodeIfPresent(UUID.self, forKey: .contactID)
         delivered = try c.decodeIfPresent(Bool.self, forKey: .delivered) ?? false
+        try validateStoredShape()
     }
 
     /// A brand-new locally-generated cipher with a random key, id, and decorative mapping.
@@ -89,5 +98,25 @@ struct Cipher: Codable, Equatable, Identifiable {
         let mapping = Array(0..<32).shuffled(using: &rng)
         return Cipher(label: label, origin: .generated, publicID: publicID,
                       keyMaterial: key, decorativeMapping: mapping)
+    }
+
+    private func validateStoredShape() throws {
+        guard formatVersion == Self.currentVersion else {
+            throw CipherValidationError.unsupportedFormatVersion(formatVersion)
+        }
+        guard publicID.count == 8 else {
+            throw CipherValidationError.invalidPublicIDLength
+        }
+        guard keyMaterial.count == 32 else {
+            throw CipherValidationError.invalidKeyMaterialLength
+        }
+        guard decorativeMapping.count == 32,
+              Set(decorativeMapping) == Set(0..<32)
+        else {
+            throw CipherValidationError.invalidDecorativeMapping
+        }
+        guard fontRef.hasValidWireShape else {
+            throw CipherValidationError.invalidFontReference
+        }
     }
 }

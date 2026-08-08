@@ -18,6 +18,9 @@ enum Clipboard {
     static func runeScribeURLString() -> String? {
         guard let raw = service.stringSynchronously() else { return nil }
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        return CipherSharePayload.isShareURL(trimmed) ? trimmed : nil
+        guard let url = URL(string: trimmed), LinkRouter.isCipherImportURL(url) else {
+            return nil
+        }
+        return trimmed
     }
 }

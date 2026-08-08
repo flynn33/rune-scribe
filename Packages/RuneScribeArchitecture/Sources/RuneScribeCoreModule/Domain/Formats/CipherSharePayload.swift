@@ -1,12 +1,15 @@
 import Foundation
 import CryptoKit
 
-enum CipherShareError: Error, LocalizedError {
+enum CipherShareError: Error, LocalizedError, Equatable, Sendable {
     case wrongSize, unsupportedVersion(UInt8), badChecksum, notAMapping
+    case invalidPublicIDLength, invalidKeyMaterialLength, invalidFontReference
     case invalidURL, badBase64, missingPayload
     var errorDescription: String? {
         switch self {
-        case .wrongSize, .badBase64, .notAMapping: return "The cipher's data is corrupted."
+        case .wrongSize, .badBase64, .notAMapping,
+             .invalidPublicIDLength, .invalidKeyMaterialLength, .invalidFontReference:
+            return "The cipher's data is corrupted."
         case .badChecksum:                          return "The cipher's data failed its integrity check."
         case .unsupportedVersion:                   return "This cipher uses a newer format. Update Rune Scribe."
         case .invalidURL:                           return "This isn't a Rune Scribe cipher link."
@@ -20,7 +23,7 @@ enum CipherShareError: Error, LocalizedError {
 ///   version(1) | publicID(8) | keyMaterial(32) | decorativeMapping(32)
 ///   | fontId(16, utf8 zero-padded) | fontVersion(4, big-endian) | fontSha256(32)
 ///   | checksum(4)
-struct CipherSharePayload: Equatable {
+struct CipherSharePayload: Equatable, Sendable {
     static let version: UInt8 = 3
     static let scheme = "runescribe"
     static let host = "import"
@@ -57,7 +60,16 @@ struct CipherSharePayload: Equatable {
 
     // MARK: binary
 
-    func encoded() -> Data {
+    func encoded() throws -> Data {
+        guard publicID.count == 8 else { throw CipherShareError.invalidPublicIDLength }
+        guard keyMaterial.count == 32 else { throw CipherShareError.invalidKeyMaterialLength }
+        guard decorativeMapping.count == 32,
+              Set(decorativeMapping) == Set(0..<32)
+        else {
+            throw CipherShareError.notAMapping
+        }
+        guard fontRef.hasValidWireShape else { throw CipherShareError.invalidFontReference }
+
         var body = Data([Self.version])
         body.append(publicID)
         body.append(keyMaterial)
@@ -86,16 +98,17 @@ struct CipherSharePayload: Equatable {
         let fontIdData   = data.subdata(in: i ..< data.index(i, offsetBy: 16)); i = data.index(i, offsetBy: 16)
         let fontVerData  = data.subdata(in: i ..< data.index(i, offsetBy: 4));  i = data.index(i, offsetBy: 4)
         let fontSha      = data.subdata(in: i ..< data.index(i, offsetBy: 32))
-        let fontId      = Self.parseID(fontIdData)
+        let fontId      = try Self.parseID(fontIdData)
         let fontVersion = Int(fontVerData.reduce(0) { ($0 << 8) | UInt32($1) })
         let ref = FontRef(id: fontId, version: fontVersion, sha256: fontSha)
+        guard ref.hasValidWireShape else { throw CipherShareError.invalidFontReference }
         self.init(publicID: pid, keyMaterial: key, decorativeMapping: map, fontRef: ref)
     }
 
     // MARK: file form
 
     /// Self-contained file form: the 129-byte compact payload followed by the raw font bytes.
-    func encodedFile(fontBytes: Data) -> Data { encoded() + fontBytes }
+    func encodedFile(fontBytes: Data) throws -> Data { try encoded() + fontBytes }
 
     /// Splits a file form into (payload, fontBytes?). A file exactly `byteCount` long has no font.
     static func decodeFile(_ data: Data) throws -> (CipherSharePayload, Data?) {
@@ -124,8 +137,12 @@ struct CipherSharePayload: Equatable {
         return Data(d)
     }
 
-    private static func parseID(_ d: Data) -> String {
-        String(decoding: Data(d.prefix { $0 != 0 }), as: UTF8.self)
+    private static func parseID(_ d: Data) throws -> String {
+        let bytes = Data(d.prefix { $0 != 0 })
+        guard !bytes.isEmpty, let id = String(data: bytes, encoding: .utf8) else {
+            throw CipherShareError.invalidFontReference
+        }
+        return id
     }
 
     // MARK: URL
@@ -137,7 +154,7 @@ struct CipherSharePayload: Equatable {
         // `isShareURL` still accept the legacy https form for any links made before this.
         comps.scheme = Self.scheme; comps.host = Self.host
         var items = [URLQueryItem(name: "v", value: String(Self.version)),
-                     URLQueryItem(name: "p", value: Self.base64url(encoded()))]
+                     URLQueryItem(name: "p", value: Self.base64url(try encoded()))]
         if let name = name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
             items.append(URLQueryItem(name: "n", value: name))
         }
@@ -169,6 +186,7 @@ struct CipherSharePayload: Equatable {
             .replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: "=", with: "")
     }
     private static func bytesFromBase64url(_ s: String) throws -> Data {
+        guard s.utf8.count <= 172 else { throw CipherShareError.wrongSize }
         var b = s.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/")
         let rem = b.count % 4; if rem > 0 { b += String(repeating: "=", count: 4 - rem) }
         guard let data = Data(base64Encoded: b) else { throw CipherShareError.badBase64 }

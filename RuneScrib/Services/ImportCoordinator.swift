@@ -1,89 +1,92 @@
-// RuneScrib/Services/ImportCoordinator.swift
-
 import Foundation
-import CryptoKit
+import RuneScribeContracts
 
-/// App-wide intake for ciphers arriving over the wire — deep links (`.onOpenURL`),
-/// scanned QR codes, the clipboard, and `.runescribe` cipher files. It decodes the
-/// payload and publishes a `PendingImport`; `RootView` observes it and shows the
-/// one-tap confirmation sheet (gated so it never appears over the lock screen).
-///
-/// Published as a singleton and injected as an `@EnvironmentObject`; all state
-/// mutates on the main actor.
+/// Temporary UI presenter for Core-owned import state. It retains only key-free
+/// summaries and delegates every validation/persistence operation to the application
+/// service. Migration owner: UIMigration. Removal phase: P5.
 @MainActor
 final class ImportCoordinator: ObservableObject {
-
-    static let shared = ImportCoordinator()
-
-    /// A decoded cipher awaiting the user's confirmation.
-    @Published var pending: PendingImport?
-
-    /// A human-readable reason a link/QR couldn't be imported.
+    @Published var pending: PendingImportSummary?
     @Published var errorMessage: String?
 
-    /// The most recently ingested source (a URL's string or a file's content hash),
-    /// used to drop a duplicate delivery — e.g. the macOS AppDelegate's
-    /// `application(_:open:)` and SwiftUI's `.onOpenURL` both firing for the same source.
+    private let keyManager: KeyManager
     private var lastHandledKey: String?
 
-    private init() {}
-
-    struct PendingImport: Identifiable, Equatable {
-        let id = UUID()
-        let payload: CipherSharePayload
-        let suggestedName: String
-        /// The font bytes that rode along in a file form, if any. Nil for URL imports.
-        let fontBytes: Data?
+    init(keyManager: KeyManager) {
+        self.keyManager = keyManager
     }
 
-    /// Decodes a `runescribe://import` URL and, on success, surfaces it for
-    /// confirmation; on failure, surfaces a readable error.
-    func ingest(url: URL) {
-        // Drop a duplicate delivery of the same link while one is already pending.
+    func ingest(
+        url: URL,
+        source: InboundDeliverySourceDTO = .applicationOpen,
+        isColdStart: Bool = false
+    ) {
         let key = url.absoluteString
-        if key == lastHandledKey, pending != nil { return }
+        guard key != lastHandledKey || pending == nil else { return }
         lastHandledKey = key
-        do {
-            let payload = try CipherSharePayload(url: url)
-            errorMessage = nil
-            pending = PendingImport(payload: payload,
-                                    suggestedName: payload.parsedName ?? "Imported Cipher",
-                                    fontBytes: nil)
-        } catch {
-            pending = nil
-            errorMessage = (error as? LocalizedError)?.errorDescription
-                ?? "This isn't a valid Rune Scribe cipher link."
+        Task {
+            do {
+                let result = try await keyManager.importURL(
+                    url,
+                    source: source,
+                    isColdStart: isColdStart
+                )
+                pending = result.pendingImport
+                errorMessage = nil
+            } catch {
+                pending = nil
+                errorMessage = keyManager.lastError ?? "This isn't a valid Rune Scribe cipher link."
+            }
         }
     }
 
-    /// Decodes cipher file bytes (compact payload + optional font) and surfaces a
-    /// `PendingImport` carrying the font, so confirmation can install font + cipher
-    /// atomically; on failure, surfaces a readable error.
-    func ingest(fileData data: Data) {
-        // Drop a duplicate delivery of the same file while one is already pending.
-        let key = Data(SHA256.hash(data: data)).base64EncodedString()
-        if key == lastHandledKey, pending != nil { return }
+    func ingest(
+        fileURL: URL,
+        source: InboundDeliverySourceDTO = .applicationOpen,
+        isColdStart: Bool = false
+    ) {
+        let key = fileURL.standardizedFileURL.absoluteString
+        guard key != lastHandledKey || pending == nil else { return }
         lastHandledKey = key
-        do {
-            let (payload, fontBytes) = try CipherSharePayload.decodeFile(data)
-            errorMessage = nil
-            pending = PendingImport(payload: payload,
-                                    suggestedName: payload.parsedName ?? "Imported Cipher",
-                                    fontBytes: fontBytes)
-        } catch {
-            pending = nil
-            errorMessage = (error as? LocalizedError)?.errorDescription
-                ?? "This isn't a valid Rune Scribe cipher file."
+        Task {
+            do {
+                let result = try await keyManager.importFile(
+                    fileURL,
+                    source: source,
+                    isColdStart: isColdStart
+                )
+                pending = result.pendingImport
+                errorMessage = nil
+            } catch {
+                pending = nil
+                errorMessage = keyManager.lastError ?? "This isn't a valid Rune Scribe cipher file."
+            }
         }
     }
 
-    /// Same as `ingest(url:)` but from a raw string (clipboard / scanned payload).
-    /// Silently ignores anything that isn't one of our links. Accepts both the host
-    /// form (`runescribe://import`) and the path form (`runescribe:import`), matching
-    /// `RuneCipherLink.decodeURL`.
-    func ingest(urlString: String) {
+    func ingest(
+        urlString: String,
+        source: InboundDeliverySourceDTO = .clipboard
+    ) {
         let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard CipherSharePayload.isShareURL(trimmed), let url = URL(string: trimmed) else { return }
-        ingest(url: url)
+        guard let url = URL(string: trimmed), LinkRouter.isCipherImportURL(url) else { return }
+        ingest(url: url, source: source)
+    }
+
+    func confirm(name: String) async throws -> CipherViewState {
+        guard let pending else {
+            throw RuneScribeProductError.failure(
+                RuneScribeFailureDTO(code: .itemNotFound)
+            )
+        }
+        let imported = try await keyManager.confirmImport(id: pending.id, name: name)
+        self.pending = nil
+        return imported
+    }
+
+    func cancelPending() {
+        guard let id = pending?.id else { return }
+        pending = nil
+        Task { await keyManager.cancelImport(id: id) }
     }
 }

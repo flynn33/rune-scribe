@@ -4,13 +4,12 @@ import Foundation
 /// when a contact is deleted. Published for SwiftUI; all state on the main actor.
 @MainActor
 final class ContactManager: ObservableObject {
-    static let shared = ContactManager()
     @Published private(set) var contacts: [Contact] = []
     @Published private(set) var lastError: String?
     private let store: ContactStore
     private let keyManager: KeyManager
 
-    init(store: ContactStore = .shared, keyManager: KeyManager = .shared) {
+    init(store: ContactStore = .shared, keyManager: KeyManager) {
         self.store = store
         self.keyManager = keyManager
         contacts = store.load().contacts
@@ -36,20 +35,20 @@ final class ContactManager: ObservableObject {
         guard !added.isEmpty else { return }
         persist(ContactBook(contacts: contacts + added))
         for contact in added {
-            keyManager.ensureLinkedCipher(forImportedContact: contact)
+            Task { try? await keyManager.ensureLinkedCipher(forImportedContact: contact) }
         }
     }
 
     /// Deletes a contact and unlinks (never deletes) its ciphers.
     func delete(id: UUID) {
-        keyManager.unlinkContact(id)
+        Task { try? await keyManager.unlinkContact(id) }
         persist(book().removing(id: id))
     }
 
     /// Bulk-deletes contacts and unlinks (never deletes) their ciphers in one batched persist.
     func delete(ids: Set<UUID>) {
         guard !ids.isEmpty else { return }
-        keyManager.unlinkContacts(ids)
+        Task { try? await keyManager.unlinkContacts(ids) }
         persist(book().removing(ids: ids))
     }
 
@@ -59,7 +58,7 @@ final class ContactManager: ObservableObject {
     func deleteAllImported() {
         let importedIDs = contacts.filter { $0.source == .imported }.map(\.id)
         guard !importedIDs.isEmpty else { return }
-        keyManager.unlinkContacts(Set(importedIDs))
+        Task { try? await keyManager.unlinkContacts(Set(importedIDs)) }
         persist(book().removingImported())
     }
 

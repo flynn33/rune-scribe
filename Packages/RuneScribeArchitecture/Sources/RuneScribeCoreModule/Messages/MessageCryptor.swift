@@ -1,7 +1,7 @@
 import Foundation
 import CryptoKit
 
-enum MessageCryptorError: Error, LocalizedError {
+enum MessageCryptorError: Error, LocalizedError, Equatable, Sendable {
     case sealFailed
     case notUTF8
     var errorDescription: String? {
@@ -14,7 +14,7 @@ enum MessageCryptorError: Error, LocalizedError {
 
 /// Stateless authenticated encryption over a `Cipher`'s symmetric key (AES-GCM).
 /// A wrong key or any tampering makes `open` throw — it never returns bogus plaintext.
-struct MessageCryptor {
+struct MessageCryptor: Sendable {
     /// Returns `AES.GCM.SealedBox.combined` (12-byte nonce ‖ ciphertext ‖ 16-byte tag).
     func seal(_ plaintext: String, with cipher: Cipher) throws -> Data {
         let box = try AES.GCM.seal(Data(plaintext.utf8), using: cipher.symmetricKey)

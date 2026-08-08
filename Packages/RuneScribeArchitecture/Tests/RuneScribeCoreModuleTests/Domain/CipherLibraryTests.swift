@@ -1,7 +1,8 @@
 // RuneScribTests/CipherLibraryTests.swift
 
 import XCTest
-@testable import RuneScrib
+import CryptoKit
+@testable import RuneScribeCoreModule
 
 /// Tests for the multi-cipher library model and the share/import round-trip.
 final class CipherLibraryTests: XCTestCase {
@@ -96,7 +97,9 @@ final class CipherLibraryTests: XCTestCase {
 
     func testShareImportRoundTripProducesAWorkingCipher() throws {
         let original = Cipher.generated(label: "Friend")
-        let rebuilt = try CipherSharePayload(decoding: CipherSharePayload(cipher: original).encoded())
+        let rebuilt = try CipherSharePayload(
+            decoding: CipherSharePayload(cipher: original).encoded()
+        )
             .cipher(label: "Imported")
         XCTAssertEqual(rebuilt.keyMaterial, original.keyMaterial)
         XCTAssertEqual(rebuilt.origin, .imported)
@@ -108,11 +111,27 @@ final class CipherLibraryTests: XCTestCase {
 }
 
 extension CipherLibraryTests {
-    func testImportFromFileFormValidatesFontAndRebuildsCipher() throws {
-        let original = Cipher.generated(label: "Friend")
-        let file = CipherSharePayload(cipher: original).encodedFile(fontBytes: FontRef.bundledFontData())
-        let (payload, fontBytes) = try CipherSharePayload.decodeFile(file)
-        if let fontBytes { try FontStore.shared.importFont(fontBytes, expecting: payload.fontRef) }
+    func testImportFromFileFormReturnsInjectedFontBytesAndRebuildsCipher() throws {
+        let fontBytes = Data("synthetic-font-fixture".utf8)
+        let fontRef = FontRef(
+            id: "fixture-font",
+            version: 7,
+            sha256: Data(SHA256.hash(data: fontBytes))
+        )
+        let generated = Cipher.generated(label: "Friend")
+        let original = Cipher(
+            id: generated.id,
+            label: generated.label,
+            origin: generated.origin,
+            createdAt: generated.createdAt,
+            publicID: generated.publicID,
+            keyMaterial: generated.keyMaterial,
+            decorativeMapping: generated.decorativeMapping,
+            fontRef: fontRef
+        )
+        let file = try CipherSharePayload(cipher: original).encodedFile(fontBytes: fontBytes)
+        let (payload, decodedFontBytes) = try CipherSharePayload.decodeFile(file)
+        XCTAssertEqual(decodedFontBytes, fontBytes)
         let rebuilt = payload.cipher(label: "Imported")
         XCTAssertEqual(rebuilt.fontRef, original.fontRef)
         let runes = try MessageService().compose("hi", with: original)

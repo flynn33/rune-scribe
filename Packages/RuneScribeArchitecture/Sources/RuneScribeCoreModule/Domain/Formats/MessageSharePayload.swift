@@ -1,13 +1,17 @@
 import Foundation
 import CryptoKit
 
-enum MessageShareError: Error, LocalizedError, Equatable {
-    case tooShort, unsupportedVersion(UInt8), badChecksum
+enum MessageShareError: Error, LocalizedError, Equatable, Sendable {
+    case tooShort, unsupportedVersion(UInt8), unsupportedFlags(UInt8), badChecksum
+    case senderNameTooLong, invalidSenderName, envelopeTooLarge, invalidEnvelopeLength
     var errorDescription: String? {
         switch self {
-        case .tooShort:           return "The message's data is corrupted."
+        case .tooShort, .unsupportedFlags, .invalidSenderName, .invalidEnvelopeLength:
+            return "The message's data is corrupted."
         case .badChecksum:        return "The message failed its integrity check."
         case .unsupportedVersion: return "This message uses a newer format. Update Rune Scribe."
+        case .senderNameTooLong:  return "The sender name is too long to share."
+        case .envelopeTooLarge:   return "The encrypted message is too large to share."
         }
     }
 }
@@ -16,7 +20,7 @@ enum MessageShareError: Error, LocalizedError, Equatable {
 /// v1 layout:
 ///   version(1) | flags(1; bit0 = hasCipher) | nameLen(1, UInt8) | name(utf8, ≤255)
 ///   | envLen(2, UInt16 big-endian) | envelope | [embeddedCipher.encoded() 129B if flag] | checksum(4)
-struct MessageSharePayload: Equatable {
+struct MessageSharePayload: Equatable, Sendable {
     static let version: UInt8 = 1
 
     let senderName: String
@@ -31,16 +35,24 @@ struct MessageSharePayload: Equatable {
 
     // MARK: binary
 
-    func encoded() -> Data {
-        let nameBytes = Data(senderName.utf8).prefix(255)
+    func encoded() throws -> Data {
+        let nameBytes = Data(senderName.utf8)
+        guard nameBytes.count <= Int(UInt8.max) else {
+            throw MessageShareError.senderNameTooLong
+        }
+        guard !envelope.isEmpty else { throw MessageShareError.invalidEnvelopeLength }
+        guard envelope.count <= Int(UInt16.max) else {
+            throw MessageShareError.envelopeTooLarge
+        }
+
         var body = Data([Self.version])
         body.append(embeddedCipher == nil ? 0x00 : 0x01)        // flags
         body.append(UInt8(nameBytes.count))                     // nameLen
-        body.append(Data(nameBytes))                            // name
+        body.append(nameBytes)                                  // name
         var envLen = UInt16(envelope.count).bigEndian
         body.append(Data(bytes: &envLen, count: 2))             // envLen (BE)
         body.append(envelope)
-        if let embeddedCipher { body.append(embeddedCipher.encoded()) }   // 129 bytes
+        if let embeddedCipher { body.append(try embeddedCipher.encoded()) }   // 129 bytes
         body.append(Self.checksum(of: body))
         return body
     }
@@ -55,7 +67,9 @@ struct MessageSharePayload: Equatable {
         var i = data.startIndex
         guard data[i] == version else { throw MessageShareError.unsupportedVersion(data[i]) }
         i = data.index(i, offsetBy: 1)
-        let hasCipher = (data[i] & 0x01) != 0
+        let flags = data[i]
+        guard flags & ~0x01 == 0 else { throw MessageShareError.unsupportedFlags(flags) }
+        let hasCipher = (flags & 0x01) != 0
         i = data.index(i, offsetBy: 1)
         let nameLen = Int(data[i])
         i = data.index(i, offsetBy: 1)
@@ -64,6 +78,7 @@ struct MessageSharePayload: Equatable {
         i = data.index(i, offsetBy: nameLen)
         let envLen = Int(data.subdata(in: i ..< data.index(i, offsetBy: 2)).reduce(0) { ($0 << 8) | Int($1) })
         i = data.index(i, offsetBy: 2)
+        guard envLen > 0 else { throw MessageShareError.invalidEnvelopeLength }
         let needed = envLen + (hasCipher ? CipherSharePayload.byteCount : 0) + 4
         guard data.distance(from: i, to: data.endIndex) >= needed else { throw MessageShareError.tooShort }
         let env = data.subdata(in: i ..< data.index(i, offsetBy: envLen))
@@ -81,8 +96,14 @@ struct MessageSharePayload: Equatable {
         let given = Data(data.subdata(in: i ..< data.index(i, offsetBy: 4)))
         guard checksum(of: body) == given else { throw MessageShareError.badChecksum }
 
-        let payload = MessageSharePayload(senderName: String(decoding: nameData, as: UTF8.self),
-                                          envelope: Data(env), embeddedCipher: embedded)
+        guard let senderName = String(data: nameData, encoding: .utf8) else {
+            throw MessageShareError.invalidSenderName
+        }
+        let payload = MessageSharePayload(
+            senderName: senderName,
+            envelope: Data(env),
+            embeddedCipher: embedded
+        )
         return (payload, consumed)
     }
 
@@ -96,9 +117,9 @@ struct MessageSharePayload: Equatable {
     // MARK: file form
 
     /// Self-contained file form: the encoded payload followed by the raw font bytes (if any).
-    func encodedFile(fontBytes: Data?) -> Data {
-        guard let fontBytes, !fontBytes.isEmpty else { return encoded() }
-        return encoded() + fontBytes
+    func encodedFile(fontBytes: Data?) throws -> Data {
+        guard let fontBytes, !fontBytes.isEmpty else { return try encoded() }
+        return try encoded() + fontBytes
     }
 
     /// Splits a file form into (payload, fontBytes?). Bytes past the payload are the font;

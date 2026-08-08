@@ -15,12 +15,17 @@
     "macOS": "15.0"
   },
   "capabilitiesRequested": [
+    "runtime.service.resolve",
+    "application.commands",
+    "application.state.read",
     "runtime.events.subscribe",
     "ui.root"
   ],
   "entryPoint": "RuneScribeUIModule",
   "runtimeRequirements": {
-    "requiredServices": [],
+    "requiredServices": [
+      "RuneScribeApplicationService"
+    ],
     "requiredModuleRoles": [
       "runescribe.core"
     ]

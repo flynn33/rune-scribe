@@ -1,5 +1,6 @@
 // RuneScrib/Views/ContentView.swift
 
+import RuneScribeContracts
 import SwiftUI
 
 struct ContentView: View {
@@ -37,10 +38,9 @@ struct ContentView: View {
     @State private var showSettings: Bool = false
     @State private var decodeError: String?
     @State private var showMessageCompose = false
-    /// The outgoing file captured when Send via iMessage is tapped — snapshotted *with* the
-    /// key (on a first message to a contact) before the cipher is marked delivered, so this
-    /// one message carries the key and the next one never does.
-    @State private var pendingMessageFile: Data?
+    /// Scoped Core artifact for a first-delivery attachment. UI receives only the
+    /// temporary file reference and completion handle, never payload or key bytes.
+    @State private var pendingMessageArtifact: ShareArtifactDTO?
 
     // Linking the active cipher to a recipient so its first message carries the key.
     @State private var showNewContact = false
@@ -60,31 +60,14 @@ struct ContentView: View {
     }
 
     /// The cipher used to produce the current result snapshot (encode only).
-    private var resultCipher: Cipher? {
+    private var resultCipher: CipherViewState? {
         transformDirection == .encode ? keyManager.activeCipher : nil
     }
 
-    /// The self-contained `.runescribe` attachment bytes for the FIRST message to a contact —
-    /// the envelope plus the cipher key. Returns nil once the key has been delivered (and for
-    /// unlinked ciphers), so follow-up messages carry no file at all: only the runes (which a
-    /// holder of the cipher decodes) and the product link travel in the message text. The key
-    /// therefore rides exactly one message; re-sharing a cipher afterward is manual (QR / file).
-    private func messageFileData() -> Data? {
-        guard transformDirection == .encode, let cipher = resultCipher,
-              MessageSend.shouldIncludeKey(cipher) else { return nil }
-        return try? MessageSend.fileData(runes: targetSnapshot,
-                                         senderName: cipher.label,
-                                         cipher: cipher,
-                                         includeKey: true)
-    }
-
-    /// Marks the active cipher delivered iff the current message embedded its key (a first
-    /// message to a linked contact). Used by every send/share path so the cipher attaches at
-    /// most once — never on a repeat. Deferred to the next runloop so an in-flight share keeps
-    /// the key-bearing file it already captured; only later messages drop the key.
-    private func consumeKeyIfNeeded() {
-        guard let cipher = resultCipher, MessageSend.shouldIncludeKey(cipher) else { return }
-        DispatchQueue.main.async { keyManager.markDelivered(cipherID: cipher.id) }
+    private var pendingAttachmentURL: URL? {
+        guard let artifact = pendingMessageArtifact,
+              case .file(let url) = artifact.reference else { return nil }
+        return url
     }
 
     /// The text Rune Scribe sends for a message: always the runes. The plain "get the app"
@@ -161,10 +144,12 @@ struct ContentView: View {
         }
         #if os(iOS)
         .sheet(isPresented: $showMessageCompose) {
-            MessageComposeView(messageText: outgoingMessageText(includeProductLink: pendingMessageFile != nil),
+            MessageComposeView(messageText: outgoingMessageText(
+                                   includeProductLink: pendingMessageArtifact?.requiresKeyDelivery == true
+                               ),
                                recipients: messageRecipients(),
-                               attachmentData: pendingMessageFile,
-                               onFinish: handleMessageSent)
+                               attachmentURL: pendingAttachmentURL,
+                               onFinish: handleMessageFinished)
         }
         #endif
         .alert("Couldn't Complete", isPresented: Binding(
@@ -195,7 +180,7 @@ struct ContentView: View {
             // setActive would be a silent no-op and the reply would use the wrong key.
             guard let cipherID = note.object as? UUID,
                   keyManager.ciphers.contains(where: { $0.id == cipherID }) else { return }
-            keyManager.setActive(id: cipherID)
+            Task { try? await keyManager.setActive(id: cipherID) }
             mode = .encode
             if !isEditing { returnToEditing() }
         }
@@ -279,7 +264,7 @@ struct ContentView: View {
                     }
                 } else {
                     Button {
-                        performAction()
+                        Task { await performAction() }
                     } label: {
                         Label(mode == .encode ? "RUNE SCRIBE" : "DECODE",
                               systemImage: mode == .encode ? "bolt.fill" : "wand.and.rays")
@@ -318,13 +303,8 @@ struct ContentView: View {
                 }
 
                 if transformDirection == .encode, let cipher = resultCipher {
-                    // The `.runescribe` file (carrying the cipher key) is attached ONLY on the
-                    // first message to a contact; `messageFileData()` returns nil thereafter, so
-                    // follow-up messages send just the runes + product link in the text. The
-                    // Send / Share buttons stay available either way.
-                    let fileData = messageFileData()
                     HStack(spacing: 14) {
-                        shareButton(fileData: fileData)
+                        shareButton()
 
                         #if os(iOS)
                         // Always present so it's never "missing"; disabled (not hidden) when
@@ -335,17 +315,16 @@ struct ContentView: View {
                             // A first message must actually be able to attach the key file. If
                             // this device/account can't attach it, don't quietly send a keyless
                             // message that would strand the recipient — tell them to use Share.
-                            if fileData != nil,
+                            if pendingMessageArtifact?.requiresKeyDelivery == true,
                                !MessageComposeView.canSend(requiredAttachment: true) {
                                 decodeError = "This device can’t attach Rune Scribe files to Messages. Use Share to send the key instead."
                                 return
                             }
-                            // Snapshot the file (key-bearing on a first message, nil afterward)
-                            // for this send. Delivery is marked only when Messages reports an
-                            // actual send AND the key attachment was accepted (handleMessageSent
-                            // via the composer's delivery gate), never on tap — so cancelling the
-                            // compose sheet does not burn the one-time key bootstrap.
-                            pendingMessageFile = fileData
+                            guard pendingMessageArtifact?.requiresKeyDelivery != true
+                                    || pendingAttachmentURL != nil else {
+                                decodeError = "Rune Scribe is still preparing the key attachment."
+                                return
+                            }
                             showMessageCompose = true
                         } label: {
                             Label("Send via iMessage", systemImage: "message.fill")
@@ -380,7 +359,7 @@ struct ContentView: View {
 
             Menu {
                 ForEach(keyManager.ciphers) { cipher in
-                    Button { keyManager.setActive(id: cipher.id) } label: {
+                    Button { Task { try? await keyManager.setActive(id: cipher.id) } } label: {
                         if cipher.id == keyManager.activeCipher?.id {
                             Label(cipher.label, systemImage: "checkmark")
                         } else {
@@ -437,11 +416,11 @@ struct ContentView: View {
 
     /// Shown when the active cipher isn't linked to anyone yet: pick (or add) the
     /// recipient so the first message to them carries the cipher key.
-    private func recipientPicker(for cipher: Cipher) -> some View {
+    private func recipientPicker(for cipher: CipherViewState) -> some View {
         Menu {
             ForEach(contactManager.contacts) { contact in
                 Button(contact.displayName) {
-                    keyManager.setContact(cipherID: cipher.id, contactID: contact.id)
+                    Task { try? await keyManager.setContact(cipherID: cipher.id, contactID: contact.id) }
                 }
             }
             if !contactManager.contacts.isEmpty { Divider() }
@@ -469,19 +448,29 @@ struct ContentView: View {
 
     // MARK: - Actions
 
-    private func performAction() {
+    private func performAction() async {
         guard boxPhase == .editing, let activeCipher = keyManager.activeCipher else { return }
         let source = inputText
-        let service = MessageService()
         let target: String
         do {
             switch mode {
             case .encode:
-                target = try service.compose(source, with: activeCipher)
+                let result = try await keyManager.encode(source, cipherID: activeCipher.id)
+                target = result.runes
                 transformDirection = .encode
+                if MessageSend.shouldIncludeKey(activeCipher) {
+                    pendingMessageArtifact = try await keyManager.prepareMessageShare(
+                        runes: result.runes,
+                        senderName: activeCipher.label,
+                        cipherID: activeCipher.id
+                    )
+                } else {
+                    releaseMessageArtifact()
+                }
             case .decode:
-                target = try service.read(source, tryingCiphers: keyManager.ciphers).plaintext
+                target = try await keyManager.decode(source).plaintext
                 transformDirection = .decode
+                releaseMessageArtifact()
             }
         } catch {
             decodeError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
@@ -505,6 +494,7 @@ struct ContentView: View {
 
     private func returnToEditing() {
         settleTask?.cancel()
+        releaseMessageArtifact()
         copyConfirmed = false
         boxPhase = .editing
     }
@@ -516,6 +506,7 @@ struct ContentView: View {
         inputText = ""
         sourceSnapshot = ""
         targetSnapshot = ""
+        releaseMessageArtifact()
         copyConfirmed = false
         decodeError = nil
         boxPhase = .editing
@@ -547,7 +538,7 @@ struct ContentView: View {
         let emails = [newContactEmail.trimmingCharacters(in: .whitespacesAndNewlines)].filter { !$0.isEmpty }
         let contact = Contact(displayName: name, phones: phones, emails: emails, source: .manual)
         contactManager.add(contact)
-        keyManager.setContact(cipherID: active.id, contactID: contact.id)
+        Task { try? await keyManager.setContact(cipherID: active.id, contactID: contact.id) }
     }
 
     private func resetNewContact() {
@@ -560,21 +551,26 @@ struct ContentView: View {
     /// only with the cipher file) — which a recipient who already holds the cipher decodes in
     /// the Decode tab.
     @ViewBuilder
-    private func shareButton(fileData: Data?) -> some View {
-        if let fileData {
-            ShareLink(item: RuneScribeShareFile(data: fileData,
-                                                filename: MessageSend.filename(senderName: resultCipher?.label ?? "")),
+    private func shareButton() -> some View {
+        if let artifact = pendingMessageArtifact,
+           case .file(let fileURL) = artifact.reference {
+            ShareLink(item: fileURL,
                       preview: SharePreview("Rune Scribe message",
                                             image: Image(systemName: "doc.fill"))) {
                 Label("Share", systemImage: "square.and.arrow.up")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(RuneSecondaryButtonStyle())
-            // The cipher key rides only this FIRST message. The moment the user hands it to the
-            // share sheet, mark it delivered so no later message re-attaches the key (re-sharing
-            // afterward is manual: QR or file). `fileData` was already captured into the share
-            // item above, so this message still carries the key; only subsequent ones won't.
-            .simultaneousGesture(TapGesture().onEnded { consumeKeyIfNeeded() })
+            .simultaneousGesture(TapGesture().onEnded {
+                Task { await completePreparedArtifact(outcome: .handedOff) }
+            })
+        } else if resultCipher.map(MessageSend.shouldIncludeKey) == true {
+            Button { } label: {
+                Label("Preparing…", systemImage: "clock")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(RuneSecondaryButtonStyle())
+            .disabled(true)
         } else {
             // No cipher file on this message → share the runes alone. The product link rides
             // only with the cipher file (the first message to a contact), never on follow-ups.
@@ -588,7 +584,7 @@ struct ContentView: View {
 
     /// A light line telling the sender whether this message carries the cipher key.
     @ViewBuilder
-    private func keyIndicator(for cipher: Cipher?) -> some View {
+    private func keyIndicator(for cipher: CipherViewState?) -> some View {
         if let cipher {
             let included = MessageSend.shouldIncludeKey(cipher)
             HStack(spacing: 6) {
@@ -612,14 +608,26 @@ struct ContentView: View {
         return all.isEmpty ? nil : all
     }
 
-    /// Called when Apple's compose sheet reports an actual send: mark the key delivered —
-    /// but only when this message actually embedded the key (a contact-linked, not-yet-
-    /// delivered cipher). `delivered` means "key handed to the contact", not "ever sent",
-    /// so an unlinked send must not flip it and skip a later first-delivery bootstrap.
-    private func handleMessageSent() {
-        if let cipher = resultCipher, MessageSend.shouldIncludeKey(cipher) {
-            keyManager.markDelivered(cipherID: cipher.id)
-        }
+    private func handleMessageFinished(_ outcome: ShareArtifactOutcomeDTO) {
+        Task { await completePreparedArtifact(outcome: outcome) }
     }
     #endif
+
+    private func completePreparedArtifact(outcome: ShareArtifactOutcomeDTO) async {
+        guard let artifact = pendingMessageArtifact else { return }
+        do {
+            let result = try await keyManager.completeShareArtifact(id: artifact.id, outcome: outcome)
+            if result != .retainedForRetry {
+                pendingMessageArtifact = nil
+            }
+        } catch {
+            decodeError = keyManager.lastError ?? error.localizedDescription
+        }
+    }
+
+    private func releaseMessageArtifact() {
+        guard let artifact = pendingMessageArtifact else { return }
+        pendingMessageArtifact = nil
+        Task { await keyManager.releaseShareArtifact(id: artifact.id) }
+    }
 }

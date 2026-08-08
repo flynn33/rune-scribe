@@ -1,6 +1,6 @@
 import XCTest
 import CryptoKit
-@testable import RuneScrib
+@testable import RuneScribeCoreModule
 
 final class CipherTests: XCTestCase {
     func testGeneratedCipherHasValidShape() {
@@ -79,5 +79,61 @@ extension CipherTests {
          "decorativeMapping":[\((0..<32).map(String.init).joined(separator: ","))]}
         """
         XCTAssertFalse(try JSONDecoder().decode(Cipher.self, from: Data(json.utf8)).delivered)
+    }
+}
+
+extension CipherTests {
+    func testDecodingRejectsInvalidPersistedKeyBearingShapes() {
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(
+                Cipher.self,
+                from: storedCipherJSON(publicIDCount: 7)
+            )
+        ) { error in
+            XCTAssertEqual(error as? CipherValidationError, .invalidPublicIDLength)
+        }
+
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(
+                Cipher.self,
+                from: storedCipherJSON(keyMaterialCount: 31)
+            )
+        ) { error in
+            XCTAssertEqual(error as? CipherValidationError, .invalidKeyMaterialLength)
+        }
+
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(
+                Cipher.self,
+                from: storedCipherJSON(mapping: Array(repeating: 0, count: 32))
+            )
+        ) { error in
+            XCTAssertEqual(error as? CipherValidationError, .invalidDecorativeMapping)
+        }
+
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(
+                Cipher.self,
+                from: storedCipherJSON(formatVersion: 2)
+            )
+        ) { error in
+            XCTAssertEqual(error as? CipherValidationError, .unsupportedFormatVersion(2))
+        }
+    }
+
+    private func storedCipherJSON(
+        formatVersion: Int = 1,
+        publicIDCount: Int = 8,
+        keyMaterialCount: Int = 32,
+        mapping: [Int] = Array(0..<32)
+    ) -> Data {
+        let json = """
+        {"id":"\(UUID().uuidString)","label":"stored","origin":"generated","createdAt":0,
+         "formatVersion":\(formatVersion),
+         "publicID":"\(Data(repeating: 0, count: publicIDCount).base64EncodedString())",
+         "keyMaterial":"\(Data(repeating: 1, count: keyMaterialCount).base64EncodedString())",
+         "decorativeMapping":[\(mapping.map(String.init).joined(separator: ","))]}
+        """
+        return Data(json.utf8)
     }
 }

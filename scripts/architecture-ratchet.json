@@ -88,6 +88,12 @@
       "reason": "P0 contains six feature-channel uses and two local media-finish observer operations.",
       "removalPhase": "P5"
     },
+    "temporaryApplicationSessionAdapters": {
+      "maximum": 1,
+      "owner": "UIMigration",
+      "reason": "One key-free hosted-view adapter bridges the application service until the single UI module owns observation.",
+      "removalPhase": "P5"
+    },
     "hostLegacyBoundaryReferences": {
       "maximum": 17,
       "owner": "HostMigration",

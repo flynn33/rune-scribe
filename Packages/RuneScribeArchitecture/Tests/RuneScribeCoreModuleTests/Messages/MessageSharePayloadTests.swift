@@ -1,6 +1,6 @@
 import XCTest
 import CryptoKit
-@testable import RuneScrib
+@testable import RuneScribeCoreModule
 
 final class MessageSharePayloadTests: XCTestCase {
     /// Builds a real envelope (version byte + AES-GCM sealed box) for a known cipher.
@@ -40,7 +40,11 @@ extension MessageSharePayloadTests {
     func testFlippedByteRejectedByChecksum() throws {
         let cipher = Cipher.generated(label: "x")
         let env = MessageEnvelope.wrap(try MessageCryptor().seal("tamper", with: cipher))
-        var bytes = MessageSharePayload(senderName: "x", envelope: env, embeddedCipher: nil).encoded()
+        var bytes = try MessageSharePayload(
+            senderName: "x",
+            envelope: env,
+            embeddedCipher: nil
+        ).encoded()
         bytes[5] ^= 0x01
         XCTAssertThrowsError(try MessageSharePayload(decoding: bytes)) { error in
             XCTAssertEqual(error as? MessageShareError, .badChecksum)
@@ -50,7 +54,11 @@ extension MessageSharePayloadTests {
     func testWrongVersionRejected() throws {
         let cipher = Cipher.generated(label: "x")
         let env = MessageEnvelope.wrap(try MessageCryptor().seal("v", with: cipher))
-        var bytes = MessageSharePayload(senderName: "x", envelope: env, embeddedCipher: nil).encoded()
+        var bytes = try MessageSharePayload(
+            senderName: "x",
+            envelope: env,
+            embeddedCipher: nil
+        ).encoded()
         bytes[0] = 9
         // Recompute checksum so we exercise the version guard, not the checksum guard.
         let body = bytes.prefix(bytes.count - 4)
@@ -89,8 +97,11 @@ extension MessageSharePayloadTests {
     func testDecodeConsumingReportsExactLength() throws {
         let cipher = Cipher.generated(label: "Con")
         let env = try envelope("consumed", with: cipher)
-        let encoded = MessageSharePayload(senderName: "Con", envelope: env,
-                                          embeddedCipher: CipherSharePayload(cipher: cipher)).encoded()
+        let encoded = try MessageSharePayload(
+            senderName: "Con",
+            envelope: env,
+            embeddedCipher: CipherSharePayload(cipher: cipher)
+        ).encoded()
 
         let (payload, consumed) = try MessageSharePayload.decodeConsuming(encoded)
         XCTAssertEqual(consumed, encoded.count)
@@ -103,7 +114,11 @@ extension MessageSharePayloadTests {
     func testInitDecodingRejectsTrailingBytes() throws {
         let cipher = Cipher.generated(label: "Trail")
         let env = try envelope("no extras", with: cipher)
-        let encoded = MessageSharePayload(senderName: "Trail", envelope: env, embeddedCipher: nil).encoded()
+        let encoded = try MessageSharePayload(
+            senderName: "Trail",
+            envelope: env,
+            embeddedCipher: nil
+        ).encoded()
         let withTrailer = encoded + Data([0xDE, 0xAD, 0xBE, 0xEF])
         XCTAssertThrowsError(try MessageSharePayload(decoding: withTrailer)) { error in
             XCTAssertEqual(error as? MessageShareError, .tooShort)
@@ -118,8 +133,8 @@ extension MessageSharePayloadTests {
                                           embeddedCipher: CipherSharePayload(cipher: cipher))
         let font = Data((0..<200).map { UInt8($0 & 0xFF) })   // synthetic font blob
 
-        let file = payload.encodedFile(fontBytes: font)
-        XCTAssertEqual(file.count, payload.encoded().count + font.count)
+        let file = try payload.encodedFile(fontBytes: font)
+        XCTAssertEqual(file.count, try payload.encoded().count + font.count)
 
         let (back, fontBytes) = try MessageSharePayload.decodeFile(file)
         XCTAssertEqual(back.senderName, "WithFont")
@@ -135,10 +150,12 @@ extension MessageSharePayloadTests {
         let env = try envelope("plain message", with: cipher)
         let payload = MessageSharePayload(senderName: "NoFont", envelope: env, embeddedCipher: nil)
 
-        XCTAssertEqual(payload.encodedFile(fontBytes: nil), payload.encoded())
-        XCTAssertEqual(payload.encodedFile(fontBytes: Data()), payload.encoded())
+        XCTAssertEqual(try payload.encodedFile(fontBytes: nil), try payload.encoded())
+        XCTAssertEqual(try payload.encodedFile(fontBytes: Data()), try payload.encoded())
 
-        let (back, fontBytes) = try MessageSharePayload.decodeFile(payload.encodedFile(fontBytes: nil))
+        let (back, fontBytes) = try MessageSharePayload.decodeFile(
+            payload.encodedFile(fontBytes: nil)
+        )
         XCTAssertEqual(back.envelope, env)
         XCTAssertNil(fontBytes)
     }
@@ -168,10 +185,53 @@ extension MessageSharePayloadTests {
     }
 
     func testTruncatedEmbeddedCipherRejected() {
-        // hasCipher flag set, nameLen=0, envLen=0, but no room for the 129-byte embedded cipher.
-        let bytes = withChecksum(Data([1, 1, 0, 0, 0]))
+        // hasCipher flag set, one-byte envelope, but no room for the embedded cipher.
+        let bytes = withChecksum(Data([1, 1, 0, 0, 1, 1]))
         XCTAssertThrowsError(try MessageSharePayload(decoding: bytes)) { error in
             XCTAssertEqual(error as? MessageShareError, .tooShort)
+        }
+    }
+
+    func testEncodingRejectsOversizedEnvelope() {
+        let payload = MessageSharePayload(
+            senderName: "Oversized",
+            envelope: Data(repeating: 0, count: Int(UInt16.max) + 1),
+            embeddedCipher: nil
+        )
+        XCTAssertThrowsError(try payload.encoded()) { error in
+            XCTAssertEqual(error as? MessageShareError, .envelopeTooLarge)
+        }
+    }
+
+    func testEncodingRejectsOversizedSenderNameWithoutSplittingUTF8() {
+        let payload = MessageSharePayload(
+            senderName: String(repeating: "ᚠ", count: 86),
+            envelope: Data([MessageEnvelope.version]),
+            embeddedCipher: nil
+        )
+        XCTAssertThrowsError(try payload.encoded()) { error in
+            XCTAssertEqual(error as? MessageShareError, .senderNameTooLong)
+        }
+    }
+
+    func testDecodeRejectsUnknownFlagBits() {
+        let bytes = withChecksum(Data([1, 0x80, 0, 0, 1, MessageEnvelope.version]))
+        XCTAssertThrowsError(try MessageSharePayload(decoding: bytes)) { error in
+            XCTAssertEqual(error as? MessageShareError, .unsupportedFlags(0x80))
+        }
+    }
+
+    func testDecodeRejectsInvalidSenderUTF8() {
+        let bytes = withChecksum(Data([1, 0, 1, 0xFF, 0, 1, MessageEnvelope.version]))
+        XCTAssertThrowsError(try MessageSharePayload(decoding: bytes)) { error in
+            XCTAssertEqual(error as? MessageShareError, .invalidSenderName)
+        }
+    }
+
+    func testDecodeRejectsEmptyEnvelope() {
+        let bytes = withChecksum(Data([1, 0, 0, 0, 0]))
+        XCTAssertThrowsError(try MessageSharePayload(decoding: bytes)) { error in
+            XCTAssertEqual(error as? MessageShareError, .invalidEnvelopeLength)
         }
     }
 }

@@ -1,50 +1,18 @@
-import CryptoKit
+import RuneScribeContracts
 import RuneScribePlatform
 import XCTest
 @testable import RuneScrib
 
 final class FontStoreTests: XCTestCase {
-    func testResolveBundledRefReturnsRegisteredName() {
-        let store = FontStore.shared
-        store.registerBundledAndImportedFonts()
-        XCTAssertEqual(store.resolve(.bundled), "Noto Sans Runic")
-    }
-
-    func testImportBundledBytesValidates() throws {
-        let store = FontStore.shared
-        XCTAssertNoThrow(try store.importFont(FontRef.bundledFontData(), expecting: .bundled))
-    }
-
-    func testImportRejectsCorruptBytes() {
-        let store = FontStore.shared
-        XCTAssertThrowsError(try store.importFont(Data([0, 1, 2, 3]), expecting: .bundled))
-    }
-
-    func testImportRejectsHashMismatch() {
-        let store = FontStore.shared
-        let wrongRef = FontRef(id: "noto-sans-runic", version: 1, sha256: Data(repeating: 0xAB, count: 32))
-        XCTAssertThrowsError(try store.importFont(FontRef.bundledFontData(), expecting: wrongRef))
-    }
-
-    func testRegistrationFailureDoesNotPersistCustomFont() throws {
-        let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("FontStoreRegistrationFailure-\(UUID().uuidString)")
+    func testLaunchRegistrationToleratesMissingImportedFontDirectory() {
+        let root = temporaryDirectory(named: "MissingImportedFonts")
         defer { try? FileManager.default.removeItem(at: root) }
-        let bytes = FontRef.bundledFontData()
-        let ref = FontRef(
-            id: "registration-failure",
-            version: 1,
-            sha256: Data(SHA256.hash(data: bytes))
-        )
         let store = FontStore(
-            registrar: RejectingFontRegistrationService(),
             files: AppleProtectedFileStore(applicationSupportDirectory: root)
         )
 
-        XCTAssertThrowsError(try store.importFont(bytes, expecting: ref)) { error in
-            XCTAssertEqual(error as? FontStoreError, .cannotRegister)
-        }
-        XCTAssertNil(store.fontData(for: ref))
+        store.registerBundledAndImportedFonts()
+
         XCTAssertFalse(
             FileManager.default.fileExists(
                 atPath: root.appendingPathComponent("RuneScribFonts").path
@@ -52,23 +20,21 @@ final class FontStoreTests: XCTestCase {
         )
     }
 
-    func testRuneFontResolvesToBundledName() {
-        FontStore.shared.registerBundledAndImportedFonts()
-        XCTAssertEqual(RuneFont.name(for: nil), "Noto Sans Runic")
-        XCTAssertEqual(RuneFont.name(for: Cipher.generated(label: "x")), "Noto Sans Runic")
-    }
-}
+    func testLaunchRegistrationDoesNotMutatePersistedFontBytes() throws {
+        let root = temporaryDirectory(named: "PersistedImportedFont")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let files = AppleProtectedFileStore(applicationSupportDirectory: root)
+        let path = try ProtectedPath.fontsDirectory.appending("fixture.ttf")
+        let bytes = Data([0x00, 0x01, 0x00, 0x00, 0x52, 0x46])
+        try files.writeSynchronously(bytes, relativePath: path)
 
-private struct RejectingFontRegistrationService: FontRegistrationService {
-    private enum Failure: Error {
-        case rejected
-    }
+        FontStore(files: files).registerBundledAndImportedFonts()
 
-    func postScriptName(for data: Data) throws -> String {
-        "RegistrationFailure-Regular"
+        XCTAssertEqual(try files.readSynchronously(relativePath: path), bytes)
     }
 
-    func register(_ data: Data) throws {
-        throw Failure.rejected
+    private func temporaryDirectory(named name: String) -> URL {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent("FontStoreTests-\(name)-\(UUID().uuidString)")
     }
 }

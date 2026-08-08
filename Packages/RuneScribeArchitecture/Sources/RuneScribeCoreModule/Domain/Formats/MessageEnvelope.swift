@@ -1,6 +1,6 @@
 import Foundation
 
-enum MessageEnvelopeError: Error { case empty, unsupportedVersion(UInt8) }
+enum MessageEnvelopeError: Error, Equatable, Sendable { case empty, unsupportedVersion(UInt8) }
 
 /// The on-the-wire message framing: a 1-byte version followed by the AES-GCM sealed box.
 /// No cipher identifier is included — the receiver tries its stored ciphers (the AEAD

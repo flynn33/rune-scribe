@@ -1,6 +1,6 @@
 import Foundation
 
-enum MessageError: Error, LocalizedError, Equatable {
+enum MessageError: Error, LocalizedError, Equatable, Sendable {
     case noMatchingCipher
     var errorDescription: String? {
         switch self {
@@ -12,7 +12,7 @@ enum MessageError: Error, LocalizedError, Equatable {
 
 /// Orchestrates compose (encrypt → frame → decorate) and read (try each cipher:
 /// un-decorate → unframe → decrypt). Stateless; depends only on the leaf services.
-struct MessageService {
+struct MessageService: Sendable {
     private let cryptor = MessageCryptor()
     private let codec = RuneCodec()
 

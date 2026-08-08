@@ -3,6 +3,10 @@ import CryptoKit
 import RuneScribeContracts
 import RuneScribePlatform
 
+private enum ContactStoreError: Error {
+    case encryptionFailed
+}
+
 /// Persists the `ContactBook` AES-GCM-encrypted in a file in app-support, using the same
 /// Keychain-held symmetric key as the cipher library. The key and directory are injectable so
 /// the encrypted round-trip is unit-testable without touching the Keychain or app-support.
@@ -60,7 +64,7 @@ final class ContactStore: @unchecked Sendable {
     private func encrypt<T: Encodable>(_ value: T, using key: SymmetricKey) throws -> Data {
         let encoder = JSONEncoder(); encoder.dateEncodingStrategy = .deferredToDate
         let box = try AES.GCM.seal(try encoder.encode(value), using: key)
-        guard let combined = box.combined else { throw KeyManagerError.encryptionFailed }
+        guard let combined = box.combined else { throw ContactStoreError.encryptionFailed }
         return combined
     }
 

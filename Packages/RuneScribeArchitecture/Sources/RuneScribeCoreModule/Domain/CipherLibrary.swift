@@ -5,7 +5,7 @@ import Foundation
 /// The persisted collection of the user's labelled ciphers, plus which one is
 /// active. Stored AES-GCM-encrypted in the Keychain (account `cipherLibrary`).
 /// Library order is the user's order — new ciphers are appended.
-struct CipherLibrary: Codable, Equatable {
+struct CipherLibrary: Codable, Equatable, Sendable {
 
     /// Schema version, so the stored format can evolve safely.
     var version: Int = 1

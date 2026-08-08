@@ -8,7 +8,6 @@ import SwiftUI
 struct RootView: View {
 
     @EnvironmentObject private var appLock: AppLock
-    @EnvironmentObject private var keyManager: KeyManager
     @EnvironmentObject private var coordinator: ImportCoordinator
     @EnvironmentObject private var messageCoordinator: MessageCoordinator
     @Environment(\.scenePhase) private var scenePhase
@@ -62,27 +61,41 @@ struct RootView: View {
             get: { (showSplash || appLock.isLocked) ? nil : coordinator.pending },
             // Only clear on a genuine, unlocked dismissal — not when the splash or
             // lock flips `get` to nil (which must preserve the pending import).
-            set: { if $0 == nil && !appLock.isLocked && !showSplash { coordinator.pending = nil } }
+            set: {
+                if $0 == nil && !appLock.isLocked && !showSplash {
+                    coordinator.cancelPending()
+                }
+            }
         )) { pending in
-            ImportConfirmView(pending: pending) { result in
+            ImportConfirmView(
+                pending: pending,
+                confirmImport: { try await coordinator.confirm(name: $0) },
+                cancelImport: { coordinator.cancelPending() }
+            ) { result in
                 if case .failure(let error) = result {
                     coordinator.errorMessage = (error as? LocalizedError)?.errorDescription
                         ?? error.localizedDescription
                 }
             }
-            .environmentObject(keyManager)
         }
         // Inbound decrypted message. Same splash/lock gating as the import host: a
         // tapped message link waits and presents the moment the splash ends and the
         // app unlocks.
         .sheet(item: Binding(
             get: { (showSplash || appLock.isLocked) ? nil : messageCoordinator.pending },
-            set: { if $0 == nil && !appLock.isLocked && !showSplash { messageCoordinator.pending = nil } }
+            set: {
+                if $0 == nil && !appLock.isLocked && !showSplash {
+                    messageCoordinator.dismissPending()
+                }
+            }
         )) { pending in
             ReceivedMessageView(pending: pending) { message in
                 // Reply: hand ContentView the cipher to compose with via a notification;
                 // it switches the active cipher and drops to the editor.
-                NotificationCenter.default.post(name: .replyToMessageRequested, object: message.cipher.id)
+                NotificationCenter.default.post(
+                    name: .replyToMessageRequested,
+                    object: message.cipherID
+                )
             }
         }
         .alert("Import Failed", isPresented: Binding(
@@ -115,7 +128,7 @@ struct RootView: View {
         guard count != lastClipboardChangeCount else { return }
         lastClipboardChangeCount = count
         if let urlString = Clipboard.runeScribeURLString() {
-            LinkRouter.route(urlString: urlString)
+            LinkRouter.route(urlString: urlString, coordinator: coordinator)
         }
     }
 }

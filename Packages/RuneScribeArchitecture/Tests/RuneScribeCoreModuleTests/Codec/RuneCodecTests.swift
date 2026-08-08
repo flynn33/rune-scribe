@@ -1,5 +1,5 @@
 import XCTest
-@testable import RuneScrib
+@testable import RuneScribeCoreModule
 
 final class RuneCodecTests: XCTestCase {
     func testDecorativeAlphabetIs32UniqueRunesWithBroadCoverage() {
@@ -33,6 +33,32 @@ extension RuneCodecTests {
     func testDecodeRejectsForeignCharacter() {
         let codec = RuneCodec()
         let c = Cipher.generated(label: "x")
-        XCTAssertThrowsError(try codec.decode("A", with: c))
+        XCTAssertThrowsError(try codec.decode("A", with: c)) { error in
+            XCTAssertEqual(error as? RuneCodecError, .foreignCharacter)
+        }
+    }
+
+    func testDecodeRejectsImpossibleZeroPaddedGroupCount() {
+        let codec = RuneCodec()
+        let cipher = Cipher.generated(label: "x")
+        let zeroRune = RuneCharacterSet.decorativeAlphabet[cipher.decorativeMapping[0]]
+
+        XCTAssertThrowsError(try codec.decode(String(zeroRune), with: cipher)) { error in
+            XCTAssertEqual(error as? RuneCodecError, .invalidLength)
+        }
+    }
+
+    func testDecodeRejectsNonzeroTrailingBits() {
+        let codec = RuneCodec()
+        let cipher = Cipher.generated(label: "x")
+        let alphabet = RuneCharacterSet.decorativeAlphabet
+        let first = alphabet[cipher.decorativeMapping[0]]
+        let nonzeroPadding = alphabet[cipher.decorativeMapping[1]]
+
+        XCTAssertThrowsError(
+            try codec.decode(String([first, nonzeroPadding]), with: cipher)
+        ) { error in
+            XCTAssertEqual(error as? RuneCodecError, .invalidLength)
+        }
     }
 }

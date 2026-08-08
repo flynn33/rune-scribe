@@ -1,6 +1,6 @@
 import Foundation
 
-enum RuneCodecError: Error { case foreignCharacter, invalidLength }
+enum RuneCodecError: Error, Equatable, Sendable { case foreignCharacter, invalidLength }
 
 /// Reversible DECORATIVE encoding of bytes to a rune string and back, using a cipher's
 /// `decorativeMapping`. This is base-32 (5 bits/rune, RFC 4648 bit order, no padding)
@@ -50,6 +50,11 @@ struct RuneCodec {
     }
 
     private func bytes(fromFiveBitGroups groups: [Int]) throws -> Data {
+        // Unpadded base-32 can only represent complete bytes at these group-count residues.
+        // Reject non-canonical zero padding as well as nonzero trailing bits.
+        guard [0, 2, 4, 5, 7].contains(groups.count % 8) else {
+            throw RuneCodecError.invalidLength
+        }
         var out = Data()
         var buffer: UInt32 = 0
         var bits = 0

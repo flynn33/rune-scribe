@@ -63,11 +63,10 @@ extension Font {
     }
 }
 
-/// Resolves the rune font name a cipher renders with (its `FontRef` via `FontStore`),
-/// falling back to the bundled font name.
+/// Resolves the key-free font name supplied by the application snapshot.
 enum RuneFont {
-    static func name(for cipher: Cipher?) -> String {
-        cipher.flatMap { FontStore.shared.resolve($0.fontRef) } ?? "Noto Sans Runic"
+    static func name(for cipher: CipherViewState?) -> String {
+        cipher?.fontName ?? "Noto Sans Runic"
     }
 }
 

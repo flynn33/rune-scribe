@@ -187,7 +187,7 @@ public enum ImportPhaseDTO: String, Codable, Hashable, Sendable {
     case failed
 }
 
-public struct PendingImportSummary: Codable, Equatable, Hashable, Sendable {
+public struct PendingImportSummary: Codable, Equatable, Hashable, Identifiable, Sendable {
     public let id: ImportID
     public let suggestedName: String
     public let source: ImportSourceDTO

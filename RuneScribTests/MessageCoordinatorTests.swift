@@ -1,157 +1,155 @@
-import XCTest
+import Combine
 import CryptoKit
+import RuneScribeContracts
+import RuneScribeCoreModule
+import RuneScribePlatform
+import XCTest
 @testable import RuneScrib
 
 @MainActor
 final class MessageCoordinatorTests: XCTestCase {
-
-    /// Ciphers already in the shared library before a test runs; everything added
-    /// during the test is removed in tearDown so other test classes see a clean library.
-    private var preexistingCipherIDs: Set<UUID> = []
-
-    override func setUp() async throws {
-        try await super.setUp()
-        await KeyManager.shared.load()
-        preexistingCipherIDs = Set(KeyManager.shared.ciphers.map(\.id))
+    private struct Context {
+        let keyManager: KeyManager
+        let contactManager: ContactManager
+        let coordinator: MessageCoordinator
+        let snapshots: CurrentValueSubject<RuneScribeApplicationSnapshot?, Never>
+        let directory: URL
     }
 
-    // `autoAssociate` is always exercised through an injected `freshContactManager()`
-    // (never `ContactManager.shared`), so contacts stay isolated per test and tearDown
-    // only needs to restore the shared `KeyManager`, not contact state.
-    override func tearDown() async throws {
-        for cipher in KeyManager.shared.ciphers where !preexistingCipherIDs.contains(cipher.id) {
-            KeyManager.shared.deleteCipher(id: cipher.id)
-        }
-        try await super.tearDown()
-    }
+    func testKeyFreeSnapshotSurfacesPendingMessageAndAssociatesContact() async throws {
+        let context = await makeContext()
+        defer { try? FileManager.default.removeItem(at: context.directory) }
+        let cipher = try await context.keyManager.addCipher(label: "Sender")
+        await waitUntil { context.keyManager.ciphers.contains { $0.id == cipher.id } }
 
-    // A fresh ContactManager backed by an isolated, key-injected store — never
-    // touches the Keychain or app-support, and starts with zero contacts.
-    private func freshContactManager() -> ContactManager {
-        let dir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("MsgCoordTests-\(UUID().uuidString)", isDirectory: true)
-        let store = ContactStore(key: SymmetricKey(size: .bits256), directory: dir)
-        return ContactManager(store: store, keyManager: .shared)
-    }
-
-    // Builds the wire envelope for `plaintext` under `cipher`, exactly as the app does.
-    private func envelope(_ plaintext: String, with cipher: Cipher) throws -> Data {
-        let sealed = try MessageCryptor().seal(plaintext, with: cipher)
-        return MessageEnvelope.wrap(sealed)
-    }
-
-    func testIngestEmbeddedCipherImportsDecryptsAndLinksNewContact() throws {
-        let km = KeyManager.shared
-        let cm = freshContactManager()
-        let coordinator = MessageCoordinator(keyManager: km, contactManager: cm)
-
-        let senderCipher = Cipher.generated(label: "Sender")
-        let env = try envelope("rendezvous at dusk", with: senderCipher)
-        let payload = MessageSharePayload(
+        let message = ReceivedMessageDTO(
+            id: MessageID(rawValue: UUID()),
+            plaintext: "rendezvous at dusk",
             senderName: "Astrid",
-            envelope: env,
-            embeddedCipher: CipherSharePayload(cipher: senderCipher))
+            cipherID: cipher.contractID,
+            cipherName: cipher.label
+        )
+        context.snapshots.send(snapshot(from: try XCTUnwrap(context.keyManager.snapshot), message: message))
 
-        coordinator.ingest(fileData: payload.encoded())
+        await waitUntil { context.coordinator.pending?.id == message.id }
+        XCTAssertEqual(context.coordinator.pending?.plaintext, "rendezvous at dusk")
+        XCTAssertEqual(context.coordinator.pending?.senderName, "Astrid")
+        XCTAssertEqual(context.coordinator.pending?.cipherID, cipher.id)
+        XCTAssertEqual(context.coordinator.pending?.cipherName, "Sender")
 
-        XCTAssertNil(coordinator.errorMessage)
-        let pending = try XCTUnwrap(coordinator.pending)
-        XCTAssertEqual(pending.plaintext, "rendezvous at dusk")
-        XCTAssertEqual(pending.senderName, "Astrid")
-
-        let imported = try XCTUnwrap(km.ciphers.first { $0.keyMaterial == senderCipher.keyMaterial })
-        XCTAssertEqual(imported.origin, .imported)
-        XCTAssertEqual(pending.cipher.id, imported.id)
-
-        let contact = try XCTUnwrap(cm.contacts.first { $0.displayName == "Astrid" })
+        await waitUntil {
+            context.contactManager.contacts.contains { $0.displayName == "Astrid" }
+        }
+        let contact = try XCTUnwrap(
+            context.contactManager.contacts.first { $0.displayName == "Astrid" }
+        )
         XCTAssertEqual(contact.source, .imported)
-        XCTAssertEqual(km.ciphers(forContact: contact.id).map(\.id), [imported.id])
+        await waitUntil {
+            context.keyManager.ciphers.first { $0.id == cipher.id }?.contactID == contact.id
+        }
     }
 
-    func testIngestNoEmbedDecryptsViaAlreadyStoredCipher() throws {
-        let km = KeyManager.shared
-        let cm = freshContactManager()
-        let coordinator = MessageCoordinator(keyManager: km, contactManager: cm)
+    func testRepeatingSameMessageDoesNotDuplicateContact() async throws {
+        let context = await makeContext()
+        defer { try? FileManager.default.removeItem(at: context.directory) }
+        let cipher = try await context.keyManager.addCipher(label: "Sender")
+        let message = ReceivedMessageDTO(
+            id: MessageID(rawValue: UUID()),
+            plaintext: "once only",
+            senderName: "Eira",
+            cipherID: cipher.contractID,
+            cipherName: cipher.label
+        )
+        let state = snapshot(from: try XCTUnwrap(context.keyManager.snapshot), message: message)
 
-        let shared = try km.importCipher(CipherSharePayload(cipher: Cipher.generated(label: "Pre")),
-                                         label: "Pre-shared")
-        let env = try envelope("the eagle has landed", with: shared)
-        let payload = MessageSharePayload(senderName: "Bjorn", envelope: env, embeddedCipher: nil)
+        context.snapshots.send(state)
+        await waitUntil { context.contactManager.contacts.contains { $0.displayName == "Eira" } }
+        context.snapshots.send(state)
+        await Task.yield()
 
-        coordinator.ingest(fileData: payload.encoded())
-
-        XCTAssertNil(coordinator.errorMessage)
-        let pending = try XCTUnwrap(coordinator.pending)
-        XCTAssertEqual(pending.plaintext, "the eagle has landed")
-        XCTAssertEqual(pending.cipher.id, shared.id)
-        XCTAssertTrue(cm.contacts.contains { $0.displayName == "Bjorn" })
+        XCTAssertEqual(
+            context.contactManager.contacts.filter { $0.displayName == "Eira" }.count,
+            1
+        )
     }
 
-    func testIngestJunkSetsErrorAndLeavesPendingNil() {
-        let coordinator = MessageCoordinator(keyManager: .shared, contactManager: freshContactManager())
-        // Leading message-version byte but otherwise garbage -> decode fails.
-        coordinator.ingest(fileData: Data([MessageSharePayload.version, 0x00, 0xFF, 0xFF, 0xFF]))
-        XCTAssertNil(coordinator.pending)
-        XCTAssertNotNil(coordinator.errorMessage)
+    func testNilMessageStateClearsPendingPresentation() async throws {
+        let context = await makeContext()
+        defer { try? FileManager.default.removeItem(at: context.directory) }
+        let cipher = try await context.keyManager.addCipher(label: "Sender")
+        let message = ReceivedMessageDTO(
+            id: MessageID(rawValue: UUID()),
+            plaintext: "hello",
+            senderName: "Bjorn",
+            cipherID: cipher.contractID,
+            cipherName: cipher.label
+        )
+        let base = try XCTUnwrap(context.keyManager.snapshot)
+
+        context.snapshots.send(snapshot(from: base, message: message))
+        await waitUntil { context.coordinator.pending != nil }
+        context.snapshots.send(snapshot(from: base, message: nil))
+        await waitUntil { context.coordinator.pending == nil }
     }
 
-    func testIngestUndecryptableMessageSetsErrorAndLeavesPendingNil() throws {
-        let coordinator = MessageCoordinator(keyManager: .shared, contactManager: freshContactManager())
-        let stranger = Cipher.generated(label: "Stranger")
-        let env = try envelope("you cannot read this", with: stranger)
-        let payload = MessageSharePayload(senderName: "Ghost", envelope: env, embeddedCipher: nil)
-        coordinator.ingest(fileData: payload.encoded())
-        XCTAssertNil(coordinator.pending)
-        XCTAssertNotNil(coordinator.errorMessage)
+    private func makeContext() async -> Context {
+        let service = RuneScribeCoreApplicationService(
+            secureValueStore: InMemorySecureValueStore(),
+            clock: SystemClock(),
+            uuid: SystemUUIDProvider()
+        )
+        let keyManager = KeyManager(service: service)
+        await waitUntil { keyManager.snapshot != nil && !keyManager.isLoading }
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("MessageCoordinatorTests-\(UUID().uuidString)", isDirectory: true)
+        let contactManager = ContactManager(
+            store: ContactStore(key: SymmetricKey(size: .bits256), directory: directory),
+            keyManager: keyManager
+        )
+        let snapshots = CurrentValueSubject<RuneScribeApplicationSnapshot?, Never>(nil)
+        let coordinator = MessageCoordinator(
+            keyManager: keyManager,
+            contactManager: contactManager,
+            snapshotPublisher: snapshots.eraseToAnyPublisher()
+        )
+        return Context(
+            keyManager: keyManager,
+            contactManager: contactManager,
+            coordinator: coordinator,
+            snapshots: snapshots,
+            directory: directory
+        )
     }
 
-    func testSameFileIngestedTwiceIsDeduped() throws {
-        let cm = freshContactManager()
-        let coordinator = MessageCoordinator(keyManager: .shared, contactManager: cm)
-        let cipher = Cipher.generated(label: "Dup")
-        let env = try envelope("once only", with: cipher)
-        let file = MessageSharePayload(
-            senderName: "Eira", envelope: env,
-            embeddedCipher: CipherSharePayload(cipher: cipher)).encoded()
-
-        coordinator.ingest(fileData: file)
-        let firstPendingID = try XCTUnwrap(coordinator.pending).id
-        let contactsAfterFirst = cm.contacts.count
-
-        coordinator.ingest(fileData: file)   // duplicate delivery
-
-        XCTAssertEqual(coordinator.pending?.id, firstPendingID)
-        XCTAssertEqual(cm.contacts.count, contactsAfterFirst)
+    private func snapshot(
+        from base: RuneScribeApplicationSnapshot,
+        message: ReceivedMessageDTO?
+    ) -> RuneScribeApplicationSnapshot {
+        RuneScribeApplicationSnapshot(
+            revision: base.revision + 1,
+            capturedAt: Date(),
+            cipherLibrary: base.cipherLibrary,
+            contactLibrary: base.contactLibrary,
+            fonts: base.fonts,
+            importState: base.importState,
+            messageState: MessageStateDTO(
+                phase: message == nil ? .idle : .received,
+                pendingMessage: message
+            ),
+            lockState: base.lockState,
+            lastFailure: base.lastFailure
+        )
     }
 
-    // MARK: - a key re-sent across distinct messages dedups by publicID and never hijacks active
-
-    func testReingestingSameEmbeddedKeyDeduplicatesAndKeepsActiveCipher() throws {
-        let km = KeyManager.shared
-        let coordinator = MessageCoordinator(keyManager: km, contactManager: freshContactManager())
-
-        // Establish a known active cipher the user is "composing with".
-        let mine = try km.importCipher(CipherSharePayload(cipher: Cipher.generated(label: "Mine")), label: "Mine")
-        XCTAssertEqual(km.activeCipher?.id, mine.id)
-
-        // The same sender cipher embedded in two DISTINCT messages (different plaintext →
-        // different file bytes, so content-hash dedup doesn't apply; the publicID dedup is
-        // what's tested).
-        let senderCipher = Cipher.generated(label: "Sender")
-        let embed = CipherSharePayload(cipher: senderCipher)
-        let file1 = MessageSharePayload(senderName: "Astrid",
-                                        envelope: try envelope("first", with: senderCipher),
-                                        embeddedCipher: embed).encoded()
-        let file2 = MessageSharePayload(senderName: "Astrid",
-                                        envelope: try envelope("second", with: senderCipher),
-                                        embeddedCipher: embed).encoded()
-
-        coordinator.ingest(fileData: file1)
-        coordinator.ingest(fileData: file2)
-
-        // Imported exactly once — a re-sent key must not pile up duplicates.
-        XCTAssertEqual(km.ciphers.filter { $0.publicID == senderCipher.publicID }.count, 1)
-        // Receiving messages must not change the cipher the user is composing with.
-        XCTAssertEqual(km.activeCipher?.id, mine.id)
+    private func waitUntil(
+        _ condition: @escaping @MainActor () -> Bool,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) async {
+        for _ in 0..<500 {
+            if condition() { return }
+            try? await Task.sleep(for: .milliseconds(2))
+        }
+        XCTFail("Timed out waiting for application state", file: file, line: line)
     }
 }

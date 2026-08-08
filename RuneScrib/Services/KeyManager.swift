@@ -1,304 +1,343 @@
-// RuneScrib/Services/KeyManager.swift
-
+import Combine
 import Foundation
-import CryptoKit
+import RuneScribeContracts
 
-// MARK: - KeyManager Errors
+/// Key-free view state used by the hosted SwiftUI screens during the module migration.
+///
+/// Migration owner: UIMigration. Removal phase: P5. New callers are prohibited; the
+/// single UI module will observe `RuneScribeApplicationSnapshot` directly.
+struct CipherViewState: Identifiable, Equatable, Sendable {
+    let id: UUID
+    let label: String
+    let origin: CipherOriginDTO
+    let createdAt: Date
+    let isActive: Bool
+    let contactID: UUID?
+    let delivered: Bool
+    let publicIdentifier: String
+    let fontName: String
 
-enum KeyManagerError: Error, LocalizedError {
-    case encryptionFailed
-    case decryptionFailed
-    case noKeyAvailable
+    var contractID: CipherID {
+        CipherID(rawValue: id)
+    }
 
-    var errorDescription: String? {
-        switch self {
-        case .encryptionFailed: return "Failed to encrypt the cipher library."
-        case .decryptionFailed: return "Failed to decrypt the cipher library."
-        case .noKeyAvailable:   return "No cipher is currently available."
-        }
+    var shortPublicID: String {
+        String(publicIdentifier.prefix(8))
     }
 }
 
-// MARK: - KeyManager
-
-/// Owns the user's cipher library: a list of labelled `Cipher`s plus the active
-/// selection. The whole library is persisted AES-GCM-encrypted in the Keychain.
-/// One symmetric AES key (also in the Keychain) protects it.
+/// Temporary observation adapter from the key-free application service to the
+/// existing hosted views. It owns no persistence, cryptography, payloads, or keys.
 ///
-/// Published as a singleton and injected as an `@EnvironmentObject`. All published
-/// state mutates on the main actor.
+/// Migration owner: UIMigration. Removal phase: P5. This is the only permitted
+/// adapter instance and must not become a second write path.
+/// Architecture ratchet: temporary-application-session-adapter.
 @MainActor
 final class KeyManager: ObservableObject {
-
-    // MARK: - Singleton
-
-    static let shared = KeyManager()
-
-    // MARK: - Published State
-
-    @Published private(set) var library: CipherLibrary = .empty
-    @Published private(set) var isLoading: Bool = false
+    @Published private(set) var snapshot: RuneScribeApplicationSnapshot?
     @Published private(set) var lastError: String?
 
-    // MARK: - Derived
+    private let service: any RuneScribeApplicationService
+    private var stateTask: Task<Void, Never>?
 
-    /// All ciphers in library order.
-    var ciphers: [Cipher] { library.ciphers }
-
-    /// The active cipher, used as the default when composing a message.
-    var activeCipher: Cipher? { library.activeCipher }
-
-    // MARK: - Private Dependencies
-
-    private let keychain = KeychainService.shared
-
-    // MARK: - Init
-
-    private init() {
-        Task { await load() }
-    }
-
-    // MARK: - Load
-
-    /// Loads the cipher library from the Keychain, guaranteeing at least one cipher
-    /// exists on first launch.
-    func load() async {
-        isLoading = true
-        lastError = nil
-        defer { isLoading = false }
-
-        do {
-            let aesKey = try loadOrCreateSymmetricKey()
-
-            if let data = try keychain.retrieveEncryptedLibrary() {
-                library = try decrypt(CipherLibrary.self, from: data, using: aesKey)
+    init(service: any RuneScribeApplicationService) {
+        self.service = service
+        stateTask = Task { [weak self, service] in
+            for await state in service.stateStream() {
+                guard !Task.isCancelled else { return }
+                self?.snapshot = state
+                self?.lastError = state.lastFailure.map(Self.message(for:))
             }
-
-            if library.ciphers.isEmpty {
-                let first = Cipher.generated(label: "My Cipher")
-                library = CipherLibrary(ciphers: [first], activeID: first.id)
-                try persist(using: aesKey)
-            }
-        } catch {
-            lastError = error.localizedDescription
         }
     }
 
-    // MARK: - Mutations
-
-    /// Creates a new random cipher, appends it, and makes it active.
-    @discardableResult
-    func addCipher(label: String) -> Cipher? {
-        let cipher = Cipher.generated(label: cleanLabel(label, fallback: "New Cipher"))
-        library = library.adding(cipher)
-        persist()
-        return lastError == nil ? cipher : nil
+    var isLoading: Bool {
+        snapshot?.cipherLibrary.isLoading ?? true
     }
 
-    /// Imports a shared cipher (from a deep link, QR code, file, or clipboard) as a
-    /// new cipher, appends it, and makes it active.
-    @discardableResult
-    func importCipher(_ payload: CipherSharePayload, label: String?) throws -> Cipher {
-        let cipher = payload.cipher(label: cleanLabel(label ?? "", fallback: "Imported Cipher"))
-        let aesKey = try loadOrCreateSymmetricKey()
-        library = library.adding(cipher)
-        try persist(using: aesKey)
-        lastError = nil
-        return cipher
-    }
-
-    /// Imports a cipher that arrived *inside a message* (not a deliberate cipher share).
-    /// Unlike `importCipher` it (1) deduplicates by `publicID`, so a key re-sent on every
-    /// message never piles up duplicates, and (2) uses `addingWithoutActivating`, so merely
-    /// receiving a message never hijacks the cipher the user is composing with (Reply switches
-    /// the active cipher explicitly). Always returns a usable decrypt candidate: the stored
-    /// copy when we already hold this key, the freshly persisted cipher otherwise, or — if the
-    /// Keychain is unavailable — an in-memory copy so the current message still decrypts.
-    @discardableResult
-    func ingestMessageCipher(_ payload: CipherSharePayload, label: String) -> Cipher {
-        if let existing = library.ciphers.first(where: { $0.publicID == payload.publicID }) {
-            return existing
+    var ciphers: [CipherViewState] {
+        guard let snapshot else { return [] }
+        let fonts = Dictionary(uniqueKeysWithValues: snapshot.fonts.map { ($0.id, $0) })
+        return snapshot.cipherLibrary.ciphers.map { summary in
+            CipherViewState(
+                id: summary.id.rawValue,
+                label: summary.name,
+                origin: summary.origin,
+                createdAt: summary.createdAt,
+                isActive: summary.isActive,
+                contactID: summary.assignedContactID?.rawValue,
+                delivered: summary.hasBeenDelivered,
+                publicIdentifier: summary.publicIdentifier,
+                fontName: fonts[summary.fontID]?.displayName ?? "Noto Sans Runic"
+            )
         }
-        let cipher = payload.cipher(label: cleanLabel(label, fallback: "Imported Cipher"))
-        do {
-            let aesKey = try loadOrCreateSymmetricKey()
-            library = library.addingWithoutActivating(cipher)
-            try persist(using: aesKey)
-            lastError = nil
-        } catch {
-            // Keychain unavailable: return the in-memory cipher unsaved so THIS message still
-            // opens; it simply won't persist for later (the same best-effort as before).
-        }
-        return cipher
     }
 
-    /// Imports a cipher from a file-form package (compact payload + optional font bytes).
-    /// Validates and stores the font; requires the font to be present (supplied in the file, or
-    /// already local) before the cipher is added.
+    var activeCipher: CipherViewState? {
+        ciphers.first(where: \.isActive)
+    }
+
+    var pendingImport: PendingImportSummary? {
+        snapshot?.importState.pending
+    }
+
+    var pendingMessage: ReceivedMessageDTO? {
+        snapshot?.messageState.pendingMessage
+    }
+
+    func ciphers(forContact contactID: UUID) -> [CipherViewState] {
+        ciphers.filter { $0.contactID == contactID }
+    }
+
     @discardableResult
-    func importCipher(fileData data: Data, label: String?) throws -> Cipher {
-        let (payload, fontBytes) = try CipherSharePayload.decodeFile(data)
-        if let fontBytes {
-            try FontStore.shared.importFont(fontBytes, expecting: payload.fontRef)
-        } else if FontStore.shared.resolve(payload.fontRef) == nil {
-            throw FontStoreError.unreadableFont
+    func addCipher(label: String) async throws -> CipherViewState {
+        let summary = try await perform {
+            try await service.createCipher(CreateCipherCommand(name: label))
         }
-        return try importCipher(payload, label: label)
+        return viewState(for: summary)
     }
 
-    /// Renames the cipher with the given id.
-    func renameCipher(id: UUID, to newLabel: String) {
-        guard let existing = library.ciphers.first(where: { $0.id == id }) else { return }
-        library = library.renamingCipher(id: id, to: cleanLabel(newLabel, fallback: existing.label))
-        persist()
-    }
-
-    /// Deletes the cipher with the given id. Never leaves the library empty: if the
-    /// last cipher is removed, a fresh one is generated.
-    func deleteCipher(id: UUID) {
-        library = library.removingCipher(id: id)
-        persist()
-    }
-
-    /// Selects the active cipher used as the default when composing.
-    func setActive(id: UUID) {
-        library = library.settingActive(id: id)
-        persist()
-    }
-
-    /// Links (or clears, with nil) a cipher's contact. Never changes key material.
-    func setContact(cipherID: UUID, contactID: UUID?) {
-        library = library.settingContact(cipherID: cipherID, contactID: contactID)
-        persist()
-    }
-
-    /// Clears the link on every cipher of a contact (used when the contact is deleted). Keeps ciphers.
-    func unlinkContact(_ contactID: UUID) {
-        library = library.unlinkingContact(contactID: contactID)
-        persist()
-    }
-
-    /// Clears the link on every cipher of each of `contactIDs` in one library assignment and a
-    /// single `persist()`, so a bulk contact removal triggers one Keychain write, not N. Keeps ciphers.
-    func unlinkContacts(_ contactIDs: Set<UUID>) {
-        guard !contactIDs.isEmpty else { return }
-        library = contactIDs.reduce(library) { $0.unlinkingContact(contactID: $1) }
-        persist()
-    }
-
-    /// Marks the cipher with `cipherID` as having had its key delivered, then persists.
-    /// Idempotent and never touches key material. Called by the send flow after a message
-    /// that embedded this cipher's key has been handed off to Messages.
-    func markDelivered(cipherID: UUID) {
-        library = library.markingDelivered(cipherID: cipherID)
-        persist()
-    }
-
-    /// The ciphers currently linked to `contactID`.
-    func ciphers(forContact contactID: UUID) -> [Cipher] { library.ciphers.filter { $0.contactID == contactID } }
-
-    /// Ensures an imported contact has at least one linked cipher, generating and linking one
-    /// (without changing the active selection) when it has none. Returns the new cipher, or
-    /// `nil` when the contact already has a linked cipher. Import-only by design.
     @discardableResult
-    func ensureLinkedCipher(forImportedContact contact: Contact) -> Cipher? {
+    func renameCipher(id: UUID, to label: String) async throws -> CipherViewState {
+        let summary = try await perform {
+            try await service.renameCipher(
+                RenameCipherCommand(cipherID: CipherID(rawValue: id), name: label)
+            )
+        }
+        return viewState(for: summary)
+    }
+
+    func deleteCipher(id: UUID) async throws {
+        try await perform {
+            try await service.deleteCipher(id: CipherID(rawValue: id))
+        }
+    }
+
+    func setActive(id: UUID) async throws {
+        try await perform {
+            try await service.setActiveCipher(
+                SetActiveCipherCommand(cipherID: CipherID(rawValue: id))
+            )
+        }
+    }
+
+    func setContact(cipherID: UUID, contactID: UUID?) async throws {
+        try await perform {
+            try await service.assignContact(
+                AssignContactCommand(
+                    cipherID: CipherID(rawValue: cipherID),
+                    contactID: contactID.map(ContactID.init(rawValue:))
+                )
+            )
+        }
+    }
+
+    func unlinkContact(_ contactID: UUID) async throws {
+        try await unlinkContacts([contactID])
+    }
+
+    func unlinkContacts(_ contactIDs: Set<UUID>) async throws {
+        let affected = ciphers.filter { cipher in
+            cipher.contactID.map(contactIDs.contains) == true
+        }
+        for cipher in affected {
+            try await setContact(cipherID: cipher.id, contactID: nil)
+        }
+    }
+
+    /// Preserves the legacy imported-contact behavior without exposing Core models:
+    /// create one linked cipher, then restore the prior active selection.
+    @discardableResult
+    func ensureLinkedCipher(forImportedContact contact: Contact) async throws -> CipherViewState? {
         guard ciphers(forContact: contact.id).isEmpty else { return nil }
-        var cipher = Cipher.generated(label: cleanLabel(contact.displayName, fallback: "Imported Cipher"))
-        cipher.contactID = contact.id
-        library = library.addingWithoutActivating(cipher)
-        persist()
-        return cipher
-    }
-
-    // MARK: - Export / Share
-
-    /// The self-contained file-form package for the given cipher: the compact payload plus the
-    /// cipher's font bytes, so a recipient who lacks the font still receives it.
-    func exportData(for id: UUID) throws -> Data {
-        guard let cipher = library.ciphers.first(where: { $0.id == id }) else {
-            throw KeyManagerError.noKeyAvailable
+        let priorActiveID = activeCipher?.id
+        let created = try await addCipher(label: contact.displayName)
+        try await setContact(cipherID: created.id, contactID: contact.id)
+        if let priorActiveID {
+            try await setActive(id: priorActiveID)
         }
-        let fontBytes = FontStore.shared.fontData(for: cipher.fontRef) ?? Data()
-        return CipherSharePayload(cipher: cipher).encodedFile(fontBytes: fontBytes)
+        return ciphers.first(where: { $0.id == created.id }) ?? created
     }
 
-    /// The `runescribe://import` share URL for the given cipher (QR / deep-link form).
-    func shareURL(for id: UUID, name: String?) throws -> URL {
-        guard let cipher = library.ciphers.first(where: { $0.id == id }) else {
-            throw KeyManagerError.noKeyAvailable
+    func encode(_ plaintext: String, cipherID: UUID?) async throws -> EncodedMessageResult {
+        try await perform {
+            try await service.encode(
+                EncodeMessageCommand(
+                    plaintext: plaintext,
+                    cipherID: cipherID.map(CipherID.init(rawValue:))
+                )
+            )
         }
-        return try CipherSharePayload(cipher: cipher).url(name: name)
     }
 
-    /// Suggested filename (without extension) for the given cipher's share file.
-    func exportFilename(for id: UUID) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        let cipher = library.ciphers.first(where: { $0.id == id })
-        let base = cipher.map { sanitizeForFilename($0.label) } ?? "cipher"
-        let stamp = cipher.map { formatter.string(from: $0.createdAt) } ?? "key"
-        return "RuneScrib-\(base)-\(stamp)"
+    func decode(_ runes: String) async throws -> DecodedMessageResult {
+        try await perform {
+            try await service.decode(DecodeMessageCommand(runes: runes))
+        }
     }
 
-    // MARK: - Persistence Helpers
+    func prepareCipherShare(
+        cipherID: UUID,
+        displayName: String?,
+        representation: ShareRepresentationDTO
+    ) async throws -> ShareArtifactDTO {
+        try await perform {
+            try await service.prepareCipherShare(
+                PrepareCipherShareCommand(
+                    cipherID: CipherID(rawValue: cipherID),
+                    displayName: displayName,
+                    representation: representation
+                )
+            )
+        }
+    }
 
-    private func persist() {
+    func prepareMessageShare(
+        runes: String,
+        senderName: String,
+        cipherID: UUID
+    ) async throws -> ShareArtifactDTO {
+        try await perform {
+            try await service.prepareMessageShare(
+                PrepareMessageShareCommand(
+                    runes: runes,
+                    senderName: senderName,
+                    cipherID: CipherID(rawValue: cipherID)
+                )
+            )
+        }
+    }
+
+    func completeShareArtifact(
+        id: ShareArtifactID,
+        outcome: ShareArtifactOutcomeDTO
+    ) async throws -> ShareArtifactCompletionResultDTO {
+        try await perform {
+            try await service.completeShareArtifact(
+                CompleteShareArtifactCommand(artifactID: id, outcome: outcome)
+            )
+        }
+    }
+
+    func releaseShareArtifact(id: ShareArtifactID) async {
+        await service.releaseShareArtifact(id: id)
+    }
+
+    func importFile(
+        _ url: URL,
+        source: InboundDeliverySourceDTO,
+        isColdStart: Bool = false
+    ) async throws -> ImportResultDTO {
+        try await perform {
+            try await service.importFile(
+                InboundFileDTO(
+                    metadata: inboundMetadata(source: source, isColdStart: isColdStart),
+                    fileURL: url
+                )
+            )
+        }
+    }
+
+    func importURL(
+        _ url: URL,
+        source: InboundDeliverySourceDTO,
+        isColdStart: Bool = false
+    ) async throws -> ImportResultDTO {
+        try await perform {
+            try await service.importURL(
+                InboundURLDTO(
+                    metadata: inboundMetadata(source: source, isColdStart: isColdStart),
+                    url: url
+                )
+            )
+        }
+    }
+
+    @discardableResult
+    func confirmImport(id: ImportID, name: String) async throws -> CipherViewState {
+        let summary = try await perform {
+            try await service.confirmImport(ConfirmImportCommand(importID: id, name: name))
+        }
+        return viewState(for: summary)
+    }
+
+    func cancelImport(id: ImportID) async {
+        await service.cancelImport(id: id)
+    }
+
+    func dismissReceivedMessage(id: MessageID) async {
+        await service.dismissReceivedMessage(id: id)
+    }
+
+    private func inboundMetadata(
+        source: InboundDeliverySourceDTO,
+        isColdStart: Bool
+    ) -> InboundInputMetadataDTO {
+        InboundInputMetadataDTO(
+            id: InboundInputID(rawValue: UUID()),
+            receivedAt: Date(),
+            source: source,
+            isColdStart: isColdStart
+        )
+    }
+
+    private func viewState(for summary: CipherSummary) -> CipherViewState {
+        if let current = ciphers.first(where: { $0.id == summary.id.rawValue }) {
+            return current
+        }
+        let fontName = snapshot?.fonts.first(where: { $0.id == summary.fontID })?.displayName
+            ?? "Noto Sans Runic"
+        return CipherViewState(
+            id: summary.id.rawValue,
+            label: summary.name,
+            origin: summary.origin,
+            createdAt: summary.createdAt,
+            isActive: summary.isActive,
+            contactID: summary.assignedContactID?.rawValue,
+            delivered: summary.hasBeenDelivered,
+            publicIdentifier: summary.publicIdentifier,
+            fontName: fontName
+        )
+    }
+
+    private func perform<Result>(
+        _ operation: () async throws -> Result
+    ) async throws -> Result {
         do {
-            let aesKey = try loadOrCreateSymmetricKey()
-            try persist(using: aesKey)
+            let result = try await operation()
             lastError = nil
+            return result
         } catch {
-            lastError = error.localizedDescription
+            lastError = Self.message(for: error)
+            throw error
         }
     }
 
-    private func persist(using aesKey: SymmetricKey) throws {
-        let data = try encrypt(library, using: aesKey)
-        try keychain.storeEncryptedLibrary(data)
-    }
-
-    /// Loads the AES symmetric key from Keychain, creating and storing one if absent.
-    private func loadOrCreateSymmetricKey() throws -> SymmetricKey {
-        if let data = try keychain.retrieveSymmetricKeyData() {
-            return SymmetricKey(data: data)
+    private static func message(for error: Error) -> String {
+        if let productError = error as? RuneScribeProductError,
+           case .failure(let failure) = productError {
+            return message(for: failure)
         }
-        let key = SymmetricKey(size: .bits256)
-        try keychain.storeSymmetricKeyData(key.withUnsafeBytes { Data($0) })
-        return key
+        return (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
     }
 
-    /// AES-GCM-encrypts any Codable value to combined Data.
-    private func encrypt<T: Encodable>(_ value: T, using aesKey: SymmetricKey) throws -> Data {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        let sealedBox = try AES.GCM.seal(try encoder.encode(value), using: aesKey)
-        guard let combined = sealedBox.combined else { throw KeyManagerError.encryptionFailed }
-        return combined
-    }
-
-    /// AES-GCM-decrypts combined Data back into a Codable value.
-    private func decrypt<T: Decodable>(_ type: T.Type, from data: Data, using aesKey: SymmetricKey) throws -> T {
-        let sealedBox = try AES.GCM.SealedBox(combined: data)
-        let plaintext = try AES.GCM.open(sealedBox, using: aesKey)
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(T.self, from: plaintext)
-    }
-
-    // MARK: - Label Helpers
-
-    /// Trims a user label and caps its length; falls back when empty.
-    private func cleanLabel(_ raw: String, fallback: String) -> String {
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        let value = trimmed.isEmpty ? fallback : trimmed
-        return String(value.prefix(40))
-    }
-
-    /// Reduces a label to a filename-safe slug.
-    private func sanitizeForFilename(_ label: String) -> String {
-        let allowed = CharacterSet.alphanumerics
-        let slug = String(label.unicodeScalars.map { allowed.contains($0) ? Character($0) : "-" })
-        let collapsed = slug.split(separator: "-").joined(separator: "-")
-        return collapsed.isEmpty ? "cipher" : String(collapsed.prefix(32))
+    private static func message(for failure: RuneScribeFailureDTO) -> String {
+        switch failure.code {
+        case .invalidInput: return "The information provided is not valid."
+        case .itemNotFound: return "The requested item is no longer available."
+        case .unsupportedFormat: return "This Rune Scribe format is not supported."
+        case .corruptedContent: return "This Rune Scribe item is damaged or incomplete."
+        case .noMatchingCipher: return "No cipher in your library can decode this message."
+        case .authorizationDenied: return "Permission was not granted."
+        case .authenticationFailed: return "Authentication failed."
+        case .lockedOut: return "Try again later."
+        case .secureStorageUnavailable: return "Secure storage is unavailable."
+        case .protectedFileUnavailable: return "The protected file could not be opened."
+        case .resourceUnavailable: return "A required app resource is unavailable."
+        case .shareUnavailable: return "The item could not be prepared for sharing."
+        case .operationCancelled: return "The operation was cancelled."
+        case .temporarilyUnavailable: return "The operation is temporarily unavailable."
+        case .internalFailure: return "Rune Scribe could not complete the operation."
+        }
     }
 }

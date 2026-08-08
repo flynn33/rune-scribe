@@ -1,5 +1,6 @@
 // RuneScrib/Views/CipherLibraryView.swift
 
+import RuneScribeContracts
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -8,40 +9,47 @@ import UniformTypeIdentifiers
 /// decoding on the main screen) is highlighted and switchable here.
 struct CipherLibraryView: View {
 
+    private struct CipherQRShare: Identifiable {
+        let artifact: ShareArtifactDTO
+        let url: URL
+        let label: String
+
+        var id: ShareArtifactID { artifact.id }
+    }
+
     @EnvironmentObject private var keyManager: KeyManager
     @EnvironmentObject private var contactManager: ContactManager
     @Environment(\.dismiss) private var dismiss
 
     // Export
     @State private var showExporter = false
-    @State private var exportDocument = DecoderDocument(data: Data())
+    @State private var exportArtifact: ShareArtifactDTO?
+    @State private var exportItem: RuneScribeExportArtifact?
     @State private var exportFilename = "RuneScrib-Decoder"
 
     // Import
     @State private var showImporter = false
-    @State private var pendingImportData: Data?
-    @State private var importLabel = ""
-    @State private var showImportLabel = false
 
     // Create
     @State private var showNewCipher = false
     @State private var newLabel = ""
 
     // Rename
-    @State private var renameTarget: Cipher?
+    @State private var renameTarget: CipherViewState?
     @State private var renameLabel = ""
     @State private var showRename = false
 
     // Delete
-    @State private var deleteTarget: Cipher?
+    @State private var deleteTarget: CipherViewState?
     @State private var showDelete = false
 
     // Share via QR
-    @State private var qrCipher: Cipher?
+    @State private var qrShare: CipherQRShare?
+    @State private var linkArtifacts: [UUID: ShareArtifactDTO] = [:]
 
     // In-app QR scanner (iOS) → confirm
     @State private var showScanner = false
-    @State private var pendingScan: ImportCoordinator.PendingImport?
+    @State private var pendingScan: PendingImportSummary?
 
     @State private var status: Status = .idle
 
@@ -86,27 +94,39 @@ struct CipherLibraryView: View {
         .background(Color.runeNavy)
         .preferredColorScheme(.dark)
         .fileExporter(isPresented: $showExporter,
-                      document: exportDocument,
-                      contentType: .runeScribe,
+                      item: exportItem,
+                      contentTypes: [.runeScribe],
                       defaultFilename: exportFilename) { result in
             switch result {
-            case .success(let url): status = .success("Saved \(url.lastPathComponent)")
-            case .failure(let error): status = .failure(error.localizedDescription)
+            case .success(let url):
+                status = .success("Saved \(url.lastPathComponent)")
+                finishExport(outcome: .handedOff)
+            case .failure(let error):
+                status = .failure(error.localizedDescription)
+                finishExport(outcome: .failed)
             }
+        } onCancellation: {
+            finishExport(outcome: .cancelled)
         }
         .fileImporter(isPresented: $showImporter,
                       allowedContentTypes: [.runeScribe],
                       allowsMultipleSelection: false) { result in
             handleImportSelection(result)
         }
-        .sheet(item: $qrCipher) { cipher in
-            if let url = try? keyManager.shareURL(for: cipher.id, name: cipher.label) {
-                QRDisplaySheet(url: url, label: cipher.label)
-            }
+        .sheet(item: $qrShare, onDismiss: releaseQRShare) { share in
+            QRDisplaySheet(url: share.url, label: share.label)
         }
         .sheet(isPresented: $showScanner) { scannerSheet }
         .sheet(item: $pendingScan) { pending in
-            ImportConfirmView(pending: pending) { result in
+            ImportConfirmView(
+                pending: pending,
+                confirmImport: {
+                    try await keyManager.confirmImport(id: pending.id, name: $0)
+                },
+                cancelImport: {
+                    Task { await keyManager.cancelImport(id: pending.id) }
+                }
+            ) { result in
                 switch result {
                 case .success(let cipher):
                     status = .success("Imported \u{201C}\(cipher.label)\u{201D} and made it active.")
@@ -114,7 +134,6 @@ struct CipherLibraryView: View {
                     status = .failure(error.localizedDescription)
                 }
             }
-            .environmentObject(keyManager)
         }
         // New cipher
         .alert("New Cipher", isPresented: $showNewCipher) {
@@ -124,19 +143,13 @@ struct CipherLibraryView: View {
         } message: {
             Text("Generates a new random cipher/decipher pair and makes it active.")
         }
-        // Import label
-        .alert("Name This Cipher", isPresented: $showImportLabel) {
-            TextField("Label", text: $importLabel)
-            Button("Import") { commitImport() }
-            Button("Cancel", role: .cancel) { pendingImportData = nil; importLabel = "" }
-        } message: {
-            Text("Give the imported decoder a label so you can find it later.")
-        }
         // Rename
         .alert("Rename Cipher", isPresented: $showRename) {
             TextField("Label", text: $renameLabel)
             Button("Save") {
-                if let target = renameTarget { keyManager.renameCipher(id: target.id, to: renameLabel) }
+                if let target = renameTarget {
+                    Task { try? await keyManager.renameCipher(id: target.id, to: renameLabel) }
+                }
                 renameTarget = nil
             }
             Button("Cancel", role: .cancel) { renameTarget = nil }
@@ -149,7 +162,9 @@ struct CipherLibraryView: View {
                 deleteTarget = nil
             }
             Button("Delete", role: .destructive) {
-                if let target = deleteTarget { keyManager.deleteCipher(id: target.id) }
+                if let target = deleteTarget {
+                    Task { try? await keyManager.deleteCipher(id: target.id) }
+                }
                 deleteTarget = nil
                 status = .idle
             }
@@ -162,7 +177,12 @@ struct CipherLibraryView: View {
         .alert("Reassign Cipher?", isPresented: $showReassignConfirm) {
             Button("Reassign", role: .destructive) {
                 if let pending = pendingReassign {
-                    keyManager.setContact(cipherID: pending.cipherID, contactID: pending.contactID)
+                    Task {
+                        try? await keyManager.setContact(
+                            cipherID: pending.cipherID,
+                            contactID: pending.contactID
+                        )
+                    }
                 }
                 pendingReassign = nil
             }
@@ -189,6 +209,10 @@ struct CipherLibraryView: View {
                 .environmentObject(contactManager)
                 .environmentObject(keyManager)
         }
+        .task(id: keyManager.ciphers.map(\.id)) {
+            await prepareLinkArtifacts()
+        }
+        .onDisappear { releaseLinkArtifacts() }
     }
 
     // MARK: - Actions Bar
@@ -223,7 +247,7 @@ struct CipherLibraryView: View {
 
     // MARK: - Cipher Card
 
-    private func cipherCard(_ cipher: Cipher) -> some View {
+    private func cipherCard(_ cipher: CipherViewState) -> some View {
         let isActive = cipher.id == keyManager.activeCipher?.id
 
         return VStack(alignment: .leading, spacing: 12) {
@@ -248,7 +272,9 @@ struct CipherLibraryView: View {
             Divider().overlay(Color.runeSilver.opacity(0.15))
 
             HStack(spacing: 10) {
-                Button { keyManager.setActive(id: cipher.id) } label: {
+                Button {
+                    Task { try? await keyManager.setActive(id: cipher.id) }
+                } label: {
                     Label(isActive ? "Active" : "Use", systemImage: isActive ? "checkmark.circle.fill" : "circle")
                 }
                 .buttonStyle(.plain)
@@ -263,7 +289,8 @@ struct CipherLibraryView: View {
                 // the app and land on the import sheet via LinkRouter. (A `.runescribe`
                 // *file* is still available from Export; files do not single-tap-launch
                 // third-party apps from Messages, so sharing a file here broke auto-import.)
-                if let shareURL = try? keyManager.shareURL(for: cipher.id, name: cipher.label) {
+                if let artifact = linkArtifacts[cipher.id],
+                   case .link(let shareURL) = artifact.reference {
                     ShareLink(
                         item: shareURL,
                         subject: Text("Rune Scribe cipher: \(cipher.label)"),
@@ -273,16 +300,23 @@ struct CipherLibraryView: View {
                     }
                     .buttonStyle(.plain)
                     .help("Share via Messages, Mail…")
+                    .simultaneousGesture(TapGesture().onEnded {
+                        completeLinkShare(cipherID: cipher.id, artifact: artifact)
+                    })
 
-                    cardIconButton("qrcode", help: "Show QR code") { qrCipher = cipher }
+                    cardIconButton("qrcode", help: "Show QR code") {
+                        linkArtifacts.removeValue(forKey: cipher.id)
+                        qrShare = CipherQRShare(
+                            artifact: artifact,
+                            url: shareURL,
+                            label: cipher.label
+                        )
+                    }
                 } else {
-                    // Exotic imported ciphers (runes outside the canonical pool) can't
-                    // be expressed as a link/QR. Show the affordances disabled with an
-                    // explanation rather than silently dropping them.
                     cardIconChrome("square.and.arrow.up", tint: .runeSilver.opacity(0.3))
-                        .help("Hand-crafted ciphers can't be shared as a link or QR code.")
+                        .help("Preparing the cipher link…")
                     cardIconChrome("qrcode", tint: .runeSilver.opacity(0.3))
-                        .help("Hand-crafted ciphers can't be shared as a link or QR code.")
+                        .help("Preparing the cipher link…")
                 }
 
                 cardIconButton("arrow.down.doc", help: "Export decoder file") { beginExport(cipher) }
@@ -311,7 +345,7 @@ struct CipherLibraryView: View {
     /// The per-card control to link / change / remove the cipher's contact. Reassigning an
     /// already-linked cipher to a DIFFERENT contact asks for confirmation first; removing the
     /// link (No contact) or making a first link does not.
-    private func contactControl(_ cipher: Cipher) -> some View {
+    private func contactControl(_ cipher: CipherViewState) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "person.crop.circle")
                 .font(.system(size: 12))
@@ -344,12 +378,14 @@ struct CipherLibraryView: View {
         }
     }
 
-    private func requestSetContact(_ cipher: Cipher, to contactID: UUID?) {
+    private func requestSetContact(_ cipher: CipherViewState, to contactID: UUID?) {
         if let current = cipher.contactID, contactID != nil, current != contactID {
             pendingReassign = (cipher.id, contactID)
             showReassignConfirm = true
         } else {
-            keyManager.setContact(cipherID: cipher.id, contactID: contactID)
+            Task {
+                try? await keyManager.setContact(cipherID: cipher.id, contactID: contactID)
+            }
         }
     }
 
@@ -433,19 +469,51 @@ struct CipherLibraryView: View {
     // MARK: - Operations
 
     private func createCipher() {
-        keyManager.addCipher(label: newLabel)
+        let label = newLabel
         newLabel = ""
-        status = keyManager.lastError.map { .failure($0) } ?? .success("Created and activated.")
+        Task {
+            do {
+                _ = try await keyManager.addCipher(label: label)
+                status = .success("Created and activated.")
+            } catch {
+                status = .failure(error.localizedDescription)
+            }
+        }
     }
 
-    private func beginExport(_ cipher: Cipher) {
-        do {
-            exportDocument = DecoderDocument(data: try keyManager.exportData(for: cipher.id))
-            exportFilename = keyManager.exportFilename(for: cipher.id)
-            status = .idle
-            showExporter = true
-        } catch {
-            status = .failure(error.localizedDescription)
+    private func beginExport(_ cipher: CipherViewState) {
+        Task {
+            do {
+                let artifact = try await keyManager.prepareCipherShare(
+                    cipherID: cipher.id,
+                    displayName: cipher.label,
+                    representation: .file
+                )
+                guard case .file(let url) = artifact.reference else {
+                    await keyManager.releaseShareArtifact(id: artifact.id)
+                    status = .failure("The decoder file could not be prepared.")
+                    return
+                }
+                exportArtifact = artifact
+                exportFilename = artifact.displayName
+                exportItem = RuneScribeExportArtifact(
+                    url: url,
+                    filename: artifact.displayName
+                )
+                status = .idle
+                showExporter = true
+            } catch {
+                status = .failure(error.localizedDescription)
+            }
+        }
+    }
+
+    private func finishExport(outcome: ShareArtifactOutcomeDTO) {
+        guard let artifact = exportArtifact else { return }
+        exportArtifact = nil
+        exportItem = nil
+        Task {
+            _ = try? await keyManager.completeShareArtifact(id: artifact.id, outcome: outcome)
         }
     }
 
@@ -453,28 +521,72 @@ struct CipherLibraryView: View {
         switch result {
         case .success(let urls):
             guard let url = urls.first else { return }
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            do {
-                pendingImportData = try Data(contentsOf: url)
-                importLabel = url.deletingPathExtension().lastPathComponent
-                showImportLabel = true
-            } catch {
-                status = .failure(error.localizedDescription)
+            Task {
+                do {
+                    let result = try await keyManager.importFile(url, source: .fileImporter)
+                    pendingScan = result.pendingImport
+                    if result.pendingImport == nil, result.disposition == .duplicate {
+                        status = .success("That cipher is already in your library.")
+                    }
+                } catch {
+                    status = .failure(error.localizedDescription)
+                }
             }
         case .failure(let error):
             status = .failure(error.localizedDescription)
         }
     }
 
-    private func commitImport() {
-        guard let data = pendingImportData else { return }
-        defer { pendingImportData = nil; importLabel = "" }
-        do {
-            let cipher = try keyManager.importCipher(fileData: data, label: importLabel)
-            status = .success("Imported \u{201C}\(cipher.label)\u{201D} and made it active.")
-        } catch {
-            status = .failure(error.localizedDescription)
+    private func prepareLinkArtifacts() async {
+        let liveIDs = Set(keyManager.ciphers.map(\.id))
+        let stale = linkArtifacts.filter { !liveIDs.contains($0.key) }
+        for artifact in stale.values {
+            await keyManager.releaseShareArtifact(id: artifact.id)
+        }
+        linkArtifacts = linkArtifacts.filter { liveIDs.contains($0.key) }
+
+        for cipher in keyManager.ciphers where linkArtifacts[cipher.id] == nil {
+            do {
+                let artifact = try await keyManager.prepareCipherShare(
+                    cipherID: cipher.id,
+                    displayName: cipher.label,
+                    representation: .link
+                )
+                guard case .link = artifact.reference else {
+                    await keyManager.releaseShareArtifact(id: artifact.id)
+                    continue
+                }
+                linkArtifacts[cipher.id] = artifact
+            } catch {
+                // Unsupported hand-crafted ciphers retain the disabled affordance.
+            }
+        }
+    }
+
+    private func completeLinkShare(cipherID: UUID, artifact: ShareArtifactDTO) {
+        linkArtifacts.removeValue(forKey: cipherID)
+        Task {
+            _ = try? await keyManager.completeShareArtifact(id: artifact.id, outcome: .handedOff)
+            await prepareLinkArtifacts()
+        }
+    }
+
+    private func releaseQRShare() {
+        guard let share = qrShare else { return }
+        qrShare = nil
+        Task {
+            await keyManager.releaseShareArtifact(id: share.artifact.id)
+            await prepareLinkArtifacts()
+        }
+    }
+
+    private func releaseLinkArtifacts() {
+        let artifacts = Array(linkArtifacts.values)
+        linkArtifacts.removeAll()
+        Task {
+            for artifact in artifacts {
+                await keyManager.releaseShareArtifact(id: artifact.id)
+            }
         }
     }
 
@@ -500,14 +612,17 @@ struct CipherLibraryView: View {
             status = .failure("That QR code isn't a Rune Scribe cipher.")
             return
         }
-        do {
-            let payload = try CipherSharePayload(url: url)
-            pendingScan = ImportCoordinator.PendingImport(payload: payload,
-                                                          suggestedName: payload.parsedName ?? "Imported Cipher",
-                                                          fontBytes: nil)
-        } catch {
-            status = .failure((error as? LocalizedError)?.errorDescription
-                              ?? "That QR code isn't a Rune Scribe cipher.")
+        guard LinkRouter.isCipherImportURL(url) else {
+            status = .failure("That QR code isn't a Rune Scribe cipher.")
+            return
+        }
+        Task {
+            do {
+                let result = try await keyManager.importURL(url, source: .qrScanner)
+                pendingScan = result.pendingImport
+            } catch {
+                status = .failure(error.localizedDescription)
+            }
         }
     }
 }

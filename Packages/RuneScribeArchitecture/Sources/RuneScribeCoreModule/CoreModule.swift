@@ -16,6 +16,7 @@ public enum RuneScribeCoreModuleBootstrap {
         entryPoint: "RuneScribeCoreModule",
         role: RuneScribeRoles.core,
         requestedCapabilities: [
+            RuneScribeCapabilities.publishService,
             RuneScribeCapabilities.publishEvents,
             RuneScribeCapabilities.keychainStorage,
             RuneScribeCapabilities.protectedFileStorage,
@@ -35,7 +36,8 @@ public enum RuneScribeCoreModuleBootstrap {
             RuneScribeServiceIDs.clipboardRead,
             RuneScribeServiceIDs.clock,
             RuneScribeServiceIDs.uuid,
-        ]
+        ],
+        publishedServices: [RuneScribeServiceIDs.application]
     )
 
     public static func manifestData() throws -> Data {
@@ -52,20 +54,25 @@ public enum RuneScribeCoreModuleBootstrap {
         try ModuleManifestDecoder.decode(manifestData())
     }
 
-    public static func factory() -> AnyModuleFactory {
+    public static func factory(
+        applicationService: (any RuneScribeApplicationService)? = nil
+    ) -> AnyModuleFactory {
         AnyModuleFactory(descriptor: descriptor) {
-            RuneScribeCoreModule()
+            RuneScribeCoreModule(applicationService: applicationService)
         }
     }
 }
 
 public struct RuneScribeCoreModule: RuneScribeModule {
     public let descriptor = RuneScribeCoreModuleBootstrap.descriptor
+    private let applicationService: (any RuneScribeApplicationService)?
 
-    public init() {}
+    public init(applicationService: (any RuneScribeApplicationService)? = nil) {
+        self.applicationService = applicationService
+    }
 
     public func start(context: ModuleContext) async throws {
-        let _: any SecureValueStore = try await context.resolveService(
+        let secureValueStore: any SecureValueStore = try await context.resolveService(
             RuneScribeServiceKeys.secureValueStore
         )
         let _: any ProtectedFileStore = try await context.resolveService(
@@ -83,12 +90,18 @@ public struct RuneScribeCoreModule: RuneScribeModule {
         let _: any ClipboardReading = try await context.resolveService(
             RuneScribeServiceKeys.clipboardRead
         )
-        let _: any ClockProviding = try await context.resolveService(
+        let clock: any ClockProviding = try await context.resolveService(
             RuneScribeServiceKeys.clock
         )
-        let _: any UUIDProviding = try await context.resolveService(
+        let uuid: any UUIDProviding = try await context.resolveService(
             RuneScribeServiceKeys.uuid
         )
+        let service = applicationService ?? RuneScribeCoreApplicationService(
+            secureValueStore: secureValueStore,
+            clock: clock,
+            uuid: uuid
+        )
+        try await context.publishService(service, for: RuneScribeServiceKeys.application)
     }
 
     public func stop() async {}

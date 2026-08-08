@@ -1,18 +1,19 @@
-// RuneScrib/App/AppDelegate.swift
-//
-// Per-platform application delegate. Both register the bundled runic font at
-// launch; macOS additionally enforces single-window / no-tabbing behaviour. Every
-// inbound URL/file open routes through the one canonical `InboundOpenRouter`.
-
 #if os(macOS)
 import AppKit
+import RuneScribeContracts
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private let runtimeComposition = RuneScribeRuntimeComposition()
-
+    lazy var keyManager = KeyManager(service: runtimeComposition.applicationService)
+    lazy var contactManager = ContactManager(keyManager: keyManager)
+    lazy var importCoordinator = ImportCoordinator(keyManager: keyManager)
+    lazy var messageCoordinator = MessageCoordinator(
+        keyManager: keyManager,
+        contactManager: contactManager
+    )
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return true
+        true
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -20,88 +21,112 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         FontStore.shared.registerBundledAndImportedFonts()
         Task { await runtimeComposition.start() }
     }
-
     func applicationWillTerminate(_ notification: Notification) {
         Task { await runtimeComposition.stop() }
     }
-
-    /// Handles inbound URLs on macOS, including cold launch — where SwiftUI's
-    /// `.onOpenURL` can miss a URL that arrives before the scene is ready. Routes through
-    /// the canonical `InboundOpenRouter`: a `.runescribe` file goes to `FileRouter`
-    /// (message vs. cipher by version byte), a runescribe:// link to `LinkRouter`. Both
-    /// coordinators dedupe if `.onOpenURL` also delivers the same item.
     func application(_ application: NSApplication, open urls: [URL]) {
-        InboundOpenRouter.route(urls: urls)
+        InboundOpenRouter.route(
+            urls: urls,
+            coordinator: importCoordinator,
+            source: .applicationOpen
+        )
     }
 }
 
 #elseif os(iOS)
+import RuneScribeContracts
 import UIKit
 
 @MainActor
 final class AppDelegate: NSObject, UIApplicationDelegate {
     private let runtimeComposition = RuneScribeRuntimeComposition()
-
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+    lazy var keyManager = KeyManager(service: runtimeComposition.applicationService)
+    lazy var contactManager = ContactManager(keyManager: keyManager)
+    lazy var importCoordinator = ImportCoordinator(keyManager: keyManager)
+    lazy var messageCoordinator = MessageCoordinator(
+        keyManager: keyManager,
+        contactManager: contactManager
+    )
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
         FontStore.shared.registerBundledAndImportedFonts()
         Task { await runtimeComposition.start() }
         return true
     }
-
     func applicationWillTerminate(_ application: UIApplication) {
         Task { await runtimeComposition.stop() }
     }
-
-    /// Attaches the scene delegate so scene-level URL/document opens — the modern iOS
-    /// intake path for a `.runescribe` attachment tapped in Messages, especially at cold
-    /// launch — are captured. Only `delegateClass` is set; `sceneClass` is deliberately
-    /// left to SwiftUI so the `WindowGroup` keeps creating and rendering the UI.
-    func application(_ application: UIApplication,
-                     configurationForConnecting connectingSceneSession: UISceneSession,
-                     options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        let configuration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
+    func application(
+        _ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions
+    ) -> UISceneConfiguration {
+        let configuration = UISceneConfiguration(
+            name: nil,
+            sessionRole: connectingSceneSession.role
+        )
         configuration.delegateClass = RuneScribeSceneDelegate.self
         return configuration
     }
 
-    /// Fallback URL open. With a scene delegate attached, iOS delivers opens through the
-    /// scene's URL contexts instead, so this rarely fires now — it stays as a
-    /// belt-and-suspenders path (alongside SwiftUI's `.onOpenURL`) and routes through the
-    /// same canonical `InboundOpenRouter`.
-    func application(_ app: UIApplication, open url: URL,
-                     options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        InboundOpenRouter.route(url: url)
+    func application(
+        _ application: UIApplication,
+        open url: URL,
+        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
+    ) -> Bool {
+        InboundOpenRouter.route(
+            url: url,
+            coordinator: importCoordinator,
+            source: .applicationOpen
+        )
         return true
     }
 }
 
-/// The iOS scene delegate: the scene-lifecycle entry point for URL/document opens. It
-/// captures cold-launch opens (`connectionOptions.urlContexts` — how a `.runescribe` file
-/// tapped in Messages arrives when the app was not running), opens while running
-/// (`openURLContexts`), and web-browsing continuation for legacy https import links, and
-/// funnels every one through the single canonical `InboundOpenRouter`.
-///
-/// It deliberately never touches the window — no `self.window`, no root view controller —
-/// so SwiftUI keeps hosting the `WindowGroup`. `UIWindowSceneDelegate` is main-actor
-/// isolated, so these callbacks call the main-actor router directly.
+@MainActor
 final class RuneScribeSceneDelegate: UIResponder, UIWindowSceneDelegate {
+    private var importCoordinator: ImportCoordinator? {
+        (UIApplication.shared.delegate as? AppDelegate)?.importCoordinator
+    }
 
-    func scene(_ scene: UIScene,
-               willConnectTo session: UISceneSession,
-               options connectionOptions: UIScene.ConnectionOptions) {
-        InboundOpenRouter.route(urls: connectionOptions.urlContexts.map(\.url))
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
+        guard let importCoordinator else { return }
+        InboundOpenRouter.route(
+            urls: connectionOptions.urlContexts.map(\.url),
+            coordinator: importCoordinator,
+            source: .sceneOpen,
+            isColdStart: true
+        )
         for activity in connectionOptions.userActivities {
-            InboundOpenRouter.route(userActivity: activity)
+            InboundOpenRouter.route(
+                userActivity: activity,
+                coordinator: importCoordinator,
+                isColdStart: true
+            )
         }
     }
 
-    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        InboundOpenRouter.route(urls: URLContexts.map(\.url))
+    func scene(_ scene: UIScene, openURLContexts contexts: Set<UIOpenURLContext>) {
+        guard let importCoordinator else { return }
+        InboundOpenRouter.route(
+            urls: contexts.map(\.url),
+            coordinator: importCoordinator,
+            source: .sceneOpen
+        )
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
-        InboundOpenRouter.route(userActivity: userActivity)
+        guard let importCoordinator else { return }
+        InboundOpenRouter.route(
+            userActivity: userActivity,
+            coordinator: importCoordinator
+        )
     }
 }
 #endif

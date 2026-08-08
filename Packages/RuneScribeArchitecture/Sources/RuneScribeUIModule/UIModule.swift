@@ -18,9 +18,13 @@ public enum RuneScribeUIModuleBootstrap {
         entryPoint: "RuneScribeUIModule",
         role: RuneScribeRoles.primaryUI,
         requestedCapabilities: [
+            RuneScribeCapabilities.resolveService,
+            RuneScribeCapabilities.applicationCommands,
+            RuneScribeCapabilities.applicationStateRead,
             RuneScribeCapabilities.subscribeEvents,
             RuneScribeCapabilities.rootUI,
         ],
+        requiredServices: [RuneScribeServiceIDs.application],
         requiredModuleRoles: [RuneScribeRoles.core]
     )
 
@@ -50,7 +54,11 @@ public struct RuneScribeUIModule: RuneScribeUIContributingModule {
 
     public init() {}
 
-    public func start(context: ModuleContext) async throws {}
+    public func start(context: ModuleContext) async throws {
+        let _: any RuneScribeApplicationService = try await context.resolveService(
+            RuneScribeServiceKeys.application
+        )
+    }
 
     public func stop() async {}
 

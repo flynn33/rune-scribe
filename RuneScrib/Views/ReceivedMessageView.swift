@@ -41,7 +41,7 @@ struct ReceivedMessageView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
 
-                    Text("Decoded with the “\(pending.cipher.label)” cipher.")
+                    Text("Decoded with the “\(pending.cipherName)” cipher.")
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundColor(.runeSilver.opacity(0.8))
                 }

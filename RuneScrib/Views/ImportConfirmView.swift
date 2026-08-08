@@ -1,6 +1,7 @@
 // RuneScrib/Views/ImportConfirmView.swift
 
 import SwiftUI
+import RuneScribeContracts
 
 /// One-tap confirmation for a cipher arriving over the wire (deep link, QR, or
 /// clipboard). Shows what's being imported and lets the user name it before it's
@@ -11,11 +12,12 @@ import SwiftUI
 /// scanner without coupling to a particular presenter.
 struct ImportConfirmView: View {
 
-    @EnvironmentObject private var keyManager: KeyManager
     @Environment(\.dismiss) private var dismiss
 
-    let pending: ImportCoordinator.PendingImport
-    var onResult: ((Result<Cipher, Error>) -> Void)? = nil
+    let pending: PendingImportSummary
+    let confirmImport: (String) async throws -> CipherViewState
+    var cancelImport: () -> Void = {}
+    var onResult: ((Result<CipherViewState, Error>) -> Void)? = nil
 
     @State private var name: String = ""
 
@@ -28,7 +30,10 @@ struct ImportConfirmView: View {
             RuneHeader(
                 runic: "ᛁᛗᛈᛟᚱᛏ",
                 subtitle: "Import Cipher",
-                trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Cancel") { dismiss() }]
+                trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Cancel") {
+                    cancelImport()
+                    dismiss()
+                }]
             )
 
             ScrollView {
@@ -62,7 +67,10 @@ struct ImportConfirmView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             HStack(spacing: 12) {
-                Button { dismiss() } label: {
+                Button {
+                    cancelImport()
+                    dismiss()
+                } label: {
                     Label("Cancel", systemImage: "xmark").frame(maxWidth: .infinity)
                 }
                 .buttonStyle(RuneSecondaryButtonStyle())
@@ -82,18 +90,15 @@ struct ImportConfirmView: View {
     }
 
     private func confirm() {
-        let label = trimmedName.isEmpty ? nil : trimmedName
-        do {
-            // When the cipher arrived as a file with its font, install the font first so
-            // the imported cipher renders correctly; both succeed or the import fails.
-            if let fontBytes = pending.fontBytes {
-                try FontStore.shared.importFont(fontBytes, expecting: pending.payload.fontRef)
+        let label = trimmedName
+        Task {
+            do {
+                let cipher = try await confirmImport(label)
+                onResult?(.success(cipher))
+            } catch {
+                onResult?(.failure(error))
             }
-            let cipher = try keyManager.importCipher(pending.payload, label: label)
-            onResult?(.success(cipher))
-        } catch {
-            onResult?(.failure(error))
+            dismiss()
         }
-        dismiss()
     }
 }
