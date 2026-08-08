@@ -1,5 +1,6 @@
 name: RuneScrib
 options:
+  xcodeVersion: "26.2"
   bundleIdPrefix: com.runescribe
   deploymentTarget:
     macOS: "15.0"
@@ -21,14 +22,15 @@ settings:
     # Hardened Runtime on for distribution (App Store / notarization). Debug builds
     # still get `get-task-allow`, so local ad-hoc runs and tests work.
     ENABLE_HARDENED_RUNTIME: YES
-    # Base identity is ad-hoc (used by the test bundle); the app targets override
-    # with the developer team's automatic signing below.
+    # Keep an ad-hoc fallback for non-hosted utility targets. App and hosted test
+    # targets use the developer team's automatic signing below.
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "-"
     DEVELOPMENT_TEAM: ""
 targets:
   RuneScrib-macOS:
     type: application
+    productName: RuneScrib
     platform: macOS
     deploymentTarget: "15.0"
     sources:
@@ -61,6 +63,12 @@ targets:
             LSItemContentTypes: [com.runescribe.runescribe]
             CFBundleTypeRole: Editor
             LSHandlerRank: Owner
+    entitlements:
+      path: Config/RuneScrib-macOS.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.personal-information.addressbook: true
+        com.apple.security.files.user-selected.read-write: true
     settings:
       base:
         PRODUCT_NAME: RuneScrib
@@ -72,12 +80,24 @@ targets:
         # App Sandbox is mandatory for the Mac App Store. The user-selected
         # read-write entitlement lets the decoder export/import file panels work
         # inside the sandbox. Signed with the developer team's automatic signing.
-        CODE_SIGN_ENTITLEMENTS: Config/RuneScrib-macOS.entitlements
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"
         DEVELOPMENT_TEAM: "9AQ2C2838M"
+        # Keep Xcode's capability model authoritative so regenerating the project
+        # preserves the sandbox, Contacts, and user-selected file access.
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_RESOURCE_ACCESS_CONTACTS: YES
+        ENABLE_USER_SELECTED_FILES: readwrite
+      configs:
+        Debug:
+          # Hosted XCTest and the app must have the same signing identity. Keep
+          # local/CI Debug builds ad-hoc so tests never wait on a user Keychain.
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: "-"
+          DEVELOPMENT_TEAM: ""
   RuneScrib-iOS:
     type: application
+    productName: RuneScrib
     platform: iOS
     deploymentTarget: "17.0"
     sources:
@@ -130,6 +150,11 @@ targets:
             LSItemContentTypes: [com.runescribe.runescribe]
             CFBundleTypeRole: Editor
             LSHandlerRank: Owner
+    entitlements:
+      path: Config/RuneScrib-iOS.entitlements
+      properties:
+        keychain-access-groups:
+          - "$(AppIdentifierPrefix)com.runescribe.app"
     settings:
       base:
         PRODUCT_NAME: RuneScrib
@@ -138,7 +163,6 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         TARGETED_DEVICE_FAMILY: "1,2"
         ENABLE_PREVIEWS: YES
-        CODE_SIGN_ENTITLEMENTS: Config/RuneScrib-iOS.entitlements
         # Signed with the developer team's automatic signing. Xcode provisions the
         # keychain-access-groups entitlement automatically; $(AppIdentifierPrefix)
         # in the entitlements file resolves to this team's prefix.
@@ -158,6 +182,16 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.tests
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/Contents/MacOS/RuneScrib"
         BUNDLE_LOADER: "$(TEST_HOST)"
+        # Match the signed test host. An ad-hoc test bundle cannot be loaded into
+        # an Apple Development-signed host because their Team IDs differ.
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: "9AQ2C2838M"
+      configs:
+        Debug:
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: "-"
+          DEVELOPMENT_TEAM: ""
 schemes:
   RuneScrib-macOS:
     build:

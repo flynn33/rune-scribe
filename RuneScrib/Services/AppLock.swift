@@ -216,7 +216,9 @@ final class AppLock: ObservableObject {
 
     /// PBKDF2-HMAC-SHA256 derivation. On any failure it returns all-zero bytes, so
     /// verification fails closed.
-    private static func deriveHash(pin: String, salt: Data, iterations: Int) -> Data {
+    /// Internal visibility keeps the production path unchanged while allowing a
+    /// frozen compatibility vector to guard the persisted PIN derivation format.
+    nonisolated static func deriveHash(pin: String, salt: Data, iterations: Int) -> Data {
         let pinData = Data(pin.utf8)
         guard !pinData.isEmpty, !salt.isEmpty else { return Data(repeating: 0, count: 32) }
 

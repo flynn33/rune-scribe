@@ -2,6 +2,7 @@
 
 import Foundation
 import Security
+import os
 
 // MARK: - Error Type
 
@@ -40,10 +41,36 @@ enum KeychainError: Error, LocalizedError {
 /// concurrency-safe under Swift 6 strict checking.
 final class KeychainService: Sendable {
 
+    /// Hosted tests must never read or mutate the operator's real Keychain. This
+    /// lock-backed store preserves the same account semantics without prompting
+    /// for an existing production item during an unattended test run.
+    private final class MemoryStore: Sendable {
+        private let values = OSAllocatedUnfairLock(initialState: [String: Data]())
+
+        func set(_ data: Data, account: String) {
+            values.withLock { $0[account] = data }
+        }
+
+        func data(account: String) -> Data? {
+            values.withLock { $0[account] }
+        }
+
+        func remove(account: String) {
+            values.withLock { $0.removeValue(forKey: account) }
+        }
+    }
+
     // MARK: - Singleton
 
     static let shared = KeychainService()
-    private init() {}
+
+    private let memoryStore: MemoryStore?
+
+    private init() {
+        memoryStore = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil
+            ? nil
+            : MemoryStore()
+    }
 
     // MARK: - Constants
 
@@ -58,6 +85,11 @@ final class KeychainService: Sendable {
     /// Stores arbitrary Data in the Keychain under the given account.
     /// If an item already exists, it is deleted and replaced.
     private func store(data: Data, account: String) throws {
+        if let memoryStore {
+            memoryStore.set(data, account: account)
+            return
+        }
+
         // Build base query
         let deleteQuery: [String: Any] = [
             kSecClass as String:           kSecClassGenericPassword,
@@ -87,6 +119,11 @@ final class KeychainService: Sendable {
 
     /// Deletes any item stored under the given account (no-op if absent).
     private func delete(account: String) throws {
+        if let memoryStore {
+            memoryStore.remove(account: account)
+            return
+        }
+
         let query: [String: Any] = [
             kSecClass as String:       kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -101,6 +138,10 @@ final class KeychainService: Sendable {
     /// Retrieves Data stored under the given account.
     /// Returns nil if the item does not exist.
     private func retrieve(account: String) throws -> Data? {
+        if let memoryStore {
+            return memoryStore.data(account: account)
+        }
+
         let query: [String: Any] = [
             kSecClass as String:       kSecClassGenericPassword,
             kSecAttrService as String: service,
