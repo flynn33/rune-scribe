@@ -93,6 +93,7 @@
 		8F80EB6127FCD18CB29C7C3D /* CompatibilityBaselineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */; };
 		90967110D847AD379BCB6EDB /* KeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA657AA7320B6333C8D191BD /* KeyManager.swift */; };
 		94F3288DDBB27DDAEA96A20A /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 4D1C1664E02BEE34BC1CC37A /* RuneScribeCoreModule */; };
+		957D220785271243149B5236 /* RuntimeCompositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */; };
 		95A79F56B2567C326B47A6C8 /* RuneMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C804E8889A60C1394E8D3841 /* RuneMetalView.swift */; };
 		973EBAFA7B1E6A25FAE46B58 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
 		97C78EAF515BE1E3A98A4A6F /* RuneTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */; };
@@ -110,6 +111,7 @@
 		A86EDA53424B9C65FC09E8D5 /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5E51F0E25CDF33AA3544E166 /* RuneScribeRuntimeCore */; };
 		A8860E28862BB912A033B9A9 /* VideoSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203BB2198F06103565DD4D26 /* VideoSplashView.swift */; };
 		A89334636625EA839DDFC991 /* MessageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */; };
+		A8C26AD2AF7E44AA9AAACF72 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28082518CEB6EC58A922151F /* RuneScribeRuntimeComposition.swift */; };
 		AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
 		ADE58C68BC79EBBE8A2CA9C5 /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */; };
 		B0614EBD257EEA0A80FA1862 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */; };
@@ -122,6 +124,7 @@
 		B82752C4229DA7F2A18BF1D9 /* ContactManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50CBAAF3486CBF7224F4CDD /* ContactManager.swift */; };
 		B98E838AC8959237CB19A737 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 52B302D4A6F1BF026533FEFF /* RuneScribeUIModule */; };
 		BA66D328CF6D3F70A3E7281B /* MessageSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86342C6D604E4F987CEEE2A /* MessageSend.swift */; };
+		BCCB00CA0B608C13F0886246 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28082518CEB6EC58A922151F /* RuneScribeRuntimeComposition.swift */; };
 		BD5917F1551D8490BBABE0D0 /* FontRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0EBAF25DA0BBDE5890321BB /* FontRef.swift */; };
 		BDEE0FF98DA731D5504F9135 /* MessageComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 695DD706F34F8FB5F20C1080 /* MessageComposeView.swift */; };
 		C1A6CF8336377BFF19B73290 /* RuneMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C804E8889A60C1394E8D3841 /* RuneMetalView.swift */; };
@@ -179,6 +182,7 @@
 		1EAAEE1A2466F5AD48EB4F99 /* ContactImportPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImportPicker.swift; sourceTree = "<group>"; };
 		203BB2198F06103565DD4D26 /* VideoSplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoSplashView.swift; sourceTree = "<group>"; };
 		236AB4A6CB356708A2A004EE /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		28082518CEB6EC58A922151F /* RuneScribeRuntimeComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeRuntimeComposition.swift; sourceTree = "<group>"; };
 		289AA0236910C21C79D71A7E /* PINFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINFlowView.swift; sourceTree = "<group>"; };
 		29341AC7EDF3058C96DD83C0 /* LicenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseView.swift; sourceTree = "<group>"; };
 		2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCoordinator.swift; sourceTree = "<group>"; };
@@ -210,6 +214,7 @@
 		7D15D6F87C83071DA639125F /* DecoderDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecoderDocument.swift; sourceTree = "<group>"; };
 		8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchitectureGuardrailTests.swift; sourceTree = "<group>"; };
 		83E215F3EF5FE734CB87EA5C /* CipherLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibraryView.swift; sourceTree = "<group>"; };
+		84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeCompositionTests.swift; sourceTree = "<group>"; };
 		88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityBaselineTests.swift; sourceTree = "<group>"; };
 		89650C349BCE670EBDDEF2D2 /* ContactStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactStore.swift; sourceTree = "<group>"; };
 		8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalRenderer.swift; sourceTree = "<group>"; };
@@ -377,6 +382,7 @@
 			children = (
 				A23D157957EEFB14E8CB7147 /* AppDelegate.swift */,
 				B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */,
+				28082518CEB6EC58A922151F /* RuneScribeRuntimeComposition.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -467,6 +473,7 @@
 				9FF432A970A6B11D44198C59 /* MessageServiceTests.swift */,
 				E12A33AC824869AC62776BF8 /* MessageSharePayloadTests.swift */,
 				6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */,
+				84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */,
 				B2E3CCF2FB6C262E708D7BE8 /* SplashAssetScheduleTests.swift */,
 			);
 			path = RuneScribTests;
@@ -664,6 +671,7 @@
 				EDD9F1C27E7005B8FE8A9949 /* MessageServiceTests.swift in Sources */,
 				6F5A8557401233BC22918304 /* MessageSharePayloadTests.swift in Sources */,
 				DA56A46F02A37D239461F8C8 /* RuneCodecTests.swift in Sources */,
+				957D220785271243149B5236 /* RuntimeCompositionTests.swift in Sources */,
 				6C66AD98EB4A111089FB9C3C /* SplashAssetScheduleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -728,6 +736,7 @@
 				C1A6CF8336377BFF19B73290 /* RuneMetalView.swift in Sources */,
 				EDC58C55E2D5154B15A0A5B6 /* RuneScribApp.swift in Sources */,
 				3FDE51AADDBEA7CB2C35BDF3 /* RuneScribButtonStyle.swift in Sources */,
+				A8C26AD2AF7E44AA9AAACF72 /* RuneScribeRuntimeComposition.swift in Sources */,
 				3D38B09452746F6509C37C02 /* RuneTheme.swift in Sources */,
 				DD3F914F90546898BD31D151 /* SettingsView.swift in Sources */,
 				01C55610EF12C17DA83396B2 /* Shaders.metal in Sources */,
@@ -787,6 +796,7 @@
 				95A79F56B2567C326B47A6C8 /* RuneMetalView.swift in Sources */,
 				701C3AD554E79E1CDED99C6C /* RuneScribApp.swift in Sources */,
 				8E820672C49B7E3C933036F8 /* RuneScribButtonStyle.swift in Sources */,
+				BCCB00CA0B608C13F0886246 /* RuneScribeRuntimeComposition.swift in Sources */,
 				97C78EAF515BE1E3A98A4A6F /* RuneTheme.swift in Sources */,
 				0F375290B9932F3D5C1F8956 /* SettingsView.swift in Sources */,
 				50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */,

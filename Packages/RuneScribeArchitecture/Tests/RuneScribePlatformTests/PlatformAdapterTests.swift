@@ -1,0 +1,508 @@
+import Foundation
+import os
+import RuneScribeContracts
+import Security
+@testable import RuneScribePlatform
+import XCTest
+
+final class PlatformAdapterTests: XCTestCase {
+    func testKeychainConstantsAndDeleteThenAddCompatibility() async throws {
+        XCTAssertEqual(RuneScribeKeychain.service, "com.runescribe.keystore")
+        XCTAssertEqual(
+            RuneScribeKeychain.accounts,
+            ["symmetricKey", "cipherLibrary", "appPin", "pinThrottle"]
+        )
+
+        let operations = RecordingKeychainOperations()
+        let store = AppleKeychainStore(operations: operations)
+        let payload = Data([0x01, 0x02, 0x03])
+
+        try store.setSynchronously(
+            payload,
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.symmetricKeyAccount
+        )
+
+        XCTAssertEqual(
+            operations.calls,
+            [
+                .delete(
+                    service: RuneScribeKeychain.service,
+                    account: RuneScribeKeychain.symmetricKeyAccount
+                ),
+                .add(
+                    data: payload,
+                    service: RuneScribeKeychain.service,
+                    account: RuneScribeKeychain.symmetricKeyAccount,
+                    accessibility: .whenUnlockedThisDeviceOnly
+                ),
+            ]
+        )
+        let storedPayload = try await store.data(
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.symmetricKeyAccount
+        )
+        XCTAssertEqual(storedPayload, payload)
+
+        try store.deleteSynchronously(
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.symmetricKeyAccount
+        )
+        XCTAssertNil(
+            try store.dataSynchronously(
+                service: RuneScribeKeychain.service,
+                account: RuneScribeKeychain.symmetricKeyAccount
+            )
+        )
+    }
+
+    func testKeychainErrorsAreTypedAndContainNoValues() throws {
+        let deleteFailure = OSStatus(-34018)
+        let operations = RecordingKeychainOperations(forcedDeleteStatus: deleteFailure)
+        let store = AppleKeychainStore(operations: operations)
+
+        XCTAssertThrowsError(
+            try store.setSynchronously(
+                Data("secret marker".utf8),
+                service: RuneScribeKeychain.service,
+                account: RuneScribeKeychain.appPINAccount
+            )
+        ) { error in
+            XCTAssertEqual(error as? AppleKeychainStoreError, .deleteFailed(deleteFailure))
+            XCTAssertFalse(error.localizedDescription.contains("secret marker"))
+        }
+
+        let malformed = AppleKeychainStore(
+            operations: RecordingKeychainOperations(
+                forcedReadStatus: errSecSuccess,
+                forcedReadData: nil
+            )
+        )
+        XCTAssertThrowsError(
+            try malformed.dataSynchronously(
+                service: RuneScribeKeychain.service,
+                account: RuneScribeKeychain.cipherLibraryAccount
+            )
+        ) { error in
+            XCTAssertEqual(error as? AppleKeychainStoreError, .unexpectedDataFormat)
+        }
+    }
+
+    func testProtectedFileStorePreservesPathsAndListsImportedFonts() async throws {
+        let root = temporaryDirectory(named: "ProtectedFiles")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = AppleProtectedFileStore(applicationSupportDirectory: root)
+
+        let missingContacts = try await store.read(relativePath: .contacts)
+        XCTAssertNil(missingContacts)
+        let contacts = Data([0x43, 0x54])
+        try await store.write(contacts, relativePath: .contacts)
+        XCTAssertEqual(try store.readSynchronously(relativePath: .contacts), contacts)
+        XCTAssertEqual(
+            try Data(contentsOf: root.appendingPathComponent("RuneScribContacts/contacts.enc")),
+            contacts
+        )
+
+        let firstFont = try ProtectedPath.fontsDirectory.appending("a.ttf")
+        let secondFont = try ProtectedPath.fontsDirectory.appending("b.ttf")
+        let ignored = try ProtectedPath.fontsDirectory.appending("notes.txt")
+        try await store.write(Data([1]), relativePath: secondFont)
+        try await store.write(Data([2]), relativePath: ignored)
+        try store.writeSynchronously(Data([3]), relativePath: firstFont)
+
+        let fontContents = try await store.contents(
+            of: .fontsDirectory,
+            matchingExtension: "ttf"
+        )
+        XCTAssertEqual(fontContents, [firstFont, secondFont])
+        let fontsDirectoryExists = try await store.exists(relativePath: .fontsDirectory)
+        XCTAssertTrue(fontsDirectoryExists)
+        try await store.remove(relativePath: firstFont)
+        let firstFontExists = try await store.exists(relativePath: firstFont)
+        let removedFont = try await store.read(relativePath: firstFont)
+        XCTAssertFalse(firstFontExists)
+        XCTAssertNil(removedFont)
+    }
+
+    func testProtectedFileStoreRejectsSymlinkedDirectoryForEveryOperation() throws {
+        let root = temporaryDirectory(named: "SymlinkRoot")
+        let outside = temporaryDirectory(named: "SymlinkOutside")
+        defer {
+            try? FileManager.default.removeItem(at: root)
+            try? FileManager.default.removeItem(at: outside)
+        }
+        try FileManager.default.createDirectory(
+            at: root,
+            withIntermediateDirectories: true
+        )
+        try FileManager.default.createDirectory(
+            at: outside,
+            withIntermediateDirectories: true
+        )
+        let outsideFile = outside.appendingPathComponent("contacts.enc")
+        let outsideData = Data([0xAA, 0xBB])
+        try outsideData.write(to: outsideFile)
+        try FileManager.default.createSymbolicLink(
+            at: root.appendingPathComponent("RuneScribContacts"),
+            withDestinationURL: outside
+        )
+
+        let store = AppleProtectedFileStore(applicationSupportDirectory: root)
+        XCTAssertThrowsError(try store.readSynchronously(relativePath: .contacts))
+        XCTAssertEqual(try Data(contentsOf: outsideFile), outsideData)
+        try FileManager.default.removeItem(at: outsideFile)
+        XCTAssertThrowsError(
+            try store.writeSynchronously(Data([0x01]), relativePath: .contacts)
+        )
+        XCTAssertFalse(FileManager.default.fileExists(atPath: outsideFile.path))
+        XCTAssertThrowsError(try store.existsSynchronously(relativePath: .contacts))
+        XCTAssertThrowsError(try store.removeSynchronously(relativePath: .contacts))
+        let contactDirectory = try ProtectedPath(validating: "RuneScribContacts")
+        XCTAssertThrowsError(
+            try store.contentsSynchronously(of: contactDirectory, matchingExtension: nil)
+        )
+    }
+
+    func testProtectedFileStoreSkipsSymlinkEntriesAndAllowsSafeMissingLeaf() throws {
+        let root = temporaryDirectory(named: "SymlinkListingRoot")
+        let outside = temporaryDirectory(named: "SymlinkListingOutside")
+        defer {
+            try? FileManager.default.removeItem(at: root)
+            try? FileManager.default.removeItem(at: outside)
+        }
+        let fontDirectory = root.appendingPathComponent("RuneScribFonts", isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: fontDirectory,
+            withIntermediateDirectories: true
+        )
+        try FileManager.default.createDirectory(
+            at: outside,
+            withIntermediateDirectories: true
+        )
+        let outsideFont = outside.appendingPathComponent("outside.ttf")
+        let outsideData = Data([0x10, 0x20])
+        try outsideData.write(to: outsideFont)
+
+        let linkedFontURL = fontDirectory.appendingPathComponent("linked.ttf")
+        try FileManager.default.createSymbolicLink(
+            at: linkedFontURL,
+            withDestinationURL: outsideFont
+        )
+        try FileManager.default.createSymbolicLink(
+            at: fontDirectory.appendingPathComponent("broken.ttf"),
+            withDestinationURL: outside.appendingPathComponent("missing.ttf")
+        )
+
+        let store = AppleProtectedFileStore(applicationSupportDirectory: root)
+        let safePath = try ProtectedPath.fontsDirectory.appending("safe.ttf")
+        try store.writeSynchronously(Data([0x30]), relativePath: safePath)
+        XCTAssertEqual(
+            try store.contentsSynchronously(of: .fontsDirectory, matchingExtension: "ttf"),
+            [safePath]
+        )
+
+        let linkedPath = try ProtectedPath.fontsDirectory.appending("linked.ttf")
+        XCTAssertThrowsError(try store.readSynchronously(relativePath: linkedPath))
+        XCTAssertThrowsError(try store.removeSynchronously(relativePath: linkedPath))
+        XCTAssertEqual(try Data(contentsOf: outsideFont), outsideData)
+    }
+
+    func testInMemoryStorageAdaptersObeyContracts() async throws {
+        let secure = InMemorySecureValueStore()
+        try await secure.set(
+            Data([7]),
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.pinThrottleAccount
+        )
+        let throttle = try await secure.data(
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.pinThrottleAccount
+        )
+        XCTAssertEqual(throttle, Data([7]))
+        try await secure.delete(
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.pinThrottleAccount
+        )
+        let deletedThrottle = try await secure.data(
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.pinThrottleAccount
+        )
+        XCTAssertNil(deletedThrottle)
+
+        let font = try ProtectedPath.fontsDirectory.appending("fixture.ttf")
+        let files = InMemoryProtectedFileStore()
+        try await files.write(Data([9]), relativePath: font)
+        let memoryDirectoryExists = try await files.exists(relativePath: .fontsDirectory)
+        let memoryContents = try await files.contents(
+            of: .fontsDirectory,
+            matchingExtension: "ttf"
+        )
+        XCTAssertTrue(memoryDirectoryExists)
+        XCTAssertEqual(memoryContents, [font])
+        try await files.remove(relativePath: .fontsDirectory)
+        let memoryFontExists = try await files.exists(relativePath: font)
+        XCTAssertFalse(memoryFontExists)
+    }
+
+    func testContactAdapterMapsMinimalValuesAndExcludesUnnamedContacts() async throws {
+        let service = SystemContactAccessService(
+            operations: ContactOperations(
+                authorizationStatus: { .limited },
+                requestAccess: { false },
+                fetchContacts: {
+                    [
+                        ContactRecord(
+                            systemIdentifier: "kept",
+                            displayName: "  Baseline Contact  ",
+                            phoneNumbers: ["+15551234567"],
+                            emailAddresses: ["baseline@example.com"]
+                        ),
+                        ContactRecord(
+                            systemIdentifier: "dropped",
+                            displayName: " \n ",
+                            phoneNumbers: ["unused"],
+                            emailAddresses: []
+                        ),
+                        ContactRecord(
+                            systemIdentifier: "legacy-sentinel",
+                            displayName: "Unnamed",
+                            phoneNumbers: [],
+                            emailAddresses: []
+                        ),
+                    ]
+                }
+            )
+        )
+
+        let authorizationStatus = await service.authorizationStatus()
+        let accessGranted = try await service.requestAccess()
+        let contacts = try await service.fetchContacts()
+        XCTAssertEqual(authorizationStatus, .limited)
+        XCTAssertFalse(accessGranted)
+        XCTAssertEqual(
+            contacts,
+            [
+                SystemContactDTO(
+                    systemIdentifier: "kept",
+                    displayName: "Baseline Contact",
+                    phoneNumbers: ["+15551234567"],
+                    emailAddresses: ["baseline@example.com"]
+                )
+            ]
+        )
+    }
+
+    @MainActor
+    func testClipboardAdapterSupportsAsyncAndSynchronousCompatibilityCalls() async throws {
+        let fixture = ClipboardFixture(value: "original", changeCount: 4)
+        let service = SystemClipboardService(
+            operations: ClipboardOperations(
+                changeCount: { fixture.changeCount },
+                string: { fixture.value },
+                setString: { value in
+                    fixture.value = value
+                    fixture.changeCount += 1
+                    return true
+                }
+            )
+        )
+
+        XCTAssertEqual(service.changeCountSynchronously(), 4)
+        let original = await service.string()
+        XCTAssertEqual(original, "original")
+        try service.setStringSynchronously("runescribe://cipher/value")
+        let updatedChangeCount = await service.changeCount()
+        XCTAssertEqual(updatedChangeCount, 5)
+        XCTAssertEqual(service.stringSynchronously(), "runescribe://cipher/value")
+    }
+
+    func testFontAdapterUsesValueBoundaryAndTreatsRepeatRegistrationAsSuccess() async throws {
+        let fontData = Data([1, 2, 3])
+        let registered = CoreTextFontRegistrar(
+            operations: FontOperations(
+                postScriptName: { $0 == fontData ? "FixtureFont-Regular" : nil },
+                register: { _ in .alreadyRegistered }
+            )
+        )
+
+        let registration = try await registered.registerFont(fontData)
+        XCTAssertEqual(
+            registration,
+            RegisteredFontDTO(postScriptName: "FixtureFont-Regular")
+        )
+        do {
+            _ = try await registered.postScriptName(forFontData: Data())
+            XCTFail("Expected invalid font data to fail")
+        } catch {
+            XCTAssertEqual(error as? CoreTextFontRegistrarError, .invalidFontData)
+        }
+
+        let bundledFontURL = repositoryRoot()
+            .appendingPathComponent("RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf")
+        let bundledFontData = try Data(contentsOf: bundledFontURL)
+        let postScriptName = try await CoreTextFontRegistrar()
+            .postScriptName(forFontData: bundledFontData)
+        XCTAssertEqual(postScriptName, "NotoSansRunic-Regular")
+    }
+
+    func testResourceAndDeterministicAdapters() async throws {
+        let root = temporaryDirectory(named: "Resources")
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let resource = ApplicationResource(name: "fixture", fileExtension: "bin")
+        let resourceURL = root.appendingPathComponent("fixture.bin")
+        let bytes = Data([0x52, 0x46])
+        try bytes.write(to: resourceURL, options: .atomic)
+        let locator = MappedApplicationResourceLocator(locations: [resource: resourceURL])
+
+        let locatedURL = try await locator.url(for: resource)
+        let locatedData = try await locator.data(for: resource)
+        XCTAssertEqual(locatedURL, resourceURL)
+        XCTAssertEqual(locatedData, bytes)
+        XCTAssertNil(ApplicationResource.bundledRuneFont.subdirectory)
+        XCTAssertEqual(ApplicationResource.splashVideo.name, "raven-forge-spp-splash")
+
+        let date = Date(timeIntervalSinceReferenceDate: 42)
+        let uuid = UUID(uuidString: "00000000-0000-0000-0000-000000000042")!
+        XCTAssertEqual(FixedClock(date).now(), date)
+        XCTAssertEqual(FixedUUIDProvider(uuid).nextUUID(), uuid)
+    }
+
+    func testBundleResourceLocatorUsesTheExplicitHostBundle() async throws {
+        let root = temporaryDirectory(named: "HostBundle")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let bundleURL = root.appendingPathComponent("Fixture.bundle", isDirectory: true)
+        #if os(macOS)
+        let contentsURL = bundleURL.appendingPathComponent("Contents", isDirectory: true)
+        let resourcesURL = contentsURL.appendingPathComponent("Resources", isDirectory: true)
+        let infoURL = contentsURL.appendingPathComponent("Info.plist")
+        #else
+        let resourcesURL = bundleURL
+        let infoURL = bundleURL.appendingPathComponent("Info.plist")
+        #endif
+        try FileManager.default.createDirectory(at: resourcesURL, withIntermediateDirectories: true)
+        let info: [String: Any] = [
+            "CFBundleIdentifier": "com.runescribe.platform-tests.fixture",
+            "CFBundleName": "Fixture",
+            "CFBundlePackageType": "BNDL",
+        ]
+        try PropertyListSerialization.data(fromPropertyList: info, format: .xml, options: 0)
+            .write(to: infoURL, options: .atomic)
+        let expectedData = Data([0x01, 0x05, 0x09])
+        let expectedURL = resourcesURL.appendingPathComponent("host-owned.dat")
+        try expectedData.write(to: expectedURL, options: .atomic)
+
+        let bundle = try XCTUnwrap(Bundle(url: bundleURL))
+        let locator = BundleApplicationResourceLocator(bundle: bundle)
+        let resource = ApplicationResource(name: "host-owned", fileExtension: "dat")
+        XCTAssertEqual(try locator.urlSynchronously(for: resource), expectedURL)
+        XCTAssertEqual(try locator.dataSynchronously(for: resource), expectedData)
+        let asyncURL = try await locator.url(for: resource)
+        XCTAssertEqual(asyncURL, expectedURL)
+    }
+
+    private func temporaryDirectory(named name: String) -> URL {
+        FileManager.default.temporaryDirectory
+            .appendingPathComponent("RuneScribePlatformTests-\(name)-\(UUID().uuidString)")
+    }
+
+    private func repositoryRoot() -> URL {
+        var url = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 { url.deleteLastPathComponent() }
+        return url
+    }
+}
+
+private enum KeychainCall: Equatable {
+    case add(
+        data: Data,
+        service: String,
+        account: String,
+        accessibility: KeychainAccessibility
+    )
+    case read(service: String, account: String)
+    case delete(service: String, account: String)
+}
+
+private final class RecordingKeychainOperations: KeychainOperations {
+    private struct State {
+        var calls: [KeychainCall] = []
+        var values: [SecureValueLocation: Data] = [:]
+        let forcedDeleteStatus: OSStatus?
+        let forcedReadStatus: OSStatus?
+        let forcedReadData: Data?
+    }
+
+    private let state: OSAllocatedUnfairLock<State>
+
+    init(
+        forcedDeleteStatus: OSStatus? = nil,
+        forcedReadStatus: OSStatus? = nil,
+        forcedReadData: Data? = nil
+    ) {
+        state = OSAllocatedUnfairLock(
+            initialState: State(
+                forcedDeleteStatus: forcedDeleteStatus,
+                forcedReadStatus: forcedReadStatus,
+                forcedReadData: forcedReadData
+            )
+        )
+    }
+
+    var calls: [KeychainCall] {
+        state.withLock { $0.calls }
+    }
+
+    func add(
+        data: Data,
+        service: String,
+        account: String,
+        accessibility: KeychainAccessibility
+    ) -> OSStatus {
+        state.withLock { state in
+            state.calls.append(
+                .add(
+                    data: data,
+                    service: service,
+                    account: account,
+                    accessibility: accessibility
+                )
+            )
+            state.values[SecureValueLocation(service: service, account: account)] = data
+            return errSecSuccess
+        }
+    }
+
+    func read(service: String, account: String) -> (status: OSStatus, data: Data?) {
+        state.withLock { state in
+            state.calls.append(.read(service: service, account: account))
+            if let status = state.forcedReadStatus {
+                return (status, state.forcedReadData)
+            }
+            let data = state.values[SecureValueLocation(service: service, account: account)]
+            return data == nil ? (errSecItemNotFound, nil) : (errSecSuccess, data)
+        }
+    }
+
+    func delete(service: String, account: String) -> OSStatus {
+        state.withLock { state in
+            state.calls.append(.delete(service: service, account: account))
+            if let status = state.forcedDeleteStatus { return status }
+            let key = SecureValueLocation(service: service, account: account)
+            return state.values.removeValue(forKey: key) == nil
+                ? errSecItemNotFound
+                : errSecSuccess
+        }
+    }
+}
+
+@MainActor
+private final class ClipboardFixture {
+    var value: String?
+    var changeCount: Int
+
+    init(value: String?, changeCount: Int) {
+        self.value = value
+        self.changeCount = changeCount
+    }
+}

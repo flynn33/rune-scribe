@@ -1,74 +1,85 @@
-import Foundation
 import Contacts
+import Foundation
+import RuneScribeContracts
+import RuneScribePlatform
 
-/// Errors from a Contacts import action.
-enum ContactImportError: Error { case accessDenied }
+enum ContactImportError: Error {
+    case accessDenied
+}
 
-/// Bridges Apple Contacts into local `Contact` snapshots: the pure `snapshot(from:)` mapping,
-/// the permission-gated `importAll()`, and (on iOS) the out-of-process system `ContactPicker`.
+/// Transitional presentation facade. Permission and store-wide fetch operations
+/// are delegated to the value-only Platform adapter; the system picker remains a
+/// UI concern until it moves into the UI module.
 enum ContactImporter {
-    /// Snapshots a `CNContact` into a local `Contact` (`.imported`, keeping the identifier
-    /// for reference only — never auto-resynced).
-    static func snapshot(from cn: CNContact) -> Contact {
-        let name = CNContactFormatter.string(from: cn, style: .fullName)?
+    static func snapshot(from contact: CNContact) -> Contact {
+        let name = CNContactFormatter.string(from: contact, style: .fullName)?
             .trimmingCharacters(in: .whitespacesAndNewlines)
         return Contact(
             displayName: name.flatMap { $0.isEmpty ? nil : $0 } ?? "Unnamed",
-            phones: cn.phoneNumbers.map { $0.value.stringValue },
-            emails: cn.emailAddresses.map { $0.value as String },
-            appleContactID: cn.identifier,
+            phones: contact.phoneNumbers.map(\.value.stringValue),
+            emails: contact.emailAddresses.map { String($0.value) },
+            appleContactID: contact.identifier,
             source: .imported
         )
     }
 
-    /// Requests Contacts access and returns snapshots of every contact that has a usable name.
-    /// The caller decides what to do with them (import all, or let the user pick a subset).
-    /// Works on iOS and macOS. Throws `ContactImportError.accessDenied` if the user denies access.
     static func fetchAll() async throws -> [Contact] {
-        let store = CNContactStore()
-        let granted = (try? await store.requestAccess(for: .contacts)) ?? false
-        guard granted else { throw ContactImportError.accessDenied }
-        let keys: [any CNKeyDescriptor] = [
-            CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
-            CNContactPhoneNumbersKey as CNKeyDescriptor,
-            CNContactEmailAddressesKey as CNKeyDescriptor
-        ]
-        var out: [Contact] = []
-        let request = CNContactFetchRequest(keysToFetch: keys)
-        try store.enumerateContacts(with: request) { cn, _ in
-            let snap = snapshot(from: cn)
-            if snap.displayName != "Unnamed" { out.append(snap) }
+        let service = SystemContactAccessService()
+        guard try await service.requestAccess() else {
+            throw ContactImportError.accessDenied
         }
-        return out
+        return try await service.fetchContacts().map { contact in
+            Contact(
+                displayName: contact.displayName,
+                phones: contact.phoneNumbers,
+                emails: contact.emailAddresses,
+                appleContactID: contact.systemIdentifier,
+                source: .imported
+            )
+        }
     }
 }
 
 #if os(iOS)
-import SwiftUI
 import ContactsUI
+import SwiftUI
 
-/// The system contact picker — no Contacts permission needed (it runs out-of-process).
-/// Returns local snapshots of the chosen contacts. Present via `.sheet`.
 struct ContactPicker: UIViewControllerRepresentable {
     var onPicked: ([Contact]) -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(onPicked) }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onPicked)
+    }
 
     func makeUIViewController(context: Context) -> CNContactPickerViewController {
-        let vc = CNContactPickerViewController()
-        vc.delegate = context.coordinator
-        return vc
+        let controller = CNContactPickerViewController()
+        controller.delegate = context.coordinator
+        return controller
     }
-    func updateUIViewController(_ vc: CNContactPickerViewController, context: Context) {}
+
+    func updateUIViewController(
+        _ controller: CNContactPickerViewController,
+        context: Context
+    ) {}
 
     final class Coordinator: NSObject, CNContactPickerDelegate {
-        let onPicked: ([Contact]) -> Void
-        init(_ onPicked: @escaping ([Contact]) -> Void) { self.onPicked = onPicked }
+        private let onPicked: ([Contact]) -> Void
 
-        func contactPicker(_ picker: CNContactPickerViewController, didSelect contacts: [CNContact]) {
+        init(_ onPicked: @escaping ([Contact]) -> Void) {
+            self.onPicked = onPicked
+        }
+
+        func contactPicker(
+            _ picker: CNContactPickerViewController,
+            didSelect contacts: [CNContact]
+        ) {
             onPicked(contacts.map(ContactImporter.snapshot(from:)))
         }
-        func contactPicker(_ picker: CNContactPickerViewController, didSelect contact: CNContact) {
+
+        func contactPicker(
+            _ picker: CNContactPickerViewController,
+            didSelect contact: CNContact
+        ) {
             onPicked([ContactImporter.snapshot(from: contact)])
         }
     }

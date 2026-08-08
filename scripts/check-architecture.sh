@@ -344,7 +344,10 @@ host_files.each do |path|
   File.readlines(path).each_with_index do |line, index|
     match = line.match(/^\s*import\s+([A-Za-z_][A-Za-z0-9_]*)/)
     next unless match
-    allowed = %w[Foundation SwiftUI AppKit UIKit]
+    allowed = %w[
+      Foundation SwiftUI AppKit UIKit RuneScribeContracts RuneScribeRuntimeCore
+      RuneScribePlatform RuneScribeCoreModule RuneScribeUIModule
+    ]
     errors << "#{relative(path, root)}:#{index + 1}: host may not import #{match[1]}" unless allowed.include?(match[1])
   end
 end

@@ -81,7 +81,88 @@ public struct RuntimePolicy: Sendable {
             RuneScribeCapabilities.sendMessages: [RuneScribeRoles.core, RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.receiveMessages: [RuneScribeRoles.core, RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.rootUI: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.keychainStorage: [RuneScribeRoles.core],
+            RuneScribeCapabilities.protectedFileStorage: [RuneScribeRoles.core],
+            RuneScribeCapabilities.resourceRead: [RuneScribeRoles.core, RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.fontRegistration: [RuneScribeRoles.core],
+            RuneScribeCapabilities.contactRead: [RuneScribeRoles.core],
+            RuneScribeCapabilities.clipboardRead: [RuneScribeRoles.core],
+            RuneScribeCapabilities.clipboardWrite: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.clockRead: [RuneScribeRoles.core],
+            RuneScribeCapabilities.uuidGenerate: [RuneScribeRoles.core],
+            RuneScribeCapabilities.inboundInput: [RuneScribeRoles.core],
+            RuneScribeCapabilities.applicationCommands: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.applicationStateRead: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.shareUI: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.messagesUI: [RuneScribeRoles.primaryUI],
         ]),
-        services: ServiceAccessPolicy(rules: [])
+        services: ServiceAccessPolicy(rules: [
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.application,
+                requiredCapability: RuneScribeCapabilities.resolveService,
+                publisherRoles: [RuneScribeRoles.core],
+                consumerRoles: [RuneScribeRoles.primaryUI]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.inboundInput,
+                requiredCapability: RuneScribeCapabilities.inboundInput,
+                publisherRoles: [RuneScribeRoles.core],
+                consumerRoles: [RuneScribeRoles.applicationHost]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.secureValueStore,
+                requiredCapability: RuneScribeCapabilities.keychainStorage,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.core]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.protectedFileStore,
+                requiredCapability: RuneScribeCapabilities.protectedFileStorage,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.core]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.applicationResourceLocator,
+                requiredCapability: RuneScribeCapabilities.resourceRead,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.core, RuneScribeRoles.primaryUI]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.systemFontRegistrar,
+                requiredCapability: RuneScribeCapabilities.fontRegistration,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.core]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.contactAccess,
+                requiredCapability: RuneScribeCapabilities.contactRead,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.core]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.clipboardRead,
+                requiredCapability: RuneScribeCapabilities.clipboardRead,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.core]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.clipboardWrite,
+                requiredCapability: RuneScribeCapabilities.clipboardWrite,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.primaryUI]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.clock,
+                requiredCapability: RuneScribeCapabilities.clockRead,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.core]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.uuid,
+                requiredCapability: RuneScribeCapabilities.uuidGenerate,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.core]
+            ),
+        ])
     )
 }

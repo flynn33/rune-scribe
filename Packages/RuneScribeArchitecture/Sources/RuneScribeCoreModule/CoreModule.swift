@@ -15,7 +15,27 @@ public enum RuneScribeCoreModuleBootstrap {
         kind: .service,
         entryPoint: "RuneScribeCoreModule",
         role: RuneScribeRoles.core,
-        requestedCapabilities: [RuneScribeCapabilities.publishEvents]
+        requestedCapabilities: [
+            RuneScribeCapabilities.publishEvents,
+            RuneScribeCapabilities.keychainStorage,
+            RuneScribeCapabilities.protectedFileStorage,
+            RuneScribeCapabilities.resourceRead,
+            RuneScribeCapabilities.fontRegistration,
+            RuneScribeCapabilities.contactRead,
+            RuneScribeCapabilities.clipboardRead,
+            RuneScribeCapabilities.clockRead,
+            RuneScribeCapabilities.uuidGenerate,
+        ],
+        requiredServices: [
+            RuneScribeServiceIDs.secureValueStore,
+            RuneScribeServiceIDs.protectedFileStore,
+            RuneScribeServiceIDs.applicationResourceLocator,
+            RuneScribeServiceIDs.systemFontRegistrar,
+            RuneScribeServiceIDs.contactAccess,
+            RuneScribeServiceIDs.clipboardRead,
+            RuneScribeServiceIDs.clock,
+            RuneScribeServiceIDs.uuid,
+        ]
     )
 
     public static func manifestData() throws -> Data {
@@ -44,7 +64,32 @@ public struct RuneScribeCoreModule: RuneScribeModule {
 
     public init() {}
 
-    public func start(context: ModuleContext) async throws {}
+    public func start(context: ModuleContext) async throws {
+        let _: any SecureValueStore = try await context.resolveService(
+            RuneScribeServiceKeys.secureValueStore
+        )
+        let _: any ProtectedFileStore = try await context.resolveService(
+            RuneScribeServiceKeys.protectedFileStore
+        )
+        let _: any ApplicationResourceLocator = try await context.resolveService(
+            RuneScribeServiceKeys.applicationResourceLocator
+        )
+        let _: any SystemFontRegistrar = try await context.resolveService(
+            RuneScribeServiceKeys.systemFontRegistrar
+        )
+        let _: any ContactAccessService = try await context.resolveService(
+            RuneScribeServiceKeys.contactAccess
+        )
+        let _: any ClipboardReading = try await context.resolveService(
+            RuneScribeServiceKeys.clipboardRead
+        )
+        let _: any ClockProviding = try await context.resolveService(
+            RuneScribeServiceKeys.clock
+        )
+        let _: any UUIDProviding = try await context.resolveService(
+            RuneScribeServiceKeys.uuid
+        )
+    }
 
     public func stop() async {}
 }

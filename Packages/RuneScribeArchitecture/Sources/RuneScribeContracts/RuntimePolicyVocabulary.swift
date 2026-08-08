@@ -19,6 +19,20 @@ public enum RuneScribeCapabilities {
     public static let sendMessages: CapabilityIdentifier = "runtime.messages.send"
     public static let receiveMessages: CapabilityIdentifier = "runtime.messages.receive"
     public static let rootUI: CapabilityIdentifier = "ui.root"
+    public static let keychainStorage: CapabilityIdentifier = "storage.keychain"
+    public static let protectedFileStorage: CapabilityIdentifier = "storage.protected-files"
+    public static let resourceRead: CapabilityIdentifier = "resources.read"
+    public static let fontRegistration: CapabilityIdentifier = "fonts.register"
+    public static let contactRead: CapabilityIdentifier = "contacts.read"
+    public static let clipboardRead: CapabilityIdentifier = "clipboard.read"
+    public static let clipboardWrite: CapabilityIdentifier = "clipboard.write"
+    public static let clockRead: CapabilityIdentifier = "clock.read"
+    public static let uuidGenerate: CapabilityIdentifier = "uuid.generate"
+    public static let inboundInput: CapabilityIdentifier = "application.inbound-input"
+    public static let applicationCommands: CapabilityIdentifier = "application.commands"
+    public static let applicationStateRead: CapabilityIdentifier = "application.state.read"
+    public static let shareUI: CapabilityIdentifier = "ui.share"
+    public static let messagesUI: CapabilityIdentifier = "ui.messages"
 
     public static let all: Set<CapabilityIdentifier> = [
         publishService,
@@ -28,6 +42,20 @@ public enum RuneScribeCapabilities {
         sendMessages,
         receiveMessages,
         rootUI,
+        keychainStorage,
+        protectedFileStorage,
+        resourceRead,
+        fontRegistration,
+        contactRead,
+        clipboardRead,
+        clipboardWrite,
+        clockRead,
+        uuidGenerate,
+        inboundInput,
+        applicationCommands,
+        applicationStateRead,
+        shareUI,
+        messagesUI,
     ]
 }
 

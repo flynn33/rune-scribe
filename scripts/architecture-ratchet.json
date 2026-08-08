@@ -95,9 +95,9 @@
       "removalPhase": "P6"
     },
     "hostPhysicalLines": {
-      "maximum": 175,
+      "maximum": 300,
       "owner": "HostMigration",
-      "reason": "The P0 app and delegate files contain legacy bootstrap and input-routing responsibilities.",
+      "reason": "The P3 production composition root temporarily coexists with the legacy app and delegate bootstrap until runtime activation becomes authoritative.",
       "removalPhase": "P6"
     }
   }

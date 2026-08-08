@@ -15,11 +15,28 @@
     "macOS": "15.0"
   },
   "capabilitiesRequested": [
-    "runtime.events.publish"
+    "runtime.events.publish",
+    "storage.keychain",
+    "storage.protected-files",
+    "resources.read",
+    "fonts.register",
+    "contacts.read",
+    "clipboard.read",
+    "clock.read",
+    "uuid.generate"
   ],
   "entryPoint": "RuneScribeCoreModule",
   "runtimeRequirements": {
-    "requiredServices": [],
+    "requiredServices": [
+      "SecureValueStore",
+      "ProtectedFileStore",
+      "ApplicationResourceLocator",
+      "SystemFontRegistrar",
+      "ContactAccessService",
+      "ClipboardService",
+      "ClockService",
+      "UUIDService"
+    ],
     "requiredModuleRoles": []
   },
   "defaultRole": "runescribe.core",

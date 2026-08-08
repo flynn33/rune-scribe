@@ -116,6 +116,23 @@ public actor RuneScribeRuntime {
         try await services.registerHostService(value, for: key)
     }
 
+    /// Resolves a module-published service for the application host only when the
+    /// explicit service policy names the host as a consumer. This is used for the
+    /// narrow inbound-input rail; it is not a general registry escape hatch.
+    public func resolveHostService<Value: Sendable>(
+        _ key: ServiceKey<Value>
+    ) async throws -> Value {
+        guard status == .running else {
+            throw RuneScribeRuntimeError.runtimeBusy
+        }
+        guard let rule = policy.services.rule(for: key.identifier),
+              rule.consumerRoles.contains(RuneScribeRoles.applicationHost)
+        else {
+            throw RuneScribeRuntimeError.hostServiceAccessDenied(key.identifier)
+        }
+        return try await services.resolve(key)
+    }
+
     public func start() async throws {
         if status == .running {
             return

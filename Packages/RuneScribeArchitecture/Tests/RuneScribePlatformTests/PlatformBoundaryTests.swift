@@ -1,16 +1,26 @@
 import Foundation
+import RuneScribeContracts
 import RuneScribePlatform
 import XCTest
 
 final class PlatformBoundaryTests: XCTestCase {
     func testPlatformSeamsProvideSystemValues() {
         let before = Date()
-        let now = SystemClock().now()
+        let clock: any ClockProviding = SystemClock()
+        let now = clock.now()
         let after = Date()
 
         XCTAssertEqual(RuneScribePlatformBoundary.contractVersion, 1)
         XCTAssertGreaterThanOrEqual(now, before)
         XCTAssertLessThanOrEqual(now, after)
-        XCTAssertNotEqual(SystemUUIDProvider().nextUUID(), UUID())
+    }
+
+    func testPublicSystemUUIDProviderConformsToContract() {
+        let provider: any UUIDProviding = SystemUUIDProvider()
+        let first = provider.nextUUID()
+        let second = provider.nextUUID()
+
+        XCTAssertNotEqual(first, second)
+        XCTAssertNotNil(UUID(uuidString: first.uuidString))
     }
 }

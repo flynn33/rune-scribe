@@ -1,5 +1,7 @@
 import Foundation
 import CryptoKit
+import RuneScribeContracts
+import RuneScribePlatform
 
 /// Persists the `ContactBook` AES-GCM-encrypted in a file in app-support, using the same
 /// Keychain-held symmetric key as the cipher library. The key and directory are injectable so
@@ -12,11 +14,15 @@ final class ContactStore: @unchecked Sendable {
     static let shared = ContactStore()
 
     private let injectedKey: SymmetricKey?
-    private let directory: URL?
+    private let fileStore: AppleProtectedFileStore
+    private let contactPath: ProtectedPath
 
     init(key: SymmetricKey? = nil, directory: URL? = nil) {
         self.injectedKey = key
-        self.directory = directory
+        fileStore = AppleProtectedFileStore(applicationSupportDirectory: directory)
+        contactPath = directory == nil
+            ? .contacts
+            : ProtectedPath(rawValue: "contacts.enc")!
     }
 
     /// Decrypts the stored book, or `.empty` if the file is absent or unreadable (missing,
@@ -27,7 +33,7 @@ final class ContactStore: @unchecked Sendable {
     ///   unless they know the file was genuinely absent, or they risk overwriting real (but
     ///   temporarily unreadable) contact data.
     func load() -> ContactBook {
-        guard let data = try? Data(contentsOf: fileURL),
+        guard let data = try? fileStore.readSynchronously(relativePath: contactPath),
               let key = try? symmetricKey(),
               let book = try? decrypt(ContactBook.self, from: data, using: key)
         else { return .empty }
@@ -36,25 +42,12 @@ final class ContactStore: @unchecked Sendable {
 
     /// AES-GCM-encrypts and writes the book atomically.
     func save(_ book: ContactBook) throws {
-        let url = fileURL
         let key = try symmetricKey()
         let data = try encrypt(book, using: key)
-        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
-                                                withIntermediateDirectories: true)
-        #if os(iOS)
-        try data.write(to: url, options: [.atomic, .completeFileProtection])
-        #else
-        try data.write(to: url, options: [.atomic])
-        #endif
+        try fileStore.writeSynchronously(data, relativePath: contactPath)
     }
 
     // MARK: helpers
-
-    private var fileURL: URL {
-        let base = directory ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("RuneScribContacts", isDirectory: true)
-        return base.appendingPathComponent("contacts.enc")
-    }
 
     private func symmetricKey() throws -> SymmetricKey {
         if let injectedKey { return injectedKey }

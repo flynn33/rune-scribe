@@ -7,7 +7,10 @@
 #if os(macOS)
 import AppKit
 
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private let runtimeComposition = RuneScribeRuntimeComposition()
+
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         return true
     }
@@ -15,6 +18,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSWindow.allowsAutomaticWindowTabbing = false
         FontStore.shared.registerBundledAndImportedFonts()
+        Task { await runtimeComposition.start() }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        Task { await runtimeComposition.stop() }
     }
 
     /// Handles inbound URLs on macOS, including cold launch — where SwiftUI's
@@ -30,11 +38,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 #elseif os(iOS)
 import UIKit
 
+@MainActor
 final class AppDelegate: NSObject, UIApplicationDelegate {
+    private let runtimeComposition = RuneScribeRuntimeComposition()
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         FontStore.shared.registerBundledAndImportedFonts()
+        Task { await runtimeComposition.start() }
         return true
+    }
+
+    func applicationWillTerminate(_ application: UIApplication) {
+        Task { await runtimeComposition.stop() }
     }
 
     /// Attaches the scene delegate so scene-level URL/document opens — the modern iOS

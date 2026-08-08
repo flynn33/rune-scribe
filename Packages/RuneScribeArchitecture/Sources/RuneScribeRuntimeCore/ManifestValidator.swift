@@ -78,7 +78,9 @@ public enum ModuleManifestValidator {
                     service: service
                 )
             }
-            guard descriptor.requestedCapabilities.contains(rule.requiredCapability) else {
+            guard descriptor.requestedCapabilities.contains(rule.requiredCapability),
+                  policy.capabilities.allows(rule.requiredCapability, for: descriptor.role)
+            else {
                 throw RuneScribeRuntimeError.serviceCapabilityMissing(
                     moduleID: manifest.moduleID,
                     service: service
