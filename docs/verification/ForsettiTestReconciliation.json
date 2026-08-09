@@ -1,0 +1,3642 @@
+{
+  "schemaVersion": "1.0",
+  "baselineCommit": "a3d5a86",
+  "baselineDescription": "P0 regenerated-project snapshot: 23 XCTest files and 157 test methods.",
+  "evidencePolicy": "Every original method has a terminal source disposition and an exact current replacement. Current verification identifies the final P7 package and/or hosted execution that ran each replacement; historical executions remain provenance only.",
+  "recordedExecutionEvidence": [
+    {
+      "id": "P6-SWIFTPM-FINAL",
+      "result": "passed",
+      "timestampUTC": "2026-08-08T19:08:02Z",
+      "scope": "256 package tests",
+      "relatedCommit": "314b73f"
+    },
+    {
+      "id": "P6-MACOS-FINAL",
+      "result": "passed",
+      "timestampUTC": "2026-08-08T19:08:28Z",
+      "scope": "five hosted tests and the standalone architecture guard",
+      "resultBundlePath": "/tmp/RuneScribe-P6-final-mac.ceyWwn/RuneScrib-macOS.xcresult",
+      "relatedCommit": "314b73f"
+    },
+    {
+      "id": "P7-FOCUSED-SWIFTPM",
+      "result": "passed",
+      "timestampLocal": "2026-08-08 14:36 CDT",
+      "scope": "ContactManagerCoreTests 11/11, P4BApplicationServiceTests 37/37, and InboundRoutingTests 4/4",
+      "relatedCommit": "uncommitted P7 working tree"
+    },
+    {
+      "id": "P7-IOS-FOCUSED",
+      "result": "passed",
+      "timestampLocal": "2026-08-08 14:36 CDT",
+      "scope": "AppHostRoutingTests 4/4 on iPhone 17 Pro, iOS 26.0.1 Simulator",
+      "resultBundlePath": "/tmp/RuneScribe-P7-ios-focused.PlHwgF/AppHostRoutingTests.xcresult",
+      "relatedCommit": "uncommitted P7 working tree"
+    },
+    {
+      "id": "P7-CONTACT-CODABLE-FOCUSED",
+      "result": "passed",
+      "timestampLocal": "2026-08-08 16:43:00 CDT",
+      "scope": "ContactRepositoryTests exact Contact and ContactBook Codable replacements 2/2, 0 failures",
+      "relatedCommit": "uncommitted P7 working tree"
+    },
+    {
+      "id": "P7-PACKAGE-FINAL",
+      "result": "passed",
+      "timestampUTC": "2026-08-09T03:01:24Z",
+      "scope": "283/283 SwiftPM package tests, 0 failures; current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2; 17/17 architecture checks, clean diff, and 0/0 warning/error census",
+      "logPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/swift-test.log",
+      "relatedCommit": "uncommitted P7 final working tree",
+      "architectureLogPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/check-architecture.log",
+      "diffCheckLogPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/git-diff-check.log",
+      "warningCensusPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/warnings-errors.log"
+    },
+    {
+      "id": "P7-MACOS-FINAL",
+      "result": "passed",
+      "timestampUTC": "2026-08-09T03:11:54Z",
+      "scope": "8/8 total tests (7 RuneScribTests hosted plus 1 ArchitectureGuardrailTests), 0 failures/skips",
+      "resultBundlePath": "/tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
+      "relatedCommit": "uncommitted P7 final working tree"
+    },
+    {
+      "id": "P7-IOS-HOSTED-FINAL",
+      "result": "passed",
+      "timestampUTC": "2026-08-09T03:01:52Z",
+      "scope": "18/18 RuneScribIOSTests hosted tests (AppHostRouting 5/5, KeychainMigration 1/1, NativeShareOutcome 3/3, PlatformPresentation 9/9), 0 failures/skips",
+      "resultBundlePath": "/tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult",
+      "relatedCommit": "uncommitted P7 final working tree"
+    }
+  ],
+  "summary": {
+    "totalOriginalMethods": 157,
+    "preservedInOwningTarget": 78,
+    "replacedWithTestedEquivalent": 79,
+    "pendingReplacement": 0,
+    "currentVerificationCounts": {
+      "passed-P7-package-final": 148,
+      "passed-P7-macos-final": 2,
+      "passed-P7-ios-hosted-final": 2,
+      "passed-P7-package-and-macos-final": 4,
+      "passed-P7-ios-and-macos-final": 1
+    }
+  },
+  "entries": [
+    {
+      "id": "OT-001",
+      "original": {
+        "file": "RuneScribTests/AppLockTests.swift",
+        "class": "AppLockTests",
+        "method": "testValidPINFormats"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/PINFormatTests.swift",
+          "class": "PINFormatTests",
+          "method": "testAcceptsExactlyFourASCIIDigits"
+        }
+      ],
+      "rationale": "The UI-owned format test preserves acceptance of exactly four ASCII digits.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-002",
+      "original": {
+        "file": "RuneScribTests/AppLockTests.swift",
+        "class": "AppLockTests",
+        "method": "testInvalidPINFormats"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/PINFormatTests.swift",
+          "class": "PINFormatTests",
+          "method": "testRejectsInvalidPINShapes"
+        }
+      ],
+      "rationale": "The UI-owned format test covers short, long, non-digit, and non-ASCII PIN shapes.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-003",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testGeneratedCipherIsValid"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testGeneratedCipherIsValid"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-004",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testTwoGeneratedCiphersHaveDistinctIds"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testTwoGeneratedCiphersHaveDistinctIds"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-005",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testLibraryCodableRoundTrip"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testLibraryCodableRoundTrip"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-006",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testActiveCipherFallsBackToFirst"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testActiveCipherFallsBackToFirst"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-007",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testAddingActivates"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testAddingActivates"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-008",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testRemovingLastCipherRegenerates"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testRemovingLastCipherRegenerates"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-009",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testRemovingActiveReassignsActive"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testRemovingActiveReassignsActive"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-010",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testRemovingNonActiveKeepsActive"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testRemovingNonActiveKeepsActive"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-011",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testSettingActiveIgnoresUnknownId"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testSettingActiveIgnoresUnknownId"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-012",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testRenamingCipher"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testRenamingCipher"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-013",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testShareImportRoundTripProducesAWorkingCipher"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testShareImportRoundTripProducesAWorkingCipher"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-014",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testImportFromFileFormValidatesFontAndRebuildsCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testImportFromFileFormReturnsInjectedFontBytesAndRebuildsCipher"
+        }
+      ],
+      "rationale": "The replacement preserves cipher reconstruction and additionally verifies injected font bytes.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-015",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testMarkingDeliveredFlipsOnlyTheTarget"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testMarkingDeliveredFlipsOnlyTheTarget"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-016",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testMarkingDeliveredUnknownIDIsNoOp"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testMarkingDeliveredUnknownIDIsNoOp"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-017",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testAddingWithoutActivatingAppendsAndKeepsActive"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testAddingWithoutActivatingAppendsAndKeepsActive"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-018",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testAddingWithoutActivatingSeedsActiveWhenNil"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testAddingWithoutActivatingSeedsActiveWhenNil"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-019",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testSettingAndClearingContactKeepsTheCipher"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testSettingAndClearingContactKeepsTheCipher"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-020",
+      "original": {
+        "file": "RuneScribTests/CipherLibraryTests.swift",
+        "class": "CipherLibraryTests",
+        "method": "testUnlinkingAContactClearsOnlyItsCiphersAndKeepsThem"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testUnlinkingAContactClearsOnlyItsCiphersAndKeepsThem"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-021",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testBinaryRoundTripRebuildsAWorkingCipher"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testBinaryRoundTripRebuildsAWorkingCipher"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-022",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testURLRoundTrip"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testURLRoundTrip"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-023",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testCorruptionRejectedByChecksum"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testCorruptionRejectedByChecksum"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-024",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testWrongVersionRejected"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testWrongVersionRejected"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-025",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testV3CompactRoundTripIncludesFontRef"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testV3CompactRoundTripIncludesFontRef"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-026",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testV3ByteCount"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testV3ByteCount"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-027",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testFileFormRoundTripsPayloadAndFontBytes"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testFileFormRoundTripsPayloadAndFontBytes"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-028",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testFileFormWithoutFontIsCompactOnly"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testFileFormWithoutFontIsCompactOnly"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-029",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testShareURLUsesOfflineCustomScheme"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testShareURLUsesOfflineCustomScheme"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-030",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testLegacyHTTPSURLStillParses"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testLegacyHTTPSURLStillParses"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-031",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testLegacyCustomSchemeStillParses"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testLegacyCustomSchemeStillParses"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-032",
+      "original": {
+        "file": "RuneScribTests/CipherSharePayloadTests.swift",
+        "class": "CipherSharePayloadTests",
+        "method": "testIsShareURL"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift",
+          "class": "CipherSharePayloadTests",
+          "method": "testIsShareURL"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-033",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testGeneratedCipherHasValidShape"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testGeneratedCipherHasValidShape"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-034",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testTwoGeneratedCiphersDiffer"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testTwoGeneratedCiphersDiffer"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-035",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testCodableRoundTrip"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testCodableRoundTrip"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-036",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testSymmetricKeyMatchesKeyMaterial"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testSymmetricKeyMatchesKeyMaterial"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-037",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testGeneratedCipherUsesBundledFont"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testGeneratedCipherUsesBundledFont"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-038",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testDecodingALegacyCipherWithoutFontRefDefaultsToBundled"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testDecodingALegacyCipherWithoutFontRefDefaultsToBundled"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-039",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testNewCipherHasNoContact"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testNewCipherHasNoContact"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-040",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testLegacyCipherWithoutContactIDDecodesNil"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testLegacyCipherWithoutContactIDDecodesNil"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-041",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testNewCipherIsNotDelivered"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testNewCipherIsNotDelivered"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-042",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testDeliveredSurvivesCodableRoundTrip"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testDeliveredSurvivesCodableRoundTrip"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-043",
+      "original": {
+        "file": "RuneScribTests/CipherTests.swift",
+        "class": "CipherTests",
+        "method": "testLegacyCipherWithoutDeliveredDecodesFalse"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift",
+          "class": "CipherTests",
+          "method": "testLegacyCipherWithoutDeliveredDecodesFalse"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-044",
+      "original": {
+        "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+        "class": "CompatibilityBaselineTests",
+        "method": "testCipherV3GoldenFixtureDecodesAndReencodesExactly"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift",
+          "class": "WireCompatibilityTests",
+          "method": "testCipherV3GoldenFixtureDecodesAndReencodesExactly"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-045",
+      "original": {
+        "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+        "class": "CompatibilityBaselineTests",
+        "method": "testMessageV1GoldenFixtureDecodesAndReencodesExactly"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift",
+          "class": "WireCompatibilityTests",
+          "method": "testMessageV1GoldenFixtureDecodesAndReencodesExactly"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-046",
+      "original": {
+        "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+        "class": "CompatibilityBaselineTests",
+        "method": "testCipherV3GoldenFixtureParsesFromCustomLink"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift",
+          "class": "WireCompatibilityTests",
+          "method": "testGoldenCipherParsesFromCustomAndLegacyLinks"
+        }
+      ],
+      "rationale": "One frozen-fixture test now verifies both supported custom and legacy link forms.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-047",
+      "original": {
+        "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+        "class": "CompatibilityBaselineTests",
+        "method": "testCipherV3GoldenFixtureParsesFromLegacyHTTPSLink"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift",
+          "class": "WireCompatibilityTests",
+          "method": "testGoldenCipherParsesFromCustomAndLegacyLinks"
+        }
+      ],
+      "rationale": "One frozen-fixture test now verifies both supported custom and legacy link forms.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-048",
+      "original": {
+        "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+        "class": "CompatibilityBaselineTests",
+        "method": "testCipherV3GoldenFixtureRejectsCorruptionAndTruncation"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift",
+          "class": "WireCompatibilityTests",
+          "method": "testGoldenFixturesRejectCorruptionTruncationAndOversize"
+        }
+      ],
+      "rationale": "The replacement retains corruption and truncation rejection and adds an oversize bound.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-049",
+      "original": {
+        "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+        "class": "CompatibilityBaselineTests",
+        "method": "testMessageV1GoldenFixtureRejectsCorruptionAndTruncation"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift",
+          "class": "WireCompatibilityTests",
+          "method": "testGoldenFixturesRejectCorruptionTruncationAndOversize"
+        }
+      ],
+      "rationale": "The replacement retains corruption and truncation rejection and adds an oversize bound.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-050",
+      "original": {
+        "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+        "class": "CompatibilityBaselineTests",
+        "method": "testEncryptedContactStoreGoldenFixtureLoads"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactRepositoryTests",
+          "method": "testLoadsFrozenVersion1AESGCMFixtureFromShippingPathAndAccount"
+        }
+      ],
+      "rationale": "The replacement loads the frozen AES-GCM contact fixture through the rebuilt repository and asserts shipping path/account compatibility.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-051",
+      "original": {
+        "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+        "class": "CompatibilityBaselineTests",
+        "method": "testBundledFontMatchesFixedSHA256"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+          "class": "CompatibilityBaselineTests",
+          "method": "testBundledFontMatchesFixedSHA256"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-macos-final"
+    },
+    {
+      "id": "OT-052",
+      "original": {
+        "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+        "class": "CompatibilityBaselineTests",
+        "method": "testPINGoldenVector"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/AppLockServiceTests.swift",
+          "class": "AppLockServiceTests",
+          "method": "testGoldenPBKDF2VectorMatchesShippingBytes"
+        }
+      ],
+      "rationale": "The replacement preserves the exact PBKDF2 shipping vector under the Core security owner.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-053",
+      "original": {
+        "file": "RuneScribTests/ContactBookTests.swift",
+        "class": "ContactBookTests",
+        "method": "testAddUpdateRemove"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactManagerCoreTests",
+          "method": "testManualCreateAndUpdatePreserveIdentitySourceAndCreationDate"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete"
+        }
+      ],
+      "rationale": "The replacements cover create/update identity semantics and deletion through the application facade, including cipher unlinking.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-054",
+      "original": {
+        "file": "RuneScribTests/ContactBookTests.swift",
+        "class": "ContactBookTests",
+        "method": "testCodableRoundTrip"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactRepositoryTests",
+          "method": "testContactBookCodableRoundTripPreservesVersionAndContacts"
+        }
+      ],
+      "rationale": "The focused replacement round-trips a versioned ContactBook containing manual and imported contacts, then asserts the decoded version and ordered contacts exactly.",
+      "evidence": [
+        "Current source contains the exact ContactBook Codable replacement test in the Core contact test target.",
+        "P7-CONTACT-CODABLE-FOCUSED passed both exact Contact and ContactBook round trips 2/2 with 0 failures at 2026-08-08 16:43:00 CDT."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-055",
+      "original": {
+        "file": "RuneScribTests/ContactBookTests.swift",
+        "class": "ContactBookTests",
+        "method": "testRemovingIdsLeavesTheComplement"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactManagerCoreTests",
+          "method": "testDeleteAllImportedPreservesManualAndReportsRemovedIDs"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete"
+        }
+      ],
+      "rationale": "Repository and facade tests verify selective removal, retained contacts, and retained unlinked ciphers.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-056",
+      "original": {
+        "file": "RuneScribTests/ContactBookTests.swift",
+        "class": "ContactBookTests",
+        "method": "testRemovingImportedSparesManual"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactManagerCoreTests",
+          "method": "testDeleteAllImportedPreservesManualAndReportsRemovedIDs"
+        }
+      ],
+      "rationale": "The repository test explicitly preserves manual contacts while reporting imported removals.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-057",
+      "original": {
+        "file": "RuneScribTests/ContactBookTests.swift",
+        "class": "ContactBookTests",
+        "method": "testRemovingEmptySetIsNoOp"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactManagerCoreTests",
+          "method": "testRemovingEmptySetIsNoOp"
+        }
+      ],
+      "rationale": "The focused Core-domain test submits an empty contact-ID set and asserts equality of the complete ContactBook, preserving version and contacts.",
+      "evidence": [
+        "Current source contains the exact empty-set assertion.",
+        "P7-FOCUSED-SWIFTPM passed ContactManagerCoreTests 11/11 at 2026-08-08 14:36 CDT."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-058",
+      "original": {
+        "file": "RuneScribTests/ContactImporterTests.swift",
+        "class": "ContactImporterTests",
+        "method": "testSnapshotMapsNamePhonesEmails"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ContactImporterTests.swift",
+          "class": "ContactImporterTests",
+          "method": "testSnapshotMapsNamePhonesEmailsAndIdentifier"
+        }
+      ],
+      "rationale": "The replacement preserves all value mapping and adds the system identifier boundary.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-059",
+      "original": {
+        "file": "RuneScribTests/ContactImporterTests.swift",
+        "class": "ContactImporterTests",
+        "method": "testSnapshotWithNoNameFallsBackToUnnamed"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ContactImporterTests.swift",
+          "class": "ContactImporterTests",
+          "method": "testSnapshotWithNoNameFallsBackToUnnamed"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-060",
+      "original": {
+        "file": "RuneScribTests/ContactImporterTests.swift",
+        "class": "ContactImporterTests",
+        "method": "testSnapshotWithNoPhonesOrEmailsMapsToEmptyArrays"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ContactImporterTests.swift",
+          "class": "ContactImporterTests",
+          "method": "testSnapshotWithoutChannelsUsesEmptyArrays"
+        }
+      ],
+      "rationale": "The replacement preserves empty phone/email arrays.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-061",
+      "original": {
+        "file": "RuneScribTests/ContactImporterTests.swift",
+        "class": "ContactImporterTests",
+        "method": "testSnapshotIsIndependentOfLaterCNContactChanges"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ContactImporterTests.swift",
+          "class": "ContactImporterTests",
+          "method": "testSnapshotIsIndependentOfLaterContactChanges"
+        }
+      ],
+      "rationale": "The replacement retains value-snapshot independence without exporting CNContact.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-062",
+      "original": {
+        "file": "RuneScribTests/ContactManagerTests.swift",
+        "class": "ContactManagerTests",
+        "method": "testAddImportedAutoLinksExactlyOneCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete"
+        }
+      ],
+      "rationale": "The application-facade test asserts exactly one linked cipher for each imported contact.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-063",
+      "original": {
+        "file": "RuneScribTests/ContactManagerTests.swift",
+        "class": "ContactManagerTests",
+        "method": "testReimportingSameAppleIDDoesNotAddSecondCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactManagerCoreTests",
+          "method": "testImportDeduplicatesExistingAndBatchWhilePreservingFirstSeenOrder"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete"
+        }
+      ],
+      "rationale": "Repository and facade tests verify repeated imports neither duplicate contacts nor linked ciphers.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-064",
+      "original": {
+        "file": "RuneScribTests/ContactManagerTests.swift",
+        "class": "ContactManagerTests",
+        "method": "testManualAddDoesNotAutoGenerateCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactManagerCoreTests",
+          "method": "testManualCreateAndUpdatePreserveIdentitySourceAndCreationDate"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testManualContactCreationDoesNotGenerateOrLinkCipher"
+        }
+      ],
+      "rationale": "The Core test preserves manual identity/source semantics, while the application-facade test asserts zero linked ciphers and equality of the entire cipher-library state before and after manual creation.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P7-FOCUSED-SWIFTPM passed ContactManagerCoreTests 11/11 and P4BApplicationServiceTests 37/37 at 2026-08-08 14:36 CDT."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-065",
+      "original": {
+        "file": "RuneScribTests/ContactManagerTests.swift",
+        "class": "ContactManagerTests",
+        "method": "testBulkDeleteUnlinksCiphersButKeepsThem"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete"
+        }
+      ],
+      "rationale": "The facade test deletes linked contacts, retains cipher count, and clears assignments.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-066",
+      "original": {
+        "file": "RuneScribTests/ContactManagerTests.swift",
+        "class": "ContactManagerTests",
+        "method": "testDeleteAllImportedSparesManual"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactManagerCoreTests",
+          "method": "testDeleteAllImportedPreservesManualAndReportsRemovedIDs"
+        }
+      ],
+      "rationale": "The repository test explicitly preserves the manual contact.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-067",
+      "original": {
+        "file": "RuneScribTests/ContactManagerTests.swift",
+        "class": "ContactManagerTests",
+        "method": "testBulkDeleteEmptySetIsNoOp"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactManagerCoreTests",
+          "method": "testDeletingEmptySetReturnsUnchangedBookWithoutWriting"
+        }
+      ],
+      "rationale": "The focused Core-manager test asserts an empty removal result, unchanged returned and reloaded books, and no additional protected-file write. This is stronger than the original contact-list-only assertion.",
+      "evidence": [
+        "Current source contains the exact empty-delete assertion and write-count check.",
+        "P7-FOCUSED-SWIFTPM passed ContactManagerCoreTests 11/11 at 2026-08-08 14:36 CDT."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-068",
+      "original": {
+        "file": "RuneScribTests/ContactStoreTests.swift",
+        "class": "ContactStoreTests",
+        "method": "testEncryptedSaveReloadRoundTrip"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactRepositoryTests",
+          "method": "testAmbiguousProtectedWriteInvalidatesCacheAndReloadsAuthoritativeFile"
+        }
+      ],
+      "rationale": "The replacement persists a contact and reloads authoritative encrypted state after an ambiguous write, a stronger durability path.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-069",
+      "original": {
+        "file": "RuneScribTests/ContactStoreTests.swift",
+        "class": "ContactStoreTests",
+        "method": "testWrongKeyCannotDecrypt"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactRepositoryTests",
+          "method": "testExistingFileWithWrongKeyFailsWithoutRewriting"
+        }
+      ],
+      "rationale": "The replacement retains wrong-key failure and additionally asserts no rewrite.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-070",
+      "original": {
+        "file": "RuneScribTests/ContactTests.swift",
+        "class": "ContactTests",
+        "method": "testManualContactShape"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactManagerCoreTests",
+          "method": "testManualCreateAndUpdatePreserveIdentitySourceAndCreationDate"
+        }
+      ],
+      "rationale": "The replacement verifies manual source, identity, date, and mapped fields through the repository owner.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-071",
+      "original": {
+        "file": "RuneScribTests/ContactTests.swift",
+        "class": "ContactTests",
+        "method": "testCodableRoundTrip"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift",
+          "class": "ContactRepositoryTests",
+          "method": "testContactCodableRoundTripPreservesEveryField"
+        }
+      ],
+      "rationale": "The focused replacement round-trips a Contact with every persisted field populated, including multiple phones, email, Apple contact identifier, imported source, and creation date.",
+      "evidence": [
+        "Current source contains the exact Contact Codable replacement test in the Core contact test target.",
+        "P7-CONTACT-CODABLE-FOCUSED passed both exact Contact and ContactBook round trips 2/2 with 0 failures at 2026-08-08 16:43:00 CDT."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-072",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testClassifiesMessageVersionAsMessage"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testFileRouterStrictlyDecodesCompleteCipherAndMessageFiles"
+        }
+      ],
+      "rationale": "The strict decoder test distinguishes and fully decodes a message file.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-073",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testClassifiesCipherVersionAsCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testFileRouterStrictlyDecodesCompleteCipherAndMessageFiles"
+        }
+      ],
+      "rationale": "The strict decoder test distinguishes and fully decodes a cipher file.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-074",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testClassifiesEmptyAsUnknown"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testFileRouterRejectsUnknownTruncatedAndCorruptFiles"
+        }
+      ],
+      "rationale": "The strict router now returns a typed empty-file error.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-075",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testClassifiesOtherLeadingByteAsUnknown"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testFileRouterRejectsUnknownTruncatedAndCorruptFiles"
+        }
+      ],
+      "rationale": "The strict router asserts the unsupported version byte in its typed error.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-076",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testMessageAndCipherVersionsAreDistinct"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testFileRouterStrictlyDecodesCompleteCipherAndMessageFiles"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/ContractSafetyTests.swift",
+          "class": "ContractSafetyTests",
+          "method": "testStableServiceStorageAndWireIdentifiers"
+        }
+      ],
+      "rationale": "Complete decode coverage and fixed wire identifier/version assertions preserve version separation.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-077",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testTappedMessageFileRoutesToMessageCoordinator"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testInboundMessageEmbeddedAndStoredCipherPathsPreserveAssociationAndDedupe"
+        }
+      ],
+      "rationale": "The Core facade now imports a real message file through the authoritative inbound path and projects received-message state.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-078",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testRouteUnknownBytesReturnsUnknownAndSetsError"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testFileRouterRejectsUnknownTruncatedAndCorruptFiles"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testUnreadableAndUnknownFilesPublishSafeFailureAndDoNotBlockValidRetry"
+        }
+      ],
+      "rationale": "Unit classification and application-state tests preserve typed failure and visible safe error state.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-079",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testRouteEmptyDataReturnsUnknownAndSetsError"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testFileRouterRejectsUnknownTruncatedAndCorruptFiles"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testUnreadableAndUnknownFilesPublishSafeFailureAndDoNotBlockValidRetry"
+        }
+      ],
+      "rationale": "The strict empty-file error and application failure-state test cover classification and presentation behavior.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-080",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testRouteUnreadableFileURLReturnsUnreadableAndSetsError"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testUnreadableAndUnknownFilesPublishSafeFailureAndDoNotBlockValidRetry"
+        }
+      ],
+      "rationale": "The replacement imports a missing file, asserts protected-file failure state, and verifies later recovery.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-081",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testRouteCipherFileReturnsRoutedCipherAndSurfacesPending"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testFileRouterStrictlyDecodesCompleteCipherAndMessageFiles"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testUnreadableAndUnknownFilesPublishSafeFailureAndDoNotBlockValidRetry"
+        }
+      ],
+      "rationale": "Strict cipher decoding plus a valid retry asserting awaiting-confirmation state preserves routing and pending presentation.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-082",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "FileRouterTests",
+        "method": "testRouteMessageFileReturnsRoutedMessage"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testInboundMessageEmbeddedAndStoredCipherPathsPreserveAssociationAndDedupe"
+        }
+      ],
+      "rationale": "The replacement imports embedded and stored-cipher message files and asserts received-message disposition.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-083",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "InboundOpenRouterTests",
+        "method": "testFileURLTargetsFileRoute"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "RuneScribTests/RuntimeCompositionTests.swift",
+          "class": "RuntimeCompositionTests",
+          "method": "testInputRailPreservesMappingMetadataAndFIFOAcrossDetach"
+        }
+      ],
+      "rationale": "The hosted composition test asserts file URLs become file inputs with source/cold metadata.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-macos-final"
+    },
+    {
+      "id": "OT-084",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "InboundOpenRouterTests",
+        "method": "testCustomSchemeURLTargetsLinkRoute"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "RuneScribTests/RuntimeCompositionTests.swift",
+          "class": "RuntimeCompositionTests",
+          "method": "testInputRailPreservesMappingMetadataAndFIFOAcrossDetach"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testLinkRouterAcceptsCompatibleCustomAndLegacyLinks"
+        }
+      ],
+      "rationale": "The hosted rail preserves URL input and the Core link parser validates the custom scheme.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-and-macos-final"
+    },
+    {
+      "id": "OT-085",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "InboundOpenRouterTests",
+        "method": "testLegacyHTTPSURLTargetsLinkRoute"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "RuneScribTests/RuntimeCompositionTests.swift",
+          "class": "RuntimeCompositionTests",
+          "method": "testInputRailPreservesMappingMetadataAndFIFOAcrossDetach"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testLinkRouterAcceptsCompatibleCustomAndLegacyLinks"
+        }
+      ],
+      "rationale": "The hosted rail preserves URL input and the Core parser validates the legacy HTTPS route.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-and-macos-final"
+    },
+    {
+      "id": "OT-086",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "InboundOpenRouterTests",
+        "method": "testTargetsPreserveOrder"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "RuneScribTests/RuntimeCompositionTests.swift",
+          "class": "RuntimeCompositionTests",
+          "method": "testInputRailPreservesMappingMetadataAndFIFOAcrossDetach"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/InboundInputForwarderTests.swift",
+          "class": "InboundInputForwarderTests",
+          "method": "testInterleavedCallbackBatchesRemainFIFOAcrossAwait"
+        }
+      ],
+      "rationale": "Hosted and forwarder tests preserve FIFO across mixed batches, suspension, detach, and restart.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-and-macos-final"
+    },
+    {
+      "id": "OT-087",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "InboundOpenRouterTests",
+        "method": "testBrowsingUserActivityWithURLTargetsLink"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "RuneScribTests/RuntimeCompositionTests.swift",
+          "class": "RuntimeCompositionTests",
+          "method": "testInputRailPreservesMappingMetadataAndFIFOAcrossDetach"
+        },
+        {
+          "file": "RuneScribIOSTests/AppHostRoutingTests.swift",
+          "class": "AppHostRoutingTests",
+          "method": "testAppDelegateRoutesURLsFilesActivitiesAndLifecycleWithColdWarmMetadata"
+        }
+      ],
+      "rationale": "The composition rail verifies web-browsing source metadata and the iOS host test directly submits a browsing NSUserActivity with a URL.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P6-MACOS-FINAL executed the composition-rail replacement at commit 314b73f.",
+        "P7-IOS-FOCUSED passed AppHostRoutingTests 4/4 on iPhone 17 Pro, iOS 26.0.1 Simulator, with result bundle /tmp/RuneScribe-P7-ios-focused.PlHwgF/AppHostRoutingTests.xcresult."
+      ],
+      "currentVerification": "passed-P7-ios-and-macos-final"
+    },
+    {
+      "id": "OT-088",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "InboundOpenRouterTests",
+        "method": "testNonBrowsingUserActivityHasNoTarget"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "RuneScribIOSTests/AppHostRoutingTests.swift",
+          "class": "AppHostRoutingTests",
+          "method": "testAppDelegateIgnoresUnsupportedAndBrowsingActivitiesWithoutURLs"
+        }
+      ],
+      "rationale": "The focused host test directly asserts an empty disposition list and no delivery for an unsupported activity that carries a URL.",
+      "evidence": [
+        "Current source contains the direct unsupported-activity assertion.",
+        "P7-IOS-FOCUSED passed AppHostRoutingTests 4/4 on iPhone 17 Pro, iOS 26.0.1 Simulator, with result bundle /tmp/RuneScribe-P7-ios-focused.PlHwgF/AppHostRoutingTests.xcresult."
+      ],
+      "currentVerification": "passed-P7-ios-hosted-final"
+    },
+    {
+      "id": "OT-089",
+      "original": {
+        "file": "RuneScribTests/FileRouterTests.swift",
+        "class": "InboundOpenRouterTests",
+        "method": "testBrowsingUserActivityWithoutURLHasNoTarget"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "RuneScribIOSTests/AppHostRoutingTests.swift",
+          "class": "AppHostRoutingTests",
+          "method": "testAppDelegateIgnoresUnsupportedAndBrowsingActivitiesWithoutURLs"
+        }
+      ],
+      "rationale": "The focused iOS host test submits a browsing NSUserActivity without webpageURL, asserts an empty disposition list, and proves no inbound delivery after runtime activation.",
+      "evidence": [
+        "Current source contains the exact missing-webpageURL assertion and empty-delivery check.",
+        "P7-IOS-FOCUSED passed AppHostRoutingTests 4/4 on iPhone 17 Pro, iOS 26.0.1 Simulator, with result bundle /tmp/RuneScribe-P7-ios-focused.PlHwgF/AppHostRoutingTests.xcresult."
+      ],
+      "currentVerification": "passed-P7-ios-hosted-final"
+    },
+    {
+      "id": "OT-090",
+      "original": {
+        "file": "RuneScribTests/FontRefTests.swift",
+        "class": "FontRefTests",
+        "method": "testBundledRefShape"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/FontRefTests.swift",
+          "class": "FontRefTests",
+          "method": "testBundledRefShape"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-091",
+      "original": {
+        "file": "RuneScribTests/FontRefTests.swift",
+        "class": "FontRefTests",
+        "method": "testBundledRefHashMatchesTheBundledFontFile"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/FontRefTests.swift",
+          "class": "FontRefTests",
+          "method": "testBundledRefUsesFixedShippingDigest"
+        },
+        {
+          "file": "RuneScribTests/CompatibilityBaselineTests.swift",
+          "class": "CompatibilityBaselineTests",
+          "method": "testBundledFontMatchesFixedSHA256"
+        }
+      ],
+      "rationale": "Core identity and hosted SHA-256 tests jointly bind the reference to the shipping font bytes.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-and-macos-final"
+    },
+    {
+      "id": "OT-092",
+      "original": {
+        "file": "RuneScribTests/FontRefTests.swift",
+        "class": "FontRefTests",
+        "method": "testCodableRoundTrip"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/FontRefTests.swift",
+          "class": "FontRefTests",
+          "method": "testCodableRoundTrip"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-093",
+      "original": {
+        "file": "RuneScribTests/FontStoreTests.swift",
+        "class": "FontStoreTests",
+        "method": "testResolveBundledRefReturnsRegisteredName"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Fonts/FontCatalogTests.swift",
+          "class": "FontCatalogTests",
+          "method": "testRegistersFixedBundledIdentityThroughInjectedResourceAndRegistrar"
+        }
+      ],
+      "rationale": "The catalog test resolves and registers the fixed bundled identity through injected boundaries.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-094",
+      "original": {
+        "file": "RuneScribTests/FontStoreTests.swift",
+        "class": "FontStoreTests",
+        "method": "testImportBundledBytesValidates"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Fonts/FontCatalogTests.swift",
+          "class": "FontCatalogTests",
+          "method": "testRegistersFixedBundledIdentityThroughInjectedResourceAndRegistrar"
+        }
+      ],
+      "rationale": "The replacement validates the bundled digest/resource and successful registrar result.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-095",
+      "original": {
+        "file": "RuneScribTests/FontStoreTests.swift",
+        "class": "FontStoreTests",
+        "method": "testImportRejectsCorruptBytes"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Fonts/FontCatalogTests.swift",
+          "class": "FontCatalogTests",
+          "method": "testCorruptCustomEntryIsQuarantinedWithoutBlockingValidFontRegistration"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Fonts/FontCatalogTests.swift",
+          "class": "FontCatalogTests",
+          "method": "testCorruptPersistedBytesAreRejectedBeforeFontParsing"
+        }
+      ],
+      "rationale": "The replacements reject corrupt persisted bytes and verify quarantine/failure behavior.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-096",
+      "original": {
+        "file": "RuneScribTests/FontStoreTests.swift",
+        "class": "FontStoreTests",
+        "method": "testImportRejectsHashMismatch"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Fonts/FontCatalogTests.swift",
+          "class": "FontCatalogTests",
+          "method": "testHashMismatchDoesNotWriteOrRegister"
+        }
+      ],
+      "rationale": "The replacement additionally proves no persistence or registration side effect.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-097",
+      "original": {
+        "file": "RuneScribTests/FontStoreTests.swift",
+        "class": "FontStoreTests",
+        "method": "testRuneFontResolvesToBundledName"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Fonts/FontCatalogTests.swift",
+          "class": "FontCatalogTests",
+          "method": "testRegistersFixedBundledIdentityThroughInjectedResourceAndRegistrar"
+        }
+      ],
+      "rationale": "The catalog test asserts the bundled PostScript name and safe summary.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-098",
+      "original": {
+        "file": "RuneScribTests/KeyManagerLinkTests.swift",
+        "class": "KeyManagerLinkTests",
+        "method": "testEnsureLinkedCipherGeneratesOneLinkedNonActiveCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete"
+        }
+      ],
+      "rationale": "The facade test asserts one linked cipher per contact while preserving the prior active cipher.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-099",
+      "original": {
+        "file": "RuneScribTests/KeyManagerLinkTests.swift",
+        "class": "KeyManagerLinkTests",
+        "method": "testEnsureLinkedCipherIsIdempotentPerContact"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete"
+        }
+      ],
+      "rationale": "The facade imports the same contacts twice and asserts only one link each.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-100",
+      "original": {
+        "file": "RuneScribTests/KeyManagerLinkTests.swift",
+        "class": "KeyManagerLinkTests",
+        "method": "testUnlinkContactsClearsAllLinksAndKeepsAllCiphers"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherLibraryTests.swift",
+          "class": "CipherLibraryTests",
+          "method": "testUnlinkingAContactClearsOnlyItsCiphersAndKeepsThem"
+        }
+      ],
+      "rationale": "Facade and domain tests retain cipher count while clearing selected contact assignments.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-101",
+      "original": {
+        "file": "RuneScribTests/LinkRouterTests.swift",
+        "class": "LinkRouterTests",
+        "method": "testClassifiesGeneratedShareURLAsCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testLinkRouterAcceptsCompatibleCustomAndLegacyLinks"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testCipherLinkAndQRRemainWireCompatibleAndEphemeral"
+        }
+      ],
+      "rationale": "Generated share URLs are parsed through the Core router and application share path.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-102",
+      "original": {
+        "file": "RuneScribTests/LinkRouterTests.swift",
+        "class": "LinkRouterTests",
+        "method": "testClassifiesCustomSchemeCipherImportAsCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testLinkRouterAcceptsCompatibleCustomAndLegacyLinks"
+        }
+      ],
+      "rationale": "The replacement decodes a generated custom-scheme cipher URL.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-103",
+      "original": {
+        "file": "RuneScribTests/LinkRouterTests.swift",
+        "class": "LinkRouterTests",
+        "method": "testClassifiesUnrelatedHTTPSAsUnknown"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testLinkRouterRejectsAmbiguousRoutesQueriesAndBounds"
+        }
+      ],
+      "rationale": "The strict decoder test submits https://example.com/hello and asserts the typed invalidRoute result, which is the current equivalent of the removed classifier's unknown result.",
+      "evidence": [
+        "Current source contains the exact unrelated-host assertion.",
+        "P7-FOCUSED-SWIFTPM passed InboundRoutingTests 4/4 at 2026-08-08 14:36 CDT."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-104",
+      "original": {
+        "file": "RuneScribTests/LinkRouterTests.swift",
+        "class": "LinkRouterTests",
+        "method": "testClassifiesHTTPSImportAsCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testLinkRouterAcceptsCompatibleCustomAndLegacyLinks"
+        }
+      ],
+      "rationale": "The replacement decodes the supported Raven Forge HTTPS import path.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-105",
+      "original": {
+        "file": "RuneScribTests/LinkRouterTests.swift",
+        "class": "LinkRouterTests",
+        "method": "testClassifiesLegacyMessageURLAsUnknown"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Import/InboundRoutingTests.swift",
+          "class": "InboundRoutingTests",
+          "method": "testLinkRouterRejectsAmbiguousRoutesQueriesAndBounds"
+        }
+      ],
+      "rationale": "The strict decoder test submits the legacy message-shaped HTTPS URL and asserts the typed invalidRoute result, which is the current equivalent of the removed classifier's unknown result.",
+      "evidence": [
+        "Current source contains the exact legacy-message URL assertion.",
+        "P7-FOCUSED-SWIFTPM passed InboundRoutingTests 4/4 at 2026-08-08 14:36 CDT."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-106",
+      "original": {
+        "file": "RuneScribTests/MessageCoordinatorTests.swift",
+        "class": "MessageCoordinatorTests",
+        "method": "testIngestEmbeddedCipherImportsDecryptsAndLinksNewContact"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testInboundMessageEmbeddedAndStoredCipherPathsPreserveAssociationAndDedupe"
+        }
+      ],
+      "rationale": "The replacement asserts decrypt, contact creation, one link, inactive imported cipher, and pending message.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-107",
+      "original": {
+        "file": "RuneScribTests/MessageCoordinatorTests.swift",
+        "class": "MessageCoordinatorTests",
+        "method": "testIngestNoEmbedDecryptsViaAlreadyStoredCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testInboundMessageEmbeddedAndStoredCipherPathsPreserveAssociationAndDedupe"
+        }
+      ],
+      "rationale": "The same integration test imports the follow-up without an embedded cipher and reuses stored state.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-108",
+      "original": {
+        "file": "RuneScribTests/MessageCoordinatorTests.swift",
+        "class": "MessageCoordinatorTests",
+        "method": "testIngestJunkSetsErrorAndLeavesPendingNil"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testInboundMessageFailuresAreSafeAndDoNotBlockRetry"
+        }
+      ],
+      "rationale": "The replacement asserts safe failure state and successful retry after malformed input.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-109",
+      "original": {
+        "file": "RuneScribTests/MessageCoordinatorTests.swift",
+        "class": "MessageCoordinatorTests",
+        "method": "testIngestUndecryptableMessageSetsErrorAndLeavesPendingNil"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testInboundMessageFailuresAreSafeAndDoNotBlockRetry"
+        }
+      ],
+      "rationale": "The replacement covers undecryptable input with safe failure projection and no blocked retry.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-110",
+      "original": {
+        "file": "RuneScribTests/MessageCoordinatorTests.swift",
+        "class": "MessageCoordinatorTests",
+        "method": "testSameFileIngestedTwiceIsDeduped"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testInboundMessageEmbeddedAndStoredCipherPathsPreserveAssociationAndDedupe"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testPrestartQueueDrainsInOrderAndDeduplicatesSameContent"
+        }
+      ],
+      "rationale": "Integration and queue tests verify pending-content and prestart deduplication.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-111",
+      "original": {
+        "file": "RuneScribTests/MessageCoordinatorTests.swift",
+        "class": "MessageCoordinatorTests",
+        "method": "testReingestingSameEmbeddedKeyDeduplicatesAndKeepsActiveCipher"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testInboundMessageEmbeddedAndStoredCipherPathsPreserveAssociationAndDedupe"
+        }
+      ],
+      "rationale": "The replacement reimports the embedded key, retains cipher/contact counts, and preserves active cipher.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-112",
+      "original": {
+        "file": "RuneScribTests/MessageCryptorTests.swift",
+        "class": "MessageCryptorTests",
+        "method": "testRoundTrip"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageCryptorTests.swift",
+          "class": "MessageCryptorTests",
+          "method": "testRoundTrip"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-113",
+      "original": {
+        "file": "RuneScribTests/MessageCryptorTests.swift",
+        "class": "MessageCryptorTests",
+        "method": "testWrongCipherFails"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageCryptorTests.swift",
+          "class": "MessageCryptorTests",
+          "method": "testWrongCipherFails"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-114",
+      "original": {
+        "file": "RuneScribTests/MessageCryptorTests.swift",
+        "class": "MessageCryptorTests",
+        "method": "testTamperFails"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageCryptorTests.swift",
+          "class": "MessageCryptorTests",
+          "method": "testTamperFails"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-115",
+      "original": {
+        "file": "RuneScribTests/MessageCryptorTests.swift",
+        "class": "MessageCryptorTests",
+        "method": "testTwoSealsDifferentCiphertext"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageCryptorTests.swift",
+          "class": "MessageCryptorTests",
+          "method": "testTwoSealsDifferentCiphertext"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-116",
+      "original": {
+        "file": "RuneScribTests/MessageEnvelopeTests.swift",
+        "class": "MessageEnvelopeTests",
+        "method": "testWrapUnwrapRoundTrip"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageEnvelopeTests.swift",
+          "class": "MessageEnvelopeTests",
+          "method": "testWrapUnwrapRoundTrip"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-117",
+      "original": {
+        "file": "RuneScribTests/MessageEnvelopeTests.swift",
+        "class": "MessageEnvelopeTests",
+        "method": "testUnwrapRejectsEmpty"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageEnvelopeTests.swift",
+          "class": "MessageEnvelopeTests",
+          "method": "testUnwrapRejectsEmpty"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-118",
+      "original": {
+        "file": "RuneScribTests/MessageEnvelopeTests.swift",
+        "class": "MessageEnvelopeTests",
+        "method": "testUnwrapRejectsWrongVersion"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageEnvelopeTests.swift",
+          "class": "MessageEnvelopeTests",
+          "method": "testUnwrapRejectsWrongVersion"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-119",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testShouldIncludeKeyTruthTable"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testUnlinkedMessageNeverRequiresKeyDeliveryOrRecordsDelivery"
+        }
+      ],
+      "rationale": "Application-facade tests cover linked first delivery, follow-up, cancellation, and unlinked cases.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-120",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testPayloadEnvelopeRoundTripsPlaintext"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup"
+        }
+      ],
+      "rationale": "The replacement produces, stores, decodes, and inspects the message share file through the authoritative facade.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-121",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testPayloadEmbedsCipherOnlyWhenIncludeKey"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testUnlinkedMessageNeverRequiresKeyDeliveryOrRecordsDelivery"
+        }
+      ],
+      "rationale": "The replacements assert embedded cipher on required first delivery and no stored file/key delivery otherwise.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-122",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testFileDataMatchesEncodedPayloadForBundledFont"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup"
+        }
+      ],
+      "rationale": "The replacement decodes the actual scoped artifact and asserts the bundled-font case has no trailing custom bytes.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-123",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testFileDataAppendsCustomFontBytesOnlyWithKey"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testCustomFontBytesAppearOnlyInRequiredFirstDeliveryFile"
+        }
+      ],
+      "rationale": "The replacement verifies custom bytes only in the required first-delivery file and not the follow-up.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-124",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testDecideNoAttachmentAllowedWhenCanSendText"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/MessageAttachmentPolicyTests.swift",
+          "class": "MessageAttachmentPolicyTests",
+          "method": "testDecisionTruthTablePreservesRequiredAttachmentGate"
+        }
+      ],
+      "rationale": "The consolidated truth table retains the no-required-attachment allowed case.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-125",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testDecideBlockedWhenCannotSendText"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/MessageAttachmentPolicyTests.swift",
+          "class": "MessageAttachmentPolicyTests",
+          "method": "testDecisionTruthTablePreservesRequiredAttachmentGate"
+        }
+      ],
+      "rationale": "The consolidated truth table retains the cannot-send-text case.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-126",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testDecideRequiredAttachmentBlockedWhenAttachmentsUnavailable"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/MessageAttachmentPolicyTests.swift",
+          "class": "MessageAttachmentPolicyTests",
+          "method": "testDecisionTruthTablePreservesRequiredAttachmentGate"
+        }
+      ],
+      "rationale": "The consolidated truth table retains the attachment-unavailable block.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-127",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testDecideRequiredAttachmentBlockedWhenUTIUnsupported"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/MessageAttachmentPolicyTests.swift",
+          "class": "MessageAttachmentPolicyTests",
+          "method": "testDecisionTruthTablePreservesRequiredAttachmentGate"
+        }
+      ],
+      "rationale": "The consolidated truth table retains the unsupported-UTI block.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-128",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testDecideRequiredAttachmentAllowedWhenSupported"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/MessageAttachmentPolicyTests.swift",
+          "class": "MessageAttachmentPolicyTests",
+          "method": "testDecisionTruthTablePreservesRequiredAttachmentGate"
+        }
+      ],
+      "rationale": "The consolidated truth table retains the fully-supported allowed case.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-129",
+      "original": {
+        "file": "RuneScribTests/MessageSendTests.swift",
+        "class": "MessageSendTests",
+        "method": "testShouldConsumeDeliveryTruthTable"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/MessageAttachmentPolicyTests.swift",
+          "class": "MessageAttachmentPolicyTests",
+          "method": "testDeliveryIsConsumedOnlyAfterRequiredAttachmentAcceptance"
+        },
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+          "class": "P4BApplicationServiceTests",
+          "method": "testRejectedRequiredAttachmentNeverRecordsDelivery"
+        }
+      ],
+      "rationale": "Policy and facade tests preserve the truth table and durable non-consumption after rejection.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-130",
+      "original": {
+        "file": "RuneScribTests/MessageServiceTests.swift",
+        "class": "MessageServiceTests",
+        "method": "testComposeProducesRunesThatReadBack"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageServiceTests.swift",
+          "class": "MessageServiceTests",
+          "method": "testComposeProducesRunesThatReadBack"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-131",
+      "original": {
+        "file": "RuneScribTests/MessageServiceTests.swift",
+        "class": "MessageServiceTests",
+        "method": "testReadPicksCorrectCipherAmongMany"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageServiceTests.swift",
+          "class": "MessageServiceTests",
+          "method": "testReadPicksCorrectCipherAmongMany"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-132",
+      "original": {
+        "file": "RuneScribTests/MessageServiceTests.swift",
+        "class": "MessageServiceTests",
+        "method": "testReadFailsWhenNoCipherMatches"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageServiceTests.swift",
+          "class": "MessageServiceTests",
+          "method": "testReadFailsWhenNoCipherMatches"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-133",
+      "original": {
+        "file": "RuneScribTests/MessageServiceTests.swift",
+        "class": "MessageServiceTests",
+        "method": "testReadToleratesSurroundingWhitespace"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageServiceTests.swift",
+          "class": "MessageServiceTests",
+          "method": "testReadToleratesSurroundingWhitespace"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-134",
+      "original": {
+        "file": "RuneScribTests/MessageServiceTests.swift",
+        "class": "MessageServiceTests",
+        "method": "testReadEnvelopeRecoversUnderCorrectCipherAmongCandidates"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageServiceTests.swift",
+          "class": "MessageServiceTests",
+          "method": "testReadEnvelopeRecoversUnderCorrectCipherAmongCandidates"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-135",
+      "original": {
+        "file": "RuneScribTests/MessageServiceTests.swift",
+        "class": "MessageServiceTests",
+        "method": "testReadEnvelopeThrowsWhenNoCipherMatches"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageServiceTests.swift",
+          "class": "MessageServiceTests",
+          "method": "testReadEnvelopeThrowsWhenNoCipherMatches"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-136",
+      "original": {
+        "file": "RuneScribTests/MessageServiceTests.swift",
+        "class": "MessageServiceTests",
+        "method": "testReadEnvelopeRejectsTamperedBytesNoFalsePositive"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageServiceTests.swift",
+          "class": "MessageServiceTests",
+          "method": "testReadEnvelopeRejectsTamperedBytesNoFalsePositive"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-137",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testBinaryRoundTripWithoutEmbeddedCipher"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testBinaryRoundTripWithoutEmbeddedCipher"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-138",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testBinaryRoundTripWithEmbeddedCipher"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testBinaryRoundTripWithEmbeddedCipher"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-139",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testFlippedByteRejectedByChecksum"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testFlippedByteRejectedByChecksum"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-140",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testWrongVersionRejected"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testWrongVersionRejected"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-141",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testTooShortRejected"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testTooShortRejected"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-142",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testLongEnvelopeRoundTripsViaUInt16Length"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testLongEnvelopeRoundTripsViaUInt16Length"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-143",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testDecodeConsumingReportsExactLength"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testDecodeConsumingReportsExactLength"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-144",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testInitDecodingRejectsTrailingBytes"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testInitDecodingRejectsTrailingBytes"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-145",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testEncodedFileRoundTripsWithTrailingFont"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testEncodedFileRoundTripsWithTrailingFont"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-146",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testEncodedFileRoundTripsWithoutFont"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testEncodedFileRoundTripsWithoutFont"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-147",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testTruncatedNameRejected"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testTruncatedNameRejected"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-148",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testTruncatedEnvelopeRejected"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testTruncatedEnvelopeRejected"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-149",
+      "original": {
+        "file": "RuneScribTests/MessageSharePayloadTests.swift",
+        "class": "MessageSharePayloadTests",
+        "method": "testTruncatedEmbeddedCipherRejected"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift",
+          "class": "MessageSharePayloadTests",
+          "method": "testTruncatedEmbeddedCipherRejected"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-150",
+      "original": {
+        "file": "RuneScribTests/RuneCodecTests.swift",
+        "class": "RuneCodecTests",
+        "method": "testDecorativeAlphabetIs32UniqueRunesWithBroadCoverage"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Codec/RuneCodecTests.swift",
+          "class": "RuneCodecTests",
+          "method": "testDecorativeAlphabetIs32UniqueRunesWithBroadCoverage"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-151",
+      "original": {
+        "file": "RuneScribTests/RuneCodecTests.swift",
+        "class": "RuneCodecTests",
+        "method": "testRoundTripArbitraryBytes"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Codec/RuneCodecTests.swift",
+          "class": "RuneCodecTests",
+          "method": "testRoundTripArbitraryBytes"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-152",
+      "original": {
+        "file": "RuneScribTests/RuneCodecTests.swift",
+        "class": "RuneCodecTests",
+        "method": "testOutputUsesOnlyAlphabetRunes"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Codec/RuneCodecTests.swift",
+          "class": "RuneCodecTests",
+          "method": "testOutputUsesOnlyAlphabetRunes"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-153",
+      "original": {
+        "file": "RuneScribTests/RuneCodecTests.swift",
+        "class": "RuneCodecTests",
+        "method": "testDecodeRejectsForeignCharacter"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Codec/RuneCodecTests.swift",
+          "class": "RuneCodecTests",
+          "method": "testDecodeRejectsForeignCharacter"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-154",
+      "original": {
+        "file": "RuneScribTests/SplashAssetScheduleTests.swift",
+        "class": "SplashAssetScheduleTests",
+        "method": "testShouldShowWhenNeverPresented"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/SplashAssetScheduleTests.swift",
+          "class": "SplashAssetScheduleTests",
+          "method": "testNeverPresentedSplashShowsOnlyWhenResourceExists"
+        }
+      ],
+      "rationale": "The replacement preserves first display and adds the required resource-existence condition.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-155",
+      "original": {
+        "file": "RuneScribTests/SplashAssetScheduleTests.swift",
+        "class": "SplashAssetScheduleTests",
+        "method": "testShouldNotShowWithinThirtyDays"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/SplashAssetScheduleTests.swift",
+          "class": "SplashAssetScheduleTests",
+          "method": "testSplashDoesNotShowWithinThirtyDays"
+        }
+      ],
+      "rationale": "The replacement preserves the 30-day suppression interval.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-156",
+      "original": {
+        "file": "RuneScribTests/SplashAssetScheduleTests.swift",
+        "class": "SplashAssetScheduleTests",
+        "method": "testShouldShowAfterThirtyDays"
+      },
+      "disposition": "replaced-with-tested-equivalent",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/SplashAssetScheduleTests.swift",
+          "class": "SplashAssetScheduleTests",
+          "method": "testSplashShowsAtAndAfterThirtyDays"
+        }
+      ],
+      "rationale": "The replacement covers both the exact boundary and later dates.",
+      "evidence": [
+        "Current source contains every listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    },
+    {
+      "id": "OT-157",
+      "original": {
+        "file": "RuneScribTests/SplashAssetScheduleTests.swift",
+        "class": "SplashAssetScheduleTests",
+        "method": "testMarkShownPersistsDate"
+      },
+      "disposition": "preserved-in-owning-target",
+      "replacements": [
+        {
+          "file": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/SplashAssetScheduleTests.swift",
+          "class": "SplashAssetScheduleTests",
+          "method": "testMarkShownPersistsDate"
+        }
+      ],
+      "rationale": "The same named behavioral test remains in the target that now owns the implementation.",
+      "evidence": [
+        "Current source contains the listed replacement test.",
+        "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
+      ],
+      "currentVerification": "passed-P7-package-final"
+    }
+  ]
+}

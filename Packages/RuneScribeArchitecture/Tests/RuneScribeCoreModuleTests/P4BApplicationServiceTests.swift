@@ -1,6 +1,7 @@
 import CryptoKit
 import Foundation
 import RuneScribeContracts
+import Synchronization
 @testable import RuneScribeCoreModule
 import XCTest
 
@@ -517,6 +518,91 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(duplicate, .duplicate)
     }
 
+    func testColdQueuedLegacyURLConfirmationPersistsAndActivatesImportedCipher() async throws {
+        let secure = P4BGatedSecureStore()
+        let protected = P4BProtectedStore()
+        let bundledFontBytes = try bundledRuneFontData()
+        let registrar = P4BRecordingFontRegistrar()
+        let service = fullService(
+            secure: secure,
+            protected: protected,
+            registrar: registrar,
+            resources: P4BExistingInstallResources(bundledFontData: bundledFontBytes)
+        )
+        let payload = CipherSharePayload(cipher: .generated(label: "Legacy Queue"))
+        let customURL = try payload.url(name: "Queued Legacy")
+        var legacyComponents = URLComponents()
+        legacyComponents.scheme = "https"
+        legacyComponents.host = "www.ravenforgesoftware.com"
+        legacyComponents.path = "/rune-scribe/import"
+        legacyComponents.queryItems = try XCTUnwrap(
+            URLComponents(url: customURL, resolvingAgainstBaseURL: false)?.queryItems
+        )
+        let legacyURL = try XCTUnwrap(legacyComponents.url)
+
+        let disposition = try await service.receive(
+            .url(inboundURL(legacyURL, id: UUID(), cold: true))
+        )
+        XCTAssertEqual(disposition, .accepted)
+
+        let pendingObservation = Task { () -> RuneScribeApplicationSnapshot? in
+            var iterator = service.stateStream().makeAsyncIterator()
+            while let snapshot = await iterator.next() {
+                if snapshot.importState.pending != nil {
+                    return snapshot
+                }
+            }
+            return nil
+        }
+        let starting = Task { await service.startInboundProcessing() }
+        await secure.waitUntilPaused()
+        await secure.resume()
+
+        let observedPendingSnapshot = await pendingObservation.value
+        let pendingSnapshot = try XCTUnwrap(observedPendingSnapshot)
+        XCTAssertEqual(pendingSnapshot.cipherLibrary.ciphers.count, 1)
+        XCTAssertEqual(pendingSnapshot.importState.pending?.suggestedName, "Queued Legacy")
+        let pending = try XCTUnwrap(pendingSnapshot.importState.pending)
+        let confirmation = Task {
+            try await service.confirmImport(
+                ConfirmImportCommand(
+                    importID: pending.id,
+                    name: "Confirmed Legacy"
+                )
+            )
+        }
+
+        let imported = try await confirmation.value
+        await starting.value
+        let confirmedSnapshot = try await currentSnapshot(from: service)
+        XCTAssertEqual(confirmedSnapshot.cipherLibrary.ciphers.count, 2)
+        XCTAssertEqual(confirmedSnapshot.cipherLibrary.activeCipherID, imported.id)
+        XCTAssertTrue(imported.isActive)
+        XCTAssertEqual(imported.name, "Confirmed Legacy")
+        XCTAssertNil(confirmedSnapshot.importState.pending)
+        let validations = await registrar.inspectedFontData()
+        XCTAssertEqual(validations, [bundledFontBytes, bundledFontBytes])
+        let registrations = await registrar.registeredFontData()
+        XCTAssertEqual(registrations, [bundledFontBytes])
+        await service.stopInboundProcessing()
+
+        let reconstructed = fullService(
+            secure: secure,
+            protected: protected,
+            registrar: P4BRecordingFontRegistrar(),
+            resources: P4BExistingInstallResources(bundledFontData: bundledFontBytes)
+        )
+        await reconstructed.startInboundProcessing()
+        let persisted = try await currentSnapshot(from: reconstructed)
+        XCTAssertEqual(persisted.cipherLibrary.ciphers.count, 2)
+        XCTAssertEqual(persisted.cipherLibrary.activeCipherID, imported.id)
+        XCTAssertEqual(
+            persisted.cipherLibrary.ciphers.first { $0.id == imported.id }?.name,
+            "Confirmed Legacy"
+        )
+        await reconstructed.stopInboundProcessing()
+    }
+
     func testURLDedupeLivesOnlyForPendingPresentation() async throws {
         let service = RuneScribeCoreApplicationService(
             secureValueStore: P4BSecureStore(),
@@ -992,6 +1078,255 @@ final class P4BApplicationServiceTests: XCTestCase {
 
         XCTAssertEqual(first, .openSettings)
         XCTAssertEqual(second, .openCipherLibrary)
+    }
+
+    func testManualContactCreationDoesNotGenerateOrLinkCipher() async throws {
+        let service = fullService(
+            secure: P4BSecureStore(),
+            protected: P4BProtectedStore()
+        )
+        await service.startInboundProcessing()
+        let before = try await currentSnapshot(from: service)
+
+        let contact = try await service.createContact(
+            CreateContactCommand(displayName: "Manual Contact")
+        )
+
+        let after = try await currentSnapshot(from: service)
+        XCTAssertEqual(contact.source, .manual)
+        XCTAssertEqual(contact.linkedCipherCount, 0)
+        XCTAssertEqual(after.cipherLibrary, before.cipherLibrary)
+        XCTAssertEqual(
+            after.contactLibrary.contacts.filter { $0.id == contact.id },
+            [contact]
+        )
+    }
+
+    func testExistingInstallLoadsTogetherWithoutResetDuplicateOrStartupRewrite() async throws {
+        let cipherID = try XCTUnwrap(
+            UUID(uuidString: "11111111-2222-3333-4444-555555555555")
+        )
+        let importedFontCipherID = try XCTUnwrap(
+            UUID(uuidString: "22222222-3333-4444-5555-666666666666")
+        )
+        let contactID = try XCTUnwrap(
+            UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
+        )
+        let storeKey = Data(0...31)
+        let frozenCipherKey = Data(32...63)
+        let importedFontCipherKey = Data(64...95)
+        let importedFontBytes = Data("synthetic-existing-install-font".utf8)
+        let importedFontDigest = Data(SHA256.hash(data: importedFontBytes))
+        let importedFontReference = FontRef(
+            id: "legacy-custom",
+            version: 1,
+            sha256: importedFontDigest
+        )
+        let frozenCipher = Cipher(
+            id: cipherID,
+            label: "Legacy Cipher",
+            origin: .generated,
+            createdAt: Date(timeIntervalSince1970: 1_704_164_645),
+            publicID: Data(1...8),
+            keyMaterial: frozenCipherKey,
+            decorativeMapping: Array((0..<32).reversed()),
+            fontRef: .bundled,
+            contactID: contactID,
+            delivered: true
+        )
+        let importedFontCipher = Cipher(
+            id: importedFontCipherID,
+            label: "Imported Font Cipher",
+            origin: .imported,
+            createdAt: Date(timeIntervalSince1970: 1_704_164_646),
+            publicID: Data(9...16),
+            keyMaterial: importedFontCipherKey,
+            decorativeMapping: Array(8..<32) + Array(0..<8),
+            fontRef: importedFontReference
+        )
+        let library = CipherLibrary(
+            ciphers: [frozenCipher, importedFontCipher],
+            activeID: cipherID
+        )
+        let encryptedLibrary = try encryptedLibraryFixture(
+            library,
+            key: storeKey,
+            nonceByte: 0xA1
+        )
+
+        let contact = Contact(
+            id: contactID,
+            displayName: "Existing Contact",
+            phones: ["+1 555 0100"],
+            emails: ["existing@example.invalid"],
+            appleContactID: "synthetic-system-contact",
+            source: .imported,
+            createdAt: Date(timeIntervalSince1970: 1_704_164_647)
+        )
+        let encryptedContacts = try encryptedContactFixture(
+            ContactBook(contacts: [contact]),
+            key: storeKey,
+            nonceByte: 0xB2
+        )
+        let pinRecord = Data(
+            #"{"version":1,"iterations":120000,"salt":"AAECAwQFBgcICQoLDA0ODw==","hash":"UHAyHKNNva/pslNx0cD4O8r+Bz+64fInTwCm1saOmJk="}"#.utf8
+        )
+        let throttleRecord = Data(
+            #"{"failedAttempts":5,"lastFailure":771692799}"#.utf8
+        )
+        let importedFontPath = try ProtectedPath.fontsDirectory.appending(
+            importedFontDigest.map { String(format: "%02x", $0) }.joined() + ".ttf"
+        )
+
+        let secure = P4BSecureStore()
+        await secure.seed(storeKey, account: RuneScribeKeychain.symmetricKeyAccount)
+        await secure.seed(encryptedLibrary, account: RuneScribeKeychain.cipherLibraryAccount)
+        await secure.seed(pinRecord, account: RuneScribeKeychain.appPINAccount)
+        await secure.seed(throttleRecord, account: RuneScribeKeychain.pinThrottleAccount)
+        let protected = P4BProtectedStore()
+        await protected.seed(encryptedContacts, at: .contacts)
+        await protected.seed(importedFontBytes, at: importedFontPath)
+        let secureBeforeStartup = await secure.storedValues()
+        let protectedBeforeStartup = await protected.storedValues()
+
+        let defaultsSuite = "runescribe.tests.existing-install.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: defaultsSuite))
+        defaults.removePersistentDomain(forName: defaultsSuite)
+        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
+        let lastSplashDate = Date(timeIntervalSince1970: 1_700_000_000)
+        defaults.set(lastSplashDate, forKey: "rf.splash.lastShownAt")
+        defaults.set(true, forKey: "rf.contacts.importPrompted")
+
+        let bundledFontBytes = try bundledRuneFontData()
+        let registrar = P4BRecordingFontRegistrar()
+        let clock = P4BMutableClock(
+            Date(timeIntervalSince1970: 1_750_000_000)
+        )
+        let service = fullService(
+            secure: secure,
+            protected: protected,
+            registrar: registrar,
+            resources: P4BExistingInstallResources(bundledFontData: bundledFontBytes),
+            clock: clock
+        )
+
+        await service.startInboundProcessing()
+        let snapshot = try await currentSnapshot(from: service)
+
+        XCTAssertNil(snapshot.lastFailure)
+        XCTAssertFalse(snapshot.cipherLibrary.isLoading)
+        XCTAssertEqual(snapshot.cipherLibrary.ciphers.count, 2)
+        XCTAssertFalse(snapshot.cipherLibrary.ciphers.contains { $0.name == "My Cipher" })
+        XCTAssertEqual(snapshot.cipherLibrary.activeCipherID?.rawValue, cipherID)
+        let frozenSummary = try XCTUnwrap(
+            snapshot.cipherLibrary.ciphers.first { $0.id.rawValue == cipherID }
+        )
+        XCTAssertEqual(frozenSummary.name, "Legacy Cipher")
+        XCTAssertTrue(frozenSummary.isActive)
+        XCTAssertEqual(frozenSummary.assignedContactID?.rawValue, contactID)
+        XCTAssertTrue(frozenSummary.hasBeenDelivered)
+        XCTAssertEqual(frozenSummary.fontID.rawValue, FontRef.bundled.id)
+        let importedFontSummary = try XCTUnwrap(
+            snapshot.cipherLibrary.ciphers.first { $0.id.rawValue == importedFontCipherID }
+        )
+        XCTAssertEqual(importedFontSummary.fontID.rawValue, importedFontReference.id)
+
+        XCTAssertEqual(snapshot.contactLibrary.contacts.count, 1)
+        XCTAssertEqual(snapshot.contactLibrary.importedCount, 1)
+        let contactSummary = try XCTUnwrap(snapshot.contactLibrary.contacts.first)
+        XCTAssertEqual(contactSummary.id.rawValue, contactID)
+        XCTAssertEqual(contactSummary.displayName, "Existing Contact")
+        XCTAssertEqual(contactSummary.phoneNumbers, ["+1 555 0100"])
+        XCTAssertEqual(contactSummary.emailAddresses, ["existing@example.invalid"])
+        XCTAssertEqual(contactSummary.source, .imported)
+        XCTAssertEqual(contactSummary.linkedCipherCount, 1)
+
+        let fontSummary = try XCTUnwrap(
+            snapshot.fonts.first { $0.id.rawValue == importedFontReference.id }
+        )
+        XCTAssertEqual(fontSummary.source, .imported)
+        XCTAssertEqual(fontSummary.version, importedFontReference.version)
+        XCTAssertEqual(
+            fontSummary.contentHash,
+            importedFontDigest.map { String(format: "%02x", $0) }.joined()
+        )
+        XCTAssertTrue(fontSummary.isRegistered)
+        let registeredFontData = await registrar.registeredFontData()
+        XCTAssertEqual(registeredFontData.count, 2)
+        XCTAssertTrue(registeredFontData.contains(bundledFontBytes))
+        XCTAssertTrue(registeredFontData.contains(importedFontBytes))
+
+        XCTAssertTrue(snapshot.lockState.isPINSet)
+        XCTAssertTrue(snapshot.lockState.isLocked)
+        XCTAssertEqual(
+            snapshot.lockState.retryAfter,
+            Date(timeIntervalSince1970: 1_750_000_014)
+        )
+        let correctPINMatches = try await service.verifyPIN(PINInput("1234"))
+        let incorrectPINMatches = try await service.verifyPIN(PINInput("0000"))
+        XCTAssertTrue(correctPINMatches)
+        XCTAssertFalse(incorrectPINMatches)
+        XCTAssertEqual(
+            defaults.object(forKey: "rf.splash.lastShownAt") as? Date,
+            lastSplashDate
+        )
+        XCTAssertTrue(defaults.bool(forKey: "rf.contacts.importPrompted"))
+
+        let secureAfterStartup = await secure.storedValues()
+        let protectedAfterStartup = await protected.storedValues()
+        let secureStartupWrites = await secure.writtenAccounts()
+        let secureStartupDeletes = await secure.deletedAccounts()
+        let protectedStartupWrites = await protected.writePaths()
+        let protectedStartupRemovals = await protected.removalPaths()
+        XCTAssertEqual(secureAfterStartup, secureBeforeStartup)
+        XCTAssertEqual(protectedAfterStartup, protectedBeforeStartup)
+        XCTAssertEqual(secureStartupWrites, [])
+        XCTAssertEqual(secureStartupDeletes, [])
+        XCTAssertEqual(protectedStartupWrites, [])
+        XCTAssertEqual(protectedStartupRemovals, [])
+
+        clock.set(Date(timeIntervalSince1970: 1_750_000_015))
+        let unlockResult = try await service.unlock(
+            UnlockCommand(input: PINInput("1234"))
+        )
+        XCTAssertEqual(unlockResult, .unlocked)
+        for cipher in [frozenCipher, importedFontCipher] {
+            let message = "existing install \(cipher.label)"
+            let encoded = try await service.encode(
+                EncodeMessageCommand(
+                    plaintext: message,
+                    cipherID: CipherID(rawValue: cipher.id)
+                )
+            )
+            let envelope = try RuneCodec().decode(encoded.runes, with: cipher)
+            let sealed = try MessageEnvelope.unwrap(envelope)
+            XCTAssertEqual(try MessageCryptor().open(sealed, with: cipher), message)
+        }
+
+        let storedKey = await secure.value(account: RuneScribeKeychain.symmetricKeyAccount)
+        let storedLibrary = await secure.value(account: RuneScribeKeychain.cipherLibraryAccount)
+        let storedPIN = await secure.value(account: RuneScribeKeychain.appPINAccount)
+        let storedThrottle = await secure.value(account: RuneScribeKeychain.pinThrottleAccount)
+        let secureWrites = await secure.writtenAccounts()
+        let secureDeletes = await secure.deletedAccounts()
+        let protectedAfterUse = await protected.storedValues()
+        let protectedWrites = await protected.writePaths()
+        let protectedRemovals = await protected.removalPaths()
+        XCTAssertEqual(storedKey, storeKey)
+        XCTAssertEqual(storedLibrary, encryptedLibrary)
+        XCTAssertEqual(storedPIN, pinRecord)
+        XCTAssertNil(storedThrottle)
+        XCTAssertEqual(secureWrites, [])
+        XCTAssertEqual(secureDeletes, [RuneScribeKeychain.pinThrottleAccount])
+        XCTAssertEqual(protectedAfterUse, protectedBeforeStartup)
+        XCTAssertEqual(protectedWrites, [])
+        XCTAssertEqual(protectedRemovals, [])
+        XCTAssertEqual(
+            defaults.object(forKey: "rf.splash.lastShownAt") as? Date,
+            lastSplashDate
+        )
+        XCTAssertTrue(defaults.bool(forKey: "rf.contacts.importPrompted"))
+        await service.stopInboundProcessing()
     }
 
     func testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete() async throws {
@@ -1595,24 +1930,70 @@ final class P4BApplicationServiceTests: XCTestCase {
     }
 
     private func fullService(
-        secure: P4BSecureStore,
+        secure: any SecureValueStore,
         protected: P4BProtectedStore,
         clipboard: P4BClipboard = P4BClipboard(),
         artifacts: P4BShareStore = P4BShareStore(),
         registrar: any SystemFontRegistrar = P4BUnavailableFontRegistrar(),
-        contactAccess: any ContactAccessService = P4BContactAccess()
+        contactAccess: any ContactAccessService = P4BContactAccess(),
+        resources: any ApplicationResourceLocator = P4BUnavailableResources(),
+        clock: any ClockProviding = P4BClock()
     ) -> RuneScribeCoreApplicationService {
         RuneScribeCoreApplicationService(
             secureValueStore: secure,
             protectedFileStore: protected,
             inboundFileReader: P4BInboundFileReader(),
             shareArtifactStore: artifacts,
-            applicationResourceLocator: P4BUnavailableResources(),
+            applicationResourceLocator: resources,
             systemFontRegistrar: registrar,
             contactAccess: contactAccess,
             clipboardReading: clipboard,
-            clock: P4BClock(),
+            clock: clock,
             uuid: P4BUUIDs()
+        )
+    }
+
+    private func encryptedLibraryFixture(
+        _ library: CipherLibrary,
+        key: Data,
+        nonceByte: UInt8
+    ) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let nonce = try AES.GCM.Nonce(data: Data(repeating: nonceByte, count: 12))
+        let sealed = try AES.GCM.seal(
+            encoder.encode(library),
+            using: SymmetricKey(data: key),
+            nonce: nonce
+        )
+        return try XCTUnwrap(sealed.combined)
+    }
+
+    private func encryptedContactFixture(
+        _ book: ContactBook,
+        key: Data,
+        nonceByte: UInt8
+    ) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .deferredToDate
+        let nonce = try AES.GCM.Nonce(data: Data(repeating: nonceByte, count: 12))
+        let sealed = try AES.GCM.seal(
+            encoder.encode(book),
+            using: SymmetricKey(data: key),
+            nonce: nonce
+        )
+        return try XCTUnwrap(sealed.combined)
+    }
+
+    private func bundledRuneFontData() throws -> Data {
+        var repositoryRoot = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 {
+            repositoryRoot.deleteLastPathComponent()
+        }
+        return try Data(
+            contentsOf: repositoryRoot.appendingPathComponent(
+                "RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf"
+            )
         )
     }
 
@@ -1706,12 +2087,30 @@ private struct P4BClock: ClockProviding {
     func now() -> Date { Date(timeIntervalSince1970: 1_750_000_000) }
 }
 
+private final class P4BMutableClock: ClockProviding, Sendable {
+    private let date: Mutex<Date>
+
+    init(_ date: Date) {
+        self.date = Mutex(date)
+    }
+
+    func now() -> Date {
+        date.withLock { $0 }
+    }
+
+    func set(_ date: Date) {
+        self.date.withLock { $0 = date }
+    }
+}
+
 private struct P4BUUIDs: UUIDProviding {
     func nextUUID() -> UUID { UUID() }
 }
 
 private actor P4BSecureStore: SecureValueStore {
     private var values: [String: Data] = [:]
+    private var writes: [String] = []
+    private var deletes: [String] = []
     private var dataReadsFail = false
     private var cipherLibraryFailuresRemaining = 0
     private var deleteFailures: [String: Int] = [:]
@@ -1722,6 +2121,22 @@ private actor P4BSecureStore: SecureValueStore {
 
     func seed(_ data: Data, account: String) {
         values[account] = data
+    }
+
+    func value(account: String) -> Data? {
+        values[account]
+    }
+
+    func storedValues() -> [String: Data] {
+        values
+    }
+
+    func writtenAccounts() -> [String] {
+        writes
+    }
+
+    func deletedAccounts() -> [String] {
+        deletes
     }
 
     func failReads() {
@@ -1772,6 +2187,7 @@ private actor P4BSecureStore: SecureValueStore {
                 throw P4BInjectedFailure()
             }
         }
+        writes.append(account)
         values[account] = data
     }
 
@@ -1780,6 +2196,7 @@ private actor P4BSecureStore: SecureValueStore {
             deleteFailures[account] = failures - 1
             throw P4BInjectedFailure()
         }
+        deletes.append(account)
         values.removeValue(forKey: account)
     }
 }
@@ -1788,12 +2205,30 @@ private struct P4BInjectedFailure: Error, Sendable {}
 
 private actor P4BProtectedStore: ProtectedFileStore {
     private var values: [ProtectedPath: Data] = [:]
+    private var writes: [ProtectedPath] = []
+    private var removals: [ProtectedPath] = []
     private var contactWriteFailuresRemaining = 0
     private var contactFailureAction: (@Sendable () async -> Void)?
     private var pauseNextContactSet = false
     private var contactSetIsPaused = false
     private var contactPauseWaiters: [CheckedContinuation<Void, Never>] = []
     private var contactResumeContinuation: CheckedContinuation<Void, Never>?
+
+    func seed(_ data: Data, at path: ProtectedPath) {
+        values[path] = data
+    }
+
+    func storedValues() -> [ProtectedPath: Data] {
+        values
+    }
+
+    func writePaths() -> [ProtectedPath] {
+        writes
+    }
+
+    func removalPaths() -> [ProtectedPath] {
+        removals
+    }
 
     func failNextContactWrites(
         _ count: Int = 1,
@@ -1841,10 +2276,12 @@ private actor P4BProtectedStore: ProtectedFileStore {
                 throw P4BInjectedFailure()
             }
         }
+        writes.append(relativePath)
         values[relativePath] = data
     }
 
     func remove(relativePath: ProtectedPath) async throws {
+        removals.append(relativePath)
         values.removeValue(forKey: relativePath)
     }
 
@@ -1868,6 +2305,19 @@ private actor P4BProtectedStore: ProtectedFileStore {
 private struct P4BUnavailableResources: ApplicationResourceLocator {
     func data(for resource: ApplicationResource) async throws -> Data {
         throw P4BInjectedFailure()
+    }
+
+    func url(for resource: ApplicationResource) async throws -> URL {
+        throw P4BInjectedFailure()
+    }
+}
+
+private struct P4BExistingInstallResources: ApplicationResourceLocator {
+    let bundledFontData: Data
+
+    func data(for resource: ApplicationResource) async throws -> Data {
+        guard resource == .bundledRuneFont else { throw P4BInjectedFailure() }
+        return bundledFontData
     }
 
     func url(for resource: ApplicationResource) async throws -> URL {
@@ -1912,6 +2362,29 @@ private struct P4BSuccessfulFontRegistrar: SystemFontRegistrar {
 
     func registerFont(_ data: Data) async throws -> RegisteredFontDTO {
         RegisteredFontDTO(postScriptName: "TestCustomFont")
+    }
+}
+
+private actor P4BRecordingFontRegistrar: SystemFontRegistrar {
+    private var inspections: [Data] = []
+    private var registrations: [Data] = []
+
+    func postScriptName(forFontData data: Data) async throws -> String {
+        inspections.append(data)
+        return "ExistingInstallFont"
+    }
+
+    func registerFont(_ data: Data) async throws -> RegisteredFontDTO {
+        registrations.append(data)
+        return RegisteredFontDTO(postScriptName: "ExistingInstallFont")
+    }
+
+    func registeredFontData() -> [Data] {
+        registrations
+    }
+
+    func inspectedFontData() -> [Data] {
+        inspections
     }
 }
 

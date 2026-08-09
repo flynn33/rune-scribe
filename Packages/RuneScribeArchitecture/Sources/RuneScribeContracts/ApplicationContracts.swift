@@ -94,7 +94,7 @@ public enum ContactSourceDTO: String, Codable, Hashable, Sendable {
     case imported
 }
 
-public struct ContactSummary: Codable, Equatable, Hashable, Sendable {
+public struct ContactSummary: Equatable, Hashable, Sendable {
     public let id: ContactID
     public let displayName: String
     public let phoneNumbers: [String]
@@ -122,7 +122,7 @@ public struct ContactSummary: Codable, Equatable, Hashable, Sendable {
     }
 }
 
-public struct ContactLibraryStateDTO: Codable, Equatable, Sendable {
+public struct ContactLibraryStateDTO: Equatable, Sendable {
     public let contacts: [ContactSummary]
     public let importedCount: Int
     public let authorization: ContactAuthorizationDTO
@@ -418,7 +418,7 @@ public struct AssignContactCommand: Codable, Equatable, Sendable {
     }
 }
 
-public struct CreateContactCommand: Codable, Equatable, Sendable {
+public struct CreateContactCommand: Equatable, Sendable {
     public let displayName: String
     public let phoneNumbers: [String]
     public let emailAddresses: [String]
@@ -434,7 +434,7 @@ public struct CreateContactCommand: Codable, Equatable, Sendable {
     }
 }
 
-public struct UpdateContactCommand: Codable, Equatable, Sendable {
+public struct UpdateContactCommand: Equatable, Sendable {
     public let contactID: ContactID
     public let displayName: String
     public let phoneNumbers: [String]
@@ -453,7 +453,7 @@ public struct UpdateContactCommand: Codable, Equatable, Sendable {
     }
 }
 
-public struct ImportContactsCommand: Codable, Equatable, Sendable {
+public struct ImportContactsCommand: Equatable, Sendable {
     public let contacts: [SystemContactDTO]
 
     public init(contacts: [SystemContactDTO]) {

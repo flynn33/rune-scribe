@@ -4,6 +4,40 @@
 import SwiftUI
 import AVFoundation
 
+enum QRScannerPermissionAction: Equatable, Sendable {
+    case ready
+    case requestAccess
+    case denied
+
+    static func resolve(_ authorization: AVAuthorizationStatus) -> Self {
+        switch authorization {
+        case .authorized:
+            .ready
+        case .notDetermined:
+            .requestAccess
+        case .denied, .restricted:
+            .denied
+        @unknown default:
+            .denied
+        }
+    }
+}
+
+enum QRScannerCompletion: Equatable, Sendable {
+    case scanned(String)
+    case cancelled
+}
+
+struct QRScannerCompletionGate: Equatable, Sendable {
+    private(set) var hasCompleted = false
+
+    mutating func accept(_ completion: QRScannerCompletion) -> QRScannerCompletion? {
+        guard !hasCompleted else { return nil }
+        hasCompleted = true
+        return completion
+    }
+}
+
 /// Full-screen QR scanner sheet (iOS). Requests camera access, shows a live
 /// preview, and reports the first scanned string via `onScan`; the caller decodes
 /// and routes it. macOS has no scanner — the whole file is iOS-only.
@@ -12,16 +46,30 @@ struct QRScannerView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     let onScan: (String) -> Void
+    let onCancel: () -> Void
 
     @State private var status: Status = .checking
+    @State private var completionGate = QRScannerCompletionGate()
     private enum Status { case checking, ready, denied }
+
+    init(
+        onScan: @escaping (String) -> Void,
+        onCancel: @escaping () -> Void = {}
+    ) {
+        self.onScan = onScan
+        self.onCancel = onCancel
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
                 runic: "ᛊᚲᚨᚾ",
                 subtitle: "Scan QR",
-                trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() }]
+                trailingButtons: [
+                    RuneHeaderButton(systemImage: "xmark", help: "Close") {
+                        complete(.cancelled)
+                    },
+                ]
             )
             content
             footer
@@ -87,18 +135,31 @@ struct QRScannerView: View {
     }
 
     private func handleScan(_ code: String) {
-        onScan(code)
+        complete(.scanned(code))
     }
 
     private func resolvePermission() async {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
+        switch QRScannerPermissionAction.resolve(
+            AVCaptureDevice.authorizationStatus(for: .video)
+        ) {
+        case .ready:
             status = .ready
-        case .notDetermined:
+        case .requestAccess:
             status = await AVCaptureDevice.requestAccess(for: .video) ? .ready : .denied
-        default:
+        case .denied:
             status = .denied
         }
+    }
+
+    private func complete(_ proposed: QRScannerCompletion) {
+        guard let completion = completionGate.accept(proposed) else { return }
+        switch completion {
+        case .scanned(let code):
+            onScan(code)
+        case .cancelled:
+            onCancel()
+        }
+        dismiss()
     }
 
     private func openSettings() {
@@ -134,7 +195,7 @@ final class ScannerViewController: UIViewController, AVCaptureMetadataOutputObje
     private let session = AVCaptureSession()
     private let metadataQueue = DispatchQueue(label: "com.runescribe.qr.metadata")
     private var previewLayer: AVCaptureVideoPreviewLayer?
-    private var hasReported = false
+    private var completionGate = QRScannerCompletionGate()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -187,10 +248,11 @@ final class ScannerViewController: UIViewController, AVCaptureMetadataOutputObje
               object.type == .qr,
               let value = object.stringValue else { return }
         Task { @MainActor [weak self] in
-            guard let self, !self.hasReported else { return }
-            self.hasReported = true
+            guard let self,
+                  case .scanned(let code)? = self.completionGate.accept(.scanned(value))
+            else { return }
             self.session.stopRunning()
-            self.onScan?(value)
+            self.onScan?(code)
         }
     }
 }

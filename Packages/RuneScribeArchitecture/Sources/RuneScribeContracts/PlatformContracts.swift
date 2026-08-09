@@ -190,7 +190,7 @@ public enum ContactAuthorizationDTO: String, Codable, Hashable, Sendable {
     case limited
 }
 
-public struct SystemContactDTO: Codable, Equatable, Hashable, Sendable {
+public struct SystemContactDTO: Equatable, Hashable, Sendable {
     public let systemIdentifier: String
     public let displayName: String
     public let phoneNumbers: [String]

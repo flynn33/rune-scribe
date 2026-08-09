@@ -39,7 +39,7 @@ struct LockView: View {
                                 shakeToken += 1
                             }
                         } catch let unlockError {
-                            error = unlockError.localizedDescription
+                            error = RuneScribeUISession.message(forPINError: unlockError)
                             shakeToken += 1
                         }
                     }

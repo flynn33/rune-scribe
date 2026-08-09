@@ -30,6 +30,16 @@ struct OpaqueShareTransfer: Transferable, Sendable {
         })
     }
 
+    #if os(macOS)
+    /// Internal-only handoff to the AppKit picker. The URL remains outside all
+    /// public contracts and serialization surfaces.
+    var macOSSharingURL: URL { url }
+    #elseif os(iOS)
+    /// Internal-only handoff to the UIKit activity presenter. The URL remains
+    /// outside all public contracts and serialization surfaces.
+    var iOSSharingURL: URL { url }
+    #endif
+
     @MainActor
     func qrCodeImage(scale: CGFloat = 12) -> Image? {
         let filter = CIFilter.qrCodeGenerator()

@@ -29,6 +29,24 @@ final class FontCatalogTests: XCTestCase {
         XCTAssertEqual(registered, [bytes])
     }
 
+    func testEnsuringRegisteredBundledFontDoesNotRegisterItAgain() async throws {
+        let bytes = try bundledFontData()
+        let registrar = FontRegistrarFake(names: [bytes: "Noto Sans Runic"])
+        let catalog = FontCatalog(
+            protectedFileStore: FontFileStore(),
+            registrar: registrar,
+            resources: FontResourceLocatorFake(values: [.bundledRuneFont: bytes])
+        )
+
+        try await catalog.registerAvailableFonts()
+        try await catalog.ensureAvailable(reference: .bundled, suppliedBytes: nil)
+
+        let lookups = await registrar.nameLookupBytes()
+        let registrations = await registrar.registeredBytes()
+        XCTAssertEqual(lookups, [bytes, bytes])
+        XCTAssertEqual(registrations, [bytes])
+    }
+
     func testCorruptCustomEntryIsQuarantinedWithoutBlockingValidFontRegistration() async throws {
         let bundled = try bundledFontData()
         let valid = Data("valid-persisted-font".utf8)

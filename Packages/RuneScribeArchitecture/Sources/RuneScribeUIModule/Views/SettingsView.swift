@@ -137,7 +137,10 @@ struct SettingsView: View {
                         Label("ravenforgesoftware.com", systemImage: "globe")
                             .font(.system(size: 12, weight: .semibold, design: .monospaced))
                             .foregroundColor(.runeBlue)
+                            .frame(minHeight: 44, alignment: .leading)
+                            .contentShape(Rectangle())
                     }
+                    .accessibilityLabel("Raven Forge Software website")
                 }
             }
         }

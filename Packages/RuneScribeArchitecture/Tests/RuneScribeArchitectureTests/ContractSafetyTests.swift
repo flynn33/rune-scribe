@@ -183,6 +183,37 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertFalse(eventJSON.contains("runes"))
     }
 
+    func testSensitiveApplicationValuesCannotBeAccidentallySerialized() {
+        XCTAssertFalse(isEncodable(InboundURLDTO.self))
+        XCTAssertFalse(isDecodable(InboundURLDTO.self))
+        XCTAssertFalse(isEncodable(InboundFileDTO.self))
+        XCTAssertFalse(isDecodable(InboundFileDTO.self))
+        XCTAssertFalse(isEncodable(RuneScribeInboundInput.self))
+        XCTAssertFalse(isDecodable(RuneScribeInboundInput.self))
+        XCTAssertFalse(isEncodable(SystemContactDTO.self))
+        XCTAssertFalse(isDecodable(SystemContactDTO.self))
+        XCTAssertFalse(isEncodable(ContactSummary.self))
+        XCTAssertFalse(isDecodable(ContactSummary.self))
+        XCTAssertFalse(isEncodable(ContactLibraryStateDTO.self))
+        XCTAssertFalse(isDecodable(ContactLibraryStateDTO.self))
+        XCTAssertFalse(isEncodable(CreateContactCommand.self))
+        XCTAssertFalse(isDecodable(CreateContactCommand.self))
+        XCTAssertFalse(isEncodable(UpdateContactCommand.self))
+        XCTAssertFalse(isDecodable(UpdateContactCommand.self))
+        XCTAssertFalse(isEncodable(ImportContactsCommand.self))
+        XCTAssertFalse(isDecodable(ImportContactsCommand.self))
+        XCTAssertFalse(isEncodable(ReceivedMessageDTO.self))
+        XCTAssertFalse(isDecodable(ReceivedMessageDTO.self))
+        XCTAssertFalse(isEncodable(EncodeMessageCommand.self))
+        XCTAssertFalse(isDecodable(EncodeMessageCommand.self))
+        XCTAssertFalse(isEncodable(DecodeMessageCommand.self))
+        XCTAssertFalse(isDecodable(DecodeMessageCommand.self))
+        XCTAssertFalse(isEncodable(DecodedMessageResult.self))
+        XCTAssertFalse(isDecodable(DecodedMessageResult.self))
+        XCTAssertFalse(isEncodable(PINInput.self))
+        XCTAssertFalse(isDecodable(PINInput.self))
+    }
+
     func testShareCompletionCarriesAttachmentAcknowledgementWithoutArtifactBytes() throws {
         let artifactID = ShareArtifactID(
             rawValue: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
@@ -227,9 +258,40 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertFalse(applicationSource.contains("SymmetricKey"))
         XCTAssertFalse(applicationSource.contains("keyMaterial"))
         XCTAssertFalse(applicationSource.contains("PINInput: Codable"))
+        XCTAssertFalse(applicationSource.contains("ReceivedMessageDTO: Codable"))
+        XCTAssertFalse(applicationSource.contains("EncodeMessageCommand: Codable"))
+        XCTAssertFalse(applicationSource.contains("DecodeMessageCommand: Codable"))
+        XCTAssertFalse(applicationSource.contains("DecodedMessageResult: Codable"))
+        XCTAssertFalse(applicationSource.contains("ContactSummary: Codable"))
+        XCTAssertFalse(applicationSource.contains("ContactLibraryStateDTO: Codable"))
+        XCTAssertFalse(applicationSource.contains("CreateContactCommand: Codable"))
+        XCTAssertFalse(applicationSource.contains("UpdateContactCommand: Codable"))
+        XCTAssertFalse(applicationSource.contains("ImportContactsCommand: Codable"))
+
+        let inboundSource = try String(
+            contentsOf: contractsDirectory.appendingPathComponent("InboundInputs.swift"),
+            encoding: .utf8
+        )
+        XCTAssertFalse(inboundSource.contains("InboundURLDTO: Codable"))
+        XCTAssertFalse(inboundSource.contains("InboundFileDTO: Codable"))
+        XCTAssertFalse(inboundSource.contains("RuneScribeInboundInput: Codable"))
+
+        let platformSource = try String(
+            contentsOf: contractsDirectory.appendingPathComponent("PlatformContracts.swift"),
+            encoding: .utf8
+        )
+        XCTAssertFalse(platformSource.contains("SystemContactDTO: Codable"))
     }
 
     private func assertSendable<Value: Sendable>(_: Value.Type) {}
+
+    private func isEncodable(_ type: Any.Type) -> Bool {
+        type is any Encodable.Type
+    }
+
+    private func isDecodable(_ type: Any.Type) -> Bool {
+        type is any Decodable.Type
+    }
 }
 
 private struct ReadOnlyClipboardStub: ClipboardReading {

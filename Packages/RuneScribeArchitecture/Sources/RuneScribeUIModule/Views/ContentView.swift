@@ -3,6 +3,25 @@
 import RuneScribeContracts
 import SwiftUI
 
+struct MessageArtifactCompletionGate: Equatable, Sendable {
+    private(set) var inFlightArtifactID: ShareArtifactID?
+
+    mutating func begin(for artifactID: ShareArtifactID) -> Bool {
+        guard inFlightArtifactID == nil else { return false }
+        inFlightArtifactID = artifactID
+        return true
+    }
+
+    mutating func finish(for artifactID: ShareArtifactID) {
+        guard inFlightArtifactID == artifactID else { return }
+        inFlightArtifactID = nil
+    }
+
+    func isCompleting(_ artifactID: ShareArtifactID) -> Bool {
+        inFlightArtifactID == artifactID
+    }
+}
+
 struct ContentView: View {
 
     // MARK: - Environment
@@ -31,6 +50,8 @@ struct ContentView: View {
     @State private var targetSnapshot: String = ""
     @State private var transformStart: Date = .distantPast
     @State private var transformDirection: RuneInscriptionText.Direction = .encode
+    @State private var actionTask: Task<Void, Never>?
+    @State private var actionGeneration: UInt64 = 0
     @State private var settleTask: Task<Void, Never>?
     @State private var copyConfirmed = false
     @State private var showLibrary: Bool = false
@@ -40,6 +61,7 @@ struct ContentView: View {
     /// Scoped Core artifact for a first-delivery attachment. UI receives only the
     /// temporary file reference and completion handle, never payload or key bytes.
     @State private var pendingMessageArtifact: ShareArtifactDTO?
+    @State private var messageArtifactCompletionGate = MessageArtifactCompletionGate()
 
     // Linking the active cipher to a recipient so its first message carries the key.
     @State private var showNewContact = false
@@ -171,10 +193,13 @@ struct ContentView: View {
         .onChange(of: session.route, initial: true) { _, request in
             handleRoute(request)
         }
+        .onChange(of: session.isLocked) { _, isLocked in
+            if isLocked { dismissPresentedContentForLock() }
+        }
         // Changing the mode or the active cipher invalidates a shown result, so
         // drop back to editing rather than leaving stale output on screen.
-        .onChange(of: mode) { _, _ in if !isEditing { returnToEditing() } }
-        .onChange(of: session.activeCipher?.id) { _, _ in if !isEditing { returnToEditing() } }
+        .onChange(of: mode) { _, _ in handleEditingContextChange() }
+        .onChange(of: session.activeCipher?.id) { _, _ in handleEditingContextChange() }
     }
 
     // MARK: - Text Frame (fixed size; only the inner content changes)
@@ -192,6 +217,9 @@ struct ContentView: View {
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
+                    .accessibilityLabel(
+                        mode == .encode ? "Message to encode" : "Runes to decode"
+                    )
 
                 if inputText.isEmpty {
                     Text(mode == .encode ? "Type or paste your message here…"
@@ -251,14 +279,17 @@ struct ContentView: View {
                     }
                 } else {
                     Button {
-                        Task { await performAction() }
+                        beginAction()
                     } label: {
                         Label(mode == .encode ? "RUNE SCRIBE" : "DECODE",
                               systemImage: mode == .encode ? "bolt.fill" : "wand.and.rays")
                     }
                     .buttonStyle(RuneScribButtonStyle())
-                    .keyboardShortcut(.return, modifiers: [.command])
-                    .disabled(actionDisabled)
+                    .keyboardShortcut(
+                        RuneScribeCommandCatalog.primaryAction.key.keyEquivalent,
+                        modifiers: RuneScribeCommandCatalog.primaryAction.modifiers.eventModifiers
+                    )
+                    .disabled(actionDisabled || actionTask != nil)
                 }
                 Spacer()
             }
@@ -346,7 +377,7 @@ struct ContentView: View {
 
             Menu {
                 ForEach(session.ciphers) { cipher in
-                    Button { Task { try? await session.setActive(id: cipher.id) } } label: {
+                    Button { selectActiveCipher(cipher.id) } label: {
                         if cipher.id == session.activeCipher?.id {
                             Label(cipher.label, systemImage: "checkmark")
                         } else {
@@ -368,8 +399,12 @@ struct ContentView: View {
                         .font(.system(size: 10))
                         .foregroundColor(.runeSilver)
                 }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Active cipher: \(session.activeCipher?.label ?? "No Cipher")")
             }
             .menuIndicator(.hidden)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
             .fixedSize()
 
             Spacer()
@@ -379,7 +414,7 @@ struct ContentView: View {
                 .foregroundColor(.runeSilver)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 9)
+        .padding(.vertical, 0)
         .background(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous).fill(Color.runeParchment))
         .overlay(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
             .strokeBorder(Color.runeGold.opacity(0.22), lineWidth: 1))
@@ -407,7 +442,7 @@ struct ContentView: View {
         Menu {
             ForEach(session.contacts) { contact in
                 Button(contact.displayName) {
-                    Task { try? await session.setContact(cipherID: cipher.id, contactID: contact.id) }
+                    linkCipher(cipher.id, to: contact.id)
                 }
             }
             if !session.contacts.isEmpty { Divider() }
@@ -430,38 +465,75 @@ struct ContentView: View {
                 Spacer()
             }
             .padding(.horizontal, 4)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Set recipient to include the key")
         }
     }
 
     // MARK: - Actions
 
-    private func performAction() async {
+    private func beginAction() {
+        guard actionTask == nil else { return }
+        let generation = actionGeneration
+        actionTask = Task { @MainActor in
+            await performAction(generation: generation)
+            actionTask = nil
+        }
+    }
+
+    private func performAction(generation: UInt64) async {
         guard boxPhase == .editing, let activeCipher = session.activeCipher else { return }
         let source = inputText
         let target: String
+        let direction: RuneInscriptionText.Direction
+        var preparedArtifact: ShareArtifactDTO?
         do {
             switch mode {
             case .encode:
                 let result = try await session.encode(source, cipherID: activeCipher.id)
                 target = result.runes
-                transformDirection = .encode
-                pendingMessageArtifact = try await session.prepareMessageShare(
+                direction = .encode
+                preparedArtifact = try await session.prepareMessageShare(
                     runes: result.runes,
                     senderName: activeCipher.label,
                     cipherID: activeCipher.id
                 )
             case .decode:
                 target = try await session.decode(source).plaintext
-                transformDirection = .decode
-                releaseMessageArtifact()
+                direction = .decode
             }
         } catch {
-            decodeError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            guard actionGeneration == generation,
+                  !Task.isCancelled,
+                  !session.isLocked else { return }
+            presentFailure(error)
             return
         }
 
+        guard actionGeneration == generation, !Task.isCancelled else {
+            if let preparedArtifact {
+                await session.releaseShareArtifact(id: preparedArtifact.id)
+            }
+            return
+        }
+        guard !session.isLocked else {
+            if let preparedArtifact {
+                await session.releaseShareArtifact(id: preparedArtifact.id)
+            }
+            dismissPresentedContentForLock()
+            return
+        }
+
+        if let preparedArtifact {
+            pendingMessageArtifact = preparedArtifact
+        } else {
+            releaseMessageArtifact()
+        }
         sourceSnapshot = source
         targetSnapshot = target
+        transformDirection = direction
         transformStart = Date()
         copyConfirmed = false
         boxPhase = .transforming
@@ -480,6 +552,14 @@ struct ContentView: View {
         releaseMessageArtifact()
         copyConfirmed = false
         boxPhase = .editing
+    }
+
+    private func handleEditingContextChange() {
+        if actionTask != nil {
+            actionGeneration &+= 1
+            actionTask?.cancel()
+        }
+        if !isEditing { returnToEditing() }
     }
 
     /// Wipes the composer back to a pristine, empty editing state (the user changed their
@@ -527,8 +607,12 @@ struct ContentView: View {
             source: .manual
         )
         Task {
-            guard let persisted = try? await session.createContact(contact) else { return }
-            try? await session.setContact(cipherID: active.id, contactID: persisted.id)
+            do {
+                let persisted = try await session.createContact(contact)
+                try await session.setContact(cipherID: active.id, contactID: persisted.id)
+            } catch {
+                presentFailure(error)
+            }
         }
     }
 
@@ -539,6 +623,7 @@ struct ContentView: View {
     private func handleRoute(_ request: RuneScribeUIRouteRequest?) {
         guard let request else { return }
         defer { session.consumeRoute(id: request.id) }
+        guard !session.isLocked else { return }
 
         switch request.route {
         case .openCipherLibrary:
@@ -547,10 +632,35 @@ struct ContentView: View {
             showSettings = true
         case .replyToMessage(let cipherID):
             guard session.ciphers.contains(where: { $0.id == cipherID }) else { return }
-            Task { try? await session.setActive(id: cipherID) }
-            mode = .encode
-            if !isEditing { returnToEditing() }
+            Task {
+                do {
+                    try await session.setActive(id: cipherID)
+                    mode = .encode
+                    if !isEditing { returnToEditing() }
+                } catch {
+                    presentFailure(error)
+                }
+            }
         }
+    }
+
+    private func dismissPresentedContentForLock() {
+        actionGeneration &+= 1
+        actionTask?.cancel()
+        settleTask?.cancel()
+        settleTask = nil
+        inputText = ""
+        sourceSnapshot = ""
+        targetSnapshot = ""
+        decodeError = nil
+        copyConfirmed = false
+        boxPhase = .editing
+        showLibrary = false
+        showSettings = false
+        showMessageCompose = false
+        showNewContact = false
+        resetNewContact()
+        beginMessageArtifactCompletion(outcome: .cancelled)
     }
 
     /// The Share button. On the first message to a contact it shares the self-contained
@@ -562,16 +672,12 @@ struct ContentView: View {
     private func shareButton() -> some View {
         if let artifact = pendingMessageArtifact,
            case .file(let fileURL) = artifact.reference {
-            ShareLink(item: fileURL,
-                      preview: SharePreview("Rune Scribe message",
-                                            image: Image(systemName: "doc.fill"))) {
-                Label("Share", systemImage: "square.and.arrow.up")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(RuneSecondaryButtonStyle())
-            .simultaneousGesture(TapGesture().onEnded {
-                Task { await completePreparedArtifact(outcome: .handedOff) }
-            })
+            RuneScribeFileShareLink(
+                fileURL: fileURL,
+                onFinish: { outcome in
+                    beginMessageArtifactCompletion(outcome: outcome)
+                }
+            )
         } else if pendingMessageArtifact == nil {
             Button { } label: {
                 Label("Preparing…", systemImage: "clock")
@@ -617,24 +723,62 @@ struct ContentView: View {
     }
 
     private func handleMessageFinished(_ outcome: ShareArtifactOutcomeDTO) {
-        Task { await completePreparedArtifact(outcome: outcome) }
+        showMessageCompose = false
+        beginMessageArtifactCompletion(outcome: outcome)
     }
     #endif
 
-    private func completePreparedArtifact(outcome: ShareArtifactOutcomeDTO) async {
-        guard let artifact = pendingMessageArtifact else { return }
+    private func beginMessageArtifactCompletion(outcome: ShareArtifactOutcomeDTO) {
+        guard let artifact = pendingMessageArtifact,
+              messageArtifactCompletionGate.begin(for: artifact.id) else { return }
+        Task {
+            await completePreparedArtifact(artifact: artifact, outcome: outcome)
+        }
+    }
+
+    private func completePreparedArtifact(
+        artifact: ShareArtifactDTO,
+        outcome: ShareArtifactOutcomeDTO
+    ) async {
+        defer { messageArtifactCompletionGate.finish(for: artifact.id) }
         do {
             let result = try await session.completeShareArtifact(id: artifact.id, outcome: outcome)
-            if result != .retainedForRetry {
+            if result != .retainedForRetry,
+               pendingMessageArtifact?.id == artifact.id {
                 pendingMessageArtifact = nil
             }
         } catch {
-            decodeError = session.lastError ?? error.localizedDescription
+            presentFailure(error)
         }
+    }
+
+    private func selectActiveCipher(_ id: UUID) {
+        Task {
+            do {
+                try await session.setActive(id: id)
+            } catch {
+                presentFailure(error)
+            }
+        }
+    }
+
+    private func linkCipher(_ cipherID: UUID, to contactID: UUID) {
+        Task {
+            do {
+                try await session.setContact(cipherID: cipherID, contactID: contactID)
+            } catch {
+                presentFailure(error)
+            }
+        }
+    }
+
+    private func presentFailure(_ error: Error) {
+        decodeError = RuneScribeUISession.message(for: error)
     }
 
     private func releaseMessageArtifact() {
         guard let artifact = pendingMessageArtifact else { return }
+        guard !messageArtifactCompletionGate.isCompleting(artifact.id) else { return }
         pendingMessageArtifact = nil
         Task { await session.releaseShareArtifact(id: artifact.id) }
     }

@@ -23,33 +23,33 @@
   },
   "metrics": {
     "architecturePackageMissing": {
-      "maximum": 1,
+      "maximum": 0,
       "owner": "RuntimeFoundation",
-      "reason": "P0 is a shared-source monolith and has no app-owned architecture package yet.",
+      "reason": "The app-owned architecture package is required.",
       "removalPhase": "P2"
     },
     "moduleManifestsMissing": {
-      "maximum": 2,
+      "maximum": 0,
       "owner": "RuntimeFoundation",
-      "reason": "The Core and UI module manifests do not exist in the P0 monolith.",
+      "reason": "Both shipping module manifests are required.",
       "removalPhase": "P2"
     },
     "projectPackageReferenceMissing": {
-      "maximum": 1,
+      "maximum": 0,
       "owner": "BuildConfiguration",
-      "reason": "project.yml cannot reference the local architecture package until that package exists.",
+      "reason": "The generated project must retain the local architecture package reference.",
       "removalPhase": "P2"
     },
     "projectProductDependenciesMissing": {
-      "maximum": 12,
+      "maximum": 0,
       "owner": "BuildConfiguration",
-      "reason": "The two hosts do not yet compose the six required app-owned products.",
+      "reason": "Both shipping hosts must link all six required app-owned products.",
       "removalPhase": "P2"
     },
     "architectureTestTargetMissing": {
-      "maximum": 1,
+      "maximum": 0,
       "owner": "BuildConfiguration",
-      "reason": "The standalone architecture XCTest is present before project target extraction.",
+      "reason": "The standalone architecture XCTest target is required.",
       "removalPhase": "P2"
     },
     "monolithicAppTargets": {
@@ -88,11 +88,23 @@
       "reason": "Only the local media-finish observer registration and removal remain.",
       "removalPhase": "P5"
     },
+    "unexpectedNotificationCenterUses": {
+      "maximum": 0,
+      "owner": "ArchitectureClosure",
+      "reason": "Only the AVPlayer completion observer registration and removal in VideoSplashView are allowed.",
+      "removalPhase": "P7"
+    },
     "temporaryApplicationSessionAdapters": {
       "maximum": 0,
       "owner": "UIMigration",
       "reason": "The UI module owns the sole observable application session.",
       "removalPhase": "P5"
+    },
+    "productionDiagnosticSinkReferences": {
+      "maximum": 0,
+      "owner": "ArchitectureClosure",
+      "reason": "Production modules and hosts must not send sensitive application values to direct diagnostic sinks.",
+      "removalPhase": "P7"
     },
     "hostLegacyBoundaryReferences": {
       "maximum": 0,

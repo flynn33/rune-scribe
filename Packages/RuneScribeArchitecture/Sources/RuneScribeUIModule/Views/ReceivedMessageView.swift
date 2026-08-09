@@ -38,7 +38,12 @@ struct ReceivedMessageView: View {
                             .foregroundColor(.white)
                             .textSelection(.enabled)
                             .fixedSize(horizontal: false, vertical: true)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .frame(
+                                maxWidth: .infinity,
+                                minHeight: 44,
+                                alignment: .leading
+                            )
+                            .contentShape(Rectangle())
                     }
 
                     Text("Decoded with the “\(pending.cipherName)” cipher.")

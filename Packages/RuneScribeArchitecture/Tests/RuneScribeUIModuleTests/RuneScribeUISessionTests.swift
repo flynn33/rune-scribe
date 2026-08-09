@@ -1,12 +1,99 @@
+import AppKit
 import Foundation
 import RuneScribeContracts
 import RuneScribeRuntimeCore
 @testable import RuneScribeUIModule
 import RuneScribeUIRuntime
+import SwiftUI
 import XCTest
 
 @MainActor
 final class RuneScribeUISessionTests: XCTestCase {
+    func testRootImportFailureAlertDoesNotReplaceRetryableConfirmation() {
+        XCTAssertFalse(
+            RootImportFailurePresentation.shouldShowAlert(
+                message: "The import failed.",
+                hasPendingImport: true,
+                isLocked: false,
+                showSplash: false
+            )
+        )
+        XCTAssertTrue(
+            RootImportFailurePresentation.shouldShowAlert(
+                message: "The import failed.",
+                hasPendingImport: false,
+                isLocked: false,
+                showSplash: false
+            )
+        )
+        XCTAssertFalse(
+            RootImportFailurePresentation.shouldShowAlert(
+                message: nil,
+                hasPendingImport: false,
+                isLocked: false,
+                showSplash: false
+            )
+        )
+    }
+
+    func testImportConfirmationFailureRemainsPresentedAndCanRetry() async throws {
+        enum FixtureError: Error {
+            case rejected
+        }
+
+        var attemptedLabels: [String] = []
+        let failed = await ImportConfirmationFlow.attempt(label: "Retry Name") { label in
+            attemptedLabels.append(label)
+            throw FixtureError.rejected
+        }
+
+        XCTAssertEqual(attemptedLabels, ["Retry Name"])
+        XCTAssertFalse(failed.shouldDismiss)
+        guard case let .failed(error) = failed else {
+            return XCTFail("Expected the failed confirmation to remain presented")
+        }
+        XCTAssertTrue(error is FixtureError)
+
+        let importedCipher = Self.fixtureCipherViewState(label: "Retry Name")
+        let retried = await ImportConfirmationFlow.attempt(label: "Retry Name") { label in
+            attemptedLabels.append(label)
+            return Self.fixtureCipherViewState(label: label)
+        }
+
+        XCTAssertEqual(attemptedLabels, ["Retry Name", "Retry Name"])
+        XCTAssertTrue(retried.shouldDismiss)
+        guard case let .imported(cipher) = retried else {
+            return XCTFail("Expected the successful retry to dismiss")
+        }
+        XCTAssertEqual(cipher, importedCipher)
+    }
+
+    func testContactImportFailureRemainsPresentedAndCanRetry() async {
+        var attempts = 0
+        let failed = await ContactImportCommitFlow.attempt {
+            attempts += 1
+            throw StubError.unexpectedCommand
+        }
+
+        XCTAssertEqual(attempts, 1)
+        XCTAssertFalse(failed.shouldDismiss)
+        XCTAssertEqual(
+            failed,
+            .failed("Rune Scribe could not complete the operation.")
+        )
+        if case .failed(let message) = failed {
+            XCTAssertFalse(message.contains(StubError.sensitiveFixtureDetail))
+        }
+
+        let retried = await ContactImportCommitFlow.attempt {
+            attempts += 1
+        }
+
+        XCTAssertEqual(attempts, 2)
+        XCTAssertTrue(retried.shouldDismiss)
+        XCTAssertEqual(retried, .imported)
+    }
+
     func testSnapshotAndPendingMessageProjectWithoutOwningDomainState() async throws {
         let service = ControllableApplicationService()
         let session = makeSession(applicationService: service)
@@ -248,6 +335,435 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertEqual(rootStore.state, .booting)
     }
 
+    func testUserTriggeredMutationFailuresRemainVisibleAndSanitized() async throws {
+        let service = ControllableApplicationService()
+        let session = makeSession(applicationService: service)
+        let cipherID = UUID(uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA")!
+        let contactID = UUID(uuidString: "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB")!
+        let artifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC")!
+        )
+        let contact = ContactViewState(
+            id: contactID,
+            displayName: "Failure Fixture",
+            source: .manual
+        )
+
+        func assertSanitizedFailure(
+            _ operation: () async throws -> Void,
+            file: StaticString = #filePath,
+            line: UInt = #line
+        ) async {
+            do {
+                try await operation()
+                XCTFail("Expected the mutation to fail", file: file, line: line)
+            } catch {
+                XCTAssertEqual(
+                    session.lastError,
+                    "Rune Scribe could not complete the operation.",
+                    file: file,
+                    line: line
+                )
+                XCTAssertFalse(
+                    session.lastError?.contains(StubError.sensitiveFixtureDetail) ?? false,
+                    file: file,
+                    line: line
+                )
+            }
+        }
+
+        await assertSanitizedFailure {
+            _ = try await session.renameCipher(id: cipherID, to: "Renamed")
+        }
+        await assertSanitizedFailure {
+            try await session.deleteCipher(id: cipherID)
+        }
+        await assertSanitizedFailure {
+            try await session.setActive(id: cipherID)
+        }
+        await assertSanitizedFailure {
+            try await session.setContact(cipherID: cipherID, contactID: contactID)
+        }
+        await assertSanitizedFailure {
+            _ = try await session.createContact(contact)
+        }
+        await assertSanitizedFailure {
+            _ = try await session.updateContact(contact)
+        }
+        await assertSanitizedFailure {
+            try await session.deleteContact(id: contactID)
+        }
+        await assertSanitizedFailure {
+            try await session.deleteContacts(ids: [contactID])
+        }
+        await assertSanitizedFailure {
+            try await session.deleteAllImportedContacts()
+        }
+        await assertSanitizedFailure {
+            _ = try await session.importContacts([contact])
+        }
+        await assertSanitizedFailure {
+            _ = try await session.completeShareArtifact(id: artifactID, outcome: .handedOff)
+        }
+    }
+
+    func testMutationViewsDoNotDiscardThrowingSessionResults() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let viewsDirectory = packageRoot
+            .appendingPathComponent("Sources", isDirectory: true)
+            .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+            .appendingPathComponent("Views", isDirectory: true)
+
+        for filename in [
+            "CipherLibraryView.swift",
+            "ContactImportPicker.swift",
+            "ContactsView.swift",
+            "ContentView.swift",
+        ] {
+            let source = try String(
+                contentsOf: viewsDirectory.appendingPathComponent(filename),
+                encoding: .utf8
+            )
+            XCTAssertFalse(
+                source.contains("try? await session."),
+                "\(filename) must surface failures from throwing session operations"
+            )
+        }
+
+        for filename in [
+            "CipherLibraryView.swift",
+            "ContactImportPicker.swift",
+            "ContactsView.swift",
+            "RootView.swift",
+        ] {
+            let source = try String(
+                contentsOf: viewsDirectory.appendingPathComponent(filename),
+                encoding: .utf8
+            )
+            XCTAssertFalse(
+                source.contains("error.localizedDescription"),
+                "\(filename) must project unknown errors through RuneScribeUISession.message(for:)"
+            )
+        }
+    }
+
+    func testMessageArtifactCompletionGateAdmitsOneCompletionUntilFinished() {
+        let first = ShareArtifactID(
+            rawValue: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!
+        )
+        let second = ShareArtifactID(
+            rawValue: UUID(uuidString: "22222222-2222-2222-2222-222222222222")!
+        )
+        var gate = MessageArtifactCompletionGate()
+
+        XCTAssertTrue(gate.begin(for: first))
+        XCTAssertTrue(gate.isCompleting(first))
+        XCTAssertFalse(gate.begin(for: first), "A later delegate must not duplicate completion")
+        XCTAssertFalse(gate.begin(for: second), "Only one artifact completion may be in flight")
+
+        gate.finish(for: second)
+        XCTAssertTrue(gate.isCompleting(first), "A mismatched callback must not release the gate")
+
+        gate.finish(for: first)
+        XCTAssertNil(gate.inFlightArtifactID)
+        XCTAssertTrue(gate.begin(for: second), "A terminal completion must permit the next artifact")
+    }
+
+    func testContentViewLockCleanupClearsSensitiveStateAndCancelsArtifactOnce() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let source = try String(
+            contentsOf: packageRoot
+                .appendingPathComponent("Sources", isDirectory: true)
+                .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+                .appendingPathComponent("Views", isDirectory: true)
+                .appendingPathComponent("ContentView.swift"),
+            encoding: .utf8
+        )
+
+        let lockCleanup = try sourceSection(
+            source,
+            from: "    private func dismissPresentedContentForLock() {",
+            to: "    /// The Share button."
+        )
+        for requiredStatement in [
+            "settleTask?.cancel()",
+            "settleTask = nil",
+            "inputText = \"\"",
+            "sourceSnapshot = \"\"",
+            "targetSnapshot = \"\"",
+            "decodeError = nil",
+            "copyConfirmed = false",
+            "boxPhase = .editing",
+            "showLibrary = false",
+            "showSettings = false",
+            "showMessageCompose = false",
+            "showNewContact = false",
+            "resetNewContact()",
+            "beginMessageArtifactCompletion(outcome: .cancelled)",
+        ] {
+            XCTAssertTrue(
+                lockCleanup.contains(requiredStatement),
+                "Lock cleanup must contain: \(requiredStatement)"
+            )
+        }
+        XCTAssertFalse(lockCleanup.contains("releaseMessageArtifact()"))
+        XCTAssertFalse(lockCleanup.contains("pendingMessageArtifact = nil"))
+
+        let action = try sourceSection(
+            source,
+            from: "    private func performAction(generation: UInt64) async {",
+            to: "    private func returnToEditing() {"
+        )
+        let finalCoreAwait = try XCTUnwrap(
+            action.range(of: "session.prepareMessageShare", options: .backwards)
+        )
+        let postAwaitLockGuard = try XCTUnwrap(
+            action.range(of: "guard !session.isLocked else")
+        )
+        let snapshotCommit = try XCTUnwrap(
+            action.range(of: "sourceSnapshot = source")
+        )
+        XCTAssertLessThan(
+            action.distance(from: action.startIndex, to: finalCoreAwait.lowerBound),
+            action.distance(from: action.startIndex, to: postAwaitLockGuard.lowerBound),
+            "The lock guard must run after the final suspended Core operation"
+        )
+        XCTAssertLessThan(
+            action.distance(from: action.startIndex, to: postAwaitLockGuard.lowerBound),
+            action.distance(from: action.startIndex, to: snapshotCommit.lowerBound),
+            "A resumed action must not repopulate plaintext after lock cleanup"
+        )
+        XCTAssertTrue(action.contains("dismissPresentedContentForLock()"))
+        XCTAssertTrue(action.contains("actionGeneration == generation"))
+        XCTAssertTrue(action.contains("!Task.isCancelled"))
+        XCTAssertTrue(action.contains("await session.releaseShareArtifact(id: preparedArtifact.id)"))
+        XCTAssertLessThan(
+            action.distance(
+                from: action.startIndex,
+                to: try XCTUnwrap(action.range(of: "var preparedArtifact")).lowerBound
+            ),
+            action.distance(
+                from: action.startIndex,
+                to: try XCTUnwrap(action.range(of: "pendingMessageArtifact = preparedArtifact")).lowerBound
+            ),
+            "A prepared artifact must remain local until the action generation commits"
+        )
+
+        let beginAction = try sourceSection(
+            source,
+            from: "    private func beginAction() {",
+            to: "    private func performAction(generation: UInt64) async {"
+        )
+        XCTAssertTrue(beginAction.contains("guard actionTask == nil else"))
+        XCTAssertTrue(beginAction.contains("let generation = actionGeneration"))
+
+        XCTAssertTrue(lockCleanup.contains("actionGeneration &+= 1"))
+        XCTAssertTrue(lockCleanup.contains("actionTask?.cancel()"))
+
+        let beginCompletion = try sourceSection(
+            source,
+            from: "    private func beginMessageArtifactCompletion(",
+            to: "    private func completePreparedArtifact("
+        )
+        XCTAssertTrue(beginCompletion.contains("pendingMessageArtifact"))
+        XCTAssertTrue(
+            beginCompletion.contains("messageArtifactCompletionGate.begin(for: artifact.id)")
+        )
+        XCTAssertTrue(
+            beginCompletion.contains(
+                "completePreparedArtifact(artifact: artifact, outcome: outcome)"
+            )
+        )
+
+        let completion = try sourceSection(
+            source,
+            from: "    private func completePreparedArtifact(",
+            to: "    private func selectActiveCipher("
+        )
+        let coreCompletion = try XCTUnwrap(
+            completion.range(of: "try await session.completeShareArtifact")
+        )
+        let referenceClear = try XCTUnwrap(
+            completion.range(of: "pendingMessageArtifact = nil")
+        )
+        XCTAssertLessThan(
+            completion.distance(from: completion.startIndex, to: coreCompletion.lowerBound),
+            completion.distance(from: completion.startIndex, to: referenceClear.lowerBound),
+            "The UI must retain the artifact reference until Core cancellation completes"
+        )
+
+        let messageFinished = try sourceSection(
+            source,
+            from: "    private func handleMessageFinished(",
+            to: "    #endif"
+        )
+        let hidesComposer = try XCTUnwrap(
+            messageFinished.range(of: "showMessageCompose = false")
+        )
+        let beginsCompletion = try XCTUnwrap(
+            messageFinished.range(of: "beginMessageArtifactCompletion(outcome: outcome)")
+        )
+        XCTAssertLessThan(
+            messageFinished.distance(from: messageFinished.startIndex, to: hidesComposer.lowerBound),
+            messageFinished.distance(from: messageFinished.startIndex, to: beginsCompletion.lowerBound)
+        )
+
+        let normalRelease = String(
+            source[try XCTUnwrap(
+                source.range(of: "    private func releaseMessageArtifact() {")
+            ).lowerBound...]
+        )
+        XCTAssertTrue(
+            normalRelease.contains("messageArtifactCompletionGate.isCompleting(artifact.id)")
+        )
+
+        let returnToEditing = try sourceSection(
+            source,
+            from: "    private func returnToEditing() {",
+            to: "    /// Wipes the composer back to a pristine"
+        )
+        for preservedStatement in [
+            "settleTask?.cancel()",
+            "releaseMessageArtifact()",
+            "copyConfirmed = false",
+            "boxPhase = .editing",
+        ] {
+            XCTAssertTrue(
+                returnToEditing.contains(preservedStatement),
+                "Edit behavior must retain: \(preservedStatement)"
+            )
+        }
+
+        let reset = try sourceSection(
+            source,
+            from: "    private func reset() {",
+            to: "    private var copyButtonTitle: String {"
+        )
+        for preservedStatement in [
+            "settleTask?.cancel()",
+            "inputText = \"\"",
+            "sourceSnapshot = \"\"",
+            "targetSnapshot = \"\"",
+            "releaseMessageArtifact()",
+            "copyConfirmed = false",
+            "decodeError = nil",
+            "boxPhase = .editing",
+        ] {
+            XCTAssertTrue(
+                reset.contains(preservedStatement),
+                "Reset behavior must retain: \(preservedStatement)"
+            )
+        }
+    }
+
+    func testRepresentativeUserFacingViewsRenderForParityInspection() async throws {
+        let service = ControllableApplicationService()
+        let session = makeSession(applicationService: service)
+        try session.start()
+        service.yieldState(
+            Self.fixtureSnapshot(
+                revision: 40,
+                plaintext: "Synthetic parity message",
+                includeFailures: false
+            )
+        )
+        let snapshotArrived = await eventually { session.snapshot?.revision == 40 }
+        XCTAssertTrue(snapshotArrived)
+
+        let pendingImportID = try XCTUnwrap(
+            UUID(uuidString: "DDDDDDDD-DDDD-DDDD-DDDD-DDDDDDDDDDDD")
+        )
+        let pendingImport = PendingImportSummary(
+            id: ImportID(rawValue: pendingImportID),
+            suggestedName: "Shared Cipher",
+            source: .link,
+            includesFont: true
+        )
+        let pendingMessage = try XCTUnwrap(session.pendingMessage)
+        let qrArtifactID = try XCTUnwrap(
+            UUID(uuidString: "EEEEEEEE-EEEE-EEEE-EEEE-EEEEEEEEEEEE")
+        )
+        let qrTransfer = OpaqueShareTransfer(
+            artifactID: ShareArtifactID(rawValue: qrArtifactID),
+            url: try XCTUnwrap(URL(string: "runescribe://import?p=synthetic-parity"))
+        )
+        let views: [(String, AnyView, CGSize)] = [
+            (
+                "workspace",
+                AnyView(
+                    ContentView()
+                        .environmentObject(session)
+                        .environment(\.runeScribeMetalLibraryURL, nil)
+                ),
+                CGSize(width: 600, height: 720)
+            ),
+            (
+                "lock",
+                AnyView(LockView().environmentObject(session)),
+                CGSize(width: 600, height: 720)
+            ),
+            (
+                "cipher-library",
+                AnyView(CipherLibraryView().environmentObject(session)),
+                CGSize(width: 600, height: 720)
+            ),
+            (
+                "contacts",
+                AnyView(ContactsView().environmentObject(session)),
+                CGSize(width: 600, height: 720)
+            ),
+            (
+                "settings",
+                AnyView(SettingsView().environmentObject(session)),
+                CGSize(width: 600, height: 720)
+            ),
+            (
+                "pin-flow",
+                AnyView(PINFlowView(mode: .change).environmentObject(session)),
+                CGSize(width: 600, height: 720)
+            ),
+            (
+                "import-confirmation",
+                AnyView(
+                    ImportConfirmView(
+                        pending: pendingImport,
+                        confirmImport: { _ in throw StubError.unexpectedCommand }
+                    )
+                ),
+                CGSize(width: 600, height: 720)
+            ),
+            (
+                "received-message",
+                AnyView(ReceivedMessageView(pending: pendingMessage)),
+                CGSize(width: 600, height: 720)
+            ),
+            (
+                "qr-share",
+                AnyView(QRDisplaySheet(transfer: qrTransfer, label: "Freya")),
+                CGSize(width: 600, height: 720)
+            ),
+            (
+                "license",
+                AnyView(LicenseView()),
+                CGSize(width: 600, height: 720)
+            ),
+        ]
+
+        for (name, view, size) in views {
+            let pngData = try renderPNG(view, size: size)
+            XCTAssertGreaterThan(pngData.count, 10_000, "\(name) did not render meaningful output")
+            try writeParityArtifactIfRequested(pngData, name: name)
+        }
+
+        await session.stop()
+    }
+
     private func makeSession(
         applicationService: any RuneScribeApplicationService,
         clipboard: any ClipboardWriting = LifetimeClipboard()
@@ -262,6 +778,18 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
     }
 
+    private func sourceSection(
+        _ source: String,
+        from startMarker: String,
+        to endMarker: String
+    ) throws -> String {
+        let start = try XCTUnwrap(source.range(of: startMarker))
+        let end = try XCTUnwrap(
+            source.range(of: endMarker, range: start.upperBound..<source.endIndex)
+        )
+        return String(source[start.lowerBound..<end.lowerBound])
+    }
+
     private func eventually(
         _ predicate: @escaping @MainActor () -> Bool
     ) async -> Bool {
@@ -272,6 +800,33 @@ final class RuneScribeUISessionTests: XCTestCase {
             await Task.yield()
         }
         return predicate()
+    }
+
+    private func renderPNG(_ view: AnyView, size: CGSize) throws -> Data {
+        let hostingView = NSHostingView(rootView: view.frame(width: size.width, height: size.height))
+        hostingView.frame = NSRect(origin: .zero, size: size)
+        hostingView.layoutSubtreeIfNeeded()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.02))
+        hostingView.layoutSubtreeIfNeeded()
+        hostingView.displayIfNeeded()
+
+        let bitmap = try XCTUnwrap(
+            hostingView.bitmapImageRepForCachingDisplay(in: hostingView.bounds)
+        )
+        hostingView.cacheDisplay(in: hostingView.bounds, to: bitmap)
+        return try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
+    }
+
+    private func writeParityArtifactIfRequested(_ data: Data, name: String) throws {
+        guard let path = ProcessInfo.processInfo.environment["RUNESCRIBE_PARITY_ARTIFACT_DIR"] else {
+            return
+        }
+        let directory = URL(fileURLWithPath: path, isDirectory: true)
+        try FileManager.default.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+        try data.write(to: directory.appendingPathComponent("\(name).png"), options: .atomic)
     }
 
     private static func fixtureSnapshot(
@@ -359,10 +914,30 @@ final class RuneScribeUISessionTests: XCTestCase {
                 : nil
         )
     }
+
+    private static func fixtureCipherViewState(label: String) -> CipherViewState {
+        CipherViewState(
+            id: UUID(uuidString: "DDDDDDDD-DDDD-DDDD-DDDD-DDDDDDDDDDDD")!,
+            label: label,
+            origin: .imported,
+            createdAt: Date(timeIntervalSince1970: 1_700_000_000),
+            isActive: true,
+            contactID: nil,
+            delivered: false,
+            publicIdentifier: "1234567890ABCDEF",
+            fontName: "Elder Runes"
+        )
+    }
 }
 
-private enum StubError: Error {
+private enum StubError: LocalizedError {
     case unexpectedCommand
+
+    static let sensitiveFixtureDetail = "sensitive-fixture-detail-must-not-be-presented"
+
+    var errorDescription: String? {
+        Self.sensitiveFixtureDetail
+    }
 }
 
 private actor LifetimeProbe {}

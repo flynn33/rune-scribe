@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		01C55610EF12C17DA83396B2 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
 		059BA5D329AA9280083DF044 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
+		0F2990FFD15A155F37384B6C /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 526327790FEC30FB6FC7338D /* RuneScribeUIModule */; };
 		199233F0AC33FEF97975F320 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */; };
 		1CC0EAA7DFAE0294F058AAD4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */; };
 		34A07D593701D17AEC1FC143 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
@@ -18,29 +19,62 @@
 		50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
 		55BBA4421D3374DFFDED21C7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */; };
 		584241169D94C9A2AA41FD95 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
+		61AD60DA89946689B85BE523 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = 1602D1A139FE82FFA3C040DF /* RuneScribePlatform */; };
+		61DD380B448CD6318D7544DC /* PlatformPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */; };
+		6E70CD7158A62E597DC2C1EF /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 2CE6E93CB8CD48A870CF5C1A /* RuneScribeContracts */; };
 		7E3C668B9F878D13520BDE95 /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 399C59CC597482097433F43B /* RuneScribeContracts */; };
+		8196FFC54AF35A7034F9585D /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = FC00F092BEFF6E296536B9D8 /* RuneScribeCoreModule */; };
+		8E8BF64F215D751B78111DC4 /* AppHostRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */; };
 		8F80EB6127FCD18CB29C7C3D /* CompatibilityBaselineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */; };
 		94F3288DDBB27DDAEA96A20A /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 4D1C1664E02BEE34BC1CC37A /* RuneScribeCoreModule */; };
 		957D220785271243149B5236 /* RuntimeCompositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */; };
 		973EBAFA7B1E6A25FAE46B58 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
+		99B4D5CC341ADAAD426D63CF /* KeychainMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */; };
 		9AA4B4737E553835B70F9291 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = B3DFFDF31121756FBA7CFE9C /* RuneScribePlatform */; };
 		9B01C258EBB2B91127ABE1BC /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 13B5BAB3ED96974D3FAE69DD /* RuneScribeUIRuntime */; };
+		9EFFE214115C8E88F90F758F /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		A700A5151432D38B2EA96278 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 6CB0F11D349F8C67B5821299 /* RuneScribeUIModule */; };
 		A86EDA53424B9C65FC09E8D5 /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5E51F0E25CDF33AA3544E166 /* RuneScribeRuntimeCore */; };
+		ACCFADEC7CC38129C840E861 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
+		AD024D560D851D28CD7A1FDD /* NativeShareOutcomeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */; };
 		ADE58C68BC79EBBE8A2CA9C5 /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */; };
+		B011B6247C5A28BCF3FFDEA9 /* RuneScribeParityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */; };
 		B6B430C316B5F38F6DD36441 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */; };
 		B98E838AC8959237CB19A737 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 52B302D4A6F1BF026533FEFF /* RuneScribeUIModule */; };
 		D8AFBCE3366CC1C34C988AA8 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		DCF8F4F29B85C086E1ED3EC6 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */; };
 		DF507FCE9560AFB1813D59E7 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = CE59E4D588F69BF2E639C88F /* RuneScribePlatform */; };
+		DF96354EF55869EE06DB0AB6 /* RuneScribMacParityHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */; };
 		E0D344E8AB8FD067801E6E67 /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 76FB922C8FCA530F81C93F60 /* RuneScribeContracts */; };
 		E8945513767815C9E3871E78 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */; };
+		F3C8BD65A026CB058E9873F9 /* RuneScribeMacParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */; };
 		F7A6DCFC817B53A36467433D /* ArchitectureGuardrailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */; };
 		FAE1E2AAB9525E7A3C4E51DC /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		2AFCA44169FBCE9C02D119EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 31B4924C70AF8C14A282AF11;
+			remoteInfo = "RuneScrib-iOS";
+		};
+		4694840E3234730B79BA5D26 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B0EAA089C274A9658D6E37A7;
+			remoteInfo = RuneScribMacParityHost;
+		};
+		5033A05F4B4454B465C244F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 31B4924C70AF8C14A282AF11;
+			remoteInfo = "RuneScrib-iOS";
+		};
 		CDF9BB784C987E98AA226AE9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
@@ -51,19 +85,31 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHostRoutingTests.swift; sourceTree = "<group>"; };
 		0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribArchitectureTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RuneScribIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E4FF66651C4BB9C0C94DB4B /* RuneScrib.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuneScrib.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33965AD6B626161B2307C925 /* RuneScribTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeShareOutcomeTests.swift; sourceTree = "<group>"; };
+		4B31D2BF5EC1E6D84B23D71C /* RuneScribMacParityTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribMacParityTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RuneScribIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		51CE0B6CA2B2FBDB70249458 /* RuneScribeArchitecture */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RuneScribeArchitecture; path = Packages/RuneScribeArchitecture; sourceTree = SOURCE_ROOT; };
+		6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainMigrationTests.swift; sourceTree = "<group>"; };
 		70806C8FC5D83F211738FAAD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */ = {isa = PBXFileReference; path = "raven-forge-spp-splash.mp4"; sourceTree = "<group>"; };
 		78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansRunic-Regular.ttf"; sourceTree = "<group>"; };
 		8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchitectureGuardrailTests.swift; sourceTree = "<group>"; };
 		84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeCompositionTests.swift; sourceTree = "<group>"; };
 		88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityBaselineTests.swift; sourceTree = "<group>"; };
+		94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeParityUITests.swift; sourceTree = "<group>"; };
 		A9AB41A04A01C3ECB14E8D8B /* RuneScrib.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RuneScrib.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribMacParityHostApp.swift; sourceTree = "<group>"; };
 		B6164CCB0C4A4342270DC5CA /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
+		BD88036C0FE8E9BFB419B68D /* RuneScribMacParityHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuneScribMacParityHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformPresentationTests.swift; sourceTree = "<group>"; };
 		C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeRuntimeComposition.swift; sourceTree = "<group>"; };
+		C4EDEF8A8D6DD1D6CEEF3BE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeMacParityTests.swift; sourceTree = "<group>"; };
 		D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribApp.swift; sourceTree = "<group>"; };
@@ -80,6 +126,17 @@
 				DF507FCE9560AFB1813D59E7 /* RuneScribePlatform in Frameworks */,
 				94F3288DDBB27DDAEA96A20A /* RuneScribeCoreModule in Frameworks */,
 				A700A5151432D38B2EA96278 /* RuneScribeUIModule in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8E7420985153B758E8CAACD4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E70CD7158A62E597DC2C1EF /* RuneScribeContracts in Frameworks */,
+				8196FFC54AF35A7034F9585D /* RuneScribeCoreModule in Frameworks */,
+				61AD60DA89946689B85BE523 /* RuneScribePlatform in Frameworks */,
+				0F2990FFD15A155F37384B6C /* RuneScribeUIModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,9 +180,22 @@
 				EE4967BD5360F78915C6036F /* Packages */,
 				9875A592B5AF26023CDC6CEC /* RuneScrib */,
 				D8A25D577325F05220F4D89A /* RuneScribArchitectureTests */,
+				D4AB11C27235965DA1BF0E1A /* RuneScribIOSTests */,
+				B03791E99B717082B44F5378 /* RuneScribIOSUITests */,
+				5272F0D466DF0BE5C97CFC68 /* RuneScribMacParityHost */,
+				FF0DB0269C9429B0955322F7 /* RuneScribMacParityTests */,
 				EC820C2DB89AA33F3C1A4976 /* RuneScribTests */,
 				EAFA06AF269D7ED7E4731EE3 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		5272F0D466DF0BE5C97CFC68 /* RuneScribMacParityHost */ = {
+			isa = PBXGroup;
+			children = (
+				C4EDEF8A8D6DD1D6CEEF3BE5 /* Info.plist */,
+				ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */,
+			);
+			path = RuneScribMacParityHost;
 			sourceTree = "<group>";
 		};
 		7C5FDB5E16F112EAD70C17D8 /* Fonts */ = {
@@ -147,6 +217,25 @@
 			path = RuneScrib;
 			sourceTree = "<group>";
 		};
+		B03791E99B717082B44F5378 /* RuneScribIOSUITests */ = {
+			isa = PBXGroup;
+			children = (
+				94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */,
+			);
+			path = RuneScribIOSUITests;
+			sourceTree = "<group>";
+		};
+		D4AB11C27235965DA1BF0E1A /* RuneScribIOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */,
+				6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */,
+				41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */,
+				C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */,
+			);
+			path = RuneScribIOSTests;
+			sourceTree = "<group>";
+		};
 		D8A25D577325F05220F4D89A /* RuneScribArchitectureTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -161,6 +250,10 @@
 				A9AB41A04A01C3ECB14E8D8B /* RuneScrib.app */,
 				1E4FF66651C4BB9C0C94DB4B /* RuneScrib.app */,
 				0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */,
+				1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */,
+				4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */,
+				BD88036C0FE8E9BFB419B68D /* RuneScribMacParityHost.app */,
+				4B31D2BF5EC1E6D84B23D71C /* RuneScribMacParityTests.xctest */,
 				33965AD6B626161B2307C925 /* RuneScribTests.xctest */,
 			);
 			name = Products;
@@ -193,9 +286,36 @@
 			path = AppHost;
 			sourceTree = "<group>";
 		};
+		FF0DB0269C9429B0955322F7 /* RuneScribMacParityTests */ = {
+			isa = PBXGroup;
+			children = (
+				CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */,
+			);
+			path = RuneScribMacParityTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		2DD54B0EDB51920A4B33A6A2 /* RuneScribIOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F36B8D5D0B12F0CA0E1A1E91 /* Build configuration list for PBXNativeTarget "RuneScribIOSUITests" */;
+			buildPhases = (
+				09913040E6AB412E27A36DD5 /* Sources */,
+				6ABABD57A8BCA66F0377F836 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B4847232AD12DC5AFAA252AC /* PBXTargetDependency */,
+			);
+			name = RuneScribIOSUITests;
+			packageProductDependencies = (
+			);
+			productName = RuneScribIOSUITests;
+			productReference = 4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0C9E5AD021D6AB7463C69634 /* Build configuration list for PBXNativeTarget "RuneScrib-iOS" */;
@@ -263,6 +383,65 @@
 			productReference = 0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		B0EAA089C274A9658D6E37A7 /* RuneScribMacParityHost */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8F00B1DAE780700E478E0759 /* Build configuration list for PBXNativeTarget "RuneScribMacParityHost" */;
+			buildPhases = (
+				584F011872D142BA41680120 /* Sources */,
+				8E7420985153B758E8CAACD4 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RuneScribMacParityHost;
+			packageProductDependencies = (
+				2CE6E93CB8CD48A870CF5C1A /* RuneScribeContracts */,
+				FC00F092BEFF6E296536B9D8 /* RuneScribeCoreModule */,
+				1602D1A139FE82FFA3C040DF /* RuneScribePlatform */,
+				526327790FEC30FB6FC7338D /* RuneScribeUIModule */,
+			);
+			productName = RuneScribMacParityHost;
+			productReference = BD88036C0FE8E9BFB419B68D /* RuneScribMacParityHost.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C9187941FA930F4FC80F6495 /* RuneScribMacParityTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C5578A7B4655C4175187DA6B /* Build configuration list for PBXNativeTarget "RuneScribMacParityTests" */;
+			buildPhases = (
+				637F403A3BEF27E71F1A4CBE /* Sources */,
+				7EFFAEEB440D9B6FA54AE6DB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E91679BBF17FE7B62CBA6A9E /* PBXTargetDependency */,
+			);
+			name = RuneScribMacParityTests;
+			packageProductDependencies = (
+			);
+			productName = RuneScribMacParityTests;
+			productReference = 4B31D2BF5EC1E6D84B23D71C /* RuneScribMacParityTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D286A58674744CBB19D5476D /* RuneScribIOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B52BFD3B4B43442BB40D6BFE /* Build configuration list for PBXNativeTarget "RuneScribIOSTests" */;
+			buildPhases = (
+				E38093737CE2C17A124824A1 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1166786C257BFE4013E933DB /* PBXTargetDependency */,
+			);
+			name = RuneScribIOSTests;
+			packageProductDependencies = (
+			);
+			productName = RuneScribIOSTests;
+			productReference = 1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		E1E13F36C6719C0391C636A6 /* RuneScribTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AB2D1B05CEE59E518C97913F /* Build configuration list for PBXNativeTarget "RuneScribTests" */;
@@ -290,6 +469,11 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					2DD54B0EDB51920A4B33A6A2 = {
+						DevelopmentTeam = 9AQ2C2838M;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 31B4924C70AF8C14A282AF11;
+					};
 					31B4924C70AF8C14A282AF11 = {
 						DevelopmentTeam = 9AQ2C2838M;
 						ProvisioningStyle = Automatic;
@@ -297,6 +481,18 @@
 					9DC46FB3B5C4089358C387BB = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Manual;
+					};
+					B0EAA089C274A9658D6E37A7 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
+					C9187941FA930F4FC80F6495 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
+					D286A58674744CBB19D5476D = {
+						DevelopmentTeam = 9AQ2C2838M;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -317,10 +513,14 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */,
 				6F186131C8C4C80632D23A6E /* RuneScrib-macOS */,
-				9DC46FB3B5C4089358C387BB /* RuneScribArchitectureTests */,
+				31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */,
 				E1E13F36C6719C0391C636A6 /* RuneScribTests */,
+				D286A58674744CBB19D5476D /* RuneScribIOSTests */,
+				2DD54B0EDB51920A4B33A6A2 /* RuneScribIOSUITests */,
+				B0EAA089C274A9658D6E37A7 /* RuneScribMacParityHost */,
+				C9187941FA930F4FC80F6495 /* RuneScribMacParityTests */,
+				9DC46FB3B5C4089358C387BB /* RuneScribArchitectureTests */,
 			);
 		};
 /* End PBXProject section */
@@ -334,6 +534,22 @@
 				059BA5D329AA9280083DF044 /* NotoSansRunic-Regular.ttf in Resources */,
 				FAE1E2AAB9525E7A3C4E51DC /* OFL.txt in Resources */,
 				DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6ABABD57A8BCA66F0377F836 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ACCFADEC7CC38129C840E861 /* NotoSansRunic-Regular.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EFFAEEB440D9B6FA54AE6DB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9EFFE214115C8E88F90F758F /* NotoSansRunic-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -351,12 +567,36 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		09913040E6AB412E27A36DD5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B011B6247C5A28BCF3FFDEA9 /* RuneScribeParityUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4A96ECE4F6D0AB49F62AF2B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				8F80EB6127FCD18CB29C7C3D /* CompatibilityBaselineTests.swift in Sources */,
 				957D220785271243149B5236 /* RuntimeCompositionTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		584F011872D142BA41680120 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DF96354EF55869EE06DB0AB6 /* RuneScribMacParityHostApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		637F403A3BEF27E71F1A4CBE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F3C8BD65A026CB058E9873F9 /* RuneScribeMacParityTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -379,6 +619,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E38093737CE2C17A124824A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E8BF64F215D751B78111DC4 /* AppHostRoutingTests.swift in Sources */,
+				99B4D5CC341ADAAD426D63CF /* KeychainMigrationTests.swift in Sources */,
+				AD024D560D851D28CD7A1FDD /* NativeShareOutcomeTests.swift in Sources */,
+				61DD380B448CD6318D7544DC /* PlatformPresentationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EDD54B161D2552E0027B88C8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -393,10 +644,25 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1166786C257BFE4013E933DB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */;
+			targetProxy = 2AFCA44169FBCE9C02D119EF /* PBXContainerItemProxy */;
+		};
+		B4847232AD12DC5AFAA252AC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */;
+			targetProxy = 5033A05F4B4454B465C244F6 /* PBXContainerItemProxy */;
+		};
 		BA899E8B07807A8A22CDACDC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6F186131C8C4C80632D23A6E /* RuneScrib-macOS */;
 			targetProxy = CDF9BB784C987E98AA226AE9 /* PBXContainerItemProxy */;
+		};
+		E91679BBF17FE7B62CBA6A9E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B0EAA089C274A9658D6E37A7 /* RuneScribMacParityHost */;
+			targetProxy = 4694840E3234730B79BA5D26 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -483,11 +749,74 @@
 				MARKETING_VERSION = 1.0.33;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.runescribe.app;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(RUNESCRIBE_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUNESCRIBE_APP_BUNDLE_IDENTIFIER = com.runescribe.app;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		211DA3F9F2C8927BAD9110FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.ios-ui-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "RuneScrib-iOS";
+			};
+			name = Release;
+		};
+		219DC37BDB3B0EB87424DE63 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.ios-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/RuneScrib";
+			};
+			name = Release;
+		};
+		21A8AAD3C14C0A88C7765540 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-parity-tests";
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScribMacParityHost.app/Contents/MacOS/RuneScribMacParityHost";
 			};
 			name = Release;
 		};
@@ -510,6 +839,30 @@
 			};
 			name = Debug;
 		};
+		2AE5FAEFA91E6728B6AD3903 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RuneScribMacParityHost/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-parity-host";
+				PRODUCT_NAME = RuneScribMacParityHost;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		4215546946FD24A222C1E674 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -527,6 +880,72 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.runescribe.app.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/Contents/MacOS/RuneScrib";
+			};
+			name = Debug;
+		};
+		493B3CF1FD008F2194C41633 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RuneScribMacParityHost/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-parity-host";
+				PRODUCT_NAME = RuneScribMacParityHost;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		64340CCFDB78528559AF93C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-parity-tests";
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScribMacParityHost.app/Contents/MacOS/RuneScribMacParityHost";
+			};
+			name = Debug;
+		};
+		6503E54C28214F804EBDFE23 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.ios-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/RuneScrib";
 			};
 			name = Debug;
 		};
@@ -570,6 +989,26 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		A533D89F3656A94CD1D465BE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.ios-ui-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "RuneScrib-iOS";
+			};
+			name = Debug;
 		};
 		B44B9B5D9D56451DC50E6B2A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -640,8 +1079,9 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.runescribe.app;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(RUNESCRIBE_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUNESCRIBE_APP_BUNDLE_IDENTIFIER = com.runescribe.app;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
@@ -759,11 +1199,47 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		8F00B1DAE780700E478E0759 /* Build configuration list for PBXNativeTarget "RuneScribMacParityHost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				493B3CF1FD008F2194C41633 /* Debug */,
+				2AE5FAEFA91E6728B6AD3903 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		AB2D1B05CEE59E518C97913F /* Build configuration list for PBXNativeTarget "RuneScribTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4215546946FD24A222C1E674 /* Debug */,
 				0F29AF3B0C30060966DA81F3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B52BFD3B4B43442BB40D6BFE /* Build configuration list for PBXNativeTarget "RuneScribIOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6503E54C28214F804EBDFE23 /* Debug */,
+				219DC37BDB3B0EB87424DE63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C5578A7B4655C4175187DA6B /* Build configuration list for PBXNativeTarget "RuneScribMacParityTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				64340CCFDB78528559AF93C1 /* Debug */,
+				21A8AAD3C14C0A88C7765540 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F36B8D5D0B12F0CA0E1A1E91 /* Build configuration list for PBXNativeTarget "RuneScribIOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A533D89F3656A94CD1D465BE /* Debug */,
+				211DA3F9F2C8927BAD9110FE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -786,9 +1262,17 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeUIRuntime;
 		};
+		1602D1A139FE82FFA3C040DF /* RuneScribePlatform */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribePlatform;
+		};
 		24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeCoreModule;
+		};
+		2CE6E93CB8CD48A870CF5C1A /* RuneScribeContracts */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeContracts;
 		};
 		399C59CC597482097433F43B /* RuneScribeContracts */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -797,6 +1281,10 @@
 		4D1C1664E02BEE34BC1CC37A /* RuneScribeCoreModule */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeCoreModule;
+		};
+		526327790FEC30FB6FC7338D /* RuneScribeUIModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeUIModule;
 		};
 		52B302D4A6F1BF026533FEFF /* RuneScribeUIModule */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -825,6 +1313,10 @@
 		CE59E4D588F69BF2E639C88F /* RuneScribePlatform */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribePlatform;
+		};
+		FC00F092BEFF6E296536B9D8 /* RuneScribeCoreModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeCoreModule;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -83,6 +83,7 @@ struct RuneEyebrow: View {
         HStack(spacing: 7) {
             Image(systemName: systemImage)
                 .font(.system(size: 11, weight: .semibold))
+                .accessibilityHidden(true)
             Text(title.uppercased())
                 .font(.system(size: 11, weight: .semibold, design: .monospaced))
                 .tracking(2.5)
@@ -148,8 +149,11 @@ struct RuneHeader: View {
                                     .frame(width: 28, height: 28)
                                     .background(Circle().fill(Color.runeNavy.opacity(0.55)))
                                     .overlay(Circle().strokeBorder(Color.runeSilver.opacity(0.30), lineWidth: 1))
+                                    .frame(width: 44, height: 44)
+                                    .contentShape(Circle())
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel(button.help)
                             .help(button.help)
                         }
                     }

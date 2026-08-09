@@ -177,7 +177,10 @@ struct ContactsView: View {
 
     private var emptyState: some View {
         VStack(spacing: 8) {
-            Image(systemName: "person.2").font(.system(size: 28)).foregroundColor(.runeSilver.opacity(0.5))
+            Image(systemName: "person.2")
+                .font(.system(size: 28))
+                .foregroundColor(.runeSilver.opacity(0.5))
+                .accessibilityHidden(true)
             Text("No contacts yet").font(.system(size: 14, weight: .semibold)).foregroundColor(.runeSilver)
             Text("Add people to organize your ciphers by.")
                 .font(.system(size: 12)).foregroundColor(.runeSilver.opacity(0.7))
@@ -213,10 +216,16 @@ struct ContactsView: View {
                 // removing a contact is always discoverable.
                 Button { editTarget = contact; editName = contact.displayName; showEdit = true } label: {
                     Image(systemName: "pencil").foregroundColor(.runeSilver)
-                }.buttonStyle(.plain).help("Rename")
+                }
+                .buttonStyle(.plain)
+                .help("Rename \(contact.displayName)")
+                .accessibilityLabel("Rename \(contact.displayName)")
                 Button { deleteTarget = contact; showDelete = true } label: {
                     Image(systemName: "trash").foregroundColor(.red.opacity(0.85))
-                }.buttonStyle(.plain).help("Delete")
+                }
+                .buttonStyle(.plain)
+                .help("Delete \(contact.displayName)")
+                .accessibilityLabel("Delete \(contact.displayName)")
             }
         }
         .padding(16)
@@ -270,15 +279,28 @@ struct ContactsView: View {
         let name = editName.trimmingCharacters(in: .whitespacesAndNewlines)
         if !name.isEmpty {
             c.displayName = name
-            Task { try? await session.updateContact(c) }
+            Task {
+                do {
+                    _ = try await session.updateContact(c)
+                    editTarget = nil
+                } catch {
+                    presentSaveFailure(error)
+                }
+            }
+        } else {
+            editTarget = nil
         }
-        editTarget = nil
     }
     private func commitDelete() {
-        if let target = deleteTarget {
-            Task { try? await session.deleteContact(id: target.id) }
+        guard let target = deleteTarget else { return }
+        Task {
+            do {
+                try await session.deleteContact(id: target.id)
+                deleteTarget = nil
+            } catch {
+                presentSaveFailure(error)
+            }
         }
-        deleteTarget = nil
     }
     private func toggleSelecting() {
         selecting.toggle()
@@ -289,14 +311,27 @@ struct ContactsView: View {
     }
     private func commitBulkDelete() {
         let ids = selection
-        Task { try? await session.deleteContacts(ids: ids) }
-        selection.removeAll()
-        selecting = false
+        guard !ids.isEmpty else { return }
+        Task {
+            do {
+                try await session.deleteContacts(ids: ids)
+                selection.removeAll()
+                selecting = false
+            } catch {
+                presentSaveFailure(error)
+            }
+        }
     }
     private func commitRemoveAllImported() {
-        Task { try? await session.deleteAllImportedContacts() }
-        selection.removeAll()
-        selecting = false
+        Task {
+            do {
+                try await session.deleteAllImportedContacts()
+                selection.removeAll()
+                selecting = false
+            } catch {
+                presentSaveFailure(error)
+            }
+        }
     }
     private func beginSelectiveImport() {
         #if os(iOS)
@@ -316,7 +351,7 @@ struct ContactsView: View {
             } catch {
                 importError = Self.isContactAccessDenied(error)
                     ? "Rune Scribe doesn't have permission to read your contacts. You can enable it in the Settings app."
-                    : error.localizedDescription
+                    : RuneScribeUISession.message(for: error)
                 showImportError = true
                 importing = false
             }
@@ -329,10 +364,15 @@ struct ContactsView: View {
             do {
                 try await session.importContacts(contacts)
             } catch {
-                importError = error.localizedDescription
+                importError = RuneScribeUISession.message(for: error)
                 showImportError = true
             }
         }
+    }
+
+    private func presentSaveFailure(_ error: Error) {
+        session.recordPresentationError(error)
+        showSaveError = true
     }
 
     private static func isContactAccessDenied(_ error: Error) -> Bool {

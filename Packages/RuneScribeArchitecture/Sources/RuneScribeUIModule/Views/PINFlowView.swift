@@ -69,7 +69,7 @@ struct PINFlowView: View {
                     return
                 }
             } catch {
-                fail(error.localizedDescription)
+                fail(RuneScribeUISession.message(forPINError: error))
                 return
             }
             currentPIN = pin
@@ -109,7 +109,7 @@ struct PINFlowView: View {
         } catch {
             step = .create
             firstPIN = ""
-            fail(error.localizedDescription)
+            fail(RuneScribeUISession.message(forPINError: error))
         }
     }
 
@@ -118,7 +118,7 @@ struct PINFlowView: View {
             try await session.disablePIN(current: currentPIN)
             dismiss()
         } catch {
-            fail(error.localizedDescription)
+            fail(RuneScribeUISession.message(forPINError: error))
         }
     }
 

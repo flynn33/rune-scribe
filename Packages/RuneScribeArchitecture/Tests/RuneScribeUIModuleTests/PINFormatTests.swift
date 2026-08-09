@@ -1,3 +1,4 @@
+import Foundation
 @testable import RuneScribeUIModule
 import XCTest
 
@@ -15,5 +16,43 @@ final class PINFormatTests: XCTestCase {
         XCTAssertFalse(RuneScribeUISession.isValidPINFormat("12a4"))
         XCTAssertFalse(RuneScribeUISession.isValidPINFormat("12 4"))
         XCTAssertFalse(RuneScribeUISession.isValidPINFormat("１２３４"))
+    }
+
+    func testPINFailuresUseClosedSafeMessages() {
+        enum FixtureError: Error {
+            case sensitiveInternalDetail
+        }
+
+        XCTAssertEqual(
+            RuneScribeUISession.message(forPINError: RuneScribeUISession.PINError.invalidFormat),
+            "Enter a 4-digit PIN."
+        )
+        XCTAssertEqual(
+            RuneScribeUISession.message(forPINError: RuneScribeUISession.PINError.wrongPIN),
+            "Incorrect PIN."
+        )
+        XCTAssertEqual(
+            RuneScribeUISession.message(forPINError: FixtureError.sensitiveInternalDetail),
+            "App Lock is temporarily unavailable."
+        )
+    }
+
+    func testPINViewsDoNotSurfaceRawLocalizedDescriptions() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let viewsDirectory = packageRoot
+            .appendingPathComponent("Sources", isDirectory: true)
+            .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+            .appendingPathComponent("Views", isDirectory: true)
+
+        for filename in ["PINFlowView.swift", "LockView.swift"] {
+            let source = try String(
+                contentsOf: viewsDirectory.appendingPathComponent(filename),
+                encoding: .utf8
+            )
+            XCTAssertFalse(source.contains("localizedDescription"))
+        }
     }
 }

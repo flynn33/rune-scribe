@@ -26,7 +26,9 @@ end
 def production_swift_files(root)
   Dir.glob(root.join("**/*.swift").to_s).reject do |path|
     relative = Pathname(path).relative_path_from(root).to_s
-    relative.start_with?(".git/", ".build/", "DerivedData/") ||
+    relative.start_with?(
+      ".git/", ".build/", "DerivedData/", "RuneScribMacParityHost/"
+    ) ||
       relative.split("/").any? { |component| component == "Tests" || component.end_with?("Tests") }
   end
 end
@@ -238,7 +240,7 @@ module_import_policy = {
   "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore],
   "RuneScribePlatform" => %w[Foundation Darwin RuneScribeContracts Security Contacts CoreText AppKit UIKit],
   "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto RuneScribeContracts RuneScribeRuntimeCore],
-  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIRuntime AppKit UIKit MessageUI Metal MetalKit CoreImage CoreTransferable AVFoundation Contacts ContactsUI UniformTypeIdentifiers]
+  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIRuntime AppKit UIKit LinkPresentation MessageUI Metal MetalKit CoreImage CoreTransferable AVFoundation Contacts ContactsUI UniformTypeIdentifiers]
 }
 
 module_import_policy.each do |product, allowed_imports|
@@ -327,13 +329,37 @@ singleton_names = %w[
 singleton_reference_pattern = /\b(?:#{singleton_names.join('|')})\.shared\b/
 
 production_text = production_files.map { |path| File.read(path) }.join("\n")
+production_code = without_comments(production_text)
 app_owned_singleton_declarations = production_text.scan(/\bstatic\s+let\s+shared\s*=/).length
 app_owned_singleton_references = production_text.scan(singleton_reference_pattern).length
 feature_notification_calls = production_text.scan(/NotificationCenter\.default\.(?:post|publisher)\b/).length
 feature_notification_names = production_text.scan(/Notification\.Name\("com\.runescribe\./).length
 notification_center_default_uses = production_text.scan(/NotificationCenter\.default\b/).length
+allowed_notification_path = root.join(
+  "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VideoSplashView.swift"
+).to_s
+notification_center_use_records = production_files.flat_map do |path|
+  File.readlines(path).each_with_index.map do |line, index|
+    next unless line.include?("NotificationCenter.default")
+    [path, index + 1, line]
+  end.compact
+end
+unexpected_notification_center_uses = notification_center_use_records.count do |path, _line, source|
+  path != allowed_notification_path ||
+    !source.match?(/NotificationCenter\.default\.(?:addObserver|removeObserver)\b/)
+end
+allowed_notification_sources = notification_center_use_records
+  .select { |path, _line, _source| path == allowed_notification_path }
+  .map(&:last)
+unless allowed_notification_sources.count { |source| source.include?(".addObserver") } == 1 &&
+       allowed_notification_sources.count { |source| source.include?(".removeObserver") } == 1
+  errors << "VideoSplashView must contain exactly one AVPlayer observer registration and removal"
+end
 temporary_application_session_adapters = production_text.scan(
   /Architecture ratchet: temporary-application-session-adapter\./
+).length
+production_diagnostic_sink_references = production_code.scan(
+  /\b(?:print|debugPrint|dump|NSLog|os_log)\s*\(|\bLogger\s*\(/
 ).length
 
 host_files = Dir.glob(root.join("RuneScrib/AppHost/**/*.swift").to_s).sort
@@ -374,7 +400,9 @@ metrics = {
   "featureNotificationCenterCalls" => feature_notification_calls,
   "featureNotificationNames" => feature_notification_names,
   "notificationCenterDefaultUses" => notification_center_default_uses,
+  "unexpectedNotificationCenterUses" => unexpected_notification_center_uses,
   "temporaryApplicationSessionAdapters" => temporary_application_session_adapters,
+  "productionDiagnosticSinkReferences" => production_diagnostic_sink_references,
   "hostLegacyBoundaryReferences" => host_legacy_boundary_references,
   "hostRuntimeBypassReferences" => host_runtime_bypass_references,
   "hostPhysicalLines" => host_physical_lines

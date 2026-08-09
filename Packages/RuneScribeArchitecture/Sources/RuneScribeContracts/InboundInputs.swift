@@ -39,7 +39,7 @@ public struct InboundInputMetadataDTO: Codable, Equatable, Hashable, Sendable {
     }
 }
 
-public struct InboundFileDTO: Codable, Equatable, Hashable, Sendable {
+public struct InboundFileDTO: Equatable, Hashable, Sendable {
     public let metadata: InboundInputMetadataDTO
     public let fileURL: URL
     public let declaredContentType: String?
@@ -58,7 +58,7 @@ public struct InboundFileDTO: Codable, Equatable, Hashable, Sendable {
     }
 }
 
-public struct InboundURLDTO: Codable, Equatable, Hashable, Sendable {
+public struct InboundURLDTO: Equatable, Hashable, Sendable {
     public let metadata: InboundInputMetadataDTO
     public let url: URL
 
@@ -101,7 +101,7 @@ public struct InboundMenuCommandDTO: Codable, Equatable, Hashable, Sendable {
     }
 }
 
-public enum RuneScribeInboundInput: Codable, Equatable, Hashable, Sendable {
+public enum RuneScribeInboundInput: Equatable, Hashable, Sendable {
     case file(InboundFileDTO)
     case url(InboundURLDTO)
     case lifecycle(InboundLifecycleDTO)

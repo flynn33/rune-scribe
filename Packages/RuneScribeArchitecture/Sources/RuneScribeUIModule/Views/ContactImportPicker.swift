@@ -1,6 +1,33 @@
 import RuneScribeContracts
 import SwiftUI
 
+@MainActor
+enum ContactImportCommitOutcome: Equatable {
+    case imported
+    case failed(String)
+
+    var shouldDismiss: Bool {
+        if case .imported = self {
+            return true
+        }
+        return false
+    }
+}
+
+@MainActor
+enum ContactImportCommitFlow {
+    static func attempt(
+        operation: () async throws -> Void
+    ) async -> ContactImportCommitOutcome {
+        do {
+            try await operation()
+            return .imported
+        } catch {
+            return .failed(RuneScribeUISession.message(for: error))
+        }
+    }
+}
+
 /// In-app multi-select importer: lists the device's Apple Contacts with search and
 /// check-to-select, and imports only the chosen ones. Used where the system contact
 /// picker isn't available (macOS); iOS uses the out-of-process system picker instead.
@@ -13,6 +40,7 @@ struct ContactImportPicker: View {
     @State private var candidates: [ContactViewState] = []
     @State private var selection: Set<UUID> = []
     @State private var search = ""
+    @State private var importError: String?
 
     private enum Phase: Equatable { case loading, denied, failed(String), loaded }
 
@@ -29,6 +57,14 @@ struct ContactImportPicker: View {
         .background(Color.runeNavy)
         .preferredColorScheme(.dark)
         .task { await load() }
+        .alert("Import Failed", isPresented: Binding(
+            get: { importError != nil },
+            set: { if !$0 { importError = nil } }
+        )) {
+            Button("OK") { importError = nil }
+        } message: {
+            Text(importError ?? "")
+        }
     }
 
     // MARK: - Derived
@@ -78,9 +114,13 @@ struct ContactImportPicker: View {
                 .foregroundColor(.white)
             if !search.isEmpty {
                 Button { search = "" } label: {
-                    Image(systemName: "xmark.circle.fill").foregroundColor(.runeSilver)
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.runeSilver)
                 }
                 .buttonStyle(.plain)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+                .accessibilityLabel("Clear search")
             }
         }
         .font(.system(size: 14))
@@ -200,7 +240,7 @@ struct ContactImportPicker: View {
             if Self.isContactAccessDenied(error) {
                 phase = .denied
             } else {
-                phase = .failed(error.localizedDescription)
+                phase = .failed(RuneScribeUISession.message(for: error))
             }
         }
     }
@@ -208,8 +248,17 @@ struct ContactImportPicker: View {
     private func commitImport() {
         let chosen = candidates.filter { selection.contains($0.id) }
         guard !chosen.isEmpty else { return }
-        Task { try? await session.importContacts(chosen) }
-        dismiss()
+        Task {
+            let outcome = await ContactImportCommitFlow.attempt {
+                _ = try await session.importContacts(chosen)
+            }
+            switch outcome {
+            case .imported:
+                dismiss()
+            case .failed(let message):
+                importError = message
+            }
+        }
     }
 
     private static func isContactAccessDenied(_ error: Error) -> Bool {

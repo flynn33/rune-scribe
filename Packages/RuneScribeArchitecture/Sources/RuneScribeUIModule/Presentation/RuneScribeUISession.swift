@@ -244,7 +244,7 @@ final class RuneScribeUISession: ObservableObject {
            case .failure(let failure) = productError {
             return message(for: failure)
         }
-        return (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        return "Rune Scribe could not complete the operation."
     }
 
     static func message(for failure: RuneScribeFailureDTO) -> String {

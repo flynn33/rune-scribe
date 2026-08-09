@@ -103,6 +103,18 @@ final class InboundRoutingTests: XCTestCase {
         XCTAssertThrowsError(try LinkRouter.decodeCipher(oversized)) { error in
             XCTAssertEqual(error as? LinkRouterError, .invalidQuery)
         }
+
+        let unrelated = try XCTUnwrap(URL(string: "https://example.com/hello"))
+        XCTAssertThrowsError(try LinkRouter.decodeCipher(unrelated)) { error in
+            XCTAssertEqual(error as? LinkRouterError, .invalidRoute)
+        }
+
+        let legacyMessage = try XCTUnwrap(
+            URL(string: "https://example.com/rune-scribe/m?v=1&p=AAAA")
+        )
+        XCTAssertThrowsError(try LinkRouter.decodeCipher(legacyMessage)) { error in
+            XCTAssertEqual(error as? LinkRouterError, .invalidRoute)
+        }
     }
 
 }

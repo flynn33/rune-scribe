@@ -107,7 +107,7 @@ struct CipherLibraryView: View {
                 status = .success("Saved \(url.lastPathComponent)")
                 finishExport(outcome: .handedOff)
             case .failure(let error):
-                status = .failure(error.localizedDescription)
+                presentFailure(error)
                 finishExport(outcome: .failed)
             }
         } onCancellation: {
@@ -136,7 +136,7 @@ struct CipherLibraryView: View {
                 case .success(let cipher):
                     status = .success("Imported \u{201C}\(cipher.label)\u{201D} and made it active.")
                 case .failure(let error):
-                    status = .failure(error.localizedDescription)
+                    presentFailure(error)
                 }
             }
         }
@@ -152,10 +152,17 @@ struct CipherLibraryView: View {
         .alert("Rename Cipher", isPresented: $showRename) {
             TextField("Label", text: $renameLabel)
             Button("Save") {
-                if let target = renameTarget {
-                    Task { try? await session.renameCipher(id: target.id, to: renameLabel) }
-                }
+                guard let target = renameTarget else { return }
+                let label = renameLabel
                 renameTarget = nil
+                Task {
+                    do {
+                        _ = try await session.renameCipher(id: target.id, to: label)
+                        status = .success("Renamed cipher.")
+                    } catch {
+                        presentFailure(error)
+                    }
+                }
             }
             Button("Cancel", role: .cancel) { renameTarget = nil }
         }
@@ -167,11 +174,16 @@ struct CipherLibraryView: View {
                 deleteTarget = nil
             }
             Button("Delete", role: .destructive) {
-                if let target = deleteTarget {
-                    Task { try? await session.deleteCipher(id: target.id) }
-                }
+                guard let target = deleteTarget else { return }
                 deleteTarget = nil
-                status = .idle
+                Task {
+                    do {
+                        try await session.deleteCipher(id: target.id)
+                        status = .success("Deleted cipher.")
+                    } catch {
+                        presentFailure(error)
+                    }
+                }
             }
             Button("Cancel", role: .cancel) { deleteTarget = nil }
         } message: {
@@ -181,15 +193,19 @@ struct CipherLibraryView: View {
         // Reassign confirmation — changing an already-linked cipher to a different contact.
         .alert("Reassign Cipher?", isPresented: $showReassignConfirm) {
             Button("Reassign", role: .destructive) {
-                if let pending = pendingReassign {
-                    Task {
-                        try? await session.setContact(
+                guard let pending = pendingReassign else { return }
+                pendingReassign = nil
+                Task {
+                    do {
+                        try await session.setContact(
                             cipherID: pending.cipherID,
                             contactID: pending.contactID
                         )
+                        status = .success("Reassigned cipher.")
+                    } catch {
+                        presentFailure(error)
                     }
                 }
-                pendingReassign = nil
             }
             Button("Cancel", role: .cancel) { pendingReassign = nil }
         } message: {
@@ -276,10 +292,11 @@ struct CipherLibraryView: View {
 
             HStack(spacing: 10) {
                 Button {
-                    Task { try? await session.setActive(id: cipher.id) }
+                    setActiveCipher(cipher.id)
                 } label: {
                     Label(isActive ? "Active" : "Use", systemImage: isActive ? "checkmark.circle.fill" : "circle")
                 }
+                .accessibilityLabel("\(isActive ? "Active" : "Use") \(cipher.label)")
                 .buttonStyle(.plain)
                 .font(.system(size: 12, weight: .semibold, design: .monospaced))
                 .foregroundColor(isActive ? .runeGold : .runeSilver)
@@ -294,24 +311,21 @@ struct CipherLibraryView: View {
                 // third-party apps from Messages, so sharing a file here broke auto-import.)
                 if let share = linkArtifacts[cipher.id],
                    case .opaque = share.artifact.reference {
-                    ShareLink(
-                        item: share.transfer,
-                        subject: Text("Rune Scribe cipher: \(cipher.label)"),
-                        message: Text("Tap to open in Rune Scribe and import this cipher so you can decode my messages."),
-                        preview: SharePreview(
-                            "Rune Scribe cipher: \(cipher.label)",
-                            image: Image(systemName: "link")
-                        )
+                    RuneScribeCipherLinkShareLink(
+                        transfer: share.transfer,
+                        cipherLabel: cipher.label,
+                        onFinish: { outcome in
+                            completeLinkShare(
+                                cipherID: cipher.id,
+                                artifact: share.artifact,
+                                outcome: outcome
+                            )
+                        }
                     ) {
                         cardIconChrome("square.and.arrow.up")
                     }
-                    .buttonStyle(.plain)
-                    .help("Share via Messages, Mail…")
-                    .simultaneousGesture(TapGesture().onEnded {
-                        completeLinkShare(cipherID: cipher.id, artifact: share.artifact)
-                    })
 
-                    cardIconButton("qrcode", help: "Show QR code") {
+                    cardIconButton("qrcode", help: "Show QR code for \(cipher.label)") {
                         linkArtifacts.removeValue(forKey: cipher.id)
                         qrShare = CipherQRShare(
                             artifact: share.artifact,
@@ -326,11 +340,11 @@ struct CipherLibraryView: View {
                         .help("Preparing the cipher link…")
                 }
 
-                cardIconButton("arrow.down.doc", help: "Export decoder file") { beginExport(cipher) }
-                cardIconButton("pencil", help: "Rename") {
+                cardIconButton("arrow.down.doc", help: "Export \(cipher.label)") { beginExport(cipher) }
+                cardIconButton("pencil", help: "Rename \(cipher.label)") {
                     renameTarget = cipher; renameLabel = cipher.label; showRename = true
                 }
-                cardIconButton("trash", help: "Delete", tint: .red.opacity(0.85)) {
+                cardIconButton("trash", help: "Delete \(cipher.label)", tint: .red.opacity(0.85)) {
                     deleteTarget = cipher; showDelete = true
                 }
             }
@@ -357,6 +371,7 @@ struct CipherLibraryView: View {
             Image(systemName: "person.crop.circle")
                 .font(.system(size: 12))
                 .foregroundColor(.runeBlue)
+                .accessibilityHidden(true)
             Menu {
                 Button { requestSetContact(cipher, to: nil) } label: {
                     if cipher.contactID == nil { Label("No contact", systemImage: "checkmark") }
@@ -378,9 +393,17 @@ struct CipherLibraryView: View {
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.system(size: 9))
                         .foregroundColor(.runeSilver)
+                        .accessibilityHidden(true)
                 }
+                .frame(minHeight: 44, alignment: .leading)
+                .contentShape(Rectangle())
             }
             .menuIndicator(.hidden)
+            .frame(minWidth: 44, minHeight: 44, alignment: .leading)
+            .contentShape(Rectangle())
+            .accessibilityLabel(
+                "Contact for \(cipher.label): \(session.contact(id: cipher.contactID)?.displayName ?? "No contact")"
+            )
             Spacer()
         }
     }
@@ -390,9 +413,7 @@ struct CipherLibraryView: View {
             pendingReassign = (cipher.id, contactID)
             showReassignConfirm = true
         } else {
-            Task {
-                try? await session.setContact(cipherID: cipher.id, contactID: contactID)
-            }
+            setContact(cipherID: cipher.id, contactID: contactID)
         }
     }
 
@@ -438,6 +459,8 @@ struct CipherLibraryView: View {
             .frame(width: 30, height: 30)
             .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.runeNavy.opacity(0.45)))
             .overlay(RoundedRectangle(cornerRadius: 8, style: .continuous).strokeBorder(tint.opacity(0.3), lineWidth: 1))
+            .frame(width: 44, height: 44)
+            .contentShape(Rectangle())
     }
 
     private func cardIconButton(_ systemImage: String,
@@ -445,8 +468,9 @@ struct CipherLibraryView: View {
                                 tint: Color = .runeSilver,
                                 action: @escaping () -> Void) -> some View {
         Button(action: action) { cardIconChrome(systemImage, tint: tint) }
-        .buttonStyle(.plain)
-        .help(help)
+            .buttonStyle(.plain)
+            .help(help)
+            .accessibilityLabel(help)
     }
 
     @ViewBuilder
@@ -483,7 +507,7 @@ struct CipherLibraryView: View {
                 _ = try await session.addCipher(label: label)
                 status = .success("Created and activated.")
             } catch {
-                status = .failure(error.localizedDescription)
+                presentFailure(error)
             }
         }
     }
@@ -510,7 +534,7 @@ struct CipherLibraryView: View {
                 status = .idle
                 showExporter = true
             } catch {
-                status = .failure(error.localizedDescription)
+                presentFailure(error)
             }
         }
     }
@@ -520,7 +544,11 @@ struct CipherLibraryView: View {
         exportArtifact = nil
         exportItem = nil
         Task {
-            _ = try? await session.completeShareArtifact(id: artifact.id, outcome: outcome)
+            do {
+                _ = try await session.completeShareArtifact(id: artifact.id, outcome: outcome)
+            } catch {
+                presentFailure(error)
+            }
         }
     }
 
@@ -536,11 +564,11 @@ struct CipherLibraryView: View {
                         status = .success("That cipher is already in your library.")
                     }
                 } catch {
-                    status = .failure(error.localizedDescription)
+                    presentFailure(error)
                 }
             }
         case .failure(let error):
-            status = .failure(error.localizedDescription)
+            presentFailure(error)
         }
     }
 
@@ -574,10 +602,18 @@ struct CipherLibraryView: View {
         }
     }
 
-    private func completeLinkShare(cipherID: UUID, artifact: ShareArtifactDTO) {
+    private func completeLinkShare(
+        cipherID: UUID,
+        artifact: ShareArtifactDTO,
+        outcome: ShareArtifactOutcomeDTO
+    ) {
         linkArtifacts.removeValue(forKey: cipherID)
         Task {
-            _ = try? await session.completeShareArtifact(id: artifact.id, outcome: .handedOff)
+            do {
+                _ = try await session.completeShareArtifact(id: artifact.id, outcome: outcome)
+            } catch {
+                presentFailure(error)
+            }
             await prepareLinkArtifacts()
         }
     }
@@ -628,8 +664,34 @@ struct CipherLibraryView: View {
                 let result = try await session.importURL(url, source: .qrScanner)
                 pendingScan = result.pendingImport
             } catch {
-                status = .failure(error.localizedDescription)
+                presentFailure(error)
             }
         }
+    }
+
+    private func setActiveCipher(_ id: UUID) {
+        Task {
+            do {
+                try await session.setActive(id: id)
+                status = .success("Selected cipher.")
+            } catch {
+                presentFailure(error)
+            }
+        }
+    }
+
+    private func setContact(cipherID: UUID, contactID: UUID?) {
+        Task {
+            do {
+                try await session.setContact(cipherID: cipherID, contactID: contactID)
+                status = .success("Updated cipher contact.")
+            } catch {
+                presentFailure(error)
+            }
+        }
+    }
+
+    private func presentFailure(_ error: Error) {
+        status = .failure(RuneScribeUISession.message(for: error))
     }
 }

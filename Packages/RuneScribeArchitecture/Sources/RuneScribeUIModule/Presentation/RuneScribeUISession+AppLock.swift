@@ -31,6 +31,13 @@ extension RuneScribeUISession {
         isValidPINFormat(pin)
     }
 
+    nonisolated static func message(forPINError error: Error) -> String {
+        guard let pinError = error as? PINError else {
+            return "App Lock is temporarily unavailable."
+        }
+        return pinError.errorDescription ?? "App Lock is temporarily unavailable."
+    }
+
     func setPIN(_ pin: String) async throws {
         guard Self.isValidPINFormat(pin) else { throw PINError.invalidFormat }
         do {

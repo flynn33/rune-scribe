@@ -1,5 +1,17 @@
 import SwiftUI
 
+@MainActor
+enum RootImportFailurePresentation {
+    static func shouldShowAlert(
+        message: String?,
+        hasPendingImport: Bool,
+        isLocked: Bool,
+        showSplash: Bool
+    ) -> Bool {
+        message != nil && !hasPendingImport && !isLocked && !showSplash
+    }
+}
+
 /// Hosts the main interface and overlays the lock screen whenever the app is
 /// locked. The Core lifecycle path re-locks on background, while this view plays
 /// the launch splash on a cold start when the 30-day intro schedule allows.
@@ -54,8 +66,7 @@ struct RootView: View {
                 cancelImport: cancelPendingImport
             ) { result in
                 if case .failure(let error) = result {
-                    session.importErrorMessage = (error as? LocalizedError)?.errorDescription
-                        ?? error.localizedDescription
+                    session.importErrorMessage = RuneScribeUISession.message(for: error)
                 }
             }
         }
@@ -72,7 +83,14 @@ struct RootView: View {
             }
         }
         .alert("Import Failed", isPresented: Binding(
-            get: { session.importErrorMessage != nil && !session.isLocked && !showSplash },
+            get: {
+                RootImportFailurePresentation.shouldShowAlert(
+                    message: session.importErrorMessage,
+                    hasPendingImport: session.pendingImport != nil,
+                    isLocked: session.isLocked,
+                    showSplash: showSplash
+                )
+            },
             set: {
                 if !$0 && !session.isLocked && !showSplash {
                     session.importErrorMessage = nil

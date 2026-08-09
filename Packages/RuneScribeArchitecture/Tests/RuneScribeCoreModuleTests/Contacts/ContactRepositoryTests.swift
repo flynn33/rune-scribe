@@ -8,6 +8,57 @@ import XCTest
 final class ContactRepositoryTests: XCTestCase {
     private static let encryptedContactBookBase64 = "oKGio6SlpqeoqaqrnToKSDe4a9AMR73iK1ijsR7YOHPmxGBWx3UE7xuJTyPiRnfPnxJjDXKsNPg5V7PJdytreFLgKlNxbjtulEC1gISMtV4SicaEnZGPdO63gtugbome54P4CYsZV/TUuGG2/+xExWbdraHF+S1hsL3YGRZjVZvoArlhA+27ydU8nj7nK+tdsSPzclswkO5SL+m35anBDpCzleHfkJHX3KhBWaV9PYuUByF492tHAEPw1ZMSR4n9ZifaHLiyC2Qhu77yzdD6MSN+2D5mOc60vQ=="
 
+    func testContactCodableRoundTripPreservesEveryField() throws {
+        let contact = Contact(
+            id: try XCTUnwrap(
+                UUID(uuidString: "71000000-0000-0000-0000-000000000001")
+            ),
+            displayName: "Codable Contact",
+            phones: ["+15550100710", "+15550100711"],
+            emails: ["codable@example.invalid"],
+            appleContactID: "synthetic-contact-710",
+            source: .imported,
+            createdAt: Date(timeIntervalSinceReferenceDate: 710)
+        )
+
+        let encoded = try JSONEncoder().encode(contact)
+        let decoded = try JSONDecoder().decode(Contact.self, from: encoded)
+
+        XCTAssertEqual(decoded, contact)
+    }
+
+    func testContactBookCodableRoundTripPreservesVersionAndContacts() throws {
+        let contacts = try [
+            Contact(
+                id: XCTUnwrap(
+                    UUID(uuidString: "54000000-0000-0000-0000-000000000001")
+                ),
+                displayName: "Manual Contact",
+                phones: ["+15550100540"],
+                source: .manual,
+                createdAt: Date(timeIntervalSinceReferenceDate: 540)
+            ),
+            Contact(
+                id: XCTUnwrap(
+                    UUID(uuidString: "54000000-0000-0000-0000-000000000002")
+                ),
+                displayName: "Imported Contact",
+                emails: ["imported@example.invalid"],
+                appleContactID: "synthetic-contact-541",
+                source: .imported,
+                createdAt: Date(timeIntervalSinceReferenceDate: 541)
+            ),
+        ]
+        let book = ContactBook(version: ContactBook.currentVersion, contacts: contacts)
+
+        let encoded = try JSONEncoder().encode(book)
+        let decoded = try JSONDecoder().decode(ContactBook.self, from: encoded)
+
+        XCTAssertEqual(decoded, book)
+        XCTAssertEqual(decoded.version, ContactBook.currentVersion)
+        XCTAssertEqual(decoded.contacts, contacts)
+    }
+
     func testLoadsFrozenVersion1AESGCMFixtureFromShippingPathAndAccount() async throws {
         let fixture = try XCTUnwrap(Data(base64Encoded: Self.encryptedContactBookBase64))
         let key = Data((0...31).map(UInt8.init))
@@ -277,6 +328,20 @@ final class ContactRepositoryTests: XCTestCase {
 }
 
 final class ContactManagerCoreTests: XCTestCase {
+    func testRemovingEmptySetIsNoOp() throws {
+        let contact = Contact(
+            id: try XCTUnwrap(
+                UUID(uuidString: "09000000-0000-0000-0000-000000000001")
+            ),
+            displayName: "Manual",
+            source: .manual,
+            createdAt: Date(timeIntervalSinceReferenceDate: 1)
+        )
+        let book = ContactBook(contacts: [contact])
+
+        XCTAssertEqual(book.removing(ids: []), book)
+    }
+
     func testManualCreateAndUpdatePreserveIdentitySourceAndCreationDate() async throws {
         let id = try XCTUnwrap(UUID(uuidString: "10000000-0000-0000-0000-000000000001"))
         let date = Date(timeIntervalSinceReferenceDate: 42)
@@ -306,6 +371,28 @@ final class ContactManagerCoreTests: XCTestCase {
         XCTAssertEqual(updated.value.displayName, "Saga Updated")
         let finalBook = try await fixture.manager.snapshot()
         XCTAssertEqual(finalBook.contacts, [updated.value])
+    }
+
+    func testDeletingEmptySetReturnsUnchangedBookWithoutWriting() async throws {
+        let id = try XCTUnwrap(UUID(uuidString: "11000000-0000-0000-0000-000000000001"))
+        let fixture = try makeManager(
+            ids: [id],
+            date: Date(timeIntervalSinceReferenceDate: 43)
+        )
+        _ = try await fixture.manager.create(
+            CreateContactCommand(displayName: "Manual")
+        )
+        let before = try await fixture.manager.snapshot()
+        let writesBefore = await fixture.files.writePaths()
+
+        let removal = try await fixture.manager.delete(ids: [])
+
+        let after = try await fixture.manager.snapshot()
+        let writesAfter = await fixture.files.writePaths()
+        XCTAssertEqual(removal.removed, [])
+        XCTAssertEqual(removal.book, before)
+        XCTAssertEqual(after, before)
+        XCTAssertEqual(writesAfter, writesBefore)
     }
 
     func testImportDeduplicatesExistingAndBatchWhilePreservingFirstSeenOrder() async throws {

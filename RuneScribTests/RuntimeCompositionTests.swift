@@ -9,6 +9,39 @@ import XCTest
 
 @MainActor
 final class RuntimeCompositionTests: XCTestCase {
+    func testMacAppDelegateForwardsLifecycleThroughInjectedRuntime() async {
+        let fixture = makeFixture()
+        let delegate = AppDelegate(runtime: fixture.composition)
+        let notification = Notification(name: NSApplication.didBecomeActiveNotification)
+
+        delegate.applicationDidBecomeActive(notification)
+        delegate.applicationWillResignActive(notification)
+        delegate.applicationDidResignActive(notification)
+
+        await fixture.composition.start()
+        var received = await fixture.inboundInputService.snapshot()
+        XCTAssertEqual(received.count, 3)
+        guard received.count == 3 else {
+            await fixture.composition.stop()
+            return
+        }
+        assertLifecycle(received[0], equals: .didBecomeActive, isColdStart: true)
+        assertLifecycle(received[1], equals: .willResignActive, isColdStart: true)
+        assertLifecycle(received[2], equals: .didEnterBackground, isColdStart: true)
+
+        delegate.applicationWillTerminate(
+            Notification(name: NSApplication.willTerminateNotification)
+        )
+        await fixture.composition.stop()
+
+        received = await fixture.inboundInputService.snapshot()
+        XCTAssertEqual(received.count, 4)
+        if received.count == 4 {
+            assertLifecycle(received[3], equals: .willTerminate, isColdStart: false)
+        }
+        XCTAssertEqual(fixture.composition.rootPresentationStore.state, .booting)
+    }
+
     func testCompositionPublishesRootAcrossStartStopAndRestart() async {
         let fixture = makeFixture()
 

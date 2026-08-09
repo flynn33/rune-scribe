@@ -4,6 +4,323 @@ import RuneScribeRuntimeCore
 import XCTest
 
 final class RuntimeLifecycleTests: XCTestCase {
+    func testDuplicateModuleIDIsRejectedWithTypedError() async throws {
+        let module = descriptor(
+            id: "com.runescribe.module.duplicate-id",
+            kind: .ui,
+            entryPoint: "DuplicateIDModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI]
+        )
+        let counter = FactoryCounter()
+        let moduleFactory = factory(for: module, counter: counter)
+        let runtime = makeRuntime()
+
+        try await runtime.register(
+            manifest: manifest(for: module),
+            factory: moduleFactory
+        )
+        do {
+            try await runtime.register(
+                manifest: manifest(for: module),
+                factory: moduleFactory
+            )
+            XCTFail("Expected duplicate module registration to fail.")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .duplicateModuleID(module.moduleID)
+            )
+        }
+        XCTAssertEqual(counter.value, 0)
+    }
+
+    func testManifestDescriptorMismatchRejectsRegistrationBeforeFactoryUse() async {
+        let compiledDescriptor = descriptor(
+            id: "com.runescribe.module.manifest-mismatch",
+            kind: .ui,
+            entryPoint: "ManifestMismatchModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI]
+        )
+        let manifestDescriptor = descriptor(
+            id: compiledDescriptor.moduleID,
+            kind: compiledDescriptor.kind,
+            entryPoint: compiledDescriptor.entryPoint,
+            role: compiledDescriptor.role,
+            capabilities: compiledDescriptor.requestedCapabilities,
+            moduleVersion: SemanticVersion(
+                major: UInt(1),
+                minor: UInt(0),
+                patch: UInt(34)
+            )
+        )
+        let counter = FactoryCounter()
+        let runtime = makeRuntime()
+
+        do {
+            try await runtime.register(
+                manifest: manifest(for: manifestDescriptor),
+                factory: factory(for: compiledDescriptor, counter: counter)
+            )
+            XCTFail("Expected manifest and descriptor mismatch to fail.")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .manifestDescriptorMismatch(
+                    moduleID: compiledDescriptor.moduleID,
+                    field: "moduleVersion"
+                )
+            )
+        }
+        XCTAssertEqual(counter.value, 0)
+    }
+
+    func testFactoryProducedDescriptorMismatchFailsBeforeModuleStart() async throws {
+        let registeredDescriptor = descriptor(
+            id: "com.runescribe.module.factory-mismatch",
+            kind: .ui,
+            entryPoint: "FactoryMismatchModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI]
+        )
+        let producedDescriptor = descriptor(
+            id: registeredDescriptor.moduleID,
+            kind: registeredDescriptor.kind,
+            entryPoint: registeredDescriptor.entryPoint,
+            role: registeredDescriptor.role,
+            capabilities: registeredDescriptor.requestedCapabilities,
+            moduleVersion: SemanticVersion(
+                major: UInt(1),
+                minor: UInt(0),
+                patch: UInt(34)
+            )
+        )
+        let counter = FactoryCounter()
+        let recorder = RuntimeRecorder()
+        let runtime = makeRuntime()
+        let mismatchedFactory = AnyModuleFactory(descriptor: registeredDescriptor) {
+            counter.increment()
+            return ProbeModule(
+                descriptor: producedDescriptor,
+                startAction: { _ in await recorder.append("start") },
+                stopAction: { await recorder.append("stop") }
+            )
+        }
+
+        try await runtime.register(
+            manifest: manifest(for: registeredDescriptor),
+            factory: mismatchedFactory
+        )
+        do {
+            try await runtime.start()
+            XCTFail("Expected the factory descriptor mismatch to fail activation.")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .factoryDescriptorMismatch(registeredDescriptor.moduleID)
+            )
+        }
+
+        let entries = await recorder.values()
+        let snapshot = await runtime.snapshot()
+        XCTAssertEqual(counter.value, 1)
+        XCTAssertTrue(entries.isEmpty)
+        XCTAssertEqual(snapshot.status, .failed)
+        XCTAssertEqual(
+            snapshot.moduleStates[registeredDescriptor.moduleID],
+            .failed
+        )
+    }
+
+    func testTwoNonUIModulesCoexistAndStartAndStopExactlyOnce() async throws {
+        let recorder = RuntimeRecorder()
+        let firstCounter = FactoryCounter()
+        let secondCounter = FactoryCounter()
+        let uiCounter = FactoryCounter()
+        let first = descriptor(
+            id: "com.runescribe.module.coexist-alpha",
+            kind: .service,
+            entryPoint: "CoexistAlphaModule",
+            role: RuneScribeRoles.core,
+            capabilities: []
+        )
+        let secondRole: ModuleRole = "runescribe.service.secondary"
+        let second = descriptor(
+            id: "com.runescribe.module.coexist-beta",
+            kind: .service,
+            entryPoint: "CoexistBetaModule",
+            role: secondRole,
+            capabilities: []
+        )
+        let ui = descriptor(
+            id: "com.runescribe.module.coexist-ui",
+            kind: .ui,
+            entryPoint: "CoexistUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI]
+        )
+        let runtime = makeRuntime()
+
+        try await runtime.register(
+            manifest: manifest(for: ui),
+            factory: factory(
+                for: ui,
+                label: "ui",
+                recorder: recorder,
+                counter: uiCounter
+            )
+        )
+        try await runtime.register(
+            manifest: manifest(for: second),
+            factory: factory(
+                for: second,
+                label: "beta",
+                recorder: recorder,
+                counter: secondCounter
+            )
+        )
+        try await runtime.register(
+            manifest: manifest(for: first),
+            factory: factory(
+                for: first,
+                label: "alpha",
+                recorder: recorder,
+                counter: firstCounter
+            )
+        )
+
+        try await runtime.start()
+        try await runtime.start()
+        let runningSnapshot = await runtime.snapshot()
+        await runtime.stop()
+        await runtime.stop()
+        let entries = await recorder.values()
+
+        XCTAssertEqual(
+            runningSnapshot.activationOrder,
+            [first.moduleID, second.moduleID, ui.moduleID]
+        )
+        XCTAssertEqual(firstCounter.value, 1)
+        XCTAssertEqual(secondCounter.value, 1)
+        XCTAssertEqual(uiCounter.value, 1)
+        XCTAssertEqual(
+            entries,
+            [
+                "start:alpha",
+                "start:beta",
+                "start:ui",
+                "stop:ui",
+                "stop:beta",
+                "stop:alpha",
+            ]
+        )
+    }
+
+    func testMutableEligibilityReconcilesDeterministicallyAcrossRestart() async throws {
+        let recorder = RuntimeRecorder()
+        let coreCounter = FactoryCounter()
+        let optionalCounter = FactoryCounter()
+        let uiCounter = FactoryCounter()
+        let core = descriptor(
+            id: "com.runescribe.module.eligibility-core",
+            kind: .service,
+            entryPoint: "EligibilityCoreModule",
+            role: RuneScribeRoles.core,
+            capabilities: []
+        )
+        let optionalRole: ModuleRole = "runescribe.service.optional"
+        let optional = descriptor(
+            id: "com.runescribe.module.eligibility-optional",
+            kind: .service,
+            entryPoint: "EligibilityOptionalModule",
+            role: optionalRole,
+            capabilities: []
+        )
+        let ui = descriptor(
+            id: "com.runescribe.module.eligibility-ui",
+            kind: .ui,
+            entryPoint: "EligibilityUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI]
+        )
+        let eligibility = MutableEligibilityProvider(
+            eligibleModuleIDs: [core.moduleID, optional.moduleID, ui.moduleID]
+        )
+        let runtime = makeRuntime(eligibility: eligibility)
+
+        try await runtime.register(
+            manifest: manifest(for: optional),
+            factory: factory(
+                for: optional,
+                label: "optional",
+                recorder: recorder,
+                counter: optionalCounter
+            )
+        )
+        try await runtime.register(
+            manifest: manifest(for: ui),
+            factory: factory(
+                for: ui,
+                label: "ui",
+                recorder: recorder,
+                counter: uiCounter
+            )
+        )
+        try await runtime.register(
+            manifest: manifest(for: core),
+            factory: factory(
+                for: core,
+                label: "core",
+                recorder: recorder,
+                counter: coreCounter
+            )
+        )
+
+        try await runtime.start()
+        let firstSnapshot = await runtime.snapshot()
+        XCTAssertEqual(
+            firstSnapshot.activationOrder,
+            [core.moduleID, optional.moduleID, ui.moduleID]
+        )
+        await runtime.stop()
+
+        await eligibility.setEligible(false, moduleID: optional.moduleID)
+        try await runtime.start()
+        let secondSnapshot = await runtime.snapshot()
+        XCTAssertEqual(
+            secondSnapshot.activationOrder,
+            [core.moduleID, ui.moduleID]
+        )
+        XCTAssertEqual(secondSnapshot.moduleStates[optional.moduleID], .validated)
+        await runtime.stop()
+
+        await eligibility.setEligible(true, moduleID: optional.moduleID)
+        try await runtime.start()
+        let thirdSnapshot = await runtime.snapshot()
+        XCTAssertEqual(
+            thirdSnapshot.activationOrder,
+            [core.moduleID, optional.moduleID, ui.moduleID]
+        )
+        await runtime.stop()
+
+        let entries = await recorder.values()
+        XCTAssertEqual(coreCounter.value, 3)
+        XCTAssertEqual(optionalCounter.value, 2)
+        XCTAssertEqual(uiCounter.value, 3)
+        XCTAssertEqual(
+            entries,
+            [
+                "start:core", "start:optional", "start:ui",
+                "stop:ui", "stop:optional", "stop:core",
+                "start:core", "start:ui",
+                "stop:ui", "stop:core",
+                "start:core", "start:optional", "start:ui",
+                "stop:ui", "stop:optional", "stop:core",
+            ]
+        )
+    }
+
     func testFactoriesAreLazyAndServiceActivatesBeforeUI() async throws {
         let recorder = RuntimeRecorder()
         let coreCounter = FactoryCounter()
@@ -517,6 +834,102 @@ final class RuntimeLifecycleTests: XCTestCase {
         XCTAssertEqual(try message.decodePayload(as: TestValue.self), TestValue(value: 9))
         await runtime.stop()
     }
+
+    func testRetainedContextRejectsServiceEventAndMessageAccessAfterStop() async throws {
+        let serviceID: ServiceIdentifier = "RetainedContextValueService"
+        let serviceKey = ServiceKey<TestValue>(serviceID)
+        let policy = RuntimePolicy(
+            vocabulary: CapabilityVocabulary(knownCapabilities: RuneScribeCapabilities.all),
+            capabilities: CapabilityPolicy(allowedRolesByCapability: [
+                RuneScribeCapabilities.publishService: [RuneScribeRoles.core],
+                RuneScribeCapabilities.resolveService: [RuneScribeRoles.primaryUI],
+                RuneScribeCapabilities.subscribeEvents: [RuneScribeRoles.primaryUI],
+                RuneScribeCapabilities.sendMessages: [RuneScribeRoles.primaryUI],
+                RuneScribeCapabilities.rootUI: [RuneScribeRoles.primaryUI],
+            ]),
+            services: ServiceAccessPolicy(rules: [
+                ServiceAccessRule(
+                    serviceID: serviceID,
+                    requiredCapability: RuneScribeCapabilities.resolveService,
+                    publisherRoles: [RuneScribeRoles.core],
+                    consumerRoles: [RuneScribeRoles.primaryUI]
+                ),
+            ])
+        )
+        let core = descriptor(
+            id: "com.runescribe.module.retained-context-core",
+            kind: .service,
+            entryPoint: "RetainedContextCoreModule",
+            role: RuneScribeRoles.core,
+            capabilities: [RuneScribeCapabilities.publishService],
+            publishedServices: [serviceID]
+        )
+        let ui = descriptor(
+            id: "com.runescribe.module.retained-context-ui",
+            kind: .ui,
+            entryPoint: "RetainedContextUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [
+                RuneScribeCapabilities.resolveService,
+                RuneScribeCapabilities.subscribeEvents,
+                RuneScribeCapabilities.sendMessages,
+                RuneScribeCapabilities.rootUI,
+            ],
+            requiredServices: [serviceID],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let capture = ModuleContextCapture()
+        let runtime = makeRuntime(policy: policy)
+
+        try await runtime.register(
+            manifest: manifest(for: core),
+            factory: factory(for: core, start: { context in
+                try await context.publishService(TestValue(value: 42), for: serviceKey)
+            })
+        )
+        try await runtime.register(
+            manifest: manifest(for: ui),
+            factory: factory(for: ui, start: { context in
+                _ = try await context.resolveService(serviceKey)
+                await capture.store(context)
+            })
+        )
+
+        try await runtime.start()
+        await runtime.stop()
+        let capturedContext = await capture.value()
+        let retainedContext = try XCTUnwrap(capturedContext)
+        let expectedError = RuneScribeRuntimeError.contextInactive(ui.moduleID)
+
+        let serviceError = await runtimeError(from: {
+            _ = try await retainedContext.resolveService(serviceKey)
+        })
+        let eventError = await runtimeError(from: {
+            _ = try await retainedContext.eventStream()
+        })
+        let messageError = await runtimeError(from: {
+            try await retainedContext.sendMessage(
+                "test.after-stop",
+                to: RuneScribeRoles.core,
+                payload: TestValue(value: 7)
+            )
+        })
+
+        XCTAssertEqual(serviceError, expectedError)
+        XCTAssertEqual(eventError, expectedError)
+        XCTAssertEqual(messageError, expectedError)
+    }
+
+    private func runtimeError(
+        from operation: () async throws -> Void
+    ) async -> RuneScribeRuntimeError? {
+        do {
+            try await operation()
+            return nil
+        } catch {
+            return error as? RuneScribeRuntimeError
+        }
+    }
 }
 
 private struct TestValue: Codable, Equatable, Sendable {
@@ -585,6 +998,38 @@ private actor RuntimeRecorder {
     }
 }
 
+private actor MutableEligibilityProvider: ModuleEligibilityProviding {
+    private var eligibleModuleIDs: Set<ModuleIdentifier>
+
+    init(eligibleModuleIDs: Set<ModuleIdentifier>) {
+        self.eligibleModuleIDs = eligibleModuleIDs
+    }
+
+    func isEligible(_ manifest: ModuleManifest) async -> Bool {
+        eligibleModuleIDs.contains(manifest.moduleID)
+    }
+
+    func setEligible(_ isEligible: Bool, moduleID: ModuleIdentifier) {
+        if isEligible {
+            eligibleModuleIDs.insert(moduleID)
+        } else {
+            eligibleModuleIDs.remove(moduleID)
+        }
+    }
+}
+
+private actor ModuleContextCapture {
+    private var context: ModuleContext?
+
+    func store(_ context: ModuleContext) {
+        self.context = context
+    }
+
+    func value() -> ModuleContext? {
+        context
+    }
+}
+
 private final class FactoryCounter: @unchecked Sendable {
     private let lock = NSLock()
     private var count = 0
@@ -636,11 +1081,16 @@ private func descriptor(
     capabilities: Set<CapabilityIdentifier>,
     requiredServices: Set<ServiceIdentifier> = [],
     publishedServices: Set<ServiceIdentifier> = [],
-    requiredRoles: Set<ModuleRole> = []
+    requiredRoles: Set<ModuleRole> = [],
+    moduleVersion: SemanticVersion = SemanticVersion(
+        major: UInt(1),
+        minor: UInt(0),
+        patch: UInt(33)
+    )
 ) -> ModuleDescriptor {
     ModuleDescriptor(
         moduleID: id,
-        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(33)),
+        moduleVersion: moduleVersion,
         kind: kind,
         entryPoint: entryPoint,
         role: role,
@@ -698,12 +1148,14 @@ private func factory(
 
 private func makeRuntime(
     policy: RuntimePolicy = .patternBFoundation,
-    environment: RuntimeEnvironment = .live
+    environment: RuntimeEnvironment = .live,
+    eligibility: any ModuleEligibilityProviding = AlwaysEligibleProvider()
 ) -> RuneScribeRuntime {
     RuneScribeRuntime(
         runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)),
         platform: .macOS,
         policy: policy,
+        eligibility: eligibility,
         environment: environment
     )
 }

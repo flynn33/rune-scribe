@@ -66,6 +66,9 @@ struct PINPadView: View {
                     .frame(width: 16, height: 16)
             }
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("PIN entry")
+        .accessibilityValue("\(entry.count) of \(pinLength) digits entered")
     }
 
     private var pad: some View {
@@ -96,6 +99,7 @@ struct PINPadView: View {
                     .frame(maxWidth: .infinity).frame(height: 58)
             }
             .buttonStyle(PINKeyStyle())
+            .accessibilityLabel("Delete last digit")
             .disabled(entry.isEmpty)
         }
     }

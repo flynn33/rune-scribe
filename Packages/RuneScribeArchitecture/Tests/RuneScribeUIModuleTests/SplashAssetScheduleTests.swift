@@ -1,3 +1,4 @@
+import AVFoundation
 import Foundation
 @testable import RuneScribeUIModule
 import XCTest
@@ -65,5 +66,25 @@ final class SplashAssetScheduleTests: XCTestCase {
             defaults.object(forKey: SplashAsset.lastShownDefaultsKey) as? Date,
             now
         )
+    }
+
+    @MainActor
+    func testPlaybackCompletionAndSkipEachFinishExactlyOnce() throws {
+        let natural = SplashModel(url: videoURL)
+        var naturalFinishCount = 0
+        natural.start { naturalFinishCount += 1 }
+        NotificationCenter.default.post(
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: try XCTUnwrap(natural.player.currentItem)
+        )
+        natural.finish()
+        XCTAssertEqual(naturalFinishCount, 1)
+
+        let skipped = SplashModel(url: videoURL)
+        var skippedFinishCount = 0
+        skipped.start { skippedFinishCount += 1 }
+        skipped.finish()
+        skipped.finish()
+        XCTAssertEqual(skippedFinishCount, 1)
     }
 }

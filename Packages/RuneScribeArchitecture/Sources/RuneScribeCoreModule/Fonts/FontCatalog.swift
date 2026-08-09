@@ -288,6 +288,12 @@ actor FontCatalog: CoreFontIntegrating {
         if validateName {
             _ = try await postScriptName(for: bytes)
         }
+        // CoreText registration is process-wide. Re-registering the same
+        // content from a different temporary URL can be reported as a duplicate
+        // name instead of the documented already-registered result. The digest
+        // cache proves these exact validated bytes were registered by this
+        // catalog, so avoid a second platform mutation altogether.
+        guard registeredNamesByDigest[digest] == nil else { return }
         do {
             let registered = try await registrar.registerFont(bytes)
             guard !registered.postScriptName.isEmpty else {
