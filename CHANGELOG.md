@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.34] - 2026-08-09
+
+- Complete Rune Scribe modular architecture migration (#35) by @flynn33
+
 ## [1.0.33] - 2026-07-31
 
 - Play the cold-launch intro at most once every 30 days.
