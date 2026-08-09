@@ -1,0 +1,1070 @@
+{
+  "schemaVersion": "1.0",
+  "matrixID": "rune-scribe-forsetti-tests-v1",
+  "normativeSources": [
+    "Forsetti implementation package v1.0/test-matrix.json",
+    "Forsetti implementation package v1.0/08_BUILD_TEST_DEBUG.md",
+    "Forsetti implementation package v1.0/10_FEATURE_PARITY.md",
+    "Forsetti implementation package v1.0/06_IMPLEMENTATION_PHASES.md P7 and P8"
+  ],
+  "capturedAtUTC": "2026-08-09T04:36:24Z",
+  "headCommit": "49a8cee0077939de100d6da7405c980d7a31163f",
+  "workingTreeState": "uncommitted P8 remediation and documentation changes present on the committed P7 baseline",
+  "evidencePolicy": "Stable P7 gate record IDs and finalP7ExecutionRefs preserve the normative P7 provenance, while their current execution records are refreshed to the final P8 remediation tree. A row passes only when its complete gate has current-tree execution evidence. Physical-device release validation remains explicit, and T-030 retains its normative P8 disposition.",
+  "statusDefinitions": {
+    "passed-current-evidence": "The complete required gate has a current execution record for the inspected P8 remediation tree while preserving its stable P7 matrix identity.",
+    "pending-evidence": "The required current-tree gate is incomplete and blocks P7 exit when it is P7-applicable.",
+    "device-validation-required": "All automatable underlying paths pass, but the remaining release behavior genuinely requires a signed physical device and is not claimed passed.",
+    "deferred-to-p8": "The normative implementation phases assign this required gate to P8; it is not claimed complete and does not block the preceding P7 phase."
+  },
+  "toolchainObserved": {
+    "observedAtUTC": "2026-08-09T03:41:54Z",
+    "xcode": "26.2 (17C52)",
+    "swift": "Apple Swift 6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "xcodegen": "2.46.0",
+    "note": "These versions describe the final unattended P8 remediation evidence environment. Each shared record retains its exact destination and prompt-proof execution boundary."
+  },
+  "summary": {
+    "totalRequired": 30,
+    "p7ApplicableRequired": 28,
+    "passedCurrentEvidence": 28,
+    "pendingEvidence": 0,
+    "deviceValidationRequired": 1,
+    "deferredToP8": 1,
+    "p7ExitGate": "satisfied",
+    "p7BlockingTests": [],
+    "note": "All 28 P7-applicable required rows have current prompt-proof evidence. T-026 remains an external physical-device release gate; T-030 begins in P8 after P7 passes."
+  },
+  "recordedPriorPhaseRuns": [
+    {
+      "id": "P6-SWIFTPM-FINAL",
+      "command": "swift test --package-path Packages/RuneScribeArchitecture",
+      "timestampUTC": "2026-08-08T19:08:02Z",
+      "toolVersions": "current run-state did not retain per-run versions; local environment later observed as Xcode 26.2 and Swift 6.2.3",
+      "destination": "local macOS SwiftPM host",
+      "result": "passed; exit 0; 256 tests",
+      "durationSeconds": null,
+      "logOrResultBundlePath": null,
+      "relatedCommit": "314b73f3aaac448789d4b16654623ecc6066d021",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "Recorded in /tmp/RuneScribe-Forsetti-Run.bd3t1W/run-state.json as a P6 pass."
+    },
+    {
+      "id": "P6-ARCHITECTURE-GENERATION",
+      "command": "scripts/check-architecture.sh and two consecutive xcodegen generations",
+      "timestampUTC": "2026-08-08T19:09:15Z",
+      "toolVersions": "current run-state did not retain per-run versions; local environment later observed as XcodeGen 2.45.4",
+      "destination": "repository architecture and generated-project checks",
+      "result": "passed; exit 0; ratchets passed and consecutive outputs were byte-identical",
+      "durationSeconds": null,
+      "logOrResultBundlePath": null,
+      "relatedCommit": "314b73f3aaac448789d4b16654623ecc6066d021",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "Recorded in /tmp/RuneScribe-Forsetti-Run.bd3t1W/run-state.json as a P6 pass."
+    },
+    {
+      "id": "P6-MACOS-FINAL",
+      "command": "xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -destination 'platform=macOS' CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_STYLE=Manual test",
+      "timestampUTC": "2026-08-08T19:08:28Z",
+      "toolVersions": "current run-state did not retain per-run versions; result diagnostics identify Xcode 26.2 (17C52)",
+      "destination": "platform=macOS",
+      "result": "passed; exit 0; five hosted tests and the standalone architecture guard; zero recorded warnings, errors, and test failures",
+      "durationSeconds": null,
+      "logOrResultBundlePath": "/tmp/RuneScribe-P6-final-mac.ceyWwn/RuneScrib-macOS.xcresult",
+      "relatedCommit": "314b73f3aaac448789d4b16654623ecc6066d021",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "The recorded result bundle and P6 run-state entry report success."
+    },
+    {
+      "id": "P6-IOS-FINAL",
+      "command": "xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -destination 'generic/platform=iOS Simulator' CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_STYLE=Manual build",
+      "timestampUTC": "2026-08-08T19:08:49Z",
+      "toolVersions": "current run-state did not retain per-run versions; local environment later observed as Xcode 26.2 (17C52)",
+      "destination": "generic/platform=iOS Simulator",
+      "result": "passed; exit 0; zero recorded warnings and errors",
+      "durationSeconds": null,
+      "logOrResultBundlePath": "/tmp/RuneScribe-P6-final-ios.ZtOPjW/RuneScrib-iOS.xcresult",
+      "relatedCommit": "314b73f3aaac448789d4b16654623ecc6066d021",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "The recorded result bundle and P6 run-state entry report success."
+    },
+    {
+      "id": "P5-MACOS-SMOKE",
+      "command": "Launch the final Debug product and inspect its on-screen application window and process lifetime.",
+      "timestampUTC": "2026-08-08T18:41:00Z",
+      "toolVersions": "not recorded",
+      "destination": "local macOS application",
+      "result": "passed for one window/process smoke only",
+      "durationSeconds": null,
+      "logOrResultBundlePath": null,
+      "relatedCommit": "211bd04",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "Run state records a live full-opacity 600 by 720 Rune Scribe window with no framework UI. This is not the complete T-025 parity smoke."
+    }
+  ],
+  "sharedFinalP7Runs": [
+    {
+      "id": "P7-JSON-ARCHITECTURE-FINAL",
+      "command": "Parse repository verification JSON with jq -e; preserve all 30 normative rows and their terminal statuses; run scripts/check-architecture.sh and git diff --check; prove the exact shipping source, generated PBXSources, package product, and dependency guards reject RuneScribeTestSupport injection fixtures.",
+      "timestampUTC": "2026-08-09T04:25:19Z",
+      "toolVersions": "jq 1.7.1, XcodeGen 2.46.0, Swift 6.2.3",
+      "destination": "repository working tree at /Users/jimdaley/GitHub/Rune-Scribe",
+      "result": "passed; repository JSON and all 30 normative rows validated; all 17 architecture ratchets passed; prohibited metrics are zero; the two narrowly allowlisted system-notification observations remain within their maximum; host is 290/300 physical lines; source, PBXSources, package-product, and dependency TestSupport injections were rejected by both architecture and shipping guards",
+      "durationSeconds": null,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/check-architecture.log",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/git-diff-check.log",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/json-validation.log",
+        "/tmp/RuneScribe-P8-guard-audit.4gkAfP/negative-architecture.log",
+        "/tmp/RuneScribe-P8-guard-audit.4gkAfP/negative-shipping.log",
+        "/tmp/RuneScribe-P8-guard-audit.4gkAfP/negative-package-architecture.log",
+        "/tmp/RuneScribe-P8-guard-audit.4gkAfP/negative-package-shipping.log",
+        "/tmp/RuneScribe-P8-guard-audit.4gkAfP/negative-dependency-architecture.log",
+        "/tmp/RuneScribe-P8-guard-audit.4gkAfP/negative-dependency-shipping.log",
+        "/tmp/RuneScribe-P8-cleanup.bxBuUN/negative-pbx-architecture.log",
+        "/tmp/RuneScribe-P8-cleanup.bxBuUN/negative-pbx-shipping.log"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "The final guard ends with Architecture guardrails passed; every zero-tolerance metric reports 0/0. Independent negative fixtures prove that direct TestSupport shipping-source, generated PBXSources, package-product, and dependency injection is rejected."
+    },
+    {
+      "id": "P7-SWIFTPM-FINAL",
+      "command": "swift test --package-path Packages/RuneScribeArchitecture",
+      "timestampUTC": "2026-08-09T04:25:19Z",
+      "toolVersions": "Xcode 26.2 (17C52), Swift 6.2.3",
+      "destination": "local arm64 macOS SwiftPM host",
+      "result": "passed; exit 0; 283 tests; 0 failures; 0 unexpected failures",
+      "durationSeconds": 1.437,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/swift-test.log",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/warning-error-census.log",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/evidence-sha256.txt"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "The final P8 current-tree log reports All tests passed, 283 tests with zero failures, including async-only platform adapters, TestSupport isolation, fresh lazy UI factories, contract safety, lifecycle, migration, compatibility, parity-flow, and render coverage."
+    },
+    {
+      "id": "P7-XCODEGEN-FINAL",
+      "command": "Run XcodeGen 2.46.0 twice; compare deterministic hashes for project.pbxproj and all four shared schemes; verify exact shipping/test source and product consumers; run scripts/check-architecture.sh and git diff --check.",
+      "timestampUTC": "2026-08-09T04:25:16Z",
+      "toolVersions": "XcodeGen 2.46.0, Xcode 26.2 (17C52)",
+      "destination": "RuneScrib.xcodeproj generated from project.yml",
+      "result": "passed; consecutive generation manifests are identical; project.pbxproj SHA-256 is 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; all four shared schemes are stable; shipping apps consume exactly six production products; RuneScribeTestSupport is limited to RuneScribePlatformTests and RuneScribeArchitectureTests in Package.swift plus RuneScribTests, RuneScribIOSTests, and RuneScribMacParityTests in project.yml, and is excluded from app sources and generated PBXSources",
+      "durationSeconds": null,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/xcodegen-first.log",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/xcodegen-second.log",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/generated-first.sha256",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/generated-second.sha256",
+        "/tmp/RuneScribe-P8-cleanup.bxBuUN/negative-yaml-architecture.log",
+        "/tmp/RuneScribe-P8-cleanup.bxBuUN/negative-yaml-shipping.log",
+        "/tmp/RuneScribe-P8-cleanup.bxBuUN/negative-pbx-architecture.log",
+        "/tmp/RuneScribe-P8-cleanup.bxBuUN/negative-pbx-shipping.log"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "XcodeGen 2.46.0 produced byte-identical project.pbxproj and four shared schemes twice. Source, PBXSources, package-product, and dependency negative fixtures are rejected, and the final graph limits RuneScribeTestSupport to the two package and three Xcode test consumers named above."
+    },
+    {
+      "id": "P7-MACOS-FINAL",
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/RuneScribe-P8-final-mac.MN3k9e/main-derived -resultBundlePath /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=",
+      "timestampUTC": "2026-08-09T04:30:02Z",
+      "toolVersions": "Xcode 26.2 (17C52), Swift 6.2.3",
+      "destination": "platform=macOS, manual ad-hoc test host with in-memory security stores and no login-Keychain path",
+      "result": "passed; exit 0; 8 tests; 0 failures; 0 skipped; seven hosted tests plus the standalone architecture guard",
+      "durationSeconds": 18.347,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.log",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-test-summary.json",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/safety-audit.log"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "diagnostics": [
+        "Structured xcresult warnings, errors, and analyzer issues are zero. Raw output contains only non-actionable AppIntents metadata-skip and headless linkd environment diagnostics."
+      ],
+      "finalPassEvidence": "xcresult reports Passed, totalTestCount 8, passedTests 8, failedTests 0, skippedTests 0. CompatibilityBaselineTests.testSignedHostLoadsFrozenLegacyKeychainLibraryAndActiveSelection uses an in-memory Keychain boundary; this macOS rail performs no real SecItem or login-Keychain access."
+    },
+    {
+      "id": "P7-IOS-GENERIC-BUILD-FINAL",
+      "command": "xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -destination 'generic/platform=iOS Simulator' -derivedDataPath /tmp/RuneScribe-P8-final-ios.87OHyd/generic-derived -resultBundlePath /tmp/RuneScribe-P8-final-ios.87OHyd/GenericBuild.xcresult clean build-for-testing CODE_SIGNING_ALLOWED=NO",
+      "timestampUTC": "2026-08-09T04:36:24Z",
+      "toolVersions": "Xcode 26.2 (17C52), Swift 6.2.3",
+      "destination": "generic/platform=iOS Simulator",
+      "result": "passed; exit 0; BUILD SUCCEEDED",
+      "durationSeconds": 3.108,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/generic-build.log",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/GenericBuild.xcresult",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/evidence-sha256.txt"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "The current-tree generic iOS Simulator build log ends with BUILD SUCCEEDED and records no actionable Swift compiler or concurrency warning."
+    },
+    {
+      "id": "P7-IOS-TEST-FINAL",
+      "command": "xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -destination 'platform=iOS Simulator,id=906599AD-E2E7-4BB0-AE05-8D7731BE2204' -derivedDataPath /tmp/RuneScribe-P8-final-ios.87OHyd/hosted-derived -resultBundlePath /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult test CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=9AQ2C2838M",
+      "timestampUTC": "2026-08-09T04:36:24Z",
+      "toolVersions": "Xcode 26.2 (17C52), Swift 6.2.3",
+      "destination": "fresh isolated Rune Scribe P8 Hosted iPhone 17 Pro, iOS 26.2 Simulator, id 906599AD-E2E7-4BB0-AE05-8D7731BE2204",
+      "result": "passed; exit 0; 18 tests; 0 failures; 0 skipped; five AppHostRouting, one KeychainMigration, three NativeShareOutcome, and nine PlatformPresentation tests",
+      "durationSeconds": 18.553,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/hosted-test.log",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted-summary.json",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/evidence-sha256.txt"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "xcresult reports Passed, totalTestCount 18, passedTests 18, failedTests 0, skippedTests 0. KeychainMigrationTests.testSimulatorLoadsFrozenLegacyLibraryThroughAppleKeychainStore exercises real SecItem only inside the isolated ad-hoc-signed Simulator and cannot access or prompt for the macOS login Keychain."
+    },
+    {
+      "id": "P7-SHIPPING-RELEASE-FINAL",
+      "command": "Build clean manual ad-hoc Release products for macOS and generic iOS Simulator without injected base entitlements, then run scripts/check-shipping-products.sh against the exact products.",
+      "timestampUTC": "2026-08-09T04:36:03Z",
+      "toolVersions": "Xcode 26.2 (17C52), Swift 6.2.3",
+      "destination": "Release macOS product and Release iOS Simulator product",
+      "result": "passed; clean macOS Release build succeeded in 29.848 seconds; clean iOS Simulator Release build succeeded in 28.953 seconds; exact shipping-product inspection passed 50/50 with 0 failures",
+      "durationSeconds": 58.801,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/macos-final/build.log",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/macos-final/RuneScrib-macOS-Release.xcresult",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/ios/build.log",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/ios/RuneScrib-iOS-Release.xcresult",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/census/macOS-build-results.json",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/census/iOS-build-results.json",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/census/macOS-TestSupport-symbols.txt",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/census/iOS-TestSupport-symbols.txt",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/qualification-summary.json"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "limitations": [
+        "Both products use a prompt-proof manual ad-hoc signature; distribution identity and physical-device provisioning are intentionally unassessed."
+      ],
+      "finalPassEvidence": "The clean-artifact inspection verifies built Info.plists, strict signatures and nested seals, hardened runtime, exact dual-architecture entitlements, resources, manifests, six production product links, the exact dependency graph, and RuneScribeTestSupport exclusion from both executables, ending with 50/50 passes. No app launch, identity lookup, login-Keychain access, TCC prompt, or operator interaction occurred."
+    },
+    {
+      "id": "P7-IOS-PARITY-FINAL",
+      "command": "xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=9E1647B9-7B8D-4EFD-AFD0-C17C9CFA955B' -derivedDataPath /tmp/RuneScribe-P8-final-ios.87OHyd/iphone-parity-derived -resultBundlePath /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult test RUNESCRIBE_APP_BUNDLE_IDENTIFIER=com.runescribe.app.p8uitest.iphone CODE_SIGN_ENTITLEMENTS= CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "timestampUTC": "2026-08-09T04:36:24Z",
+      "toolVersions": "Xcode 26.2 (17C52), iOS 26.2 Simulator",
+      "destination": "fresh isolated Rune Scribe P8 iPhone Parity iPhone 17 Pro, iOS 26.2 Simulator, id 9E1647B9-7B8D-4EFD-AFD0-C17C9CFA955B",
+      "result": "passed; 1 test; 0 failures; 0 skips; six accessibility audits, first-run and splash, Settings and license, contact and cipher CRUD, PIN lifecycle with real background relock, rotation, native iOS share cancel, valid and hash-mismatched custom-font imports with retry, registered cipher/message files, message and reply flows",
+      "durationSeconds": 216.666,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/iphone-parity.log",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone-summary.json",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/evidence-sha256.txt"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "limitations": [
+        "This isolated Simulator rail does not replace the exact physical-device validation items retained by T-026."
+      ],
+      "finalPassEvidence": "The final P8 current-source xcresult reports 1/1 passed in 216.666 seconds. It ran unattended with an ad-hoc Simulator signature and did not access the macOS login Keychain or request password, TCC, automation, or accessibility approval."
+    },
+    {
+      "id": "P7-IOS-IPAD-PARITY-FINAL",
+      "command": "xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=50A89D30-353C-4D26-87D7-D714C256EEF0' -derivedDataPath /tmp/RuneScribe-P8-final-ios.87OHyd/ipad-parity-derived -resultBundlePath /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPad.xcresult test RUNESCRIBE_APP_BUNDLE_IDENTIFIER=com.runescribe.app.p8uitest.ipad CODE_SIGN_ENTITLEMENTS= CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "timestampUTC": "2026-08-09T04:36:24Z",
+      "toolVersions": "Xcode 26.2 (17C52), iOS 26.2 Simulator",
+      "destination": "iPad Pro 11-inch (M5), iOS 26.2 Simulator, accessibility-extra-extra-extra-large",
+      "result": "passed; 1 test; 0 failures; 0 skips; iPad layout, largest accessibility size, rotation, and primary parity flow",
+      "durationSeconds": 223.516,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/ipad-parity.log",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPad.xcresult",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPad-summary.json",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/ipad-content-size.log",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/evidence-sha256.txt"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "The prompt-proof isolated-Simulator xcresult reports 1/1 passed in 223.516 seconds at the largest supported accessibility content size; the only raw log warning is the non-actionable AppIntents metadata skip."
+    },
+    {
+      "id": "P7-MACOS-PARITY-FINAL",
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/RuneScribe-P8-final-mac.MN3k9e/parity-derived -resultBundlePath /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-Parity.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=",
+      "timestampUTC": "2026-08-09T04:30:02Z",
+      "toolVersions": "Xcode 26.2 (17C52), Swift 6.2.3",
+      "destination": "isolated no-entitlements macOS unit-test host with in-memory services and test-owned temporary artifacts",
+      "result": "passed; 3 tests; 0 failures; 0 skips; production RootView/Settings and keyboard commands, custom-font success/hash-failure, production file/link controls, and Core cancellation cleanup",
+      "durationSeconds": 16.83,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-Parity.log",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-Parity.xcresult",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-Parity-test-summary.json",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/safety-audit.log"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "diagnostics": [
+        "Structured xcresult warnings, errors, and analyzer issues are zero. Only non-actionable headless AppIntents, linkd, and CVDisplayLink environment messages remain; Objective-C duplicate-class diagnostics are zero."
+      ],
+      "finalPassEvidence": "The final prompt-proof hosted macOS xcresult reports 3/3 passed. The lane uses no XCUI, AX, CGEvent, Apple Events, System Events, screen capture, Keychain, identity lookup, destination selection, or operator interaction."
+    },
+    {
+      "id": "P7-MACOS-NATIVE-SHARE-FINAL",
+      "command": "scripts/check-macos-native-share.sh /tmp/RuneScribe-P8-final-mac.MN3k9e/parity-derived/Build/Products/Debug/RuneScribMacParityHost.app /tmp/RuneScribe-P8-final-mac.MN3k9e/native-share-report.json",
+      "timestampUTC": "2026-08-09T04:30:02Z",
+      "toolVersions": "Xcode 26.2 (17C52), Swift 6.2.3",
+      "destination": "same-process normal macOS app self-test with local NSEvent dismissal",
+      "result": "passed; production file and link share controls each triggered once, presented a native picker, and became nonvisible after same-process local Escape",
+      "durationSeconds": null,
+      "logOrResultBundlePaths": [
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/native-share.log",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/native-share-report.json",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/codesign-verify.log",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/parity-entitlements.plist",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/final-gate-report.json",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/evidence-sha256.txt"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "limitations": [
+        "The self-test proves native macOS presentation and local dismissal but does not claim a destination was selected; real external destination handoff remains FP-023 device validation."
+      ],
+      "finalPassEvidence": "native-share-report.json reports passed true for both file and link controls with triggerCount 1, nativePickerPresented true, and dismissedByLocalEscape true. The app has a strict ad-hoc signature and no injected entitlements; dismissal uses same-process NSApp.sendEvent and the run uses no Keychain, TCC, AX, CGEvent, Apple Events, System Events, screen capture, identity lookup, or operator interaction."
+    },
+    {
+      "id": "P7-TEST-RECONCILIATION-FINAL",
+      "command": "Validate the 157 original file/method identifiers against docs/verification/ForsettiTestReconciliation.json, including unique IDs, terminal dispositions, exact replacement declarations, and per-entry current verification against the final package/macOS/iOS records.",
+      "timestampUTC": "2026-08-09T04:36:24Z",
+      "toolVersions": "jq 1.7.1, git 2.50.1, ripgrep 15.1.0",
+      "destination": "repository working tree at /Users/jimdaley/GitHub/Rune-Scribe",
+      "result": "passed; 157/157 original methods terminal; 78 preserved in owning target; 79 replaced with tested equivalents; 0 pending; all entries identify a final current verification record",
+      "durationSeconds": null,
+      "logOrResultBundlePaths": [
+        "docs/verification/ForsettiTestReconciliation.json",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/swift-test.log",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "The terminal ledger assigns all 157 methods to the final 283/283 package, 8/8 macOS, and/or 18/18 hosted iOS records: 148 package, 2 macOS, 2 iOS, 4 package plus macOS, and 1 iOS plus macOS."
+    },
+    {
+      "id": "P7-MIGRATION-RECONCILIATION-FINAL",
+      "command": "Validate docs/verification/ForsettiMigrationReconciliation.json for exact package and P0-local-delta inventories, terminal dispositions, unique source mappings, and current P7 gate verification.",
+      "timestampUTC": "2026-08-09T04:36:24Z",
+      "toolVersions": "jq 1.7.1, git 2.50.1, ripgrep 15.1.0",
+      "destination": "repository working tree at /Users/jimdaley/GitHub/Rune-Scribe",
+      "result": "passed; 89/89 migration entries identify passed-P8-final-gates; 63 package entries and 26 P0 local-delta entries; 0 pending current verification",
+      "durationSeconds": null,
+      "logOrResultBundlePaths": [
+        "docs/verification/ForsettiMigrationReconciliation.json",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/swift-test.log",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/generated-second.sha256",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log",
+        "/tmp/RuneScribe-P8-guard-audit.4gkAfP/negative-shipping.log",
+        "/tmp/RuneScribe-P8-cleanup.bxBuUN/negative-pbx-shipping.log"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "finalPassEvidence": "Every package and local-delta migration entry is terminal and references the final package, hosted platform, generation, or clean Release evidence appropriate to its moved, split, preserved-resource, or tested-equivalent disposition."
+    },
+    {
+      "id": "P7-FEATURE-PARITY-FINAL",
+      "command": "Validate and execute every non-device acceptance step in docs/verification/feature-parity-matrix.json against the final package, iPhone/iPad Simulator, hosted macOS, native-share self-test, and clean Release records.",
+      "timestampUTC": "2026-08-09T04:36:24Z",
+      "toolVersions": "Xcode 26.2 (17C52), Swift 6.2.3, iOS 26.2 Simulator",
+      "destination": "prompt-proof package, isolated iPhone/iPad Simulators, in-process macOS test hosts, and same-process normal-app share self-test",
+      "result": "passed for P7; 40/40 items terminal; 12 passed-automated, 21 passed-automated-and-manual, 7 device-validation-required, 0 in-progress, 0 failed",
+      "durationSeconds": null,
+      "logOrResultBundlePaths": [
+        "docs/verification/feature-parity-matrix.json",
+        "/tmp/RuneScribe-P8-final-package.yGz7qs/swift-test.log",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPad.xcresult",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-Parity.xcresult",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/native-share-report.json",
+        "/tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log"
+      ],
+      "relatedCommit": "uncommitted P8 remediation tree based on P7 commit 49a8cee0077939de100d6da7405c980d7a31163f",
+      "failuresOrRemediation": [],
+      "limitations": [
+        "The seven exact signed-hardware steps remain device-validation-required and are carried by T-026; they are not represented as passed."
+      ],
+      "finalPassEvidence": "All non-device acceptance steps are terminal on current source. The evidence rails are unattended and prompt-proof: no macOS login Keychain/password, identity lookup, TCC, System Events, VoiceOver approval, or operator interaction."
+    }
+  ],
+  "finalExecutionRecordRequirements": [
+    "exact command or test case",
+    "date and time",
+    "Xcode and Swift versions",
+    "destination",
+    "result",
+    "duration when available",
+    "log or result-bundle path",
+    "related commit",
+    "failures and remediation",
+    "final pass evidence"
+  ],
+  "tests": [
+    {
+      "id": "T-001",
+      "layer": "package",
+      "name": "Manifest schema and descriptor identity",
+      "required": true,
+      "commandOrMethod": "Validate every manifest and matching compiled descriptor.",
+      "gate": "zero errors",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/ManifestValidationTests.swift::testDecoderAcceptsStrictManifest",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/ManifestValidationTests.swift::testManifestRuntimeRequirementAcceptsCurrentAndRejectsOlderRuntime",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/CoreModuleTests.swift::testBundledManifestMatchesFactoryDescriptor",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/UIModuleTests.swift::testBundledManifestMatchesFactoryDescriptor"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-JSON-ARCHITECTURE-FINAL",
+        "P7-SWIFTPM-FINAL"
+      ]
+    },
+    {
+      "id": "T-002",
+      "layer": "runtime-unit",
+      "name": "Duplicate module IDs rejected",
+      "required": true,
+      "commandOrMethod": "XCTest",
+      "gate": "typed deterministic error",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeLifecycleTests.swift::testDuplicateModuleIDIsRejectedWithTypedError"
+      ],
+      "recordedPriorPhaseRuns": [],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL"
+      ]
+    },
+    {
+      "id": "T-003",
+      "layer": "runtime-unit",
+      "name": "Manifest/descriptor mismatch rejected",
+      "required": true,
+      "commandOrMethod": "XCTest",
+      "gate": "activation denied before start",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeLifecycleTests.swift::testManifestDescriptorMismatchRejectsRegistrationBeforeFactoryUse",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeLifecycleTests.swift::testFactoryProducedDescriptorMismatchFailsBeforeModuleStart"
+      ],
+      "recordedPriorPhaseRuns": [],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL"
+      ]
+    },
+    {
+      "id": "T-004",
+      "layer": "runtime-unit",
+      "name": "Exactly one UI module",
+      "required": true,
+      "commandOrMethod": "XCTest with zero/one/two UI modules",
+      "gate": "only one configuration activates",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeLifecycleTests.swift::testExactlyOneEligibleUIIsRequired",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/UIModuleTests.swift::testRootContributionSelectorRejectsZeroAndMultiple"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL"
+      ]
+    },
+    {
+      "id": "T-005",
+      "layer": "runtime-unit",
+      "name": "Service modules coexist",
+      "required": true,
+      "commandOrMethod": "XCTest",
+      "gate": "all eligible services start once",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeLifecycleTests.swift::testTwoNonUIModulesCoexistAndStartAndStopExactlyOnce"
+      ],
+      "recordedPriorPhaseRuns": [],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL"
+      ]
+    },
+    {
+      "id": "T-006",
+      "layer": "runtime-unit",
+      "name": "Lifecycle idempotency",
+      "required": true,
+      "commandOrMethod": "XCTest",
+      "gate": "repeated start/stop has no duplicate effects",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "RuneScribTests/RuntimeCompositionTests.swift::testCompositionPublishesRootAcrossStartStopAndRestart",
+        "RuneScribTests/RuntimeCompositionTests.swift::testConcurrentStopsJoinInterruptedStartAndCannotLeaveRuntimeActive",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeStopDuringStartTests.swift::testStopDuringActivationWaitsForRollbackAndRevokesPublishedServices"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL",
+        "P6-MACOS-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL",
+        "P7-MACOS-FINAL"
+      ]
+    },
+    {
+      "id": "T-007",
+      "layer": "runtime-unit",
+      "name": "Default-deny capabilities",
+      "required": true,
+      "commandOrMethod": "XCTest",
+      "gate": "undeclared resolution fails",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeLifecycleTests.swift::testUnmappedServiceAndUnknownCapabilityAreDeniedAtRegistration",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeLifecycleTests.swift::testClipboardCapabilityPolicyDeniesCoreWriteAndUIRead",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeStopDuringStartTests.swift::testInboundFileReaderRequiresDedicatedCapability"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL"
+      ]
+    },
+    {
+      "id": "T-008",
+      "layer": "runtime-unit",
+      "name": "Runtime-stamped event source",
+      "required": true,
+      "commandOrMethod": "XCTest",
+      "gate": "module cannot spoof source",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeLifecycleTests.swift::testRuntimeStampsEventsAndDirectedMessages"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL"
+      ]
+    },
+    {
+      "id": "T-009",
+      "layer": "runtime-unit",
+      "name": "Eligibility/activation state",
+      "required": true,
+      "commandOrMethod": "XCTest with in-memory provider/store",
+      "gate": "deterministic restore/reconcile",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeLifecycleTests.swift::testMutableEligibilityReconcilesDeterministicallyAcrossRestart"
+      ],
+      "recordedPriorPhaseRuns": [],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL"
+      ]
+    },
+    {
+      "id": "T-010",
+      "layer": "architecture",
+      "name": "No external Forsetti dependency/copy",
+      "required": true,
+      "commandOrMethod": "Repository script plus package/project inspection",
+      "gate": "no package URL/submodule/vendor/binary/copy/download",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "scripts/check-architecture.sh dependency, import, directory, submodule, package, and project scans",
+        "scripts/architecture-ratchet.json zero-tolerance architecture thresholds"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-ARCHITECTURE-GENERATION"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-JSON-ARCHITECTURE-FINAL",
+        "P7-SHIPPING-RELEASE-FINAL"
+      ]
+    },
+    {
+      "id": "T-011",
+      "layer": "architecture",
+      "name": "No forbidden target edge",
+      "required": true,
+      "commandOrMethod": "Package/project graph and import scan",
+      "gate": "matches target-architecture.json",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "scripts/check-architecture.sh package product, target dependency, app dependency, and import checks",
+        "Forsetti implementation package v1.0/target-architecture.json",
+        "Negative package-product and dependency fixtures prove that RuneScribeTestSupport cannot become a production package or app dependency."
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-ARCHITECTURE-GENERATION"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-JSON-ARCHITECTURE-FINAL",
+        "P7-SHIPPING-RELEASE-FINAL"
+      ]
+    },
+    {
+      "id": "T-012",
+      "layer": "architecture",
+      "name": "No app-owned cross-module singleton",
+      "required": true,
+      "commandOrMethod": "Static scan and review",
+      "gate": "zero violations",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "scripts/check-architecture.sh app singleton and legacy ownership scans",
+        "RuneScribArchitectureTests/ArchitectureGuardrailTests.swift::testRepositoryArchitectureGuardrails"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-ARCHITECTURE-GENERATION",
+        "P6-MACOS-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-JSON-ARCHITECTURE-FINAL",
+        "P7-MACOS-FINAL"
+      ]
+    },
+    {
+      "id": "T-013",
+      "layer": "architecture",
+      "name": "No cross-module NotificationCenter",
+      "required": true,
+      "commandOrMethod": "Static scan with narrow OS-notification allowlist",
+      "gate": "zero app coordination uses",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "scripts/check-architecture.sh NotificationCenter coordination scan and allowlist handling",
+        "scripts/architecture-ratchet.json notification metric"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-ARCHITECTURE-GENERATION"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-JSON-ARCHITECTURE-FINAL"
+      ]
+    },
+    {
+      "id": "T-014",
+      "layer": "architecture",
+      "name": "Thin hosts",
+      "required": true,
+      "commandOrMethod": "Responsibility/target scan",
+      "gate": "composition/lifecycle/input only",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "scripts/check-architecture.sh host responsibility, line-count, ownership, and runtime-bypass checks",
+        "RuneScribTests/RuntimeCompositionTests.swift",
+        "RuneScribIOSTests/AppHostRoutingTests.swift"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-ARCHITECTURE-GENERATION",
+        "P6-MACOS-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-JSON-ARCHITECTURE-FINAL",
+        "P7-MACOS-FINAL",
+        "P7-IOS-TEST-FINAL"
+      ]
+    },
+    {
+      "id": "T-015",
+      "layer": "compatibility",
+      "name": "CipherSharePayload v3",
+      "required": true,
+      "commandOrMethod": "Golden and existing tests",
+      "gate": "byte-compatible parse/write",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift::testCipherV3GoldenFixtureDecodesAndReencodesExactly",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift::testV3ByteCount",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherSharePayloadTests.swift::testLegacyHTTPSURLStillParses"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL"
+      ]
+    },
+    {
+      "id": "T-016",
+      "layer": "compatibility",
+      "name": "MessageSharePayload v1",
+      "required": true,
+      "commandOrMethod": "Golden and existing tests",
+      "gate": "byte-compatible parse/write",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift::testMessageV1GoldenFixtureDecodesAndReencodesExactly",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift::testDecodeConsumingReportsExactLength",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageSharePayloadTests.swift::testInitDecodingRejectsTrailingBytes"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL"
+      ]
+    },
+    {
+      "id": "T-017",
+      "layer": "migration",
+      "name": "Existing Keychain/library",
+      "required": true,
+      "commandOrMethod": "Adapter fixture and signed smoke",
+      "gate": "same keys/ciphers/active selection",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherPersistenceApplicationTests.swift::testLoadsFrozenLegacyEncryptedLibraryWithoutRewriting",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribePlatformTests/PlatformAdapterTests.swift::testKeychainConstantsAndDeleteThenAddCompatibility",
+        "RuneScribTests/CompatibilityBaselineTests.swift::testSignedHostLoadsFrozenLegacyKeychainLibraryAndActiveSelection",
+        "RuneScribIOSTests/KeychainMigrationTests.swift::testSimulatorLoadsFrozenLegacyLibraryThroughAppleKeychainStore",
+        "The macOS compatibility test uses an in-memory Keychain boundary. The real AppleKeychainStore/SecItem smoke runs only in a fresh, isolated, ad-hoc-signed iOS Simulator; it uses a unique test namespace, preserves canonical account names, proves active selection and ciphertext round-trip without library rewrite, cleans up, and cannot access or prompt for the macOS login Keychain."
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL",
+        "P7-MACOS-FINAL",
+        "P7-IOS-TEST-FINAL",
+        "P7-MIGRATION-RECONCILIATION-FINAL"
+      ]
+    },
+    {
+      "id": "T-018",
+      "layer": "migration",
+      "name": "Existing encrypted contacts",
+      "required": true,
+      "commandOrMethod": "Fixture/integration",
+      "gate": "same contacts/associations",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift::testLoadsFrozenVersion1AESGCMFixtureFromShippingPathAndAccount",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift::testAssociationIntentIsEncryptedVerifiedAndClearedAfterAmbiguousRemoval",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift::testImportedContactLinksAreIdempotentPreserveActiveAndUnlinkOnDelete"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL",
+        "P7-MIGRATION-RECONCILIATION-FINAL"
+      ]
+    },
+    {
+      "id": "T-019",
+      "layer": "migration",
+      "name": "Existing fonts",
+      "required": true,
+      "commandOrMethod": "Fixture/integration",
+      "gate": "same hashes/files/registration",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Fonts/FontCatalogTests.swift::testRegistersFixedBundledIdentityThroughInjectedResourceAndRegistrar",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Fonts/FontCatalogTests.swift::testCustomImportUsesContentDigestPathAndRoundTrips",
+        "RuneScribTests/CompatibilityBaselineTests.swift::testBundledFontMatchesFixedSHA256"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL",
+        "P6-MACOS-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL",
+        "P7-MACOS-FINAL",
+        "P7-SHIPPING-RELEASE-FINAL",
+        "P7-MIGRATION-RECONCILIATION-FINAL"
+      ]
+    },
+    {
+      "id": "T-020",
+      "layer": "existing-unit",
+      "name": "All original tests reconciled",
+      "required": true,
+      "commandOrMethod": "Inventory mapping",
+      "gate": "none silently removed",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "docs/verification/ForsettiTestReconciliation.json maps all 157 P0 original test methods.",
+        "All 157 entries are terminal: 78 are preserved in the owning target and 79 are replaced with a tested equivalent; none remain pending.",
+        "All 157 entries identify the exact final current-tree package, macOS hosted, and/or iOS hosted execution that ran their preserved or replacement methods."
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL",
+        "P6-MACOS-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-TEST-RECONCILIATION-FINAL"
+      ]
+    },
+    {
+      "id": "T-021",
+      "layer": "macOS",
+      "name": "Full macOS XCTest",
+      "required": true,
+      "commandOrMethod": "xcodebuild macOS test",
+      "gate": "exit 0",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "RuneScribTests hosted test target",
+        "RuneScribArchitectureTests standalone architecture target"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-MACOS-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-MACOS-FINAL"
+      ]
+    },
+    {
+      "id": "T-022",
+      "layer": "iOS",
+      "name": "Generic simulator build",
+      "required": true,
+      "commandOrMethod": "xcodebuild iOS simulator build",
+      "gate": "exit 0",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "RuneScrib-iOS generic Simulator build"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-IOS-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-IOS-GENERIC-BUILD-FINAL"
+      ]
+    },
+    {
+      "id": "T-023",
+      "layer": "iOS",
+      "name": "iOS-compatible tests",
+      "required": true,
+      "commandOrMethod": "xcodebuild test on available simulator",
+      "gate": "exit 0",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "RuneScribIOSTests/AppHostRoutingTests.swift::testAppDelegateIgnoresUnsupportedAndBrowsingActivitiesWithoutURLs",
+        "RuneScribIOSTests/AppHostRoutingTests.swift::testAppDelegateRoutesURLsFilesActivitiesAndLifecycleWithColdWarmMetadata",
+        "RuneScribIOSTests/AppHostRoutingTests.swift::testSwiftUIScenePhaseMappingForwardsOrderedLifecycleInputs",
+        "RuneScribIOSTests/AppHostRoutingTests.swift::testCompositionRecoversFromFirstStartupFailureAndRetries",
+        "RuneScribIOSTests/AppHostRoutingTests.swift::testSystemClipboardAdapterRoundTripsWithinHostedApplicationWithoutPastePrompt",
+        "project.yml and RuneScrib-iOS.xcscheme contain the RuneScribIOSTests target/testable",
+        ".github/workflows/unit-tests.yml selects an available simulator and executes the final 18-test hosted breakdown: five AppHostRouting, one KeychainMigration, three NativeShareOutcome, and nine PlatformPresentation tests"
+      ],
+      "recordedPriorPhaseRuns": [],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-IOS-TEST-FINAL"
+      ]
+    },
+    {
+      "id": "T-024",
+      "layer": "build",
+      "name": "XcodeGen reproducibility",
+      "required": true,
+      "commandOrMethod": "Generate twice and inspect diff",
+      "gate": "no unexpected second diff",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "project.yml is the authoritative project description",
+        ".github/workflows/unit-tests.yml pins XcodeGen 2.46.0 and performs two generations plus tracked and untracked generated-surface diff checks",
+        "Final local XcodeGen 2.46.0 generation produced identical project.pbxproj and four shared-scheme hashes twice",
+        "Negative project.yml shipping-source and regenerated PBXSources fixtures were rejected by both architecture and shipping guards."
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-ARCHITECTURE-GENERATION"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-XCODEGEN-FINAL"
+      ]
+    },
+    {
+      "id": "T-025",
+      "layer": "manual",
+      "name": "macOS parity smoke",
+      "required": true,
+      "commandOrMethod": "Execute applicable feature matrix",
+      "gate": "all pass",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "docs/verification/feature-parity-matrix.json is terminal for all 40 normative cases: 12 passed-automated, 21 passed-automated-and-manual, 7 device-validation-required, 0 in-progress, and 0 failed.",
+        "Final current-source package, iPhone, largest-Dynamic-Type iPad, hosted macOS, same-process native macOS share, and clean Release rails execute every applicable non-device acceptance step.",
+        "The macOS rails use in-memory/test-owned services or a strict ad-hoc normal-app self-test; the iOS rails use freshly isolated ad-hoc-signed Simulators. They require no login-Keychain password, identity lookup, TCC, System Events, VoiceOver approval, or operator interaction.",
+        "The seven exact physical-device-only cases are terminally classified in the parity ledger and remain honestly carried by T-026 rather than being called passed."
+      ],
+      "recordedPriorPhaseRuns": [
+        "P5-MACOS-SMOKE"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL",
+        "P7-MACOS-FINAL",
+        "P7-IOS-PARITY-FINAL",
+        "P7-IOS-IPAD-PARITY-FINAL",
+        "P7-MACOS-PARITY-FINAL",
+        "P7-MACOS-NATIVE-SHARE-FINAL",
+        "P7-SHIPPING-RELEASE-FINAL",
+        "P7-FEATURE-PARITY-FINAL"
+      ]
+    },
+    {
+      "id": "T-026",
+      "layer": "device",
+      "name": "iOS device paths",
+      "required": true,
+      "commandOrMethod": "Camera/Contacts/MessageUI/lifecycle/file-open on device",
+      "gate": "all pass before release",
+      "status": "device-validation-required",
+      "coverageEvidence": [
+        "docs/verification/feature-parity-matrix.json records exact physical-device steps and expected results for FP-009, FP-015, FP-020, FP-021, FP-022, FP-023, and FP-030."
+      ],
+      "recordedPriorPhaseRuns": [],
+      "pendingEvidence": [
+        "Run the physical-device portions on signed hardware with required permissions and services before release: Camera, Contacts, MessageUI, external file-open/share destinations, and real lock/background lifecycle."
+      ],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL",
+        "P7-IOS-GENERIC-BUILD-FINAL",
+        "P7-IOS-TEST-FINAL",
+        "P7-IOS-PARITY-FINAL",
+        "P7-IOS-IPAD-PARITY-FINAL",
+        "P7-FEATURE-PARITY-FINAL"
+      ],
+      "phaseDisposition": "Does not block P7 after every automatable underlying path passes; remains an external release gate and cannot be called passed."
+    },
+    {
+      "id": "T-027",
+      "layer": "security",
+      "name": "No secrets in contracts/events/logs",
+      "required": true,
+      "commandOrMethod": "Static/runtime audit",
+      "gate": "zero violations",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/ContractSafetyTests.swift::testPendingImportAndSafeEventSerializationExcludeInboundContent",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/ContractSafetyTests.swift::testSensitiveApplicationValuesCannotBeAccidentallySerialized",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/ContractSafetyTests.swift::testShareCompletionCarriesAttachmentAcknowledgementWithoutArtifactBytes",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/ContractSafetyTests.swift::testContractsSourceUsesOnlyFoundationAndApplicationSurfaceNamesNoKeyType",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift::testContentViewLockCleanupClearsSensitiveStateAndCancelsArtifactOnce",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift::testMessageArtifactCompletionGateAdmitsOneCompletionUntilFinished",
+        "scripts/check-architecture.sh enforces zero production diagnostic sinks"
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL",
+        "P7-JSON-ARCHITECTURE-FINAL"
+      ]
+    },
+    {
+      "id": "T-028",
+      "layer": "config",
+      "name": "Info/entitlement preservation",
+      "required": true,
+      "commandOrMethod": "plutil/codesign/build-settings inspection",
+      "gate": "all required values present",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "scripts/check-shipping-products.sh inspects the two final signed Release products.",
+        "Built macOS and iOS Info.plists, strict signatures and nested seals, dual-architecture entitlements, URL and document registrations, resource membership, manifests, six production product links, exact dependency graph, and RuneScribeTestSupport exclusion passed 50/50 checks."
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-MACOS-FINAL",
+        "P6-IOS-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SHIPPING-RELEASE-FINAL"
+      ]
+    },
+    {
+      "id": "T-029",
+      "layer": "quality",
+      "name": "Swift 6 concurrency/warnings",
+      "required": true,
+      "commandOrMethod": "Build log review and targeted tests",
+      "gate": "zero new actionable warnings",
+      "status": "passed-current-evidence",
+      "coverageEvidence": [
+        "Final P8 remediation package 283/283, macOS 8/8 and 3/3, generic iOS Simulator build, hosted iOS 18/18, iPhone/iPad parity, and signed Release-product logs were reviewed under Swift 6.2.3.",
+        "Structured warnings, errors, and analyzer issues are zero across the final Xcode result bundles; the package warnings/errors census is empty.",
+        "Raw Xcode output contains only classified non-actionable environment diagnostics: AppIntents metadata skips, headless linkd/CVDisplayLink messages, and two matching-destination notices in the macOS Release log."
+      ],
+      "recordedPriorPhaseRuns": [
+        "P6-SWIFTPM-FINAL",
+        "P6-MACOS-FINAL",
+        "P6-IOS-FINAL"
+      ],
+      "pendingEvidence": [],
+      "finalP7ExecutionRefs": [
+        "P7-SWIFTPM-FINAL",
+        "P7-MACOS-FINAL",
+        "P7-IOS-GENERIC-BUILD-FINAL",
+        "P7-IOS-TEST-FINAL",
+        "P7-IOS-PARITY-FINAL",
+        "P7-IOS-IPAD-PARITY-FINAL",
+        "P7-MACOS-PARITY-FINAL",
+        "P7-SHIPPING-RELEASE-FINAL"
+      ]
+    },
+    {
+      "id": "T-030",
+      "layer": "final",
+      "name": "Repeated self-audit",
+      "required": true,
+      "commandOrMethod": "self-audit-checklist.json",
+      "gate": "all blocking items pass",
+      "status": "deferred-to-p8",
+      "coverageEvidence": [
+        "Forsetti implementation package v1.0/self-audit-checklist.json defines the required audit."
+      ],
+      "recordedPriorPhaseRuns": [],
+      "pendingEvidence": [
+        "After P7 passes, execute self-audit-checklist.json in P8, remediate every blocking failure, rerun the complete audit from A-001, and retain the schema-valid completion report."
+      ],
+      "finalP7ExecutionRefs": [],
+      "phaseDisposition": "Normative 06_IMPLEMENTATION_PHASES.md assigns the full repeated self-audit to P8, which depends on P7; this row is intentionally not claimed complete during P7."
+    }
+  ]
+}

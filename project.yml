@@ -1,5 +1,6 @@
 name: RuneScrib
 options:
+  xcodeVersion: "26.2"
   bundleIdPrefix: com.runescribe
   deploymentTarget:
     macOS: "15.0"
@@ -11,7 +12,8 @@ settings:
     GENERATE_INFOPLIST_FILE: YES
     MARKETING_VERSION: "1.0.33"
     CURRENT_PROJECT_VERSION: "33"
-    PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app
+    RUNESCRIBE_APP_BUNDLE_IDENTIFIER: com.runescribe.app
+    PRODUCT_BUNDLE_IDENTIFIER: "$(RUNESCRIBE_APP_BUNDLE_IDENTIFIER)"
     INFOPLIST_KEY_CFBundleDisplayName: "Rune Scribe"
     INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.lifestyle
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -21,18 +23,37 @@ settings:
     # Hardened Runtime on for distribution (App Store / notarization). Debug builds
     # still get `get-task-allow`, so local ad-hoc runs and tests work.
     ENABLE_HARDENED_RUNTIME: YES
-    # Base identity is ad-hoc (used by the test bundle); the app targets override
-    # with the developer team's automatic signing below.
+    # Keep an ad-hoc fallback for non-hosted utility targets. App and hosted test
+    # targets use the developer team's automatic signing below.
     CODE_SIGN_STYLE: Manual
     CODE_SIGN_IDENTITY: "-"
     DEVELOPMENT_TEAM: ""
+packages:
+  RuneScribeArchitecture:
+    path: Packages/RuneScribeArchitecture
 targets:
   RuneScrib-macOS:
     type: application
+    productName: RuneScrib
     platform: macOS
     deploymentTarget: "15.0"
     sources:
-      - path: RuneScrib
+      - path: RuneScrib/AppHost
+      - path: RuneScrib/Metal/Shaders.metal
+      - path: RuneScrib/Resources
+    dependencies:
+      - package: RuneScribeArchitecture
+        product: RuneScribeContracts
+      - package: RuneScribeArchitecture
+        product: RuneScribeRuntimeCore
+      - package: RuneScribeArchitecture
+        product: RuneScribeUIRuntime
+      - package: RuneScribeArchitecture
+        product: RuneScribePlatform
+      - package: RuneScribeArchitecture
+        product: RuneScribeCoreModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeUIModule
     # An explicit, XcodeGen-managed Info.plist is required because the
     # runescribe:// URL scheme is a nested array that GENERATE_INFOPLIST_FILE can't
     # express. Keys previously set via INFOPLIST_KEY_* are migrated here.
@@ -61,6 +82,12 @@ targets:
             LSItemContentTypes: [com.runescribe.runescribe]
             CFBundleTypeRole: Editor
             LSHandlerRank: Owner
+    entitlements:
+      path: Config/RuneScrib-macOS.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.personal-information.addressbook: true
+        com.apple.security.files.user-selected.read-write: true
     settings:
       base:
         PRODUCT_NAME: RuneScrib
@@ -72,16 +99,43 @@ targets:
         # App Sandbox is mandatory for the Mac App Store. The user-selected
         # read-write entitlement lets the decoder export/import file panels work
         # inside the sandbox. Signed with the developer team's automatic signing.
-        CODE_SIGN_ENTITLEMENTS: Config/RuneScrib-macOS.entitlements
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_IDENTITY: "Apple Development"
         DEVELOPMENT_TEAM: "9AQ2C2838M"
+        # Keep Xcode's capability model authoritative so regenerating the project
+        # preserves the sandbox, Contacts, and user-selected file access.
+        ENABLE_APP_SANDBOX: YES
+        ENABLE_RESOURCE_ACCESS_CONTACTS: YES
+        ENABLE_USER_SELECTED_FILES: readwrite
+      configs:
+        Debug:
+          # Hosted XCTest and the app must have the same signing identity. Keep
+          # local/CI Debug builds ad-hoc so tests never wait on a user Keychain.
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: "-"
+          DEVELOPMENT_TEAM: ""
   RuneScrib-iOS:
     type: application
+    productName: RuneScrib
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - path: RuneScrib
+      - path: RuneScrib/AppHost
+      - path: RuneScrib/Metal/Shaders.metal
+      - path: RuneScrib/Resources
+    dependencies:
+      - package: RuneScribeArchitecture
+        product: RuneScribeContracts
+      - package: RuneScribeArchitecture
+        product: RuneScribeRuntimeCore
+      - package: RuneScribeArchitecture
+        product: RuneScribeUIRuntime
+      - package: RuneScribeArchitecture
+        product: RuneScribePlatform
+      - package: RuneScribeArchitecture
+        product: RuneScribeCoreModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeUIModule
     # An explicit, XcodeGen-managed Info.plist is required because the
     # runescribe:// URL scheme is a nested array that GENERATE_INFOPLIST_FILE can't
     # express, and the camera scanner needs NSCameraUsageDescription. Keys
@@ -130,6 +184,11 @@ targets:
             LSItemContentTypes: [com.runescribe.runescribe]
             CFBundleTypeRole: Editor
             LSHandlerRank: Owner
+    entitlements:
+      path: Config/RuneScrib-iOS.entitlements
+      properties:
+        keychain-access-groups:
+          - "$(AppIdentifierPrefix)com.runescribe.app"
     settings:
       base:
         PRODUCT_NAME: RuneScrib
@@ -138,7 +197,6 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         TARGETED_DEVICE_FAMILY: "1,2"
         ENABLE_PREVIEWS: YES
-        CODE_SIGN_ENTITLEMENTS: Config/RuneScrib-iOS.entitlements
         # Signed with the developer team's automatic signing. Xcode provisions the
         # keychain-access-groups entitlement automatically; $(AppIdentifierPrefix)
         # in the entitlements file resolves to this team's prefix.
@@ -153,11 +211,133 @@ targets:
       - path: RuneScribTests
     dependencies:
       - target: RuneScrib-macOS
+      - package: RuneScribeArchitecture
+        product: RuneScribeTestSupport
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.tests
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/Contents/MacOS/RuneScrib"
         BUNDLE_LOADER: "$(TEST_HOST)"
+        # Match the signed test host. An ad-hoc test bundle cannot be loaded into
+        # an Apple Development-signed host because their Team IDs differ.
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: "9AQ2C2838M"
+      configs:
+        Debug:
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: "-"
+          DEVELOPMENT_TEAM: ""
+  RuneScribIOSTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: RuneScribIOSTests
+    dependencies:
+      - target: RuneScrib-iOS
+      - package: RuneScribeArchitecture
+        product: RuneScribeTestSupport
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.ios-tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/RuneScrib"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: "9AQ2C2838M"
+  RuneScribIOSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: RuneScribIOSUITests
+      - path: RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf
+    dependencies:
+      - target: RuneScrib-iOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.ios-ui-tests
+        TARGETED_DEVICE_FAMILY: "1,2"
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_IDENTITY: "Apple Development"
+        DEVELOPMENT_TEAM: "9AQ2C2838M"
+  RuneScribMacParityHost:
+    type: application
+    productName: RuneScribMacParityHost
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: RuneScribMacParityHost
+    dependencies:
+      - package: RuneScribeArchitecture
+        product: RuneScribeContracts
+      - package: RuneScribeArchitecture
+        product: RuneScribeCoreModule
+      - package: RuneScribeArchitecture
+        product: RuneScribePlatform
+      - package: RuneScribeArchitecture
+        product: RuneScribeUIModule
+    info:
+      path: RuneScribMacParityHost/Info.plist
+      properties:
+        CFBundleDisplayName: "Rune Scribe Parity Host"
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.runescribe.runescribe
+            UTTypeDescription: "Rune Scribe Cipher/Message"
+            UTTypeConformsTo: [public.content, public.data]
+            UTTypeTagSpecification:
+              public.filename-extension: [runescribe]
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: "Rune Scribe File"
+            LSItemContentTypes: [com.runescribe.runescribe]
+            CFBundleTypeRole: Editor
+            LSHandlerRank: Owner
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.macos-parity-host
+        PRODUCT_NAME: RuneScribMacParityHost
+        GENERATE_INFOPLIST_FILE: NO
+        ENABLE_HARDENED_RUNTIME: NO
+        ENABLE_APP_SANDBOX: NO
+        ENABLE_TESTABILITY: YES
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+  RuneScribMacParityTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: RuneScribMacParityTests
+      - path: RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf
+    dependencies:
+      - target: RuneScribMacParityHost
+      - package: RuneScribeArchitecture
+        product: RuneScribeTestSupport
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.macos-parity-tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/RuneScribMacParityHost.app/Contents/MacOS/RuneScribMacParityHost"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        ENABLE_HARDENED_RUNTIME: NO
+        ENABLE_APP_SANDBOX: NO
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
+  RuneScribArchitectureTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: RuneScribArchitectureTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.architecture-tests
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
 schemes:
   RuneScrib-macOS:
     build:
@@ -166,7 +346,26 @@ schemes:
     test:
       targets:
         - RuneScribTests
+        - RuneScribArchitectureTests
   RuneScrib-iOS:
     build:
       targets:
         RuneScrib-iOS: all
+    test:
+      targets:
+        - RuneScribIOSTests
+  RuneScrib-iOS-Parity:
+    build:
+      targets:
+        RuneScrib-iOS: all
+    test:
+      targets:
+        - RuneScribIOSUITests
+  RuneScrib-macOS-Parity:
+    build:
+      targets:
+        RuneScribMacParityHost: all
+        RuneScribMacParityTests: all
+    test:
+      targets:
+        - RuneScribMacParityTests

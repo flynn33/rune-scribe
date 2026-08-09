@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0",
+  "policyProfile": "forsetti-pattern-b-standalone",
+  "runtimeVersion": "1.0.0",
+  "moduleID": "com.runescribe.module.core",
+  "displayName": "Rune Scribe Core",
+  "moduleVersion": "1.0.33",
+  "moduleType": "service",
+  "supportedPlatforms": [
+    "iOS",
+    "macOS"
+  ],
+  "minimumOS": {
+    "iOS": "17.0",
+    "macOS": "15.0"
+  },
+  "capabilitiesRequested": [
+    "runtime.service.publish",
+    "runtime.events.publish",
+    "storage.keychain",
+    "storage.protected-files",
+    "files.inbound.read",
+    "storage.share-artifacts",
+    "resources.read",
+    "fonts.register",
+    "contacts.read",
+    "clipboard.read",
+    "clock.read",
+    "uuid.generate",
+    "application.inbound-input"
+  ],
+  "entryPoint": "RuneScribeCoreModule",
+  "runtimeRequirements": {
+    "requiredServices": [
+      "SecureValueStore",
+      "ProtectedFileStore",
+      "InboundFileReader",
+      "ShareArtifactStore",
+      "ApplicationResourceLocator",
+      "SystemFontRegistrar",
+      "ContactAccessService",
+      "ClipboardService",
+      "ClockService",
+      "UUIDService"
+    ],
+    "requiredModuleRoles": []
+  },
+  "defaultRole": "runescribe.core",
+  "entitlementRequirement": null,
+  "diagnosticsVisibleInProduction": false
+}

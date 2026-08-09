@@ -7,142 +7,77 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		008FD6B6415CDE82EE157B84 /* FontRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0EBAF25DA0BBDE5890321BB /* FontRef.swift */; };
+		00C20D49F14613A66733DD1B /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = CF4ADC70BD29BA2CE0411ABA /* RuneScribeTestSupport */; };
 		01C55610EF12C17DA83396B2 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
-		036F7BB7BA50F4AAE1F1DE48 /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */; };
-		047CAFD7FCD06597F042E57E /* ContactStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4448FA2A77E4B258694B3CC4 /* ContactStoreTests.swift */; };
-		05564C21ED178128F862F4F3 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236AB4A6CB356708A2A004EE /* KeychainService.swift */; };
 		059BA5D329AA9280083DF044 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
-		073B6A7EF02F502983F82D09 /* ContactImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C002B92A1AA0BBB489CC32F /* ContactImporterTests.swift */; };
-		0AA2A1B762BAD94CF4973189 /* ContactImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EB26ADD23F56433988EDC2 /* ContactImporter.swift */; };
-		0DEE180E6F0CC7A45A7043A4 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8437A6505FB44F89EEE9D9B /* AppLock.swift */; };
-		0E7EE57FCC7EF36C764D4C9C /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D37342DC065A1648904DC62 /* QRScannerView.swift */; };
-		0F375290B9932F3D5C1F8956 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098511B1E52AF229830C74E4 /* SettingsView.swift */; };
-		0FE15DBC0B9074385443CEE2 /* AppLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8437A6505FB44F89EEE9D9B /* AppLock.swift */; };
-		12027B50430F47B08FC91BEC /* FontStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B77A2EAB94A310BB3110C79 /* FontStore.swift */; };
-		12B61513617B7DB4D76580E1 /* MessageComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 695DD706F34F8FB5F20C1080 /* MessageComposeView.swift */; };
-		14C70DB6B47EB309C69D2024 /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B05B133702211E19EC95A5A /* Contact.swift */; };
-		15777090BCB442077B87397A /* PINPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CE669299B8B857610BAA76 /* PINPadView.swift */; };
-		176EFC88D4B1F5D8D2B296DA /* MessageSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86342C6D604E4F987CEEE2A /* MessageSend.swift */; };
-		1DF4DEAAB181AD335313F763 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD00524F7CD74AD5EE0D8121 /* LockView.swift */; };
-		21390D5D4A291C44897D708E /* ContactBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C9649F3A635A72F42E0378F /* ContactBook.swift */; };
-		2534F5D451B13B24B4A64A9B /* FontStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B77A2EAB94A310BB3110C79 /* FontStore.swift */; };
-		2B3A29FAFF2CF3E931C055DF /* RuneCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */; };
-		2C63520D30D4605995F598DB /* RuneCharacterSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */; };
-		312A8A3914A0A1B0B36124BC /* VideoSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203BB2198F06103565DD4D26 /* VideoSplashView.swift */; };
-		32052333DC272F9086A942D4 /* CipherLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */; };
-		3216BD9FD4314395132F51BB /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A31FF059DEEC7C01229CF75 /* Clipboard.swift */; };
-		325932978CA48BA181A0D39B /* ContactBookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2E9E5E5423CA74FB4A85DC8 /* ContactBookTests.swift */; };
-		3367F4DE31A8BFA2F5A8955B /* AppLicense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CBE938486EB9A2F975D48A /* AppLicense.swift */; };
-		3447330F5168705303052836 /* CipherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46F63FD575D0B3CC9087D99F /* CipherTests.swift */; };
+		0F2990FFD15A155F37384B6C /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 526327790FEC30FB6FC7338D /* RuneScribeUIModule */; };
+		199233F0AC33FEF97975F320 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */; };
+		1CC0EAA7DFAE0294F058AAD4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */; };
 		34A07D593701D17AEC1FC143 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
-		35C98AE00276C7655C193856 /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */; };
-		3734D1550897FAC020B54AE2 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8D5A799A33DED366C377F6 /* RootView.swift */; };
-		3782081107E06E0D3CAAF015 /* ContactImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EB26ADD23F56433988EDC2 /* ContactImporter.swift */; };
+		3648E76D4DC6515672B26F81 /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0856EBE343F18E81979224CE /* RuneScribeRuntimeCore */; };
 		38049FACD09DEBB67B1C6DAF /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
-		3B800BA0C9FF8BC9800E7E8E /* ContactTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6175FFF53B5C206A832ECEE8 /* ContactTests.swift */; };
-		3D100436F2A2562A94DD7040 /* LinkRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCAC6AA1D8EDD7C7ACF3953A /* LinkRouterTests.swift */; };
-		3D38B09452746F6509C37C02 /* RuneTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */; };
-		3FDE51AADDBEA7CB2C35BDF3 /* RuneScribButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */; };
-		40E94BF207A2E3593747F2D3 /* MessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC921700CE142D04727FE6CF /* MessageService.swift */; };
-		45113334F4CA66360C41C767 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2631879B41FCA864DDE6E7 /* ContentView.swift */; };
-		4582CC9CE71ADB1635028699 /* LicenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29341AC7EDF3058C96DD83C0 /* LicenseView.swift */; };
-		46E7C851C6AF62FB5647521F /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B05B133702211E19EC95A5A /* Contact.swift */; };
-		49352218624B7663754F6B52 /* QRDisplaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */; };
-		4AA210342C0819378107412D /* ContactManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50CBAAF3486CBF7224F4CDD /* ContactManager.swift */; };
-		4CEC9F890801975A75463D58 /* ReceivedMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B046BB4EA0B953E787BC40CD /* ReceivedMessageView.swift */; };
-		4D4586FA9B5495EE9D02CDA8 /* Cipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C811485E565AD02AF0B21DD8 /* Cipher.swift */; };
-		4F4668CE7576A83D775D37BE /* QRDisplaySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */; };
+		49A2F2518A57128E5F05A105 /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 9C0E34DE3867BB9FDF5211F1 /* RuneScribeUIRuntime */; };
 		50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
-		503C91F791F1A5E3940868FF /* Cipher.swift in Sources */ = {isa = PBXBuildFile; fileRef = C811485E565AD02AF0B21DD8 /* Cipher.swift */; };
-		509573937921C44707A045BE /* MessageCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED388EE7376C2E10FDCCBAF0 /* MessageCryptor.swift */; };
-		51F8FC3FC311B598FA5E74B6 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
+		55BBA4421D3374DFFDED21C7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */; };
 		584241169D94C9A2AA41FD95 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
-		5D39D2881EC32AB8C2E09098 /* FontStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34818326B3EDB2664B91AA90 /* FontStoreTests.swift */; };
-		5E16115C0E51E0A6DAB25FD4 /* ContactImportPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EAAEE1A2466F5AD48EB4F99 /* ContactImportPicker.swift */; };
-		60C298F14A6E6FC30EFE21DE /* MessageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC921700CE142D04727FE6CF /* MessageService.swift */; };
-		61D64E792969FDFF3BE22D51 /* FontRefTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 010A368AFC48F1D89E72560F /* FontRefTests.swift */; };
-		62276BA1FCA311A976C6BE13 /* ImportConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646E63DF1024E9E21119084D /* ImportConfirmView.swift */; };
-		6931263401DCF6FEA4E9DA28 /* CipherSharePayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D12001A373854AF1280772E /* CipherSharePayloadTests.swift */; };
-		6A8EB25787C0164E0004149F /* CipherSharePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7009AA365459E8B4CE80758 /* CipherSharePayload.swift */; };
-		6AC3F38E914DAC3AFD88C7A2 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 095E5000C8D5BD26F0C60F3B /* ContactsView.swift */; };
-		6B22D46F33484FFF56504076 /* PINPadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39CE669299B8B857610BAA76 /* PINPadView.swift */; };
-		6C90DCFCA2ACF228146666A5 /* ContactStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89650C349BCE670EBDDEF2D2 /* ContactStore.swift */; };
-		6F5A8557401233BC22918304 /* MessageSharePayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12A33AC824869AC62776BF8 /* MessageSharePayloadTests.swift */; };
-		701C3AD554E79E1CDED99C6C /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */; };
-		73F9B7D0C0E9652541C30B76 /* ContactsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 095E5000C8D5BD26F0C60F3B /* ContactsView.swift */; };
-		7506B7BCCE0B9D508FC13B2D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23D157957EEFB14E8CB7147 /* AppDelegate.swift */; };
-		7612DFED0FFD7CCE5F51CACB /* CipherLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E215F3EF5FE734CB87EA5C /* CipherLibraryView.swift */; };
-		76B55D28EAD870E258B0AF67 /* LicenseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29341AC7EDF3058C96DD83C0 /* LicenseView.swift */; };
-		7B39C4181A95092F95729DCF /* FileRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C260892CA3A3EDA4F31C1AFF /* FileRouter.swift */; };
-		7BA7569056634A2C5C04D4C6 /* DecoderDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D15D6F87C83071DA639125F /* DecoderDocument.swift */; };
-		7BF138CAE8F17D14882A4596 /* PINFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289AA0236910C21C79D71A7E /* PINFlowView.swift */; };
-		80A1AC959D6C3F0A06ADC959 /* LinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98578E247AB4ADA6313E4448 /* LinkRouter.swift */; };
-		80AB19E15DBCFE8401431CDD /* CipherLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E215F3EF5FE734CB87EA5C /* CipherLibraryView.swift */; };
-		80E4EDFC691AB83CE9B78E5E /* RuneCharacterSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */; };
-		817CB2732E8A24EBC3E0F3F5 /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */; };
-		822609291F0EDC271B157343 /* MessageSendTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8C9A3D8B0BF6AA4A96C227D /* MessageSendTests.swift */; };
-		86EC8F977E7E340F16A64EA2 /* DecoderDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D15D6F87C83071DA639125F /* DecoderDocument.swift */; };
-		87C653A1A5B292FB7831DB22 /* KeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA657AA7320B6333C8D191BD /* KeyManager.swift */; };
-		8ADCE74E2F709CC5E0820566 /* MessageCryptorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE45258617B63F3648F061B2 /* MessageCryptorTests.swift */; };
-		8E820672C49B7E3C933036F8 /* RuneScribButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */; };
-		90967110D847AD379BCB6EDB /* KeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA657AA7320B6333C8D191BD /* KeyManager.swift */; };
-		95A79F56B2567C326B47A6C8 /* RuneMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C804E8889A60C1394E8D3841 /* RuneMetalView.swift */; };
+		61AD60DA89946689B85BE523 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = 1602D1A139FE82FFA3C040DF /* RuneScribePlatform */; };
+		61DD380B448CD6318D7544DC /* PlatformPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */; };
+		6E70CD7158A62E597DC2C1EF /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 2CE6E93CB8CD48A870CF5C1A /* RuneScribeContracts */; };
+		7E3C668B9F878D13520BDE95 /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 399C59CC597482097433F43B /* RuneScribeContracts */; };
+		8196FFC54AF35A7034F9585D /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = FC00F092BEFF6E296536B9D8 /* RuneScribeCoreModule */; };
+		8E8BF64F215D751B78111DC4 /* AppHostRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */; };
+		8F80EB6127FCD18CB29C7C3D /* CompatibilityBaselineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */; };
+		94F3288DDBB27DDAEA96A20A /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 4D1C1664E02BEE34BC1CC37A /* RuneScribeCoreModule */; };
+		957D220785271243149B5236 /* RuntimeCompositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */; };
 		973EBAFA7B1E6A25FAE46B58 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
-		97C78EAF515BE1E3A98A4A6F /* RuneTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */; };
-		9C1AFA5A5FD5B9FC6C7EE00F /* FileRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C260892CA3A3EDA4F31C1AFF /* FileRouter.swift */; };
-		9CB1A311A27D330B1AE3726D /* ContactStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89650C349BCE670EBDDEF2D2 /* ContactStore.swift */; };
-		9D7FEA16DD78184E7FE55034 /* RuneCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */; };
-		9F95A099D27690B6214A6DE9 /* PINFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 289AA0236910C21C79D71A7E /* PINFlowView.swift */; };
-		A2AD7F0E94799F4DFD6D8AD8 /* FileRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04291E986B3D03ED1648EB3C /* FileRouterTests.swift */; };
-		A472D43E5F8F1163E7746623 /* MessageSharePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588F8820EBD1E78EAAD0F980 /* MessageSharePayload.swift */; };
-		A6C686B66946360588DED3C0 /* MessageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */; };
-		A86A326BDA398A9366838BCB /* KeyManagerLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */; };
-		A8860E28862BB912A033B9A9 /* VideoSplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 203BB2198F06103565DD4D26 /* VideoSplashView.swift */; };
-		A89334636625EA839DDFC991 /* MessageCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */; };
-		AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */; };
-		B0614EBD257EEA0A80FA1862 /* AppLockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */; };
-		B111BA7E2C381C641BA4989F /* ReceivedMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B046BB4EA0B953E787BC40CD /* ReceivedMessageView.swift */; };
-		B1A33C13DEDE49385C78E523 /* QRScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D37342DC065A1648904DC62 /* QRScannerView.swift */; };
-		B1BD766416360737E09888AC /* CipherLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */; };
-		B2A85D13B6EC9173917D5A44 /* MessageEnvelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F8D1CCEB6A36CFD48A9808 /* MessageEnvelope.swift */; };
-		B4F8144B90E37A2B69CF4F17 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A23D157957EEFB14E8CB7147 /* AppDelegate.swift */; };
-		B7DB4883F7A2A96A58E543EA /* QRCodeGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */; };
-		B82752C4229DA7F2A18BF1D9 /* ContactManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50CBAAF3486CBF7224F4CDD /* ContactManager.swift */; };
-		BA66D328CF6D3F70A3E7281B /* MessageSend.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86342C6D604E4F987CEEE2A /* MessageSend.swift */; };
-		BD5917F1551D8490BBABE0D0 /* FontRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0EBAF25DA0BBDE5890321BB /* FontRef.swift */; };
-		BDEE0FF98DA731D5504F9135 /* MessageComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 695DD706F34F8FB5F20C1080 /* MessageComposeView.swift */; };
-		C1A6CF8336377BFF19B73290 /* RuneMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C804E8889A60C1394E8D3841 /* RuneMetalView.swift */; };
-		C1C0B6E37E3C2EA178DB28FF /* ContactBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C9649F3A635A72F42E0378F /* ContactBook.swift */; };
-		C7A7CBB0509B37B3561EE324 /* CipherSharePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7009AA365459E8B4CE80758 /* CipherSharePayload.swift */; };
-		C7C2D5659A4FC1DEE373BCD3 /* MessageCryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED388EE7376C2E10FDCCBAF0 /* MessageCryptor.swift */; };
-		CEC9C8FD3A0AE90684413AF5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF2631879B41FCA864DDE6E7 /* ContentView.swift */; };
-		D0BFADBB943FAA7F8810D803 /* MessageSharePayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588F8820EBD1E78EAAD0F980 /* MessageSharePayload.swift */; };
-		D510973FADAD8196543583E7 /* LockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD00524F7CD74AD5EE0D8121 /* LockView.swift */; };
-		D6FF3E61093B3453CF127E3E /* MessageCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFCEB5C9419CC1BB56239537 /* MessageCoordinatorTests.swift */; };
-		D719FF1B2410C74EE3A7B1C5 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8D5A799A33DED366C377F6 /* RootView.swift */; };
-		D78630CCAAB450865DA20EA1 /* ImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */; };
+		99B4D5CC341ADAAD426D63CF /* KeychainMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */; };
+		9AA4B4737E553835B70F9291 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = B3DFFDF31121756FBA7CFE9C /* RuneScribePlatform */; };
+		9B01C258EBB2B91127ABE1BC /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 13B5BAB3ED96974D3FAE69DD /* RuneScribeUIRuntime */; };
+		9EFFE214115C8E88F90F758F /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
+		A700A5151432D38B2EA96278 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 6CB0F11D349F8C67B5821299 /* RuneScribeUIModule */; };
+		A86EDA53424B9C65FC09E8D5 /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5E51F0E25CDF33AA3544E166 /* RuneScribeRuntimeCore */; };
+		ACCFADEC7CC38129C840E861 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
+		AD024D560D851D28CD7A1FDD /* NativeShareOutcomeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */; };
+		ADE58C68BC79EBBE8A2CA9C5 /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */; };
+		B011B6247C5A28BCF3FFDEA9 /* RuneScribeParityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */; };
+		B6B430C316B5F38F6DD36441 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */; };
+		B98E838AC8959237CB19A737 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 52B302D4A6F1BF026533FEFF /* RuneScribeUIModule */; };
+		C0CF74DC37DD18955598A48F /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = B9866BDCD5A898F67A3260A2 /* RuneScribeTestSupport */; };
 		D8AFBCE3366CC1C34C988AA8 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
-		D8B2571F4B7BF5D06739FFA8 /* CipherLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */; };
-		DA56A46F02A37D239461F8C8 /* RuneCodecTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */; };
 		DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
-		DD3F914F90546898BD31D151 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 098511B1E52AF229830C74E4 /* SettingsView.swift */; };
-		E1B0A6B679BEC5818F149301 /* ContactImportPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EAAEE1A2466F5AD48EB4F99 /* ContactImportPicker.swift */; };
-		E75D12CA83AAD2428F022AD1 /* ImportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */; };
-		E7F15014B8213E8936B6FC1C /* MessageEnvelope.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74F8D1CCEB6A36CFD48A9808 /* MessageEnvelope.swift */; };
-		E86F474B5165185D3A657E4C /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 236AB4A6CB356708A2A004EE /* KeychainService.swift */; };
-		E9F2F0B69E2840171D762FE0 /* LinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98578E247AB4ADA6313E4448 /* LinkRouter.swift */; };
-		EC9E355ADDCB1E429EB55082 /* ImportConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 646E63DF1024E9E21119084D /* ImportConfirmView.swift */; };
-		ED9A3B29C5ED7535452420E4 /* Clipboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A31FF059DEEC7C01229CF75 /* Clipboard.swift */; };
-		EDC58C55E2D5154B15A0A5B6 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */; };
-		EDD0C98D860D01DC95DEAB01 /* ContactManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 315C7696C8620553F107C26D /* ContactManagerTests.swift */; };
-		EDD9F1C27E7005B8FE8A9949 /* MessageServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF432A970A6B11D44198C59 /* MessageServiceTests.swift */; };
-		F2701FE600A43C4D66968B53 /* MessageEnvelopeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */; };
-		F98B6935CCC807A13270F6EA /* AppLicense.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CBE938486EB9A2F975D48A /* AppLicense.swift */; };
+		DCF8F4F29B85C086E1ED3EC6 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */; };
+		DF507FCE9560AFB1813D59E7 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = CE59E4D588F69BF2E639C88F /* RuneScribePlatform */; };
+		DF96354EF55869EE06DB0AB6 /* RuneScribMacParityHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */; };
+		E0D344E8AB8FD067801E6E67 /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 76FB922C8FCA530F81C93F60 /* RuneScribeContracts */; };
+		E8945513767815C9E3871E78 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */; };
+		F3C8BD65A026CB058E9873F9 /* RuneScribeMacParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */; };
+		F7A6DCFC817B53A36467433D /* ArchitectureGuardrailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */; };
+		F9A85A1AA048475516E0F38A /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 415BD6C69E96BAF82603E6EB /* RuneScribeTestSupport */; };
 		FAE1E2AAB9525E7A3C4E51DC /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		2AFCA44169FBCE9C02D119EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 31B4924C70AF8C14A282AF11;
+			remoteInfo = "RuneScrib-iOS";
+		};
+		4694840E3234730B79BA5D26 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B0EAA089C274A9658D6E37A7;
+			remoteInfo = RuneScribMacParityHost;
+		};
+		5033A05F4B4454B465C244F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 31B4924C70AF8C14A282AF11;
+			remoteInfo = "RuneScrib-iOS";
+		};
 		CDF9BB784C987E98AA226AE9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
@@ -153,130 +88,101 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		010A368AFC48F1D89E72560F /* FontRefTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontRefTests.swift; sourceTree = "<group>"; };
-		04291E986B3D03ED1648EB3C /* FileRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileRouterTests.swift; sourceTree = "<group>"; };
-		095E5000C8D5BD26F0C60F3B /* ContactsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsView.swift; sourceTree = "<group>"; };
-		098511B1E52AF229830C74E4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribButtonStyle.swift; sourceTree = "<group>"; };
-		1B05B133702211E19EC95A5A /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
-		1EAAEE1A2466F5AD48EB4F99 /* ContactImportPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImportPicker.swift; sourceTree = "<group>"; };
-		203BB2198F06103565DD4D26 /* VideoSplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoSplashView.swift; sourceTree = "<group>"; };
-		236AB4A6CB356708A2A004EE /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
-		289AA0236910C21C79D71A7E /* PINFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINFlowView.swift; sourceTree = "<group>"; };
-		29341AC7EDF3058C96DD83C0 /* LicenseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicenseView.swift; sourceTree = "<group>"; };
-		2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCoordinator.swift; sourceTree = "<group>"; };
-		2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManagerLinkTests.swift; sourceTree = "<group>"; };
-		2D37342DC065A1648904DC62 /* QRScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScannerView.swift; sourceTree = "<group>"; };
-		315C7696C8620553F107C26D /* ContactManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactManagerTests.swift; sourceTree = "<group>"; };
+		002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHostRoutingTests.swift; sourceTree = "<group>"; };
+		0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribArchitectureTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RuneScribIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E4FF66651C4BB9C0C94DB4B /* RuneScrib.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuneScrib.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33965AD6B626161B2307C925 /* RuneScribTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		34818326B3EDB2664B91AA90 /* FontStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStoreTests.swift; sourceTree = "<group>"; };
-		38CBE938486EB9A2F975D48A /* AppLicense.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLicense.swift; sourceTree = "<group>"; };
-		38EB26ADD23F56433988EDC2 /* ContactImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImporter.swift; sourceTree = "<group>"; };
-		39CE669299B8B857610BAA76 /* PINPadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PINPadView.swift; sourceTree = "<group>"; };
-		3B77A2EAB94A310BB3110C79 /* FontStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontStore.swift; sourceTree = "<group>"; };
-		4448FA2A77E4B258694B3CC4 /* ContactStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactStoreTests.swift; sourceTree = "<group>"; };
-		46F63FD575D0B3CC9087D99F /* CipherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherTests.swift; sourceTree = "<group>"; };
-		4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibraryTests.swift; sourceTree = "<group>"; };
-		4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLockTests.swift; sourceTree = "<group>"; };
-		588F8820EBD1E78EAAD0F980 /* MessageSharePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSharePayload.swift; sourceTree = "<group>"; };
-		6175FFF53B5C206A832ECEE8 /* ContactTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactTests.swift; sourceTree = "<group>"; };
-		646E63DF1024E9E21119084D /* ImportConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportConfirmView.swift; sourceTree = "<group>"; };
-		695DD706F34F8FB5F20C1080 /* MessageComposeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageComposeView.swift; sourceTree = "<group>"; };
-		6C002B92A1AA0BBB489CC32F /* ContactImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactImporterTests.swift; sourceTree = "<group>"; };
-		6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCodecTests.swift; sourceTree = "<group>"; };
+		41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeShareOutcomeTests.swift; sourceTree = "<group>"; };
+		4B31D2BF5EC1E6D84B23D71C /* RuneScribMacParityTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribMacParityTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RuneScribIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		51CE0B6CA2B2FBDB70249458 /* RuneScribeArchitecture */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RuneScribeArchitecture; path = Packages/RuneScribeArchitecture; sourceTree = SOURCE_ROOT; };
+		6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainMigrationTests.swift; sourceTree = "<group>"; };
 		70806C8FC5D83F211738FAAD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */ = {isa = PBXFileReference; path = "raven-forge-spp-splash.mp4"; sourceTree = "<group>"; };
-		74F8D1CCEB6A36CFD48A9808 /* MessageEnvelope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageEnvelope.swift; sourceTree = "<group>"; };
-		7556775133D15B619AD67B09 /* RuneScrib-macOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RuneScrib-macOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansRunic-Regular.ttf"; sourceTree = "<group>"; };
-		7A31FF059DEEC7C01229CF75 /* Clipboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clipboard.swift; sourceTree = "<group>"; };
-		7D15D6F87C83071DA639125F /* DecoderDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecoderDocument.swift; sourceTree = "<group>"; };
-		83E215F3EF5FE734CB87EA5C /* CipherLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibraryView.swift; sourceTree = "<group>"; };
-		89650C349BCE670EBDDEF2D2 /* ContactStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactStore.swift; sourceTree = "<group>"; };
-		8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalRenderer.swift; sourceTree = "<group>"; };
-		98578E247AB4ADA6313E4448 /* LinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkRouter.swift; sourceTree = "<group>"; };
-		9C9649F3A635A72F42E0378F /* ContactBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactBook.swift; sourceTree = "<group>"; };
-		9D12001A373854AF1280772E /* CipherSharePayloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherSharePayloadTests.swift; sourceTree = "<group>"; };
-		9FF432A970A6B11D44198C59 /* MessageServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageServiceTests.swift; sourceTree = "<group>"; };
-		A23D157957EEFB14E8CB7147 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneInscriptionText.swift; sourceTree = "<group>"; };
-		A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCodec.swift; sourceTree = "<group>"; };
-		AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneCharacterSet.swift; sourceTree = "<group>"; };
-		B046BB4EA0B953E787BC40CD /* ReceivedMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReceivedMessageView.swift; sourceTree = "<group>"; };
-		B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribApp.swift; sourceTree = "<group>"; };
-		B2E9E5E5423CA74FB4A85DC8 /* ContactBookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactBookTests.swift; sourceTree = "<group>"; };
-		B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherLibrary.swift; sourceTree = "<group>"; };
-		B50CBAAF3486CBF7224F4CDD /* ContactManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactManager.swift; sourceTree = "<group>"; };
+		8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchitectureGuardrailTests.swift; sourceTree = "<group>"; };
+		84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeCompositionTests.swift; sourceTree = "<group>"; };
+		88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityBaselineTests.swift; sourceTree = "<group>"; };
+		94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeParityUITests.swift; sourceTree = "<group>"; };
+		A9AB41A04A01C3ECB14E8D8B /* RuneScrib.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RuneScrib.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribMacParityHostApp.swift; sourceTree = "<group>"; };
 		B6164CCB0C4A4342270DC5CA /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
-		B8437A6505FB44F89EEE9D9B /* AppLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLock.swift; sourceTree = "<group>"; };
-		B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRDisplaySheet.swift; sourceTree = "<group>"; };
-		BA657AA7320B6333C8D191BD /* KeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyManager.swift; sourceTree = "<group>"; };
-		BCAC6AA1D8EDD7C7ACF3953A /* LinkRouterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkRouterTests.swift; sourceTree = "<group>"; };
-		C260892CA3A3EDA4F31C1AFF /* FileRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileRouter.swift; sourceTree = "<group>"; };
-		C804E8889A60C1394E8D3841 /* RuneMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneMetalView.swift; sourceTree = "<group>"; };
-		C811485E565AD02AF0B21DD8 /* Cipher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cipher.swift; sourceTree = "<group>"; };
-		CF2631879B41FCA864DDE6E7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		BD88036C0FE8E9BFB419B68D /* RuneScribMacParityHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuneScribMacParityHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformPresentationTests.swift; sourceTree = "<group>"; };
+		C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeRuntimeComposition.swift; sourceTree = "<group>"; };
+		C4EDEF8A8D6DD1D6CEEF3BE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeMacParityTests.swift; sourceTree = "<group>"; };
 		D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageEnvelopeTests.swift; sourceTree = "<group>"; };
-		DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeGenerator.swift; sourceTree = "<group>"; };
-		E12A33AC824869AC62776BF8 /* MessageSharePayloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSharePayloadTests.swift; sourceTree = "<group>"; };
-		E8C9A3D8B0BF6AA4A96C227D /* MessageSendTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSendTests.swift; sourceTree = "<group>"; };
-		E91D52C55B3AEDED27523270 /* RuneScrib-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "RuneScrib-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneTheme.swift; sourceTree = "<group>"; };
-		EC8D5A799A33DED366C377F6 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		EC921700CE142D04727FE6CF /* MessageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageService.swift; sourceTree = "<group>"; };
-		ED388EE7376C2E10FDCCBAF0 /* MessageCryptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCryptor.swift; sourceTree = "<group>"; };
-		F0EBAF25DA0BBDE5890321BB /* FontRef.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontRef.swift; sourceTree = "<group>"; };
-		F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportCoordinator.swift; sourceTree = "<group>"; };
-		F7009AA365459E8B4CE80758 /* CipherSharePayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CipherSharePayload.swift; sourceTree = "<group>"; };
-		F86342C6D604E4F987CEEE2A /* MessageSend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageSend.swift; sourceTree = "<group>"; };
-		FD00524F7CD74AD5EE0D8121 /* LockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockView.swift; sourceTree = "<group>"; };
-		FE45258617B63F3648F061B2 /* MessageCryptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCryptorTests.swift; sourceTree = "<group>"; };
-		FFCEB5C9419CC1BB56239537 /* MessageCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageCoordinatorTests.swift; sourceTree = "<group>"; };
+		F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		27A72D02E0250A1748705F00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7E3C668B9F878D13520BDE95 /* RuneScribeContracts in Frameworks */,
+				3648E76D4DC6515672B26F81 /* RuneScribeRuntimeCore in Frameworks */,
+				49A2F2518A57128E5F05A105 /* RuneScribeUIRuntime in Frameworks */,
+				DF507FCE9560AFB1813D59E7 /* RuneScribePlatform in Frameworks */,
+				94F3288DDBB27DDAEA96A20A /* RuneScribeCoreModule in Frameworks */,
+				A700A5151432D38B2EA96278 /* RuneScribeUIModule in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		54D5990058621F8DF821B79F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C0CF74DC37DD18955598A48F /* RuneScribeTestSupport in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8E7420985153B758E8CAACD4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E70CD7158A62E597DC2C1EF /* RuneScribeContracts in Frameworks */,
+				8196FFC54AF35A7034F9585D /* RuneScribeCoreModule in Frameworks */,
+				61AD60DA89946689B85BE523 /* RuneScribePlatform in Frameworks */,
+				0F2990FFD15A155F37384B6C /* RuneScribeUIModule in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A7A0F1AEFE31077919969F7A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9A85A1AA048475516E0F38A /* RuneScribeTestSupport in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B84D779B523292F564E650FD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00C20D49F14613A66733DD1B /* RuneScribeTestSupport in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E6BD39A26392AE6FE2BE49DC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E0D344E8AB8FD067801E6E67 /* RuneScribeContracts in Frameworks */,
+				A86EDA53424B9C65FC09E8D5 /* RuneScribeRuntimeCore in Frameworks */,
+				9B01C258EBB2B91127ABE1BC /* RuneScribeUIRuntime in Frameworks */,
+				9AA4B4737E553835B70F9291 /* RuneScribePlatform in Frameworks */,
+				ADE58C68BC79EBBE8A2CA9C5 /* RuneScribeCoreModule in Frameworks */,
+				B98E838AC8959237CB19A737 /* RuneScribeUIModule in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
-		0AD5AD3B080C0728DB1C76C6 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				B8437A6505FB44F89EEE9D9B /* AppLock.swift */,
-				7A31FF059DEEC7C01229CF75 /* Clipboard.swift */,
-				38EB26ADD23F56433988EDC2 /* ContactImporter.swift */,
-				B50CBAAF3486CBF7224F4CDD /* ContactManager.swift */,
-				89650C349BCE670EBDDEF2D2 /* ContactStore.swift */,
-				C260892CA3A3EDA4F31C1AFF /* FileRouter.swift */,
-				3B77A2EAB94A310BB3110C79 /* FontStore.swift */,
-				F357C36D1F3AAFBDAC82F4DC /* ImportCoordinator.swift */,
-				236AB4A6CB356708A2A004EE /* KeychainService.swift */,
-				BA657AA7320B6333C8D191BD /* KeyManager.swift */,
-				98578E247AB4ADA6313E4448 /* LinkRouter.swift */,
-				2B9E2B9BC4D50C8D892BD42D /* MessageCoordinator.swift */,
-				ED388EE7376C2E10FDCCBAF0 /* MessageCryptor.swift */,
-				F86342C6D604E4F987CEEE2A /* MessageSend.swift */,
-				EC921700CE142D04727FE6CF /* MessageService.swift */,
-				DF445A6148B57ABACA44D96C /* QRCodeGenerator.swift */,
-				A8EBB7172CB48235DFAD06D6 /* RuneCodec.swift */,
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
-		1233414ECFD0FABAD30570F5 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				38CBE938486EB9A2F975D48A /* AppLicense.swift */,
-				C811485E565AD02AF0B21DD8 /* Cipher.swift */,
-				B3DA3073DFAC4ACF30278759 /* CipherLibrary.swift */,
-				F7009AA365459E8B4CE80758 /* CipherSharePayload.swift */,
-				1B05B133702211E19EC95A5A /* Contact.swift */,
-				9C9649F3A635A72F42E0378F /* ContactBook.swift */,
-				F0EBAF25DA0BBDE5890321BB /* FontRef.swift */,
-				74F8D1CCEB6A36CFD48A9808 /* MessageEnvelope.swift */,
-				588F8820EBD1E78EAAD0F980 /* MessageSharePayload.swift */,
-				AFAB5EB6251A338AE1ECA023 /* RuneCharacterSet.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
 		440678049B6FEABABD99B823 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -290,8 +196,6 @@
 		45649D8BC5483D9F7E9F9E25 /* Metal */ = {
 			isa = PBXGroup;
 			children = (
-				8EDFDD25377EFCF05C9C535A /* MetalRenderer.swift */,
-				C804E8889A60C1394E8D3841 /* RuneMetalView.swift */,
 				70806C8FC5D83F211738FAAD /* Shaders.metal */,
 			);
 			path = Metal;
@@ -300,34 +204,25 @@
 		4862C4363B57CFEF7F19B2EB = {
 			isa = PBXGroup;
 			children = (
+				EE4967BD5360F78915C6036F /* Packages */,
 				9875A592B5AF26023CDC6CEC /* RuneScrib */,
+				D8A25D577325F05220F4D89A /* RuneScribArchitectureTests */,
+				D4AB11C27235965DA1BF0E1A /* RuneScribIOSTests */,
+				B03791E99B717082B44F5378 /* RuneScribIOSUITests */,
+				5272F0D466DF0BE5C97CFC68 /* RuneScribMacParityHost */,
+				FF0DB0269C9429B0955322F7 /* RuneScribMacParityTests */,
 				EC820C2DB89AA33F3C1A4976 /* RuneScribTests */,
 				EAFA06AF269D7ED7E4731EE3 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		587741695BBC8E01B5722A5E /* Components */ = {
+		5272F0D466DF0BE5C97CFC68 /* RuneScribMacParityHost */ = {
 			isa = PBXGroup;
 			children = (
-				7D15D6F87C83071DA639125F /* DecoderDocument.swift */,
-				695DD706F34F8FB5F20C1080 /* MessageComposeView.swift */,
-				39CE669299B8B857610BAA76 /* PINPadView.swift */,
-				2D37342DC065A1648904DC62 /* QRScannerView.swift */,
-				A3E1DFDF6F05EF437FE18D40 /* RuneInscriptionText.swift */,
-				0E6C0FB28B0737CBAB48217D /* RuneScribButtonStyle.swift */,
-				EC89E1DD1818A1986D82FB79 /* RuneTheme.swift */,
-				203BB2198F06103565DD4D26 /* VideoSplashView.swift */,
+				C4EDEF8A8D6DD1D6CEEF3BE5 /* Info.plist */,
+				ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */,
 			);
-			path = Components;
-			sourceTree = "<group>";
-		};
-		5A6A1FFBC70A0FBE6F6FCE52 /* App */ = {
-			isa = PBXGroup;
-			children = (
-				A23D157957EEFB14E8CB7147 /* AppDelegate.swift */,
-				B1C8B2E6921A8C4F3057BF12 /* RuneScribApp.swift */,
-			);
-			path = App;
+			path = RuneScribMacParityHost;
 			sourceTree = "<group>";
 		};
 		7C5FDB5E16F112EAD70C17D8 /* Fonts */ = {
@@ -342,41 +237,50 @@
 		9875A592B5AF26023CDC6CEC /* RuneScrib */ = {
 			isa = PBXGroup;
 			children = (
-				5A6A1FFBC70A0FBE6F6FCE52 /* App */,
+				F2397F9B0963552B8A9A12D8 /* AppHost */,
 				45649D8BC5483D9F7E9F9E25 /* Metal */,
-				1233414ECFD0FABAD30570F5 /* Models */,
 				440678049B6FEABABD99B823 /* Resources */,
-				0AD5AD3B080C0728DB1C76C6 /* Services */,
-				DA0E8E292BBBD023A5EBEBB9 /* Views */,
 			);
 			path = RuneScrib;
 			sourceTree = "<group>";
 		};
-		DA0E8E292BBBD023A5EBEBB9 /* Views */ = {
+		B03791E99B717082B44F5378 /* RuneScribIOSUITests */ = {
 			isa = PBXGroup;
 			children = (
-				83E215F3EF5FE734CB87EA5C /* CipherLibraryView.swift */,
-				1EAAEE1A2466F5AD48EB4F99 /* ContactImportPicker.swift */,
-				095E5000C8D5BD26F0C60F3B /* ContactsView.swift */,
-				CF2631879B41FCA864DDE6E7 /* ContentView.swift */,
-				646E63DF1024E9E21119084D /* ImportConfirmView.swift */,
-				29341AC7EDF3058C96DD83C0 /* LicenseView.swift */,
-				FD00524F7CD74AD5EE0D8121 /* LockView.swift */,
-				289AA0236910C21C79D71A7E /* PINFlowView.swift */,
-				B92E54E35C2B9E4C8B18AB4B /* QRDisplaySheet.swift */,
-				B046BB4EA0B953E787BC40CD /* ReceivedMessageView.swift */,
-				EC8D5A799A33DED366C377F6 /* RootView.swift */,
-				098511B1E52AF229830C74E4 /* SettingsView.swift */,
-				587741695BBC8E01B5722A5E /* Components */,
+				94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */,
 			);
-			path = Views;
+			path = RuneScribIOSUITests;
+			sourceTree = "<group>";
+		};
+		D4AB11C27235965DA1BF0E1A /* RuneScribIOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */,
+				6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */,
+				41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */,
+				C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */,
+			);
+			path = RuneScribIOSTests;
+			sourceTree = "<group>";
+		};
+		D8A25D577325F05220F4D89A /* RuneScribArchitectureTests */ = {
+			isa = PBXGroup;
+			children = (
+				8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */,
+			);
+			path = RuneScribArchitectureTests;
 			sourceTree = "<group>";
 		};
 		EAFA06AF269D7ED7E4731EE3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E91D52C55B3AEDED27523270 /* RuneScrib-iOS.app */,
-				7556775133D15B619AD67B09 /* RuneScrib-macOS.app */,
+				A9AB41A04A01C3ECB14E8D8B /* RuneScrib.app */,
+				1E4FF66651C4BB9C0C94DB4B /* RuneScrib.app */,
+				0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */,
+				1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */,
+				4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */,
+				BD88036C0FE8E9BFB419B68D /* RuneScribMacParityHost.app */,
+				4B31D2BF5EC1E6D84B23D71C /* RuneScribMacParityTests.xctest */,
 				33965AD6B626161B2307C925 /* RuneScribTests.xctest */,
 			);
 			name = Products;
@@ -385,40 +289,67 @@
 		EC820C2DB89AA33F3C1A4976 /* RuneScribTests */ = {
 			isa = PBXGroup;
 			children = (
-				4FF80C74BD2ADA18593E7125 /* AppLockTests.swift */,
-				4DA103877E361A83E36ADE7F /* CipherLibraryTests.swift */,
-				9D12001A373854AF1280772E /* CipherSharePayloadTests.swift */,
-				46F63FD575D0B3CC9087D99F /* CipherTests.swift */,
-				B2E9E5E5423CA74FB4A85DC8 /* ContactBookTests.swift */,
-				6C002B92A1AA0BBB489CC32F /* ContactImporterTests.swift */,
-				315C7696C8620553F107C26D /* ContactManagerTests.swift */,
-				4448FA2A77E4B258694B3CC4 /* ContactStoreTests.swift */,
-				6175FFF53B5C206A832ECEE8 /* ContactTests.swift */,
-				04291E986B3D03ED1648EB3C /* FileRouterTests.swift */,
-				010A368AFC48F1D89E72560F /* FontRefTests.swift */,
-				34818326B3EDB2664B91AA90 /* FontStoreTests.swift */,
-				2D0E79563B914FB9846FB095 /* KeyManagerLinkTests.swift */,
-				BCAC6AA1D8EDD7C7ACF3953A /* LinkRouterTests.swift */,
-				FFCEB5C9419CC1BB56239537 /* MessageCoordinatorTests.swift */,
-				FE45258617B63F3648F061B2 /* MessageCryptorTests.swift */,
-				D40812E375A829F3030A1AB3 /* MessageEnvelopeTests.swift */,
-				E8C9A3D8B0BF6AA4A96C227D /* MessageSendTests.swift */,
-				9FF432A970A6B11D44198C59 /* MessageServiceTests.swift */,
-				E12A33AC824869AC62776BF8 /* MessageSharePayloadTests.swift */,
-				6FA0F6BA57F7969C56EDCD1A /* RuneCodecTests.swift */,
+				88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */,
+				84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */,
 			);
 			path = RuneScribTests;
+			sourceTree = "<group>";
+		};
+		EE4967BD5360F78915C6036F /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				51CE0B6CA2B2FBDB70249458 /* RuneScribeArchitecture */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		F2397F9B0963552B8A9A12D8 /* AppHost */ = {
+			isa = PBXGroup;
+			children = (
+				F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */,
+				F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */,
+				C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */,
+			);
+			path = AppHost;
+			sourceTree = "<group>";
+		};
+		FF0DB0269C9429B0955322F7 /* RuneScribMacParityTests */ = {
+			isa = PBXGroup;
+			children = (
+				CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */,
+			);
+			path = RuneScribMacParityTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		2DD54B0EDB51920A4B33A6A2 /* RuneScribIOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F36B8D5D0B12F0CA0E1A1E91 /* Build configuration list for PBXNativeTarget "RuneScribIOSUITests" */;
+			buildPhases = (
+				09913040E6AB412E27A36DD5 /* Sources */,
+				6ABABD57A8BCA66F0377F836 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B4847232AD12DC5AFAA252AC /* PBXTargetDependency */,
+			);
+			name = RuneScribIOSUITests;
+			packageProductDependencies = (
+			);
+			productName = RuneScribIOSUITests;
+			productReference = 4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0C9E5AD021D6AB7463C69634 /* Build configuration list for PBXNativeTarget "RuneScrib-iOS" */;
 			buildPhases = (
 				AF8CFE1D0A2C27387331A0AF /* Sources */,
 				CF008865DBE6EA0114CB2AEB /* Resources */,
+				E6BD39A26392AE6FE2BE49DC /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -426,9 +357,15 @@
 			);
 			name = "RuneScrib-iOS";
 			packageProductDependencies = (
+				76FB922C8FCA530F81C93F60 /* RuneScribeContracts */,
+				5E51F0E25CDF33AA3544E166 /* RuneScribeRuntimeCore */,
+				13B5BAB3ED96974D3FAE69DD /* RuneScribeUIRuntime */,
+				B3DFFDF31121756FBA7CFE9C /* RuneScribePlatform */,
+				24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */,
+				52B302D4A6F1BF026533FEFF /* RuneScribeUIModule */,
 			);
 			productName = "RuneScrib-iOS";
-			productReference = E91D52C55B3AEDED27523270 /* RuneScrib-iOS.app */;
+			productReference = A9AB41A04A01C3ECB14E8D8B /* RuneScrib.app */;
 			productType = "com.apple.product-type.application";
 		};
 		6F186131C8C4C80632D23A6E /* RuneScrib-macOS */ = {
@@ -437,6 +374,7 @@
 			buildPhases = (
 				EDD54B161D2552E0027B88C8 /* Sources */,
 				3D7818CB5FE09FE0BB5D139B /* Resources */,
+				27A72D02E0250A1748705F00 /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -444,16 +382,103 @@
 			);
 			name = "RuneScrib-macOS";
 			packageProductDependencies = (
+				399C59CC597482097433F43B /* RuneScribeContracts */,
+				0856EBE343F18E81979224CE /* RuneScribeRuntimeCore */,
+				9C0E34DE3867BB9FDF5211F1 /* RuneScribeUIRuntime */,
+				CE59E4D588F69BF2E639C88F /* RuneScribePlatform */,
+				4D1C1664E02BEE34BC1CC37A /* RuneScribeCoreModule */,
+				6CB0F11D349F8C67B5821299 /* RuneScribeUIModule */,
 			);
 			productName = "RuneScrib-macOS";
-			productReference = 7556775133D15B619AD67B09 /* RuneScrib-macOS.app */;
+			productReference = 1E4FF66651C4BB9C0C94DB4B /* RuneScrib.app */;
 			productType = "com.apple.product-type.application";
+		};
+		9DC46FB3B5C4089358C387BB /* RuneScribArchitectureTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 43B30282A1F64010047A52BD /* Build configuration list for PBXNativeTarget "RuneScribArchitectureTests" */;
+			buildPhases = (
+				7354BF7F9D0A09CC1F50EBE5 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RuneScribArchitectureTests;
+			packageProductDependencies = (
+			);
+			productName = RuneScribArchitectureTests;
+			productReference = 0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B0EAA089C274A9658D6E37A7 /* RuneScribMacParityHost */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8F00B1DAE780700E478E0759 /* Build configuration list for PBXNativeTarget "RuneScribMacParityHost" */;
+			buildPhases = (
+				584F011872D142BA41680120 /* Sources */,
+				8E7420985153B758E8CAACD4 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RuneScribMacParityHost;
+			packageProductDependencies = (
+				2CE6E93CB8CD48A870CF5C1A /* RuneScribeContracts */,
+				FC00F092BEFF6E296536B9D8 /* RuneScribeCoreModule */,
+				1602D1A139FE82FFA3C040DF /* RuneScribePlatform */,
+				526327790FEC30FB6FC7338D /* RuneScribeUIModule */,
+			);
+			productName = RuneScribMacParityHost;
+			productReference = BD88036C0FE8E9BFB419B68D /* RuneScribMacParityHost.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C9187941FA930F4FC80F6495 /* RuneScribMacParityTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C5578A7B4655C4175187DA6B /* Build configuration list for PBXNativeTarget "RuneScribMacParityTests" */;
+			buildPhases = (
+				637F403A3BEF27E71F1A4CBE /* Sources */,
+				7EFFAEEB440D9B6FA54AE6DB /* Resources */,
+				A7A0F1AEFE31077919969F7A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E91679BBF17FE7B62CBA6A9E /* PBXTargetDependency */,
+			);
+			name = RuneScribMacParityTests;
+			packageProductDependencies = (
+				415BD6C69E96BAF82603E6EB /* RuneScribeTestSupport */,
+			);
+			productName = RuneScribMacParityTests;
+			productReference = 4B31D2BF5EC1E6D84B23D71C /* RuneScribMacParityTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D286A58674744CBB19D5476D /* RuneScribIOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B52BFD3B4B43442BB40D6BFE /* Build configuration list for PBXNativeTarget "RuneScribIOSTests" */;
+			buildPhases = (
+				E38093737CE2C17A124824A1 /* Sources */,
+				54D5990058621F8DF821B79F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1166786C257BFE4013E933DB /* PBXTargetDependency */,
+			);
+			name = RuneScribIOSTests;
+			packageProductDependencies = (
+				B9866BDCD5A898F67A3260A2 /* RuneScribeTestSupport */,
+			);
+			productName = RuneScribIOSTests;
+			productReference = 1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		E1E13F36C6719C0391C636A6 /* RuneScribTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AB2D1B05CEE59E518C97913F /* Build configuration list for PBXNativeTarget "RuneScribTests" */;
 			buildPhases = (
 				4A96ECE4F6D0AB49F62AF2B7 /* Sources */,
+				B84D779B523292F564E650FD /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -462,6 +487,7 @@
 			);
 			name = RuneScribTests;
 			packageProductDependencies = (
+				CF4ADC70BD29BA2CE0411ABA /* RuneScribeTestSupport */,
 			);
 			productName = RuneScribTests;
 			productReference = 33965AD6B626161B2307C925 /* RuneScribTests.xctest */;
@@ -474,19 +500,32 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					2DD54B0EDB51920A4B33A6A2 = {
+						DevelopmentTeam = 9AQ2C2838M;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 31B4924C70AF8C14A282AF11;
+					};
 					31B4924C70AF8C14A282AF11 = {
 						DevelopmentTeam = 9AQ2C2838M;
 						ProvisioningStyle = Automatic;
 					};
-					6F186131C8C4C80632D23A6E = {
-						DevelopmentTeam = 9AQ2C2838M;
-						ProvisioningStyle = Automatic;
-					};
-					E1E13F36C6719C0391C636A6 = {
+					9DC46FB3B5C4089358C387BB = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Manual;
+					};
+					B0EAA089C274A9658D6E37A7 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
+					C9187941FA930F4FC80F6495 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
+					D286A58674744CBB19D5476D = {
+						DevelopmentTeam = 9AQ2C2838M;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -499,14 +538,22 @@
 			);
 			mainGroup = 4862C4363B57CFEF7F19B2EB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8667E59CFAC32A934210E654 /* XCLocalSwiftPackageReference "Packages/RuneScribeArchitecture" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EAFA06AF269D7ED7E4731EE3 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */,
 				6F186131C8C4C80632D23A6E /* RuneScrib-macOS */,
+				31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */,
 				E1E13F36C6719C0391C636A6 /* RuneScribTests */,
+				D286A58674744CBB19D5476D /* RuneScribIOSTests */,
+				2DD54B0EDB51920A4B33A6A2 /* RuneScribIOSUITests */,
+				B0EAA089C274A9658D6E37A7 /* RuneScribMacParityHost */,
+				C9187941FA930F4FC80F6495 /* RuneScribMacParityTests */,
+				9DC46FB3B5C4089358C387BB /* RuneScribArchitectureTests */,
 			);
 		};
 /* End PBXProject section */
@@ -520,6 +567,22 @@
 				059BA5D329AA9280083DF044 /* NotoSansRunic-Regular.ttf in Resources */,
 				FAE1E2AAB9525E7A3C4E51DC /* OFL.txt in Resources */,
 				DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6ABABD57A8BCA66F0377F836 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ACCFADEC7CC38129C840E861 /* NotoSansRunic-Regular.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EFFAEEB440D9B6FA54AE6DB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9EFFE214115C8E88F90F758F /* NotoSansRunic-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -537,31 +600,44 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		09913040E6AB412E27A36DD5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B011B6247C5A28BCF3FFDEA9 /* RuneScribeParityUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4A96ECE4F6D0AB49F62AF2B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0614EBD257EEA0A80FA1862 /* AppLockTests.swift in Sources */,
-				D8B2571F4B7BF5D06739FFA8 /* CipherLibraryTests.swift in Sources */,
-				6931263401DCF6FEA4E9DA28 /* CipherSharePayloadTests.swift in Sources */,
-				3447330F5168705303052836 /* CipherTests.swift in Sources */,
-				325932978CA48BA181A0D39B /* ContactBookTests.swift in Sources */,
-				073B6A7EF02F502983F82D09 /* ContactImporterTests.swift in Sources */,
-				EDD0C98D860D01DC95DEAB01 /* ContactManagerTests.swift in Sources */,
-				047CAFD7FCD06597F042E57E /* ContactStoreTests.swift in Sources */,
-				3B800BA0C9FF8BC9800E7E8E /* ContactTests.swift in Sources */,
-				A2AD7F0E94799F4DFD6D8AD8 /* FileRouterTests.swift in Sources */,
-				61D64E792969FDFF3BE22D51 /* FontRefTests.swift in Sources */,
-				5D39D2881EC32AB8C2E09098 /* FontStoreTests.swift in Sources */,
-				A86A326BDA398A9366838BCB /* KeyManagerLinkTests.swift in Sources */,
-				3D100436F2A2562A94DD7040 /* LinkRouterTests.swift in Sources */,
-				D6FF3E61093B3453CF127E3E /* MessageCoordinatorTests.swift in Sources */,
-				8ADCE74E2F709CC5E0820566 /* MessageCryptorTests.swift in Sources */,
-				F2701FE600A43C4D66968B53 /* MessageEnvelopeTests.swift in Sources */,
-				822609291F0EDC271B157343 /* MessageSendTests.swift in Sources */,
-				EDD9F1C27E7005B8FE8A9949 /* MessageServiceTests.swift in Sources */,
-				6F5A8557401233BC22918304 /* MessageSharePayloadTests.swift in Sources */,
-				DA56A46F02A37D239461F8C8 /* RuneCodecTests.swift in Sources */,
+				8F80EB6127FCD18CB29C7C3D /* CompatibilityBaselineTests.swift in Sources */,
+				957D220785271243149B5236 /* RuntimeCompositionTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		584F011872D142BA41680120 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DF96354EF55869EE06DB0AB6 /* RuneScribMacParityHostApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		637F403A3BEF27E71F1A4CBE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F3C8BD65A026CB058E9873F9 /* RuneScribeMacParityTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7354BF7F9D0A09CC1F50EBE5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F7A6DCFC817B53A36467433D /* ArchitectureGuardrailTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -569,58 +645,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7506B7BCCE0B9D508FC13B2D /* AppDelegate.swift in Sources */,
-				F98B6935CCC807A13270F6EA /* AppLicense.swift in Sources */,
-				0DEE180E6F0CC7A45A7043A4 /* AppLock.swift in Sources */,
-				503C91F791F1A5E3940868FF /* Cipher.swift in Sources */,
-				B1BD766416360737E09888AC /* CipherLibrary.swift in Sources */,
-				80AB19E15DBCFE8401431CDD /* CipherLibraryView.swift in Sources */,
-				6A8EB25787C0164E0004149F /* CipherSharePayload.swift in Sources */,
-				ED9A3B29C5ED7535452420E4 /* Clipboard.swift in Sources */,
-				14C70DB6B47EB309C69D2024 /* Contact.swift in Sources */,
-				21390D5D4A291C44897D708E /* ContactBook.swift in Sources */,
-				5E16115C0E51E0A6DAB25FD4 /* ContactImportPicker.swift in Sources */,
-				3782081107E06E0D3CAAF015 /* ContactImporter.swift in Sources */,
-				B82752C4229DA7F2A18BF1D9 /* ContactManager.swift in Sources */,
-				9CB1A311A27D330B1AE3726D /* ContactStore.swift in Sources */,
-				73F9B7D0C0E9652541C30B76 /* ContactsView.swift in Sources */,
-				CEC9C8FD3A0AE90684413AF5 /* ContentView.swift in Sources */,
-				7BA7569056634A2C5C04D4C6 /* DecoderDocument.swift in Sources */,
-				9C1AFA5A5FD5B9FC6C7EE00F /* FileRouter.swift in Sources */,
-				BD5917F1551D8490BBABE0D0 /* FontRef.swift in Sources */,
-				12027B50430F47B08FC91BEC /* FontStore.swift in Sources */,
-				EC9E355ADDCB1E429EB55082 /* ImportConfirmView.swift in Sources */,
-				E75D12CA83AAD2428F022AD1 /* ImportCoordinator.swift in Sources */,
-				87C653A1A5B292FB7831DB22 /* KeyManager.swift in Sources */,
-				05564C21ED178128F862F4F3 /* KeychainService.swift in Sources */,
-				76B55D28EAD870E258B0AF67 /* LicenseView.swift in Sources */,
-				80A1AC959D6C3F0A06ADC959 /* LinkRouter.swift in Sources */,
-				1DF4DEAAB181AD335313F763 /* LockView.swift in Sources */,
-				BDEE0FF98DA731D5504F9135 /* MessageComposeView.swift in Sources */,
-				A6C686B66946360588DED3C0 /* MessageCoordinator.swift in Sources */,
-				509573937921C44707A045BE /* MessageCryptor.swift in Sources */,
-				E7F15014B8213E8936B6FC1C /* MessageEnvelope.swift in Sources */,
-				BA66D328CF6D3F70A3E7281B /* MessageSend.swift in Sources */,
-				60C298F14A6E6FC30EFE21DE /* MessageService.swift in Sources */,
-				A472D43E5F8F1163E7746623 /* MessageSharePayload.swift in Sources */,
-				817CB2732E8A24EBC3E0F3F5 /* MetalRenderer.swift in Sources */,
-				9F95A099D27690B6214A6DE9 /* PINFlowView.swift in Sources */,
-				6B22D46F33484FFF56504076 /* PINPadView.swift in Sources */,
-				B7DB4883F7A2A96A58E543EA /* QRCodeGenerator.swift in Sources */,
-				49352218624B7663754F6B52 /* QRDisplaySheet.swift in Sources */,
-				B1A33C13DEDE49385C78E523 /* QRScannerView.swift in Sources */,
-				B111BA7E2C381C641BA4989F /* ReceivedMessageView.swift in Sources */,
-				D719FF1B2410C74EE3A7B1C5 /* RootView.swift in Sources */,
-				2C63520D30D4605995F598DB /* RuneCharacterSet.swift in Sources */,
-				2B3A29FAFF2CF3E931C055DF /* RuneCodec.swift in Sources */,
-				51F8FC3FC311B598FA5E74B6 /* RuneInscriptionText.swift in Sources */,
-				C1A6CF8336377BFF19B73290 /* RuneMetalView.swift in Sources */,
-				EDC58C55E2D5154B15A0A5B6 /* RuneScribApp.swift in Sources */,
-				3FDE51AADDBEA7CB2C35BDF3 /* RuneScribButtonStyle.swift in Sources */,
-				3D38B09452746F6509C37C02 /* RuneTheme.swift in Sources */,
-				DD3F914F90546898BD31D151 /* SettingsView.swift in Sources */,
+				55BBA4421D3374DFFDED21C7 /* AppDelegate.swift in Sources */,
+				199233F0AC33FEF97975F320 /* RuneScribApp.swift in Sources */,
+				B6B430C316B5F38F6DD36441 /* RuneScribeRuntimeComposition.swift in Sources */,
 				01C55610EF12C17DA83396B2 /* Shaders.metal in Sources */,
-				A8860E28862BB912A033B9A9 /* VideoSplashView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E38093737CE2C17A124824A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E8BF64F215D751B78111DC4 /* AppHostRoutingTests.swift in Sources */,
+				99B4D5CC341ADAAD426D63CF /* KeychainMigrationTests.swift in Sources */,
+				AD024D560D851D28CD7A1FDD /* NativeShareOutcomeTests.swift in Sources */,
+				61DD380B448CD6318D7544DC /* PlatformPresentationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -628,68 +667,35 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B4F8144B90E37A2B69CF4F17 /* AppDelegate.swift in Sources */,
-				3367F4DE31A8BFA2F5A8955B /* AppLicense.swift in Sources */,
-				0FE15DBC0B9074385443CEE2 /* AppLock.swift in Sources */,
-				4D4586FA9B5495EE9D02CDA8 /* Cipher.swift in Sources */,
-				32052333DC272F9086A942D4 /* CipherLibrary.swift in Sources */,
-				7612DFED0FFD7CCE5F51CACB /* CipherLibraryView.swift in Sources */,
-				C7A7CBB0509B37B3561EE324 /* CipherSharePayload.swift in Sources */,
-				3216BD9FD4314395132F51BB /* Clipboard.swift in Sources */,
-				46E7C851C6AF62FB5647521F /* Contact.swift in Sources */,
-				C1C0B6E37E3C2EA178DB28FF /* ContactBook.swift in Sources */,
-				E1B0A6B679BEC5818F149301 /* ContactImportPicker.swift in Sources */,
-				0AA2A1B762BAD94CF4973189 /* ContactImporter.swift in Sources */,
-				4AA210342C0819378107412D /* ContactManager.swift in Sources */,
-				6C90DCFCA2ACF228146666A5 /* ContactStore.swift in Sources */,
-				6AC3F38E914DAC3AFD88C7A2 /* ContactsView.swift in Sources */,
-				45113334F4CA66360C41C767 /* ContentView.swift in Sources */,
-				86EC8F977E7E340F16A64EA2 /* DecoderDocument.swift in Sources */,
-				7B39C4181A95092F95729DCF /* FileRouter.swift in Sources */,
-				008FD6B6415CDE82EE157B84 /* FontRef.swift in Sources */,
-				2534F5D451B13B24B4A64A9B /* FontStore.swift in Sources */,
-				62276BA1FCA311A976C6BE13 /* ImportConfirmView.swift in Sources */,
-				D78630CCAAB450865DA20EA1 /* ImportCoordinator.swift in Sources */,
-				90967110D847AD379BCB6EDB /* KeyManager.swift in Sources */,
-				E86F474B5165185D3A657E4C /* KeychainService.swift in Sources */,
-				4582CC9CE71ADB1635028699 /* LicenseView.swift in Sources */,
-				E9F2F0B69E2840171D762FE0 /* LinkRouter.swift in Sources */,
-				D510973FADAD8196543583E7 /* LockView.swift in Sources */,
-				12B61513617B7DB4D76580E1 /* MessageComposeView.swift in Sources */,
-				A89334636625EA839DDFC991 /* MessageCoordinator.swift in Sources */,
-				C7C2D5659A4FC1DEE373BCD3 /* MessageCryptor.swift in Sources */,
-				B2A85D13B6EC9173917D5A44 /* MessageEnvelope.swift in Sources */,
-				176EFC88D4B1F5D8D2B296DA /* MessageSend.swift in Sources */,
-				40E94BF207A2E3593747F2D3 /* MessageService.swift in Sources */,
-				D0BFADBB943FAA7F8810D803 /* MessageSharePayload.swift in Sources */,
-				35C98AE00276C7655C193856 /* MetalRenderer.swift in Sources */,
-				7BF138CAE8F17D14882A4596 /* PINFlowView.swift in Sources */,
-				15777090BCB442077B87397A /* PINPadView.swift in Sources */,
-				036F7BB7BA50F4AAE1F1DE48 /* QRCodeGenerator.swift in Sources */,
-				4F4668CE7576A83D775D37BE /* QRDisplaySheet.swift in Sources */,
-				0E7EE57FCC7EF36C764D4C9C /* QRScannerView.swift in Sources */,
-				4CEC9F890801975A75463D58 /* ReceivedMessageView.swift in Sources */,
-				3734D1550897FAC020B54AE2 /* RootView.swift in Sources */,
-				80E4EDFC691AB83CE9B78E5E /* RuneCharacterSet.swift in Sources */,
-				9D7FEA16DD78184E7FE55034 /* RuneCodec.swift in Sources */,
-				AA6418F651819163A40090B1 /* RuneInscriptionText.swift in Sources */,
-				95A79F56B2567C326B47A6C8 /* RuneMetalView.swift in Sources */,
-				701C3AD554E79E1CDED99C6C /* RuneScribApp.swift in Sources */,
-				8E820672C49B7E3C933036F8 /* RuneScribButtonStyle.swift in Sources */,
-				97C78EAF515BE1E3A98A4A6F /* RuneTheme.swift in Sources */,
-				0F375290B9932F3D5C1F8956 /* SettingsView.swift in Sources */,
+				1CC0EAA7DFAE0294F058AAD4 /* AppDelegate.swift in Sources */,
+				DCF8F4F29B85C086E1ED3EC6 /* RuneScribApp.swift in Sources */,
+				E8945513767815C9E3871E78 /* RuneScribeRuntimeComposition.swift in Sources */,
 				50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */,
-				312A8A3914A0A1B0B36124BC /* VideoSplashView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		1166786C257BFE4013E933DB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */;
+			targetProxy = 2AFCA44169FBCE9C02D119EF /* PBXContainerItemProxy */;
+		};
+		B4847232AD12DC5AFAA252AC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */;
+			targetProxy = 5033A05F4B4454B465C244F6 /* PBXContainerItemProxy */;
+		};
 		BA899E8B07807A8A22CDACDC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 6F186131C8C4C80632D23A6E /* RuneScrib-macOS */;
 			targetProxy = CDF9BB784C987E98AA226AE9 /* PBXContainerItemProxy */;
+		};
+		E91679BBF17FE7B62CBA6A9E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B0EAA089C274A9658D6E37A7 /* RuneScribMacParityHost */;
+			targetProxy = 4694840E3234730B79BA5D26 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -698,7 +704,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -773,11 +782,117 @@
 				MARKETING_VERSION = 1.0.33;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.runescribe.app;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(RUNESCRIBE_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUNESCRIBE_APP_BUNDLE_IDENTIFIER = com.runescribe.app;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		211DA3F9F2C8927BAD9110FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.ios-ui-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "RuneScrib-iOS";
+			};
+			name = Release;
+		};
+		219DC37BDB3B0EB87424DE63 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.ios-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/RuneScrib";
+			};
+			name = Release;
+		};
+		21A8AAD3C14C0A88C7765540 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-parity-tests";
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScribMacParityHost.app/Contents/MacOS/RuneScribMacParityHost";
+			};
+			name = Release;
+		};
+		265B73DF14D76100E56539B0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.architecture-tests";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		2AE5FAEFA91E6728B6AD3903 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RuneScribMacParityHost/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-parity-host";
+				PRODUCT_NAME = RuneScribMacParityHost;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -785,7 +900,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -797,6 +915,91 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/Contents/MacOS/RuneScrib";
 			};
 			name = Debug;
+		};
+		493B3CF1FD008F2194C41633 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RuneScribMacParityHost/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-parity-host";
+				PRODUCT_NAME = RuneScribMacParityHost;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		64340CCFDB78528559AF93C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-parity-tests";
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScribMacParityHost.app/Contents/MacOS/RuneScribMacParityHost";
+			};
+			name = Debug;
+		};
+		6503E54C28214F804EBDFE23 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.ios-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/RuneScrib";
+			};
+			name = Debug;
+		};
+		6905F013FAD94D67817B9BDD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.architecture-tests";
+				SDKROOT = macosx;
+			};
+			name = Release;
 		};
 		750F4277C32C4B4726512627 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -819,6 +1022,26 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		A533D89F3656A94CD1D465BE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.ios-ui-tests";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "RuneScrib-iOS";
+			};
+			name = Debug;
 		};
 		B44B9B5D9D56451DC50E6B2A /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -889,8 +1112,9 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.runescribe.app;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(RUNESCRIBE_APP_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUNESCRIBE_APP_BUNDLE_IDENTIFIER = com.runescribe.app;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;
@@ -928,7 +1152,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Config/RuneScrib-macOS-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -946,11 +1173,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "Config/RuneScrib-macOS.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Config/RuneScrib-macOS-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -975,6 +1205,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		43B30282A1F64010047A52BD /* Build configuration list for PBXNativeTarget "RuneScribArchitectureTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				265B73DF14D76100E56539B0 /* Debug */,
+				6905F013FAD94D67817B9BDD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		5E6380B7078C1D52B253B909 /* Build configuration list for PBXProject "RuneScrib" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -993,6 +1232,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		8F00B1DAE780700E478E0759 /* Build configuration list for PBXNativeTarget "RuneScribMacParityHost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				493B3CF1FD008F2194C41633 /* Debug */,
+				2AE5FAEFA91E6728B6AD3903 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		AB2D1B05CEE59E518C97913F /* Build configuration list for PBXNativeTarget "RuneScribTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1002,7 +1250,120 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		B52BFD3B4B43442BB40D6BFE /* Build configuration list for PBXNativeTarget "RuneScribIOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6503E54C28214F804EBDFE23 /* Debug */,
+				219DC37BDB3B0EB87424DE63 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C5578A7B4655C4175187DA6B /* Build configuration list for PBXNativeTarget "RuneScribMacParityTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				64340CCFDB78528559AF93C1 /* Debug */,
+				21A8AAD3C14C0A88C7765540 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F36B8D5D0B12F0CA0E1A1E91 /* Build configuration list for PBXNativeTarget "RuneScribIOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A533D89F3656A94CD1D465BE /* Debug */,
+				211DA3F9F2C8927BAD9110FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		8667E59CFAC32A934210E654 /* XCLocalSwiftPackageReference "Packages/RuneScribeArchitecture" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/RuneScribeArchitecture;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0856EBE343F18E81979224CE /* RuneScribeRuntimeCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeRuntimeCore;
+		};
+		13B5BAB3ED96974D3FAE69DD /* RuneScribeUIRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeUIRuntime;
+		};
+		1602D1A139FE82FFA3C040DF /* RuneScribePlatform */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribePlatform;
+		};
+		24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeCoreModule;
+		};
+		2CE6E93CB8CD48A870CF5C1A /* RuneScribeContracts */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeContracts;
+		};
+		399C59CC597482097433F43B /* RuneScribeContracts */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeContracts;
+		};
+		415BD6C69E96BAF82603E6EB /* RuneScribeTestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeTestSupport;
+		};
+		4D1C1664E02BEE34BC1CC37A /* RuneScribeCoreModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeCoreModule;
+		};
+		526327790FEC30FB6FC7338D /* RuneScribeUIModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeUIModule;
+		};
+		52B302D4A6F1BF026533FEFF /* RuneScribeUIModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeUIModule;
+		};
+		5E51F0E25CDF33AA3544E166 /* RuneScribeRuntimeCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeRuntimeCore;
+		};
+		6CB0F11D349F8C67B5821299 /* RuneScribeUIModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeUIModule;
+		};
+		76FB922C8FCA530F81C93F60 /* RuneScribeContracts */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeContracts;
+		};
+		9C0E34DE3867BB9FDF5211F1 /* RuneScribeUIRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeUIRuntime;
+		};
+		B3DFFDF31121756FBA7CFE9C /* RuneScribePlatform */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribePlatform;
+		};
+		B9866BDCD5A898F67A3260A2 /* RuneScribeTestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeTestSupport;
+		};
+		CE59E4D588F69BF2E639C88F /* RuneScribePlatform */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribePlatform;
+		};
+		CF4ADC70BD29BA2CE0411ABA /* RuneScribeTestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeTestSupport;
+		};
+		FC00F092BEFF6E296536B9D8 /* RuneScribeCoreModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeCoreModule;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5FD9792BC82FD2A7455D1745 /* Project object */;
 }

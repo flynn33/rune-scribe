@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "1.0",
+  "architecturePackagePath": "Packages/RuneScribeArchitecture",
+  "requiredProducts": [
+    "RuneScribeContracts",
+    "RuneScribeRuntimeCore",
+    "RuneScribeUIRuntime",
+    "RuneScribePlatform",
+    "RuneScribeCoreModule",
+    "RuneScribeUIModule"
+  ],
+  "testOnlyProducts": [
+    "RuneScribeTestSupport"
+  ],
+  "requiredModuleIDs": {
+    "com.runescribe.module.core": {
+      "product": "RuneScribeCoreModule",
+      "moduleType": "service",
+      "defaultRole": "runescribe.core"
+    },
+    "com.runescribe.module.ui": {
+      "product": "RuneScribeUIModule",
+      "moduleType": "ui",
+      "defaultRole": "runescribe.ui.primary"
+    }
+  },
+  "metrics": {
+    "architecturePackageMissing": {
+      "maximum": 0,
+      "owner": "RuntimeFoundation",
+      "reason": "The app-owned architecture package is required.",
+      "removalPhase": "P2"
+    },
+    "moduleManifestsMissing": {
+      "maximum": 0,
+      "owner": "RuntimeFoundation",
+      "reason": "Both shipping module manifests are required.",
+      "removalPhase": "P2"
+    },
+    "projectPackageReferenceMissing": {
+      "maximum": 0,
+      "owner": "BuildConfiguration",
+      "reason": "The generated project must retain the local architecture package reference.",
+      "removalPhase": "P2"
+    },
+    "projectProductDependenciesMissing": {
+      "maximum": 0,
+      "owner": "BuildConfiguration",
+      "reason": "Both shipping hosts must link all six required app-owned products.",
+      "removalPhase": "P2"
+    },
+    "architectureTestTargetMissing": {
+      "maximum": 0,
+      "owner": "BuildConfiguration",
+      "reason": "The standalone architecture XCTest target is required.",
+      "removalPhase": "P2"
+    },
+    "monolithicAppTargets": {
+      "maximum": 0,
+      "owner": "ModuleMigration",
+      "reason": "Application targets compile only host, resource, and Metal-shader inputs.",
+      "removalPhase": "P5"
+    },
+    "appOwnedSingletonDeclarations": {
+      "maximum": 0,
+      "owner": "CoreMigration",
+      "reason": "Core services are scoped behind runtime contracts; app-owned global instances are prohibited.",
+      "removalPhase": "P4B"
+    },
+    "appOwnedSingletonReferences": {
+      "maximum": 0,
+      "owner": "ModuleMigration",
+      "reason": "Hosted bridges receive scoped dependencies and may not resolve app-owned globals.",
+      "removalPhase": "P5"
+    },
+    "featureNotificationCenterCalls": {
+      "maximum": 0,
+      "owner": "UIMigration",
+      "reason": "Feature routing uses typed application and UI-session streams.",
+      "removalPhase": "P5"
+    },
+    "featureNotificationNames": {
+      "maximum": 0,
+      "owner": "UIMigration",
+      "reason": "No application-specific notification channel remains.",
+      "removalPhase": "P5"
+    },
+    "notificationCenterDefaultUses": {
+      "maximum": 2,
+      "owner": "UIMigration",
+      "reason": "Only the local media-finish observer registration and removal remain.",
+      "removalPhase": "P5"
+    },
+    "unexpectedNotificationCenterUses": {
+      "maximum": 0,
+      "owner": "ArchitectureClosure",
+      "reason": "Only the AVPlayer completion observer registration and removal in VideoSplashView are allowed.",
+      "removalPhase": "P7"
+    },
+    "temporaryApplicationSessionAdapters": {
+      "maximum": 0,
+      "owner": "UIMigration",
+      "reason": "The UI module owns the sole observable application session.",
+      "removalPhase": "P5"
+    },
+    "productionDiagnosticSinkReferences": {
+      "maximum": 0,
+      "owner": "ArchitectureClosure",
+      "reason": "Production modules and hosts must not send sensitive application values to direct diagnostic sinks.",
+      "removalPhase": "P7"
+    },
+    "hostLegacyBoundaryReferences": {
+      "maximum": 0,
+      "owner": "HostMigration",
+      "reason": "Host lifecycle and inbound routing use runtime contracts; legacy singletons, notifications, and routers are prohibited.",
+      "removalPhase": "P6"
+    },
+    "hostRuntimeBypassReferences": {
+      "maximum": 0,
+      "owner": "HostMigration",
+      "reason": "Hosts must resolve the application facade through the runtime and may not construct or retain the concrete Core application service.",
+      "removalPhase": "P6"
+    },
+    "hostPhysicalLines": {
+      "maximum": 300,
+      "owner": "HostMigration",
+      "reason": "The host is limited to composition, runtime activation, typed OS input conversion, and neutral root presentation.",
+      "removalPhase": "P6"
+    }
+  }
+}
