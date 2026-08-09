@@ -9,6 +9,9 @@
     "RuneScribeCoreModule",
     "RuneScribeUIModule"
   ],
+  "testOnlyProducts": [
+    "RuneScribeTestSupport"
+  ],
   "requiredModuleIDs": {
     "com.runescribe.module.core": {
       "product": "RuneScribeCoreModule",

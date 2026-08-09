@@ -2,72 +2,73 @@
   "schemaVersion": "1.0",
   "baselineCommit": "793f275b86ef16aa3d2606318cccd9714b7af95e",
   "p0Commit": "a3d5a86",
-  "evidencePolicy": "Terminal status records file ownership/disposition. Current verification is terminal only because the final P7 current-tree generation, package, hosted, UI, native-share, build, architecture, and shipping gates listed below passed; distribution identity and physical-device checks remain outside this file-migration ledger.",
+  "evidencePolicy": "Terminal status records file ownership/disposition. Current verification is terminal only because the final P8 remediation-tree generation, package, hosted, UI, native-share, build, architecture, negative-guard, and shipping gates listed below passed; the explicit historical P7 record is provenance only, while distribution identity and physical-device checks remain outside this file-migration ledger.",
   "recordedExecutionEvidence": [
     {
-      "id": "P7-PACKAGE-FINAL",
+      "id": "P8-PACKAGE-FINAL",
       "result": "passed",
-      "timestampUTC": "2026-08-09T03:01:24Z",
-      "scope": "283/283 SwiftPM package tests, 0 failures; current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2; 17/17 architecture checks, clean diff, and 0/0 warning/error census",
-      "logPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/swift-test.log",
-      "architectureLogPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/check-architecture.log",
-      "diffCheckLogPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/git-diff-check.log",
-      "warningCensusPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/warnings-errors.log"
+      "timestampUTC": "2026-08-09T04:25:19Z",
+      "scope": "283/283 SwiftPM package tests, 0 failures; 17/17 architecture checks; clean diff; valid verification JSON; and an empty warning/error census on the final P8 remediation tree",
+      "logPath": "/tmp/RuneScribe-P8-final-package.yGz7qs/swift-test.log",
+      "architectureLogPath": "/tmp/RuneScribe-P8-final-package.yGz7qs/check-architecture.log",
+      "diffCheckLogPath": "/tmp/RuneScribe-P8-final-package.yGz7qs/git-diff-check.log",
+      "warningCensusPath": "/tmp/RuneScribe-P8-final-package.yGz7qs/warning-error-census.log"
     },
     {
-      "id": "P7-XCODEGEN-ARCHITECTURE-FINAL",
+      "id": "P8-XCODEGEN-ARCHITECTURE-FINAL",
       "result": "passed",
-      "timestampUTC": "2026-08-09T02:19:32Z",
-      "scope": "XcodeGen 2.46.0 generated twice with identical PBX and four scheme hashes; final PBX SHA-256 8e2b14812a97589501a2b752944cb3982b7bce919b6dd128ffe2b377317e7aaf; current NativeShareOutcome membership verified",
-      "artifactDirectory": "/tmp/RuneScribe-P7-security-project.4dMuDB"
+      "timestampUTC": "2026-08-09T04:25:16Z",
+      "scope": "XcodeGen 2.46.0 generated twice with identical PBX and four scheme hashes; final PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; exact shipping source and generated PBXSources allowlists passed; RuneScribeTestSupport is package-test-only and excluded from both shipping targets",
+      "artifactDirectory": "/tmp/RuneScribe-P8-final-package.yGz7qs",
+      "negativeGuardAuditDirectory": "/tmp/RuneScribe-P8-guard-audit.4gkAfP"
     },
     {
-      "id": "P7-MACOS-FINAL",
+      "id": "P8-MACOS-FINAL",
       "result": "passed",
-      "timestampUTC": "2026-08-09T03:14:20Z",
+      "timestampUTC": "2026-08-09T04:30:02Z",
       "scope": "8/8 total macOS tests (7 hosted plus 1 architecture guard) and 3/3 prompt-free parity-hosted tests passed with 0 failures/skips; isolated native file and link presenters each showed a public picker once and dismissed via same-process local Escape without Keychain, TCC, AX, Contacts, clipboard, identity, or operator interaction",
-      "resultBundlePath": "/tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
-      "parityResultBundlePath": "/tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS-Parity.xcresult",
-      "nativeShareReportPath": "/tmp/RuneScribe-final-mac-presenter.Widumf/native-share-report.json",
-      "finalGateReportPath": "/tmp/RuneScribe-final-mac-presenter.Widumf/final-gate-report.json"
+      "resultBundlePath": "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
+      "parityResultBundlePath": "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-Parity.xcresult",
+      "nativeShareReportPath": "/tmp/RuneScribe-P8-final-mac.MN3k9e/native-share-report.json",
+      "finalGateReportPath": "/tmp/RuneScribe-P8-final-mac.MN3k9e/final-gate-report.json"
     },
     {
-      "id": "P7-IOS-BUILD-AND-HOSTED-FINAL",
+      "id": "P8-IOS-BUILD-AND-HOSTED-FINAL",
       "result": "passed",
-      "timestampUTC": "2026-08-09T03:01:52Z",
+      "timestampUTC": "2026-08-09T04:36:24Z",
       "scope": "generic unsigned iOS Simulator build succeeded; 18/18 hosted tests passed with 0 failures/skips (AppHostRouting 5/5, KeychainMigration 1/1, NativeShareOutcome 3/3, PlatformPresentation 9/9)",
-      "resultBundlePath": "/tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult",
-      "buildResultBundlePath": "/tmp/RuneScribe-ios-presenter-final-build.xjKzZl/GenericBuild-final.xcresult"
+      "resultBundlePath": "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult",
+      "buildResultBundlePath": "/tmp/RuneScribe-P8-final-ios.87OHyd/GenericBuild.xcresult"
     },
     {
-      "id": "P7-UI-PARITY-FINAL",
+      "id": "P8-UI-PARITY-FINAL",
       "result": "passed",
-      "timestampUTC": "2026-08-09T03:14:20Z",
-      "scope": "current isolated iPhone parity passed 1/1 in 196.493s; current AXXXL iPad parity passed 1/1 in 203.032s; prompt-free macOS parity passed 3/3; isolated native macOS file and link presenter report passed",
+      "timestampUTC": "2026-08-09T04:36:24Z",
+      "scope": "current isolated iPhone parity passed 1/1 in 216.666s; current AXXXL iPad parity passed 1/1 in 223.516s; prompt-free macOS parity passed 3/3; isolated native macOS file and link presenter report passed",
       "evidencePaths": [
-        "/tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult",
-        "/tmp/RuneScribe-ios-parity-ipad-final.5kVld1/IOSParity-iPad.xcresult",
-        "/tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS-Parity.xcresult",
-        "/tmp/RuneScribe-final-mac-presenter.Widumf/native-share-report.json"
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult",
+        "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPad.xcresult",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-Parity.xcresult",
+        "/tmp/RuneScribe-P8-final-mac.MN3k9e/native-share-report.json"
       ]
     },
     {
       "id": "P7-SHIPPING-RELEASE-HISTORICAL-44",
       "result": "passed",
       "timestampUTC": "2026-08-09T00:45:49Z",
-      "scope": "historical provenance only: earlier clean Release products passed 44/44 shipping/configuration checks; this record is superseded by P7-SHIPPING-RELEASE-FINAL and is not current-tree exit evidence",
+      "scope": "historical provenance only: earlier clean P7 Release products passed 44/44 shipping/configuration checks; this record is superseded by P8-SHIPPING-RELEASE-FINAL and is not current-tree exit evidence",
       "logPath": "/tmp/RuneScribe-P7-release-final.arn4kt/shipping-products-clean.log",
       "macOSProductPath": "/tmp/RuneScribe-P7-release-final.arn4kt/macos-clean-derived/Build/Products/Release/RuneScrib.app",
       "iOSSimulatorProductPath": "/tmp/RuneScribe-P7-release-final.arn4kt/ios-simulator-derived/Build/Products/Release-iphonesimulator/RuneScrib.app"
     },
     {
-      "id": "P7-SHIPPING-RELEASE-FINAL",
+      "id": "P8-SHIPPING-RELEASE-FINAL",
       "result": "passed",
-      "timestampUTC": "2026-08-09T03:13:09Z",
-      "scope": "current macOS and iOS Simulator Release builds succeeded; 48/48 shipping-product and configuration checks passed with 0 failures, including exact per-architecture entitlements without extras, strict signatures and nested seals, macOS hardened runtime, canonical platform linkage, one expected main Mach-O per product, no Forsetti binary or dynamic linkage, resources, manifests, and the exact dependency graph",
-      "logPath": "/tmp/RuneScribe-release-gate-20260808.cTIuQe/shipping-products.log",
-      "macOSProductPath": "/tmp/RuneScribe-release-gate-20260808.cTIuQe/DerivedData-macOS/Build/Products/Release/RuneScrib.app",
-      "iOSSimulatorProductPath": "/tmp/RuneScribe-release-gate-20260808.cTIuQe/DerivedData-iOS/Build/Products/Release-iphonesimulator/RuneScrib.app"
+      "timestampUTC": "2026-08-09T04:36:03Z",
+      "scope": "current macOS and iOS Simulator Release builds succeeded; 50/50 shipping-product and configuration checks passed with 0 failures, including exact per-architecture entitlements without extras, strict signatures and nested seals, macOS hardened runtime, canonical platform linkage, one expected main Mach-O per product, no Forsetti binary or dynamic linkage, resources, manifests, exact dependency graph, and explicit RuneScribeTestSupport exclusion from both executables",
+      "logPath": "/tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log",
+      "macOSProductPath": "/tmp/RuneScribe-P8-release-final.XsJS4P/macos-final/DerivedData/Build/Products/Release/RuneScrib.app",
+      "iOSSimulatorProductPath": "/tmp/RuneScribe-P8-release-final.XsJS4P/ios/DerivedData/Build/Products/Release-iphonesimulator/RuneScrib.app"
     }
   ],
   "summary": {
@@ -85,7 +86,7 @@
       "replaced-with-tested-equivalent": 11
     },
     "currentVerificationCounts": {
-      "passed-P7-final-gates": 89
+      "passed-P8-final-gates": 89
     }
   },
   "packageEntries": [
@@ -101,9 +102,9 @@
       "rationale": "Retain the prohibition on AI attribution and generated-by/co-author notices.",
       "evidence": [
         "Current repository path: .github/workflows/ai-attribution-guard.yml",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL and the final hosted/shipping gates verified the current CI and configuration paths."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL and the final hosted/shipping gates verified the current CI and configuration paths."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-002",
@@ -117,9 +118,9 @@
       "rationale": "Add runtime, module, architecture, project-generation, macOS test, and iOS simulator build gates while preserving existing checks.",
       "evidence": [
         "Current repository path: .github/workflows/unit-tests.yml",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL and the final hosted/shipping gates verified the current CI and configuration paths."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL and the final hosted/shipping gates verified the current CI and configuration paths."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-003",
@@ -133,9 +134,9 @@
       "rationale": "Preserve URL scheme, document type/UTI, fonts, privacy strings, scene/lifecycle configuration, and all shipping identity.",
       "evidence": [
         "Current repository path: Config/RuneScrib-iOS-Info.plist",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-004",
@@ -149,9 +150,9 @@
       "rationale": "Do not add or remove entitlements during the architecture rebuild.",
       "evidence": [
         "Current repository path: Config/RuneScrib-iOS.entitlements",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-005",
@@ -165,9 +166,9 @@
       "rationale": "Preserve document type/UTI, fonts, application identity, and all shipping behavior.",
       "evidence": [
         "Current repository path: Config/RuneScrib-macOS-Info.plist",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-006",
@@ -181,9 +182,9 @@
       "rationale": "Do not add or remove entitlements during the architecture rebuild.",
       "evidence": [
         "Current repository path: Config/RuneScrib-macOS.entitlements",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-007",
@@ -197,9 +198,9 @@
       "rationale": "Never hand-edit as the primary change. Regenerate with XcodeGen and verify no unexplained drift.",
       "evidence": [
         "Current repository path: RuneScrib.xcodeproj/project.pbxproj",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-008",
@@ -213,9 +214,9 @@
       "rationale": "Reduce to composition, lifecycle forwarding, and inbound-input forwarding. No business logic or direct singleton access.",
       "evidence": [
         "Current repository path: RuneScrib/AppHost/AppDelegate.swift",
-        "P7-MACOS-FINAL executed the current RuntimeCompositionTests within 7/7 app-hosted tests."
+        "P8-MACOS-FINAL executed the current RuntimeCompositionTests within 7/7 app-hosted tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-009",
@@ -229,9 +230,9 @@
       "rationale": "Reduce to composition, lifecycle forwarding, and inbound-input forwarding. No business logic or direct singleton access.",
       "evidence": [
         "Current repository path: RuneScrib/AppHost/RuneScribApp.swift",
-        "P7-MACOS-FINAL executed the current RuntimeCompositionTests within 7/7 app-hosted tests."
+        "P8-MACOS-FINAL executed the current RuntimeCompositionTests within 7/7 app-hosted tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-010",
@@ -247,7 +248,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Rendering/MetalRenderer.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-011",
@@ -263,7 +264,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Rendering/RuneMetalView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-012",
@@ -279,7 +280,7 @@
         "Current repository path: RuneScrib/Metal/Shaders.metal",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-013",
@@ -295,7 +296,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/ProductContent/AppLicense.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-014",
@@ -311,7 +312,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Cipher.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-015",
@@ -327,7 +328,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/CipherLibrary.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-016",
@@ -343,7 +344,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/CipherSharePayload.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-017",
@@ -359,7 +360,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Contact.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-018",
@@ -375,7 +376,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/ContactBook.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-019",
@@ -391,7 +392,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/FontRef.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-020",
@@ -407,7 +408,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/MessageEnvelope.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-021",
@@ -423,7 +424,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/MessageSharePayload.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-022",
@@ -439,7 +440,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/RuneCharacterSet.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-023",
@@ -453,9 +454,9 @@
       "rationale": "Preserve app icons, accent color, asset names, target membership, and bundle lookup behavior.",
       "evidence": [
         "Current repository path: RuneScrib/Resources/Assets.xcassets",
-        "P7-MACOS-FINAL and P7-SHIPPING-RELEASE-FINAL verified current hosted resource tests and both Release products."
+        "P8-MACOS-FINAL and P8-SHIPPING-RELEASE-FINAL verified current hosted resource tests and both Release products."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-024",
@@ -471,7 +472,7 @@
         "Current repository path: RuneScrib/Resources/Fonts",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-025",
@@ -485,9 +486,9 @@
       "rationale": "Preserve splash resource name, target membership, playback behavior, and bundle lookup.",
       "evidence": [
         "Current repository path: RuneScrib/Resources/raven-forge-spp-splash.mp4",
-        "P7-MACOS-FINAL and P7-SHIPPING-RELEASE-FINAL verified current hosted resource tests and both Release products."
+        "P8-MACOS-FINAL and P8-SHIPPING-RELEASE-FINAL verified current hosted resource tests and both Release products."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-026",
@@ -503,7 +504,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Security/AppLockService.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-027",
@@ -518,7 +519,7 @@
       "evidence": [
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribePlatform/Clipboard/SystemClipboardService.swift"
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-028",
@@ -538,7 +539,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/PlatformContracts.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-029",
@@ -554,7 +555,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Contacts/ContactManager.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-030",
@@ -572,7 +573,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribePlatform/Storage/AppleProtectedFileStore.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-031",
@@ -587,7 +588,7 @@
       "evidence": [
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Import/FileRouter.swift"
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-032",
@@ -607,7 +608,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribePlatform/Resources/BundleApplicationResourceLocator.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-033",
@@ -626,7 +627,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift",
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/UIModels.swift"
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-034",
@@ -644,7 +645,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Persistence/CipherRepository.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-035",
@@ -659,7 +660,7 @@
       "evidence": [
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribePlatform/Security/AppleKeychainStore.swift"
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-036",
@@ -674,7 +675,7 @@
       "evidence": [
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Import/LinkRouter.swift"
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-037",
@@ -694,7 +695,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/UIModels.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-038",
@@ -710,7 +711,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageCryptor.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-039",
@@ -726,7 +727,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-040",
@@ -742,7 +743,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageService.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-041",
@@ -760,7 +761,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRDisplaySheet.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-042",
@@ -776,7 +777,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Codec/RuneCodec.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-043",
@@ -792,7 +793,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-044",
@@ -808,7 +809,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/DecoderDocument.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-045",
@@ -824,7 +825,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/MessageComposeView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-046",
@@ -840,7 +841,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/PINPadView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-047",
@@ -856,7 +857,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRScannerView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-048",
@@ -872,7 +873,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneInscriptionText.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-049",
@@ -888,7 +889,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneScribButtonStyle.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-050",
@@ -904,7 +905,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneTheme.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-051",
@@ -920,7 +921,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VideoSplashView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-052",
@@ -936,7 +937,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContactImportPicker.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-053",
@@ -952,7 +953,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContactsView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-054",
@@ -968,7 +969,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-055",
@@ -984,7 +985,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ImportConfirmView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-056",
@@ -1000,7 +1001,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/LicenseView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-057",
@@ -1016,7 +1017,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/LockView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-058",
@@ -1032,7 +1033,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/PINFlowView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-059",
@@ -1048,7 +1049,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRDisplaySheet.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-060",
@@ -1064,7 +1065,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ReceivedMessageView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-061",
@@ -1080,7 +1081,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-062",
@@ -1096,7 +1097,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SettingsView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "FM-063",
@@ -1110,9 +1111,9 @@
       "rationale": "Add app-owned package/target products, dependencies, tests, schemes, and guard scripts here first; regenerate and commit the Xcode project.",
       "evidence": [
         "Current repository path: project.yml",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     }
   ],
   "p0LocalDeltaEntries": [
@@ -1130,7 +1131,7 @@
         "Current repository path: .github/FUNDING.yaml",
         "Static source presence confirms the P0 repository artifact was not discarded."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-002",
@@ -1146,7 +1147,7 @@
         "Current repository path: .github/FUNDING.yml",
         "Static source presence confirms the P0 repository artifact was not discarded."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-003",
@@ -1162,7 +1163,7 @@
         "Current repository path: .github/ISSUE_TEMPLATE/bug_report.md",
         "Static source presence confirms the P0 repository artifact was not discarded."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-004",
@@ -1178,7 +1179,7 @@
         "Current repository path: .github/ISSUE_TEMPLATE/config.yml",
         "Static source presence confirms the P0 repository artifact was not discarded."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-005",
@@ -1194,7 +1195,7 @@
         "Current repository path: .github/ISSUE_TEMPLATE/feature_request.md",
         "Static source presence confirms the P0 repository artifact was not discarded."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-006",
@@ -1210,7 +1211,7 @@
         "Current repository path: .github/PULL_REQUEST_TEMPLATE.md",
         "Static source presence confirms the P0 repository artifact was not discarded."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-007",
@@ -1226,7 +1227,7 @@
         "Current repository path: .github/workflows/version-bump.yml",
         "Static source presence confirms the P0 repository artifact was not discarded."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-008",
@@ -1240,9 +1241,9 @@
       "rationale": "P0 local behavior/configuration delta retained through the package mapping. Never hand-edit as the primary change. Regenerate with XcodeGen and verify no unexplained drift.",
       "evidence": [
         "Current repository path: RuneScrib.xcodeproj/project.pbxproj",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-009",
@@ -1256,9 +1257,9 @@
       "rationale": "Preserved and regenerated the shared iOS scheme from project.yml.",
       "evidence": [
         "Current repository path: RuneScrib.xcodeproj/xcshareddata/xcschemes/RuneScrib-iOS.xcscheme",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL used XcodeGen 2.46.0 twice and produced identical project and scheme hashes."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL used XcodeGen 2.46.0 twice and produced identical project and scheme hashes."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-010",
@@ -1272,9 +1273,9 @@
       "rationale": "Preserved and regenerated the shared macOS scheme from project.yml.",
       "evidence": [
         "Current repository path: RuneScrib.xcodeproj/xcshareddata/xcschemes/RuneScrib-macOS.xcscheme",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL used XcodeGen 2.46.0 twice and produced identical project and scheme hashes."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL used XcodeGen 2.46.0 twice and produced identical project and scheme hashes."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-011",
@@ -1288,9 +1289,9 @@
       "rationale": "P0 local behavior/configuration delta retained through the package mapping. Reduce to composition, lifecycle forwarding, and inbound-input forwarding. No business logic or direct singleton access.",
       "evidence": [
         "Current repository path: RuneScrib/AppHost/AppDelegate.swift",
-        "P7-MACOS-FINAL executed the current RuntimeCompositionTests within 7/7 app-hosted tests."
+        "P8-MACOS-FINAL executed the current RuntimeCompositionTests within 7/7 app-hosted tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-012",
@@ -1304,9 +1305,9 @@
       "rationale": "P0 local behavior/configuration delta retained through the package mapping. Reduce to composition, lifecycle forwarding, and inbound-input forwarding. No business logic or direct singleton access.",
       "evidence": [
         "Current repository path: RuneScrib/AppHost/RuneScribApp.swift",
-        "P7-MACOS-FINAL executed the current RuntimeCompositionTests within 7/7 app-hosted tests."
+        "P8-MACOS-FINAL executed the current RuntimeCompositionTests within 7/7 app-hosted tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-013",
@@ -1322,7 +1323,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Security/AppLockService.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-014",
@@ -1337,7 +1338,7 @@
       "evidence": [
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Import/FileRouter.swift"
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-015",
@@ -1352,7 +1353,7 @@
       "evidence": [
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribePlatform/Security/AppleKeychainStore.swift"
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-016",
@@ -1368,7 +1369,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests, including Core, Platform, and UI ownership tests."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-017",
@@ -1384,7 +1385,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-018",
@@ -1400,7 +1401,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/MessageComposeView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-019",
@@ -1416,7 +1417,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VideoSplashView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-020",
@@ -1432,7 +1433,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-021",
@@ -1448,7 +1449,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift",
         "P5-SWIFTPM-FINAL recorded 253 package tests; P5-MACOS-SMOKE recorded a live Rune Scribe window without framework UI."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-022",
@@ -1470,7 +1471,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/AppLockServiceTests.swift",
         "Detailed method-level mapping is recorded in ForsettiTestReconciliation.json."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-023",
@@ -1490,7 +1491,7 @@
         "Current repository path: RuneScribTests/RuntimeCompositionTests.swift",
         "Detailed method-level mapping is recorded in ForsettiTestReconciliation.json."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-024",
@@ -1508,7 +1509,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/MessageAttachmentPolicyTests.swift",
         "Detailed method-level mapping is recorded in ForsettiTestReconciliation.json."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-025",
@@ -1524,7 +1525,7 @@
         "Current repository path: Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/SplashAssetScheduleTests.swift",
         "Detailed method-level mapping is recorded in ForsettiTestReconciliation.json."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     },
     {
       "id": "LD-026",
@@ -1538,9 +1539,9 @@
       "rationale": "P0 local behavior/configuration delta retained through the package mapping. Add app-owned package/target products, dependencies, tests, schemes, and guard scripts here first; regenerate and commit the Xcode project.",
       "evidence": [
         "Current repository path: project.yml",
-        "P7-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
+        "P8-XCODEGEN-ARCHITECTURE-FINAL regenerated twice identically; final macOS/iOS builds and T-028 shipping inspection passed."
       ],
-      "currentVerification": "passed-P7-final-gates"
+      "currentVerification": "passed-P8-final-gates"
     }
   ]
 }

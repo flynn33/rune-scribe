@@ -2,6 +2,7 @@ import RuneScribeContracts
 import RuneScribeRuntimeCore
 @testable import RuneScribeUIModule
 import RuneScribeUIRuntime
+import SwiftUI
 import XCTest
 
 @MainActor
@@ -22,14 +23,21 @@ final class UIModuleTests: XCTestCase {
         )
     }
 
-    func testModuleProvidesExactlyOneRuntimePresentedRootContribution() throws {
-        let module = RuneScribeUIModule(dependencies: dependencies())
-        let contribution = module.rootContribution()
-        let selected = try RootContributionSelector.select(from: [contribution])
+    func testFactoryCreatesFreshModulesOnDemandWithoutPresentingRoot() throws {
+        let rootStore = RootViewPresentationStore()
+        let factory = RuneScribeUIModuleBootstrap.factory(
+            dependencies: RuneScribeUIDependencies(
+                rootPresentationStore: rootStore
+            )
+        )
 
-        XCTAssertEqual(selected.moduleID, RuneScribeUIModuleBootstrap.moduleID)
-        _ = selected.makeView()
-        _ = module.makeRootView()
+        XCTAssertEqual(rootStore.state, .booting)
+        let first = try XCTUnwrap(factory.makeModule() as? RuneScribeUIModule)
+        XCTAssertEqual(rootStore.state, .booting)
+        let second = try XCTUnwrap(factory.makeModule() as? RuneScribeUIModule)
+
+        XCTAssertFalse(first === second)
+        XCTAssertEqual(rootStore.state, .booting)
     }
 
     func testRootContributionSelectorRejectsZeroAndMultiple() {
@@ -37,16 +45,16 @@ final class UIModuleTests: XCTestCase {
             XCTAssertEqual(error as? RootContributionError, RootContributionError.none)
         }
 
-        let contribution = RuneScribeUIModule(dependencies: dependencies()).rootContribution()
+        let firstID: ModuleIdentifier = "com.runescribe.module.synthetic.first"
+        let secondID: ModuleIdentifier = "com.runescribe.module.synthetic.second"
+        let first = RootViewContribution(moduleID: firstID) { AnyView(EmptyView()) }
+        let second = RootViewContribution(moduleID: secondID) { AnyView(EmptyView()) }
         XCTAssertThrowsError(
-            try RootContributionSelector.select(from: [contribution, contribution])
+            try RootContributionSelector.select(from: [second, first])
         ) { error in
             XCTAssertEqual(
                 error as? RootContributionError,
-                .multiple([
-                    RuneScribeUIModuleBootstrap.moduleID,
-                    RuneScribeUIModuleBootstrap.moduleID,
-                ])
+                .multiple([firstID, secondID])
             )
         }
     }
@@ -72,12 +80,6 @@ final class UIModuleTests: XCTestCase {
         } catch {
             XCTAssertEqual(error as? TestOpaqueLinkVault.Error, .unavailable)
         }
-    }
-
-    private func dependencies() -> RuneScribeUIDependencies {
-        RuneScribeUIDependencies(
-            rootPresentationStore: RootViewPresentationStore()
-        )
     }
 }
 

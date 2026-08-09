@@ -9,11 +9,63 @@ final class ManifestValidationTests: XCTestCase {
         let current = try SemanticVersion("1.2.3")
 
         XCTAssertLessThan(minimum, current)
-        XCTAssertTrue(
-            SemanticVersionRange(minimumInclusive: minimum).contains(current)
-        )
         XCTAssertThrowsError(try SemanticVersion("1.2"))
         XCTAssertThrowsError(try SemanticVersion("1.02.3-beta"))
+    }
+
+    func testManifestRuntimeRequirementAcceptsCurrentAndRejectsOlderRuntime() throws {
+        let manifest = try ModuleManifestDecoder.decode(try validManifestData())
+        let descriptor = ModuleDescriptor(
+            moduleID: manifest.moduleID,
+            moduleVersion: manifest.moduleVersion,
+            kind: manifest.moduleType,
+            entryPoint: manifest.entryPoint,
+            role: manifest.defaultRole,
+            requestedCapabilities: Set(manifest.capabilitiesRequested)
+        )
+        let policy = RuntimePolicy(
+            vocabulary: CapabilityVocabulary(
+                knownCapabilities: Set(manifest.capabilitiesRequested)
+            ),
+            capabilities: CapabilityPolicy(
+                allowedRolesByCapability: Dictionary(
+                    uniqueKeysWithValues: manifest.capabilitiesRequested.map {
+                        ($0, Set([manifest.defaultRole]))
+                    }
+                )
+            ),
+            services: ServiceAccessPolicy(rules: [])
+        )
+
+        XCTAssertNoThrow(
+            try ModuleManifestValidator.validate(
+                manifest: manifest,
+                descriptor: descriptor,
+                runtimeVersion: manifest.runtimeVersion,
+                platform: .macOS,
+                policy: policy
+            )
+        )
+
+        let olderRuntime = try SemanticVersion("0.9.9")
+        XCTAssertThrowsError(
+            try ModuleManifestValidator.validate(
+                manifest: manifest,
+                descriptor: descriptor,
+                runtimeVersion: olderRuntime,
+                platform: .macOS,
+                policy: policy
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .incompatibleRuntime(
+                    moduleID: manifest.moduleID,
+                    minimum: manifest.runtimeVersion,
+                    actual: olderRuntime
+                )
+            )
+        }
     }
 
     func testDecoderAcceptsStrictManifest() throws {

@@ -1,11 +1,6 @@
 import Foundation
 import RuneScribeContracts
-import RuneScribeRuntimeCore
 import SwiftUI
-
-public protocol RuneScribeUIContributingModule: RuneScribeModule {
-    @MainActor func makeRootView() -> AnyView
-}
 
 public struct RootViewContribution: Sendable {
     public let moduleID: ModuleIdentifier

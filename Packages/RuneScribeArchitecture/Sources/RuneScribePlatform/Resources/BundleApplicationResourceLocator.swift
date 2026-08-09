@@ -15,18 +15,14 @@ public struct BundleApplicationResourceLocator: ApplicationResourceLocator, Send
     }
 
     public func data(for resource: ApplicationResource) async throws -> Data {
-        try dataSynchronously(for: resource)
+        try Data(contentsOf: try location(for: resource))
     }
 
     public func url(for resource: ApplicationResource) async throws -> URL {
-        try urlSynchronously(for: resource)
+        try location(for: resource)
     }
 
-    public func dataSynchronously(for resource: ApplicationResource) throws -> Data {
-        try Data(contentsOf: try urlSynchronously(for: resource))
-    }
-
-    public func urlSynchronously(for resource: ApplicationResource) throws -> URL {
+    private func location(for resource: ApplicationResource) throws -> URL {
         guard let url = bundle.url(
             forResource: resource.name,
             withExtension: resource.fileExtension,

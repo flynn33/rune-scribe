@@ -2,6 +2,7 @@ import Foundation
 import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
+import RuneScribeTestSupport
 import XCTest
 
 final class KeychainMigrationTests: XCTestCase {
@@ -38,18 +39,18 @@ final class KeychainMigrationTests: XCTestCase {
             namespacedService: namespacedService
         )
         addTeardownBlock {
-            try Self.deleteKeychainEntries(
+            try await Self.deleteKeychainEntries(
                 from: appleStore,
                 service: namespacedService
             )
         }
 
-        try appleStore.setSynchronously(
+        try await appleStore.set(
             key,
             service: namespacedService,
             account: RuneScribeKeychain.symmetricKeyAccount
         )
-        try appleStore.setSynchronously(
+        try await appleStore.set(
             encrypted,
             service: namespacedService,
             account: RuneScribeKeychain.cipherLibraryAccount
@@ -91,33 +92,35 @@ final class KeychainMigrationTests: XCTestCase {
             )
             XCTAssertEqual(decoded.plaintext, "isolated Apple Keychain migration smoke")
             XCTAssertEqual(decoded.cipherID, summary.id)
-            XCTAssertEqual(
-                try appleStore.dataSynchronously(
-                    service: namespacedService,
-                    account: RuneScribeKeychain.symmetricKeyAccount
-                ),
-                key
+            let storedKey = try await appleStore.data(
+                service: namespacedService,
+                account: RuneScribeKeychain.symmetricKeyAccount
             )
-            XCTAssertEqual(
-                try appleStore.dataSynchronously(
-                    service: namespacedService,
-                    account: RuneScribeKeychain.cipherLibraryAccount
-                ),
-                encrypted
+            let storedLibrary = try await appleStore.data(
+                service: namespacedService,
+                account: RuneScribeKeychain.cipherLibraryAccount
             )
+            XCTAssertEqual(storedKey, key)
+            XCTAssertEqual(storedLibrary, encrypted)
 
             await service.stopInboundProcessing()
-            try Self.deleteKeychainEntries(from: appleStore, service: namespacedService)
+            try await Self.deleteKeychainEntries(
+                from: appleStore,
+                service: namespacedService
+            )
             for account in RuneScribeKeychain.accounts {
-                XCTAssertNil(
-                    try appleStore.dataSynchronously(
-                        service: namespacedService,
-                        account: account
-                    )
+                let deletedValue = try await appleStore.data(
+                    service: namespacedService,
+                    account: account
                 )
+                XCTAssertNil(deletedValue)
             }
         } catch {
             await service.stopInboundProcessing()
+            try? await Self.deleteKeychainEntries(
+                from: appleStore,
+                service: namespacedService
+            )
             throw error
         }
     }
@@ -125,11 +128,11 @@ final class KeychainMigrationTests: XCTestCase {
     private static func deleteKeychainEntries(
         from store: AppleKeychainStore,
         service: String
-    ) throws {
+    ) async throws {
         var firstError: Error?
         for account in RuneScribeKeychain.accounts {
             do {
-                try store.deleteSynchronously(service: service, account: account)
+                try await store.delete(service: service, account: account)
             } catch {
                 firstError = firstError ?? error
             }

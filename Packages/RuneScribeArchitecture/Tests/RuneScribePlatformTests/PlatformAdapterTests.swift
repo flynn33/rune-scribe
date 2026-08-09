@@ -3,6 +3,7 @@ import os
 import RuneScribeContracts
 import Security
 @testable import RuneScribePlatform
+import RuneScribeTestSupport
 import XCTest
 
 final class PlatformAdapterTests: XCTestCase {
@@ -17,7 +18,7 @@ final class PlatformAdapterTests: XCTestCase {
         let store = AppleKeychainStore(operations: operations)
         let payload = Data([0x01, 0x02, 0x03])
 
-        try store.setSynchronously(
+        try await store.set(
             payload,
             service: RuneScribeKeychain.service,
             account: RuneScribeKeychain.symmetricKeyAccount
@@ -44,30 +45,30 @@ final class PlatformAdapterTests: XCTestCase {
         )
         XCTAssertEqual(storedPayload, payload)
 
-        try store.deleteSynchronously(
+        try await store.delete(
             service: RuneScribeKeychain.service,
             account: RuneScribeKeychain.symmetricKeyAccount
         )
-        XCTAssertNil(
-            try store.dataSynchronously(
-                service: RuneScribeKeychain.service,
-                account: RuneScribeKeychain.symmetricKeyAccount
-            )
+        let deletedPayload = try await store.data(
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.symmetricKeyAccount
         )
+        XCTAssertNil(deletedPayload)
     }
 
-    func testKeychainErrorsAreTypedAndContainNoValues() throws {
+    func testKeychainErrorsAreTypedAndContainNoValues() async throws {
         let deleteFailure = OSStatus(-34018)
         let operations = RecordingKeychainOperations(forcedDeleteStatus: deleteFailure)
         let store = AppleKeychainStore(operations: operations)
 
-        XCTAssertThrowsError(
-            try store.setSynchronously(
+        do {
+            try await store.set(
                 Data("secret marker".utf8),
                 service: RuneScribeKeychain.service,
                 account: RuneScribeKeychain.appPINAccount
             )
-        ) { error in
+            XCTFail("Expected the injected delete failure")
+        } catch {
             XCTAssertEqual(error as? AppleKeychainStoreError, .deleteFailed(deleteFailure))
             XCTAssertFalse(error.localizedDescription.contains("secret marker"))
         }
@@ -78,12 +79,13 @@ final class PlatformAdapterTests: XCTestCase {
                 forcedReadData: nil
             )
         )
-        XCTAssertThrowsError(
-            try malformed.dataSynchronously(
+        do {
+            _ = try await malformed.data(
                 service: RuneScribeKeychain.service,
                 account: RuneScribeKeychain.cipherLibraryAccount
             )
-        ) { error in
+            XCTFail("Expected malformed Keychain data to be rejected")
+        } catch {
             XCTAssertEqual(error as? AppleKeychainStoreError, .unexpectedDataFormat)
         }
     }
@@ -97,7 +99,8 @@ final class PlatformAdapterTests: XCTestCase {
         XCTAssertNil(missingContacts)
         let contacts = Data([0x43, 0x54])
         try await store.write(contacts, relativePath: .contacts)
-        XCTAssertEqual(try store.readSynchronously(relativePath: .contacts), contacts)
+        let persistedContacts = try await store.read(relativePath: .contacts)
+        XCTAssertEqual(persistedContacts, contacts)
         XCTAssertEqual(
             try Data(contentsOf: root.appendingPathComponent("RuneScribContacts/contacts.enc")),
             contacts
@@ -108,7 +111,7 @@ final class PlatformAdapterTests: XCTestCase {
         let ignored = try ProtectedPath.fontsDirectory.appending("notes.txt")
         try await store.write(Data([1]), relativePath: secondFont)
         try await store.write(Data([2]), relativePath: ignored)
-        try store.writeSynchronously(Data([3]), relativePath: firstFont)
+        try await store.write(Data([3]), relativePath: firstFont)
 
         let fontContents = try await store.contents(
             of: .fontsDirectory,
@@ -124,7 +127,7 @@ final class PlatformAdapterTests: XCTestCase {
         XCTAssertNil(removedFont)
     }
 
-    func testProtectedFileStoreRejectsSymlinkedDirectoryForEveryOperation() throws {
+    func testProtectedFileStoreRejectsSymlinkedDirectoryForEveryOperation() async throws {
         let root = temporaryDirectory(named: "SymlinkRoot")
         let outside = temporaryDirectory(named: "SymlinkOutside")
         defer {
@@ -148,22 +151,28 @@ final class PlatformAdapterTests: XCTestCase {
         )
 
         let store = AppleProtectedFileStore(applicationSupportDirectory: root)
-        XCTAssertThrowsError(try store.readSynchronously(relativePath: .contacts))
+        await assertAsyncThrows {
+            try await store.read(relativePath: .contacts)
+        }
         XCTAssertEqual(try Data(contentsOf: outsideFile), outsideData)
         try FileManager.default.removeItem(at: outsideFile)
-        XCTAssertThrowsError(
-            try store.writeSynchronously(Data([0x01]), relativePath: .contacts)
-        )
+        await assertAsyncThrows {
+            try await store.write(Data([0x01]), relativePath: .contacts)
+        }
         XCTAssertFalse(FileManager.default.fileExists(atPath: outsideFile.path))
-        XCTAssertThrowsError(try store.existsSynchronously(relativePath: .contacts))
-        XCTAssertThrowsError(try store.removeSynchronously(relativePath: .contacts))
+        await assertAsyncThrows {
+            try await store.exists(relativePath: .contacts)
+        }
+        await assertAsyncThrows {
+            try await store.remove(relativePath: .contacts)
+        }
         let contactDirectory = try ProtectedPath(validating: "RuneScribContacts")
-        XCTAssertThrowsError(
-            try store.contentsSynchronously(of: contactDirectory, matchingExtension: nil)
-        )
+        await assertAsyncThrows {
+            try await store.contents(of: contactDirectory, matchingExtension: nil)
+        }
     }
 
-    func testProtectedFileStoreSkipsSymlinkEntriesAndAllowsSafeMissingLeaf() throws {
+    func testProtectedFileStoreSkipsSymlinkEntriesAndAllowsSafeMissingLeaf() async throws {
         let root = temporaryDirectory(named: "SymlinkListingRoot")
         let outside = temporaryDirectory(named: "SymlinkListingOutside")
         defer {
@@ -195,15 +204,20 @@ final class PlatformAdapterTests: XCTestCase {
 
         let store = AppleProtectedFileStore(applicationSupportDirectory: root)
         let safePath = try ProtectedPath.fontsDirectory.appending("safe.ttf")
-        try store.writeSynchronously(Data([0x30]), relativePath: safePath)
-        XCTAssertEqual(
-            try store.contentsSynchronously(of: .fontsDirectory, matchingExtension: "ttf"),
-            [safePath]
+        try await store.write(Data([0x30]), relativePath: safePath)
+        let contents = try await store.contents(
+            of: .fontsDirectory,
+            matchingExtension: "ttf"
         )
+        XCTAssertEqual(contents, [safePath])
 
         let linkedPath = try ProtectedPath.fontsDirectory.appending("linked.ttf")
-        XCTAssertThrowsError(try store.readSynchronously(relativePath: linkedPath))
-        XCTAssertThrowsError(try store.removeSynchronously(relativePath: linkedPath))
+        await assertAsyncThrows {
+            try await store.read(relativePath: linkedPath)
+        }
+        await assertAsyncThrows {
+            try await store.remove(relativePath: linkedPath)
+        }
         XCTAssertEqual(try Data(contentsOf: outsideFont), outsideData)
     }
 
@@ -395,7 +409,7 @@ final class PlatformAdapterTests: XCTestCase {
     }
 
     @MainActor
-    func testClipboardAdapterSupportsAsyncAndSynchronousCompatibilityCalls() async throws {
+    func testClipboardAdapterUsesAsyncContract() async throws {
         let fixture = ClipboardFixture(value: "original", changeCount: 4)
         let service = SystemClipboardService(
             operations: ClipboardOperations(
@@ -409,13 +423,15 @@ final class PlatformAdapterTests: XCTestCase {
             )
         )
 
-        XCTAssertEqual(service.changeCountSynchronously(), 4)
+        let originalChangeCount = await service.changeCount()
+        XCTAssertEqual(originalChangeCount, 4)
         let original = await service.string()
         XCTAssertEqual(original, "original")
-        try service.setStringSynchronously("runescribe://cipher/value")
+        try await service.setString("runescribe://cipher/value")
         let updatedChangeCount = await service.changeCount()
+        let updatedString = await service.string()
         XCTAssertEqual(updatedChangeCount, 5)
-        XCTAssertEqual(service.stringSynchronously(), "runescribe://cipher/value")
+        XCTAssertEqual(updatedString, "runescribe://cipher/value")
     }
 
     func testFontAdapterUsesValueBoundaryAndTreatsRepeatRegistrationAsSuccess() async throws {
@@ -497,10 +513,10 @@ final class PlatformAdapterTests: XCTestCase {
         let bundle = try XCTUnwrap(Bundle(url: bundleURL))
         let locator = BundleApplicationResourceLocator(bundle: bundle)
         let resource = ApplicationResource(name: "host-owned", fileExtension: "dat")
-        XCTAssertEqual(try locator.urlSynchronously(for: resource), expectedURL)
-        XCTAssertEqual(try locator.dataSynchronously(for: resource), expectedData)
-        let asyncURL = try await locator.url(for: resource)
-        XCTAssertEqual(asyncURL, expectedURL)
+        let locatedURL = try await locator.url(for: resource)
+        let locatedData = try await locator.data(for: resource)
+        XCTAssertEqual(locatedURL, expectedURL)
+        XCTAssertEqual(locatedData, expectedData)
     }
 
     func testShareArtifactStoreScopesWritesAndCleanup() async throws {
@@ -683,6 +699,17 @@ final class PlatformAdapterTests: XCTestCase {
         for _ in 0..<5 { url.deleteLastPathComponent() }
         return url
     }
+}
+
+private func assertAsyncThrows<Value>(
+    _ operation: () async throws -> Value,
+    file: StaticString = #filePath,
+    line: UInt = #line
+) async {
+    do {
+        _ = try await operation()
+        XCTFail("Expected operation to throw", file: file, line: line)
+    } catch {}
 }
 
 private enum KeychainCall: Equatable {

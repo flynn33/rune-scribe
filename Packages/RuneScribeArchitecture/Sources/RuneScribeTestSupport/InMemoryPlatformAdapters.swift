@@ -1,6 +1,8 @@
 import Foundation
 import RuneScribeContracts
 
+/// Deterministic contract adapters for package and hosted test targets only.
+
 public struct SecureValueLocation: Hashable, Sendable {
     public let service: String
     public let account: String
@@ -270,6 +272,10 @@ public actor InMemoryFontRegistrar: SystemFontRegistrar {
     }
 }
 
+public enum MappedApplicationResourceLocatorError: Error, Equatable, Sendable {
+    case resourceNotFound(ApplicationResource)
+}
+
 public struct MappedApplicationResourceLocator: ApplicationResourceLocator, Sendable {
     private let locations: [ApplicationResource: URL]
 
@@ -287,7 +293,7 @@ public struct MappedApplicationResourceLocator: ApplicationResourceLocator, Send
 
     private func location(for resource: ApplicationResource) throws -> URL {
         guard let url = locations[resource] else {
-            throw ApplicationResourceLocatorError.resourceNotFound(resource)
+            throw MappedApplicationResourceLocatorError.resourceNotFound(resource)
         }
         return url
     }

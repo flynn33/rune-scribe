@@ -5,6 +5,7 @@ import Metal
 import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
+import RuneScribeTestSupport
 @testable import RuneScrib
 
 final class CompatibilityBaselineTests: XCTestCase {

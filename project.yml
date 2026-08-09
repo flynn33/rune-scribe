@@ -211,6 +211,8 @@ targets:
       - path: RuneScribTests
     dependencies:
       - target: RuneScrib-macOS
+      - package: RuneScribeArchitecture
+        product: RuneScribeTestSupport
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.tests
@@ -234,6 +236,8 @@ targets:
       - path: RuneScribIOSTests
     dependencies:
       - target: RuneScrib-iOS
+      - package: RuneScribeArchitecture
+        product: RuneScribeTestSupport
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.ios-tests
@@ -310,6 +314,8 @@ targets:
       - path: RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf
     dependencies:
       - target: RuneScribMacParityHost
+      - package: RuneScribeArchitecture
+        product: RuneScribeTestSupport
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.macos-parity-tests

@@ -23,35 +23,12 @@ public struct AppleProtectedFileStore: ProtectedFileStore, Sendable {
     }
 
     public func read(relativePath: ProtectedPath) async throws -> Data? {
-        try readSynchronously(relativePath: relativePath)
-    }
-
-    public func write(_ data: Data, relativePath: ProtectedPath) async throws {
-        try writeSynchronously(data, relativePath: relativePath)
-    }
-
-    public func remove(relativePath: ProtectedPath) async throws {
-        try removeSynchronously(relativePath: relativePath)
-    }
-
-    public func exists(relativePath: ProtectedPath) async throws -> Bool {
-        try existsSynchronously(relativePath: relativePath)
-    }
-
-    public func contents(
-        of directory: ProtectedPath,
-        matchingExtension fileExtension: String?
-    ) async throws -> [ProtectedPath] {
-        try contentsSynchronously(of: directory, matchingExtension: fileExtension)
-    }
-
-    public func readSynchronously(relativePath: ProtectedPath) throws -> Data? {
         let url = try resolvedURL(for: relativePath)
         guard FileManager.default.fileExists(atPath: url.path) else { return nil }
         return try Data(contentsOf: url)
     }
 
-    public func writeSynchronously(_ data: Data, relativePath: ProtectedPath) throws {
+    public func write(_ data: Data, relativePath: ProtectedPath) async throws {
         let url = try resolvedURL(for: relativePath)
         try FileManager.default.createDirectory(
             at: url.deletingLastPathComponent(),
@@ -65,20 +42,20 @@ public struct AppleProtectedFileStore: ProtectedFileStore, Sendable {
         #endif
     }
 
-    public func removeSynchronously(relativePath: ProtectedPath) throws {
+    public func remove(relativePath: ProtectedPath) async throws {
         let url = try resolvedURL(for: relativePath)
         guard FileManager.default.fileExists(atPath: url.path) else { return }
         try FileManager.default.removeItem(at: url)
     }
 
-    public func existsSynchronously(relativePath: ProtectedPath) throws -> Bool {
+    public func exists(relativePath: ProtectedPath) async throws -> Bool {
         try FileManager.default.fileExists(atPath: resolvedURL(for: relativePath).path)
     }
 
-    public func contentsSynchronously(
+    public func contents(
         of directory: ProtectedPath,
         matchingExtension fileExtension: String?
-    ) throws -> [ProtectedPath] {
+    ) async throws -> [ProtectedPath] {
         let directoryURL = try resolvedURL(for: directory)
         guard FileManager.default.fileExists(atPath: directoryURL.path) else { return [] }
 

@@ -29,9 +29,7 @@ public enum AppleKeychainStoreError: Error, Equatable, LocalizedError, Sendable 
 /// The concrete generic-password Keychain adapter used by the application hosts.
 ///
 /// Writes intentionally retain the shipping delete-then-add behavior and the
-/// `whenUnlockedThisDeviceOnly` accessibility class. The synchronous methods are
-/// a temporary compatibility surface for legacy repositories; new callers use
-/// the async `SecureValueStore` requirements.
+/// `whenUnlockedThisDeviceOnly` accessibility class.
 public struct AppleKeychainStore: SecureValueStore, Sendable {
     private let operations: any KeychainOperations
 
@@ -44,18 +42,6 @@ public struct AppleKeychainStore: SecureValueStore, Sendable {
     }
 
     public func data(service: String, account: String) async throws -> Data? {
-        try dataSynchronously(service: service, account: account)
-    }
-
-    public func set(_ data: Data, service: String, account: String) async throws {
-        try setSynchronously(data, service: service, account: account)
-    }
-
-    public func delete(service: String, account: String) async throws {
-        try deleteSynchronously(service: service, account: account)
-    }
-
-    public func dataSynchronously(service: String, account: String) throws -> Data? {
         let result = operations.read(service: service, account: account)
         switch result.status {
         case errSecSuccess:
@@ -70,7 +56,7 @@ public struct AppleKeychainStore: SecureValueStore, Sendable {
         }
     }
 
-    public func setSynchronously(_ data: Data, service: String, account: String) throws {
+    public func set(_ data: Data, service: String, account: String) async throws {
         let deleteStatus = operations.delete(service: service, account: account)
         guard deleteStatus == errSecSuccess || deleteStatus == errSecItemNotFound else {
             throw AppleKeychainStoreError.deleteFailed(deleteStatus)
@@ -87,7 +73,7 @@ public struct AppleKeychainStore: SecureValueStore, Sendable {
         }
     }
 
-    public func deleteSynchronously(service: String, account: String) throws {
+    public func delete(service: String, account: String) async throws {
         let status = operations.delete(service: service, account: account)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             throw AppleKeychainStoreError.deleteFailed(status)

@@ -2,7 +2,7 @@
   "schemaVersion": "1.0",
   "baselineCommit": "a3d5a86",
   "baselineDescription": "P0 regenerated-project snapshot: 23 XCTest files and 157 test methods.",
-  "evidencePolicy": "Every original method has a terminal source disposition and an exact current replacement. Current verification identifies the final P7 package and/or hosted execution that ran each replacement; historical executions remain provenance only.",
+  "evidencePolicy": "Every original method has a terminal source disposition and an exact current replacement. Current verification identifies the final P8 package and/or hosted execution that ran each replacement; historical executions remain provenance only.",
   "recordedExecutionEvidence": [
     {
       "id": "P6-SWIFTPM-FINAL",
@@ -42,31 +42,32 @@
       "relatedCommit": "uncommitted P7 working tree"
     },
     {
-      "id": "P7-PACKAGE-FINAL",
+      "id": "P8-PACKAGE-FINAL",
       "result": "passed",
-      "timestampUTC": "2026-08-09T03:01:24Z",
-      "scope": "283/283 SwiftPM package tests, 0 failures; current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2; 17/17 architecture checks, clean diff, and 0/0 warning/error census",
-      "logPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/swift-test.log",
-      "relatedCommit": "uncommitted P7 final working tree",
-      "architectureLogPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/check-architecture.log",
-      "diffCheckLogPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/git-diff-check.log",
-      "warningCensusPath": "/tmp/RuneScribe-P7-final-current-package.anKJx2/warnings-errors.log"
+      "timestampUTC": "2026-08-09T04:25:19Z",
+      "scope": "283/283 SwiftPM package tests, 0 failures; generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 17/17 architecture checks, clean diff, 0/0 warning/error census, and an exact graph of six production products plus the test-only RuneScribeTestSupport product whose shipping consumers exclude test support",
+      "logPath": "/tmp/RuneScribe-P8-final-package.yGz7qs/swift-test.log",
+      "relatedCommit": "49a8cee plus current P8 cleanup working tree",
+      "architectureLogPath": "/tmp/RuneScribe-P8-final-package.yGz7qs/check-architecture.log",
+      "diffCheckLogPath": "/tmp/RuneScribe-P8-final-package.yGz7qs/git-diff-check.log",
+      "warningCensusPath": "/tmp/RuneScribe-P8-final-package.yGz7qs/warning-error-census.log",
+      "projectGenerationEvidencePath": "/tmp/RuneScribe-P8-final-package.yGz7qs/generated-second.sha256"
     },
     {
-      "id": "P7-MACOS-FINAL",
+      "id": "P8-MACOS-FINAL",
       "result": "passed",
-      "timestampUTC": "2026-08-09T03:11:54Z",
+      "timestampUTC": "2026-08-09T04:26:44Z",
       "scope": "8/8 total tests (7 RuneScribTests hosted plus 1 ArchitectureGuardrailTests), 0 failures/skips",
-      "resultBundlePath": "/tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
-      "relatedCommit": "uncommitted P7 final working tree"
+      "resultBundlePath": "/tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
+      "relatedCommit": "49a8cee plus current P8 cleanup working tree"
     },
     {
-      "id": "P7-IOS-HOSTED-FINAL",
+      "id": "P8-IOS-HOSTED-FINAL",
       "result": "passed",
-      "timestampUTC": "2026-08-09T03:01:52Z",
+      "timestampUTC": "2026-08-09T04:36:24Z",
       "scope": "18/18 RuneScribIOSTests hosted tests (AppHostRouting 5/5, KeychainMigration 1/1, NativeShareOutcome 3/3, PlatformPresentation 9/9), 0 failures/skips",
-      "resultBundlePath": "/tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult",
-      "relatedCommit": "uncommitted P7 final working tree"
+      "resultBundlePath": "/tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult",
+      "relatedCommit": "49a8cee plus current P8 cleanup working tree"
     }
   ],
   "summary": {
@@ -75,11 +76,11 @@
     "replacedWithTestedEquivalent": 79,
     "pendingReplacement": 0,
     "currentVerificationCounts": {
-      "passed-P7-package-final": 148,
-      "passed-P7-macos-final": 2,
-      "passed-P7-ios-hosted-final": 2,
-      "passed-P7-package-and-macos-final": 4,
-      "passed-P7-ios-and-macos-final": 1
+      "passed-P8-package-final": 148,
+      "passed-P8-macos-final": 2,
+      "passed-P8-ios-hosted-final": 2,
+      "passed-P8-package-and-macos-final": 4,
+      "passed-P8-ios-and-macos-final": 1
     }
   },
   "entries": [
@@ -103,7 +104,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-002",
@@ -125,7 +126,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-003",
@@ -147,7 +148,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-004",
@@ -169,7 +170,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-005",
@@ -191,7 +192,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-006",
@@ -213,7 +214,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-007",
@@ -235,7 +236,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-008",
@@ -257,7 +258,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-009",
@@ -279,7 +280,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-010",
@@ -301,7 +302,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-011",
@@ -323,7 +324,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-012",
@@ -345,7 +346,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-013",
@@ -367,7 +368,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-014",
@@ -389,7 +390,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-015",
@@ -411,7 +412,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-016",
@@ -433,7 +434,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-017",
@@ -455,7 +456,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-018",
@@ -477,7 +478,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-019",
@@ -499,7 +500,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-020",
@@ -521,7 +522,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-021",
@@ -543,7 +544,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-022",
@@ -565,7 +566,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-023",
@@ -587,7 +588,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-024",
@@ -609,7 +610,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-025",
@@ -631,7 +632,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-026",
@@ -653,7 +654,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-027",
@@ -675,7 +676,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-028",
@@ -697,7 +698,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-029",
@@ -719,7 +720,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-030",
@@ -741,7 +742,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-031",
@@ -763,7 +764,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-032",
@@ -785,7 +786,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-033",
@@ -807,7 +808,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-034",
@@ -829,7 +830,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-035",
@@ -851,7 +852,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-036",
@@ -873,7 +874,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-037",
@@ -895,7 +896,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-038",
@@ -917,7 +918,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-039",
@@ -939,7 +940,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-040",
@@ -961,7 +962,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-041",
@@ -983,7 +984,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-042",
@@ -1005,7 +1006,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-043",
@@ -1027,7 +1028,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-044",
@@ -1049,7 +1050,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-045",
@@ -1071,7 +1072,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-046",
@@ -1093,7 +1094,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-047",
@@ -1115,7 +1116,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-048",
@@ -1137,7 +1138,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-049",
@@ -1159,7 +1160,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-050",
@@ -1181,7 +1182,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-051",
@@ -1203,7 +1204,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-macos-final"
+      "currentVerification": "passed-P8-macos-final"
     },
     {
       "id": "OT-052",
@@ -1225,7 +1226,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-053",
@@ -1252,7 +1253,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-054",
@@ -1274,7 +1275,7 @@
         "Current source contains the exact ContactBook Codable replacement test in the Core contact test target.",
         "P7-CONTACT-CODABLE-FOCUSED passed both exact Contact and ContactBook round trips 2/2 with 0 failures at 2026-08-08 16:43:00 CDT."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-055",
@@ -1301,7 +1302,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-056",
@@ -1323,7 +1324,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-057",
@@ -1345,7 +1346,7 @@
         "Current source contains the exact empty-set assertion.",
         "P7-FOCUSED-SWIFTPM passed ContactManagerCoreTests 11/11 at 2026-08-08 14:36 CDT."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-058",
@@ -1367,7 +1368,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-059",
@@ -1389,7 +1390,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-060",
@@ -1411,7 +1412,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-061",
@@ -1433,7 +1434,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-062",
@@ -1455,7 +1456,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-063",
@@ -1482,7 +1483,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-064",
@@ -1509,7 +1510,7 @@
         "Current source contains every listed replacement test.",
         "P7-FOCUSED-SWIFTPM passed ContactManagerCoreTests 11/11 and P4BApplicationServiceTests 37/37 at 2026-08-08 14:36 CDT."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-065",
@@ -1531,7 +1532,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-066",
@@ -1553,7 +1554,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-067",
@@ -1575,7 +1576,7 @@
         "Current source contains the exact empty-delete assertion and write-count check.",
         "P7-FOCUSED-SWIFTPM passed ContactManagerCoreTests 11/11 at 2026-08-08 14:36 CDT."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-068",
@@ -1597,7 +1598,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-069",
@@ -1619,7 +1620,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-070",
@@ -1641,7 +1642,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-071",
@@ -1663,7 +1664,7 @@
         "Current source contains the exact Contact Codable replacement test in the Core contact test target.",
         "P7-CONTACT-CODABLE-FOCUSED passed both exact Contact and ContactBook round trips 2/2 with 0 failures at 2026-08-08 16:43:00 CDT."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-072",
@@ -1685,7 +1686,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-073",
@@ -1707,7 +1708,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-074",
@@ -1729,7 +1730,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-075",
@@ -1751,7 +1752,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-076",
@@ -1778,7 +1779,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-077",
@@ -1800,7 +1801,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-078",
@@ -1827,7 +1828,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-079",
@@ -1854,7 +1855,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-080",
@@ -1876,7 +1877,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-081",
@@ -1903,7 +1904,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-082",
@@ -1925,7 +1926,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-083",
@@ -1947,7 +1948,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-macos-final"
+      "currentVerification": "passed-P8-macos-final"
     },
     {
       "id": "OT-084",
@@ -1974,7 +1975,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-and-macos-final"
+      "currentVerification": "passed-P8-package-and-macos-final"
     },
     {
       "id": "OT-085",
@@ -2001,7 +2002,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-and-macos-final"
+      "currentVerification": "passed-P8-package-and-macos-final"
     },
     {
       "id": "OT-086",
@@ -2028,7 +2029,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-and-macos-final"
+      "currentVerification": "passed-P8-package-and-macos-final"
     },
     {
       "id": "OT-087",
@@ -2056,7 +2057,7 @@
         "P6-MACOS-FINAL executed the composition-rail replacement at commit 314b73f.",
         "P7-IOS-FOCUSED passed AppHostRoutingTests 4/4 on iPhone 17 Pro, iOS 26.0.1 Simulator, with result bundle /tmp/RuneScribe-P7-ios-focused.PlHwgF/AppHostRoutingTests.xcresult."
       ],
-      "currentVerification": "passed-P7-ios-and-macos-final"
+      "currentVerification": "passed-P8-ios-and-macos-final"
     },
     {
       "id": "OT-088",
@@ -2078,7 +2079,7 @@
         "Current source contains the direct unsupported-activity assertion.",
         "P7-IOS-FOCUSED passed AppHostRoutingTests 4/4 on iPhone 17 Pro, iOS 26.0.1 Simulator, with result bundle /tmp/RuneScribe-P7-ios-focused.PlHwgF/AppHostRoutingTests.xcresult."
       ],
-      "currentVerification": "passed-P7-ios-hosted-final"
+      "currentVerification": "passed-P8-ios-hosted-final"
     },
     {
       "id": "OT-089",
@@ -2100,7 +2101,7 @@
         "Current source contains the exact missing-webpageURL assertion and empty-delivery check.",
         "P7-IOS-FOCUSED passed AppHostRoutingTests 4/4 on iPhone 17 Pro, iOS 26.0.1 Simulator, with result bundle /tmp/RuneScribe-P7-ios-focused.PlHwgF/AppHostRoutingTests.xcresult."
       ],
-      "currentVerification": "passed-P7-ios-hosted-final"
+      "currentVerification": "passed-P8-ios-hosted-final"
     },
     {
       "id": "OT-090",
@@ -2122,7 +2123,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-091",
@@ -2149,7 +2150,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-and-macos-final"
+      "currentVerification": "passed-P8-package-and-macos-final"
     },
     {
       "id": "OT-092",
@@ -2171,7 +2172,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-093",
@@ -2193,7 +2194,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-094",
@@ -2215,7 +2216,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-095",
@@ -2242,7 +2243,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-096",
@@ -2264,7 +2265,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-097",
@@ -2286,7 +2287,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-098",
@@ -2308,7 +2309,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-099",
@@ -2330,7 +2331,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-100",
@@ -2357,7 +2358,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-101",
@@ -2384,7 +2385,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-102",
@@ -2406,7 +2407,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-103",
@@ -2428,7 +2429,7 @@
         "Current source contains the exact unrelated-host assertion.",
         "P7-FOCUSED-SWIFTPM passed InboundRoutingTests 4/4 at 2026-08-08 14:36 CDT."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-104",
@@ -2450,7 +2451,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-105",
@@ -2472,7 +2473,7 @@
         "Current source contains the exact legacy-message URL assertion.",
         "P7-FOCUSED-SWIFTPM passed InboundRoutingTests 4/4 at 2026-08-08 14:36 CDT."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-106",
@@ -2494,7 +2495,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-107",
@@ -2516,7 +2517,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-108",
@@ -2538,7 +2539,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-109",
@@ -2560,7 +2561,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-110",
@@ -2587,7 +2588,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-111",
@@ -2609,7 +2610,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-112",
@@ -2631,7 +2632,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-113",
@@ -2653,7 +2654,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-114",
@@ -2675,7 +2676,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-115",
@@ -2697,7 +2698,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-116",
@@ -2719,7 +2720,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-117",
@@ -2741,7 +2742,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-118",
@@ -2763,7 +2764,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-119",
@@ -2790,7 +2791,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-120",
@@ -2812,7 +2813,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-121",
@@ -2839,7 +2840,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-122",
@@ -2861,7 +2862,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-123",
@@ -2883,7 +2884,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-124",
@@ -2905,7 +2906,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-125",
@@ -2927,7 +2928,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-126",
@@ -2949,7 +2950,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-127",
@@ -2971,7 +2972,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-128",
@@ -2993,7 +2994,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-129",
@@ -3020,7 +3021,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-130",
@@ -3042,7 +3043,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-131",
@@ -3064,7 +3065,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-132",
@@ -3086,7 +3087,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-133",
@@ -3108,7 +3109,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-134",
@@ -3130,7 +3131,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-135",
@@ -3152,7 +3153,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-136",
@@ -3174,7 +3175,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-137",
@@ -3196,7 +3197,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-138",
@@ -3218,7 +3219,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-139",
@@ -3240,7 +3241,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-140",
@@ -3262,7 +3263,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-141",
@@ -3284,7 +3285,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-142",
@@ -3306,7 +3307,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-143",
@@ -3328,7 +3329,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-144",
@@ -3350,7 +3351,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-145",
@@ -3372,7 +3373,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-146",
@@ -3394,7 +3395,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-147",
@@ -3416,7 +3417,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-148",
@@ -3438,7 +3439,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-149",
@@ -3460,7 +3461,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-150",
@@ -3482,7 +3483,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-151",
@@ -3504,7 +3505,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-152",
@@ -3526,7 +3527,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-153",
@@ -3548,7 +3549,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-154",
@@ -3570,7 +3571,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-155",
@@ -3592,7 +3593,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-156",
@@ -3614,7 +3615,7 @@
         "Current source contains every listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     },
     {
       "id": "OT-157",
@@ -3636,7 +3637,7 @@
         "Current source contains the listed replacement test.",
         "P5-SWIFTPM-FINAL recorded 253 package tests passing before P6 host changes."
       ],
-      "currentVerification": "passed-P7-package-final"
+      "currentVerification": "passed-P8-package-final"
     }
   ]
 }

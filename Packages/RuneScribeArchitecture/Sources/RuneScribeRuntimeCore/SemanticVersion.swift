@@ -63,19 +63,3 @@ public struct SemanticVersion: Hashable, Comparable, Sendable, Codable, CustomSt
         try container.encode(description)
     }
 }
-
-public struct SemanticVersionRange: Hashable, Sendable {
-    public let minimumInclusive: SemanticVersion
-    public let maximumExclusive: SemanticVersion?
-
-    public init(minimumInclusive: SemanticVersion, maximumExclusive: SemanticVersion? = nil) {
-        self.minimumInclusive = minimumInclusive
-        self.maximumExclusive = maximumExclusive
-    }
-
-    public func contains(_ version: SemanticVersion) -> Bool {
-        guard version >= minimumInclusive else { return false }
-        guard let maximumExclusive else { return true }
-        return version < maximumExclusive
-    }
-}

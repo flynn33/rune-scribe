@@ -3,14 +3,13 @@ import RuneScribeContracts
 import RuneScribePlatform
 import XCTest
 
-final class PlatformBoundaryTests: XCTestCase {
+final class SystemValueAdapterTests: XCTestCase {
     func testPlatformSeamsProvideSystemValues() {
         let before = Date()
         let clock: any ClockProviding = SystemClock()
         let now = clock.now()
         let after = Date()
 
-        XCTAssertEqual(RuneScribePlatformBoundary.contractVersion, 1)
         XCTAssertGreaterThanOrEqual(now, before)
         XCTAssertLessThanOrEqual(now, after)
     }

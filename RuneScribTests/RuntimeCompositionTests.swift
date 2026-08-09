@@ -3,6 +3,7 @@ import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
 import RuneScribeRuntimeCore
+import RuneScribeTestSupport
 import RuneScribeUIRuntime
 import XCTest
 @testable import RuneScrib

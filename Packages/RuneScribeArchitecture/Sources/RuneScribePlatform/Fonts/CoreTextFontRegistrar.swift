@@ -20,22 +20,14 @@ public struct CoreTextFontRegistrar: SystemFontRegistrar, Sendable {
     }
 
     public func postScriptName(forFontData data: Data) async throws -> String {
-        try postScriptNameSynchronously(forFontData: data)
-    }
-
-    public func registerFont(_ data: Data) async throws -> RegisteredFontDTO {
-        try registerFontSynchronously(data)
-    }
-
-    public func postScriptNameSynchronously(forFontData data: Data) throws -> String {
         guard let name = operations.postScriptName(data), !name.isEmpty else {
             throw CoreTextFontRegistrarError.invalidFontData
         }
         return name
     }
 
-    public func registerFontSynchronously(_ data: Data) throws -> RegisteredFontDTO {
-        let name = try postScriptNameSynchronously(forFontData: data)
+    public func registerFont(_ data: Data) async throws -> RegisteredFontDTO {
+        let name = try await postScriptName(forFontData: data)
         switch operations.register(data) {
         case .registered, .alreadyRegistered:
             return RegisteredFontDTO(postScriptName: name)

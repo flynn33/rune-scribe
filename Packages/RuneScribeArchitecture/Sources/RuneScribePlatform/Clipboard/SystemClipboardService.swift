@@ -28,26 +28,14 @@ public final class SystemClipboardService: ClipboardReading, ClipboardWriting {
     }
 
     public func changeCount() async -> Int {
-        changeCountSynchronously()
-    }
-
-    public func string() async -> String? {
-        stringSynchronously()
-    }
-
-    public func setString(_ value: String) async throws {
-        try setStringSynchronously(value)
-    }
-
-    public func changeCountSynchronously() -> Int {
         operations.changeCount()
     }
 
-    public func stringSynchronously() -> String? {
+    public func string() async -> String? {
         operations.string()
     }
 
-    public func setStringSynchronously(_ value: String) throws {
+    public func setString(_ value: String) async throws {
         guard operations.setString(value) else {
             throw SystemClipboardServiceError.writeFailed
         }

@@ -3,6 +3,7 @@ import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
 import RuneScribeRuntimeCore
+import RuneScribeTestSupport
 import RuneScribeUIModule
 import RuneScribeUIRuntime
 import XCTest
@@ -56,13 +57,6 @@ final class ArchitectureIntegrationTests: XCTestCase {
         XCTAssertEqual(stopped.moduleStates[RuneScribeModuleIDs.primaryUI], .stopped)
         let stoppedRootState = await MainActor.run { rootStore.state }
         XCTAssertEqual(stoppedRootState, .booting)
-    }
-
-    func testProductDependencySurfacesRemainIndependentlyImportable() {
-        XCTAssertEqual(RuneScribePlatformBoundary.contractVersion, 1)
-        XCTAssertEqual(BootPresentationState.booting, .booting)
-        XCTAssertEqual(RuneScribeCoreModuleBootstrap.moduleID, RuneScribeModuleIDs.core)
-        XCTAssertEqual(RuneScribeUIModuleBootstrap.moduleID, RuneScribeModuleIDs.primaryUI)
     }
 
     private func registerHostPlatformServices(

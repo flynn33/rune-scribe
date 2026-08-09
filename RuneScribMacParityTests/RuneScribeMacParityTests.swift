@@ -4,6 +4,7 @@ import Foundation
 import RuneScribeContracts
 @testable import RuneScribeCoreModule
 import RuneScribePlatform
+import RuneScribeTestSupport
 @testable import RuneScribeUIModule
 import SwiftUI
 import XCTest

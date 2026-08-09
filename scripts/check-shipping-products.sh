@@ -787,6 +787,12 @@ inspect_linkage() {
       fail_check "$platform executable has no linkage evidence for $module"
     fi
   done
+
+  if grep -Fq "RuneScribeTestSupport" "$symbols"; then
+    fail_check "$platform executable unexpectedly links RuneScribeTestSupport"
+  else
+    pass_check "$platform executable excludes RuneScribeTestSupport"
+  fi
 }
 
 inspect_linkage "$macos_executable" "macOS" "$macos_app"
@@ -836,9 +842,10 @@ pbxproj = JSON.parse(File.read(ARGV.fetch(1)))
 package = JSON.parse(File.read(ARGV.fetch(2)))
 macos_source_entitlements = JSON.parse(File.read(ARGV.fetch(3)))
 ios_source_entitlements = JSON.parse(File.read(ARGV.fetch(4)))
+require "set"
 errors = []
 
-products = [
+shipping_products = [
   "RuneScribeContracts",
   "RuneScribeRuntimeCore",
   "RuneScribeUIRuntime",
@@ -846,7 +853,9 @@ products = [
   "RuneScribeCoreModule",
   "RuneScribeUIModule"
 ]
-expected_app_dependencies = products.map do |product|
+test_only_products = ["RuneScribeTestSupport"]
+all_products = shipping_products + test_only_products
+expected_app_dependencies = shipping_products.map do |product|
   { "package" => "RuneScribeArchitecture", "product" => product }
 end
 
@@ -873,6 +882,11 @@ expected_entitlement_sources = {
     "properties" => expected_ios_entitlements
   }
 }
+expected_shipping_source_declarations = [
+  { "path" => "RuneScrib/AppHost" },
+  { "path" => "RuneScrib/Metal/Shaders.metal" },
+  { "path" => "RuneScrib/Resources" }
+]
 
 errors << "macOS source entitlement dictionary differs" unless macos_source_entitlements == expected_macos_entitlements
 errors << "iOS source entitlement dictionary differs" unless ios_source_entitlements == expected_ios_entitlements
@@ -888,6 +902,9 @@ errors << "iOS source entitlement dictionary differs" unless ios_source_entitlem
   unless actual_dependencies == expected_app_dependencies
     errors << "project.yml #{target_name} dependencies differ"
   end
+  unless target.fetch("sources", []) == expected_shipping_source_declarations
+    errors << "project.yml #{target_name} shipping sources differ from the exact allowlist"
+  end
   unless target["entitlements"] == expected_entitlement_sources.fetch(target_name)
     errors << "project.yml #{target_name} entitlement declaration differs"
   end
@@ -895,10 +912,10 @@ end
 
 package_product_rows = package.fetch("products", [])
 package_products = package_product_rows.map { |product| product["name"] }
-errors << "Package.swift public products differ" unless package_products == products
+errors << "Package.swift public products differ" unless package_products == all_products
 errors << "Package.swift gained an external dependency" unless package.fetch("dependencies", []).empty?
 package_product_rows.each do |product|
-  next unless products.include?(product["name"])
+  next unless all_products.include?(product["name"])
   unless product["targets"] == [product["name"]]
     errors << "Package.swift product #{product['name']} exposes unexpected targets"
   end
@@ -918,19 +935,39 @@ package_targets.each do |target|
 end
 
 regular_target_names = package_targets.select { |target| target["type"] == "regular" }.map { |target| target["name"] }
-errors << "Package.swift regular target set differs" unless regular_target_names == products
+errors << "Package.swift regular target set differs" unless regular_target_names == all_products
 
 expected_edges = {
   "RuneScribeContracts" => [],
   "RuneScribeRuntimeCore" => ["RuneScribeContracts"],
-  "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeUIRuntime" => ["RuneScribeContracts"],
   "RuneScribePlatform" => ["RuneScribeContracts"],
   "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-  "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"]
+  "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"],
+  "RuneScribeTestSupport" => ["RuneScribeContracts"]
 }
 
 expected_edges.each do |target, edges|
   errors << "Package.swift target edges differ for #{target}" unless target_edges[target] == edges
+end
+
+test_support_package_consumers = target_edges.each_with_object([]) do |(target, dependencies), consumers|
+  consumers << target if dependencies.include?("RuneScribeTestSupport")
+end.sort
+unless test_support_package_consumers == %w[RuneScribeArchitectureTests RuneScribePlatformTests].sort
+  errors << "Package.swift RuneScribeTestSupport consumers differ"
+end
+
+project_test_support_consumers = project.fetch("targets", {}).each_with_object([]) do |(target_name, target), consumers|
+  dependencies = target.is_a?(Hash) ? target.fetch("dependencies", []) : []
+  uses_test_support = dependencies.any? do |dependency|
+    dependency.is_a?(Hash) && dependency["package"] == "RuneScribeArchitecture" &&
+      dependency["product"] == "RuneScribeTestSupport"
+  end
+  consumers << target_name if uses_test_support
+end.sort
+unless project_test_support_consumers == %w[RuneScribIOSTests RuneScribMacParityTests RuneScribTests].sort
+  errors << "project.yml RuneScribeTestSupport consumers differ"
 end
 
 objects = pbxproj["objects"]
@@ -986,6 +1023,63 @@ def configurations_for(objects, owner, label, errors)
   end
 end
 
+def compiled_source_paths(objects, main_group, target, target_name, errors)
+  source_phases = Array(target["buildPhases"]).each_with_object([]) do |identifier, phases|
+    phase = objects[identifier]
+    phases << phase if phase.is_a?(Hash) && phase["isa"] == "PBXSourcesBuildPhase"
+  end
+  unless source_phases.length == 1
+    errors << "generated project #{target_name} Sources phase is missing or duplicated"
+    return []
+  end
+
+  parent_groups = Hash.new { |hash, key| hash[key] = [] }
+  objects.each do |identifier, object|
+    next unless object.is_a?(Hash) && object["isa"] == "PBXGroup"
+    Array(object["children"]).each { |child| parent_groups[child] << identifier }
+  end
+
+  Array(source_phases.first["files"]).each_with_object([]) do |build_file_id, paths|
+    build_file = objects[build_file_id]
+    unless build_file.is_a?(Hash) && build_file["isa"] == "PBXBuildFile" && build_file["fileRef"]
+      errors << "generated project #{target_name} contains an invalid source build file"
+      next
+    end
+    file_id = build_file["fileRef"]
+    file = objects[file_id]
+    unless file.is_a?(Hash) && file["isa"] == "PBXFileReference" && file["sourceTree"] == "<group>"
+      errors << "generated project #{target_name} contains an invalid source file reference"
+      next
+    end
+
+    components = [file["path"] || file["name"]].compact
+    current = file_id
+    visited = Set.new
+    while current != main_group
+      if visited.include?(current)
+        errors << "generated project #{target_name} source group graph contains a cycle"
+        break
+      end
+      visited << current
+      parents = parent_groups[current]
+      if parents.length != 1
+        errors << "generated project #{target_name} source reference has #{parents.length} parent groups"
+        break
+      end
+      current = parents.first
+      next if current == main_group
+      group = objects[current]
+      unless group.is_a?(Hash) && group["isa"] == "PBXGroup" && group["sourceTree"] == "<group>"
+        errors << "generated project #{target_name} source parent is invalid"
+        break
+      end
+      component = group["path"] || group["name"]
+      components.unshift(component) if component
+    end
+    paths << components.join("/") if current == main_group
+  end
+end
+
 configurations_for(objects, project_object, "generated project", errors).each do |configuration|
   settings = configuration.fetch("buildSettings", {})
   forbidden_build_settings.each do |setting|
@@ -998,6 +1092,12 @@ expected_entitlement_paths = {
   "RuneScrib-iOS" => "Config/RuneScrib-iOS.entitlements"
 }
 expected_phase_types = ["PBXSourcesBuildPhase", "PBXResourcesBuildPhase", "PBXFrameworksBuildPhase"]
+expected_compiled_sources = %w[
+  RuneScrib/AppHost/AppDelegate.swift
+  RuneScrib/AppHost/RuneScribApp.swift
+  RuneScrib/AppHost/RuneScribeRuntimeComposition.swift
+  RuneScrib/Metal/Shaders.metal
+]
 
 ["RuneScrib-macOS", "RuneScrib-iOS"].each do |target_name|
   matching_targets = objects.values.select do |object|
@@ -1011,18 +1111,28 @@ expected_phase_types = ["PBXSourcesBuildPhase", "PBXResourcesBuildPhase", "PBXFr
   target = matching_targets.first
   errors << "generated project #{target_name} target dependencies differ" unless Array(target["dependencies"]).empty?
   errors << "generated project #{target_name} build rules differ" unless Array(target["buildRules"]).empty?
+  compiled_sources = compiled_source_paths(
+    objects,
+    project_object["mainGroup"],
+    target,
+    target_name,
+    errors
+  )
+  unless compiled_sources == expected_compiled_sources
+    errors << "generated project #{target_name} compiled sources differ from the exact allowlist"
+  end
 
   product_ids = Array(target["packageProductDependencies"])
   product_objects = product_ids.map { |identifier| objects[identifier] }
   product_names = product_objects.map do |object|
     object["productName"] if object.is_a?(Hash) && object["isa"] == "XCSwiftPackageProductDependency"
   end
-  errors << "generated project #{target_name} package products differ" unless product_names == products
+  errors << "generated project #{target_name} package products differ" unless product_names == shipping_products
   errors << "generated project #{target_name} package product identifiers are duplicated" unless product_ids.uniq == product_ids
   product_objects.each_with_index do |object, index|
     expected_object = {
       "isa" => "XCSwiftPackageProductDependency",
-      "productName" => products[index]
+      "productName" => shipping_products[index]
     }
     errors << "generated project #{target_name} package product object differs" unless object == expected_object
   end
@@ -1059,6 +1169,19 @@ expected_phase_types = ["PBXSourcesBuildPhase", "PBXResourcesBuildPhase", "PBXFr
       errors << "generated project #{target_name} #{configuration['name']} injects #{setting}" if settings.key?(setting)
     end
   end
+end
+
+
+generated_test_support_consumers = objects.values.each_with_object([]) do |object, consumers|
+  next unless object.is_a?(Hash) && object["isa"] == "PBXNativeTarget"
+  product_names = Array(object["packageProductDependencies"]).each_with_object([]) do |identifier, names|
+    product = objects[identifier]
+    names << product["productName"] if product.is_a?(Hash) && product["isa"] == "XCSwiftPackageProductDependency"
+  end
+  consumers << object["name"] if product_names.include?("RuneScribeTestSupport")
+end.sort
+unless generated_test_support_consumers == %w[RuneScribIOSTests RuneScribMacParityTests RuneScribTests].sort
+  errors << "generated project RuneScribeTestSupport consumers differ"
 end
 
 puts errors

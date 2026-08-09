@@ -52,13 +52,14 @@ public enum RuneScribeUIModuleBootstrap {
     public static func factory(
         dependencies: RuneScribeUIDependencies
     ) -> AnyModuleFactory {
-        let module = RuneScribeUIModule(dependencies: dependencies)
-        return AnyModuleFactory(descriptor: descriptor) { module }
+        AnyModuleFactory(descriptor: descriptor) {
+            RuneScribeUIModule(dependencies: dependencies)
+        }
     }
 }
 
 @MainActor
-public final class RuneScribeUIModule: RuneScribeUIContributingModule {
+public final class RuneScribeUIModule: RuneScribeModule {
     public nonisolated let descriptor = RuneScribeUIModuleBootstrap.descriptor
 
     private nonisolated let dependencies: RuneScribeUIDependencies
@@ -112,13 +113,4 @@ public final class RuneScribeUIModule: RuneScribeUIContributingModule {
         dependencies.rootPresentationStore.dismiss(moduleID: descriptor.moduleID)
     }
 
-    public func makeRootView() -> AnyView {
-        AnyView(RuntimePresentedRootView(store: self.dependencies.rootPresentationStore))
-    }
-
-    public nonisolated func rootContribution() -> RootViewContribution {
-        RootViewContribution(moduleID: descriptor.moduleID) {
-            AnyView(RuntimePresentedRootView(store: self.dependencies.rootPresentationStore))
-        }
-    }
 }

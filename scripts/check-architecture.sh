@@ -10,6 +10,7 @@ ruby - "$repository_root" "$ratchet_file" <<'RUBY'
 require "json"
 require "open3"
 require "pathname"
+require "set"
 require "yaml"
 
 Encoding.default_external = Encoding::UTF_8
@@ -27,7 +28,8 @@ def production_swift_files(root)
   Dir.glob(root.join("**/*.swift").to_s).reject do |path|
     relative = Pathname(path).relative_path_from(root).to_s
     relative.start_with?(
-      ".git/", ".build/", "DerivedData/", "RuneScribMacParityHost/"
+      ".git/", ".build/", "DerivedData/", "RuneScribMacParityHost/",
+      "Packages/RuneScribeArchitecture/Sources/RuneScribeTestSupport/"
     ) ||
       relative.split("/").any? { |component| component == "Tests" || component.end_with?("Tests") }
   end
@@ -61,6 +63,73 @@ def dependency_name(value)
   end
 end
 
+def compiled_source_paths(pbxproj, target_name)
+  objects = pbxproj["objects"]
+  return [[], ["generated project object graph is missing"]] unless objects.is_a?(Hash)
+
+  targets = objects.values.select do |object|
+    object.is_a?(Hash) && object["isa"] == "PBXNativeTarget" && object["name"] == target_name
+  end
+  return [[], ["generated project target #{target_name} is missing or duplicated"]] unless targets.length == 1
+
+  source_phases = Array(targets.first["buildPhases"]).each_with_object([]) do |identifier, phases|
+    phase = objects[identifier]
+    phases << phase if phase.is_a?(Hash) && phase["isa"] == "PBXSourcesBuildPhase"
+  end
+  return [[], ["generated project #{target_name} Sources phase is missing or duplicated"]] unless source_phases.length == 1
+
+  parent_groups = Hash.new { |hash, key| hash[key] = [] }
+  objects.each do |identifier, object|
+    next unless object.is_a?(Hash) && object["isa"] == "PBXGroup"
+    Array(object["children"]).each { |child| parent_groups[child] << identifier }
+  end
+  project = objects[pbxproj["rootObject"]]
+  main_group = project["mainGroup"] if project.is_a?(Hash) && project["isa"] == "PBXProject"
+  return [[], ["generated project main group is missing"]] unless main_group
+
+  errors = []
+  paths = Array(source_phases.first["files"]).each_with_object([]) do |build_file_id, source_paths|
+    build_file = objects[build_file_id]
+    unless build_file.is_a?(Hash) && build_file["isa"] == "PBXBuildFile" && build_file["fileRef"]
+      errors << "generated project #{target_name} contains an invalid source build file"
+      next
+    end
+    file_id = build_file["fileRef"]
+    file = objects[file_id]
+    unless file.is_a?(Hash) && file["isa"] == "PBXFileReference" && file["sourceTree"] == "<group>"
+      errors << "generated project #{target_name} contains an invalid source file reference"
+      next
+    end
+
+    components = [file["path"] || file["name"]].compact
+    current = file_id
+    visited = Set.new
+    while current != main_group
+      if visited.include?(current)
+        errors << "generated project #{target_name} source group graph contains a cycle"
+        break
+      end
+      visited << current
+      parents = parent_groups[current]
+      if parents.length != 1
+        errors << "generated project #{target_name} source reference has #{parents.length} parent groups"
+        break
+      end
+      current = parents.first
+      next if current == main_group
+      group = objects[current]
+      unless group.is_a?(Hash) && group["isa"] == "PBXGroup" && group["sourceTree"] == "<group>"
+        errors << "generated project #{target_name} source parent is invalid"
+        break
+      end
+      component = group["path"] || group["name"]
+      components.unshift(component) if component
+    end
+    source_paths << components.join("/") if current == main_group
+  end
+  [paths, errors]
+end
+
 unless ratchet_path.file?
   warn "architecture guard: missing #{ratchet_path}"
   exit 1
@@ -70,6 +139,9 @@ ratchet = JSON.parse(ratchet_path.read)
 errors << "ratchet schemaVersion must be 1.0" unless ratchet["schemaVersion"] == "1.0"
 
 required_products = Array(ratchet["requiredProducts"])
+test_only_products = Array(ratchet["testOnlyProducts"])
+all_products = required_products + test_only_products
+errors << "ratchet product names must be unique" unless all_products.uniq == all_products
 required_module_ids = ratchet.fetch("requiredModuleIDs", {})
 metrics_policy = ratchet.fetch("metrics", {})
 
@@ -126,6 +198,62 @@ project_packages.each do |name, specification|
   end
 end
 project_targets = project.fetch("targets", {}) || {}
+app_target_names = %w[RuneScrib-macOS RuneScrib-iOS]
+expected_shipping_source_declarations = [
+  { "path" => "RuneScrib/AppHost" },
+  { "path" => "RuneScrib/Metal/Shaders.metal" },
+  { "path" => "RuneScrib/Resources" }
+]
+app_target_names.each do |target_name|
+  actual_sources = Array(project_targets.dig(target_name, "sources"))
+  unless actual_sources == expected_shipping_source_declarations
+    errors << "project.yml target #{target_name} shipping sources differ from the exact allowlist"
+  end
+end
+
+generated_project_path = root.join("RuneScrib.xcodeproj/project.pbxproj")
+expected_compiled_sources = %w[
+  RuneScrib/AppHost/AppDelegate.swift
+  RuneScrib/AppHost/RuneScribApp.swift
+  RuneScrib/AppHost/RuneScribeRuntimeComposition.swift
+  RuneScrib/Metal/Shaders.metal
+]
+if generated_project_path.file?
+  stdout, stderr, status = Open3.capture3(
+    "plutil", "-convert", "json", "-o", "-", generated_project_path.to_s
+  )
+  if status.success?
+    begin
+      pbxproj = JSON.parse(stdout)
+      app_target_names.each do |target_name|
+        paths, path_errors = compiled_source_paths(pbxproj, target_name)
+        errors.concat(path_errors)
+        unless paths == expected_compiled_sources
+          errors << "generated project #{target_name} compiled sources differ from the exact allowlist"
+        end
+      end
+    rescue JSON::ParserError => error
+      errors << "RuneScrib.xcodeproj/project.pbxproj: invalid converted JSON: #{error.message}"
+    end
+  else
+    errors << "RuneScrib.xcodeproj/project.pbxproj: plutil conversion failed: #{stderr.strip}"
+  end
+else
+  errors << "missing RuneScrib.xcodeproj/project.pbxproj"
+end
+
+if test_only_products == ["RuneScribeTestSupport"]
+  test_support_consumers = project_targets.each_with_object([]) do |(target_name, target), consumers|
+    dependencies = target.is_a?(Hash) ? Array(target["dependencies"]) : []
+    consumers << target_name if dependencies.any? { |dependency| dependency_name(dependency) == "RuneScribeTestSupport" }
+  end.sort
+  expected_test_support_consumers = %w[
+    RuneScribIOSTests RuneScribMacParityTests RuneScribTests
+  ].sort
+  unless test_support_consumers == expected_test_support_consumers
+    errors << "project.yml RuneScribeTestSupport consumers differ: #{test_support_consumers.join(', ')}"
+  end
+end
 
 architecture_package_relative = ratchet.fetch("architecturePackagePath")
 architecture_package = root.join(architecture_package_relative)
@@ -141,7 +269,6 @@ strict_package_mode = package_present && (
   !package_reference_names.empty? || ENV["RUNESCRIBE_ARCHITECTURE_STRICT"] == "1"
 )
 
-app_target_names = %w[RuneScrib-macOS RuneScrib-iOS]
 project_product_dependencies = {}
 app_target_names.each do |target_name|
   dependencies = Array(project_targets.dig(target_name, "dependencies"))
@@ -181,44 +308,60 @@ if package_present
       products = Array(package["products"])
       product_names = products.map { |product| product["name"] }
       missing_products = required_products - product_names
-      extra_products = product_names - required_products
+      missing_test_products = test_only_products - product_names
+      extra_products = product_names - all_products
       errors << "architecture package missing products: #{missing_products.join(', ')}" unless missing_products.empty?
+      errors << "architecture package missing test-only products: #{missing_test_products.join(', ')}" unless missing_test_products.empty?
       errors << "architecture package has unexpected products: #{extra_products.join(', ')}" unless extra_products.empty?
+      errors << "architecture package product order or duplication differs" unless product_names == all_products
 
       products.each do |product|
-        next unless required_products.include?(product["name"])
+        next unless all_products.include?(product["name"])
         targets = Array(product["targets"])
         errors << "product #{product['name']} must expose only target #{product['name']}" unless targets == [product["name"]]
       end
 
       targets = Array(package["targets"]).to_h { |target| [target["name"], target] }
-      missing_targets = required_products - targets.keys
+      missing_targets = all_products - targets.keys
       errors << "architecture package missing targets: #{missing_targets.join(', ')}" unless missing_targets.empty?
 
       allowed_dependencies = {
         "RuneScribeContracts" => [],
         "RuneScribeRuntimeCore" => ["RuneScribeContracts"],
-        "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeUIRuntime" => ["RuneScribeContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"]
+        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"],
+        "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
       required_dependencies = {
         "RuneScribeContracts" => [],
         "RuneScribeRuntimeCore" => [],
-        "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeUIRuntime" => ["RuneScribeContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"]
+        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"],
+        "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
 
-      required_products.each do |target_name|
+      all_products.each do |target_name|
         next unless targets[target_name]
         dependencies = Array(targets[target_name]["dependencies"]).map { |dependency| dependency_name(dependency) }.compact
         forbidden = dependencies - allowed_dependencies.fetch(target_name)
         missing = required_dependencies.fetch(target_name) - dependencies
         errors << "target #{target_name} has forbidden dependencies: #{forbidden.join(', ')}" unless forbidden.empty?
         errors << "target #{target_name} is missing dependencies: #{missing.join(', ')}" unless missing.empty?
+      end
+
+      test_support_consumers = targets.values.each_with_object([]) do |target, consumers|
+        dependencies = Array(target["dependencies"]).map { |dependency| dependency_name(dependency) }.compact
+        consumers << target["name"] if dependencies.include?("RuneScribeTestSupport")
+      end.sort
+      expected_test_support_consumers = %w[
+        RuneScribeArchitectureTests RuneScribePlatformTests
+      ].sort
+      unless test_support_consumers == expected_test_support_consumers
+        errors << "package RuneScribeTestSupport consumers differ: #{test_support_consumers.join(', ')}"
       end
     rescue JSON::ParserError => error
       errors << "#{architecture_package_relative}/Package.swift: invalid dump-package JSON: #{error.message}"
@@ -229,7 +372,9 @@ if package_present
     errors << "project.yml must reference #{architecture_package_relative} as a local package" if package_reference_names.empty?
     app_target_names.each do |target_name|
       missing = required_products - project_product_dependencies.fetch(target_name)
+      unexpected = project_product_dependencies.fetch(target_name) - required_products
       errors << "project.yml target #{target_name} is missing package products: #{missing.join(', ')}" unless missing.empty?
+      errors << "project.yml target #{target_name} has non-shipping package products: #{unexpected.join(', ')}" unless unexpected.empty?
     end
   end
 end
@@ -237,10 +382,11 @@ end
 module_import_policy = {
   "RuneScribeContracts" => %w[Foundation],
   "RuneScribeRuntimeCore" => %w[Foundation RuneScribeContracts],
-  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts],
   "RuneScribePlatform" => %w[Foundation Darwin RuneScribeContracts Security Contacts CoreText AppKit UIKit],
   "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto RuneScribeContracts RuneScribeRuntimeCore],
-  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIRuntime AppKit UIKit LinkPresentation MessageUI Metal MetalKit CoreImage CoreTransferable AVFoundation Contacts ContactsUI UniformTypeIdentifiers]
+  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIRuntime AppKit UIKit LinkPresentation MessageUI Metal MetalKit CoreImage CoreTransferable AVFoundation Contacts ContactsUI UniformTypeIdentifiers],
+  "RuneScribeTestSupport" => %w[Foundation RuneScribeContracts]
 }
 
 module_import_policy.each do |product, allowed_imports|

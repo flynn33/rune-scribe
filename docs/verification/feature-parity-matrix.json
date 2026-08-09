@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0",
-  "baseline": "P0 behavior baseline at a3d5a86; current executable evidence through the recorded P7 final package, hosted, UI, native-share, build, and shipping gates.",
+  "baseline": "P0 behavior baseline at a3d5a86; current executable evidence through the recorded P8 final package, hosted, UI, native-share, build, and shipping gates.",
   "evidencePolicy": "A passed status is used only when the listed evidence satisfies every applicable verification mode. In-progress rows retain exact missing non-device evidence. Device-validation-required is used only when automatable and non-device checks are complete and the remaining behavior genuinely requires signed physical hardware.",
   "summary": {
     "total": 40,
@@ -37,10 +37,10 @@
         "test-source: RuneScribTests/RuntimeCompositionTests.testCompositionPublishesRootAcrossStartStopAndRestart",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
         "recorded-manual: P7-MACOS-PRODUCT-SMOKE, visible alpha=1 Rune Scribe production window at 540x649",
-        "recorded-run: P7-IOS-PARITY-FINAL, fresh isolated product launch skipped the bundled intro, reached the workspace with My Cipher, exposed product-only controls, and completed the strict accessibility audit; 1/1 passed, 0 failures, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult"
+        "recorded-run: P8-IOS-PARITY-FINAL, fresh isolated product launch skipped the bundled intro, reached the workspace with My Cipher, exposed product-only controls, and completed the strict accessibility audit; 1/1 passed, 0 failures, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult"
       ],
       "pending": []
     },
@@ -63,7 +63,7 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testExistingInstallLoadsTogetherWithoutResetDuplicateOrStartupRewrite",
         "recorded-run: P7-EXISTING-INSTALL-FOCUSED, 1 test, 0 failures, 2026-08-08T19:54:12Z",
         "test-source: RuneScribIOSTests/KeychainMigrationTests.testSimulatorLoadsFrozenLegacyLibraryThroughAppleKeychainStore",
-        "recorded-run: P7-IOS-HOSTED-FINAL, isolated Simulator namespaced AppleKeychainStore migration passed in 0.024s within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation) with 0 failures/skips, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult",
+        "recorded-run: P8-IOS-HOSTED-FINAL, isolated Simulator namespaced AppleKeychainStore migration passed in 0.028s within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation) with 0 failures/skips, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, existing cipher/contact/settings/lock/PIN states inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/*.png",
         "recorded-manual: P7-IOS-SIMULATOR-SMOKE-FINAL, production launch reached bundled splash and existing-user PIN root, /tmp/RuneScribe-P7-ios-smoke-final.8E3JZq/{launch,content}.png"
       ],
@@ -86,9 +86,9 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/CipherPersistenceApplicationTests.testDeletingLastCipherRegeneratesAndActivatesMyCipher",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, macOS cipher-library hierarchy and controls inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/cipher-library.png",
-        "recorded-run: P7-IOS-PARITY-FINAL, created, renamed, selected, linked, unlinked, and deleted a second cipher in the isolated production UI while asserting active state and counts; 1/1 passed, 0 failures, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult"
+        "recorded-run: P8-IOS-PARITY-FINAL, created, renamed, selected, linked, unlinked, and deleted a second cipher in the isolated production UI while asserting active state and counts; 1/1 passed, 0 failures, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult"
       ],
       "pending": []
     },
@@ -106,7 +106,7 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/MessageCryptorTests.testRoundTrip",
         "test-source: Packages/RuneScribeArchitecture/Tests/MessageCryptorTests.testWrongCipherFails",
         "test-source: Packages/RuneScribeArchitecture/Tests/MessageCryptorTests.testTamperFails",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}"
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}"
       ],
       "pending": []
     },
@@ -127,7 +127,7 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneCodecTests.testDecodeRejectsForeignCharacter",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testExistingInstallLoadsTogetherWithoutResetDuplicateOrStartupRewrite",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-run: P7-EXISTING-INSTALL-FOCUSED, both seeded decorative mappings and key bytes decoded service output, 1 test, 0 failures, 2026-08-08T19:54:12Z",
         "recorded-run: P7-VIEW-PARITY-FOCUSED, 1 test, 0 failures, /tmp/RuneScribe-P7-view-parity-final.r1mq2W/swift-test.log",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, workspace rune rendering inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/workspace.png"
@@ -151,9 +151,9 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/PlatformAdapterTests.testKeychainConstantsAndDeleteThenAddCompatibility",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testExistingInstallLoadsTogetherWithoutResetDuplicateOrStartupRewrite",
         "test-source: RuneScribIOSTests/KeychainMigrationTests.testSimulatorLoadsFrozenLegacyLibraryThroughAppleKeychainStore",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-run: P7-EXISTING-INSTALL-FOCUSED, seeded Keychain key/library bytes and active selection loaded without startup writes, 1 test, 0 failures, 2026-08-08T19:54:12Z",
-        "recorded-run: P7-IOS-HOSTED-FINAL, isolated Simulator namespaced AppleKeychainStore migration passed in 0.024s within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation) with 0 failures/skips, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult"
+        "recorded-run: P8-IOS-HOSTED-FINAL, isolated Simulator namespaced AppleKeychainStore migration passed in 0.028s within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation) with 0 failures/skips, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult"
       ],
       "pending": []
     },
@@ -172,7 +172,7 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/ContactRepositoryTests.testLoadsFrozenVersion1AESGCMFixtureFromShippingPathAndAccount",
         "test-source: Packages/RuneScribeArchitecture/Tests/ContactRepositoryTests.testAmbiguousProtectedWriteInvalidatesCacheAndReloadsAuthoritativeFile",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testExistingInstallLoadsTogetherWithoutResetDuplicateOrStartupRewrite",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-run: P7-EXISTING-INSTALL-FOCUSED, seeded encrypted contacts loaded with association intact and no protected-store write, 1 test, 0 failures, 2026-08-08T19:54:12Z"
       ],
       "pending": []
@@ -196,9 +196,9 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Contacts/ContactRepositoryTests.swift, ContactManagerCoreTests.testDeletingEmptySetReturnsUnchangedBookWithoutWriting",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, macOS contacts hierarchy and controls inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/contacts.png",
-        "recorded-run: P7-IOS-PARITY-FINAL, manually created and renamed a contact, linked and unlinked it from a cipher, then deleted it in the isolated production UI; 1/1 passed, 0 failures, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult"
+        "recorded-run: P8-IOS-PARITY-FINAL, manually created and renamed a contact, linked and unlinked it from a cipher, then deleted it in the isolated production UI; 1/1 passed, 0 failures, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult"
       ],
       "pending": []
     },
@@ -216,7 +216,7 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/PlatformAdapterTests.testContactAdapterMapsMinimalValuesAndExcludesUnnamedContacts",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testSystemContactRequestUsesApplicationFacadeAndPublishesAuthorization",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-run: P7-CONTACT-REPLACEMENTS-FOCUSED, ContactManagerCoreTests 11/11 and P4BApplicationServiceTests 37/37, 0 failures, 2026-08-08T19:36:00Z",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, contact list and settings affordances inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/{contacts,settings}.png"
       ],
@@ -249,9 +249,9 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testCipherLinkAndQRRemainWireCompatibleAndEphemeral",
         "test-source: RuneScribTests/RuntimeCompositionTests.testInputRailPreservesMappingMetadataAndFIFOAcrossDetach",
         "test-source: RuneScribIOSTests/AppHostRoutingTests.testAppDelegateRoutesURLsFilesActivitiesAndLifecycleWithColdWarmMetadata",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-MACOS-FINAL, hosted runtime input rail passed within 8/8 total tests (7 hosted plus 1 architecture guard), /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
-        "recorded-run: P7-IOS-HOSTED-FINAL, AppHostRoutingTests 5/5 passed within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation) with 0 failures/skips, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult"
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-MACOS-FINAL, hosted runtime input rail passed within 8/8 total tests (7 hosted plus 1 architecture guard), /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-IOS-HOSTED-FINAL, AppHostRoutingTests 5/5 passed within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation) with 0 failures/skips, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult"
       ],
       "pending": []
     },
@@ -270,7 +270,7 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/WireCompatibilityTests.testCipherV3GoldenFixtureDecodesAndReencodesExactly",
         "test-source: Packages/RuneScribeArchitecture/Tests/InboundRoutingTests.testFileRouterStrictlyDecodesCompleteCipherAndMessageFiles",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-run: P7-IOS-FILE-SHARE-UI, registered synthetic v3 .runescribe file opened through the final host, displayed SHARED CIPHER with Imported Cipher, committed, and became the active cipher; the exact round-trip fixture test covers output compatibility; 1/1 passed, 0 failures, 152.568s, finished 2026-08-08 17:13:04 CDT, /tmp/RuneScribe-P7-file-share-ui.zxG2Cc/RuneScribeParityUITests.xcresult"
       ],
       "pending": []
@@ -291,9 +291,9 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testInboundMessageEmbeddedAndStoredCipherPathsPreserveAssociationAndDedupe",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, decoded-message and reply state inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/received-message.png",
-        "recorded-run: P7-IOS-PARITY-FINAL, opened a synthetic v1 .runescribe message file through the production host and asserted decoded sender, plaintext, and Reply transition; 1/1 passed, 0 failures, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult"
+        "recorded-run: P8-IOS-PARITY-FINAL, opened a synthetic v1 .runescribe message file through the production host and asserted decoded sender, plaintext, and Reply transition; 1/1 passed, 0 failures, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult"
       ],
       "pending": []
     },
@@ -311,7 +311,7 @@
       "evidence": [
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testCustomFontBytesAppearOnlyInRequiredFirstDeliveryFile",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}"
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}"
       ],
       "pending": []
     },
@@ -329,7 +329,7 @@
       "evidence": [
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testUnlinkedMessageNeverRequiresKeyDeliveryOrRecordsDelivery",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}"
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}"
       ],
       "pending": []
     },
@@ -349,8 +349,8 @@
         "test-source: RuneScribTests/RuntimeCompositionTests.testInputRailPreservesMappingMetadataAndFIFOAcrossDetach",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testUnreadableAndUnknownFilesPublishSafeFailureAndDoNotBlockValidRetry",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
         "recorded-run: P7-IOS-FILE-SHARE-UI, final host routed registered v3 cipher and v1 message .runescribe files to distinct confirmation versus decoded-message/reply states, and committed the cipher import; 1/1 passed, 0 failures, 152.568s, /tmp/RuneScribe-P7-file-share-ui.zxG2Cc/RuneScribeParityUITests.xcresult"
       ],
       "pending": [],
@@ -381,11 +381,11 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testColdQueuedLegacyURLConfirmationPersistsAndActivatesImportedCipher",
         "test-source: RuneScribIOSTests/AppHostRoutingTests.testAppDelegateRoutesURLsFilesActivitiesAndLifecycleWithColdWarmMetadata",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
-        "recorded-run: P7-IOS-HOSTED-FINAL, AppHostRoutingTests 5/5 passed within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation) with 0 failures/skips, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-IOS-HOSTED-FINAL, AppHostRoutingTests 5/5 passed within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation) with 0 failures/skips, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult",
         "recorded-run: P7-COLD-LEGACY-CONFIRM-FOCUSED, queued pre-start legacy URL confirmed during gated startup, persisted two ciphers, reconstructed with the imported cipher active, and asserted two font-name validations with one platform registration; 1/1 passed, 0 failures, 2026-08-08 16:20:15 CDT",
-        "recorded-run: P7-IOS-PARITY-FINAL, cold-opened and cancelled a custom URL, then warm-opened malformed and valid legacy HTTPS URLs with visible failure and successful commit; 1/1 passed, 0 failures, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult"
+        "recorded-run: P8-IOS-PARITY-FINAL, cold-opened and cancelled a custom URL, then warm-opened malformed and valid legacy HTTPS URLs with visible failure and successful commit; 1/1 passed, 0 failures, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult"
       ],
       "pending": []
     },
@@ -408,10 +408,10 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testColdQueuedLegacyURLConfirmationPersistsAndActivatesImportedCipher",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, import confirmation and error-capable hierarchy inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/import-confirmation.png",
         "recorded-run: P7-COLD-LEGACY-CONFIRM-FOCUSED, full service with real bundled font bytes confirmed and persisted a cold queued legacy URL using two name validations and one platform font registration; 1/1 passed, 0 failures, 2026-08-08 16:20:15 CDT",
-        "recorded-run: P7-IOS-PARITY-FINAL, asserted custom-link confirmation and cancel, visible malformed-link error, legacy confirmation, and successful Import commit in the isolated production UI; 1/1 passed, 0 failures, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult"
+        "recorded-run: P8-IOS-PARITY-FINAL, asserted custom-link confirmation and cancel, visible malformed-link error, legacy confirmation, and successful Import commit in the isolated production UI; 1/1 passed, 0 failures, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult"
       ],
       "pending": []
     },
@@ -431,9 +431,9 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testMenuStreamAndReplyUseTypedConsumableRoutes",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, decoded sender/plaintext and reply presentation inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/received-message.png",
-        "recorded-run: P7-IOS-PARITY-FINAL, production-host message file displayed Parity Sender and Parity reply message, then Reply returned to the workspace; 1/1 passed, 0 failures, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult"
+        "recorded-run: P8-IOS-PARITY-FINAL, production-host message file displayed Parity Sender and Parity reply message, then Reply returned to the workspace; 1/1 passed, 0 failures, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult"
       ],
       "pending": []
     },
@@ -449,13 +449,13 @@
       ],
       "status": "passed-automated-and-manual",
       "evidence": [
-        "test-source: Packages/RuneScribeArchitecture/Tests/PlatformAdapterTests.testClipboardAdapterSupportsAsyncAndSynchronousCompatibilityCalls",
+        "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribePlatformTests/PlatformAdapterTests.swift, PlatformAdapterTests.testClipboardAdapterUsesAsyncContract",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testStopReleasesApplicationClipboardAndShareProviderOwners",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testPendingMessageDoesNotConsumeClipboardChangeBeforeDismissal",
         "test-source: RuneScribIOSTests/AppHostRoutingTests.swift, AppHostRoutingTests.testSystemClipboardAdapterRoundTripsWithinHostedApplicationWithoutPastePrompt",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-IOS-CLIPBOARD-PLATFORM-FINAL2, in the hosted app process SystemClipboardService wrote before reading, verified synchronous and asynchronous reads plus changeCount, then cleared without a paste prompt; 1/1 passed, 0 failures, 0.029s, finished 2026-08-08 17:09:20 CDT, /tmp/RuneScribe-P7-clipboard-platform-final2.moGKXE/ClipboardPlatform.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-IOS-HOSTED-FINAL, hosted SystemClipboardService wrote, read, and checked changeCount through the async-only contract, then cleared without a paste prompt; AppHostRoutingTests 5/5 passed within 18/18 hosted iOS tests with 0 failures/skips, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, clipboard-routed cipher uses the same inspected import-confirmation presentation at /tmp/RuneScribe-P7-view-parity-final.r1mq2W/import-confirmation.png; Core tests prove activation-triggered clipboard import, source metadata, and pending-state gating"
       ],
       "pending": []
@@ -475,7 +475,7 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testCipherLinkAndQRRemainWireCompatibleAndEphemeral",
         "test-source: Packages/RuneScribeArchitecture/Tests/UIModuleTests.testOpaqueSharePresentationResolvesOnlyWhileLeased",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-run: P7-VIEW-PARITY-FOCUSED, real CI-generated QR rendered to PNG, 1 test, 0 failures, /tmp/RuneScribe-P7-view-parity-final.r1mq2W/swift-test.log",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, QR output inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/qr-share.png"
       ],
@@ -532,8 +532,8 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testRejectedRequiredAttachmentNeverRecordsDelivery",
         "test-source: RuneScribIOSTests/PlatformPresentationTests.testMessageComposeMapsSentCancelledAndFailedResults",
         "test-source: RuneScribIOSTests/PlatformPresentationTests.testMessageComposeReportsRequiredAttachmentOnlyWhenComposerAcceptedIt",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-build: P7-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/GenericBuild-final.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-build: P8-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-P8-final-ios.87OHyd/GenericBuild.xcresult",
         "recorded-run: P7-IOS-PLATFORM-PRESENTATION-FOCUSED, PlatformPresentationTests 5/5, 0 failures/skips on iPhone 17 Pro iOS 26.2, /tmp/RuneScribe-FP021-022-tests.DV9Zks/PlatformPresentationTests.xcresult",
         "recorded-build: P7-IOS-PLATFORM-PRESENTATION-GENERIC, production generic Simulator build succeeded, /tmp/RuneScribe-FP021-022-build.ZfgwrL/DerivedData",
         "test-source: RuneScribIOSTests/PlatformPresentationTests.swift, PlatformPresentationTests.testMessageComposeAttachmentSetupAllowsAcceptedRequiredAttachment",
@@ -541,7 +541,7 @@
         "test-source: RuneScribIOSTests/PlatformPresentationTests.swift, PlatformPresentationTests.testMessageComposeAttachmentSetupAllowsComposerWithoutRequiredAttachment",
         "test-source: RuneScribIOSTests/PlatformPresentationTests.swift, PlatformPresentationTests.testMessageComposeCompletionGateEmitsOnlyFirstTerminalOutcome",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift, RuneScribeUISessionTests.testMessageArtifactCompletionGateAdmitsOneCompletionUntilFinished",
-        "recorded-run: P7-IOS-HOSTED-FINAL, 18/18 hosted tests passed with 0 failures/skips, including PlatformPresentationTests 9/9 for MessageUI attachment setup, outcome mapping, and exactly-once completion, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult"
+        "recorded-run: P8-IOS-HOSTED-FINAL, 18/18 hosted tests passed with 0 failures/skips, including PlatformPresentationTests 9/9 for MessageUI attachment setup, outcome mapping, and exactly-once completion, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult"
       ],
       "pending": [],
       "deviceValidation": {
@@ -568,17 +568,17 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/UIModuleTests.testOpaqueSharePresentationResolvesOnlyWhileLeased",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-IOS-PARITY-FINAL, Share My Cipher presented and cancelled the native ActivityListView in the current isolated product UI; 1/1 passed, 0 failures/skips, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-IOS-PARITY-FINAL, Share My Cipher presented and cancelled the native ActivityListView in the current isolated product UI; 1/1 passed, 0 failures/skips, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult",
         "test-source: Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneScribeFileShareLink.swift, production file and opaque-link controls use public NSSharingServicePicker delegates with exactly-once cancelled/handed-off/failed outcomes",
-        "recorded-run: P7-MAC-NATIVE-SHARE-FINAL, isolated ad-hoc normal app presented both production file and link pickers with nonempty proposed services, recorded one trigger each, then mapped same-process local Escape to one cancelled outcome each; /tmp/RuneScribe-final-mac-presenter.Widumf/native-share-report.json",
-        "recorded-run: P7-MAC-PARITY-FINAL, real share controls rendered and Core released cancelled scoped file/link artifacts; 3/3 passed, 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS-Parity.xcresult",
+        "recorded-run: P8-MAC-NATIVE-SHARE-FINAL, isolated ad-hoc normal app presented both production file and link pickers with nonempty proposed services, recorded one trigger each, then mapped same-process local Escape to one cancelled outcome each; /tmp/RuneScribe-P8-final-mac.MN3k9e/native-share-report.json",
+        "recorded-run: P8-MAC-PARITY-FINAL, real share controls rendered and Core released cancelled scoped file/link artifacts; 3/3 passed, 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-Parity.xcresult",
         "scope: macOS native evidence used an isolated EmptyView host, test-owned temporary data, local NSEvents, ad-hoc signing, and no Keychain, Contacts, clipboard, Accessibility, CGEvent, Apple Events, TCC, identity, or operator interaction",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift, RuneScribeUISessionTests.testMessageArtifactCompletionGateAdmitsOneCompletionUntilFinished",
         "test-source: RuneScribIOSTests/NativeShareOutcomeTests.swift, NativeShareOutcomeTests.testActivityOutcomeMapsPublicCompletionStates",
         "test-source: RuneScribIOSTests/NativeShareOutcomeTests.swift, NativeShareOutcomeTests.testActivityCompletionGateSuppressesDisappearFallbackAfterCompletion",
         "test-source: RuneScribIOSTests/NativeShareOutcomeTests.swift, NativeShareOutcomeTests.testActivityCompletionGateAcceptsDisappearFallbackOnlyOnce",
-        "recorded-run: P7-IOS-HOSTED-FINAL, 18/18 hosted tests passed with 0 failures/skips, including NativeShareOutcomeTests 3/3 for public completion-state mapping and exactly-once fallback behavior, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult"
+        "recorded-run: P8-IOS-HOSTED-FINAL, 18/18 hosted tests passed with 0 failures/skips, including NativeShareOutcomeTests 3/3 for public completion-state mapping and exactly-once fallback behavior, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult"
       ],
       "pending": [],
       "deviceValidation": {
@@ -607,12 +607,12 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/FontCatalogTests.testRegistrationFailureRemovesNewlyPersistedBytes",
         "test-source: Packages/RuneScribeArchitecture/Tests/PlatformAdapterTests.testProtectedFileStorePreservesPathsAndListsImportedFonts",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testExistingInstallLoadsTogetherWithoutResetDuplicateOrStartupRewrite",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-run: P7-EXISTING-INSTALL-FOCUSED, content-addressed imported font bytes loaded and registered with mapping intact and no startup write, 1 test, 0 failures, 2026-08-08T19:54:12Z",
         "test-source: RuneScribMacParityTests/RuneScribeMacParityTests.testCustomFontSuccessAndFailureProjectThroughRealSession",
-        "recorded-run: P7-MAC-PARITY-FINAL, the real macOS session and import confirmation accepted valid custom-font bytes, persisted the digest path, registered and activated the imported cipher, then preserved the retryable confirmation and prior active cipher for hash-mismatched bytes without an extra file; 3/3 passed, 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS-Parity.xcresult",
-        "recorded-run: P7-IOS-PARITY-FINAL, the current isolated iPhone UI imported a valid custom-font cipher, rejected hash-mismatched bytes with visible retryable error, preserved four ciphers and the active prior import, and completed the remaining product rail; 1/1 passed, 0 failures/skips, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult",
-        "recorded-run: P7-IOS-IPAD-PARITY-FINAL, the isolated iPad Pro 11-inch (M5) AXXXL UI completed the same custom-font and full parity rail; 1/1 passed, 0 failures/skips, 203.032s, /tmp/RuneScribe-ios-parity-ipad-final.5kVld1/IOSParity-iPad.xcresult"
+        "recorded-run: P8-MAC-PARITY-FINAL, the real macOS session and import confirmation accepted valid custom-font bytes, persisted the digest path, registered and activated the imported cipher, then preserved the retryable confirmation and prior active cipher for hash-mismatched bytes without an extra file; 3/3 passed, 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-Parity.xcresult",
+        "recorded-run: P8-IOS-PARITY-FINAL, the current isolated iPhone UI imported a valid custom-font cipher, rejected hash-mismatched bytes with visible retryable error, preserved four ciphers and the active prior import, and completed the remaining product rail; 1/1 passed, 0 failures/skips, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult",
+        "recorded-run: P8-IOS-IPAD-PARITY-FINAL, the isolated iPad Pro 11-inch (M5) AXXXL UI completed the same custom-font and full parity rail; 1/1 passed, 0 failures/skips, 223.516s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPad.xcresult"
       ],
       "pending": []
     },
@@ -629,10 +629,10 @@
       "evidence": [
         "test-source: Packages/RuneScribeArchitecture/Tests/FontCatalogTests.testRegistersFixedBundledIdentityThroughInjectedResourceAndRegistrar",
         "test-source: RuneScribTests/CompatibilityBaselineTests.testBundledFontMatchesFixedSHA256",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
-        "recorded-run: P7-SHIPPING-RELEASE-FINAL, both Release products contain the valid fixed-digest Runic font, 48/48 checks, /tmp/RuneScribe-release-gate-20260808.cTIuQe/shipping-products.log",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-SHIPPING-RELEASE-FINAL, both Release products contain the valid fixed-digest Runic font, 50/50 checks, /tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, runic rendering inspected across the synthetic workspace and QR states in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/*.png"
       ],
       "pending": []
@@ -650,9 +650,9 @@
       "evidence": [
         "test-source: RuneScribTests/CompatibilityBaselineTests.testSplashAndMetalLibraryRemainHostResources",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testModuleActivationToleratesMissingOptionalVisualResources",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
-        "recorded-build: P7-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/GenericBuild-final.xcresult",
-        "recorded-run: P7-SHIPPING-RELEASE-FINAL, valid default.metallib is present in both Release products, 48/48 checks, /tmp/RuneScribe-release-gate-20260808.cTIuQe/shipping-products.log",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
+        "recorded-build: P8-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-P8-final-ios.87OHyd/GenericBuild.xcresult",
+        "recorded-run: P8-SHIPPING-RELEASE-FINAL, valid default.metallib is present in both Release products, 50/50 checks, /tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log",
         "recorded-manual: P5-MACOS-SMOKE, live 600x720 Rune Scribe product window rendered the production chrome/background with no framework UI",
         "recorded-manual: P7-IOS-METAL-INSPECTION, production final3 screenshot visibly shows the navy wave and gold-particle Metal header behind Rune Scribe chrome at /tmp/RuneScribe-P7-final3-attachments.ku0Bmr/9EF246B5-2F6D-469A-98F2-53B2DEA49DE4.png; the compatibility test loads default.metallib on a real Metal device and resolves vertex_fullscreen plus fragment_rune_background",
         "scope: the current retained frame proves the visible iOS effect; macOS parity is inferred from the shared renderer, real macOS MTLDevice function load, Release resource identity, and the earlier live mac product observation. No current retained mac frame pair exists because unattended gates must not launch a login-Keychain product flow."
@@ -676,10 +676,10 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/SplashAssetScheduleTests.swift, SplashAssetScheduleTests.testPlaybackCompletionAndSkipEachFinishExactlyOnce",
         "test-source: RuneScribTests/CompatibilityBaselineTests.testSplashAndMetalLibraryRemainHostResources",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
         "recorded-run: P7-SPLASH-PLAYBACK-FOCUSED, posted AVPlayer natural-completion notification and separately invoked skip/finish, asserting each completion callback occurs exactly once and remains idempotent; SplashAssetScheduleTests 5/5 passed, 0 failures, 2026-08-08 17:09:37 CDT",
-        "recorded-run: P7-SHIPPING-RELEASE-FINAL, real bundled splash mp4 is valid in both Release products, 48/48 checks, /tmp/RuneScribe-release-gate-20260808.cTIuQe/shipping-products.log",
+        "recorded-run: P8-SHIPPING-RELEASE-FINAL, real bundled splash mp4 is valid in both Release products, 50/50 checks, /tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log",
         "recorded-manual: P7-IOS-SPLASH, production launch visibly presented the bundled splash at /tmp/RuneScribe-P7-ios-smoke-final.8E3JZq/launch.png and the green isolated UI rails exercised Skip intro before reaching content",
         "scope: completion/skip ordering lives in shared cross-platform SplashModel and VideoSplashView and uses the same verified mp4 on macOS and iOS; no new interactive mac product launch was required under the no-login-Keychain boundary"
       ],
@@ -703,9 +703,9 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/PINFormatTests.testRejectsInvalidPINShapes",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, lock, set/change, and disable PIN states inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/{lock,pin-flow}.png",
-        "recorded-run: P7-IOS-PARITY-FINAL, set 1234, unlocked, changed to 5678, and disabled the PIN through the production UI while asserting each transition; 1/1 passed, 0 failures, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult"
+        "recorded-run: P8-IOS-PARITY-FINAL, set 1234, unlocked, changed to 5678, and disabled the PIN through the production UI while asserting each transition; 1/1 passed, 0 failures, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult"
       ],
       "pending": []
     },
@@ -724,7 +724,7 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/AppLockServiceTests.testFifthFailureLocksUntilCooldownAndSuccessfulUnlockClearsThrottle",
         "test-source: Packages/RuneScribeArchitecture/Tests/AppLockServiceTests.testMalformedAndNegativeThrottleRecordsFailClosedWithoutMutation",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testExistingInstallLoadsTogetherWithoutResetDuplicateOrStartupRewrite",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-run: P7-EXISTING-INSTALL-FOCUSED, seeded fifth-failure cooldown restored at the exact retry date and unlocked only after clock advance, 1 test, 0 failures, 2026-08-08T19:54:12Z"
       ],
       "pending": []
@@ -746,12 +746,12 @@
         "test-source: RuneScribIOSTests/AppHostRoutingTests.testAppDelegateRoutesURLsFilesActivitiesAndLifecycleWithColdWarmMetadata",
         "test-source: RuneScribIOSTests/AppHostRoutingTests.testSwiftUIScenePhaseMappingForwardsOrderedLifecycleInputs",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
         "recorded-run: P7-MAC-LIFECYCLE-FOCUSED, injected in-memory host runtime received didBecomeActive, willResignActive, didEnterBackground, and willTerminate in order; 1/1 passed, 0 failures, 0.005s, empty entitlements, /tmp/RuneScribe-P7-mac-lifecycle.O9tDar/MacLifecycleTests.xcresult",
-        "recorded-run: P7-IOS-PARITY-FINAL, after PIN setup the isolated Simulator app reached runningBackground via Home, resumed to Enter PIN with the Settings sheet dismissed, and unlocked successfully; 1/1 passed, 0 failures, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult",
+        "recorded-run: P8-IOS-PARITY-FINAL, after PIN setup the isolated Simulator app reached runningBackground via Home, resumed to Enter PIN with the Settings sheet dismissed, and unlocked successfully; 1/1 passed, 0 failures, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift, RuneScribeUISessionTests.testContentViewLockCleanupClearsSensitiveStateAndCancelsArtifactOnce",
-        "recorded-run: P7-IOS-HOSTED-FINAL, 18/18 hosted tests passed with 0 failures/skips, including AppHostRoutingTests 5/5 for current scene and lifecycle forwarding, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult"
+        "recorded-run: P8-IOS-HOSTED-FINAL, 18/18 hosted tests passed with 0 failures/skips, including AppHostRoutingTests 5/5 for current scene and lifecycle forwarding, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult"
       ],
       "pending": [],
       "deviceValidation": {
@@ -775,10 +775,10 @@
       "evidence": [
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-build: P7-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/GenericBuild-final.xcresult",
+        "recorded-build: P8-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-P8-final-ios.87OHyd/GenericBuild.xcresult",
         "recorded-manual: P5-MACOS-SMOKE, live 600x720 Rune Scribe window with no framework UI",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, settings sections, font controls, navigation controls, and license content inspected in /tmp/RuneScribe-P7-view-parity-final.r1mq2W/{settings,license}.png",
-        "recorded-run: P7-IOS-PARITY-FINAL, navigated the production Settings sheet, asserted PIN/contact/license controls, opened LICENSE, and returned; 1/1 passed, 0 failures, 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult"
+        "recorded-run: P8-IOS-PARITY-FINAL, navigated the production Settings sheet, asserted PIN/contact/license controls, opened LICENSE, and returned; 1/1 passed, 0 failures, 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult"
       ],
       "pending": []
     },
@@ -797,8 +797,8 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testMenuStreamAndReplyUseTypedConsumableRoutes",
         "test-source: RuneScribTests/RuntimeCompositionTests.testInputRailPreservesMappingMetadataAndFIFOAcrossDetach",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeCommandCatalogTests.swift, RuneScribeCommandCatalogTests.testMacCommandSurfaceAndPrimaryShortcutRemainExact",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
         "recorded-run: P7-MAC-COMMAND-CATALOG-FOCUSED, after final conditional CommandGroup consumption, actual Commands and ContentView use one descriptor catalog; exact assertions cover removal of system New, Settings Command-comma, Cipher Library Command-Shift-L, and primary action Command-Return; 1/1 passed, 0 failures, 2026-08-08 16:51:03 CDT",
         "recorded-manual: P7-MACOS-PRODUCT-SMOKE, visible alpha=1 Rune Scribe production window at 540x649; typed command routing and window-root behavior are covered by the listed hosted tests without Accessibility/System Events or Keychain access"
       ],
@@ -817,10 +817,10 @@
       "status": "passed-automated-and-manual",
       "evidence": [
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-build: P7-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/GenericBuild-final.xcresult",
-        "recorded-run: P7-IOS-PARITY-FINAL, rotated an iPhone 17 Pro iOS 26.2 Simulator to landscapeLeft and back to portrait while asserting Cipher Library remained visible; UI rail passed 1/1 with 0 failures in 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult",
-        "recorded-run: P7-IOS-IPAD-PARITY-FINAL, erased iPad Pro 11-inch (M5) Simulator at accessibility-extra-extra-extra-large rotated landscapeLeft then portrait while the full parity rail remained functional; 1/1 passed, 0 failures, 203.032s, /tmp/RuneScribe-ios-parity-ipad-final.5kVld1/IOSParity-iPad.xcresult",
-        "recorded-inspection: P7-IPAD-BUILT-PLIST, the final current Release product preserves identifiers, iPhone/iPad platform settings, URL/UTI registration, privacy strings, and versions within the 48/48 shipping inspection, /tmp/RuneScribe-release-gate-20260808.cTIuQe/shipping-products.log"
+        "recorded-build: P8-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-P8-final-ios.87OHyd/GenericBuild.xcresult",
+        "recorded-run: P8-IOS-PARITY-FINAL, rotated an iPhone 17 Pro iOS 26.2 Simulator to landscapeLeft and back to portrait while asserting Cipher Library remained visible; UI rail passed 1/1 with 0 failures in 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult",
+        "recorded-run: P8-IOS-IPAD-PARITY-FINAL, erased iPad Pro 11-inch (M5) Simulator at accessibility-extra-extra-extra-large rotated landscapeLeft then portrait while the full parity rail remained functional; 1/1 passed, 0 failures, 223.516s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPad.xcresult",
+        "recorded-inspection: P8-IPAD-BUILT-PLIST, the final current Release product preserves identifiers, iPhone/iPad platform settings, URL/UTI registration, privacy strings, and versions within the 50/50 shipping inspection, /tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log"
       ],
       "pending": []
     },
@@ -835,9 +835,9 @@
       ],
       "status": "passed-automated",
       "evidence": [
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
-        "recorded-build: P7-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/GenericBuild-final.xcresult",
-        "recorded-run: P7-SHIPPING-RELEASE-FINAL, both current Release products passed 48/48 checks; signatures and nested seals verified, macOS hardened runtime was present, and every executable architecture preserved the exact sandbox, Contacts, file-access, and Keychain entitlement set without extras, /tmp/RuneScribe-release-gate-20260808.cTIuQe/shipping-products.log"
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
+        "recorded-build: P8-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-P8-final-ios.87OHyd/GenericBuild.xcresult",
+        "recorded-run: P8-SHIPPING-RELEASE-FINAL, both current Release products passed 50/50 checks; signatures and nested seals verified, macOS hardened runtime was present, and every executable architecture preserved the exact sandbox, Contacts, file-access, and Keychain entitlement set without extras, /tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log"
       ],
       "pending": []
     },
@@ -853,13 +853,13 @@
       "status": "passed-automated",
       "evidence": [
         "test-source: Packages/RuneScribeArchitecture/Tests/ContractSafetyTests.testStableServiceStorageAndWireIdentifiers",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
         "test-source: RuneScribIOSTests/AppHostRoutingTests.testAppDelegateRoutesURLsFilesActivitiesAndLifecycleWithColdWarmMetadata",
-        "recorded-build: P7-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/GenericBuild-final.xcresult",
-        "recorded-run: P7-IOS-HOSTED-FINAL, AppHostRoutingTests 5/5 passed within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation) with 0 failures/skips, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult",
-        "recorded-run: P7-SHIPPING-RELEASE-FINAL, both built Info.plists preserve the exact runescribe URL scheme and com.runescribe.runescribe document type, 48/48 checks, /tmp/RuneScribe-release-gate-20260808.cTIuQe/shipping-products.log",
-        "recorded-generation: P7-XCODEGEN-FINAL, XcodeGen 2.46.0 generated the current project twice identically; PBX SHA-256 8e2b14812a97589501a2b752944cb3982b7bce919b6dd128ffe2b377317e7aaf; all four schemes and NativeShareOutcome target membership verified, /tmp/RuneScribe-P7-security-project.4dMuDB"
+        "recorded-build: P8-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-P8-final-ios.87OHyd/GenericBuild.xcresult",
+        "recorded-run: P8-IOS-HOSTED-FINAL, AppHostRoutingTests 5/5 passed within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation) with 0 failures/skips, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult",
+        "recorded-run: P8-SHIPPING-RELEASE-FINAL, both built Info.plists preserve the exact runescribe URL scheme and com.runescribe.runescribe document type, 50/50 checks, /tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log",
+        "recorded-generation: P8-XCODEGEN-FINAL, XcodeGen 2.46.0 generated the current project twice identically; PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; all four schemes and NativeShareOutcome target membership verified, /tmp/RuneScribe-P8-final-package.yGz7qs/{xcodegen-first.log,xcodegen-second.log,generated-second.sha256}"
       ],
       "pending": []
     },
@@ -880,7 +880,7 @@
         "recorded-runtime: P7-NO-NETWORK-SIMULATOR-1, at 2026-08-08T20:15:22Z isolated production PID 72167 had run 00:40 and lsof -nP -a -p 72167 -i returned no Internet socket rows",
         "recorded-runtime: P7-NO-NETWORK-SIMULATOR-2, at 2026-08-08T20:19:48Z fresh isolated production PID 73536 had run 00:25 and lsof -nP -a -p 73536 -i returned no Internet socket rows",
         "scope: runtime evidence is two bounded iOS Simulator observation windows across separate product launches. No fresh mac process was launched under the unattended no-login-Keychain boundary; macOS is inferred from the zero-API/dependency/capability audit, direct no-CFNetwork/Network linkage inspection of the mac Release executable, and shared implementation rather than a separate mac socket trace.",
-        "recorded-run: P7-SHIPPING-RELEASE-FINAL, 48/48 checks passed; exact per-slice entitlements contained no unapproved capability, bundled Mach-O files linked only canonical platform system libraries, and both products contained one expected main executable with no Forsetti binary or dynamic linkage, /tmp/RuneScribe-release-gate-20260808.cTIuQe/shipping-products.log"
+        "recorded-run: P8-SHIPPING-RELEASE-FINAL, 50/50 checks passed; exact per-slice entitlements contained no unapproved capability, bundled Mach-O files linked only canonical platform system libraries, and both products contained one expected main executable with no Forsetti binary or dynamic linkage, /tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log"
       ],
       "pending": []
     },
@@ -895,15 +895,16 @@
       ],
       "status": "passed-automated-and-manual",
       "evidence": [
-        "test-source: Packages/RuneScribeArchitecture/Tests/UIModuleTests.testModuleProvidesExactlyOneRuntimePresentedRootContribution",
+        "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/UIModuleTests.swift, UIModuleTests.testFactoryCreatesFreshModulesOnDemandWithoutPresentingRoot",
+        "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/ArchitectureIntegrationTests.swift, ArchitectureIntegrationTests.testBundledSkeletonBootsNonUIBeforeExactlyOneUI",
         "test-source: RuneScribTests/RuntimeCompositionTests.testCompositionPublishesRootAcrossStartStopAndRestart",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
         "recorded-manual: P5-MACOS-SMOKE, live 600x720 Rune Scribe window with no framework UI",
         "recorded-run: P7-VIEW-PARITY-FOCUSED, 10 product-only states rendered, 1 test, 0 failures, /tmp/RuneScribe-P7-view-parity-final.r1mq2W/swift-test.log",
         "recorded-manual: P7-MACOS-PRODUCT-SMOKE, visible alpha=1 Rune Scribe window at 540x649 with no module chooser, framework dashboard, or diagnostics",
         "recorded-manual: P7-IOS-SIMULATOR-SMOKE-FINAL, production splash and PIN root contain no framework administration UI, /tmp/RuneScribe-P7-ios-smoke-final.8E3JZq/{launch,content}.png",
-        "recorded-run: P7-SHIPPING-RELEASE-FINAL, both current Release products contained only the expected main Mach-O executable, no test-only debug dylib, and no Forsetti binary or dynamic linkage within 48/48 passed checks, /tmp/RuneScribe-release-gate-20260808.cTIuQe/shipping-products.log"
+        "recorded-run: P8-SHIPPING-RELEASE-FINAL, both current Release products contained only the expected main Mach-O executable, no test-only debug dylib, no RuneScribeTestSupport symbols, and no Forsetti binary or dynamic linkage within 50/50 passed checks; the exact graph limits RuneScribeTestSupport to the three Xcode test consumers and two Swift package test consumers, /tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log"
       ],
       "pending": []
     },
@@ -919,12 +920,12 @@
       "status": "passed-automated",
       "evidence": [
         "test-source: RuneScribIOSUITests/RuneScribeParityUITests.testFreshInstallExercisesPrimaryProductFlows",
-        "recorded-run: P7-IOS-PARITY-FINAL, the current isolated iPhone UI completed strict sufficient-description, hit-region, trait, and text-clipping audits across import confirmation, workspace, Settings, Contacts, Cipher Library, and decoded-message states; the full rail passed 1/1 with 0 failures/skips in 196.493s, /tmp/RuneScribe-ios-parity-presenter-final.h64h8X/IOSParity.xcresult",
-        "recorded-run: P7-IOS-IPAD-PARITY-FINAL, erased iPad Pro 11-inch (M5) Simulator at accessibility-extra-extra-extra-large completed representative strict audits plus the full contact/cipher/PIN/lifecycle/import/reply rail in portrait and landscape; 1/1 passed, 0 failures/skips in 203.032s, /tmp/RuneScribe-ios-parity-ipad-final.5kVld1/IOSParity-iPad.xcresult",
+        "recorded-run: P8-IOS-PARITY-FINAL, the current isolated iPhone UI completed strict sufficient-description, hit-region, trait, and text-clipping audits across import confirmation, workspace, Settings, Contacts, Cipher Library, and decoded-message states; the full rail passed 1/1 with 0 failures/skips in 216.666s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPhone.xcresult",
+        "recorded-run: P8-IOS-IPAD-PARITY-FINAL, erased iPad Pro 11-inch (M5) Simulator at accessibility-extra-extra-extra-large completed representative strict audits plus the full contact/cipher/PIN/lifecycle/import/reply rail in portrait and landscape; 1/1 passed, 0 failures/skips in 223.516s, /tmp/RuneScribe-P8-final-ios.87OHyd/IOSParity-iPad.xcresult",
         "test-source: RuneScribMacParityTests/RuneScribeMacParityTests.testRealViewsRenderWithFocusableWorkspaceAndExactCommandCatalog",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeCommandCatalogTests.swift, RuneScribeCommandCatalogTests.testMacCommandSurfaceAndPrimaryShortcutRemainExact",
-        "recorded-run: P7-MAC-PARITY-FINAL, real RootView and SettingsView rendered to retained PNGs; the in-process AppKit key-view chain contained at least three views, exposed focusable controls, accepted first responder, and matched production-consumed command descriptors; 3/3 passed, 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS-Parity.xcresult",
-        "recorded-run: P7-PACKAGE-FINAL, production-consumed Settings, Cipher Library, and primary keyboard command descriptors passed within 283/283 package tests, /tmp/RuneScribe-P7-final-current-package.anKJx2/swift-test.log",
+        "recorded-run: P8-MAC-PARITY-FINAL, real RootView and SettingsView rendered to retained PNGs; the in-process AppKit key-view chain contained at least three views, exposed focusable controls, accepted first responder, and matched production-consumed command descriptors; 3/3 passed, 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS-Parity.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, production-consumed Settings, Cipher Library, and primary keyboard command descriptors passed within 283/283 package tests, /tmp/RuneScribe-P8-final-package.yGz7qs/swift-test.log",
         "scope: no macOS AX, VoiceOver, System Events, TCC, CGEvent, Keychain, or operator permission was invoked; macOS evidence is the real shared views' prompt-free key-view/focus behavior and exact command consumption, paired with strict live audits of the shared semantic controls on iPhone and AXXXL iPad"
       ],
       "pending": []
@@ -945,11 +946,11 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/PlatformAdapterTests.testBundleResourceLocatorUsesTheExplicitHostBundle",
         "test-source: RuneScribTests/CompatibilityBaselineTests.testBundledFontMatchesFixedSHA256",
         "test-source: RuneScribTests/CompatibilityBaselineTests.testSplashAndMetalLibraryRemainHostResources",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
-        "recorded-run: P7-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-final-mac-presenter.Widumf/RuneScrib-macOS.xcresult",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
+        "recorded-run: P8-MACOS-FINAL, 8/8 total tests (7 hosted plus 1 architecture guard), 0 failures, /tmp/RuneScribe-P8-final-mac.MN3k9e/RuneScrib-macOS.xcresult",
         "test-source: Packages/RuneScribeArchitecture/Tests/RuneScribeUISessionTests.testRepresentativeUserFacingViewsRenderForParityInspection",
-        "recorded-build: P7-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/GenericBuild-final.xcresult",
-        "recorded-run: P7-SHIPPING-RELEASE-FINAL, both products contain valid asset catalogs, icons, fixed-digest font, splash video, Metal library, and manifests, 48/48 checks, /tmp/RuneScribe-release-gate-20260808.cTIuQe/shipping-products.log",
+        "recorded-build: P8-IOS-GENERIC-FINAL, unsigned generic iOS Simulator build succeeded with the current presenter code, /tmp/RuneScribe-P8-final-ios.87OHyd/GenericBuild.xcresult",
+        "recorded-run: P8-SHIPPING-RELEASE-FINAL, both products contain valid asset catalogs, icons, fixed-digest font, splash video, Metal library, and manifests, 50/50 checks, /tmp/RuneScribe-P8-release-final.XsJS4P/shipping-products-50-of-50.log",
         "recorded-manual: P7-VIEW-PARITY-INSPECTION, colors and Runic font inspected across 10 PNG states, /tmp/RuneScribe-P7-view-parity-final.r1mq2W/*.png",
         "recorded-manual: P7-IOS-SIMULATOR-SMOKE-FINAL, bundled splash and production content rendered, /tmp/RuneScribe-P7-ios-smoke-final.8E3JZq/{launch,content}.png"
       ],
@@ -974,9 +975,9 @@
         "test-source: Packages/RuneScribeArchitecture/Tests/AppLockServiceTests.testSeededLegacyPINAndThrottleRestoreColdLockedState",
         "test-source: Packages/RuneScribeArchitecture/Tests/P4BApplicationServiceTests.testExistingInstallLoadsTogetherWithoutResetDuplicateOrStartupRewrite",
         "test-source: RuneScribIOSTests/KeychainMigrationTests.testSimulatorLoadsFrozenLegacyLibraryThroughAppleKeychainStore",
-        "recorded-run: P7-PACKAGE-FINAL, current presenter SHA-256 a4479b27491ddbd70d1adcf85f2fdf3ea0ef030f4543a4b3e321b887f6e32ca2 compiled; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P7-final-current-package.anKJx2/{swift-test.log,check-architecture.log,git-diff-check.log,warnings-errors.log}",
+        "recorded-run: P8-PACKAGE-FINAL, generated PBX SHA-256 5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30; 283/283 package tests and 17/17 architecture checks passed with 0 failures, a clean diff, and 0/0 warning/error census, /tmp/RuneScribe-P8-final-package.yGz7qs/{swift-test.log,check-architecture.log,git-diff-check.log,warning-error-census.log}",
         "recorded-run: P7-EXISTING-INSTALL-FOCUSED, one isolated environment loaded legacy library/key bytes, active cipher, PIN/throttle, encrypted contacts/association, imported font/mappings, and preferences with zero startup writes, resets, or duplicates; 1 test, 0 failures, 2026-08-08T19:54:12Z",
-        "recorded-run: P7-IOS-HOSTED-FINAL, frozen library loaded without rewrite through an isolated Simulator namespaced AppleKeychainStore in 0.024s within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation), /tmp/RuneScribe-ios-presenter-final-build.xjKzZl/HostedTests-final.xcresult",
+        "recorded-run: P8-IOS-HOSTED-FINAL, frozen library loaded without rewrite through an isolated Simulator namespaced AppleKeychainStore in 0.028s within 18/18 hosted iOS tests (5 AppHostRouting, 1 KeychainMigration, 3 NativeShareOutcome, and 9 PlatformPresentation), /tmp/RuneScribe-P8-final-ios.87OHyd/IOSHosted.xcresult",
         "recorded-manual: P7-IOS-SIMULATOR-SMOKE-FINAL, installed production state reached existing-user PIN root after splash, /tmp/RuneScribe-P7-ios-smoke-final.8E3JZq/{launch,content}.png"
       ],
       "pending": []

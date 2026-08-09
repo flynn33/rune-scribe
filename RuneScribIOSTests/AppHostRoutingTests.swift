@@ -3,6 +3,7 @@ import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
 import RuneScribeRuntimeCore
+import RuneScribeTestSupport
 import RuneScribeUIRuntime
 import UIKit
 import XCTest
@@ -122,18 +123,15 @@ final class AppHostRoutingTests: XCTestCase {
 
     func testSystemClipboardAdapterRoundTripsWithinHostedApplicationWithoutPastePrompt() async throws {
         let clipboard = SystemClipboardService()
-        let originalChangeCount = clipboard.changeCountSynchronously()
+        let originalChangeCount = await clipboard.changeCount()
         defer {
             UIPasteboard.general.items = []
         }
-        try clipboard.setStringSynchronously(Self.clipboardCipherURL.absoluteString)
-        XCTAssertEqual(
-            clipboard.stringSynchronously(),
-            Self.clipboardCipherURL.absoluteString
-        )
-        XCTAssertGreaterThan(clipboard.changeCountSynchronously(), originalChangeCount)
-        let asynchronousString = await clipboard.string()
-        XCTAssertEqual(asynchronousString, Self.clipboardCipherURL.absoluteString)
+        try await clipboard.setString(Self.clipboardCipherURL.absoluteString)
+        let string = await clipboard.string()
+        let updatedChangeCount = await clipboard.changeCount()
+        XCTAssertEqual(string, Self.clipboardCipherURL.absoluteString)
+        XCTAssertGreaterThan(updatedChangeCount, originalChangeCount)
     }
 
     private func makeFixture(startAttempt: HostedStartAttempt? = nil) -> AppHostFixture {
