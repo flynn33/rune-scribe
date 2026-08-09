@@ -1,5 +1,15 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "controllingPolicy": {
+    "path": "docs/architecture/FORSETTI_CONTROLLING_POLICY.md",
+    "sha256": "8392d9ad457ccb2afbf9e872d591ec887d383f4b8617236179d624d2f792fb53"
+  },
+  "reportOnlyGuard": {
+    "catalogPath": "scripts/forsetti-compliance-rules.json",
+    "checkerPath": "scripts/check-forsetti-compliance.sh",
+    "ruleCount": 20,
+    "mode": "report-only"
+  },
   "architecturePackagePath": "Packages/RuneScribeArchitecture",
   "requiredProducts": [
     "RuneScribeContracts",

@@ -1,17 +1,17 @@
 # Rune Scribe Module Graph
 
+> **Superseded architecture snapshot:** This graph records the pre-remediation layout. The [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md) governs current boundaries; historical target, build, and test observations remain evidence.
+
 ## Graph conventions
 
 In the compile-time graph below, `A --> B` means “A imports or links B.” The graph is intentionally acyclic inside the app-owned package. The logical runtime graph is different: it shows which component registers, publishes, resolves, activates, or presents another component through neutral interfaces.
 
 This graph describes committed cleanup snapshot `01e2fcf655a3139a856787fc96f17a58db3f3ad0`.
 
-> **Locked-roadmap supersession.** This is the verified current graph, not the final
-> Codex graph. `RuneScribeRuntimeCore` and `RuneScribeUIRuntime` are transitional. Once
-> the audited upstream gate clears, the host and modules migrate to official Forsetti
-> released public products under
-> [`ADR-RS-001`](decisions/ADR-RS-001-module-packaging-and-target-graph.md). Until then,
-> no unused dependency, private fork, or copied framework source is added.
+> **Current interpretation.** This is the verified historical graph, not the final
+> compliant call graph. `RuneScribeRuntimeCore` remains app-owned and is remediated into
+> the permanent per-call control plane. No external Forsetti dependency, binary, source
+> copy, fetch, or local checkout is permitted.
 
 ## Physical compile-time graph
 
@@ -228,6 +228,6 @@ The generated project adds:
 | `RuneScribIOSUITests` | iPhone/iPad product parity flow |
 | `RuneScribMacParityHost` / `RuneScribMacParityTests` | Isolated macOS product and native-share parity validation |
 
-[`scripts/check-architecture.sh`](../../scripts/check-architecture.sh) enforces the current six shipping products, the separately classified test-only product, target edges, import allowlists, manifest count, exact shipping-app linkage, thin-host thresholds, singleton/notification closure, and the present blocked-gate prohibition on Forsetti package material. When the official upstream release gate clears, that rule must be replaced by a conditional check for the one pinned official dependency while private forks, vendoring, and copies remain prohibited. [`scripts/architecture-ratchet.json`](../../scripts/architecture-ratchet.json) makes the current structural expectations explicit. [`scripts/check-shipping-products.sh`](../../scripts/check-shipping-products.sh) separately proves that built app products do not link or embed Test Support.
+[`scripts/check-architecture.sh`](../../scripts/check-architecture.sh) enforces the current shipping products, test-only product classification, target edges, import allowlists, manifest count, shipping-app linkage, thin-host thresholds, singleton/notification closure, and the permanent prohibition on external Forsetti package material. [`scripts/architecture-ratchet.json`](../../scripts/architecture-ratchet.json) makes structural expectations explicit. [`scripts/check-shipping-products.sh`](../../scripts/check-shipping-products.sh) separately proves that built app products do not link or embed Test Support.
 
 At the recorded snapshot, the package suite passed 283 of 283 tests and the architecture ratchet passed 17 of 17 checks under `/tmp/RuneScribe-P8-final-package.yGz7qs`; the current Release inspection passed 50 of 50 checks under `/tmp/RuneScribe-P8-release-final.XsJS4P`. Negative fixtures under `/tmp/RuneScribe-P8-cleanup.bxBuUN` and `/tmp/RuneScribe-P8-guard-audit.4gkAfP` confirm that both guards fail on source-allowlist drift, generated-project drift, a shipping target linked to `RuneScribeTestSupport`, or a shipping package target made to depend on it.

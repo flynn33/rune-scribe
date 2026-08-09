@@ -1,5 +1,7 @@
 # ADR-RS-007: Themed Follow-Up Transport
 
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
 **Status:** Accepted; implementation deferred to Wave 4
 **Date:** 2026-08-09
 

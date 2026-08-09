@@ -1,17 +1,16 @@
 # Rune Scribe Contracts and Capabilities
 
+> **Authority notice:** This is a historical description of the pre-remediation contract surface. Architectural interpretation is governed by the [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md); measured compatibility and test evidence remains historical evidence.
+
 ## Boundary model
 
 [`RuneScribeContracts`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeContracts) is the only product-semantic surface shared by Core, UI, Platform, and hosts. It is Foundation-first and contains values and protocols, not implementations or orchestration.
 
 This report records committed cleanup snapshot `01e2fcf655a3139a856787fc96f17a58db3f3ad0`.
 
-> **Locked-roadmap supersession.** These are the verified current app-owned contracts.
-> The local runtime is transitional and must migrate to official Forsetti released
-> public products after the upstream gate in
-> [`ADR-RS-001`](decisions/ADR-RS-001-module-packaging-and-target-graph.md) clears. The
-> neutral Rune Scribe product contracts remain app-owned; no unused dependency, private
-> fork, or copied framework implementation is allowed during the block.
+> **Current interpretation.** These are verified historical app-owned contracts, not a
+> complete per-call mediation boundary. The app-owned runtime is permanent. External
+> Forsetti packages, binaries, source copies, fetches, and local checkouts are prohibited.
 
 The boundary follows four rules:
 
@@ -203,12 +202,9 @@ Pattern B permits exactly one eligible user-facing UI module. A new UI contribut
 4. Prove zero/one/two eligible-UI behavior, root selection, boot recovery, stop cleanup, accessibility, platform presentation, and feature parity.
 5. Update manifests, descriptors, `project.yml`, architecture scans, resource membership, and documentation together.
 
-For either path, do not add an unpinned or unused Forsetti package, a private fork,
-copied framework source, a runtime plugin downloader, a global registry, a cross-module
-notification, or product-facing module administration UI. The one official released
-Forsetti dependency required by the locked roadmap is allowed only after the audited
-gate clears and the package graph, policy, manifests, composition, guards, and tests are
-updated together.
+For either path, do not add an external Forsetti package, binary, source copy, fetch,
+local checkout, runtime plugin downloader, global registry, cross-module notification,
+or product-facing module administration UI. The prohibition is permanent.
 
 ## Verification entry points
 

@@ -1,42 +1,35 @@
 # ADR-RS-001: Module Packaging and Target Graph
 
-**Status:** Accepted; upstream integration blocked
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
+**Status:** Superseded by the controlling Forsetti policy
 **Date:** 2026-08-09
 
 ## Decision
 
-Retain the macOS and iOS XcodeGen application targets as thin composition roots and
-retain app-owned implementation targets in the local Swift package. The final Codex
-runtime graph will consume official Forsetti public products plus
-`RuneScribeContracts`. No runtime implementation target may import another runtime
-implementation target.
+The historical decision retained the macOS and iOS XcodeGen application targets as
+thin composition roots and retained app-owned implementation targets in the local Swift
+package. Those target-graph and Test Support decisions remain useful. Its planned
+external-framework integration does not.
 
 The host may import factories and platform-adapter products solely to compose the
 runtime. `RuneScribeTestSupport` remains test-only and must never be linked into a
 shipping application or shipping package target.
 
-`RuneScribeRuntimeCore` and `RuneScribeUIRuntime` are transitional app-owned
-infrastructure, not the final upstream integration. The earlier decision in
-[`MigrationDecisions.md`](../MigrationDecisions.md) that Forsetti must never be a
-dependency is superseded for Codex work.
+The controlling replacement makes `RuneScribeRuntimeCore` the permanent app-owned
+control plane. No runtime implementation target may import another runtime module
+implementation, and no external Forsetti dependency is permitted.
 
-## Upstream gate
+## Supersession
 
-The inspected official Forsetti source is commit `f0199a4`, source version `0.1.5`.
-It has no release tag and does not yet expose all required generalized entitlement,
-runtime reconciliation, keyed contribution, opaque resource-resolution, and
-app-defined service APIs. Rune Scribe will not add an unused package dependency or copy
-framework source while that gate is unresolved.
-
-Integration may begin only after an official semantic release exposes those APIs with
-tests and migration documentation. At that point the package graph, manifests,
-composition root, and architecture guard must be changed together.
+The external-release gate and conditional dependency allowance are removed. Required
+entitlement, reconciliation, contribution, resource, settings, I/O, and service
+capabilities must be implemented and tested in the app-owned runtime.
 
 ## Consequences
 
 - The current behavior-preserving Core/UI split remains usable and testable.
-- Current local runtime success is not reported as Wave 0B completion.
-- Direct runtime-module imports, copied framework source, private patches, and
-  developer-machine checkout assumptions remain prohibited.
-- The architecture guard must eventually allow the one pinned official dependency
-  while continuing to reject vendored or privately modified framework code.
+- Historical test and compatibility evidence remains evidence, not current compliance.
+- Direct runtime-module imports, external packages, copied framework source, binaries,
+  fetch scripts, submodules, and developer-machine checkout assumptions are prohibited.
+- The architecture guard must enforce that prohibition permanently.

@@ -1,5 +1,7 @@
 # ADR-RS-009: Privacy-Safe Relationship Token
 
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
 **Status:** Accepted in part; cross-device token reconciliation blocked
 **Date:** 2026-08-09
 

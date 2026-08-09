@@ -1,5 +1,11 @@
 # Rune Scribe Forsetti Compliance Report
 
+> **Historical qualification record:** Build, test, parity, compatibility, and device
+> observations remain evidence for the recorded snapshot. Architectural conclusions
+> based on provider lookup or retained service objects are superseded and are not current
+> compliance claims. The current authority is the
+> [controlling Forsetti policy](../architecture/FORSETTI_CONTROLLING_POLICY.md).
+
 ## Executive result
 
 **Status:** `CODE COMPLETE — EXTERNAL VALIDATION REMAINS`

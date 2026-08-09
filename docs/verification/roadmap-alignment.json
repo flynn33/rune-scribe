@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "asOfDate": "2026-08-09",
   "authority": {
     "systemSpec": {
@@ -12,28 +12,34 @@
     },
     "repositoryAuditBaseline": "b7e3da24a6e0a78fe1866c7b8f2bafb8140ea14e"
   },
-  "forsettiGate": {
-    "status": "blocked-upstream",
-    "repositoryURL": "https://github.com/flynn33/Forsetti-Framework-Mac-iOS",
-    "auditedRevision": "f0199a4f2f0becd1372dbfd5db714e85619c88bc",
-    "reportedSourceVersion": "0.1.5",
-    "releasedTag": null,
-    "blockers": [
-      "The audited revision has no semantic-version release tag.",
-      "Generalized entitlement requirements and composite included, earned, debug, and future-purchase sources are not available as released public APIs.",
-      "Runtime entitlement-change reconciliation is not available as a released public API.",
-      "Keyed content contribution, source identity, lifecycle, duplicate-ID, and capability enforcement APIs are incomplete.",
-      "Opaque module resource resolution and app-defined capability-scoped service registration APIs are incomplete.",
-      "The required neutral Pattern B sample, framework tests, migration notes, and semantic release are absent."
-    ],
-    "migrationPolicy": "no-private-fork"
+  "sourcePriority": [
+    "active operator instructions",
+    "active implementation package and machine-readable controls",
+    "actual local repository behavior and compatibility identifiers",
+    "Forsetti Compliance Audit v2.0 factual findings",
+    "locked product decisions not superseded by later operator clarification",
+    "third-party audit nonconflicting facts only",
+    "general conventions"
+  ],
+  "forsettiPolicy": {
+    "status": "active",
+    "implementationOwnership": "app-owned",
+    "externalDependencyAllowed": false,
+    "perCallRuntimeMediationRequired": true,
+    "runtimeOwnsOperationalIO": true,
+    "runtimeOwnsPersistentSettings": true,
+    "uiModuleOwnsViews": true,
+    "controllingPolicy": {
+      "path": "docs/architecture/FORSETTI_CONTROLLING_POLICY.md",
+      "sha256": "8392d9ad457ccb2afbf9e872d591ec887d383f4b8617236179d624d2f792fb53"
+    }
   },
   "statusVocabulary": {
     "satisfied": "The work package is implemented and has repository evidence.",
-    "transitional": "The behavior exists in app-owned infrastructure but the official Forsetti migration remains required.",
+    "transitional": "The behavior exists in app-owned infrastructure but does not yet meet the controlling runtime policy.",
     "partial": "Some required behavior or evidence exists, but the work package is not complete.",
     "decision-frozen": "The governing decision is accepted; production implementation remains outstanding.",
-    "blocked-upstream": "Completion requires an official Forsetti release that does not yet exist.",
+    "superseded": "The historical work package is retained for traceability but no longer directs implementation.",
     "blocked-device": "Completion requires physical-device or destination evidence that unattended local tests cannot supply.",
     "not-started": "No qualifying production implementation exists.",
     "not-applicable": "The conditional task has no approved input to include."
@@ -62,36 +68,36 @@
       "wave": "0B",
       "dependsOn": ["BAS-007"],
       "items": [
-        {"id":"FOR-001","status":"blocked-upstream","dependsOn":["BAS-007"],"evidence":["#/forsettiGate","docs/architecture/decisions/ADR-RS-001-module-packaging-and-target-graph.md"],"notes":"Commit is audit-pinned, but no released semantic version can be integrated."},
-        {"id":"FOR-002","status":"blocked-upstream","dependsOn":["FOR-001"],"evidence":["#/forsettiGate"],"notes":"The required released Pattern B bootstrap must be validated upstream."},
-        {"id":"FOR-003","status":"blocked-upstream","dependsOn":["FOR-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift","#/forsettiGate"],"notes":"Rune Scribe has neutral generalized requirement descriptors, but the framework public API is missing."},
-        {"id":"FOR-004","status":"blocked-upstream","dependsOn":["FOR-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift","#/forsettiGate"],"notes":"Consumer contracts name composite sources; released framework providers and composition do not exist."},
-        {"id":"FOR-005","status":"blocked-upstream","dependsOn":["FOR-003","FOR-004"],"evidence":["#/forsettiGate"],"notes":"Safe activation reconciliation must be provided and tested upstream."},
-        {"id":"FOR-006","status":"blocked-upstream","dependsOn":["FOR-001"],"evidence":["#/forsettiGate"],"notes":"Released keyed content-contribution registration is missing."},
-        {"id":"FOR-007","status":"blocked-upstream","dependsOn":["FOR-001"],"evidence":["#/forsettiGate"],"notes":"Released opaque module resource resolution is missing."},
-        {"id":"FOR-008","status":"blocked-upstream","dependsOn":["FOR-001"],"evidence":["#/forsettiGate"],"notes":"Released app-defined capability-scoped service registration is missing."},
-        {"id":"FOR-009","status":"blocked-upstream","dependsOn":["FOR-006","FOR-007","FOR-008"],"evidence":["#/forsettiGate"],"notes":"The required identity, lifecycle, duplicate-ID, and capability enforcement is incomplete upstream."},
-        {"id":"FOR-010","status":"blocked-upstream","dependsOn":["FOR-005","FOR-009"],"evidence":["#/forsettiGate"],"notes":"The neutral five-module sample is absent."},
-        {"id":"FOR-011","status":"blocked-upstream","dependsOn":["FOR-010"],"evidence":["#/forsettiGate"],"notes":"Tests, documentation, migration notes, and a semantic release are required upstream."}
+        {"id":"FOR-001","status":"superseded","dependsOn":["BAS-007"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md","docs/architecture/decisions/ADR-RS-001-module-packaging-and-target-graph.md"],"notes":"The former external-version integration task is superseded by the permanent app-owned policy."},
+        {"id":"FOR-002","status":"superseded","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"The former external bootstrap task is superseded; bootstrap validation belongs to the app-owned runtime."},
+        {"id":"FOR-003","status":"superseded","dependsOn":["FOR-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift","docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Generalized requirements remain product needs but are implemented in the app-owned runtime."},
+        {"id":"FOR-004","status":"superseded","dependsOn":["FOR-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift","docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Composite sources remain product needs but are implemented in the app-owned runtime."},
+        {"id":"FOR-005","status":"superseded","dependsOn":["FOR-003","FOR-004"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Live eligibility reconciliation remains required local runtime work."},
+        {"id":"FOR-006","status":"superseded","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Keyed contribution registration remains required local runtime work."},
+        {"id":"FOR-007","status":"superseded","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Opaque resource resolution remains required local runtime work."},
+        {"id":"FOR-008","status":"superseded","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Capability-scoped runtime ports remain required local work."},
+        {"id":"FOR-009","status":"superseded","dependsOn":["FOR-006","FOR-007","FOR-008"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Identity, lifecycle, duplicate-ID, and capability enforcement remain required local work."},
+        {"id":"FOR-010","status":"superseded","dependsOn":["FOR-005","FOR-009"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"The provider sample remains a local runtime conformance requirement."},
+        {"id":"FOR-011","status":"superseded","dependsOn":["FOR-010"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md","docs/architecture/ForsettiSupersessionIndex.md"],"notes":"Tests, documentation, migration notes, and guards remain local repository deliverables."}
       ]
     },
     {
       "prefix": "MOD",
       "wave": "1A",
-      "dependsOn": ["FOR-011"],
+      "dependsOn": ["BAS-007"],
       "items": [
         {"id":"MOD-001","status":"partial","dependsOn":["BAS-007"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/DomainIdentifiers.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift"],"notes":"Stable Codex-domain, package, event, operation, relationship, and entitlement vocabulary exists; service and theme contracts remain."},
-        {"id":"MOD-002","status":"transitional","dependsOn":["FOR-011","MOD-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json","RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"],"notes":"App-owned manifests and factories work; official Forsetti manifest/registry migration is blocked."},
-        {"id":"MOD-003","status":"transitional","dependsOn":["MOD-002"],"evidence":["RuneScrib/AppHost/RuneScribApp.swift","RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"],"notes":"Hosts are thin with one UI root under the local runtime; official Forsetti bootstrap remains."},
-        {"id":"MOD-004","status":"transitional","dependsOn":["MOD-001","MOD-002"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule"],"notes":"The current domain and security behavior is inside a Core service module; activation must migrate upstream."},
-        {"id":"MOD-005","status":"transitional","dependsOn":["MOD-001","MOD-002"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule","Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime"],"notes":"One user-facing UI module exists; the local UI runtime is transitional."},
+        {"id":"MOD-002","status":"transitional","dependsOn":["MOD-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json","RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"],"notes":"App-owned manifests and factories exist but require standard ports and catalog validation."},
+        {"id":"MOD-003","status":"transitional","dependsOn":["MOD-002"],"evidence":["RuneScrib/AppHost/RuneScribApp.swift","RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"],"notes":"Hosts are thin with one UI root, but bootstrap and ingress must satisfy the controlling runtime policy."},
+        {"id":"MOD-004","status":"transitional","dependsOn":["MOD-001","MOD-002"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule"],"notes":"Domain and security behavior is inside Core; activation and I/O must remain runtime-mediated per operation."},
+        {"id":"MOD-005","status":"transitional","dependsOn":["MOD-001","MOD-002"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule","Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime"],"notes":"One user-facing UI module exists; its operational I/O, Settings, and provider retention require remediation."},
         {"id":"MOD-006","status":"satisfied","dependsOn":["MOD-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/PlatformContracts.swift","Packages/RuneScribeArchitecture/Sources/RuneScribePlatform"],"notes":"Keychain, repositories, contacts, fonts, lock dependencies, and intake are behind neutral adapters."},
         {"id":"MOD-007","status":"satisfied","dependsOn":["MOD-004","MOD-005","MOD-006"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift"],"notes":"Composition and constructor-injected facades replaced cross-boundary product singletons."},
         {"id":"MOD-008","status":"satisfied","dependsOn":["MOD-001","MOD-007"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/SafeEvents.swift","scripts/architecture-ratchet.json"],"notes":"Typed state, routes, events, and messages replace app-owned cross-module notifications."},
         {"id":"MOD-009","status":"satisfied","dependsOn":["MOD-001","MOD-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/InboundInputs.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/SerialInboundInputForwarder.swift"],"notes":"Scene, file, URL, lifecycle, and menu input use the host ingress rail."},
         {"id":"MOD-010","status":"satisfied","dependsOn":["MOD-003","MOD-009"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift","docs/verification/feature-parity-matrix.json"],"notes":"Splash and lock gating retain ordered pending inputs."},
         {"id":"MOD-011","status":"satisfied","dependsOn":["MOD-004","MOD-005"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule","Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule"],"notes":"SwiftUI, MessageUI, Metal, and presentation adapters are excluded from Core."},
-        {"id":"MOD-012","status":"satisfied","dependsOn":["MOD-002","MOD-004","MOD-005","MOD-011"],"evidence":["scripts/check-architecture.sh","scripts/architecture-ratchet.json"],"notes":"Architecture checks reject cross imports, shared state, and unapproved notifications; the dependency rule must become conditional at official integration."},
+        {"id":"MOD-012","status":"satisfied","dependsOn":["MOD-002","MOD-004","MOD-005","MOD-011"],"evidence":["scripts/check-architecture.sh","scripts/architecture-ratchet.json"],"notes":"Historical architecture checks reject cross imports, shared state, and unapproved notifications; the external dependency prohibition is permanent."},
         {"id":"MOD-013","status":"satisfied","dependsOn":["MOD-002","MOD-003","MOD-012"],"evidence":["RuneScribTests","RuneScribIOSTests","RuneScribMacParityTests","docs/verification/p7-test-matrix.json"],"notes":"Hosted production-composition tests supplement package tests rather than replacing boot coverage."}
       ]
     },
@@ -125,12 +131,12 @@
     {
       "prefix": "THM",
       "wave": "2",
-      "dependsOn": ["FOR-011","MOD-001","DOM-004"],
+      "dependsOn": ["MOD-001","DOM-004"],
       "items": [
-        {"id":"THM-001","status":"not-started","dependsOn":["FOR-011","MOD-001"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No Theme descriptor schema or compatibility version exists."},
-        {"id":"THM-002","status":"not-started","dependsOn":["FOR-011","MOD-002","THM-001"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No Theme Coordinator product or target exists."},
-        {"id":"THM-003","status":"not-started","dependsOn":["FOR-011","THM-002"],"evidence":["#/forsettiGate"],"notes":"Keyed contribution registration awaits the upstream API and coordinator."},
-        {"id":"THM-004","status":"not-started","dependsOn":["FOR-011","THM-002"],"evidence":["#/forsettiGate","docs/architecture/decisions/ADR-RS-010-theme-resource-budgets.md"],"notes":"Budgets are frozen, but opaque resolution and validation are not implemented."},
+        {"id":"THM-001","status":"not-started","dependsOn":["MOD-001"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No Theme descriptor schema or compatibility version exists."},
+        {"id":"THM-002","status":"not-started","dependsOn":["MOD-002","THM-001"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No Theme Coordinator product or target exists."},
+        {"id":"THM-003","status":"not-started","dependsOn":["THM-002"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Keyed contribution registration and its runtime registry are not implemented."},
+        {"id":"THM-004","status":"not-started","dependsOn":["THM-002"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md","docs/architecture/decisions/ADR-RS-010-theme-resource-budgets.md"],"notes":"Budgets are frozen, but opaque runtime resolution and validation are not implemented."},
         {"id":"THM-005","status":"partial","dependsOn":["MOD-005","THM-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneTheme.swift"],"notes":"A UI-owned design system exists; it is not yet driven by a versioned semantic Theme descriptor."},
         {"id":"THM-006","status":"not-started","dependsOn":["THM-003","THM-004","THM-005"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"Base presentation has not been extracted into a Theme Module."},
         {"id":"THM-007","status":"not-started","dependsOn":["THM-006"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"The first placeholder provider does not exist."},
@@ -144,9 +150,9 @@
     {
       "prefix": "PRO",
       "wave": "3",
-      "dependsOn": ["FOR-011","MOD-001","THM-009"],
+      "dependsOn": ["MOD-001","THM-009"],
       "items": [
-        {"id":"PRO-001","status":"not-started","dependsOn":["FOR-011","MOD-001"],"evidence":["Packages/RuneScribeArchitecture/Package.swift","docs/architecture/decisions/ADR-RS-008-progression-persistence.md"],"notes":"Persistence is decided, but no Progression Module or store exists."},
+        {"id":"PRO-001","status":"not-started","dependsOn":["MOD-001"],"evidence":["Packages/RuneScribeArchitecture/Package.swift","docs/architecture/decisions/ADR-RS-008-progression-persistence.md"],"notes":"Persistence is decided, but no Progression Module or store exists."},
         {"id":"PRO-002","status":"partial","dependsOn":["PRO-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift"],"notes":"A bounded privacy-safe versioned event envelope exists; the event catalog does not."},
         {"id":"PRO-003","status":"not-started","dependsOn":["MOD-004","PRO-001","PRO-002"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No Core outbox or Progression dedupe handshake exists."},
         {"id":"PRO-004","status":"partial","dependsOn":["BAS-007","MOD-004","PRO-002"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/DomainIdentifiers.swift","docs/architecture/decisions/ADR-RS-009-relationship-token.md"],"notes":"The opaque token type and derivation policy exist; generation and encrypted lifecycle persistence do not."},
@@ -154,7 +160,7 @@
         {"id":"PRO-006","status":"not-started","dependsOn":["PRO-005"],"evidence":["docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md"],"notes":"The locked catalog is specified but not implemented."},
         {"id":"PRO-007","status":"not-started","dependsOn":["PRO-001","PRO-002"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No ownership, grant, or Encounter records exist."},
         {"id":"PRO-008","status":"not-started","dependsOn":["PRO-005","PRO-006","PRO-007"],"evidence":["docs/architecture/decisions/ADR-RS-008-progression-persistence.md"],"notes":"Atomicity is decided but not implemented."},
-        {"id":"PRO-009","status":"not-started","dependsOn":["FOR-005","PRO-008"],"evidence":["#/forsettiGate"],"notes":"No entitlement snapshot or earned-entitlement bridge exists."},
+        {"id":"PRO-009","status":"not-started","dependsOn":["PRO-008"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"No runtime-owned entitlement snapshot or earned-progression gate bridge exists."},
         {"id":"PRO-010","status":"not-started","dependsOn":["DOM-007","PRO-003","PRO-008"],"evidence":["docs/architecture/decisions/ADR-RS-006-share-route-completion.md"],"notes":"The no-backfill policy is frozen; the idempotent existing-user migration is not implemented."},
         {"id":"PRO-011","status":"not-started","dependsOn":["THM-009","PRO-007"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No Vault Codices view exists."},
         {"id":"PRO-012","status":"not-started","dependsOn":["PRO-007"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No Artifact collection view exists."},

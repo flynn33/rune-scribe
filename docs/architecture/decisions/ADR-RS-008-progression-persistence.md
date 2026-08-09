@@ -1,5 +1,7 @@
 # ADR-RS-008: Progression Persistence
 
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
 **Status:** Accepted; implementation deferred to Wave 3
 **Date:** 2026-08-09
 

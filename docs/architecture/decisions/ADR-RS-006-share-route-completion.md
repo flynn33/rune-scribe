@@ -1,5 +1,7 @@
 # ADR-RS-006: Share-Route Completion Semantics
 
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
 **Status:** Accepted
 **Date:** 2026-08-09
 

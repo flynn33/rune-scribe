@@ -1,5 +1,7 @@
 # ADR-RS-011: Game Center App Store Record Strategy
 
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
 **Status:** Blocked on App Store configuration review
 **Date:** 2026-08-09
 

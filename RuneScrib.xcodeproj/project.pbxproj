@@ -16,6 +16,7 @@
 		34A07D593701D17AEC1FC143 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
 		3648E76D4DC6515672B26F81 /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0856EBE343F18E81979224CE /* RuneScribeRuntimeCore */; };
 		38049FACD09DEBB67B1C6DAF /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
+		3828C5D79EBACBAE2932DCA1 /* ComplianceGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8794218367CD5682362E58C /* ComplianceGuardTests.swift */; };
 		49A2F2518A57128E5F05A105 /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 9C0E34DE3867BB9FDF5211F1 /* RuneScribeUIRuntime */; };
 		50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
 		55BBA4421D3374DFFDED21C7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */; };
@@ -112,6 +113,7 @@
 		C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformPresentationTests.swift; sourceTree = "<group>"; };
 		C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeRuntimeComposition.swift; sourceTree = "<group>"; };
 		C4EDEF8A8D6DD1D6CEEF3BE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		C8794218367CD5682362E58C /* ComplianceGuardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceGuardTests.swift; sourceTree = "<group>"; };
 		CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeMacParityTests.swift; sourceTree = "<group>"; };
 		D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -267,6 +269,7 @@
 			isa = PBXGroup;
 			children = (
 				8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */,
+				C8794218367CD5682362E58C /* ComplianceGuardTests.swift */,
 			);
 			path = RuneScribArchitectureTests;
 			sourceTree = "<group>";
@@ -638,6 +641,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F7A6DCFC817B53A36467433D /* ArchitectureGuardrailTests.swift in Sources */,
+				3828C5D79EBACBAE2932DCA1 /* ComplianceGuardTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
