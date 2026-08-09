@@ -26,6 +26,8 @@ jobs:
             echo 'Xcode 26.2 is required for deterministic verification.' >&2
             exit 1
           fi
+          sudo xcode-select --switch "$DEVELOPER_DIR"
+          test "$(xcode-select -p)" = "$DEVELOPER_DIR"
           echo "DEVELOPER_DIR=$DEVELOPER_DIR" >> "$GITHUB_ENV"
           xcodebuild -version
           xcodebuild -version | grep -Fxq 'Xcode 26.2'
