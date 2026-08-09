@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.35] - 2026-08-09
+
+- Align Rune Scribe architecture with the product roadmap (#36) by @flynn33
+
 ## [1.0.34] - 2026-08-09
 
 - Complete Rune Scribe modular architecture migration (#35) by @flynn33
