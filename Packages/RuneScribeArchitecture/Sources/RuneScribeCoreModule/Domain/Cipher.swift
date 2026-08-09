@@ -1,22 +1,47 @@
-import Foundation
 import CryptoKit
+import Foundation
 
 enum CipherValidationError: Error, Equatable, Sendable {
     case unsupportedFormatVersion(Int)
     case invalidPublicIDLength
     case invalidKeyMaterialLength
-    case invalidDecorativeMapping
+    case invalidSymbolPermutation
     case invalidFontReference
+    case invalidDeliveryState
 }
 
-/// A Rune Scribe cipher: real symmetric encryption key material plus the
-/// decorative rune presentation. Replaces the old permutation-based `RuneKey`/`NamedCipher`.
+enum KeyDeliveryState: String, Codable, Equatable, Sendable {
+    case notLinked
+    case pending
+    case inProgress
+    case completed
+    case migratedUnverified
+
+    var requiresDelivery: Bool {
+        self == .pending
+    }
+
+    var preservesLegacyDeliveryContinuity: Bool {
+        self == .completed || self == .migratedUnverified
+    }
+}
+
+/// Compatibility data that remains Core-owned. A legacy/imported font is a validated
+/// rendering resource, not a Theme Module and never a source of executable behavior.
+struct CipherCompatibilityRecord: Codable, Equatable, Sendable {
+    let originalRecordVersion: Int
+    let legacyFontRef: FontRef?
+}
+
+/// A Rune Scribe cipher record. Cryptographic material and the 32-slot symbol
+/// permutation are intentionally independent from the selected Codex/Script.
 struct Cipher: Codable, Equatable, Identifiable, Sendable {
 
     enum Origin: String, Codable, Sendable { case generated, imported }
 
-    /// Current on-disk schema version for a cipher.
-    static let currentVersion = 1
+    /// v1 stored `decorativeMapping`, `fontRef`, and `delivered`. v2 stores the
+    /// neutral symbol permutation, an explicit delivery state, and compatibility data.
+    static let currentVersion = 2
 
     let id: UUID
     var label: String
@@ -24,39 +49,60 @@ struct Cipher: Codable, Equatable, Identifiable, Sendable {
     let createdAt: Date
     let formatVersion: Int
 
-    /// Non-secret 8-byte identity, used only in the share payload (dedup / updated-cipher
-    /// recognition). Never placed in messages. Never derived from the key.
+    /// Non-secret 8-byte identity used for share-payload deduplication. It is never
+    /// derived from the key and must not be used as a progression relationship token.
     let publicID: Data
 
-    /// The secret AES-256 key (32 bytes). Only ever serialized into the Keychain-encrypted
-    /// library and a user-initiated share payload. Never logged.
+    /// Secret AES-256 key material. It is serialized only in the encrypted library
+    /// and explicit key-bearing share payloads and must never enter diagnostics.
     let keyMaterial: Data
 
-    /// Permutation of 0..<32: `decorativeMapping[value]` is the index into
-    /// `RuneCharacterSet.decorativeAlphabet` that represents that 5-bit value.
-    let decorativeMapping: [Int]
+    /// `symbolPermutation[value]` is the slot in a Script's ordered 32-symbol alphabet
+    /// that represents that five-bit value. Changing a Script never changes this value.
+    let symbolPermutation: [Int]
 
-    /// The rune font this cipher uses for display. Defaults to the bundled font.
-    let fontRef: FontRef
+    /// Local organization metadata. It is not cryptographic material or share metadata.
+    private(set) var contactID: UUID?
 
-    /// The contact this cipher is organized under, if any. Purely organizational metadata —
-    /// setting or clearing it never affects `keyMaterial`. Codable default nil so Phase-1/2
-    /// ciphers (which predate this field) load unchanged.
-    var contactID: UUID?
+    /// Key-exchange continuity is explicit and independent from future progression proof.
+    private(set) var keyDeliveryState: KeyDeliveryState
 
-    /// Whether this cipher's key has been delivered to its linked contact at least once.
-    /// Drives Phase-4 key auto-exchange: a key is embedded in an outgoing message only while
-    /// this is false. Codable default false so pre-Phase-4 ciphers load unchanged.
-    var delivered: Bool
+    let compatibility: CipherCompatibilityRecord
+
+    /// Source-compatible aliases for the legacy domain vocabulary. New code uses
+    /// `symbolPermutation`, `keyDeliveryState`, and the explicit transition methods.
+    var decorativeMapping: [Int] { symbolPermutation }
+    var fontRef: FontRef { compatibility.legacyFontRef ?? .bundled }
+    var delivered: Bool {
+        get { keyDeliveryState.preservesLegacyDeliveryContinuity }
+        set {
+            guard contactID != nil else {
+                keyDeliveryState = .notLinked
+                return
+            }
+            keyDeliveryState = newValue ? .completed : .pending
+        }
+    }
 
     var symmetricKey: SymmetricKey { SymmetricKey(data: keyMaterial) }
 
-    var shortPublicID: String { publicID.map { String(format: "%02x", $0) }.joined().prefix(8).description }
+    var shortPublicID: String {
+        publicID.map { String(format: "%02x", $0) }.joined().prefix(8).description
+    }
 
-    init(id: UUID = UUID(), label: String, origin: Origin, createdAt: Date = Date(),
-         formatVersion: Int = Cipher.currentVersion, publicID: Data, keyMaterial: Data,
-         decorativeMapping: [Int], fontRef: FontRef = .bundled, contactID: UUID? = nil,
-         delivered: Bool = false) {
+    init(
+        id: UUID = UUID(),
+        label: String,
+        origin: Origin,
+        createdAt: Date = Date(),
+        formatVersion: Int = Cipher.currentVersion,
+        publicID: Data,
+        keyMaterial: Data,
+        decorativeMapping: [Int],
+        fontRef: FontRef = .bundled,
+        contactID: UUID? = nil,
+        delivered: Bool = false
+    ) {
         self.id = id
         self.label = label
         self.origin = origin
@@ -64,40 +110,156 @@ struct Cipher: Codable, Equatable, Identifiable, Sendable {
         self.formatVersion = formatVersion
         self.publicID = publicID
         self.keyMaterial = keyMaterial
-        self.decorativeMapping = decorativeMapping
-        self.fontRef = fontRef
+        self.symbolPermutation = decorativeMapping
         self.contactID = contactID
-        self.delivered = delivered
+        if contactID == nil {
+            self.keyDeliveryState = .notLinked
+        } else {
+            self.keyDeliveryState = delivered ? .completed : .pending
+        }
+        self.compatibility = CipherCompatibilityRecord(
+            originalRecordVersion: formatVersion,
+            legacyFontRef: fontRef == .bundled ? nil : fontRef
+        )
+    }
+
+    init(
+        id: UUID = UUID(),
+        label: String,
+        origin: Origin,
+        createdAt: Date = Date(),
+        publicID: Data,
+        keyMaterial: Data,
+        symbolPermutation: [Int],
+        contactID: UUID? = nil,
+        keyDeliveryState: KeyDeliveryState? = nil,
+        compatibility: CipherCompatibilityRecord? = nil
+    ) {
+        self.id = id
+        self.label = label
+        self.origin = origin
+        self.createdAt = createdAt
+        self.formatVersion = Self.currentVersion
+        self.publicID = publicID
+        self.keyMaterial = keyMaterial
+        self.symbolPermutation = symbolPermutation
+        self.contactID = contactID
+        self.keyDeliveryState = keyDeliveryState
+            ?? (contactID == nil ? .notLinked : .pending)
+        self.compatibility = compatibility ?? CipherCompatibilityRecord(
+            originalRecordVersion: Self.currentVersion,
+            legacyFontRef: nil
+        )
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, label, origin, createdAt, formatVersion, publicID, keyMaterial, decorativeMapping, fontRef, contactID, delivered
+        case id, label, origin, createdAt, formatVersion, publicID, keyMaterial
+        case symbolPermutation, keyDeliveryState, compatibility
+        case decorativeMapping, fontRef, contactID, delivered
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        id = try c.decode(UUID.self, forKey: .id)
-        label = try c.decode(String.self, forKey: .label)
-        origin = try c.decode(Origin.self, forKey: .origin)
-        createdAt = try c.decode(Date.self, forKey: .createdAt)
-        formatVersion = try c.decode(Int.self, forKey: .formatVersion)
-        publicID = try c.decode(Data.self, forKey: .publicID)
-        keyMaterial = try c.decode(Data.self, forKey: .keyMaterial)
-        decorativeMapping = try c.decode([Int].self, forKey: .decorativeMapping)
-        fontRef = try c.decodeIfPresent(FontRef.self, forKey: .fontRef) ?? .bundled
-        contactID = try c.decodeIfPresent(UUID.self, forKey: .contactID)
-        delivered = try c.decodeIfPresent(Bool.self, forKey: .delivered) ?? false
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let storedVersion = try container.decode(Int.self, forKey: .formatVersion)
+        guard storedVersion == 1 || storedVersion == Self.currentVersion else {
+            throw CipherValidationError.unsupportedFormatVersion(storedVersion)
+        }
+
+        id = try container.decode(UUID.self, forKey: .id)
+        label = try container.decode(String.self, forKey: .label)
+        origin = try container.decode(Origin.self, forKey: .origin)
+        createdAt = try container.decode(Date.self, forKey: .createdAt)
+        formatVersion = Self.currentVersion
+        publicID = try container.decode(Data.self, forKey: .publicID)
+        keyMaterial = try container.decode(Data.self, forKey: .keyMaterial)
+        contactID = try container.decodeIfPresent(UUID.self, forKey: .contactID)
+
+        if storedVersion == 1 {
+            symbolPermutation = try container.decode([Int].self, forKey: .decorativeMapping)
+            let legacyFont = try container.decodeIfPresent(FontRef.self, forKey: .fontRef) ?? .bundled
+            let wasDelivered = try container.decodeIfPresent(Bool.self, forKey: .delivered) ?? false
+            if contactID == nil {
+                // Legacy code deliberately preserved `delivered` while unlinking a
+                // contact. With no current relationship there is no key-delivery
+                // continuity to preserve and no progression fact to infer.
+                keyDeliveryState = .notLinked
+            } else {
+                keyDeliveryState = wasDelivered ? .migratedUnverified : .pending
+            }
+            compatibility = CipherCompatibilityRecord(
+                originalRecordVersion: storedVersion,
+                legacyFontRef: legacyFont == .bundled ? nil : legacyFont
+            )
+        } else {
+            symbolPermutation = try container.decode([Int].self, forKey: .symbolPermutation)
+            let decodedDeliveryState = try container.decode(
+                KeyDeliveryState.self,
+                forKey: .keyDeliveryState
+            )
+            // An in-flight share lease is process-local. A relaunch cannot prove
+            // completion, so persisted in-progress state recovers to pending.
+            keyDeliveryState = decodedDeliveryState == .inProgress
+                ? .pending
+                : decodedDeliveryState
+            compatibility = try container.decodeIfPresent(
+                CipherCompatibilityRecord.self,
+                forKey: .compatibility
+            ) ?? CipherCompatibilityRecord(
+                originalRecordVersion: Self.currentVersion,
+                legacyFontRef: nil
+            )
+        }
         try validateStoredShape()
     }
 
-    /// A brand-new locally-generated cipher with a random key, id, and decorative mapping.
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(label, forKey: .label)
+        try container.encode(origin, forKey: .origin)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(Self.currentVersion, forKey: .formatVersion)
+        try container.encode(publicID, forKey: .publicID)
+        try container.encode(keyMaterial, forKey: .keyMaterial)
+        try container.encode(symbolPermutation, forKey: .symbolPermutation)
+        try container.encodeIfPresent(contactID, forKey: .contactID)
+        try container.encode(keyDeliveryState, forKey: .keyDeliveryState)
+        try container.encode(compatibility, forKey: .compatibility)
+    }
+
+    mutating func setContactID(_ newContactID: UUID?) {
+        guard newContactID != contactID else { return }
+        contactID = newContactID
+        keyDeliveryState = newContactID == nil ? .notLinked : .pending
+    }
+
+    mutating func beginKeyDelivery() {
+        guard contactID != nil, keyDeliveryState.requiresDelivery else { return }
+        keyDeliveryState = .inProgress
+    }
+
+    mutating func cancelKeyDelivery() {
+        guard contactID != nil, keyDeliveryState == .inProgress else { return }
+        keyDeliveryState = .pending
+    }
+
+    mutating func completeKeyDelivery() {
+        guard contactID != nil else { return }
+        keyDeliveryState = .completed
+    }
+
+    /// A brand-new locally generated cipher with random key material and permutation.
     static func generated(label: String) -> Cipher {
-        var rng = SystemRandomNumberGenerator()   // CSPRNG on Apple platforms
+        var rng = SystemRandomNumberGenerator()
         let key = SymmetricKey(size: .bits256).withUnsafeBytes { Data($0) }
         let publicID = Data((0..<8).map { _ in UInt8.random(in: .min ... .max, using: &rng) })
-        let mapping = Array(0..<32).shuffled(using: &rng)
-        return Cipher(label: label, origin: .generated, publicID: publicID,
-                      keyMaterial: key, decorativeMapping: mapping)
+        return Cipher(
+            label: label,
+            origin: .generated,
+            publicID: publicID,
+            keyMaterial: key,
+            symbolPermutation: Array(0..<32).shuffled(using: &rng)
+        )
     }
 
     private func validateStoredShape() throws {
@@ -110,13 +272,16 @@ struct Cipher: Codable, Equatable, Identifiable, Sendable {
         guard keyMaterial.count == 32 else {
             throw CipherValidationError.invalidKeyMaterialLength
         }
-        guard decorativeMapping.count == 32,
-              Set(decorativeMapping) == Set(0..<32)
+        guard symbolPermutation.count == 32,
+              Set(symbolPermutation) == Set(0..<32)
         else {
-            throw CipherValidationError.invalidDecorativeMapping
+            throw CipherValidationError.invalidSymbolPermutation
         }
         guard fontRef.hasValidWireShape else {
             throw CipherValidationError.invalidFontReference
+        }
+        guard (contactID == nil) == (keyDeliveryState == .notLinked) else {
+            throw CipherValidationError.invalidDeliveryState
         }
     }
 }

@@ -72,7 +72,7 @@ final class ManifestValidationTests: XCTestCase {
         let manifest = try ModuleManifestDecoder.decode(try validManifestData())
 
         XCTAssertEqual(manifest.moduleID, "com.runescribe.module.test")
-        XCTAssertEqual(manifest.moduleVersion, try SemanticVersion("1.0.33"))
+        XCTAssertEqual(manifest.moduleVersion, try SemanticVersion("1.0.34"))
         XCTAssertFalse(manifest.diagnosticsVisibleInProduction)
     }
 
@@ -150,7 +150,7 @@ private func validManifestObject() throws -> [String: Any] {
         "runtimeVersion": "1.0.0",
         "moduleID": "com.runescribe.module.test",
         "displayName": "Test Module",
-        "moduleVersion": "1.0.33",
+        "moduleVersion": "1.0.34",
         "moduleType": "service",
         "supportedPlatforms": ["macOS"],
         "minimumOS": ["macOS": "15.0"],

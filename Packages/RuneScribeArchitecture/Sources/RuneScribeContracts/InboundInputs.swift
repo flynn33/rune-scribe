@@ -9,6 +9,10 @@ public enum RuneScribeWireFormat {
     public static let fileExtension = "runescribe"
     public static let cipherVersion = 3
     public static let messageVersion = 1
+    public static let containerMagic = Data([
+        0x52, 0x53, 0x43, 0x52, 0x50, 0x4B, 0x47, 0x0A,
+    ])
+    public static let containerVersion = 1
 }
 
 public enum InboundDeliverySourceDTO: String, Codable, Hashable, Sendable {

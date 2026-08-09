@@ -12,7 +12,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-130%20passing-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-310%20package%20%7C%2017%20architecture-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -213,94 +213,66 @@ new key. See [Platform notes](docs/platform-notes.md) for the supported import p
 
 ## 🏛 Architecture
 
-Rune Scribe is SwiftUI + Metal, organised into clear layers. All cryptography and
-storage happen on-device; the app itself makes **no network calls**.
+Rune Scribe is a SwiftUI + Metal application split across compile-time package
+boundaries. All cryptography and storage happen on-device; the current shipping app
+makes **no network calls**.
 
 ```mermaid
 flowchart TD
-    subgraph UI["🖼  Views (SwiftUI)"]
-        RV[RootView<br/>splash · lock · link sheets] --> CV[ContentView<br/>encode / decode / send]
-        RV --> VSP[VideoSplashView]
-        RV --> LV[LockView]
-        RV --> ICV[ImportConfirmView]
-        RV --> RMV2[ReceivedMessageView]
-        CV --> CLV[CipherLibraryView]
-        CV --> CTV[ContactsView]
-        CV --> SV[SettingsView]
-        CLV --> QRD[QRDisplaySheet]
-        CLV --> QRS[QRScannerView<br/>iOS]
-        CV --> MCV[MessageComposeView<br/>iOS]
-        CV --> RIT[RuneInscriptionText]
-    end
-
-    subgraph SVC["⚙️  Services"]
-        KM[KeyManager<br/>cipher library]
-        CM[ContactManager]
-        AL[AppLock<br/>PIN]
-        MS[MessageService<br/>compose / read]
-        MC[MessageCryptor<br/>AES-GCM]
-        RC[RuneCodec<br/>base-32]
-        KC[KeychainService]
-        FS[FontStore]
-        LR[LinkRouter]
-        IC[ImportCoordinator]
-        MCO[MessageCoordinator]
-        QRG[QRCodeGenerator]
-    end
-
-    subgraph MOD["📦  Models"]
-        CIP[Cipher<br/>256-bit key]
-        CL[CipherLibrary]
-        CON[Contact]
-        CB[ContactBook]
-        ENV[MessageEnvelope]
-        CSP[CipherSharePayload<br/>129-byte record]
-        MSP[MessageSharePayload]
-        FR[FontRef]
-        RCS[RuneCharacterSet<br/>32 runes]
-    end
-
-    subgraph SYS["🔐  Apple frameworks"]
-        CK[(CryptoKit<br/>AES-GCM · PBKDF2)]
-        KCH[(Keychain)]
-        CNT[(Contacts)]
-        MTK[(Metal / MetalKit)]
-        AVF[(AVFoundation<br/>splash · QR scan)]
-        CIM[(CoreImage<br/>QR generate)]
-        MUI[(MessageUI<br/>iOS)]
-    end
-
-    URL{{runescribe:// · https link}} --> LR
-    LR --> IC --> ICV --> KM
-    LR --> MCO --> RMV2
-    MCO --> MS
-    CV --> MS --> MC & RC
-    MC --> CIP
-    KM --> CL --> CIP --> RCS
-    KM --> KC --> KCH
-    KM --> CSP
-    MCO --> MSP
-    CM --> CB --> CON
-    CM --> KM
-    AL --> KC
-    CIP --> FR --> FS
-    QRD --> QRG --> CIM
-    QRS --> AVF
-    VSP --> AVF
-    MCV --> MUI
-    KM --> CK
-    AL --> CK
-    CM --> CNT
-
-    classDef ui fill:#1A1E30,stroke:#3A7FD5,color:#FFFFFF
-    classDef svc fill:#0E1226,stroke:#D4971A,color:#EEBE45
-    classDef mod fill:#11152a,stroke:#A0A8B8,color:#D6DAE6
-    classDef sys fill:#080A1E,stroke:#A0A8B8,color:#A0A8B8
-    class RV,CV,CLV,CTV,SV,LV,ICV,RMV2,RIT,VSP,QRD,QRS,MCV ui
-    class KM,CM,AL,MS,MC,RC,KC,FS,LR,IC,MCO,QRG svc
-    class CIP,CL,CON,CB,ENV,CSP,MSP,FR,RCS mod
-    class CK,KCH,CNT,MTK,AVF,CIM,MUI sys
+    Host[macOS and iOS hosts<br/>composition · lifecycle · input] --> Runtime[RuneScribeRuntimeCore<br/>transitional runtime]
+    Host --> Platform[RuneScribePlatform<br/>Apple adapters]
+    Runtime --> Core[RuneScribeCoreModule<br/>cipher · contacts · import · security]
+    Runtime --> UI[RuneScribeUIModule<br/>only user-facing UI module]
+    UI --> UIRuntime[RuneScribeUIRuntime<br/>root presentation]
+    Core -. neutral protocols and DTOs .-> Contracts[RuneScribeContracts]
+    UI -. neutral protocols and DTOs .-> Contracts
+    Platform -. neutral protocols and DTOs .-> Contracts
+    TestSupport[RuneScribeTestSupport<br/>test-only in-memory adapters] -. tests only .-> Contracts
 ```
+
+The macOS and iOS hosts are composition roots. They construct platform adapters,
+register module factories, forward lifecycle and inbound input, and present the one UI
+root. Product behavior lives in `RuneScribeCoreModule`; all screens, navigation, and
+platform presentation live in `RuneScribeUIModule`. Runtime modules do not import one
+another, and test support is excluded from shipping products.
+
+`RuneScribeRuntimeCore` and `RuneScribeUIRuntime` are transitional app-owned
+infrastructure. The locked Codex roadmap requires them to be replaced or adapted to an
+official Forsetti release once the required upstream entitlement, contribution, and
+resource APIs are released. No unused framework dependency is declared in the meantime.
+
+See [Module Graph](docs/architecture/ModuleGraph.md),
+[Contracts and Capabilities](docs/architecture/ContractsAndCapabilities.md), and
+[Roadmap Alignment](docs/architecture/RoadmapAlignment.md) for the enforced boundaries
+and current transition status.
+
+---
+
+## 🧭 Codex product roadmap
+
+The locked roadmap evolves Rune Scribe in deliberately separated stages:
+
+1. Preserve current behavior and compatibility fixtures.
+2. Integrate the required official Forsetti release and retain exactly one UI Module.
+3. Separate cipher material from Script presentation and add a typed `.runescribe`
+   container while keeping legacy readers.
+4. Prove one semantic UI scaffold with the Base Codex and two placeholder providers.
+5. Add deterministic local progression, Vault, Archive, achievements, and unlocks.
+6. Add themed Quick Share, Share Builder, and Encounter handling.
+7. Add private iCloud progression sync and optional Game Center reporting.
+8. Replace placeholders with reviewed production themes.
+
+The repository currently contains the behavior-preserving modular foundation. Visible
+Codex, progression, cloud, and Game Center features are not enabled. Wave 0B is blocked
+on an official Forsetti release newer than source version 0.1.5 at commit `f0199a4`;
+that source snapshot has no release tag and lacks the public APIs required by the locked
+roadmap.
+
+The authoritative documents are the
+[Codex System Specification](docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md),
+[implementation roadmap](docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md),
+[roadmap status ledger](docs/verification/roadmap-alignment.json), and
+[architecture decisions](docs/architecture/decisions/README.md).
 
 ---
 
@@ -340,24 +312,26 @@ flowchart TD
 
 ```
 RuneScrib/
-├── App/          RuneScribApp (entry · link routing), AppDelegate
-├── Models/       Cipher, CipherLibrary, Contact, ContactBook, MessageEnvelope,
-│                 CipherSharePayload, MessageSharePayload, FontRef,
-│                 RuneCharacterSet, AppLicense
-├── Services/     KeyManager, ContactManager/Importer/Store, AppLock,
-│                 MessageService, MessageCryptor, MessageSend, RuneCodec,
-│                 KeychainService, FontStore, LinkRouter,
-│                 ImportCoordinator, MessageCoordinator, QRCodeGenerator, Clipboard
-├── Views/        RootView, ContentView, CipherLibraryView, ContactsView,
-│                 ReceivedMessageView, ImportConfirmView, SettingsView,
-│                 LockView, PINFlowView, LicenseView, QRDisplaySheet
-│   └── Components/  RuneTheme, RuneInscriptionText, PINPadView, QRScannerView,
-│                    VideoSplashView, MessageComposeView, RuneScribButtonStyle,
-│                    DecoderDocument
-├── Metal/        RuneMetalView, MetalRenderer, Shaders.metal
-└── Resources/    Assets, Noto Sans Runic font, raven-forge-spp-splash.mp4
-RuneScribTests/   126 unit tests (encryption, codec, library, contacts, PIN,
-                  share payloads, file/link routing, message intake)
+├── AppHost/      SwiftUI entry, delegates, composition, lifecycle and input forwarding
+├── Metal/        Shipping Metal shader
+└── Resources/    Assets, Noto Sans Runic font, splash video and licenses
+Packages/RuneScribeArchitecture/
+├── Sources/
+│   ├── RuneScribeContracts/      Neutral IDs, DTOs and service protocols
+│   ├── RuneScribeRuntimeCore/    Transitional manifest, policy and lifecycle runtime
+│   ├── RuneScribeUIRuntime/      Root-view presentation boundary
+│   ├── RuneScribePlatform/       Keychain, files, Contacts, fonts and system adapters
+│   ├── RuneScribeCoreModule/     Domain, crypto, persistence, import and app lock
+│   ├── RuneScribeUIModule/       SwiftUI, Metal, MessageUI, sharing and navigation
+│   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
+└── Tests/                        310 Swift package tests
+RuneScribTests/                   Hosted macOS composition and compatibility tests
+RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
+RuneScribIOSUITests/              iPhone/iPad product parity tests
+RuneScribMacParityTests/          Isolated macOS product parity tests
+RuneScribArchitectureTests/       Repository architecture guard
+docs/                             Architecture, verification and locked product roadmap
+scripts/                          Architecture and built-product qualification guards
 ```
 
 The Xcode project is generated from `project.yml` with
@@ -374,19 +348,26 @@ Requires Xcode 26+ on macOS.
 # Regenerate the Xcode project from project.yml
 xcodegen generate
 
-# Build & test (macOS)
+# Fast, password-free package and architecture checks
+scripts/check-architecture.sh
+swift test --package-path Packages/RuneScribeArchitecture
+
+# Build & test macOS with ad-hoc signing
 xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-macOS \
-  -destination 'platform=macOS' test
+  -configuration Debug -destination 'platform=macOS,arch=arm64' \
+  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= test
 
 # Build (iOS simulator)
 xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-iOS \
-  -destination 'generic/platform=iOS Simulator' build
+  -configuration Debug -destination 'generic/platform=iOS Simulator' \
+  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= build
 ```
 
 Two app targets — **RuneScrib-macOS** (macOS 15) and **RuneScrib-iOS** (iOS 17) —
-share one source tree behind `#if os(macOS)` / `#if os(iOS)` splits, built in
-**Swift 6** language mode. The macOS target ships with App Sandbox + Hardened Runtime
-enabled for Mac App Store distribution.
+share the thin host sources and link the same local package products, built in **Swift
+6** language mode. The macOS target ships with App Sandbox + Hardened Runtime enabled
+for Mac App Store distribution. Debug and Simulator qualification use ad-hoc signing so
+automated checks do not require a login-Keychain password.
 
 Both targets register the **`runescribe://`** URL scheme and a single exported
 **`com.runescribe.runescribe`** document type — the `.runescribe` cipher/message file,
@@ -399,24 +380,24 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-**126 unit tests** (XCTest), run as a macOS unit-test bundle. The suite proves the
-load-bearing promises end to end — that a sealed message round-trips, that a friend
-can decrypt yours, and that every wire format rejects corruption:
+The local Swift package currently contains **310 XCTest tests**, supplemented by **17
+repository architecture checks**, hosted macOS/iOS tests, iPhone/iPad UI parity, and an
+isolated macOS parity host. The package suite uses deterministic in-memory adapters and
+does not access the operator's login Keychain.
 
 | Suite | What it covers |
 |---|---|
-| `MessageCryptorTests` | AES-GCM seal/open, wrong-key and tamper rejection |
-| `MessageEnvelopeTests` | the 1-byte version frame, bad-version rejection |
-| `RuneCodecTests` | base-32 encode/decode, foreign-glyph and length errors |
-| `MessageServiceTests` | compose → read round trips, try-all decryption |
-| `CipherTests` · `CipherLibraryTests` | the cipher model, library mutations, migration |
-| `CipherSharePayloadTests` | the 129-byte cipher record — encode, decode, checksum |
-| `MessageSharePayloadTests` | the message wire format + embedded key |
-| `LinkRouterTests` · `FileRouterTests` | cipher-link routing · cipher-vs-message file classification |
-| `MessageCoordinatorTests` · `KeyManagerLinkTests` | intake, contact auto-association |
-| `Contact*Tests` (book, store, manager, importer) | contacts model, encrypted store, import |
-| `FontRefTests` · `FontStoreTests` | font reference, hash-verified font import |
-| `AppLockTests` | PIN format validation |
+| Runtime and architecture | Manifest validation, capability denial, factory lifecycle, exactly one UI Module, dependency and shipping-product guards |
+| Core domain | AES-GCM, rune codec, ciphers, encrypted repositories, contacts, imports, fonts, PIN lock and share lifetime |
+| Compatibility | Exact cipher v3/message v1 fixtures, encrypted existing-install fixtures, links, routes and no-rewrite migration |
+| UI Module | Session projection, sensitive-state cleanup, routing, attachment policy, sharing and representative view rendering |
+| Platform adapters | Keychain contract, protected files, scoped inbound reads, Contacts, fonts, resources, clipboard and share artifacts |
+| Hosted and parity tests | Composition, isolated Simulator Keychain migration, native share outcomes, accessibility, iPhone/iPad and macOS product flows |
+
+Some behaviors can only be release-qualified on physical hardware. The retained device
+matrix covers Contacts permission, inbound file handoff, QR generation/scanning,
+MessageUI, system sharing, and background locking; Simulator coverage is not presented
+as a substitute for those gates.
 
 ---
 
@@ -431,7 +412,9 @@ under the SIL Open Font License. © Raven Forge Software. All rights reserved.
 ## 📖 Documentation
 
 Detailed guides, architecture deep-dives, and diagrams live in the
-**[project wiki](https://github.com/flynn33/rune-scribe/wiki)**.
+**[project wiki](https://github.com/flynn33/rune-scribe/wiki)** and the tracked
+[`docs`](docs) directory. Start with [Roadmap Alignment](docs/architecture/RoadmapAlignment.md)
+for the current implementation boundary and dependencies.
 
 <div align="center">
 

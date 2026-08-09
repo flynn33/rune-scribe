@@ -6,6 +6,13 @@ In the compile-time graph below, `A --> B` means “A imports or links B.” The
 
 This graph describes committed cleanup snapshot `01e2fcf655a3139a856787fc96f17a58db3f3ad0`.
 
+> **Locked-roadmap supersession.** This is the verified current graph, not the final
+> Codex graph. `RuneScribeRuntimeCore` and `RuneScribeUIRuntime` are transitional. Once
+> the audited upstream gate clears, the host and modules migrate to official Forsetti
+> released public products under
+> [`ADR-RS-001`](decisions/ADR-RS-001-module-packaging-and-target-graph.md). Until then,
+> no unused dependency, private fork, or copied framework source is added.
+
 ## Physical compile-time graph
 
 ```mermaid
@@ -128,7 +135,7 @@ The manifests live with their module implementations:
 
 The compiled descriptors live in [`CoreModule.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift) and [`UIModule.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift). Runtime registration compares identity, version, kind, entry point, role, requested capabilities, required services, and required roles. Publication is a compiled descriptor property checked against the service access policy and verified after `start(context:)` returns.
 
-The strict JSON decoder accepts only the current schema keys. Both manifests target iOS and macOS, require runtime `1.0.0`, carry module version `1.0.33`, use no current entitlement requirement, and disable production diagnostics. Unknown fields and duplicate array entries fail before activation.
+The strict JSON decoder accepts only the current schema keys. Both manifests target iOS and macOS, require runtime `1.0.0`, carry module version `1.0.34`, use no current entitlement requirement, and disable production diagnostics. Unknown fields and duplicate array entries fail before activation.
 
 ## Composition and activation sequence
 
@@ -221,6 +228,6 @@ The generated project adds:
 | `RuneScribIOSUITests` | iPhone/iPad product parity flow |
 | `RuneScribMacParityHost` / `RuneScribMacParityTests` | Isolated macOS product and native-share parity validation |
 
-[`scripts/check-architecture.sh`](../../scripts/check-architecture.sh) enforces the six shipping products, the separately classified test-only product, target edges, import allowlists, manifest count, exact shipping-app linkage, thin-host thresholds, singleton/notification closure, and absence of prohibited external Forsetti material. [`scripts/architecture-ratchet.json`](../../scripts/architecture-ratchet.json) makes those structural expectations explicit. [`scripts/check-shipping-products.sh`](../../scripts/check-shipping-products.sh) separately proves that built app products do not link or embed Test Support.
+[`scripts/check-architecture.sh`](../../scripts/check-architecture.sh) enforces the current six shipping products, the separately classified test-only product, target edges, import allowlists, manifest count, exact shipping-app linkage, thin-host thresholds, singleton/notification closure, and the present blocked-gate prohibition on Forsetti package material. When the official upstream release gate clears, that rule must be replaced by a conditional check for the one pinned official dependency while private forks, vendoring, and copies remain prohibited. [`scripts/architecture-ratchet.json`](../../scripts/architecture-ratchet.json) makes the current structural expectations explicit. [`scripts/check-shipping-products.sh`](../../scripts/check-shipping-products.sh) separately proves that built app products do not link or embed Test Support.
 
 At the recorded snapshot, the package suite passed 283 of 283 tests and the architecture ratchet passed 17 of 17 checks under `/tmp/RuneScribe-P8-final-package.yGz7qs`; the current Release inspection passed 50 of 50 checks under `/tmp/RuneScribe-P8-release-final.XsJS4P`. Negative fixtures under `/tmp/RuneScribe-P8-cleanup.bxBuUN` and `/tmp/RuneScribe-P8-guard-audit.4gkAfP` confirm that both guards fail on source-allowlist drift, generated-project drift, a shipping target linked to `RuneScribeTestSupport`, or a shipping package target made to depend on it.

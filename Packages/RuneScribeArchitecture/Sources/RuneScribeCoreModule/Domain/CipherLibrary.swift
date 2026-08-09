@@ -82,7 +82,9 @@ extension CipherLibrary {
     /// Sets (or clears, with nil) a cipher's contact link. Never touches key material.
     func settingContact(cipherID: UUID, contactID: UUID?) -> CipherLibrary {
         var copy = self
-        if let i = copy.ciphers.firstIndex(where: { $0.id == cipherID }) { copy.ciphers[i].contactID = contactID }
+        if let i = copy.ciphers.firstIndex(where: { $0.id == cipherID }) {
+            copy.ciphers[i].setContactID(contactID)
+        }
         return copy
     }
 
@@ -90,14 +92,18 @@ extension CipherLibrary {
     /// Never removes a cipher.
     func unlinkingContact(contactID: UUID) -> CipherLibrary {
         var copy = self
-        for i in copy.ciphers.indices where copy.ciphers[i].contactID == contactID { copy.ciphers[i].contactID = nil }
+        for i in copy.ciphers.indices where copy.ciphers[i].contactID == contactID {
+            copy.ciphers[i].setContactID(nil)
+        }
         return copy
     }
 
     /// Marks the cipher with `cipherID` as delivered (no-op if not found). Touches nothing else.
     func markingDelivered(cipherID: UUID) -> CipherLibrary {
         var copy = self
-        if let i = copy.ciphers.firstIndex(where: { $0.id == cipherID }) { copy.ciphers[i].delivered = true }
+        if let i = copy.ciphers.firstIndex(where: { $0.id == cipherID }) {
+            copy.ciphers[i].completeKeyDelivery()
+        }
         return copy
     }
 

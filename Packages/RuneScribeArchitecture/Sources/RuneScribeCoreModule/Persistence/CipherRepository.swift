@@ -224,7 +224,7 @@ actor CipherRepository {
                 clock: clock,
                 uuid: uuid
             )
-            cipher.contactID = contact.contactID
+            cipher.setContactID(contact.contactID)
             candidate = candidate.addingWithoutActivating(cipher)
             added.append(cipher)
         }
@@ -278,7 +278,7 @@ actor CipherRepository {
         for index in candidate.ciphers.indices {
             if let contactID = candidate.ciphers[index].contactID,
                !validContactIDs.contains(contactID) {
-                candidate.ciphers[index].contactID = nil
+                candidate.ciphers[index].setContactID(nil)
                 changes += 1
             }
         }
@@ -294,12 +294,12 @@ actor CipherRepository {
                     clock: clock,
                     uuid: uuid
                 )
-                cipher.contactID = seed.contactID
+                cipher.setContactID(seed.contactID)
                 candidate = candidate.addingWithoutActivating(cipher)
                 changes += 1
             } else if linked.count > 1 {
                 for index in linked.dropFirst() {
-                    candidate.ciphers[index].contactID = nil
+                    candidate.ciphers[index].setContactID(nil)
                     changes += 1
                 }
             }

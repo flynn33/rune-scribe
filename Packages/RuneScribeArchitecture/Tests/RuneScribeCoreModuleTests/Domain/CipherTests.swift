@@ -9,8 +9,10 @@ final class CipherTests: XCTestCase {
         XCTAssertEqual(c.origin, .generated)
         XCTAssertEqual(c.keyMaterial.count, 32)        // AES-256
         XCTAssertEqual(c.publicID.count, 8)
-        XCTAssertEqual(c.decorativeMapping.count, 32)
-        XCTAssertEqual(Set(c.decorativeMapping), Set(0..<32), "mapping must be a permutation of 0..<32")
+        XCTAssertEqual(c.symbolPermutation.count, 32)
+        XCTAssertEqual(Set(c.symbolPermutation), Set(0..<32), "mapping must be a permutation of 0..<32")
+        XCTAssertEqual(c.formatVersion, 2)
+        XCTAssertEqual(c.keyDeliveryState, .notLinked)
     }
     func testTwoGeneratedCiphersDiffer() {
         XCTAssertNotEqual(Cipher.generated(label: "A").keyMaterial,
@@ -64,10 +66,12 @@ extension CipherTests {
 
     func testDeliveredSurvivesCodableRoundTrip() throws {
         var c = Cipher.generated(label: "Bob")
+        c.setContactID(UUID())
         c.delivered = true
         let data = try JSONEncoder().encode(c)
         let back = try JSONDecoder().decode(Cipher.self, from: data)
         XCTAssertTrue(back.delivered)
+        XCTAssertEqual(back.keyDeliveryState, .completed)
         XCTAssertEqual(c, back)
     }
 
@@ -108,17 +112,85 @@ extension CipherTests {
                 from: storedCipherJSON(mapping: Array(repeating: 0, count: 32))
             )
         ) { error in
-            XCTAssertEqual(error as? CipherValidationError, .invalidDecorativeMapping)
+            XCTAssertEqual(error as? CipherValidationError, .invalidSymbolPermutation)
         }
 
         XCTAssertThrowsError(
             try JSONDecoder().decode(
                 Cipher.self,
-                from: storedCipherJSON(formatVersion: 2)
+                from: storedCipherJSON(formatVersion: 3)
             )
         ) { error in
-            XCTAssertEqual(error as? CipherValidationError, .unsupportedFormatVersion(2))
+            XCTAssertEqual(error as? CipherValidationError, .unsupportedFormatVersion(3))
         }
+    }
+
+    func testLegacyDeliveredCipherMigratesWithoutCreatingProgressionProof() throws {
+        let contactID = UUID()
+        let json = """
+        {"id":"\(UUID().uuidString)","label":"old","origin":"generated","createdAt":0,
+         "formatVersion":1,"publicID":"AAAAAAAAAAA=","keyMaterial":"\(Data(repeating:1,count:32).base64EncodedString())",
+         "decorativeMapping":[\((0..<32).map(String.init).joined(separator: ","))],
+         "contactID":"\(contactID.uuidString)","delivered":true}
+        """
+        let cipher = try JSONDecoder().decode(Cipher.self, from: Data(json.utf8))
+
+        XCTAssertEqual(cipher.formatVersion, Cipher.currentVersion)
+        XCTAssertEqual(cipher.compatibility.originalRecordVersion, 1)
+        XCTAssertEqual(cipher.keyDeliveryState, .migratedUnverified)
+        XCTAssertTrue(cipher.delivered)
+        XCTAssertFalse(MessageSend.shouldIncludeKey(cipher))
+    }
+
+    func testLegacyUnlinkedDeliveredCipherMigratesToNotLinked() throws {
+        let json = """
+        {"id":"\(UUID().uuidString)","label":"old","origin":"generated","createdAt":0,
+         "formatVersion":1,"publicID":"AAAAAAAAAAA=","keyMaterial":"\(Data(repeating:1,count:32).base64EncodedString())",
+         "decorativeMapping":[\((0..<32).map(String.init).joined(separator: ","))],
+         "delivered":true}
+        """
+
+        let cipher = try JSONDecoder().decode(Cipher.self, from: Data(json.utf8))
+
+        XCTAssertNil(cipher.contactID)
+        XCTAssertEqual(cipher.keyDeliveryState, .notLinked)
+        XCTAssertFalse(cipher.delivered)
+        XCTAssertFalse(MessageSend.shouldIncludeKey(cipher))
+    }
+
+    func testPersistedInProgressDeliveryRecoversToPending() throws {
+        var cipher = Cipher.generated(label: "Interrupted")
+        cipher.setContactID(UUID())
+        cipher.beginKeyDelivery()
+        XCTAssertEqual(cipher.keyDeliveryState, .inProgress)
+        XCTAssertFalse(cipher.keyDeliveryState.requiresDelivery)
+
+        let recovered = try JSONDecoder().decode(
+            Cipher.self,
+            from: JSONEncoder().encode(cipher)
+        )
+
+        XCTAssertEqual(recovered.keyDeliveryState, .pending)
+        XCTAssertTrue(MessageSend.shouldIncludeKey(recovered))
+    }
+
+    func testContactAndDeliveryTransitionsAreExplicit() {
+        var cipher = Cipher.generated(label: "Transition")
+        let contactID = UUID()
+
+        cipher.setContactID(contactID)
+        XCTAssertEqual(cipher.keyDeliveryState, .pending)
+        XCTAssertTrue(MessageSend.shouldIncludeKey(cipher))
+        cipher.beginKeyDelivery()
+        XCTAssertEqual(cipher.keyDeliveryState, .inProgress)
+        cipher.cancelKeyDelivery()
+        XCTAssertEqual(cipher.keyDeliveryState, .pending)
+        cipher.beginKeyDelivery()
+        cipher.completeKeyDelivery()
+        XCTAssertEqual(cipher.keyDeliveryState, .completed)
+        XCTAssertFalse(MessageSend.shouldIncludeKey(cipher))
+        cipher.setContactID(nil)
+        XCTAssertEqual(cipher.keyDeliveryState, .notLinked)
     }
 
     private func storedCipherJSON(

@@ -6,6 +6,13 @@
 
 This report records committed cleanup snapshot `01e2fcf655a3139a856787fc96f17a58db3f3ad0`.
 
+> **Locked-roadmap supersession.** These are the verified current app-owned contracts.
+> The local runtime is transitional and must migrate to official Forsetti released
+> public products after the upstream gate in
+> [`ADR-RS-001`](decisions/ADR-RS-001-module-packaging-and-target-graph.md) clears. The
+> neutral Rune Scribe product contracts remain app-owned; no unused dependency, private
+> fork, or copied framework implementation is allowed during the block.
+
 The boundary follows four rules:
 
 1. Module implementations never import or cast to another module implementation.
@@ -196,7 +203,12 @@ Pattern B permits exactly one eligible user-facing UI module. A new UI contribut
 4. Prove zero/one/two eligible-UI behavior, root selection, boot recovery, stop cleanup, accessibility, platform presentation, and feature parity.
 5. Update manifests, descriptors, `project.yml`, architecture scans, resource membership, and documentation together.
 
-For either path, do not add a remote Forsetti package, copied framework source, a runtime plugin downloader, a global registry, a cross-module notification, or product-facing module administration UI.
+For either path, do not add an unpinned or unused Forsetti package, a private fork,
+copied framework source, a runtime plugin downloader, a global registry, a cross-module
+notification, or product-facing module administration UI. The one official released
+Forsetti dependency required by the locked roadmap is allowed only after the audited
+gate clears and the package graph, policy, manifests, composition, guards, and tests are
+updated together.
 
 ## Verification entry points
 

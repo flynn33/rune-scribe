@@ -103,7 +103,7 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         XCTAssertEqual(ciphers.count, 1)
         XCTAssertEqual(ciphers.first?["id"] as? String, generatedID.uuidString)
         XCTAssertEqual(ciphers.first?["createdAt"] as? String, "2025-06-07T08:09:10Z")
-        XCTAssertEqual(ciphers.first?["formatVersion"] as? Int, 1)
+        XCTAssertEqual(ciphers.first?["formatVersion"] as? Int, Cipher.currentVersion)
 
         let operations = await store.recordedOperations()
         XCTAssertEqual(

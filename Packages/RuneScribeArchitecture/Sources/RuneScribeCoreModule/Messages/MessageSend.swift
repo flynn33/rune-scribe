@@ -4,7 +4,7 @@ import RuneScribeContracts
 enum MessageSend {
     /// Core is authoritative for first-delivery key inclusion.
     static func shouldIncludeKey(_ cipher: Cipher) -> Bool {
-        cipher.contactID != nil && !cipher.delivered
+        cipher.contactID != nil && cipher.keyDeliveryState.requiresDelivery
     }
 
     /// The neutral filename deliberately contains neither message nor sender data.
