@@ -10,7 +10,10 @@ These decisions describe the migration from the pre-architecture Rune Scribe app
 - [`feature-parity-matrix.json`](../verification/feature-parity-matrix.json)
 - [`p7-test-matrix.json`](../verification/p7-test-matrix.json)
 
-All decisions below are accepted for the current architecture. They preserve existing product behavior; they do not authorize roadmap features.
+These decisions preserve the historical P8 current-shipping-state evidence. The locked
+Codex roadmap and the records in [`decisions`](decisions/README.md) control new Codex
+work. Where they conflict, the `ADR-RS-*` decision supersedes the earlier migration
+decision without changing what the P8 evidence proved at its recorded snapshot.
 
 ## ADR-001: Reconcile the live repository before moving ownership
 
@@ -53,13 +56,24 @@ The committed package also declares `RuneScribeTestSupport` as a seventh, explic
 
 **Evidence.** [`Package.swift`](../../Packages/RuneScribeArchitecture/Package.swift), [`project.yml`](../../project.yml), [`ModuleGraph.md`](ModuleGraph.md), `T-011`/`T-024` in the phase ledger, the 17-of-17 architecture result under `/tmp/RuneScribe-P8-final-package.yGz7qs`, and the 50-of-50 shipping result under `/tmp/RuneScribe-P8-release-final.XsJS4P`.
 
-## ADR-003: Keep Forsetti as policy, never as a dependency
+## ADR-003: Keep the local runtime transitional until official Forsetti is releasable
 
-**Context.** The external material defines Pattern B principles, not reusable product source.
+**Context.** At the P8 snapshot, the available material supported Pattern B principles
+but did not provide a released public package that met Rune Scribe's requirements.
 
-**Decision.** Implement original Rune Scribe types, namespaces, manifests, runtime, policy, and tests. Prohibit Forsetti imports, Swift Package URLs, linked products, Git submodules, vendored directories, copied implementation, generated artifacts, fetch scripts, and developer-machine checkout assumptions.
+**Decision.** Retain the current app-owned runtime as transitional infrastructure while
+the audited upstream gate is blocked. Do not add an unused dependency, private fork,
+vendored or copied implementation, generated framework artifact, fetch script, or
+developer-machine checkout assumption. Once an official semantic release exposes the
+required public APIs, migrate to its released public products under
+[`ADR-RS-001`](decisions/ADR-RS-001-module-packaging-and-target-graph.md) and update the
+package graph, manifests, composition, guards, and tests together.
 
-**Consequences.** The word “Forsetti” appears only in policy-oriented documentation, test/report terminology, and the manifest policy-profile string. Build and runtime behavior depend only on app-owned code and Apple frameworks.
+**Consequences.** The current shipping build remains app-owned and Apple-only. That is
+a recorded present-state fact, not a permanent ban on the official released dependency.
+The source-version `0.1.5` tree at commit `f0199a4` has no release tag and is missing the
+generalized entitlement, reconciliation, contribution, resource, and service APIs
+required by the locked roadmap, so Wave 0B remains blocked upstream.
 
 **Evidence.** [`check-architecture.sh`](../../scripts/check-architecture.sh), [`architecture-ratchet.json`](../../scripts/architecture-ratchet.json), and `T-010` in the P7 ledger.
 
@@ -177,7 +191,7 @@ At committed cleanup snapshot `01e2fcf655a3139a856787fc96f17a58db3f3ad0`:
 - 33 feature-parity items pass automated or automated-plus-manual local evidence;
 - 7 feature-parity items remain explicitly assigned to physical-device validation;
 - no migration entry, replacement test, or non-device parity item is pending;
-- no external Forsetti dependency, direct implementation edge, app-owned boundary singleton, cross-module notification channel, or temporary application-session bridge remains.
+- at that snapshot, no external Forsetti dependency, direct implementation edge, app-owned boundary singleton, cross-module notification channel, or temporary application-session bridge remained;
 - the package suite passes 283 of 283 tests and the architecture ratchet passes 17 of 17 checks under `/tmp/RuneScribe-P8-final-package.yGz7qs`;
 - two generated-project passes produce committed `RuneScrib.xcodeproj/project.pbxproj` SHA-256 `5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30`;
 - the current Release inspection passes 50 of 50 checks under `/tmp/RuneScribe-P8-release-final.XsJS4P`;

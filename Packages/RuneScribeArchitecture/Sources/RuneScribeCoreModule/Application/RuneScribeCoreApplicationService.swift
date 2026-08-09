@@ -1905,9 +1905,14 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         }
         if let fileError = error as? FileRouterError {
             switch fileError {
-            case .unsupportedVersion:
+            case .unsupportedVersion,
+                 .unsupportedContainerVersion,
+                 .unsupportedPayloadKind,
+                 .unsupportedPayloadVersion,
+                 .unknownRequiredSection,
+                 .unsupportedRequiredSectionVersion:
                 return RuneScribeFailureDTO(code: .unsupportedFormat)
-            case .empty, .malformedCipher, .malformedMessage:
+            case .empty, .malformedContainer, .malformedCipher, .malformedMessage:
                 return RuneScribeFailureDTO(code: .corruptedContent)
             }
         }
@@ -1988,8 +1993,9 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 return RuneScribeFailureDTO(code: .unsupportedFormat)
             case .invalidPublicIDLength,
                  .invalidKeyMaterialLength,
-                 .invalidDecorativeMapping,
-                 .invalidFontReference:
+                 .invalidSymbolPermutation,
+                 .invalidFontReference,
+                 .invalidDeliveryState:
                 return RuneScribeFailureDTO(code: .corruptedContent)
             }
         }

@@ -145,11 +145,13 @@ extension CipherLibraryTests {
         let a = Cipher.generated(label: "A")
         let b = Cipher.generated(label: "B")
         let library = CipherLibrary(ciphers: [a, b], activeID: a.id)
+            .settingContact(cipherID: b.id, contactID: UUID())
 
         let after = library.markingDelivered(cipherID: b.id)
 
         XCTAssertFalse(after.ciphers.first { $0.id == a.id }!.delivered)
         XCTAssertTrue(after.ciphers.first { $0.id == b.id }!.delivered)
+        XCTAssertEqual(after.ciphers.first { $0.id == b.id }!.keyDeliveryState, .completed)
         XCTAssertEqual(after.activeID, a.id, "marking delivered must not change the active cipher")
     }
 

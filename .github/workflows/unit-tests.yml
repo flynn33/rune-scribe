@@ -36,6 +36,9 @@ jobs:
       - name: Run architecture guardrails
         run: bash scripts/check-architecture.sh
 
+      - name: Run roadmap alignment guardrails
+        run: bash scripts/check-roadmap-alignment.sh
+
       - name: Run Swift package tests
         run: swift test --package-path Packages/RuneScribeArchitecture
 

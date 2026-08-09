@@ -1,72 +1,119 @@
 import Foundation
 
-enum RuneCodecError: Error, Equatable, Sendable { case foreignCharacter, invalidLength }
+enum RuneCodecError: Error, Equatable, Sendable {
+    case foreignCharacter
+    case invalidLength
+    case invalidScript
+    case invalidPermutation
+}
 
-/// Reversible DECORATIVE encoding of bytes to a rune string and back, using a cipher's
-/// `decorativeMapping`. This is base-32 (5 bits/rune, RFC 4648 bit order, no padding)
-/// over `RuneCharacterSet.decorativeAlphabet`, with the per-cipher permutation applied.
-/// It carries NO security — the security is the AES-GCM layer beneath it.
+/// Reversible decorative encoding of bytes through a cipher's symbol permutation and
+/// an independently selected Script. The default overload remains the Base Rune Script
+/// and is byte-for-byte compatible with the legacy codec.
 struct RuneCodec {
 
     func encode(_ data: Data, with cipher: Cipher) -> String {
-        let alphabet = RuneCharacterSet.decorativeAlphabet
-        var out = String()
-        for value in fiveBitGroups(of: data) {
-            out.append(alphabet[cipher.decorativeMapping[value]])
+        // Base Rune is a statically validated portable Script.
+        (try? encode(data, with: cipher, script: .baseRune)) ?? ""
+    }
+
+    func encode(
+        _ data: Data,
+        with cipher: Cipher,
+        script: ScriptDescriptor
+    ) throws -> String {
+        guard Self.isValidPermutation(cipher.symbolPermutation) else {
+            throw RuneCodecError.invalidPermutation
         }
-        return out
+        guard let alphabet = script.portableAlphabet else {
+            throw RuneCodecError.invalidScript
+        }
+        var output = String()
+        output.reserveCapacity((data.count * 8 + 4) / 5)
+        for value in fiveBitGroups(of: data) {
+            output.append(alphabet[cipher.symbolPermutation[value]])
+        }
+        return output
     }
 
     func decode(_ runes: String, with cipher: Cipher) throws -> Data {
-        var indexOfRune: [Character: Int] = [:]
-        for (i, ch) in RuneCharacterSet.decorativeAlphabet.enumerated() { indexOfRune[ch] = i }
-        var valueForAlphabetIndex = [Int](repeating: 0, count: 32)
-        for (value, alphaIndex) in cipher.decorativeMapping.enumerated() { valueForAlphabetIndex[alphaIndex] = value }
+        try decode(runes, with: cipher, script: .baseRune)
+    }
+
+    func decode(
+        _ encoded: String,
+        with cipher: Cipher,
+        script: ScriptDescriptor
+    ) throws -> Data {
+        guard Self.isValidPermutation(cipher.symbolPermutation) else {
+            throw RuneCodecError.invalidPermutation
+        }
+        guard let alphabet = script.portableAlphabet else {
+            throw RuneCodecError.invalidScript
+        }
+        var alphabetIndexByToken: [Character: Int] = [:]
+        for (index, token) in alphabet.enumerated() {
+            alphabetIndexByToken[token] = index
+        }
+        var valueByAlphabetIndex = [Int](repeating: 0, count: 32)
+        for (value, alphabetIndex) in cipher.symbolPermutation.enumerated() {
+            valueByAlphabetIndex[alphabetIndex] = value
+        }
 
         var groups: [Int] = []
-        for ch in runes {
-            guard let alphaIndex = indexOfRune[ch] else { throw RuneCodecError.foreignCharacter }
-            groups.append(valueForAlphabetIndex[alphaIndex])
+        groups.reserveCapacity(encoded.count)
+        for token in encoded {
+            guard let alphabetIndex = alphabetIndexByToken[token] else {
+                throw RuneCodecError.foreignCharacter
+            }
+            groups.append(valueByAlphabetIndex[alphabetIndex])
         }
         return try bytes(fromFiveBitGroups: groups)
     }
 
-    // MARK: base-32 bit packing (RFC 4648 order, no padding)
+    // MARK: - Canonical unpadded base-32 (RFC 4648 bit order)
 
     private func fiveBitGroups(of data: Data) -> [Int] {
-        var out: [Int] = []
+        var output: [Int] = []
         var buffer: UInt32 = 0
-        var bits = 0
+        var bitCount = 0
         for byte in data {
             buffer = (buffer << 8) | UInt32(byte)
-            bits += 8
-            while bits >= 5 {
-                bits -= 5
-                out.append(Int((buffer >> UInt32(bits)) & 0x1F))
+            bitCount += 8
+            while bitCount >= 5 {
+                bitCount -= 5
+                output.append(Int((buffer >> UInt32(bitCount)) & 0x1F))
             }
         }
-        if bits > 0 { out.append(Int((buffer << UInt32(5 - bits)) & 0x1F)) }
-        return out
+        if bitCount > 0 {
+            output.append(Int((buffer << UInt32(5 - bitCount)) & 0x1F))
+        }
+        return output
     }
 
     private func bytes(fromFiveBitGroups groups: [Int]) throws -> Data {
-        // Unpadded base-32 can only represent complete bytes at these group-count residues.
-        // Reject non-canonical zero padding as well as nonzero trailing bits.
         guard [0, 2, 4, 5, 7].contains(groups.count % 8) else {
             throw RuneCodecError.invalidLength
         }
-        var out = Data()
+        var output = Data()
         var buffer: UInt32 = 0
-        var bits = 0
-        for g in groups {
-            buffer = (buffer << 5) | UInt32(g & 0x1F)
-            bits += 5
-            if bits >= 8 {
-                bits -= 8
-                out.append(UInt8((buffer >> UInt32(bits)) & 0xFF))
+        var bitCount = 0
+        for group in groups {
+            buffer = (buffer << 5) | UInt32(group & 0x1F)
+            bitCount += 5
+            if bitCount >= 8 {
+                bitCount -= 8
+                output.append(UInt8((buffer >> UInt32(bitCount)) & 0xFF))
             }
         }
-        if bits > 0, (buffer & ((1 << UInt32(bits)) - 1)) != 0 { throw RuneCodecError.invalidLength }
-        return out
+        if bitCount > 0,
+           (buffer & ((1 << UInt32(bitCount)) - 1)) != 0 {
+            throw RuneCodecError.invalidLength
+        }
+        return output
+    }
+
+    private static func isValidPermutation(_ permutation: [Int]) -> Bool {
+        permutation.count == 32 && Set(permutation) == Set(0..<32)
     }
 }

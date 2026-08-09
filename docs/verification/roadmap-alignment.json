@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "1.0",
+  "asOfDate": "2026-08-09",
+  "authority": {
+    "systemSpec": {
+      "path": "docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md",
+      "sha256": "7c4c460815064fca87a6769766fb875f267eb692795bbab2635eec5d55d8f88d"
+    },
+    "implementationRoadmap": {
+      "path": "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md",
+      "sha256": "884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4"
+    },
+    "repositoryAuditBaseline": "b7e3da24a6e0a78fe1866c7b8f2bafb8140ea14e"
+  },
+  "forsettiGate": {
+    "status": "blocked-upstream",
+    "repositoryURL": "https://github.com/flynn33/Forsetti-Framework-Mac-iOS",
+    "auditedRevision": "f0199a4f2f0becd1372dbfd5db714e85619c88bc",
+    "reportedSourceVersion": "0.1.5",
+    "releasedTag": null,
+    "blockers": [
+      "The audited revision has no semantic-version release tag.",
+      "Generalized entitlement requirements and composite included, earned, debug, and future-purchase sources are not available as released public APIs.",
+      "Runtime entitlement-change reconciliation is not available as a released public API.",
+      "Keyed content contribution, source identity, lifecycle, duplicate-ID, and capability enforcement APIs are incomplete.",
+      "Opaque module resource resolution and app-defined capability-scoped service registration APIs are incomplete.",
+      "The required neutral Pattern B sample, framework tests, migration notes, and semantic release are absent."
+    ],
+    "migrationPolicy": "no-private-fork"
+  },
+  "statusVocabulary": {
+    "satisfied": "The work package is implemented and has repository evidence.",
+    "transitional": "The behavior exists in app-owned infrastructure but the official Forsetti migration remains required.",
+    "partial": "Some required behavior or evidence exists, but the work package is not complete.",
+    "decision-frozen": "The governing decision is accepted; production implementation remains outstanding.",
+    "blocked-upstream": "Completion requires an official Forsetti release that does not yet exist.",
+    "blocked-device": "Completion requires physical-device or destination evidence that unattended local tests cannot supply.",
+    "not-started": "No qualifying production implementation exists.",
+    "not-applicable": "The conditional task has no approved input to include."
+  },
+  "taskCount": 92,
+  "taskGroups": [
+    {
+      "prefix": "BAS",
+      "wave": "0A",
+      "dependsOn": [],
+      "items": [
+        {"id":"BAS-001","status":"satisfied","dependsOn":[],"evidence":["docs/verification/ForsettiMigrationBaseline.md"],"notes":"The byte-exact source baseline and reconciliation revision are recorded."},
+        {"id":"BAS-002","status":"satisfied","dependsOn":["BAS-001"],"evidence":["docs/verification/BuildAndTestReport.md","docs/verification/p7-test-matrix.json"],"notes":"Recorded macOS and iOS build/test rails exist; the post-alignment SwiftPM run passed 310 of 310 without interactive credentials."},
+        {"id":"BAS-003","status":"satisfied","dependsOn":["BAS-001"],"evidence":["README.md","docs/verification/BuildAndTestReport.md"],"notes":"README reports the measured 310-package-test and 17-architecture-check suites rather than the pre-migration monolith counts."},
+        {"id":"BAS-004","status":"satisfied","dependsOn":["BAS-003"],"evidence":["Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift","docs/verification/feature-parity-matrix.json"],"notes":"Current cipher, message, link, QR, encrypted-library, contact, and font compatibility fixtures are covered by repository tests and parity evidence."},
+        {"id":"BAS-005","status":"not-applicable","dependsOn":["BAS-004"],"evidence":["docs/architecture/RoadmapAlignment.md"],"notes":"No separately approved scrubbed real user sample was supplied; synthetic golden fixtures remain authoritative."},
+        {"id":"BAS-006","status":"blocked-device","dependsOn":["BAS-001"],"evidence":["docs/verification/feature-parity-matrix.json","docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Seven historical parity cases and the new share-composition matrix require physical-device evidence."},
+        {"id":"BAS-007","status":"satisfied","dependsOn":["BAS-001"],"evidence":["docs/architecture/decisions/README.md"],"notes":"ADR-RS-001 through ADR-RS-012 have explicit statuses and decisions."},
+        {"id":"BAS-008","status":"partial","dependsOn":["BAS-004","BAS-007"],"evidence":["docs/architecture/decisions/ADR-RS-005-forward-compatibility.md","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/RuneScribePackageTests.swift"],"notes":"Legacy-only outbound is frozen and initial old/new intake coverage exists; the destination and update-required matrix remains incomplete."},
+        {"id":"BAS-009","status":"satisfied","dependsOn":["BAS-001"],"evidence":["scripts/check-architecture.sh","scripts/architecture-ratchet.json"],"notes":"The consumer-repository architecture policy and executable guard exist."},
+        {"id":"BAS-010","status":"partial","dependsOn":["BAS-007"],"evidence":["README.md","docs/architecture/RoadmapAlignment.md","docs/architecture/MigrationDecisions.md","docs/architecture/ForsettiCompliance.md"],"notes":"Primary architecture pages now distinguish historical current-state evidence from locked-roadmap direction; a broader Wiki/support update checklist remains."}
+      ]
+    },
+    {
+      "prefix": "FOR",
+      "wave": "0B",
+      "dependsOn": ["BAS-007"],
+      "items": [
+        {"id":"FOR-001","status":"blocked-upstream","dependsOn":["BAS-007"],"evidence":["#/forsettiGate","docs/architecture/decisions/ADR-RS-001-module-packaging-and-target-graph.md"],"notes":"Commit is audit-pinned, but no released semantic version can be integrated."},
+        {"id":"FOR-002","status":"blocked-upstream","dependsOn":["FOR-001"],"evidence":["#/forsettiGate"],"notes":"The required released Pattern B bootstrap must be validated upstream."},
+        {"id":"FOR-003","status":"blocked-upstream","dependsOn":["FOR-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift","#/forsettiGate"],"notes":"Rune Scribe has neutral generalized requirement descriptors, but the framework public API is missing."},
+        {"id":"FOR-004","status":"blocked-upstream","dependsOn":["FOR-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift","#/forsettiGate"],"notes":"Consumer contracts name composite sources; released framework providers and composition do not exist."},
+        {"id":"FOR-005","status":"blocked-upstream","dependsOn":["FOR-003","FOR-004"],"evidence":["#/forsettiGate"],"notes":"Safe activation reconciliation must be provided and tested upstream."},
+        {"id":"FOR-006","status":"blocked-upstream","dependsOn":["FOR-001"],"evidence":["#/forsettiGate"],"notes":"Released keyed content-contribution registration is missing."},
+        {"id":"FOR-007","status":"blocked-upstream","dependsOn":["FOR-001"],"evidence":["#/forsettiGate"],"notes":"Released opaque module resource resolution is missing."},
+        {"id":"FOR-008","status":"blocked-upstream","dependsOn":["FOR-001"],"evidence":["#/forsettiGate"],"notes":"Released app-defined capability-scoped service registration is missing."},
+        {"id":"FOR-009","status":"blocked-upstream","dependsOn":["FOR-006","FOR-007","FOR-008"],"evidence":["#/forsettiGate"],"notes":"The required identity, lifecycle, duplicate-ID, and capability enforcement is incomplete upstream."},
+        {"id":"FOR-010","status":"blocked-upstream","dependsOn":["FOR-005","FOR-009"],"evidence":["#/forsettiGate"],"notes":"The neutral five-module sample is absent."},
+        {"id":"FOR-011","status":"blocked-upstream","dependsOn":["FOR-010"],"evidence":["#/forsettiGate"],"notes":"Tests, documentation, migration notes, and a semantic release are required upstream."}
+      ]
+    },
+    {
+      "prefix": "MOD",
+      "wave": "1A",
+      "dependsOn": ["FOR-011"],
+      "items": [
+        {"id":"MOD-001","status":"partial","dependsOn":["BAS-007"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/DomainIdentifiers.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift"],"notes":"Stable Codex-domain, package, event, operation, relationship, and entitlement vocabulary exists; service and theme contracts remain."},
+        {"id":"MOD-002","status":"transitional","dependsOn":["FOR-011","MOD-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json","RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"],"notes":"App-owned manifests and factories work; official Forsetti manifest/registry migration is blocked."},
+        {"id":"MOD-003","status":"transitional","dependsOn":["MOD-002"],"evidence":["RuneScrib/AppHost/RuneScribApp.swift","RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"],"notes":"Hosts are thin with one UI root under the local runtime; official Forsetti bootstrap remains."},
+        {"id":"MOD-004","status":"transitional","dependsOn":["MOD-001","MOD-002"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule"],"notes":"The current domain and security behavior is inside a Core service module; activation must migrate upstream."},
+        {"id":"MOD-005","status":"transitional","dependsOn":["MOD-001","MOD-002"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule","Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime"],"notes":"One user-facing UI module exists; the local UI runtime is transitional."},
+        {"id":"MOD-006","status":"satisfied","dependsOn":["MOD-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/PlatformContracts.swift","Packages/RuneScribeArchitecture/Sources/RuneScribePlatform"],"notes":"Keychain, repositories, contacts, fonts, lock dependencies, and intake are behind neutral adapters."},
+        {"id":"MOD-007","status":"satisfied","dependsOn":["MOD-004","MOD-005","MOD-006"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift"],"notes":"Composition and constructor-injected facades replaced cross-boundary product singletons."},
+        {"id":"MOD-008","status":"satisfied","dependsOn":["MOD-001","MOD-007"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/SafeEvents.swift","scripts/architecture-ratchet.json"],"notes":"Typed state, routes, events, and messages replace app-owned cross-module notifications."},
+        {"id":"MOD-009","status":"satisfied","dependsOn":["MOD-001","MOD-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/InboundInputs.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/SerialInboundInputForwarder.swift"],"notes":"Scene, file, URL, lifecycle, and menu input use the host ingress rail."},
+        {"id":"MOD-010","status":"satisfied","dependsOn":["MOD-003","MOD-009"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift","docs/verification/feature-parity-matrix.json"],"notes":"Splash and lock gating retain ordered pending inputs."},
+        {"id":"MOD-011","status":"satisfied","dependsOn":["MOD-004","MOD-005"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule","Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule"],"notes":"SwiftUI, MessageUI, Metal, and presentation adapters are excluded from Core."},
+        {"id":"MOD-012","status":"satisfied","dependsOn":["MOD-002","MOD-004","MOD-005","MOD-011"],"evidence":["scripts/check-architecture.sh","scripts/architecture-ratchet.json"],"notes":"Architecture checks reject cross imports, shared state, and unapproved notifications; the dependency rule must become conditional at official integration."},
+        {"id":"MOD-013","status":"satisfied","dependsOn":["MOD-002","MOD-003","MOD-012"],"evidence":["RuneScribTests","RuneScribIOSTests","RuneScribMacParityTests","docs/verification/p7-test-matrix.json"],"notes":"Hosted production-composition tests supplement package tests rather than replacing boot coverage."}
+      ]
+    },
+    {
+      "prefix": "DOM",
+      "wave": "1B",
+      "dependsOn": ["MOD-004"],
+      "items": [
+        {"id":"DOM-001","status":"satisfied","dependsOn":["BAS-004","MOD-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Cipher.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherPersistenceApplicationTests.swift"],"notes":"Cipher Record v1 decodes into v2 with key, public ID, permutation, contact, and compatibility data preserved."},
+        {"id":"DOM-002","status":"satisfied","dependsOn":["DOM-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Cipher.swift"],"notes":"The neutral stored property is symbolPermutation; decorativeMapping remains a compatibility alias."},
+        {"id":"DOM-003","status":"satisfied","dependsOn":["DOM-002","MOD-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Codec/ScriptDescriptor.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Codec/RuneCodec.swift"],"notes":"A validated 32-symbol Script descriptor and Script-aware codec exist."},
+        {"id":"DOM-004","status":"satisfied","dependsOn":["DOM-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Codec/ScriptDescriptor.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Codec/RuneCodecTests.swift"],"notes":"Base Rune Script preserves the current alphabet and exact output."},
+        {"id":"DOM-005","status":"partial","dependsOn":["DOM-001","DOM-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Codec/ScriptDescriptor.swift","docs/architecture/decisions/ADR-RS-003-legacy-font-compatibility.md"],"notes":"Legacy FontRef data is retained and can produce a font-dependent Script descriptor; end-to-end imported-font resolution and rendering through the compatibility adapter still require proof."},
+        {"id":"DOM-006","status":"partial","dependsOn":["DOM-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Cipher.swift","docs/architecture/decisions/ADR-RS-002-cipher-and-script.md"],"notes":"Cipher Record excludes Codex and per-share presentation, but selected-Codex and per-share presentation models, storage, and APIs do not yet exist; the separation is only structural."},
+        {"id":"DOM-007","status":"partial","dependsOn":["BAS-007","DOM-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Cipher.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherTests.swift"],"notes":"Explicit key-delivery state and safe legacy decode exist, but the writable delivered compatibility path and remaining completion call sites must be removed from active behavior and regression-tested."}
+      ]
+    },
+    {
+      "prefix": "PKG",
+      "wave": "1B",
+      "dependsOn": ["MOD-004","BAS-004"],
+      "items": [
+        {"id":"PKG-001","status":"satisfied","dependsOn":["BAS-007","MOD-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/RuneScribePackage.swift","docs/architecture/decisions/ADR-RS-004-typed-runescribe-container.md"],"notes":"The frozen typed container parser/builder identifies independent payload kind and version."},
+        {"id":"PKG-002","status":"satisfied","dependsOn":["BAS-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/CipherSharePayload.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/MessageSharePayload.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift"],"notes":"Legacy cipher v3 and message v1 readers and exact vectors remain."},
+        {"id":"PKG-003","status":"partial","dependsOn":["PKG-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/RuneScribePackage.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/RuneScribePackageTests.swift"],"notes":"Length, type, section, resource, checksum, canonical-order, and required-version checks exist; complete fail-before-allocation proof across the frozen bounds remains tied to unfinished malformed-input coverage."},
+        {"id":"PKG-004","status":"satisfied","dependsOn":["BAS-007"],"evidence":["docs/architecture/decisions/ADR-RS-005-forward-compatibility.md","Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift"],"notes":"Current shipping policy remains legacy-only outbound until product review."},
+        {"id":"PKG-005","status":"partial","dependsOn":["PKG-003"],"evidence":["Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/RuneScribePackageTests.swift"],"notes":"Directed malformed, length, checksum, unknown-required, and oversize tests exist; randomized malformed-input coverage and bounded-allocation instrumentation remain incomplete."},
+        {"id":"PKG-006","status":"satisfied","dependsOn":["PKG-001","PKG-002"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Import/FileRouter.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/RuneScribePackageTests.swift"],"notes":"File routing checks complete or partial vNext magic before legacy leading bytes."}
+      ]
+    },
+    {
+      "prefix": "THM",
+      "wave": "2",
+      "dependsOn": ["FOR-011","MOD-001","DOM-004"],
+      "items": [
+        {"id":"THM-001","status":"not-started","dependsOn":["FOR-011","MOD-001"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No Theme descriptor schema or compatibility version exists."},
+        {"id":"THM-002","status":"not-started","dependsOn":["FOR-011","MOD-002","THM-001"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No Theme Coordinator product or target exists."},
+        {"id":"THM-003","status":"not-started","dependsOn":["FOR-011","THM-002"],"evidence":["#/forsettiGate"],"notes":"Keyed contribution registration awaits the upstream API and coordinator."},
+        {"id":"THM-004","status":"not-started","dependsOn":["FOR-011","THM-002"],"evidence":["#/forsettiGate","docs/architecture/decisions/ADR-RS-010-theme-resource-budgets.md"],"notes":"Budgets are frozen, but opaque resolution and validation are not implemented."},
+        {"id":"THM-005","status":"partial","dependsOn":["MOD-005","THM-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneTheme.swift"],"notes":"A UI-owned design system exists; it is not yet driven by a versioned semantic Theme descriptor."},
+        {"id":"THM-006","status":"not-started","dependsOn":["THM-003","THM-004","THM-005"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"Base presentation has not been extracted into a Theme Module."},
+        {"id":"THM-007","status":"not-started","dependsOn":["THM-006"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"The first placeholder provider does not exist."},
+        {"id":"THM-008","status":"not-started","dependsOn":["THM-006","DOM-004"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"The second placeholder and portability Script do not exist."},
+        {"id":"THM-009","status":"not-started","dependsOn":["THM-002","THM-006","THM-007","THM-008"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No selected-Codex preference or provider fallback service exists."},
+        {"id":"THM-010","status":"not-started","dependsOn":["THM-005","THM-009"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No Codex Settings product UI exists."},
+        {"id":"THM-011","status":"not-started","dependsOn":["THM-002"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No theme diagnostics surface exists."},
+        {"id":"THM-012","status":"not-started","dependsOn":["THM-001","THM-003","THM-004","THM-005","THM-006","THM-007","THM-008","THM-009","THM-010","THM-011"],"evidence":["Packages/RuneScribeArchitecture/Tests"],"notes":"No three-provider conformance suite exists."}
+      ]
+    },
+    {
+      "prefix": "PRO",
+      "wave": "3",
+      "dependsOn": ["FOR-011","MOD-001","THM-009"],
+      "items": [
+        {"id":"PRO-001","status":"not-started","dependsOn":["FOR-011","MOD-001"],"evidence":["Packages/RuneScribeArchitecture/Package.swift","docs/architecture/decisions/ADR-RS-008-progression-persistence.md"],"notes":"Persistence is decided, but no Progression Module or store exists."},
+        {"id":"PRO-002","status":"partial","dependsOn":["PRO-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift"],"notes":"A bounded privacy-safe versioned event envelope exists; the event catalog does not."},
+        {"id":"PRO-003","status":"not-started","dependsOn":["MOD-004","PRO-001","PRO-002"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No Core outbox or Progression dedupe handshake exists."},
+        {"id":"PRO-004","status":"partial","dependsOn":["BAS-007","MOD-004","PRO-002"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/DomainIdentifiers.swift","docs/architecture/decisions/ADR-RS-009-relationship-token.md"],"notes":"The opaque token type and derivation policy exist; generation and encrypted lifecycle persistence do not."},
+        {"id":"PRO-005","status":"not-started","dependsOn":["PRO-002","PRO-003","PRO-004"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No statistics or rule engine exists."},
+        {"id":"PRO-006","status":"not-started","dependsOn":["PRO-005"],"evidence":["docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md"],"notes":"The locked catalog is specified but not implemented."},
+        {"id":"PRO-007","status":"not-started","dependsOn":["PRO-001","PRO-002"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No ownership, grant, or Encounter records exist."},
+        {"id":"PRO-008","status":"not-started","dependsOn":["PRO-005","PRO-006","PRO-007"],"evidence":["docs/architecture/decisions/ADR-RS-008-progression-persistence.md"],"notes":"Atomicity is decided but not implemented."},
+        {"id":"PRO-009","status":"not-started","dependsOn":["FOR-005","PRO-008"],"evidence":["#/forsettiGate"],"notes":"No entitlement snapshot or earned-entitlement bridge exists."},
+        {"id":"PRO-010","status":"not-started","dependsOn":["DOM-007","PRO-003","PRO-008"],"evidence":["docs/architecture/decisions/ADR-RS-006-share-route-completion.md"],"notes":"The no-backfill policy is frozen; the idempotent existing-user migration is not implemented."},
+        {"id":"PRO-011","status":"not-started","dependsOn":["THM-009","PRO-007"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No Vault Codices view exists."},
+        {"id":"PRO-012","status":"not-started","dependsOn":["PRO-007"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No Artifact collection view exists."},
+        {"id":"PRO-013","status":"not-started","dependsOn":["PRO-006","PRO-008"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No Achievements or Statistics view exists."},
+        {"id":"PRO-014","status":"not-started","dependsOn":["PRO-007"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No Archive or Encounter view exists."},
+        {"id":"PRO-015","status":"not-started","dependsOn":["PRO-008","PRO-011","PRO-012","PRO-013","PRO-014"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No reveal queue or accessibility alternative exists."},
+        {"id":"PRO-016","status":"not-started","dependsOn":["PRO-001","PRO-008"],"evidence":["docs/architecture/decisions/ADR-RS-008-progression-persistence.md"],"notes":"Quarantine and recovery policy is frozen; implementation and tests remain."}
+      ]
+    },
+    {
+      "prefix": "SHR",
+      "wave": "4",
+      "dependsOn": ["PKG-001","THM-012","PRO-009"],
+      "items": [
+        {"id":"SHR-001","status":"blocked-device","dependsOn":["BAS-006","BAS-007"],"evidence":["docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"The required public-destination behavior can be decided only from physical-device evidence."},
+        {"id":"SHR-002","status":"not-started","dependsOn":["THM-004","THM-005"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No Artifact or static-preview renderer exists."},
+        {"id":"SHR-003","status":"decision-frozen","dependsOn":["THM-012","SHR-002"],"evidence":["docs/architecture/decisions/ADR-RS-010-theme-resource-budgets.md"],"notes":"Initial resource budgets are frozen; crop, contrast, and text-safe renderer conformance remains."},
+        {"id":"SHR-004","status":"not-started","dependsOn":["PKG-001","THM-009","SHR-002","SHR-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No themed Share Builder exists."},
+        {"id":"SHR-005","status":"not-started","dependsOn":["SHR-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"Current sharing is not Codex-aware Quick Share."},
+        {"id":"SHR-006","status":"partial","dependsOn":["BAS-007","DOM-007","PKG-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift","docs/architecture/decisions/ADR-RS-007-themed-follow-up-transport.md"],"notes":"Legacy first-delivery key inclusion exists; established themed packages remain deferred under legacy-only outbound."},
+        {"id":"SHR-007","status":"partial","dependsOn":["BAS-007","PKG-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/CipherSharePayload.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Import/LinkRouter.swift","docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Legacy cipher file, link, and QR composition exists; final Artifact transport awaits the spike."},
+        {"id":"SHR-008","status":"partial","dependsOn":["BAS-007","SHR-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ApplicationContracts.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/MessageComposeView.swift","RuneScribIOSTests/NativeShareOutcomeTests.swift","docs/architecture/decisions/ADR-RS-006-share-route-completion.md"],"notes":"Current adapters report useful terminal outcomes; the normalized operation/correlation vocabulary is not wired end-to-end."},
+        {"id":"SHR-009","status":"not-started","dependsOn":["PRO-002","SHR-008"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift"],"notes":"Stable event vocabulary exists, but share and first-delivery event emission does not."},
+        {"id":"SHR-010","status":"decision-frozen","dependsOn":["PKG-001","THM-001"],"evidence":["docs/architecture/decisions/ADR-RS-004-typed-runescribe-container.md"],"notes":"The presentation section is allocated and bounded; its metadata schema and outbound use remain."},
+        {"id":"SHR-011","status":"partial","dependsOn":["BAS-007","PKG-003","THM-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/RuneScribePackage.swift","docs/architecture/decisions/ADR-RS-010-theme-resource-budgets.md"],"notes":"Container preview/resource section bounds exist; media decode, hash table, and safe-preview validation remain."},
+        {"id":"SHR-012","status":"not-started","dependsOn":["THM-009","PKG-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No locked, unavailable, or unknown-Codex Base fallback exists."},
+        {"id":"SHR-013","status":"not-started","dependsOn":["PRO-007","SHR-009","SHR-012"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No Encounter recording exists."},
+        {"id":"SHR-014","status":"not-started","dependsOn":["SHR-010","SHR-013"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No provenance detail UI or verification status exists."},
+        {"id":"SHR-015","status":"blocked-device","dependsOn":["SHR-001"],"evidence":["docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Quick Look extension scope is conditional on physical-device spike value."},
+        {"id":"SHR-016","status":"partial","dependsOn":["SHR-001","SHR-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRDisplaySheet.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRScannerView.swift","docs/verification/feature-parity-matrix.json"],"notes":"Current QR and generic share fallbacks exist; themed Artifact scan/print reliability evidence remains."},
+        {"id":"SHR-017","status":"partial","dependsOn":["BAS-008","PKG-002","PKG-004","SHR-006","SHR-007","SHR-012"],"evidence":["Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/RuneScribePackageTests.swift"],"notes":"Legacy and initial vNext intake are tested; the full old/new and update-required destination matrix remains."}
+      ]
+    }
+  ]
+}

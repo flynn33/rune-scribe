@@ -1620,6 +1620,45 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertNil(recovered.importState.lastFailure)
     }
 
+    func testUnsupportedTypedContainerPublishesUpdateRequiredFailure() async throws {
+        let service = fullService(
+            secure: P4BSecureStore(),
+            protected: P4BProtectedStore()
+        )
+        await service.startInboundProcessing()
+
+        let cipher = Cipher.generated(label: "Newer Container")
+        let package = try RuneScribePackage(
+            kind: .cipherInvitation,
+            payloadVersion: UInt16(CipherSharePayload.version),
+            sections: [
+                RuneScribePackageSection(
+                    type: RuneScribePackageSectionType.corePayload.rawValue,
+                    required: true,
+                    data: try CipherSharePayload(cipher: cipher).encoded()
+                )
+            ]
+        )
+        var bytes = try package.encoded()
+        bytes.replaceSubrange(8..<10, with: Data([0, 2]))
+        let checksumStart = bytes.count - RuneScribePackage.checksumLength
+        bytes.replaceSubrange(
+            checksumStart..<bytes.count,
+            with: Data(SHA256.hash(data: bytes.prefix(checksumStart)))
+        )
+        let url = try temporaryFile(containing: bytes)
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        do {
+            _ = try await service.importFile(inboundFile(url))
+            XCTFail("A newer typed container must require an update")
+        } catch {}
+
+        let failed = try await currentSnapshot(from: service)
+        XCTAssertEqual(failed.importState.phase, .failed)
+        XCTAssertEqual(failed.importState.lastFailure?.code, .unsupportedFormat)
+    }
+
     func testMessageContactCommitFailureRepairsBeforeRetry() async throws {
         let secure = P4BSecureStore()
         let protected = P4BProtectedStore()

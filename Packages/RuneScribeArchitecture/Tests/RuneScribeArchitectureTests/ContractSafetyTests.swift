@@ -129,6 +129,30 @@ final class ContractSafetyTests: XCTestCase {
         assertSendable(CipherID.self)
         assertSendable(ContactID.self)
         assertSendable(FontID.self)
+        assertSendable(CodexID.self)
+        assertSendable(ScriptID.self)
+        assertSendable(ArtifactID.self)
+        assertSendable(RelicID.self)
+        assertSendable(SealID.self)
+        assertSendable(FrameID.self)
+        assertSendable(EffectID.self)
+        assertSendable(AchievementID.self)
+        assertSendable(RuleID.self)
+        assertSendable(UnlockID.self)
+        assertSendable(EventID.self)
+        assertSendable(CorrelationID.self)
+        assertSendable(CipherToken.self)
+        assertSendable(MessageToken.self)
+        assertSendable(PackageToken.self)
+        assertSendable(RelationshipToken.self)
+        assertSendable(PackageKindID.self)
+        assertSendable(PackageVersionID.self)
+        assertSendable(PackageTypeDescriptor.self)
+        assertSendable(DomainEventEligibilityMetadata.self)
+        assertSendable(DomainEventPayload.self)
+        assertSendable(DomainEventEnvelope.self)
+        assertSendable(EntitlementSourceDescriptor.self)
+        assertSendable(EntitlementRequirementDescriptor.self)
         assertSendable(CipherSummary.self)
         assertSendable(ContactSummary.self)
         assertSendable(FontSummary.self)
@@ -228,6 +252,258 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertFalse(String(decoding: encoded, as: UTF8.self).contains("artifactData"))
     }
 
+    func testRoadmapStringIdentifiersValidateSyntaxAndRoundTrip() throws {
+        let codex = try XCTUnwrap(CodexID(rawValue: "codex.base"))
+        let script = try XCTUnwrap(ScriptID(rawValue: "script.base-runes"))
+        let artifact = try XCTUnwrap(ArtifactID(rawValue: "artifact.first-mark"))
+        let relic = try XCTUnwrap(RelicID(rawValue: "relic.base-01"))
+        let seal = try XCTUnwrap(SealID(rawValue: "seal.base-01"))
+        let frame = try XCTUnwrap(FrameID(rawValue: "frame.base-01"))
+        let effect = try XCTUnwrap(EffectID(rawValue: "effect.base-01"))
+        let achievement = try XCTUnwrap(AchievementID(rawValue: "achievement.first-mark"))
+        let rule = try XCTUnwrap(RuleID(rawValue: "rule.first-mark"))
+        let unlock = try XCTUnwrap(UnlockID(rawValue: "unlock.codex-02"))
+        let packageKind = try XCTUnwrap(PackageKindID(rawValue: "encrypted-message"))
+        let packageVersion = try XCTUnwrap(PackageVersionID(rawValue: "1.0"))
+
+        try assertCodableRoundTrip(codex)
+        try assertCodableRoundTrip(script)
+        try assertCodableRoundTrip(artifact)
+        try assertCodableRoundTrip(relic)
+        try assertCodableRoundTrip(seal)
+        try assertCodableRoundTrip(frame)
+        try assertCodableRoundTrip(effect)
+        try assertCodableRoundTrip(achievement)
+        try assertCodableRoundTrip(rule)
+        try assertCodableRoundTrip(unlock)
+        try assertCodableRoundTrip(packageKind)
+        try assertCodableRoundTrip(packageVersion)
+        try assertCodableRoundTrip(
+            PackageTypeDescriptor(kind: packageKind, version: packageVersion)
+        )
+
+        XCTAssertNil(CodexID(rawValue: ""))
+        XCTAssertNil(CodexID(rawValue: "Codex.Base"))
+        XCTAssertNil(CodexID(rawValue: "codex_base"))
+        XCTAssertNil(CodexID(rawValue: ".codex"))
+        XCTAssertNil(CodexID(rawValue: "codex-"))
+        XCTAssertNil(CodexID(rawValue: "codex..base"))
+        XCTAssertNil(CodexID(rawValue: "codex.-base"))
+        XCTAssertNil(CodexID(rawValue: "codex/base"))
+        XCTAssertNil(CodexID(rawValue: String(repeating: "a", count: 97)))
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(CodexID.self, from: Data("\"Codex.Base\"".utf8))
+        )
+    }
+
+    func testRoadmapEventAndCorrelationIdentifiersAreUUIDBackedAndCodable() throws {
+        let eventID = EventID(
+            rawValue: UUID(uuidString: "00000000-0000-0000-0000-000000000101")!
+        )
+        let correlationID = CorrelationID(
+            rawValue: UUID(uuidString: "00000000-0000-0000-0000-000000000102")!
+        )
+
+        try assertCodableRoundTrip(eventID)
+        try assertCodableRoundTrip(correlationID)
+    }
+
+    func testPrivacySafeTokensAreOpaqueBoundedAndCodable() throws {
+        let cipher = try XCTUnwrap(
+            CipherToken(rawValue: String(repeating: "a", count: 64))
+        )
+        let message = try XCTUnwrap(
+            MessageToken(rawValue: String(repeating: "b", count: 64))
+        )
+        let package = try XCTUnwrap(
+            PackageToken(rawValue: String(repeating: "d", count: 64))
+        )
+        let relationship = try XCTUnwrap(
+            RelationshipToken(rawValue: "01234567-89abcdef-01234567-89abcdef")
+        )
+
+        try assertCodableRoundTrip(cipher)
+        try assertCodableRoundTrip(message)
+        try assertCodableRoundTrip(package)
+        try assertCodableRoundTrip(relationship)
+
+        XCTAssertNil(RelationshipToken(rawValue: "alice"))
+        XCTAssertNil(RelationshipToken(rawValue: "alice@example.com"))
+        XCTAssertNil(RelationshipToken(rawValue: "0123456789ABCDEF"))
+        XCTAssertNil(RelationshipToken(rawValue: "01234567--89abcdef"))
+        XCTAssertNil(RelationshipToken(rawValue: String(repeating: "a", count: 129)))
+    }
+
+    func testDomainEventEnvelopeIsVersionedBoundedAndPrivacySafe() throws {
+        let cipherToken = try XCTUnwrap(
+            CipherToken(rawValue: String(repeating: "c", count: 64))
+        )
+        let eligibility = DomainEventEligibilityMetadata(
+            state: .eligible,
+            reason: try XCTUnwrap(EligibilityReasonID(rawValue: "operation.committed"))
+        )
+        let codexID = try XCTUnwrap(CodexID(rawValue: "codex.base"))
+        let artifactID = try XCTUnwrap(ArtifactID(rawValue: "artifact.base.first-mark"))
+        let payload = try DomainEventPayload(
+            cipherToken: cipherToken,
+            origin: .generated,
+            routeClass: .shareSheet,
+            codexIDs: [codexID],
+            artifactIDs: [artifactID],
+            keyIncluded: true,
+            linkedRelationship: false
+        )
+        let envelope = try makeDomainEventEnvelope(
+            eligibility: eligibility,
+            payload: payload
+        )
+
+        try assertCodableRoundTrip(envelope)
+        let encoded = try JSONEncoder().encode(envelope)
+        let encodedText = String(decoding: encoded, as: UTF8.self)
+        XCTAssertFalse(encodedText.contains("plaintext"))
+        XCTAssertFalse(encodedText.contains("keyMaterial"))
+        XCTAssertFalse(encodedText.contains("senderName"))
+        XCTAssertFalse(encodedText.contains("contactName"))
+        XCTAssertFalse(encodedText.contains("packageBytes"))
+
+        XCTAssertThrowsError(try makeDomainEventEnvelope(schemaVersion: 0))
+        XCTAssertThrowsError(
+            try makeDomainEventEnvelope(eventType: EventIdentifier(rawValue: "Cipher.Created"))
+        )
+        XCTAssertThrowsError(
+            try makeDomainEventEnvelope(
+                sourceModuleID: ModuleIdentifier(rawValue: "com.runescribe.module.Core")
+            )
+        )
+        XCTAssertThrowsError(
+            try makeDomainEventEnvelope(
+                occurredAt: Date(timeIntervalSinceReferenceDate: .infinity)
+            )
+        )
+        XCTAssertThrowsError(
+            try DomainEventPayload(
+                codexIDs: Array(
+                    repeating: codexID,
+                    count: DomainEventPayload.maximumCodexIDs + 1
+                )
+            )
+        )
+        XCTAssertThrowsError(try DomainEventPayload(codexIDs: [codexID, codexID]))
+
+        var invalidObject = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        )
+        invalidObject["schemaVersion"] = 0
+        let invalidEncoded = try JSONSerialization.data(withJSONObject: invalidObject)
+        XCTAssertThrowsError(try JSONDecoder().decode(DomainEventEnvelope.self, from: invalidEncoded))
+
+        invalidObject = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        )
+        invalidObject.removeValue(forKey: "eligibility")
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(
+                DomainEventEnvelope.self,
+                from: JSONSerialization.data(withJSONObject: invalidObject)
+            )
+        )
+
+        invalidObject = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        )
+        var forgedPayload = try XCTUnwrap(invalidObject["payload"] as? [String: Any])
+        forgedPayload["cipherToken"] = "5551234567"
+        invalidObject["payload"] = forgedPayload
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(
+                DomainEventEnvelope.self,
+                from: JSONSerialization.data(withJSONObject: invalidObject)
+            )
+        )
+    }
+
+    func testEntitlementDescriptorsModelNeutralSourcesAndValidateComposition() throws {
+        let earnedReference = try XCTUnwrap(
+            EntitlementSourceReferenceID(rawValue: "progression.codex-02")
+        )
+        let debugReference = try XCTUnwrap(
+            EntitlementSourceReferenceID(rawValue: "debug.codex-02")
+        )
+        let purchaseReference = try XCTUnwrap(
+            EntitlementSourceReferenceID(rawValue: "purchase.codex-02")
+        )
+        let sources: [EntitlementSourceDescriptor] = [
+            .included,
+            .earned(earnedReference),
+            .debug(debugReference),
+            .futurePurchase(purchaseReference),
+        ]
+        let requirement = try EntitlementRequirementDescriptor(
+            requirementID: XCTUnwrap(UnlockID(rawValue: "unlock.codex-02")),
+            match: .any,
+            sources: sources
+        )
+
+        try assertCodableRoundTrip(requirement)
+        XCTAssertEqual(requirement.sources.map(\.kind), EntitlementSourceKind.allCases)
+        XCTAssertNil(EntitlementSourceDescriptor.included.referenceID)
+
+        XCTAssertThrowsError(
+            try EntitlementSourceDescriptor(
+                kind: .included,
+                referenceID: earnedReference
+            )
+        )
+        XCTAssertThrowsError(try EntitlementSourceDescriptor(kind: .earned))
+        XCTAssertThrowsError(
+            try EntitlementRequirementDescriptor(
+                requirementID: XCTUnwrap(UnlockID(rawValue: "unlock.empty")),
+                sources: []
+            )
+        )
+        XCTAssertThrowsError(
+            try EntitlementRequirementDescriptor(
+                requirementID: XCTUnwrap(UnlockID(rawValue: "unlock.duplicate")),
+                sources: [.included, .included]
+            )
+        )
+        XCTAssertThrowsError(
+            try EntitlementRequirementDescriptor(
+                requirementID: XCTUnwrap(UnlockID(rawValue: "unlock.too-many")),
+                sources: (0 ... EntitlementRequirementDescriptor.maximumSourceCount).map {
+                    .earned(
+                        EntitlementSourceReferenceID(rawValue: "progression.source-\($0)")!
+                    )
+                }
+            )
+        )
+
+        let invalidSource = Data("{\"kind\":\"included\",\"referenceID\":\"debug.invalid\"}".utf8)
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(EntitlementSourceDescriptor.self, from: invalidSource)
+        )
+    }
+
+    func testRoadmapContractsDoNotReferenceSensitiveApplicationDTOs() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let sourceURL = packageRoot
+            .appendingPathComponent("Sources/RuneScribeContracts/RoadmapContracts.swift")
+        let source = try String(contentsOf: sourceURL, encoding: .utf8)
+
+        XCTAssertFalse(source.contains("CipherSummary"))
+        XCTAssertFalse(source.contains("ContactSummary"))
+        XCTAssertFalse(source.contains("ReceivedMessageDTO"))
+        XCTAssertFalse(source.contains("PINInput"))
+        XCTAssertFalse(source.contains("MessageEnvelope"))
+        XCTAssertFalse(source.contains("SymmetricKey"))
+        XCTAssertFalse(source.contains("payload: Data"))
+        XCTAssertFalse(source.contains("[String: Any]"))
+    }
+
     func testContractsSourceUsesOnlyFoundationAndApplicationSurfaceNamesNoKeyType() throws {
         let packageRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
@@ -284,6 +560,46 @@ final class ContractSafetyTests: XCTestCase {
     }
 
     private func assertSendable<Value: Sendable>(_: Value.Type) {}
+
+    private func assertCodableRoundTrip<Value: Codable & Equatable>(
+        _ value: Value,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) throws {
+        let encoded = try JSONEncoder().encode(value)
+        let decoded = try JSONDecoder().decode(Value.self, from: encoded)
+        XCTAssertEqual(decoded, value, file: file, line: line)
+    }
+
+    private func makeDomainEventEnvelope(
+        schemaVersion: UInt16 = 1,
+        eventType: EventIdentifier = EventIdentifier(rawValue: "cipher.created"),
+        sourceModuleID: ModuleIdentifier = ModuleIdentifier(
+            rawValue: "com.runescribe.module.core"
+        ),
+        occurredAt: Date = Date(timeIntervalSince1970: 1_800_000_000),
+        eligibility: DomainEventEligibilityMetadata? = nil,
+        payload: DomainEventPayload? = nil
+    ) throws -> DomainEventEnvelope {
+        let resolvedEligibility = eligibility ?? DomainEventEligibilityMetadata(
+            state: .informational,
+            reason: EligibilityReasonID(rawValue: "operation.not-evaluated")!
+        )
+        return try DomainEventEnvelope(
+            schemaVersion: schemaVersion,
+            eventID: EventID(
+                rawValue: UUID(uuidString: "00000000-0000-0000-0000-000000000103")!
+            ),
+            correlationID: CorrelationID(
+                rawValue: UUID(uuidString: "00000000-0000-0000-0000-000000000104")!
+            ),
+            eventType: eventType,
+            sourceModuleID: sourceModuleID,
+            occurredAt: occurredAt,
+            eligibility: resolvedEligibility,
+            payload: try payload ?? DomainEventPayload()
+        )
+    }
 
     private func isEncodable(_ type: Any.Type) -> Bool {
         type is any Encodable.Type
