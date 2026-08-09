@@ -62,7 +62,11 @@ final class RuneScribeParityUITests: XCTestCase {
         app.buttons["Rename Parity Contact"].tap()
         let renameContact = app.alerts["Rename Contact"]
         XCTAssertTrue(renameContact.waitForExistence(timeout: 5))
-        replaceText(in: renameContact.textFields["Name"], with: "Parity Contact Edited")
+        appendTextAtEnd(
+            in: renameContact.textFields["Name"],
+            suffix: " Edited",
+            expectedValue: "Parity Contact Edited"
+        )
         renameContact.buttons["Save"].tap()
         XCTAssertTrue(app.staticTexts["Parity Contact Edited"].waitForExistence(timeout: 5))
         app.buttons["Close"].firstMatch.tap()
@@ -142,7 +146,11 @@ final class RuneScribeParityUITests: XCTestCase {
         app.buttons["Rename Parity Cipher"].tap()
         let renameCipher = app.alerts["Rename Cipher"]
         XCTAssertTrue(renameCipher.waitForExistence(timeout: 5))
-        replaceText(in: renameCipher.textFields["Label"], with: "Parity Cipher Renamed")
+        appendTextAtEnd(
+            in: renameCipher.textFields["Label"],
+            suffix: " Renamed",
+            expectedValue: "Parity Cipher Renamed"
+        )
         renameCipher.buttons["Save"].tap()
         XCTAssertTrue(app.staticTexts["Parity Cipher Renamed"].waitForExistence(timeout: 8))
 
@@ -325,6 +333,16 @@ final class RuneScribeParityUITests: XCTestCase {
             }
         }
         field.typeText(replacement)
+    }
+
+    private func appendTextAtEnd(
+        in field: XCUIElement,
+        suffix: String,
+        expectedValue: String
+    ) {
+        field.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        field.typeText(suffix)
+        XCTAssertEqual(field.value as? String, expectedValue)
     }
 
     private func makeMessageFixtureFile() throws -> URL {
