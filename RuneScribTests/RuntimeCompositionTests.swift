@@ -376,14 +376,8 @@ private struct HostedTestCoreModule: RuneScribeModule {
 
     func start(context: ModuleContext) async throws {
         if let startGate { await startGate.enterAndWait() }
-        try await context.publishService(
-            applicationService as any RuneScribeApplicationService,
-            for: RuneScribeServiceKeys.application
-        )
-        try await context.publishService(
-            inboundInputService as any RuneScribeInboundInputService,
-            for: RuneScribeServiceKeys.inboundInput
-        )
+        try await context.registerApplicationEndpoints(applicationService)
+        try await context.registerInboundInputEndpoint(inboundInputService)
         await applicationService.startInboundProcessing()
     }
 

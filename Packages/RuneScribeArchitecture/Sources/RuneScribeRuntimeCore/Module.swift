@@ -11,6 +11,8 @@ public struct ModuleDescriptor: Hashable, Sendable {
     public let requiredServices: Set<ServiceIdentifier>
     public let publishedServices: Set<ServiceIdentifier>
     public let requiredModuleRoles: Set<ModuleRole>
+    public let consumedEndpoints: Set<RuntimeEndpointIdentifier>
+    public let publishedEndpoints: Set<RuntimeEndpointIdentifier>
 
     public init(
         moduleID: ModuleIdentifier,
@@ -21,7 +23,9 @@ public struct ModuleDescriptor: Hashable, Sendable {
         requestedCapabilities: Set<CapabilityIdentifier>,
         requiredServices: Set<ServiceIdentifier> = [],
         publishedServices: Set<ServiceIdentifier> = [],
-        requiredModuleRoles: Set<ModuleRole> = []
+        requiredModuleRoles: Set<ModuleRole> = [],
+        consumedEndpoints: Set<RuntimeEndpointIdentifier> = [],
+        publishedEndpoints: Set<RuntimeEndpointIdentifier> = []
     ) {
         self.moduleID = moduleID
         self.moduleVersion = moduleVersion
@@ -32,6 +36,8 @@ public struct ModuleDescriptor: Hashable, Sendable {
         self.requiredServices = requiredServices
         self.publishedServices = publishedServices
         self.requiredModuleRoles = requiredModuleRoles
+        self.consumedEndpoints = consumedEndpoints
+        self.publishedEndpoints = publishedEndpoints
     }
 }
 

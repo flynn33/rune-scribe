@@ -28,6 +28,31 @@ public enum RuneScribeRuntimeError: Error, Equatable, Sendable {
     case hostServiceAccessDenied(ServiceIdentifier)
     case messageDestinationUnavailable(ModuleRole)
     case duplicateMessageDestination(ModuleRole)
+    case providerPublicationDenied(ServiceIdentifier)
+    case endpointAlreadyRegistered(RuntimeEndpointIdentifier)
+    case endpointUnavailable(RuntimeEndpointIdentifier)
+    case endpointNotDeclared(moduleID: ModuleIdentifier, endpoint: RuntimeEndpointIdentifier)
+    case endpointDestinationMismatch(RuntimeEndpointIdentifier)
+    case endpointDescriptorMismatch(RuntimeEndpointIdentifier)
+    case endpointTypeMismatch(RuntimeEndpointIdentifier)
+    case endpointKindMismatch(
+        endpoint: RuntimeEndpointIdentifier,
+        expected: RuntimeEndpointKind,
+        actual: RuntimeEndpointKind
+    )
+    case operationSchemaMismatch(
+        endpoint: RuntimeEndpointIdentifier,
+        expected: RuntimeSchemaVersion,
+        actual: RuntimeSchemaVersion
+    )
+    case operationRequestTooLarge(endpoint: RuntimeEndpointIdentifier, maximumBytes: UInt64)
+    case operationResponseTooLarge(endpoint: RuntimeEndpointIdentifier, maximumBytes: UInt64)
+    case operationSessionLimitExceeded(maximum: Int)
+    case operationRateLimitExceeded(maximumCalls: Int, window: TimeInterval)
+    case runtimeNotRunning
+    case moduleNotActive(ModuleIdentifier)
+    case staleClient(ModuleIdentifier)
+    case operationCancelled(RuntimeOperationID)
 }
 
 extension RuneScribeRuntimeError: LocalizedError {
@@ -85,6 +110,40 @@ extension RuneScribeRuntimeError: LocalizedError {
             "No message destination is registered for role \(role.rawValue)."
         case .duplicateMessageDestination(let role):
             "A message destination is already registered for role \(role.rawValue)."
+        case .providerPublicationDenied(let service):
+            "Provider publication is not permitted for \(service.rawValue)."
+        case .endpointAlreadyRegistered(let endpoint):
+            "Endpoint \(endpoint.rawValue) is already registered."
+        case .endpointUnavailable(let endpoint):
+            "Endpoint \(endpoint.rawValue) is unavailable."
+        case .endpointNotDeclared(let moduleID, let endpoint):
+            "Module \(moduleID.rawValue) did not declare endpoint \(endpoint.rawValue)."
+        case .endpointDestinationMismatch(let endpoint):
+            "Endpoint \(endpoint.rawValue) is registered by the wrong destination."
+        case .endpointDescriptorMismatch(let endpoint):
+            "Endpoint \(endpoint.rawValue) descriptor does not match its registration."
+        case .endpointTypeMismatch(let endpoint):
+            "Endpoint \(endpoint.rawValue) was invoked with incompatible types."
+        case .endpointKindMismatch(let endpoint, let expected, let actual):
+            "Endpoint \(endpoint.rawValue) requires \(expected.rawValue), not \(actual.rawValue)."
+        case .operationSchemaMismatch(let endpoint, let expected, let actual):
+            "Endpoint \(endpoint.rawValue) requires schema \(expected.rawValue), not \(actual.rawValue)."
+        case .operationRequestTooLarge(let endpoint, let maximumBytes):
+            "Endpoint \(endpoint.rawValue) request exceeds \(maximumBytes) bytes."
+        case .operationResponseTooLarge(let endpoint, let maximumBytes):
+            "Endpoint \(endpoint.rawValue) response exceeds \(maximumBytes) bytes."
+        case .operationSessionLimitExceeded(let maximum):
+            "The runtime operation session limit of \(maximum) is saturated."
+        case .operationRateLimitExceeded(let maximumCalls, let window):
+            "The runtime operation rate limit of \(maximumCalls) calls per \(window) seconds is saturated."
+        case .runtimeNotRunning:
+            "The runtime is not running."
+        case .moduleNotActive(let moduleID):
+            "Module \(moduleID.rawValue) is not active."
+        case .staleClient(let moduleID):
+            "The runtime client for \(moduleID.rawValue) is stale."
+        case .operationCancelled(let operationID):
+            "Operation \(operationID.rawValue) was cancelled."
         }
     }
 }

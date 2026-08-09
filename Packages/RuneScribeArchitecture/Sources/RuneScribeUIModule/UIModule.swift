@@ -70,15 +70,9 @@ public final class RuneScribeUIModule: RuneScribeModule {
     }
 
     public func start(context: ModuleContext) async throws {
-        let applicationService: any RuneScribeApplicationService = try await context.resolveService(
-            RuneScribeServiceKeys.application
-        )
-        let resources: any ApplicationResourceLocator = try await context.resolveService(
-            RuneScribeServiceKeys.applicationResourceLocator
-        )
-        let clipboardWriting: any ClipboardWriting = try await context.resolveService(
-            RuneScribeServiceKeys.clipboardWrite
-        )
+        let applicationService = try await context.applicationServiceClient()
+        let resources = try await context.applicationResourceClient()
+        let clipboardWriting = try await context.clipboardWritingClient()
 
         async let splashVideoURL: URL? = try? await resources.url(for: .splashVideo)
         async let metalLibraryURL: URL? = try? await resources.url(for: .defaultMetalLibrary)

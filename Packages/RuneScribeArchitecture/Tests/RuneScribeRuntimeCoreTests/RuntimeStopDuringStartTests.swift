@@ -56,23 +56,25 @@ final class RuntimeStopDuringStartTests: XCTestCase {
     }
 
     func testStopDuringActivationWaitsForRollbackAndRevokesPublishedServices() async throws {
-        let serviceID: ServiceIdentifier = "StopDuringStartValue"
-        let serviceKey = ServiceKey<StopDuringStartValue>(serviceID)
+        let endpointID: RuntimeEndpointIdentifier = "test.stop-during-start.query"
+        let endpoint = RuntimeEndpointDescriptor<RuntimeEmptyPayload, StopDuringStartValue>(
+            endpointID: endpointID,
+            kind: .query,
+            destination: .role(RuneScribeRoles.core),
+            requestSchemaVersion: RuntimeSchemaVersions.v1,
+            responseSchemaVersion: RuntimeSchemaVersions.v1,
+            requiredCapability: RuneScribeCapabilities.applicationCommands,
+            privacyClass: .internalData,
+            maximumRequestBytes: 1,
+            maximumResponseBytes: 16
+        ).key
         let policy = RuntimePolicy(
             vocabulary: CapabilityVocabulary(knownCapabilities: RuneScribeCapabilities.all),
             capabilities: CapabilityPolicy(allowedRolesByCapability: [
-                RuneScribeCapabilities.publishService: [RuneScribeRoles.core],
-                RuneScribeCapabilities.resolveService: [RuneScribeRoles.primaryUI],
+                RuneScribeCapabilities.applicationCommands: [RuneScribeRoles.primaryUI],
                 RuneScribeCapabilities.rootUI: [RuneScribeRoles.primaryUI],
             ]),
-            services: ServiceAccessPolicy(rules: [
-                ServiceAccessRule(
-                    serviceID: serviceID,
-                    requiredCapability: RuneScribeCapabilities.resolveService,
-                    publisherRoles: [RuneScribeRoles.core],
-                    consumerRoles: [RuneScribeRoles.primaryUI]
-                ),
-            ])
+            services: ServiceAccessPolicy(rules: [])
         )
         let runtime = RuneScribeRuntime(
             runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)),
@@ -86,8 +88,8 @@ final class RuntimeStopDuringStartTests: XCTestCase {
             kind: .service,
             entryPoint: "StopRaceCoreModule",
             role: RuneScribeRoles.core,
-            capabilities: [RuneScribeCapabilities.publishService],
-            publishedServices: [serviceID]
+            capabilities: [],
+            publishedEndpoints: [endpointID]
         )
         let ui = stopRaceDescriptor(
             id: "com.runescribe.module.stop-race-ui",
@@ -95,11 +97,11 @@ final class RuntimeStopDuringStartTests: XCTestCase {
             entryPoint: "StopRaceUIModule",
             role: RuneScribeRoles.primaryUI,
             capabilities: [
-                RuneScribeCapabilities.resolveService,
+                RuneScribeCapabilities.applicationCommands,
                 RuneScribeCapabilities.rootUI,
             ],
-            requiredServices: [serviceID],
-            requiredRoles: [RuneScribeRoles.core]
+            requiredRoles: [RuneScribeRoles.core],
+            consumedEndpoints: [endpointID]
         )
 
         try await runtime.register(
@@ -110,9 +112,9 @@ final class RuntimeStopDuringStartTests: XCTestCase {
                     startAction: { context in
                         await probe.recordCoreStart()
                         await gate.suspend()
-                        try await context.publishService(
-                            StopDuringStartValue(value: 7),
-                            for: serviceKey
+                        try await context.registerEndpoint(
+                            endpoint,
+                            handler: { _, _ in StopDuringStartValue(value: 7) }
                         )
                     },
                     stopAction: { await probe.recordCoreStop() }
@@ -125,7 +127,10 @@ final class RuntimeStopDuringStartTests: XCTestCase {
                 StopRaceModule(
                     descriptor: ui,
                     startAction: { context in
-                        _ = try await context.resolveService(serviceKey)
+                        let client = try await context.queryClient(
+                            to: .role(RuneScribeRoles.core)
+                        )
+                        _ = client
                         await probe.recordUIStart()
                     },
                     stopAction: { await probe.recordUIStop() }
@@ -252,7 +257,9 @@ private func stopRaceDescriptor(
     capabilities: Set<CapabilityIdentifier>,
     requiredServices: Set<ServiceIdentifier> = [],
     publishedServices: Set<ServiceIdentifier> = [],
-    requiredRoles: Set<ModuleRole> = []
+    requiredRoles: Set<ModuleRole> = [],
+    consumedEndpoints: Set<RuntimeEndpointIdentifier> = [],
+    publishedEndpoints: Set<RuntimeEndpointIdentifier> = []
 ) -> ModuleDescriptor {
     ModuleDescriptor(
         moduleID: id,
@@ -263,7 +270,9 @@ private func stopRaceDescriptor(
         requestedCapabilities: capabilities,
         requiredServices: requiredServices,
         publishedServices: publishedServices,
-        requiredModuleRoles: requiredRoles
+        requiredModuleRoles: requiredRoles,
+        consumedEndpoints: consumedEndpoints,
+        publishedEndpoints: publishedEndpoints
     )
 }
 

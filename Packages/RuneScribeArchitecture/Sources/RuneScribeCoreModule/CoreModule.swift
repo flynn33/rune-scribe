@@ -76,36 +76,16 @@ public struct RuneScribeCoreModule: RuneScribeModule {
     public init() {}
 
     public func start(context: ModuleContext) async throws {
-        let secureValueStore: any SecureValueStore = try await context.resolveService(
-            RuneScribeServiceKeys.secureValueStore
-        )
-        let protectedFileStore: any ProtectedFileStore = try await context.resolveService(
-            RuneScribeServiceKeys.protectedFileStore
-        )
-        let inboundFileReader: any InboundFileReader = try await context.resolveService(
-            RuneScribeServiceKeys.inboundFileReader
-        )
-        let shareArtifactStore: any ShareArtifactStore = try await context.resolveService(
-            RuneScribeServiceKeys.shareArtifactStore
-        )
-        let applicationResourceLocator: any ApplicationResourceLocator = try await context.resolveService(
-            RuneScribeServiceKeys.applicationResourceLocator
-        )
-        let systemFontRegistrar: any SystemFontRegistrar = try await context.resolveService(
-            RuneScribeServiceKeys.systemFontRegistrar
-        )
-        let contactAccess: any ContactAccessService = try await context.resolveService(
-            RuneScribeServiceKeys.contactAccess
-        )
-        let clipboardReading: any ClipboardReading = try await context.resolveService(
-            RuneScribeServiceKeys.clipboardRead
-        )
-        let clock: any ClockProviding = try await context.resolveService(
-            RuneScribeServiceKeys.clock
-        )
-        let uuid: any UUIDProviding = try await context.resolveService(
-            RuneScribeServiceKeys.uuid
-        )
+        let secureValueStore = try await context.secureValueStoreClient()
+        let protectedFileStore = try await context.protectedFileStoreClient()
+        let inboundFileReader = try await context.inboundFileReaderClient()
+        let shareArtifactStore = try await context.shareArtifactStoreClient()
+        let applicationResourceLocator = try await context.applicationResourceClient()
+        let systemFontRegistrar = try await context.systemFontRegistrarClient()
+        let contactAccess = try await context.contactAccessClient()
+        let clipboardReading = try await context.clipboardReadingClient()
+        let clock = try await context.clockClient()
+        let uuid = try await context.uuidClient()
         let service = RuneScribeCoreApplicationService(
             secureValueStore: secureValueStore,
             protectedFileStore: protectedFileStore,
@@ -118,14 +98,8 @@ public struct RuneScribeCoreModule: RuneScribeModule {
             clock: clock,
             uuid: uuid
         )
-        try await context.publishService(
-            service as any RuneScribeApplicationService,
-            for: RuneScribeServiceKeys.application
-        )
-        try await context.publishService(
-            service as any RuneScribeInboundInputService,
-            for: RuneScribeServiceKeys.inboundInput
-        )
+        try await context.registerApplicationEndpoints(service)
+        try await context.registerInboundInputEndpoint(service)
         await lifecycle.store(service)
         await service.startInboundProcessing()
     }

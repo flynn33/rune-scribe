@@ -308,20 +308,10 @@ def external_dependency_evidence(scanner)
 end
 
 PRESENCE_DETECTORS = {
-  "FG-004" => [
-    ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Services.swift", /let value: any Sendable/, "registry entry stores a raw provider value"],
-    ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Services.swift", /func publishService/, "module publishes a service object"],
-    ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Services.swift", /func resolveService/, "consumer resolves a provider-owned service value"]
-  ],
   "FG-005" => [
     ["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift", /RuneScribeApplicationService.*resolveService|resolveService\(/, "UI resolves the Core application service"],
     ["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift", /applicationServiceHandle:.*RuneScribeApplicationService/, "UI session retains the Core service handle"],
     ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/SerialInboundInputForwarder.swift", /private var service:.*RuneScribeInboundInputService/, "host forwarder retains the inbound provider service"]
-  ],
-  "FG-006" => [
-    ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Services.swift", /func resolveService/, "lookup returns a provider value instead of a per-call dispatch identity"],
-    ["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift", /requireApplicationService\(/, "UI command path calls through a retained provider handle"],
-    ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/SerialInboundInputForwarder.swift", /service\.receive\(/, "host ingress invokes the retained provider directly"]
   ],
   "FG-007" => [
     ["RuneScrib/AppHost/RuneScribeRuntimeComposition.swift", /registerHostService\(/, "host registers raw operational adapters as services"],
@@ -371,6 +361,236 @@ PRESENCE_DETECTORS = {
     ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Messages.swift", /payload: Data/, "directed messages use opaque Data without durable delivery semantics"]
   ]
 }.freeze
+
+def shipping_swift_paths(scanner)
+  scanner.files("Packages/RuneScribeArchitecture/Sources/**/*.swift")
+    .merge(scanner.files("RuneScrib/**/*.swift"))
+    .keys
+    .sort
+end
+
+def required_anchor_evidence(scanner, requirements)
+  present = []
+  missing = []
+  requirements.each do |relative, pattern, detail|
+    matches = scanner.evidence(relative, pattern, detail)
+    if matches.empty?
+      marker = scanner.marker(relative, "required runtime proof is missing: #{detail}")
+      missing.concat(
+        marker.empty? ? [{"path" => relative, "line" => 1, "detail" => "required runtime proof file is missing: #{detail}"}] : marker
+      )
+    else
+      present.concat(matches)
+    end
+  end
+  [unique_evidence(present), unique_evidence(missing)]
+end
+
+def generic_cast_return_evidence(scanner)
+  evidence = []
+  shipping_swift_paths(scanner).each do |relative|
+    lines = scanner.lines(relative)
+    next unless lines
+    lines.each_index do |start_index|
+      next unless lines[start_index].match?(/\bfunc\b/)
+      signature_end = start_index
+      signature = +""
+      while signature_end < lines.length && signature_end < start_index + 12
+        signature << " " << lines[signature_end].strip
+        break if lines[signature_end].include?("{")
+        signature_end += 1
+      end
+      match = signature.match(/\bfunc\s+[A-Za-z_][A-Za-z0-9_]*\s*<([^>]+)>.*?->\s*([A-Za-z_][A-Za-z0-9_]*)\b/)
+      next unless match
+      generic_parameters = match[1].scan(/(?:\A|,)\s*([A-Za-z_][A-Za-z0-9_]*)\s*:/).flatten
+      returned_parameter = match[2]
+      next unless generic_parameters.include?(returned_parameter)
+
+      depth = 0
+      body_started = false
+      (start_index...[lines.length, start_index + 120].min).each do |line_index|
+        line = lines[line_index]
+        body_started ||= line.include?("{")
+        if body_started && line.match?(/\bas\?\s*#{Regexp.escape(returned_parameter)}\b/)
+          evidence << {
+            "path" => relative,
+            "line" => line_index + 1,
+            "detail" => "generic function casts stored data and returns it as its caller-selected type"
+          }
+          break
+        end
+        depth += line.count("{") - line.count("}") if body_started
+        break if body_started && depth <= 0
+      end
+    end
+  end
+  unique_evidence(evidence)
+end
+
+def provider_publication_rule(scanner)
+  forbidden = [
+    [/\b(?:actor|class|struct)\s+ScopedServiceRegistry\b/, "raw provider-value service registry remains"],
+    [/\b(?:let|var)\s+(?!handlerBox\b)[A-Za-z_][A-Za-z0-9_]*:\s*any\s+Sendable\b/, "generic raw Sendable storage remains outside the private typed handler box"],
+    [/\bas\?\s*(?:Value|T|Element|Payload|Stored|Service)\b/, "generic raw registry casts a stored object back to its requested type"],
+    [/\[ServiceIdentifier:\s*Entry\]/, "service registry is keyed to raw value entries"],
+    [/\bfunc\s+register(?:Host|Module)?Service\s*<\s*[A-Za-z_][A-Za-z0-9_]*\s*:\s*Sendable\b/, "generic raw service registration remains"],
+    [/\bfunc\s+resolve\s*<\s*[A-Za-z_][A-Za-z0-9_]*\s*:\s*Sendable\b/, "generic raw registry resolution remains"],
+    [/\bfunc\s+resolve(?:Host)?Service\s*<\s*[A-Za-z_][A-Za-z0-9_]*\s*:\s*Sendable\b/, "generic service resolver can return a provider object"],
+    [/\bfunc\s+registerModuleService\b/, "module service object registration remains"],
+    [/\bfunc\s+publishService\s*<\s*[A-Za-z_][A-Za-z0-9_]*\s*:\s*Sendable\b/, "generic module provider publication API remains"],
+    [/\bpublishService\s*\(\s*self\b/, "module publishes its provider implementation"],
+    [/\bfunc\s+register(?!HostService\b)[A-Za-z0-9_]*Service\s*\([^)]*\bany\s+[A-Za-z0-9_]*Service\b/, "raw module service actor or existential registration remains"]
+  ]
+  violations = []
+  shipping_swift_paths(scanner).each do |relative|
+    forbidden.each do |pattern, detail|
+      violations.concat(scanner.evidence(relative, pattern, detail, all: true))
+    end
+  end
+  violations = unique_evidence(violations + generic_cast_return_evidence(scanner))
+  return ["violation", violations, "detected-source-anchor"] unless violations.empty?
+
+  dispatcher = "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeOperationDispatcher.swift"
+  compatibility = "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeApplicationEndpoints.swift"
+  platform_bridge = "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimePlatformBridge.swift"
+  runtime = "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift"
+  guard_tests = "RuneScribArchitectureTests/ComplianceGuardTests.swift"
+  requirements = [
+    [dispatcher, /private struct RuntimeTypedEndpoint</, "runtime stores only a private typed endpoint handler"],
+    [dispatcher, /let handler: @Sendable/, "endpoint entry retains an invocation handler rather than a provider object"],
+    [dispatcher, /private struct RuntimeEndpointEntry\b/, "runtime endpoint entry is implementation-private"],
+    [dispatcher, /func registerEndpoint</, "modules register typed endpoint descriptors and handlers"],
+    [dispatcher, /handler: @escaping @Sendable/, "endpoint registration accepts a runtime-owned invocation closure"],
+    [dispatcher, /handlerBox: RuntimeTypedEndpoint\(/, "registered provider behavior is wrapped as a typed handler"],
+    [platform_bridge, /actor RuntimePlatformBridge\b/, "host platform adapters are isolated in an exact-member bridge"],
+    [compatibility, /func registerApplicationEndpoints\(/, "Core application behavior is translated into runtime endpoint handlers"],
+    [compatibility, /func registerInboundInputEndpoint\(/, "Core inbound behavior is translated into a runtime ingress handler"],
+    [compatibility, /return RuntimeApplicationServiceProxy\(/, "application resolution constructs a runtime-owned proxy"],
+    [compatibility, /private struct RuntimeApplicationServiceProxy\b/, "application compatibility proxy is runtime-owned and private"],
+    [compatibility, /let command: RuntimeCommandClient/, "application proxy stores a runtime command client"],
+    [compatibility, /let query: RuntimeQueryClient/, "application proxy stores a runtime query client"],
+    [runtime, /return RuntimeInboundInputServiceProxy\(/, "host inbound resolution constructs a runtime-owned proxy"],
+    [compatibility, /^struct RuntimeInboundInputServiceProxy\b/, "inbound compatibility proxy is runtime-owned and internal"],
+    [compatibility, /let client: RuntimeIngressClient/, "inbound proxy stores a runtime ingress client"],
+    [guard_tests, /"NM-FG-004-01"/, "provider self-publication negative mutation is present"],
+    [guard_tests, /"NM-FG-004-02"/, "raw actor registration negative mutation is present"],
+    [guard_tests, /func testGenericRawResolverRegressionReportsFG004\(/, "generic resolver and cast-return regression test is present"]
+  ]
+  present, missing = required_anchor_evidence(scanner, requirements)
+  unless missing.empty?
+    return ["violation", missing, "detected-absence-anchor"]
+  end
+
+  proof = present + scanner.marker(
+    dispatcher,
+    "shipping Swift sources were scanned with no raw module provider publication, cast, or return surface"
+  )
+  ["pass", unique_evidence(proof), "detector-proof"]
+end
+
+def runtime_dispatch_rule(scanner)
+  dispatcher = "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeOperationDispatcher.swift"
+  payload_sizer = "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimePayloadSizer.swift"
+  guard_tests = "RuneScribArchitectureTests/ComplianceGuardTests.swift"
+  runtime_tests = "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeOperationDispatcherTests.swift"
+  requirements = [
+    [dispatcher, /public actor RuntimeOperationDispatcher\b/, "runtime owns the operation dispatcher"],
+    [dispatcher, /struct RuntimeClientLease\b/, "runtime clients carry generation-pinned identities"],
+    [dispatcher, /func registerEndpoint</, "providers register typed endpoints with runtime"],
+    [dispatcher, /func dispatch</, "cross-module clients enter the runtime dispatcher"],
+    [dispatcher, /let endpoint = try validateBeforeCall\(/, "every dispatch invokes the pre-call validator"],
+    [dispatcher, /try validateRuntimeGeneration\(lease\)/, "every call checks runtime generation"],
+    [dispatcher, /try validateSourceLifecycle\(/, "every call checks runtime and source lifecycle plus generation"],
+    [dispatcher, /try validateDestinationLifecycle\(/, "every call checks destination lifecycle plus endpoint generation"],
+    [dispatcher, /try validateEndpointDeclarations\(/, "every call checks source and destination endpoint declarations"],
+    [dispatcher, /try validateCapability\(/, "every call checks source capability and runtime policy"],
+    [dispatcher, /try validateDescriptorAndSchemas\(/, "every call checks endpoint identity, types, kind, and schemas"],
+    [dispatcher, /try validateRequestBounds\(/, "every call checks request bounds"],
+    [dispatcher, /try validateRateBounds\(/, "every call checks runtime rate and concurrency policy"],
+    [payload_sizer, /enum RuntimePayloadSizer\b/, "runtime owns deterministic payload sizing"],
+    [dispatcher, /RuntimePayloadSizer\.byteCount\(/, "dispatcher applies runtime-owned payload sizing"],
+    [dispatcher, /inFlight\[operationID\] = RuntimeInFlightOperation\(/, "runtime owns in-flight operation cancellation"],
+    [dispatcher, /operation\.cancel\(\)/, "module or runtime invalidation cancels affected operations"],
+    [dispatcher, /try validateAfterCall\(lease: lease, endpoint: endpoint\)/, "dispatch revalidates generations after provider execution"],
+    [dispatcher, /guard responseBytes <= endpoint\.descriptor\.maximumResponseBytes/, "post-call validation checks response bounds"],
+    [dispatcher, /private func appendLedgerStart\(/, "runtime records every attempted operation"],
+    [dispatcher, /private func completeLedger\(/, "runtime records operation completion or denial"],
+    [dispatcher, /let hadIdempotencyKey: Bool/, "ledger records only whether an idempotency key existed"],
+    [dispatcher, /idempotencyKey: nil/, "ledger removes the idempotency key value"],
+    [dispatcher, /public struct RuntimeCommandClient\b/, "command calls use a runtime-owned client"],
+    [dispatcher, /public struct RuntimeQueryClient\b/, "query calls use a runtime-owned client"],
+    [dispatcher, /public struct RuntimeStateClient\b/, "state calls use a runtime-owned client"],
+    [dispatcher, /public struct RuntimeIngressClient\b/, "ingress calls use a runtime-owned client"],
+    [guard_tests, /"NM-FG-006-01"/, "stopped-provider negative mutation is present"],
+    [guard_tests, /"NM-FG-006-02"/, "provider-replacement negative mutation is present"],
+    [guard_tests, /"NM-FG-006-03"/, "undeclared-endpoint negative mutation is present"],
+    [runtime_tests, /func testTRT001AuthorizedCommandIsMediatedAndLedgered\(/, "authorized command mediation and ledger test is present"],
+    [runtime_tests, /func testLedgerUsesRuntimeStampedBoundedMetadata\(/, "runtime-stamped bounded metadata test is present"],
+    [runtime_tests, /func testTRT002UnauthorizedAndUndeclaredSourcesFailClosed\(/, "unauthorized and undeclared source test is present"],
+    [runtime_tests, /func testEveryRejectedAttemptCreatesOneCompletedClassifiedLedgerRow\(/, "rejected-attempt ledger classification table test is present"],
+    [runtime_tests, /func testStoppedClientFailsBeforeEndpointLookup\(/, "stopped client rejection test is present"],
+    [runtime_tests, /func testSourceInvalidationMakesRetainedClientStale\(/, "retained client source invalidation test is present"],
+    [runtime_tests, /func testProviderInvalidationMakesRetainedClientStale\(/, "retained client provider invalidation test is present"],
+    [runtime_tests, /func testProviderInvalidationWhileInFlightDiscardsResultAndFinalizesLedgerAsStale\(/, "in-flight provider invalidation ledger test is present"],
+    [runtime_tests, /func testRuntimeRestartMakesPriorGenerationClientStale\(/, "runtime-generation restart test is present"],
+    [runtime_tests, /func testResponseSchemaOverrideIsDeniedBeforeHandler\(/, "response schema rejection test is present"],
+    [runtime_tests, /func testNoEligibleDestinationReturnsBoundedTypedFailure\(/, "missing destination bounded failure test is present"],
+    [runtime_tests, /func testRuntimeIngressClientMediatesAndLedgersAcceptedInput\(/, "runtime ingress mediation test is present"],
+    [runtime_tests, /func testProviderCannotRegisterUndeclaredEndpoint\(/, "undeclared provider endpoint test is present"],
+    [runtime_tests, /func testWrongSchemaTypeDescriptorAndOversizedRequestFailClosed\(/, "schema, type, descriptor, and request-bound test is present"],
+    [runtime_tests, /func testHandlerFailureCreatesOneCompletedFailureLedgerRow\(/, "handler failure ledger test is present"],
+    [runtime_tests, /func testTRT003ReplacementInvalidatesOldClientAndNewClientUsesNewHandler\(/, "provider replacement invalidation test is present"],
+    [runtime_tests, /func testStopWhileInFlightDiscardsHandlerResultAfterAwait\(/, "stop-during-call cancellation race test is present"],
+    [runtime_tests, /func testReplacementWhileInFlightDiscardsStaleResultAfterAwait\(/, "replacement-during-call generation race test is present"],
+    [runtime_tests, /func testStopWhileInFlightReplacesLateHandlerFailureWithRuntimeFailure\(/, "stop-during-call late failure precedence test is present"],
+    [runtime_tests, /func testCooperativeInFlightCancellationCreatesOneCancelledLedgerRow\(/, "cooperative cancellation ledger test is present"],
+    [runtime_tests, /func testReplacementWhileInFlightReplacesLateHandlerFailureWithStaleFailure\(/, "replacement-during-call late failure precedence test is present"],
+    [runtime_tests, /func testTRT014LedgerNeverRetainsPayloadResultOrIdempotencySecret\(/, "secret-safe call ledger test is present"],
+    [runtime_tests, /func testLedgerEvictsOldestRecordsAtDeterministicBound\(/, "deterministic ledger eviction test is present"],
+    [runtime_tests, /func testStateRelayIsRuntimeOwnedAndFinishesOnProviderInvalidation\(/, "runtime-owned state relay invalidation test is present"],
+    [runtime_tests, /func testStateSubscriptionSchemaMismatchIsDeniedBeforeProviderStreamCreation\(/, "state subscription schema rejection test is present"],
+    [runtime_tests, /func testOversizedStateDeliveryIsSuppressedAndLedgered\(/, "oversized state delivery ledger test is present"],
+    [runtime_tests, /func testNormallyCompletedStateRelayCreatesSucceededLedgerRow\(/, "normal state relay completion ledger test is present"],
+    [runtime_tests, /func testSessionBoundRejectsSaturationWithoutRetry\(/, "in-flight session bound test is present"],
+    [runtime_tests, /func testPerSourceRateBoundRejectsWithoutInvokingHandlerAndResetsAfterWindow\(/, "per-source rate bound test is present"],
+    [runtime_tests, /func testApplicationEndpointUsesComputedPayloadBound\(/, "application payload bound test is present"],
+    [runtime_tests, /func testHostRegistrationRejectsMismatchedExactKey\(/, "exact host platform registration key test is present"],
+    [runtime_tests, /func testFailedActivationInvalidatesCapturedContextBeforeReturning\(/, "failed activation context invalidation test is present"],
+    [runtime_tests, /func testRetainedSynchronousPlatformClientsReturnDeterministicSentinelsAfterStop\(/, "retained platform proxy invalidation test is present"]
+  ]
+  present, missing = required_anchor_evidence(scanner, requirements)
+
+  forbidden = [
+    [/\bunsafeEndpointWithoutValidation\b/, "consumer or client can bypass runtime validation"],
+    [/\bdispatchWithoutValidation\b/, "consumer or client can bypass runtime dispatch validation"],
+    [/\bcallSkippingGenerationCheck\b/, "retained client can bypass generation checks"]
+  ]
+  violations = []
+  shipping_swift_paths(scanner).each do |relative|
+    forbidden.each do |pattern, detail|
+      violations.concat(scanner.evidence(relative, pattern, detail, all: true))
+    end
+  end
+  violations.concat(
+    scanner.evidence(
+      dispatcher,
+      /public let (?:payload|request|response|errorDescription|filePath|url|pin|content):/,
+      "runtime call ledger exposes secret-bearing operation data",
+      all: true
+    )
+  )
+  violations = unique_evidence(violations + missing)
+  unless violations.empty?
+    kind = missing.empty? ? "detected-source-anchor" : "detected-absence-anchor"
+    return ["violation", violations, kind]
+  end
+
+  proof = present + scanner.marker(
+    dispatcher,
+    "typed command, query, state, and ingress clients were traced through per-call runtime validation"
+  )
+  ["pass", unique_evidence(proof), "detector-proof"]
+end
 
 def one_ui_module(scanner)
   manifests = scanner.files("Packages/RuneScribeArchitecture/Sources/**/Resources/module-manifest.json")
@@ -573,6 +793,10 @@ results = rules.map do |rule|
   when "FG-003"
     status, evidence = module_import_edges(scanner)
     evidence_kind = status == "pass" ? "detector-proof" : "detected-source-anchor"
+  when "FG-004"
+    status, evidence, evidence_kind = provider_publication_rule(scanner)
+  when "FG-006"
+    status, evidence, evidence_kind = runtime_dispatch_rule(scanner)
   when "FG-015"
     registry_hits = []
     scanner.files("Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/**/*.swift").each_key do |relative|

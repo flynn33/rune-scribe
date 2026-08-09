@@ -59,9 +59,9 @@
       "findingIDs": ["FRC-001"],
       "expectedP01Status": "violation",
       "remediationOwner": "runtime-dispatch",
-      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "evidence-only", "blockingPhase": "P11"},
+      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "complete", "blockingPhase": "P11"},
       "waiverStatus": "none",
-      "evidenceAnchors": ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Services.swift"]
+      "evidenceAnchors": ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeOperationDispatcher.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeApplicationEndpoints.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimePlatformBridge.swift"]
     },
     {
       "id": "FG-005",
@@ -83,9 +83,9 @@
       "findingIDs": ["FRC-001", "FRC-002", "FRC-003"],
       "expectedP01Status": "violation",
       "remediationOwner": "runtime-dispatch",
-      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "evidence-only", "blockingPhase": "P11"},
+      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "complete", "blockingPhase": "P11"},
       "waiverStatus": "none",
-      "evidenceAnchors": ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Services.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/SerialInboundInputForwarder.swift"]
+      "evidenceAnchors": ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeOperationDispatcher.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeApplicationEndpoints.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/SerialInboundInputForwarder.swift"]
     },
     {
       "id": "FG-007",

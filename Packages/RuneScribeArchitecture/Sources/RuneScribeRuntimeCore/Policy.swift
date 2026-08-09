@@ -92,7 +92,10 @@ public struct RuntimePolicy: Sendable {
             RuneScribeCapabilities.clipboardWrite: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.clockRead: [RuneScribeRoles.core],
             RuneScribeCapabilities.uuidGenerate: [RuneScribeRoles.core],
-            RuneScribeCapabilities.inboundInput: [RuneScribeRoles.core],
+            RuneScribeCapabilities.inboundInput: [
+                RuneScribeRoles.core,
+                RuneScribeRoles.applicationHost,
+            ],
             RuneScribeCapabilities.applicationCommands: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.applicationStateRead: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.shareUI: [RuneScribeRoles.primaryUI],

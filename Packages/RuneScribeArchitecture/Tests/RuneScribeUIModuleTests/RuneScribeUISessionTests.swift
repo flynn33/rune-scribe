@@ -1160,10 +1160,7 @@ private struct ApplicationPublishingModule: RuneScribeModule {
     let applicationService: any RuneScribeApplicationService
 
     func start(context: ModuleContext) async throws {
-        try await context.publishService(
-            applicationService,
-            for: RuneScribeServiceKeys.application
-        )
+        try await context.registerApplicationEndpoints(applicationService)
     }
 
     func stop() async {}

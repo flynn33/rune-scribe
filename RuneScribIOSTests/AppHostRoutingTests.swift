@@ -249,14 +249,8 @@ private struct HostedCoreModule: RuneScribeModule {
         if let startAttempt, await startAttempt.shouldFail() {
             throw HostedStartFailure.requested
         }
-        try await context.publishService(
-            applicationService as any RuneScribeApplicationService,
-            for: RuneScribeServiceKeys.application
-        )
-        try await context.publishService(
-            inboundInputService as any RuneScribeInboundInputService,
-            for: RuneScribeServiceKeys.inboundInput
-        )
+        try await context.registerApplicationEndpoints(applicationService)
+        try await context.registerInboundInputEndpoint(inboundInputService)
         await applicationService.startInboundProcessing()
     }
 

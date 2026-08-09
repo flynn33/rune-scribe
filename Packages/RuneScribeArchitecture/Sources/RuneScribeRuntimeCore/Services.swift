@@ -1,65 +1,6 @@
 import Foundation
 import RuneScribeContracts
 
-public actor ScopedServiceRegistry {
-    private struct Entry: Sendable {
-        let owner: ModuleIdentifier?
-        let value: any Sendable
-    }
-
-    private var entries: [ServiceIdentifier: Entry] = [:]
-
-    public init() {}
-
-    public func registerHostService<Value: Sendable>(
-        _ value: Value,
-        for key: ServiceKey<Value>
-    ) throws {
-        try register(value, for: key, owner: nil)
-    }
-
-    public func contains(_ serviceID: ServiceIdentifier) -> Bool {
-        entries[serviceID] != nil
-    }
-
-    public func registeredServiceIDs() -> Set<ServiceIdentifier> {
-        Set(entries.keys)
-    }
-
-    func registerModuleService<Value: Sendable>(
-        _ value: Value,
-        for key: ServiceKey<Value>,
-        owner: ModuleIdentifier
-    ) throws {
-        try register(value, for: key, owner: owner)
-    }
-
-    func resolve<Value: Sendable>(_ key: ServiceKey<Value>) throws -> Value {
-        guard let entry = entries[key.identifier] else {
-            throw RuneScribeRuntimeError.serviceUnavailable(key.identifier)
-        }
-        guard let value = entry.value as? Value else {
-            throw RuneScribeRuntimeError.serviceTypeMismatch(key.identifier)
-        }
-        return value
-    }
-
-    func removeServices(publishedBy owner: ModuleIdentifier) {
-        entries = entries.filter { $0.value.owner != owner }
-    }
-
-    private func register<Value: Sendable>(
-        _ value: Value,
-        for key: ServiceKey<Value>,
-        owner: ModuleIdentifier?
-    ) throws {
-        guard entries[key.identifier] == nil else {
-            throw RuneScribeRuntimeError.duplicateService(key.identifier)
-        }
-        entries[key.identifier] = Entry(owner: owner, value: value)
-    }
-}
-
 actor ModuleContextLease {
     let moduleID: ModuleIdentifier
     private var active = true
@@ -83,20 +24,26 @@ public struct ModuleContext: Sendable {
     public let moduleID: ModuleIdentifier
     public let role: ModuleRole
 
-    private let descriptor: ModuleDescriptor
-    private let policy: RuntimePolicy
-    private let services: ScopedServiceRegistry
+    let descriptor: ModuleDescriptor
+    let policy: RuntimePolicy
     private let events: RuntimeEventBus
     private let messages: DirectedMessageRouter
+    private let dispatcher: RuntimeOperationDispatcher
+    private let moduleGeneration: UInt64
+    let platformBridge: RuntimePlatformBridge
+    let platformGeneration: UInt64
     private let environment: RuntimeEnvironment
-    private let lease: ModuleContextLease
+    let lease: ModuleContextLease
 
     init(
         descriptor: ModuleDescriptor,
         policy: RuntimePolicy,
-        services: ScopedServiceRegistry,
         events: RuntimeEventBus,
         messages: DirectedMessageRouter,
+        dispatcher: RuntimeOperationDispatcher,
+        moduleGeneration: UInt64,
+        platformBridge: RuntimePlatformBridge,
+        platformGeneration: UInt64,
         environment: RuntimeEnvironment,
         lease: ModuleContextLease
     ) {
@@ -104,61 +51,108 @@ public struct ModuleContext: Sendable {
         role = descriptor.role
         self.descriptor = descriptor
         self.policy = policy
-        self.services = services
         self.events = events
         self.messages = messages
+        self.dispatcher = dispatcher
+        self.moduleGeneration = moduleGeneration
+        self.platformBridge = platformBridge
+        self.platformGeneration = platformGeneration
         self.environment = environment
         self.lease = lease
     }
 
-    public func publishService<Value: Sendable>(
-        _ value: Value,
-        for key: ServiceKey<Value>
+    public func registerEndpoint<Request: Sendable, Response: Sendable>(
+        _ key: RuntimeEndpointKey<Request, Response>,
+        handler: @escaping @Sendable (RuntimeOperationMetadata, Request) async throws -> Response
     ) async throws {
         try await lease.requireActive()
-        guard descriptor.publishedServices.contains(key.identifier) else {
-            throw RuneScribeRuntimeError.serviceNotDeclared(
-                moduleID: moduleID,
-                service: key.identifier
-            )
-        }
-        guard descriptor.requestedCapabilities.contains(RuneScribeCapabilities.publishService),
-              policy.capabilities.allows(RuneScribeCapabilities.publishService, for: role)
-        else {
-            throw RuneScribeRuntimeError.serviceCapabilityMissing(
-                moduleID: moduleID,
-                service: key.identifier
-            )
-        }
-        guard let rule = policy.services.rule(for: key.identifier),
-              rule.publisherRoles.contains(role)
-        else {
-            throw RuneScribeRuntimeError.serviceAccessDenied(
-                moduleID: moduleID,
-                service: key.identifier
-            )
-        }
-        try await services.registerModuleService(value, for: key, owner: moduleID)
+        try await dispatcher.registerEndpoint(
+            ownerModuleID: moduleID,
+            ownerGeneration: moduleGeneration,
+            key: key,
+            handler: handler
+        )
     }
 
-    public func resolveService<Value: Sendable>(_ key: ServiceKey<Value>) async throws -> Value {
+    public func registerStateEndpoint<State: Sendable>(
+        _ descriptor: RuntimeStateEndpointDescriptor<State>,
+        handler: @escaping @Sendable (RuntimeOperationMetadata) -> AsyncStream<State>
+    ) async throws {
         try await lease.requireActive()
-        guard descriptor.requiredServices.contains(key.identifier) else {
+        try await dispatcher.registerStateEndpoint(
+            ownerModuleID: moduleID,
+            ownerGeneration: moduleGeneration,
+            descriptor: descriptor,
+            handler: handler
+        )
+    }
+
+    public func commandClient(
+        to destination: RuntimeEndpointDestination
+    ) async throws -> RuntimeCommandClient {
+        try await lease.requireActive()
+        let clientLease = try await dispatcher.makeLease(
+            sourceModuleID: moduleID,
+            sourceGeneration: moduleGeneration,
+            destination: destination
+        )
+        return RuntimeCommandClient(dispatcher: dispatcher, lease: clientLease)
+    }
+
+    public func queryClient(
+        to destination: RuntimeEndpointDestination
+    ) async throws -> RuntimeQueryClient {
+        try await lease.requireActive()
+        let clientLease = try await dispatcher.makeLease(
+            sourceModuleID: moduleID,
+            sourceGeneration: moduleGeneration,
+            destination: destination
+        )
+        return RuntimeQueryClient(dispatcher: dispatcher, lease: clientLease)
+    }
+
+    public func ingressClient(
+        to destination: RuntimeEndpointDestination
+    ) async throws -> RuntimeIngressClient {
+        try await lease.requireActive()
+        let clientLease = try await dispatcher.makeLease(
+            sourceModuleID: moduleID,
+            sourceGeneration: moduleGeneration,
+            destination: destination
+        )
+        return RuntimeIngressClient(dispatcher: dispatcher, lease: clientLease)
+    }
+
+    public func stateClient(
+        to destination: RuntimeEndpointDestination
+    ) async throws -> RuntimeStateClient {
+        try await lease.requireActive()
+        let clientLease = try await dispatcher.makeLease(
+            sourceModuleID: moduleID,
+            sourceGeneration: moduleGeneration,
+            destination: destination
+        )
+        return RuntimeStateClient(dispatcher: dispatcher, lease: clientLease)
+    }
+
+    func requirePlatformService(_ serviceID: ServiceIdentifier) async throws {
+        try await lease.requireActive()
+        guard descriptor.requiredServices.contains(serviceID) else {
             throw RuneScribeRuntimeError.serviceNotDeclared(
                 moduleID: moduleID,
-                service: key.identifier
+                service: serviceID
             )
         }
-        guard let rule = policy.services.rule(for: key.identifier) else {
+        guard let rule = policy.services.rule(for: serviceID) else {
             throw RuneScribeRuntimeError.serviceAccessDenied(
                 moduleID: moduleID,
-                service: key.identifier
+                service: serviceID
             )
         }
         guard descriptor.requestedCapabilities.contains(rule.requiredCapability) else {
             throw RuneScribeRuntimeError.serviceCapabilityMissing(
                 moduleID: moduleID,
-                service: key.identifier
+                service: serviceID
             )
         }
         guard policy.capabilities.allows(rule.requiredCapability, for: role),
@@ -166,10 +160,12 @@ public struct ModuleContext: Sendable {
         else {
             throw RuneScribeRuntimeError.serviceAccessDenied(
                 moduleID: moduleID,
-                service: key.identifier
+                service: serviceID
             )
         }
-        return try await services.resolve(key)
+        guard await platformBridge.contains(serviceID) else {
+            throw RuneScribeRuntimeError.serviceUnavailable(serviceID)
+        }
     }
 
     public func publishEvent<Payload: Encodable & Sendable>(
@@ -218,7 +214,6 @@ public struct ModuleContext: Sendable {
 
     func invalidate() async {
         await lease.deactivate()
-        await services.removeServices(publishedBy: moduleID)
         await events.removeSubscriptions(ownedBy: moduleID)
         await messages.removeDestination(ownedBy: moduleID)
     }
