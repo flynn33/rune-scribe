@@ -18,9 +18,15 @@ final class CoreModuleTests: XCTestCase {
             Set(manifest.runtimeRequirements.requiredServices),
             descriptor.requiredServices
         )
+        XCTAssertTrue(descriptor.publishedServices.isEmpty)
+        XCTAssertFalse(
+            descriptor.requestedCapabilities.contains(RuneScribeCapabilities.publishService)
+        )
         XCTAssertEqual(
-            descriptor.publishedServices,
-            [RuneScribeServiceIDs.application, RuneScribeServiceIDs.inboundInput]
+            descriptor.publishedEndpoints,
+            RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(
+                RuntimeApplicationEndpointCatalog.ingressEndpointIDs
+            )
         )
     }
 }

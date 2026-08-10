@@ -28,11 +28,11 @@ public enum RuneScribeUIModuleBootstrap {
             RuneScribeCapabilities.messagesUI,
         ],
         requiredServices: [
-            RuneScribeServiceIDs.application,
             RuneScribeServiceIDs.applicationResourceLocator,
             RuneScribeServiceIDs.clipboardWrite,
         ],
-        requiredModuleRoles: [RuneScribeRoles.core]
+        requiredModuleRoles: [RuneScribeRoles.core],
+        consumedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs
     )
 
     public static func manifestData() throws -> Data {
@@ -70,7 +70,7 @@ public final class RuneScribeUIModule: RuneScribeModule {
     }
 
     public func start(context: ModuleContext) async throws {
-        let applicationService = try await context.applicationServiceClient()
+        let applicationClient = try await context.applicationClient()
         let resources = try await context.applicationResourceClient()
         let clipboardWriting = try await context.clipboardWritingClient()
 
@@ -79,7 +79,7 @@ public final class RuneScribeUIModule: RuneScribeModule {
         let resolvedResources = await (splashVideoURL, metalLibraryURL)
 
         let session = RuneScribeUISession(
-            applicationService: applicationService,
+            applicationClient: applicationClient,
             clipboardWriting: clipboardWriting,
             sharePresentation: dependencies.sharePresentation,
             splashVideoURL: resolvedResources.0,

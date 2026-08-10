@@ -103,18 +103,6 @@ public struct RuntimePolicy: Sendable {
         ]),
         services: ServiceAccessPolicy(rules: [
             ServiceAccessRule(
-                serviceID: RuneScribeServiceIDs.application,
-                requiredCapability: RuneScribeCapabilities.resolveService,
-                publisherRoles: [RuneScribeRoles.core],
-                consumerRoles: [RuneScribeRoles.primaryUI]
-            ),
-            ServiceAccessRule(
-                serviceID: RuneScribeServiceIDs.inboundInput,
-                requiredCapability: RuneScribeCapabilities.inboundInput,
-                publisherRoles: [RuneScribeRoles.core],
-                consumerRoles: [RuneScribeRoles.applicationHost]
-            ),
-            ServiceAccessRule(
                 serviceID: RuneScribeServiceIDs.secureValueStore,
                 requiredCapability: RuneScribeCapabilities.keychainStorage,
                 publisherRoles: [RuneScribeRoles.applicationHost],

@@ -4,8 +4,6 @@ import XCTest
 
 final class ContractSafetyTests: XCTestCase {
     func testStableServiceStorageAndWireIdentifiers() {
-        XCTAssertEqual(RuneScribeServiceIDs.application.rawValue, "RuneScribeApplicationService")
-        XCTAssertEqual(RuneScribeServiceIDs.inboundInput.rawValue, "RuneScribeInboundInputService")
         XCTAssertEqual(RuneScribeServiceIDs.secureValueStore.rawValue, "SecureValueStore")
         XCTAssertEqual(RuneScribeServiceIDs.protectedFileStore.rawValue, "ProtectedFileStore")
         XCTAssertEqual(RuneScribeServiceIDs.inboundFileReader.rawValue, "InboundFileReader")
@@ -20,15 +18,7 @@ final class ContractSafetyTests: XCTestCase {
         )
         XCTAssertEqual(RuneScribeServiceIDs.clock.rawValue, "ClockService")
         XCTAssertEqual(RuneScribeServiceIDs.uuid.rawValue, "UUIDService")
-        XCTAssertEqual(RuneScribeServiceIDs.all.count, 13)
-        XCTAssertEqual(
-            RuneScribeServiceKeys.application.identifier,
-            RuneScribeServiceIDs.application
-        )
-        XCTAssertEqual(
-            RuneScribeServiceKeys.inboundInput.identifier,
-            RuneScribeServiceIDs.inboundInput
-        )
+        XCTAssertEqual(RuneScribeServiceIDs.all.count, 11)
         XCTAssertEqual(
             RuneScribeServiceKeys.secureValueStore.identifier,
             RuneScribeServiceIDs.secureValueStore

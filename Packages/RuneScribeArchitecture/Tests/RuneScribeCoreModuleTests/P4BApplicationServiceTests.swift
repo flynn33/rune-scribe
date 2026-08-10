@@ -1039,7 +1039,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(deniedSnapshot.contactLibrary.authorization, .denied)
     }
 
-    func testColdQueuedMenuCommandsReachFirstUISubscriberInOrder() async throws {
+    func testColdQueuedMenuCommandsRemainAcceptedForRuntimeRouteRail() async throws {
         let service = fullService(
             secure: P4BSecureStore(),
             protected: P4BProtectedStore()
@@ -1072,12 +1072,8 @@ final class P4BApplicationServiceTests: XCTestCase {
         }
 
         await service.startInboundProcessing()
-        var iterator = service.menuCommandStream().makeAsyncIterator()
-        let first = await iterator.next()
-        let second = await iterator.next()
-
-        XCTAssertEqual(first, .openSettings)
-        XCTAssertEqual(second, .openCipherLibrary)
+        let snapshot = try await currentSnapshot(from: service)
+        XCTAssertNil(snapshot.lastFailure)
     }
 
     func testManualContactCreationDoesNotGenerateOrLinkCipher() async throws {

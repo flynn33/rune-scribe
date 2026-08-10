@@ -514,6 +514,48 @@ final class RuntimeLifecycleTests: XCTestCase {
         await runtime.stop()
     }
 
+    func testRuntimeActivationRejectsMissingDeclaredPublishedEndpoint() async throws {
+        let missingEndpointID: RuntimeEndpointIdentifier = "test.declared-but-unregistered"
+        let core = descriptor(
+            id: "com.runescribe.module.incomplete-provider",
+            kind: .service,
+            entryPoint: "IncompleteProviderModule",
+            role: RuneScribeRoles.core,
+            capabilities: [],
+            publishedEndpoints: [missingEndpointID]
+        )
+        let ui = descriptor(
+            id: "com.runescribe.module.incomplete-provider-ui",
+            kind: .ui,
+            entryPoint: "IncompleteProviderUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let runtime = makeRuntime()
+        try await runtime.register(
+            manifest: manifest(for: core),
+            factory: factory(for: core)
+        )
+        try await runtime.register(
+            manifest: manifest(for: ui),
+            factory: factory(for: ui)
+        )
+
+        do {
+            try await runtime.start()
+            XCTFail("A module must register every endpoint it declares before activation")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .activationFailed(core.moduleID)
+            )
+        }
+
+        let snapshot = await runtime.snapshot()
+        XCTAssertEqual(snapshot.moduleStates[core.moduleID], .failed)
+    }
+
     func testUnmappedServiceAndUnknownCapabilityAreDeniedAtRegistration() async throws {
         let serviceID: ServiceIdentifier = "UnmappedService"
         let serviceDescriptor = descriptor(

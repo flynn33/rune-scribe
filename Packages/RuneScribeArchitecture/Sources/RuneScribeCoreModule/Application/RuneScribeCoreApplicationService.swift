@@ -78,11 +78,6 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     private var seenInboundIDOrder: [InboundInputID] = []
     private var lastClipboardChangeCount = 0
 
-    private var nextMenuSubscriberID: UInt64 = 0
-    private var menuSubscribers:
-        [UInt64: AsyncStream<ApplicationMenuCommandDTO>.Continuation] = [:]
-    private var pendingMenuCommands: [ApplicationMenuCommandDTO] = []
-
     private var nextSubscriberID: UInt64 = 0
     private var subscribers: [UInt64: AsyncStream<RuneScribeApplicationSnapshot>.Continuation] = [:]
 
@@ -1004,14 +999,6 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         return .rejected
     }
 
-    /// Hosted navigation can subscribe without giving Core any presentation API.
-    public nonisolated func menuCommandStream() -> AsyncStream<ApplicationMenuCommandDTO> {
-        AsyncStream(bufferingPolicy: .bufferingOldest(Self.maximumPendingMenuCommands)) {
-            continuation in
-            Task { await self.attachMenuSubscriber(continuation) }
-        }
-    }
-
     private func processInbound(
         _ input: RuneScribeInboundInput
     ) async throws -> InboundInputDispositionDTO {
@@ -1037,26 +1024,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 await importChangedClipboardIfEligible(metadata: lifecycle.metadata)
             }
             return .accepted
-        case .menu(let menu):
-            guard !menuSubscribers.isEmpty else {
-                guard pendingMenuCommands.count < Self.maximumPendingMenuCommands else {
-                    return rejectInbound(code: .temporarilyUnavailable)
-                }
-                pendingMenuCommands.append(menu.command)
-                return .accepted
-            }
-            var delivered = false
-            for continuation in menuSubscribers.values {
-                switch continuation.yield(menu.command) {
-                case .enqueued:
-                    delivered = true
-                case .dropped, .terminated:
-                    break
-                @unknown default:
-                    break
-                }
-            }
-            return delivered ? .accepted : rejectInbound(code: .temporarilyUnavailable)
+        case .menu:
+            // Menu presentation is admitted by the single runtime-owned route
+            // rail after Core has processed this ordered ingress item.
+            return .accepted
         }
     }
 
@@ -1172,37 +1143,6 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         _ = try? await importURL(clipboardInput)
     }
 
-    private func attachMenuSubscriber(
-        _ continuation: AsyncStream<ApplicationMenuCommandDTO>.Continuation
-    ) {
-        let id = nextMenuSubscriberID
-        nextMenuSubscriberID &+= 1
-        continuation.onTermination = { @Sendable [weak self] _ in
-            Task { await self?.detachMenuSubscriber(id) }
-        }
-        let isFirstSubscriber = menuSubscribers.isEmpty
-        menuSubscribers[id] = continuation
-        guard isFirstSubscriber, !pendingMenuCommands.isEmpty else { return }
-
-        var deliveredCount = 0
-        for command in pendingMenuCommands {
-            switch continuation.yield(command) {
-            case .enqueued:
-                deliveredCount += 1
-            case .dropped, .terminated:
-                break
-            @unknown default:
-                break
-            }
-            if deliveredCount == 0 { break }
-        }
-        pendingMenuCommands.removeFirst(deliveredCount)
-    }
-
-    private func detachMenuSubscriber(_ id: UInt64) {
-        menuSubscribers.removeValue(forKey: id)
-    }
-
     private static func requiresClearPresentation(_ input: RuneScribeInboundInput) -> Bool {
         switch input {
         case .file, .url: true
@@ -1226,7 +1166,6 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
     private static let maximumQueuedInputs = 512
     private static let maximumQueuedDataInputs = 496
-    private static let maximumPendingMenuCommands = 16
     private static let maximumInboundFileURLByteCount = 4_096
     private static let maximumDeclaredContentTypeByteCount = 256
 

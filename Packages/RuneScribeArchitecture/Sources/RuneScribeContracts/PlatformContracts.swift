@@ -1,8 +1,6 @@
 import Foundation
 
 public enum RuneScribeServiceIDs {
-    public static let application: ServiceIdentifier = "RuneScribeApplicationService"
-    public static let inboundInput: ServiceIdentifier = "RuneScribeInboundInputService"
     public static let secureValueStore: ServiceIdentifier = "SecureValueStore"
     public static let protectedFileStore: ServiceIdentifier = "ProtectedFileStore"
     public static let inboundFileReader: ServiceIdentifier = "InboundFileReader"
@@ -16,8 +14,6 @@ public enum RuneScribeServiceIDs {
     public static let uuid: ServiceIdentifier = "UUIDService"
 
     public static let all: Set<ServiceIdentifier> = [
-        application,
-        inboundInput,
         secureValueStore,
         protectedFileStore,
         inboundFileReader,
@@ -273,12 +269,6 @@ public protocol ApplicationResourceLocator: Sendable {
 }
 
 public enum RuneScribeServiceKeys {
-    public static let application = ServiceKey<any RuneScribeApplicationService>(
-        RuneScribeServiceIDs.application
-    )
-    public static let inboundInput = ServiceKey<any RuneScribeInboundInputService>(
-        RuneScribeServiceIDs.inboundInput
-    )
     public static let secureValueStore = ServiceKey<any SecureValueStore>(
         RuneScribeServiceIDs.secureValueStore
     )

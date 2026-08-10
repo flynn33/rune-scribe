@@ -5,7 +5,7 @@ extension RuneScribeUISession {
     @discardableResult
     func addCipher(label: String) async throws -> CipherViewState {
         let summary = try await perform {
-            try await requireApplicationService().createCipher(CreateCipherCommand(name: label))
+            try await requireApplicationClient().createCipher(CreateCipherCommand(name: label))
         }
         return viewState(for: summary)
     }
@@ -13,7 +13,7 @@ extension RuneScribeUISession {
     @discardableResult
     func renameCipher(id: UUID, to label: String) async throws -> CipherViewState {
         let summary = try await perform {
-            try await requireApplicationService().renameCipher(
+            try await requireApplicationClient().renameCipher(
                 RenameCipherCommand(cipherID: CipherID(rawValue: id), name: label)
             )
         }
@@ -22,13 +22,13 @@ extension RuneScribeUISession {
 
     func deleteCipher(id: UUID) async throws {
         try await perform {
-            try await requireApplicationService().deleteCipher(id: CipherID(rawValue: id))
+            try await requireApplicationClient().deleteCipher(id: CipherID(rawValue: id))
         }
     }
 
     func setActive(id: UUID) async throws {
         try await perform {
-            try await requireApplicationService().setActiveCipher(
+            try await requireApplicationClient().setActiveCipher(
                 SetActiveCipherCommand(cipherID: CipherID(rawValue: id))
             )
         }
@@ -36,7 +36,7 @@ extension RuneScribeUISession {
 
     func setContact(cipherID: UUID, contactID: UUID?) async throws {
         try await perform {
-            try await requireApplicationService().assignContact(
+            try await requireApplicationClient().assignContact(
                 AssignContactCommand(
                     cipherID: CipherID(rawValue: cipherID),
                     contactID: contactID.map(ContactID.init(rawValue:))
@@ -47,7 +47,7 @@ extension RuneScribeUISession {
 
     func encode(_ plaintext: String, cipherID: UUID?) async throws -> EncodedMessageResult {
         try await perform {
-            try await requireApplicationService().encode(
+            try await requireApplicationClient().encode(
                 EncodeMessageCommand(
                     plaintext: plaintext,
                     cipherID: cipherID.map(CipherID.init(rawValue:))
@@ -58,7 +58,7 @@ extension RuneScribeUISession {
 
     func decode(_ runes: String) async throws -> DecodedMessageResult {
         try await perform {
-            try await requireApplicationService().decode(DecodeMessageCommand(runes: runes))
+            try await requireApplicationClient().decode(DecodeMessageCommand(runes: runes))
         }
     }
 
@@ -68,7 +68,7 @@ extension RuneScribeUISession {
         representation: ShareRepresentationDTO
     ) async throws -> ShareArtifactDTO {
         try await perform {
-            try await requireApplicationService().prepareCipherShare(
+            try await requireApplicationClient().prepareCipherShare(
                 PrepareCipherShareCommand(
                     cipherID: CipherID(rawValue: cipherID),
                     displayName: displayName,
@@ -84,7 +84,7 @@ extension RuneScribeUISession {
         cipherID: UUID
     ) async throws -> ShareArtifactDTO {
         try await perform {
-            try await requireApplicationService().prepareMessageShare(
+            try await requireApplicationClient().prepareMessageShare(
                 PrepareMessageShareCommand(
                     runes: runes,
                     senderName: senderName,
@@ -99,15 +99,15 @@ extension RuneScribeUISession {
         outcome: ShareArtifactOutcomeDTO
     ) async throws -> ShareArtifactCompletionResultDTO {
         try await perform {
-            try await requireApplicationService().completeShareArtifact(
+            try await requireApplicationClient().completeShareArtifact(
                 CompleteShareArtifactCommand(artifactID: id, outcome: outcome)
             )
         }
     }
 
     func releaseShareArtifact(id: ShareArtifactID) async {
-        guard let service = try? requireApplicationService() else { return }
-        await service.releaseShareArtifact(id: id)
+        guard let client = try? requireApplicationClient() else { return }
+        try? await client.releaseShareArtifact(id: id)
     }
 
     func shareTransfer(for id: ShareArtifactID) async throws -> OpaqueShareTransfer {
@@ -120,7 +120,7 @@ extension RuneScribeUISession {
         isColdStart: Bool = false
     ) async throws -> ImportResultDTO {
         try await perform {
-            try await requireApplicationService().importFile(
+            try await requireApplicationClient().importFile(
                 InboundFileDTO(
                     metadata: inboundMetadata(source: source, isColdStart: isColdStart),
                     fileURL: url
@@ -135,7 +135,7 @@ extension RuneScribeUISession {
         isColdStart: Bool = false
     ) async throws -> ImportResultDTO {
         try await perform {
-            try await requireApplicationService().importURL(
+            try await requireApplicationClient().importURL(
                 InboundURLDTO(
                     metadata: inboundMetadata(source: source, isColdStart: isColdStart),
                     url: url
@@ -182,7 +182,7 @@ extension RuneScribeUISession {
     @discardableResult
     func confirmImport(id: ImportID, name: String) async throws -> CipherViewState {
         let summary = try await perform {
-            try await requireApplicationService().confirmImport(
+            try await requireApplicationClient().confirmImport(
                 ConfirmImportCommand(importID: id, name: name)
             )
         }
@@ -200,8 +200,8 @@ extension RuneScribeUISession {
     }
 
     func cancelImport(id: ImportID) async {
-        guard let service = try? requireApplicationService() else { return }
-        await service.cancelImport(id: id)
+        guard let client = try? requireApplicationClient() else { return }
+        try? await client.cancelImport(id: id)
     }
 
     func cancelPendingImport() {
@@ -212,8 +212,8 @@ extension RuneScribeUISession {
     }
 
     func dismissReceivedMessage(id: MessageID) async {
-        guard let service = try? requireApplicationService() else { return }
-        await service.dismissReceivedMessage(id: id)
+        guard let client = try? requireApplicationClient() else { return }
+        try? await client.dismissReceivedMessage(id: id)
     }
 
     func dismissPendingMessage() {

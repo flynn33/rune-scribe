@@ -16,7 +16,6 @@ public enum RuneScribeCoreModuleBootstrap {
         entryPoint: "RuneScribeCoreModule",
         role: RuneScribeRoles.core,
         requestedCapabilities: [
-            RuneScribeCapabilities.publishService,
             RuneScribeCapabilities.publishEvents,
             RuneScribeCapabilities.keychainStorage,
             RuneScribeCapabilities.protectedFileStorage,
@@ -42,10 +41,9 @@ public enum RuneScribeCoreModuleBootstrap {
             RuneScribeServiceIDs.clock,
             RuneScribeServiceIDs.uuid,
         ],
-        publishedServices: [
-            RuneScribeServiceIDs.application,
-            RuneScribeServiceIDs.inboundInput,
-        ]
+        publishedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(
+            RuntimeApplicationEndpointCatalog.ingressEndpointIDs
+        )
     )
 
     public static func manifestData() throws -> Data {

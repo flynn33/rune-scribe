@@ -29,6 +29,21 @@ public struct RuntimeSnapshot: Equatable, Sendable {
     }
 }
 
+protocol RuntimeStartCoordinating: Sendable {
+    func beforeInfrastructureActivation() async
+    func afterRuntimeMarkedRunningBeforeIngressActivation() async
+    func afterClientQuiesceBeforeIngressDrain() async
+}
+
+extension RuntimeStartCoordinating {
+    func afterRuntimeMarkedRunningBeforeIngressActivation() async {}
+    func afterClientQuiesceBeforeIngressDrain() async {}
+}
+
+private struct ImmediateRuntimeStartCoordinator: RuntimeStartCoordinating {
+    func beforeInfrastructureActivation() async {}
+}
+
 public actor RuneScribeRuntime {
     private struct Registration: Sendable {
         let manifest: ModuleManifest
@@ -47,6 +62,8 @@ public actor RuneScribeRuntime {
     private let eligibility: any ModuleEligibilityProviding
     private let environment: RuntimeEnvironment
     private let dispatcher: RuntimeOperationDispatcher
+    private nonisolated let hostIngress: RuntimeHostIngressRail
+    private let startCoordinator: any RuntimeStartCoordinating
     private let platformBridge = RuntimePlatformBridge()
     private let events = RuntimeEventBus()
     private let messages = DirectedMessageRouter()
@@ -75,6 +92,26 @@ public actor RuneScribeRuntime {
         self.eligibility = eligibility
         self.environment = environment
         dispatcher = RuntimeOperationDispatcher(policy: policy, environment: environment)
+        hostIngress = RuntimeHostIngressRail(environment: environment)
+        startCoordinator = ImmediateRuntimeStartCoordinator()
+    }
+
+    init(
+        runtimeVersion: SemanticVersion,
+        platform: SupportedPlatform,
+        policy: RuntimePolicy = .patternBFoundation,
+        eligibility: any ModuleEligibilityProviding = AlwaysEligibleProvider(),
+        environment: RuntimeEnvironment = .live,
+        startCoordinator: any RuntimeStartCoordinating
+    ) {
+        self.runtimeVersion = runtimeVersion
+        self.platform = platform
+        self.policy = policy
+        self.eligibility = eligibility
+        self.environment = environment
+        dispatcher = RuntimeOperationDispatcher(policy: policy, environment: environment)
+        hostIngress = RuntimeHostIngressRail(environment: environment)
+        self.startCoordinator = startCoordinator
     }
 
     public func register(
@@ -132,26 +169,28 @@ public actor RuneScribeRuntime {
     public func registerHostService(_ value: any ClockProviding, for key: ServiceKey<any ClockProviding>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.clock); try await platformBridge.register(value) }
     public func registerHostService(_ value: any UUIDProviding, for key: ServiceKey<any UUIDProviding>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.uuid); try await platformBridge.register(value) }
 
-    public func resolveHostService(
-        _ key: ServiceKey<any RuneScribeInboundInputService>
-    ) async throws -> any RuneScribeInboundInputService {
-        guard status == .running else {
-            throw RuneScribeRuntimeError.runtimeBusy
-        }
-        guard key.identifier == RuneScribeServiceIDs.inboundInput else {
-            throw RuneScribeRuntimeError.hostServiceAccessDenied(key.identifier)
-        }
-        let generation = try await dispatcher.currentGeneration(
-            moduleID: RuntimeHostIdentity.moduleID
-        )
-        let lease = try await dispatcher.makeLease(
-            sourceModuleID: RuntimeHostIdentity.moduleID,
-            sourceGeneration: generation,
-            destination: .role(RuneScribeRoles.core)
-        )
-        return RuntimeInboundInputServiceProxy(
-            client: RuntimeIngressClient(dispatcher: dispatcher, lease: lease)
-        )
+    @discardableResult
+    public nonisolated func submit(
+        _ input: ExternalInputEnvelope
+    ) -> InboundInputDispositionDTO {
+        hostIngress.submit(input)
+    }
+
+    @discardableResult
+    public nonisolated func submit(
+        contentsOf inputs: [ExternalInputEnvelope]
+    ) -> [InboundInputDispositionDTO] {
+        hostIngress.submit(contentsOf: inputs)
+    }
+
+    public nonisolated var hostIngressSnapshot: RuntimeHostIngressSnapshot {
+        hostIngress.snapshot
+    }
+
+    public nonisolated func observeHostIngressFailures(
+        _ observer: @escaping @Sendable (RuntimeHostIngressFailure) -> Void
+    ) {
+        hostIngress.observeFailures(observer)
     }
 
     public func start() async throws {
@@ -163,30 +202,29 @@ public actor RuneScribeRuntime {
         }
 
         status = .starting
-        _ = await dispatcher.beginRuntimeStart()
-        _ = await platformBridge.activateRuntime()
         stopRequestedWhileStarting = false
+        await startCoordinator.beforeInfrastructureActivation()
+        if stopRequestedWhileStarting {
+            await finishInterruptedStart()
+            return
+        }
+        _ = await dispatcher.beginRuntimeStart()
+        if stopRequestedWhileStarting {
+            await finishInterruptedStart()
+            return
+        }
+        _ = await platformBridge.activateRuntime()
+        if stopRequestedWhileStarting {
+            await finishInterruptedStart()
+            return
+        }
         activeUIModuleID = nil
         activationOrder = []
 
         do {
             let eligible = await eligibleRegistrations()
             for registration in eligible {
-                let descriptor = registration.factory.descriptor
-                await dispatcher.registerModule(descriptor)
-                await dispatcher.mergeDeclarations(
-                    moduleID: descriptor.moduleID,
-                    consumed: descriptor.consumedEndpoints.union(
-                        RuntimeApplicationEndpointCatalog.consumedEndpointIDs(
-                            for: descriptor.requiredServices
-                        )
-                    ),
-                    published: descriptor.publishedEndpoints.union(
-                        RuntimeApplicationEndpointCatalog.publishedEndpointIDs(
-                            for: descriptor.publishedServices
-                        )
-                    )
-                )
+                await dispatcher.registerModule(registration.factory.descriptor)
             }
             await dispatcher.registerHostSource(
                 consumedEndpoints: RuntimeApplicationEndpointCatalog.ingressEndpointIDs
@@ -215,6 +253,24 @@ public actor RuneScribeRuntime {
                 }
             }
             await dispatcher.markRuntimeRunning()
+            if stopRequestedWhileStarting {
+                await finishInterruptedStart()
+                return
+            }
+            await startCoordinator.afterRuntimeMarkedRunningBeforeIngressActivation()
+            if stopRequestedWhileStarting {
+                await finishInterruptedStart()
+                return
+            }
+            hostIngress.activate { [dispatcher] input in
+                try await dispatcher.dispatchHostIngress(input)
+            }
+            await hostIngress.flush()
+            if stopRequestedWhileStarting {
+                await finishInterruptedStart()
+                return
+            }
+            hostIngress.noteSuccessfulActivation()
             status = .running
         } catch {
             if stopRequestedWhileStarting {
@@ -223,16 +279,13 @@ public actor RuneScribeRuntime {
             }
             await stopActivatedModules(markFailed: true)
             if stopRequestedWhileStarting {
-                activeUIModuleID = nil
-                activationOrder = []
-                stopRequestedWhileStarting = false
-                status = .stopped
-                resumeStopWaiters()
+                await finishInterruptedStart()
                 return
             }
             activeUIModuleID = nil
             activationOrder = []
             status = .failed
+            hostIngress.suspend()
             await dispatcher.beginRuntimeStop()
             await platformBridge.deactivateRuntime()
             resumeStopWaiters()
@@ -242,14 +295,22 @@ public actor RuneScribeRuntime {
 
     public func stop() async {
         if status == .idle || status == .stopped {
+            hostIngress.suspend()
+            hostIngress.resumeAdmissions()
             status = .stopped
             return
         }
         if status == .starting {
             stopRequestedWhileStarting = true
             status = .stopping
+            hostIngress.quiesceAdmissions()
+            hostIngress.suspend()
             await dispatcher.beginRuntimeStop()
             await platformBridge.deactivateRuntime()
+            await hostIngress.flush()
+            if status == .stopped {
+                return
+            }
             await waitForStopCompletion()
             return
         }
@@ -259,10 +320,17 @@ public actor RuneScribeRuntime {
         }
 
         status = .stopping
+        hostIngress.quiesceAdmissions()
+        await dispatcher.beginRuntimeQuiesce()
+        await startCoordinator.afterClientQuiesceBeforeIngressDrain()
+        await hostIngress.flush()
+        hostIngress.suspend()
         await dispatcher.beginRuntimeStop()
         await platformBridge.deactivateRuntime()
+        await hostIngress.flush()
         await stopActivatedModules(markFailed: false)
         activeUIModuleID = nil
+        hostIngress.resumeAdmissions()
         status = .stopped
         resumeStopWaiters()
     }
@@ -348,16 +416,6 @@ public actor RuneScribeRuntime {
         moduleStates[moduleID] = .activating
 
         for serviceID in registration.factory.descriptor.requiredServices.sorted() {
-            if serviceID == RuneScribeServiceIDs.application {
-                let available = await dispatcher.endpointsAvailable(
-                    RuntimeApplicationEndpointCatalog.applicationEndpointIDs
-                )
-                guard available else {
-                    moduleStates[moduleID] = .failed
-                    throw RuneScribeRuntimeError.activationFailed(moduleID)
-                }
-                continue
-            }
             guard await platformBridge.contains(serviceID) else {
                 moduleStates[moduleID] = .failed
                 throw RuneScribeRuntimeError.activationFailed(moduleID)
@@ -400,20 +458,17 @@ public actor RuneScribeRuntime {
 
         do {
             try await module.start(context: context)
+            guard await dispatcher.publishedEndpointsAvailable(
+                moduleID: moduleID,
+                generation: moduleGeneration,
+                endpointIDs: registration.factory.descriptor.publishedEndpoints
+            ) else {
+                throw RuneScribeRuntimeError.activationFailed(moduleID)
+            }
             try await dispatcher.markActive(
                 moduleID: moduleID,
                 generation: moduleGeneration
             )
-            for serviceID in registration.factory.descriptor.publishedServices.sorted() {
-                let endpointIDs = RuntimeApplicationEndpointCatalog.publishedEndpointIDs(
-                    for: [serviceID]
-                )
-                guard !endpointIDs.isEmpty,
-                      await dispatcher.endpointsAvailable(endpointIDs)
-                else {
-                    throw RuneScribeRuntimeError.serviceUnavailable(serviceID)
-                }
-            }
         } catch {
             await dispatcher.invalidateModule(moduleID: moduleID, failed: true)
             await context.invalidate()
@@ -441,10 +496,15 @@ public actor RuneScribeRuntime {
 
     private func finishInterruptedStart() async {
         status = .stopping
+        hostIngress.suspend()
+        await dispatcher.beginRuntimeStop()
+        await platformBridge.deactivateRuntime()
+        await hostIngress.flush()
         await stopActivatedModules(markFailed: false)
         activeUIModuleID = nil
         activationOrder = []
         stopRequestedWhileStarting = false
+        hostIngress.resumeAdmissions()
         status = .stopped
         resumeStopWaiters()
     }

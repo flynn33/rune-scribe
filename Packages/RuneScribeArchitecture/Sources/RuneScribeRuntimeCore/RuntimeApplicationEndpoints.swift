@@ -31,7 +31,8 @@ public enum RuntimeApplicationEndpointCatalog {
     }
 
     private static func state<State: Sendable>(
-        _ id: RuntimeEndpointIdentifier
+        _ id: RuntimeEndpointIdentifier,
+        bufferingPolicy: RuntimeStateRelayBufferingPolicy = .bufferingNewest(1)
     ) -> RuntimeStateEndpointDescriptor<State> {
         RuntimeStateEndpointDescriptor(
             endpointID: id,
@@ -41,14 +42,15 @@ public enum RuntimeApplicationEndpointCatalog {
             requiredCapability: RuneScribeCapabilities.applicationStateRead,
             privacyClass: .sensitiveRedacted,
             maximumSubscriptionBytes: 0,
-            maximumStateBytes: responseLimit
+            maximumStateBytes: responseLimit,
+            bufferingPolicy: bufferingPolicy
         )
     }
 
     public static let applicationState: RuntimeStateEndpointDescriptor<RuneScribeApplicationSnapshot> =
         state("application.state")
     public static let menuCommands: RuntimeStateEndpointDescriptor<ApplicationMenuCommandDTO> =
-        state("application.menu-commands")
+        state("application.menu-commands", bufferingPolicy: .bufferingOldest(16))
     public static let encode: RuntimeEndpointKey<EncodeMessageCommand, EncodedMessageResult> =
         endpoint("application.encode")
     public static let decode: RuntimeEndpointKey<DecodeMessageCommand, DecodedMessageResult> =
@@ -134,24 +136,6 @@ public enum RuntimeApplicationEndpointCatalog {
         inboundInput.descriptor.endpointID
     ]
 
-    static func consumedEndpointIDs(
-        for services: Set<ServiceIdentifier>
-    ) -> Set<RuntimeEndpointIdentifier> {
-        var result: Set<RuntimeEndpointIdentifier> = []
-        if services.contains(RuneScribeServiceIDs.application) {
-            result.formUnion(applicationEndpointIDs)
-        }
-        if services.contains(RuneScribeServiceIDs.inboundInput) {
-            result.formUnion(ingressEndpointIDs)
-        }
-        return result
-    }
-
-    static func publishedEndpointIDs(
-        for services: Set<ServiceIdentifier>
-    ) -> Set<RuntimeEndpointIdentifier> {
-        consumedEndpointIDs(for: services)
-    }
 }
 
 public extension ModuleContext {
@@ -170,9 +154,8 @@ public extension ModuleContext {
             RuntimeApplicationEndpointCatalog.applicationState,
             handler: { _ in service.stateStream() }
         )
-        try await registerStateEndpoint(
-            RuntimeApplicationEndpointCatalog.menuCommands,
-            handler: { _ in service.menuCommandStream() }
+        try await registerRuntimeMenuCommandEndpoint(
+            RuntimeApplicationEndpointCatalog.menuCommands
         )
         try await register(RuntimeApplicationEndpointCatalog.encode, service.encode)
         try await register(RuntimeApplicationEndpointCatalog.decode, service.decode)
@@ -237,87 +220,167 @@ public extension ModuleContext {
         )
     }
 
-    func applicationServiceClient() async throws -> any RuneScribeApplicationService {
+    func applicationClient() async throws -> RuntimeApplicationClient {
         let destination: RuntimeEndpointDestination = .role(RuneScribeRoles.core)
-        let command = try await commandClient(to: destination)
-        let query = try await queryClient(to: destination)
-        let state = try await stateClient(to: destination)
+        let command = try await self.commandClient(to: destination)
+        let query = try await self.queryClient(to: destination)
+        let state = try await self.stateClient(to: destination)
         let applicationState = try await state.subscribe(
             to: RuntimeApplicationEndpointCatalog.applicationState
         )
-        let menuCommands = try await state.subscribe(
-            to: RuntimeApplicationEndpointCatalog.menuCommands
+        let menuCommands = try await state.subscribeToMenuCommands(
+            RuntimeApplicationEndpointCatalog.menuCommands
         )
-        return RuntimeApplicationServiceProxy(
+        return RuntimeApplicationClient(
             command: command,
             query: query,
-            applicationState: applicationState.map(\.payload),
-            menuCommands: menuCommands.map(\.payload)
+            applicationStateEnvelopes: applicationState,
+            menuCommandEnvelopes: menuCommands
         )
     }
 }
 
-private struct RuntimeApplicationServiceProxy: RuneScribeApplicationService {
-    let command: RuntimeCommandClient
-    let query: RuntimeQueryClient
-    let applicationState: AsyncStream<RuneScribeApplicationSnapshot>
-    let menuCommands: AsyncStream<ApplicationMenuCommandDTO>
+public struct RuntimeApplicationClient: Sendable {
+    private let command: RuntimeCommandClient
+    private let query: RuntimeQueryClient
+    public let applicationStateEnvelopes: RuntimeStateStream<RuneScribeApplicationSnapshot>
+    public let menuCommandEnvelopes: RuntimeStateStream<ApplicationMenuCommandDTO>
 
-    func stateStream() -> AsyncStream<RuneScribeApplicationSnapshot> { applicationState }
-    func menuCommandStream() -> AsyncStream<ApplicationMenuCommandDTO> { menuCommands }
-    func encode(_ value: EncodeMessageCommand) async throws -> EncodedMessageResult { try await command.send(value, to: RuntimeApplicationEndpointCatalog.encode) }
-    func decode(_ value: DecodeMessageCommand) async throws -> DecodedMessageResult { try await command.send(value, to: RuntimeApplicationEndpointCatalog.decode) }
-    func createCipher(_ value: CreateCipherCommand) async throws -> CipherSummary { try await command.send(value, to: RuntimeApplicationEndpointCatalog.createCipher) }
-    func renameCipher(_ value: RenameCipherCommand) async throws -> CipherSummary { try await command.send(value, to: RuntimeApplicationEndpointCatalog.renameCipher) }
-    func deleteCipher(id: CipherID) async throws { _ = try await command.send(id, to: RuntimeApplicationEndpointCatalog.deleteCipher) }
-    func setActiveCipher(_ value: SetActiveCipherCommand) async throws { _ = try await command.send(value, to: RuntimeApplicationEndpointCatalog.setActiveCipher) }
-    func assignContact(_ value: AssignContactCommand) async throws { _ = try await command.send(value, to: RuntimeApplicationEndpointCatalog.assignContact) }
-    func createContact(_ value: CreateContactCommand) async throws -> ContactSummary { try await command.send(value, to: RuntimeApplicationEndpointCatalog.createContact) }
-    func updateContact(_ value: UpdateContactCommand) async throws -> ContactSummary { try await command.send(value, to: RuntimeApplicationEndpointCatalog.updateContact) }
-    func deleteContacts(ids: Set<ContactID>) async throws { _ = try await command.send(ids, to: RuntimeApplicationEndpointCatalog.deleteContacts) }
-    func deleteAllImportedContacts() async throws { _ = try await command.send(RuntimeEmptyPayload(), to: RuntimeApplicationEndpointCatalog.deleteAllImportedContacts) }
-    func importContacts(_ value: ImportContactsCommand) async throws -> [ContactSummary] { try await command.send(value, to: RuntimeApplicationEndpointCatalog.importContacts) }
-    func requestSystemContacts() async throws -> [SystemContactDTO] { try await query.fetch(RuntimeEmptyPayload(), from: RuntimeApplicationEndpointCatalog.requestSystemContacts) }
-    func prepareCipherShare(_ value: PrepareCipherShareCommand) async throws -> ShareArtifactDTO { try await command.send(value, to: RuntimeApplicationEndpointCatalog.prepareCipherShare) }
-    func prepareMessageShare(_ value: PrepareMessageShareCommand) async throws -> ShareArtifactDTO { try await command.send(value, to: RuntimeApplicationEndpointCatalog.prepareMessageShare) }
-    func completeShareArtifact(_ value: CompleteShareArtifactCommand) async throws -> ShareArtifactCompletionResultDTO { try await command.send(value, to: RuntimeApplicationEndpointCatalog.completeShareArtifact) }
-    func releaseShareArtifact(id: ShareArtifactID) async { _ = try? await command.send(id, to: RuntimeApplicationEndpointCatalog.releaseShareArtifact) as RuntimeEmptyPayload }
-    func importFile(_ value: InboundFileDTO) async throws -> ImportResultDTO { try await command.send(value, to: RuntimeApplicationEndpointCatalog.importFile) }
-    func importURL(_ value: InboundURLDTO) async throws -> ImportResultDTO { try await command.send(value, to: RuntimeApplicationEndpointCatalog.importURL) }
-    func confirmImport(_ value: ConfirmImportCommand) async throws -> CipherSummary { try await command.send(value, to: RuntimeApplicationEndpointCatalog.confirmImport) }
-    func cancelImport(id: ImportID) async { _ = try? await command.send(id, to: RuntimeApplicationEndpointCatalog.cancelImport) as RuntimeEmptyPayload }
-    func dismissReceivedMessage(id: MessageID) async { _ = try? await command.send(id, to: RuntimeApplicationEndpointCatalog.dismissReceivedMessage) as RuntimeEmptyPayload }
-    func lock() async { _ = try? await command.send(RuntimeEmptyPayload(), to: RuntimeApplicationEndpointCatalog.lock) as RuntimeEmptyPayload }
-    func verifyPIN(_ value: PINInput) async throws -> Bool { try await command.send(value, to: RuntimeApplicationEndpointCatalog.verifyPIN) }
-    func unlock(_ value: UnlockCommand) async throws -> UnlockResultDTO { try await command.send(value, to: RuntimeApplicationEndpointCatalog.unlock) }
-    func setPIN(_ value: SetPINCommand) async throws { _ = try await command.send(value, to: RuntimeApplicationEndpointCatalog.setPIN) }
-    func changePIN(_ value: ChangePINCommand) async throws { _ = try await command.send(value, to: RuntimeApplicationEndpointCatalog.changePIN) }
-    func disablePIN(_ value: DisablePINCommand) async throws { _ = try await command.send(value, to: RuntimeApplicationEndpointCatalog.disablePIN) }
-}
-
-struct RuntimeInboundInputServiceProxy: RuneScribeInboundInputService {
-    let client: RuntimeIngressClient
-
-    func receive(
-        _ input: RuneScribeInboundInput
-    ) async throws -> InboundInputDispositionDTO {
-        try await client.submit(input, to: RuntimeApplicationEndpointCatalog.inboundInput)
+    init(
+        command: RuntimeCommandClient,
+        query: RuntimeQueryClient,
+        applicationStateEnvelopes: RuntimeStateStream<RuneScribeApplicationSnapshot>,
+        menuCommandEnvelopes: RuntimeStateStream<ApplicationMenuCommandDTO>
+    ) {
+        self.command = command
+        self.query = query
+        self.applicationStateEnvelopes = applicationStateEnvelopes
+        self.menuCommandEnvelopes = menuCommandEnvelopes
     }
-}
 
-private extension AsyncStream where Element: Sendable {
-    func map<Transformed: Sendable>(
-        _ transform: @escaping @Sendable (Element) -> Transformed
-    ) -> AsyncStream<Transformed> {
-        let source = self
-        return AsyncStream<Transformed>(bufferingPolicy: .bufferingNewest(1)) { continuation in
-            let task = Task { @Sendable in
-                for await value in source {
-                    continuation.yield(transform(value))
-                }
-                continuation.finish()
-            }
-            continuation.onTermination = { @Sendable _ in task.cancel() }
-        }
+    public func encode(_ value: EncodeMessageCommand) async throws -> EncodedMessageResult {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.encode)
+    }
+
+    public func decode(_ value: DecodeMessageCommand) async throws -> DecodedMessageResult {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.decode)
+    }
+
+    public func createCipher(_ value: CreateCipherCommand) async throws -> CipherSummary {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.createCipher)
+    }
+
+    public func renameCipher(_ value: RenameCipherCommand) async throws -> CipherSummary {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.renameCipher)
+    }
+
+    public func deleteCipher(id: CipherID) async throws {
+        _ = try await command.send(id, to: RuntimeApplicationEndpointCatalog.deleteCipher)
+    }
+
+    public func setActiveCipher(_ value: SetActiveCipherCommand) async throws {
+        _ = try await command.send(value, to: RuntimeApplicationEndpointCatalog.setActiveCipher)
+    }
+
+    public func assignContact(_ value: AssignContactCommand) async throws {
+        _ = try await command.send(value, to: RuntimeApplicationEndpointCatalog.assignContact)
+    }
+
+    public func createContact(_ value: CreateContactCommand) async throws -> ContactSummary {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.createContact)
+    }
+
+    public func updateContact(_ value: UpdateContactCommand) async throws -> ContactSummary {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.updateContact)
+    }
+
+    public func deleteContacts(ids: Set<ContactID>) async throws {
+        _ = try await command.send(ids, to: RuntimeApplicationEndpointCatalog.deleteContacts)
+    }
+
+    public func deleteAllImportedContacts() async throws {
+        _ = try await command.send(
+            RuntimeEmptyPayload(),
+            to: RuntimeApplicationEndpointCatalog.deleteAllImportedContacts
+        )
+    }
+
+    public func importContacts(
+        _ value: ImportContactsCommand
+    ) async throws -> [ContactSummary] {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.importContacts)
+    }
+
+    public func requestSystemContacts() async throws -> [SystemContactDTO] {
+        try await query.fetch(
+            RuntimeEmptyPayload(),
+            from: RuntimeApplicationEndpointCatalog.requestSystemContacts
+        )
+    }
+
+    public func prepareCipherShare(
+        _ value: PrepareCipherShareCommand
+    ) async throws -> ShareArtifactDTO {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.prepareCipherShare)
+    }
+
+    public func prepareMessageShare(
+        _ value: PrepareMessageShareCommand
+    ) async throws -> ShareArtifactDTO {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.prepareMessageShare)
+    }
+
+    public func completeShareArtifact(
+        _ value: CompleteShareArtifactCommand
+    ) async throws -> ShareArtifactCompletionResultDTO {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.completeShareArtifact)
+    }
+
+    public func releaseShareArtifact(id: ShareArtifactID) async throws {
+        _ = try await command.send(id, to: RuntimeApplicationEndpointCatalog.releaseShareArtifact)
+    }
+
+    public func importFile(_ value: InboundFileDTO) async throws -> ImportResultDTO {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.importFile)
+    }
+
+    public func importURL(_ value: InboundURLDTO) async throws -> ImportResultDTO {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.importURL)
+    }
+
+    public func confirmImport(_ value: ConfirmImportCommand) async throws -> CipherSummary {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.confirmImport)
+    }
+
+    public func cancelImport(id: ImportID) async throws {
+        _ = try await command.send(id, to: RuntimeApplicationEndpointCatalog.cancelImport)
+    }
+
+    public func dismissReceivedMessage(id: MessageID) async throws {
+        _ = try await command.send(id, to: RuntimeApplicationEndpointCatalog.dismissReceivedMessage)
+    }
+
+    public func lock() async throws {
+        _ = try await command.send(RuntimeEmptyPayload(), to: RuntimeApplicationEndpointCatalog.lock)
+    }
+
+    public func verifyPIN(_ value: PINInput) async throws -> Bool {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.verifyPIN)
+    }
+
+    public func unlock(_ value: UnlockCommand) async throws -> UnlockResultDTO {
+        try await command.send(value, to: RuntimeApplicationEndpointCatalog.unlock)
+    }
+
+    public func setPIN(_ value: SetPINCommand) async throws {
+        _ = try await command.send(value, to: RuntimeApplicationEndpointCatalog.setPIN)
+    }
+
+    public func changePIN(_ value: ChangePINCommand) async throws {
+        _ = try await command.send(value, to: RuntimeApplicationEndpointCatalog.changePIN)
+    }
+
+    public func disablePIN(_ value: DisablePINCommand) async throws {
+        _ = try await command.send(value, to: RuntimeApplicationEndpointCatalog.disablePIN)
     }
 }

@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 import RuneScribeUIRuntime
 
 @MainActor
@@ -16,7 +17,7 @@ final class RuneScribeUISession: ObservableObject {
     let appVersion: String
     let buildNumber: String
 
-    private var applicationServiceHandle: (any RuneScribeApplicationService)?
+    private var applicationClientHandle: RuntimeApplicationClient?
     private var clipboardWritingHandle: (any ClipboardWriting)?
     private var sharePresentationHandle: OpaqueSharePresentationProvider?
 
@@ -26,14 +27,14 @@ final class RuneScribeUISession: ObservableObject {
     private var observationGeneration: UInt64 = 0
 
     init(
-        applicationService: any RuneScribeApplicationService,
+        applicationClient: RuntimeApplicationClient,
         clipboardWriting: any ClipboardWriting,
         sharePresentation: OpaqueSharePresentationProvider,
         splashVideoURL: URL?,
         metalLibraryURL: URL?,
         productMetadata: RuneScribeUIProductMetadata
     ) {
-        applicationServiceHandle = applicationService
+        applicationClientHandle = applicationClient
         clipboardWritingHandle = clipboardWriting
         sharePresentationHandle = sharePresentation
         self.splashVideoURL = splashVideoURL
@@ -49,25 +50,25 @@ final class RuneScribeUISession: ObservableObject {
 
     func start() throws {
         guard stateTask == nil, menuTask == nil else { return }
-        let service = try requireApplicationService()
+        let client = try requireApplicationClient()
         observationGeneration &+= 1
         let generation = observationGeneration
-        stateTask = Task { @MainActor [weak self, service] in
-            for await nextSnapshot in service.stateStream() {
+        stateTask = Task { @MainActor [weak self, client] in
+            for await envelope in client.applicationStateEnvelopes {
                 guard !Task.isCancelled,
                       let self,
                       observationGeneration == generation
                 else { return }
-                adopt(nextSnapshot)
+                adopt(envelope.payload)
             }
         }
-        menuTask = Task { @MainActor [weak self, service] in
-            for await command in service.menuCommandStream() {
+        menuTask = Task { @MainActor [weak self, client] in
+            for await envelope in client.menuCommandEnvelopes {
                 guard !Task.isCancelled,
                       let self,
                       observationGeneration == generation
                 else { return }
-                switch command {
+                switch envelope.payload {
                 case .openCipherLibrary:
                     requestRoute(.openCipherLibrary)
                 case .openSettings:
@@ -91,7 +92,7 @@ final class RuneScribeUISession: ObservableObject {
         messageErrorMessage = nil
         route = nil
         contactSystemIdentifiers.removeAll()
-        applicationServiceHandle = nil
+        applicationClientHandle = nil
         clipboardWritingHandle = nil
         sharePresentationHandle = nil
         await stateTask?.value
@@ -214,13 +215,17 @@ final class RuneScribeUISession: ObservableObject {
         lastError = Self.message(for: error)
     }
 
-    func requireApplicationService() throws -> any RuneScribeApplicationService {
-        guard let applicationServiceHandle else {
+    func dismissLastError() {
+        lastError = nil
+    }
+
+    func requireApplicationClient() throws -> RuntimeApplicationClient {
+        guard let applicationClientHandle else {
             throw RuneScribeProductError.failure(
                 RuneScribeFailureDTO(code: .temporarilyUnavailable)
             )
         }
-        return applicationServiceHandle
+        return applicationClientHandle
     }
 
     func requireSharePresentation() throws -> OpaqueSharePresentationProvider {

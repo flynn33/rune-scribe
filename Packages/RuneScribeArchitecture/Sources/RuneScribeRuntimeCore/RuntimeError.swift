@@ -27,6 +27,7 @@ public enum RuneScribeRuntimeError: Error, Equatable, Sendable {
     case duplicateService(ServiceIdentifier)
     case hostServiceAccessDenied(ServiceIdentifier)
     case messageDestinationUnavailable(ModuleRole)
+    case ingressDestinationUnavailable
     case duplicateMessageDestination(ModuleRole)
     case providerPublicationDenied(ServiceIdentifier)
     case endpointAlreadyRegistered(RuntimeEndpointIdentifier)
@@ -108,6 +109,8 @@ extension RuneScribeRuntimeError: LocalizedError {
             "The application host is denied service \(service.rawValue)."
         case .messageDestinationUnavailable(let role):
             "No message destination is registered for role \(role.rawValue)."
+        case .ingressDestinationUnavailable:
+            "No eligible runtime ingress destination is available."
         case .duplicateMessageDestination(let role):
             "A message destination is already registered for role \(role.rawValue)."
         case .providerPublicationDenied(let service):

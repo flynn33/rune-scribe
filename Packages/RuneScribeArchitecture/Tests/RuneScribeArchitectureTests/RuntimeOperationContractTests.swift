@@ -137,7 +137,8 @@ final class RuntimeOperationContractTests: XCTestCase {
             requiredCapability: "runtime.state.observe",
             privacyClass: .internalData,
             maximumSubscriptionBytes: 128,
-            maximumStateBytes: 65_536
+            maximumStateBytes: 65_536,
+            bufferingPolicy: .bufferingOldest(16)
         )
 
         assertSendable(descriptor)
@@ -148,6 +149,7 @@ final class RuntimeOperationContractTests: XCTestCase {
         XCTAssertEqual(descriptor.requiredCapability, "runtime.state.observe")
         XCTAssertEqual(descriptor.privacyClass, .internalData)
         XCTAssertEqual(descriptor.maximumSubscriptionBytes, 128)
+        XCTAssertEqual(descriptor.bufferingPolicy, .bufferingOldest(16))
         XCTAssertEqual(descriptor.maximumStateBytes, 65_536)
         XCTAssertEqual(descriptor.key.identity, descriptor.identity)
     }

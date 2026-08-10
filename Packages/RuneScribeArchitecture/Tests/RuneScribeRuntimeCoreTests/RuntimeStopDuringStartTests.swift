@@ -1,9 +1,211 @@
 import Foundation
 import RuneScribeContracts
-import RuneScribeRuntimeCore
+@testable import RuneScribeRuntimeCore
 import XCTest
 
 final class RuntimeStopDuringStartTests: XCTestCase {
+    func testStopDuringEarlyInfrastructureStartCannotBeErasedOrStrandWaiter() async throws {
+        let gate = EarlyRuntimeStartGate()
+        let probe = RuntimeStopProbe()
+        let core = stopRaceDescriptor(
+            id: "com.runescribe.module.early-stop-core",
+            kind: .service,
+            entryPoint: "EarlyStopCoreModule",
+            role: RuneScribeRoles.core,
+            capabilities: []
+        )
+        let ui = stopRaceDescriptor(
+            id: "com.runescribe.module.early-stop-ui",
+            kind: .ui,
+            entryPoint: "EarlyStopUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)),
+            platform: .macOS,
+            startCoordinator: gate
+        )
+        try await runtime.register(
+            manifest: stopRaceManifest(for: core),
+            factory: AnyModuleFactory(descriptor: core) {
+                StopRaceModule(
+                    descriptor: core,
+                    startAction: { _ in await probe.recordCoreStart() },
+                    stopAction: { await probe.recordCoreStop() }
+                )
+            }
+        )
+        try await runtime.register(
+            manifest: stopRaceManifest(for: ui),
+            factory: AnyModuleFactory(descriptor: ui) {
+                StopRaceModule(
+                    descriptor: ui,
+                    startAction: { _ in await probe.recordUIStart() },
+                    stopAction: { await probe.recordUIStop() }
+                )
+            }
+        )
+
+        let startTask = Task { try await runtime.start() }
+        await gate.waitUntilSuspended()
+        let stopTask = Task { await runtime.stop() }
+        let stoppingObserved = await waitForStatus(.stopping, runtime: runtime)
+        XCTAssertTrue(stoppingObserved)
+
+        await gate.release()
+        let interrupted = await waitForStatus(.stopped, runtime: runtime)
+        if !interrupted {
+            await runtime.stop()
+        }
+        await stopTask.value
+        try await startTask.value
+
+        XCTAssertTrue(interrupted)
+        let stoppedSnapshot = await runtime.snapshot()
+        let interruptedCounts = await probe.counts()
+        XCTAssertEqual(stoppedSnapshot.status, .stopped)
+        XCTAssertEqual(interruptedCounts.coreStarts, 0)
+        XCTAssertEqual(interruptedCounts.coreStops, 0)
+        XCTAssertEqual(interruptedCounts.uiStarts, 0)
+        XCTAssertEqual(interruptedCounts.uiStops, 0)
+
+        try await runtime.start()
+        let restartedSnapshot = await runtime.snapshot()
+        XCTAssertEqual(restartedSnapshot.status, .running)
+        await runtime.stop()
+    }
+
+    func testStopAfterRuntimeMarkedRunningCannotReopenIngressAgainstStoppedDispatcher() async throws {
+        let gate = LateRuntimeActivationGate()
+        let probe = RuntimeStopProbe()
+        let core = stopRaceDescriptor(
+            id: "com.runescribe.module.late-stop-core",
+            kind: .service,
+            entryPoint: "LateStopCoreModule",
+            role: RuneScribeRoles.core,
+            capabilities: []
+        )
+        let ui = stopRaceDescriptor(
+            id: "com.runescribe.module.late-stop-ui",
+            kind: .ui,
+            entryPoint: "LateStopUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)),
+            platform: .macOS,
+            startCoordinator: gate
+        )
+        try await runtime.register(
+            manifest: stopRaceManifest(for: core),
+            factory: AnyModuleFactory(descriptor: core) {
+                StopRaceModule(
+                    descriptor: core,
+                    startAction: { _ in await probe.recordCoreStart() },
+                    stopAction: { await probe.recordCoreStop() }
+                )
+            }
+        )
+        try await runtime.register(
+            manifest: stopRaceManifest(for: ui),
+            factory: AnyModuleFactory(descriptor: ui) {
+                StopRaceModule(
+                    descriptor: ui,
+                    startAction: { _ in await probe.recordUIStart() },
+                    stopAction: { await probe.recordUIStop() }
+                )
+            }
+        )
+
+        let startTask = Task { try await runtime.start() }
+        await gate.waitUntilSuspended()
+        let stopTask = Task { await runtime.stop() }
+        let stoppingObserved = await waitForStatus(.stopping, runtime: runtime)
+        XCTAssertTrue(stoppingObserved)
+        XCTAssertEqual(runtime.submit(.menu(.openSettings)), .rejected)
+
+        await gate.release()
+        await stopTask.value
+        try await startTask.value
+
+        let snapshot = await runtime.snapshot()
+        let counts = await probe.counts()
+        XCTAssertEqual(snapshot.status, .stopped)
+        XCTAssertEqual(counts.coreStarts, 1)
+        XCTAssertEqual(counts.coreStops, 1)
+        XCTAssertEqual(counts.uiStarts, 1)
+        XCTAssertEqual(counts.uiStops, 1)
+        XCTAssertEqual(runtime.submit(.menu(.openCipherLibrary)), .accepted)
+    }
+
+    func testStopDuringFailedStartCleanupRestoresStoppedIngressAdmissions() async throws {
+        let cleanupGate = FailedStartCleanupGate()
+        let probe = RuntimeStopProbe()
+        let core = stopRaceDescriptor(
+            id: "com.runescribe.module.failed-cleanup-core",
+            kind: .service,
+            entryPoint: "FailedCleanupCoreModule",
+            role: RuneScribeRoles.core,
+            capabilities: []
+        )
+        let ui = stopRaceDescriptor(
+            id: "com.runescribe.module.failed-cleanup-ui",
+            kind: .ui,
+            entryPoint: "FailedCleanupUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)),
+            platform: .macOS
+        )
+        try await runtime.register(
+            manifest: stopRaceManifest(for: core),
+            factory: AnyModuleFactory(descriptor: core) {
+                StopRaceModule(
+                    descriptor: core,
+                    startAction: { _ in await probe.recordCoreStart() },
+                    stopAction: {
+                        await cleanupGate.suspendIfNeeded()
+                        await probe.recordCoreStop()
+                    }
+                )
+            }
+        )
+        try await runtime.register(
+            manifest: stopRaceManifest(for: ui),
+            factory: AnyModuleFactory(descriptor: ui) {
+                StopRaceModule(
+                    descriptor: ui,
+                    startAction: { _ in throw StopRaceTestError.activationFailed },
+                    stopAction: { await probe.recordUIStop() }
+                )
+            }
+        )
+
+        let startTask = Task { try await runtime.start() }
+        await cleanupGate.waitUntilSuspended()
+        let stopTask = Task { await runtime.stop() }
+        let stoppingObserved = await waitForStatus(.stopping, runtime: runtime)
+        XCTAssertTrue(stoppingObserved)
+        await cleanupGate.release()
+        await stopTask.value
+        try await startTask.value
+
+        let snapshot = await runtime.snapshot()
+        let counts = await probe.counts()
+        XCTAssertEqual(snapshot.status, .stopped)
+        XCTAssertEqual(counts.coreStarts, 1)
+        XCTAssertEqual(counts.coreStops, 1)
+        XCTAssertEqual(counts.uiStops, 1)
+        XCTAssertEqual(runtime.submit(.menu(.openSettings)), .accepted)
+    }
+
     func testInboundFileReaderRequiresDedicatedCapability() async throws {
         let denied = stopRaceDescriptor(
             id: "com.runescribe.module.inbound-file-denied",
@@ -171,8 +373,15 @@ final class RuntimeStopDuringStartTests: XCTestCase {
     }
 
     private func waitForStopping(_ runtime: RuneScribeRuntime) async -> Bool {
+        await waitForStatus(.stopping, runtime: runtime)
+    }
+
+    private func waitForStatus(
+        _ expected: RuntimeStatus,
+        runtime: RuneScribeRuntime
+    ) async -> Bool {
         for _ in 0..<1_000 {
-            if await runtime.snapshot().status == .stopping {
+            if await runtime.snapshot().status == expected {
                 return true
             }
             await Task.yield()
@@ -183,6 +392,99 @@ final class RuntimeStopDuringStartTests: XCTestCase {
 
 private struct StopDuringStartValue: Sendable {
     let value: Int
+}
+
+private enum StopRaceTestError: Error {
+    case activationFailed
+}
+
+private actor EarlyRuntimeStartGate: RuntimeStartCoordinating {
+    private var suspended = false
+    private var released = false
+    private var suspensionWaiters: [CheckedContinuation<Void, Never>] = []
+    private var releaseWaiter: CheckedContinuation<Void, Never>?
+
+    func beforeInfrastructureActivation() async {
+        suspended = true
+        let waiters = suspensionWaiters
+        suspensionWaiters.removeAll()
+        for waiter in waiters {
+            waiter.resume()
+        }
+        guard !released else { return }
+        await withCheckedContinuation { continuation in
+            releaseWaiter = continuation
+        }
+    }
+
+    func waitUntilSuspended() async {
+        guard !suspended else { return }
+        await withCheckedContinuation { continuation in
+            suspensionWaiters.append(continuation)
+        }
+    }
+
+    func release() {
+        released = true
+        releaseWaiter?.resume()
+        releaseWaiter = nil
+    }
+}
+
+private actor LateRuntimeActivationGate: RuntimeStartCoordinating {
+    private var suspended = false
+    private var released = false
+    private var suspensionWaiters: [CheckedContinuation<Void, Never>] = []
+    private var releaseWaiter: CheckedContinuation<Void, Never>?
+
+    func beforeInfrastructureActivation() async {}
+
+    func afterRuntimeMarkedRunningBeforeIngressActivation() async {
+        suspended = true
+        let waiters = suspensionWaiters
+        suspensionWaiters.removeAll()
+        waiters.forEach { $0.resume() }
+        guard !released else { return }
+        await withCheckedContinuation { releaseWaiter = $0 }
+    }
+
+    func waitUntilSuspended() async {
+        guard !suspended else { return }
+        await withCheckedContinuation { suspensionWaiters.append($0) }
+    }
+
+    func release() {
+        released = true
+        releaseWaiter?.resume()
+        releaseWaiter = nil
+    }
+}
+
+private actor FailedStartCleanupGate {
+    private var suspended = false
+    private var released = false
+    private var suspensionWaiters: [CheckedContinuation<Void, Never>] = []
+    private var releaseWaiter: CheckedContinuation<Void, Never>?
+
+    func suspendIfNeeded() async {
+        suspended = true
+        let waiters = suspensionWaiters
+        suspensionWaiters.removeAll()
+        waiters.forEach { $0.resume() }
+        guard !released else { return }
+        await withCheckedContinuation { releaseWaiter = $0 }
+    }
+
+    func waitUntilSuspended() async {
+        guard !suspended else { return }
+        await withCheckedContinuation { suspensionWaiters.append($0) }
+    }
+
+    func release() {
+        released = true
+        releaseWaiter?.resume()
+        releaseWaiter = nil
+    }
 }
 
 private actor RuntimeActivationGate {

@@ -96,6 +96,15 @@ final class AppHostRoutingTests: XCTestCase {
     func testCompositionRecoversFromFirstStartupFailureAndRetries() async {
         let startAttempt = HostedStartAttempt()
         let fixture = makeFixture(startAttempt: startAttempt)
+        let retainedURL = URL(string: "runescribe://import?p=startup-retry")!
+
+        XCTAssertEqual(
+            fixture.composition.receive(
+                urls: [retainedURL],
+                source: .applicationOpen
+            ),
+            [.accepted]
+        )
 
         await fixture.composition.start()
 
@@ -106,6 +115,8 @@ final class AppHostRoutingTests: XCTestCase {
         )
         let failedAttemptCount = await startAttempt.count
         XCTAssertEqual(failedAttemptCount, 1)
+        let receivedAfterFailure = await fixture.inboundInputService.snapshot()
+        XCTAssertTrue(receivedAfterFailure.isEmpty)
 
         await fixture.composition.start()
 
@@ -116,6 +127,16 @@ final class AppHostRoutingTests: XCTestCase {
         )
         let recoveredAttemptCount = await startAttempt.count
         XCTAssertEqual(recoveredAttemptCount, 2)
+        let received = await fixture.inboundInputService.snapshot()
+        XCTAssertEqual(received.count, 1)
+        if received.count == 1 {
+            assertURL(
+                received[0],
+                equals: retainedURL,
+                source: .applicationOpen,
+                isColdStart: true
+            )
+        }
 
         await fixture.composition.stop()
         XCTAssertEqual(fixture.composition.rootPresentationStore.state, .booting)

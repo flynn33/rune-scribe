@@ -15,7 +15,6 @@
     "macOS": "15.0"
   },
   "capabilitiesRequested": [
-    "runtime.service.publish",
     "runtime.events.publish",
     "storage.keychain",
     "storage.protected-files",

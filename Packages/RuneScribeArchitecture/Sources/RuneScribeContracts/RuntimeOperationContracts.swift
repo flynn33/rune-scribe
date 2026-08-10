@@ -257,8 +257,32 @@ public struct RuntimeStateSubscription: Hashable, Sendable {
     public init() {}
 }
 
+public struct RuntimeStateRelayBufferingPolicy: Hashable, Sendable {
+    public enum Ordering: String, Hashable, Sendable {
+        case newest
+        case oldest
+    }
+
+    public let ordering: Ordering
+    public let capacity: UInt16
+
+    private init(ordering: Ordering, capacity: UInt16) {
+        self.ordering = ordering
+        self.capacity = max(1, capacity)
+    }
+
+    public static func bufferingNewest(_ capacity: UInt16) -> Self {
+        Self(ordering: .newest, capacity: capacity)
+    }
+
+    public static func bufferingOldest(_ capacity: UInt16) -> Self {
+        Self(ordering: .oldest, capacity: capacity)
+    }
+}
+
 public struct RuntimeStateEndpointDescriptor<State: Sendable>: Hashable, Sendable {
     public let endpoint: RuntimeEndpointDescriptor<RuntimeStateSubscription, State>
+    public let bufferingPolicy: RuntimeStateRelayBufferingPolicy
 
     public init(
         endpointID: RuntimeEndpointIdentifier,
@@ -268,7 +292,8 @@ public struct RuntimeStateEndpointDescriptor<State: Sendable>: Hashable, Sendabl
         requiredCapability: CapabilityIdentifier,
         privacyClass: RuntimePrivacyClass,
         maximumSubscriptionBytes: UInt64,
-        maximumStateBytes: UInt64
+        maximumStateBytes: UInt64,
+        bufferingPolicy: RuntimeStateRelayBufferingPolicy = .bufferingNewest(1)
     ) {
         endpoint = RuntimeEndpointDescriptor(
             endpointID: endpointID,
@@ -281,6 +306,7 @@ public struct RuntimeStateEndpointDescriptor<State: Sendable>: Hashable, Sendabl
             maximumRequestBytes: maximumSubscriptionBytes,
             maximumResponseBytes: maximumStateBytes
         )
+        self.bufferingPolicy = bufferingPolicy
     }
 
     public var endpointID: RuntimeEndpointIdentifier { endpoint.endpointID }

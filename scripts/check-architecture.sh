@@ -32,7 +32,7 @@ def production_swift_files(root)
     relative = Pathname(path).relative_path_from(root).to_s
     relative.start_with?(
       ".git/", ".build/", "DerivedData/", "RuneScribMacParityHost/",
-      "Packages/RuneScribeArchitecture/Sources/RuneScribeTestSupport/"
+      "scripts/", "Packages/RuneScribeArchitecture/Sources/RuneScribeTestSupport/"
     ) ||
       relative.split("/").any? { |component| component == "Tests" || component.end_with?("Tests") }
   end

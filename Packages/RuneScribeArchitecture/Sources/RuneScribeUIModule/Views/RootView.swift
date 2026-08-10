@@ -113,6 +113,20 @@ struct RootView: View {
         } message: {
             Text(session.messageErrorMessage ?? "")
         }
+        .alert("Couldn't Complete", isPresented: Binding(
+            get: {
+                session.lastError != nil
+                    && session.importErrorMessage == nil
+                    && session.messageErrorMessage == nil
+                    && !session.isLocked
+                    && !showSplash
+            },
+            set: { if !$0 { session.dismissLastError() } }
+        )) {
+            Button("OK") { session.dismissLastError() }
+        } message: {
+            Text(session.lastError ?? "")
+        }
         .environmentObject(session)
         .environment(\.runeScribeMetalLibraryURL, session.metalLibraryURL)
     }

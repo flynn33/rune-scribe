@@ -27,7 +27,6 @@
   "entryPoint": "RuneScribeUIModule",
   "runtimeRequirements": {
     "requiredServices": [
-      "RuneScribeApplicationService",
       "ApplicationResourceLocator",
       "ClipboardWriteService"
     ],

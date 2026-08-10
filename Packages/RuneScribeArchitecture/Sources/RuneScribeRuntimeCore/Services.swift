@@ -87,6 +87,17 @@ public struct ModuleContext: Sendable {
         )
     }
 
+    public func registerRuntimeMenuCommandEndpoint(
+        _ descriptor: RuntimeStateEndpointDescriptor<ApplicationMenuCommandDTO>
+    ) async throws {
+        try await lease.requireActive()
+        try await dispatcher.registerRuntimeMenuCommandEndpoint(
+            ownerModuleID: moduleID,
+            ownerGeneration: moduleGeneration,
+            descriptor: descriptor
+        )
+    }
+
     public func commandClient(
         to destination: RuntimeEndpointDestination
     ) async throws -> RuntimeCommandClient {

@@ -70,7 +70,7 @@ final class RuntimeCompositionTests: XCTestCase {
         XCTAssertEqual(fixture.composition.rootPresentationStore.state, .booting)
     }
 
-    func testInputRailPreservesMappingMetadataAndFIFOAcrossDetach() async {
+    func testRuntimeInputRailPreservesMappingMetadataAndFIFOAcrossStopStart() async {
         let fixture = makeFixture()
         let coldURL = URL(string: "runescribe://import?p=cold-url")!
         let coldFile = URL(fileURLWithPath: "/in-memory/cold.runescribe")
@@ -234,6 +234,54 @@ final class RuntimeCompositionTests: XCTestCase {
             .ready(moduleID: RuneScribeModuleIDs.primaryUI)
         )
         await fixture.composition.stop()
+    }
+
+    func testIngressAdmissionFailurePresentsSanitizedRootNotice() async throws {
+        let fixture = makeFixture()
+        let sensitiveMarker = "private-input-must-not-be-presented"
+        let oversized = try XCTUnwrap(
+            URL(
+                string: "runescribe://import?p="
+                    + sensitiveMarker
+                    + String(repeating: "x", count: 4_096)
+            )
+        )
+
+        XCTAssertEqual(
+            fixture.composition.receive(urls: [oversized], source: .sceneOpen),
+            [.rejected]
+        )
+        var notice: RootPresentationNotice?
+        for _ in 0..<1_000 {
+            notice = fixture.composition.rootPresentationStore.notice
+            if notice != nil { break }
+            await Task.yield()
+        }
+
+        XCTAssertEqual(fixture.composition.lastInputFailure, .admissionRejected)
+        XCTAssertEqual(notice, .inputRejected)
+        let message = try XCTUnwrap(notice?.message)
+        XCTAssertLessThanOrEqual(message.utf8.count, 96)
+        XCTAssertFalse(message.contains(sensitiveMarker))
+        XCTAssertEqual(message, "Rune Scribe could not accept that item.")
+    }
+
+    func testUnavailableDestinationFailurePresentsSanitizedRootNotice() throws {
+        let fixture = makeFixture()
+        let sensitiveMarker = "unroutable-private-input"
+
+        fixture.composition.presentHostIngressFailure(.destinationUnavailable)
+
+        let notice = try XCTUnwrap(
+            fixture.composition.rootPresentationStore.notice
+        )
+        XCTAssertEqual(notice, .inputUnavailable)
+        XCTAssertLessThanOrEqual(notice.message.utf8.count, 96)
+        XCTAssertFalse(notice.message.contains(sensitiveMarker))
+        XCTAssertEqual(
+            notice.message,
+            "Rune Scribe could not open that item right now."
+        )
     }
 
     private func makeFixture(

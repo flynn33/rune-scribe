@@ -61,7 +61,7 @@
       "remediationOwner": "runtime-dispatch",
       "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "complete", "blockingPhase": "P11"},
       "waiverStatus": "none",
-      "evidenceAnchors": ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeOperationDispatcher.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeApplicationEndpoints.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimePlatformBridge.swift"]
+      "evidenceAnchors": ["scripts/swift-compliance-scanner.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeOperationDispatcher.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeApplicationEndpoints.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimePlatformBridge.swift"]
     },
     {
       "id": "FG-005",
@@ -71,9 +71,9 @@
       "findingIDs": ["FRC-002", "FRC-003"],
       "expectedP01Status": "violation",
       "remediationOwner": "runtime-clients",
-      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "evidence-only", "blockingPhase": "P11"},
+      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "complete", "blockingPhase": "P11"},
       "waiverStatus": "none",
-      "evidenceAnchors": ["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/SerialInboundInputForwarder.swift"]
+      "evidenceAnchors": ["scripts/swift-compliance-scanner.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeApplicationEndpoints.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/SerialInboundInputForwarder.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift", "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"]
     },
     {
       "id": "FG-006",
@@ -85,7 +85,7 @@
       "remediationOwner": "runtime-dispatch",
       "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "complete", "blockingPhase": "P11"},
       "waiverStatus": "none",
-      "evidenceAnchors": ["Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeOperationDispatcher.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeApplicationEndpoints.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/SerialInboundInputForwarder.swift"]
+      "evidenceAnchors": ["scripts/swift-compliance-scanner.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeOperationDispatcher.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeApplicationEndpoints.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/SerialInboundInputForwarder.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift", "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"]
     },
     {
       "id": "FG-007",

@@ -204,12 +204,14 @@ final class RuntimeOperationDispatcherTests: XCTestCase {
             await missingCounter.record(); return value
         }
         let missingID: RuntimeEndpointIdentifier = "test.command.missing"
-        await missing.dispatcher.mergeDeclarations(
+        await missing.dispatcher.replaceDeclarations(
             moduleID: missing.sourceID,
-            consumed: [missingID]
+            consumed: [missingID],
+            published: []
         )
-        await missing.dispatcher.mergeDeclarations(
+        await missing.dispatcher.replaceDeclarations(
             moduleID: missing.providerID,
+            consumed: [],
             published: [missingID]
         )
         let missingKey = RuntimeEndpointDescriptor<String, String>(
@@ -963,6 +965,58 @@ final class RuntimeOperationDispatcherTests: XCTestCase {
         providerContinuation.finish()
     }
 
+    func testStateRelaySuppressesLateValueWhenProviderInvalidationWinsDeliveryRace() async throws {
+        let barrier = RuntimeTestBarrier()
+        let (providerStream, providerContinuation) = AsyncStream<String>.makeStream()
+        let harness = try await makeStateHarness(
+            beforeStateDelivery: { await barrier.suspend() }
+        ) { _ in
+            providerStream
+        }
+        let relay = try await harness.client.subscribe(to: harness.descriptor)
+        let nextValue = Task {
+            var iterator = relay.makeAsyncIterator()
+            return await iterator.next()
+        }
+
+        providerContinuation.yield("late")
+        await barrier.waitForArrivals(1)
+        await harness.dispatcher.invalidateModule(moduleID: harness.providerID)
+        await barrier.releaseAll()
+
+        let deliveredAfterInvalidation = await nextValue.value
+        XCTAssertNil(deliveredAfterInvalidation)
+        let ledger = await harness.dispatcher.ledgerSnapshot()
+        XCTAssertEqual(ledger.count, 1)
+        XCTAssertEqual(ledger[0].outcome, .cancelled)
+        providerContinuation.finish()
+    }
+
+    func testStateRelayPurgesUnreadBufferedValueAfterProviderInvalidation() async throws {
+        let (providerStream, providerContinuation) = AsyncStream<String>.makeStream()
+        let harness = try await makeStateHarness { _ in providerStream }
+        let relay = try await harness.client.subscribe(to: harness.descriptor)
+
+        providerContinuation.yield("unread")
+        var buffered = false
+        for _ in 0..<1_000 {
+            let ledger = await harness.dispatcher.ledgerSnapshot()
+            buffered = ledger.first?.responseByteCount == 6
+            if buffered { break }
+            await Task.yield()
+        }
+        XCTAssertTrue(buffered)
+
+        await harness.dispatcher.invalidateModule(moduleID: harness.providerID)
+        var iterator = relay.makeAsyncIterator()
+        let staleBufferedValue = await iterator.next()
+
+        XCTAssertNil(staleBufferedValue)
+        let ledger = await harness.dispatcher.ledgerSnapshot()
+        XCTAssertEqual(ledger.first?.outcome, .cancelled)
+        providerContinuation.finish()
+    }
+
     func testStateSubscriptionSchemaMismatchIsDeniedBeforeProviderStreamCreation() async throws {
         let (providerStream, providerContinuation) = AsyncStream<String>.makeStream()
         let counter = RuntimeSynchronousInvocationCounter()
@@ -994,6 +1048,37 @@ final class RuntimeOperationDispatcherTests: XCTestCase {
         providerContinuation.finish()
     }
 
+    func testStateRelayRejectsClientBufferingPolicyDriftBeforeProviderStreamCreation() async throws {
+        let (providerStream, providerContinuation) = AsyncStream<String>.makeStream()
+        let counter = RuntimeSynchronousInvocationCounter()
+        let harness = try await makeStateHarness { _ in
+            counter.record()
+            return providerStream
+        }
+        let descriptor = RuntimeStateEndpointDescriptor<String>(
+            endpointID: harness.descriptor.endpointID,
+            destination: harness.descriptor.destination,
+            subscriptionSchemaVersion: harness.descriptor.subscriptionSchemaVersion,
+            stateSchemaVersion: harness.descriptor.stateSchemaVersion,
+            requiredCapability: harness.descriptor.requiredCapability,
+            privacyClass: harness.descriptor.privacyClass,
+            maximumSubscriptionBytes: harness.descriptor.maximumSubscriptionBytes,
+            maximumStateBytes: harness.descriptor.maximumStateBytes,
+            bufferingPolicy: .bufferingOldest(16)
+        )
+
+        let error = await runtimeError {
+            _ = try await harness.client.subscribe(to: descriptor)
+        }
+
+        XCTAssertEqual(error, .endpointDescriptorMismatch(descriptor.endpointID))
+        XCTAssertEqual(counter.value(), 0)
+        let ledger = await harness.dispatcher.ledgerSnapshot()
+        XCTAssertEqual(ledger.count, 1)
+        XCTAssertEqual(ledger[0].outcome, .denied(.descriptorMismatch))
+        providerContinuation.finish()
+    }
+
     func testOversizedStateDeliveryIsSuppressedAndLedgered() async throws {
         let (providerStream, providerContinuation) = AsyncStream<String>.makeStream()
         let harness = try await makeStateHarness(maximumStateBytes: 4) { _ in
@@ -1018,12 +1103,21 @@ final class RuntimeOperationDispatcherTests: XCTestCase {
         let (providerStream, providerContinuation) = AsyncStream<String>.makeStream()
         let harness = try await makeStateHarness { _ in providerStream }
         let relay = try await harness.client.subscribe(to: harness.descriptor)
-        var iterator = relay.makeAsyncIterator()
 
         providerContinuation.yield("snapshot")
+        providerContinuation.finish()
+        var completed = false
+        for _ in 0..<1_000 {
+            let ledger = await harness.dispatcher.ledgerSnapshot()
+            completed = ledger.first?.outcome == .succeeded
+            if completed { break }
+            await Task.yield()
+        }
+        XCTAssertTrue(completed)
+
+        var iterator = relay.makeAsyncIterator()
         let snapshot = await iterator.next()
         XCTAssertEqual(snapshot?.payload, "snapshot")
-        providerContinuation.finish()
         let finished = await iterator.next()
         XCTAssertNil(finished)
 
@@ -1236,11 +1330,14 @@ final class RuntimeOperationDispatcherTests: XCTestCase {
 
     private func makeStateHarness(
         maximumStateBytes: UInt64 = 64,
+        beforeStateDelivery: @escaping @Sendable () async -> Void = {},
         handler: @escaping @Sendable (RuntimeOperationMetadata) -> AsyncStream<String>
     ) async throws -> RuntimeStateHarness {
         let dispatcher = RuntimeOperationDispatcher(
             policy: .patternBFoundation,
-            environment: .live
+            environment: .live,
+            ratePolicy: .shippingDefault,
+            beforeStateDelivery: beforeStateDelivery
         )
         let providerID: ModuleIdentifier = "test.state-harness.provider"
         let sourceID: ModuleIdentifier = "test.state-harness.source"
@@ -1296,6 +1393,7 @@ final class RuntimeOperationDispatcherTests: XCTestCase {
         )
         return RuntimeStateHarness(
             dispatcher: dispatcher,
+            providerID: providerID,
             descriptor: descriptor,
             client: RuntimeStateClient(dispatcher: dispatcher, lease: lease)
         )
@@ -1395,6 +1493,7 @@ private struct RuntimeCommandHarness: Sendable {
 
 private struct RuntimeStateHarness: Sendable {
     let dispatcher: RuntimeOperationDispatcher
+    let providerID: ModuleIdentifier
     let descriptor: RuntimeStateEndpointDescriptor<String>
     let client: RuntimeStateClient
 }

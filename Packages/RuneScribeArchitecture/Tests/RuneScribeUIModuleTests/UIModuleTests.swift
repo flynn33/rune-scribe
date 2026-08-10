@@ -21,6 +21,21 @@ final class UIModuleTests: XCTestCase {
             Set(manifest.runtimeRequirements.requiredModuleRoles),
             descriptor.requiredModuleRoles
         )
+        XCTAssertEqual(
+            Set(manifest.runtimeRequirements.requiredServices),
+            descriptor.requiredServices
+        )
+        XCTAssertEqual(
+            descriptor.requiredServices,
+            [
+                RuneScribeServiceIDs.applicationResourceLocator,
+                RuneScribeServiceIDs.clipboardWrite,
+            ]
+        )
+        XCTAssertEqual(
+            descriptor.consumedEndpoints,
+            RuntimeApplicationEndpointCatalog.applicationEndpointIDs
+        )
     }
 
     func testFactoryCreatesFreshModulesOnDemandWithoutPresentingRoot() throws {

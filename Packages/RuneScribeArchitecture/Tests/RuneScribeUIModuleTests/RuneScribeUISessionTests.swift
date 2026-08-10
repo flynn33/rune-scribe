@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
 import RuneScribeContracts
-import RuneScribeRuntimeCore
+@testable import RuneScribeRuntimeCore
 @testable import RuneScribeUIModule
 import RuneScribeUIRuntime
 import SwiftUI
@@ -94,9 +94,338 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertEqual(retried, .imported)
     }
 
+    func testRuntimeApplicationClientMediatesCommandQueryStateAndLedger() async throws {
+        let snapshot = Self.fixtureSnapshot(
+            revision: 6,
+            plaintext: nil,
+            includeFailures: false
+        )
+        let cipher = try XCTUnwrap(snapshot.cipherLibrary.ciphers.first)
+        let contacts = [
+            SystemContactDTO(systemIdentifier: "system-freya", displayName: "Freya Day"),
+        ]
+        let service = ControllableApplicationService(
+            createdCipher: cipher,
+            systemContacts: contacts
+        )
+        let harness = try await makeApplicationClientHarness(
+            applicationService: service
+        )
+        let stateTask = Task {
+            var iterator = harness.client.applicationStateEnvelopes.makeAsyncIterator()
+            return await iterator.next()
+        }
+
+        service.yieldState(snapshot)
+        let created = try await harness.client.createCipher(
+            CreateCipherCommand(name: "Freya")
+        )
+        let queriedContacts = try await harness.client.requestSystemContacts()
+        let receivedState = await stateTask.value
+        let stateEnvelope = try XCTUnwrap(receivedState)
+
+        XCTAssertEqual(created, cipher)
+        XCTAssertEqual(queriedContacts, contacts)
+        XCTAssertEqual(stateEnvelope.payload, snapshot)
+        XCTAssertEqual(
+            stateEnvelope.metadata.operationIdentifier.rawValue,
+            RuntimeApplicationEndpointCatalog.applicationState.endpointID.rawValue
+        )
+        XCTAssertEqual(stateEnvelope.metadata.sourceModuleID, TestApplicationClientModule.moduleID)
+        XCTAssertEqual(stateEnvelope.metadata.destinationModuleID, TestCoreModule.moduleID)
+
+        let ledger = await harness.runtime.callLedgerSnapshot()
+        let createRecord = try XCTUnwrap(
+            ledger.last {
+                $0.metadata.operationIdentifier.rawValue
+                    == RuntimeApplicationEndpointCatalog.createCipher.descriptor.endpointID.rawValue
+            }
+        )
+        let queryRecord = try XCTUnwrap(
+            ledger.last {
+                $0.metadata.operationIdentifier.rawValue
+                    == RuntimeApplicationEndpointCatalog.requestSystemContacts
+                        .descriptor.endpointID.rawValue
+            }
+        )
+        let stateRecord = try XCTUnwrap(
+            ledger.last {
+                $0.metadata.operationIdentifier.rawValue
+                    == RuntimeApplicationEndpointCatalog.applicationState.endpointID.rawValue
+            }
+        )
+        XCTAssertEqual(createRecord.endpointKind, .command)
+        XCTAssertEqual(createRecord.outcome, .succeeded)
+        XCTAssertEqual(queryRecord.endpointKind, .query)
+        XCTAssertEqual(queryRecord.outcome, .succeeded)
+        XCTAssertEqual(stateRecord.endpointKind, .state)
+        XCTAssertTrue(stateRecord.outcome == .inFlight || stateRecord.outcome == .succeeded)
+
+        await harness.runtime.stop()
+    }
+
+    func testRuntimeApplicationClientPreservesBurstMenuCommandFIFO() async throws {
+        let service = ControllableApplicationService()
+        let harness = try await makeApplicationClientHarness(
+            applicationService: service
+        )
+        let expected: [ApplicationMenuCommandDTO] = (0..<16).map {
+            $0.isMultiple(of: 2) ? .openCipherLibrary : .openSettings
+        }
+
+        let consumer = Task { () -> [ApplicationMenuCommandDTO] in
+            var received: [ApplicationMenuCommandDTO] = []
+            for await envelope in harness.client.menuCommandEnvelopes {
+                received.append(envelope.payload)
+                if received.count == expected.count { break }
+            }
+            return received
+        }
+        let dispositions = harness.runtime.submit(
+            contentsOf: expected.map(ExternalInputEnvelope.menu)
+        )
+        XCTAssertEqual(dispositions, Array(repeating: .accepted, count: expected.count))
+        let received = await consumer.value
+
+        XCTAssertEqual(received, expected)
+        await harness.runtime.stop()
+    }
+
+    func testRuntimeMenuCommandRailRejectsCapacityPlusOneAndPreservesFIFO() async throws {
+        let harness = try await makeApplicationClientHarness(
+            applicationService: ControllableApplicationService()
+        )
+        let failureCapture = IngressFailureCapture()
+        harness.runtime.observeHostIngressFailures { failure in
+            Task { await failureCapture.record(failure) }
+        }
+        let expected: [ApplicationMenuCommandDTO] = (0..<16).map {
+            $0.isMultiple(of: 2) ? .openSettings : .openCipherLibrary
+        }
+        let dispositions = harness.runtime.submit(
+            contentsOf: (expected + [.openSettings]).map(ExternalInputEnvelope.menu)
+        )
+
+        XCTAssertEqual(
+            Array(dispositions.prefix(16)),
+            Array(repeating: .accepted, count: 16)
+        )
+        XCTAssertEqual(dispositions.last, .rejected)
+        var observedFailure: RuntimeHostIngressFailure?
+        for _ in 0..<1_000 {
+            observedFailure = await failureCapture.last()
+            if observedFailure != nil { break }
+            await Task.yield()
+        }
+        XCTAssertEqual(observedFailure, .admissionRejected)
+
+        var iterator = harness.client.menuCommandEnvelopes.makeAsyncIterator()
+        var received: [ApplicationMenuCommandDTO] = []
+        for _ in expected.indices {
+            let next = await iterator.next()
+            received.append(try XCTUnwrap(next).payload)
+        }
+        XCTAssertEqual(received, expected)
+        XCTAssertEqual(harness.runtime.hostIngressSnapshot.rejectedInputCount, 1)
+
+        await harness.runtime.stop()
+    }
+
+    func testRuntimeMenuCommandRailInvalidatesStaleStreamAndReopensAfterRestart() async throws {
+        let harness = try await makeApplicationClientHarness(
+            applicationService: ControllableApplicationService()
+        )
+        var staleIterator = harness.client.menuCommandEnvelopes.makeAsyncIterator()
+
+        await harness.runtime.stop()
+        let staleNext = await staleIterator.next()
+        XCTAssertNil(staleNext)
+
+        try await harness.runtime.start()
+        let replacementClient = try await harness.capture.requireClient()
+        var replacementIterator = replacementClient.menuCommandEnvelopes.makeAsyncIterator()
+        XCTAssertEqual(harness.runtime.submit(.menu(.openSettings)), .accepted)
+        let replacementNext = await replacementIterator.next()
+        let replacement = try XCTUnwrap(replacementNext)
+        XCTAssertEqual(replacement.payload, .openSettings)
+
+        await harness.runtime.stop()
+    }
+
+    func testRuntimeMenuCommandRailPurgesUnreadBufferedValueAfterStop() async throws {
+        let harness = try await makeApplicationClientHarness(
+            applicationService: ControllableApplicationService()
+        )
+        let staleStream = harness.client.menuCommandEnvelopes
+
+        XCTAssertEqual(harness.runtime.submit(.menu(.openSettings)), .accepted)
+        let deliveredToRuntimeBuffer = await eventually {
+            harness.runtime.hostIngressSnapshot.queuedInputCount == 0
+        }
+        XCTAssertTrue(deliveredToRuntimeBuffer)
+        XCTAssertEqual(harness.runtime.hostIngressSnapshot.failedDeliveryCount, 0)
+
+        await harness.runtime.stop()
+        var staleIterator = staleStream.makeAsyncIterator()
+        let staleBufferedValue = await staleIterator.next()
+        XCTAssertNil(staleBufferedValue)
+    }
+
+    func testCancelledMenuConsumerRejectsDeliveryAndPermitsFreshRuntimeClient() async throws {
+        let harness = try await makeApplicationClientHarness(
+            applicationService: ControllableApplicationService()
+        )
+        let failureCapture = IngressFailureCapture()
+        harness.runtime.observeHostIngressFailures { failure in
+            Task { await failureCapture.record(failure) }
+        }
+        let consumer = Task { () -> RuntimeStateEnvelope<ApplicationMenuCommandDTO>? in
+            var iterator = harness.client.menuCommandEnvelopes.makeAsyncIterator()
+            return await iterator.next()
+        }
+        await Task.yield()
+        consumer.cancel()
+        let cancelledValue = await consumer.value
+        XCTAssertNil(cancelledValue)
+
+        XCTAssertEqual(harness.runtime.submit(.menu(.openSettings)), .accepted)
+        var observedFailure: RuntimeHostIngressFailure?
+        for _ in 0..<1_000 {
+            observedFailure = await failureCapture.last()
+            if observedFailure != nil { break }
+            await Task.yield()
+        }
+        XCTAssertEqual(observedFailure, .destinationRejected)
+
+        let replacement = try await harness.capture.makeClient()
+        var replacementIterator = replacement.menuCommandEnvelopes.makeAsyncIterator()
+        XCTAssertEqual(harness.runtime.submit(.menu(.openCipherLibrary)), .accepted)
+        let next = await replacementIterator.next()
+        XCTAssertEqual(try XCTUnwrap(next).payload, .openCipherLibrary)
+
+        await harness.runtime.stop()
+    }
+
+    func testCancelledMenuConsumerAllowsImmediateReplacementSubscription() async throws {
+        let harness = try await makeApplicationClientHarness(
+            applicationService: ControllableApplicationService()
+        )
+        let consumer = Task { () -> RuntimeStateEnvelope<ApplicationMenuCommandDTO>? in
+            var iterator = harness.client.menuCommandEnvelopes.makeAsyncIterator()
+            return await iterator.next()
+        }
+        await Task.yield()
+        consumer.cancel()
+        let cancelledValue = await consumer.value
+        XCTAssertNil(cancelledValue)
+
+        let replacement = try await harness.capture.makeClient()
+        var replacementIterator = replacement.menuCommandEnvelopes.makeAsyncIterator()
+        XCTAssertEqual(harness.runtime.submit(.menu(.openSettings)), .accepted)
+        let next = await replacementIterator.next()
+        XCTAssertEqual(try XCTUnwrap(next).payload, .openSettings)
+
+        await harness.runtime.stop()
+    }
+
+    func testRuntimeStopDeniesNewClientCallsWhileAcceptedMenuDrainsToSubscriber() async throws {
+        let inboundGate = InboundReceiveGate()
+        let quiesceGate = RuntimeQuiesceGate()
+        let cipher = try XCTUnwrap(
+            Self.fixtureSnapshot(
+                revision: 20,
+                plaintext: nil,
+                includeFailures: false
+            ).cipherLibrary.ciphers.first
+        )
+        let service = ControllableApplicationService(
+            createdCipher: cipher,
+            inboundGate: inboundGate
+        )
+        let harness = try await makeApplicationClientHarness(
+            applicationService: service,
+            startCoordinator: quiesceGate
+        )
+        let session = RuneScribeUISession(
+            applicationClient: harness.client,
+            clipboardWriting: LifetimeClipboard(),
+            sharePresentation: .unavailable,
+            splashVideoURL: nil,
+            metalLibraryURL: nil,
+            productMetadata: .init(version: "1.0", buildNumber: "1")
+        )
+        try session.start()
+        XCTAssertEqual(harness.runtime.submit(.menu(.openSettings)), .accepted)
+        await inboundGate.waitUntilSuspended()
+
+        let stopTask = Task { await harness.runtime.stop() }
+        await quiesceGate.waitUntilSuspended()
+        do {
+            _ = try await harness.client.createCipher(
+                CreateCipherCommand(name: "Denied during stop")
+            )
+            XCTFail("A new client call must not enter after stop quiesces the runtime")
+        } catch let error as RuneScribeRuntimeError {
+            guard case .runtimeNotRunning = error else {
+                return XCTFail("Expected runtime-not-running, received \(error)")
+            }
+        }
+
+        await inboundGate.release()
+        let menuDelivered = await eventually {
+            session.route?.route == .openSettings
+        }
+        XCTAssertTrue(menuDelivered)
+        await quiesceGate.release()
+        await stopTask.value
+        let finalStatus = await harness.runtime.snapshot().status
+        XCTAssertEqual(finalStatus, .stopped)
+        await session.stop()
+    }
+
+    func testRuntimeApplicationClientFailsAfterCoreReplacementWithoutSessionCleanup() async throws {
+        let snapshot = Self.fixtureSnapshot(
+            revision: 6,
+            plaintext: nil,
+            includeFailures: false
+        )
+        let cipher = try XCTUnwrap(snapshot.cipherLibrary.ciphers.first)
+        let service = ControllableApplicationService(createdCipher: cipher)
+        let (session, runtime) = try await makeSession(applicationService: service)
+        try session.start()
+
+        let created = try await session.addCipher(label: "Before replacement")
+        XCTAssertEqual(created.id, cipher.id.rawValue)
+
+        await runtime.stop()
+        try await runtime.start()
+
+        do {
+            _ = try await session.addCipher(label: "Stale client")
+            XCTFail("The retained UI client must fail after Core replacement")
+        } catch let error as RuneScribeRuntimeError {
+            guard case .staleClient = error else {
+                return XCTFail("Expected stale-client rejection, received \(error)")
+            }
+        }
+        XCTAssertEqual(session.lastError, "Rune Scribe could not complete the operation.")
+
+        let ledger = await runtime.callLedgerSnapshot()
+        XCTAssertTrue(
+            ledger.contains {
+                $0.metadata.operationIdentifier.rawValue
+                    == RuntimeApplicationEndpointCatalog.createCipher.descriptor.endpointID.rawValue
+                    && $0.outcome == .denied(.staleClient)
+            }
+        )
+
+        await session.stop()
+        await runtime.stop()
+    }
+
     func testSnapshotAndPendingMessageProjectWithoutOwningDomainState() async throws {
         let service = ControllableApplicationService()
-        let session = makeSession(applicationService: service)
+        let (session, runtime) = try await makeSession(applicationService: service)
         try session.start()
 
         service.yieldState(Self.fixtureSnapshot(revision: 7, plaintext: "Meet at the oak."))
@@ -120,11 +449,12 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
 
         await session.stop()
+        await runtime.stop()
     }
 
     func testRepeatingSameMessageSnapshotKeepsOneIdenticalProjection() async throws {
         let service = ControllableApplicationService()
-        let session = makeSession(applicationService: service)
+        let (session, runtime) = try await makeSession(applicationService: service)
         try session.start()
         let state = Self.fixtureSnapshot(
             revision: 8,
@@ -146,11 +476,12 @@ final class RuneScribeUISessionTests: XCTestCase {
 
         XCTAssertEqual(session.pendingMessage, firstProjection)
         await session.stop()
+        await runtime.stop()
     }
 
     func testSnapshotWithoutPendingMessageClearsPresentation() async throws {
         let service = ControllableApplicationService()
-        let session = makeSession(applicationService: service)
+        let (session, runtime) = try await makeSession(applicationService: service)
         try session.start()
 
         service.yieldState(
@@ -178,18 +509,27 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertTrue(pendingProjectionCleared)
 
         await session.stop()
+        await runtime.stop()
     }
 
     func testMenuStreamAndReplyUseTypedConsumableRoutes() async throws {
         let service = ControllableApplicationService()
-        let session = makeSession(applicationService: service)
+        let (session, runtime) = try await makeSession(applicationService: service)
         try session.start()
 
-        service.yieldMenu(.openSettings)
+        XCTAssertEqual(runtime.submit(.menu(.openSettings)), .accepted)
         let settingsProjected = await eventually {
             session.route?.route == .openSettings
         }
-        XCTAssertTrue(settingsProjected)
+        let menuIngressSnapshot = runtime.hostIngressSnapshot
+        let menuLedger = await runtime.callLedgerSnapshot().filter {
+            $0.metadata.operationIdentifier.rawValue.contains("menu")
+                || $0.metadata.operationIdentifier.rawValue.contains("ingress")
+        }
+        XCTAssertTrue(
+            settingsProjected,
+            "ingress=\(menuIngressSnapshot), menuLedger=\(menuLedger)"
+        )
         let settingsRequest = try XCTUnwrap(session.route)
 
         session.consumeRoute(id: UUID())
@@ -197,7 +537,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         session.consumeRoute(id: settingsRequest.id)
         XCTAssertNil(session.route)
 
-        service.yieldMenu(.openCipherLibrary)
+        XCTAssertEqual(runtime.submit(.menu(.openCipherLibrary)), .accepted)
         let libraryProjected = await eventually {
             session.route?.route == .openCipherLibrary
         }
@@ -208,15 +548,16 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertEqual(session.route?.route, .replyToMessage(cipherID: cipherID))
 
         await session.stop()
+        await runtime.stop()
     }
 
     func testStopClearsPresentationStateAndIgnoresLateStreamValues() async throws {
         let service = ControllableApplicationService()
-        let session = makeSession(applicationService: service)
+        let (session, runtime) = try await makeSession(applicationService: service)
         try session.start()
 
         service.yieldState(Self.fixtureSnapshot(revision: 1, plaintext: "Secret plaintext"))
-        service.yieldMenu(.openSettings)
+        XCTAssertEqual(runtime.submit(.menu(.openSettings)), .accepted)
         let initialProjectionArrived = await eventually {
             session.snapshot?.revision == 1 && session.route?.route == .openSettings
         }
@@ -237,7 +578,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertNil(session.messageErrorMessage)
 
         service.yieldState(Self.fixtureSnapshot(revision: 2, plaintext: "Late plaintext"))
-        service.yieldMenu(.openCipherLibrary)
+        XCTAssertEqual(runtime.submit(.menu(.openCipherLibrary)), .accepted)
         for _ in 0..<20 {
             await Task.yield()
         }
@@ -246,9 +587,10 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertNil(session.pendingMessage)
         XCTAssertNil(session.route)
         await session.stop()
+        await runtime.stop()
     }
 
-    func testStopReleasesApplicationClipboardAndShareProviderOwners() async throws {
+    func testStopReleasesClientClipboardAndShareOwnersWithoutOwningCoreProvider() async throws {
         var service: ControllableApplicationService? = ControllableApplicationService()
         var clipboard: LifetimeClipboard? = LifetimeClipboard()
         var shareOwner: LifetimeProbe? = LifetimeProbe()
@@ -256,17 +598,14 @@ final class RuneScribeUISessionTests: XCTestCase {
         let weakClipboard = WeakReference(clipboard)
         let weakShareOwner = WeakReference(shareOwner)
 
-        let session = RuneScribeUISession(
+        let (session, runtime) = try await makeSession(
             applicationService: try XCTUnwrap(service),
-            clipboardWriting: try XCTUnwrap(clipboard),
+            clipboard: try XCTUnwrap(clipboard),
             sharePresentation: OpaqueSharePresentationProvider {
                 [owner = try XCTUnwrap(shareOwner)] _ in
                 _ = owner
                 return URL(fileURLWithPath: "/fixture/share.runescribe")
-            },
-            splashVideoURL: URL(fileURLWithPath: "/fixture/splash.mp4"),
-            metalLibraryURL: URL(fileURLWithPath: "/fixture/default.metallib"),
-            productMetadata: .init(version: "1.0", buildNumber: "1")
+            }
         )
         try session.start()
 
@@ -279,11 +618,12 @@ final class RuneScribeUISessionTests: XCTestCase {
 
         await session.stop()
         let ownersReleased = await eventually {
-            weakService.value == nil
-                && weakClipboard.value == nil
+            weakClipboard.value == nil
                 && weakShareOwner.value == nil
         }
         XCTAssertTrue(ownersReleased)
+        XCTAssertNotNil(weakService.value)
+        await runtime.stop()
     }
 
     func testModuleActivationToleratesMissingOptionalVisualResources() async throws {
@@ -319,10 +659,9 @@ final class RuneScribeUISessionTests: XCTestCase {
             .ready(moduleID: RuneScribeUIModuleBootstrap.moduleID)
         )
 
-        let nilResourceSession = RuneScribeUISession(
-            applicationService: applicationService,
-            clipboardWriting: LifetimeClipboard(),
-            sharePresentation: .unavailable,
+        let (nilResourceSession, nilResourceRuntime) = try await makeSession(
+            applicationService: ControllableApplicationService(),
+            clipboard: LifetimeClipboard(),
             splashVideoURL: nil,
             metalLibraryURL: nil,
             productMetadata: .unavailable
@@ -330,6 +669,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertNil(nilResourceSession.splashVideoURL)
         XCTAssertNil(nilResourceSession.metalLibraryURL)
         await nilResourceSession.stop()
+        await nilResourceRuntime.stop()
 
         await runtime.stop()
         XCTAssertEqual(rootStore.state, .booting)
@@ -337,7 +677,7 @@ final class RuneScribeUISessionTests: XCTestCase {
 
     func testUserTriggeredMutationFailuresRemainVisibleAndSanitized() async throws {
         let service = ControllableApplicationService()
-        let session = makeSession(applicationService: service)
+        let (session, runtime) = try await makeSession(applicationService: service)
         let cipherID = UUID(uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA")!
         let contactID = UUID(uuidString: "BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBBB")!
         let artifactID = ShareArtifactID(
@@ -405,6 +745,8 @@ final class RuneScribeUISessionTests: XCTestCase {
         await assertSanitizedFailure {
             _ = try await session.completeShareArtifact(id: artifactID, outcome: .handedOff)
         }
+        await session.stop()
+        await runtime.stop()
     }
 
     func testMutationViewsDoNotDiscardThrowingSessionResults() throws {
@@ -664,7 +1006,7 @@ final class RuneScribeUISessionTests: XCTestCase {
 
     func testRepresentativeUserFacingViewsRenderForParityInspection() async throws {
         let service = ControllableApplicationService()
-        let session = makeSession(applicationService: service)
+        let (session, runtime) = try await makeSession(applicationService: service)
         try session.start()
         service.yieldState(
             Self.fixtureSnapshot(
@@ -762,20 +1104,66 @@ final class RuneScribeUISessionTests: XCTestCase {
         }
 
         await session.stop()
+        await runtime.stop()
     }
 
     private func makeSession(
-        applicationService: any RuneScribeApplicationService,
-        clipboard: any ClipboardWriting = LifetimeClipboard()
-    ) -> RuneScribeUISession {
-        RuneScribeUISession(
-            applicationService: applicationService,
-            clipboardWriting: clipboard,
-            sharePresentation: .unavailable,
-            splashVideoURL: URL(fileURLWithPath: "/fixture/splash.mp4"),
-            metalLibraryURL: URL(fileURLWithPath: "/fixture/default.metallib"),
-            productMetadata: .init(version: "1.0", buildNumber: "1")
+        applicationService: ControllableApplicationService,
+        clipboard: any ClipboardWriting = LifetimeClipboard(),
+        sharePresentation: OpaqueSharePresentationProvider = .unavailable,
+        splashVideoURL: URL? = URL(fileURLWithPath: "/fixture/splash.mp4"),
+        metalLibraryURL: URL? = URL(fileURLWithPath: "/fixture/default.metallib"),
+        productMetadata: RuneScribeUIProductMetadata = .init(
+            version: "1.0",
+            buildNumber: "1"
         )
+    ) async throws -> (session: RuneScribeUISession, runtime: RuneScribeRuntime) {
+        let harness = try await makeApplicationClientHarness(
+            applicationService: applicationService
+        )
+        let session = RuneScribeUISession(
+            applicationClient: harness.client,
+            clipboardWriting: clipboard,
+            sharePresentation: sharePresentation,
+            splashVideoURL: splashVideoURL,
+            metalLibraryURL: metalLibraryURL,
+            productMetadata: productMetadata
+        )
+        return (session, harness.runtime)
+    }
+
+    private func makeApplicationClientHarness(
+        applicationService: ControllableApplicationService,
+        startCoordinator: (any RuntimeStartCoordinating)? = nil
+    ) async throws -> (
+        client: RuntimeApplicationClient,
+        runtime: RuneScribeRuntime,
+        capture: ApplicationClientCapture
+    ) {
+        let capture = ApplicationClientCapture()
+        let runtime: RuneScribeRuntime
+        if let startCoordinator {
+            runtime = RuneScribeRuntime(
+                runtimeVersion: TestCoreModule.moduleVersion,
+                platform: .macOS,
+                startCoordinator: startCoordinator
+            )
+        } else {
+            runtime = RuneScribeRuntime(
+                runtimeVersion: TestCoreModule.moduleVersion,
+                platform: .macOS
+            )
+        }
+        try await runtime.register(
+            manifest: TestCoreModule.manifest,
+            factory: TestCoreModule.factory(applicationService: applicationService)
+        )
+        try await runtime.register(
+            manifest: TestApplicationClientModule.manifest,
+            factory: TestApplicationClientModule.factory(capture: capture)
+        )
+        try await runtime.start()
+        return (try await capture.requireClient(), runtime, capture)
     }
 
     private func sourceSection(
@@ -942,6 +1330,74 @@ private enum StubError: LocalizedError {
 
 private actor LifetimeProbe {}
 
+private actor InboundReceiveGate {
+    private var suspended = false
+    private var released = false
+    private var suspensionWaiters: [CheckedContinuation<Void, Never>] = []
+    private var releaseWaiter: CheckedContinuation<Void, Never>?
+
+    func suspendIfNeeded() async {
+        suspended = true
+        let waiters = suspensionWaiters
+        suspensionWaiters.removeAll()
+        waiters.forEach { $0.resume() }
+        guard !released else { return }
+        await withCheckedContinuation { releaseWaiter = $0 }
+    }
+
+    func waitUntilSuspended() async {
+        guard !suspended else { return }
+        await withCheckedContinuation { suspensionWaiters.append($0) }
+    }
+
+    func release() {
+        released = true
+        releaseWaiter?.resume()
+        releaseWaiter = nil
+    }
+}
+
+private actor RuntimeQuiesceGate: RuntimeStartCoordinating {
+    private var suspended = false
+    private var released = false
+    private var suspensionWaiters: [CheckedContinuation<Void, Never>] = []
+    private var releaseWaiter: CheckedContinuation<Void, Never>?
+
+    func beforeInfrastructureActivation() async {}
+
+    func afterClientQuiesceBeforeIngressDrain() async {
+        suspended = true
+        let waiters = suspensionWaiters
+        suspensionWaiters.removeAll()
+        waiters.forEach { $0.resume() }
+        guard !released else { return }
+        await withCheckedContinuation { releaseWaiter = $0 }
+    }
+
+    func waitUntilSuspended() async {
+        guard !suspended else { return }
+        await withCheckedContinuation { suspensionWaiters.append($0) }
+    }
+
+    func release() {
+        released = true
+        releaseWaiter?.resume()
+        releaseWaiter = nil
+    }
+}
+
+private actor IngressFailureCapture {
+    private var failures: [RuntimeHostIngressFailure] = []
+
+    func record(_ failure: RuntimeHostIngressFailure) {
+        failures.append(failure)
+    }
+
+    func last() -> RuntimeHostIngressFailure? {
+        failures.last
+    }
+}
+
 private final class WeakReference<Value: AnyObject> {
     weak var value: Value?
 
@@ -954,42 +1410,50 @@ private actor LifetimeClipboard: ClipboardWriting {
     func setString(_ value: String) async throws {}
 }
 
-private actor ControllableApplicationService: RuneScribeApplicationService {
+private actor ControllableApplicationService:
+    RuneScribeApplicationService,
+    RuneScribeInboundInputService
+{
+    private let createdCipher: CipherSummary?
+    private let systemContacts: [SystemContactDTO]?
+    private let inboundGate: InboundReceiveGate?
     nonisolated let states: AsyncStream<RuneScribeApplicationSnapshot>
     nonisolated let stateContinuation: AsyncStream<RuneScribeApplicationSnapshot>.Continuation
-    nonisolated let menuCommands: AsyncStream<ApplicationMenuCommandDTO>
-    nonisolated let menuContinuation: AsyncStream<ApplicationMenuCommandDTO>.Continuation
 
-    init() {
+    init(
+        createdCipher: CipherSummary? = nil,
+        systemContacts: [SystemContactDTO]? = nil,
+        inboundGate: InboundReceiveGate? = nil
+    ) {
+        self.createdCipher = createdCipher
+        self.systemContacts = systemContacts
+        self.inboundGate = inboundGate
         let stateChannel = AsyncStream.makeStream(
             of: RuneScribeApplicationSnapshot.self,
             bufferingPolicy: .bufferingNewest(16)
         )
         states = stateChannel.stream
         stateContinuation = stateChannel.continuation
-
-        let menuChannel = AsyncStream.makeStream(
-            of: ApplicationMenuCommandDTO.self,
-            bufferingPolicy: .bufferingNewest(16)
-        )
-        menuCommands = menuChannel.stream
-        menuContinuation = menuChannel.continuation
     }
 
     nonisolated func yieldState(_ snapshot: RuneScribeApplicationSnapshot) {
         stateContinuation.yield(snapshot)
     }
 
-    nonisolated func yieldMenu(_ command: ApplicationMenuCommandDTO) {
-        menuContinuation.yield(command)
-    }
-
     nonisolated func stateStream() -> AsyncStream<RuneScribeApplicationSnapshot> {
         states
     }
 
-    nonisolated func menuCommandStream() -> AsyncStream<ApplicationMenuCommandDTO> {
-        menuCommands
+    func receive(
+        _ input: RuneScribeInboundInput
+    ) async throws -> InboundInputDispositionDTO {
+        switch input {
+        case .menu:
+            await inboundGate?.suspendIfNeeded()
+            return .accepted
+        case .file, .url, .lifecycle:
+            return .rejected
+        }
     }
 
     func encode(_ command: EncodeMessageCommand) async throws -> EncodedMessageResult {
@@ -1001,6 +1465,7 @@ private actor ControllableApplicationService: RuneScribeApplicationService {
     }
 
     func createCipher(_ command: CreateCipherCommand) async throws -> CipherSummary {
+        if let createdCipher { return createdCipher }
         throw StubError.unexpectedCommand
     }
 
@@ -1041,6 +1506,7 @@ private actor ControllableApplicationService: RuneScribeApplicationService {
     }
 
     func requestSystemContacts() async throws -> [SystemContactDTO] {
+        if let systemContacts { return systemContacts }
         throw StubError.unexpectedCommand
     }
 
@@ -1130,8 +1596,10 @@ private enum TestCoreModule {
         kind: .service,
         entryPoint: "RuneScribeTestCoreModule",
         role: RuneScribeRoles.core,
-        requestedCapabilities: [RuneScribeCapabilities.publishService],
-        publishedServices: [RuneScribeServiceIDs.application]
+        requestedCapabilities: [RuneScribeCapabilities.inboundInput],
+        publishedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(
+            RuntimeApplicationEndpointCatalog.ingressEndpointIDs
+        )
     )
     static let manifest = ModuleManifest(
         runtimeVersion: moduleVersion,
@@ -1140,14 +1608,14 @@ private enum TestCoreModule {
         moduleVersion: moduleVersion,
         moduleType: .service,
         supportedPlatforms: [.iOS, .macOS],
-        capabilitiesRequested: [RuneScribeCapabilities.publishService],
+        capabilitiesRequested: [RuneScribeCapabilities.inboundInput],
         entryPoint: descriptor.entryPoint,
         runtimeRequirements: ModuleRuntimeRequirements(),
         defaultRole: RuneScribeRoles.core
     )
 
     static func factory(
-        applicationService: any RuneScribeApplicationService
+        applicationService: ControllableApplicationService
     ) -> AnyModuleFactory {
         AnyModuleFactory(descriptor: descriptor) {
             ApplicationPublishingModule(applicationService: applicationService)
@@ -1157,10 +1625,93 @@ private enum TestCoreModule {
 
 private struct ApplicationPublishingModule: RuneScribeModule {
     let descriptor = TestCoreModule.descriptor
-    let applicationService: any RuneScribeApplicationService
+    let applicationService: ControllableApplicationService
 
     func start(context: ModuleContext) async throws {
         try await context.registerApplicationEndpoints(applicationService)
+        try await context.registerInboundInputEndpoint(applicationService)
+    }
+
+    func stop() async {}
+}
+
+private enum TestApplicationClientModule {
+    static let moduleID: ModuleIdentifier = "com.runescribe.test.ui-client"
+    static let descriptor = ModuleDescriptor(
+        moduleID: moduleID,
+        moduleVersion: TestCoreModule.moduleVersion,
+        kind: .ui,
+        entryPoint: "RuneScribeTestApplicationClientModule",
+        role: RuneScribeRoles.primaryUI,
+        requestedCapabilities: [
+            RuneScribeCapabilities.applicationCommands,
+            RuneScribeCapabilities.applicationStateRead,
+            RuneScribeCapabilities.rootUI,
+        ],
+        requiredModuleRoles: [RuneScribeRoles.core],
+        consumedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs
+    )
+    static let manifest = ModuleManifest(
+        runtimeVersion: TestCoreModule.moduleVersion,
+        moduleID: moduleID,
+        displayName: "Rune Scribe Test Application Client",
+        moduleVersion: TestCoreModule.moduleVersion,
+        moduleType: .ui,
+        supportedPlatforms: [.iOS, .macOS],
+        capabilitiesRequested: [
+            RuneScribeCapabilities.applicationCommands,
+            RuneScribeCapabilities.applicationStateRead,
+            RuneScribeCapabilities.rootUI,
+        ],
+        entryPoint: descriptor.entryPoint,
+        runtimeRequirements: ModuleRuntimeRequirements(
+            requiredModuleRoles: [RuneScribeRoles.core]
+        ),
+        defaultRole: RuneScribeRoles.primaryUI
+    )
+
+    static func factory(capture: ApplicationClientCapture) -> AnyModuleFactory {
+        AnyModuleFactory(descriptor: descriptor) {
+            ApplicationClientModule(capture: capture)
+        }
+    }
+}
+
+private actor ApplicationClientCapture {
+    typealias ClientFactory = @Sendable () async throws -> RuntimeApplicationClient
+
+    private var client: RuntimeApplicationClient?
+    private var clientFactory: ClientFactory?
+
+    func store(
+        _ client: RuntimeApplicationClient,
+        clientFactory: @escaping ClientFactory
+    ) {
+        self.client = client
+        self.clientFactory = clientFactory
+    }
+
+    func requireClient() throws -> RuntimeApplicationClient {
+        guard let client else { throw StubError.unexpectedCommand }
+        return client
+    }
+
+    func makeClient() async throws -> RuntimeApplicationClient {
+        guard let clientFactory else { throw StubError.unexpectedCommand }
+        return try await clientFactory()
+    }
+}
+
+private struct ApplicationClientModule: RuneScribeModule {
+    let descriptor = TestApplicationClientModule.descriptor
+    let capture: ApplicationClientCapture
+
+    func start(context: ModuleContext) async throws {
+        let client = try await context.applicationClient()
+        await capture.store(
+            client,
+            clientFactory: { try await context.applicationClient() }
+        )
     }
 
     func stop() async {}

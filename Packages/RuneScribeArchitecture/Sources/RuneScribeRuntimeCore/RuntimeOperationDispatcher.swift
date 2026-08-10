@@ -1,6 +1,13 @@
 import Foundation
 import RuneScribeContracts
 
+/// Internal control signal proving host ingress failed before any destination
+/// handler was invoked. The rail may retry only this signal; provider errors
+/// remain ambiguous and are never replayed.
+enum RuntimeHostIngressRoutingError: Error {
+    case destinationUnavailableBeforeInvocation
+}
+
 public enum RuntimeCallLedgerFailure: String, Equatable, Sendable {
     case runtimeUnavailable
     case staleClient
@@ -126,7 +133,12 @@ private struct RuntimeTypedEndpoint<Request: Sendable, Response: Sendable>:
 }
 
 private struct RuntimeTypedStateEndpoint<State: Sendable>: RuntimeEndpointHandlerBox {
+    let bufferingPolicy: RuntimeStateRelayBufferingPolicy
     let handler: @Sendable (RuntimeOperationMetadata) -> AsyncStream<State>
+}
+
+private struct RuntimeMenuCommandEndpoint: RuntimeEndpointHandlerBox {
+    let bufferingPolicy: RuntimeStateRelayBufferingPolicy
 }
 
 private struct RuntimeEndpointEntry: Sendable {
@@ -142,7 +154,35 @@ private struct RuntimeInFlightOperation: Sendable {
     let operationID: RuntimeOperationID
     let sourceModuleID: ModuleIdentifier
     let destinationModuleID: ModuleIdentifier
+    let endpointID: RuntimeEndpointIdentifier
+    let endpointKind: RuntimeEndpointKind
     let cancel: @Sendable () -> Void
+}
+
+private final class RuntimeStateStreamRevocation: @unchecked Sendable {
+    private let lock = NSLock()
+    private var revoked = false
+
+    var isRevoked: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return revoked
+    }
+
+    func revoke() {
+        lock.lock()
+        revoked = true
+        lock.unlock()
+    }
+}
+
+private struct RuntimeMenuCommandSubscription: Sendable {
+    let operationID: RuntimeOperationID
+    let lease: RuntimeClientLease
+    let endpoint: RuntimeEndpointEntry
+    let continuation: AsyncStream<
+        RuntimeStateEnvelope<ApplicationMenuCommandDTO>
+    >.Continuation
 }
 
 public struct RuntimeOperationRatePolicy: Equatable, Sendable {
@@ -171,6 +211,7 @@ public actor RuntimeOperationDispatcher {
     private let policy: RuntimePolicy
     private let environment: RuntimeEnvironment
     private let ratePolicy: RuntimeOperationRatePolicy
+    private let beforeStateDelivery: @Sendable () async -> Void
     private var modules: [ModuleIdentifier: RuntimeModuleDispatchRecord] = [:]
     private var endpoints: [RuntimeEndpointIdentifier: RuntimeEndpointEntry] = [:]
     private var inFlight: [RuntimeOperationID: RuntimeInFlightOperation] = [:]
@@ -180,6 +221,8 @@ public actor RuntimeOperationDispatcher {
     private var runtimeGeneration: UInt64 = 0
     private var runtimeIsStarting = false
     private var runtimeIsRunning = false
+    private var runtimeIsQuiescing = false
+    private var menuCommandSubscription: RuntimeMenuCommandSubscription?
 
     public init(
         policy: RuntimePolicy,
@@ -189,6 +232,19 @@ public actor RuntimeOperationDispatcher {
         self.policy = policy
         self.environment = environment
         self.ratePolicy = ratePolicy
+        beforeStateDelivery = {}
+    }
+
+    init(
+        policy: RuntimePolicy,
+        environment: RuntimeEnvironment,
+        ratePolicy: RuntimeOperationRatePolicy,
+        beforeStateDelivery: @escaping @Sendable () async -> Void
+    ) {
+        self.policy = policy
+        self.environment = environment
+        self.ratePolicy = ratePolicy
+        self.beforeStateDelivery = beforeStateDelivery
     }
 
     func registerModule(_ descriptor: ModuleDescriptor) {
@@ -217,15 +273,6 @@ public actor RuntimeOperationDispatcher {
         sourceCallTimes.removeValue(forKey: RuntimeHostIdentity.moduleID)
     }
 
-    func mergeDeclarations(
-        moduleID: ModuleIdentifier,
-        consumed: Set<RuntimeEndpointIdentifier> = [],
-        published: Set<RuntimeEndpointIdentifier> = []
-    ) {
-        modules[moduleID]?.consumedEndpoints.formUnion(consumed)
-        modules[moduleID]?.publishedEndpoints.formUnion(published)
-    }
-
     func replaceDeclarations(
         moduleID: ModuleIdentifier,
         consumed: Set<RuntimeEndpointIdentifier>,
@@ -238,20 +285,35 @@ public actor RuntimeOperationDispatcher {
     func beginRuntimeStart() -> UInt64 {
         runtimeGeneration &+= 1
         sourceCallTimes.removeAll(keepingCapacity: true)
+        menuCommandSubscription = nil
         runtimeIsStarting = true
         runtimeIsRunning = false
+        runtimeIsQuiescing = false
         return runtimeGeneration
     }
 
     func markRuntimeRunning() {
         runtimeIsStarting = false
         runtimeIsRunning = true
+        runtimeIsQuiescing = false
+    }
+
+    func beginRuntimeQuiesce() {
+        runtimeIsStarting = false
+        runtimeIsRunning = false
+        runtimeIsQuiescing = true
+        cancelInFlight {
+            $0.sourceModuleID != RuntimeHostIdentity.moduleID
+                && $0.endpointKind != .state
+        }
     }
 
     func beginRuntimeStop() {
         runtimeIsStarting = false
         runtimeIsRunning = false
+        runtimeIsQuiescing = false
         cancelInFlight { _ in true }
+        menuCommandSubscription = nil
     }
 
     func beginActivation(moduleID: ModuleIdentifier) throws -> UInt64 {
@@ -298,8 +360,15 @@ public actor RuntimeOperationDispatcher {
         return module.generation
     }
 
-    func endpointsAvailable(_ endpointIDs: Set<RuntimeEndpointIdentifier>) -> Bool {
-        endpointIDs.allSatisfy { endpoints[$0] != nil }
+    func publishedEndpointsAvailable(
+        moduleID: ModuleIdentifier,
+        generation: UInt64,
+        endpointIDs: Set<RuntimeEndpointIdentifier>
+    ) -> Bool {
+        endpointIDs.allSatisfy {
+            endpoints[$0]?.ownerModuleID == moduleID
+                && endpoints[$0]?.ownerGeneration == generation
+        }
     }
 
     func makeLease(
@@ -318,6 +387,46 @@ public actor RuntimeOperationDispatcher {
             destinationModuleID: destinationModule.moduleID,
             destinationGeneration: destinationModule.generation
         )
+    }
+
+    /// Selects the currently active Core destination for each offered host item.
+    /// No destination generation is retained between queue elements.
+    func dispatchHostIngress(
+        _ input: RuneScribeInboundInput
+    ) async throws -> InboundInputDispositionDTO {
+        let lease: RuntimeClientLease
+        do {
+            let sourceGeneration = try currentGeneration(
+                moduleID: RuntimeHostIdentity.moduleID
+            )
+            lease = try makeLease(
+                sourceModuleID: RuntimeHostIdentity.moduleID,
+                sourceGeneration: sourceGeneration,
+                destination: .role(RuneScribeRoles.core)
+            )
+        } catch RuneScribeRuntimeError.messageDestinationUnavailable {
+            let error = RuneScribeRuntimeError.ingressDestinationUnavailable
+            recordHostIngressResolutionFailure(error)
+            throw RuntimeHostIngressRoutingError
+                .destinationUnavailableBeforeInvocation
+        } catch {
+            recordHostIngressResolutionFailure(error)
+            throw error
+        }
+        let disposition = try await dispatch(
+            lease: lease,
+            key: RuntimeApplicationEndpointCatalog.inboundInput,
+            expectedKind: .ingress,
+            request: input,
+            requestSchemaVersion: RuntimeApplicationEndpointCatalog.inboundInput
+                .descriptor.requestSchemaVersion,
+            responseSchemaVersion: RuntimeApplicationEndpointCatalog.inboundInput
+                .descriptor.responseSchemaVersion
+        )
+        guard disposition == .accepted,
+              case .menu(let menu) = input
+        else { return disposition }
+        return offerMenuCommand(menu.command)
     }
 
     func registerEndpoint<Request: Sendable, Response: Sendable>(
@@ -388,7 +497,47 @@ public actor RuntimeOperationDispatcher {
             ownerGeneration: ownerGeneration,
             requestType: ObjectIdentifier(RuntimeStateSubscription.self),
             responseType: ObjectIdentifier(State.self),
-            handlerBox: RuntimeTypedStateEndpoint(handler: handler)
+            handlerBox: RuntimeTypedStateEndpoint(
+                bufferingPolicy: descriptor.bufferingPolicy,
+                handler: handler
+            )
+        )
+    }
+
+    func registerRuntimeMenuCommandEndpoint(
+        ownerModuleID: ModuleIdentifier,
+        ownerGeneration: UInt64,
+        descriptor: RuntimeStateEndpointDescriptor<ApplicationMenuCommandDTO>
+    ) throws {
+        let endpointDescriptor = descriptor.endpoint
+        guard let owner = modules[ownerModuleID],
+              owner.generation == ownerGeneration,
+              owner.lifecycle == .activating,
+              (runtimeIsStarting || runtimeIsRunning)
+        else {
+            throw RuneScribeRuntimeError.staleClient(ownerModuleID)
+        }
+        guard owner.publishedEndpoints.contains(endpointDescriptor.endpointID) else {
+            throw RuneScribeRuntimeError.endpointNotDeclared(
+                moduleID: ownerModuleID,
+                endpoint: endpointDescriptor.endpointID
+            )
+        }
+        guard destinationMatches(endpointDescriptor.destination, module: owner) else {
+            throw RuneScribeRuntimeError.endpointDestinationMismatch(endpointDescriptor.endpointID)
+        }
+        guard endpoints[endpointDescriptor.endpointID] == nil else {
+            throw RuneScribeRuntimeError.endpointAlreadyRegistered(endpointDescriptor.endpointID)
+        }
+        endpoints[endpointDescriptor.endpointID] = RuntimeEndpointEntry(
+            descriptor: AnyRuntimeEndpointDescriptor(endpointDescriptor),
+            ownerModuleID: ownerModuleID,
+            ownerGeneration: ownerGeneration,
+            requestType: ObjectIdentifier(RuntimeStateSubscription.self),
+            responseType: ObjectIdentifier(ApplicationMenuCommandDTO.self),
+            handlerBox: RuntimeMenuCommandEndpoint(
+                bufferingPolicy: descriptor.bufferingPolicy
+            )
         )
     }
 
@@ -453,6 +602,8 @@ public actor RuntimeOperationDispatcher {
                 operationID: operationID,
                 sourceModuleID: lease.sourceModuleID,
                 destinationModuleID: endpoint.ownerModuleID,
+                endpointID: endpointID,
+                endpointKind: expectedKind,
                 cancel: { task.cancel() }
             )
 
@@ -508,7 +659,7 @@ public actor RuntimeOperationDispatcher {
         descriptor: RuntimeStateEndpointDescriptor<State>,
         subscriptionSchemaVersion: RuntimeSchemaVersion,
         stateSchemaVersion: RuntimeSchemaVersion
-    ) throws -> AsyncStream<RuntimeStateEnvelope<State>> {
+    ) throws -> RuntimeStateStream<State> {
         let key = descriptor.key
         let endpointID = descriptor.endpointID
         let operationID = nextOperationID()
@@ -537,6 +688,9 @@ public actor RuntimeOperationDispatcher {
             guard let typedEndpoint = endpoint.handlerBox as? RuntimeTypedStateEndpoint<State> else {
                 throw RuneScribeRuntimeError.endpointTypeMismatch(endpointID)
             }
+            guard typedEndpoint.bufferingPolicy == descriptor.bufferingPolicy else {
+                throw RuneScribeRuntimeError.endpointDescriptorMismatch(endpointID)
+            }
             try validateSessionBounds()
             try validateRateBounds(sourceModuleID: lease.sourceModuleID)
             let authorizedMetadata = authoritativeMetadata(
@@ -544,39 +698,38 @@ public actor RuntimeOperationDispatcher {
                 endpoint: endpoint
             )
             let providerStream = typedEndpoint.handler(authorizedMetadata)
+            let relayBufferingPolicy: AsyncStream<RuntimeStateEnvelope<State>>.Continuation
+                .BufferingPolicy
+            switch typedEndpoint.bufferingPolicy.ordering {
+            case .newest:
+                relayBufferingPolicy = .bufferingNewest(
+                    Int(typedEndpoint.bufferingPolicy.capacity)
+                )
+            case .oldest:
+                relayBufferingPolicy = .bufferingOldest(
+                    Int(typedEndpoint.bufferingPolicy.capacity)
+                )
+            }
             let (relay, continuation) = AsyncStream<RuntimeStateEnvelope<State>>.makeStream(
-                bufferingPolicy: .bufferingNewest(1)
+                bufferingPolicy: relayBufferingPolicy
             )
+            let revocation = RuntimeStateStreamRevocation()
             let relayTask = Task { [dispatcher = self] in
                 var outcome: RuntimeCallLedgerOutcome = .succeeded
                 var lastResponseByteCount: UInt64?
                 do {
                     for await state in providerStream {
                         try Task.checkCancellation()
-                        try await dispatcher.validateStateDelivery(
+                        let byteCount = try await dispatcher.deliverState(
+                            state,
+                            operationID: operationID,
                             lease: lease,
                             endpointID: endpointID,
-                            ownerGeneration: endpoint.ownerGeneration
-                        )
-                        let byteCount = RuntimePayloadSizer.byteCount(
-                            state,
-                            maximum: endpoint.descriptor.maximumResponseBytes
+                            ownerGeneration: endpoint.ownerGeneration,
+                            stateSchemaVersion: stateSchemaVersion,
+                            continuation: continuation
                         )
                         lastResponseByteCount = byteCount
-                        guard byteCount <= endpoint.descriptor.maximumResponseBytes else {
-                            throw RuneScribeRuntimeError.operationResponseTooLarge(
-                                endpoint: endpointID,
-                                maximumBytes: endpoint.descriptor.maximumResponseBytes
-                            )
-                        }
-                        let stateMetadata = await dispatcher.makeStateMetadata(
-                            lease: lease,
-                            endpoint: endpoint.descriptor,
-                            schemaVersion: stateSchemaVersion
-                        )
-                        continuation.yield(
-                            RuntimeStateEnvelope(metadata: stateMetadata, payload: state)
-                        )
                     }
                     try Task.checkCancellation()
                 } catch is CancellationError {
@@ -600,10 +753,130 @@ public actor RuntimeOperationDispatcher {
                 operationID: operationID,
                 sourceModuleID: lease.sourceModuleID,
                 destinationModuleID: endpoint.ownerModuleID,
-                cancel: { relayTask.cancel() }
+                endpointID: endpointID,
+                endpointKind: .state,
+                cancel: {
+                    revocation.revoke()
+                    relayTask.cancel()
+                }
             )
-            continuation.onTermination = { @Sendable _ in relayTask.cancel() }
-            return relay
+            continuation.onTermination = { @Sendable termination in
+                if case .cancelled = termination {
+                    revocation.revoke()
+                }
+                relayTask.cancel()
+            }
+            return RuntimeStateStream(
+                stream: relay,
+                dispatcher: self,
+                operationID: operationID,
+                lease: lease,
+                endpointID: endpointID,
+                ownerGeneration: endpoint.ownerGeneration,
+                revocation: revocation
+            )
+        } catch {
+            completeLedger(
+                operationID: operationID,
+                responseByteCount: nil,
+                outcome: ledgerOutcome(for: error, metadata: metadata)
+            )
+            throw error
+        }
+    }
+
+    func openMenuCommandRelay(
+        lease: RuntimeClientLease,
+        descriptor: RuntimeStateEndpointDescriptor<ApplicationMenuCommandDTO>
+    ) throws -> RuntimeStateStream<ApplicationMenuCommandDTO> {
+        let endpointID = descriptor.endpointID
+        let operationID = nextOperationID()
+        let metadata = makeMetadata(
+            operationID: operationID,
+            lease: lease,
+            endpointID: endpointID,
+            destinationModuleID: lease.destinationModuleID,
+            schemaVersion: descriptor.subscriptionSchemaVersion,
+            privacyClass: .internalData
+        )
+        appendLedgerStart(metadata: metadata, endpointKind: .state, requestByteCount: 0)
+
+        do {
+            let endpoint = try validateBeforeCall(
+                lease: lease,
+                key: descriptor.key,
+                expectedKind: .state,
+                requestType: RuntimeStateSubscription.self,
+                responseType: ApplicationMenuCommandDTO.self,
+                requestSchemaVersion: descriptor.subscriptionSchemaVersion,
+                responseSchemaVersion: descriptor.stateSchemaVersion,
+                request: RuntimeStateSubscription(),
+                operationID: operationID
+            )
+            guard let marker = endpoint.handlerBox as? RuntimeMenuCommandEndpoint,
+                  marker.bufferingPolicy == descriptor.bufferingPolicy
+            else {
+                throw RuneScribeRuntimeError.endpointDescriptorMismatch(endpointID)
+            }
+            try validateSessionBounds()
+            try validateRateBounds(sourceModuleID: lease.sourceModuleID)
+            guard menuCommandSubscription == nil else {
+                throw RuneScribeRuntimeError.operationSessionLimitExceeded(maximum: 1)
+            }
+            let bufferingPolicy: AsyncStream<
+                RuntimeStateEnvelope<ApplicationMenuCommandDTO>
+            >.Continuation.BufferingPolicy
+            switch marker.bufferingPolicy.ordering {
+            case .newest:
+                bufferingPolicy = .bufferingNewest(
+                    Int(clamping: marker.bufferingPolicy.capacity)
+                )
+            case .oldest:
+                bufferingPolicy = .bufferingOldest(
+                    Int(clamping: marker.bufferingPolicy.capacity)
+                )
+            }
+            let (stream, continuation) = AsyncStream<
+                RuntimeStateEnvelope<ApplicationMenuCommandDTO>
+            >.makeStream(bufferingPolicy: bufferingPolicy)
+            let revocation = RuntimeStateStreamRevocation()
+            menuCommandSubscription = RuntimeMenuCommandSubscription(
+                operationID: operationID,
+                lease: lease,
+                endpoint: endpoint,
+                continuation: continuation
+            )
+            inFlight[operationID] = RuntimeInFlightOperation(
+                operationID: operationID,
+                sourceModuleID: lease.sourceModuleID,
+                destinationModuleID: endpoint.ownerModuleID,
+                endpointID: endpointID,
+                endpointKind: .state,
+                cancel: {
+                    revocation.revoke()
+                    continuation.finish()
+                }
+            )
+            continuation.onTermination = { @Sendable [dispatcher = self] termination in
+                if case .cancelled = termination {
+                    revocation.revoke()
+                }
+                Task {
+                    await dispatcher.finishMenuCommandRelay(
+                        operationID: operationID,
+                        termination: termination
+                    )
+                }
+            }
+            return RuntimeStateStream(
+                stream: stream,
+                dispatcher: self,
+                operationID: operationID,
+                lease: lease,
+                endpointID: endpointID,
+                ownerGeneration: endpoint.ownerGeneration,
+                revocation: revocation
+            )
         } catch {
             completeLedger(
                 operationID: operationID,
@@ -618,16 +891,124 @@ public actor RuntimeOperationDispatcher {
         ledger
     }
 
+    private func offerMenuCommand(
+        _ command: ApplicationMenuCommandDTO
+    ) -> InboundInputDispositionDTO {
+        guard let subscription = menuCommandSubscription else { return .rejected }
+        do {
+            try validateStateDelivery(
+                lease: subscription.lease,
+                endpointID: subscription.endpoint.descriptor.endpointID,
+                ownerGeneration: subscription.endpoint.ownerGeneration
+            )
+            let byteCount = RuntimePayloadSizer.byteCount(
+                command,
+                maximum: subscription.endpoint.descriptor.maximumResponseBytes
+            )
+            guard byteCount <= subscription.endpoint.descriptor.maximumResponseBytes else {
+                return .rejected
+            }
+            let stateMetadata = makeStateMetadata(
+                lease: subscription.lease,
+                endpoint: subscription.endpoint.descriptor,
+                schemaVersion: subscription.endpoint.descriptor.responseSchemaVersion
+            )
+            let yieldResult = subscription.continuation.yield(
+                RuntimeStateEnvelope(metadata: stateMetadata, payload: command),
+            )
+            let disposition: InboundInputDispositionDTO
+            switch yieldResult {
+            case .enqueued:
+                disposition = .accepted
+            case .dropped, .terminated:
+                disposition = .rejected
+            @unknown default:
+                disposition = .rejected
+            }
+            if disposition == .accepted {
+                updateLedgerResponseByteCount(
+                    operationID: subscription.operationID,
+                    responseByteCount: byteCount
+                )
+            }
+            return disposition
+        } catch {
+            return .rejected
+        }
+    }
+
+    private func finishMenuCommandRelay(
+        operationID: RuntimeOperationID,
+        termination: AsyncStream<RuntimeStateEnvelope<ApplicationMenuCommandDTO>>
+            .Continuation.Termination
+    ) {
+        guard menuCommandSubscription?.operationID == operationID else { return }
+        menuCommandSubscription = nil
+        guard inFlight.removeValue(forKey: operationID) != nil else { return }
+        let outcome: RuntimeCallLedgerOutcome
+        switch termination {
+        case .cancelled:
+            outcome = .cancelled
+        case .finished:
+            outcome = .succeeded
+        @unknown default:
+            outcome = .cancelled
+        }
+        completeLedger(
+            operationID: operationID,
+            responseByteCount: nil,
+            outcome: outcome
+        )
+    }
+
     private func finishStateRelay(
         operationID: RuntimeOperationID,
         responseByteCount: UInt64?,
         outcome: RuntimeCallLedgerOutcome
     ) {
-        inFlight.removeValue(forKey: operationID)
+        guard inFlight.removeValue(forKey: operationID) != nil else { return }
         completeLedger(
             operationID: operationID,
             responseByteCount: responseByteCount,
             outcome: outcome
+        )
+    }
+
+    func stateRelayIsCurrent(
+        lease: RuntimeClientLease,
+        endpointID: RuntimeEndpointIdentifier,
+        ownerGeneration: UInt64
+    ) -> Bool {
+        guard let endpoint = endpoints[endpointID],
+              endpoint.ownerGeneration == ownerGeneration
+        else {
+            return false
+        }
+        do {
+            try validateAfterCall(
+                lease: lease,
+                endpoint: endpoint,
+                allowStartingState: true
+            )
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    func cancelStateRelay(operationID: RuntimeOperationID) {
+        guard let operation = inFlight[operationID], operation.endpointKind == .state else {
+            return
+        }
+        operation.cancel()
+        if menuCommandSubscription?.operationID == operationID {
+            menuCommandSubscription = nil
+        }
+        inFlight.removeValue(forKey: operationID)
+        completeLedger(
+            operationID: operationID,
+            responseByteCount: nil,
+            outcome: .cancelled
         )
     }
 
@@ -661,6 +1042,9 @@ public actor RuntimeOperationDispatcher {
         let operations = inFlight.values.filter(shouldCancel)
         for operation in operations {
             operation.cancel()
+            if menuCommandSubscription?.operationID == operation.operationID {
+                menuCommandSubscription = nil
+            }
             inFlight.removeValue(forKey: operation.operationID)
             completeLedger(
                 operationID: operation.operationID,
@@ -677,15 +1061,69 @@ public actor RuntimeOperationDispatcher {
         )
     }
 
+    private func deliverState<State: Sendable>(
+        _ state: State,
+        operationID: RuntimeOperationID,
+        lease: RuntimeClientLease,
+        endpointID: RuntimeEndpointIdentifier,
+        ownerGeneration: UInt64,
+        stateSchemaVersion: RuntimeSchemaVersion,
+        continuation: AsyncStream<RuntimeStateEnvelope<State>>.Continuation
+    ) async throws -> UInt64 {
+        // The test coordinator suspends before the final actor-isolated gate.
+        // In production it is a no-op. Every real suspension therefore occurs
+        // before the generation check, metadata stamp, and yield below.
+        await beforeStateDelivery()
+        try Task.checkCancellation()
+        guard let endpoint = endpoints[endpointID], endpoint.ownerGeneration == ownerGeneration else {
+            throw RuneScribeRuntimeError.staleClient(lease.destinationModuleID)
+        }
+        try validateAfterCall(lease: lease, endpoint: endpoint, allowStartingState: true)
+        let byteCount = RuntimePayloadSizer.byteCount(
+            state,
+            maximum: endpoint.descriptor.maximumResponseBytes
+        )
+        updateLedgerResponseByteCount(
+            operationID: operationID,
+            responseByteCount: byteCount
+        )
+        guard byteCount <= endpoint.descriptor.maximumResponseBytes else {
+            throw RuneScribeRuntimeError.operationResponseTooLarge(
+                endpoint: endpointID,
+                maximumBytes: endpoint.descriptor.maximumResponseBytes
+            )
+        }
+        let stateMetadata = makeMetadata(
+            operationID: nextOperationID(),
+            lease: lease,
+            endpointID: endpointID,
+            destinationModuleID: lease.destinationModuleID,
+            schemaVersion: stateSchemaVersion,
+            privacyClass: endpoint.descriptor.privacyClass
+        )
+        continuation.yield(
+            RuntimeStateEnvelope(metadata: stateMetadata, payload: state)
+        )
+        return byteCount
+    }
+
+    /// Menu delivery already executes entirely inside one dispatcher actor
+    /// turn, so these synchronous helpers preserve its existing atomic path.
     private func validateStateDelivery(
         lease: RuntimeClientLease,
         endpointID: RuntimeEndpointIdentifier,
         ownerGeneration: UInt64
     ) throws {
-        guard let endpoint = endpoints[endpointID], endpoint.ownerGeneration == ownerGeneration else {
+        guard let endpoint = endpoints[endpointID],
+              endpoint.ownerGeneration == ownerGeneration
+        else {
             throw RuneScribeRuntimeError.staleClient(lease.destinationModuleID)
         }
-        try validateAfterCall(lease: lease, endpoint: endpoint, allowStartingState: true)
+        try validateAfterCall(
+            lease: lease,
+            endpoint: endpoint,
+            allowStartingState: true
+        )
     }
 
     private func makeStateMetadata(
@@ -814,7 +1252,10 @@ public actor RuntimeOperationDispatcher {
         let activationAllowed = expectedKind == .state
             && runtimeIsStarting
             && source.lifecycle == .activating
-        guard runtimeIsRunning || activationAllowed else {
+        let quiescingIngressAllowed = runtimeIsQuiescing
+            && expectedKind == .ingress
+            && source.moduleID == RuntimeHostIdentity.moduleID
+        guard runtimeIsRunning || activationAllowed || quiescingIngressAllowed else {
             throw RuneScribeRuntimeError.runtimeNotRunning
         }
         guard source.lifecycle == .active || activationAllowed else {
@@ -921,7 +1362,17 @@ public actor RuntimeOperationDispatcher {
         endpoint: RuntimeEndpointEntry,
         allowStartingState: Bool = false
     ) throws {
-        guard runtimeIsRunning || (allowStartingState && runtimeIsStarting) else {
+        let quiescingIngressAllowed = runtimeIsQuiescing
+            && endpoint.descriptor.kind == .ingress
+            && lease.sourceModuleID == RuntimeHostIdentity.moduleID
+        let existingStateRelayAllowed = runtimeIsQuiescing
+            && allowStartingState
+            && endpoint.descriptor.kind == .state
+        guard runtimeIsRunning
+                || (allowStartingState && runtimeIsStarting)
+                || quiescingIngressAllowed
+                || existingStateRelayAllowed
+        else {
             throw RuneScribeRuntimeError.runtimeNotRunning
         }
         guard lease.runtimeGeneration == runtimeGeneration else {
@@ -1001,6 +1452,35 @@ public actor RuntimeOperationDispatcher {
                 requestByteCount: requestByteCount,
                 outcome: .inFlight
             )
+        )
+    }
+
+    private func recordHostIngressResolutionFailure(_ error: Error) {
+        let endpoint = RuntimeApplicationEndpointCatalog.inboundInput.descriptor
+        let operationID = nextOperationID()
+        let metadata = RuntimeOperationMetadata(
+            schemaVersion: endpoint.requestSchemaVersion,
+            operationID: operationID,
+            correlationID: RuntimeCorrelationID(
+                environment.nextUUID().uuidString.lowercased()
+            ),
+            sourceModuleID: RuntimeHostIdentity.moduleID,
+            destinationModuleID: nil,
+            runtimeGeneration: runtimeGeneration,
+            timestampUTC: environment.now(),
+            operationIdentifier: RuntimeOperationIdentifier(endpoint.endpointID.rawValue),
+            privacyClass: endpoint.privacyClass,
+            idempotencyKey: nil
+        )
+        appendLedgerStart(
+            metadata: metadata,
+            endpointKind: .ingress,
+            requestByteCount: 0
+        )
+        completeLedger(
+            operationID: operationID,
+            responseByteCount: nil,
+            outcome: ledgerOutcome(for: error, metadata: metadata)
         )
     }
 
@@ -1105,6 +1585,8 @@ public actor RuntimeOperationDispatcher {
         switch runtimeError {
         case .runtimeNotRunning, .runtimeBusy:
             return .denied(.runtimeUnavailable)
+        case .ingressDestinationUnavailable, .messageDestinationUnavailable:
+            return .denied(.inactiveDestination)
         case .staleClient:
             return .denied(.staleClient)
         case .moduleNotActive(let moduleID):
@@ -1235,6 +1717,115 @@ public struct RuntimeIngressClient: Sendable {
     }
 }
 
+/// A generation-pinned runtime state sequence. The underlying AsyncStream may
+/// retain values that were buffered before its continuation was finished, so
+/// each iterator revalidates the runtime lease and endpoint immediately before
+/// and after awaiting a value. Revoked clients therefore discard unread values
+/// instead of draining stale application or menu state after stop/replacement.
+public struct RuntimeStateStream<State: Sendable>: AsyncSequence, Sendable {
+    public typealias Element = RuntimeStateEnvelope<State>
+
+    private let stream: AsyncStream<Element>
+    private let dispatcher: RuntimeOperationDispatcher
+    private let operationID: RuntimeOperationID
+    private let lease: RuntimeClientLease
+    private let endpointID: RuntimeEndpointIdentifier
+    private let ownerGeneration: UInt64
+    private let revocation: RuntimeStateStreamRevocation
+
+    fileprivate init(
+        stream: AsyncStream<Element>,
+        dispatcher: RuntimeOperationDispatcher,
+        operationID: RuntimeOperationID,
+        lease: RuntimeClientLease,
+        endpointID: RuntimeEndpointIdentifier,
+        ownerGeneration: UInt64,
+        revocation: RuntimeStateStreamRevocation
+    ) {
+        self.stream = stream
+        self.dispatcher = dispatcher
+        self.operationID = operationID
+        self.lease = lease
+        self.endpointID = endpointID
+        self.ownerGeneration = ownerGeneration
+        self.revocation = revocation
+    }
+
+    public func makeAsyncIterator() -> Iterator {
+        Iterator(
+            base: stream.makeAsyncIterator(),
+            dispatcher: dispatcher,
+            operationID: operationID,
+            lease: lease,
+            endpointID: endpointID,
+            ownerGeneration: ownerGeneration,
+            revocation: revocation
+        )
+    }
+
+    public struct Iterator: AsyncIteratorProtocol {
+        private var base: AsyncStream<Element>.Iterator
+        private let dispatcher: RuntimeOperationDispatcher
+        private let operationID: RuntimeOperationID
+        private let lease: RuntimeClientLease
+        private let endpointID: RuntimeEndpointIdentifier
+        private let ownerGeneration: UInt64
+        private let revocation: RuntimeStateStreamRevocation
+
+        fileprivate init(
+            base: AsyncStream<Element>.Iterator,
+            dispatcher: RuntimeOperationDispatcher,
+            operationID: RuntimeOperationID,
+            lease: RuntimeClientLease,
+            endpointID: RuntimeEndpointIdentifier,
+            ownerGeneration: UInt64,
+            revocation: RuntimeStateStreamRevocation
+        ) {
+            self.base = base
+            self.dispatcher = dispatcher
+            self.operationID = operationID
+            self.lease = lease
+            self.endpointID = endpointID
+            self.ownerGeneration = ownerGeneration
+            self.revocation = revocation
+        }
+
+        public mutating func next() async -> Element? {
+            guard !Task.isCancelled, !revocation.isRevoked else {
+                await dispatcher.cancelStateRelay(operationID: operationID)
+                return nil
+            }
+            guard await dispatcher.stateRelayIsCurrent(
+                lease: lease,
+                endpointID: endpointID,
+                ownerGeneration: ownerGeneration
+            ) else {
+                await dispatcher.cancelStateRelay(operationID: operationID)
+                return nil
+            }
+            guard let value = await base.next() else {
+                if Task.isCancelled || revocation.isRevoked {
+                    await dispatcher.cancelStateRelay(operationID: operationID)
+                }
+                return nil
+            }
+            guard !Task.isCancelled, !revocation.isRevoked else {
+                await dispatcher.cancelStateRelay(operationID: operationID)
+                return nil
+            }
+            guard await dispatcher.stateRelayIsCurrent(
+                lease: lease,
+                endpointID: endpointID,
+                ownerGeneration: ownerGeneration
+            ) else {
+                await dispatcher.cancelStateRelay(operationID: operationID)
+                return nil
+            }
+            return value
+        }
+    }
+}
+
 public struct RuntimeStateClient: Sendable {
     private let dispatcher: RuntimeOperationDispatcher
     private let lease: RuntimeClientLease
@@ -1248,13 +1839,22 @@ public struct RuntimeStateClient: Sendable {
         to descriptor: RuntimeStateEndpointDescriptor<State>,
         subscriptionSchemaVersion: RuntimeSchemaVersion? = nil,
         stateSchemaVersion: RuntimeSchemaVersion? = nil
-    ) async throws -> AsyncStream<RuntimeStateEnvelope<State>> {
+    ) async throws -> RuntimeStateStream<State> {
         try await dispatcher.openStateRelay(
             lease: lease,
             descriptor: descriptor,
             subscriptionSchemaVersion: subscriptionSchemaVersion
                 ?? descriptor.subscriptionSchemaVersion,
             stateSchemaVersion: stateSchemaVersion ?? descriptor.stateSchemaVersion
+        )
+    }
+
+    func subscribeToMenuCommands(
+        _ descriptor: RuntimeStateEndpointDescriptor<ApplicationMenuCommandDTO>
+    ) async throws -> RuntimeStateStream<ApplicationMenuCommandDTO> {
+        try await dispatcher.openMenuCommandRelay(
+            lease: lease,
+            descriptor: descriptor
         )
     }
 }
