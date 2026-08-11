@@ -38,19 +38,23 @@ struct PINFlowView: View {
                 trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Cancel") { dismiss() }]
             )
 
-            Spacer(minLength: 0)
-
-            PINPadView(
-                title: stepTitle,
-                subtitle: stepSubtitle,
-                error: error,
-                shakeToken: shakeToken
-            ) { pin in
-                Task { await handle(pin) }
+            GeometryReader { proxy in
+                ScrollView {
+                    PINPadView(
+                        title: stepTitle,
+                        subtitle: stepSubtitle,
+                        error: error,
+                        shakeToken: shakeToken
+                    ) { pin in
+                        Task { await handle(pin) }
+                    }
+                    .padding(.horizontal, RuneMetrics.pad)
+                    .padding(.vertical, 16)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: proxy.size.height, alignment: .center)
+                }
+                .scrollBounceBehavior(.basedOnSize)
             }
-            .padding(.horizontal, RuneMetrics.pad)
-
-            Spacer(minLength: 0)
         }
         .runeSheetFrame()
         .background(Color.runeNavy)

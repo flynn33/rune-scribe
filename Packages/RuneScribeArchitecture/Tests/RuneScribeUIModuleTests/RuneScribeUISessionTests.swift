@@ -848,6 +848,144 @@ final class RuneScribeUISessionTests: XCTestCase {
         }
     }
 
+    func testCipherCardActionsAdaptBeforeTheActivationLabelCompresses() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let source = try String(
+            contentsOf: packageRoot
+                .appendingPathComponent("Sources", isDirectory: true)
+                .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+                .appendingPathComponent("Views", isDirectory: true)
+                .appendingPathComponent("CipherLibraryView.swift"),
+            encoding: .utf8
+        )
+
+        let adaptiveLayout = try sourceSection(
+            source,
+            from: "    private func cipherCardActions(",
+            to: "    private func cipherActivationButton("
+        )
+        XCTAssertTrue(adaptiveLayout.contains("ViewThatFits(in: .horizontal)"))
+        XCTAssertTrue(adaptiveLayout.contains("VStack(alignment: .leading"))
+        XCTAssertTrue(adaptiveLayout.contains("cipherUtilityActions(cipher, spacing: 4)"))
+
+        let activationButton = try sourceSection(
+            source,
+            from: "    private func cipherActivationButton(",
+            to: "    private func cipherUtilityActions("
+        )
+        XCTAssertTrue(activationButton.contains(".lineLimit(1)"))
+        XCTAssertTrue(
+            activationButton.contains(".fixedSize(horizontal: true, vertical: false)")
+        )
+        XCTAssertTrue(
+            activationButton.contains(".frame(minWidth: 44, minHeight: 44")
+        )
+    }
+
+    func testCompactActionRowsAndPINFlowsRetainAdaptiveLayoutGuards() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let viewsDirectory = packageRoot
+            .appendingPathComponent("Sources", isDirectory: true)
+            .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+            .appendingPathComponent("Views", isDirectory: true)
+
+        func viewSource(_ filename: String) throws -> String {
+            try String(
+                contentsOf: viewsDirectory.appendingPathComponent(filename),
+                encoding: .utf8
+            )
+        }
+
+        let contentSource = try viewSource("ContentView.swift")
+        let resultActions = try sourceSection(
+            contentSource,
+            from: "    private var resultEditCopyActions:",
+            to: "    // MARK: - Active Cipher Bar"
+        )
+        XCTAssertGreaterThanOrEqual(
+            resultActions.components(separatedBy: "ViewThatFits(in: .horizontal)").count - 1,
+            2
+        )
+        XCTAssertTrue(resultActions.contains("resultEditButton(resistsCompression: true)"))
+        XCTAssertTrue(resultActions.contains("resultEditButton(resistsCompression: false)"))
+        XCTAssertTrue(resultActions.contains("resultShareButton(resistsCompression: true)"))
+        XCTAssertTrue(resultActions.contains("resultShareButton(resistsCompression: false)"))
+        XCTAssertGreaterThanOrEqual(
+            resultActions.components(separatedBy: ".lineLimit(1)").count - 1,
+            4
+        )
+
+        let activeCipherBar = try sourceSection(
+            contentSource,
+            from: "    private var activeCipherBar:",
+            to: "    // MARK: - Compose Recipient"
+        )
+        XCTAssertTrue(activeCipherBar.contains(".truncationMode(.tail)"))
+        XCTAssertTrue(
+            activeCipherBar.contains(".frame(maxWidth: .infinity, minHeight: 44")
+        )
+        XCTAssertTrue(
+            activeCipherBar.contains(".fixedSize(horizontal: true, vertical: false)")
+        )
+        XCTAssertFalse(
+            activeCipherBar.contains(".contentShape(Rectangle())\n            .fixedSize()")
+        )
+
+        let cipherSource = try viewSource("CipherLibraryView.swift")
+        let creationActions = try sourceSection(
+            cipherSource,
+            from: "    private var creationActions:",
+            to: "    // MARK: - Cipher Card"
+        )
+        XCTAssertTrue(creationActions.contains("ViewThatFits(in: .horizontal)"))
+        XCTAssertTrue(creationActions.contains("newCipherButton(resistsCompression: true)"))
+        XCTAssertTrue(creationActions.contains("newCipherButton(resistsCompression: false)"))
+        XCTAssertTrue(creationActions.contains("importCipherButton(resistsCompression: true)"))
+        XCTAssertTrue(creationActions.contains("importCipherButton(resistsCompression: false)"))
+
+        let contactsSource = try viewSource("ContactsView.swift")
+        let contactActions = try sourceSection(
+            contactsSource,
+            from: "    private var actionsBar:",
+            to: "    private var emptyState:"
+        )
+        XCTAssertEqual(
+            contactActions.components(separatedBy: "ViewThatFits(in: .horizontal)").count - 1,
+            3
+        )
+        XCTAssertTrue(contactActions.contains("VStack(spacing: 8)"))
+        XCTAssertTrue(contactActions.contains("removeSelectedButton(resistsCompression: true)"))
+        XCTAssertTrue(contactActions.contains("removeSelectedButton(resistsCompression: false)"))
+        XCTAssertGreaterThanOrEqual(
+            contactActions.components(separatedBy: ".lineLimit(1)").count - 1,
+            8
+        )
+
+        for filename in ["PINFlowView.swift", "LockView.swift"] {
+            let source = try viewSource(filename)
+            XCTAssertTrue(source.contains("GeometryReader { proxy in"), filename)
+            XCTAssertTrue(source.contains("ScrollView {"), filename)
+            XCTAssertTrue(
+                source.contains(".frame(minHeight: proxy.size.height, alignment: .center)"),
+                filename
+            )
+            XCTAssertTrue(source.contains(".scrollBounceBehavior(.basedOnSize)"), filename)
+        }
+
+        let buttonStyles = try viewSource("RuneScribButtonStyle.swift")
+        XCTAssertGreaterThanOrEqual(
+            buttonStyles.components(separatedBy: ".frame(minHeight: 46)").count - 1,
+            2,
+            "Both compact-row button styles must preserve at least 44-point targets"
+        )
+    }
+
     func testMessageArtifactCompletionGateAdmitsOneCompletionUntilFinished() {
         let first = ShareArtifactID(
             rawValue: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!

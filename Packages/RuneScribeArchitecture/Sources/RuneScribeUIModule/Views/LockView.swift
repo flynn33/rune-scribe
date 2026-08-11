@@ -18,35 +18,39 @@ struct LockView: View {
             VStack(spacing: 0) {
                 RuneHeader(runic: "ᚱᚢᚾᛖ ᛚᛟᚲ", subtitle: "Locked")
 
-                Spacer(minLength: 0)
-
-                PINPadView(
-                    title: "Enter PIN",
-                    subtitle: "Enter your 4-digit PIN to unlock Rune Scribe.",
-                    error: error,
-                    shakeToken: shakeToken
-                ) { pin in
-                    Task {
-                        do {
-                            switch try await session.attemptUnlock(pin) {
-                            case .success:
-                                error = nil
-                            case .incorrect:
-                                error = "Incorrect PIN. Try again."
-                                shakeToken += 1
-                            case .lockedOut(let seconds):
-                                error = "Too many attempts. Try again in \(seconds)s."
-                                shakeToken += 1
+                GeometryReader { proxy in
+                    ScrollView {
+                        PINPadView(
+                            title: "Enter PIN",
+                            subtitle: "Enter your 4-digit PIN to unlock Rune Scribe.",
+                            error: error,
+                            shakeToken: shakeToken
+                        ) { pin in
+                            Task {
+                                do {
+                                    switch try await session.attemptUnlock(pin) {
+                                    case .success:
+                                        error = nil
+                                    case .incorrect:
+                                        error = "Incorrect PIN. Try again."
+                                        shakeToken += 1
+                                    case .lockedOut(let seconds):
+                                        error = "Too many attempts. Try again in \(seconds)s."
+                                        shakeToken += 1
+                                    }
+                                } catch let unlockError {
+                                    error = RuneScribeUISession.message(forPINError: unlockError)
+                                    shakeToken += 1
+                                }
                             }
-                        } catch let unlockError {
-                            error = RuneScribeUISession.message(forPINError: unlockError)
-                            shakeToken += 1
                         }
+                        .padding(.horizontal, RuneMetrics.pad)
+                        .padding(.vertical, 16)
+                        .frame(maxWidth: .infinity)
+                        .frame(minHeight: proxy.size.height, alignment: .center)
                     }
+                    .scrollBounceBehavior(.basedOnSize)
                 }
-                .padding(.horizontal, RuneMetrics.pad)
-
-                Spacer(minLength: 0)
             }
         }
         .runeRootFrame()
