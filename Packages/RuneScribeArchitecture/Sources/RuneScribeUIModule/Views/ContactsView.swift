@@ -125,57 +125,161 @@ struct ContactsView: View {
     private var actionsBar: some View {
         VStack(spacing: 12) {
             Button { resetManual(); showAddManual = true } label: {
-                Label("Add Manually", systemImage: "person.badge.plus").frame(maxWidth: .infinity)
+                Label("Add Manually", systemImage: "person.badge.plus")
+                    .lineLimit(1)
+                    .frame(maxWidth: .infinity)
             }
             .buttonStyle(RuneScribButtonStyle())
 
-            HStack(spacing: 12) {
-                Button { importAll() } label: {
-                    HStack {
-                        if importing { ProgressView().scaleEffect(0.8) }
-                        Label("Import All", systemImage: "square.and.arrow.down.on.square")
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(RuneSecondaryButtonStyle())
-                .disabled(importing)
+            contactImportActions
 
-                Button { beginSelectiveImport() } label: {
-                    Label("Import Selected…", systemImage: "checklist").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(RuneSecondaryButtonStyle())
-                .disabled(importing)
-            }
             if !session.contacts.isEmpty {
-                HStack(spacing: 12) {
-                    Button { toggleSelecting() } label: {
-                        Label(selecting ? "Done" : "Select", systemImage: selecting ? "checkmark.circle" : "checkmark.circle.badge.questionmark")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(RuneSecondaryButtonStyle())
-                    Button(role: .destructive) { showRemoveAllImported = true } label: {
-                        Label("Remove All Imported", systemImage: "person.crop.circle.badge.xmark").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(RuneSecondaryButtonStyle())
-                    .disabled(session.importedContactCount == 0)
-                }
+                contactSelectionModeActions
+
                 if selecting {
-                    HStack(spacing: 12) {
-                        Button("Select All") { selection = Set(session.contacts.map(\.id)) }
-                            .buttonStyle(RuneSecondaryButtonStyle())
-                        Button("Clear") { selection.removeAll() }
-                            .buttonStyle(RuneSecondaryButtonStyle())
-                        Button(role: .destructive) { showBulkDelete = true } label: {
-                            Text("Remove Selected (\(selection.count))").frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(RuneScribButtonStyle())
-                        .disabled(selection.isEmpty)
-                    }
+                    bulkSelectionActions
                 }
             }
         }
         .padding(.horizontal, RuneMetrics.pad)
         .padding(.top, RuneMetrics.pad)
+    }
+
+    private var contactImportActions: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                importAllButton(resistsCompression: true)
+                importSelectedButton(resistsCompression: true)
+            }
+
+            VStack(spacing: 8) {
+                importAllButton(resistsCompression: false)
+                importSelectedButton(resistsCompression: false)
+            }
+        }
+    }
+
+    private func importAllButton(resistsCompression: Bool) -> some View {
+        Button { importAll() } label: {
+            HStack(spacing: 8) {
+                if importing { ProgressView().scaleEffect(0.8) }
+                Label("Import All", systemImage: "square.and.arrow.down.on.square")
+                    .lineLimit(1)
+            }
+            .fixedSize(horizontal: resistsCompression, vertical: false)
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneSecondaryButtonStyle())
+        .disabled(importing)
+    }
+
+    private func importSelectedButton(resistsCompression: Bool) -> some View {
+        Button { beginSelectiveImport() } label: {
+            Label("Import Selected…", systemImage: "checklist")
+                .lineLimit(1)
+                .fixedSize(horizontal: resistsCompression, vertical: false)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneSecondaryButtonStyle())
+        .disabled(importing)
+    }
+
+    private var contactSelectionModeActions: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                selectionModeButton(resistsCompression: true)
+                removeAllImportedButton(resistsCompression: true)
+            }
+
+            VStack(spacing: 8) {
+                selectionModeButton(resistsCompression: false)
+                removeAllImportedButton(resistsCompression: false)
+            }
+        }
+    }
+
+    private func selectionModeButton(resistsCompression: Bool) -> some View {
+        Button { toggleSelecting() } label: {
+            Label(
+                selecting ? "Done" : "Select",
+                systemImage: selecting
+                    ? "checkmark.circle"
+                    : "checkmark.circle.badge.questionmark"
+            )
+            .lineLimit(1)
+            .fixedSize(horizontal: resistsCompression, vertical: false)
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneSecondaryButtonStyle())
+    }
+
+    private func removeAllImportedButton(resistsCompression: Bool) -> some View {
+        Button(role: .destructive) {
+            showRemoveAllImported = true
+        } label: {
+            Label(
+                "Remove All Imported",
+                systemImage: "person.crop.circle.badge.xmark"
+            )
+            .lineLimit(1)
+            .fixedSize(horizontal: resistsCompression, vertical: false)
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneSecondaryButtonStyle())
+        .disabled(session.importedContactCount == 0)
+    }
+
+    private var bulkSelectionActions: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                selectAllButton(resistsCompression: true)
+                clearSelectionButton(resistsCompression: true)
+                removeSelectedButton(resistsCompression: true)
+            }
+
+            VStack(spacing: 8) {
+                selectAllButton(resistsCompression: false)
+                clearSelectionButton(resistsCompression: false)
+                removeSelectedButton(resistsCompression: false)
+            }
+        }
+    }
+
+    private func selectAllButton(resistsCompression: Bool) -> some View {
+        Button {
+            selection = Set(session.contacts.map(\.id))
+        } label: {
+            Text("Select All")
+                .lineLimit(1)
+                .fixedSize(horizontal: resistsCompression, vertical: false)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneSecondaryButtonStyle())
+    }
+
+    private func clearSelectionButton(resistsCompression: Bool) -> some View {
+        Button {
+            selection.removeAll()
+        } label: {
+            Text("Clear")
+                .lineLimit(1)
+                .fixedSize(horizontal: resistsCompression, vertical: false)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneSecondaryButtonStyle())
+    }
+
+    private func removeSelectedButton(resistsCompression: Bool) -> some View {
+        Button(role: .destructive) {
+            showBulkDelete = true
+        } label: {
+            Text("Remove Selected (\(selection.count))")
+                .lineLimit(1)
+                .fixedSize(horizontal: resistsCompression, vertical: false)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneScribButtonStyle())
+        .disabled(selection.isEmpty)
     }
 
     private var emptyState: some View {

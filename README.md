@@ -12,7 +12,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-310%20package%20%7C%2017%20architecture-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-444%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -223,7 +223,10 @@ flowchart TD
     Host --> Platform[RuneScribePlatform<br/>Apple adapters]
     Runtime --> Core[RuneScribeCoreModule<br/>cipher · contacts · import · security]
     Runtime --> UI[RuneScribeUIModule<br/>only user-facing UI module]
-    UI --> UIRuntime[RuneScribeUIRuntime<br/>root presentation]
+    UI --> UIRuntime[RuneScribeUIRuntime<br/>native system presentation]
+    Runtime --> Presentation[RuneScribeUIPresentationContracts<br/>typed root-presentation port]
+    UI -. root contribution .-> Presentation
+    UIRuntime -. presentation adapter .-> Presentation
     Core -. neutral protocols and DTOs .-> Contracts[RuneScribeContracts]
     UI -. neutral protocols and DTOs .-> Contracts
     Platform -. neutral protocols and DTOs .-> Contracts
@@ -234,8 +237,10 @@ The macOS and iOS hosts are composition roots. Product behavior lives in
 `RuneScribeCoreModule`; exactly one UI Module owns the SwiftUI view tree. The controlling
 target makes `RuneScribeRuntimeCore` the continuing app-owned control plane: every
 cross-module call remains runtime-mediated, and the runtime owns operational I/O,
-persistent Settings, lifecycle, resources, and system-presentation sessions. Runtime
-modules do not import one another, and test support is excluded from shipping products.
+persistent Settings, lifecycle, resources, and system-presentation sessions.
+`RuneScribeUIRuntime` contains the narrow Apple presentation bridges, while the UI
+module retains product views and normalized state only. Runtime modules do not import
+one another, and test support is excluded from shipping products.
 
 The current source is being remediated to that target. Existing provider-object,
 platform-I/O, Settings, and lifecycle deviations are tracked explicitly and are not
@@ -251,7 +256,36 @@ the current boundary and dependency rules.
 
 ---
 
-## 🧭 Codex product roadmap
+## 🗺 Implementation roadmap
+
+The remediation program is intentionally incremental: every phase must preserve the
+shipping cipher workflows while tightening one architectural boundary. The current
+repository status is:
+
+| Phase | Scope | Status |
+| --- | --- | --- |
+| P00 | Worktree protection, evidence capture, and clean final baseline | Complete (controls remain continuous) |
+| P01 | Controlling policy, supersession rules, and report-only compliance guard | Complete |
+| P02 | Per-call runtime command, query, state, and ingress spine | Complete |
+| P03 | UI and host migration to runtime clients | Complete |
+| P04 | Runtime-owned I/O and system-presentation gateways | Active |
+| P05 | Runtime settings, metadata, and opaque operational handles | Planned |
+| P06 | Uniform module contracts, policy classes, and generated catalog | Planned |
+| P07 | State, contribution, resource, and diagnostics registries | Planned |
+| P08 | Live-gate reconciliation and optional-failure isolation | Planned |
+| P09 | Theme-module readiness scaffold and sole-UI rendering | Planned |
+| P10 | Typed durable event and coordination rail | Planned |
+| P11 | Permanent compliance guards, negative mutations, and CI | Planned |
+| P12 | Full Xcode, parity, device, final audit, and handoff | Planned |
+
+P04 has landed the runtime I/O gateway, normalized inbound-file delivery, opaque
+resource and share leases, the metatype-only module factory, and typed root
+presentation. Its remaining phase closure work is tracked by the report-only FG-007
+finding. FG-016 remains open across the later resource, theme, and permanent-guard
+phases; neither finding is treated as a pass simply because the package and focused
+tests build successfully.
+
+### Product roadmap
 
 The locked roadmap evolves Rune Scribe in deliberately separated stages:
 
@@ -325,12 +359,13 @@ Packages/RuneScribeArchitecture/
 ├── Sources/
 │   ├── RuneScribeContracts/      Neutral IDs, DTOs and service protocols
 │   ├── RuneScribeRuntimeCore/    App-owned runtime and mediation control plane
-│   ├── RuneScribeUIRuntime/      Root-view presentation boundary
+│   ├── RuneScribeUIPresentationContracts/ Typed root-presentation contracts
+│   ├── RuneScribeUIRuntime/      Native system-presentation boundary
 │   ├── RuneScribePlatform/       Keychain, files, Contacts, fonts and system adapters
 │   ├── RuneScribeCoreModule/     Domain, crypto, persistence, import and app lock
-│   ├── RuneScribeUIModule/       SwiftUI, Metal, MessageUI, sharing and navigation
+│   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        310 Swift package tests
+└── Tests/                        444 Swift package tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -386,8 +421,8 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package currently contains **310 XCTest tests**, supplemented by **17
-repository architecture checks**, hosted macOS/iOS tests, iPhone/iPad UI parity, and an
+The local Swift package currently contains **444 XCTest tests**, supplemented by
+repository architecture guards, hosted macOS/iOS tests, iPhone/iPad UI parity, and an
 isolated macOS parity host. The package suite uses deterministic in-memory adapters and
 does not access the operator's login Keychain.
 

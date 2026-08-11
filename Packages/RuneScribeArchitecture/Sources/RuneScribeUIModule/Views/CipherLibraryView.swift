@@ -233,23 +233,12 @@ struct CipherLibraryView: View {
 
     private var actionsBar: some View {
         VStack(spacing: 12) {
-            HStack(spacing: 12) {
-                Button { newLabel = ""; showNewCipher = true } label: {
-                    Label("New Cipher", systemImage: "plus.circle.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(RuneScribButtonStyle())
-
-                Button { showImporter = true } label: {
-                    Label("Import…", systemImage: "square.and.arrow.down")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(RuneSecondaryButtonStyle())
-            }
+            creationActions
 
             #if os(iOS)
             Button { showScanner = true } label: {
                 Label("Scan QR Code", systemImage: "qrcode.viewfinder")
+                    .lineLimit(1)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(RuneSecondaryButtonStyle())
@@ -257,6 +246,45 @@ struct CipherLibraryView: View {
         }
         .padding(.horizontal, RuneMetrics.pad)
         .padding(.top, RuneMetrics.pad)
+    }
+
+    private var creationActions: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                newCipherButton(resistsCompression: true)
+                importCipherButton(resistsCompression: true)
+            }
+
+            VStack(spacing: 8) {
+                newCipherButton(resistsCompression: false)
+                importCipherButton(resistsCompression: false)
+            }
+        }
+    }
+
+    private func newCipherButton(resistsCompression: Bool) -> some View {
+        Button {
+            newLabel = ""
+            showNewCipher = true
+        } label: {
+            Label("New Cipher", systemImage: "plus.circle.fill")
+                .lineLimit(1)
+                .fixedSize(horizontal: resistsCompression, vertical: false)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneScribButtonStyle())
+    }
+
+    private func importCipherButton(resistsCompression: Bool) -> some View {
+        Button {
+            showImporter = true
+        } label: {
+            Label("Import…", systemImage: "square.and.arrow.down")
+                .lineLimit(1)
+                .fixedSize(horizontal: resistsCompression, vertical: false)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneSecondaryButtonStyle())
     }
 
     // MARK: - Cipher Card
@@ -285,64 +313,7 @@ struct CipherLibraryView: View {
 
             Divider().overlay(Color.runeSilver.opacity(0.15))
 
-            HStack(spacing: 10) {
-                Button {
-                    setActiveCipher(cipher.id)
-                } label: {
-                    Label(isActive ? "Active" : "Use", systemImage: isActive ? "checkmark.circle.fill" : "circle")
-                }
-                .accessibilityLabel("\(isActive ? "Active" : "Use") \(cipher.label)")
-                .buttonStyle(.plain)
-                .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                .foregroundColor(isActive ? .runeGold : .runeSilver)
-                .disabled(isActive)
-
-                Spacer()
-
-                // Share the offline `runescribe://import?…` deep link — the same payload
-                // as the QR. Recipients tapping the link in Messages / Mail / Notes open
-                // the app and land on the import sheet through the Core input service. (A `.runescribe`
-                // *file* is still available from Export; files do not single-tap-launch
-                // third-party apps from Messages, so sharing a file here broke auto-import.)
-                if let share = linkArtifacts[cipher.id],
-                   case .opaque = share.artifact.reference {
-                    RuneScribeCipherLinkShareLink(
-                        transfer: share.transfer,
-                        cipherLabel: cipher.label,
-                        onFinish: { outcome in
-                            completeLinkShare(
-                                cipherID: cipher.id,
-                                artifact: share.artifact,
-                                outcome: outcome
-                            )
-                        }
-                    ) {
-                        cardIconChrome("square.and.arrow.up")
-                    }
-
-                    cardIconButton("qrcode", help: "Show QR code for \(cipher.label)") {
-                        linkArtifacts.removeValue(forKey: cipher.id)
-                        qrShare = CipherQRShare(
-                            artifact: share.artifact,
-                            transfer: share.transfer,
-                            label: cipher.label
-                        )
-                    }
-                } else {
-                    cardIconChrome("square.and.arrow.up", tint: .runeSilver.opacity(0.3))
-                        .help("Preparing the cipher link…")
-                    cardIconChrome("qrcode", tint: .runeSilver.opacity(0.3))
-                        .help("Preparing the cipher link…")
-                }
-
-                cardIconButton("arrow.down.doc", help: "Export \(cipher.label)") { beginExport(cipher) }
-                cardIconButton("pencil", help: "Rename \(cipher.label)") {
-                    renameTarget = cipher; renameLabel = cipher.label; showRename = true
-                }
-                cardIconButton("trash", help: "Delete \(cipher.label)", tint: .red.opacity(0.85)) {
-                    deleteTarget = cipher; showDelete = true
-                }
-            }
+            cipherCardActions(cipher, isActive: isActive)
         }
         .padding(16)
         .background(
@@ -418,6 +389,99 @@ struct CipherLibraryView: View {
         let from = session.contact(id: cipher.contactID)?.displayName ?? "a contact"
         let to = session.contact(id: pending.contactID)?.displayName ?? "another contact"
         return "This cipher is linked to \(from). Reassign it to \(to)?"
+    }
+
+    // MARK: - Cipher Card Actions
+
+    private func cipherCardActions(_ cipher: CipherViewState, isActive: Bool) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) {
+                cipherActivationButton(cipher, isActive: isActive)
+                Spacer(minLength: 0)
+                cipherUtilityActions(cipher, spacing: 10)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                cipherActivationButton(cipher, isActive: isActive)
+                HStack(spacing: 0) {
+                    Spacer(minLength: 0)
+                    cipherUtilityActions(cipher, spacing: 4)
+                }
+            }
+        }
+    }
+
+    private func cipherActivationButton(
+        _ cipher: CipherViewState,
+        isActive: Bool
+    ) -> some View {
+        Button {
+            setActiveCipher(cipher.id)
+        } label: {
+            Label(
+                isActive ? "Active" : "Use",
+                systemImage: isActive ? "checkmark.circle.fill" : "circle"
+            )
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
+        }
+        .accessibilityLabel("\(isActive ? "Active" : "Use") \(cipher.label)")
+        .buttonStyle(.plain)
+        .font(.system(size: 12, weight: .semibold, design: .monospaced))
+        .foregroundColor(isActive ? .runeGold : .runeSilver)
+        .frame(minWidth: 44, minHeight: 44, alignment: .leading)
+        .disabled(isActive)
+    }
+
+    private func cipherUtilityActions(
+        _ cipher: CipherViewState,
+        spacing: CGFloat
+    ) -> some View {
+        HStack(spacing: spacing) {
+            // Share the offline `runescribe://import?…` deep link — the same payload
+            // as the QR. Recipients tapping the link in Messages / Mail / Notes open
+            // the app and land on the import sheet through the Core input service. (A `.runescribe`
+            // *file* is still available from Export; files do not single-tap-launch
+            // third-party apps from Messages, so sharing a file here broke auto-import.)
+            if let share = linkArtifacts[cipher.id],
+               case .opaque = share.artifact.reference {
+                RuneScribeCipherLinkShareLink(
+                    transfer: share.transfer,
+                    cipherLabel: cipher.label,
+                    onFinish: { outcome in
+                        completeLinkShare(
+                            cipherID: cipher.id,
+                            artifact: share.artifact,
+                            outcome: outcome
+                        )
+                    }
+                ) {
+                    cardIconChrome("square.and.arrow.up")
+                }
+
+                cardIconButton("qrcode", help: "Show QR code for \(cipher.label)") {
+                    linkArtifacts.removeValue(forKey: cipher.id)
+                    qrShare = CipherQRShare(
+                        artifact: share.artifact,
+                        transfer: share.transfer,
+                        label: cipher.label
+                    )
+                }
+            } else {
+                cardIconChrome("square.and.arrow.up", tint: .runeSilver.opacity(0.3))
+                    .help("Preparing the cipher link…")
+                cardIconChrome("qrcode", tint: .runeSilver.opacity(0.3))
+                    .help("Preparing the cipher link…")
+            }
+
+            cardIconButton("arrow.down.doc", help: "Export \(cipher.label)") { beginExport(cipher) }
+            cardIconButton("pencil", help: "Rename \(cipher.label)") {
+                renameTarget = cipher; renameLabel = cipher.label; showRename = true
+            }
+            cardIconButton("trash", help: "Delete \(cipher.label)", tint: .red.opacity(0.85)) {
+                deleteTarget = cipher; showDelete = true
+            }
+        }
     }
 
     // MARK: - Small Components

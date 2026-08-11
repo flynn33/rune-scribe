@@ -297,57 +297,14 @@ struct ContentView: View {
 
         case .result:
             VStack(spacing: 8) {
-                HStack(spacing: 14) {
-                    Button {
-                        returnToEditing()
-                    } label: {
-                        Label("Edit", systemImage: "pencil")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(RuneSecondaryButtonStyle())
-
-                    Button {
-                        confirmCopy()
-                    } label: {
-                        Label(copyButtonTitle,
-                              systemImage: copyConfirmed ? "checkmark.circle.fill" : "doc.on.clipboard")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(RuneScribButtonStyle())
-                }
+                resultEditCopyActions
 
                 if transformDirection == .encode, let cipher = resultCipher {
-                    HStack(spacing: 14) {
-                        shareButton()
-
-                        #if os(iOS)
-                        // Always present so it's never "missing"; disabled (not hidden) when
-                        // the device can't send (Simulator / no iMessage account). macOS sends
-                        // through the native Share sheet above (Messages/Mail/AirDrop) — no
-                        // separate button, so we don't reinvent what the share sheet provides.
-                        Button {
-                            // A first message must actually be able to attach the key file. If
-                            // this device/account can't attach it, don't quietly send a keyless
-                            // message that would strand the recipient — tell them to use Share.
-                            if pendingMessageArtifact?.requiresKeyDelivery == true,
-                               !MessageComposeView.canSend(requiredAttachment: true) {
-                                decodeError = "This device can’t attach Rune Scribe files to Messages. Use Share to send the key instead."
-                                return
-                            }
-                            guard pendingMessageArtifact?.requiresKeyDelivery != true
-                                    || pendingMessageTransfer?.isAvailable == true else {
-                                decodeError = "Rune Scribe is still preparing the key attachment."
-                                return
-                            }
-                            showMessageCompose = true
-                        } label: {
-                            Label("Send via iMessage", systemImage: "message.fill")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(RuneScribButtonStyle())
-                        .disabled(!MessageComposeView.canSend(requiredAttachment: false))
-                        #endif
-                    }
+                    #if os(iOS)
+                    resultShareActions
+                    #else
+                    shareButton()
+                    #endif
 
                     keyIndicator(for: cipher)
                 }
@@ -356,12 +313,107 @@ struct ContentView: View {
                     reset()
                 } label: {
                     Label("Clear", systemImage: "trash")
+                        .lineLimit(1)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(RuneSecondaryButtonStyle())
             }
         }
     }
+
+    private var resultEditCopyActions: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 14) {
+                resultEditButton(resistsCompression: true)
+                resultCopyButton(resistsCompression: true)
+            }
+
+            VStack(spacing: 8) {
+                resultEditButton(resistsCompression: false)
+                resultCopyButton(resistsCompression: false)
+            }
+        }
+    }
+
+    private func resultEditButton(resistsCompression: Bool) -> some View {
+        Button {
+            returnToEditing()
+        } label: {
+            Label("Edit", systemImage: "pencil")
+                .lineLimit(1)
+                .fixedSize(horizontal: resistsCompression, vertical: false)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneSecondaryButtonStyle())
+    }
+
+    private func resultCopyButton(resistsCompression: Bool) -> some View {
+        Button {
+            confirmCopy()
+        } label: {
+            Label(
+                copyButtonTitle,
+                systemImage: copyConfirmed
+                    ? "checkmark.circle.fill"
+                    : "doc.on.clipboard"
+            )
+            .lineLimit(1)
+            .fixedSize(horizontal: resistsCompression, vertical: false)
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneScribButtonStyle())
+    }
+
+    #if os(iOS)
+    private var resultShareActions: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 14) {
+                resultShareButton(resistsCompression: true)
+                resultMessageButton(resistsCompression: true)
+            }
+
+            VStack(spacing: 8) {
+                resultShareButton(resistsCompression: false)
+                resultMessageButton(resistsCompression: false)
+            }
+        }
+    }
+
+    private func resultShareButton(resistsCompression: Bool) -> some View {
+        shareButton()
+            .lineLimit(1)
+            .fixedSize(horizontal: resistsCompression, vertical: false)
+            .frame(maxWidth: .infinity)
+    }
+
+    /// Always present so it is never "missing"; disabled (not hidden) when the
+    /// device cannot send (Simulator / no iMessage account).
+    private func resultMessageButton(resistsCompression: Bool) -> some View {
+        Button {
+            // A first message must actually be able to attach the key file. If
+            // this device/account cannot attach it, do not quietly send a keyless
+            // message that would strand the recipient — tell them to use Share.
+            if pendingMessageArtifact?.requiresKeyDelivery == true,
+               !MessageComposeView.canSend(requiredAttachment: true) {
+                decodeError = "This device can’t attach Rune Scribe files to Messages. Use Share to send the key instead."
+                return
+            }
+            guard pendingMessageArtifact?.requiresKeyDelivery != true
+                    || pendingMessageTransfer?.isAvailable == true else {
+                decodeError = "Rune Scribe is still preparing the key attachment."
+                return
+            }
+            showMessageCompose = true
+        } label: {
+            Label("Send via iMessage", systemImage: "message.fill")
+                .lineLimit(1)
+                .fixedSize(horizontal: resistsCompression, vertical: false)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneScribButtonStyle())
+        .disabled(!MessageComposeView.canSend(requiredAttachment: false))
+    }
+    #endif
 
     // MARK: - Active Cipher Bar
 
@@ -391,23 +443,25 @@ struct ContentView: View {
                         .font(.system(size: 13, weight: .semibold, design: .monospaced))
                         .foregroundColor(.white)
                         .lineLimit(1)
+                        .truncationMode(.tail)
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.system(size: 10))
                         .foregroundColor(.runeSilver)
+                        .fixedSize()
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .accessibilityElement(children: .combine)
                 .accessibilityLabel("Active cipher: \(session.activeCipher?.label ?? "No Cipher")")
             }
             .menuIndicator(.hidden)
-            .frame(minHeight: 44)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
             .contentShape(Rectangle())
-            .fixedSize()
-
-            Spacer()
 
             Text("\(session.ciphers.count) cipher\(session.ciphers.count == 1 ? "" : "s")")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundColor(.runeSilver)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 0)
