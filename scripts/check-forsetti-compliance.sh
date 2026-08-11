@@ -525,7 +525,7 @@ def run_swift_compliance_scan(root, fixture_root)
   finding_errors = []
   findings.each_with_index do |finding, index|
     valid = finding.is_a?(Hash) &&
-      %w[FG-004 FG-005 FG-006].include?(finding["ruleID"]) &&
+      %w[FG-004 FG-005 FG-006 FG-007 FG-009 FG-016].include?(finding["ruleID"]) &&
       finding["category"].is_a?(String) && !finding["category"].empty? &&
       finding["path"].is_a?(String) && !finding["path"].empty? &&
       !Pathname(finding["path"]).absolute? &&
@@ -1798,6 +1798,70 @@ def runtime_dispatch_rule(scanner)
   ["pass", unique_evidence(proof), "detector-proof"]
 end
 
+def p04_semantic_rule(scanner, rule_id)
+  guard_tests = "RuneScribArchitectureTests/ComplianceGuardTests.swift"
+  required_fixture_markers = {
+    "FG-007" => [
+      [/testP04SemanticNegativeMutationsReportOnlyTheirExactRuleIDs/, "P04 semantic mutation test"],
+      [/P04OperationalMutation\.swift/, "module operational API mutation fixture"],
+      [/P04UnknownNativeBridgeMutation\.swift/, "UIRuntime bridge-path mutation fixture"],
+      [/AVAudioRecorder is not allowlisted/, "UIRuntime bridge-symbol mutation fixture"],
+      [/import AVFoundation/, "operational framework mutation fixture"],
+      [/@AppStorage/, "AppStorage mutation fixture"],
+      [/UserDefaults\.standard/, "UserDefaults mutation fixture"],
+      [/session\.unvalidatedOpen\(\)/, "opaque authority acquisition mutation fixture"]
+    ],
+    "FG-009" => [
+      [/P04FactoryMutation\.swift/, "uniform factory mutation fixture"],
+      [/RuntimeTesting descriptor-and-closure/, "RuntimeTesting factory initializer mutation fixture"],
+      [/imports the RuntimeTesting SPI/, "RuntimeTesting SPI import mutation fixture"],
+      [/alternateFactory/, "labeled make and contextual init mutation fixture"],
+      [/bootstrapFactory/, "closure-valued bootstrap factory mutation fixture"]
+    ],
+    "FG-016" => [
+      [/P04ResourceBoundaryMutation\.swift/, "opaque resource boundary mutation fixture"],
+      [/runtime generation and revocation validation/, "generation and revocation mutation fixture"],
+      [/imports the RuntimeResourceHost SPI outside/, "unauthorized RuntimeResourceHost fixture"],
+      [/guessedResourceViaInit/, "contextual ApplicationResource init mutation fixture"],
+      [/subscript\(resource name:/, "raw resource subscript mutation fixture"],
+      [/runtimeGeneration == lease\.runtimeGeneration/,
+       "dead lifecycle-validation comparison mutation fixture"],
+      [/if false \{/, "dead lifecycle-validation branch mutation fixture"]
+    ]
+  }
+
+  qualification = []
+  missing_qualification = []
+  required_fixture_markers.fetch(rule_id).each do |pattern, detail|
+    matches = scanner.evidence(guard_tests, pattern, detail)
+    if matches.empty?
+      missing_qualification.concat(
+        scanner.marker(guard_tests, "required negative fixture is missing: #{detail}")
+      )
+    else
+      qualification.concat(matches)
+    end
+  end
+
+  violations = unique_evidence(
+    scanner.swift_finding_evidence(rule_id) + missing_qualification
+  )
+  unless violations.empty?
+    return ["violation", violations, "detected-source-anchor"]
+  end
+
+  proof = scanner.marker(
+    "scripts/swift-compliance-scanner.swift",
+    "SwiftSyntax fail-closed P04 analysis found no #{rule_id} violation across shipping module, runtime, host, platform, and UIRuntime sources"
+  )
+  proof = [{
+    "path" => "scripts/swift-compliance-scanner.swift",
+    "line" => 1,
+    "detail" => "SwiftSyntax fail-closed P04 analysis found no #{rule_id} violation"
+  }] if proof.empty?
+  ["pass", unique_evidence(proof + qualification), "detector-proof"]
+end
+
 def one_ui_module(scanner)
   manifests = scanner.files("Packages/RuneScribeArchitecture/Sources/**/Resources/module-manifest.json")
   ui = []
@@ -2005,6 +2069,8 @@ results = rules.map do |rule|
     status, evidence, evidence_kind = peer_service_retention_rule(scanner)
   when "FG-006"
     status, evidence, evidence_kind = runtime_dispatch_rule(scanner)
+  when "FG-007", "FG-009", "FG-016"
+    status, evidence, evidence_kind = p04_semantic_rule(scanner, id)
   when "FG-015"
     registry_hits = []
     scanner.files("Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/**/*.swift").each_key do |relative|

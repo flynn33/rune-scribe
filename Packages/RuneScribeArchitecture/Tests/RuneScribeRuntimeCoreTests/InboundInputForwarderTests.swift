@@ -1,6 +1,6 @@
 import Foundation
 import RuneScribeContracts
-@testable import RuneScribeRuntimeCore
+@_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import XCTest
 
 final class InboundInputForwarderTests: XCTestCase {
@@ -16,7 +16,8 @@ final class InboundInputForwarderTests: XCTestCase {
             environment: RuntimeEnvironment(
                 now: { values.nextDate() },
                 nextUUID: { values.nextUUID() }
-            )
+            ),
+            normalizeFile: { _ in Data("second-file".utf8) }
         )
         let recorder = IngressRecorder()
         let firstURL = URL(string: "runescribe://import?p=first")!
@@ -64,9 +65,8 @@ final class InboundInputForwarderTests: XCTestCase {
             return XCTFail("Runtime ingress changed the callback payload kinds.")
         }
         XCTAssertEqual(receivedURL.url, firstURL)
-        XCTAssertEqual(receivedFile.fileURL, secondFile)
+        XCTAssertEqual(receivedFile.data, Data("second-file".utf8))
         XCTAssertEqual(receivedFile.declaredContentType, RuneScribeWireFormat.contentType)
-        XCTAssertTrue(receivedFile.requiresSecurityScopedAccess)
         XCTAssertEqual(receivedMenu.command, .openSettings)
         XCTAssertEqual(rail.snapshot.queuedInputCount, 0)
     }
@@ -137,6 +137,36 @@ final class InboundInputForwarderTests: XCTestCase {
         )
         XCTAssertEqual(snapshot.failedDeliveryCount, 0)
         XCTAssertTrue(snapshot.hasDeliveryFailures)
+    }
+
+    func testRuntimeIngressFileNormalizationFailureIsAccountedWithoutDelivery() async {
+        let rail = RuntimeHostIngressRail(
+            environment: .live,
+            normalizeFile: { _ in throw InboundFileReaderError.unavailable }
+        )
+        let recorder = IngressRecorder()
+        rail.activate { input in
+            await recorder.record(input)
+            return .accepted
+        }
+
+        XCTAssertEqual(
+            rail.submit(
+                .file(
+                    URL(fileURLWithPath: "/tmp/unreadable.runescribe"),
+                    source: .applicationOpen
+                )
+            ),
+            .accepted
+        )
+        await rail.flush()
+
+        let received = await recorder.snapshot()
+        let snapshot = rail.snapshot
+        XCTAssertTrue(received.isEmpty)
+        XCTAssertEqual(snapshot.queuedInputCount, 0)
+        XCTAssertEqual(snapshot.failedDeliveryCount, 1)
+        XCTAssertEqual(snapshot.lastFailure, .deliveryFailed)
     }
 
     func testRuntimeIngressRejectsMenuCapacityPlusOneAndReleasesAfterOffer() async {

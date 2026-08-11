@@ -1,4 +1,5 @@
 import RuneScribeContracts
+import RuneScribeUIRuntime
 import SwiftUI
 
 /// Manage the people you organize ciphers by: add manually, import from Apple Contacts
@@ -107,8 +108,10 @@ struct ContactsView: View {
         .preferredColorScheme(.dark)
         #if os(iOS)
         .sheet(isPresented: $showPicker) {
-            ContactPicker { contacts in
-                importSystemContacts(contacts)
+            RuntimeContactPicker { contacts in
+                importSystemContacts(
+                    contacts.map(ContactViewState.init(systemContact:))
+                )
             }
             .ignoresSafeArea()
         }

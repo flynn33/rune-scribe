@@ -1,4 +1,5 @@
 import RuneScribeContracts
+import RuneScribeUIPresentationContracts
 import SwiftUI
 
 public enum RootPresentationNotice: Equatable, Sendable {
@@ -23,6 +24,23 @@ public final class RootViewPresentationStore: ObservableObject {
     private var contribution: RootViewContribution?
 
     public init() {}
+
+    public func runtimeHostAdapter(
+        productMetadata: RuneScribeUIProductMetadata
+    ) -> RuntimeRootPresentationHostAdapter {
+        RuntimeRootPresentationHostAdapter(
+            productMetadata: productMetadata,
+            present: { [weak self] contribution in
+                guard let self else {
+                    throw RootContributionError.none
+                }
+                try self.present(contribution)
+            },
+            dismiss: { [weak self] moduleID in
+                self?.dismiss(moduleID: moduleID)
+            }
+        )
+    }
 
     public func present(_ contribution: RootViewContribution) throws {
         if let current = self.contribution,

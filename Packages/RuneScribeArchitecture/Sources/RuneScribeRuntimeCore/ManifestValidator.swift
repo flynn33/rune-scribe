@@ -27,6 +27,12 @@ public enum ModuleManifestValidator {
             field: "runtimeRequirements.requiredServices"
         )
         try requireEqual(
+            Set(manifest.runtimeRequirements.requiredResources),
+            descriptor.requiredResources,
+            moduleID: manifest.moduleID,
+            field: "runtimeRequirements.requiredResources"
+        )
+        try requireEqual(
             Set(manifest.runtimeRequirements.requiredModuleRoles),
             descriptor.requiredModuleRoles,
             moduleID: manifest.moduleID,

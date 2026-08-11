@@ -906,6 +906,20 @@ private func inferredExpressionTypes(
             functionReturns: functionReturns
         )
     }
+    if let attempted = expression.as(TryExprSyntax.self) {
+        return inferredExpressionTypes(
+            attempted.expression,
+            variables: variables,
+            functionReturns: functionReturns
+        )
+    }
+    if let awaited = expression.as(AwaitExprSyntax.self) {
+        return inferredExpressionTypes(
+            awaited.expression,
+            variables: variables,
+            functionReturns: functionReturns
+        )
+    }
     return []
 }
 
@@ -2796,6 +2810,1138 @@ private func sortedFindings(_ findings: Set<Finding>) -> [Finding] {
         ($0.ruleID, $0.path, $0.line, $0.category, $0.detail) <
             ($1.ruleID, $1.path, $1.line, $1.category, $1.detail)
     }
+}
+
+private let p04UIModulePrefix =
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/"
+private let p04UIRuntimePrefix =
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/"
+private let p04PlatformPrefix =
+    "Packages/RuneScribeArchitecture/Sources/RuneScribePlatform/"
+private let p04RuntimeIOGatewayPath =
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeIOGateway.swift"
+
+private let p04ExplicitOperationalSymbols: Set<String> = [
+    "AppStorage", "AudioServicesPlaySystemSound", "AVAudioPlayer", "AVAudioSession",
+    "AVCaptureDevice", "AVCaptureDeviceInput",
+    "AVCaptureMetadataOutput", "AVCaptureSession", "AVCaptureVideoPreviewLayer",
+    "AVPlayer", "AVPlayerLayer", "CKContainer", "CNContact", "CNContactFormatter",
+    "CNContactPickerDelegate", "CNContactPickerViewController", "CNContactStore",
+    "FileDocument", "FileHandle", "FileManager", "GKLocalPlayer", "Link",
+    "MFMessageComposeViewController",
+    "MFMessageComposeViewControllerDelegate", "NSPasteboard", "NSSharingService",
+    "NSSharingServiceDelegate", "NSSharingServicePicker",
+    "NSOpenPanel", "NSSavePanel", "NSSharingServicePickerDelegate", "NSWorkspace",
+    "NSViewController", "OpenURLAction", "PhotosPicker", "ReferenceFileDocument",
+    "SecItemAdd", "SecItemCopyMatching", "SecItemDelete", "SecItemUpdate", "ShareLink",
+    "UIActivityViewController", "UIApplication", "UIDocumentPickerViewController",
+    "UIPasteboard", "UIViewController", "URLSession", "UserDefaults",
+    "fileExporter", "fileImporter", "openURL", "startAccessingSecurityScopedResource",
+]
+
+private let p04QualifiedOperationalMembers: Set<String> = [
+    "authorizationStatus", "requestAccess",
+]
+
+private func isP04OperationalPlatformSymbol(_ name: String) -> Bool {
+    if p04ExplicitOperationalSymbols.contains(name) { return true }
+    return ["AudioServices", "AV", "CK", "CL", "CN", "GK", "MFMessage", "MPMusic",
+            "MTL", "NW", "PHPhoto", "SecItem", "SFSpeech"].contains {
+        name.hasPrefix($0) && name.count > $0.count
+    }
+}
+
+private let p04UIRuntimeOperationalAllowlist: [String: Set<String>] = [
+    "RuntimeApplicationResourcePresentation.swift": [
+        "AVAudioSession", "AVPlayer", "AVPlayerItemDidPlayToEndTime", "AVPlayerLayer",
+        "MTLBuffer", "MTLClearColor", "MTLCommandQueue", "MTLCreateSystemDefaultDevice",
+        "MTLDevice", "MTLLibrary", "MTLRenderPipelineDescriptor", "MTLRenderPipelineState",
+    ],
+    "RuntimeContactPicker.swift": [
+        "CNContact", "CNContactFormatter", "CNContactPickerDelegate",
+        "CNContactPickerViewController", "UIViewController",
+    ],
+    "RuntimeInboundFileImporter.swift": ["fileImporter"],
+    "RuntimeMessageComposeView.swift": [
+        "MFMessageComposeViewController", "MFMessageComposeViewControllerDelegate",
+        "UIViewController",
+    ],
+    "RuntimeNativeShareView.swift": [
+        "NSSharingService", "NSSharingServiceDelegate", "NSSharingServicePicker",
+        "NSSharingServicePickerDelegate", "UIActivityViewController", "UIViewController",
+    ],
+    "RuntimeQRScanner.swift": [
+        "AVAuthorizationStatus", "AVCaptureConnection", "AVCaptureDevice",
+        "AVCaptureDeviceInput", "AVCaptureMetadataOutput",
+        "AVCaptureMetadataOutputObjectsDelegate", "AVCaptureSession",
+        "AVCaptureVideoPreviewLayer", "AVMetadataMachineReadableCodeObject",
+        "AVMetadataObject", "UIApplication", "UIViewController", "authorizationStatus",
+        "requestAccess",
+    ],
+    "RuntimeSharePresentation.swift": ["fileExporter"],
+]
+
+private let p04OperationalFrameworks: Set<String> = [
+    "AudioToolbox", "AVFoundation", "CloudKit", "Contacts", "ContactsUI", "CoreAudio",
+    "CoreLocation", "GameKit", "MediaPlayer", "MessageUI", "Metal", "MetalKit",
+    "Network", "Photos", "PhotosUI", "Security", "Speech",
+]
+
+private let p04UIRuntimeFrameworkAllowlist: [String: Set<String>] = [
+    "RuntimeApplicationResourcePresentation.swift": ["AVFoundation", "Metal", "MetalKit"],
+    "RuntimeContactPicker.swift": ["Contacts", "ContactsUI"],
+    "RuntimeMessageComposeView.swift": ["MessageUI"],
+    "RuntimeQRScanner.swift": ["AVFoundation"],
+]
+
+private let p04HostOperationalAllowlist: [String: Set<String>] = [
+    "RuneScrib/AppHost/AppDelegate.swift": ["UIApplication"],
+]
+
+private func p04SyntaxNames<T: SyntaxProtocol>(in syntax: T) -> Set<String> {
+    var names: Set<String> = []
+    var stack = [Syntax(syntax)]
+    while let current = stack.popLast() {
+        if let reference = current.as(DeclReferenceExprSyntax.self) {
+            names.insert(reference.baseName.text)
+        } else if let member = current.as(MemberAccessExprSyntax.self) {
+            names.insert(member.declName.baseName.text)
+        } else if let identifier = current.as(IdentifierTypeSyntax.self) {
+            names.insert(identifier.name.text)
+        } else if let member = current.as(MemberTypeSyntax.self) {
+            names.insert(member.name.text)
+        }
+        stack.append(contentsOf: current.children(viewMode: .sourceAccurate).reversed())
+    }
+    return names
+}
+
+private func p04OperationalName(in node: Syntax) -> String? {
+    if let reference = node.as(DeclReferenceExprSyntax.self),
+       isP04OperationalPlatformSymbol(reference.baseName.text)
+    {
+        return reference.baseName.text
+    }
+    if let member = node.as(MemberAccessExprSyntax.self) {
+        let memberName = member.declName.baseName.text
+        if isP04OperationalPlatformSymbol(memberName) { return memberName }
+        if p04QualifiedOperationalMembers.contains(memberName),
+           member.base.map({ base in
+            p04SyntaxNames(in: base).contains(where: isP04OperationalPlatformSymbol)
+           }) == true
+        {
+            return memberName
+        }
+    }
+    if let identifier = node.as(IdentifierTypeSyntax.self),
+       isP04OperationalPlatformSymbol(identifier.name.text)
+    {
+        return identifier.name.text
+    }
+    if let member = node.as(MemberTypeSyntax.self),
+       isP04OperationalPlatformSymbol(member.name.text)
+    {
+        return member.name.text
+    }
+    return nil
+}
+
+private func p04IsManifestResourceRead(_ node: Syntax, source: ParsedSource) -> Bool {
+    guard [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift",
+    ].contains(source.relativePath),
+          (node.as(FunctionDeclSyntax.self)?.name.text ??
+           enclosingFunction(node)?.name.text) == "manifestData"
+    else {
+        return false
+    }
+    return true
+}
+
+private func p04TargetName(for path: String) -> String? {
+    let prefix = "Packages/RuneScribeArchitecture/Sources/"
+    guard path.hasPrefix(prefix) else { return nil }
+    return path.dropFirst(prefix.count).split(separator: "/").first.map(String.init)
+}
+
+private func p04IsShippingModuleImplementation(_ path: String) -> Bool {
+    p04TargetName(for: path)?.hasSuffix("Module") == true
+}
+
+private func p04FactoryCaptureIsOperational(_ name: String) -> Bool {
+    let lowered = name.lowercased()
+    return [
+        "adapter", "client", "dependencies", "facility", "locator", "provider",
+        "runtimeio", "service", "store",
+    ].contains { lowered.contains($0) }
+}
+
+private func p04ApplicationResourceName(
+    from expression: ExprSyntax,
+    at use: Syntax,
+    in source: ParsedSource,
+    visited: Set<String> = []
+) -> String? {
+    if let member = expression.as(MemberAccessExprSyntax.self),
+       member.declName.baseName.text != "init"
+    {
+        return member.declName.baseName.text
+    }
+    guard let reference = expression.as(DeclReferenceExprSyntax.self) else { return nil }
+    let name = reference.baseName.text
+    guard !visited.contains(name),
+          let binding = nearestVisibleVariable(named: name, at: use, in: source),
+          let initializer = binding.binding.initializer
+    else {
+        return nil
+    }
+    return p04ApplicationResourceName(
+        from: initializer.value,
+        at: Syntax(binding.binding),
+        in: source,
+        visited: visited.union(Set([name]))
+    )
+}
+
+private func p04AcceptedRuntimeAuthorityNames(in source: ParsedSource) -> Set<String> {
+    var names: Set<String> = []
+    for node in source.nodes {
+        if let function = node.as(FunctionDeclSyntax.self) {
+            for parameter in functionParameters(function) {
+                names.formUnion(typeNames(in: parameter.type))
+            }
+        } else if let initializer = node.as(InitializerDeclSyntax.self) {
+            for parameter in initializerParameters(initializer) {
+                names.formUnion(typeNames(in: parameter.type))
+            }
+        }
+    }
+    return names
+}
+
+private func p04HasTypedAuthorityCall(
+    _ memberName: String,
+    authorityTypes: Set<String>,
+    acquiredLeaseTypes: Set<String> = [],
+    in source: ParsedSource
+) -> Bool {
+    for node in source.nodes {
+        guard let call = node.as(FunctionCallExprSyntax.self),
+              let target = callTarget(call), target.member == memberName,
+              let baseName = directExpressionName(target.base)
+        else {
+            continue
+        }
+        let variables = lexicalVariableTypes(
+            at: Syntax(call),
+            in: source,
+            functionReturns: acquiredLeaseTypes.isEmpty
+                ? [:]
+                : ["acquire": acquiredLeaseTypes]
+        )
+        if !variables[baseName, default: []].isDisjoint(with: authorityTypes) {
+            return true
+        }
+    }
+    return false
+}
+
+private func p04HandlesRuntimeRevocation(in source: ParsedSource) -> Bool {
+    for node in source.nodes {
+        guard let member = node.as(MemberAccessExprSyntax.self),
+              member.declName.baseName.text == "revoked"
+        else {
+            continue
+        }
+        var hasEventLoop = false
+        var hasConditionalHandling = false
+        var current = Syntax(member).parent
+        while let ancestor = current {
+            if ancestor.is(ForStmtSyntax.self) { hasEventLoop = true }
+            if ancestor.is(GuardStmtSyntax.self) || ancestor.is(SwitchCaseSyntax.self) ||
+                ancestor.is(IfExprSyntax.self)
+            {
+                hasConditionalHandling = true
+            }
+            current = ancestor.parent
+        }
+        if hasEventLoop && hasConditionalHandling { return true }
+    }
+    return false
+}
+
+private func p04UIRuntimeBridgeHasOpaqueAuthority(
+    _ source: ParsedSource,
+    runtimeAuthorityNames: Set<String>
+) -> Bool {
+    let fileName = URL(fileURLWithPath: source.relativePath).lastPathComponent
+    let names = p04SyntaxNames(in: source.tree)
+    let sourceText = compactSyntaxText(source.tree)
+    let sessionTypes = Set(runtimeAuthorityNames.filter { $0.hasSuffix("Session") })
+    let leaseTypes = Set(runtimeAuthorityNames.filter { $0.hasSuffix("Lease") })
+    let acquiresRuntimeLease = p04HasTypedAuthorityCall(
+        "acquire",
+        authorityTypes: sessionTypes,
+        in: source
+    )
+    let observesRuntimeEvents = p04HasTypedAuthorityCall(
+        "events",
+        authorityTypes: leaseTypes,
+        acquiredLeaseTypes: leaseTypes,
+        in: source
+    )
+    let closesRuntimeLease = p04HasTypedAuthorityCall(
+        "close",
+        authorityTypes: leaseTypes,
+        acquiredLeaseTypes: leaseTypes,
+        in: source
+    )
+    let handlesRuntimeRevocation = p04HandlesRuntimeRevocation(in: source)
+    switch fileName {
+    case "RuntimeApplicationResourcePresentation.swift":
+        return runtimeAuthorityNames.contains("RuntimeApplicationResourceSession") &&
+            runtimeAuthorityNames.contains("RuntimeApplicationResourceLease") &&
+            names.contains("RuntimeApplicationResourceSession") &&
+            names.contains("RuntimeApplicationResourceLease") &&
+            source.source.contains("@_spi(RuntimeResourceHost) import RuneScribeRuntimeCore") &&
+            acquiresRuntimeLease && observesRuntimeEvents && handlesRuntimeRevocation &&
+            closesRuntimeLease
+    case "RuntimeSharePresentation.swift":
+        return runtimeAuthorityNames.contains("RuntimeSharePresentationSession") &&
+            runtimeAuthorityNames.contains("RuntimeSharePresentationLease") &&
+            names.contains("RuntimeSharePresentationSession") &&
+            names.contains("RuntimeSharePresentationLease") &&
+            source.source.contains("@_spi(RuntimeResourceHost) import RuneScribeRuntimeCore") &&
+            acquiresRuntimeLease && observesRuntimeEvents && handlesRuntimeRevocation &&
+            closesRuntimeLease
+    case "RuntimeInboundFileImporter.swift":
+        return runtimeAuthorityNames.contains("RuntimeInboundFileImportSession") &&
+            names.contains("RuntimeInboundFileImportSession") &&
+            source.source.contains("@_spi(RuntimeFileImportHost) import RuneScribeRuntimeCore") &&
+            names.contains("importSelectedFile")
+    case "RuntimeMessageComposeView.swift", "RuntimeNativeShareView.swift":
+        return names.contains("OpaqueShareTransfer") &&
+            names.contains("finish") && !sourceText.contains("publicvarpresentationURL")
+    case "RuntimeQRScanner.swift", "RuntimeContactPicker.swift":
+        let acceptedAuthorities = p04AcceptedRuntimeAuthorityNames(in: source)
+            .intersection(runtimeAuthorityNames)
+        let acceptedSession = acceptedAuthorities.contains { $0.hasSuffix("Session") }
+        let referencedLease = names.intersection(runtimeAuthorityNames).contains {
+            $0.hasSuffix("Lease")
+        }
+        return acceptedSession && referencedLease &&
+            source.source.contains("@_spi(RuntimeResourceHost) import RuneScribeRuntimeCore") &&
+            acquiresRuntimeLease && observesRuntimeEvents && handlesRuntimeRevocation &&
+            closesRuntimeLease
+    default:
+        return false
+    }
+}
+
+private func p04ReturnTypeIsRawResourceSurface(
+    _ type: TypeSyntax,
+    rawResourceAliases: Set<String> = []
+) -> Bool {
+    let names = typeNames(in: type)
+    if !names.isDisjoint(with: Set(["Data", "URL"]).union(rawResourceAliases)) {
+        return true
+    }
+    return names.contains { name in
+        ["Adapter", "Locator", "Provider", "Service", "Store"].contains {
+            name.hasSuffix($0)
+        }
+    }
+}
+
+private func p04Findings(in sources: [ParsedSource]) -> Set<Finding> {
+    var findings: Set<Finding> = []
+
+    func insert(
+        _ ruleID: String,
+        _ category: String,
+        _ source: ParsedSource,
+        _ node: some SyntaxProtocol,
+        _ detail: String
+    ) {
+        findings.insert(Finding(
+            ruleID: ruleID,
+            category: category,
+            path: source.relativePath,
+            line: source.line(of: node),
+            detail: detail
+        ))
+    }
+
+    var declaredApplicationResources: Set<String> = []
+    var requiredApplicationResourcesByTarget: [String: Set<String>] = [:]
+    var runtimeAuthorityNames: Set<String> = []
+    var resourceAliasTargets: [String: Set<String>] = [:]
+    for source in sources {
+        for node in source.nodes {
+            if let alias = node.as(TypeAliasDeclSyntax.self) {
+                resourceAliasTargets[alias.name.text] = typeNames(in: alias.initializer.value)
+            }
+            if isRuntimeCorePath(source.relativePath),
+               let nominal = nominalContext(for: node),
+               nominal.name.hasPrefix("Runtime"),
+               nominal.name.hasSuffix("Session") || nominal.name.hasSuffix("Lease"),
+               nominal.inheritance.contains("Sendable"),
+               isExternallyVisible(nominal.modifiers)
+            {
+                runtimeAuthorityNames.insert(nominal.name)
+            }
+            if let variable = node.as(VariableDeclSyntax.self),
+               enclosingOperationOwnerName(node) == "ApplicationResource"
+            {
+                for binding in variable.bindings {
+                    guard binding.initializer.map({ initializer in
+                        descendantCalls(of: initializer.value).contains {
+                            callTarget($0)?.member == "ApplicationResource"
+                        }
+                    }) == true
+                    else { continue }
+                    declaredApplicationResources.formUnion(patternNames(binding.pattern))
+                }
+            }
+
+            guard let call = node.as(FunctionCallExprSyntax.self),
+                  callTarget(call)?.member == "ModuleDescriptor",
+                  let target = p04TargetName(for: source.relativePath),
+                  let resources = labeledArgument("requiredResources", in: call)
+            else {
+                continue
+            }
+            var names: Set<String> = []
+            var stack = [Syntax(resources)]
+            while let current = stack.popLast() {
+                if let member = current.as(MemberAccessExprSyntax.self), member.base == nil {
+                    names.insert(member.declName.baseName.text)
+                }
+                stack.append(contentsOf: current.children(viewMode: .sourceAccurate).reversed())
+            }
+            requiredApplicationResourcesByTarget[target, default: []].formUnion(names)
+        }
+    }
+
+    var rawResourceAliases: Set<String> = []
+    var applicationResourceAliases: Set<String> = []
+    var moduleFactoryAliases: Set<String> = []
+    var aliasesChanged = true
+    while aliasesChanged {
+        aliasesChanged = false
+        for (name, targets) in resourceAliasTargets where !rawResourceAliases.contains(name) {
+            let isRaw = !targets.isDisjoint(with: Set(["Data", "URL"]).union(rawResourceAliases)) ||
+                targets.contains { p04FactoryCaptureIsOperational($0) }
+            if isRaw {
+                rawResourceAliases.insert(name)
+                aliasesChanged = true
+            }
+        }
+        for (name, targets) in resourceAliasTargets where !applicationResourceAliases.contains(name) {
+            if targets.contains("ApplicationResource") ||
+                !targets.isDisjoint(with: applicationResourceAliases)
+            {
+                applicationResourceAliases.insert(name)
+                aliasesChanged = true
+            }
+        }
+        for (name, targets) in resourceAliasTargets where !moduleFactoryAliases.contains(name) {
+            if targets.contains("AnyModuleFactory") ||
+                !targets.isDisjoint(with: moduleFactoryAliases)
+            {
+                moduleFactoryAliases.insert(name)
+                aliasesChanged = true
+            }
+        }
+    }
+
+    for source in sources {
+        let isUIModule = source.relativePath.hasPrefix(p04UIModulePrefix)
+        let isUIRuntime = source.relativePath.hasPrefix(p04UIRuntimePrefix)
+        let isPlatformImplementation = source.relativePath.hasPrefix(p04PlatformPrefix)
+        let isOperationalModule = p04IsShippingModuleImplementation(source.relativePath)
+        let uiRuntimeFile = URL(fileURLWithPath: source.relativePath).lastPathComponent
+        let applicationResourceTypes = applicationResourceAliases.union(
+            Set(["ApplicationResource"])
+        )
+        let moduleFactoryTypes = moduleFactoryAliases.union(Set(["AnyModuleFactory"]))
+        var uiRuntimeOperationalUse = false
+
+        for node in source.nodes {
+            if let member = node.as(MemberAccessExprSyntax.self),
+               member.declName.baseName.text == "module",
+               directExpressionName(member.base) == "Bundle",
+               !p04IsManifestResourceRead(node, source: source)
+            {
+                insert(
+                    "FG-016",
+                    "guessed-bundle-resource-location",
+                    source,
+                    member,
+                    "module guesses a Bundle.module resource location outside its manifest loader"
+                )
+            }
+
+            if let operationalName = p04OperationalName(in: node) {
+                let hostAllowsSymbol = p04HostOperationalAllowlist[source.relativePath]?
+                    .contains(operationalName) == true
+                if !isPlatformImplementation, !isUIRuntime, !hostAllowsSymbol,
+                   !p04IsManifestResourceRead(node, source: source)
+                {
+                    insert(
+                        "FG-007",
+                        "module-owned-operational-platform-api",
+                        source,
+                        node,
+                        isOperationalModule
+                            ? "shipping module implementation uses operational platform symbol \(operationalName)"
+                            : "non-designated shipping source uses operational platform symbol \(operationalName)"
+                    )
+                }
+                if isUIRuntime {
+                    uiRuntimeOperationalUse = true
+                    let allowed = p04UIRuntimeOperationalAllowlist[uiRuntimeFile]
+                    if allowed?.contains(operationalName) != true {
+                        insert(
+                            "FG-007",
+                            "unallowlisted-runtime-native-bridge-symbol",
+                            source,
+                            node,
+                            "UIRuntime operational symbol \(operationalName) is not allowlisted for \(uiRuntimeFile)"
+                        )
+                    }
+                }
+            }
+
+            if let call = node.as(FunctionCallExprSyntax.self), let target = callTarget(call) {
+                let labels = callArgumentLabels(call)
+                let isRawFileRead = target.member == "Data" && labels.contains("contentsOf")
+                if !isPlatformImplementation, isRawFileRead,
+                   !p04IsManifestResourceRead(node, source: source)
+                {
+                    insert(
+                        "FG-007",
+                        "module-owned-file-data-extraction",
+                        source,
+                        call,
+                        "shipping module implementation reads file data directly"
+                    )
+                }
+
+                let constructsApplicationResource = applicationResourceTypes.contains(target.member) ||
+                    (target.member == "init" &&
+                     (!p04SyntaxNames(in: call.calledExpression).isDisjoint(
+                        with: applicationResourceTypes
+                     ) ||
+                      !contextualTypeNames(containing: Syntax(call)).isDisjoint(
+                        with: applicationResourceTypes
+                      )))
+                if constructsApplicationResource, !isContractsPath(source.relativePath) {
+                    insert(
+                        "FG-016",
+                        "guessed-application-resource",
+                        source,
+                        call,
+                        "shipping code constructs an ApplicationResource outside its canonical catalog"
+                    )
+                }
+
+                if ["applicationResourceSession", "registerBundledSystemFont"].contains(target.member),
+                   let argument = call.arguments.first?.expression
+                {
+                    let requestedName = p04ApplicationResourceName(
+                        from: argument,
+                        at: Syntax(call),
+                        in: source
+                    )
+                    if let requestedName {
+                        let targetName = p04TargetName(for: source.relativePath)
+                        let declaredForTarget = targetName.flatMap {
+                            requiredApplicationResourcesByTarget[$0]
+                        } ?? []
+                        if !declaredApplicationResources.contains(requestedName) ||
+                            !declaredForTarget.contains(requestedName)
+                        {
+                            insert(
+                                "FG-016",
+                                "undeclared-application-resource",
+                                source,
+                                call,
+                                "module requests ApplicationResource.\(requestedName) without a catalog and descriptor declaration"
+                            )
+                        }
+                    } else if p04IsShippingModuleImplementation(source.relativePath) {
+                        insert(
+                            "FG-016",
+                            "unproven-application-resource-request",
+                            source,
+                            call,
+                            "module requests an ApplicationResource that cannot be proven against its catalog and descriptor"
+                        )
+                    }
+                }
+
+                let constructsModuleFactory = moduleFactoryTypes.contains(target.member) ||
+                    (target.member == "init" &&
+                     (!p04SyntaxNames(in: call.calledExpression).isDisjoint(
+                        with: moduleFactoryTypes
+                     ) ||
+                      !contextualTypeNames(containing: Syntax(call)).isDisjoint(
+                        with: moduleFactoryTypes
+                      )))
+                if constructsModuleFactory {
+                    if callArgumentLabels(call).contains("descriptor") {
+                        insert(
+                            "FG-009",
+                            "shipping-runtime-testing-factory-initializer",
+                            source,
+                            call,
+                            "shipping source uses the RuntimeTesting descriptor-and-closure AnyModuleFactory initializer"
+                        )
+                    }
+                    let closure = call.trailingClosure ??
+                        labeledArgument("make", in: call)?.as(ClosureExprSyntax.self)
+                    if let closure {
+                        let closureNames = p04SyntaxNames(in: closure)
+                        let lexicalTypes = lexicalVariableTypes(
+                            at: Syntax(closure),
+                            in: source,
+                            functionReturns: [:]
+                        )
+                        let capturesOperationalValue = closureNames.contains { name in
+                            p04FactoryCaptureIsOperational(name) ||
+                                lexicalTypes[name, default: []].contains(
+                                    where: p04FactoryCaptureIsOperational
+                                )
+                        }
+                        if capturesOperationalValue {
+                            insert(
+                                "FG-009",
+                                "factory-closure-operational-capture",
+                                source,
+                                closure,
+                                "AnyModuleFactory closure captures an operational dependency or facility"
+                            )
+                        }
+                        let constructedWithArguments = descendantCalls(of: closure).contains {
+                            nested in
+                            nested.id != call.id && !nested.arguments.isEmpty
+                        }
+                        if constructedWithArguments {
+                            insert(
+                                "FG-009",
+                                "factory-closure-parameterized-module",
+                                source,
+                                closure,
+                                "AnyModuleFactory closure constructs a module with captured arguments"
+                            )
+                        }
+                    } else if callArgumentLabels(call).contains("make") {
+                        insert(
+                            "FG-009",
+                            "factory-closure-opaque-capture",
+                            source,
+                            call,
+                            "shipping AnyModuleFactory uses an unanalyzable make closure or function reference"
+                        )
+                    }
+                }
+
+                if target.member == "factory", !call.arguments.isEmpty,
+                   compactSyntaxText(call.calledExpression).contains("ModuleBootstrap")
+                {
+                    insert(
+                        "FG-009",
+                        "parameterized-module-bootstrap-call",
+                        source,
+                        call,
+                        "host invokes a module bootstrap factory with captured dependencies"
+                    )
+                }
+
+                if isUIModule, target.member == "InboundURLDTO" {
+                    insert(
+                        "FG-016",
+                        "url-bearing-module-dto",
+                        source,
+                        call,
+                        "RuneScribeUIModule constructs a URL-bearing DTO"
+                    )
+                }
+            }
+
+            if let function = node.as(FunctionDeclSyntax.self) {
+                let isModuleFactory = function.name.text == "factory" &&
+                    (p04IsShippingModuleImplementation(source.relativePath) ||
+                     enclosingNominalName(node)?.hasSuffix("ModuleBootstrap") == true ||
+                     function.signature.returnClause.map {
+                        !typeNames(in: $0.type).isDisjoint(with: moduleFactoryTypes)
+                     } == true)
+                if isModuleFactory, !functionParameters(function).isEmpty
+                {
+                    insert(
+                        "FG-009",
+                        "parameterized-module-factory",
+                        source,
+                        function,
+                        "shipping module factory accepts arbitrary dependencies"
+                    )
+                }
+
+                if let owner = enclosingOperationOwnerName(node),
+                   ["ModuleContext", "RuntimeIOClient"].contains(owner),
+                   memberIsExternallyVisible(function.modifiers, syntax: node),
+                   let returnType = function.signature.returnClause?.type,
+                   p04ReturnTypeIsRawResourceSurface(
+                    returnType,
+                    rawResourceAliases: rawResourceAliases
+                   ),
+                   !(source.relativePath == p04RuntimeIOGatewayPath &&
+                     owner == "RuntimeIOClient" &&
+                     ["readInboundFile", "readProtectedFile", "secureValueData"]
+                        .contains(function.name.text) &&
+                     typeNames(in: returnType).contains("Data") &&
+                     !typeNames(in: returnType).contains("URL") &&
+                     !typeNames(in: returnType).contains(where: { name in
+                        ["Adapter", "Locator", "Provider", "Service", "Store"]
+                            .contains { name.hasSuffix($0) }
+                     }))
+                {
+                    insert(
+                        "FG-016",
+                        "raw-runtime-resource-vending",
+                        source,
+                        function,
+                        "\(owner) exposes a provider or raw URL/Data resource result instead of an opaque session"
+                    )
+                }
+
+                if isUIModule, !p04IsManifestResourceRead(node, source: source) {
+                    let parameters = functionParameters(function)
+                    let parameterTypes = parameters.reduce(into: Set<String>()) {
+                        $0.formUnion(typeNames(in: $1.type))
+                    }
+                    let resultTypes = function.signature.returnClause.map {
+                        typeNames(in: $0.type)
+                    } ?? []
+                    let rawTypes = parameterTypes.union(resultTypes)
+                    let boundaryName = function.name.text.lowercased()
+                    let boundaryHints = [
+                        "artifact", "file", "import", "ingest", "key", "resource", "share", "url",
+                    ]
+                    let hasBoundaryName = boundaryHints.contains(where: boundaryName.contains) ||
+                        parameters.contains { parameter in
+                            let name = parameter.name.lowercased()
+                            return boundaryHints.contains(where: name.contains)
+                        }
+                    let containsRawAlias = !rawTypes.isDisjoint(with: rawResourceAliases)
+                    if rawTypes.contains("URL") || containsRawAlias ||
+                        (rawTypes.contains("Data") && hasBoundaryName)
+                    {
+                        insert(
+                            "FG-016",
+                            "raw-module-url-data-boundary",
+                            source,
+                            function,
+                            "RuneScribeUIModule accepts or returns raw URL/Data at a resource boundary"
+                        )
+                    }
+                }
+
+                if isUIRuntime, memberIsExternallyVisible(function.modifiers, syntax: node) {
+                    var exposedTypes = functionParameters(function).reduce(into: Set<String>()) {
+                        $0.formUnion(typeNames(in: $1.type))
+                    }
+                    if let result = function.signature.returnClause?.type {
+                        exposedTypes.formUnion(typeNames(in: result))
+                    }
+                    if exposedTypes.contains(where: isP04OperationalPlatformSymbol) {
+                        insert(
+                            "FG-007",
+                            "public-native-presentation-type",
+                            source,
+                            function,
+                            "UIRuntime bridge exposes a native operational presentation type publicly"
+                        )
+                    }
+                }
+            }
+
+            if let variable = node.as(VariableDeclSyntax.self),
+               isRetainedOrGlobalVariable(variable)
+            {
+                for binding in variable.bindings {
+                    guard let initializer = binding.initializer,
+                          let closure = initializer.value.as(ClosureExprSyntax.self)
+                    else { continue }
+                    let declaredTypes = binding.typeAnnotation.map {
+                        typeNames(in: $0.type)
+                    } ?? []
+                    let closureNames = p04SyntaxNames(in: closure)
+                    guard !declaredTypes.isDisjoint(with: moduleFactoryTypes) ||
+                            !closureNames.isDisjoint(with: moduleFactoryTypes)
+                    else {
+                        continue
+                    }
+                    insert(
+                        "FG-009",
+                        "closure-valued-shipping-module-factory",
+                        source,
+                        binding,
+                        "shipping source declares a closure-valued module factory instead of the uniform zero-argument factory"
+                    )
+                    if declaredTypes.union(closureNames).contains(
+                        where: p04FactoryCaptureIsOperational
+                    ) {
+                        insert(
+                            "FG-009",
+                            "factory-closure-operational-capture",
+                            source,
+                            closure,
+                            "module bootstrap closure captures an operational dependency or facility"
+                        )
+                    }
+                }
+            }
+
+            if isUIRuntime, let initializer = node.as(InitializerDeclSyntax.self),
+               memberIsExternallyVisible(initializer.modifiers, syntax: node)
+            {
+                let exposedTypes = initializerParameters(initializer).reduce(into: Set<String>()) {
+                    $0.formUnion(typeNames(in: $1.type))
+                }
+                if exposedTypes.contains(where: isP04OperationalPlatformSymbol) {
+                    insert(
+                        "FG-007",
+                        "public-native-presentation-type",
+                        source,
+                        initializer,
+                        "UIRuntime bridge initializer exposes a native operational presentation type publicly"
+                    )
+                }
+            }
+
+            if isUIRuntime, let variable = node.as(VariableDeclSyntax.self),
+               memberIsExternallyVisible(variable.modifiers, syntax: node)
+            {
+                for binding in variable.bindings {
+                    let exposedTypes = binding.typeAnnotation.map {
+                        typeNames(in: $0.type)
+                    } ?? []
+                    if exposedTypes.contains(where: isP04OperationalPlatformSymbol) {
+                        insert(
+                            "FG-007",
+                            "public-native-presentation-type",
+                            source,
+                            binding,
+                            "UIRuntime bridge property exposes a native operational presentation type publicly"
+                        )
+                    }
+                }
+            }
+
+            if let variable = node.as(VariableDeclSyntax.self),
+               let owner = enclosingOperationOwnerName(node),
+               ["ModuleContext", "RuntimeIOClient"].contains(owner),
+               memberIsExternallyVisible(variable.modifiers, syntax: node)
+            {
+                for binding in variable.bindings {
+                    guard let type = binding.typeAnnotation?.type,
+                          p04ReturnTypeIsRawResourceSurface(
+                            type,
+                            rawResourceAliases: rawResourceAliases
+                          )
+                    else { continue }
+                    insert(
+                        "FG-016",
+                        "raw-runtime-resource-property",
+                        source,
+                        binding,
+                        "\(owner) exposes a provider or raw URL/Data resource property instead of an opaque session"
+                    )
+                }
+            }
+
+            if let subscriptDeclaration = node.as(SubscriptDeclSyntax.self),
+               let owner = enclosingOperationOwnerName(node),
+               ["ModuleContext", "RuntimeIOClient"].contains(owner),
+               memberIsExternallyVisible(subscriptDeclaration.modifiers, syntax: node),
+               p04ReturnTypeIsRawResourceSurface(
+                subscriptDeclaration.returnClause.type,
+                rawResourceAliases: rawResourceAliases
+               )
+            {
+                insert(
+                    "FG-016",
+                    "raw-runtime-resource-subscript",
+                    source,
+                    subscriptDeclaration,
+                    "\(owner) exposes a provider or raw URL/Data resource subscript instead of an opaque session"
+                )
+            }
+
+            if isUIModule, let variable = node.as(VariableDeclSyntax.self),
+               isRetainedOrGlobalVariable(variable),
+               !p04IsManifestResourceRead(node, source: source)
+            {
+                for binding in variable.bindings {
+                    let declaredTypes = binding.typeAnnotation.map {
+                        typeNames(in: $0.type)
+                    } ?? []
+                    let inferredTypes = binding.initializer.map {
+                        p04SyntaxNames(in: $0.value)
+                    } ?? []
+                    let resourceTypes = declaredTypes.union(inferredTypes)
+                    let isDTO = enclosingNominalName(node)?.hasSuffix("DTO") == true
+                    let boundaryHints = [
+                        "artifact", "file", "import", "ingest", "key", "resource", "share", "url",
+                    ]
+                    let bindingNames = patternNames(binding.pattern).map { $0.lowercased() }
+                    let isResourceNamed = bindingNames.contains { name in
+                        boundaryHints.contains(where: name.contains)
+                    }
+                    let storesURL = resourceTypes.contains("URL")
+                    let storesDataOrRawAlias = resourceTypes.contains("Data") ||
+                        !resourceTypes.isDisjoint(with: rawResourceAliases)
+                    if storesURL || (storesDataOrRawAlias && (isDTO || isResourceNamed)) {
+                        insert(
+                            "FG-016",
+                            isDTO ? "url-data-bearing-module-dto" : "stored-raw-module-resource",
+                            source,
+                            binding,
+                            isDTO
+                                ? "RuneScribeUIModule declares a URL/Data-bearing DTO instead of an opaque resource handle"
+                                : "RuneScribeUIModule stores raw URL/Data instead of an opaque resource handle"
+                        )
+                    }
+                }
+            }
+
+            if let declaration = node.as(ImportDeclSyntax.self) {
+                let importText = compactSyntaxText(declaration)
+                let importedModule = declaration.path.trimmedDescription
+                if p04OperationalFrameworks.contains(importedModule) {
+                    if !isPlatformImplementation, !isUIRuntime {
+                        insert(
+                            "FG-007",
+                            "module-owned-operational-framework",
+                            source,
+                            declaration,
+                            isOperationalModule
+                                ? "shipping module implementation imports operational framework \(importedModule)"
+                                : "non-designated shipping source imports operational framework \(importedModule)"
+                        )
+                    } else if isUIRuntime,
+                              p04UIRuntimeFrameworkAllowlist[uiRuntimeFile]?
+                                .contains(importedModule) != true
+                    {
+                        insert(
+                            "FG-007",
+                            "unallowlisted-runtime-native-bridge-framework",
+                            source,
+                            declaration,
+                            "UIRuntime framework \(importedModule) is not allowlisted for \(uiRuntimeFile)"
+                        )
+                    }
+                }
+                let spiName: String?
+                if importText.contains("@_spi(RuntimeResourceHost)") {
+                    spiName = "RuntimeResourceHost"
+                } else if importText.contains("@_spi(RuntimeFileImportHost)") {
+                    spiName = "RuntimeFileImportHost"
+                } else {
+                    spiName = nil
+                }
+                if let spiName {
+                    let allowedFiles: [String: Set<String>] = [
+                        "RuntimeResourceHost": [
+                            "RuntimeApplicationResourcePresentation.swift",
+                            "RuntimeContactPicker.swift", "RuntimeQRScanner.swift",
+                            "RuntimeSharePresentation.swift",
+                        ],
+                        "RuntimeFileImportHost": ["RuntimeInboundFileImporter.swift"],
+                    ]
+                    if !isUIRuntime || allowedFiles[spiName]?.contains(uiRuntimeFile) != true {
+                        insert(
+                            "FG-016",
+                            "unauthorized-runtime-resource-spi-import",
+                            source,
+                            declaration,
+                            "shipping source imports the \(spiName) SPI outside its exact UIRuntime bridge allowlist"
+                        )
+                    }
+                }
+                if importText.contains("@_spi(RuntimeTesting)"),
+                   declaration.path.trimmedDescription == "RuneScribeRuntimeCore"
+                {
+                    insert(
+                        "FG-009",
+                        "shipping-runtime-testing-spi-import",
+                        source,
+                        declaration,
+                        "shipping source imports the RuntimeTesting SPI"
+                    )
+                }
+            }
+        }
+
+        if isUIRuntime, uiRuntimeOperationalUse,
+           !p04UIRuntimeBridgeHasOpaqueAuthority(
+            source,
+            runtimeAuthorityNames: runtimeAuthorityNames
+           )
+        {
+            findings.insert(Finding(
+                ruleID: "FG-007",
+                category: "runtime-native-bridge-without-opaque-authority",
+                path: source.relativePath,
+                line: 1,
+                detail: "UIRuntime native bridge lacks opaque runtime authority acquisition, revocation handling, and deterministic close"
+            ))
+        }
+    }
+
+    if let gateway = sources.first(where: { $0.relativePath == p04RuntimeIOGatewayPath }) {
+        var functions: [String: [FunctionDeclSyntax]] = [:]
+        for node in gateway.nodes {
+            guard let function = node.as(FunctionDeclSyntax.self),
+                  isCanonicalOwnerMember(
+                    node,
+                    owner: "RuntimeIOGateway",
+                    source: gateway,
+                    path: p04RuntimeIOGatewayPath
+                  )
+            else { continue }
+            functions[function.name.text, default: []].append(function)
+        }
+        func directlyOwnedGuardConditions(_ function: FunctionDeclSyntax) -> [String] {
+            guard let body = function.body else { return [] }
+            var conditions: [String] = []
+            var stack = [Syntax(body)]
+            while let current = stack.popLast() {
+                if let nested = current.as(FunctionDeclSyntax.self), nested.id != function.id {
+                    continue
+                }
+                if current.is(ClosureExprSyntax.self) || current.is(InitializerDeclSyntax.self) {
+                    continue
+                }
+                if let statement = current.as(GuardStmtSyntax.self),
+                   !hasConditionalAncestor(Syntax(statement), before: Syntax(function))
+                {
+                    conditions.append(compactSyntaxText(statement.conditions))
+                }
+                stack.append(contentsOf: current.children(viewMode: .sourceAccurate).reversed())
+            }
+            return conditions
+        }
+
+        func insertLifecycleFinding(
+            functionName: String,
+            detail: String,
+            validates: (FunctionDeclSyntax) -> Bool
+        ) {
+            guard let matches = functions[functionName], matches.count == 1,
+                  let function = matches.first, validates(function)
+            else {
+                findings.insert(Finding(
+                    ruleID: "FG-016",
+                    category: "missing-runtime-resource-lifecycle-validation",
+                    path: gateway.relativePath,
+                    line: 1,
+                    detail: detail
+                ))
+                return
+            }
+        }
+
+        insertLifecycleFinding(
+            functionName: "validateLifecycle",
+            detail: "runtime I/O lifecycle validation no longer checks runtime and module generations"
+        ) { function in
+            let guards = directlyOwnedGuardConditions(function)
+            return guards.contains("runtimeIsActive") &&
+                guards.contains("runtimeGeneration==lease.runtimeGeneration") &&
+                guards.contains {
+                    $0.contains("letsource=sources[lease.sourceModuleID]") &&
+                        $0.contains("source.generation==lease.sourceModuleGeneration")
+                }
+        }
+
+        insertLifecycleFinding(
+            functionName: "invalidateModule",
+            detail: "module invalidation no longer revokes runtime resource bindings"
+        ) { function in
+            let calls = directCalls(in: function).filter {
+                !hasConditionalAncestor(Syntax($0), before: Syntax(function))
+            }.map { compactSyntaxText($0) }
+            return calls.contains { $0.contains("sources.removeValue(forKey:moduleID)") } &&
+                calls.contains {
+                    $0.contains(
+                        "revokeResourceBindings(moduleID:moduleID,generation:generation)"
+                    )
+                }
+        }
+
+        insertLifecycleFinding(
+            functionName: "acquireApplicationResource",
+            detail: "application resource acquisition no longer creates a validated opaque lease"
+        ) { function in
+            guard let body = function.body else { return false }
+            let compact = compactSyntaxText(body)
+            return [
+                "authorizedResourceHandlers", "resourceBindings",
+                "RuntimeApplicationResourceLease",
+            ].allSatisfy(compact.contains)
+        }
+
+        insertLifecycleFinding(
+            functionName: "revokeResourceBindings",
+            detail: "resource revocation no longer validates generation and emits revocation"
+        ) { function in
+            guard let body = function.body else { return false }
+            var guardChecksGeneration = false
+            var terminatesRevokedLease = false
+            var stack = [Syntax(body)]
+            while let current = stack.popLast() {
+                if let statement = current.as(GuardStmtSyntax.self) {
+                    let condition = compactSyntaxText(statement.conditions)
+                    if condition.contains("binding.lease.sourceModuleID==moduleID") &&
+                        condition.contains(
+                            "generation==nil||binding.lease.sourceModuleGeneration==generation"
+                        )
+                    {
+                        guardChecksGeneration = true
+                    }
+                }
+                if let call = current.as(FunctionCallExprSyntax.self),
+                   callTarget(call)?.member == "terminate",
+                   compactSyntaxText(call).contains("with:.revoked")
+                {
+                    var ancestor = Syntax(call).parent
+                    while let node = ancestor, node.id != function.id {
+                        if node.is(ForStmtSyntax.self) {
+                            terminatesRevokedLease = true
+                            break
+                        }
+                        ancestor = node.parent
+                    }
+                }
+                stack.append(contentsOf: current.children(viewMode: .sourceAccurate).reversed())
+            }
+            return guardChecksGeneration && terminatesRevokedLease
+        }
+    } else {
+        findings.insert(Finding(
+            ruleID: "FG-016",
+            category: "missing-runtime-resource-lifecycle-validation",
+            path: p04RuntimeIOGatewayPath,
+            line: 1,
+            detail: "canonical RuntimeIOGateway source is missing"
+        ))
+    }
+
+    return findings
 }
 
 private func scan(_ sources: [ParsedSource]) -> Set<Finding> {
@@ -5207,6 +6353,8 @@ private func scan(_ sources: [ParsedSource]) -> Set<Finding> {
             detail: "canonical ModuleContext.applicationClient factory is missing or overloaded"
         ))
     }
+
+    findings.formUnion(p04Findings(in: sources))
 
     return findings
 }

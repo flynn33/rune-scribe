@@ -1,6 +1,6 @@
 import Foundation
 import RuneScribeContracts
-import RuneScribeRuntimeCore
+@_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import XCTest
 
 final class RuntimeLifecycleTests: XCTestCase {
@@ -687,22 +687,22 @@ final class RuntimeLifecycleTests: XCTestCase {
         )
         let runtime = makeRuntime()
 
-        try await runtime.registerHostService(reader, for: RuneScribeServiceKeys.clipboardRead)
-        try await runtime.registerHostService(writer, for: RuneScribeServiceKeys.clipboardWrite)
+        try await runtime.installPlatformAdapter(reader, for: RuneScribeServiceKeys.clipboardRead)
+        try await runtime.installPlatformAdapter(writer, for: RuneScribeServiceKeys.clipboardWrite)
         try await runtime.register(
             manifest: manifest(for: core),
             factory: factory(for: core, start: { context in
-                let service = try await context.clipboardReadingClient()
-                let value = await service.string()
-                await recorder.append("read:\(value ?? "nil")")
-                await recorder.record(number: await service.changeCount())
+                let client = try await context.runtimeIOClient()
+                let snapshot = try await client.clipboardSnapshot()
+                await recorder.append("read:\(snapshot.string ?? "nil")")
+                await recorder.record(number: snapshot.changeCount)
             })
         )
         try await runtime.register(
             manifest: manifest(for: ui),
             factory: factory(for: ui, start: { context in
-                let service = try await context.clipboardWritingClient()
-                try await service.setString("updated")
+                let client = try await context.runtimeIOClient()
+                try await client.setClipboardString("updated")
             })
         )
 

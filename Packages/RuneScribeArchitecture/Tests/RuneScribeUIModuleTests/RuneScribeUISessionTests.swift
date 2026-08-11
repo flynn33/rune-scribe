@@ -1,7 +1,7 @@
 import AppKit
 import Foundation
 import RuneScribeContracts
-@testable import RuneScribeRuntimeCore
+@_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 @testable import RuneScribeUIModule
 import RuneScribeUIRuntime
 import SwiftUI
@@ -348,10 +348,11 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
         let session = RuneScribeUISession(
             applicationClient: harness.client,
-            clipboardWriting: LifetimeClipboard(),
-            sharePresentation: .unavailable,
-            splashVideoURL: nil,
-            metalLibraryURL: nil,
+            runtimeIO: RuntimeIOClient(setClipboardString: { _ in }),
+            resourcePresentation: RuntimeApplicationResourcePresentation(
+                splashVideo: nil,
+                metalLibrary: nil
+            ),
             productMetadata: .init(version: "1.0", buildNumber: "1")
         )
         try session.start()
@@ -419,6 +420,51 @@ final class RuneScribeUISessionTests: XCTestCase {
             }
         )
 
+        await session.stop()
+        await runtime.stop()
+    }
+
+    func testClipboardCopyUsesRuntimeIOClient() async throws {
+        let capture = ClipboardWriteCapture()
+        let runtimeIO = RuntimeIOClient(
+            setClipboardString: { value in
+                await capture.append(value)
+            }
+        )
+        let (session, runtime) = try await makeSession(
+            applicationService: ControllableApplicationService(),
+            runtimeIO: runtimeIO
+        )
+
+        let copied = await session.copyToClipboard("ᚱᚢᚾᛖ")
+        let copiedValues = await capture.values()
+
+        XCTAssertTrue(copied)
+        XCTAssertEqual(copiedValues, ["ᚱᚢᚾᛖ"])
+        XCTAssertNil(session.lastError)
+        await session.stop()
+        await runtime.stop()
+    }
+
+    func testClipboardCopyFailureIsSanitizedAndNotConfirmed() async throws {
+        let runtimeIO = RuntimeIOClient(
+            setClipboardString: { _ in throw StubError.unexpectedCommand }
+        )
+        let (session, runtime) = try await makeSession(
+            applicationService: ControllableApplicationService(),
+            runtimeIO: runtimeIO
+        )
+
+        let copied = await session.copyToClipboard("secret")
+
+        XCTAssertFalse(copied)
+        XCTAssertEqual(
+            session.lastError,
+            "Rune Scribe could not complete the operation."
+        )
+        XCTAssertFalse(
+            session.lastError?.contains(StubError.sensitiveFixtureDetail) ?? false
+        )
         await session.stop()
         await runtime.stop()
     }
@@ -590,40 +636,44 @@ final class RuneScribeUISessionTests: XCTestCase {
         await runtime.stop()
     }
 
-    func testStopReleasesClientClipboardAndShareOwnersWithoutOwningCoreProvider() async throws {
+    func testStopReleasesClientWithoutTakingOwnershipFromRuntimeShareProvider() async throws {
         var service: ControllableApplicationService? = ControllableApplicationService()
-        var clipboard: LifetimeClipboard? = LifetimeClipboard()
         var shareOwner: LifetimeProbe? = LifetimeProbe()
         let weakService = WeakReference(service)
-        let weakClipboard = WeakReference(clipboard)
         let weakShareOwner = WeakReference(shareOwner)
-
-        let (session, runtime) = try await makeSession(
-            applicationService: try XCTUnwrap(service),
-            clipboard: try XCTUnwrap(clipboard),
-            sharePresentation: OpaqueSharePresentationProvider {
-                [owner = try XCTUnwrap(shareOwner)] _ in
-                _ = owner
-                return URL(fileURLWithPath: "/fixture/share.runescribe")
-            }
+        var shareProvider: SharePresentationProbe? = SharePresentationProbe(
+            owner: try XCTUnwrap(shareOwner)
         )
-        try session.start()
+        var session: RuneScribeUISession?
+        var runtime: RuneScribeRuntime?
+
+        do {
+            let fixture = try await makeSession(
+                applicationService: try XCTUnwrap(service),
+                sharePresentation: try XCTUnwrap(shareProvider)
+            )
+            session = fixture.session
+            runtime = fixture.runtime
+        }
+        try XCTUnwrap(session).start()
 
         service = nil
-        clipboard = nil
         shareOwner = nil
+        shareProvider = nil
         XCTAssertNotNil(weakService.value)
-        XCTAssertNotNil(weakClipboard.value)
         XCTAssertNotNil(weakShareOwner.value)
 
-        await session.stop()
-        let ownersReleased = await eventually {
-            weakClipboard.value == nil
-                && weakShareOwner.value == nil
-        }
-        XCTAssertTrue(ownersReleased)
+        await session?.stop()
+        XCTAssertNotNil(
+            weakShareOwner.value,
+            "The runtime, rather than the stopped UI session, must own the provider"
+        )
         XCTAssertNotNil(weakService.value)
-        await runtime.stop()
+        await runtime?.stop()
+        session = nil
+        runtime = nil
+        let runtimeOwnersReleased = await eventually { weakShareOwner.value == nil }
+        XCTAssertTrue(runtimeOwnersReleased)
     }
 
     func testModuleActivationToleratesMissingOptionalVisualResources() async throws {
@@ -640,17 +690,27 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
         try await runtime.register(
             manifest: RuneScribeUIModuleBootstrap.manifest(),
-            factory: RuneScribeUIModuleBootstrap.factory(
-                dependencies: RuneScribeUIDependencies(rootPresentationStore: rootStore)
-            )
+            factory: RuneScribeUIModuleBootstrap.factory()
         )
-        try await runtime.registerHostService(
+        try await runtime.installStandardPort(
+            rootStore.runtimeHostAdapter(productMetadata: .unavailable),
+            for: .standard
+        )
+        try await runtime.installPlatformAdapter(
             MissingApplicationResources(),
             for: RuneScribeServiceKeys.applicationResourceLocator
         )
-        try await runtime.registerHostService(
+        try await runtime.installPlatformAdapter(
             LifetimeClipboard(),
             for: RuneScribeServiceKeys.clipboardWrite
+        )
+        try await runtime.installPlatformAdapter(
+            UnavailableInboundFileReader(),
+            for: RuneScribeServiceKeys.inboundFileReader
+        )
+        try await runtime.installPlatformAdapter(
+            SharePresentationProbe(),
+            for: RuneScribeServiceKeys.sharePresentation
         )
 
         try await runtime.start()
@@ -661,13 +721,9 @@ final class RuneScribeUISessionTests: XCTestCase {
 
         let (nilResourceSession, nilResourceRuntime) = try await makeSession(
             applicationService: ControllableApplicationService(),
-            clipboard: LifetimeClipboard(),
-            splashVideoURL: nil,
-            metalLibraryURL: nil,
             productMetadata: .unavailable
         )
-        XCTAssertNil(nilResourceSession.splashVideoURL)
-        XCTAssertNil(nilResourceSession.metalLibraryURL)
+        XCTAssertFalse(nilResourceSession.resourcePresentation.hasSplashVideo)
         await nilResourceSession.stop()
         await nilResourceRuntime.stop()
 
@@ -1031,9 +1087,8 @@ final class RuneScribeUISessionTests: XCTestCase {
         let qrArtifactID = try XCTUnwrap(
             UUID(uuidString: "EEEEEEEE-EEEE-EEEE-EEEE-EEEEEEEEEEEE")
         )
-        let qrTransfer = OpaqueShareTransfer(
-            artifactID: ShareArtifactID(rawValue: qrArtifactID),
-            url: try XCTUnwrap(URL(string: "runescribe://import?p=synthetic-parity"))
+        let qrTransfer = try await session.shareTransfer(
+            for: ShareArtifactID(rawValue: qrArtifactID)
         )
         let views: [(String, AnyView, CGSize)] = [
             (
@@ -1041,7 +1096,7 @@ final class RuneScribeUISessionTests: XCTestCase {
                 AnyView(
                     ContentView()
                         .environmentObject(session)
-                        .environment(\.runeScribeMetalLibraryURL, nil)
+                        .environment(\.runtimeApplicationResourcePresentation, nil)
                 ),
                 CGSize(width: 600, height: 720)
             ),
@@ -1109,24 +1164,26 @@ final class RuneScribeUISessionTests: XCTestCase {
 
     private func makeSession(
         applicationService: ControllableApplicationService,
-        clipboard: any ClipboardWriting = LifetimeClipboard(),
-        sharePresentation: OpaqueSharePresentationProvider = .unavailable,
-        splashVideoURL: URL? = URL(fileURLWithPath: "/fixture/splash.mp4"),
-        metalLibraryURL: URL? = URL(fileURLWithPath: "/fixture/default.metallib"),
+        runtimeIO: RuntimeIOClient? = nil,
+        sharePresentation: any SharePresentationProviding = SharePresentationProbe(),
+        resourcePresentation: RuntimeApplicationResourcePresentation? = nil,
         productMetadata: RuneScribeUIProductMetadata = .init(
             version: "1.0",
             buildNumber: "1"
         )
     ) async throws -> (session: RuneScribeUISession, runtime: RuneScribeRuntime) {
         let harness = try await makeApplicationClientHarness(
-            applicationService: applicationService
+            applicationService: applicationService,
+            sharePresentation: sharePresentation
         )
         let session = RuneScribeUISession(
             applicationClient: harness.client,
-            clipboardWriting: clipboard,
-            sharePresentation: sharePresentation,
-            splashVideoURL: splashVideoURL,
-            metalLibraryURL: metalLibraryURL,
+            runtimeIO: runtimeIO ?? harness.runtimeIO,
+            resourcePresentation: resourcePresentation
+                ?? RuntimeApplicationResourcePresentation(
+                    splashVideo: nil,
+                    metalLibrary: nil
+                ),
             productMetadata: productMetadata
         )
         return (session, harness.runtime)
@@ -1134,9 +1191,11 @@ final class RuneScribeUISessionTests: XCTestCase {
 
     private func makeApplicationClientHarness(
         applicationService: ControllableApplicationService,
-        startCoordinator: (any RuntimeStartCoordinating)? = nil
+        startCoordinator: (any RuntimeStartCoordinating)? = nil,
+        sharePresentation: any SharePresentationProviding = SharePresentationProbe()
     ) async throws -> (
         client: RuntimeApplicationClient,
+        runtimeIO: RuntimeIOClient,
         runtime: RuneScribeRuntime,
         capture: ApplicationClientCapture
     ) {
@@ -1154,6 +1213,10 @@ final class RuneScribeUISessionTests: XCTestCase {
                 platform: .macOS
             )
         }
+        try await runtime.installPlatformAdapter(
+            sharePresentation,
+            for: RuneScribeServiceKeys.sharePresentation
+        )
         try await runtime.register(
             manifest: TestCoreModule.manifest,
             factory: TestCoreModule.factory(applicationService: applicationService)
@@ -1163,7 +1226,12 @@ final class RuneScribeUISessionTests: XCTestCase {
             factory: TestApplicationClientModule.factory(capture: capture)
         )
         try await runtime.start()
-        return (try await capture.requireClient(), runtime, capture)
+        return (
+            try await capture.requireClient(),
+            try await capture.requireRuntimeIOClient(),
+            runtime,
+            capture
+        )
     }
 
     private func sourceSection(
@@ -1329,6 +1397,42 @@ private enum StubError: LocalizedError {
 }
 
 private actor LifetimeProbe {}
+
+private actor SharePresentationProbe: SharePresentationProviding {
+    private let owner: LifetimeProbe?
+    private let url: URL
+    private var requestedArtifactIDs: [ShareArtifactID] = []
+
+    init(
+        owner: LifetimeProbe? = nil,
+        url: URL = URL(fileURLWithPath: "/fixture/share.runescribe")
+    ) {
+        self.owner = owner
+        self.url = url
+    }
+
+    func presentationURL(for artifactID: ShareArtifactID) async throws -> URL {
+        _ = owner
+        requestedArtifactIDs.append(artifactID)
+        return url
+    }
+
+    func requests() -> [ShareArtifactID] {
+        requestedArtifactIDs
+    }
+}
+
+private actor ClipboardWriteCapture {
+    private var recordedValues: [String] = []
+
+    func append(_ value: String) {
+        recordedValues.append(value)
+    }
+
+    func values() -> [String] {
+        recordedValues
+    }
+}
 
 private actor InboundReceiveGate {
     private var suspended = false
@@ -1573,6 +1677,16 @@ private enum MissingResourceError: Error {
     case unavailable
 }
 
+private struct UnavailableInboundFileReader: InboundFileReader {
+    func read(
+        _ fileURL: URL,
+        requiresSecurityScope: Bool,
+        maximumByteCount: Int
+    ) async throws -> Data {
+        throw InboundFileReaderError.unavailable
+    }
+}
+
 private struct MissingApplicationResources: ApplicationResourceLocator {
     func data(for resource: ApplicationResource) async throws -> Data {
         throw MissingResourceError.unavailable
@@ -1647,7 +1761,9 @@ private enum TestApplicationClientModule {
             RuneScribeCapabilities.applicationCommands,
             RuneScribeCapabilities.applicationStateRead,
             RuneScribeCapabilities.rootUI,
+            RuneScribeCapabilities.shareUI,
         ],
+        requiredServices: [RuneScribeServiceIDs.sharePresentation],
         requiredModuleRoles: [RuneScribeRoles.core],
         consumedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs
     )
@@ -1662,9 +1778,11 @@ private enum TestApplicationClientModule {
             RuneScribeCapabilities.applicationCommands,
             RuneScribeCapabilities.applicationStateRead,
             RuneScribeCapabilities.rootUI,
+            RuneScribeCapabilities.shareUI,
         ],
         entryPoint: descriptor.entryPoint,
         runtimeRequirements: ModuleRuntimeRequirements(
+            requiredServices: [RuneScribeServiceIDs.sharePresentation],
             requiredModuleRoles: [RuneScribeRoles.core]
         ),
         defaultRole: RuneScribeRoles.primaryUI
@@ -1681,19 +1799,27 @@ private actor ApplicationClientCapture {
     typealias ClientFactory = @Sendable () async throws -> RuntimeApplicationClient
 
     private var client: RuntimeApplicationClient?
+    private var runtimeIOClient: RuntimeIOClient?
     private var clientFactory: ClientFactory?
 
     func store(
         _ client: RuntimeApplicationClient,
+        runtimeIOClient: RuntimeIOClient,
         clientFactory: @escaping ClientFactory
     ) {
         self.client = client
+        self.runtimeIOClient = runtimeIOClient
         self.clientFactory = clientFactory
     }
 
     func requireClient() throws -> RuntimeApplicationClient {
         guard let client else { throw StubError.unexpectedCommand }
         return client
+    }
+
+    func requireRuntimeIOClient() throws -> RuntimeIOClient {
+        guard let runtimeIOClient else { throw StubError.unexpectedCommand }
+        return runtimeIOClient
     }
 
     func makeClient() async throws -> RuntimeApplicationClient {
@@ -1708,8 +1834,10 @@ private struct ApplicationClientModule: RuneScribeModule {
 
     func start(context: ModuleContext) async throws {
         let client = try await context.applicationClient()
+        let runtimeIOClient = try await context.runtimeIOClient()
         await capture.store(
             client,
+            runtimeIOClient: runtimeIOClient,
             clientFactory: { try await context.applicationClient() }
         )
     }

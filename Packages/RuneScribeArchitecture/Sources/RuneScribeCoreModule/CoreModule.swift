@@ -19,7 +19,6 @@ public enum RuneScribeCoreModuleBootstrap {
             RuneScribeCapabilities.publishEvents,
             RuneScribeCapabilities.keychainStorage,
             RuneScribeCapabilities.protectedFileStorage,
-            RuneScribeCapabilities.inboundFileRead,
             RuneScribeCapabilities.shareArtifactStorage,
             RuneScribeCapabilities.resourceRead,
             RuneScribeCapabilities.fontRegistration,
@@ -32,7 +31,6 @@ public enum RuneScribeCoreModuleBootstrap {
         requiredServices: [
             RuneScribeServiceIDs.secureValueStore,
             RuneScribeServiceIDs.protectedFileStore,
-            RuneScribeServiceIDs.inboundFileReader,
             RuneScribeServiceIDs.shareArtifactStore,
             RuneScribeServiceIDs.applicationResourceLocator,
             RuneScribeServiceIDs.systemFontRegistrar,
@@ -40,6 +38,9 @@ public enum RuneScribeCoreModuleBootstrap {
             RuneScribeServiceIDs.clipboardRead,
             RuneScribeServiceIDs.clock,
             RuneScribeServiceIDs.uuid,
+        ],
+        requiredResources: [
+            .bundledRuneFont,
         ],
         publishedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(
             RuntimeApplicationEndpointCatalog.ingressEndpointIDs
@@ -61,41 +62,20 @@ public enum RuneScribeCoreModuleBootstrap {
     }
 
     public static func factory() -> AnyModuleFactory {
-        AnyModuleFactory(descriptor: descriptor) {
-            RuneScribeCoreModule()
-        }
+        AnyModuleFactory(moduleType: RuneScribeCoreModule.self)
     }
 }
 
-public struct RuneScribeCoreModule: RuneScribeModule {
-    public let descriptor = RuneScribeCoreModuleBootstrap.descriptor
+public struct RuneScribeCoreModule: RuntimeConstructibleModule {
+    public static let moduleDescriptor = RuneScribeCoreModuleBootstrap.descriptor
+    public let descriptor = Self.moduleDescriptor
     private let lifecycle = RuneScribeCoreModuleLifecycle()
 
     public init() {}
 
     public func start(context: ModuleContext) async throws {
-        let secureValueStore = try await context.secureValueStoreClient()
-        let protectedFileStore = try await context.protectedFileStoreClient()
-        let inboundFileReader = try await context.inboundFileReaderClient()
-        let shareArtifactStore = try await context.shareArtifactStoreClient()
-        let applicationResourceLocator = try await context.applicationResourceClient()
-        let systemFontRegistrar = try await context.systemFontRegistrarClient()
-        let contactAccess = try await context.contactAccessClient()
-        let clipboardReading = try await context.clipboardReadingClient()
-        let clock = try await context.clockClient()
-        let uuid = try await context.uuidClient()
-        let service = RuneScribeCoreApplicationService(
-            secureValueStore: secureValueStore,
-            protectedFileStore: protectedFileStore,
-            inboundFileReader: inboundFileReader,
-            shareArtifactStore: shareArtifactStore,
-            applicationResourceLocator: applicationResourceLocator,
-            systemFontRegistrar: systemFontRegistrar,
-            contactAccess: contactAccess,
-            clipboardReading: clipboardReading,
-            clock: clock,
-            uuid: uuid
-        )
+        let runtimeIO = try await context.runtimeIOClient()
+        let service = RuneScribeCoreApplicationService(runtimeIO: runtimeIO)
         try await context.registerApplicationEndpoints(service)
         try await context.registerInboundInputEndpoint(service)
         await lifecycle.store(service)

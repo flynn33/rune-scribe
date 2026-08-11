@@ -12,14 +12,13 @@ final class RuneScribeUISession: ObservableObject {
     @Published var messageErrorMessage: String?
     @Published private(set) var route: RuneScribeUIRouteRequest?
 
-    let splashVideoURL: URL?
-    let metalLibraryURL: URL?
+    let resourcePresentation: RuntimeApplicationResourcePresentation
+    let inboundFileImportSession: RuntimeInboundFileImportSession
     let appVersion: String
     let buildNumber: String
 
     private var applicationClientHandle: RuntimeApplicationClient?
-    private var clipboardWritingHandle: (any ClipboardWriting)?
-    private var sharePresentationHandle: OpaqueSharePresentationProvider?
+    private var runtimeIOHandle: RuntimeIOClient?
 
     var contactSystemIdentifiers: [UUID: String] = [:]
     private var stateTask: Task<Void, Never>?
@@ -28,17 +27,15 @@ final class RuneScribeUISession: ObservableObject {
 
     init(
         applicationClient: RuntimeApplicationClient,
-        clipboardWriting: any ClipboardWriting,
-        sharePresentation: OpaqueSharePresentationProvider,
-        splashVideoURL: URL?,
-        metalLibraryURL: URL?,
+        runtimeIO: RuntimeIOClient,
+        inboundFileImportSession: RuntimeInboundFileImportSession = .unavailable,
+        resourcePresentation: RuntimeApplicationResourcePresentation,
         productMetadata: RuneScribeUIProductMetadata
     ) {
         applicationClientHandle = applicationClient
-        clipboardWritingHandle = clipboardWriting
-        sharePresentationHandle = sharePresentation
-        self.splashVideoURL = splashVideoURL
-        self.metalLibraryURL = metalLibraryURL
+        runtimeIOHandle = runtimeIO
+        self.inboundFileImportSession = inboundFileImportSession
+        self.resourcePresentation = resourcePresentation
         appVersion = productMetadata.version
         buildNumber = productMetadata.buildNumber
     }
@@ -93,8 +90,8 @@ final class RuneScribeUISession: ObservableObject {
         route = nil
         contactSystemIdentifiers.removeAll()
         applicationClientHandle = nil
-        clipboardWritingHandle = nil
-        sharePresentationHandle = nil
+        runtimeIOHandle = nil
+        await resourcePresentation.close()
         await stateTask?.value
         await menuTask?.value
     }
@@ -172,12 +169,15 @@ final class RuneScribeUISession: ObservableObject {
         route = nil
     }
 
-    func copyToClipboard(_ value: String) async {
+    @discardableResult
+    func copyToClipboard(_ value: String) async -> Bool {
         do {
-            try await requireClipboardWriter().setString(value)
+            try await requireRuntimeIOClient().setClipboardString(value)
             lastError = nil
+            return true
         } catch {
             lastError = Self.message(for: error)
+            return false
         }
     }
 
@@ -228,20 +228,13 @@ final class RuneScribeUISession: ObservableObject {
         return applicationClientHandle
     }
 
-    func requireSharePresentation() throws -> OpaqueSharePresentationProvider {
-        guard let sharePresentationHandle else {
-            throw OpaqueSharePresentationError.unavailable
-        }
-        return sharePresentationHandle
-    }
-
-    private func requireClipboardWriter() throws -> any ClipboardWriting {
-        guard let clipboardWritingHandle else {
+    func requireRuntimeIOClient() throws -> RuntimeIOClient {
+        guard let runtimeIOHandle else {
             throw RuneScribeProductError.failure(
                 RuneScribeFailureDTO(code: .temporarilyUnavailable)
             )
         }
-        return clipboardWritingHandle
+        return runtimeIOHandle
     }
 
     static func message(for error: Error) -> String {

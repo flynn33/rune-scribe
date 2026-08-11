@@ -1,5 +1,6 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeUIPresentationContracts
 
 actor ModuleContextLease {
     let moduleID: ModuleIdentifier
@@ -30,8 +31,10 @@ public struct ModuleContext: Sendable {
     private let messages: DirectedMessageRouter
     private let dispatcher: RuntimeOperationDispatcher
     private let moduleGeneration: UInt64
-    let platformBridge: RuntimePlatformBridge
-    let platformGeneration: UInt64
+    private let runtimeIOGateway: RuntimeIOGateway
+    private let runtimeIOGeneration: UInt64
+    private let rootPresentationGateway: RuntimeRootPresentationGateway
+    private let rootPresentationGeneration: UInt64
     private let environment: RuntimeEnvironment
     let lease: ModuleContextLease
 
@@ -42,8 +45,10 @@ public struct ModuleContext: Sendable {
         messages: DirectedMessageRouter,
         dispatcher: RuntimeOperationDispatcher,
         moduleGeneration: UInt64,
-        platformBridge: RuntimePlatformBridge,
-        platformGeneration: UInt64,
+        runtimeIOGateway: RuntimeIOGateway,
+        runtimeIOGeneration: UInt64,
+        rootPresentationGateway: RuntimeRootPresentationGateway,
+        rootPresentationGeneration: UInt64,
         environment: RuntimeEnvironment,
         lease: ModuleContextLease
     ) {
@@ -55,8 +60,10 @@ public struct ModuleContext: Sendable {
         self.messages = messages
         self.dispatcher = dispatcher
         self.moduleGeneration = moduleGeneration
-        self.platformBridge = platformBridge
-        self.platformGeneration = platformGeneration
+        self.runtimeIOGateway = runtimeIOGateway
+        self.runtimeIOGeneration = runtimeIOGeneration
+        self.rootPresentationGateway = rootPresentationGateway
+        self.rootPresentationGeneration = rootPresentationGeneration
         self.environment = environment
         self.lease = lease
     }
@@ -146,37 +153,25 @@ public struct ModuleContext: Sendable {
         return RuntimeStateClient(dispatcher: dispatcher, lease: clientLease)
     }
 
-    func requirePlatformService(_ serviceID: ServiceIdentifier) async throws {
+    public func runtimeIOClient() async throws -> RuntimeIOClient {
         try await lease.requireActive()
-        guard descriptor.requiredServices.contains(serviceID) else {
-            throw RuneScribeRuntimeError.serviceNotDeclared(
-                moduleID: moduleID,
-                service: serviceID
-            )
-        }
-        guard let rule = policy.services.rule(for: serviceID) else {
-            throw RuneScribeRuntimeError.serviceAccessDenied(
-                moduleID: moduleID,
-                service: serviceID
-            )
-        }
-        guard descriptor.requestedCapabilities.contains(rule.requiredCapability) else {
-            throw RuneScribeRuntimeError.serviceCapabilityMissing(
-                moduleID: moduleID,
-                service: serviceID
-            )
-        }
-        guard policy.capabilities.allows(rule.requiredCapability, for: role),
-              rule.consumerRoles.contains(role)
-        else {
-            throw RuneScribeRuntimeError.serviceAccessDenied(
-                moduleID: moduleID,
-                service: serviceID
-            )
-        }
-        guard await platformBridge.contains(serviceID) else {
-            throw RuneScribeRuntimeError.serviceUnavailable(serviceID)
-        }
+        return try await runtimeIOGateway.makeClient(
+            sourceModuleID: moduleID,
+            sourceModuleGeneration: moduleGeneration,
+            runtimeGeneration: runtimeIOGeneration
+        )
+    }
+
+    public func rootPresentationClient() async throws
+        -> RuntimeRootPresentationClient
+    {
+        try await lease.requireActive()
+        return try await rootPresentationGateway.makeClient(
+            sourceModuleID: moduleID,
+            sourceModuleGeneration: moduleGeneration,
+            runtimeGeneration: rootPresentationGeneration,
+            policy: policy
+        )
     }
 
     public func publishEvent<Payload: Encodable & Sendable>(
@@ -224,6 +219,14 @@ public struct ModuleContext: Sendable {
     }
 
     func invalidate() async {
+        await rootPresentationGateway.invalidateModule(
+            moduleID,
+            generation: moduleGeneration
+        )
+        await runtimeIOGateway.invalidateModule(
+            moduleID,
+            generation: moduleGeneration
+        )
         await lease.deactivate()
         await events.removeSubscriptions(ownedBy: moduleID)
         await messages.removeDestination(ownedBy: moduleID)

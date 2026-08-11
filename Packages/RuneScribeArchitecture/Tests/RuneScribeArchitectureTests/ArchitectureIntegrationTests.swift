@@ -22,17 +22,20 @@ final class ArchitectureIntegrationTests: XCTestCase {
 
         try await runtime.register(
             manifest: RuneScribeUIModuleBootstrap.manifest(),
-            factory: RuneScribeUIModuleBootstrap.factory(
-                dependencies: RuneScribeUIDependencies(
-                    rootPresentationStore: rootStore
-                )
-            )
+            factory: RuneScribeUIModuleBootstrap.factory()
         )
         try await runtime.register(
             manifest: RuneScribeCoreModuleBootstrap.manifest(),
             factory: RuneScribeCoreModuleBootstrap.factory()
         )
         try await registerHostPlatformServices(on: runtime)
+        let rootPresentationAdapter = await MainActor.run {
+            rootStore.runtimeHostAdapter(productMetadata: .unavailable)
+        }
+        try await runtime.installStandardPort(
+            rootPresentationAdapter,
+            for: .standard
+        )
 
         try await runtime.start()
         let running = await runtime.snapshot()
@@ -65,7 +68,7 @@ final class ArchitectureIntegrationTests: XCTestCase {
         let secureValues: any SecureValueStore = InMemorySecureValueStore()
         let protectedFiles: any ProtectedFileStore = InMemoryProtectedFileStore()
         let inboundFiles: any InboundFileReader = InMemoryInboundFileReader()
-        let shareArtifacts: any ShareArtifactStore = InMemoryShareArtifactStore()
+        let shareArtifacts = InMemoryShareArtifactStore()
         let resources: any ApplicationResourceLocator = MappedApplicationResourceLocator(
             locations: [
                 .splashVideo: URL(fileURLWithPath: "/fixture/splash.mp4"),
@@ -82,43 +85,47 @@ final class ArchitectureIntegrationTests: XCTestCase {
             UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
         )
 
-        try await runtime.registerHostService(
+        try await runtime.installPlatformAdapter(
             secureValues,
             for: RuneScribeServiceKeys.secureValueStore
         )
-        try await runtime.registerHostService(
+        try await runtime.installPlatformAdapter(
             protectedFiles,
             for: RuneScribeServiceKeys.protectedFileStore
         )
-        try await runtime.registerHostService(
+        try await runtime.installPlatformAdapter(
             inboundFiles,
             for: RuneScribeServiceKeys.inboundFileReader
         )
-        try await runtime.registerHostService(
+        try await runtime.installPlatformAdapter(
             shareArtifacts,
             for: RuneScribeServiceKeys.shareArtifactStore
         )
-        try await runtime.registerHostService(
+        try await runtime.installPlatformAdapter(
+            shareArtifacts,
+            for: RuneScribeServiceKeys.sharePresentation
+        )
+        try await runtime.installPlatformAdapter(
             resources,
             for: RuneScribeServiceKeys.applicationResourceLocator
         )
-        try await runtime.registerHostService(
+        try await runtime.installPlatformAdapter(
             fonts,
             for: RuneScribeServiceKeys.systemFontRegistrar
         )
-        try await runtime.registerHostService(
+        try await runtime.installPlatformAdapter(
             contacts,
             for: RuneScribeServiceKeys.contactAccess
         )
-        try await runtime.registerHostService(
+        try await runtime.installPlatformAdapter(
             clipboardReader,
             for: RuneScribeServiceKeys.clipboardRead
         )
-        try await runtime.registerHostService(
+        try await runtime.installPlatformAdapter(
             clipboardWriter,
             for: RuneScribeServiceKeys.clipboardWrite
         )
-        try await runtime.registerHostService(clock, for: RuneScribeServiceKeys.clock)
-        try await runtime.registerHostService(uuid, for: RuneScribeServiceKeys.uuid)
+        try await runtime.installPlatformAdapter(clock, for: RuneScribeServiceKeys.clock)
+        try await runtime.installPlatformAdapter(uuid, for: RuneScribeServiceKeys.uuid)
     }
 }

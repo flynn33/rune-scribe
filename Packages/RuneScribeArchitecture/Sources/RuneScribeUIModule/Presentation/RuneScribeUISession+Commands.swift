@@ -1,5 +1,6 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeUIRuntime
 
 extension RuneScribeUISession {
     @discardableResult
@@ -111,22 +112,28 @@ extension RuneScribeUISession {
     }
 
     func shareTransfer(for id: ShareArtifactID) async throws -> OpaqueShareTransfer {
-        try await requireSharePresentation().transfer(for: id)
+        let runtimeIO = try requireRuntimeIOClient()
+        let presentationSession = try await runtimeIO.sharePresentationSession(
+            artifactID: id
+        )
+        return try await OpaqueShareTransfer.open(
+            artifactID: id,
+            session: presentationSession
+        )
     }
 
-    func importFile(
-        _ url: URL,
-        source: InboundDeliverySourceDTO = .fileImporter,
-        isColdStart: Bool = false
-    ) async throws -> ImportResultDTO {
-        try await perform {
-            try await requireApplicationClient().importFile(
-                InboundFileDTO(
-                    metadata: inboundMetadata(source: source, isColdStart: isColdStart),
-                    fileURL: url
-                )
-            )
-        }
+    func textShareTransfer(
+        _ text: String,
+        artifactID: ShareArtifactID
+    ) async throws -> OpaqueShareTransfer {
+        let runtimeIO = try requireRuntimeIOClient()
+        let presentationSession = try await runtimeIO.textSharePresentationSession(
+            text
+        )
+        return try await OpaqueShareTransfer.open(
+            artifactID: artifactID,
+            session: presentationSession
+        )
     }
 
     func importURL(
@@ -154,19 +161,6 @@ extension RuneScribeUISession {
             importErrorMessage = nil
         } catch {
             importErrorMessage = lastError ?? "This isn't a valid Rune Scribe cipher link."
-        }
-    }
-
-    func ingest(
-        fileURL: URL,
-        source: InboundDeliverySourceDTO = .fileImporter,
-        isColdStart: Bool = false
-    ) async {
-        do {
-            _ = try await importFile(fileURL, source: source, isColdStart: isColdStart)
-            importErrorMessage = nil
-        } catch {
-            importErrorMessage = lastError ?? "This isn't a valid Rune Scribe cipher file."
         }
     }
 

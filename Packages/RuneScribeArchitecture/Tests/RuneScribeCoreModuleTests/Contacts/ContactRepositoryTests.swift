@@ -3,6 +3,7 @@ import Foundation
 import RuneScribeContracts
 import Synchronization
 @testable import RuneScribeCoreModule
+@testable import RuneScribeRuntimeCore
 import XCTest
 
 final class ContactRepositoryTests: XCTestCase {
@@ -579,15 +580,67 @@ final class ContactManagerCoreTests: XCTestCase {
             secureValueStore: secureStore,
             protectedFileStore: files
         )
+        let contactAccess = ContactAccessFake(status: .authorized)
+        let clock = ContactFixedClock(date)
+        let uuid = ContactSequenceUUIDProvider(ids)
         return (
             ContactManager(
                 repository: repository,
-                contactAccess: ContactAccessFake(status: .authorized),
-                clock: ContactFixedClock(date),
-                uuid: ContactSequenceUUIDProvider(ids)
+                runtimeIO: RuntimeIOClient(
+                    now: { clock.now() },
+                    nextUUID: { uuid.nextUUID() },
+                    contactAuthorizationStatus: {
+                        await contactAccess.authorizationStatus()
+                    },
+                    requestContactAccess: {
+                        try await contactAccess.requestAccess()
+                    },
+                    fetchSystemContacts: {
+                        try await contactAccess.fetchContacts()
+                    }
+                )
             ),
             repository,
             files
+        )
+    }
+}
+
+private extension EncryptedContactRepository {
+    init(
+        secureValueStore: any SecureValueStore,
+        protectedFileStore: any ProtectedFileStore
+    ) {
+        self.init(
+            runtimeIO: RuntimeIOClient(
+                secureValueData: {
+                    try await secureValueStore.data(service: $0, account: $1)
+                },
+                setSecureValue: {
+                    try await secureValueStore.set($0, service: $1, account: $2)
+                },
+                deleteSecureValue: {
+                    try await secureValueStore.delete(service: $0, account: $1)
+                },
+                readProtectedFile: {
+                    try await protectedFileStore.read(relativePath: $0)
+                },
+                writeProtectedFile: {
+                    try await protectedFileStore.write($0, relativePath: $1)
+                },
+                removeProtectedFile: {
+                    try await protectedFileStore.remove(relativePath: $0)
+                },
+                protectedFileExists: {
+                    try await protectedFileStore.exists(relativePath: $0)
+                },
+                protectedFileContents: {
+                    try await protectedFileStore.contents(
+                        of: $0,
+                        matchingExtension: $1
+                    )
+                }
+            )
         )
     }
 }

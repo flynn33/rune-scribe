@@ -1,5 +1,6 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 
 enum ContactManagerError: Error, Equatable, Sendable {
     case contactNotFound
@@ -64,23 +65,17 @@ struct MessageContactAssociationRecovery: Sendable {
 /// never needs access to key-bearing cipher values.
 actor ContactManager: CoreMessageContactAssociating {
     private let repository: EncryptedContactRepository
-    private let contactAccess: any ContactAccessService
-    private let clock: any ClockProviding
-    private let uuid: any UUIDProviding
+    private let runtimeIO: RuntimeIOClient
 
     private var mutationInProgress = false
     private var mutationWaiters: [CheckedContinuation<Void, Never>] = []
 
     init(
         repository: EncryptedContactRepository,
-        contactAccess: any ContactAccessService,
-        clock: any ClockProviding,
-        uuid: any UUIDProviding
+        runtimeIO: RuntimeIOClient
     ) {
         self.repository = repository
-        self.contactAccess = contactAccess
-        self.clock = clock
-        self.uuid = uuid
+        self.runtimeIO = runtimeIO
     }
 
     func snapshot() async throws -> ContactBook {
@@ -88,15 +83,15 @@ actor ContactManager: CoreMessageContactAssociating {
     }
 
     func authorizationStatus() async -> ContactAuthorizationDTO {
-        await contactAccess.authorizationStatus()
+        (try? await runtimeIO.contactAuthorizationStatus()) ?? .denied
     }
 
     func requestAccess() async throws -> Bool {
-        try await contactAccess.requestAccess()
+        try await runtimeIO.requestContactAccess()
     }
 
     func fetchSystemContacts() async throws -> [SystemContactDTO] {
-        try await contactAccess.fetchContacts()
+        try await runtimeIO.fetchSystemContacts()
     }
 
     func create(_ command: CreateContactCommand) async throws -> ContactMutation<Contact> {
@@ -105,12 +100,12 @@ actor ContactManager: CoreMessageContactAssociating {
 
         let current = try await repository.snapshot()
         let contact = Contact(
-            id: uuid.nextUUID(),
+            id: try await runtimeIO.nextUUID(),
             displayName: command.displayName,
             phones: command.phoneNumbers,
             emails: command.emailAddresses,
             source: .manual,
-            createdAt: clock.now()
+            createdAt: try await runtimeIO.now()
         )
         let committed = try await repository.replace(current.adding(contact))
         return ContactMutation(value: contact, book: committed)
@@ -147,13 +142,13 @@ actor ContactManager: CoreMessageContactAssociating {
             }
             added.append(
                 Contact(
-                    id: uuid.nextUUID(),
+                    id: try await runtimeIO.nextUUID(),
                     displayName: source.displayName,
                     phones: source.phoneNumbers,
                     emails: source.emailAddresses,
                     appleContactID: source.systemIdentifier,
                     source: .imported,
-                    createdAt: clock.now()
+                    createdAt: try await runtimeIO.now()
                 )
             )
         }
@@ -222,10 +217,10 @@ actor ContactManager: CoreMessageContactAssociating {
             return PreparedMessageContact(contact: existing, requiresCommit: false)
         }
         let contact = Contact(
-            id: uuid.nextUUID(),
+            id: try await runtimeIO.nextUUID(),
             displayName: displayName,
             source: .imported,
-            createdAt: clock.now()
+            createdAt: try await runtimeIO.now()
         )
         return PreparedMessageContact(contact: contact, requiresCommit: true)
     }

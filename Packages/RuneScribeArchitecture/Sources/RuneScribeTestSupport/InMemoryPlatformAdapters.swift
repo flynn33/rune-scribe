@@ -124,9 +124,9 @@ public enum InMemoryShareArtifactStoreError: Error, Equatable, Sendable {
     case unknownArtifact
 }
 
-public actor InMemoryShareArtifactStore: ShareArtifactStore {
+public actor InMemoryShareArtifactStore: ShareArtifactStore, SharePresentationProviding {
     private struct Entry: Sendable {
-        let file: ScopedShareFile
+        let fileURL: URL
         let data: Data
     }
 
@@ -140,23 +140,21 @@ public actor InMemoryShareArtifactStore: ShareArtifactStore {
         artifactID: ShareArtifactID,
         filename: String,
         fileExtension: String
-    ) async throws -> ScopedShareFile {
+    ) async throws {
         guard entries[artifactID] == nil, links[artifactID] == nil else {
             throw InMemoryShareArtifactStoreError.duplicateIdentifier
         }
-        let file = ScopedShareFile(
-            artifactID: artifactID,
-            fileURL: URL(fileURLWithPath: "/in-memory-share/\(artifactID.rawValue.uuidString)/\(filename).\(fileExtension)")
+        let fileURL = URL(
+            fileURLWithPath: "/in-memory-share/\(artifactID.rawValue.uuidString)/\(filename).\(fileExtension)"
         )
-        entries[artifactID] = Entry(file: file, data: data)
-        return file
+        entries[artifactID] = Entry(fileURL: fileURL, data: data)
     }
 
-    public func remove(_ file: ScopedShareFile) async throws {
-        guard entries[file.artifactID]?.file == file else {
+    public func remove(artifactID: ShareArtifactID) async throws {
+        guard entries[artifactID] != nil else {
             throw InMemoryShareArtifactStoreError.unknownArtifact
         }
-        entries.removeValue(forKey: file.artifactID)
+        entries.removeValue(forKey: artifactID)
     }
 
     public func storeLink(_ url: URL, artifactID: ShareArtifactID) async throws {
@@ -187,6 +185,16 @@ public actor InMemoryShareArtifactStore: ShareArtifactStore {
 
     public func link(for artifactID: ShareArtifactID) -> URL? {
         links[artifactID]
+    }
+
+    public func presentationURL(for artifactID: ShareArtifactID) async throws -> URL {
+        if let fileURL = entries[artifactID]?.fileURL {
+            return fileURL
+        }
+        if let linkURL = links[artifactID] {
+            return linkURL
+        }
+        throw InMemoryShareArtifactStoreError.unknownArtifact
     }
 }
 

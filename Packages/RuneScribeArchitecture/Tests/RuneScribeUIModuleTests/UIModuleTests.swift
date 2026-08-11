@@ -1,5 +1,5 @@
 import RuneScribeContracts
-import RuneScribeRuntimeCore
+@_spi(RuntimeTesting) import RuneScribeRuntimeCore
 @testable import RuneScribeUIModule
 import RuneScribeUIRuntime
 import SwiftUI
@@ -30,6 +30,7 @@ final class UIModuleTests: XCTestCase {
             [
                 RuneScribeServiceIDs.applicationResourceLocator,
                 RuneScribeServiceIDs.clipboardWrite,
+                RuneScribeServiceIDs.sharePresentation,
             ]
         )
         XCTAssertEqual(
@@ -38,21 +39,14 @@ final class UIModuleTests: XCTestCase {
         )
     }
 
-    func testFactoryCreatesFreshModulesOnDemandWithoutPresentingRoot() throws {
-        let rootStore = RootViewPresentationStore()
-        let factory = RuneScribeUIModuleBootstrap.factory(
-            dependencies: RuneScribeUIDependencies(
-                rootPresentationStore: rootStore
-            )
-        )
+    func testZeroArgumentFactoryCreatesFreshModulesOnDemand() throws {
+        let factory = RuneScribeUIModuleBootstrap.factory()
 
-        XCTAssertEqual(rootStore.state, .booting)
         let first = try XCTUnwrap(factory.makeModule() as? RuneScribeUIModule)
-        XCTAssertEqual(rootStore.state, .booting)
         let second = try XCTUnwrap(factory.makeModule() as? RuneScribeUIModule)
 
         XCTAssertFalse(first === second)
-        XCTAssertEqual(rootStore.state, .booting)
+        XCTAssertEqual(factory.descriptor, RuneScribeUIModuleBootstrap.descriptor)
     }
 
     func testRootContributionSelectorRejectsZeroAndMultiple() {
@@ -79,39 +73,148 @@ final class UIModuleTests: XCTestCase {
         let link = try XCTUnwrap(
             URL(string: "runescribe://import?v=3&p=synthetic")
         )
-        let vault = TestOpaqueLinkVault(link: link)
-        let provider = OpaqueSharePresentationProvider { requestedID in
-            try await vault.load(requestedID)
-        }
+        let vault = TestOpaqueLinkVault(artifactID: artifactID, link: link)
+        let capture = TestSharePresentationClientCapture()
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: TestSharePresentationModule.moduleVersion,
+            platform: .macOS
+        )
+        try await runtime.installPlatformAdapter(
+            vault,
+            for: RuneScribeServiceKeys.sharePresentation
+        )
+        try await runtime.register(
+            manifest: TestSharePresentationModule.manifest,
+            factory: TestSharePresentationModule.factory(capture: capture)
+        )
+        try await runtime.start()
 
-        let transfer = try await provider.transfer(for: artifactID)
+        let runtimeIO = try await capture.requireClient()
+        let session = try await runtimeIO.sharePresentationSession(
+            artifactID: artifactID
+        )
+        let transfer = try await OpaqueShareTransfer.open(
+            artifactID: artifactID,
+            session: session
+        )
         XCTAssertEqual(transfer.artifactID, artifactID)
         XCTAssertNotNil(transfer.qrCodeImage())
 
         await vault.revoke()
         do {
-            _ = try await provider.transfer(for: artifactID)
+            let revokedSession = try await runtimeIO.sharePresentationSession(
+                artifactID: artifactID
+            )
+            _ = try await OpaqueShareTransfer.open(
+                artifactID: artifactID,
+                session: revokedSession
+            )
             XCTFail("A revoked opaque link must not resolve again")
         } catch {
             XCTAssertEqual(error as? TestOpaqueLinkVault.Error, .unavailable)
         }
+
+        await transfer.close()
+        XCTAssertFalse(transfer.isAvailable)
+        XCTAssertNil(transfer.qrCodeImage())
+        await runtime.stop()
     }
 }
 
-private actor TestOpaqueLinkVault {
+private actor TestOpaqueLinkVault: SharePresentationProviding {
     enum Error: Swift.Error, Equatable { case unavailable }
+    private let artifactID: ShareArtifactID
     private var link: URL?
 
-    init(link: URL) {
+    init(artifactID: ShareArtifactID, link: URL) {
+        self.artifactID = artifactID
         self.link = link
     }
 
-    func load(_ artifactID: ShareArtifactID) throws -> URL {
-        guard let link else { throw Error.unavailable }
+    func presentationURL(
+        for requestedArtifactID: ShareArtifactID
+    ) async throws -> URL {
+        guard requestedArtifactID == artifactID, let link else {
+            throw Error.unavailable
+        }
         return link
     }
 
     func revoke() {
         link = nil
     }
+}
+
+private actor TestSharePresentationClientCapture {
+    private var client: RuntimeIOClient?
+
+    func store(_ client: RuntimeIOClient) {
+        self.client = client
+    }
+
+    func requireClient() throws -> RuntimeIOClient {
+        guard let client else { throw TestSharePresentationCaptureError.missingClient }
+        return client
+    }
+}
+
+private enum TestSharePresentationCaptureError: Error {
+    case missingClient
+}
+
+private enum TestSharePresentationModule {
+    static let moduleID: ModuleIdentifier = "com.runescribe.test.share-presentation"
+    static let moduleVersion = SemanticVersion(
+        major: UInt(1),
+        minor: UInt(0),
+        patch: UInt(0)
+    )
+    static let descriptor = ModuleDescriptor(
+        moduleID: moduleID,
+        moduleVersion: moduleVersion,
+        kind: .ui,
+        entryPoint: "RuneScribeTestSharePresentationModule",
+        role: RuneScribeRoles.primaryUI,
+        requestedCapabilities: [
+            RuneScribeCapabilities.rootUI,
+            RuneScribeCapabilities.shareUI,
+        ],
+        requiredServices: [RuneScribeServiceIDs.sharePresentation]
+    )
+    static let manifest = ModuleManifest(
+        runtimeVersion: moduleVersion,
+        moduleID: moduleID,
+        displayName: "Rune Scribe Test Share Presentation",
+        moduleVersion: moduleVersion,
+        moduleType: .ui,
+        supportedPlatforms: [.iOS, .macOS],
+        capabilitiesRequested: [
+            RuneScribeCapabilities.rootUI,
+            RuneScribeCapabilities.shareUI,
+        ],
+        entryPoint: descriptor.entryPoint,
+        runtimeRequirements: ModuleRuntimeRequirements(
+            requiredServices: [RuneScribeServiceIDs.sharePresentation]
+        ),
+        defaultRole: RuneScribeRoles.primaryUI
+    )
+
+    static func factory(
+        capture: TestSharePresentationClientCapture
+    ) -> AnyModuleFactory {
+        AnyModuleFactory(descriptor: descriptor) {
+            TestSharePresentationModuleInstance(capture: capture)
+        }
+    }
+}
+
+private struct TestSharePresentationModuleInstance: RuneScribeModule {
+    let descriptor = TestSharePresentationModule.descriptor
+    let capture: TestSharePresentationClientCapture
+
+    func start(context: ModuleContext) async throws {
+        await capture.store(try await context.runtimeIOClient())
+    }
+
+    func stop() async {}
 }

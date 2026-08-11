@@ -207,6 +207,18 @@ required_products = Array(ratchet["requiredProducts"])
 test_only_products = Array(ratchet["testOnlyProducts"])
 all_products = required_products + test_only_products
 errors << "ratchet product names must be unique" unless all_products.uniq == all_products
+presentation_contract_products = ["RuneScribeUIPresentationContracts"]
+architecture_package_products = required_products.dup
+runtime_core_product_index = architecture_package_products.index("RuneScribeRuntimeCore")
+if runtime_core_product_index
+  architecture_package_products.insert(runtime_core_product_index, *presentation_contract_products)
+else
+  errors << "ratchet requiredProducts must include RuneScribeRuntimeCore"
+end
+architecture_package_products.concat(test_only_products)
+unless architecture_package_products.uniq == architecture_package_products
+  errors << "architecture package product names must be unique"
+end
 required_module_ids = ratchet.fetch("requiredModuleIDs", {})
 metrics_policy = ratchet.fetch("metrics", {})
 
@@ -410,43 +422,51 @@ if package_present
       products = Array(package["products"])
       product_names = products.map { |product| product["name"] }
       missing_products = required_products - product_names
+      missing_presentation_contract_products = presentation_contract_products - product_names
       missing_test_products = test_only_products - product_names
-      extra_products = product_names - all_products
+      extra_products = product_names - architecture_package_products
       errors << "architecture package missing products: #{missing_products.join(', ')}" unless missing_products.empty?
+      unless missing_presentation_contract_products.empty?
+        errors << "architecture package missing presentation-contract products: #{missing_presentation_contract_products.join(', ')}"
+      end
       errors << "architecture package missing test-only products: #{missing_test_products.join(', ')}" unless missing_test_products.empty?
       errors << "architecture package has unexpected products: #{extra_products.join(', ')}" unless extra_products.empty?
-      errors << "architecture package product order or duplication differs" unless product_names == all_products
+      unless product_names == architecture_package_products
+        errors << "architecture package product order or duplication differs"
+      end
 
       products.each do |product|
-        next unless all_products.include?(product["name"])
+        next unless architecture_package_products.include?(product["name"])
         targets = Array(product["targets"])
         errors << "product #{product['name']} must expose only target #{product['name']}" unless targets == [product["name"]]
       end
 
       targets = Array(package["targets"]).to_h { |target| [target["name"], target] }
-      missing_targets = all_products - targets.keys
+      missing_targets = architecture_package_products - targets.keys
       errors << "architecture package missing targets: #{missing_targets.join(', ')}" unless missing_targets.empty?
 
       allowed_dependencies = {
         "RuneScribeContracts" => [],
-        "RuneScribeRuntimeCore" => ["RuneScribeContracts"],
-        "RuneScribeUIRuntime" => ["RuneScribeContracts"],
+        "RuneScribeUIPresentationContracts" => ["RuneScribeContracts"],
+        "RuneScribeRuntimeCore" => ["RuneScribeContracts", "RuneScribeUIPresentationContracts"],
+        "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"],
+        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
       required_dependencies = {
         "RuneScribeContracts" => [],
-        "RuneScribeRuntimeCore" => [],
-        "RuneScribeUIRuntime" => ["RuneScribeContracts"],
+        "RuneScribeUIPresentationContracts" => ["RuneScribeContracts"],
+        "RuneScribeRuntimeCore" => ["RuneScribeContracts", "RuneScribeUIPresentationContracts"],
+        "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"],
+        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
 
-      all_products.each do |target_name|
+      architecture_package_products.each do |target_name|
         next unless targets[target_name]
         dependencies = Array(targets[target_name]["dependencies"]).map { |dependency| dependency_name(dependency) }.compact
         forbidden = dependencies - allowed_dependencies.fetch(target_name)
@@ -483,13 +503,17 @@ end
 
 module_import_policy = {
   "RuneScribeContracts" => %w[Foundation],
-  "RuneScribeRuntimeCore" => %w[Foundation RuneScribeContracts],
-  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts],
+  "RuneScribeUIPresentationContracts" => %w[Foundation SwiftUI RuneScribeContracts],
+  "RuneScribeRuntimeCore" => %w[Foundation RuneScribeContracts RuneScribeUIPresentationContracts],
+  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts AVFoundation AppKit Contacts ContactsUI CoreImage CoreTransferable LinkPresentation MessageUI Metal MetalKit Observation UIKit UniformTypeIdentifiers],
   "RuneScribePlatform" => %w[Foundation Darwin RuneScribeContracts Security Contacts CoreText AppKit UIKit],
   "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto RuneScribeContracts RuneScribeRuntimeCore],
-  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIRuntime AppKit UIKit LinkPresentation MessageUI Metal MetalKit CoreImage CoreTransferable AVFoundation Contacts ContactsUI UniformTypeIdentifiers],
+  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
   "RuneScribeTestSupport" => %w[Foundation RuneScribeContracts]
 }
+runtime_integrity_source = architecture_package.join(
+  "Sources/RuneScribeRuntimeCore/RuntimeBundledResourceIntegrity.swift"
+).to_s
 module_import_policy.each do |product, allowed_imports|
   source_root = architecture_package.join("Sources/#{product}")
   next unless source_root.directory?
@@ -498,7 +522,9 @@ module_import_policy.each do |product, allowed_imports|
       match = line.match(/^\s*(?:@testable\s+)?import\s+([A-Za-z_][A-Za-z0-9_]*)/)
       next unless match
       imported = match[1]
-      unless allowed_imports.include?(imported)
+      isolated_runtime_integrity_import = product == "RuneScribeRuntimeCore" &&
+        imported == "CryptoKit" && path == runtime_integrity_source
+      unless allowed_imports.include?(imported) || isolated_runtime_integrity_import
         errors << "#{relative(path, root)}:#{index + 1}: #{product} may not import #{imported}"
       end
     end
@@ -552,8 +578,8 @@ required_module_ids.each do |module_id, policy|
   capabilities = Array(manifest["capabilitiesRequested"])
   errors << "#{relative_path}: capabilitiesRequested must be unique strings" unless capabilities.all? { |capability| capability.is_a?(String) } && capabilities.uniq == capabilities
   requirements = manifest["runtimeRequirements"]
-  unless requirements.is_a?(Hash) && requirements.keys.sort == %w[requiredModuleRoles requiredServices].sort
-    errors << "#{relative_path}: runtimeRequirements must contain only requiredServices and requiredModuleRoles"
+  unless requirements.is_a?(Hash) && requirements.keys.sort == %w[requiredModuleRoles requiredResources requiredServices].sort
+    errors << "#{relative_path}: runtimeRequirements must contain only requiredServices, requiredResources, and requiredModuleRoles"
   end
 
   descriptor_sources = Dir.glob(architecture_package.join("Sources/#{policy['product']}/**/*.swift").to_s)
@@ -583,7 +609,7 @@ feature_notification_calls = production_text.scan(/NotificationCenter\.default\.
 feature_notification_names = production_text.scan(/Notification\.Name\("com\.runescribe\./).length
 notification_center_default_uses = production_text.scan(/NotificationCenter\.default\b/).length
 allowed_notification_path = root.join(
-  "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VideoSplashView.swift"
+  "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift"
 ).to_s
 notification_center_use_records = production_files.flat_map do |path|
   File.readlines(path).each_with_index.map do |line, index|
@@ -600,7 +626,7 @@ allowed_notification_sources = notification_center_use_records
   .map(&:last)
 unless allowed_notification_sources.count { |source| source.include?(".addObserver") } == 1 &&
        allowed_notification_sources.count { |source| source.include?(".removeObserver") } == 1
-  errors << "VideoSplashView must contain exactly one AVPlayer observer registration and removal"
+  errors << "RuntimeApplicationResourcePresentation must contain exactly one AVPlayer observer registration and removal"
 end
 temporary_application_session_adapters = production_text.scan(
   /Architecture ratchet: temporary-application-session-adapter\./

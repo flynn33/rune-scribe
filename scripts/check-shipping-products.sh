@@ -940,7 +940,7 @@ errors << "Package.swift regular target set differs" unless regular_target_names
 expected_edges = {
   "RuneScribeContracts" => [],
   "RuneScribeRuntimeCore" => ["RuneScribeContracts"],
-  "RuneScribeUIRuntime" => ["RuneScribeContracts"],
+  "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
   "RuneScribePlatform" => ["RuneScribeContracts"],
   "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
   "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"],

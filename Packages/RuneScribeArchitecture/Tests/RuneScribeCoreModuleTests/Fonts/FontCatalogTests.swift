@@ -2,6 +2,7 @@ import CryptoKit
 import Foundation
 import RuneScribeContracts
 @testable import RuneScribeCoreModule
+@testable import RuneScribeRuntimeCore
 import XCTest
 
 final class FontCatalogTests: XCTestCase {
@@ -43,7 +44,7 @@ final class FontCatalogTests: XCTestCase {
 
         let lookups = await registrar.nameLookupBytes()
         let registrations = await registrar.registeredBytes()
-        XCTAssertEqual(lookups, [bytes, bytes])
+        XCTAssertEqual(lookups, [bytes])
         XCTAssertEqual(registrations, [bytes])
     }
 
@@ -338,6 +339,56 @@ final class FontCatalogTests: XCTestCase {
 
     private static func path(for reference: FontRef) throws -> ProtectedPath {
         try .fontsDirectory.appending("\(hex(reference.sha256)).ttf")
+    }
+}
+
+private extension FontCatalog {
+    init(
+        protectedFileStore: any ProtectedFileStore,
+        registrar: any SystemFontRegistrar,
+        resources: any ApplicationResourceLocator
+    ) {
+        self.init(
+            runtimeIO: RuntimeIOClient(
+                readProtectedFile: {
+                    try await protectedFileStore.read(relativePath: $0)
+                },
+                writeProtectedFile: {
+                    try await protectedFileStore.write($0, relativePath: $1)
+                },
+                removeProtectedFile: {
+                    try await protectedFileStore.remove(relativePath: $0)
+                },
+                protectedFileExists: {
+                    try await protectedFileStore.exists(relativePath: $0)
+                },
+                protectedFileContents: {
+                    try await protectedFileStore.contents(
+                        of: $0,
+                        matchingExtension: $1
+                    )
+                },
+                registerBundledSystemFont: {
+                    let data = try await resources.data(for: $0)
+                    guard Data(SHA256.hash(data: data)) == $1 else {
+                        throw RuntimeBundledFontFailure.integrityMismatch
+                    }
+                    let postScriptName = try await registrar.postScriptName(
+                        forFontData: data
+                    )
+                    guard !postScriptName.isEmpty else {
+                        throw RuntimeBundledFontFailure.unreadableFont
+                    }
+                    return try await registrar.registerFont(data)
+                },
+                systemFontPostScriptName: {
+                    try await registrar.postScriptName(forFontData: $0)
+                },
+                registerSystemFont: {
+                    try await registrar.registerFont($0)
+                }
+            )
+        )
     }
 }
 

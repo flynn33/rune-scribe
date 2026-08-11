@@ -85,10 +85,26 @@ public enum ModuleManifestDecoder {
         }
         try checkFields(
             requirements,
-            allowed: ["requiredServices", "requiredModuleRoles"],
+            allowed: ["requiredServices", "requiredResources", "requiredModuleRoles"],
             required: ["requiredServices", "requiredModuleRoles"],
             path: "$.runtimeRequirements"
         )
+        if let resources = requirements["requiredResources"] {
+            guard let values = resources as? [[String: Any]] else {
+                throw ManifestDecodingError.invalidField(
+                    path: "$.runtimeRequirements.requiredResources",
+                    reason: "Expected an array of resource objects."
+                )
+            }
+            for (index, value) in values.enumerated() {
+                try checkFields(
+                    value,
+                    allowed: ["name", "fileExtension", "subdirectory"],
+                    required: ["name", "fileExtension"],
+                    path: "$.runtimeRequirements.requiredResources[\(index)]"
+                )
+            }
+        }
 
         if let minimumOS = root["minimumOS"] {
             guard !(minimumOS is NSNull), let object = minimumOS as? [String: Any] else {
@@ -182,6 +198,12 @@ public enum ModuleManifestDecoder {
             path: "$.runtimeRequirements.requiredServices"
         )
         try requireUnique(
+            manifest.runtimeRequirements.requiredResources.map {
+                [$0.subdirectory ?? "", $0.name, $0.fileExtension].joined(separator: "/")
+            },
+            path: "$.runtimeRequirements.requiredResources"
+        )
+        try requireUnique(
             manifest.runtimeRequirements.requiredModuleRoles.map(\.rawValue),
             path: "$.runtimeRequirements.requiredModuleRoles"
         )
@@ -221,6 +243,31 @@ public enum ModuleManifestDecoder {
                 pattern: #"^[A-Za-z_][A-Za-z0-9_.-]*$"#,
                 path: "$.runtimeRequirements.requiredServices"
             )
+        }
+        for resource in manifest.runtimeRequirements.requiredResources {
+            try requireMatch(
+                resource.name,
+                pattern: #"^[A-Za-z0-9][A-Za-z0-9._-]*$"#,
+                path: "$.runtimeRequirements.requiredResources.name"
+            )
+            try requireMatch(
+                resource.fileExtension,
+                pattern: #"^[A-Za-z0-9][A-Za-z0-9_-]*$"#,
+                path: "$.runtimeRequirements.requiredResources.fileExtension"
+            )
+            if let subdirectory = resource.subdirectory {
+                try requireMatch(
+                    subdirectory,
+                    pattern: #"^[A-Za-z0-9][A-Za-z0-9._/-]*$"#,
+                    path: "$.runtimeRequirements.requiredResources.subdirectory"
+                )
+                guard !subdirectory.split(separator: "/").contains("..") else {
+                    throw ManifestDecodingError.invalidField(
+                        path: "$.runtimeRequirements.requiredResources.subdirectory",
+                        reason: "Parent traversal is not allowed."
+                    )
+                }
+            }
         }
         guard manifest.diagnosticsVisibleInProduction == false else {
             throw ManifestDecodingError.invalidField(

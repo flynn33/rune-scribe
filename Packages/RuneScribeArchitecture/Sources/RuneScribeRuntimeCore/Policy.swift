@@ -84,6 +84,7 @@ public struct RuntimePolicy: Sendable {
             RuneScribeCapabilities.keychainStorage: [RuneScribeRoles.core],
             RuneScribeCapabilities.protectedFileStorage: [RuneScribeRoles.core],
             RuneScribeCapabilities.inboundFileRead: [RuneScribeRoles.core],
+            RuneScribeCapabilities.fileImportUI: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.shareArtifactStorage: [RuneScribeRoles.core],
             RuneScribeCapabilities.resourceRead: [RuneScribeRoles.core, RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.fontRegistration: [RuneScribeRoles.core],
@@ -125,6 +126,12 @@ public struct RuntimePolicy: Sendable {
                 requiredCapability: RuneScribeCapabilities.shareArtifactStorage,
                 publisherRoles: [RuneScribeRoles.applicationHost],
                 consumerRoles: [RuneScribeRoles.core]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.sharePresentation,
+                requiredCapability: RuneScribeCapabilities.shareUI,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.primaryUI]
             ),
             ServiceAccessRule(
                 serviceID: RuneScribeServiceIDs.applicationResourceLocator,

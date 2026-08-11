@@ -1,5 +1,6 @@
 import AVFoundation
 import RuneScribeContracts
+import RuneScribeUIRuntime
 @testable import RuneScribeUIModule
 import XCTest
 

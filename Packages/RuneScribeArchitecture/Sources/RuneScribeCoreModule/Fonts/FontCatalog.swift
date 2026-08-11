@@ -1,6 +1,7 @@
 import CryptoKit
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 
 enum FontCatalogError: Error, Equatable, Sendable {
     case invalidReference
@@ -36,23 +37,15 @@ struct FontCatalogRegistrationReport: Equatable, Sendable {
 actor FontCatalog: CoreFontIntegrating {
     static let bundledDisplayName = "Noto Sans Runic"
 
-    private let protectedFileStore: any ProtectedFileStore
-    private let registrar: any SystemFontRegistrar
-    private let resources: any ApplicationResourceLocator
+    private let runtimeIO: RuntimeIOClient
 
     private var registeredNamesByDigest: [String: String] = [:]
     private var lastRegistrationReport: FontCatalogRegistrationReport = .empty
     private var mutationInProgress = false
     private var mutationWaiters: [CheckedContinuation<Void, Never>] = []
 
-    init(
-        protectedFileStore: any ProtectedFileStore,
-        registrar: any SystemFontRegistrar,
-        resources: any ApplicationResourceLocator
-    ) {
-        self.protectedFileStore = protectedFileStore
-        self.registrar = registrar
-        self.resources = resources
+    init(runtimeIO: RuntimeIOClient) {
+        self.runtimeIO = runtimeIO
     }
 
     /// Registers the fixed shipping font and all content-addressed imported
@@ -64,12 +57,11 @@ actor FontCatalog: CoreFontIntegrating {
         await acquireMutationPermit()
         defer { releaseMutationPermit() }
 
-        let bundled = try await bundledData()
-        try await registerValidated(bundled, digest: Self.digestHex(FontRef.bundled.sha256))
+        try await registerBundledFontIfNeeded()
 
         let paths: [ProtectedPath]
         do {
-            paths = try await protectedFileStore.contents(
+            paths = try await runtimeIO.protectedFileContents(
                 of: .fontsDirectory,
                 matchingExtension: "ttf"
             )
@@ -117,13 +109,13 @@ actor FontCatalog: CoreFontIntegrating {
             throw FontCatalogError.invalidReference
         }
         if reference == .bundled {
-            return try await bundledData()
+            return nil
         }
 
         let path = try Self.importedPath(for: reference)
         let stored: Data?
         do {
-            stored = try await protectedFileStore.read(relativePath: path)
+            stored = try await runtimeIO.readProtectedFile(path)
         } catch {
             throw FontCatalogError.protectedStorageUnavailable
         }
@@ -158,7 +150,7 @@ actor FontCatalog: CoreFontIntegrating {
         let path = try Self.importedPath(for: reference)
         let previous: Data?
         do {
-            previous = try await protectedFileStore.read(relativePath: path)
+            previous = try await runtimeIO.readProtectedFile(path)
         } catch {
             throw FontCatalogError.protectedStorageUnavailable
         }
@@ -166,14 +158,14 @@ actor FontCatalog: CoreFontIntegrating {
         let changedPersistence = previous != bytes
         if changedPersistence {
             do {
-                try await protectedFileStore.write(bytes, relativePath: path)
+                try await runtimeIO.writeProtectedFile(bytes, path: path)
             } catch {
                 // Atomic replacement can reach disk before an adapter reports
                 // failure. Continue only when an authoritative re-read proves
                 // the intended content-addressed bytes were committed.
                 let authoritative: Data?
                 do {
-                    authoritative = try await protectedFileStore.read(relativePath: path)
+                    authoritative = try await runtimeIO.readProtectedFile(path)
                 } catch {
                     throw FontCatalogError.protectedStorageUnavailable
                 }
@@ -205,6 +197,13 @@ actor FontCatalog: CoreFontIntegrating {
     func ensureAvailable(reference: FontRef, suppliedBytes: Data?) async throws {
         if let suppliedBytes {
             try await importFont(suppliedBytes, expecting: reference)
+            return
+        }
+
+        if reference == .bundled {
+            await acquireMutationPermit()
+            defer { releaseMutationPermit() }
+            try await registerBundledFontIfNeeded()
             return
         }
 
@@ -244,17 +243,34 @@ actor FontCatalog: CoreFontIntegrating {
         )
     }
 
-    private func bundledData() async throws -> Data {
-        let bytes: Data
+    private func registerBundledFontIfNeeded() async throws {
+        let digest = Self.digestHex(FontRef.bundled.sha256)
+        guard registeredNamesByDigest[digest] == nil else { return }
         do {
-            bytes = try await resources.data(for: .bundledRuneFont)
+            let registered = try await runtimeIO.registerBundledSystemFont(
+                .bundledRuneFont,
+                expectedSHA256: FontRef.bundled.sha256
+            )
+            guard !registered.postScriptName.isEmpty else {
+                throw FontCatalogError.cannotRegister
+            }
+            registeredNamesByDigest[digest] = registered.postScriptName
+        } catch let error as RuntimeBundledFontFailure {
+            switch error {
+            case .resourceUnavailable:
+                throw FontCatalogError.resourceUnavailable
+            case .integrityMismatch:
+                throw FontCatalogError.hashMismatch
+            case .unreadableFont:
+                throw FontCatalogError.unreadableFont
+            case .registrationFailed:
+                throw FontCatalogError.cannotRegister
+            }
+        } catch let error as FontCatalogError {
+            throw error
         } catch {
-            throw FontCatalogError.resourceUnavailable
+            throw FontCatalogError.cannotRegister
         }
-        guard Self.digest(of: bytes) == FontRef.bundled.sha256 else {
-            throw FontCatalogError.hashMismatch
-        }
-        return bytes
     }
 
     private func validate(_ bytes: Data, expecting reference: FontRef) throws {
@@ -268,7 +284,7 @@ actor FontCatalog: CoreFontIntegrating {
 
     private func postScriptName(for bytes: Data) async throws -> String {
         do {
-            let name = try await registrar.postScriptName(forFontData: bytes)
+            let name = try await runtimeIO.systemFontPostScriptName(for: bytes)
             guard !name.isEmpty else {
                 throw FontCatalogError.unreadableFont
             }
@@ -295,7 +311,7 @@ actor FontCatalog: CoreFontIntegrating {
         // catalog, so avoid a second platform mutation altogether.
         guard registeredNamesByDigest[digest] == nil else { return }
         do {
-            let registered = try await registrar.registerFont(bytes)
+            let registered = try await runtimeIO.registerSystemFont(bytes)
             guard !registered.postScriptName.isEmpty else {
                 throw FontCatalogError.cannotRegister
             }
@@ -310,7 +326,7 @@ actor FontCatalog: CoreFontIntegrating {
     private func registerStoredFont(at path: ProtectedPath) async throws {
         let bytes: Data
         do {
-            guard let stored = try await protectedFileStore.read(relativePath: path) else {
+            guard let stored = try await runtimeIO.readProtectedFile(path) else {
                 throw FontCatalogError.corruptedStoredFont
             }
             bytes = stored
@@ -343,15 +359,15 @@ actor FontCatalog: CoreFontIntegrating {
     ) async throws {
         do {
             if let previous {
-                try await protectedFileStore.write(previous, relativePath: path)
+                try await runtimeIO.writeProtectedFile(previous, path: path)
             } else {
-                try await protectedFileStore.remove(relativePath: path)
+                try await runtimeIO.removeProtectedFile(path)
             }
             return
         } catch {
             let authoritative: Data?
             do {
-                authoritative = try await protectedFileStore.read(relativePath: path)
+                authoritative = try await runtimeIO.readProtectedFile(path)
             } catch {
                 throw FontCatalogError.rollbackFailed
             }

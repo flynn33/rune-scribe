@@ -1,6 +1,6 @@
 import Foundation
 import RuneScribeContracts
-@testable import RuneScribeRuntimeCore
+@_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import XCTest
 
 final class RuntimeOperationDispatcherTests: XCTestCase {
@@ -1244,7 +1244,7 @@ final class RuntimeOperationDispatcherTests: XCTestCase {
         )
         let wrongKey = ServiceKey<any ClipboardReading>(RuneScribeServiceIDs.clipboardWrite)
         do {
-            try await runtime.registerHostService(RuntimeTestClipboardReader(), for: wrongKey)
+            try await runtime.installPlatformAdapter(RuntimeTestClipboardReader(), for: wrongKey)
             XCTFail("Expected mismatched exact host key rejection.")
         } catch {
             XCTAssertEqual(
@@ -1307,25 +1307,21 @@ final class RuntimeOperationDispatcherTests: XCTestCase {
         XCTAssertEqual(error, .contextInactive(core.moduleID))
     }
 
-    func testRetainedSynchronousPlatformClientsReturnDeterministicSentinelsAfterStop() async throws {
+    func testClockRegistrationTracksAvailabilityWithoutVendingAProviderClient() async throws {
         let bridge = RuntimePlatformBridge()
         let date = Date(timeIntervalSince1970: 123)
-        let uuid = UUID(uuidString: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")!
         try await bridge.register(RuntimeTestClock(date: date))
-        try await bridge.register(RuntimeTestUUID(value: uuid))
-        let generation = await bridge.activateRuntime()
-        let clock = bridge.clockClient(generation: generation)
-        let uuidClient = bridge.uuidClient(generation: generation)
-        XCTAssertEqual(clock.now(), date)
-        XCTAssertEqual(uuidClient.nextUUID(), uuid)
-
-        await bridge.deactivateRuntime()
-
-        XCTAssertEqual(clock.now(), .distantPast)
-        XCTAssertEqual(
-            uuidClient.nextUUID(),
-            UUID(uuidString: "00000000-0000-0000-0000-000000000000")!
-        )
+        let containsClock = await bridge.contains(RuneScribeServiceIDs.clock)
+        XCTAssertTrue(containsClock)
+        do {
+            try await bridge.register(RuntimeTestClock(date: date))
+            XCTFail("Expected duplicate clock registration to fail.")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .duplicateService(RuneScribeServiceIDs.clock)
+            )
+        }
     }
 
     private func makeStateHarness(

@@ -274,6 +274,10 @@ targets:
       - package: RuneScribeArchitecture
         product: RuneScribeContracts
       - package: RuneScribeArchitecture
+        product: RuneScribeRuntimeCore
+      - package: RuneScribeArchitecture
+        product: RuneScribeUIRuntime
+      - package: RuneScribeArchitecture
         product: RuneScribeCoreModule
       - package: RuneScribeArchitecture
         product: RuneScribePlatform

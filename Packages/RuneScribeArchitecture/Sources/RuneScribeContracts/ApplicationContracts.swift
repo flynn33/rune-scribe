@@ -496,7 +496,7 @@ public struct PrepareMessageShareCommand: Sendable {
 }
 
 public enum ShareArtifactReference: Codable, Equatable, Hashable, Sendable {
-    case file(URL)
+    case file(ShareArtifactID)
     case opaque(ShareArtifactID)
 }
 

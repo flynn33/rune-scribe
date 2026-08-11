@@ -1,5 +1,6 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeUIPresentationContracts
 
 public enum RuntimeStatus: Equatable, Sendable {
     case idle
@@ -65,6 +66,8 @@ public actor RuneScribeRuntime {
     private nonisolated let hostIngress: RuntimeHostIngressRail
     private let startCoordinator: any RuntimeStartCoordinating
     private let platformBridge = RuntimePlatformBridge()
+    private let runtimeIOGateway: RuntimeIOGateway
+    private let rootPresentationGateway = RuntimeRootPresentationGateway()
     private let events = RuntimeEventBus()
     private let messages = DirectedMessageRouter()
 
@@ -92,7 +95,17 @@ public actor RuneScribeRuntime {
         self.eligibility = eligibility
         self.environment = environment
         dispatcher = RuntimeOperationDispatcher(policy: policy, environment: environment)
-        hostIngress = RuntimeHostIngressRail(environment: environment)
+        let runtimeIOGateway = RuntimeIOGateway(
+            policy: policy,
+            environment: environment
+        )
+        self.runtimeIOGateway = runtimeIOGateway
+        hostIngress = RuntimeHostIngressRail(
+            environment: environment,
+            normalizeFile: { request in
+                try await runtimeIOGateway.readHostInboundFile(request)
+            }
+        )
         startCoordinator = ImmediateRuntimeStartCoordinator()
     }
 
@@ -110,7 +123,17 @@ public actor RuneScribeRuntime {
         self.eligibility = eligibility
         self.environment = environment
         dispatcher = RuntimeOperationDispatcher(policy: policy, environment: environment)
-        hostIngress = RuntimeHostIngressRail(environment: environment)
+        let runtimeIOGateway = RuntimeIOGateway(
+            policy: policy,
+            environment: environment
+        )
+        self.runtimeIOGateway = runtimeIOGateway
+        hostIngress = RuntimeHostIngressRail(
+            environment: environment,
+            normalizeFile: { request in
+                try await runtimeIOGateway.readHostInboundFile(request)
+            }
+        )
         self.startCoordinator = startCoordinator
     }
 
@@ -142,7 +165,7 @@ public actor RuneScribeRuntime {
         moduleStates[manifest.moduleID] = .registered
     }
 
-    private func authorizeHostRegistration(
+    private func authorizePlatformAdapterInstallation(
         _ serviceID: ServiceIdentifier,
         expected: ServiceIdentifier
     ) throws {
@@ -157,17 +180,28 @@ public actor RuneScribeRuntime {
         }
     }
 
-    public func registerHostService(_ value: any SecureValueStore, for key: ServiceKey<any SecureValueStore>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.secureValueStore); try await platformBridge.register(value) }
-    public func registerHostService(_ value: any ProtectedFileStore, for key: ServiceKey<any ProtectedFileStore>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.protectedFileStore); try await platformBridge.register(value) }
-    public func registerHostService(_ value: any InboundFileReader, for key: ServiceKey<any InboundFileReader>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.inboundFileReader); try await platformBridge.register(value) }
-    public func registerHostService(_ value: any ShareArtifactStore, for key: ServiceKey<any ShareArtifactStore>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.shareArtifactStore); try await platformBridge.register(value) }
-    public func registerHostService(_ value: any ApplicationResourceLocator, for key: ServiceKey<any ApplicationResourceLocator>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.applicationResourceLocator); try await platformBridge.register(value) }
-    public func registerHostService(_ value: any SystemFontRegistrar, for key: ServiceKey<any SystemFontRegistrar>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.systemFontRegistrar); try await platformBridge.register(value) }
-    public func registerHostService(_ value: any ContactAccessService, for key: ServiceKey<any ContactAccessService>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.contactAccess); try await platformBridge.register(value) }
-    public func registerHostService(_ value: any ClipboardReading, for key: ServiceKey<any ClipboardReading>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.clipboardRead); try await platformBridge.register(value) }
-    public func registerHostService(_ value: any ClipboardWriting, for key: ServiceKey<any ClipboardWriting>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.clipboardWrite); try await platformBridge.register(value) }
-    public func registerHostService(_ value: any ClockProviding, for key: ServiceKey<any ClockProviding>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.clock); try await platformBridge.register(value) }
-    public func registerHostService(_ value: any UUIDProviding, for key: ServiceKey<any UUIDProviding>) async throws { try authorizeHostRegistration(key.identifier, expected: RuneScribeServiceIDs.uuid); try await platformBridge.register(value) }
+    public func installPlatformAdapter(_ value: any SecureValueStore, for key: ServiceKey<any SecureValueStore>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.secureValueStore); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any ProtectedFileStore, for key: ServiceKey<any ProtectedFileStore>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.protectedFileStore); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any InboundFileReader, for key: ServiceKey<any InboundFileReader>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.inboundFileReader); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any ShareArtifactStore, for key: ServiceKey<any ShareArtifactStore>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.shareArtifactStore); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any SharePresentationProviding, for key: ServiceKey<any SharePresentationProviding>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.sharePresentation); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any ApplicationResourceLocator, for key: ServiceKey<any ApplicationResourceLocator>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.applicationResourceLocator); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any SystemFontRegistrar, for key: ServiceKey<any SystemFontRegistrar>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.systemFontRegistrar); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any ContactAccessService, for key: ServiceKey<any ContactAccessService>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.contactAccess); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any ClipboardReading, for key: ServiceKey<any ClipboardReading>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.clipboardRead); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any ClipboardWriting, for key: ServiceKey<any ClipboardWriting>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.clipboardWrite); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any ClockProviding, for key: ServiceKey<any ClockProviding>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.clock); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(_ value: any UUIDProviding, for key: ServiceKey<any UUIDProviding>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.uuid); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+
+    public func installStandardPort(
+        _ adapter: RuntimeRootPresentationHostAdapter,
+        for key: RuntimeRootPresentationPortKey
+    ) async throws {
+        guard status == .idle || status == .stopped || status == .failed else {
+            throw RuneScribeRuntimeError.runtimeBusy
+        }
+        try await rootPresentationGateway.install(adapter, for: key)
+    }
 
     @discardableResult
     public nonisolated func submit(
@@ -214,6 +248,8 @@ public actor RuneScribeRuntime {
             return
         }
         _ = await platformBridge.activateRuntime()
+        _ = await runtimeIOGateway.activateRuntime()
+        _ = await rootPresentationGateway.activateRuntime()
         if stopRequestedWhileStarting {
             await finishInterruptedStart()
             return
@@ -288,6 +324,8 @@ public actor RuneScribeRuntime {
             hostIngress.suspend()
             await dispatcher.beginRuntimeStop()
             await platformBridge.deactivateRuntime()
+            await runtimeIOGateway.deactivateRuntime()
+            await rootPresentationGateway.deactivateRuntime()
             resumeStopWaiters()
             throw error
         }
@@ -307,6 +345,8 @@ public actor RuneScribeRuntime {
             hostIngress.suspend()
             await dispatcher.beginRuntimeStop()
             await platformBridge.deactivateRuntime()
+            await runtimeIOGateway.deactivateRuntime()
+            await rootPresentationGateway.deactivateRuntime()
             await hostIngress.flush()
             if status == .stopped {
                 return
@@ -327,6 +367,8 @@ public actor RuneScribeRuntime {
         hostIngress.suspend()
         await dispatcher.beginRuntimeStop()
         await platformBridge.deactivateRuntime()
+        await runtimeIOGateway.deactivateRuntime()
+        await rootPresentationGateway.deactivateRuntime()
         await hostIngress.flush()
         await stopActivatedModules(markFailed: false)
         activeUIModuleID = nil
@@ -443,6 +485,28 @@ public actor RuneScribeRuntime {
         }
 
         let lease = ModuleContextLease(moduleID: moduleID)
+        do {
+            try await runtimeIOGateway.activateModule(
+                descriptor: registration.factory.descriptor,
+                generation: moduleGeneration
+            )
+            try await rootPresentationGateway.activateModule(
+                descriptor: registration.factory.descriptor,
+                generation: moduleGeneration
+            )
+        } catch {
+            await dispatcher.invalidateModule(moduleID: moduleID, failed: true)
+            await runtimeIOGateway.invalidateModule(
+                moduleID,
+                generation: moduleGeneration
+            )
+            await rootPresentationGateway.invalidateModule(
+                moduleID,
+                generation: moduleGeneration
+            )
+            moduleStates[moduleID] = .failed
+            throw RuneScribeRuntimeError.activationFailed(moduleID)
+        }
         let context = ModuleContext(
             descriptor: registration.factory.descriptor,
             policy: policy,
@@ -450,8 +514,10 @@ public actor RuneScribeRuntime {
             messages: messages,
             dispatcher: dispatcher,
             moduleGeneration: moduleGeneration,
-            platformBridge: platformBridge,
-            platformGeneration: await platformBridge.currentGeneration(),
+            runtimeIOGateway: runtimeIOGateway,
+            runtimeIOGeneration: await runtimeIOGateway.currentGeneration(),
+            rootPresentationGateway: rootPresentationGateway,
+            rootPresentationGeneration: await rootPresentationGateway.currentGeneration(),
             environment: environment,
             lease: lease
         )
@@ -499,6 +565,8 @@ public actor RuneScribeRuntime {
         hostIngress.suspend()
         await dispatcher.beginRuntimeStop()
         await platformBridge.deactivateRuntime()
+        await runtimeIOGateway.deactivateRuntime()
+        await rootPresentationGateway.deactivateRuntime()
         await hostIngress.flush()
         await stopActivatedModules(markFailed: false)
         activeUIModuleID = nil

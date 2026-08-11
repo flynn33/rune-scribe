@@ -1,7 +1,9 @@
 import AppKit
 import Foundation
 import RuneScribeContracts
-@testable import RuneScribeUIModule
+import RuneScribePlatform
+@_spi(RuntimeTesting) import RuneScribeRuntimeCore
+import RuneScribeUIRuntime
 import SwiftUI
 
 @MainActor
@@ -56,10 +58,13 @@ private final class NativeShareSelfTest {
     }
 
     func run() async {
+        var fixture: NativeShareRuntimeFixture?
         let report: NativeShareSelfTestReport
         do {
-            let fileResult = try runFileShare()
-            let linkResult = try runCipherLinkShare()
+            let activeFixture = try await NativeShareRuntimeFixture.start()
+            fixture = activeFixture
+            let fileResult = try await runFileShare(using: activeFixture)
+            let linkResult = try await runCipherLinkShare(using: activeFixture)
             report = NativeShareSelfTestReport(
                 version: 1,
                 file: fileResult,
@@ -83,6 +88,7 @@ private final class NativeShareSelfTest {
                 failureCode: NativeShareSelfTestFailure.unexpected.rawValue
             )
         }
+        await fixture?.stop()
 
         do {
             try FileManager.default.createDirectory(
@@ -97,47 +103,41 @@ private final class NativeShareSelfTest {
         }
     }
 
-    private func runFileShare() throws -> NativeShareStepReport {
-        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
-            "RuneScribeMacParityHost-\(UUID().uuidString)",
-            isDirectory: true
-        )
-        try FileManager.default.createDirectory(
-            at: directory,
-            withIntermediateDirectories: true
-        )
-        defer { try? FileManager.default.removeItem(at: directory) }
-
-        let fileURL = directory.appendingPathComponent("synthetic.runescribe")
-        try Data([0x03, 0x52, 0x53]).write(to: fileURL, options: .atomic)
+    private func runFileShare(
+        using fixture: NativeShareRuntimeFixture
+    ) async throws -> NativeShareStepReport {
+        let transfer = try await fixture.makeFileTransfer()
         var triggerCount = 0
         var finishOutcome: ShareArtifactOutcomeDTO?
         var presentation: RuneScribeSharePresentationHandle?
         let view = AnyView(
             RuneScribeFileShareLink(
-                fileURL: fileURL,
+                transfer: transfer,
                 onShareTriggered: { triggerCount += 1 },
                 onFinish: { finishOutcome = $0 },
                 onPresentation: { presentation = $0 }
             )
             .frame(width: 260, height: 100)
         )
-        return try presentAndDismiss(
-            view: view,
-            triggerCount: { triggerCount },
-            finishOutcome: { finishOutcome },
-            presentationReady: { (presentation?.proposedServiceCount ?? 0) > 0 }
-        )
+        do {
+            let report = try presentAndDismiss(
+                view: view,
+                triggerCount: { triggerCount },
+                finishOutcome: { finishOutcome },
+                presentationReady: { (presentation?.proposedServiceCount ?? 0) > 0 }
+            )
+            await transfer.close()
+            return report
+        } catch {
+            await transfer.close()
+            throw error
+        }
     }
 
-    private func runCipherLinkShare() throws -> NativeShareStepReport {
-        guard let url = URL(string: "runescribe://import?v=3&p=synthetic") else {
-            throw NativeShareSelfTestFailure.invalidFixture
-        }
-        let transfer = OpaqueShareTransfer(
-            artifactID: ShareArtifactID(rawValue: UUID()),
-            url: url
-        )
+    private func runCipherLinkShare(
+        using fixture: NativeShareRuntimeFixture
+    ) async throws -> NativeShareStepReport {
+        let transfer = try await fixture.makeLinkTransfer()
         var triggerCount = 0
         var finishOutcome: ShareArtifactOutcomeDTO?
         var presentation: RuneScribeSharePresentationHandle?
@@ -154,12 +154,19 @@ private final class NativeShareSelfTest {
             }
             .frame(width: 260, height: 100)
         )
-        return try presentAndDismiss(
-            view: view,
-            triggerCount: { triggerCount },
-            finishOutcome: { finishOutcome },
-            presentationReady: { (presentation?.proposedServiceCount ?? 0) > 0 }
-        )
+        do {
+            let report = try presentAndDismiss(
+                view: view,
+                triggerCount: { triggerCount },
+                finishOutcome: { finishOutcome },
+                presentationReady: { (presentation?.proposedServiceCount ?? 0) > 0 }
+            )
+            await transfer.close()
+            return report
+        } catch {
+            await transfer.close()
+            throw error
+        }
     }
 
     private func presentAndDismiss(
@@ -299,6 +306,181 @@ private final class NativeShareSelfTest {
     }
 }
 
+@MainActor
+private final class NativeShareRuntimeFixture {
+    private let runtime: RuneScribeRuntime
+    private let runtimeIO: RuntimeIOClient
+    private let shareArtifacts: AppleShareArtifactStore
+    private let temporaryRoot: URL
+    private var isStopped = false
+
+    private init(
+        runtime: RuneScribeRuntime,
+        runtimeIO: RuntimeIOClient,
+        shareArtifacts: AppleShareArtifactStore,
+        temporaryRoot: URL
+    ) {
+        self.runtime = runtime
+        self.runtimeIO = runtimeIO
+        self.shareArtifacts = shareArtifacts
+        self.temporaryRoot = temporaryRoot
+    }
+
+    static func start() async throws -> NativeShareRuntimeFixture {
+        let temporaryRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "RuneScribeMacParityHostRuntime-\(UUID().uuidString)",
+                isDirectory: true
+            )
+        try FileManager.default.createDirectory(
+            at: temporaryRoot,
+            withIntermediateDirectories: false
+        )
+
+        let shareArtifacts = AppleShareArtifactStore(
+            temporaryDirectory: temporaryRoot
+        )
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: NativeShareRuntimeModule.version,
+            platform: .macOS
+        )
+        let clientCapture = NativeShareRuntimeClientCapture()
+
+        do {
+            try await runtime.register(
+                manifest: NativeShareRuntimeModule.manifest,
+                factory: AnyModuleFactory(
+                    descriptor: NativeShareRuntimeModule.descriptor
+                ) {
+                    NativeShareRuntimeClientModule(capture: clientCapture)
+                }
+            )
+            try await runtime.installPlatformAdapter(
+                shareArtifacts,
+                for: RuneScribeServiceKeys.sharePresentation
+            )
+            try await runtime.start()
+            return NativeShareRuntimeFixture(
+                runtime: runtime,
+                runtimeIO: try await clientCapture.requireRuntimeIO(),
+                shareArtifacts: shareArtifacts,
+                temporaryRoot: temporaryRoot
+            )
+        } catch {
+            await runtime.stop()
+            try? await shareArtifacts.removeAll()
+            try? FileManager.default.removeItem(at: temporaryRoot)
+            throw error
+        }
+    }
+
+    func makeFileTransfer() async throws -> OpaqueShareTransfer {
+        let artifactID = ShareArtifactID(rawValue: UUID())
+        try await shareArtifacts.create(
+            Data([0x03, 0x52, 0x53]),
+            artifactID: artifactID,
+            filename: "synthetic",
+            fileExtension: "runescribe"
+        )
+        return try await openTransfer(artifactID: artifactID)
+    }
+
+    func makeLinkTransfer() async throws -> OpaqueShareTransfer {
+        guard let url = URL(string: "runescribe://import?v=3&p=synthetic") else {
+            throw NativeShareSelfTestFailure.invalidFixture
+        }
+        let artifactID = ShareArtifactID(rawValue: UUID())
+        try await shareArtifacts.storeLink(url, artifactID: artifactID)
+        return try await openTransfer(artifactID: artifactID)
+    }
+
+    func stop() async {
+        guard !isStopped else { return }
+        isStopped = true
+        await runtime.stop()
+        try? await shareArtifacts.removeAll()
+        try? FileManager.default.removeItem(at: temporaryRoot)
+    }
+
+    private func openTransfer(
+        artifactID: ShareArtifactID
+    ) async throws -> OpaqueShareTransfer {
+        let session = try await runtimeIO.sharePresentationSession(
+            artifactID: artifactID
+        )
+        return try await OpaqueShareTransfer.open(
+            artifactID: artifactID,
+            session: session
+        )
+    }
+}
+
+private enum NativeShareRuntimeModule {
+    static let version = SemanticVersion(
+        major: UInt(1),
+        minor: UInt(0),
+        patch: UInt(0)
+    )
+    static let moduleID: ModuleIdentifier =
+        "com.runescribe.parity.native-share-ui"
+    static let descriptor = ModuleDescriptor(
+        moduleID: moduleID,
+        moduleVersion: version,
+        kind: .ui,
+        entryPoint: "RuneScribeNativeShareRuntimeClientModule",
+        role: RuneScribeRoles.primaryUI,
+        requestedCapabilities: [
+            RuneScribeCapabilities.rootUI,
+            RuneScribeCapabilities.shareUI,
+        ],
+        requiredServices: [RuneScribeServiceIDs.sharePresentation]
+    )
+    static let manifest = ModuleManifest(
+        runtimeVersion: version,
+        moduleID: moduleID,
+        displayName: "Rune Scribe Native Share Runtime Client",
+        moduleVersion: version,
+        moduleType: .ui,
+        supportedPlatforms: [.macOS],
+        capabilitiesRequested: [
+            RuneScribeCapabilities.rootUI,
+            RuneScribeCapabilities.shareUI,
+        ],
+        entryPoint: descriptor.entryPoint,
+        runtimeRequirements: ModuleRuntimeRequirements(
+            requiredServices: [RuneScribeServiceIDs.sharePresentation]
+        ),
+        defaultRole: RuneScribeRoles.primaryUI
+    )
+}
+
+private actor NativeShareRuntimeClientCapture {
+    private var runtimeIO: RuntimeIOClient?
+
+    func store(_ runtimeIO: RuntimeIOClient) {
+        self.runtimeIO = runtimeIO
+    }
+
+    func requireRuntimeIO() throws -> RuntimeIOClient {
+        guard let runtimeIO else {
+            throw NativeShareSelfTestFailure.runtimeClientUnavailable
+        }
+        return runtimeIO
+    }
+}
+
+private struct NativeShareRuntimeClientModule: RuneScribeModule {
+    let descriptor = NativeShareRuntimeModule.descriptor
+    let capture: NativeShareRuntimeClientCapture
+
+    func start(context: ModuleContext) async throws {
+        let runtimeIO = try await context.runtimeIOClient()
+        await capture.store(runtimeIO)
+    }
+
+    func stop() async {}
+}
+
 private struct NativeShareSelfTestReport: Codable {
     let version: Int
     let file: NativeShareStepReport
@@ -341,6 +523,7 @@ private struct NativeShareStepReport: Codable {
 
 private enum NativeShareSelfTestFailure: String, Error {
     case invalidFixture
+    case runtimeClientUnavailable
     case noScreen
     case hostNotActive
     case controlNotHittable

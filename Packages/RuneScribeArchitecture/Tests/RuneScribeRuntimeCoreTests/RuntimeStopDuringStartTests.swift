@@ -1,6 +1,6 @@
 import Foundation
 import RuneScribeContracts
-@testable import RuneScribeRuntimeCore
+@_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import XCTest
 
 final class RuntimeStopDuringStartTests: XCTestCase {

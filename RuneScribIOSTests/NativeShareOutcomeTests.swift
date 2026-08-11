@@ -1,5 +1,5 @@
 import RuneScribeContracts
-@testable import RuneScribeUIModule
+import RuneScribeUIRuntime
 import XCTest
 
 final class NativeShareOutcomeTests: XCTestCase {

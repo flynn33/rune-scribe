@@ -61,10 +61,23 @@ public final class RuntimeHostIngressRail: @unchecked Sendable {
     typealias Delivery = @Sendable (
         RuneScribeInboundInput
     ) async throws -> InboundInputDispositionDTO
+    typealias FileNormalization = @Sendable (
+        RuntimeInboundFileReadRequest
+    ) async throws -> Data
+
+    private enum StampedInput: Sendable {
+        case ready(RuneScribeInboundInput)
+        case file(
+            metadata: InboundInputMetadataDTO,
+            url: URL,
+            declaredContentType: String?,
+            requiresSecurityScopedAccess: Bool
+        )
+    }
 
     private struct RetainedInput: Sendable {
         let reservationID: UInt64
-        var value: RuneScribeInboundInput?
+        var value: StampedInput?
         let isControl: Bool
         let isMenu: Bool
         let securityEvent: ApplicationLifecycleInputDTO?
@@ -83,6 +96,7 @@ public final class RuntimeHostIngressRail: @unchecked Sendable {
 
     private let lock = NSLock()
     private let environment: RuntimeEnvironment
+    private let normalizeFile: FileNormalization
     private var queue: [RetainedInput] = []
     private var offeredInput: RetainedInput?
     private var retainedDataCount = 0
@@ -102,8 +116,16 @@ public final class RuntimeHostIngressRail: @unchecked Sendable {
     private var lastFailure: RuntimeHostIngressFailure?
     private var failureObserver: (@Sendable (RuntimeHostIngressFailure) -> Void)?
 
-    init(environment: RuntimeEnvironment) {
+    init(
+        environment: RuntimeEnvironment,
+        normalizeFile: @escaping FileNormalization = { _ in
+            throw RuneScribeRuntimeError.serviceUnavailable(
+                RuneScribeServiceIDs.inboundFileReader
+            )
+        }
+    ) {
         self.environment = environment
+        self.normalizeFile = normalizeFile
     }
 
     @discardableResult
@@ -274,7 +296,7 @@ public final class RuntimeHostIngressRail: @unchecked Sendable {
     }
 
     private func finishStamping(
-        _ value: RuneScribeInboundInput,
+        _ value: StampedInput,
         reservationID: UInt64
     ) {
         let readyWaiters = withLock { () -> [ReservationWaiter] in
@@ -321,7 +343,7 @@ public final class RuntimeHostIngressRail: @unchecked Sendable {
     private func stampedInput(
         _ rawInput: ExternalInputEnvelope,
         isColdStart: Bool
-    ) -> RuneScribeInboundInput {
+    ) -> StampedInput {
         let source: InboundDeliverySourceDTO
         switch rawInput {
         case .url(_, let value), .file(_, _, _, let value):
@@ -337,7 +359,7 @@ public final class RuntimeHostIngressRail: @unchecked Sendable {
         )
         switch rawInput {
         case .url(let url, _):
-            return .url(InboundURLDTO(metadata: metadata, url: url))
+            return .ready(.url(InboundURLDTO(metadata: metadata, url: url)))
         case .file(
             let url,
             let declaredContentType,
@@ -345,17 +367,19 @@ public final class RuntimeHostIngressRail: @unchecked Sendable {
             _
         ):
             return .file(
-                InboundFileDTO(
-                    metadata: metadata,
-                    fileURL: url,
-                    declaredContentType: declaredContentType,
-                    requiresSecurityScopedAccess: requiresSecurityScopedAccess
-                )
+                metadata: metadata,
+                url: url,
+                declaredContentType: declaredContentType,
+                requiresSecurityScopedAccess: requiresSecurityScopedAccess
             )
         case .lifecycle(let event):
-            return .lifecycle(InboundLifecycleDTO(metadata: metadata, event: event))
+            return .ready(
+                .lifecycle(InboundLifecycleDTO(metadata: metadata, event: event))
+            )
         case .menu(let command):
-            return .menu(InboundMenuCommandDTO(metadata: metadata, command: command))
+            return .ready(
+                .menu(InboundMenuCommandDTO(metadata: metadata, command: command))
+            )
         }
     }
 
@@ -388,10 +412,17 @@ public final class RuntimeHostIngressRail: @unchecked Sendable {
 
     private func drain(routingGeneration generation: UInt64) async {
         while let offer = takeNextOffer(routingGeneration: generation) {
+            let value: RuneScribeInboundInput
+            do {
+                value = try await normalizedInput(offer.value)
+            } catch {
+                finishOffer(offer.input, failure: .deliveryFailed)
+                continue
+            }
             var destinationResolutionRetryCount = 0
             while true {
                 do {
-                    let disposition = try await offer.delivery(offer.value)
+                    let disposition = try await offer.delivery(value)
                     finishOffer(
                         offer.input,
                         failure: disposition == .rejected ? .destinationRejected : nil
@@ -423,7 +454,7 @@ public final class RuntimeHostIngressRail: @unchecked Sendable {
 
     private func takeNextOffer(
         routingGeneration generation: UInt64
-    ) -> (input: RetainedInput, value: RuneScribeInboundInput, delivery: Delivery)? {
+    ) -> (input: RetainedInput, value: StampedInput, delivery: Delivery)? {
         withLock {
             guard generation == routingGeneration,
                   let delivery,
@@ -437,6 +468,35 @@ public final class RuntimeHostIngressRail: @unchecked Sendable {
             let input = queue.removeFirst()
             offeredInput = input
             return (input, value, delivery)
+        }
+    }
+
+    private func normalizedInput(
+        _ input: StampedInput
+    ) async throws -> RuneScribeInboundInput {
+        switch input {
+        case .ready(let value):
+            return value
+        case .file(
+            let metadata,
+            let url,
+            let declaredContentType,
+            let requiresSecurityScopedAccess
+        ):
+            let data = try await normalizeFile(
+                RuntimeInboundFileReadRequest(
+                    fileURL: url,
+                    requiresSecurityScopedAccess: requiresSecurityScopedAccess,
+                    maximumByteCount: RuntimeIOGateway.maximumInboundFileByteCount
+                )
+            )
+            return .file(
+                InboundFileDTO(
+                    metadata: metadata,
+                    data: data,
+                    declaredContentType: declaredContentType
+                )
+            )
         }
     }
 

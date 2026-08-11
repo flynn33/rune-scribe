@@ -3,14 +3,14 @@ import MessageUI
 import RuneScribeContracts
 import SwiftUI
 
-enum MessageComposeTerminalResult: Equatable, Sendable {
+public enum MessageComposeTerminalResult: Equatable, Sendable {
     case sent
     case cancelled
     case failed
 }
 
-enum MessageComposeOutcomeMapper {
-    static func outcome(
+public enum MessageComposeOutcomeMapper {
+    public static func outcome(
         for result: MessageComposeTerminalResult,
         requiredAttachmentWasPresent: Bool,
         requiredAttachmentAccepted: Bool
@@ -29,13 +29,13 @@ enum MessageComposeOutcomeMapper {
     }
 }
 
-enum MessageComposeAttachmentSetupDecision: Equatable, Sendable {
+public enum MessageComposeAttachmentSetupDecision: Equatable, Sendable {
     case presentComposer(requiredAttachmentAccepted: Bool)
     case fail
 }
 
-enum MessageComposeAttachmentSetupPolicy {
-    static func decide(
+public enum MessageComposeAttachmentSetupPolicy {
+    public static func decide(
         requiredAttachmentWasPresent: Bool,
         requiredAttachmentAccepted: Bool
     ) -> MessageComposeAttachmentSetupDecision {
@@ -47,10 +47,14 @@ enum MessageComposeAttachmentSetupPolicy {
     }
 }
 
-struct MessageComposeCompletionGate: Equatable, Sendable {
-    private(set) var hasCompleted = false
+public struct MessageComposeCompletionGate: Equatable, Sendable {
+    public private(set) var hasCompleted = false
 
-    mutating func accept(_ outcome: ShareArtifactOutcomeDTO) -> ShareArtifactOutcomeDTO? {
+    public init() {}
+
+    public mutating func accept(
+        _ outcome: ShareArtifactOutcomeDTO
+    ) -> ShareArtifactOutcomeDTO? {
         guard !hasCompleted else { return nil }
         hasCompleted = true
         return outcome
@@ -62,11 +66,27 @@ struct MessageComposeCompletionGate: Equatable, Sendable {
 /// must carry the cipher key (the first message to a contact), the key rides as a real
 /// `.runescribe` attachment — and this bridge refuses to quietly mark the key delivered
 /// unless that attachment was actually accepted and the user actually sent.
-struct MessageComposeView: UIViewControllerRepresentable {
-    var messageText: String
-    var recipients: [String]?
-    var attachmentURL: URL?
-    var onFinish: ((ShareArtifactOutcomeDTO) -> Void)?
+public struct MessageComposeView: UIViewControllerRepresentable {
+    private let messageText: String
+    private let recipients: [String]?
+    private let attachment: OpaqueShareTransfer?
+    private let onFinish: ((ShareArtifactOutcomeDTO) -> Void)?
+
+    public init(
+        messageText: String,
+        recipients: [String]? = nil,
+        attachment: OpaqueShareTransfer? = nil,
+        onFinish: ((ShareArtifactOutcomeDTO) -> Void)? = nil
+    ) {
+        self.messageText = messageText
+        self.recipients = recipients
+        self.attachment = attachment
+        self.onFinish = onFinish
+    }
+
+    private var attachmentURL: URL? {
+        attachment?.presentationURL
+    }
 
     /// Whether this device can send this message at all. Pass `requiredAttachment: true`
     /// when the message must carry the key file: the device must then also support
@@ -76,19 +96,23 @@ struct MessageComposeView: UIViewControllerRepresentable {
     /// The `MFMessageComposeViewController` capability probes are main-actor-isolated, so
     /// this accessor is too; it is only read from the view body / a button action.
     @MainActor
-    static func canSend(requiredAttachment: Bool) -> Bool {
-        MessageAttachmentPolicy.decide(
-            canSendText: MFMessageComposeViewController.canSendText(),
-            canSendAttachments: MFMessageComposeViewController.canSendAttachments(),
-            utiSupported: MFMessageComposeViewController.isSupportedAttachmentUTI(RuneScribeShare.uti),
-            requiredAttachment: requiredAttachment) == .allowed
+    public static func canSend(requiredAttachment: Bool) -> Bool {
+        guard MFMessageComposeViewController.canSendText() else { return false }
+        guard requiredAttachment else { return true }
+        return MFMessageComposeViewController.canSendAttachments()
+            && MFMessageComposeViewController.isSupportedAttachmentUTI(
+                RuneScribeWireFormat.contentType
+            )
     }
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onFinish: onFinish, requiredAttachmentWasPresent: attachmentURL != nil)
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(
+            onFinish: finish,
+            requiredAttachmentWasPresent: attachmentURL != nil
+        )
     }
 
-    func makeUIViewController(context: Context) -> UIViewController {
+    public func makeUIViewController(context: Context) -> UIViewController {
         let composer = MFMessageComposeViewController()
         composer.messageComposeDelegate = context.coordinator
         composer.body = messageText
@@ -96,7 +120,7 @@ struct MessageComposeView: UIViewControllerRepresentable {
 
         var requiredAttachmentAccepted = false
         if let attachmentURL {
-            let filename = "message.\(RuneScribeShare.fileExtension)"
+            let filename = "message.\(RuneScribeWireFormat.fileExtension)"
             requiredAttachmentAccepted = composer.addAttachmentURL(
                 attachmentURL,
                 withAlternateFilename: filename
@@ -120,7 +144,22 @@ struct MessageComposeView: UIViewControllerRepresentable {
         }
     }
 
-    func updateUIViewController(_ vc: UIViewController, context: Context) {}
+    public func updateUIViewController(_ vc: UIViewController, context: Context) {}
+
+    private func finish(_ outcome: ShareArtifactOutcomeDTO) {
+        guard let attachment else {
+            onFinish?(outcome)
+            return
+        }
+        Task { @MainActor in
+            do {
+                try await attachment.finish(outcome)
+                onFinish?(outcome)
+            } catch {
+                onFinish?(.failed)
+            }
+        }
+    }
 
     // MFMessageComposeViewControllerDelegate predates Swift concurrency and is not
     // annotated @MainActor in the SDK, yet UIKit always invokes it on the main thread.
@@ -130,7 +169,9 @@ struct MessageComposeView: UIViewControllerRepresentable {
     // @MainActor-isolated `dismiss` and the non-Sendable `onFinish` directly, with no
     // cross-actor send.
     @MainActor
-    final class Coordinator: NSObject, @preconcurrency MFMessageComposeViewControllerDelegate {
+    public final class Coordinator: NSObject,
+        @preconcurrency MFMessageComposeViewControllerDelegate
+    {
         let onFinish: ((ShareArtifactOutcomeDTO) -> Void)?
         /// Whether this send was required to carry the scoped Core artifact.
         let requiredAttachmentWasPresent: Bool
@@ -145,8 +186,10 @@ struct MessageComposeView: UIViewControllerRepresentable {
             self.requiredAttachmentWasPresent = requiredAttachmentWasPresent
         }
 
-        func messageComposeViewController(_ controller: MFMessageComposeViewController,
-                                          didFinishWith result: MessageComposeResult) {
+        public func messageComposeViewController(
+            _ controller: MFMessageComposeViewController,
+            didFinishWith result: MessageComposeResult
+        ) {
             defer { controller.dismiss(animated: true) }
             finish(MessageComposeOutcomeMapper.outcome(
                 for: Self.terminalResult(for: result),
@@ -155,7 +198,7 @@ struct MessageComposeView: UIViewControllerRepresentable {
             ))
         }
 
-        func finish(_ proposedOutcome: ShareArtifactOutcomeDTO) {
+        public func finish(_ proposedOutcome: ShareArtifactOutcomeDTO) {
             guard let outcome = completionGate.accept(proposedOutcome) else { return }
             onFinish?(outcome)
         }

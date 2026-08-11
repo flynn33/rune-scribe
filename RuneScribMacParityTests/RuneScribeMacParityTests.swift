@@ -4,8 +4,10 @@ import Foundation
 import RuneScribeContracts
 @testable import RuneScribeCoreModule
 import RuneScribePlatform
+@_spi(RuntimeFileImportHost) @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
 @testable import RuneScribeUIModule
+import RuneScribeUIRuntime
 import SwiftUI
 import XCTest
 
@@ -80,7 +82,7 @@ final class RuneScribeMacParityTests: XCTestCase {
             )
             await harness.inboundFiles.set(validFixture, for: validURL)
 
-            let validResult = try await harness.session.importFile(validURL)
+            let validResult = try await harness.importSelectedFile(validURL)
             XCTAssertEqual(validResult.disposition, .awaitingConfirmation)
             let validPending = try XCTUnwrap(validResult.pendingImport)
             XCTAssertTrue(validPending.includesFont)
@@ -157,7 +159,7 @@ final class RuneScribeMacParityTests: XCTestCase {
             )
             await harness.inboundFiles.set(invalidFixture, for: invalidURL)
 
-            let invalidResult = try await harness.session.importFile(invalidURL)
+            let invalidResult = try await harness.importSelectedFile(invalidURL)
             XCTAssertEqual(invalidResult.disposition, .awaitingConfirmation)
             let invalidPending = try XCTUnwrap(invalidResult.pendingImport)
             let invalidPendingObserved = await eventually {
@@ -237,9 +239,14 @@ final class RuneScribeMacParityTests: XCTestCase {
                 displayName: activeCipher.label,
                 representation: .file
             )
-            guard case let .file(fileURL) = fileArtifact.reference else {
+            guard case let .file(fileArtifactID) = fileArtifact.reference else {
                 return XCTFail("The cipher share did not produce a file artifact.")
             }
+            XCTAssertEqual(fileArtifactID, fileArtifact.id)
+            let fileTransfer = try await harness.session.shareTransfer(
+                for: fileArtifact.id
+            )
+            let fileURL = try await harness.shareURL(for: fileArtifact.id)
             XCTAssertTrue(FileManager.default.fileExists(atPath: fileURL.path))
 
             let controlsPNG = try renderPNG(
@@ -249,10 +256,9 @@ final class RuneScribeMacParityTests: XCTestCase {
                             transfer: transfer,
                             cipherLabel: activeCipher.label
                         ) {
-                        } label: {
                             Label("Share link", systemImage: "link")
                         }
-                        RuneScribeFileShareLink(fileURL: fileURL)
+                        RuneScribeFileShareLink(transfer: fileTransfer)
                     }
                     .frame(width: 320, height: 160)
                 ),
@@ -278,6 +284,8 @@ final class RuneScribeMacParityTests: XCTestCase {
             } catch {
                 // The opaque link lease was released by Core.
             }
+            await transfer.close()
+            await fileTransfer.close()
         }
     }
 
@@ -291,7 +299,7 @@ final class RuneScribeMacParityTests: XCTestCase {
             )
         )
         let bundledFontBytes = try Data(contentsOf: fontURL)
-        let harness = try MacParityHarness(
+        let harness = try await MacParityHarness(
             bundledFontURL: fontURL,
             bundledFontBytes: bundledFontBytes,
             validCustomFontBytes: Self.validCustomFontBytes
@@ -445,13 +453,14 @@ private final class MacParityHarness {
     let fontRegistrar: InMemoryFontRegistrar
 
     private let shareArtifacts: AppleShareArtifactStore
+    private let runtime: RuneScribeRuntime
     private let temporaryRoot: URL
 
     init(
         bundledFontURL: URL,
         bundledFontBytes: Data,
         validCustomFontBytes: Data
-    ) throws {
+    ) async throws {
         temporaryRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "RuneScribeMacParityTests-\(UUID().uuidString)",
@@ -482,20 +491,134 @@ private final class MacParityHarness {
         )
         let contacts = InMemoryContactAccessService(authorizationStatus: .denied)
         let clipboard = InMemoryClipboardService()
-        let service = RuneScribeCoreApplicationService(
-            secureValueStore: secureValues,
-            protectedFileStore: protectedFiles,
-            inboundFileReader: inboundFiles,
-            shareArtifactStore: shareArtifacts,
-            applicationResourceLocator: resources,
-            systemFontRegistrar: fontRegistrar,
-            contactAccess: contacts,
-            clipboardReading: clipboard,
-            clock: SystemClock(),
-            uuid: SystemUUIDProvider()
+        let clock = SystemClock()
+        let uuid = SystemUUIDProvider()
+        let runtimeIO = RuntimeIOClient(
+            secureValueData: {
+                try await secureValues.data(service: $0, account: $1)
+            },
+            setSecureValue: {
+                try await secureValues.set($0, service: $1, account: $2)
+            },
+            deleteSecureValue: {
+                try await secureValues.delete(service: $0, account: $1)
+            },
+            readProtectedFile: {
+                try await protectedFiles.read(relativePath: $0)
+            },
+            writeProtectedFile: {
+                try await protectedFiles.write($0, relativePath: $1)
+            },
+            removeProtectedFile: {
+                try await protectedFiles.remove(relativePath: $0)
+            },
+            protectedFileExists: {
+                try await protectedFiles.exists(relativePath: $0)
+            },
+            protectedFileContents: {
+                try await protectedFiles.contents(of: $0, matchingExtension: $1)
+            },
+            now: { clock.now() },
+            nextUUID: { uuid.nextUUID() },
+            clipboardSnapshot: {
+                let initialChangeCount = await clipboard.changeCount()
+                let initialString = await clipboard.string()
+                let finalChangeCount = await clipboard.changeCount()
+                return RuntimeClipboardSnapshot(
+                    changeCount: finalChangeCount,
+                    string: initialChangeCount == finalChangeCount
+                        ? initialString
+                        : await clipboard.string()
+                )
+            },
+            contactAuthorizationStatus: {
+                await contacts.authorizationStatus()
+            },
+            requestContactAccess: {
+                try await contacts.requestAccess()
+            },
+            fetchSystemContacts: {
+                try await contacts.fetchContacts()
+            },
+            readInboundFile: {
+                try await inboundFiles.read(
+                    $0.fileURL,
+                    requiresSecurityScope: $0.requiresSecurityScopedAccess,
+                    maximumByteCount: $0.maximumByteCount
+                )
+            },
+            registerBundledSystemFont: {
+                let data = try await resources.data(for: $0)
+                guard Data(SHA256.hash(data: data)) == $1 else {
+                    throw RuntimeBundledFontFailure.integrityMismatch
+                }
+                let postScriptName = try await fontRegistrar.postScriptName(
+                    forFontData: data
+                )
+                guard !postScriptName.isEmpty else {
+                    throw RuntimeBundledFontFailure.unreadableFont
+                }
+                return try await fontRegistrar.registerFont(data)
+            },
+            systemFontPostScriptName: {
+                try await fontRegistrar.postScriptName(forFontData: $0)
+            },
+            registerSystemFont: {
+                try await fontRegistrar.registerFont($0)
+            },
+            createShareArtifact: {
+                try await shareArtifacts.create(
+                    $0,
+                    artifactID: $1,
+                    filename: $2,
+                    fileExtension: $3
+                )
+            },
+            storeShareArtifactLink: {
+                try await shareArtifacts.storeLink($0, artifactID: $1)
+            },
+            removeShareArtifactLink: {
+                try await shareArtifacts.removeLink(artifactID: $0)
+            },
+            removeShareArtifact: { try await shareArtifacts.remove(artifactID: $0) },
+            removeAllShareArtifacts: { try await shareArtifacts.removeAll() }
         )
-        let sharePresentation = OpaqueSharePresentationProvider { artifactID in
-            try await shareArtifacts.link(for: artifactID)
+        let service = RuneScribeCoreApplicationService(runtimeIO: runtimeIO)
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: MacParityRuntimeModules.version,
+            platform: .macOS
+        )
+        let clientCapture = MacParityApplicationClientCapture()
+        try await runtime.register(
+            manifest: MacParityRuntimeModules.coreManifest,
+            factory: AnyModuleFactory(
+                descriptor: MacParityRuntimeModules.coreDescriptor
+            ) {
+                MacParityApplicationPublishingModule(service: service)
+            }
+        )
+        try await runtime.register(
+            manifest: MacParityRuntimeModules.clientManifest,
+            factory: AnyModuleFactory(
+                descriptor: MacParityRuntimeModules.clientDescriptor
+            ) {
+                MacParityApplicationClientModule(capture: clientCapture)
+            }
+        )
+        try await runtime.installPlatformAdapter(
+            shareArtifacts,
+            for: RuneScribeServiceKeys.sharePresentation
+        )
+        try await runtime.installPlatformAdapter(
+            inboundFiles,
+            for: RuneScribeServiceKeys.inboundFileReader
+        )
+        try await runtime.start()
+        let applicationClient = try await clientCapture.requireClient()
+        let uiRuntimeIO = try await clientCapture.requireRuntimeIO()
+        let inboundFileImportSession = try await uiRuntimeIO.inboundFileImportSession {
+            [applicationClient] input in
+            try await applicationClient.importFile(input)
         }
 
         self.service = service
@@ -503,12 +626,15 @@ private final class MacParityHarness {
         self.protectedFiles = protectedFiles
         self.fontRegistrar = fontRegistrar
         self.shareArtifacts = shareArtifacts
+        self.runtime = runtime
         session = RuneScribeUISession(
-            applicationService: service,
-            clipboardWriting: clipboard,
-            sharePresentation: sharePresentation,
-            splashVideoURL: nil,
-            metalLibraryURL: nil,
+            applicationClient: applicationClient,
+            runtimeIO: uiRuntimeIO,
+            inboundFileImportSession: inboundFileImportSession,
+            resourcePresentation: RuntimeApplicationResourcePresentation(
+                splashVideo: nil,
+                metalLibrary: nil
+            ),
             productMetadata: RuneScribeUIProductMetadata(
                 version: "Parity Test",
                 buildNumber: "1"
@@ -524,9 +650,144 @@ private final class MacParityHarness {
     func stop() async {
         await service.stopInboundProcessing()
         await session.stop()
+        await runtime.stop()
         try? await shareArtifacts.removeAll()
         try? FileManager.default.removeItem(at: temporaryRoot)
     }
+
+    func shareURL(for artifactID: ShareArtifactID) async throws -> URL {
+        try await shareArtifacts.presentationURL(for: artifactID)
+    }
+
+    func importSelectedFile(_ fileURL: URL) async throws -> ImportResultDTO {
+        try await session.inboundFileImportSession.importSelectedFile(fileURL)
+    }
+}
+
+private enum MacParityRuntimeModules {
+    static let version = SemanticVersion(
+        major: UInt(1),
+        minor: UInt(0),
+        patch: UInt(0)
+    )
+    static let coreID: ModuleIdentifier = "com.runescribe.test.mac-parity-core"
+    static let clientID: ModuleIdentifier = "com.runescribe.test.mac-parity-ui"
+
+    static let coreDescriptor = ModuleDescriptor(
+        moduleID: coreID,
+        moduleVersion: version,
+        kind: .service,
+        entryPoint: "RuneScribeMacParityCoreModule",
+        role: RuneScribeRoles.core,
+        requestedCapabilities: [RuneScribeCapabilities.inboundInput],
+        publishedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(
+            RuntimeApplicationEndpointCatalog.ingressEndpointIDs
+        )
+    )
+    static let clientDescriptor = ModuleDescriptor(
+        moduleID: clientID,
+        moduleVersion: version,
+        kind: .ui,
+        entryPoint: "RuneScribeMacParityClientModule",
+        role: RuneScribeRoles.primaryUI,
+        requestedCapabilities: [
+            RuneScribeCapabilities.applicationCommands,
+            RuneScribeCapabilities.applicationStateRead,
+            RuneScribeCapabilities.fileImportUI,
+            RuneScribeCapabilities.rootUI,
+            RuneScribeCapabilities.shareUI,
+        ],
+        requiredServices: [RuneScribeServiceIDs.sharePresentation],
+        requiredModuleRoles: [RuneScribeRoles.core],
+        consumedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs
+    )
+
+    static let coreManifest = ModuleManifest(
+        runtimeVersion: version,
+        moduleID: coreID,
+        displayName: "Rune Scribe Mac Parity Core",
+        moduleVersion: version,
+        moduleType: .service,
+        supportedPlatforms: [.macOS],
+        capabilitiesRequested: [RuneScribeCapabilities.inboundInput],
+        entryPoint: coreDescriptor.entryPoint,
+        runtimeRequirements: ModuleRuntimeRequirements(),
+        defaultRole: RuneScribeRoles.core
+    )
+    static let clientManifest = ModuleManifest(
+        runtimeVersion: version,
+        moduleID: clientID,
+        displayName: "Rune Scribe Mac Parity UI",
+        moduleVersion: version,
+        moduleType: .ui,
+        supportedPlatforms: [.macOS],
+        capabilitiesRequested: [
+            RuneScribeCapabilities.applicationCommands,
+            RuneScribeCapabilities.applicationStateRead,
+            RuneScribeCapabilities.fileImportUI,
+            RuneScribeCapabilities.rootUI,
+            RuneScribeCapabilities.shareUI,
+        ],
+        entryPoint: clientDescriptor.entryPoint,
+        runtimeRequirements: ModuleRuntimeRequirements(
+            requiredServices: [RuneScribeServiceIDs.sharePresentation],
+            requiredModuleRoles: [RuneScribeRoles.core]
+        ),
+        defaultRole: RuneScribeRoles.primaryUI
+    )
+}
+
+private struct MacParityApplicationPublishingModule: RuneScribeModule {
+    let descriptor = MacParityRuntimeModules.coreDescriptor
+    let service: RuneScribeCoreApplicationService
+
+    func start(context: ModuleContext) async throws {
+        try await context.registerApplicationEndpoints(service)
+        try await context.registerInboundInputEndpoint(service)
+    }
+
+    func stop() async {}
+}
+
+private actor MacParityApplicationClientCapture {
+    private var client: RuntimeApplicationClient?
+    private var runtimeIO: RuntimeIOClient?
+
+    func store(_ client: RuntimeApplicationClient, runtimeIO: RuntimeIOClient) {
+        self.client = client
+        self.runtimeIO = runtimeIO
+    }
+
+    func requireClient() throws -> RuntimeApplicationClient {
+        guard let client else {
+            throw MacParityHarnessError.applicationClientUnavailable
+        }
+        return client
+    }
+
+    func requireRuntimeIO() throws -> RuntimeIOClient {
+        guard let runtimeIO else {
+            throw MacParityHarnessError.applicationClientUnavailable
+        }
+        return runtimeIO
+    }
+}
+
+private struct MacParityApplicationClientModule: RuneScribeModule {
+    let descriptor = MacParityRuntimeModules.clientDescriptor
+    let capture: MacParityApplicationClientCapture
+
+    func start(context: ModuleContext) async throws {
+        let client = try await context.applicationClient()
+        let runtimeIO = try await context.runtimeIOClient()
+        await capture.store(client, runtimeIO: runtimeIO)
+    }
+
+    func stop() async {}
+}
+
+private enum MacParityHarnessError: Error {
+    case applicationClientUnavailable
 }
 
 private struct KeyboardFocusReport {

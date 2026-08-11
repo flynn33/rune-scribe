@@ -96,7 +96,7 @@ final class ComplianceGuardTests: XCTestCase {
             XCTAssertEqual(rule["waiverStatus"] as? String, "none", id)
             XCTAssertEqual((rule["enforcement"] as? [String: Any])?["mode"] as? String, "report-only", id)
             XCTAssertFalse(try XCTUnwrap(rule["owningPhases"] as? [String]).isEmpty, id)
-            if ["FG-004", "FG-005", "FG-006"].contains(id) {
+            if ["FG-004", "FG-005", "FG-006", "FG-007", "FG-009", "FG-016"].contains(id) {
                 XCTAssertEqual(
                     (rule["enforcement"] as? [String: Any])?["detectorCoverage"] as? String,
                     "complete",
@@ -328,6 +328,398 @@ final class ComplianceGuardTests: XCTestCase {
                 let id = try XCTUnwrap(rule["id"] as? String, fixture.id)
                 XCTAssertEqual(rule["status"] as? String, baselineStatuses[id], "\(fixture.id): \(id)")
             }
+        }
+    }
+
+    func testP04SemanticNegativeMutationsReportOnlyTheirExactRuleIDs() throws {
+        func normalizedEvidence(in rule: [String: Any]) -> [String] {
+            let evidence = rule["evidence"] as? [[String: Any]] ?? []
+            return evidence.map { item in
+                let path = item["path"] as? String ?? ""
+                let detail = item["detail"] as? String ?? ""
+                return "\(path):\(detail)"
+            }.sorted()
+        }
+
+        let baseline = try invokeGuard()
+        XCTAssertEqual(baseline.status, 0, baseline.standardError)
+        let baselineRules = try reportRules(baseline.json)
+        let baselineStatuses = Dictionary(
+            uniqueKeysWithValues: baselineRules.compactMap { rule -> (String, String)? in
+                guard let id = rule["id"] as? String,
+                      let status = rule["status"] as? String
+                else {
+                    return nil
+                }
+                return (id, status)
+            }
+        )
+        let baselineEvidence = Dictionary(
+            uniqueKeysWithValues: baselineRules.compactMap { rule -> (String, [String])? in
+                guard let id = rule["id"] as? String else { return nil }
+                return (id, normalizedEvidence(in: rule))
+            }
+        )
+
+        func assertMutation(
+            _ label: String,
+            ruleID: String,
+            expectedEvidence: [String: [String]],
+            fixture: @escaping (URL) throws -> Void
+        ) throws {
+            let invocation = try invokeGuard(fixture: fixture)
+            XCTAssertEqual(invocation.status, 0, "\(label): \(invocation.standardError)")
+            let rules = try reportRules(invocation.json)
+            let result = try XCTUnwrap(
+                rules.first { ($0["id"] as? String) == ruleID },
+                label
+            )
+            XCTAssertEqual(result["status"] as? String, "violation", label)
+            let evidence = try XCTUnwrap(result["evidence"] as? [[String: Any]], label)
+            for (evidencePath, detailFragments) in expectedEvidence {
+                let mutationEvidence = evidence.filter {
+                    ($0["path"] as? String) == evidencePath
+                }
+                XCTAssertFalse(mutationEvidence.isEmpty, "\(label): \(evidencePath)")
+                for fragment in detailFragments {
+                    XCTAssertTrue(
+                        mutationEvidence.contains {
+                            ($0["detail"] as? String)?.contains(fragment) == true
+                        },
+                        "\(label): \(evidencePath) missing detail fragment \(fragment)"
+                    )
+                }
+            }
+
+            for rule in rules where (rule["id"] as? String) != ruleID {
+                let id = try XCTUnwrap(rule["id"] as? String, label)
+                XCTAssertEqual(
+                    rule["status"] as? String,
+                    baselineStatuses[id],
+                    "\(label): \(id)"
+                )
+                XCTAssertEqual(
+                    normalizedEvidence(in: rule),
+                    baselineEvidence[id],
+                    "\(label): unexpected \(id) evidence"
+                )
+            }
+        }
+
+        let moduleOperationalPath =
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/P04OperationalMutation.swift"
+        let unknownBridgePath =
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/P04UnknownNativeBridgeMutation.swift"
+        let knownBridgePath =
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeQRScanner.swift"
+        let authorityBridgePath =
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeSharePresentation.swift"
+        try assertMutation(
+            "P04 runtime-owned I/O",
+            ruleID: "FG-007",
+            expectedEvidence: [
+                moduleOperationalPath: [
+                    "symbol fileImporter", "symbol fileExporter",
+                    "symbol UIActivityViewController", "symbol MFMessageComposeViewController",
+                    "symbol AVCaptureSession", "symbol requestAccess", "symbol CNContact",
+                    "symbol UIApplication", "symbol Link", "symbol AVAudioSession",
+                    "symbol AppStorage", "symbol UserDefaults",
+                    "imports operational framework AVFoundation",
+                    "imports operational framework Contacts",
+                    "imports operational framework MessageUI",
+                    "reads file data directly",
+                ],
+                unknownBridgePath: [
+                    "not allowlisted for P04UnknownNativeBridgeMutation.swift",
+                    "lacks opaque runtime authority acquisition",
+                ],
+                knownBridgePath: ["operational symbol AVAudioRecorder is not allowlisted"],
+                authorityBridgePath: ["lacks opaque runtime authority acquisition"],
+            ]
+        ) { root in
+            var destination = root.appendingPathComponent(moduleOperationalPath)
+            try FileManager.default.createDirectory(
+                at: destination.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try Data(
+                """
+                import AVFoundation
+                import Contacts
+                import MessageUI
+                import SwiftUI
+
+                private func mutateOperationalAPIs<Content>(
+                    _ content: Content,
+                    contact: CNContact
+                ) {
+                    _ = content.fileImporter
+                    _ = content.fileExporter
+                    _ = UIActivityViewController(activityItems: [], applicationActivities: nil)
+                    _ = MFMessageComposeViewController()
+                    _ = AVCaptureSession()
+                    _ = AVCaptureDevice.requestAccess
+                    _ = contact.identifier
+                    _ = UIApplication.shared
+                    _ = Link.self
+                    _ = AVAudioSession.sharedInstance()
+                    _ = try? Data(contentsOf: URL(fileURLWithPath: "/tmp/p04"))
+                }
+
+                @AppStorage("p04.operational-setting")
+                private var p04OperationalSetting = false
+                private let p04DefaultsMutation = UserDefaults.standard
+                """.utf8
+            ).write(to: destination, options: .atomic)
+
+            destination = root.appendingPathComponent(unknownBridgePath)
+            try FileManager.default.createDirectory(
+                at: destination.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try Data(
+                """
+                private let unownedCaptureSession = AVCaptureSession()
+                """.utf8
+            ).write(to: destination, options: .atomic)
+
+            let source = try String(
+                contentsOf: self.repository.appendingPathComponent(knownBridgePath),
+                encoding: .utf8
+            )
+            destination = root.appendingPathComponent(knownBridgePath)
+            try FileManager.default.createDirectory(
+                at: destination.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try Data(
+                (source + "\nprivate let p04UnknownAudioMutation = AVAudioRecorder()\n").utf8
+            ).write(to: destination, options: .atomic)
+
+            let authoritySource = try String(
+                contentsOf: self.repository.appendingPathComponent(authorityBridgePath),
+                encoding: .utf8
+            )
+            let acquireAnchor = "session.acquire()"
+            let acquireRanges = authoritySource.ranges(of: acquireAnchor)
+            XCTAssertEqual(acquireRanges.count, 1, "P04 opaque authority acquire anchor")
+            let acquireRange = try XCTUnwrap(acquireRanges.first)
+            let authorityMutation = authoritySource.replacingCharacters(
+                in: acquireRange,
+                with: "session.unvalidatedOpen()"
+            )
+            destination = root.appendingPathComponent(authorityBridgePath)
+            try FileManager.default.createDirectory(
+                at: destination.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try Data(authorityMutation.utf8).write(to: destination, options: .atomic)
+        }
+
+        let factoryPath =
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/P04FactoryMutation.swift"
+        try assertMutation(
+            "P04 uniform factory",
+            ruleID: "FG-009",
+            expectedEvidence: [
+                factoryPath: [
+                    "factory accepts arbitrary dependencies",
+                    "closure captures an operational dependency",
+                    "closure constructs a module with captured arguments",
+                    "uses the RuntimeTesting descriptor-and-closure",
+                    "imports the RuntimeTesting SPI",
+                    "closure-valued module factory",
+                    "module bootstrap closure captures an operational dependency",
+                ],
+            ]
+        ) { root in
+            let destination = root.appendingPathComponent(factoryPath)
+            try FileManager.default.createDirectory(
+                at: destination.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try Data(
+                """
+                @_spi(RuntimeTesting) import RuneScribeRuntimeCore
+
+                private struct P04CapturedProvider {}
+                private struct P04FactoryModule {
+                    init(provider: P04CapturedProvider) {}
+                }
+
+                private enum P04FactoryMutation {
+                    static func factory(
+                        dependencies: P04CapturedProvider
+                    ) -> AnyModuleFactory {
+                        AnyModuleFactory(descriptor: RuneScribeUIModuleBootstrap.descriptor) {
+                            P04FactoryModule(provider: dependencies)
+                        }
+                    }
+
+                    static func alternateFactory(
+                        dependencies: P04CapturedProvider
+                    ) -> AnyModuleFactory {
+                        .init(
+                            descriptor: RuneScribeUIModuleBootstrap.descriptor,
+                            make: {
+                                P04FactoryModule(provider: dependencies)
+                            }
+                        )
+                    }
+
+                    static let bootstrapFactory:
+                        (P04CapturedProvider) -> AnyModuleFactory = { provider in
+                            .init(
+                                descriptor: RuneScribeUIModuleBootstrap.descriptor,
+                                make: {
+                                    P04FactoryModule(provider: provider)
+                                }
+                            )
+                        }
+                }
+                """.utf8
+            ).write(to: destination, options: .atomic)
+        }
+
+        let resourceBoundaryPath =
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/P04ResourceBoundaryMutation.swift"
+        let gatewayPath =
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeIOGateway.swift"
+        try assertMutation(
+            "P04 opaque resource boundary with runtime generation and revocation validation",
+            ruleID: "FG-016",
+            expectedEvidence: [
+                resourceBoundaryPath: [
+                    "imports the RuntimeResourceHost SPI outside",
+                    "exposes a provider or raw URL/Data resource result",
+                    "constructs an ApplicationResource outside its canonical catalog",
+                    "without a catalog and descriptor declaration",
+                    "declares a URL/Data-bearing DTO",
+                    "stores raw URL/Data instead of an opaque resource handle",
+                    "resource property instead of an opaque session",
+                    "resource subscript instead of an opaque session",
+                    "Bundle.module resource location outside its manifest loader",
+                ],
+                gatewayPath: [
+                    "no longer checks runtime and module generations",
+                    "module invalidation no longer revokes runtime resource bindings",
+                ],
+            ]
+        ) { root in
+            var destination = root.appendingPathComponent(resourceBoundaryPath)
+            try FileManager.default.createDirectory(
+                at: destination.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try Data(
+                """
+                import Foundation
+                @_spi(RuntimeResourceHost) import RuneScribeRuntimeCore
+
+                private typealias P04ResourceURL = URL
+                private struct P04KeyBearingURLDTO {
+                    let keyURL: URL
+                }
+                private let p04RetainedKeyURL: URL = fatalError()
+
+                public extension ModuleContext {
+                    func resourceProvider() -> any ApplicationResourceLocator {
+                        fatalError()
+                    }
+
+                    func resourceData() -> Data {
+                        Data()
+                    }
+
+                    var resourceURL: P04ResourceURL {
+                        fatalError()
+                    }
+
+                    subscript(resource name: String) -> Data {
+                        Data()
+                    }
+                }
+
+                public extension RuntimeIOClient {
+                    func unsafeResourceURL() -> URL {
+                        fatalError()
+                    }
+                }
+
+                private let guessedResource = ApplicationResource(
+                    name: "guessed",
+                    fileExtension: "bin"
+                )
+                private let guessedResourceViaInit: ApplicationResource = .init(
+                    name: "guessed-via-init",
+                    fileExtension: "bin"
+                )
+                private let guessedResourceBundle = Bundle.module
+
+                private func requestUndeclaredResource(
+                    _ client: RuntimeIOClient
+                ) async throws {
+                    let indirectResource = ApplicationResource.bundledRuneFont
+                    _ = try await client.applicationResourceSession(indirectResource)
+                }
+                """.utf8
+            ).write(to: destination, options: .atomic)
+
+            let source = try String(
+                contentsOf: self.repository.appendingPathComponent(gatewayPath),
+                encoding: .utf8
+            )
+            let anchor = "guard runtimeGeneration == lease.runtimeGeneration else {"
+            let ranges = source.ranges(of: anchor)
+            XCTAssertEqual(ranges.count, 1, "P04 runtime generation validation anchor")
+            let range = try XCTUnwrap(ranges.first)
+            var mutated = source.replacingCharacters(
+                in: range,
+                with: "guard lease.runtimeGeneration > 0 else {"
+            )
+            let lifecycleTailAnchor = "        return source\n    }\n}"
+            let lifecycleTailRanges = mutated.ranges(of: lifecycleTailAnchor)
+            XCTAssertEqual(lifecycleTailRanges.count, 1, "P04 lifecycle tail anchor")
+            let lifecycleTailRange = try XCTUnwrap(lifecycleTailRanges.first)
+            mutated.replaceSubrange(
+                lifecycleTailRange,
+                with: """
+                        if false {
+                            guard runtimeGeneration == lease.runtimeGeneration else {
+                                return source
+                            }
+                        }
+                        return source
+                    }
+                }
+                """
+            )
+            let revocationAnchor =
+                "await revokeResourceBindings(moduleID: moduleID, generation: generation)"
+            let revocationRanges = mutated.ranges(of: revocationAnchor)
+            XCTAssertEqual(
+                revocationRanges.count,
+                1,
+                "P04 runtime revocation validation anchor"
+            )
+            let revocationRange = try XCTUnwrap(revocationRanges.first)
+            mutated.replaceSubrange(
+                revocationRange,
+                with: """
+                if false {
+                    await revokeResourceBindings(
+                        moduleID: moduleID,
+                        generation: generation
+                    )
+                }
+                """
+            )
+            destination = root.appendingPathComponent(gatewayPath)
+            try FileManager.default.createDirectory(
+                at: destination.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try Data(mutated.utf8).write(to: destination, options: .atomic)
         }
     }
 

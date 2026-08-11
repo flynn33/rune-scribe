@@ -5,6 +5,7 @@ import Metal
 import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
+@testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
 @testable import RuneScrib
 
@@ -83,12 +84,55 @@ final class CompatibilityBaselineTests: XCTestCase {
             keyLocation: key,
             libraryLocation: encrypted,
         ])
-        let service = RuneScribeCoreApplicationService(
-            secureValueStore: store,
-            shareArtifactStore: InMemoryShareArtifactStore(),
-            clock: SystemClock(),
-            uuid: SystemUUIDProvider()
+        let protectedFiles = InMemoryProtectedFileStore()
+        let shareArtifacts = InMemoryShareArtifactStore()
+        let clock = SystemClock()
+        let uuid = SystemUUIDProvider()
+        let runtimeIO = RuntimeIOClient(
+            secureValueData: {
+                try await store.data(service: $0, account: $1)
+            },
+            setSecureValue: {
+                try await store.set($0, service: $1, account: $2)
+            },
+            deleteSecureValue: {
+                try await store.delete(service: $0, account: $1)
+            },
+            readProtectedFile: {
+                try await protectedFiles.read(relativePath: $0)
+            },
+            writeProtectedFile: {
+                try await protectedFiles.write($0, relativePath: $1)
+            },
+            removeProtectedFile: {
+                try await protectedFiles.remove(relativePath: $0)
+            },
+            protectedFileExists: {
+                try await protectedFiles.exists(relativePath: $0)
+            },
+            protectedFileContents: {
+                try await protectedFiles.contents(of: $0, matchingExtension: $1)
+            },
+            now: { clock.now() },
+            nextUUID: { uuid.nextUUID() },
+            createShareArtifact: {
+                try await shareArtifacts.create(
+                    $0,
+                    artifactID: $1,
+                    filename: $2,
+                    fileExtension: $3
+                )
+            },
+            storeShareArtifactLink: {
+                try await shareArtifacts.storeLink($0, artifactID: $1)
+            },
+            removeShareArtifactLink: {
+                try await shareArtifacts.removeLink(artifactID: $0)
+            },
+            removeShareArtifact: { try await shareArtifacts.remove(artifactID: $0) },
+            removeAllShareArtifacts: { try await shareArtifacts.removeAll() }
         )
+        let service = RuneScribeCoreApplicationService(runtimeIO: runtimeIO)
 
         await service.startInboundProcessing()
         var iterator = service.stateStream().makeAsyncIterator()

@@ -21,7 +21,7 @@ final class RuneScribeRuntimeComposition {
     private let clipboardWrite: any ClipboardWriting
     private let clock: any ClockProviding
     private let uuid: any UUIDProviding
-    private let uiDependencies: RuneScribeUIDependencies
+    private let rootPresentationAdapter: RuntimeRootPresentationHostAdapter
     private var isConfigured = false
     private var activationState: RuntimeActivationState = .idle
     private var activationGeneration: UInt64 = 0
@@ -51,14 +51,12 @@ final class RuneScribeRuntimeComposition {
         let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         let buildNumber = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String
         let rootPresentationStore = RootViewPresentationStore()
-        let sharePresentation = OpaqueSharePresentationProvider { artifactID in
-            try await shareArtifacts.link(for: artifactID)
-        }
         self.rootPresentationStore = rootPresentationStore
-        uiDependencies = RuneScribeUIDependencies(
-            rootPresentationStore: rootPresentationStore,
-            sharePresentation: sharePresentation,
-            productMetadata: RuneScribeUIProductMetadata(version: version ?? "—", buildNumber: buildNumber ?? "—")
+        rootPresentationAdapter = rootPresentationStore.runtimeHostAdapter(
+            productMetadata: RuneScribeUIProductMetadata(
+                version: version ?? "—",
+                buildNumber: buildNumber ?? "—"
+            )
         )
         let runtime = RuneScribeRuntime(runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)), platform: Self.platform)
         self.runtime = runtime
@@ -148,18 +146,23 @@ final class RuneScribeRuntimeComposition {
     }
     private func configure() async throws {
         try await runtime.register(manifest: RuneScribeCoreModuleBootstrap.manifest(), factory: coreFactory)
-        try await runtime.register(manifest: RuneScribeUIModuleBootstrap.manifest(), factory: RuneScribeUIModuleBootstrap.factory(dependencies: uiDependencies))
-        try await runtime.registerHostService(secureValues, for: RuneScribeServiceKeys.secureValueStore)
-        try await runtime.registerHostService(protectedFiles, for: RuneScribeServiceKeys.protectedFileStore)
-        try await runtime.registerHostService(inboundFiles, for: RuneScribeServiceKeys.inboundFileReader)
-        try await runtime.registerHostService(shareArtifacts, for: RuneScribeServiceKeys.shareArtifactStore)
-        try await runtime.registerHostService(resources, for: RuneScribeServiceKeys.applicationResourceLocator)
-        try await runtime.registerHostService(fonts, for: RuneScribeServiceKeys.systemFontRegistrar)
-        try await runtime.registerHostService(contacts, for: RuneScribeServiceKeys.contactAccess)
-        try await runtime.registerHostService(clipboardRead, for: RuneScribeServiceKeys.clipboardRead)
-        try await runtime.registerHostService(clipboardWrite, for: RuneScribeServiceKeys.clipboardWrite)
-        try await runtime.registerHostService(clock, for: RuneScribeServiceKeys.clock)
-        try await runtime.registerHostService(uuid, for: RuneScribeServiceKeys.uuid)
+        try await runtime.register(manifest: RuneScribeUIModuleBootstrap.manifest(), factory: RuneScribeUIModuleBootstrap.factory())
+        try await runtime.installStandardPort(
+            rootPresentationAdapter,
+            for: .standard
+        )
+        try await runtime.installPlatformAdapter(secureValues, for: RuneScribeServiceKeys.secureValueStore)
+        try await runtime.installPlatformAdapter(protectedFiles, for: RuneScribeServiceKeys.protectedFileStore)
+        try await runtime.installPlatformAdapter(inboundFiles, for: RuneScribeServiceKeys.inboundFileReader)
+        try await runtime.installPlatformAdapter(shareArtifacts, for: RuneScribeServiceKeys.shareArtifactStore)
+        try await runtime.installPlatformAdapter(shareArtifacts, for: RuneScribeServiceKeys.sharePresentation)
+        try await runtime.installPlatformAdapter(resources, for: RuneScribeServiceKeys.applicationResourceLocator)
+        try await runtime.installPlatformAdapter(fonts, for: RuneScribeServiceKeys.systemFontRegistrar)
+        try await runtime.installPlatformAdapter(contacts, for: RuneScribeServiceKeys.contactAccess)
+        try await runtime.installPlatformAdapter(clipboardRead, for: RuneScribeServiceKeys.clipboardRead)
+        try await runtime.installPlatformAdapter(clipboardWrite, for: RuneScribeServiceKeys.clipboardWrite)
+        try await runtime.installPlatformAdapter(clock, for: RuneScribeServiceKeys.clock)
+        try await runtime.installPlatformAdapter(uuid, for: RuneScribeServiceKeys.uuid)
     }
     private static var platform: SupportedPlatform {
         #if os(macOS)

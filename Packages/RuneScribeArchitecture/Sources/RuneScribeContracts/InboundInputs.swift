@@ -45,20 +45,17 @@ public struct InboundInputMetadataDTO: Codable, Equatable, Hashable, Sendable {
 
 public struct InboundFileDTO: Equatable, Hashable, Sendable {
     public let metadata: InboundInputMetadataDTO
-    public let fileURL: URL
+    public let data: Data
     public let declaredContentType: String?
-    public let requiresSecurityScopedAccess: Bool
 
     public init(
         metadata: InboundInputMetadataDTO,
-        fileURL: URL,
-        declaredContentType: String? = nil,
-        requiresSecurityScopedAccess: Bool = true
+        data: Data,
+        declaredContentType: String? = nil
     ) {
         self.metadata = metadata
-        self.fileURL = fileURL
+        self.data = data
         self.declaredContentType = declaredContentType
-        self.requiresSecurityScopedAccess = requiresSecurityScopedAccess
     }
 }
 

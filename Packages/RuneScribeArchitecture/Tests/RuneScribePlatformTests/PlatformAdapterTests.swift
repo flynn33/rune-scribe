@@ -526,18 +526,23 @@ final class PlatformAdapterTests: XCTestCase {
         let artifactID = ShareArtifactID(rawValue: UUID())
         let payload = Data([0x52, 0x53])
 
-        let file = try await store.create(
+        try await store.create(
             payload,
             artifactID: artifactID,
             filename: "RuneScrib-Message",
             fileExtension: "runescribe"
         )
+        let presentationProvider: any SharePresentationProviding = store
+        let fileURL = try await presentationProvider.presentationURL(for: artifactID)
 
-        XCTAssertEqual(file.artifactID, artifactID)
-        XCTAssertEqual(file.fileURL.lastPathComponent, "RuneScrib-Message.runescribe")
-        XCTAssertEqual(try Data(contentsOf: file.fileURL), payload)
+        XCTAssertEqual(
+            fileURL.deletingLastPathComponent().lastPathComponent,
+            artifactID.rawValue.uuidString
+        )
+        XCTAssertEqual(fileURL.lastPathComponent, "RuneScrib-Message.runescribe")
+        XCTAssertEqual(try Data(contentsOf: fileURL), payload)
         do {
-            _ = try await store.create(
+            try await store.create(
                 payload,
                 artifactID: artifactID,
                 filename: "duplicate",
@@ -548,7 +553,7 @@ final class PlatformAdapterTests: XCTestCase {
             XCTAssertEqual(error as? AppleShareArtifactStoreError, .duplicateIdentifier)
         }
         do {
-            _ = try await store.create(
+            try await store.create(
                 payload,
                 artifactID: ShareArtifactID(rawValue: UUID()),
                 filename: "../escape",
@@ -559,23 +564,25 @@ final class PlatformAdapterTests: XCTestCase {
             XCTAssertEqual(error as? AppleShareArtifactStoreError, .invalidFilename)
         }
 
-        try await store.remove(file)
-        XCTAssertFalse(FileManager.default.fileExists(atPath: file.fileURL.path))
+        try await store.remove(artifactID: artifactID)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
         do {
-            try await store.remove(file)
+            try await store.remove(artifactID: artifactID)
             XCTFail("An already removed artifact must be rejected")
         } catch {
             XCTAssertEqual(error as? AppleShareArtifactStoreError, .unknownArtifact)
         }
 
-        let second = try await store.create(
+        let secondArtifactID = ShareArtifactID(rawValue: UUID())
+        try await store.create(
             payload,
-            artifactID: ShareArtifactID(rawValue: UUID()),
+            artifactID: secondArtifactID,
             filename: "RuneScrib-Message",
             fileExtension: "runescribe"
         )
+        let secondURL = try await presentationProvider.presentationURL(for: secondArtifactID)
         try await store.removeAll()
-        XCTAssertFalse(FileManager.default.fileExists(atPath: second.fileURL.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: secondURL.path))
     }
 
     func testShareArtifactStorePurgesStaleSymlinkedRootWithoutFollowingIt() async throws {
@@ -594,14 +601,16 @@ final class PlatformAdapterTests: XCTestCase {
             withDestinationURL: outside
         )
         let store = AppleShareArtifactStore(temporaryDirectory: base)
-        let file = try await store.create(
+        let artifactID = ShareArtifactID(rawValue: UUID())
+        try await store.create(
             Data([0x01]),
-            artifactID: ShareArtifactID(rawValue: UUID()),
+            artifactID: artifactID,
             filename: "RuneScrib-Message",
             fileExtension: "runescribe"
         )
+        let fileURL = try await store.presentationURL(for: artifactID)
 
-        XCTAssertTrue(FileManager.default.fileExists(atPath: file.fileURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: fileURL.path))
         XCTAssertEqual(try Data(contentsOf: sentinel), Data([0x7A]))
     }
 
@@ -633,7 +642,7 @@ final class PlatformAdapterTests: XCTestCase {
         try FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: outside, withIntermediateDirectories: true)
         let store = AppleShareArtifactStore(temporaryDirectory: base)
-        _ = try await store.create(
+        try await store.create(
             Data([0x01]),
             artifactID: ShareArtifactID(rawValue: UUID()),
             filename: "first",
@@ -645,7 +654,7 @@ final class PlatformAdapterTests: XCTestCase {
         try FileManager.default.createSymbolicLink(at: ownedRoot, withDestinationURL: outside)
 
         do {
-            _ = try await store.create(
+            try await store.create(
                 Data([0x02]),
                 artifactID: ShareArtifactID(rawValue: UUID()),
                 filename: "second",
@@ -669,7 +678,7 @@ final class PlatformAdapterTests: XCTestCase {
         let link = try XCTUnwrap(URL(string: "runescribe://import?v=3&p=synthetic"))
 
         try await store.storeLink(link, artifactID: artifactID)
-        let stored = try await store.link(for: artifactID)
+        let stored = try await store.presentationURL(for: artifactID)
         XCTAssertEqual(stored, link)
         XCTAssertFalse(FileManager.default.fileExists(atPath: root.path + "/RuneScribeShareArtifacts"))
 
@@ -682,7 +691,7 @@ final class PlatformAdapterTests: XCTestCase {
 
         try await store.removeLink(artifactID: artifactID)
         do {
-            _ = try await store.link(for: artifactID)
+            _ = try await store.presentationURL(for: artifactID)
             XCTFail("Revoked opaque links must be unavailable")
         } catch {
             XCTAssertEqual(error as? AppleShareArtifactStoreError, .unknownArtifact)

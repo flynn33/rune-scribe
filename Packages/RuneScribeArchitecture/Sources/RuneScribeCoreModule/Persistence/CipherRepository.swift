@@ -1,6 +1,7 @@
 import CryptoKit
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 
 enum CipherRepositoryError: Error, Equatable, Sendable {
     case secureStorageUnavailable
@@ -39,9 +40,7 @@ actor CipherRepository {
         let task: Task<LoadedState, Error>
     }
 
-    private let secureValueStore: any SecureValueStore
-    private let clock: any ClockProviding
-    private let uuid: any UUIDProviding
+    private let runtimeIO: RuntimeIOClient
 
     private var library: CipherLibrary?
     private var symmetricKey: SymmetricKey?
@@ -53,14 +52,8 @@ actor CipherRepository {
     private var mutationInProgress = false
     private var mutationWaiters: [CheckedContinuation<Void, Never>] = []
 
-    init(
-        secureValueStore: any SecureValueStore,
-        clock: any ClockProviding,
-        uuid: any UUIDProviding
-    ) {
-        self.secureValueStore = secureValueStore
-        self.clock = clock
-        self.uuid = uuid
+    init(runtimeIO: RuntimeIOClient) {
+        self.runtimeIO = runtimeIO
     }
 
     /// Loads the shipping Keychain representation, creating and persisting one
@@ -73,15 +66,9 @@ actor CipherRepository {
             return try await finishLoading(initialization)
         }
 
-        let secureValueStore = secureValueStore
-        let clock = clock
-        let uuid = uuid
+        let runtimeIO = runtimeIO
         let task = Task<LoadedState, Error> {
-            try await Self.loadState(
-                secureValueStore: secureValueStore,
-                clock: clock,
-                uuid: uuid
-            )
+            try await Self.loadState(runtimeIO: runtimeIO)
         }
         let initialization = Initialization(id: nextInitializationID, task: task)
         nextInitializationID &+= 1
@@ -94,10 +81,9 @@ actor CipherRepository {
         defer { releaseMutationPermit() }
 
         let current = try await snapshot()
-        let cipher = Self.generatedCipher(
+        let cipher = try await Self.generatedCipher(
             label: Self.cleanLabel(label, fallback: "New Cipher"),
-            clock: clock,
-            uuid: uuid
+            runtimeIO: runtimeIO
         )
         let candidate = current.adding(cipher)
         // The secure write is the commit point. Never publish or cache an
@@ -145,10 +131,9 @@ actor CipherRepository {
             candidate.activeID = candidate.ciphers.first?.id
         }
         if candidate.ciphers.isEmpty {
-            let replacement = Self.generatedCipher(
+            let replacement = try await Self.generatedCipher(
                 label: "My Cipher",
-                clock: clock,
-                uuid: uuid
+                runtimeIO: runtimeIO
             )
             candidate = CipherLibrary(ciphers: [replacement], activeID: replacement.id)
         }
@@ -219,10 +204,9 @@ actor CipherRepository {
         for contact in contacts where !candidate.ciphers.contains(where: {
             $0.contactID == contact.contactID
         }) {
-            var cipher = Self.generatedCipher(
+            var cipher = try await Self.generatedCipher(
                 label: Self.cleanLabel(contact.displayName, fallback: "Imported Cipher"),
-                clock: clock,
-                uuid: uuid
+                runtimeIO: runtimeIO
             )
             cipher.setContactID(contact.contactID)
             candidate = candidate.addingWithoutActivating(cipher)
@@ -289,10 +273,9 @@ actor CipherRepository {
                 candidate.ciphers[$0].contactID == seed.contactID
             }
             if linked.isEmpty {
-                var cipher = Self.generatedCipher(
+                var cipher = try await Self.generatedCipher(
                     label: Self.cleanLabel(seed.displayName, fallback: "Imported Cipher"),
-                    clock: clock,
-                    uuid: uuid
+                    runtimeIO: runtimeIO
                 )
                 cipher.setContactID(seed.contactID)
                 candidate = candidate.addingWithoutActivating(cipher)
@@ -322,11 +305,10 @@ actor CipherRepository {
         defer { releaseMutationPermit() }
 
         let current = try await snapshot()
-        let cipher = Self.importedCipher(
+        let cipher = try await Self.importedCipher(
             payload,
             label: Self.cleanLabel(label ?? "", fallback: "Imported Cipher"),
-            clock: clock,
-            uuid: uuid
+            runtimeIO: runtimeIO
         )
         let candidate = current.adding(cipher)
         try await persist(candidate)
@@ -340,7 +322,7 @@ actor CipherRepository {
     func ingestMessageCipher(
         _ payload: CipherSharePayload,
         label: String
-    ) async -> MessageCipherIngestionResult {
+    ) async throws -> MessageCipherIngestionResult {
         await acquireMutationPermit()
         defer { releaseMutationPermit() }
 
@@ -351,11 +333,10 @@ actor CipherRepository {
                 return .existing(cipher: existing, library: current)
             }
 
-            let cipher = Self.importedCipher(
+            let cipher = try await Self.importedCipher(
                 payload,
                 label: cleanedLabel,
-                clock: clock,
-                uuid: uuid
+                runtimeIO: runtimeIO
             )
             let candidate = current.addingWithoutActivating(cipher)
             do {
@@ -368,19 +349,17 @@ actor CipherRepository {
                 return .transient(cipher: cipher, failure: .secureStorageUnavailable)
             }
         } catch let error as CipherRepositoryError {
-            let cipher = Self.importedCipher(
+            let cipher = try await Self.importedCipher(
                 payload,
                 label: cleanedLabel,
-                clock: clock,
-                uuid: uuid
+                runtimeIO: runtimeIO
             )
             return .transient(cipher: cipher, failure: error)
         } catch {
-            let cipher = Self.importedCipher(
+            let cipher = try await Self.importedCipher(
                 payload,
                 label: cleanedLabel,
-                clock: clock,
-                uuid: uuid
+                runtimeIO: runtimeIO
             )
             return .transient(cipher: cipher, failure: .secureStorageUnavailable)
         }
@@ -406,13 +385,11 @@ actor CipherRepository {
     }
 
     private static func loadState(
-        secureValueStore: any SecureValueStore,
-        clock: any ClockProviding,
-        uuid: any UUIDProviding
+        runtimeIO: RuntimeIOClient
     ) async throws -> LoadedState {
         let keyData: Data
         if let storedKey = try await secureData(
-            secureValueStore,
+            runtimeIO,
             account: RuneScribeKeychain.symmetricKeyAccount
         ) {
             guard storedKey.count == 32 else {
@@ -423,7 +400,7 @@ actor CipherRepository {
             keyData = SymmetricKey(size: .bits256).withUnsafeBytes { Data($0) }
             try await setSecureData(
                 keyData,
-                secureValueStore: secureValueStore,
+                runtimeIO: runtimeIO,
                 account: RuneScribeKeychain.symmetricKeyAccount
             )
         }
@@ -431,7 +408,7 @@ actor CipherRepository {
         let key = SymmetricKey(data: keyData)
         var loadedLibrary: CipherLibrary = .empty
         if let encrypted = try await secureData(
-            secureValueStore,
+            runtimeIO,
             account: RuneScribeKeychain.cipherLibraryAccount
         ) {
             loadedLibrary = try decryptLibrary(encrypted, using: key)
@@ -442,12 +419,15 @@ actor CipherRepository {
         }
 
         if loadedLibrary.ciphers.isEmpty {
-            let first = generatedCipher(label: "My Cipher", clock: clock, uuid: uuid)
+            let first = try await generatedCipher(
+                label: "My Cipher",
+                runtimeIO: runtimeIO
+            )
             loadedLibrary = CipherLibrary(ciphers: [first], activeID: first.id)
             try await writeLibrary(
                 loadedLibrary,
                 using: key,
-                secureValueStore: secureValueStore
+                runtimeIO: runtimeIO
             )
         }
 
@@ -461,14 +441,14 @@ actor CipherRepository {
         try await Self.writeLibrary(
             library,
             using: symmetricKey,
-            secureValueStore: secureValueStore
+            runtimeIO: runtimeIO
         )
     }
 
     private static func writeLibrary(
         _ library: CipherLibrary,
         using key: SymmetricKey,
-        secureValueStore: any SecureValueStore
+        runtimeIO: RuntimeIOClient
     ) async throws {
         let encoded: Data
         do {
@@ -494,7 +474,7 @@ actor CipherRepository {
 
         try await setSecureData(
             encrypted,
-            secureValueStore: secureValueStore,
+            runtimeIO: runtimeIO,
             account: RuneScribeKeychain.cipherLibraryAccount
         )
     }
@@ -515,11 +495,11 @@ actor CipherRepository {
     }
 
     private static func secureData(
-        _ secureValueStore: any SecureValueStore,
+        _ runtimeIO: RuntimeIOClient,
         account: String
     ) async throws -> Data? {
         do {
-            return try await secureValueStore.data(
+            return try await runtimeIO.secureValueData(
                 service: RuneScribeKeychain.service,
                 account: account
             )
@@ -530,11 +510,11 @@ actor CipherRepository {
 
     private static func setSecureData(
         _ data: Data,
-        secureValueStore: any SecureValueStore,
+        runtimeIO: RuntimeIOClient,
         account: String
     ) async throws {
         do {
-            try await secureValueStore.set(
+            try await runtimeIO.setSecureValue(
                 data,
                 service: RuneScribeKeychain.service,
                 account: account
@@ -568,9 +548,8 @@ actor CipherRepository {
 
     private static func generatedCipher(
         label: String,
-        clock: any ClockProviding,
-        uuid: any UUIDProviding
-    ) -> Cipher {
+        runtimeIO: RuntimeIOClient
+    ) async throws -> Cipher {
         var random = SystemRandomNumberGenerator()
         let key = SymmetricKey(size: .bits256).withUnsafeBytes { Data($0) }
         let publicID = Data((0..<8).map { _ in
@@ -578,10 +557,10 @@ actor CipherRepository {
         })
         let mapping = Array(0..<32).shuffled(using: &random)
         return Cipher(
-            id: uuid.nextUUID(),
+            id: try await runtimeIO.nextUUID(),
             label: label,
             origin: .generated,
-            createdAt: clock.now(),
+            createdAt: try await runtimeIO.now(),
             publicID: publicID,
             keyMaterial: key,
             decorativeMapping: mapping
@@ -591,14 +570,13 @@ actor CipherRepository {
     private static func importedCipher(
         _ payload: CipherSharePayload,
         label: String,
-        clock: any ClockProviding,
-        uuid: any UUIDProviding
-    ) -> Cipher {
+        runtimeIO: RuntimeIOClient
+    ) async throws -> Cipher {
         Cipher(
-            id: uuid.nextUUID(),
+            id: try await runtimeIO.nextUUID(),
             label: label,
             origin: .imported,
-            createdAt: clock.now(),
+            createdAt: try await runtimeIO.now(),
             publicID: payload.publicID,
             keyMaterial: payload.keyMaterial,
             decorativeMapping: payload.decorativeMapping,

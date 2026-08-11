@@ -96,9 +96,9 @@
       "findingIDs": ["FRC-004", "FRC-005"],
       "expectedP01Status": "violation",
       "remediationOwner": "runtime-io",
-      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "evidence-only", "blockingPhase": "P11"},
+      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "complete", "blockingPhase": "P11"},
       "waiverStatus": "none",
-      "evidenceAnchors": ["RuneScrib/AppHost/RuneScribeRuntimeComposition.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRScannerView.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/ContactPicker.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/MessageComposeView.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneScribeFileShareLink.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VideoSplashView.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift"]
+      "evidenceAnchors": ["scripts/swift-compliance-scanner.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeIOGateway.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"]
     },
     {
       "id": "FG-008",
@@ -120,9 +120,9 @@
       "findingIDs": ["FRC-004", "FRC-007"],
       "expectedP01Status": "violation",
       "remediationOwner": "module-factory",
-      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "evidence-only", "blockingPhase": "P11"},
+      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "complete", "blockingPhase": "P11"},
       "waiverStatus": "none",
-      "evidenceAnchors": ["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift", "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"]
+      "evidenceAnchors": ["scripts/swift-compliance-scanner.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Module.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift", "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"]
     },
     {
       "id": "FG-010",
@@ -204,9 +204,9 @@
       "findingIDs": ["FRC-012", "FRC-017"],
       "expectedP01Status": "violation",
       "remediationOwner": "resource-registry",
-      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "evidence-only", "blockingPhase": "P11"},
+      "enforcement": {"mode": "report-only", "severity": "blocking", "detectorCoverage": "complete", "blockingPhase": "P11"},
       "waiverStatus": "none",
-      "evidenceAnchors": ["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/OpaqueSharePresentation.swift"]
+      "evidenceAnchors": ["scripts/swift-compliance-scanner.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeIOGateway.swift", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime", "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"]
     },
     {
       "id": "FG-017",

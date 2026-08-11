@@ -3,7 +3,6 @@
 import RuneScribeContracts
 import RuneScribeUIRuntime
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// The cipher library: create, import, label, select, export, and delete the
 /// user's cipher/decipher pairs. The active cipher (used for both encoding and
@@ -29,7 +28,7 @@ struct CipherLibraryView: View {
     // Export
     @State private var showExporter = false
     @State private var exportArtifact: ShareArtifactDTO?
-    @State private var exportItem: RuneScribeExportArtifact?
+    @State private var exportTransfer: OpaqueShareTransfer?
     @State private var exportFilename = "RuneScrib-Decoder"
 
     // Import
@@ -98,25 +97,21 @@ struct CipherLibraryView: View {
         .runeSheetFrame()
         .background(Color.runeNavy)
         .preferredColorScheme(.dark)
-        .fileExporter(isPresented: $showExporter,
-                      item: exportItem,
-                      contentTypes: [.runeScribe],
-                      defaultFilename: exportFilename) { result in
-            switch result {
-            case .success(let url):
-                status = .success("Saved \(url.lastPathComponent)")
-                finishExport(outcome: .handedOff)
-            case .failure(let error):
-                presentFailure(error)
-                finishExport(outcome: .failed)
+        .runtimeShareArtifactExporter(
+            isPresented: $showExporter,
+            transfer: exportTransfer,
+            defaultFilename: exportFilename
+        ) { outcome in
+            if outcome == .handedOff {
+                status = .success("Saved \(exportFilename).\(RuneScribeWireFormat.fileExtension)")
             }
-        } onCancellation: {
-            finishExport(outcome: .cancelled)
+            finishExport(outcome: outcome)
         }
-        .fileImporter(isPresented: $showImporter,
-                      allowedContentTypes: [.runeScribe],
-                      allowsMultipleSelection: false) { result in
-            handleImportSelection(result)
+        .runtimeInboundFileImporter(
+            isPresented: $showImporter,
+            session: session.inboundFileImportSession
+        ) { result in
+            handleImportCompletion(result)
         }
         .sheet(item: $qrShare, onDismiss: releaseQRShare) { share in
             QRDisplaySheet(transfer: share.transfer, label: share.label)
@@ -520,17 +515,15 @@ struct CipherLibraryView: View {
                     displayName: cipher.label,
                     representation: .file
                 )
-                guard case .file(let url) = artifact.reference else {
+                guard case .file = artifact.reference else {
                     await session.releaseShareArtifact(id: artifact.id)
                     status = .failure("The decoder file could not be prepared.")
                     return
                 }
+                let transfer = try await session.shareTransfer(for: artifact.id)
                 exportArtifact = artifact
                 exportFilename = artifact.displayName
-                exportItem = RuneScribeExportArtifact(
-                    url: url,
-                    filename: artifact.displayName
-                )
+                exportTransfer = transfer
                 status = .idle
                 showExporter = true
             } catch {
@@ -542,8 +535,10 @@ struct CipherLibraryView: View {
     private func finishExport(outcome: ShareArtifactOutcomeDTO) {
         guard let artifact = exportArtifact else { return }
         exportArtifact = nil
-        exportItem = nil
+        let transfer = exportTransfer
+        exportTransfer = nil
         Task {
+            await transfer?.close()
             do {
                 _ = try await session.completeShareArtifact(id: artifact.id, outcome: outcome)
             } catch {
@@ -552,20 +547,15 @@ struct CipherLibraryView: View {
         }
     }
 
-    private func handleImportSelection(_ result: Result<[URL], Error>) {
+    private func handleImportCompletion(
+        _ result: Result<ImportResultDTO, Error>
+    ) {
         switch result {
-        case .success(let urls):
-            guard let url = urls.first else { return }
-            Task {
-                do {
-                    let result = try await session.importFile(url, source: .fileImporter)
-                    pendingScan = result.pendingImport
-                    if result.pendingImport == nil, result.disposition == .duplicate {
-                        status = .success("That cipher is already in your library.")
-                    }
-                } catch {
-                    presentFailure(error)
-                }
+        case .success(let importResult):
+            pendingScan = importResult.pendingImport
+            if importResult.pendingImport == nil,
+               importResult.disposition == .duplicate {
+                status = .success("That cipher is already in your library.")
             }
         case .failure(let error):
             presentFailure(error)
@@ -576,6 +566,7 @@ struct CipherLibraryView: View {
         let liveIDs = Set(session.ciphers.map(\.id))
         let stale = linkArtifacts.filter { !liveIDs.contains($0.key) }
         for share in stale.values {
+            await share.transfer.close()
             await session.releaseShareArtifact(id: share.artifact.id)
         }
         linkArtifacts = linkArtifacts.filter { liveIDs.contains($0.key) }
@@ -607,8 +598,9 @@ struct CipherLibraryView: View {
         artifact: ShareArtifactDTO,
         outcome: ShareArtifactOutcomeDTO
     ) {
-        linkArtifacts.removeValue(forKey: cipherID)
+        let transfer = linkArtifacts.removeValue(forKey: cipherID)?.transfer
         Task {
+            await transfer?.close()
             do {
                 _ = try await session.completeShareArtifact(id: artifact.id, outcome: outcome)
             } catch {
@@ -622,17 +614,19 @@ struct CipherLibraryView: View {
         guard let share = qrShare else { return }
         qrShare = nil
         Task {
+            await share.transfer.close()
             await session.releaseShareArtifact(id: share.artifact.id)
             await prepareLinkArtifacts()
         }
     }
 
     private func releaseLinkArtifacts() {
-        let artifacts = linkArtifacts.values.map(\.artifact)
+        let shares = Array(linkArtifacts.values)
         linkArtifacts.removeAll()
         Task {
-            for artifact in artifacts {
-                await session.releaseShareArtifact(id: artifact.id)
+            for share in shares {
+                await share.transfer.close()
+                await session.releaseShareArtifact(id: share.artifact.id)
             }
         }
     }

@@ -2,7 +2,32 @@ import CryptoKit
 import Foundation
 import RuneScribeContracts
 @testable import RuneScribeCoreModule
+@testable import RuneScribeRuntimeCore
 import XCTest
+
+extension CipherRepository {
+    init(
+        secureValueStore: any SecureValueStore,
+        clock: any ClockProviding,
+        uuid: any UUIDProviding
+    ) {
+        self.init(
+            runtimeIO: RuntimeIOClient(
+                secureValueData: {
+                    try await secureValueStore.data(service: $0, account: $1)
+                },
+                setSecureValue: {
+                    try await secureValueStore.set($0, service: $1, account: $2)
+                },
+                deleteSecureValue: {
+                    try await secureValueStore.delete(service: $0, account: $1)
+                },
+                now: { clock.now() },
+                nextUUID: { uuid.nextUUID() }
+            )
+        )
+    }
+}
 
 final class CipherPersistenceApplicationTests: XCTestCase {
     private static let legacyCipherID = UUID(
@@ -217,7 +242,7 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         await store.clearOperations()
 
         let duplicatePayload = Self.payload(publicID: Data(1...8), keyStart: 64)
-        let duplicate = await repository.ingestMessageCipher(
+        let duplicate = try await repository.ingestMessageCipher(
             duplicatePayload,
             label: "Duplicate"
         )
@@ -230,7 +255,7 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         XCTAssertEqual(duplicateWrites.count, 0)
 
         let newPayload = Self.payload(publicID: Data(9...16), keyStart: 96)
-        let imported = await repository.ingestMessageCipher(
+        let imported = try await repository.ingestMessageCipher(
             newPayload,
             label: "Received"
         )
@@ -475,7 +500,7 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         XCTAssertEqual(summary.assignedContactID, ContactID(rawValue: contactID))
     }
 
-    func testMissingFileImportEmitsProtectedFileFailureBeforeReturning() async throws {
+    func testEmptyNormalizedFilePayloadEmitsCorruptionFailureBeforeReturning() async throws {
         let store = InMemorySecureValueStore()
         try await Self.seedLegacyLibrary(in: store)
         let service = RuneScribeCoreApplicationService(
@@ -496,16 +521,15 @@ final class CipherPersistenceApplicationTests: XCTestCase {
                 source: .fileImporter,
                 isColdStart: false
             ),
-            fileURL: URL(fileURLWithPath: "/tmp/fixture.runescribe"),
-            requiresSecurityScopedAccess: false
+            data: Data()
         )
         do {
             _ = try await service.importFile(input)
-            XCTFail("Expected the missing file to fail")
+            XCTFail("Expected the empty normalized payload to fail")
         } catch let error as RuneScribeProductError {
             XCTAssertEqual(
                 error,
-                .failure(RuneScribeFailureDTO(code: .protectedFileUnavailable))
+                .failure(RuneScribeFailureDTO(code: .corruptedContent))
             )
         }
 
@@ -519,8 +543,8 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         }
         let failed = try XCTUnwrap(failedSnapshot)
         XCTAssertEqual(failed.importState.phase, .failed)
-        XCTAssertEqual(failed.importState.lastFailure?.code, .protectedFileUnavailable)
-        XCTAssertEqual(failed.lastFailure?.code, .protectedFileUnavailable)
+        XCTAssertEqual(failed.importState.lastFailure?.code, .corruptedContent)
+        XCTAssertEqual(failed.lastFailure?.code, .corruptedContent)
     }
 
     // MARK: - Frozen migration fixture

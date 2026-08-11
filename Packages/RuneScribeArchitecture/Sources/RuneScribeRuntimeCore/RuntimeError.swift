@@ -22,6 +22,7 @@ public enum RuneScribeRuntimeError: Error, Equatable, Sendable {
     case serviceNotDeclared(moduleID: ModuleIdentifier, service: ServiceIdentifier)
     case serviceCapabilityMissing(moduleID: ModuleIdentifier, service: ServiceIdentifier)
     case serviceAccessDenied(moduleID: ModuleIdentifier, service: ServiceIdentifier)
+    case resourceNotDeclared(moduleID: ModuleIdentifier, resource: ApplicationResource)
     case serviceUnavailable(ServiceIdentifier)
     case serviceTypeMismatch(ServiceIdentifier)
     case duplicateService(ServiceIdentifier)
@@ -99,6 +100,8 @@ extension RuneScribeRuntimeError: LocalizedError {
             "Module \(moduleID.rawValue) lacks the capability required for \(service.rawValue)."
         case .serviceAccessDenied(let moduleID, let service):
             "Module \(moduleID.rawValue) is denied service \(service.rawValue)."
+        case .resourceNotDeclared(let moduleID, let resource):
+            "Module \(moduleID.rawValue) did not declare resource \(resource.name).\(resource.fileExtension)."
         case .serviceUnavailable(let service):
             "Service \(service.rawValue) is unavailable."
         case .serviceTypeMismatch(let service):
