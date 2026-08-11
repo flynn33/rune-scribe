@@ -1,5 +1,6 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 
 struct MessageImportMutation: Sendable {
     let message: ReceivedMessageDTO
@@ -18,7 +19,7 @@ enum MessageImportUseCase {
         messageService: MessageService,
         fontIntegration: (any CoreFontIntegrating)?,
         contactIntegration: (any CoreMessageContactAssociating)?,
-        uuid: any UUIDProviding
+        runtimeIO: RuntimeIOClient
     ) async throws -> MessageImportMutation {
         var transientCandidate: Cipher?
         var library: CipherLibrary
@@ -32,7 +33,7 @@ enum MessageImportUseCase {
                     suppliedBytes: fontBytes
                 )
             }
-            switch await repository.ingestMessageCipher(
+            switch try await repository.ingestMessageCipher(
                 embedded,
                 label: payload.senderName
             ) {
@@ -89,7 +90,7 @@ enum MessageImportUseCase {
 
         return MessageImportMutation(
             message: ReceivedMessageDTO(
-                id: MessageID(rawValue: uuid.nextUUID()),
+                id: MessageID(rawValue: try await runtimeIO.nextUUID()),
                 plaintext: decoded.plaintext,
                 senderName: payload.senderName,
                 cipherID: CipherID(rawValue: decoded.cipher.id),

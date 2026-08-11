@@ -9,6 +9,7 @@ alignment_file="${RUNESCRIBE_ROADMAP_ALIGNMENT_FILE:-$repository_root/docs/verif
 
 ruby - "$repository_root" "$ratchet_file" "$alignment_file" <<'RUBY'
 require "json"
+require "digest"
 require "open3"
 require "pathname"
 require "set"
@@ -31,7 +32,7 @@ def production_swift_files(root)
     relative = Pathname(path).relative_path_from(root).to_s
     relative.start_with?(
       ".git/", ".build/", "DerivedData/", "RuneScribMacParityHost/",
-      "Packages/RuneScribeArchitecture/Sources/RuneScribeTestSupport/"
+      "scripts/", "Packages/RuneScribeArchitecture/Sources/RuneScribeTestSupport/"
     ) ||
       relative.split("/").any? { |component| component == "Tests" || component.end_with?("Tests") }
   end
@@ -138,25 +139,86 @@ unless ratchet_path.file?
 end
 
 ratchet = JSON.parse(ratchet_path.read)
-errors << "ratchet schemaVersion must be 1.0" unless ratchet["schemaVersion"] == "1.0"
+errors << "ratchet schemaVersion must be 1.1" unless ratchet["schemaVersion"] == "1.1"
 
 alignment = JSON.parse(alignment_path.read)
-forsetti_gate = alignment.fetch("forsettiGate")
-official_forsetti_url = forsetti_gate.fetch("repositoryURL")
-expected_official_forsetti_url = "https://github.com/flynn33/Forsetti-Framework-Mac-iOS"
-official_forsetti_products = %w[ForsettiCore ForsettiPlatform ForsettiHostTemplate]
-forsetti_blocked = forsetti_gate.fetch("status") == "blocked-upstream"
-forsetti_release_version = forsetti_gate["releasedTag"]
-errors << "roadmap ledger must retain the official Forsetti repository URL" unless official_forsetti_url == expected_official_forsetti_url
-unless forsetti_blocked
-  errors << "roadmap ledger must record an exact semantic Forsetti release" unless forsetti_release_version.to_s.match?(/\Av?\d+\.\d+\.\d+\z/)
-  errors << "roadmap ledger must retain the no-private-fork policy" unless forsetti_gate["migrationPolicy"] == "no-private-fork"
+forsetti_policy = alignment.fetch("forsettiPolicy")
+expected_policy = {
+  "status" => "active",
+  "implementationOwnership" => "app-owned",
+  "externalDependencyAllowed" => false,
+  "perCallRuntimeMediationRequired" => true,
+  "runtimeOwnsOperationalIO" => true,
+  "runtimeOwnsPersistentSettings" => true,
+  "uiModuleOwnsViews" => true
+}
+expected_policy.each do |field, expected|
+  unless forsetti_policy[field] == expected
+    errors << "FG-001: roadmap forsettiPolicy.#{field} must be #{expected.inspect}"
+  end
+end
+
+policy_record = forsetti_policy.fetch("controllingPolicy", {})
+ratchet_policy_record = ratchet.fetch("controllingPolicy", {})
+policy_relative = policy_record["path"].to_s
+policy_path = root.join(policy_relative)
+unless policy_relative == "docs/architecture/FORSETTI_CONTROLLING_POLICY.md" && policy_path.file?
+  errors << "FG-020: controlling policy path is missing or not canonical"
+else
+  actual_policy_hash = Digest::SHA256.file(policy_path).hexdigest
+  errors << "FG-020: roadmap controlling policy hash drifted" unless policy_record["sha256"] == actual_policy_hash
+  unless ratchet_policy_record == { "path" => policy_relative, "sha256" => actual_policy_hash }
+    errors << "FG-020: architecture ratchet controlling policy record drifted"
+  end
+end
+
+report_only_guard = ratchet.fetch("reportOnlyGuard", {})
+unless report_only_guard == {
+  "catalogPath" => "scripts/forsetti-compliance-rules.json",
+  "checkerPath" => "scripts/check-forsetti-compliance.sh",
+  "ruleCount" => 20,
+  "mode" => "report-only"
+}
+  errors << "FG-020: report-only guard metadata is missing or malformed"
+end
+
+guard_catalog_path = root.join(report_only_guard["catalogPath"].to_s)
+guard_checker_path = root.join(report_only_guard["checkerPath"].to_s)
+unless guard_catalog_path.file?
+  errors << "FG-020: report-only rule catalog is missing"
+end
+unless guard_checker_path.file? && guard_checker_path.executable?
+  errors << "FG-020: report-only checker is missing or not executable"
+end
+if guard_catalog_path.file?
+  begin
+    guard_catalog = JSON.parse(guard_catalog_path.read)
+    guard_ids = Array(guard_catalog["rules"]).map { |rule| rule["id"] }
+    expected_guard_ids = (1..20).map { |number| format("FG-%03d", number) }
+    unless guard_catalog["mode"] == "report-only" && guard_ids == expected_guard_ids
+      errors << "FG-020: report-only rule catalog mode, count, or stable ordering drifted"
+    end
+  rescue JSON::ParserError => error
+    errors << "FG-020: report-only rule catalog is invalid JSON: #{error.message}"
+  end
 end
 
 required_products = Array(ratchet["requiredProducts"])
 test_only_products = Array(ratchet["testOnlyProducts"])
 all_products = required_products + test_only_products
 errors << "ratchet product names must be unique" unless all_products.uniq == all_products
+presentation_contract_products = ["RuneScribeUIPresentationContracts"]
+architecture_package_products = required_products.dup
+runtime_core_product_index = architecture_package_products.index("RuneScribeRuntimeCore")
+if runtime_core_product_index
+  architecture_package_products.insert(runtime_core_product_index, *presentation_contract_products)
+else
+  errors << "ratchet requiredProducts must include RuneScribeRuntimeCore"
+end
+architecture_package_products.concat(test_only_products)
+unless architecture_package_products.uniq == architecture_package_products
+  errors << "architecture package product names must be unique"
+end
 required_module_ids = ratchet.fetch("requiredModuleIDs", {})
 metrics_policy = ratchet.fetch("metrics", {})
 
@@ -166,7 +228,7 @@ metrics_policy.each do |name, policy|
     errors << "ratchet metric #{name} requires a non-empty #{field}" unless value.is_a?(String) && !value.strip.empty?
   end
   errors << "ratchet metric #{name} requires a non-negative integer maximum" unless policy["maximum"].is_a?(Integer) && policy["maximum"] >= 0
-  errors << "ratchet metric #{name} has an invalid removalPhase" unless policy["removalPhase"].to_s.match?(/\AP(?:[0-8]|4A|4B)\z/)
+  errors << "ratchet metric #{name} has an invalid removalPhase" unless policy["removalPhase"].to_s.match?(/\AP(?:[0-9]|1[0-2]|4A|4B)\z/)
 end
 
 swift_files = Dir.glob(root.join("**/*.swift").to_s).reject { |path| path.include?("/.git/") || path.include?("/.build/") }
@@ -176,12 +238,7 @@ swift_files.each do |path|
   File.readlines(path).each_with_index do |line, index|
     match = line.match(/^\s*(?:@testable\s+)?import\s+(Forsetti[A-Za-z0-9_]*)/i)
     next unless match
-    imported = match[1]
-    if forsetti_blocked
-      errors << "#{relative(path, root)}:#{index + 1}: prohibited Forsetti import while the upstream gate is blocked"
-    elsif !official_forsetti_products.include?(imported)
-      errors << "#{relative(path, root)}:#{index + 1}: unapproved Forsetti product import #{imported}"
-    end
+    errors << "FG-001: #{relative(path, root)}:#{index + 1}: external Forsetti imports are permanently prohibited"
   end
 end
 
@@ -194,63 +251,24 @@ end.each do |path|
   text = File.read(path)
   relative_path = relative(path, root)
   forsetti_reference = text.match?(/github\.com[^\n\"']*forsetti|\.package\s*\([^)]*forsetti|(?:url|path|product)\s*:\s*[^\n]*forsetti/i)
-  if File.basename(path) == ".gitmodules" && forsetti_reference
-    errors << "#{relative_path}: Forsetti submodules are not allowed"
-  elsif forsetti_blocked && forsetti_reference
-    errors << "#{relative_path}: prohibited Forsetti dependency reference while the upstream gate is blocked"
-  elsif !forsetti_blocked && text.match?(/(?:path)\s*:\s*[^\n]*forsetti/i)
-    errors << "#{relative_path}: local or vendored Forsetti dependency references are not allowed"
-  end
-
-  forsetti_urls = text.scan(%r{https://[^\s\"';,]+forsetti[^\s\"';,]*}i)
-  forsetti_urls.each do |url|
-    errors << "#{relative_path}: Forsetti dependency must use #{official_forsetti_url}" unless url == official_forsetti_url
+  if forsetti_reference
+    errors << "FG-001: #{relative_path}: external, local, product, submodule, or vendored Forsetti dependency references are permanently prohibited"
   end
 
   if File.basename(path) == "Package.swift"
     remote_clauses = text.scan(/\.package\s*\((.*?)\)/m).flatten.select { |clause| clause.match?(/\burl\s*:/) }
-    if forsetti_blocked && !remote_clauses.empty?
-      errors << "#{relative_path}: remote package dependencies are not allowed while the upstream gate is blocked"
-    elsif !forsetti_blocked
-      remote_clauses.each do |clause|
-        exact_version = forsetti_release_version.to_s.sub(/\Av/, "")
-        unless clause.include?(%Q(url: "#{official_forsetti_url}")) && clause.match?(/\bexact\s*:\s*["']#{Regexp.escape(exact_version)}["']/)
-          errors << "#{relative_path}: remote dependency must be the exact official Forsetti release #{forsetti_release_version}"
-        end
-      end
-    end
+    errors << "#{relative_path}: remote package dependencies are outside the app-owned shipping graph" unless remote_clauses.empty?
   end
 
   if File.basename(path) == "project.pbxproj" && text.include?("XCRemoteSwiftPackageReference")
-    if forsetti_blocked
-      errors << "#{relative_path}: remote package references are not allowed while the upstream gate is blocked"
-    else
-      repository_urls = text.scan(/repositoryURL\s*=\s*([^;]+);/).flatten.map { |value| value.strip.delete('"') }
-      exact_version = forsetti_release_version.to_s.sub(/\Av/, "")
-      unless repository_urls.all? { |url| url == official_forsetti_url } &&
-             text.match?(/kind\s*=\s*exactVersion;/) &&
-             text.match?(/version\s*=\s*#{Regexp.escape(exact_version)};/)
-        errors << "#{relative_path}: remote references must use the exact official Forsetti release #{forsetti_release_version}"
-      end
-    end
+    errors << "#{relative_path}: remote package references are outside the app-owned shipping graph"
   end
 
   if File.basename(path) == "Package.resolved"
     begin
       resolved = JSON.parse(text)
       pins = Array(resolved["pins"] || resolved.dig("object", "pins"))
-      if forsetti_blocked
-        if pins.any? { |pin| JSON.generate(pin).match?(/forsetti/i) }
-          errors << "#{relative_path}: resolved Forsetti pins are not allowed while the upstream gate is blocked"
-        end
-      else
-        exact_version = forsetti_release_version.to_s.sub(/\Av/, "")
-        unless pins.length == 1 &&
-               (pins.first["location"] || pins.first["repositoryURL"]) == official_forsetti_url &&
-               pins.first.dig("state", "version") == exact_version
-          errors << "#{relative_path}: resolved packages must contain only the exact official Forsetti release #{forsetti_release_version}"
-        end
-      end
+      errors << "#{relative_path}: resolved package pins are outside the app-owned shipping graph" unless pins.empty?
     rescue JSON::ParserError => error
       errors << "#{relative_path}: invalid resolved-package JSON: #{error.message}"
     end
@@ -262,7 +280,23 @@ Dir.glob(root.join("**/*").to_s, File::FNM_DOTMATCH).each do |path|
   relative_path = relative(path, root)
   next if relative_path.start_with?(".git/", ".build/", "DerivedData/", "docs/", "Docs/")
   if File.basename(path).match?(/forsetti/i)
-    errors << "#{relative_path}: vendored Forsetti directory is not allowed"
+    errors << "FG-001: #{relative_path}: vendored Forsetti directories are permanently prohibited"
+  end
+end
+
+fetch_scan_files = Dir.glob(root.join("{scripts,.github}/**/*").to_s, File::FNM_DOTMATCH).select { |path| File.file?(path) }
+fetch_scan_files.concat([
+  root.join("project.yml").to_s,
+  root.join("RuneScrib.xcodeproj/project.pbxproj").to_s
+].select { |path| File.file?(path) })
+fetch_scan_files.uniq!
+fetch_scan_files.reject! do |path|
+  %w[scripts/check-architecture.sh scripts/check-forsetti-compliance.sh].include?(relative(path, root))
+end
+fetch_scan_files.each do |path|
+  File.readlines(path).each_with_index do |line, index|
+    next unless line.match?(/(?:git\s+(?:clone|fetch|submodule)|curl|wget|download)[^\n]*forsetti/i)
+    errors << "FG-001: #{relative(path, root)}:#{index + 1}: build-time Forsetti fetches are permanently prohibited"
   end
 end
 
@@ -271,14 +305,8 @@ project = project_path.file? ? (YAML.load_file(project_path.to_s) || {}) : {}
 project_packages = project.fetch("packages", {}) || {}
 project_packages.each do |name, specification|
   if specification.is_a?(Hash) && specification.key?("url")
-    if forsetti_blocked
-      errors << "project.yml package #{name}: remote package references are not allowed while the upstream gate is blocked"
-    else
-      exact_version = forsetti_release_version.to_s.sub(/\Av/, "")
-      unless specification["url"] == official_forsetti_url && specification["exactVersion"] == exact_version
-        errors << "project.yml package #{name}: remote reference must use the exact official Forsetti release #{forsetti_release_version}"
-      end
-    end
+    prefix = JSON.generate(specification).match?(/forsetti/i) ? "FG-001: " : ""
+    errors << "#{prefix}project.yml package #{name}: remote packages are outside the app-owned shipping graph"
   end
 end
 project_targets = project.fetch("targets", {}) || {}
@@ -386,72 +414,59 @@ if package_present
     begin
       package = JSON.parse(stdout)
       external_dependencies = Array(package["dependencies"])
-      if forsetti_blocked
-        unless external_dependencies.empty?
-          errors << "#{architecture_package_relative}/Package.swift: external package dependencies are not allowed while the upstream gate is blocked"
-        end
-      else
-        exact_version = forsetti_release_version.to_s.sub(/\Av/, "")
-        unless external_dependencies.length == 1
-          errors << "#{architecture_package_relative}/Package.swift: must declare exactly one official Forsetti dependency"
-        end
-        external_dependencies.each do |dependency|
-          serialized = JSON.generate(dependency)
-          unless serialized.include?(official_forsetti_url) &&
-                 serialized.include?(exact_version) &&
-                 serialized.match?(/"exact"/) &&
-                 !serialized.match?(/"(?:branch|range|revision)"/)
-            errors << "#{architecture_package_relative}/Package.swift: Forsetti must use the exact ledger release #{forsetti_release_version}"
-          end
-        end
+      unless external_dependencies.empty?
+        prefix = external_dependencies.any? { |dependency| JSON.generate(dependency).match?(/forsetti/i) } ? "FG-001: " : ""
+        errors << "#{prefix}#{architecture_package_relative}/Package.swift: external package dependencies are outside the app-owned shipping graph"
       end
 
       products = Array(package["products"])
       product_names = products.map { |product| product["name"] }
       missing_products = required_products - product_names
+      missing_presentation_contract_products = presentation_contract_products - product_names
       missing_test_products = test_only_products - product_names
-      extra_products = product_names - all_products
+      extra_products = product_names - architecture_package_products
       errors << "architecture package missing products: #{missing_products.join(', ')}" unless missing_products.empty?
+      unless missing_presentation_contract_products.empty?
+        errors << "architecture package missing presentation-contract products: #{missing_presentation_contract_products.join(', ')}"
+      end
       errors << "architecture package missing test-only products: #{missing_test_products.join(', ')}" unless missing_test_products.empty?
       errors << "architecture package has unexpected products: #{extra_products.join(', ')}" unless extra_products.empty?
-      errors << "architecture package product order or duplication differs" unless product_names == all_products
+      unless product_names == architecture_package_products
+        errors << "architecture package product order or duplication differs"
+      end
 
       products.each do |product|
-        next unless all_products.include?(product["name"])
+        next unless architecture_package_products.include?(product["name"])
         targets = Array(product["targets"])
         errors << "product #{product['name']} must expose only target #{product['name']}" unless targets == [product["name"]]
       end
 
       targets = Array(package["targets"]).to_h { |target| [target["name"], target] }
-      missing_targets = all_products - targets.keys
+      missing_targets = architecture_package_products - targets.keys
       errors << "architecture package missing targets: #{missing_targets.join(', ')}" unless missing_targets.empty?
 
       allowed_dependencies = {
         "RuneScribeContracts" => [],
-        "RuneScribeRuntimeCore" => ["RuneScribeContracts"],
-        "RuneScribeUIRuntime" => ["RuneScribeContracts"],
+        "RuneScribeUIPresentationContracts" => ["RuneScribeContracts"],
+        "RuneScribeRuntimeCore" => ["RuneScribeContracts", "RuneScribeUIPresentationContracts"],
+        "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"],
+        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
-      unless forsetti_blocked
-        allowed_dependencies.each do |target_name, dependencies|
-          next if %w[RuneScribeContracts RuneScribeTestSupport].include?(target_name)
-          dependencies.concat(official_forsetti_products)
-        end
-      end
       required_dependencies = {
         "RuneScribeContracts" => [],
-        "RuneScribeRuntimeCore" => [],
-        "RuneScribeUIRuntime" => ["RuneScribeContracts"],
+        "RuneScribeUIPresentationContracts" => ["RuneScribeContracts"],
+        "RuneScribeRuntimeCore" => ["RuneScribeContracts", "RuneScribeUIPresentationContracts"],
+        "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"],
+        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
 
-      all_products.each do |target_name|
+      architecture_package_products.each do |target_name|
         next unless targets[target_name]
         dependencies = Array(targets[target_name]["dependencies"]).map { |dependency| dependency_name(dependency) }.compact
         forbidden = dependencies - allowed_dependencies.fetch(target_name)
@@ -488,21 +503,17 @@ end
 
 module_import_policy = {
   "RuneScribeContracts" => %w[Foundation],
-  "RuneScribeRuntimeCore" => %w[Foundation RuneScribeContracts],
-  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts],
+  "RuneScribeUIPresentationContracts" => %w[Foundation SwiftUI RuneScribeContracts],
+  "RuneScribeRuntimeCore" => %w[Foundation RuneScribeContracts RuneScribeUIPresentationContracts],
+  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts AVFoundation AppKit Contacts ContactsUI CoreImage CoreTransferable LinkPresentation MessageUI Metal MetalKit Observation UIKit UniformTypeIdentifiers],
   "RuneScribePlatform" => %w[Foundation Darwin RuneScribeContracts Security Contacts CoreText AppKit UIKit],
   "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto RuneScribeContracts RuneScribeRuntimeCore],
-  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIRuntime AppKit UIKit LinkPresentation MessageUI Metal MetalKit CoreImage CoreTransferable AVFoundation Contacts ContactsUI UniformTypeIdentifiers],
+  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
   "RuneScribeTestSupport" => %w[Foundation RuneScribeContracts]
 }
-unless forsetti_blocked
-  module_import_policy["RuneScribeRuntimeCore"].concat(%w[ForsettiCore])
-  module_import_policy["RuneScribeUIRuntime"].concat(%w[ForsettiCore ForsettiHostTemplate])
-  module_import_policy["RuneScribePlatform"].concat(%w[ForsettiCore ForsettiPlatform])
-  module_import_policy["RuneScribeCoreModule"].concat(%w[ForsettiCore])
-  module_import_policy["RuneScribeUIModule"].concat(%w[ForsettiCore ForsettiHostTemplate])
-end
-
+runtime_integrity_source = architecture_package.join(
+  "Sources/RuneScribeRuntimeCore/RuntimeBundledResourceIntegrity.swift"
+).to_s
 module_import_policy.each do |product, allowed_imports|
   source_root = architecture_package.join("Sources/#{product}")
   next unless source_root.directory?
@@ -511,7 +522,9 @@ module_import_policy.each do |product, allowed_imports|
       match = line.match(/^\s*(?:@testable\s+)?import\s+([A-Za-z_][A-Za-z0-9_]*)/)
       next unless match
       imported = match[1]
-      unless allowed_imports.include?(imported)
+      isolated_runtime_integrity_import = product == "RuneScribeRuntimeCore" &&
+        imported == "CryptoKit" && path == runtime_integrity_source
+      unless allowed_imports.include?(imported) || isolated_runtime_integrity_import
         errors << "#{relative(path, root)}:#{index + 1}: #{product} may not import #{imported}"
       end
     end
@@ -565,8 +578,8 @@ required_module_ids.each do |module_id, policy|
   capabilities = Array(manifest["capabilitiesRequested"])
   errors << "#{relative_path}: capabilitiesRequested must be unique strings" unless capabilities.all? { |capability| capability.is_a?(String) } && capabilities.uniq == capabilities
   requirements = manifest["runtimeRequirements"]
-  unless requirements.is_a?(Hash) && requirements.keys.sort == %w[requiredModuleRoles requiredServices].sort
-    errors << "#{relative_path}: runtimeRequirements must contain only requiredServices and requiredModuleRoles"
+  unless requirements.is_a?(Hash) && requirements.keys.sort == %w[requiredModuleRoles requiredResources requiredServices].sort
+    errors << "#{relative_path}: runtimeRequirements must contain only requiredServices, requiredResources, and requiredModuleRoles"
   end
 
   descriptor_sources = Dir.glob(architecture_package.join("Sources/#{policy['product']}/**/*.swift").to_s)
@@ -596,7 +609,7 @@ feature_notification_calls = production_text.scan(/NotificationCenter\.default\.
 feature_notification_names = production_text.scan(/Notification\.Name\("com\.runescribe\./).length
 notification_center_default_uses = production_text.scan(/NotificationCenter\.default\b/).length
 allowed_notification_path = root.join(
-  "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VideoSplashView.swift"
+  "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift"
 ).to_s
 notification_center_use_records = production_files.flat_map do |path|
   File.readlines(path).each_with_index.map do |line, index|
@@ -613,7 +626,7 @@ allowed_notification_sources = notification_center_use_records
   .map(&:last)
 unless allowed_notification_sources.count { |source| source.include?(".addObserver") } == 1 &&
        allowed_notification_sources.count { |source| source.include?(".removeObserver") } == 1
-  errors << "VideoSplashView must contain exactly one AVPlayer observer registration and removal"
+  errors << "RuntimeApplicationResourcePresentation must contain exactly one AVPlayer observer registration and removal"
 end
 temporary_application_session_adapters = production_text.scan(
   /Architecture ratchet: temporary-application-session-adapter\./
@@ -639,7 +652,6 @@ host_files.each do |path|
       Foundation SwiftUI AppKit UIKit RuneScribeContracts RuneScribeRuntimeCore
       RuneScribePlatform RuneScribeCoreModule RuneScribeUIModule RuneScribeUIRuntime
     ]
-    allowed.concat(official_forsetti_products) unless forsetti_blocked
     errors << "#{relative(path, root)}:#{index + 1}: host may not import #{match[1]}" unless allowed.include?(match[1])
   end
 end

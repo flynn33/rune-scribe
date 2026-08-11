@@ -23,14 +23,39 @@ public struct MinimumOSVersions: Codable, Equatable, Sendable {
 
 public struct ModuleRuntimeRequirements: Codable, Equatable, Sendable {
     public let requiredServices: [ServiceIdentifier]
+    public let requiredResources: [ApplicationResource]
     public let requiredModuleRoles: [ModuleRole]
 
     public init(
         requiredServices: [ServiceIdentifier] = [],
+        requiredResources: [ApplicationResource] = [],
         requiredModuleRoles: [ModuleRole] = []
     ) {
         self.requiredServices = requiredServices
+        self.requiredResources = requiredResources
         self.requiredModuleRoles = requiredModuleRoles
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case requiredServices
+        case requiredResources
+        case requiredModuleRoles
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        requiredServices = try container.decode(
+            [ServiceIdentifier].self,
+            forKey: .requiredServices
+        )
+        requiredResources = try container.decodeIfPresent(
+            [ApplicationResource].self,
+            forKey: .requiredResources
+        ) ?? []
+        requiredModuleRoles = try container.decode(
+            [ModuleRole].self,
+            forKey: .requiredModuleRoles
+        )
     }
 }
 

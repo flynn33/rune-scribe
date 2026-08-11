@@ -41,7 +41,7 @@ extension RuneScribeUISession {
     func setPIN(_ pin: String) async throws {
         guard Self.isValidPINFormat(pin) else { throw PINError.invalidFormat }
         do {
-            try await requireApplicationService().setPIN(SetPINCommand(input: PINInput(pin)))
+            try await requireApplicationClient().setPIN(SetPINCommand(input: PINInput(pin)))
         } catch {
             throw Self.mapPINError(error)
         }
@@ -50,7 +50,7 @@ extension RuneScribeUISession {
     func changePIN(current: String, new: String) async throws {
         guard Self.isValidPINFormat(new) else { throw PINError.invalidFormat }
         do {
-            try await requireApplicationService().changePIN(
+            try await requireApplicationClient().changePIN(
                 ChangePINCommand(current: PINInput(current), replacement: PINInput(new))
             )
         } catch {
@@ -60,7 +60,7 @@ extension RuneScribeUISession {
 
     func disablePIN(current: String) async throws {
         do {
-            try await requireApplicationService().disablePIN(
+            try await requireApplicationClient().disablePIN(
                 DisablePINCommand(current: PINInput(current))
             )
         } catch {
@@ -70,7 +70,7 @@ extension RuneScribeUISession {
 
     func attemptUnlock(_ pin: String) async throws -> UnlockResult {
         do {
-            switch try await requireApplicationService().unlock(
+            switch try await requireApplicationClient().unlock(
                 UnlockCommand(input: PINInput(pin))
             ) {
             case .unlocked:
@@ -88,20 +88,20 @@ extension RuneScribeUISession {
 
     func verify(_ pin: String) async throws -> Bool {
         do {
-            return try await requireApplicationService().verifyPIN(PINInput(pin))
+            return try await requireApplicationClient().verifyPIN(PINInput(pin))
         } catch {
             throw Self.mapPINError(error)
         }
     }
 
     func lockIfEnabled() async {
-        guard let service = try? requireApplicationService() else { return }
-        await service.lock()
+        guard let client = try? requireApplicationClient() else { return }
+        try? await client.lock()
     }
 
     func lock() async {
-        guard let service = try? requireApplicationService() else { return }
-        await service.lock()
+        guard let client = try? requireApplicationClient() else { return }
+        try? await client.lock()
     }
 
     private nonisolated static func mapPINError(_ error: Error) -> PINError {

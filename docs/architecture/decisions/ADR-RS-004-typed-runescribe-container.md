@@ -1,5 +1,7 @@
 # ADR-RS-004: Typed `.runescribe` Container
 
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
 **Status:** Accepted; version 1 wire layout frozen
 **Date:** 2026-08-09
 

@@ -1,12 +1,11 @@
 import Foundation
 
 public enum RuneScribeServiceIDs {
-    public static let application: ServiceIdentifier = "RuneScribeApplicationService"
-    public static let inboundInput: ServiceIdentifier = "RuneScribeInboundInputService"
     public static let secureValueStore: ServiceIdentifier = "SecureValueStore"
     public static let protectedFileStore: ServiceIdentifier = "ProtectedFileStore"
     public static let inboundFileReader: ServiceIdentifier = "InboundFileReader"
     public static let shareArtifactStore: ServiceIdentifier = "ShareArtifactStore"
+    public static let sharePresentation: ServiceIdentifier = "SharePresentationService"
     public static let applicationResourceLocator: ServiceIdentifier = "ApplicationResourceLocator"
     public static let systemFontRegistrar: ServiceIdentifier = "SystemFontRegistrar"
     public static let contactAccess: ServiceIdentifier = "ContactAccessService"
@@ -16,12 +15,11 @@ public enum RuneScribeServiceIDs {
     public static let uuid: ServiceIdentifier = "UUIDService"
 
     public static let all: Set<ServiceIdentifier> = [
-        application,
-        inboundInput,
         secureValueStore,
         protectedFileStore,
         inboundFileReader,
         shareArtifactStore,
+        sharePresentation,
         applicationResourceLocator,
         systemFontRegistrar,
         contactAccess,
@@ -150,19 +148,6 @@ public protocol InboundFileReader: Sendable {
     ) async throws -> Data
 }
 
-/// An opaque, adapter-owned file made available to a system share surface.
-/// The URL is intentionally scoped to one generated artifact; callers never
-/// receive the adapter's root directory or arbitrary file-system access.
-public struct ScopedShareFile: Equatable, Sendable {
-    public let artifactID: ShareArtifactID
-    public let fileURL: URL
-
-    public init(artifactID: ShareArtifactID, fileURL: URL) {
-        self.artifactID = artifactID
-        self.fileURL = fileURL
-    }
-}
-
 /// Creates and removes short-lived share files through a narrow Platform seam.
 /// Core owns payload construction and lifetime policy; the adapter owns safe
 /// temporary-path construction, atomic writes, and physical cleanup.
@@ -172,14 +157,21 @@ public protocol ShareArtifactStore: Sendable {
         artifactID: ShareArtifactID,
         filename: String,
         fileExtension: String
-    ) async throws -> ScopedShareFile
+    ) async throws
 
     /// Stores a key-bearing cipher link behind an opaque lease. The URL never
     /// enters an application DTO, event, snapshot, log, or Codable value.
     func storeLink(_ url: URL, artifactID: ShareArtifactID) async throws
     func removeLink(artifactID: ShareArtifactID) async throws
-    func remove(_ file: ScopedShareFile) async throws
+    func remove(artifactID: ShareArtifactID) async throws
     func removeAll() async throws
+}
+
+/// Resolves one previously-created share artifact for runtime-owned native
+/// presentation. Only RuntimeCore may retain this provider; modules receive a
+/// revocable, opaque presentation session instead of the resolved URL.
+public protocol SharePresentationProviding: Sendable {
+    func presentationURL(for artifactID: ShareArtifactID) async throws -> URL
 }
 
 public enum ContactAuthorizationDTO: String, Codable, Hashable, Sendable {
@@ -273,12 +265,6 @@ public protocol ApplicationResourceLocator: Sendable {
 }
 
 public enum RuneScribeServiceKeys {
-    public static let application = ServiceKey<any RuneScribeApplicationService>(
-        RuneScribeServiceIDs.application
-    )
-    public static let inboundInput = ServiceKey<any RuneScribeInboundInputService>(
-        RuneScribeServiceIDs.inboundInput
-    )
     public static let secureValueStore = ServiceKey<any SecureValueStore>(
         RuneScribeServiceIDs.secureValueStore
     )
@@ -290,6 +276,9 @@ public enum RuneScribeServiceKeys {
     )
     public static let shareArtifactStore = ServiceKey<any ShareArtifactStore>(
         RuneScribeServiceIDs.shareArtifactStore
+    )
+    public static let sharePresentation = ServiceKey<any SharePresentationProviding>(
+        RuneScribeServiceIDs.sharePresentation
     )
     public static let applicationResourceLocator = ServiceKey<any ApplicationResourceLocator>(
         RuneScribeServiceIDs.applicationResourceLocator

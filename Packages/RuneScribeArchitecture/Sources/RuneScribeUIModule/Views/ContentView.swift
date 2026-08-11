@@ -1,6 +1,7 @@
 // RuneScrib/Views/ContentView.swift
 
 import RuneScribeContracts
+import RuneScribeUIRuntime
 import SwiftUI
 
 struct MessageArtifactCompletionGate: Equatable, Sendable {
@@ -61,6 +62,7 @@ struct ContentView: View {
     /// Scoped Core artifact for a first-delivery attachment. UI receives only the
     /// temporary file reference and completion handle, never payload or key bytes.
     @State private var pendingMessageArtifact: ShareArtifactDTO?
+    @State private var pendingMessageTransfer: OpaqueShareTransfer?
     @State private var messageArtifactCompletionGate = MessageArtifactCompletionGate()
 
     // Linking the active cipher to a recipient so its first message carries the key.
@@ -83,12 +85,6 @@ struct ContentView: View {
     /// The cipher used to produce the current result snapshot (encode only).
     private var resultCipher: CipherViewState? {
         transformDirection == .encode ? session.activeCipher : nil
-    }
-
-    private var pendingAttachmentURL: URL? {
-        guard let artifact = pendingMessageArtifact,
-              case .file(let url) = artifact.reference else { return nil }
-        return url
     }
 
     /// The text Rune Scribe sends for a message: always the runes. The plain "get the app"
@@ -169,7 +165,7 @@ struct ContentView: View {
                                    includeProductLink: pendingMessageArtifact?.requiresKeyDelivery == true
                                ),
                                recipients: messageRecipients(),
-                               attachmentURL: pendingAttachmentURL,
+                               attachment: pendingMessageTransfer,
                                onFinish: handleMessageFinished)
         }
         #endif
@@ -339,7 +335,7 @@ struct ContentView: View {
                                 return
                             }
                             guard pendingMessageArtifact?.requiresKeyDelivery != true
-                                    || pendingAttachmentURL != nil else {
+                                    || pendingMessageTransfer?.isAvailable == true else {
                                 decodeError = "Rune Scribe is still preparing the key attachment."
                                 return
                             }
@@ -489,6 +485,7 @@ struct ContentView: View {
         let target: String
         let direction: RuneInscriptionText.Direction
         var preparedArtifact: ShareArtifactDTO?
+        var preparedTransfer: OpaqueShareTransfer?
         do {
             switch mode {
             case .encode:
@@ -500,11 +497,28 @@ struct ContentView: View {
                     senderName: activeCipher.label,
                     cipherID: activeCipher.id
                 )
+                if let preparedArtifact {
+                    switch preparedArtifact.reference {
+                    case .file:
+                        preparedTransfer = try await session.shareTransfer(
+                            for: preparedArtifact.id
+                        )
+                    case .opaque:
+                        preparedTransfer = try await session.textShareTransfer(
+                            target,
+                            artifactID: preparedArtifact.id
+                        )
+                    }
+                }
             case .decode:
                 target = try await session.decode(source).plaintext
                 direction = .decode
             }
         } catch {
+            await preparedTransfer?.close()
+            if let preparedArtifact {
+                await session.releaseShareArtifact(id: preparedArtifact.id)
+            }
             guard actionGeneration == generation,
                   !Task.isCancelled,
                   !session.isLocked else { return }
@@ -513,12 +527,14 @@ struct ContentView: View {
         }
 
         guard actionGeneration == generation, !Task.isCancelled else {
+            await preparedTransfer?.close()
             if let preparedArtifact {
                 await session.releaseShareArtifact(id: preparedArtifact.id)
             }
             return
         }
         guard !session.isLocked else {
+            await preparedTransfer?.close()
             if let preparedArtifact {
                 await session.releaseShareArtifact(id: preparedArtifact.id)
             }
@@ -528,6 +544,7 @@ struct ContentView: View {
 
         if let preparedArtifact {
             pendingMessageArtifact = preparedArtifact
+            pendingMessageTransfer = preparedTransfer
         } else {
             releaseMessageArtifact()
         }
@@ -584,7 +601,7 @@ struct ContentView: View {
         // Copy is plain runes only. A first-message cipher rides in the `.runescribe` file
         // (Share / Send via iMessage), never as a link inside copied text.
         Task {
-            await session.copyToClipboard(targetSnapshot)
+            guard await session.copyToClipboard(targetSnapshot) else { return }
             withAnimation { copyConfirmed = true }
             try? await Task.sleep(for: .seconds(2.5))
             withAnimation { copyConfirmed = false }
@@ -671,13 +688,23 @@ struct ContentView: View {
     @ViewBuilder
     private func shareButton() -> some View {
         if let artifact = pendingMessageArtifact,
-           case .file(let fileURL) = artifact.reference {
-            RuneScribeFileShareLink(
-                fileURL: fileURL,
-                onFinish: { outcome in
-                    beginMessageArtifactCompletion(outcome: outcome)
+           case .file = artifact.reference {
+            if let transfer = pendingMessageTransfer {
+                RuneScribeFileShareLink(
+                    transfer: transfer,
+                    onFinish: { outcome in
+                        beginMessageArtifactCompletion(outcome: outcome)
+                    }
+                )
+                .buttonStyle(RuneSecondaryButtonStyle())
+            } else {
+                Button { } label: {
+                    Label("Preparing…", systemImage: "clock")
+                        .frame(maxWidth: .infinity)
                 }
-            )
+                .buttonStyle(RuneSecondaryButtonStyle())
+                .disabled(true)
+            }
         } else if pendingMessageArtifact == nil {
             Button { } label: {
                 Label("Preparing…", systemImage: "clock")
@@ -686,13 +713,22 @@ struct ContentView: View {
             .buttonStyle(RuneSecondaryButtonStyle())
             .disabled(true)
         } else {
-            // No cipher file on this message → share the runes alone. The product link rides
-            // only with the cipher file (the first message to a contact), never on follow-ups.
-            ShareLink(item: outgoingMessageText(includeProductLink: false)) {
-                Label("Share", systemImage: "square.and.arrow.up")
-                    .frame(maxWidth: .infinity)
+            if let transfer = pendingMessageTransfer {
+                RuneScribeTextShareLink(
+                    transfer: transfer,
+                    onFinish: { outcome in
+                        beginMessageArtifactCompletion(outcome: outcome)
+                    }
+                )
+                .buttonStyle(RuneSecondaryButtonStyle())
+            } else {
+                Button { } label: {
+                    Label("Preparing…", systemImage: "clock")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(RuneSecondaryButtonStyle())
+                .disabled(true)
             }
-            .buttonStyle(RuneSecondaryButtonStyle())
         }
     }
 
@@ -746,6 +782,9 @@ struct ContentView: View {
             if result != .retainedForRetry,
                pendingMessageArtifact?.id == artifact.id {
                 pendingMessageArtifact = nil
+                let transfer = pendingMessageTransfer
+                pendingMessageTransfer = nil
+                await transfer?.close()
             }
         } catch {
             presentFailure(error)
@@ -780,6 +819,11 @@ struct ContentView: View {
         guard let artifact = pendingMessageArtifact else { return }
         guard !messageArtifactCompletionGate.isCompleting(artifact.id) else { return }
         pendingMessageArtifact = nil
-        Task { await session.releaseShareArtifact(id: artifact.id) }
+        let transfer = pendingMessageTransfer
+        pendingMessageTransfer = nil
+        Task {
+            await transfer?.close()
+            await session.releaseShareArtifact(id: artifact.id)
+        }
     }
 }

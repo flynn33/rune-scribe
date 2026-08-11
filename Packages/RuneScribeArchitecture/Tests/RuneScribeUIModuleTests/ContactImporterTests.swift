@@ -1,6 +1,6 @@
 #if os(iOS)
 import Contacts
-@testable import RuneScribeUIModule
+@testable import RuneScribeUIRuntime
 import XCTest
 
 final class ContactImporterTests: XCTestCase {
@@ -18,18 +18,19 @@ final class ContactImporterTests: XCTestCase {
             CNLabeledValue(label: CNLabelHome, value: "freya@example.com" as NSString),
         ]
 
-        let snapshot = ContactImporter.snapshot(from: contact)
+        let snapshot = RuntimeSystemContactSnapshot.makeDTO(from: contact)
 
         XCTAssertEqual(snapshot.displayName, "Freya Day")
-        XCTAssertEqual(snapshot.phones, ["+15550001"])
-        XCTAssertEqual(snapshot.emails, ["freya@example.com"])
+        XCTAssertEqual(snapshot.phoneNumbers, ["+15550001"])
+        XCTAssertEqual(snapshot.emailAddresses, ["freya@example.com"])
         XCTAssertEqual(snapshot.systemIdentifier, contact.identifier)
-        XCTAssertEqual(snapshot.source, .imported)
     }
 
     func testSnapshotWithNoNameFallsBackToUnnamed() {
         XCTAssertEqual(
-            ContactImporter.snapshot(from: CNMutableContact()).displayName,
+            RuntimeSystemContactSnapshot.makeDTO(
+                from: CNMutableContact()
+            ).displayName,
             "Unnamed"
         )
     }
@@ -38,11 +39,11 @@ final class ContactImporterTests: XCTestCase {
         let contact = CNMutableContact()
         contact.givenName = "Solo"
 
-        let snapshot = ContactImporter.snapshot(from: contact)
+        let snapshot = RuntimeSystemContactSnapshot.makeDTO(from: contact)
 
         XCTAssertEqual(snapshot.displayName, "Solo")
-        XCTAssertTrue(snapshot.phones.isEmpty)
-        XCTAssertTrue(snapshot.emails.isEmpty)
+        XCTAssertTrue(snapshot.phoneNumbers.isEmpty)
+        XCTAssertTrue(snapshot.emailAddresses.isEmpty)
     }
 
     func testSnapshotIsIndependentOfLaterContactChanges() {
@@ -54,15 +55,15 @@ final class ContactImporterTests: XCTestCase {
                 value: CNPhoneNumber(stringValue: "+15550111")
             ),
         ]
-        let original = ContactImporter.snapshot(from: contact)
+        let original = RuntimeSystemContactSnapshot.makeDTO(from: contact)
 
         contact.givenName = "Changed"
         contact.phoneNumbers = []
 
         XCTAssertEqual(original.displayName, "Idunn")
-        XCTAssertEqual(original.phones, ["+15550111"])
+        XCTAssertEqual(original.phoneNumbers, ["+15550111"])
         XCTAssertNotEqual(
-            ContactImporter.snapshot(from: contact).displayName,
+            RuntimeSystemContactSnapshot.makeDTO(from: contact).displayName,
             original.displayName
         )
     }

@@ -84,6 +84,7 @@ public struct RuntimePolicy: Sendable {
             RuneScribeCapabilities.keychainStorage: [RuneScribeRoles.core],
             RuneScribeCapabilities.protectedFileStorage: [RuneScribeRoles.core],
             RuneScribeCapabilities.inboundFileRead: [RuneScribeRoles.core],
+            RuneScribeCapabilities.fileImportUI: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.shareArtifactStorage: [RuneScribeRoles.core],
             RuneScribeCapabilities.resourceRead: [RuneScribeRoles.core, RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.fontRegistration: [RuneScribeRoles.core],
@@ -92,25 +93,16 @@ public struct RuntimePolicy: Sendable {
             RuneScribeCapabilities.clipboardWrite: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.clockRead: [RuneScribeRoles.core],
             RuneScribeCapabilities.uuidGenerate: [RuneScribeRoles.core],
-            RuneScribeCapabilities.inboundInput: [RuneScribeRoles.core],
+            RuneScribeCapabilities.inboundInput: [
+                RuneScribeRoles.core,
+                RuneScribeRoles.applicationHost,
+            ],
             RuneScribeCapabilities.applicationCommands: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.applicationStateRead: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.shareUI: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.messagesUI: [RuneScribeRoles.primaryUI],
         ]),
         services: ServiceAccessPolicy(rules: [
-            ServiceAccessRule(
-                serviceID: RuneScribeServiceIDs.application,
-                requiredCapability: RuneScribeCapabilities.resolveService,
-                publisherRoles: [RuneScribeRoles.core],
-                consumerRoles: [RuneScribeRoles.primaryUI]
-            ),
-            ServiceAccessRule(
-                serviceID: RuneScribeServiceIDs.inboundInput,
-                requiredCapability: RuneScribeCapabilities.inboundInput,
-                publisherRoles: [RuneScribeRoles.core],
-                consumerRoles: [RuneScribeRoles.applicationHost]
-            ),
             ServiceAccessRule(
                 serviceID: RuneScribeServiceIDs.secureValueStore,
                 requiredCapability: RuneScribeCapabilities.keychainStorage,
@@ -134,6 +126,12 @@ public struct RuntimePolicy: Sendable {
                 requiredCapability: RuneScribeCapabilities.shareArtifactStorage,
                 publisherRoles: [RuneScribeRoles.applicationHost],
                 consumerRoles: [RuneScribeRoles.core]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.sharePresentation,
+                requiredCapability: RuneScribeCapabilities.shareUI,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.primaryUI]
             ),
             ServiceAccessRule(
                 serviceID: RuneScribeServiceIDs.applicationResourceLocator,

@@ -49,13 +49,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         receive(urls: [url], source: .applicationOpen)
         return true
     }
-    @discardableResult func receive(urls: [URL], source: InboundDeliverySourceDTO, isColdStart: Bool? = nil) -> [InboundInputDispositionDTO] {
-        runtime.receive(urls: urls, source: source, isColdStart: isColdStart)
+    @discardableResult func receive(urls: [URL], source: InboundDeliverySourceDTO) -> [InboundInputDispositionDTO] {
+        runtime.receive(urls: urls, source: source)
     }
-    @discardableResult func receive(userActivity: NSUserActivity, isColdStart: Bool? = nil) -> [InboundInputDispositionDTO] {
+    @discardableResult func receive(userActivity: NSUserActivity) -> [InboundInputDispositionDTO] {
         guard userActivity.activityType == NSUserActivityTypeBrowsingWeb,
               let url = userActivity.webpageURL else { return [] }
-        return receive(urls: [url], source: .webBrowsingActivity, isColdStart: isColdStart)
+        return receive(urls: [url], source: .webBrowsingActivity)
     }
     @discardableResult func receive(lifecycle event: ApplicationLifecycleInputDTO) -> InboundInputDispositionDTO { runtime.receive(lifecycle: event) }
 }

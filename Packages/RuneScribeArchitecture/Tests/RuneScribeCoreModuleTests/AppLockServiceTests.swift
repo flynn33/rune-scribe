@@ -2,6 +2,7 @@ import Foundation
 import os
 import RuneScribeContracts
 @testable import RuneScribeCoreModule
+@testable import RuneScribeRuntimeCore
 import XCTest
 
 final class AppLockServiceTests: XCTestCase {
@@ -425,6 +426,30 @@ private struct FixedPINEntropy: PINEntropyProviding {
     func randomBytes(count: Int) throws -> Data {
         guard count == bytes.count else { throw Error.unexpectedCount }
         return bytes
+    }
+}
+
+private extension AppLockService {
+    init(
+        secureValueStore: any SecureValueStore,
+        clock: any ClockProviding,
+        entropy: any PINEntropyProviding = SystemPINEntropy()
+    ) {
+        self.init(
+            runtimeIO: RuntimeIOClient(
+                secureValueData: {
+                    try await secureValueStore.data(service: $0, account: $1)
+                },
+                setSecureValue: {
+                    try await secureValueStore.set($0, service: $1, account: $2)
+                },
+                deleteSecureValue: {
+                    try await secureValueStore.delete(service: $0, account: $1)
+                },
+                now: { clock.now() }
+            ),
+            entropy: entropy
+        )
     }
 }
 

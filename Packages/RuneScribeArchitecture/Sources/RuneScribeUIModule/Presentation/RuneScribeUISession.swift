@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 import RuneScribeUIRuntime
 
 @MainActor
@@ -11,14 +12,13 @@ final class RuneScribeUISession: ObservableObject {
     @Published var messageErrorMessage: String?
     @Published private(set) var route: RuneScribeUIRouteRequest?
 
-    let splashVideoURL: URL?
-    let metalLibraryURL: URL?
+    let resourcePresentation: RuntimeApplicationResourcePresentation
+    let inboundFileImportSession: RuntimeInboundFileImportSession
     let appVersion: String
     let buildNumber: String
 
-    private var applicationServiceHandle: (any RuneScribeApplicationService)?
-    private var clipboardWritingHandle: (any ClipboardWriting)?
-    private var sharePresentationHandle: OpaqueSharePresentationProvider?
+    private var applicationClientHandle: RuntimeApplicationClient?
+    private var runtimeIOHandle: RuntimeIOClient?
 
     var contactSystemIdentifiers: [UUID: String] = [:]
     private var stateTask: Task<Void, Never>?
@@ -26,18 +26,16 @@ final class RuneScribeUISession: ObservableObject {
     private var observationGeneration: UInt64 = 0
 
     init(
-        applicationService: any RuneScribeApplicationService,
-        clipboardWriting: any ClipboardWriting,
-        sharePresentation: OpaqueSharePresentationProvider,
-        splashVideoURL: URL?,
-        metalLibraryURL: URL?,
+        applicationClient: RuntimeApplicationClient,
+        runtimeIO: RuntimeIOClient,
+        inboundFileImportSession: RuntimeInboundFileImportSession = .unavailable,
+        resourcePresentation: RuntimeApplicationResourcePresentation,
         productMetadata: RuneScribeUIProductMetadata
     ) {
-        applicationServiceHandle = applicationService
-        clipboardWritingHandle = clipboardWriting
-        sharePresentationHandle = sharePresentation
-        self.splashVideoURL = splashVideoURL
-        self.metalLibraryURL = metalLibraryURL
+        applicationClientHandle = applicationClient
+        runtimeIOHandle = runtimeIO
+        self.inboundFileImportSession = inboundFileImportSession
+        self.resourcePresentation = resourcePresentation
         appVersion = productMetadata.version
         buildNumber = productMetadata.buildNumber
     }
@@ -49,25 +47,25 @@ final class RuneScribeUISession: ObservableObject {
 
     func start() throws {
         guard stateTask == nil, menuTask == nil else { return }
-        let service = try requireApplicationService()
+        let client = try requireApplicationClient()
         observationGeneration &+= 1
         let generation = observationGeneration
-        stateTask = Task { @MainActor [weak self, service] in
-            for await nextSnapshot in service.stateStream() {
+        stateTask = Task { @MainActor [weak self, client] in
+            for await envelope in client.applicationStateEnvelopes {
                 guard !Task.isCancelled,
                       let self,
                       observationGeneration == generation
                 else { return }
-                adopt(nextSnapshot)
+                adopt(envelope.payload)
             }
         }
-        menuTask = Task { @MainActor [weak self, service] in
-            for await command in service.menuCommandStream() {
+        menuTask = Task { @MainActor [weak self, client] in
+            for await envelope in client.menuCommandEnvelopes {
                 guard !Task.isCancelled,
                       let self,
                       observationGeneration == generation
                 else { return }
-                switch command {
+                switch envelope.payload {
                 case .openCipherLibrary:
                     requestRoute(.openCipherLibrary)
                 case .openSettings:
@@ -91,9 +89,9 @@ final class RuneScribeUISession: ObservableObject {
         messageErrorMessage = nil
         route = nil
         contactSystemIdentifiers.removeAll()
-        applicationServiceHandle = nil
-        clipboardWritingHandle = nil
-        sharePresentationHandle = nil
+        applicationClientHandle = nil
+        runtimeIOHandle = nil
+        await resourcePresentation.close()
         await stateTask?.value
         await menuTask?.value
     }
@@ -171,12 +169,15 @@ final class RuneScribeUISession: ObservableObject {
         route = nil
     }
 
-    func copyToClipboard(_ value: String) async {
+    @discardableResult
+    func copyToClipboard(_ value: String) async -> Bool {
         do {
-            try await requireClipboardWriter().setString(value)
+            try await requireRuntimeIOClient().setClipboardString(value)
             lastError = nil
+            return true
         } catch {
             lastError = Self.message(for: error)
+            return false
         }
     }
 
@@ -214,29 +215,26 @@ final class RuneScribeUISession: ObservableObject {
         lastError = Self.message(for: error)
     }
 
-    func requireApplicationService() throws -> any RuneScribeApplicationService {
-        guard let applicationServiceHandle else {
+    func dismissLastError() {
+        lastError = nil
+    }
+
+    func requireApplicationClient() throws -> RuntimeApplicationClient {
+        guard let applicationClientHandle else {
             throw RuneScribeProductError.failure(
                 RuneScribeFailureDTO(code: .temporarilyUnavailable)
             )
         }
-        return applicationServiceHandle
+        return applicationClientHandle
     }
 
-    func requireSharePresentation() throws -> OpaqueSharePresentationProvider {
-        guard let sharePresentationHandle else {
-            throw OpaqueSharePresentationError.unavailable
-        }
-        return sharePresentationHandle
-    }
-
-    private func requireClipboardWriter() throws -> any ClipboardWriting {
-        guard let clipboardWritingHandle else {
+    func requireRuntimeIOClient() throws -> RuntimeIOClient {
+        guard let runtimeIOHandle else {
             throw RuneScribeProductError.failure(
                 RuneScribeFailureDTO(code: .temporarilyUnavailable)
             )
         }
-        return clipboardWritingHandle
+        return runtimeIOHandle
     }
 
     static func message(for error: Error) -> String {

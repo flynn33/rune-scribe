@@ -2,6 +2,7 @@ import CommonCrypto
 import CryptoKit
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 
 enum AppLockServiceError: Error, Equatable, Sendable {
     case invalidPINFormat
@@ -39,8 +40,7 @@ actor AppLockService {
     private static let failureThreshold = 5
     private static let saltByteCount = 16
 
-    private let secureValueStore: any SecureValueStore
-    private let clock: any ClockProviding
+    private let runtimeIO: RuntimeIOClient
     private let entropy: any PINEntropyProviding
 
     private var loaded = false
@@ -49,12 +49,10 @@ actor AppLockService {
     private var throttle = ThrottleState()
 
     init(
-        secureValueStore: any SecureValueStore,
-        clock: any ClockProviding,
+        runtimeIO: RuntimeIOClient,
         entropy: any PINEntropyProviding = SystemPINEntropy()
     ) {
-        self.secureValueStore = secureValueStore
-        self.clock = clock
+        self.runtimeIO = runtimeIO
         self.entropy = entropy
     }
 
@@ -64,7 +62,7 @@ actor AppLockService {
 
     func state() async throws -> ApplicationLockStateDTO {
         try await loadIfNeeded()
-        return makeState()
+        return try await makeState()
     }
 
     func setPIN(_ input: PINInput) async throws {
@@ -91,7 +89,7 @@ actor AppLockService {
             )
         }
         do {
-            try await secureValueStore.set(
+            try await runtimeIO.setSecureValue(
                 try JSONEncoder().encode(record),
                 service: RuneScribeKeychain.service,
                 account: RuneScribeKeychain.appPINAccount
@@ -123,7 +121,7 @@ actor AppLockService {
         // state left behind.
         try await clearThrottle()
         do {
-            try await secureValueStore.delete(
+            try await runtimeIO.deleteSecureValue(
                 service: RuneScribeKeychain.service,
                 account: RuneScribeKeychain.appPINAccount
             )
@@ -137,7 +135,7 @@ actor AppLockService {
 
     func unlock(_ input: PINInput) async throws -> UnlockResultDTO {
         try await loadIfNeeded()
-        if let retryAfter = lockoutRetryAfter() {
+        if let retryAfter = try await lockoutRetryAfter() {
             return .lockedOut(retryAfter: retryAfter)
         }
 
@@ -148,7 +146,7 @@ actor AppLockService {
         }
 
         try await registerFailure()
-        if let retryAfter = lockoutRetryAfter() {
+        if let retryAfter = try await lockoutRetryAfter() {
             return .lockedOut(retryAfter: retryAfter)
         }
         return .incorrect
@@ -169,11 +167,11 @@ actor AppLockService {
     private func loadIfNeeded() async throws {
         guard !loaded else { return }
         do {
-            let pinData = try await secureValueStore.data(
+            let pinData = try await runtimeIO.secureValueData(
                 service: RuneScribeKeychain.service,
                 account: RuneScribeKeychain.appPINAccount
             )
-            let throttleData = try await secureValueStore.data(
+            let throttleData = try await runtimeIO.secureValueData(
                 service: RuneScribeKeychain.service,
                 account: RuneScribeKeychain.pinThrottleAccount
             )
@@ -199,7 +197,7 @@ actor AppLockService {
     private func verify(_ input: PINInput) async throws -> Bool {
         let data: Data?
         do {
-            data = try await secureValueStore.data(
+            data = try await runtimeIO.secureValueData(
                 service: RuneScribeKeychain.service,
                 account: RuneScribeKeychain.appPINAccount
             )
@@ -227,9 +225,9 @@ actor AppLockService {
 
     private func registerFailure() async throws {
         throttle.failedAttempts += 1
-        throttle.lastFailure = clock.now()
+        throttle.lastFailure = try await runtimeIO.now()
         do {
-            try await secureValueStore.set(
+            try await runtimeIO.setSecureValue(
                 try JSONEncoder().encode(throttle),
                 service: RuneScribeKeychain.service,
                 account: RuneScribeKeychain.pinThrottleAccount
@@ -243,7 +241,7 @@ actor AppLockService {
 
     private func clearThrottle() async throws {
         do {
-            try await secureValueStore.delete(
+            try await runtimeIO.deleteSecureValue(
                 service: RuneScribeKeychain.service,
                 account: RuneScribeKeychain.pinThrottleAccount
             )
@@ -264,12 +262,12 @@ actor AppLockService {
         return throttle.lastFailure != nil
     }
 
-    private func lockoutRetryAfter() -> Date? {
+    private func lockoutRetryAfter() async throws -> Date? {
         guard throttle.failedAttempts >= Self.failureThreshold,
               let lastFailure = throttle.lastFailure
         else { return nil }
         let expiry = lastFailure.addingTimeInterval(Self.cooldown(forAttempts: throttle.failedAttempts))
-        return expiry > clock.now() ? expiry : nil
+        return expiry > (try await runtimeIO.now()) ? expiry : nil
     }
 
     private static func cooldown(forAttempts attempts: Int) -> TimeInterval {
@@ -283,11 +281,11 @@ actor AppLockService {
         }
     }
 
-    private func makeState() -> ApplicationLockStateDTO {
+    private func makeState() async throws -> ApplicationLockStateDTO {
         ApplicationLockStateDTO(
             isPINSet: pinIsSet,
             isLocked: locked,
-            retryAfter: lockoutRetryAfter()
+            retryAfter: try await lockoutRetryAfter()
         )
     }
 

@@ -21,18 +21,19 @@ final class RuneScribeRuntimeComposition {
     private let clipboardWrite: any ClipboardWriting
     private let clock: any ClockProviding
     private let uuid: any UUIDProviding
-    private let inputForwarder: SerialInboundInputForwarder
-    private let uiDependencies: RuneScribeUIDependencies
+    private let rootPresentationAdapter: RuntimeRootPresentationHostAdapter
     private var isConfigured = false
     private var activationState: RuntimeActivationState = .idle
-    private var hasCompletedInitialActivation = false
     private var activationGeneration: UInt64 = 0
     private var startIsInFlight = false
     private var startCompletionWaiters: [CheckedContinuation<Void, Never>] = []
     private var stopOperation: Task<Void, Never>?
     let rootPresentationStore: RootViewPresentationStore
     private(set) var startupFailed = false
-    var inputDeliveryFailed: Bool { inputForwarder.hasDeliveryFailures }
+    var inputDeliveryFailed: Bool { runtime.hostIngressSnapshot.hasDeliveryFailures }
+    var lastInputFailure: RuntimeHostIngressFailure? {
+        runtime.hostIngressSnapshot.lastFailure
+    }
     init(bundle: Bundle = .main, injectedCoreFactory: AnyModuleFactory? = nil) {
         let shareArtifacts = AppleShareArtifactStore()
         let systemClipboard = SystemClipboardService()
@@ -50,17 +51,28 @@ final class RuneScribeRuntimeComposition {
         let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         let buildNumber = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String
         let rootPresentationStore = RootViewPresentationStore()
-        let sharePresentation = OpaqueSharePresentationProvider { artifactID in
-            try await shareArtifacts.link(for: artifactID)
-        }
         self.rootPresentationStore = rootPresentationStore
-        uiDependencies = RuneScribeUIDependencies(
-            rootPresentationStore: rootPresentationStore,
-            sharePresentation: sharePresentation,
-            productMetadata: RuneScribeUIProductMetadata(version: version ?? "—", buildNumber: buildNumber ?? "—")
+        rootPresentationAdapter = rootPresentationStore.runtimeHostAdapter(
+            productMetadata: RuneScribeUIProductMetadata(
+                version: version ?? "—",
+                buildNumber: buildNumber ?? "—"
+            )
         )
-        inputForwarder = SerialInboundInputForwarder()
-        runtime = RuneScribeRuntime(runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)), platform: Self.platform)
+        let runtime = RuneScribeRuntime(runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)), platform: Self.platform)
+        self.runtime = runtime
+        runtime.observeHostIngressFailures { [weak self] failure in
+            Task { @MainActor [weak self] in
+                self?.presentHostIngressFailure(failure)
+            }
+        }
+    }
+    func presentHostIngressFailure(_ failure: RuntimeHostIngressFailure) {
+        switch failure {
+        case .admissionRejected, .destinationRejected:
+            rootPresentationStore.presentNotice(.inputRejected)
+        case .destinationUnavailable, .deliveryFailed:
+            rootPresentationStore.presentNotice(.inputUnavailable)
+        }
     }
     func start() async {
         if let stopOperation { await stopOperation.value }
@@ -83,19 +95,10 @@ final class RuneScribeRuntimeComposition {
             guard generation == activationGeneration, activationState == .starting else { return }
             try await runtime.start()
             guard generation == activationGeneration, activationState == .starting else { return }
-            let inputService = try await runtime.resolveHostService(RuneScribeServiceKeys.inboundInput) as any RuneScribeInboundInputService
-            guard generation == activationGeneration, activationState == .starting else { return }
-            guard inputForwarder.attach(service: inputService) == .attached else {
-                throw RuntimeCompositionError.inputRailUnavailable
-            }
-            await inputForwarder.flush()
-            guard generation == activationGeneration, activationState == .starting else { return }
             activationState = .running
-            hasCompletedInitialActivation = true
             startupFailed = false
         } catch {
             guard generation == activationGeneration, activationState == .starting else { return }
-            await inputForwarder.detach()
             await runtime.stop()
             guard generation == activationGeneration, activationState == .starting else { return }
             activationState = .idle
@@ -108,11 +111,8 @@ final class RuneScribeRuntimeComposition {
         activationState = .stopping
         activationGeneration &+= 1
         let task = Task { @MainActor in
-            await self.inputForwarder.flush()
-            await self.inputForwarder.detach()
             await self.runtime.stop()
             await self.awaitStartCompletion()
-            await self.inputForwarder.detach()
             self.activationState = .idle
             self.stopOperation = nil
         }
@@ -124,44 +124,45 @@ final class RuneScribeRuntimeComposition {
         await withCheckedContinuation { startCompletionWaiters.append($0) }
     }
     @discardableResult
-    func receive(urls: [URL], source: InboundDeliverySourceDTO, isColdStart: Bool? = nil) -> [InboundInputDispositionDTO] {
-        let inputs = urls.map { input(for: $0, source: source, isColdStart: isColdStart) }
-        return inputForwarder.submit(contentsOf: inputs)
+    func receive(
+        urls: [URL],
+        source: InboundDeliverySourceDTO
+    ) -> [InboundInputDispositionDTO] {
+        runtime.submit(
+            contentsOf: urls.map { url in
+                url.isFileURL
+                    ? .file(url, source: source)
+                    : .url(url, source: source)
+            }
+        )
     }
     @discardableResult
     func receive(lifecycle event: ApplicationLifecycleInputDTO) -> InboundInputDispositionDTO {
-        inputForwarder.submit(.lifecycle(InboundLifecycleDTO(metadata: metadata(source: .applicationOpen), event: event)))
+        runtime.submit(.lifecycle(event))
     }
     @discardableResult
     func receive(menu command: ApplicationMenuCommandDTO) -> InboundInputDispositionDTO {
-        inputForwarder.submit(.menu(InboundMenuCommandDTO(metadata: metadata(source: .applicationOpen), command: command)))
+        runtime.submit(.menu(command))
     }
     private func configure() async throws {
         try await runtime.register(manifest: RuneScribeCoreModuleBootstrap.manifest(), factory: coreFactory)
-        try await runtime.register(manifest: RuneScribeUIModuleBootstrap.manifest(), factory: RuneScribeUIModuleBootstrap.factory(dependencies: uiDependencies))
-        try await runtime.registerHostService(secureValues, for: RuneScribeServiceKeys.secureValueStore)
-        try await runtime.registerHostService(protectedFiles, for: RuneScribeServiceKeys.protectedFileStore)
-        try await runtime.registerHostService(inboundFiles, for: RuneScribeServiceKeys.inboundFileReader)
-        try await runtime.registerHostService(shareArtifacts, for: RuneScribeServiceKeys.shareArtifactStore)
-        try await runtime.registerHostService(resources, for: RuneScribeServiceKeys.applicationResourceLocator)
-        try await runtime.registerHostService(fonts, for: RuneScribeServiceKeys.systemFontRegistrar)
-        try await runtime.registerHostService(contacts, for: RuneScribeServiceKeys.contactAccess)
-        try await runtime.registerHostService(clipboardRead, for: RuneScribeServiceKeys.clipboardRead)
-        try await runtime.registerHostService(clipboardWrite, for: RuneScribeServiceKeys.clipboardWrite)
-        try await runtime.registerHostService(clock, for: RuneScribeServiceKeys.clock)
-        try await runtime.registerHostService(uuid, for: RuneScribeServiceKeys.uuid)
-    }
-    private func input(for url: URL, source: InboundDeliverySourceDTO, isColdStart: Bool?) -> RuneScribeInboundInput {
-        let metadata = metadata(source: source, isColdStart: isColdStart)
-        return url.isFileURL ? .file(InboundFileDTO(metadata: metadata, fileURL: url)) : .url(InboundURLDTO(metadata: metadata, url: url))
-    }
-    private func metadata(source: InboundDeliverySourceDTO, isColdStart: Bool? = nil) -> InboundInputMetadataDTO {
-        InboundInputMetadataDTO(
-            id: InboundInputID(rawValue: uuid.nextUUID()),
-            receivedAt: clock.now(),
-            source: source,
-            isColdStart: isColdStart ?? !hasCompletedInitialActivation
+        try await runtime.register(manifest: RuneScribeUIModuleBootstrap.manifest(), factory: RuneScribeUIModuleBootstrap.factory())
+        try await runtime.installStandardPort(
+            rootPresentationAdapter,
+            for: .standard
         )
+        try await runtime.installPlatformAdapter(secureValues, for: RuneScribeServiceKeys.secureValueStore)
+        try await runtime.installPlatformAdapter(protectedFiles, for: RuneScribeServiceKeys.protectedFileStore)
+        try await runtime.installPlatformAdapter(inboundFiles, for: RuneScribeServiceKeys.inboundFileReader)
+        try await runtime.installPlatformAdapter(shareArtifacts, for: RuneScribeServiceKeys.shareArtifactStore)
+        try await runtime.installPlatformAdapter(shareArtifacts, for: RuneScribeServiceKeys.sharePresentation)
+        try await runtime.installPlatformAdapter(resources, for: RuneScribeServiceKeys.applicationResourceLocator)
+        try await runtime.installPlatformAdapter(fonts, for: RuneScribeServiceKeys.systemFontRegistrar)
+        try await runtime.installPlatformAdapter(contacts, for: RuneScribeServiceKeys.contactAccess)
+        try await runtime.installPlatformAdapter(clipboardRead, for: RuneScribeServiceKeys.clipboardRead)
+        try await runtime.installPlatformAdapter(clipboardWrite, for: RuneScribeServiceKeys.clipboardWrite)
+        try await runtime.installPlatformAdapter(clock, for: RuneScribeServiceKeys.clock)
+        try await runtime.installPlatformAdapter(uuid, for: RuneScribeServiceKeys.uuid)
     }
     private static var platform: SupportedPlatform {
         #if os(macOS)
@@ -171,5 +172,4 @@ final class RuneScribeRuntimeComposition {
         #endif
     }
 }
-private enum RuntimeCompositionError: Error { case inputRailUnavailable }
 private enum RuntimeActivationState { case idle, starting, running, stopping }

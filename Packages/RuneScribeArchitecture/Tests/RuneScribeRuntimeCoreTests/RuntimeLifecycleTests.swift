@@ -1,6 +1,6 @@
 import Foundation
 import RuneScribeContracts
-import RuneScribeRuntimeCore
+@_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import XCTest
 
 final class RuntimeLifecycleTests: XCTestCase {
@@ -442,31 +442,34 @@ final class RuntimeLifecycleTests: XCTestCase {
         }
     }
 
-    func testDeclaredServicePublishesThenResolvesThroughPolicy() async throws {
-        let serviceID: ServiceIdentifier = "TestValueService"
-        let serviceKey = ServiceKey<TestValue>(serviceID)
-        let rule = ServiceAccessRule(
-            serviceID: serviceID,
-            requiredCapability: RuneScribeCapabilities.resolveService,
-            publisherRoles: [RuneScribeRoles.core],
-            consumerRoles: [RuneScribeRoles.primaryUI]
-        )
+    func testDeclaredEndpointDispatchesThroughPolicy() async throws {
+        let endpointID: RuntimeEndpointIdentifier = "test.value.query"
+        let endpoint = RuntimeEndpointDescriptor<RuntimeEmptyPayload, TestValue>(
+            endpointID: endpointID,
+            kind: .query,
+            destination: .role(RuneScribeRoles.core),
+            requestSchemaVersion: RuntimeSchemaVersions.v1,
+            responseSchemaVersion: RuntimeSchemaVersions.v1,
+            requiredCapability: RuneScribeCapabilities.applicationCommands,
+            privacyClass: .internalData,
+            maximumRequestBytes: 1,
+            maximumResponseBytes: 16
+        ).key
         let policy = RuntimePolicy(
             vocabulary: CapabilityVocabulary(knownCapabilities: RuneScribeCapabilities.all),
             capabilities: CapabilityPolicy(allowedRolesByCapability: [
-                RuneScribeCapabilities.publishService: [RuneScribeRoles.core],
-                RuneScribeCapabilities.resolveService: [RuneScribeRoles.primaryUI],
+                RuneScribeCapabilities.applicationCommands: [RuneScribeRoles.primaryUI],
                 RuneScribeCapabilities.rootUI: [RuneScribeRoles.primaryUI],
             ]),
-            services: ServiceAccessPolicy(rules: [rule])
+            services: ServiceAccessPolicy(rules: [])
         )
         let core = descriptor(
             id: "com.runescribe.module.service-provider",
             kind: .service,
             entryPoint: "ServiceProviderModule",
             role: RuneScribeRoles.core,
-            capabilities: [RuneScribeCapabilities.publishService],
-            publishedServices: [serviceID]
+            capabilities: [],
+            publishedEndpoints: [endpointID]
         )
         let ui = descriptor(
             id: "com.runescribe.module.service-consumer",
@@ -474,33 +477,83 @@ final class RuntimeLifecycleTests: XCTestCase {
             entryPoint: "ServiceConsumerModule",
             role: RuneScribeRoles.primaryUI,
             capabilities: [
-                RuneScribeCapabilities.resolveService,
+                RuneScribeCapabilities.applicationCommands,
                 RuneScribeCapabilities.rootUI,
             ],
-            requiredServices: [serviceID],
-            requiredRoles: [RuneScribeRoles.core]
+            requiredRoles: [RuneScribeRoles.core],
+            consumedEndpoints: [endpointID]
         )
         let recorder = RuntimeRecorder()
+        let clientCapture = RuntimeQueryClientCapture()
         let runtime = makeRuntime(policy: policy)
 
         try await runtime.register(
             manifest: manifest(for: core),
             factory: factory(for: core, start: { context in
-                try await context.publishService(TestValue(value: 42), for: serviceKey)
+                try await context.registerEndpoint(
+                    endpoint,
+                    handler: { _, _ in TestValue(value: 42) }
+                )
             })
         )
         try await runtime.register(
             manifest: manifest(for: ui),
             factory: factory(for: ui, start: { context in
-                let value = try await context.resolveService(serviceKey)
-                await recorder.record(number: value.value)
+                let client = try await context.queryClient(to: .role(RuneScribeRoles.core))
+                await clientCapture.store(client)
             })
         )
 
         try await runtime.start()
+        let capturedClient = await clientCapture.value()
+        let client = try XCTUnwrap(capturedClient)
+        let value = try await client.fetch(RuntimeEmptyPayload(), from: endpoint)
+        await recorder.record(number: value.value)
         let resolvedNumber = await recorder.number()
         XCTAssertEqual(resolvedNumber, 42)
         await runtime.stop()
+    }
+
+    func testRuntimeActivationRejectsMissingDeclaredPublishedEndpoint() async throws {
+        let missingEndpointID: RuntimeEndpointIdentifier = "test.declared-but-unregistered"
+        let core = descriptor(
+            id: "com.runescribe.module.incomplete-provider",
+            kind: .service,
+            entryPoint: "IncompleteProviderModule",
+            role: RuneScribeRoles.core,
+            capabilities: [],
+            publishedEndpoints: [missingEndpointID]
+        )
+        let ui = descriptor(
+            id: "com.runescribe.module.incomplete-provider-ui",
+            kind: .ui,
+            entryPoint: "IncompleteProviderUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let runtime = makeRuntime()
+        try await runtime.register(
+            manifest: manifest(for: core),
+            factory: factory(for: core)
+        )
+        try await runtime.register(
+            manifest: manifest(for: ui),
+            factory: factory(for: ui)
+        )
+
+        do {
+            try await runtime.start()
+            XCTFail("A module must register every endpoint it declares before activation")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .activationFailed(core.moduleID)
+            )
+        }
+
+        let snapshot = await runtime.snapshot()
+        XCTAssertEqual(snapshot.moduleStates[core.moduleID], .failed)
     }
 
     func testUnmappedServiceAndUnknownCapabilityAreDeniedAtRegistration() async throws {
@@ -634,22 +687,22 @@ final class RuntimeLifecycleTests: XCTestCase {
         )
         let runtime = makeRuntime()
 
-        try await runtime.registerHostService(reader, for: RuneScribeServiceKeys.clipboardRead)
-        try await runtime.registerHostService(writer, for: RuneScribeServiceKeys.clipboardWrite)
+        try await runtime.installPlatformAdapter(reader, for: RuneScribeServiceKeys.clipboardRead)
+        try await runtime.installPlatformAdapter(writer, for: RuneScribeServiceKeys.clipboardWrite)
         try await runtime.register(
             manifest: manifest(for: core),
             factory: factory(for: core, start: { context in
-                let service = try await context.resolveService(RuneScribeServiceKeys.clipboardRead)
-                let value = await service.string()
-                await recorder.append("read:\(value ?? "nil")")
-                await recorder.record(number: await service.changeCount())
+                let client = try await context.runtimeIOClient()
+                let snapshot = try await client.clipboardSnapshot()
+                await recorder.append("read:\(snapshot.string ?? "nil")")
+                await recorder.record(number: snapshot.changeCount)
             })
         )
         try await runtime.register(
             manifest: manifest(for: ui),
             factory: factory(for: ui, start: { context in
-                let service = try await context.resolveService(RuneScribeServiceKeys.clipboardWrite)
-                try await service.setString("updated")
+                let client = try await context.runtimeIOClient()
+                try await client.setClipboardString("updated")
             })
         )
 
@@ -836,33 +889,35 @@ final class RuntimeLifecycleTests: XCTestCase {
     }
 
     func testRetainedContextRejectsServiceEventAndMessageAccessAfterStop() async throws {
-        let serviceID: ServiceIdentifier = "RetainedContextValueService"
-        let serviceKey = ServiceKey<TestValue>(serviceID)
+        let endpointID: RuntimeEndpointIdentifier = "test.retained-context.query"
+        let endpoint = RuntimeEndpointDescriptor<RuntimeEmptyPayload, TestValue>(
+            endpointID: endpointID,
+            kind: .query,
+            destination: .role(RuneScribeRoles.core),
+            requestSchemaVersion: RuntimeSchemaVersions.v1,
+            responseSchemaVersion: RuntimeSchemaVersions.v1,
+            requiredCapability: RuneScribeCapabilities.applicationCommands,
+            privacyClass: .internalData,
+            maximumRequestBytes: 1,
+            maximumResponseBytes: 16
+        ).key
         let policy = RuntimePolicy(
             vocabulary: CapabilityVocabulary(knownCapabilities: RuneScribeCapabilities.all),
             capabilities: CapabilityPolicy(allowedRolesByCapability: [
-                RuneScribeCapabilities.publishService: [RuneScribeRoles.core],
-                RuneScribeCapabilities.resolveService: [RuneScribeRoles.primaryUI],
+                RuneScribeCapabilities.applicationCommands: [RuneScribeRoles.primaryUI],
                 RuneScribeCapabilities.subscribeEvents: [RuneScribeRoles.primaryUI],
                 RuneScribeCapabilities.sendMessages: [RuneScribeRoles.primaryUI],
                 RuneScribeCapabilities.rootUI: [RuneScribeRoles.primaryUI],
             ]),
-            services: ServiceAccessPolicy(rules: [
-                ServiceAccessRule(
-                    serviceID: serviceID,
-                    requiredCapability: RuneScribeCapabilities.resolveService,
-                    publisherRoles: [RuneScribeRoles.core],
-                    consumerRoles: [RuneScribeRoles.primaryUI]
-                ),
-            ])
+            services: ServiceAccessPolicy(rules: [])
         )
         let core = descriptor(
             id: "com.runescribe.module.retained-context-core",
             kind: .service,
             entryPoint: "RetainedContextCoreModule",
             role: RuneScribeRoles.core,
-            capabilities: [RuneScribeCapabilities.publishService],
-            publishedServices: [serviceID]
+            capabilities: [],
+            publishedEndpoints: [endpointID]
         )
         let ui = descriptor(
             id: "com.runescribe.module.retained-context-ui",
@@ -870,13 +925,13 @@ final class RuntimeLifecycleTests: XCTestCase {
             entryPoint: "RetainedContextUIModule",
             role: RuneScribeRoles.primaryUI,
             capabilities: [
-                RuneScribeCapabilities.resolveService,
+                RuneScribeCapabilities.applicationCommands,
                 RuneScribeCapabilities.subscribeEvents,
                 RuneScribeCapabilities.sendMessages,
                 RuneScribeCapabilities.rootUI,
             ],
-            requiredServices: [serviceID],
-            requiredRoles: [RuneScribeRoles.core]
+            requiredRoles: [RuneScribeRoles.core],
+            consumedEndpoints: [endpointID]
         )
         let capture = ModuleContextCapture()
         let runtime = makeRuntime(policy: policy)
@@ -884,13 +939,16 @@ final class RuntimeLifecycleTests: XCTestCase {
         try await runtime.register(
             manifest: manifest(for: core),
             factory: factory(for: core, start: { context in
-                try await context.publishService(TestValue(value: 42), for: serviceKey)
+                try await context.registerEndpoint(
+                    endpoint,
+                    handler: { _, _ in TestValue(value: 42) }
+                )
             })
         )
         try await runtime.register(
             manifest: manifest(for: ui),
             factory: factory(for: ui, start: { context in
-                _ = try await context.resolveService(serviceKey)
+                _ = try await context.queryClient(to: .role(RuneScribeRoles.core))
                 await capture.store(context)
             })
         )
@@ -902,7 +960,7 @@ final class RuntimeLifecycleTests: XCTestCase {
         let expectedError = RuneScribeRuntimeError.contextInactive(ui.moduleID)
 
         let serviceError = await runtimeError(from: {
-            _ = try await retainedContext.resolveService(serviceKey)
+            _ = try await retainedContext.queryClient(to: .role(RuneScribeRoles.core))
         })
         let eventError = await runtimeError(from: {
             _ = try await retainedContext.eventStream()
@@ -1030,6 +1088,18 @@ private actor ModuleContextCapture {
     }
 }
 
+private actor RuntimeQueryClientCapture {
+    private var client: RuntimeQueryClient?
+
+    func store(_ client: RuntimeQueryClient) {
+        self.client = client
+    }
+
+    func value() -> RuntimeQueryClient? {
+        client
+    }
+}
+
 private final class FactoryCounter: @unchecked Sendable {
     private let lock = NSLock()
     private var count = 0
@@ -1082,6 +1152,8 @@ private func descriptor(
     requiredServices: Set<ServiceIdentifier> = [],
     publishedServices: Set<ServiceIdentifier> = [],
     requiredRoles: Set<ModuleRole> = [],
+    consumedEndpoints: Set<RuntimeEndpointIdentifier> = [],
+    publishedEndpoints: Set<RuntimeEndpointIdentifier> = [],
     moduleVersion: SemanticVersion = SemanticVersion(
         major: UInt(1),
         minor: UInt(0),
@@ -1097,7 +1169,9 @@ private func descriptor(
         requestedCapabilities: capabilities,
         requiredServices: requiredServices,
         publishedServices: publishedServices,
-        requiredModuleRoles: requiredRoles
+        requiredModuleRoles: requiredRoles,
+        consumedEndpoints: consumedEndpoints,
+        publishedEndpoints: publishedEndpoints
     )
 }
 

@@ -1,12 +1,14 @@
 # ADR-RS-010: Theme Resource Delivery and Budgets
 
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
 **Status:** Accepted; initial limits frozen for scaffold work
 **Date:** 2026-08-09
 
 ## Decision
 
 Theme Modules contribute a versioned descriptor and content-addressed resources through
-the official opaque Forsetti resource API. Consumers resolve stable resource handles;
+the app-owned runtime's opaque resource API. Consumers resolve stable resource handles;
 they never guess bundle paths, import a Theme Module, accept a remote URL, or execute
 module-supplied script.
 

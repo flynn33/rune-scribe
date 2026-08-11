@@ -496,7 +496,7 @@ public struct PrepareMessageShareCommand: Sendable {
 }
 
 public enum ShareArtifactReference: Codable, Equatable, Hashable, Sendable {
-    case file(URL)
+    case file(ShareArtifactID)
     case opaque(ShareArtifactID)
 }
 
@@ -621,7 +621,6 @@ public enum UnlockResultDTO: Equatable, Sendable {
 
 public protocol RuneScribeApplicationService: Sendable {
     func stateStream() -> AsyncStream<RuneScribeApplicationSnapshot>
-    func menuCommandStream() -> AsyncStream<ApplicationMenuCommandDTO>
 
     func encode(_ command: EncodeMessageCommand) async throws -> EncodedMessageResult
     func decode(_ command: DecodeMessageCommand) async throws -> DecodedMessageResult

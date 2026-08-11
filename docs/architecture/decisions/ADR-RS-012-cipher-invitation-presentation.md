@@ -1,5 +1,7 @@
 # ADR-RS-012: Cipher-Invitation Presentation
 
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
 **Status:** Blocked on physical-device spike
 **Date:** 2026-08-09
 

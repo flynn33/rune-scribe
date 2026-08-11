@@ -219,7 +219,7 @@ makes **no network calls**.
 
 ```mermaid
 flowchart TD
-    Host[macOS and iOS hosts<br/>composition · lifecycle · input] --> Runtime[RuneScribeRuntimeCore<br/>transitional runtime]
+    Host[macOS and iOS hosts<br/>composition · lifecycle · input] --> Runtime[RuneScribeRuntimeCore<br/>app-owned control plane]
     Host --> Platform[RuneScribePlatform<br/>Apple adapters]
     Runtime --> Core[RuneScribeCoreModule<br/>cipher · contacts · import · security]
     Runtime --> UI[RuneScribeUIModule<br/>only user-facing UI module]
@@ -230,21 +230,24 @@ flowchart TD
     TestSupport[RuneScribeTestSupport<br/>test-only in-memory adapters] -. tests only .-> Contracts
 ```
 
-The macOS and iOS hosts are composition roots. They construct platform adapters,
-register module factories, forward lifecycle and inbound input, and present the one UI
-root. Product behavior lives in `RuneScribeCoreModule`; all screens, navigation, and
-platform presentation live in `RuneScribeUIModule`. Runtime modules do not import one
-another, and test support is excluded from shipping products.
+The macOS and iOS hosts are composition roots. Product behavior lives in
+`RuneScribeCoreModule`; exactly one UI Module owns the SwiftUI view tree. The controlling
+target makes `RuneScribeRuntimeCore` the continuing app-owned control plane: every
+cross-module call remains runtime-mediated, and the runtime owns operational I/O,
+persistent Settings, lifecycle, resources, and system-presentation sessions. Runtime
+modules do not import one another, and test support is excluded from shipping products.
 
-`RuneScribeRuntimeCore` and `RuneScribeUIRuntime` are transitional app-owned
-infrastructure. The locked Codex roadmap requires them to be replaced or adapted to an
-official Forsetti release once the required upstream entitlement, contribution, and
-resource APIs are released. No unused framework dependency is declared in the meantime.
+The current source is being remediated to that target. Existing provider-object,
+platform-I/O, Settings, and lifecycle deviations are tracked explicitly and are not
+treated as compliant merely because the compile-time package graph is modular. An
+external Forsetti package, binary, source copy, fetch, or local checkout is permanently
+prohibited.
 
 See [Module Graph](docs/architecture/ModuleGraph.md),
 [Contracts and Capabilities](docs/architecture/ContractsAndCapabilities.md), and
-[Roadmap Alignment](docs/architecture/RoadmapAlignment.md) for the enforced boundaries
-and current transition status.
+[Roadmap Alignment](docs/architecture/RoadmapAlignment.md) for historical evidence. The
+[controlling Forsetti policy](docs/architecture/FORSETTI_CONTROLLING_POLICY.md) defines
+the current boundary and dependency rules.
 
 ---
 
@@ -253,7 +256,7 @@ and current transition status.
 The locked roadmap evolves Rune Scribe in deliberately separated stages:
 
 1. Preserve current behavior and compatibility fixtures.
-2. Integrate the required official Forsetti release and retain exactly one UI Module.
+2. Complete the app-owned Forsetti control plane and retain exactly one UI Module.
 3. Separate cipher material from Script presentation and add a typed `.runescribe`
    container while keeping legacy readers.
 4. Prove one semantic UI scaffold with the Base Codex and two placeholder providers.
@@ -263,16 +266,19 @@ The locked roadmap evolves Rune Scribe in deliberately separated stages:
 8. Replace placeholders with reviewed production themes.
 
 The repository currently contains the behavior-preserving modular foundation. Visible
-Codex, progression, cloud, and Game Center features are not enabled. Wave 0B is blocked
-on an official Forsetti release newer than source version 0.1.5 at commit `f0199a4`;
-that source snapshot has no release tag and lacks the public APIs required by the locked
-roadmap.
+Codex, progression, cloud, and Game Center features are not enabled. Theme and
+Progression feature work remains gated on completing the local runtime-remediation and
+compliance program; there is no external-framework prerequisite.
 
-The authoritative documents are the
-[Codex System Specification](docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md),
-[implementation roadmap](docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md),
-[roadmap status ledger](docs/verification/roadmap-alignment.json), and
-[architecture decisions](docs/architecture/decisions/README.md).
+Current architecture and dependency authority lives in the
+[controlling Forsetti policy](docs/architecture/FORSETTI_CONTROLLING_POLICY.md),
+[supersession index](docs/architecture/ForsettiSupersessionIndex.md),
+[roadmap status ledger](docs/verification/roadmap-alignment.json), and nonconflicting
+[architecture decisions](docs/architecture/decisions/README.md). The hash-locked
+[Codex System Specification](docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md)
+and [implementation roadmap](docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md)
+remain authoritative only for nonconflicting product requirements, compatibility
+anchors, and sequencing evidence; their external-framework direction is superseded.
 
 ---
 
@@ -318,7 +324,7 @@ RuneScrib/
 Packages/RuneScribeArchitecture/
 ├── Sources/
 │   ├── RuneScribeContracts/      Neutral IDs, DTOs and service protocols
-│   ├── RuneScribeRuntimeCore/    Transitional manifest, policy and lifecycle runtime
+│   ├── RuneScribeRuntimeCore/    App-owned runtime and mediation control plane
 │   ├── RuneScribeUIRuntime/      Root-view presentation boundary
 │   ├── RuneScribePlatform/       Keychain, files, Contacts, fonts and system adapters
 │   ├── RuneScribeCoreModule/     Domain, crypto, persistence, import and app lock

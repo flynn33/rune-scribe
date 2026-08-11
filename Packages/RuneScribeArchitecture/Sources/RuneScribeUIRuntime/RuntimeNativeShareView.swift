@@ -10,15 +10,15 @@ import UIKit
 #endif
 
 @MainActor
-final class RuneScribeSharePresentationHandle {
+public final class RuneScribeSharePresentationHandle {
     private let closeAction: @MainActor () -> Void
-    private(set) var proposedServiceCount = 0
+    public private(set) var proposedServiceCount = 0
 
     init(close: @escaping @MainActor () -> Void) {
         closeAction = close
     }
 
-    func close() {
+    public func close() {
         closeAction()
     }
 
@@ -31,56 +31,171 @@ final class RuneScribeSharePresentationHandle {
 /// messages. macOS owns its native picker so presentation and completion have
 /// a public lifecycle; iOS uses the system activity controller's public
 /// completion callback.
-struct RuneScribeFileShareLink: View {
-    let fileURL: URL
-    var onShareTriggered: @MainActor () -> Void = {}
-    var onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void = { _ in }
-    var onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in }
+public struct RuneScribeFileShareLink: View {
+    @ObservedObject private var transfer: OpaqueShareTransfer
+    private let onShareTriggered: @MainActor () -> Void
+    private let onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void
+    private let onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void
 
-    var body: some View {
+    public init(
+        transfer: OpaqueShareTransfer,
+        onShareTriggered: @escaping @MainActor () -> Void = {},
+        onFinish: @escaping @MainActor (ShareArtifactOutcomeDTO) -> Void = { _ in },
+        onPresentation: @escaping @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in }
+    ) {
+        self.transfer = transfer
+        self.onShareTriggered = onShareTriggered
+        self.onFinish = onFinish
+        self.onPresentation = onPresentation
+    }
+
+    public var body: some View {
+        Group {
+            if let presentationURL = transfer.presentationURL {
         #if os(macOS)
         Button { } label: {
             Label("Share", systemImage: "square.and.arrow.up")
                 .frame(maxWidth: .infinity)
         }
-        .buttonStyle(RuneSecondaryButtonStyle())
         .allowsHitTesting(false)
         .accessibilityHidden(true)
         .overlay {
             RuneScribeMacShareControl(
-                payload: .file(fileURL),
+                payload: .file(presentationURL),
                 accessibilityLabel: "Share",
                 help: "Share via Messages, Mail…",
                 onShareTriggered: onShareTriggered,
-                onFinish: onFinish,
+                onFinish: finish,
                 onPresentation: onPresentation
             )
         }
         #else
         RuneScribeIOSActivityButton(
-            payload: .file(fileURL),
+            payload: .file(presentationURL),
             onShareTriggered: onShareTriggered,
-            onFinish: onFinish
+            onFinish: finish
         ) {
             Label("Share", systemImage: "square.and.arrow.up")
                 .frame(maxWidth: .infinity)
         }
-        .buttonStyle(RuneSecondaryButtonStyle())
         #endif
+            } else {
+                Label("Share unavailable", systemImage: "square.and.arrow.up")
+                    .frame(maxWidth: .infinity)
+                    .disabled(true)
+            }
+        }
+    }
+
+    private func finish(_ outcome: ShareArtifactOutcomeDTO) {
+        Task { @MainActor in
+            do {
+                try await transfer.finish(outcome)
+                onFinish(outcome)
+            } catch {
+                onFinish(.failed)
+            }
+        }
+    }
+}
+
+public struct RuneScribeTextShareLink: View {
+    @ObservedObject private var transfer: OpaqueShareTransfer
+    private let onShareTriggered: @MainActor () -> Void
+    private let onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void
+    private let onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void
+
+    public init(
+        transfer: OpaqueShareTransfer,
+        onShareTriggered: @escaping @MainActor () -> Void = {},
+        onFinish: @escaping @MainActor (ShareArtifactOutcomeDTO) -> Void = { _ in },
+        onPresentation: @escaping @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in }
+    ) {
+        self.transfer = transfer
+        self.onShareTriggered = onShareTriggered
+        self.onFinish = onFinish
+        self.onPresentation = onPresentation
+    }
+
+    public var body: some View {
+        Group {
+            if let text = transfer.presentationText {
+                #if os(macOS)
+                Button { } label: {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                        .frame(maxWidth: .infinity)
+                }
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+                .overlay {
+                    RuneScribeMacShareControl(
+                        payload: .text(text),
+                        accessibilityLabel: "Share",
+                        help: "Share via Messages, Mail…",
+                        onShareTriggered: onShareTriggered,
+                        onFinish: finish,
+                        onPresentation: onPresentation
+                    )
+                }
+                #else
+                RuneScribeIOSActivityButton(
+                    payload: .text(text),
+                    onShareTriggered: onShareTriggered,
+                    onFinish: finish
+                ) {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                        .frame(maxWidth: .infinity)
+                }
+                #endif
+            } else {
+                Label("Share unavailable", systemImage: "square.and.arrow.up")
+                    .frame(maxWidth: .infinity)
+                    .disabled(true)
+            }
+        }
+    }
+
+    private func finish(_ outcome: ShareArtifactOutcomeDTO) {
+        Task { @MainActor in
+            do {
+                try await transfer.finish(outcome)
+                onFinish(outcome)
+            } catch {
+                onFinish(.failed)
+            }
+        }
     }
 }
 
 /// The production Cipher Library control for sharing an opaque, key-bearing
 /// import link through the native system share surface.
-struct RuneScribeCipherLinkShareLink<Label: View>: View {
-    let transfer: OpaqueShareTransfer
-    let cipherLabel: String
-    var onShareTriggered: @MainActor () -> Void = {}
-    var onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void = { _ in }
-    var onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in }
-    @ViewBuilder let label: () -> Label
+public struct RuneScribeCipherLinkShareLink<Label: View>: View {
+    @ObservedObject private var transfer: OpaqueShareTransfer
+    private let cipherLabel: String
+    private let onShareTriggered: @MainActor () -> Void
+    private let onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void
+    private let onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void
+    private let label: () -> Label
 
-    var body: some View {
+    public init(
+        transfer: OpaqueShareTransfer,
+        cipherLabel: String,
+        onShareTriggered: @escaping @MainActor () -> Void = {},
+        onFinish: @escaping @MainActor (ShareArtifactOutcomeDTO) -> Void = { _ in },
+        onPresentation: @escaping @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in },
+        @ViewBuilder label: @escaping () -> Label
+    ) {
+        self.transfer = transfer
+        self.cipherLabel = cipherLabel
+        self.onShareTriggered = onShareTriggered
+        self.onFinish = onFinish
+        self.onPresentation = onPresentation
+        self.label = label
+    }
+
+    public var body: some View {
+        Group {
+            if let presentationURL = transfer.presentationURL {
         #if os(macOS)
         label()
             .allowsHitTesting(false)
@@ -88,21 +203,21 @@ struct RuneScribeCipherLinkShareLink<Label: View>: View {
             .overlay {
                 RuneScribeMacShareControl(
                     payload: .link(
-                        transfer.macOSSharingURL,
+                        presentationURL,
                         subject: "Rune Scribe cipher: \(cipherLabel)",
                         message: "Tap to open in Rune Scribe and import this cipher so you can decode my messages."
                     ),
                     accessibilityLabel: "Share \(cipherLabel)",
                     help: "Share via Messages, Mail…",
                     onShareTriggered: onShareTriggered,
-                    onFinish: onFinish,
+                    onFinish: finish,
                     onPresentation: onPresentation
                 )
             }
         #else
         RuneScribeIOSActivityButton(
             payload: .link(
-                transfer,
+                presentationURL,
                 previewTitle: "Rune Scribe cipher: \(cipherLabel)",
                 previewSystemImage: "link",
                 subject: "Rune Scribe cipher: \(cipherLabel)",
@@ -110,19 +225,34 @@ struct RuneScribeCipherLinkShareLink<Label: View>: View {
                     + "can decode my messages."
             ),
             onShareTriggered: onShareTriggered,
-            onFinish: onFinish,
+            onFinish: finish,
             label: label
         )
         .accessibilityLabel("Share \(cipherLabel)")
         .buttonStyle(.plain)
         .help("Share via Messages, Mail…")
         #endif
+            } else {
+                label().disabled(true)
+            }
+        }
+    }
+
+    private func finish(_ outcome: ShareArtifactOutcomeDTO) {
+        Task { @MainActor in
+            do {
+                try await transfer.finish(outcome)
+                onFinish(outcome)
+            } catch {
+                onFinish(.failed)
+            }
+        }
     }
 }
 
 #if os(iOS)
-enum RuneScribeActivityOutcomeMapper {
-    static func outcome(
+public enum RuneScribeActivityOutcomeMapper {
+    public static func outcome(
         completed: Bool,
         error: (any Error)?
     ) -> ShareArtifactOutcomeDTO {
@@ -131,10 +261,12 @@ enum RuneScribeActivityOutcomeMapper {
     }
 }
 
-struct RuneScribeActivityCompletionGate {
-    private(set) var hasCompleted = false
+public struct RuneScribeActivityCompletionGate {
+    public private(set) var hasCompleted = false
 
-    mutating func accept(
+    public init() {}
+
+    public mutating func accept(
         completed: Bool,
         error: (any Error)?
     ) -> ShareArtifactOutcomeDTO? {
@@ -179,8 +311,9 @@ private struct RuneScribeIOSActivityButton<Label: View>: View {
 
 private enum RuneScribeIOSActivityPayload {
     case file(URL)
+    case text(String)
     case link(
-        OpaqueShareTransfer,
+        URL,
         previewTitle: String,
         previewSystemImage: String,
         subject: String,
@@ -199,8 +332,10 @@ private enum RuneScribeIOSActivityPayload {
                     subject: nil
                 ),
             ]
+        case .text(let text):
+            return [text as NSString]
         case let .link(
-            transfer,
+            url,
             previewTitle,
             previewSystemImage,
             subject,
@@ -209,7 +344,7 @@ private enum RuneScribeIOSActivityPayload {
             return [
                 message as NSString,
                 RuneScribeIOSActivityItemSource(
-                    url: transfer.iOSSharingURL,
+                    url: url,
                     previewTitle: previewTitle,
                     previewSystemImage: previewSystemImage,
                     subject: subject
@@ -496,20 +631,23 @@ private final class RuneScribeIOSActivityItemSource: NSObject,
 #if os(macOS)
 private enum RuneScribeMacSharePayload {
     case file(URL)
+    case text(String)
     case link(URL, subject: String, message: String)
 
     var items: [Any] {
         switch self {
         case .file(let url):
             [url as NSURL]
+        case .text(let text):
+            [text as NSString]
         case .link(let url, _, let message):
             [message as NSString, url as NSURL]
         }
     }
 
     var subject: String? {
-        guard case .link(_, let subject, _) = self else { return nil }
-        return subject
+        if case .link(_, let subject, _) = self { return subject }
+        return nil
     }
 }
 
@@ -583,8 +721,8 @@ private final class RuneScribeMacShareView: NSView,
     override func drawFocusRingMask() {
         NSBezierPath(
             roundedRect: bounds,
-            xRadius: RuneMetrics.corner,
-            yRadius: RuneMetrics.corner
+            xRadius: 12,
+            yRadius: 12
         ).fill()
     }
 

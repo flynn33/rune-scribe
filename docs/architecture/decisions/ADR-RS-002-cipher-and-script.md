@@ -1,5 +1,7 @@
 # ADR-RS-002: Cipher Material Versus Script Presentation
 
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
 **Status:** Accepted
 **Date:** 2026-08-09
 

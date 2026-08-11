@@ -1,6 +1,7 @@
 import CryptoKit
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 
 enum ContactRepositoryError: Error, Equatable, Sendable {
     case secureStorageUnavailable
@@ -26,8 +27,7 @@ actor EncryptedContactRepository {
         let task: Task<LoadedState, Error>
     }
 
-    private let secureValueStore: any SecureValueStore
-    private let protectedFileStore: any ProtectedFileStore
+    private let runtimeIO: RuntimeIOClient
 
     private var cachedBook: ContactBook?
     private var symmetricKey: SymmetricKey?
@@ -39,12 +39,8 @@ actor EncryptedContactRepository {
     private var mutationInProgress = false
     private var mutationWaiters: [CheckedContinuation<Void, Never>] = []
 
-    init(
-        secureValueStore: any SecureValueStore,
-        protectedFileStore: any ProtectedFileStore
-    ) {
-        self.secureValueStore = secureValueStore
-        self.protectedFileStore = protectedFileStore
+    init(runtimeIO: RuntimeIOClient) {
+        self.runtimeIO = runtimeIO
     }
 
     func snapshot() async throws -> ContactBook {
@@ -55,13 +51,9 @@ actor EncryptedContactRepository {
             return try await finishLoading(initialization)
         }
 
-        let secureValueStore = secureValueStore
-        let protectedFileStore = protectedFileStore
+        let runtimeIO = runtimeIO
         let task = Task<LoadedState, Error> {
-            try await Self.loadState(
-                secureValueStore: secureValueStore,
-                protectedFileStore: protectedFileStore
-            )
+            try await Self.loadState(runtimeIO: runtimeIO)
         }
         let initialization = Initialization(id: nextInitializationID, task: task)
         nextInitializationID &+= 1
@@ -73,7 +65,7 @@ actor EncryptedContactRepository {
         let path = try Self.messageAssociationIntentPath()
         let encrypted: Data?
         do {
-            encrypted = try await protectedFileStore.read(relativePath: path)
+            encrypted = try await runtimeIO.readProtectedFile(path)
         } catch {
             throw ContactRepositoryError.protectedStorageUnavailable
         }
@@ -120,9 +112,9 @@ actor EncryptedContactRepository {
         }
 
         do {
-            try await protectedFileStore.write(
+            try await runtimeIO.writeProtectedFile(
                 encrypted,
-                relativePath: try Self.messageAssociationIntentPath()
+                path: try Self.messageAssociationIntentPath()
             )
         } catch {
             // Atomic replacement may have reached disk before the adapter
@@ -142,8 +134,8 @@ actor EncryptedContactRepository {
 
     func removeMessageAssociationIntent() async throws {
         do {
-            try await protectedFileStore.remove(
-                relativePath: try Self.messageAssociationIntentPath()
+            try await runtimeIO.removeProtectedFile(
+                try Self.messageAssociationIntentPath()
             )
         } catch {
             do {
@@ -177,7 +169,7 @@ actor EncryptedContactRepository {
         let encrypted = try Self.encrypt(book, using: key)
 
         do {
-            try await protectedFileStore.write(encrypted, relativePath: .contacts)
+            try await runtimeIO.writeProtectedFile(encrypted, path: .contacts)
         } catch {
             // A storage implementation may report failure after an atomic
             // replacement reached disk. Discard the cached pre-write snapshot
@@ -207,13 +199,10 @@ actor EncryptedContactRepository {
         }
     }
 
-    private static func loadState(
-        secureValueStore: any SecureValueStore,
-        protectedFileStore: any ProtectedFileStore
-    ) async throws -> LoadedState {
+    private static func loadState(runtimeIO: RuntimeIOClient) async throws -> LoadedState {
         let encrypted: Data?
         do {
-            encrypted = try await protectedFileStore.read(relativePath: .contacts)
+            encrypted = try await runtimeIO.readProtectedFile(.contacts)
         } catch {
             throw ContactRepositoryError.protectedStorageUnavailable
         }
@@ -222,7 +211,7 @@ actor EncryptedContactRepository {
             return LoadedState(book: .empty, keyData: nil)
         }
 
-        let keyData = try await readSymmetricKey(from: secureValueStore)
+        let keyData = try await readSymmetricKey(from: runtimeIO)
         let book = try decrypt(encrypted, using: SymmetricKey(data: keyData))
         return LoadedState(book: book, keyData: keyData)
     }
@@ -231,18 +220,16 @@ actor EncryptedContactRepository {
         if let symmetricKey {
             return symmetricKey
         }
-        let keyData = try await Self.readSymmetricKey(from: secureValueStore)
+        let keyData = try await Self.readSymmetricKey(from: runtimeIO)
         let key = SymmetricKey(data: keyData)
         symmetricKey = key
         return key
     }
 
-    private static func readSymmetricKey(
-        from secureValueStore: any SecureValueStore
-    ) async throws -> Data {
+    private static func readSymmetricKey(from runtimeIO: RuntimeIOClient) async throws -> Data {
         let stored: Data?
         do {
-            stored = try await secureValueStore.data(
+            stored = try await runtimeIO.secureValueData(
                 service: RuneScribeKeychain.service,
                 account: RuneScribeKeychain.symmetricKeyAccount
             )

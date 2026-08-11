@@ -22,6 +22,7 @@ public enum RuneScribeCapabilities {
     public static let keychainStorage: CapabilityIdentifier = "storage.keychain"
     public static let protectedFileStorage: CapabilityIdentifier = "storage.protected-files"
     public static let inboundFileRead: CapabilityIdentifier = "files.inbound.read"
+    public static let fileImportUI: CapabilityIdentifier = "ui.file-import"
     public static let shareArtifactStorage: CapabilityIdentifier = "storage.share-artifacts"
     public static let resourceRead: CapabilityIdentifier = "resources.read"
     public static let fontRegistration: CapabilityIdentifier = "fonts.register"
@@ -47,6 +48,7 @@ public enum RuneScribeCapabilities {
         keychainStorage,
         protectedFileStorage,
         inboundFileRead,
+        fileImportUI,
         shareArtifactStorage,
         resourceRead,
         fontRegistration,

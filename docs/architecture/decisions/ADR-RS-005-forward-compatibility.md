@@ -1,5 +1,7 @@
 # ADR-RS-005: Old-App Forward Compatibility
 
+**Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
+
 **Status:** Accepted: legacy-only outbound until product review
 **Date:** 2026-08-09
 

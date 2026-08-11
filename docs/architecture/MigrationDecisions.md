@@ -1,5 +1,7 @@
 # Rune Scribe Migration Decisions
 
+> **Historical decision record:** Migration facts and compatibility anchors remain evidence, but conflicting architecture conclusions are superseded by the [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md). In particular, provider-object retention, raw platform-adapter retention, lookup-time authorization, and any external dependency direction are not current guidance.
+
 ## Record scope
 
 These decisions describe the migration from the pre-architecture Rune Scribe application to committed cleanup snapshot `01e2fcf655a3139a856787fc96f17a58db3f3ad0`. P7 implementation commit `49a8cee0077939de100d6da7405c980d7a31163f` is retained here only as the historical phase boundary that preceded the committed cleanup. The decisions supplement the source-level ledgers:
@@ -10,10 +12,12 @@ These decisions describe the migration from the pre-architecture Rune Scribe app
 - [`feature-parity-matrix.json`](../verification/feature-parity-matrix.json)
 - [`p7-test-matrix.json`](../verification/p7-test-matrix.json)
 
-These decisions preserve the historical P8 current-shipping-state evidence. The locked
-Codex roadmap and the records in [`decisions`](decisions/README.md) control new Codex
-work. Where they conflict, the `ADR-RS-*` decision supersedes the earlier migration
-decision without changing what the P8 evidence proved at its recorded snapshot.
+These decisions preserve the historical P8 current-shipping-state evidence. The
+hash-locked Codex documents and the records in [`decisions`](decisions/README.md) govern
+only nonconflicting product requirements, compatibility anchors, and sequencing
+evidence. The controlling policy and current roadmap ledger govern architecture and
+dependency direction without changing what the P8 evidence proved at its recorded
+snapshot.
 
 ## ADR-001: Reconcile the live repository before moving ownership
 
@@ -56,24 +60,18 @@ The committed package also declares `RuneScribeTestSupport` as a seventh, explic
 
 **Evidence.** [`Package.swift`](../../Packages/RuneScribeArchitecture/Package.swift), [`project.yml`](../../project.yml), [`ModuleGraph.md`](ModuleGraph.md), `T-011`/`T-024` in the phase ledger, the 17-of-17 architecture result under `/tmp/RuneScribe-P8-final-package.yGz7qs`, and the 50-of-50 shipping result under `/tmp/RuneScribe-P8-release-final.XsJS4P`.
 
-## ADR-003: Keep the local runtime transitional until official Forsetti is releasable
+## ADR-003: Superseded transitional-runtime direction
 
-**Context.** At the P8 snapshot, the available material supported Pattern B principles
-but did not provide a released public package that met Rune Scribe's requirements.
+**Context.** At the P8 snapshot, this record treated the app-owned runtime as temporary.
 
-**Decision.** Retain the current app-owned runtime as transitional infrastructure while
-the audited upstream gate is blocked. Do not add an unused dependency, private fork,
-vendored or copied implementation, generated framework artifact, fetch script, or
-developer-machine checkout assumption. Once an official semantic release exposes the
-required public APIs, migrate to its released public products under
-[`ADR-RS-001`](decisions/ADR-RS-001-module-packaging-and-target-graph.md) and update the
-package graph, manifests, composition, guards, and tests together.
+**Superseded decision.** The former external-release direction is not current guidance.
+The replacement keeps the runtime app-owned permanently and prohibits external
+Forsetti packages, binaries, source copies, submodules, fetch scripts, and local
+checkout paths. Required capabilities are implemented within Rune Scribe.
 
-**Consequences.** The current shipping build remains app-owned and Apple-only. That is
-a recorded present-state fact, not a permanent ban on the official released dependency.
-The source-version `0.1.5` tree at commit `f0199a4` has no release tag and is missing the
-generalized entitlement, reconciliation, contribution, resource, and service APIs
-required by the locked roadmap, so Wave 0B remains blocked upstream.
+**Consequences.** The recorded shipping build remains app-owned and Apple-only. That
+fact and its test evidence remain historical evidence; the conditional dependency path
+is removed.
 
 **Evidence.** [`check-architecture.sh`](../../scripts/check-architecture.sh), [`architecture-ratchet.json`](../../scripts/architecture-ratchet.json), and `T-010` in the P7 ledger.
 

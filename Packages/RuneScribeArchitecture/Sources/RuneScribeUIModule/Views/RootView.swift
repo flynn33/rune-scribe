@@ -1,3 +1,4 @@
+import RuneScribeUIRuntime
 import SwiftUI
 
 @MainActor
@@ -25,7 +26,9 @@ struct RootView: View {
     init(session: RuneScribeUISession) {
         self.session = session
         _showSplash = State(
-            initialValue: SplashAsset.shouldShow(videoURL: session.splashVideoURL)
+            initialValue: RuntimeSplashSchedule.shouldShow(
+                resourceAvailable: session.resourcePresentation.hasSplashVideo
+            )
         )
     }
 
@@ -39,9 +42,9 @@ struct RootView: View {
                     .zIndex(1)
             }
 
-            if showSplash, let splashVideoURL = session.splashVideoURL {
-                VideoSplashView(videoURL: splashVideoURL) {
-                    SplashAsset.markShown()
+            if showSplash {
+                session.resourcePresentation.makeSplashView {
+                    RuntimeSplashSchedule.markShown()
                     withAnimation(.easeInOut(duration: 0.45)) { showSplash = false }
                 }
                 .transition(.opacity)
@@ -113,8 +116,25 @@ struct RootView: View {
         } message: {
             Text(session.messageErrorMessage ?? "")
         }
+        .alert("Couldn't Complete", isPresented: Binding(
+            get: {
+                session.lastError != nil
+                    && session.importErrorMessage == nil
+                    && session.messageErrorMessage == nil
+                    && !session.isLocked
+                    && !showSplash
+            },
+            set: { if !$0 { session.dismissLastError() } }
+        )) {
+            Button("OK") { session.dismissLastError() }
+        } message: {
+            Text(session.lastError ?? "")
+        }
         .environmentObject(session)
-        .environment(\.runeScribeMetalLibraryURL, session.metalLibraryURL)
+        .environment(
+            \.runtimeApplicationResourcePresentation,
+            session.resourcePresentation
+        )
     }
 
     private func cancelPendingImport() {

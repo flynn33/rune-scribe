@@ -1,10 +1,15 @@
 # Codex Roadmap Alignment
 
+> **Superseded dependency sequencing:** Product requirements remain relevant, but the former external-framework gate and transitional-runtime direction are superseded. Current architecture work follows the [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md) and uses an app-owned implementation with a permanent external-dependency prohibition.
+
 ## Authority and scope
 
-The locked [Codex System Specification](../product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md)
+The hash-locked [Codex System Specification](../product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md)
 and [Current-App Delta and Implementation Roadmap](../product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md)
-control Codex work. Their repository SHA-256 values are respectively
+remain authority only for nonconflicting product requirements, compatibility anchors,
+and sequencing evidence. They do not control framework ownership, runtime mediation,
+operational I/O, Settings, or dependency direction. Their repository SHA-256 values are
+respectively
 `7c4c460815064fca87a6769766fb875f267eb692795bbab2635eec5d55d8f88d` and
 `884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4`.
 
@@ -15,9 +20,9 @@ dependencies, repository evidence, and notes. This page explains the dependency 
 and the implementation boundary in plain language.
 
 Historical P8 verification remains valid evidence for the app state it measured; it is
-not the final Codex architecture. The roadmap-specific
-[`ADR-RS-*` records](decisions/README.md) supersede an earlier migration decision only
-where the locked roadmap changed direction.
+not the final Codex architecture. The controlling policy and current ledger govern
+architecture. The roadmap-specific [`ADR-RS-*` records](decisions/README.md) remain
+effective only where they do not conflict with that authority.
 
 ## Current result
 
@@ -35,46 +40,33 @@ Codex domain and package work:
 - the frozen bounded typed `.runescribe` parser/builder and magic-first file routing;
 - permanent legacy cipher v3 and message v1 intake, with current sharing still emitting
   legacy formats only; and
-- twelve accepted or explicitly blocked architecture decisions, plus this auditable
-  roadmap ledger.
+- one superseded, nine accepted, and two explicitly blocked architecture decisions,
+  plus this auditable roadmap ledger.
 
 That slice is intentionally usable without external services, a physical device,
 Contacts permission, login Keychain access, App Store Connect, iCloud, or Game Center.
 It does not declare an unused framework dependency and does not claim that theme,
 progression, cloud, or public-sharing work is complete.
 
-## Forsetti upstream gate
+## App-owned Forsetti remediation gate
 
-Wave 0B is **blocked upstream**. The official repository is
-`https://github.com/flynn33/Forsetti-Framework-Mac-iOS`. The audited revision is
-`f0199a4f2f0becd1372dbfd5db714e85619c88bc`; its source reports version `0.1.5`, but no
-semantic release tag contains that revision.
+Wave 0B is local architecture work. The app-owned runtime must provide generalized
+entitlement requirements, live reconciliation, keyed contribution registration, opaque
+resource resolution, capability-scoped command/query/state ports, lifecycle and
+generation enforcement, optional failure isolation, tests, and permanent guards.
 
-The release also needs public generalized entitlement requirements, composite
-entitlement sources, runtime reconciliation, keyed contribution registration, opaque
-resource resolution, app-defined capability-scoped services, source/lifecycle and
-duplicate-ID enforcement, the neutral Pattern B sample, tests, migration notes, and a
-semantic release. Until those are available:
-
-- `RuneScribeRuntimeCore` and `RuneScribeUIRuntime` remain transitional app-owned
-  infrastructure;
-- the repository does not add an unused remote dependency;
-- no private fork, copied source, vendored binary, or developer-machine checkout is an
-  acceptable substitute; and
-- current architecture guards retain the blocked-gate rule, then change atomically with
-  the official released dependency, manifests, composition, and tests.
-
-[`ADR-RS-001`](decisions/ADR-RS-001-module-packaging-and-target-graph.md) supersedes the
-earlier permanent “never a dependency” direction. It does not alter the historical fact
-that the P8 shipping snapshot had no external dependency.
+`RuneScribeRuntimeCore` is the continuing control plane. External Forsetti packages,
+binaries, source copies, submodules, fetch scripts, and developer-machine checkout paths
+are permanently prohibited. Theme and Progression work cannot pass their gates until
+the applicable local runtime capabilities and negative enforcement are green.
 
 ## Dependency order
 
 ```mermaid
 flowchart LR
-    BAS["Wave 0A<br/>baseline and decisions"] --> FOR["Wave 0B<br/>official Forsetti release"]
+    BAS["Wave 0A<br/>baseline and decisions"] --> FOR["Wave 0B<br/>app-owned runtime remediation"]
     BAS --> DOM["Wave 1B<br/>Cipher, Script, package"]
-    FOR --> MOD["Wave 1A<br/>official module integration"]
+    FOR --> MOD["Wave 1A<br/>standard module integration"]
     MOD --> DOM
     DOM --> THM["Wave 2<br/>semantic theme scaffold"]
     FOR --> THM
@@ -87,8 +79,8 @@ flowchart LR
 ```
 
 The graph is a gate, not just a preferred order. Theme Modules cannot be finalized
-against missing Forsetti contribution/resource APIs. Progression cannot activate earned
-providers without released entitlement reconciliation. Themed sharing cannot promise
+against missing runtime contribution/resource APIs. Progression cannot activate earned
+providers without live eligibility reconciliation. Themed sharing cannot promise
 portable presentation until the Theme scaffold, package validation, progression event
 contract, and physical-device transport spike all pass.
 
@@ -97,11 +89,11 @@ contract, and physical-device transport spike all pass.
 | Group | Current ledger | Dependency and evidence |
 |---|---|---|
 | BAS-001…010 | 6 satisfied, 2 partial, 1 blocked-device, 1 not-applicable | P8 baseline/build/fixture evidence remains; ADRs and repository policy exist. The old/new destination matrix and documentation checklist remain partial; physical capture requires devices. |
-| FOR-001…011 | 11 blocked-upstream | Every item depends on the official tagged release described by `forsettiGate`; consumer-only entitlement vocabulary is not framework completion. |
-| MOD-001…013 | 8 satisfied, 4 transitional, 1 partial | Current Core/UI separation, adapters, ingress, lock gating, architecture tests, and hosted tests exist. Runtime/manifests/bootstrap remain transitional until FOR-011. |
+| FOR-001…011 | 11 superseded | The former external-release work packages are retained as historical identifiers; local runtime remediation is governed by the controlling policy and remediation phases. |
+| MOD-001…013 | 8 satisfied, 4 transitional, 1 partial | Historical Core/UI separation, adapters, ingress, lock gating, architecture tests, and hosted tests exist. Runtime mediation, manifests, and bootstrap remain incomplete under the controlling policy. |
 | DOM-001…007 | 4 satisfied, 3 partial | Cipher/Script migration and an explicit delivery-state foundation exist. End-to-end legacy-font proof, selected-Codex/per-share presentation stores, and removal of the writable `delivered` compatibility rail remain. |
 | PKG-001…006 | 4 satisfied, 2 partial | The typed container, legacy readers, policy, and magic-first router exist. Complete fail-before-allocation proof, randomized malformed-input coverage, and allocation instrumentation remain in PKG-003/005. |
-| THM-001…012 | 11 not-started, 1 partial | A current UI design system exists, but no descriptor, Coordinator, Base/placeholder Theme Modules, preference/fallback service, or conformance suite exists. FOR-011 is an upstream prerequisite. |
+| THM-001…012 | 11 not-started, 1 partial | A current UI design system exists, but no descriptor, Coordinator, Base/placeholder Theme Modules, preference/fallback service, or conformance suite exists. Local runtime registries and module contracts are prerequisites. |
 | PRO-001…016 | 14 not-started, 2 partial | Event and opaque-token contract foundations exist; the module, store, outbox, rules, catalog, atomic grants, entitlement bridge, views, quarantine, and recovery do not. |
 | SHR-001…017 | 7 not-started, 6 partial, 2 decision-frozen, 2 blocked-device | Current legacy share, QR, MessageUI, and completion foundations remain. Final composition and Quick Look decisions require the physical-device spike; themed work depends on PKG, THM, and PRO gates. |
 
@@ -142,10 +134,10 @@ result and required attachment acceptance.
 2. Finish DOM-005/006/007 compatibility rendering, presentation-state ownership, and
    atomic delivery-state migration while keeping legacy decode behavior.
 3. Complete BAS-008's old/new compatibility and update-required test matrix.
-4. Track the official Forsetti repository; begin Wave 0B only at a tagged public release
-   that closes every listed blocker.
-5. After FOR-011, migrate the transitional runtime and manifests before starting the
-   three-provider Theme scaffold.
+4. Complete the app-owned runtime's per-call mediation, standard ports, I/O, Settings,
+   resource, contribution, state, and live-reconciliation gates.
+5. Make the applicable compliance rules and negative mutations blocking before starting
+   the three-provider Theme scaffold.
 6. Run SHR-001 on physical devices before selecting permanent invitation composition or
    Quick Look scope.
 

@@ -1,6 +1,7 @@
 import Foundation
 import RuneScribeContracts
 import RuneScribeRuntimeCore
+import RuneScribeUIPresentationContracts
 import RuneScribeUIRuntime
 import SwiftUI
 
@@ -13,7 +14,7 @@ public enum RuneScribeUIModuleBootstrap {
 
     public static let descriptor = ModuleDescriptor(
         moduleID: "com.runescribe.module.ui",
-        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(34)),
+        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(35)),
         kind: .ui,
         entryPoint: "RuneScribeUIModule",
         role: RuneScribeRoles.primaryUI,
@@ -24,15 +25,21 @@ public enum RuneScribeUIModuleBootstrap {
             RuneScribeCapabilities.rootUI,
             RuneScribeCapabilities.resourceRead,
             RuneScribeCapabilities.clipboardWrite,
+            RuneScribeCapabilities.fileImportUI,
             RuneScribeCapabilities.shareUI,
             RuneScribeCapabilities.messagesUI,
         ],
         requiredServices: [
-            RuneScribeServiceIDs.application,
             RuneScribeServiceIDs.applicationResourceLocator,
             RuneScribeServiceIDs.clipboardWrite,
+            RuneScribeServiceIDs.sharePresentation,
         ],
-        requiredModuleRoles: [RuneScribeRoles.core]
+        requiredResources: [
+            .splashVideo,
+            .defaultMetalLibrary,
+        ],
+        requiredModuleRoles: [RuneScribeRoles.core],
+        consumedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs
     )
 
     public static func manifestData() throws -> Data {
@@ -49,48 +56,49 @@ public enum RuneScribeUIModuleBootstrap {
         try ModuleManifestDecoder.decode(manifestData())
     }
 
-    public static func factory(
-        dependencies: RuneScribeUIDependencies
-    ) -> AnyModuleFactory {
-        AnyModuleFactory(descriptor: descriptor) {
-            RuneScribeUIModule(dependencies: dependencies)
-        }
+    public static func factory() -> AnyModuleFactory {
+        AnyModuleFactory(moduleType: RuneScribeUIModule.self)
     }
 }
 
 @MainActor
-public final class RuneScribeUIModule: RuneScribeModule {
+public final class RuneScribeUIModule: RuntimeConstructibleModule {
+    public nonisolated static let moduleDescriptor = RuneScribeUIModuleBootstrap.descriptor
     public nonisolated let descriptor = RuneScribeUIModuleBootstrap.descriptor
 
-    private nonisolated let dependencies: RuneScribeUIDependencies
     private var session: RuneScribeUISession?
+    private var rootPresentationClient: RuntimeRootPresentationClient?
 
-    public nonisolated init(dependencies: RuneScribeUIDependencies) {
-        self.dependencies = dependencies
-    }
+    public nonisolated init() {}
 
     public func start(context: ModuleContext) async throws {
-        let applicationService: any RuneScribeApplicationService = try await context.resolveService(
-            RuneScribeServiceKeys.application
-        )
-        let resources: any ApplicationResourceLocator = try await context.resolveService(
-            RuneScribeServiceKeys.applicationResourceLocator
-        )
-        let clipboardWriting: any ClipboardWriting = try await context.resolveService(
-            RuneScribeServiceKeys.clipboardWrite
-        )
+        let applicationClient = try await context.applicationClient()
+        let runtimeIO = try await context.runtimeIOClient()
+        let rootPresentationClient = try await context.rootPresentationClient()
+        let productMetadata = try await rootPresentationClient.productMetadata()
+        let inboundFileImportSession = try await runtimeIO.inboundFileImportSession {
+            [applicationClient] input in
+            try await applicationClient.importFile(input)
+        }
 
-        async let splashVideoURL: URL? = try? await resources.url(for: .splashVideo)
-        async let metalLibraryURL: URL? = try? await resources.url(for: .defaultMetalLibrary)
-        let resolvedResources = await (splashVideoURL, metalLibraryURL)
+        async let splashVideoSession: RuntimeApplicationResourceSession? = try? await runtimeIO.applicationResourceSession(
+            .splashVideo
+        )
+        async let metalLibrarySession: RuntimeApplicationResourceSession? = try? await runtimeIO.applicationResourceSession(
+            .defaultMetalLibrary
+        )
+        let resourceSessions = await (splashVideoSession, metalLibrarySession)
+        let resourcePresentation = RuntimeApplicationResourcePresentation(
+            splashVideo: resourceSessions.0,
+            metalLibrary: resourceSessions.1
+        )
 
         let session = RuneScribeUISession(
-            applicationService: applicationService,
-            clipboardWriting: clipboardWriting,
-            sharePresentation: dependencies.sharePresentation,
-            splashVideoURL: resolvedResources.0,
-            metalLibraryURL: resolvedResources.1,
-            productMetadata: dependencies.productMetadata
+            applicationClient: applicationClient,
+            runtimeIO: runtimeIO,
+            inboundFileImportSession: inboundFileImportSession,
+            resourcePresentation: resourcePresentation,
+            productMetadata: productMetadata
         )
 
         do {
@@ -98,8 +106,9 @@ public final class RuneScribeUIModule: RuneScribeModule {
             let contribution = RootViewContribution(moduleID: descriptor.moduleID) {
                 AnyView(RootView(session: session))
             }
-            try dependencies.rootPresentationStore.present(contribution)
+            try await rootPresentationClient.present(contribution)
             self.session = session
+            self.rootPresentationClient = rootPresentationClient
         } catch {
             await session.stop()
             throw error
@@ -108,9 +117,11 @@ public final class RuneScribeUIModule: RuneScribeModule {
 
     public func stop() async {
         let session = self.session
+        let rootPresentationClient = self.rootPresentationClient
         self.session = nil
+        self.rootPresentationClient = nil
         await session?.stop()
-        dependencies.rootPresentationStore.dismiss(moduleID: descriptor.moduleID)
+        try? await rootPresentationClient?.dismiss()
     }
 
 }

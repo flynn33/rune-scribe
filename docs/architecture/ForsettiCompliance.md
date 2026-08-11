@@ -1,22 +1,20 @@
 # Rune Scribe Forsetti Compliance
 
+> **Superseded architecture assessment:** This document records a historical qualification snapshot. Its architectural conclusions are not current compliance claims. The [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md) governs; measured build, test, parity, and compatibility evidence remains historical evidence.
+
 ## Status and interpretation
 
-> **Locked-roadmap supersession.** This report preserves the historical P8
-> current-shipping-state evidence. The Codex roadmap now requires migration to official
-> Forsetti released public products once the upstream gate clears. The current
-> `RuneScribeRuntimeCore` and `RuneScribeUIRuntime` are transitional; the earlier
-> permanent no-dependency interpretation is superseded by
-> [`ADR-RS-001`](decisions/ADR-RS-001-module-packaging-and-target-graph.md).
+> **Current interpretation.** This report preserves the historical P8
+> current-shipping-state evidence. Its provider-resolution model is not per-call runtime
+> mediation. `RuneScribeRuntimeCore` is the permanent app-owned control plane, and the
+> external dependency direction formerly recorded by ADR-RS-001 is superseded.
 
 Rune Scribe currently implements the Forsetti Pattern B policy as original, app-owned code. This report records committed cleanup snapshot `01e2fcf655a3139a856787fc96f17a58db3f3ad0`. The application has one Core service module, exactly one UI module, a runtime-mediated service boundary, app-owned Apple-platform adapters, and thin macOS and iOS hosts.
 
 At the recorded snapshot, “Forsetti” was architecture-policy terminology rather than a
-source, binary, package, submodule, build-time, or runtime dependency. The current local
-package still has no external dependencies. Official Forsetti commit `f0199a4` reports
-source version `0.1.5`, has no release tag, and lacks required public entitlement,
-reconciliation, contribution, resource, and service APIs. Rune Scribe therefore adds no
-unused dependency or private fork while Wave 0B is blocked upstream.
+source, binary, package, submodule, build-time, or runtime dependency. That app-owned
+model is permanent. Required entitlement, reconciliation, contribution, resource, and
+service behavior must be implemented inside Rune Scribe without external Forsetti code.
 
 This architecture status is separate from release qualification. The committed verification ledgers record all automatable architecture gates as passed, while seven feature-parity cases remain explicitly classified as physical-device validation in [`feature-parity-matrix.json`](../verification/feature-parity-matrix.json). This document does not convert those external gates into a release pass.
 
@@ -62,15 +60,15 @@ The arrows above describe runtime composition. Compile-time dependencies are str
 | No cross-module `NotificationCenter` | Product coordination uses typed services and streams. The only allowed `NotificationCenter.default` calls are the add/remove pair for the local `AVPlayerItem` completion observer in `VideoSplashView`. | [`VideoSplashView.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VideoSplashView.swift), [`check-architecture.sh`](../../scripts/check-architecture.sh), `T-013` |
 | Secret-safe boundaries | Contracts expose key-free summaries, opaque share references, typed failure codes, and a non-serializable `PINInput` access closure. Raw keys, PIN values, persistence records, and payload bytes remain inside Core or Platform. | [`ApplicationContracts.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ApplicationContracts.swift), [`ContractSafetyTests.swift`](../../Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/ContractSafetyTests.swift), `T-027` |
 | Framework machinery is invisible | The UI module supplies existing product screens; the host presents boot, product root, or recovery state. There is no module-management interface. | [`RootViewPresentation.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RootViewPresentation.swift), [`RootView.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift), feature-parity evidence |
-| No unused, private, or copied Forsetti code | The current guard rejects package/import/product references, fetched code, and vendored source while the upstream gate is blocked. It must become conditional on one pinned official release when migration begins, while continuing to reject private forks and copies. | [`Package.swift`](../../Packages/RuneScribeArchitecture/Package.swift), [`check-architecture.sh`](../../scripts/check-architecture.sh), `T-010`, [`ADR-RS-001`](decisions/ADR-RS-001-module-packaging-and-target-graph.md) |
+| No external Forsetti code | The guard must permanently reject package/import/product references, fetched code, vendored source, binaries, submodules, and local checkout paths. | [`Package.swift`](../../Packages/RuneScribeArchitecture/Package.swift), [`check-architecture.sh`](../../scripts/check-architecture.sh), `T-010`, [controlling policy](FORSETTI_CONTROLLING_POLICY.md) |
 
 ## Owned architecture surfaces
 
 | Product | Responsibility | Allowed dependency direction |
 |---|---|---|
 | `RuneScribeContracts` | Stable identifiers, capability/service vocabulary, key-free DTOs, service protocols, inbound inputs, and safe event payloads | Foundation only |
-| `RuneScribeRuntimeCore` | Transitional manifest validation, factory registry, policy, scoped services, events, directed messages, eligibility, activation, and shutdown | Contracts and Foundation; migrate to official released Forsetti products |
-| `RuneScribeUIRuntime` | Transitional root-view type erasure, exactly-one contribution selection, boot and recovery presentation | Contracts and SwiftUI; migrate or adapt at the official Forsetti gate |
+| `RuneScribeRuntimeCore` | Historical manifest validation, factory registry, policy, scoped services, events, directed messages, eligibility, activation, and shutdown; remediation makes it the continuing per-call control plane | Contracts and Foundation only |
+| `RuneScribeUIRuntime` | Root-view type erasure, exactly-one contribution selection, boot and recovery presentation | Contracts and SwiftUI only |
 | `RuneScribePlatform` | Keychain, protected files, inbound reads, share artifacts, Contacts, clipboard, fonts, resources, clock, and UUID adapters | Contracts and narrowly required Apple frameworks |
 | `RuneScribeCoreModule` | Cipher/key domain, persistence, crypto/codecs, contacts, fonts, import/message state, sharing lifetime, PIN/lock policy, safe snapshots | Contracts, Runtime Core, CryptoKit/CommonCrypto |
 | `RuneScribeUIModule` | All screens, UI session, commands/navigation, accessibility, Metal, splash, QR, document/share surfaces, and MessageUI | Contracts, Runtime Core, UI Runtime, UI frameworks |
@@ -146,6 +144,6 @@ Test identifiers and phase evidence are retained in [`p7-test-matrix.json`](../v
 
 ## Extending the graph
 
-New service modules and a future replacement UI contribution must follow the procedure in [`ContractsAndCapabilities.md`](ContractsAndCapabilities.md). A service addition may coexist with Core when it has a unique role and an acyclic activation dependency. A new UI contribution may not activate beside the current UI; eligibility must still resolve to exactly one user-facing UI module. Extension work must not add any of the out-of-scope future product systems merely to exercise the architecture. The official Forsetti migration is separately gated by [`RoadmapAlignment.md`](RoadmapAlignment.md) and ADR-RS-001.
+New service modules and a future replacement UI contribution must follow the controlling policy and the procedure in [`ContractsAndCapabilities.md`](ContractsAndCapabilities.md). A service addition may coexist with Core when it has a unique module address, reusable policy class, and declared dependency. A new UI contribution may not activate beside the current UI; eligibility must still resolve to exactly one user-facing UI module. Extension work must not add out-of-scope product systems merely to exercise the architecture.
 
 Consequential migration decisions and compatibility anchors are recorded in [`MigrationDecisions.md`](MigrationDecisions.md).

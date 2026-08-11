@@ -6,6 +6,7 @@
 // one type scale, and one set of paddings — symmetrical and cohesive across
 // both macOS and iOS.
 
+import RuneScribeUIRuntime
 import SwiftUI
 
 // MARK: - Metrics
@@ -108,8 +109,6 @@ struct RuneHeaderButton: Identifiable {
 /// a legibility scrim, an optional top-right action, and a hairline gold rule along
 /// the bottom. Fixed height keeps all views vertically aligned.
 struct RuneHeader: View {
-    @Environment(\.runeScribeMetalLibraryURL) private var metalLibraryURL
-
     let runic: String
     let subtitle: String
     var height: CGFloat = RuneMetrics.headerHeight
@@ -117,7 +116,7 @@ struct RuneHeader: View {
 
     var body: some View {
         ZStack {
-            RuneMetalView(libraryURL: metalLibraryURL)
+            RuntimeMetalBackground()
 
             // Scrim: darkens the animated background so the wordmark stays legible.
             LinearGradient(

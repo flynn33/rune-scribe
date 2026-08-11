@@ -43,7 +43,7 @@ extension RuneScribeUISession {
         }
 
         let summary = try await perform {
-            try await requireApplicationService().createContact(
+            try await requireApplicationClient().createContact(
                 CreateContactCommand(
                     displayName: contact.displayName,
                     phoneNumbers: contact.phones,
@@ -57,7 +57,7 @@ extension RuneScribeUISession {
     @discardableResult
     func updateContact(_ contact: ContactViewState) async throws -> ContactViewState {
         let summary = try await perform {
-            try await requireApplicationService().updateContact(
+            try await requireApplicationClient().updateContact(
                 UpdateContactCommand(
                     contactID: ContactID(rawValue: contact.id),
                     displayName: contact.displayName,
@@ -79,7 +79,7 @@ extension RuneScribeUISession {
     func deleteContacts(ids: Set<UUID>) async throws {
         guard !ids.isEmpty else { return }
         try await perform {
-            try await requireApplicationService().deleteContacts(
+            try await requireApplicationClient().deleteContacts(
                 ids: Set(ids.map(ContactID.init(rawValue:)))
             )
         }
@@ -87,7 +87,7 @@ extension RuneScribeUISession {
 
     func deleteAllImportedContacts() async throws {
         try await perform {
-            try await requireApplicationService().deleteAllImportedContacts()
+            try await requireApplicationClient().deleteAllImportedContacts()
         }
     }
 
@@ -105,7 +105,7 @@ extension RuneScribeUISession {
             )
         }
         let summaries = try await perform {
-            try await requireApplicationService().importContacts(
+            try await requireApplicationClient().importContacts(
                 ImportContactsCommand(contacts: inputs)
             )
         }
@@ -120,7 +120,7 @@ extension RuneScribeUISession {
 
     func fetchSystemContacts() async throws -> [ContactViewState] {
         let contacts = try await perform {
-            try await requireApplicationService().requestSystemContacts()
+            try await requireApplicationClient().requestSystemContacts()
         }
         return contacts.map(ContactViewState.init(systemContact:))
     }

@@ -3,7 +3,70 @@ import Foundation
 import RuneScribeContracts
 import Synchronization
 @testable import RuneScribeCoreModule
+@testable import RuneScribeRuntimeCore
 import XCTest
+
+extension RuneScribeCoreApplicationService {
+    init(
+        secureValueStore: any SecureValueStore,
+        clock: any ClockProviding,
+        uuid: any UUIDProviding
+    ) {
+        let runtimeIO = RuntimeIOClient(
+            secureValueData: {
+                try await secureValueStore.data(service: $0, account: $1)
+            },
+            setSecureValue: {
+                try await secureValueStore.set($0, service: $1, account: $2)
+            },
+            deleteSecureValue: {
+                try await secureValueStore.delete(service: $0, account: $1)
+            },
+            now: { clock.now() },
+            nextUUID: { uuid.nextUUID() },
+            readInboundFile: { _ in
+                throw InboundFileReaderError.unavailable
+            }
+        )
+        self.init(
+            runtimeIO: runtimeIO,
+            fontCatalog: nil,
+            contactManager: nil
+        )
+    }
+
+    init(
+        secureValueStore _: any SecureValueStore,
+        runtimeIO: RuntimeIOClient,
+        clock: any ClockProviding,
+        uuid: any UUIDProviding
+    ) {
+        self.init(
+            runtimeIO: runtimeIO,
+            fontCatalog: nil,
+            contactManager: nil
+        )
+    }
+
+    init(
+        secureValueStore _: any SecureValueStore,
+        protectedFileStore _: any ProtectedFileStore,
+        runtimeIO: RuntimeIOClient,
+        clock: any ClockProviding,
+        uuid: any UUIDProviding
+    ) {
+        let fontCatalog = FontCatalog(runtimeIO: runtimeIO)
+        let contactManager = ContactManager(
+            repository: EncryptedContactRepository(runtimeIO: runtimeIO),
+            runtimeIO: runtimeIO
+        )
+        self.init(
+            runtimeIO: runtimeIO,
+            fontCatalog: fontCatalog,
+            contactManager: contactManager
+        )
+    }
+}
 
 final class P4BApplicationServiceTests: XCTestCase {
     func testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup() async throws {
@@ -11,7 +74,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         let artifacts = P4BShareStore()
         let service = RuneScribeCoreApplicationService(
             secureValueStore: secure,
-            shareArtifactStore: artifacts,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
             clock: P4BClock(),
             uuid: P4BUUIDs()
         )
@@ -34,9 +97,7 @@ final class P4BApplicationServiceTests: XCTestCase {
                 cipherID: cipher.id
             )
         )
-        guard case .file = cancelled.reference else {
-            return XCTFail("First delivery must be a scoped file")
-        }
+        XCTAssertEqual(cancelled.reference, .file(cancelled.id))
         XCTAssertTrue(cancelled.requiresKeyDelivery)
         let firstData = await artifacts.createdData(id: cancelled.id)
         let firstBytes = try XCTUnwrap(firstData)
@@ -101,9 +162,10 @@ final class P4BApplicationServiceTests: XCTestCase {
 
     func testUnlinkedMessageNeverRequiresKeyDeliveryOrRecordsDelivery() async throws {
         let artifacts = P4BShareStore()
+        let secure = P4BSecureStore()
         let service = RuneScribeCoreApplicationService(
-            secureValueStore: P4BSecureStore(),
-            shareArtifactStore: artifacts,
+            secureValueStore: secure,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
             clock: P4BClock(),
             uuid: P4BUUIDs()
         )
@@ -214,9 +276,10 @@ final class P4BApplicationServiceTests: XCTestCase {
 
     func testRejectedRequiredAttachmentNeverRecordsDelivery() async throws {
         let artifacts = P4BShareStore()
+        let secure = P4BSecureStore()
         let service = RuneScribeCoreApplicationService(
-            secureValueStore: P4BSecureStore(),
-            shareArtifactStore: artifacts,
+            secureValueStore: secure,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
             clock: P4BClock(),
             uuid: P4BUUIDs()
         )
@@ -254,9 +317,10 @@ final class P4BApplicationServiceTests: XCTestCase {
 
     func testCipherLinkAndQRRemainWireCompatibleAndEphemeral() async throws {
         let artifacts = P4BShareStore()
+        let secure = P4BSecureStore()
         let service = RuneScribeCoreApplicationService(
-            secureValueStore: P4BSecureStore(),
-            shareArtifactStore: artifacts,
+            secureValueStore: secure,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
             clock: P4BClock(),
             uuid: P4BUUIDs()
         )
@@ -292,7 +356,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         let artifacts = P4BShareStore()
         let service = RuneScribeCoreApplicationService(
             secureValueStore: secure,
-            shareArtifactStore: artifacts,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
             clock: P4BClock(),
             uuid: P4BUUIDs()
         )
@@ -310,16 +374,14 @@ final class P4BApplicationServiceTests: XCTestCase {
         let started = try await service.prepareCipherShare(
             PrepareCipherShareCommand(cipherID: cipher.id, representation: .file)
         )
-        guard case .file = started.reference else {
-            return XCTFail("A successful start must enable scoped sharing")
-        }
+        XCTAssertEqual(started.reference, .file(started.id))
 
         let failingSecure = P4BSecureStore()
         await failingSecure.failReads()
         let failedArtifacts = P4BShareStore()
         let failedService = RuneScribeCoreApplicationService(
             secureValueStore: failingSecure,
-            shareArtifactStore: failedArtifacts,
+            runtimeIO: shareRuntimeIO(failedArtifacts, secure: failingSecure),
             clock: P4BClock(),
             uuid: P4BUUIDs()
         )
@@ -339,9 +401,10 @@ final class P4BApplicationServiceTests: XCTestCase {
 
     func testFailedStopCleanupRetainsLeasesAndStartRetriesBeforeSharing() async throws {
         let artifacts = P4BShareStore()
+        let secure = P4BSecureStore()
         let service = RuneScribeCoreApplicationService(
-            secureValueStore: P4BSecureStore(),
-            shareArtifactStore: artifacts,
+            secureValueStore: secure,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
             clock: P4BClock(),
             uuid: P4BUUIDs()
         )
@@ -373,9 +436,10 @@ final class P4BApplicationServiceTests: XCTestCase {
 
     func testLockRevokesShareCreatedAcrossSuspension() async throws {
         let artifacts = P4BShareStore()
+        let secure = P4BSecureStore()
         let service = RuneScribeCoreApplicationService(
-            secureValueStore: P4BSecureStore(),
-            shareArtifactStore: artifacts,
+            secureValueStore: secure,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
             clock: P4BClock(),
             uuid: P4BUUIDs()
         )
@@ -414,9 +478,10 @@ final class P4BApplicationServiceTests: XCTestCase {
 
     func testFailedRevocationIsObservableAndRetriedByLifecycleCleanup() async throws {
         let artifacts = P4BShareStore()
+        let secure = P4BSecureStore()
         let service = RuneScribeCoreApplicationService(
-            secureValueStore: P4BSecureStore(),
-            shareArtifactStore: artifacts,
+            secureValueStore: secure,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
             clock: P4BClock(),
             uuid: P4BUUIDs()
         )
@@ -452,9 +517,10 @@ final class P4BApplicationServiceTests: XCTestCase {
 
     func testStopSerializesWithSuspendedShareAndLeavesNoLease() async throws {
         let artifacts = P4BShareStore()
+        let secure = P4BSecureStore()
         let service = RuneScribeCoreApplicationService(
-            secureValueStore: P4BSecureStore(),
-            shareArtifactStore: artifacts,
+            secureValueStore: secure,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
             clock: P4BClock(),
             uuid: P4BUUIDs()
         )
@@ -581,7 +647,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(imported.name, "Confirmed Legacy")
         XCTAssertNil(confirmedSnapshot.importState.pending)
         let validations = await registrar.inspectedFontData()
-        XCTAssertEqual(validations, [bundledFontBytes, bundledFontBytes])
+        XCTAssertEqual(validations, [bundledFontBytes])
         let registrations = await registrar.registeredFontData()
         XCTAssertEqual(registrations, [bundledFontBytes])
         await service.stopInboundProcessing()
@@ -665,7 +731,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(represented.importState.pending?.suggestedName, "Imported Cipher")
     }
 
-    func testIdenticalBytesAtDifferentPathsDoNotHideInPausedQueue() async throws {
+    func testIdenticalFilePayloadIsDeduplicatedWhilePresentationIsPending() async throws {
         let service = fullService(
             secure: P4BSecureStore(),
             protected: P4BProtectedStore()
@@ -684,7 +750,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         let firstSnapshot = try await currentSnapshot(from: service)
         let pending = try XCTUnwrap(firstSnapshot.importState.pending)
         let secondSubmission = try await service.receive(.file(inboundFile(secondURL)))
-        XCTAssertEqual(secondSubmission, .accepted)
+        XCTAssertEqual(secondSubmission, .duplicate)
 
         await service.cancelImport(id: pending.id)
         let afterCancel = try await currentSnapshot(from: service)
@@ -1039,7 +1105,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(deniedSnapshot.contactLibrary.authorization, .denied)
     }
 
-    func testColdQueuedMenuCommandsReachFirstUISubscriberInOrder() async throws {
+    func testColdQueuedMenuCommandsRemainAcceptedForRuntimeRouteRail() async throws {
         let service = fullService(
             secure: P4BSecureStore(),
             protected: P4BProtectedStore()
@@ -1072,12 +1138,8 @@ final class P4BApplicationServiceTests: XCTestCase {
         }
 
         await service.startInboundProcessing()
-        var iterator = service.menuCommandStream().makeAsyncIterator()
-        let first = await iterator.next()
-        let second = await iterator.next()
-
-        XCTAssertEqual(first, .openSettings)
-        XCTAssertEqual(second, .openCipherLibrary)
+        let snapshot = try await currentSnapshot(from: service)
+        XCTAssertNil(snapshot.lastFailure)
     }
 
     func testManualContactCreationDoesNotGenerateOrLinkCipher() async throws {
@@ -1576,25 +1638,24 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(recovered.messageState.pendingMessage?.plaintext, "retry succeeds")
     }
 
-    func testUnreadableAndUnknownFilesPublishSafeFailureAndDoNotBlockValidRetry() async throws {
+    func testCorruptAndUnknownFilePayloadsPublishSafeFailureAndAllowRetry() async throws {
         let service = fullService(
             secure: P4BSecureStore(),
             protected: P4BProtectedStore()
         )
         await service.startInboundProcessing()
 
-        let missingURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-            .appendingPathExtension(RuneScribeWireFormat.fileExtension)
+        let emptyURL = try temporaryFile(containing: Data())
+        defer { try? FileManager.default.removeItem(at: emptyURL) }
         do {
-            _ = try await service.importFile(inboundFile(missingURL))
-            XCTFail("An unreadable file must fail")
+            _ = try await service.importFile(inboundFile(emptyURL))
+            XCTFail("An empty normalized file payload must fail")
         } catch {}
-        let unreadable = try await currentSnapshot(from: service)
-        XCTAssertEqual(unreadable.importState.phase, .failed)
+        let corrupted = try await currentSnapshot(from: service)
+        XCTAssertEqual(corrupted.importState.phase, .failed)
         XCTAssertEqual(
-            unreadable.importState.lastFailure?.code,
-            .protectedFileUnavailable
+            corrupted.importState.lastFailure?.code,
+            .corruptedContent
         )
 
         let unknownURL = try temporaryFile(containing: Data([0x7f, 0x01, 0x02]))
@@ -1942,14 +2003,128 @@ final class P4BApplicationServiceTests: XCTestCase {
                 source: .fileImporter,
                 isColdStart: false
             ),
-            fileURL: URL(fileURLWithPath: "/tmp/inbound.runescribe"),
-            declaredContentType: String(repeating: "x", count: 257),
-            requiresSecurityScopedAccess: false
+            data: Data(),
+            declaredContentType: String(repeating: "x", count: 257)
         )
         let disposition = try await service.receive(.file(file))
         XCTAssertEqual(disposition, .rejected)
         let snapshot = try await currentSnapshot(from: service)
         XCTAssertEqual(snapshot.lastFailure?.code, .invalidInput)
+    }
+
+    func testSnapshotCapturedAtUsesRuntimeIOClock() async throws {
+        let expectedDate = Date(timeIntervalSince1970: 1_760_000_001)
+        let secure = P4BSecureStore()
+        let service = RuneScribeCoreApplicationService(
+            runtimeIO: timestampRuntimeIO(
+                secure: secure,
+                now: { expectedDate }
+            ),
+            fontCatalog: nil,
+            contactManager: nil
+        )
+        var iterator = service.stateStream().makeAsyncIterator()
+
+        let loadingValue = await iterator.next()
+        let loading = try XCTUnwrap(loadingValue)
+        let readyValue = await iterator.next()
+        let ready = try XCTUnwrap(readyValue)
+        _ = try await service.createCipher(CreateCipherCommand(name: "Timestamped"))
+        let mutationValue = await iterator.next()
+        let mutation = try XCTUnwrap(mutationValue)
+
+        XCTAssertEqual(loading.capturedAt, expectedDate)
+        XCTAssertEqual(ready.capturedAt, expectedDate)
+        XCTAssertEqual(mutation.capturedAt, expectedDate)
+        XCTAssertEqual(mutation.revision, ready.revision + 1)
+    }
+
+    func testSnapshotCapturedAtFallsBackWhenRuntimeIOClockFails() async throws {
+        let secure = P4BSecureStore()
+        let service = RuneScribeCoreApplicationService(
+            runtimeIO: timestampRuntimeIO(
+                secure: secure,
+                now: { throw P4BInjectedFailure() }
+            ),
+            fontCatalog: nil,
+            contactManager: nil
+        )
+        var iterator = service.stateStream().makeAsyncIterator()
+
+        let loadingValue = await iterator.next()
+        let loading = try XCTUnwrap(loadingValue)
+        let failedValue = await iterator.next()
+        let failed = try XCTUnwrap(failedValue)
+
+        XCTAssertEqual(loading.capturedAt, .distantPast)
+        XCTAssertEqual(failed.capturedAt, .distantPast)
+        XCTAssertFalse(failed.cipherLibrary.isLoading)
+        XCTAssertNotNil(failed.lastFailure)
+    }
+
+    func testSnapshotTimestampSuspensionPrecedesMutationAndPreservesRevision() async throws {
+        let normalDate = Date(timeIntervalSince1970: 1_760_000_002)
+        let delayedDate = Date(timeIntervalSince1970: 1_760_000_003)
+        let barrier = P4BSnapshotTimestampBarrier(
+            normalDate: normalDate,
+            delayedDate: delayedDate
+        )
+        let secure = P4BSecureStore()
+        let service = RuneScribeCoreApplicationService(
+            runtimeIO: timestampRuntimeIO(
+                secure: secure,
+                now: { await barrier.now() }
+            ),
+            fontCatalog: nil,
+            contactManager: nil
+        )
+        var iterator = service.stateStream().makeAsyncIterator()
+        let loadingValue = await iterator.next()
+        _ = try XCTUnwrap(loadingValue)
+        let readyValue = await iterator.next()
+        let ready = try XCTUnwrap(readyValue)
+
+        await barrier.pauseNextCall()
+        let invalidFile = InboundFileDTO(
+            metadata: InboundInputMetadataDTO(
+                id: InboundInputID(rawValue: UUID()),
+                receivedAt: normalDate,
+                source: .fileImporter,
+                isColdStart: false
+            ),
+            data: Data(),
+            declaredContentType: String(repeating: "x", count: 257)
+        )
+        let rejection = Task {
+            try await service.receive(.file(invalidFile))
+        }
+        await barrier.waitUntilPaused()
+
+        let created = try await service.createCipher(
+            CreateCipherCommand(name: "Timestamp Interleave")
+        )
+        let interveningMutationValue = await iterator.next()
+        let interveningMutation = try XCTUnwrap(interveningMutationValue)
+        let whilePaused = try await currentSnapshot(from: service)
+
+        XCTAssertEqual(interveningMutation.revision, ready.revision + 1)
+        XCTAssertEqual(interveningMutation.capturedAt, normalDate)
+        XCTAssertNil(interveningMutation.lastFailure)
+        XCTAssertTrue(interveningMutation.cipherLibrary.ciphers.contains { $0.id == created.id })
+        XCTAssertEqual(whilePaused.revision, interveningMutation.revision)
+        XCTAssertNil(whilePaused.lastFailure)
+        XCTAssertTrue(whilePaused.cipherLibrary.ciphers.contains { $0.id == created.id })
+
+        await barrier.resume()
+        let disposition = try await rejection.value
+        let rejectedValue = await iterator.next()
+        let rejected = try XCTUnwrap(rejectedValue)
+
+        XCTAssertEqual(disposition, .rejected)
+        XCTAssertEqual(rejected.revision, interveningMutation.revision + 1)
+        XCTAssertEqual(rejected.capturedAt, delayedDate)
+        XCTAssertEqual(rejected.lastFailure?.code, .invalidInput)
+        XCTAssertTrue(rejected.cipherLibrary.ciphers.contains { $0.id == created.id })
     }
 
     private func summary(
@@ -1968,6 +2143,25 @@ final class P4BApplicationServiceTests: XCTestCase {
         return try XCTUnwrap(value)
     }
 
+    private func timestampRuntimeIO(
+        secure: any SecureValueStore,
+        now: @escaping @Sendable () async throws -> Date
+    ) -> RuntimeIOClient {
+        RuntimeIOClient(
+            secureValueData: {
+                try await secure.data(service: $0, account: $1)
+            },
+            setSecureValue: {
+                try await secure.set($0, service: $1, account: $2)
+            },
+            deleteSecureValue: {
+                try await secure.delete(service: $0, account: $1)
+            },
+            now: now,
+            nextUUID: { UUID() }
+        )
+    }
+
     private func fullService(
         secure: any SecureValueStore,
         protected: P4BProtectedStore,
@@ -1981,14 +2175,148 @@ final class P4BApplicationServiceTests: XCTestCase {
         RuneScribeCoreApplicationService(
             secureValueStore: secure,
             protectedFileStore: protected,
-            inboundFileReader: P4BInboundFileReader(),
-            shareArtifactStore: artifacts,
-            applicationResourceLocator: resources,
-            systemFontRegistrar: registrar,
-            contactAccess: contactAccess,
-            clipboardReading: clipboard,
+            runtimeIO: RuntimeIOClient(
+                secureValueData: {
+                    try await secure.data(service: $0, account: $1)
+                },
+                setSecureValue: {
+                    try await secure.set($0, service: $1, account: $2)
+                },
+                deleteSecureValue: {
+                    try await secure.delete(service: $0, account: $1)
+                },
+                readProtectedFile: {
+                    try await protected.read(relativePath: $0)
+                },
+                writeProtectedFile: {
+                    try await protected.write($0, relativePath: $1)
+                },
+                removeProtectedFile: {
+                    try await protected.remove(relativePath: $0)
+                },
+                protectedFileExists: {
+                    try await protected.exists(relativePath: $0)
+                },
+                protectedFileContents: {
+                    try await protected.contents(
+                        of: $0,
+                        matchingExtension: $1
+                    )
+                },
+                now: {
+                    clock.now()
+                },
+                nextUUID: {
+                    UUID()
+                },
+                clipboardSnapshot: {
+                    RuntimeClipboardSnapshot(
+                        changeCount: await clipboard.changeCount(),
+                        string: await clipboard.string()
+                    )
+                },
+                contactAuthorizationStatus: {
+                    await contactAccess.authorizationStatus()
+                },
+                requestContactAccess: {
+                    try await contactAccess.requestAccess()
+                },
+                fetchSystemContacts: {
+                    try await contactAccess.fetchContacts()
+                },
+                readInboundFile: {
+                    try await P4BInboundFileReader().read(
+                        $0.fileURL,
+                        requiresSecurityScope: $0.requiresSecurityScopedAccess,
+                        maximumByteCount: $0.maximumByteCount
+                    )
+                },
+                registerBundledSystemFont: {
+                    let data = try await resources.data(for: $0)
+                    guard Data(SHA256.hash(data: data)) == $1 else {
+                        throw RuntimeBundledFontFailure.integrityMismatch
+                    }
+                    let postScriptName = try await registrar.postScriptName(
+                        forFontData: data
+                    )
+                    guard !postScriptName.isEmpty else {
+                        throw RuntimeBundledFontFailure.unreadableFont
+                    }
+                    return try await registrar.registerFont(data)
+                },
+                systemFontPostScriptName: {
+                    try await registrar.postScriptName(forFontData: $0)
+                },
+                registerSystemFont: {
+                    try await registrar.registerFont($0)
+                },
+                createShareArtifact: {
+                    try await artifacts.create(
+                        $0,
+                        artifactID: $1,
+                        filename: $2,
+                        fileExtension: $3
+                    )
+                },
+                storeShareArtifactLink: {
+                    try await artifacts.storeLink($0, artifactID: $1)
+                },
+                removeShareArtifactLink: {
+                    try await artifacts.removeLink(artifactID: $0)
+                },
+                removeShareArtifact: {
+                    try await artifacts.remove(artifactID: $0)
+                },
+                removeAllShareArtifacts: {
+                    try await artifacts.removeAll()
+                }
+            ),
             clock: clock,
             uuid: P4BUUIDs()
+        )
+    }
+
+    private func shareRuntimeIO(
+        _ artifacts: any ShareArtifactStore,
+        secure: any SecureValueStore,
+        clock: any ClockProviding = P4BClock()
+    ) -> RuntimeIOClient {
+        RuntimeIOClient(
+            secureValueData: {
+                try await secure.data(service: $0, account: $1)
+            },
+            setSecureValue: {
+                try await secure.set($0, service: $1, account: $2)
+            },
+            deleteSecureValue: {
+                try await secure.delete(service: $0, account: $1)
+            },
+            now: {
+                clock.now()
+            },
+            nextUUID: {
+                UUID()
+            },
+            createShareArtifact: {
+                try await artifacts.create(
+                    $0,
+                    artifactID: $1,
+                    filename: $2,
+                    fileExtension: $3
+                )
+            },
+            storeShareArtifactLink: {
+                try await artifacts.storeLink($0, artifactID: $1)
+            },
+            removeShareArtifactLink: {
+                try await artifacts.removeLink(artifactID: $0)
+            },
+            removeShareArtifact: {
+                try await artifacts.remove(artifactID: $0)
+            },
+            removeAllShareArtifacts: {
+                try await artifacts.removeAll()
+            }
         )
     }
 
@@ -2044,8 +2372,8 @@ final class P4BApplicationServiceTests: XCTestCase {
                 source: .fileImporter,
                 isColdStart: false
             ),
-            fileURL: url,
-            requiresSecurityScopedAccess: false
+            data: (try? Data(contentsOf: url)) ?? Data(),
+            declaredContentType: RuneScribeWireFormat.contentType
         )
     }
 
@@ -2139,6 +2467,46 @@ private final class P4BMutableClock: ClockProviding, Sendable {
 
     func set(_ date: Date) {
         self.date.withLock { $0 = date }
+    }
+}
+
+private actor P4BSnapshotTimestampBarrier {
+    private let normalDate: Date
+    private let delayedDate: Date
+    private var shouldPauseNextCall = false
+    private var isPaused = false
+    private var pauseWaiters: [CheckedContinuation<Void, Never>] = []
+    private var resumeContinuation: CheckedContinuation<Void, Never>?
+
+    init(normalDate: Date, delayedDate: Date) {
+        self.normalDate = normalDate
+        self.delayedDate = delayedDate
+    }
+
+    func pauseNextCall() {
+        shouldPauseNextCall = true
+    }
+
+    func waitUntilPaused() async {
+        if isPaused { return }
+        await withCheckedContinuation { pauseWaiters.append($0) }
+    }
+
+    func resume() {
+        resumeContinuation?.resume()
+        resumeContinuation = nil
+    }
+
+    func now() async -> Date {
+        guard shouldPauseNextCall else { return normalDate }
+        shouldPauseNextCall = false
+        isPaused = true
+        let waiters = pauseWaiters
+        pauseWaiters.removeAll()
+        for waiter in waiters { waiter.resume() }
+        await withCheckedContinuation { resumeContinuation = $0 }
+        isPaused = false
+        return delayedDate
     }
 }
 
@@ -2478,7 +2846,7 @@ private struct P4BContactAccess: ContactAccessService {
     func fetchContacts() async throws -> [SystemContactDTO] { contacts }
 }
 
-private actor P4BClipboard: ClipboardReading {
+private actor P4BClipboard {
     private var currentChangeCount = 0
     private var currentString: String?
 
@@ -2566,7 +2934,7 @@ private actor P4BShareStore: ShareArtifactStore {
         artifactID: ShareArtifactID,
         filename: String,
         fileExtension: String
-    ) async throws -> ScopedShareFile {
+    ) async throws {
         if pauseNextCreation {
             pauseNextCreation = false
             creationIsPaused = true
@@ -2576,19 +2944,15 @@ private actor P4BShareStore: ShareArtifactStore {
             await withCheckedContinuation { creationResumeContinuation = $0 }
         }
         dataByID[artifactID] = data
-        return ScopedShareFile(
-            artifactID: artifactID,
-            fileURL: URL(fileURLWithPath: "/scoped/\(artifactID.rawValue.uuidString)/\(filename).\(fileExtension)")
-        )
     }
 
-    func remove(_ file: ScopedShareFile) async throws {
+    func remove(artifactID: ShareArtifactID) async throws {
         if removeFailuresRemaining > 0 {
             removeFailuresRemaining -= 1
             throw P4BInjectedFailure()
         }
-        dataByID.removeValue(forKey: file.artifactID)
-        removed.insert(file.artifactID)
+        dataByID.removeValue(forKey: artifactID)
+        removed.insert(artifactID)
     }
 
     func storeLink(_ url: URL, artifactID: ShareArtifactID) async throws {

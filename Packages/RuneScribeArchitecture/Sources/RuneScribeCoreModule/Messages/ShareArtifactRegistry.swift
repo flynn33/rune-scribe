@@ -1,41 +1,15 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 
 enum ShareArtifactRegistryError: Error, Equatable, Sendable {
     case artifactNotFound
     case storageUnavailable
 }
 
-struct UnavailableShareArtifactStore: ShareArtifactStore {
-    func create(
-        _ data: Data,
-        artifactID: ShareArtifactID,
-        filename: String,
-        fileExtension: String
-    ) async throws -> ScopedShareFile {
-        throw ShareArtifactRegistryError.storageUnavailable
-    }
-
-    func remove(_ file: ScopedShareFile) async throws {
-        throw ShareArtifactRegistryError.storageUnavailable
-    }
-
-    func storeLink(_ url: URL, artifactID: ShareArtifactID) async throws {
-        throw ShareArtifactRegistryError.storageUnavailable
-    }
-
-    func removeLink(artifactID: ShareArtifactID) async throws {
-        throw ShareArtifactRegistryError.storageUnavailable
-    }
-
-    func removeAll() async throws {
-        throw ShareArtifactRegistryError.storageUnavailable
-    }
-}
-
 struct CoreShareArtifact: Sendable {
     let dto: ShareArtifactDTO
-    let scopedFile: ScopedShareFile?
+    let hasStoredFile: Bool
     let hasStoredLink: Bool
     let messageCipherID: UUID?
 }
@@ -43,11 +17,11 @@ struct CoreShareArtifact: Sendable {
 /// Owns the lifetime of every outbound share lease. Key-bearing data is passed
 /// directly to the scoped Platform store and is never cached by this registry.
 actor ShareArtifactRegistry {
-    private let store: any ShareArtifactStore
+    private let runtimeIO: RuntimeIOClient
     private var artifacts: [ShareArtifactID: CoreShareArtifact] = [:]
 
-    init(store: any ShareArtifactStore) {
-        self.store = store
+    init(runtimeIO: RuntimeIOClient) {
+        self.runtimeIO = runtimeIO
     }
 
     func createFile(
@@ -60,9 +34,8 @@ actor ShareArtifactRegistry {
         requiresKeyDelivery: Bool,
         messageCipherID: UUID?
     ) async throws -> ShareArtifactDTO {
-        let scopedFile: ScopedShareFile
         do {
-            scopedFile = try await store.create(
+            try await runtimeIO.createShareArtifact(
                 data,
                 artifactID: id,
                 filename: filename,
@@ -74,7 +47,7 @@ actor ShareArtifactRegistry {
 
         let dto = ShareArtifactDTO(
             id: id,
-            reference: .file(scopedFile.fileURL),
+            reference: .file(id),
             displayName: displayName,
             contentType: contentType,
             fileExtension: fileExtension,
@@ -83,7 +56,7 @@ actor ShareArtifactRegistry {
         )
         artifacts[id] = CoreShareArtifact(
             dto: dto,
-            scopedFile: scopedFile,
+            hasStoredFile: true,
             hasStoredLink: false,
             messageCipherID: messageCipherID
         )
@@ -96,7 +69,7 @@ actor ShareArtifactRegistry {
         displayName: String
     ) async throws -> ShareArtifactDTO {
         do {
-            try await store.storeLink(url, artifactID: id)
+            try await runtimeIO.storeShareArtifactLink(url, artifactID: id)
         } catch {
             throw ShareArtifactRegistryError.storageUnavailable
         }
@@ -111,7 +84,7 @@ actor ShareArtifactRegistry {
         )
         artifacts[id] = CoreShareArtifact(
             dto: dto,
-            scopedFile: nil,
+            hasStoredFile: false,
             hasStoredLink: true,
             messageCipherID: nil
         )
@@ -133,7 +106,7 @@ actor ShareArtifactRegistry {
         )
         artifacts[id] = CoreShareArtifact(
             dto: dto,
-            scopedFile: nil,
+            hasStoredFile: false,
             hasStoredLink: false,
             messageCipherID: cipherID
         )
@@ -149,15 +122,15 @@ actor ShareArtifactRegistry {
 
     func release(id: ShareArtifactID) async throws {
         guard let artifact = artifacts[id] else { return }
-        if let scopedFile = artifact.scopedFile {
+        if artifact.hasStoredFile {
             do {
-                try await store.remove(scopedFile)
+                try await runtimeIO.removeShareArtifact(artifactID: id)
             } catch {
                 throw ShareArtifactRegistryError.storageUnavailable
             }
         } else if artifact.hasStoredLink {
             do {
-                try await store.removeLink(artifactID: id)
+                try await runtimeIO.removeShareArtifactLink(artifactID: id)
             } catch {
                 throw ShareArtifactRegistryError.storageUnavailable
             }
@@ -167,7 +140,7 @@ actor ShareArtifactRegistry {
 
     func releaseAll() async throws {
         do {
-            try await store.removeAll()
+            try await runtimeIO.removeAllShareArtifacts()
             artifacts.removeAll()
         } catch {
             // Keep leases addressable so callers can retry explicit cleanup.

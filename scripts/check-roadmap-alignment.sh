@@ -20,19 +20,29 @@ root = Pathname(ARGV.fetch(0)).realpath
 alignment_path = Pathname(ARGV.fetch(1)).expand_path
 
 EXPECTED_TOP_LEVEL_KEYS = %w[
-  schemaVersion asOfDate authority forsettiGate statusVocabulary taskCount taskGroups
+  schemaVersion asOfDate authority sourcePriority forsettiPolicy statusVocabulary taskCount taskGroups
 ].freeze
 EXPECTED_AUTHORITY_KEYS = %w[
   systemSpec implementationRoadmap repositoryAuditBaseline
 ].freeze
-EXPECTED_GATE_KEYS = %w[
-  status repositoryURL auditedRevision reportedSourceVersion releasedTag blockers migrationPolicy
+EXPECTED_FORSETTI_POLICY_KEYS = %w[
+  status implementationOwnership externalDependencyAllowed perCallRuntimeMediationRequired
+  runtimeOwnsOperationalIO runtimeOwnsPersistentSettings uiModuleOwnsViews controllingPolicy
 ].freeze
 EXPECTED_GROUP_KEYS = %w[prefix wave dependsOn items].freeze
 EXPECTED_ITEM_KEYS = %w[id status dependsOn evidence notes].freeze
 EXPECTED_STATUSES = %w[
-  satisfied transitional partial decision-frozen blocked-upstream blocked-device
+  satisfied transitional partial decision-frozen superseded blocked-device
   not-started not-applicable
+].freeze
+EXPECTED_SOURCE_PRIORITY = [
+  "active operator instructions",
+  "active implementation package and machine-readable controls",
+  "actual local repository behavior and compatibility identifiers",
+  "Forsetti Compliance Audit v2.0 factual findings",
+  "locked product decisions not superseded by later operator clarification",
+  "third-party audit nonconflicting facts only",
+  "general conventions"
 ].freeze
 EXPECTED_GROUPS = {
   "BAS" => ["0A", 10],
@@ -54,13 +64,18 @@ EXPECTED_DOCUMENTS = {
     "sha256" => "884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4"
   }
 }.freeze
-EXPECTED_FORSETTI_GATE = {
-  "status" => "blocked-upstream",
-  "repositoryURL" => "https://github.com/flynn33/Forsetti-Framework-Mac-iOS",
-  "auditedRevision" => "f0199a4f2f0becd1372dbfd5db714e85619c88bc",
-  "reportedSourceVersion" => "0.1.5",
-  "releasedTag" => nil,
-  "migrationPolicy" => "no-private-fork"
+EXPECTED_FORSETTI_POLICY = {
+  "status" => "active",
+  "implementationOwnership" => "app-owned",
+  "externalDependencyAllowed" => false,
+  "perCallRuntimeMediationRequired" => true,
+  "runtimeOwnsOperationalIO" => true,
+  "runtimeOwnsPersistentSettings" => true,
+  "uiModuleOwnsViews" => true
+}.freeze
+EXPECTED_CONTROLLING_POLICY = {
+  "path" => "docs/architecture/FORSETTI_CONTROLLING_POLICY.md",
+  "sha256" => "8392d9ad457ccb2afbf9e872d591ec887d383f4b8617236179d624d2f792fb53"
 }.freeze
 EXPECTED_ADRS = %w[
   ADR-RS-001-module-packaging-and-target-graph.md
@@ -134,7 +149,7 @@ def validate(document, root)
   return ["roadmap alignment root must be an object"] unless document.is_a?(Hash)
 
   exact_keys(document, EXPECTED_TOP_LEVEL_KEYS, "roadmap alignment", errors)
-  errors << "schemaVersion must be 1.0" unless document["schemaVersion"] == "1.0"
+  errors << "schemaVersion must be 1.1" unless document["schemaVersion"] == "1.1"
   begin
     Date.iso8601(document["asOfDate"])
   rescue ArgumentError, TypeError
@@ -162,12 +177,33 @@ def validate(document, root)
     errors << "authority.repositoryAuditBaseline must be a full Git revision" unless baseline.to_s.match?(/\A[0-9a-f]{40}\z/)
   end
 
-  gate = document["forsettiGate"]
-  if exact_keys(gate, EXPECTED_GATE_KEYS, "forsettiGate", errors)
-    EXPECTED_FORSETTI_GATE.each do |field, expected|
-      errors << "forsettiGate.#{field} must be #{expected.inspect}" unless gate[field] == expected
+  unless document["sourcePriority"] == EXPECTED_SOURCE_PRIORITY
+    errors << "FG-020: sourcePriority must retain the exact controlling authority order"
+  end
+
+  forsetti_policy = document["forsettiPolicy"]
+  if exact_keys(forsetti_policy, EXPECTED_FORSETTI_POLICY_KEYS, "forsettiPolicy", errors)
+    EXPECTED_FORSETTI_POLICY.each do |field, expected|
+      rule_id = field == "externalDependencyAllowed" ? "FG-001" : "FG-020"
+      unless forsetti_policy[field] == expected
+        errors << "#{rule_id}: forsettiPolicy.#{field} must be #{expected.inspect}"
+      end
     end
-    errors << "forsettiGate.blockers must be non-empty unique strings" unless nonempty_unique_strings(gate["blockers"])
+
+    policy_record = forsetti_policy["controllingPolicy"]
+    exact_keys(policy_record, %w[path sha256], "forsettiPolicy.controllingPolicy", errors)
+    unless policy_record == EXPECTED_CONTROLLING_POLICY
+      errors << "FG-020: forsettiPolicy.controllingPolicy must retain the canonical path and SHA-256"
+    end
+
+    if policy_record.is_a?(Hash)
+      policy_path = root.join(policy_record["path"].to_s)
+      if !policy_path.file?
+        errors << "FG-020: controlling policy file is missing: #{policy_record['path']}"
+      elsif Digest::SHA256.file(policy_path).hexdigest != policy_record["sha256"]
+        errors << "FG-020: controlling policy content differs from its locked SHA-256"
+      end
+    end
   end
 
   vocabulary = document["statusVocabulary"]
@@ -217,8 +253,8 @@ def validate(document, root)
       errors << "#{item_label}.dependsOn must contain unique strings" unless optional_unique_strings(item["dependsOn"])
       errors << "#{item_label}.evidence must contain non-empty unique strings" unless nonempty_unique_strings(item["evidence"])
       errors << "#{item_label}.notes must be non-empty" unless item["notes"].is_a?(String) && !item["notes"].strip.empty?
-      if item["status"] == "blocked-upstream" && !Array(item["evidence"]).include?("#/forsettiGate")
-        errors << "#{item_label} blocked-upstream status must cite #/forsettiGate"
+      if prefix == "FOR" && item["status"] != "superseded"
+        errors << "#{item_label} must remain superseded"
       end
     end
   end
@@ -232,14 +268,19 @@ def validate(document, root)
     next unless group.is_a?(Hash)
     Array(group["dependsOn"]).each do |dependency|
       errors << "taskGroups[#{group_index}] has unknown dependency #{dependency}" unless permitted_dependencies.include?(dependency)
+      if group["prefix"] != "FOR" && dependency.to_s.start_with?("FOR-")
+        errors << "taskGroups[#{group_index}] active group may not depend on superseded #{dependency}"
+      end
     end
     Array(group["items"]).each do |item|
       next unless item.is_a?(Hash)
       Array(item["dependsOn"]).each do |dependency|
         errors << "task #{item['id']} has unknown dependency #{dependency}" unless permitted_dependencies.include?(dependency)
+        if group["prefix"] != "FOR" && dependency.to_s.start_with?("FOR-")
+          errors << "task #{item['id']} may not depend on superseded #{dependency}"
+        end
       end
       Array(item["evidence"]).each do |evidence|
-        next if evidence == "#/forsettiGate"
         begin
           path = Pathname(evidence)
           if path.absolute? || path.each_filename.any? { |component| component == ".." }
@@ -274,7 +315,13 @@ def validate(document, root)
     identifier = format("ADR-RS-%03d", index + 1)
     errors << "#{basename} must have the expected decision heading" unless text.lines.first.to_s.include?(identifier)
     status_line = text.lines.find { |line| line.match?(/\*\*Status:\*\*/i) }
-    expected_status = index < 10 ? /Accepted/i : /Blocked/i
+    expected_status = if index.zero?
+                        /Superseded/i
+                      elsif index < 10
+                        /Accepted/i
+                      else
+                        /Blocked/i
+                      end
     errors << "#{basename} must retain its recorded decision status" unless status_line&.match?(expected_status)
   end
 
@@ -299,31 +346,52 @@ end
 errors = validate(document, root)
 
 negative_cases = {
-  "duplicate task" => lambda do |copy|
-    copy["taskGroups"][0]["items"][1]["id"] = copy["taskGroups"][0]["items"][0]["id"]
-  end,
-  "upstream identity drift" => lambda do |copy|
-    copy["forsettiGate"]["repositoryURL"] = "https://example.invalid/framework"
-  end,
-  "authority hash drift" => lambda do |copy|
-    copy["authority"]["systemSpec"]["sha256"] = "0" * 64
-  end,
-  "authorship credit" => lambda do |copy|
-    credit = %w[generated with].join(" ")
-    tool = %w[chat gpt].join
-    phrase = [credit, tool].join(" ")
-    copy["taskGroups"][0]["items"][0]["notes"] = phrase
-  end
+  "duplicate task" => {
+    "expected" => "task IDs must be unique",
+    "mutation" => lambda do |copy|
+      copy["taskGroups"][0]["items"][1]["id"] = copy["taskGroups"][0]["items"][0]["id"]
+    end
+  },
+  "external dependency permission" => {
+    "expected" => "FG-001: forsettiPolicy.externalDependencyAllowed must be false",
+    "mutation" => lambda do |copy|
+      copy["forsettiPolicy"]["externalDependencyAllowed"] = true
+    end
+  },
+  "authority hash drift" => {
+    "expected" => "authority.systemSpec must retain the locked path and SHA-256",
+    "mutation" => lambda do |copy|
+      copy["authority"]["systemSpec"]["sha256"] = "0" * 64
+    end
+  },
+  "controlling policy hash drift" => {
+    "expected" => "FG-020: forsettiPolicy.controllingPolicy must retain the canonical path and SHA-256",
+    "mutation" => lambda do |copy|
+      copy["forsettiPolicy"]["controllingPolicy"]["sha256"] = "0" * 64
+    end
+  },
+  "authorship credit" => {
+    "expected" => "roadmap alignment contains prohibited authorship credit",
+    "mutation" => lambda do |copy|
+      credit = %w[generated with].join(" ")
+      tool = %w[chat gpt].join
+      copy["taskGroups"][0]["items"][0]["notes"] = [credit, tool].join(" ")
+    end
+  }
 }
 
-negative_cases.each do |name, mutation|
+negative_cases.each do |name, test_case|
   copy = Marshal.load(Marshal.dump(document))
-  mutation.call(copy)
-  errors << "internal negative check failed: #{name}" if validate(copy, root).empty?
+  test_case.fetch("mutation").call(copy)
+  negative_errors = validate(copy, root)
+  expected_error = test_case.fetch("expected")
+  unless negative_errors.include?(expected_error)
+    errors << "internal negative check failed: #{name}; expected #{expected_error.inspect}"
+  end
 end
 
 if errors.empty?
-  puts "Roadmap alignment guard passed: #{expected_task_ids.length} tasks, 12 decisions, locked authorities verified."
+  puts "Roadmap alignment guard passed: #{expected_task_ids.length} tasks, 12 decisions, controlling policy and locked authorities verified."
   exit 0
 end
 

@@ -9,8 +9,11 @@ public struct ModuleDescriptor: Hashable, Sendable {
     public let role: ModuleRole
     public let requestedCapabilities: Set<CapabilityIdentifier>
     public let requiredServices: Set<ServiceIdentifier>
+    public let requiredResources: Set<ApplicationResource>
     public let publishedServices: Set<ServiceIdentifier>
     public let requiredModuleRoles: Set<ModuleRole>
+    public let consumedEndpoints: Set<RuntimeEndpointIdentifier>
+    public let publishedEndpoints: Set<RuntimeEndpointIdentifier>
 
     public init(
         moduleID: ModuleIdentifier,
@@ -20,8 +23,11 @@ public struct ModuleDescriptor: Hashable, Sendable {
         role: ModuleRole,
         requestedCapabilities: Set<CapabilityIdentifier>,
         requiredServices: Set<ServiceIdentifier> = [],
+        requiredResources: Set<ApplicationResource> = [],
         publishedServices: Set<ServiceIdentifier> = [],
-        requiredModuleRoles: Set<ModuleRole> = []
+        requiredModuleRoles: Set<ModuleRole> = [],
+        consumedEndpoints: Set<RuntimeEndpointIdentifier> = [],
+        publishedEndpoints: Set<RuntimeEndpointIdentifier> = []
     ) {
         self.moduleID = moduleID
         self.moduleVersion = moduleVersion
@@ -30,8 +36,11 @@ public struct ModuleDescriptor: Hashable, Sendable {
         self.role = role
         self.requestedCapabilities = requestedCapabilities
         self.requiredServices = requiredServices
+        self.requiredResources = requiredResources
         self.publishedServices = publishedServices
         self.requiredModuleRoles = requiredModuleRoles
+        self.consumedEndpoints = consumedEndpoints
+        self.publishedEndpoints = publishedEndpoints
     }
 }
 
@@ -41,10 +50,23 @@ public protocol RuneScribeModule: Sendable {
     func stop() async
 }
 
+public protocol RuntimeConstructibleModule: RuneScribeModule {
+    static var moduleDescriptor: ModuleDescriptor { get }
+    init()
+}
+
 public struct AnyModuleFactory: Sendable {
     public let descriptor: ModuleDescriptor
     private let makeClosure: @Sendable () throws -> any RuneScribeModule
 
+    public init<Module: RuntimeConstructibleModule>(
+        moduleType _: Module.Type
+    ) {
+        descriptor = Module.moduleDescriptor
+        makeClosure = { Module.init() }
+    }
+
+    @_spi(RuntimeTesting)
     public init(
         descriptor: ModuleDescriptor,
         make: @escaping @Sendable () throws -> any RuneScribeModule

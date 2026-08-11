@@ -1,12 +1,10 @@
-import AVFoundation
 import Foundation
-@testable import RuneScribeUIModule
+@testable import RuneScribeUIRuntime
 import XCTest
 
 final class SplashAssetScheduleTests: XCTestCase {
     private var defaults: UserDefaults!
     private var suiteName = ""
-    private let videoURL = URL(fileURLWithPath: "/fixture/splash.mp4")
 
     override func setUp() {
         super.setUp()
@@ -22,18 +20,30 @@ final class SplashAssetScheduleTests: XCTestCase {
     }
 
     func testNeverPresentedSplashShowsOnlyWhenResourceExists() {
-        XCTAssertTrue(SplashAsset.shouldShow(videoURL: videoURL, defaults: defaults))
-        XCTAssertFalse(SplashAsset.shouldShow(videoURL: nil, defaults: defaults))
+        XCTAssertTrue(
+            RuntimeSplashSchedule.shouldShow(
+                resourceAvailable: true,
+                now: Date(),
+                defaults: defaults
+            )
+        )
+        XCTAssertFalse(
+            RuntimeSplashSchedule.shouldShow(
+                resourceAvailable: false,
+                now: Date(),
+                defaults: defaults
+            )
+        )
     }
 
     func testSplashDoesNotShowWithinThirtyDays() {
         let now = Date(timeIntervalSince1970: 1_700_000_000)
-        SplashAsset.markShown(now: now, defaults: defaults)
+        RuntimeSplashSchedule.markShown(now: now, defaults: defaults)
 
         XCTAssertFalse(
-            SplashAsset.shouldShow(
-                videoURL: videoURL,
-                now: now.addingTimeInterval(SplashAsset.replayInterval - 1),
+            RuntimeSplashSchedule.shouldShow(
+                resourceAvailable: true,
+                now: now.addingTimeInterval(RuntimeSplashSchedule.replayInterval - 1),
                 defaults: defaults
             )
         )
@@ -41,19 +51,19 @@ final class SplashAssetScheduleTests: XCTestCase {
 
     func testSplashShowsAtAndAfterThirtyDays() {
         let now = Date(timeIntervalSince1970: 1_700_000_000)
-        SplashAsset.markShown(now: now, defaults: defaults)
+        RuntimeSplashSchedule.markShown(now: now, defaults: defaults)
 
         XCTAssertTrue(
-            SplashAsset.shouldShow(
-                videoURL: videoURL,
-                now: now.addingTimeInterval(SplashAsset.replayInterval),
+            RuntimeSplashSchedule.shouldShow(
+                resourceAvailable: true,
+                now: now.addingTimeInterval(RuntimeSplashSchedule.replayInterval),
                 defaults: defaults
             )
         )
         XCTAssertTrue(
-            SplashAsset.shouldShow(
-                videoURL: videoURL,
-                now: now.addingTimeInterval(SplashAsset.replayInterval + 60),
+            RuntimeSplashSchedule.shouldShow(
+                resourceAvailable: true,
+                now: now.addingTimeInterval(RuntimeSplashSchedule.replayInterval + 60),
                 defaults: defaults
             )
         )
@@ -61,30 +71,12 @@ final class SplashAssetScheduleTests: XCTestCase {
 
     func testMarkShownPersistsDate() {
         let now = Date(timeIntervalSince1970: 1_700_000_000)
-        SplashAsset.markShown(now: now, defaults: defaults)
+        RuntimeSplashSchedule.markShown(now: now, defaults: defaults)
         XCTAssertEqual(
-            defaults.object(forKey: SplashAsset.lastShownDefaultsKey) as? Date,
+            defaults.object(
+                forKey: RuntimeSplashSchedule.lastShownDefaultsKey
+            ) as? Date,
             now
         )
-    }
-
-    @MainActor
-    func testPlaybackCompletionAndSkipEachFinishExactlyOnce() throws {
-        let natural = SplashModel(url: videoURL)
-        var naturalFinishCount = 0
-        natural.start { naturalFinishCount += 1 }
-        NotificationCenter.default.post(
-            name: .AVPlayerItemDidPlayToEndTime,
-            object: try XCTUnwrap(natural.player.currentItem)
-        )
-        natural.finish()
-        XCTAssertEqual(naturalFinishCount, 1)
-
-        let skipped = SplashModel(url: videoURL)
-        var skippedFinishCount = 0
-        skipped.start { skippedFinishCount += 1 }
-        skipped.finish()
-        skipped.finish()
-        XCTAssertEqual(skippedFinishCount, 1)
     }
 }

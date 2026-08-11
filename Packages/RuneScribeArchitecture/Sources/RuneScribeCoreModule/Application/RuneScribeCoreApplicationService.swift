@@ -1,6 +1,7 @@
 import CryptoKit
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 
 /// The Core-owned, key-free application facade. Key-bearing ciphers and
 /// persistence entities remain behind the private repository actor.
@@ -31,13 +32,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     }
 
     private let repository: CipherRepository
-    private let clock: any ClockProviding
-    private let uuid: any UUIDProviding
+    private let runtimeIO: RuntimeIOClient
     private let messageService = MessageService()
     private let appLock: AppLockService
     private let artifactRegistry: ShareArtifactRegistry
-    private let fileReader: any InboundFileReader
-    private var clipboardReading: (any ClipboardReading)? = nil
     private var fontIntegration: (any CoreFontIntegrating)? = nil
     private var contactIntegration: (any CoreMessageContactAssociating)? = nil
     private var fontCatalog: FontCatalog? = nil
@@ -78,11 +76,6 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     private var seenInboundIDOrder: [InboundInputID] = []
     private var lastClipboardChangeCount = 0
 
-    private var nextMenuSubscriberID: UInt64 = 0
-    private var menuSubscribers:
-        [UInt64: AsyncStream<ApplicationMenuCommandDTO>.Continuation] = [:]
-    private var pendingMenuCommands: [ApplicationMenuCommandDTO] = []
-
     private var nextSubscriberID: UInt64 = 0
     private var subscribers: [UInt64: AsyncStream<RuneScribeApplicationSnapshot>.Continuation] = [:]
 
@@ -91,88 +84,36 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     private var useCaseInProgress = false
     private var useCaseWaiters: [CheckedContinuation<Void, Never>] = []
 
-    public init(
-        secureValueStore: any SecureValueStore,
-        clock: any ClockProviding,
-        uuid: any UUIDProviding
-    ) {
-        let unavailableStore = UnavailableShareArtifactStore()
-        repository = CipherRepository(
-            secureValueStore: secureValueStore,
-            clock: clock,
-            uuid: uuid
-        )
-        self.clock = clock
-        self.uuid = uuid
-        appLock = AppLockService(secureValueStore: secureValueStore, clock: clock)
-        artifactRegistry = ShareArtifactRegistry(store: unavailableStore)
-        fileReader = UnavailableInboundFileReader()
-        fontCatalog = nil
-        contactManager = nil
-    }
-
-    public init(
-        secureValueStore: any SecureValueStore,
-        shareArtifactStore: any ShareArtifactStore,
-        clock: any ClockProviding,
-        uuid: any UUIDProviding
-    ) {
-        repository = CipherRepository(
-            secureValueStore: secureValueStore,
-            clock: clock,
-            uuid: uuid
-        )
-        self.clock = clock
-        self.uuid = uuid
-        appLock = AppLockService(secureValueStore: secureValueStore, clock: clock)
-        artifactRegistry = ShareArtifactRegistry(store: shareArtifactStore)
-        fileReader = UnavailableInboundFileReader()
-        fontCatalog = nil
-        contactManager = nil
-    }
-
-    public init(
-        secureValueStore: any SecureValueStore,
-        protectedFileStore: any ProtectedFileStore,
-        inboundFileReader: any InboundFileReader,
-        shareArtifactStore: any ShareArtifactStore,
-        applicationResourceLocator: any ApplicationResourceLocator,
-        systemFontRegistrar: any SystemFontRegistrar,
-        contactAccess: any ContactAccessService,
-        clipboardReading: any ClipboardReading,
-        clock: any ClockProviding,
-        uuid: any UUIDProviding
-    ) {
-        let repository = CipherRepository(
-            secureValueStore: secureValueStore,
-            clock: clock,
-            uuid: uuid
-        )
-        let fontCatalog = FontCatalog(
-            protectedFileStore: protectedFileStore,
-            registrar: systemFontRegistrar,
-            resources: applicationResourceLocator
-        )
+    public init(runtimeIO: RuntimeIOClient) {
+        let repository = CipherRepository(runtimeIO: runtimeIO)
+        let fontCatalog = FontCatalog(runtimeIO: runtimeIO)
         let contactManager = ContactManager(
-            repository: EncryptedContactRepository(
-                secureValueStore: secureValueStore,
-                protectedFileStore: protectedFileStore
-            ),
-            contactAccess: contactAccess,
-            clock: clock,
-            uuid: uuid
+            repository: EncryptedContactRepository(runtimeIO: runtimeIO),
+            runtimeIO: runtimeIO
         )
         self.repository = repository
-        self.clock = clock
-        self.uuid = uuid
-        appLock = AppLockService(secureValueStore: secureValueStore, clock: clock)
-        artifactRegistry = ShareArtifactRegistry(store: shareArtifactStore)
-        fileReader = inboundFileReader
+        self.runtimeIO = runtimeIO
+        appLock = AppLockService(runtimeIO: runtimeIO)
+        artifactRegistry = ShareArtifactRegistry(runtimeIO: runtimeIO)
         self.fontCatalog = fontCatalog
         self.contactManager = contactManager
         fontIntegration = fontCatalog
         contactIntegration = contactManager
-        self.clipboardReading = clipboardReading
+    }
+
+    init(
+        runtimeIO: RuntimeIOClient,
+        fontCatalog: FontCatalog?,
+        contactManager: ContactManager?
+    ) {
+        repository = CipherRepository(runtimeIO: runtimeIO)
+        self.runtimeIO = runtimeIO
+        appLock = AppLockService(runtimeIO: runtimeIO)
+        artifactRegistry = ShareArtifactRegistry(runtimeIO: runtimeIO)
+        self.fontCatalog = fontCatalog
+        self.contactManager = contactManager
+        fontIntegration = fontCatalog
+        contactIntegration = contactManager
     }
 
     public nonisolated func stateStream() -> AsyncStream<RuneScribeApplicationSnapshot> {
@@ -205,13 +146,13 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             }
 
             let runes = try messageService.compose(command.plaintext, with: cipher)
-            adoptSuccessfulRead(library)
+            await adoptSuccessfulRead(library)
             return EncodedMessageResult(
                 runes: runes,
                 cipherID: CipherID(rawValue: cipher.id)
             )
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -226,14 +167,14 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 command.runes,
                 tryingCiphers: library.ciphers
             )
-            adoptSuccessfulRead(library)
+            await adoptSuccessfulRead(library)
             return DecodedMessageResult(
                 plaintext: decoded.plaintext,
                 cipherID: CipherID(rawValue: decoded.cipher.id),
                 cipherName: decoded.cipher.label
             )
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -246,10 +187,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         do {
             try await requireUnlocked()
             let mutation = try await repository.createCipher(label: command.name)
-            adoptMutation(mutation.library)
+            await adoptMutation(mutation.library)
             return Self.summary(for: mutation.value, in: mutation.library)
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -268,10 +209,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                     RuneScribeFailureDTO(code: .itemNotFound)
                 )
             }
-            adoptMutation(mutation.library)
+            await adoptMutation(mutation.library)
             return Self.summary(for: cipher, in: mutation.library)
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -282,9 +223,9 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         do {
             try await requireUnlocked()
             let mutation = try await repository.deleteCipher(id: id.rawValue)
-            adoptMutation(mutation.library)
+            await adoptMutation(mutation.library)
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -295,9 +236,9 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         do {
             try await requireUnlocked()
             let mutation = try await repository.setActiveCipher(id: command.cipherID.rawValue)
-            adoptMutation(mutation.library)
+            await adoptMutation(mutation.library)
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -311,9 +252,9 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 cipherID: command.cipherID.rawValue,
                 contactID: command.contactID?.rawValue
             )
-            adoptMutation(mutation.library)
+            await adoptMutation(mutation.library)
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -330,7 +271,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             contactCommitMayHaveOccurred = true
             let mutation = try await contactManager.create(command)
             let library = try await reconcileContactAssociations(in: mutation.book)
-            adoptContactMutation(mutation.book, library: library)
+            await adoptContactMutation(mutation.book, library: library)
             return Self.contactSummary(
                 mutation.value,
                 linkedCount: Self.linkedCounts(in: library)[mutation.value.id, default: 0]
@@ -339,7 +280,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             if contactCommitMayHaveOccurred {
                 await repairContactAssociationsIndependently()
             }
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -354,7 +295,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             contactCommitMayHaveOccurred = true
             let mutation = try await contactManager.update(command)
             let library = try await reconcileContactAssociations(in: mutation.book)
-            adoptContactMutation(mutation.book, library: library)
+            await adoptContactMutation(mutation.book, library: library)
             return Self.contactSummary(
                 mutation.value,
                 linkedCount: Self.linkedCounts(in: library)[mutation.value.id, default: 0]
@@ -363,7 +304,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             if contactCommitMayHaveOccurred {
                 await repairContactAssociationsIndependently()
             }
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -378,12 +319,12 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             contactCommitMayHaveOccurred = true
             let removal = try await contactManager.delete(ids: Set(ids.map(\.rawValue)))
             let library = try await reconcileContactAssociations(in: removal.book)
-            adoptContactMutation(removal.book, library: library)
+            await adoptContactMutation(removal.book, library: library)
         } catch {
             if contactCommitMayHaveOccurred {
                 await repairContactAssociationsIndependently()
             }
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -398,12 +339,12 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             contactCommitMayHaveOccurred = true
             let removal = try await contactManager.deleteAllImported()
             let library = try await reconcileContactAssociations(in: removal.book)
-            adoptContactMutation(removal.book, library: library)
+            await adoptContactMutation(removal.book, library: library)
         } catch {
             if contactCommitMayHaveOccurred {
                 await repairContactAssociationsIndependently()
             }
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -418,7 +359,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             contactCommitMayHaveOccurred = true
             let contactMutation = try await contactManager.importContacts(command)
             let library = try await reconcileContactAssociations(in: contactMutation.book)
-            adoptContactMutation(contactMutation.book, library: library)
+            await adoptContactMutation(contactMutation.book, library: library)
             let counts = Self.linkedCounts(in: library)
             return contactMutation.added.map {
                 Self.contactSummary($0, linkedCount: counts[$0.id, default: 0])
@@ -427,7 +368,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             if contactCommitMayHaveOccurred {
                 await repairContactAssociationsIndependently()
             }
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -438,6 +379,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             try await requireUnlocked()
             guard let contactManager else { throw unavailableError() }
             let granted = try await contactManager.requestAccess()
+            let capturedAt = await snapshotTimestamp()
             contactAuthorization = await contactManager.authorizationStatus()
             guard granted else {
                 throw RuneScribeProductError.failure(
@@ -446,10 +388,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             }
             let contacts = try await contactManager.fetchSystemContacts()
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
             return contacts
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -472,7 +414,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 )
             }
 
-            let artifactID = ShareArtifactID(rawValue: uuid.nextUUID())
+            let artifactID = ShareArtifactID(rawValue: try await runtimeIO.nextUUID())
             let payload = CipherSharePayload(cipher: cipher)
             let artifact: ShareArtifactDTO
             switch command.representation {
@@ -501,10 +443,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 artifact,
                 requestGeneration: requestGeneration
             )
-            adoptSuccessfulRead(library)
+            await adoptSuccessfulRead(library)
             return artifact
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -536,7 +478,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 cipher: cipher,
                 includeKey: includeKey
             )
-            let artifactID = ShareArtifactID(rawValue: uuid.nextUUID())
+            let artifactID = ShareArtifactID(rawValue: try await runtimeIO.nextUUID())
             let artifact: ShareArtifactDTO
             if includeKey {
                 let fontBytes: Data?
@@ -566,10 +508,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 artifact,
                 requestGeneration: requestGeneration
             )
-            adoptSuccessfulRead(library)
+            await adoptSuccessfulRead(library)
             return artifact
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -593,13 +535,13 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                         RuneScribeFailureDTO(code: .itemNotFound)
                     )
                 }
-                adoptMutation(mutation.library)
+                await adoptMutation(mutation.library)
                 recordedDelivery = true
             }
             try await artifactRegistry.release(id: command.artifactID)
             return recordedDelivery ? .deliveryRecorded : .released
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -608,7 +550,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             try await artifactRegistry.release(id: id)
         } catch {
             shareCleanupNeedsRetry = true
-            _ = record(error)
+            _ = await record(error)
         }
     }
 
@@ -618,13 +560,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
         do {
             try await requireUnlocked()
-            // The scope begins immediately before the actual read and is balanced
-            // by the reader before parsing or any actor suspension occurs.
-            let data = try await fileReader.read(
-                input.fileURL,
-                requiresSecurityScope: input.requiresSecurityScopedAccess,
-                maximumByteCount: 16 * 1_024 * 1_024
-            )
+            guard input.data.count <= Self.maximumInboundFileByteCount else {
+                throw InboundFileReaderError.contentTooLarge
+            }
+            let data = input.data
             let dedupeKey = Self.digest(data)
             if activeImportDedupeKeys.contains(dedupeKey) {
                 restoreImportStateAfterDuplicate()
@@ -633,9 +572,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             guard activeImportID == nil, messageState.pendingMessage == nil else {
                 return ImportResultDTO(disposition: .ignored)
             }
+            let capturedAt = await snapshotTimestamp()
             importState = ImportStateDTO(phase: .validating)
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
             let result = try await ingestFileData(
                 data,
                 dedupeKey: dedupeKey,
@@ -647,7 +587,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 phase: .failed,
                 lastFailure: Self.failure(for: error)
             )
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -666,18 +606,19 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             guard activeImportID == nil, messageState.pendingMessage == nil else {
                 return ImportResultDTO(disposition: .ignored)
             }
+            let capturedAt = await snapshotTimestamp()
             importState = ImportStateDTO(phase: .validating)
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
             let source = Self.importSource(for: input.metadata.source)
             let pending = ImportUseCase.pending(
                 payload: payload,
                 fontBytes: nil,
-                id: ImportID(rawValue: uuid.nextUUID()),
+                id: ImportID(rawValue: try await runtimeIO.nextUUID()),
                 source: source,
                 dedupeKey: dedupeKey
             )
-            setPendingImport(pending)
+            await setPendingImport(pending)
             return ImportResultDTO(
                 disposition: .awaitingConfirmation,
                 pendingImport: pending.summary
@@ -687,7 +628,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 phase: .failed,
                 lastFailure: Self.failure(for: error)
             )
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -711,9 +652,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 id: command.importID,
                 generation: generation
             )
+            let capturedAt = await snapshotTimestamp()
             importState = ImportStateDTO(phase: .importing, pending: pending.summary)
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
 
             if let fontIntegration {
                 try await fontIntegration.ensureAvailable(
@@ -740,7 +682,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             committingImportIDs.remove(command.importID)
             importCancellationGenerations.removeValue(forKey: command.importID)
             importState = ImportStateDTO(phase: .completed)
-            adoptMutation(mutation.library)
+            await adoptMutation(mutation.library)
             let summary = Self.summary(for: mutation.value, in: mutation.library)
             releaseUseCasePermit()
             await drainInboundQueueIfPossible()
@@ -768,11 +710,12 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 lastFailure: Self.failure(for: error)
             )
             releaseUseCasePermit()
-            throw record(error)
+            throw await record(error)
         }
     }
 
     public func cancelImport(id: ImportID) async {
+        let capturedAt = await snapshotTimestamp()
         guard let pending = pendingImports[id] else { return }
         // Once the encrypted library commit begins, confirmation wins. Before
         // that point cancellation advances a generation observed after every
@@ -785,12 +728,13 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         }
         importState = ImportStateDTO(phase: .idle)
         revision &+= 1
-        broadcast(makeSnapshot(isLoading: false))
+        broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
         if useCaseInProgress { return }
         await drainInboundQueueIfPossible()
     }
 
     public func dismissReceivedMessage(id: MessageID) async {
+        let capturedAt = await snapshotTimestamp()
         guard messageState.pendingMessage?.id == id else { return }
         if let key = messageDedupeKeys.removeValue(forKey: id) {
             forgetHandledDedupeKey(key)
@@ -800,20 +744,21 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         }
         messageState = MessageStateDTO(phase: .idle)
         revision &+= 1
-        broadcast(makeSnapshot(isLoading: false))
+        broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
         await drainInboundQueueIfPossible()
     }
 
     public func lock() async {
+        let capturedAt = await snapshotTimestamp()
         shareAuthorizationGeneration &+= 1
         do {
             try await appLock.lockIfEnabled()
             lockState = try await appLock.state()
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
         } catch {
             lockState = ApplicationLockStateDTO(isPINSet: true, isLocked: true)
-            _ = record(error)
+            _ = await record(error)
         }
     }
 
@@ -823,17 +768,18 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         do {
             return try await appLock.verifyForManagement(input)
         } catch {
-            throw record(error)
+            throw await record(error)
         }
     }
 
     public func unlock(_ command: UnlockCommand) async throws -> UnlockResultDTO {
         await acquireUseCasePermit()
+        let capturedAt = await snapshotTimestamp()
         do {
             let result = try await appLock.unlock(command.input)
             lockState = try await appLock.state()
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
             releaseUseCasePermit()
             if case .unlocked = result {
                 await drainInboundQueueIfPossible()
@@ -841,27 +787,29 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             return result
         } catch {
             releaseUseCasePermit()
-            throw record(error)
+            throw await record(error)
         }
     }
 
     public func setPIN(_ command: SetPINCommand) async throws {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
+        let capturedAt = await snapshotTimestamp()
         do {
             try await appLock.setPIN(command.input)
             lockState = try await appLock.state()
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
         } catch {
             await refreshLockStateAfterSecurityFailure()
-            throw record(error)
+            throw await record(error)
         }
     }
 
     public func changePIN(_ command: ChangePINCommand) async throws {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
+        let capturedAt = await snapshotTimestamp()
         do {
             try await appLock.changePIN(
                 current: command.current,
@@ -869,26 +817,27 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             )
             lockState = try await appLock.state()
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
         } catch {
             await refreshLockStateAfterSecurityFailure()
-            throw record(error)
+            throw await record(error)
         }
     }
 
     public func disablePIN(_ command: DisablePINCommand) async throws {
         await acquireUseCasePermit()
+        let capturedAt = await snapshotTimestamp()
         do {
             try await appLock.disablePIN(current: command.current)
             lockState = try await appLock.state()
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
             releaseUseCasePermit()
             await drainInboundQueueIfPossible()
         } catch {
             await refreshLockStateAfterSecurityFailure()
             releaseUseCasePermit()
-            throw record(error)
+            throw await record(error)
         }
     }
 
@@ -908,18 +857,19 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             // A new activation must first prove that no stale key-bearing
             // artifact survived the previous lifetime.
             try await artifactRegistry.releaseAll()
+            let capturedAt = await snapshotTimestamp()
             acceptsSharePreparation = true
             if shareCleanupNeedsRetry,
                lastFailure?.code == .shareUnavailable {
                 lastFailure = nil
                 revision &+= 1
-                broadcast(makeSnapshot(isLoading: false))
+                broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
             }
             shareCleanupNeedsRetry = false
         } catch {
             acceptsSharePreparation = false
             shareCleanupNeedsRetry = true
-            _ = record(error)
+            _ = await record(error)
         }
         await drainInboundQueueIfPossible()
     }
@@ -934,18 +884,19 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         do {
             let wasRetryingCleanup = shareCleanupNeedsRetry
             try await artifactRegistry.releaseAll()
+            let capturedAt = await snapshotTimestamp()
             shareCleanupNeedsRetry = false
             if wasRetryingCleanup,
                lastFailure?.code == .shareUnavailable {
                 lastFailure = nil
                 revision &+= 1
-                broadcast(makeSnapshot(isLoading: false))
+                broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
             }
         } catch {
             // Registry retains every lease on failure; the next start retries
             // authoritative store cleanup before enabling new shares.
             shareCleanupNeedsRetry = true
-            _ = record(error)
+            _ = await record(error)
         }
         releaseUseCasePermit()
     }
@@ -954,7 +905,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         _ input: RuneScribeInboundInput
     ) async throws -> InboundInputDispositionDTO {
         guard Self.hasBoundedInboundMetadata(input) else {
-            return rejectInbound(code: .invalidInput)
+            return await rejectInbound(code: .invalidInput)
         }
         guard !seenInboundIDs.contains(input.metadata.id) else { return .duplicate }
         let dedupeKey = Self.queuedDedupeKey(for: input)
@@ -967,10 +918,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         if Self.requiresClearPresentation(input) {
             guard inboundDataQueue.count < Self.maximumQueuedDataInputs,
                   totalCount < Self.maximumQueuedInputs
-            else { return rejectInbound(code: .temporarilyUnavailable) }
+            else { return await rejectInbound(code: .temporarilyUnavailable) }
         } else {
             guard totalCount < Self.maximumQueuedInputs else {
-                return rejectInbound(code: .temporarilyUnavailable)
+                return await rejectInbound(code: .temporarilyUnavailable)
             }
         }
 
@@ -995,21 +946,13 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
     private func rejectInbound(
         code: RuneScribeFailureCode
-    ) -> InboundInputDispositionDTO {
-        _ = record(
+    ) async -> InboundInputDispositionDTO {
+        _ = await record(
             RuneScribeProductError.failure(
                 RuneScribeFailureDTO(code: code)
             )
         )
         return .rejected
-    }
-
-    /// Hosted navigation can subscribe without giving Core any presentation API.
-    public nonisolated func menuCommandStream() -> AsyncStream<ApplicationMenuCommandDTO> {
-        AsyncStream(bufferingPolicy: .bufferingOldest(Self.maximumPendingMenuCommands)) {
-            continuation in
-            Task { await self.attachMenuSubscriber(continuation) }
-        }
     }
 
     private func processInbound(
@@ -1037,26 +980,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 await importChangedClipboardIfEligible(metadata: lifecycle.metadata)
             }
             return .accepted
-        case .menu(let menu):
-            guard !menuSubscribers.isEmpty else {
-                guard pendingMenuCommands.count < Self.maximumPendingMenuCommands else {
-                    return rejectInbound(code: .temporarilyUnavailable)
-                }
-                pendingMenuCommands.append(menu.command)
-                return .accepted
-            }
-            var delivered = false
-            for continuation in menuSubscribers.values {
-                switch continuation.yield(menu.command) {
-                case .enqueued:
-                    delivered = true
-                case .dropped, .terminated:
-                    break
-                @unknown default:
-                    break
-                }
-            }
-            return delivered ? .accepted : rejectInbound(code: .temporarilyUnavailable)
+        case .menu:
+            // Menu presentation is admitted by the single runtime-owned route
+            // rail after Core has processed this ordered ingress item.
+            return .accepted
         }
     }
 
@@ -1147,12 +1074,11 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         guard !lockState.isLocked,
               activeImportID == nil,
               messageState.pendingMessage == nil,
-              let clipboardReading
+              let clipboard = try? await runtimeIO.clipboardSnapshot()
         else { return }
-        let changeCount = await clipboardReading.changeCount()
-        guard changeCount != lastClipboardChangeCount else { return }
-        lastClipboardChangeCount = changeCount
-        guard let raw = await clipboardReading.string() else { return }
+        guard clipboard.changeCount != lastClipboardChangeCount else { return }
+        lastClipboardChangeCount = clipboard.changeCount
+        guard let raw = clipboard.string else { return }
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.utf8.count <= LinkRouter.maximumURLByteCount,
               let url = URL(string: trimmed),
@@ -1160,9 +1086,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
               LinkRouter.isSupportedRoute(components)
         else { return }
 
+        guard let inputID = try? await runtimeIO.nextUUID() else { return }
         let clipboardInput = InboundURLDTO(
             metadata: InboundInputMetadataDTO(
-                id: InboundInputID(rawValue: uuid.nextUUID()),
+                id: InboundInputID(rawValue: inputID),
                 receivedAt: metadata.receivedAt,
                 source: .clipboard,
                 isColdStart: false
@@ -1170,37 +1097,6 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             url: url
         )
         _ = try? await importURL(clipboardInput)
-    }
-
-    private func attachMenuSubscriber(
-        _ continuation: AsyncStream<ApplicationMenuCommandDTO>.Continuation
-    ) {
-        let id = nextMenuSubscriberID
-        nextMenuSubscriberID &+= 1
-        continuation.onTermination = { @Sendable [weak self] _ in
-            Task { await self?.detachMenuSubscriber(id) }
-        }
-        let isFirstSubscriber = menuSubscribers.isEmpty
-        menuSubscribers[id] = continuation
-        guard isFirstSubscriber, !pendingMenuCommands.isEmpty else { return }
-
-        var deliveredCount = 0
-        for command in pendingMenuCommands {
-            switch continuation.yield(command) {
-            case .enqueued:
-                deliveredCount += 1
-            case .dropped, .terminated:
-                break
-            @unknown default:
-                break
-            }
-            if deliveredCount == 0 { break }
-        }
-        pendingMenuCommands.removeFirst(deliveredCount)
-    }
-
-    private func detachMenuSubscriber(_ id: UInt64) {
-        menuSubscribers.removeValue(forKey: id)
     }
 
     private static func requiresClearPresentation(_ input: RuneScribeInboundInput) -> Bool {
@@ -1218,7 +1114,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             }
             return inboundURLDedupeKey(value.url)
         case .file(let value):
-            return digest(Data("file:\(value.fileURL.standardizedFileURL.absoluteString)".utf8))
+            return digest(value.data)
         case .lifecycle, .menu:
             return nil
         }
@@ -1226,8 +1122,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
     private static let maximumQueuedInputs = 512
     private static let maximumQueuedDataInputs = 496
-    private static let maximumPendingMenuCommands = 16
-    private static let maximumInboundFileURLByteCount = 4_096
+    private static let maximumInboundFileByteCount = 16 * 1_024 * 1_024
     private static let maximumDeclaredContentTypeByteCount = 256
 
     private static func hasBoundedInboundMetadata(
@@ -1237,7 +1132,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         case .url(let value):
             value.url.absoluteString.utf8.count <= LinkRouter.maximumURLByteCount
         case .file(let value):
-            value.fileURL.absoluteString.utf8.count <= maximumInboundFileURLByteCount
+            value.data.count <= maximumInboundFileByteCount
                 && (value.declaredContentType?.utf8.count ?? 0)
                     <= maximumDeclaredContentTypeByteCount
         case .lifecycle, .menu:
@@ -1262,20 +1157,21 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             let pending = ImportUseCase.pending(
                 payload: payload,
                 fontBytes: fontBytes,
-                id: ImportID(rawValue: uuid.nextUUID()),
+                id: ImportID(rawValue: try await runtimeIO.nextUUID()),
                 source: source,
                 dedupeKey: dedupeKey
             )
-            setPendingImport(pending)
+            await setPendingImport(pending)
             return ImportResultDTO(
                 disposition: .awaitingConfirmation,
                 pendingImport: pending.summary
             )
 
         case .message(let payload, let fontBytes):
+            let capturedAt = await snapshotTimestamp()
             messageState = MessageStateDTO(phase: .receiving)
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
             do {
                 let mutation = try await MessageImportUseCase.ingest(
                     payload: payload,
@@ -1284,7 +1180,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                     messageService: messageService,
                     fontIntegration: fontIntegration,
                     contactIntegration: contactIntegration,
-                    uuid: uuid
+                    runtimeIO: runtimeIO
                 )
                 if let contactManager,
                    let contactBook = try? await contactManager.snapshot() {
@@ -1298,7 +1194,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                     pendingMessage: mutation.message
                 )
                 importState = ImportStateDTO(phase: .completed)
-                adoptMutation(mutation.library)
+                await adoptMutation(mutation.library)
                 return ImportResultDTO(
                     disposition: .receivedMessage,
                     receivedMessageID: mutation.message.id
@@ -1317,7 +1213,8 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         }
     }
 
-    private func setPendingImport(_ pending: PendingCipherImport) {
+    private func setPendingImport(_ pending: PendingCipherImport) async {
+        let capturedAt = await snapshotTimestamp()
         pendingImports[pending.id] = pending
         activeImportID = pending.id
         importCancellationGenerations[pending.id] = 0
@@ -1328,7 +1225,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             pending: pending.summary
         )
         revision &+= 1
-        broadcast(makeSnapshot(isLoading: false))
+        broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
     }
 
     private func removePendingImport(_ pending: PendingCipherImport) {
@@ -1456,16 +1353,17 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 _ = try? await fontCatalog.registerAvailableFonts()
             }
             await refreshFontSummaries(for: library)
+            let capturedAt = await snapshotTimestamp()
             lastKnownLibrary = library
             lockState = loadedLock
             lastFailure = nil
             initializationState = .ready
             revision &+= 1
-            broadcast(makeSnapshot(isLoading: false))
+            broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
         } catch {
             lockState = ApplicationLockStateDTO(isPINSet: true, isLocked: true)
             initializationState = .failed
-            _ = record(error)
+            _ = await record(error)
         }
     }
 
@@ -1513,11 +1411,12 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             }
         }
         subscribers[subscriberID] = continuation
+        let capturedAt = await snapshotTimestamp()
 
         switch initializationState {
         case .notStarted:
             initializationState = .loading
-            continuation.yield(makeSnapshot(isLoading: true))
+            continuation.yield(makeSnapshot(isLoading: true, capturedAt: capturedAt))
             await acquireUseCasePermit()
             do {
                 var library = try await repository.snapshot()
@@ -1535,26 +1434,27 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                     _ = try? await fontCatalog.registerAvailableFonts()
                 }
                 await refreshFontSummaries(for: library)
+                let readyCapturedAt = await snapshotTimestamp()
                 lastKnownLibrary = library
                 lockState = loadedLock
                 lastFailure = nil
                 initializationState = .ready
                 revision &+= 1
-                broadcast(makeSnapshot(isLoading: false))
+                broadcast(makeSnapshot(isLoading: false, capturedAt: readyCapturedAt))
             } catch {
                 // Secure-state uncertainty fails closed; a nonloading snapshot is
                 // never published as unlocked when PIN storage could not be read.
                 lockState = ApplicationLockStateDTO(isPINSet: true, isLocked: true)
                 initializationState = .failed
-                _ = record(error)
+                _ = await record(error)
             }
             releaseUseCasePermit()
 
         case .loading:
-            continuation.yield(makeSnapshot(isLoading: true))
+            continuation.yield(makeSnapshot(isLoading: true, capturedAt: capturedAt))
 
         case .ready, .failed:
-            continuation.yield(makeSnapshot(isLoading: false))
+            continuation.yield(makeSnapshot(isLoading: false, capturedAt: capturedAt))
         }
     }
 
@@ -1562,31 +1462,34 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         subscribers.removeValue(forKey: subscriberID)
     }
 
-    private func adoptSuccessfulRead(_ library: CipherLibrary) {
+    private func adoptSuccessfulRead(_ library: CipherLibrary) async {
+        let capturedAt = await snapshotTimestamp()
         let stateChanged = initializationState != .ready || lastFailure != nil
         lastKnownLibrary = library
         lastFailure = nil
         initializationState = .ready
         guard stateChanged else { return }
         revision &+= 1
-        broadcast(makeSnapshot(isLoading: false))
+        broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
     }
 
-    private func adoptMutation(_ library: CipherLibrary) {
+    private func adoptMutation(_ library: CipherLibrary) async {
+        let capturedAt = await snapshotTimestamp()
         lastKnownLibrary = library
         lastFailure = nil
         initializationState = .ready
         revision &+= 1
-        broadcast(makeSnapshot(isLoading: false))
+        broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
     }
 
-    private func adoptContactMutation(_ book: ContactBook, library: CipherLibrary) {
+    private func adoptContactMutation(_ book: ContactBook, library: CipherLibrary) async {
+        let capturedAt = await snapshotTimestamp()
         lastKnownContactBook = book
         lastKnownLibrary = library
         lastFailure = nil
         initializationState = .ready
         revision &+= 1
-        broadcast(makeSnapshot(isLoading: false))
+        broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
     }
 
     /// Applies the complete cross-store invariant from the committed contact
@@ -1625,7 +1528,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
         switch await repair.value {
         case .repaired(let state):
-            adoptContactMutation(state.book, library: state.library)
+            await adoptContactMutation(state.book, library: state.library)
             return state
         case .failed:
             // Keep the last known consistent projection. A reconstructed service
@@ -1689,30 +1592,20 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     }
 
     @discardableResult
-    private func record(_ error: Error) -> RuneScribeProductError {
+    private func record(_ error: Error) async -> RuneScribeProductError {
+        let capturedAt = await snapshotTimestamp()
         let failure = Self.failure(for: error)
         lastFailure = failure
         revision &+= 1
-        broadcast(makeSnapshot(isLoading: initializationState == .loading))
+        broadcast(makeSnapshot(
+            isLoading: initializationState == .loading,
+            capturedAt: capturedAt
+        ))
         return .failure(failure)
-    }
-
-    private func unavailable() -> RuneScribeProductError {
-        record(
-            RuneScribeProductError.failure(
-                RuneScribeFailureDTO(code: .temporarilyUnavailable)
-            )
-        )
     }
 
     private func unavailableError() -> RuneScribeProductError {
         .failure(RuneScribeFailureDTO(code: .temporarilyUnavailable))
-    }
-
-    private func unavailableImport() -> RuneScribeProductError {
-        let failure = RuneScribeFailureDTO(code: .temporarilyUnavailable)
-        importState = ImportStateDTO(phase: .failed, lastFailure: failure)
-        return record(RuneScribeProductError.failure(failure))
     }
 
     private func refreshLockStateAfterSecurityFailure() async {
@@ -1750,7 +1643,14 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         }
     }
 
-    private func makeSnapshot(isLoading: Bool) -> RuneScribeApplicationSnapshot {
+    private func snapshotTimestamp() async -> Date {
+        (try? await runtimeIO.now()) ?? .distantPast
+    }
+
+    private func makeSnapshot(
+        isLoading: Bool,
+        capturedAt: Date
+    ) -> RuneScribeApplicationSnapshot {
         let activeID = lastKnownLibrary.activeCipher?.id
         let summaries = lastKnownLibrary.ciphers.map { cipher in
             Self.summary(for: cipher, activeID: activeID)
@@ -1758,7 +1658,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
         return RuneScribeApplicationSnapshot(
             revision: revision,
-            capturedAt: clock.now(),
+            capturedAt: capturedAt,
             cipherLibrary: CipherLibraryStateDTO(
                 ciphers: summaries,
                 activeCipherID: activeID.map(CipherID.init(rawValue:)),

@@ -4,12 +4,14 @@ import XCTest
 
 final class ContractSafetyTests: XCTestCase {
     func testStableServiceStorageAndWireIdentifiers() {
-        XCTAssertEqual(RuneScribeServiceIDs.application.rawValue, "RuneScribeApplicationService")
-        XCTAssertEqual(RuneScribeServiceIDs.inboundInput.rawValue, "RuneScribeInboundInputService")
         XCTAssertEqual(RuneScribeServiceIDs.secureValueStore.rawValue, "SecureValueStore")
         XCTAssertEqual(RuneScribeServiceIDs.protectedFileStore.rawValue, "ProtectedFileStore")
         XCTAssertEqual(RuneScribeServiceIDs.inboundFileReader.rawValue, "InboundFileReader")
         XCTAssertEqual(RuneScribeServiceIDs.shareArtifactStore.rawValue, "ShareArtifactStore")
+        XCTAssertEqual(
+            RuneScribeServiceIDs.sharePresentation.rawValue,
+            "SharePresentationService"
+        )
         XCTAssertEqual(RuneScribeServiceIDs.applicationResourceLocator.rawValue, "ApplicationResourceLocator")
         XCTAssertEqual(RuneScribeServiceIDs.systemFontRegistrar.rawValue, "SystemFontRegistrar")
         XCTAssertEqual(RuneScribeServiceIDs.contactAccess.rawValue, "ContactAccessService")
@@ -20,15 +22,7 @@ final class ContractSafetyTests: XCTestCase {
         )
         XCTAssertEqual(RuneScribeServiceIDs.clock.rawValue, "ClockService")
         XCTAssertEqual(RuneScribeServiceIDs.uuid.rawValue, "UUIDService")
-        XCTAssertEqual(RuneScribeServiceIDs.all.count, 13)
-        XCTAssertEqual(
-            RuneScribeServiceKeys.application.identifier,
-            RuneScribeServiceIDs.application
-        )
-        XCTAssertEqual(
-            RuneScribeServiceKeys.inboundInput.identifier,
-            RuneScribeServiceIDs.inboundInput
-        )
+        XCTAssertEqual(RuneScribeServiceIDs.all.count, 12)
         XCTAssertEqual(
             RuneScribeServiceKeys.secureValueStore.identifier,
             RuneScribeServiceIDs.secureValueStore
@@ -44,6 +38,10 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertEqual(
             RuneScribeServiceKeys.shareArtifactStore.identifier,
             RuneScribeServiceIDs.shareArtifactStore
+        )
+        XCTAssertEqual(
+            RuneScribeServiceKeys.sharePresentation.identifier,
+            RuneScribeServiceIDs.sharePresentation
         )
         XCTAssertEqual(
             RuneScribeServiceKeys.applicationResourceLocator.identifier,
@@ -89,6 +87,47 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertTrue(
             RuneScribeCapabilities.all.contains(RuneScribeCapabilities.inboundFileRead)
         )
+        XCTAssertTrue(
+            RuneScribeCapabilities.all.contains(RuneScribeCapabilities.fileImportUI)
+        )
+    }
+
+    func testUIModuleInboundFilePresentationDoesNotOwnNativeURLs() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let sourceRoot = packageRoot.appendingPathComponent("Sources", isDirectory: true)
+        let uiModuleRoot = sourceRoot.appendingPathComponent(
+            "RuneScribeUIModule",
+            isDirectory: true
+        )
+        let uiRuntimeImporter = sourceRoot
+            .appendingPathComponent("RuneScribeUIRuntime", isDirectory: true)
+            .appendingPathComponent("RuntimeInboundFileImporter.swift")
+        let uiModuleSources = try FileManager.default.subpathsOfDirectory(
+            atPath: uiModuleRoot.path
+        )
+        .filter { $0.hasSuffix(".swift") }
+        .map { relativePath in
+            try String(
+                contentsOf: uiModuleRoot.appendingPathComponent(relativePath),
+                encoding: .utf8
+            )
+        }
+        .joined(separator: "\n")
+
+        XCTAssertFalse(uiModuleSources.contains(".fileImporter"))
+        XCTAssertFalse(uiModuleSources.contains("InboundFileDTO("))
+        XCTAssertFalse(uiModuleSources.contains("fileURL"))
+        XCTAssertFalse(uiModuleSources.contains("Result<[URL]"))
+
+        let runtimeSource = try String(
+            contentsOf: uiRuntimeImporter,
+            encoding: .utf8
+        )
+        XCTAssertTrue(runtimeSource.contains(".fileImporter"))
+        XCTAssertTrue(runtimeSource.contains("@_spi(RuntimeFileImportHost)"))
     }
 
     func testResourceHandlesMatchShippingRootBundleLookups() {
@@ -160,7 +199,7 @@ final class ContractSafetyTests: XCTestCase {
         assertSendable(EncodeMessageCommand.self)
         assertSendable(DecodedMessageResult.self)
         assertSendable(ShareArtifactDTO.self)
-        assertSendable(ScopedShareFile.self)
+        assertSendable(ShareArtifactID.self)
         assertSendable(CompleteShareArtifactCommand.self)
         assertSendable(RuneScribeInboundInput.self)
         assertSendable(ApplicationSnapshotChangedEvent.self)

@@ -12,9 +12,9 @@ public enum AppleShareArtifactStoreError: Error, Equatable, Sendable {
 /// Temporary storage for short-lived files handed to system share surfaces.
 /// Each instance owns one exact directory, validates every component, and only
 /// removes files that it created and still tracks by their opaque artifact ID.
-public actor AppleShareArtifactStore: ShareArtifactStore {
+public actor AppleShareArtifactStore: ShareArtifactStore, SharePresentationProviding {
     private let rootDirectory: URL
-    private var files: [ShareArtifactID: ScopedShareFile] = [:]
+    private var files: [ShareArtifactID: URL] = [:]
     private var links: [ShareArtifactID: URL] = [:]
     private var isPrepared = false
 
@@ -37,7 +37,7 @@ public actor AppleShareArtifactStore: ShareArtifactStore {
         artifactID: ShareArtifactID,
         filename: String,
         fileExtension: String
-    ) async throws -> ScopedShareFile {
+    ) async throws {
         guard Self.isValidComponent(filename), Self.isValidComponent(fileExtension) else {
             throw AppleShareArtifactStoreError.invalidFilename
         }
@@ -75,23 +75,21 @@ public actor AppleShareArtifactStore: ShareArtifactStore {
             throw error
         }
 
-        let file = ScopedShareFile(artifactID: artifactID, fileURL: fileURL)
-        files[artifactID] = file
-        return file
+        files[artifactID] = fileURL
     }
 
-    public func remove(_ file: ScopedShareFile) async throws {
-        guard files[file.artifactID] == file else {
+    public func remove(artifactID: ShareArtifactID) async throws {
+        guard let fileURL = files[artifactID] else {
             throw AppleShareArtifactStoreError.unknownArtifact
         }
-        let artifactDirectory = file.fileURL.deletingLastPathComponent().standardizedFileURL
+        let artifactDirectory = fileURL.deletingLastPathComponent().standardizedFileURL
         guard isContainedInRoot(artifactDirectory), !isSymbolicLink(at: artifactDirectory) else {
             throw AppleShareArtifactStoreError.symbolicLinkNotAllowed
         }
         if FileManager.default.fileExists(atPath: artifactDirectory.path) {
             try FileManager.default.removeItem(at: artifactDirectory)
         }
-        files.removeValue(forKey: file.artifactID)
+        files.removeValue(forKey: artifactID)
     }
 
     public func storeLink(_ url: URL, artifactID: ShareArtifactID) async throws {
@@ -107,13 +105,14 @@ public actor AppleShareArtifactStore: ShareArtifactStore {
         }
     }
 
-    /// Presentation infrastructure can export a user-requested link without
-    /// placing its key-bearing URL in Contracts, snapshots, or persisted state.
-    public func link(for artifactID: ShareArtifactID) throws -> URL {
-        guard let url = links[artifactID] else {
-            throw AppleShareArtifactStoreError.unknownArtifact
+    public func presentationURL(for artifactID: ShareArtifactID) async throws -> URL {
+        if let fileURL = files[artifactID] {
+            return fileURL
         }
-        return url
+        if let linkURL = links[artifactID] {
+            return linkURL
+        }
+        throw AppleShareArtifactStoreError.unknownArtifact
     }
 
     public func removeAll() async throws {

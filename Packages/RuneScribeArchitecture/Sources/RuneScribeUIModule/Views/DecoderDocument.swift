@@ -8,19 +8,3 @@ import UniformTypeIdentifiers
 extension UTType {
     static let runeScribe = UTType(exportedAs: RuneScribeWireFormat.contentType)
 }
-
-/// A scoped Core-produced file reference for SwiftUI export/share presentation.
-/// The UI never reads or recreates the encrypted transport bytes.
-struct RuneScribeExportArtifact: Transferable {
-    let url: URL
-    let filename: String
-
-    static var transferRepresentation: some TransferRepresentation {
-        FileRepresentation(exportedContentType: .runeScribe) { file in
-            SentTransferredFile(file.url)
-        }
-        .suggestedFileName { artifact in
-            artifact.filename + "." + RuneScribeWireFormat.fileExtension
-        }
-    }
-}

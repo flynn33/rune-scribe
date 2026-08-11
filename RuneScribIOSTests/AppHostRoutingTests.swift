@@ -2,7 +2,7 @@ import Foundation
 import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
-import RuneScribeRuntimeCore
+@_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
 import RuneScribeUIRuntime
 import UIKit
@@ -29,12 +29,18 @@ final class AppHostRoutingTests: XCTestCase {
         await fixture.composition.stop()
     }
 
-    func testAppDelegateRoutesURLsFilesActivitiesAndLifecycleWithColdWarmMetadata() async {
+    func testAppDelegateRoutesURLsFilesActivitiesAndLifecycleWithColdWarmMetadata() async throws {
         let fixture = makeFixture()
         let delegate = AppDelegate(runtime: fixture.composition)
         let application = UIApplication.shared
         let coldURL = URL(string: "runescribe://import?p=cold")!
-        let coldFile = URL(fileURLWithPath: "/in-memory/cold.runescribe")
+        let coldFileData = Data("cold-app-host-file".utf8)
+        let coldFile = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "RuneScribeAppHostRoutingTests-\(UUID().uuidString).runescribe"
+            )
+        try coldFileData.write(to: coldFile, options: .atomic)
+        defer { try? FileManager.default.removeItem(at: coldFile) }
         let coldWebURL = URL(string: "https://ravenforgesoftware.com/rune-scribe/import?p=cold-web")!
         let coldActivity = browsingActivity(url: coldWebURL)
 
@@ -56,7 +62,12 @@ final class AppHostRoutingTests: XCTestCase {
             return
         }
         assertURL(received[0], equals: coldURL, source: .applicationOpen, isColdStart: true)
-        assertFile(received[1], equals: coldFile, source: .applicationOpen, isColdStart: true)
+        assertFile(
+            received[1],
+            equals: coldFileData,
+            source: .applicationOpen,
+            isColdStart: true
+        )
         assertURL(received[2], equals: coldWebURL, source: .webBrowsingActivity, isColdStart: true)
         assertLifecycle(received[3], equals: .didBecomeActive, isColdStart: true)
         assertLifecycle(received[4], equals: .willResignActive, isColdStart: true)
@@ -96,6 +107,15 @@ final class AppHostRoutingTests: XCTestCase {
     func testCompositionRecoversFromFirstStartupFailureAndRetries() async {
         let startAttempt = HostedStartAttempt()
         let fixture = makeFixture(startAttempt: startAttempt)
+        let retainedURL = URL(string: "runescribe://import?p=startup-retry")!
+
+        XCTAssertEqual(
+            fixture.composition.receive(
+                urls: [retainedURL],
+                source: .applicationOpen
+            ),
+            [.accepted]
+        )
 
         await fixture.composition.start()
 
@@ -106,6 +126,8 @@ final class AppHostRoutingTests: XCTestCase {
         )
         let failedAttemptCount = await startAttempt.count
         XCTAssertEqual(failedAttemptCount, 1)
+        let receivedAfterFailure = await fixture.inboundInputService.snapshot()
+        XCTAssertTrue(receivedAfterFailure.isEmpty)
 
         await fixture.composition.start()
 
@@ -116,6 +138,16 @@ final class AppHostRoutingTests: XCTestCase {
         )
         let recoveredAttemptCount = await startAttempt.count
         XCTAssertEqual(recoveredAttemptCount, 2)
+        let received = await fixture.inboundInputService.snapshot()
+        XCTAssertEqual(received.count, 1)
+        if received.count == 1 {
+            assertURL(
+                received[0],
+                equals: retainedURL,
+                source: .applicationOpen,
+                isColdStart: true
+            )
+        }
 
         await fixture.composition.stop()
         XCTAssertEqual(fixture.composition.rootPresentationStore.state, .booting)
@@ -135,12 +167,56 @@ final class AppHostRoutingTests: XCTestCase {
     }
 
     private func makeFixture(startAttempt: HostedStartAttempt? = nil) -> AppHostFixture {
-        let applicationService = RuneScribeCoreApplicationService(
-            secureValueStore: InMemorySecureValueStore(),
-            shareArtifactStore: InMemoryShareArtifactStore(),
-            clock: SystemClock(),
-            uuid: SystemUUIDProvider()
+        let secureValues = InMemorySecureValueStore()
+        let protectedFiles = InMemoryProtectedFileStore()
+        let shareArtifacts = InMemoryShareArtifactStore()
+        let clock = SystemClock()
+        let uuid = SystemUUIDProvider()
+        let runtimeIO = RuntimeIOClient(
+            secureValueData: {
+                try await secureValues.data(service: $0, account: $1)
+            },
+            setSecureValue: {
+                try await secureValues.set($0, service: $1, account: $2)
+            },
+            deleteSecureValue: {
+                try await secureValues.delete(service: $0, account: $1)
+            },
+            readProtectedFile: {
+                try await protectedFiles.read(relativePath: $0)
+            },
+            writeProtectedFile: {
+                try await protectedFiles.write($0, relativePath: $1)
+            },
+            removeProtectedFile: {
+                try await protectedFiles.remove(relativePath: $0)
+            },
+            protectedFileExists: {
+                try await protectedFiles.exists(relativePath: $0)
+            },
+            protectedFileContents: {
+                try await protectedFiles.contents(of: $0, matchingExtension: $1)
+            },
+            now: { clock.now() },
+            nextUUID: { uuid.nextUUID() },
+            createShareArtifact: {
+                try await shareArtifacts.create(
+                    $0,
+                    artifactID: $1,
+                    filename: $2,
+                    fileExtension: $3
+                )
+            },
+            storeShareArtifactLink: {
+                try await shareArtifacts.storeLink($0, artifactID: $1)
+            },
+            removeShareArtifactLink: {
+                try await shareArtifacts.removeLink(artifactID: $0)
+            },
+            removeShareArtifact: { try await shareArtifacts.remove(artifactID: $0) },
+            removeAllShareArtifacts: { try await shareArtifacts.removeAll() }
         )
+        let applicationService = RuneScribeCoreApplicationService(runtimeIO: runtimeIO)
         let inboundInputService = RecordingInboundInputService()
         let coreFactory = AnyModuleFactory(
             descriptor: RuneScribeCoreModuleBootstrap.descriptor
@@ -184,7 +260,7 @@ final class AppHostRoutingTests: XCTestCase {
 
     private func assertFile(
         _ input: RuneScribeInboundInput,
-        equals expectedURL: URL,
+        equals expectedData: Data,
         source: InboundDeliverySourceDTO,
         isColdStart: Bool,
         file: StaticString = #filePath,
@@ -194,8 +270,8 @@ final class AppHostRoutingTests: XCTestCase {
             XCTFail("Expected file input, received \(input).", file: file, line: line)
             return
         }
-        XCTAssertEqual(value.fileURL, expectedURL, file: file, line: line)
-        XCTAssertTrue(value.requiresSecurityScopedAccess, file: file, line: line)
+        XCTAssertEqual(value.data, expectedData, file: file, line: line)
+        XCTAssertNil(value.declaredContentType, file: file, line: line)
         assertMetadata(value.metadata, source: source, isColdStart: isColdStart, file: file, line: line)
     }
 
@@ -249,14 +325,8 @@ private struct HostedCoreModule: RuneScribeModule {
         if let startAttempt, await startAttempt.shouldFail() {
             throw HostedStartFailure.requested
         }
-        try await context.publishService(
-            applicationService as any RuneScribeApplicationService,
-            for: RuneScribeServiceKeys.application
-        )
-        try await context.publishService(
-            inboundInputService as any RuneScribeInboundInputService,
-            for: RuneScribeServiceKeys.inboundInput
-        )
+        try await context.registerApplicationEndpoints(applicationService)
+        try await context.registerInboundInputEndpoint(inboundInputService)
         await applicationService.startInboundProcessing()
     }
 

@@ -1,5 +1,15 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "controllingPolicy": {
+    "path": "docs/architecture/FORSETTI_CONTROLLING_POLICY.md",
+    "sha256": "8392d9ad457ccb2afbf9e872d591ec887d383f4b8617236179d624d2f792fb53"
+  },
+  "reportOnlyGuard": {
+    "catalogPath": "scripts/forsetti-compliance-rules.json",
+    "checkerPath": "scripts/check-forsetti-compliance.sh",
+    "ruleCount": 20,
+    "mode": "report-only"
+  },
   "architecturePackagePath": "Packages/RuneScribeArchitecture",
   "requiredProducts": [
     "RuneScribeContracts",
@@ -88,13 +98,13 @@
     "notificationCenterDefaultUses": {
       "maximum": 2,
       "owner": "UIMigration",
-      "reason": "Only the local media-finish observer registration and removal remain.",
+      "reason": "Only the AVPlayer completion observer registration and token removal in RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift remain.",
       "removalPhase": "P5"
     },
     "unexpectedNotificationCenterUses": {
       "maximum": 0,
       "owner": "ArchitectureClosure",
-      "reason": "Only the AVPlayer completion observer registration and removal in VideoSplashView are allowed.",
+      "reason": "Only the AVPlayer completion observer registration and token removal in RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift are allowed.",
       "removalPhase": "P7"
     },
     "temporaryApplicationSessionAdapters": {
