@@ -7,6 +7,10 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.36] - 2026-08-11
+
+- Move platform I/O and system presentation behind runtime (#37) by @flynn33
+
 ## [1.0.35] - 2026-08-09
 
 - Align Rune Scribe architecture with the product roadmap (#36) by @flynn33
