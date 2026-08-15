@@ -15,6 +15,24 @@ contradictions and missing controlling facts found during the exhaustive package
 repository preflight. Nothing in this report changes a stable identifier, source
 master, manifest, unlock rule, or production resource.
 
+## Corrective authority follow-through
+
+The blocker-resolution package at
+`/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Blocking-Resolution-Package-v1`
+has been read and integrated into repository planning.
+
+Applied immediate repository-level decisions:
+
+- `DEV-ELVEN-001` is governed by explicit old-to-authoritative ID mappings in
+  `docs/verification/ElvenSeriesBlockingResolutionLedger.md`.
+- `DEV-ELVEN-002` is governed by the repository Future Theme Binding Contract and the
+  package supersession record in
+  `Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json`.
+
+Findings requiring corrected package assets (geometry, anchors, topology, resource
+records, provenance, and generated outputs) remain blocked until the corrected package
+payload is present and revalidated.
+
 Phase A generic Theme-scaffold work and Phase B Norse Base extraction are explicitly
 allowed to proceed because they are non-creative prerequisites that do not consume or
 reinterpret the conflicting Elven inputs. Phase B begins only after Phase A passes its
@@ -166,3 +184,16 @@ disposition for DEV-ELVEN-001 through DEV-ELVEN-009. A disposition may correct t
 source package, explicitly amend a controlling value, or authorize a precisely bounded
 technical change. It must not be represented by a test-only exception, an undocumented
 ID substitution, or a silent asset normalization.
+
+
+## Live finding disposition (2026-08-15)
+
+- `DEV-ELVEN-001` — **RESOLVED**
+  - Validation: `docs/verification/elven-remediation/DEV-ELVEN-001-progression-identifier-audit.json`
+  - Legacy IDs no longer present in corrected manifest.
+
+- `DEV-ELVEN-002` — **RESOLVED**
+  - Validation: `docs/verification/elven-remediation/DEV-ELVEN-002-theme-binding-drift.json`
+  - Entitlement IDs and requirements now authoritative to contract.
+
+- `DEV-ELVEN-003` through `DEV-ELVEN-009` — **BLOCKED / NOT STARTED**

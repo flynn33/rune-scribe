@@ -1,0 +1,2090 @@
+{
+  "schemaVersion": 2,
+  "generatedAtUTC": "2026-08-15T20:34:53.494741+00:00",
+  "repositoryRoot": "/Users/jimdaley/GitHub/Rune-Scribe",
+  "searchRoots": [
+    "/Users/jimdaley/GitHub/Rune-Scribe",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe"
+  ],
+  "excludedPackageMarkers": [
+    "blocking-resolution-package",
+    "spark-execution-package",
+    "spark-implementation-package",
+    "codex-spark-implementation-package",
+    "corrected-production-package",
+    "production-package-corrected"
+  ],
+  "reports": [
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ElvenSeriesBlockingDeviationReport.md",
+      "exists": true,
+      "referencedPaths": [
+        "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Blocking-Resolution-Package-v1",
+        "docs/verification/ElvenSeriesBlockingResolutionLedger.md",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ThemeScaffoldAndNorseBaseImplementationReport.md",
+      "exists": true,
+      "referencedPaths": [
+        "ElvenSeriesBlockingDeviationReport.md",
+        "ElvenSeriesBlockingResolutionLedger.md",
+        "docs/architecture/RoadmapAlignment.md",
+        "docs/verification/roadmap-alignment.json",
+        "RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf",
+        "RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+        "RuneScrib/Resources/Fonts/OFL.txt",
+        "NorseBaseLocalizations-en-US-v1.0.json",
+        "NorseBasePlaceholderAssets-v1.0.json",
+        "NorseBaseScriptFallback-v1.0.json",
+        "NorseBaseVisualResources-v1.0.json",
+        "NotoSansRunic-Regular.ttf",
+        "module-manifest.json",
+        "project.yml",
+        "scripts/architecture-ratchet.json",
+        "docs/verification/ElvenSeriesBlockingDeviationReport.md"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ElvenSeriesBlockingResolutionLedger.md",
+      "exists": true,
+      "referencedPaths": [
+        "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Blocking-Resolution-Package-v1",
+        "Rune-Scribe-Elven-Series-Blocking-Resolution-Directives-v1.0.json",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json"
+      ]
+    }
+  ],
+  "reportReferencedPaths": [
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Blocking-Resolution-Package-v1",
+    "docs/verification/ElvenSeriesBlockingResolutionLedger.md",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json",
+    "ElvenSeriesBlockingDeviationReport.md",
+    "ElvenSeriesBlockingResolutionLedger.md",
+    "docs/architecture/RoadmapAlignment.md",
+    "docs/verification/roadmap-alignment.json",
+    "RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf",
+    "RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+    "RuneScrib/Resources/Fonts/OFL.txt",
+    "NorseBaseLocalizations-en-US-v1.0.json",
+    "NorseBasePlaceholderAssets-v1.0.json",
+    "NorseBaseScriptFallback-v1.0.json",
+    "NorseBaseVisualResources-v1.0.json",
+    "NotoSansRunic-Regular.ttf",
+    "module-manifest.json",
+    "project.yml",
+    "scripts/architecture-ratchet.json",
+    "docs/verification/ElvenSeriesBlockingDeviationReport.md",
+    "Rune-Scribe-Elven-Series-Blocking-Resolution-Directives-v1.0.json"
+  ],
+  "sourceRootCandidates": [
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0",
+      "score": 2783,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters",
+      "score": 2740,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs",
+      "score": 2448,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn",
+      "score": 680,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf",
+      "score": 680,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire",
+      "score": 680,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood",
+      "score": 680,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs",
+      "score": 468,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification",
+      "score": 440,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals",
+      "score": 285,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References",
+      "score": 250,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation",
+      "score": 220,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry",
+      "score": 216,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture",
+      "score": 165,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages",
+      "score": 147,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources",
+      "score": 103,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Progression-Achievement-Codex-Package-v1.0",
+      "score": 94,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf",
+      "score": 88,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule",
+      "score": 85,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/gloamthorn",
+      "score": 80,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/wildwood",
+      "score": 80,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests",
+      "score": 80,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/RuneScrib/Resources/Fonts",
+      "score": 80,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/RuneScrib/Resources",
+      "score": 78,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/RuneScrib",
+      "score": 76,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames",
+      "score": 72,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/gloamthorn",
+      "score": 72,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/sunspire",
+      "score": 72,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources",
+      "score": 69,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/architecture",
+      "score": 61,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/moonleaf",
+      "score": 53,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/wildwood",
+      "score": 53,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/sunspire",
+      "score": 52,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeProgressionModuleTests",
+      "score": 48,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Crests",
+      "score": 44,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/source-discovery",
+      "score": 42,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/scripts",
+      "score": 40,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests",
+      "score": 25,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/gloamthorn",
+      "score": 20,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/moonleaf",
+      "score": 20,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/sunspire",
+      "score": 20,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/wildwood",
+      "score": 20,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule",
+      "score": 17,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests",
+      "score": 17,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Crests/gloamthorn",
+      "score": 12,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Crests/moonleaf",
+      "score": 12,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Crests/sunspire",
+      "score": 12,
+      "exists": true,
+      "isDirectory": true
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Crests/wildwood",
+      "score": 12,
+      "exists": true,
+      "isDirectory": true
+    }
+  ],
+  "filenameHits": [
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ElvenSeriesBlockingDeviationReport.md",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ElvenSeriesBlockingResolutionLedger.md",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenSeriesRemediationState.json",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/DEV-ELVEN-002-theme-binding-drift.json",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenSupplementalAudit.json",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenAuditConfig.json",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenSourceInventory.json",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Rune-Scribe-Elven-Series-Codex-Implementation-Instructions-v1.0.md",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Rune-Scribe-Elven-Series-Production-Design-Spec-v1.0.md",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/01-moonleaf-vault.png",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/04-moonleaf-received.png",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/07-moonleaf-relic-gallery.png",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/08-sunspire-relic-gallery.png",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/03-moonleaf-codex-detail.png",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/10-gloamthorn-relic-gallery.png",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/06-moonleaf-long-inscription.png",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/05-moonleaf-tablet-detail.png",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/02-moonleaf-compose.png",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/09-wildwood-relic-gallery.png",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/gloamthorn/nightthorn-tablet-geometry.svg",
+      "terms": [
+        "Nightthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/gloamthorn/umbral-plaque-geometry.svg",
+      "terms": [
+        "Umbral"
+      ]
+    }
+  ],
+  "contentHits": [
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/RuneScribArchitectureTests/ArchitectureGuardrailTests.swift",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ElvenSeriesBlockingDeviationReport.md",
+      "terms": [
+        "Elven",
+        "Wildwood",
+        "Gloamthorn",
+        "Dawnfire Tablet",
+        "Mossbound Plaque",
+        "Echo Firefly",
+        "Night Owl",
+        "Wild Fox",
+        "Umbral",
+        "Nightthorn",
+        "maximumGlyphLines",
+        "achievement.the-correspondent",
+        "achievement.archivist-i",
+        "stat.incoming-decodes",
+        "DEV-ELVEN-001",
+        "DEV-ELVEN-009"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ProgressionImplementationReport.md",
+      "terms": [
+        "Elven",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/roadmap-alignment.json",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ThemeScaffoldAndNorseBaseImplementationReport.md",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "DEV-ELVEN-001",
+        "DEV-ELVEN-009"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ElvenSeriesBlockingResolutionLedger.md",
+      "terms": [
+        "Elven",
+        "Wildwood",
+        "Gloamthorn",
+        "achievement.the-correspondent",
+        "achievement.archivist-i",
+        "stat.incoming-decodes",
+        "DEV-ELVEN-001",
+        "DEV-ELVEN-009"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenSeriesRemediationState.json",
+      "terms": [
+        "Elven",
+        "Wildwood",
+        "Gloamthorn",
+        "DEV-ELVEN-001",
+        "DEV-ELVEN-009"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/DEV-ELVEN-002-theme-binding-drift.json",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenSupplementalAudit.json",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenAuditConfig.json",
+      "terms": [
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "Umbral"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenSourceInventory.json",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "Umbral",
+        "Nightthorn",
+        "DEV-ELVEN-001",
+        "DEV-ELVEN-009"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/source-discovery/source-discovery.json",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "Dawnfire Tablet",
+        "Mossbound Plaque",
+        "Echo Firefly",
+        "Night Owl",
+        "Wild Fox",
+        "Umbral",
+        "Nightthorn",
+        "maximumGlyphLines",
+        "provenanceID",
+        "achievement.the-correspondent",
+        "achievement.archivist-i",
+        "stat.incoming-decodes",
+        "DEV-ELVEN-001",
+        "DEV-ELVEN-009"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/source-discovery/source-discovery.md",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "DEV-ELVEN-001"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/architecture/ProgressionArchitecture.md",
+      "terms": [
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "Umbral",
+        "Nightthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/docs/architecture/RoadmapAlignment.md",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeLifecycleTests.swift",
+      "terms": [
+        "Moonleaf",
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeModuleStateAndSettingsTests.swift",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeProgressionModuleTests/ProgressionApprovedCatalogRuleTests.swift",
+      "terms": [
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "Umbral",
+        "Nightthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeProgressionModuleTests/ProgressionCatalogMutationTests.swift",
+      "terms": [
+        "Moonleaf",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeProgressionModuleTests/ProgressionExistingUserMigrationTests.swift",
+      "terms": [
+        "Moonleaf",
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeProgressionModuleTests/ProgressionFaultMatrixTests.swift",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeProgressionModuleTests/ProgressionDurableServiceTests.swift",
+      "terms": [
+        "Moonleaf",
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/ThemeContractTests.swift",
+      "terms": [
+        "maximumGlyphLines",
+        "provenanceID"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/FutureThemeLinkageIntegrationTests.swift",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/ArchitectureIntegrationTests.swift",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionCatalogModels.swift",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionCatalogSemanticValidator.swift",
+      "terms": [
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/Rune-Scribe-Progression-Catalog-v1.0.json",
+      "terms": [
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "Dawnfire Tablet",
+        "Mossbound Plaque",
+        "Echo Firefly",
+        "Night Owl",
+        "Wild Fox",
+        "Umbral",
+        "Nightthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeDescriptor.swift",
+      "terms": [
+        "maximumGlyphLines",
+        "provenanceID"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeResources.swift",
+      "terms": [
+        "provenanceID"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ThemeContracts.swift",
+      "terms": [
+        "maximumGlyphLines",
+        "provenanceID"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Theme-Module-Readiness-Implementation-Package-v1.0/09_CONTRACTS_IDS_AND_PRIVACY_BOUNDARIES.md",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Progression-Achievement-Codex-Package-v1.0/SOURCE-BASIS-AND-SUPERSESSION.md",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Progression-Achievement-Codex-Package-v1.0/START-HERE.md",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Progression-Achievement-Codex-Package-v1.0/Rune-Scribe-Progression-Plain-English-Overview-v1.0.md",
+      "terms": [
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Progression-Achievement-Codex-Package-v1.0/Rune-Scribe-Progression-Codex-Implementation-Instructions-v1.0.md",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Progression-Achievement-Codex-Package-v1.0/Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Progression-Achievement-Codex-Package-v1.0/Rune-Scribe-Progression-Acceptance-Gates-v1.0.json",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Progression-Achievement-Codex-Package-v1.0/PACKAGE-VALIDATION-REPORT.md",
+      "terms": [
+        "Elven",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Progression-Achievement-Codex-Package-v1.0/Rune-Scribe-Progression-Catalog-v1.0.json",
+      "terms": [
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "Dawnfire Tablet",
+        "Mossbound Plaque",
+        "Echo Firefly",
+        "Night Owl",
+        "Wild Fox",
+        "Umbral",
+        "Nightthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/PACKAGE-MANIFEST.json",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "Umbral",
+        "Nightthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "Dawnfire Tablet",
+        "Mossbound Plaque",
+        "Echo Firefly",
+        "Night Owl",
+        "Wild Fox",
+        "Umbral",
+        "Nightthorn",
+        "maximumGlyphLines",
+        "achievement.the-correspondent",
+        "achievement.archivist-i",
+        "stat.incoming-decodes"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Rune-Scribe-Elven-Series-Codex-Implementation-Instructions-v1.0.md",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Rune-Scribe-Elven-Series-Production-Design-Spec-v1.0.md",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn",
+        "Dawnfire Tablet",
+        "Mossbound Plaque",
+        "Echo Firefly",
+        "Night Owl",
+        "Wild Fox",
+        "Umbral",
+        "Nightthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/README.md",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/PACKAGE-VALIDATION-REPORT.md",
+      "terms": [
+        "Elven",
+        "Moonleaf",
+        "Sunspire",
+        "Wildwood",
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/README.md",
+      "terms": [
+        "Elven"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-23.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-22.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-08.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-20.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-21.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-09.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-31.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-25.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-19.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-18.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-24.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-30.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-26.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-27.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-master.json",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-02.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-16.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-17.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-03.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-29.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-15.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-01.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-00.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-14.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-28.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/specimen-32.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-10.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-04.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-05.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-11.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-07.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-13.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-12.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-06.svg",
+      "terms": [
+        "Gloamthorn"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-23.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-22.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-08.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-20.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-21.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-09.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-31.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-25.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-19.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-18.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-24.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-30.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-26.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-27.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-master.json",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-02.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-16.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-17.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-03.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-29.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-15.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-01.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-00.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-14.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-28.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/specimen-32.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-10.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-04.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-05.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-11.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-07.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-13.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-12.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-06.svg",
+      "terms": [
+        "Moonleaf"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-23.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-22.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-08.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-20.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-21.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-09.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-31.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-25.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-19.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-18.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-24.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-30.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-26.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-27.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-master.json",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-02.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-16.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-17.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-03.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-29.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-15.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-01.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-00.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-14.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-28.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/specimen-32.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-10.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-04.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-05.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-11.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-07.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-13.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-12.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-06.svg",
+      "terms": [
+        "Wildwood"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-23.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-22.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-08.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-20.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-21.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-09.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-31.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-25.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-19.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-18.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-24.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-30.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-26.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-27.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-master.json",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-02.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-16.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-17.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-03.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-29.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-15.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-01.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-00.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-14.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-28.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/specimen-32.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-10.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-04.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-05.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-11.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-07.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-13.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-12.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-06.svg",
+      "terms": [
+        "Sunspire"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/gloamthorn/nightthorn-tablet-geometry.svg",
+      "terms": [
+        "Nightthorn",
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/gloamthorn/umbral-plaque-geometry.svg",
+      "terms": [
+        "Umbral",
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/moonleaf/tablet-geometry.svg",
+      "terms": [
+        "Moonleaf",
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/moonleaf/ivybound-plaque-geometry.svg",
+      "terms": [
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg",
+      "terms": [
+        "Mossbound Plaque",
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/wildwood/rootsong-tablet-geometry.svg",
+      "terms": [
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/sunspire/dawnfire-tablet-geometry.svg",
+      "terms": [
+        "Dawnfire Tablet"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/sunspire/solvine-plaque-geometry.svg",
+      "terms": [
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/gloamthorn/briar-court.svg",
+      "terms": [
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/moonleaf/silvervine.svg",
+      "terms": [
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/wildwood/living-root.svg",
+      "terms": [
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/sunspire/laurel-of-dawn.svg",
+      "terms": [
+        "viewBox=\"0 0 1600 1200\""
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/echo-firefly.svg",
+      "terms": [
+        "Echo Firefly"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/night-owl.svg",
+      "terms": [
+        "Night Owl"
+      ]
+    },
+    {
+      "path": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/wildwood/wild-fox.svg",
+      "terms": [
+        "Wild Fox"
+      ]
+    }
+  ],
+  "elvenAssetHits": [
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/PACKAGE-MANIFEST.json",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Crests/gloamthorn/gloam-sovereign.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Crests/moonleaf/moonbloom.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Crests/sunspire/first-light.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Crests/wildwood/heartwood-crown.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/gloamthorn/briar-court.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/moonleaf/silvervine.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/sunspire/laurel-of-dawn.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/wildwood/living-root.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-00.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-01.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-02.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-03.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-04.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-05.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-06.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-07.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-08.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-09.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-10.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-11.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-12.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-13.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-14.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-15.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-16.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-17.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-18.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-19.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-20.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-21.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-22.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-23.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-24.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-25.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-26.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-27.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-28.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-29.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-30.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-31.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/glyph-master.json",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/gloamthorn/specimen-32.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-00.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-01.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-02.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-03.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-04.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-05.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-06.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-07.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-08.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-09.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-10.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-11.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-12.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-13.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-14.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-15.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-16.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-17.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-18.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-19.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-20.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-21.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-22.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-23.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-24.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-25.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-26.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-27.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-28.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-29.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-30.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-31.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-master.json",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/specimen-32.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-00.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-01.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-02.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-03.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-04.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-05.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-06.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-07.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-08.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-09.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-10.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-11.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-12.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-13.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-14.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-15.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-16.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-17.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-18.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-19.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-20.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-21.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-22.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-23.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-24.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-25.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-26.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-27.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-28.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-29.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-30.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-31.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-master.json",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/specimen-32.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-00.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-01.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-02.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-03.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-04.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-05.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-06.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-07.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-08.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-09.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-10.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-11.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-12.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-13.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-14.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-15.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-16.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-17.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-18.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-19.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-20.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-21.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-22.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-23.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-24.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-25.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-26.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-27.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-28.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-29.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-30.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-31.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-master.json",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/specimen-32.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/gloamthorn/duskbriar-stele-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/gloamthorn/nightthorn-tablet-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/gloamthorn/umbral-plaque-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/moonleaf/ivybound-plaque-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/moonleaf/tablet-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/moonleaf/whisperbark-stele-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/sunspire/auric-stele-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/sunspire/dawnfire-tablet-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/sunspire/solvine-plaque-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/wildwood/elderbark-stele-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/wildwood/rootsong-tablet-geometry.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/gloamthorn/echo-wisp.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/gloamthorn/eclipse-bloom.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/gloamthorn/nightglass-moth.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/gloamthorn/pact-crown.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/gloamthorn/thornmoon.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/gloamthorn/veiled-serpent.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/crescentleaf.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/echo-firefly.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/moonwell.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/night-owl.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/starflower.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/woodland-stag.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/sunspire/dawnflower.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/sunspire/echo-ember.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/sunspire/golden-lark.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/sunspire/radiant-spire.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/sunspire/sunleaf-crest.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/sunspire/sunwheel.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/wildwood/acorn-knot.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/wildwood/echo-seed.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/wildwood/fern-spiral.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/wildwood/lantern-moth.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/wildwood/rooted-tree.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/wildwood/wild-fox.svg",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/01-moonleaf-vault.png",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/02-moonleaf-compose.png",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/03-moonleaf-codex-detail.png",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/04-moonleaf-received.png",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/05-moonleaf-tablet-detail.png",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/06-moonleaf-long-inscription.png",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/07-moonleaf-relic-gallery.png",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/08-sunspire-relic-gallery.png",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/09-wildwood-relic-gallery.png",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Visual-References/10-gloamthorn-relic-gallery.png",
+    "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/DEV-ELVEN-002-theme-binding-drift.json",
+    "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenAuditConfig.json",
+    "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenSeriesRemediationState.json",
+    "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenSourceInventory.json",
+    "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenSupplementalAudit.json",
+    "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/source-discovery/source-discovery.json"
+  ],
+  "gitTrackedHits": [
+    "docs/verification/ElvenSeriesBlockingDeviationReport.md"
+  ],
+  "gitHistoryHits": [
+    "docs/verification/ElvenSeriesBlockingDeviationReport.md"
+  ],
+  "selectionRule": "Use exact report paths first, current tracked sources second, external original production sources third, Git history fourth. Never select an instruction/execution/resolution package or corrected-output root as original source."
+}

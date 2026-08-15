@@ -1,0 +1,340 @@
+{
+  "schemaVersion": 1,
+  "documentID": "runescribe.elven.source-inventory",
+  "repositoryRoot": "/Users/jimdaley/GitHub/Rune-Scribe",
+  "projectSearchRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe",
+  "correctedProductionOutputRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0",
+  "selectedOriginalSourceRoots": [
+    "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0"
+  ],
+  "selectionEvidence": [
+    "source-discovery report ranked v1.0 design package highest",
+    "report-referenced path includes blocking package v1",
+    "exact source paths in artifact and geometry records"
+  ],
+  "classificationValues": [
+    "FOUND_CURRENT",
+    "FOUND_GIT_HISTORY",
+    "FOUND_ARCHIVE",
+    "MISSING_MASTER_APPROVED_REFERENCE_AVAILABLE",
+    "MISSING_HISTORY_REPLACE_WITH_NEW_MASTER",
+    "MISSING_MASTER_AND_REFERENCE",
+    "NOT_APPLICABLE"
+  ],
+  "items": [
+    {
+      "findingIDs": [
+        "DEV-ELVEN-003",
+        "DEV-ELVEN-005"
+      ],
+      "stableID": "relicGeometry:ivyboundPlaque",
+      "assetClass": "geometry",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/moonleaf/ivybound-plaque-geometry.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Relic-Geometry/moonleaf/ivybound-plaque-geometry.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-003",
+        "DEV-ELVEN-005"
+      ],
+      "stableID": "relicGeometry:solvinePlaque",
+      "assetClass": "geometry",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/sunspire/solvine-plaque-geometry.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Relic-Geometry/sunspire/solvine-plaque-geometry.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-003",
+        "DEV-ELVEN-004",
+        "DEV-ELVEN-005"
+      ],
+      "stableID": "relicGeometry:mossboundPlaque",
+      "assetClass": "geometry",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-003",
+        "DEV-ELVEN-004",
+        "DEV-ELVEN-005"
+      ],
+      "stableID": "relicGeometry:umbralPlaque",
+      "assetClass": "geometry",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/gloamthorn/umbral-plaque-geometry.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Relic-Geometry/gloamthorn/umbral-plaque-geometry.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-003",
+        "DEV-ELVEN-004"
+      ],
+      "stableID": "relicGeometry:nightthornTablet",
+      "assetClass": "geometry",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/gloamthorn/nightthorn-tablet-geometry.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Relic-Geometry/gloamthorn/nightthorn-tablet-geometry.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-004"
+      ],
+      "stableID": "relicGeometry:dawnfireTablet",
+      "assetClass": "geometry",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Relic-Geometry/sunspire/dawnfire-tablet-geometry.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Relic-Geometry/sunspire/dawnfire-tablet-geometry.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-006"
+      ],
+      "stableID": "seal:echoFirefly",
+      "assetClass": "seal",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/echo-firefly.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Seals/moonleaf/echo-firefly.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-006"
+      ],
+      "stableID": "seal:nightOwl",
+      "assetClass": "seal",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/night-owl.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Seals/moonleaf/night-owl.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-006"
+      ],
+      "stableID": "seal:wildFox",
+      "assetClass": "seal",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/wildwood/wild-fox.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Seals/wildwood/wild-fox.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-006"
+      ],
+      "stableID": "frame:silvervine",
+      "assetClass": "frame",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/sunspire/silvervine-frame.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Frames/sunspire/silvervine-frame.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-006"
+      ],
+      "stableID": "frame:laurelOfDawn",
+      "assetClass": "frame",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/sunspire/laurel-of-dawn-frame.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Frames/sunspire/laurel-of-dawn-frame.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-006"
+      ],
+      "stableID": "frame:livingRoot",
+      "assetClass": "frame",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/wildwood/living-root-frame.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Frames/wildwood/living-root-frame.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-006"
+      ],
+      "stableID": "frame:briarCourt",
+      "assetClass": "frame",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Frames/gloamthorn/briar-court-frame.svg",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Frames/gloamthorn/briar-court-frame.svg",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-007",
+        "DEV-ELVEN-008",
+        "DEV-ELVEN-009"
+      ],
+      "stableID": "crest:all",
+      "assetClass": "crest",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Crests",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Source-Masters/Crests",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-001",
+        "DEV-ELVEN-002"
+      ],
+      "stableID": "manifest:asset-manifest",
+      "assetClass": "manifest",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    },
+    {
+      "findingIDs": [
+        "DEV-ELVEN-008"
+      ],
+      "stableID": "resources:script+background+vault+frame+crest",
+      "assetClass": "resource",
+      "classification": "FOUND_CURRENT",
+      "currentSourcePath": "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+      "historicalOrArchiveSourcePath": null,
+      "approvedReferencePaths": [],
+      "sourceSHA256BeforeEdits": null,
+      "gitFirstAddCommit": null,
+      "gitFirstAddUTC": null,
+      "plannedCorrection": "CORRECT",
+      "correctedWorkingPath": "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+      "plannedOutputPaths": [],
+      "provenanceStrategy": "CORRECT",
+      "specificExternalBlocker": null
+    }
+  ]
+}

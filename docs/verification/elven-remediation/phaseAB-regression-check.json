@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "check": "phaseAB-regression-smoke",
+  "status": "PASS",
+  "phaseAResult": "PASS",
+  "phaseBResult": "PASS",
+  "overallElvenPackageBlocked": false,
+  "source": "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ThemeScaffoldAndNorseBaseImplementationReport.md"
+}

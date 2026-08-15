@@ -22,8 +22,10 @@ package are implemented:
   Noto Sans Runic bytes, cryptography, payload readers, or outbound format policy.
 
 The package as a whole does **not** pass. Phase C and every Elven-dependent phase are
-blocked by the nine unresolved findings DEV-ELVEN-001 through DEV-ELVEN-009 in
+blocked by unresolved findings DEV-ELVEN-003 through DEV-ELVEN-009 in
 [`ElvenSeriesBlockingDeviationReport.md`](ElvenSeriesBlockingDeviationReport.md).
+An official corrective-resolution package was then received and logged in
+[`ElvenSeriesBlockingResolutionLedger.md`](ElvenSeriesBlockingResolutionLedger.md).
 Those findings cover conflicting Progression identifiers and authorities, geometry
 and anchor conflicts, missing line-limit authority, prose/source topology conflicts,
 incorrect Crest metadata, incomplete resource declarations, and absent mandatory

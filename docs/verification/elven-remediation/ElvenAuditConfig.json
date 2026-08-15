@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "affectedGeometryMasters": [
+    "Source-Masters/Relic-Geometry/moonleaf/ivybound-plaque-geometry.svg",
+    "Source-Masters/Relic-Geometry/sunspire/solvine-plaque-geometry.svg",
+    "Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg",
+    "Source-Masters/Relic-Geometry/gloamthorn/umbral-plaque-geometry.svg"
+  ],
+  "requiredFeatureGroupsByFile": {
+    "Source-Masters/Seals/moonleaf/echo-firefly.svg": [
+      "feature.echo-firefly.leaf-trail"
+    ],
+    "Source-Masters/Seals/moonleaf/night-owl.svg": [
+      "feature.night-owl.crescent"
+    ],
+    "Source-Masters/Seals/wildwood/wild-fox.svg": [
+      "feature.wild-fox.botanical-curls"
+    ]
+  },
+  "staleLabels": [],
+  "completeThemeModuleMaximumBytes": 67108864
+}

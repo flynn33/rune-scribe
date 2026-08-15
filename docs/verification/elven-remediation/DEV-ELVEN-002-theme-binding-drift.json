@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "check": "DEV-ELVEN-002 theme binding drift and authority check",
+  "status": "PASS",
+  "findings": [
+
+  ]
+}
