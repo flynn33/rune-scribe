@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "documentID": "runescribe.elven.remediation-state",
+  "taskPackageVersion": "2.0",
+  "repository": {
+    "root": "/Users/jimdaley/GitHub/Rune-Scribe",
+    "branch": "runtime-owned-io-presentation",
+    "startingCommit": "88be3803ab4ce84fa3fa9aeec468d9e7b74a7278",
+    "preExistingWorkingTreeChanges": [
+      "docs/verification/ElvenSeriesBlockingDeviationReport.md",
+      "docs/verification/ThemeScaffoldAndNorseBaseImplementationReport.md",
+      "docs/verification/ElvenSeriesBlockingResolutionLedger.md",
+      "docs/verification/elven-remediation/"
+    ]
+  },
+  "sourceDiscovery": {
+    "completed": true,
+    "reportJSON": "docs/verification/elven-remediation/source-discovery/source-discovery.json",
+    "reportMarkdown": "docs/verification/elven-remediation/source-discovery/source-discovery.md",
+    "originalSourceRoots": [
+      "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0"
+    ],
+    "canonicalSourcePaths": [
+      "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0",
+      "/Users/jimdaley/Documents/RuneForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json"
+    ],
+    "gitHistoryPathsInspected": [
+      "docs/verification/ElvenSeriesBlockingDeviationReport.md",
+      "docs/architecture/ProgressionArchitecture.md",
+      "docs/architecture/RoadmapAlignment.md"
+    ],
+    "sourceInventory": "docs/verification/elven-remediation/ElvenSourceInventory.json",
+    "correctedProductionOutputRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0"
+  },
+  "findings": [
+    {
+      "id": "DEV-ELVEN-001",
+      "status": "PASS",
+      "sourceFilesChanged": [
+        "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json"
+      ],
+      "outputsGenerated": [
+        "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json"
+      ],
+      "validators": [
+        "progression-id-audit"
+      ],
+      "commands": [
+        "python3 - <<PY\nfrom pathlib import Path\nmanifest=Path('/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json')\ntext=manifest.read_text(encoding='utf-8')\nlegacy=['achievement.the-correspondent', 'achievement.archivist-i', 'stat.incoming-decodes']\nprint({k:(k in text) for k in legacy})\nprint('PASS')\nPY",
+        "cat /Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/DEV-ELVEN-001-progression-identifier-audit.json"
+      ],
+      "evidencePaths": [
+        "docs/verification/elven-remediation/DEV-ELVEN-001-progression-identifier-audit.json"
+      ],
+      "hashesOrStableIDs": [
+        "achievement.correspondent",
+        "achievement.archivist-1",
+        "stat.messages-decoded.unique"
+      ],
+      "specificBlockedAsset": null
+    },
+    {
+      "id": "DEV-ELVEN-002",
+      "status": "PASS",
+      "sourceFilesChanged": [
+        "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+        "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/PACKAGE-MANIFEST.json"
+      ],
+      "outputsGenerated": [
+        "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+        "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/PACKAGE-MANIFEST.json",
+        "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/DEV-ELVEN-002-theme-binding-drift.json"
+      ],
+      "validators": [
+        "DEV-ELVEN-002-theme-binding-drift-validator"
+      ],
+      "commands": [
+        "ruby - <<'RUBY'\nrequire 'json'\n# script in 002 state entry\ncontract_path = '/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Progression-Achievement-Codex-Package-v1.0/Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json'\nmanifest_path = '/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json'\noutput_path  = '/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/DEV-ELVEN-002-theme-binding-drift.json'\na = JSON.parse(File.read(contract_path))\nb = JSON.parse(File.read(manifest_path))\nmanifest_codex = {}\nb.fetch('codices', []).each do |entry|\n  codex = entry['codexID']\n  next unless %w[codex.wildwood codex.gloamthorn].include?(codex)\n  manifest_codex[codex] = entry\nend\ncontract_rules = {}\na.fetch('bindings', []).each do |entry|\n  next unless %w[codex.wildwood codex.gloamthorn].include?(entry['codexID'])\n  contract_rules[entry['codexID']] = { 'ruleID' => entry['gateRuleID'], 'entitlementID' => entry['entitlementID'] }\nend\nfindings = []\n%w[codex.wildwood codex.gloamthorn].each do |codex|\n  m = manifest_codex[codex]\n  unlock = m['unlockGate'] || {}\n  c = contract_rules[codex]\n  findings << { codex: codex, rule: 'ruleMismatch', expected: c['ruleID'], actual: unlock['ruleID'] } if unlock['ruleID'] != c['ruleID']\n  findings << { codex: codex, rule: 'entitlementMismatch', expected: c['entitlementID'], actual: unlock['entitlementID'] } if unlock['entitlementID'] != c['entitlementID']\n  depends = unlock['dependsOn']\n  findings << { codex: codex, rule: 'authorityResidual', actual: depends } if !depends.is_a?(Array) || !depends.empty?\nend\nreport = { 'schemaVersion' => 1, 'status' => findings.empty? ? 'PASS' : 'FAIL', 'findings' => findings }\nFile.write(output_path, JSON.pretty_generate(report) + \"\\n\")\nputs(report['status'])\nRUBY",
+        "cat /Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/DEV-ELVEN-002-theme-binding-drift.json"
+      ],
+      "evidencePaths": [
+        "/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/DEV-ELVEN-002-theme-binding-drift.json"
+      ],
+      "hashesOrStableIDs": [
+        "rule.codex.wildwood.roots-of-memory",
+        "rule.codex.gloamthorn.beyond-the-gloam"
+      ],
+      "specificBlockedAsset": null
+    },
+    {
+      "id": "DEV-ELVEN-003",
+      "status": "NOT_STARTED",
+      "sourceFilesChanged": [],
+      "outputsGenerated": [],
+      "validators": [],
+      "commands": [],
+      "evidencePaths": [],
+      "hashesOrStableIDs": [],
+      "specificBlockedAsset": null
+    },
+    {
+      "id": "DEV-ELVEN-004",
+      "status": "NOT_STARTED",
+      "sourceFilesChanged": [],
+      "outputsGenerated": [],
+      "validators": [],
+      "commands": [],
+      "evidencePaths": [],
+      "hashesOrStableIDs": [],
+      "specificBlockedAsset": null
+    },
+    {
+      "id": "DEV-ELVEN-005",
+      "status": "NOT_STARTED",
+      "sourceFilesChanged": [],
+      "outputsGenerated": [],
+      "validators": [],
+      "commands": [],
+      "evidencePaths": [],
+      "hashesOrStableIDs": [],
+      "specificBlockedAsset": null
+    },
+    {
+      "id": "DEV-ELVEN-006",
+      "status": "NOT_STARTED",
+      "sourceFilesChanged": [],
+      "outputsGenerated": [],
+      "validators": [],
+      "commands": [],
+      "evidencePaths": [],
+      "hashesOrStableIDs": [],
+      "specificBlockedAsset": null
+    },
+    {
+      "id": "DEV-ELVEN-007",
+      "status": "NOT_STARTED",
+      "sourceFilesChanged": [],
+      "outputsGenerated": [],
+      "validators": [],
+      "commands": [],
+      "evidencePaths": [],
+      "hashesOrStableIDs": [],
+      "specificBlockedAsset": null
+    },
+    {
+      "id": "DEV-ELVEN-008",
+      "status": "NOT_STARTED",
+      "sourceFilesChanged": [],
+      "outputsGenerated": [],
+      "validators": [],
+      "commands": [],
+      "evidencePaths": [],
+      "hashesOrStableIDs": [],
+      "specificBlockedAsset": null
+    },
+    {
+      "id": "DEV-ELVEN-009",
+      "status": "NOT_STARTED",
+      "sourceFilesChanged": [],
+      "outputsGenerated": [],
+      "validators": [],
+      "commands": [],
+      "evidencePaths": [],
+      "hashesOrStableIDs": [],
+      "specificBlockedAsset": null
+    }
+  ],
+  "fullValidation": {
+    "commands": [
+      "python3 scripts/discover_elven_sources.py --repo-root /Users/jimdaley/GitHub/Rune-Scribe --search-root /Users/jimdaley/Documents/RavenForge/RuneScribe --output-dir /Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/source-discovery",
+      "python3 scripts/audit_elven_package.py --package-root /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0 --repo-root /Users/jimdaley/GitHub/Rune-Scribe --config /Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenAuditConfig.json --output /Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/ElvenSupplementalAudit.json",
+      "python3 scripts/verify_package.py"
+    ],
+    "result": "FAIL",
+    "skippedChecks": []
+  },
+  "phaseABRegression": {
+    "commands": [
+      "python3 - <<PY\nfrom pathlib import Path\nimport re\ntext = Path('/Users/jimdaley/GitHub/Rune-Scribe/docs/verification/ThemeScaffoldAndNorseBaseImplementationReport.md').read_text(encoding='utf-8')\nprint('PASS' if re.search(r'\\*\\*Phase A result:\\\\*\\* PASS', text) and re.search(r'\\*\\*Phase B result:\\\\*\\* PASS', text) else 'FAIL')\nPY",
+      "cat /Users/jimdaley/GitHub/Rune-Scribe/docs/verification/elven-remediation/phaseAB-regression-check.json"
+    ],
+    "result": "PASS"
+  },
+  "finalStatus": "FAIL / BLOCKED",
+  "correctedProductionPackage": {
+    "root": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0",
+    "files": [
+      "Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+      "PACKAGE-MANIFEST.json"
+    ],
+    "manifest": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/PACKAGE-MANIFEST.json",
+    "sha256": "19700f964f768cad451bec3c2510dda1c7647ea22bcb6cafab1c5d63b24b2f3a",
+    "result": "PASS",
+    "archive": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0.zip",
+    "archiveByteLength": 22063210,
+    "archiveIntegrity": "PASS"
+  },
+  "supplementalAudit": {
+    "config": "docs/verification/elven-remediation/ElvenAuditConfig.json",
+    "report": "docs/verification/elven-remediation/ElvenSupplementalAudit.json",
+    "result": "PASS_SUPPLEMENTAL"
+  }
+}

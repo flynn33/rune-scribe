@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "tool": "Rune Scribe Elven supplemental static audit",
+  "packageRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0",
+  "repoRoot": "/Users/jimdaley/GitHub/Rune-Scribe",
+  "scannedFileCount": 10263,
+  "packageBytes": 23155940,
+  "issues": [],
+  "warnings": [
+    {
+      "type": "textReadSkipped",
+      "path": "/Users/jimdaley/GitHub/Rune-Scribe/.remediation-execution/P03/verification-20260810T051500Z/ComplianceGuardTests-full.xcresult/Staging/1_Test/Diagnostics/My Mac_00006040-0016283C11F8801C/test-session-systemlogs-2026.08.10_00-56-25--0500.logarchive/Extra/roles.plist",
+      "error": "'utf-8' codec can't decode byte 0xa6 in position 8: invalid start byte"
+    }
+  ],
+  "manualOrRepositoryValidatorsStillRequiredFor": [
+    "anchor-circle geometry intersections",
+    "renderer snapshots and smallest-output recognition",
+    "accessibility behavior",
+    "platform builds/tests",
+    "binding semantic equivalence"
+  ],
+  "summary": {
+    "issueCount": 0,
+    "warningCount": 1,
+    "status": "PASS_SUPPLEMENTAL"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "check": "DEV-ELVEN-001 progression identifier authority audit",
+  "status": "PASS",
+  "manifest": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+  "mappings": {
+    "achievement.the-correspondent": "achievement.correspondent",
+    "achievement.archivist-i": "achievement.archivist-1",
+    "stat.incoming-decodes": "stat.messages-decoded"
+  },
+  "findings": [
+    {
+      "legacyID": "achievement.the-correspondent",
+      "canonicalIDUsed": "achievement.correspondent",
+      "presentInAssetManifest": false
+    },
+    {
+      "legacyID": "achievement.archivist-i",
+      "canonicalIDUsed": "achievement.archivist-1",
+      "presentInAssetManifest": false
+    },
+    {
+      "legacyID": "stat.incoming-decodes",
+      "canonicalIDUsed": "stat.messages-decoded",
+      "presentInAssetManifest": false
+    }
+  ]
+}
