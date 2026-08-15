@@ -19,9 +19,12 @@ final class ManifestValidationTests: XCTestCase {
             moduleID: manifest.moduleID,
             moduleVersion: manifest.moduleVersion,
             kind: manifest.moduleType,
+            criticality: manifest.criticality,
             entryPoint: manifest.entryPoint,
             role: manifest.defaultRole,
-            requestedCapabilities: Set(manifest.capabilitiesRequested)
+            requestedCapabilities: Set(manifest.capabilitiesRequested),
+            consumedEndpoints: Set(manifest.consumedEndpoints),
+            publishedEndpoints: Set(manifest.publishedEndpoints)
         )
         let policy = RuntimePolicy(
             vocabulary: CapabilityVocabulary(
@@ -73,7 +76,121 @@ final class ManifestValidationTests: XCTestCase {
 
         XCTAssertEqual(manifest.moduleID, "com.runescribe.module.test")
         XCTAssertEqual(manifest.moduleVersion, try SemanticVersion("1.0.34"))
+        XCTAssertEqual(manifest.criticality, .optional)
+        XCTAssertEqual(manifest.consumedEndpoints, ["test.input"])
+        XCTAssertEqual(manifest.publishedEndpoints, ["test.output"])
         XCTAssertFalse(manifest.diagnosticsVisibleInProduction)
+    }
+
+    func testDecoderAcceptsOwnedResourceAndRejectsUnknownResourceField() throws {
+        var root = try validManifestObject()
+        var requirements = try XCTUnwrap(root["runtimeRequirements"] as? [String: Any])
+        requirements["requiredResources"] = [[
+            "name": "progression-catalog",
+            "fileExtension": "json",
+            "subdirectory": "Progression",
+            "ownerModuleID": "com.runescribe.module.progression",
+        ]]
+        root["runtimeRequirements"] = requirements
+
+        let manifest = try ModuleManifestDecoder.decode(try data(root))
+        XCTAssertEqual(
+            manifest.runtimeRequirements.requiredResources,
+            [
+                ApplicationResource(
+                    name: "progression-catalog",
+                    fileExtension: "json",
+                    subdirectory: "Progression",
+                    ownerModuleID: "com.runescribe.module.progression"
+                ),
+            ]
+        )
+
+        requirements["requiredResources"] = [[
+            "name": "progression-catalog",
+            "fileExtension": "json",
+            "ownerModuleID": "com.runescribe.module.progression",
+            "unexpected": true,
+        ]]
+        root["runtimeRequirements"] = requirements
+        XCTAssertThrowsError(try ModuleManifestDecoder.decode(try data(root))) { error in
+            XCTAssertEqual(
+                error as? ManifestDecodingError,
+                .unknownField(
+                    path: "$.runtimeRequirements.requiredResources[0]",
+                    field: "unexpected"
+                )
+            )
+        }
+    }
+
+    func testDecoderRequiresCriticalityAndExactEndpointDeclarations() throws {
+        for field in ["criticality", "consumedEndpoints", "publishedEndpoints"] {
+            var root = try validManifestObject()
+            root.removeValue(forKey: field)
+
+            XCTAssertThrowsError(try ModuleManifestDecoder.decode(try data(root))) { error in
+                XCTAssertEqual(
+                    error as? ManifestDecodingError,
+                    .missingField(path: "$", field: field)
+                )
+            }
+        }
+
+        var root = try validManifestObject()
+        root["publishedEndpoints"] = ["test.output", "test.output"]
+        XCTAssertThrowsError(try ModuleManifestDecoder.decode(try data(root))) { error in
+            XCTAssertEqual(
+                error as? ManifestDecodingError,
+                .duplicateValue(path: "$.publishedEndpoints", value: "test.output")
+            )
+        }
+    }
+
+    func testValidatorRejectsCriticalityAndEndpointMismatches() throws {
+        let manifest = try ModuleManifestDecoder.decode(try validManifestData())
+        let policy = RuntimePolicy(
+            vocabulary: CapabilityVocabulary(
+                knownCapabilities: Set(manifest.capabilitiesRequested)
+            ),
+            capabilities: CapabilityPolicy(
+                allowedRolesByCapability: Dictionary(
+                    uniqueKeysWithValues: manifest.capabilitiesRequested.map {
+                        ($0, Set([manifest.defaultRole]))
+                    }
+                )
+            ),
+            services: ServiceAccessPolicy(rules: [])
+        )
+        let mismatched = ModuleDescriptor(
+            moduleID: manifest.moduleID,
+            moduleVersion: manifest.moduleVersion,
+            kind: manifest.moduleType,
+            criticality: .required,
+            entryPoint: manifest.entryPoint,
+            role: manifest.defaultRole,
+            requestedCapabilities: Set(manifest.capabilitiesRequested),
+            consumedEndpoints: Set(manifest.consumedEndpoints),
+            publishedEndpoints: Set(manifest.publishedEndpoints)
+        )
+
+        XCTAssertThrowsError(
+            try ModuleManifestValidator.validate(
+                manifest: manifest,
+                descriptor: mismatched,
+                runtimeVersion: manifest.runtimeVersion,
+                platform: .macOS,
+                policy: policy
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .manifestDescriptorMismatch(
+                    moduleID: manifest.moduleID,
+                    field: "criticality"
+                )
+            )
+        }
     }
 
     func testDecoderRejectsUnknownRootAndNestedFields() throws {
@@ -152,6 +269,7 @@ private func validManifestObject() throws -> [String: Any] {
         "displayName": "Test Module",
         "moduleVersion": "1.0.34",
         "moduleType": "service",
+        "criticality": "optional",
         "supportedPlatforms": ["macOS"],
         "minimumOS": ["macOS": "15.0"],
         "capabilitiesRequested": ["runtime.events.publish"],
@@ -161,6 +279,8 @@ private func validManifestObject() throws -> [String: Any] {
             "requiredModuleRoles": [],
         ],
         "defaultRole": "runescribe.test",
+        "consumedEndpoints": ["test.input"],
+        "publishedEndpoints": ["test.output"],
         "entitlementRequirement": NSNull(),
         "diagnosticsVisibleInProduction": false,
     ]

@@ -14,7 +14,7 @@ public enum RuneScribeUIModuleBootstrap {
 
     public static let descriptor = ModuleDescriptor(
         moduleID: "com.runescribe.module.ui",
-        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(35)),
+        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(37)),
         kind: .ui,
         entryPoint: "RuneScribeUIModule",
         role: RuneScribeRoles.primaryUI,
@@ -28,6 +28,11 @@ public enum RuneScribeUIModuleBootstrap {
             RuneScribeCapabilities.fileImportUI,
             RuneScribeCapabilities.shareUI,
             RuneScribeCapabilities.messagesUI,
+            RuneScribeCapabilities.runtimeAvailabilityRead,
+            RuneScribeCapabilities.runtimeSettingsRead,
+            RuneScribeCapabilities.runtimeSettingsWrite,
+            RuneScribeCapabilities.progressionStateRead,
+            RuneScribeCapabilities.progressionCommands,
         ],
         requiredServices: [
             RuneScribeServiceIDs.applicationResourceLocator,
@@ -39,7 +44,9 @@ public enum RuneScribeUIModuleBootstrap {
             .defaultMetalLibrary,
         ],
         requiredModuleRoles: [RuneScribeRoles.core],
-        consumedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs
+        consumedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(
+            RuntimeProgressionEndpointCatalog.UIEndpointIDs
+        )
     )
 
     public static func manifestData() throws -> Data {
@@ -74,6 +81,10 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
     public func start(context: ModuleContext) async throws {
         let applicationClient = try await context.applicationClient()
         let runtimeIO = try await context.runtimeIOClient()
+        let availabilityClient = try await context.runtimeAvailabilityClient()
+        let progressionClient = try? await context.progressionClient()
+        let runtimeSettingsClient = try? await context.runtimeSettingsClient()
+        let unlockFeedbackClient = try? await context.unlockFeedbackClient()
         let rootPresentationClient = try await context.rootPresentationClient()
         let productMetadata = try await rootPresentationClient.productMetadata()
         let inboundFileImportSession = try await runtimeIO.inboundFileImportSession {
@@ -96,6 +107,10 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
         let session = RuneScribeUISession(
             applicationClient: applicationClient,
             runtimeIO: runtimeIO,
+            availabilityClient: availabilityClient,
+            progressionClient: progressionClient,
+            runtimeSettingsClient: runtimeSettingsClient,
+            unlockFeedbackClient: unlockFeedbackClient,
             inboundFileImportSession: inboundFileImportSession,
             resourcePresentation: resourcePresentation,
             productMetadata: productMetadata

@@ -1,5 +1,5 @@
 import Foundation
-import RuneScribeContracts
+@_spi(RuntimeOperationAuthority) import RuneScribeContracts
 
 public struct RuntimeEmptyPayload: Hashable, Sendable {
     public init() {}
@@ -140,13 +140,28 @@ public enum RuntimeApplicationEndpointCatalog {
 
 public extension ModuleContext {
     func registerApplicationEndpoints(_ service: any RuneScribeApplicationService) async throws {
+        let operationAware = service as? any RuneScribeOperationAwareApplicationService
+
         func register<Request: Sendable, Response: Sendable>(
             _ key: RuntimeEndpointKey<Request, Response>,
-            _ handler: @escaping @Sendable (Request) async throws -> Response
+            legacy: @escaping @Sendable (Request) async throws -> Response,
+            operationAware awareHandler: @escaping @Sendable (
+                any RuneScribeOperationAwareApplicationService,
+                Request,
+                RuntimePersistableOperationContext
+            ) async throws -> Response
         ) async throws {
             try await registerEndpoint(
                 key,
-                handler: { _, request in try await handler(request) }
+                handler: { metadata, request in
+                    guard let operationAware else {
+                        return try await legacy(request)
+                    }
+                    let context = try await persistableOperationContext(
+                        from: metadata
+                    )
+                    return try await awareHandler(operationAware, request, context)
+                }
             )
         }
 
@@ -157,66 +172,233 @@ public extension ModuleContext {
         try await registerRuntimeMenuCommandEndpoint(
             RuntimeApplicationEndpointCatalog.menuCommands
         )
-        try await register(RuntimeApplicationEndpointCatalog.encode, service.encode)
-        try await register(RuntimeApplicationEndpointCatalog.decode, service.decode)
-        try await register(RuntimeApplicationEndpointCatalog.createCipher, service.createCipher)
-        try await register(RuntimeApplicationEndpointCatalog.renameCipher, service.renameCipher)
-        try await register(RuntimeApplicationEndpointCatalog.deleteCipher) { id in
-            try await service.deleteCipher(id: id); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.setActiveCipher) { command in
-            try await service.setActiveCipher(command); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.assignContact) { command in
-            try await service.assignContact(command); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.createContact, service.createContact)
-        try await register(RuntimeApplicationEndpointCatalog.updateContact, service.updateContact)
-        try await register(RuntimeApplicationEndpointCatalog.deleteContacts) { ids in
-            try await service.deleteContacts(ids: ids); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.deleteAllImportedContacts) { _ in
-            try await service.deleteAllImportedContacts(); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.importContacts, service.importContacts)
-        try await register(RuntimeApplicationEndpointCatalog.requestSystemContacts) { _ in
-            try await service.requestSystemContacts()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.prepareCipherShare, service.prepareCipherShare)
-        try await register(RuntimeApplicationEndpointCatalog.prepareMessageShare, service.prepareMessageShare)
-        try await register(RuntimeApplicationEndpointCatalog.completeShareArtifact, service.completeShareArtifact)
-        try await register(RuntimeApplicationEndpointCatalog.releaseShareArtifact) { id in
-            await service.releaseShareArtifact(id: id); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.importFile, service.importFile)
-        try await register(RuntimeApplicationEndpointCatalog.importURL, service.importURL)
-        try await register(RuntimeApplicationEndpointCatalog.confirmImport, service.confirmImport)
-        try await register(RuntimeApplicationEndpointCatalog.cancelImport) { id in
-            await service.cancelImport(id: id); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.dismissReceivedMessage) { id in
-            await service.dismissReceivedMessage(id: id); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.lock) { _ in
-            await service.lock(); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.verifyPIN, service.verifyPIN)
-        try await register(RuntimeApplicationEndpointCatalog.unlock, service.unlock)
-        try await register(RuntimeApplicationEndpointCatalog.setPIN) { command in
-            try await service.setPIN(command); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.changePIN) { command in
-            try await service.changePIN(command); return RuntimeEmptyPayload()
-        }
-        try await register(RuntimeApplicationEndpointCatalog.disablePIN) { command in
-            try await service.disablePIN(command); return RuntimeEmptyPayload()
-        }
+        try await register(
+            RuntimeApplicationEndpointCatalog.encode,
+            legacy: service.encode,
+            operationAware: { try await $0.encode($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.decode,
+            legacy: service.decode,
+            operationAware: { try await $0.decode($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.createCipher,
+            legacy: service.createCipher,
+            operationAware: { try await $0.createCipher($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.renameCipher,
+            legacy: service.renameCipher,
+            operationAware: { try await $0.renameCipher($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.deleteCipher,
+            legacy: { id in
+                try await service.deleteCipher(id: id)
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, id, context in
+                try await aware.deleteCipher(id: id, context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.setActiveCipher,
+            legacy: { command in
+                try await service.setActiveCipher(command)
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, command, context in
+                try await aware.setActiveCipher(command, context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.assignContact,
+            legacy: { command in
+                try await service.assignContact(command)
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, command, context in
+                try await aware.assignContact(command, context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.createContact,
+            legacy: service.createContact,
+            operationAware: { try await $0.createContact($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.updateContact,
+            legacy: service.updateContact,
+            operationAware: { try await $0.updateContact($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.deleteContacts,
+            legacy: { ids in
+                try await service.deleteContacts(ids: ids)
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, ids, context in
+                try await aware.deleteContacts(ids: ids, context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.deleteAllImportedContacts,
+            legacy: { _ in
+                try await service.deleteAllImportedContacts()
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, _, context in
+                try await aware.deleteAllImportedContacts(context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.importContacts,
+            legacy: service.importContacts,
+            operationAware: { try await $0.importContacts($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.requestSystemContacts,
+            legacy: { _ in try await service.requestSystemContacts() },
+            operationAware: { aware, _, context in
+                try await aware.requestSystemContacts(context: context)
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.prepareCipherShare,
+            legacy: service.prepareCipherShare,
+            operationAware: { try await $0.prepareCipherShare($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.prepareMessageShare,
+            legacy: service.prepareMessageShare,
+            operationAware: { try await $0.prepareMessageShare($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.completeShareArtifact,
+            legacy: service.completeShareArtifact,
+            operationAware: { try await $0.completeShareArtifact($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.releaseShareArtifact,
+            legacy: { id in
+                await service.releaseShareArtifact(id: id)
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, id, context in
+                await aware.releaseShareArtifact(id: id, context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.importFile,
+            legacy: service.importFile,
+            operationAware: { try await $0.importFile($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.importURL,
+            legacy: service.importURL,
+            operationAware: { try await $0.importURL($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.confirmImport,
+            legacy: service.confirmImport,
+            operationAware: { try await $0.confirmImport($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.cancelImport,
+            legacy: { id in
+                await service.cancelImport(id: id)
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, id, context in
+                await aware.cancelImport(id: id, context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.dismissReceivedMessage,
+            legacy: { id in
+                await service.dismissReceivedMessage(id: id)
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, id, context in
+                await aware.dismissReceivedMessage(id: id, context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.lock,
+            legacy: { _ in
+                await service.lock()
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, _, context in
+                await aware.lock(context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.verifyPIN,
+            legacy: service.verifyPIN,
+            operationAware: { try await $0.verifyPIN($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.unlock,
+            legacy: service.unlock,
+            operationAware: { try await $0.unlock($1, context: $2) }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.setPIN,
+            legacy: { command in
+                try await service.setPIN(command)
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, command, context in
+                try await aware.setPIN(command, context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.changePIN,
+            legacy: { command in
+                try await service.changePIN(command)
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, command, context in
+                try await aware.changePIN(command, context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
+        try await register(
+            RuntimeApplicationEndpointCatalog.disablePIN,
+            legacy: { command in
+                try await service.disablePIN(command)
+                return RuntimeEmptyPayload()
+            },
+            operationAware: { aware, command, context in
+                try await aware.disablePIN(command, context: context)
+                return RuntimeEmptyPayload()
+            }
+        )
     }
 
     func registerInboundInputEndpoint(_ service: any RuneScribeInboundInputService) async throws {
+        let operationAware = service as? any RuneScribeOperationAwareInboundInputService
         try await registerEndpoint(
             RuntimeApplicationEndpointCatalog.inboundInput,
-            handler: { _, input in try await service.receive(input) }
+            handler: { metadata, input in
+                guard let operationAware else {
+                    return try await service.receive(input)
+                }
+                let context = try await persistableOperationContext(from: metadata)
+                return try await operationAware.receive(input, context: context)
+            }
         )
     }
 

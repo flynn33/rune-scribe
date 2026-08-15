@@ -38,15 +38,15 @@ import sys
 with open(sys.argv[1], "r", encoding="utf-8") as handle:
     report = json.load(handle)
 
-assert report.get("version") == 1, report
+assert report.get("version") == 2, report
 assert report.get("passed") is True, report
 for name in ("file", "link"):
     step = report.get(name, {})
     assert step.get("triggerCount") == 1, report
     assert step.get("nativePickerPresented") is True, report
-    assert step.get("dismissedByLocalEscape") is True, report
+    assert step.get("dismissedByHandleClose") is True, report
 
-print("macOS native-share self-test passed for file and link presentation/dismissal")
+print("macOS native-share self-test passed for file and link picker presentation and deterministic handle dismissal")
 PY
 
 for _ in $(seq 1 40); do

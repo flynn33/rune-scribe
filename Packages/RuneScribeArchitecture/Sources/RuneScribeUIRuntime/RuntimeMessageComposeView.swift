@@ -9,23 +9,30 @@ public enum MessageComposeTerminalResult: Equatable, Sendable {
     case failed
 }
 
-public enum MessageComposeOutcomeMapper {
-    public static func outcome(
+public enum MessageComposeReportMapper {
+    public static func report(
         for result: MessageComposeTerminalResult,
         requiredAttachmentWasPresent: Bool,
         requiredAttachmentAccepted: Bool
-    ) -> ShareArtifactOutcomeDTO {
+    ) -> SharePresentationReportDTO {
+        let routeResult: ShareRouteResultDTO
+        let accepted: Bool?
         switch result {
         case .sent:
-            .messageSent(
-                requiredAttachmentAccepted: requiredAttachmentWasPresent
-                    && requiredAttachmentAccepted
-            )
+            routeResult = .sentConfirmed
+            accepted = requiredAttachmentWasPresent && requiredAttachmentAccepted
         case .cancelled:
-            .cancelled
+            routeResult = .cancelled
+            accepted = nil
         case .failed:
-            .failed
+            routeResult = .failed
+            accepted = nil
         }
+        return try! SharePresentationReportDTO(
+            routeClass: .messages,
+            result: routeResult,
+            requiredAttachmentAccepted: accepted
+        )
     }
 }
 
@@ -53,11 +60,11 @@ public struct MessageComposeCompletionGate: Equatable, Sendable {
     public init() {}
 
     public mutating func accept(
-        _ outcome: ShareArtifactOutcomeDTO
-    ) -> ShareArtifactOutcomeDTO? {
+        _ report: SharePresentationReportDTO
+    ) -> SharePresentationReportDTO? {
         guard !hasCompleted else { return nil }
         hasCompleted = true
-        return outcome
+        return report
     }
 }
 
@@ -70,13 +77,13 @@ public struct MessageComposeView: UIViewControllerRepresentable {
     private let messageText: String
     private let recipients: [String]?
     private let attachment: OpaqueShareTransfer?
-    private let onFinish: ((ShareArtifactOutcomeDTO) -> Void)?
+    private let onFinish: ((SharePresentationCompletion) -> Void)?
 
     public init(
         messageText: String,
         recipients: [String]? = nil,
         attachment: OpaqueShareTransfer? = nil,
-        onFinish: ((ShareArtifactOutcomeDTO) -> Void)? = nil
+        onFinish: ((SharePresentationCompletion) -> Void)? = nil
     ) {
         self.messageText = messageText
         self.recipients = recipients
@@ -133,12 +140,21 @@ public struct MessageComposeView: UIViewControllerRepresentable {
         ) {
         case .presentComposer(let accepted):
             context.coordinator.requiredAttachmentAccepted = accepted
+            if let attachment {
+                Task { @MainActor in
+                    try? await attachment.reportPresented(on: .messages)
+                }
+            }
             return composer
         case .fail:
             // Do not expose the configured composer (and its Send button). Its owner
             // dismisses the inert sheet after receiving this terminal failure.
             Task { @MainActor [coordinator = context.coordinator] in
-                coordinator.finish(.failed)
+                coordinator.finish(MessageComposeReportMapper.report(
+                    for: .failed,
+                    requiredAttachmentWasPresent: true,
+                    requiredAttachmentAccepted: false
+                ))
             }
             return UIViewController()
         }
@@ -146,17 +162,16 @@ public struct MessageComposeView: UIViewControllerRepresentable {
 
     public func updateUIViewController(_ vc: UIViewController, context: Context) {}
 
-    private func finish(_ outcome: ShareArtifactOutcomeDTO) {
+    private func finish(_ report: SharePresentationReportDTO) {
         guard let attachment else {
-            onFinish?(outcome)
+            onFinish?(.failure(OpaqueSharePresentationError.unavailable))
             return
         }
         Task { @MainActor in
             do {
-                try await attachment.finish(outcome)
-                onFinish?(outcome)
+                onFinish?(.success(try await attachment.finish(report)))
             } catch {
-                onFinish?(.failed)
+                onFinish?(.failure(error))
             }
         }
     }
@@ -172,14 +187,14 @@ public struct MessageComposeView: UIViewControllerRepresentable {
     public final class Coordinator: NSObject,
         @preconcurrency MFMessageComposeViewControllerDelegate
     {
-        let onFinish: ((ShareArtifactOutcomeDTO) -> Void)?
+        let onFinish: ((SharePresentationReportDTO) -> Void)?
         /// Whether this send was required to carry the scoped Core artifact.
         let requiredAttachmentWasPresent: Bool
         /// Whether the required attachment was actually accepted by the composer.
         var requiredAttachmentAccepted = false
         private var completionGate = MessageComposeCompletionGate()
         init(
-            onFinish: ((ShareArtifactOutcomeDTO) -> Void)?,
+            onFinish: ((SharePresentationReportDTO) -> Void)?,
             requiredAttachmentWasPresent: Bool
         ) {
             self.onFinish = onFinish
@@ -191,16 +206,16 @@ public struct MessageComposeView: UIViewControllerRepresentable {
             didFinishWith result: MessageComposeResult
         ) {
             defer { controller.dismiss(animated: true) }
-            finish(MessageComposeOutcomeMapper.outcome(
+            finish(MessageComposeReportMapper.report(
                 for: Self.terminalResult(for: result),
                 requiredAttachmentWasPresent: requiredAttachmentWasPresent,
                 requiredAttachmentAccepted: requiredAttachmentAccepted
             ))
         }
 
-        public func finish(_ proposedOutcome: ShareArtifactOutcomeDTO) {
-            guard let outcome = completionGate.accept(proposedOutcome) else { return }
-            onFinish?(outcome)
+        public func finish(_ proposedReport: SharePresentationReportDTO) {
+            guard let report = completionGate.accept(proposedReport) else { return }
+            onFinish?(report)
         }
 
         private static func terminalResult(

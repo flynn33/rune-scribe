@@ -30,17 +30,16 @@ final class AppHostRoutingTests: XCTestCase {
     }
 
     func testAppDelegateRoutesURLsFilesActivitiesAndLifecycleWithColdWarmMetadata() async throws {
-        let fixture = makeFixture()
-        let delegate = AppDelegate(runtime: fixture.composition)
-        let application = UIApplication.shared
         let coldURL = URL(string: "runescribe://import?p=cold")!
         let coldFileData = Data("cold-app-host-file".utf8)
         let coldFile = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "RuneScribeAppHostRoutingTests-\(UUID().uuidString).runescribe"
             )
-        try coldFileData.write(to: coldFile, options: .atomic)
-        defer { try? FileManager.default.removeItem(at: coldFile) }
+        let inboundFiles = InMemoryInboundFileReader(files: [coldFile: coldFileData])
+        let fixture = makeFixture(inboundFiles: inboundFiles)
+        let delegate = AppDelegate(runtime: fixture.composition)
+        let application = UIApplication.shared
         let coldWebURL = URL(string: "https://ravenforgesoftware.com/rune-scribe/import?p=cold-web")!
         let coldActivity = browsingActivity(url: coldWebURL)
 
@@ -153,6 +152,62 @@ final class AppHostRoutingTests: XCTestCase {
         XCTAssertEqual(fixture.composition.rootPresentationStore.state, .booting)
     }
 
+    func testCompositionActivatesProgressionBeforeUIWithInMemoryState() async {
+        let fixture = makeFixture(moduleStateStore: InMemoryModuleStateStore())
+
+        await fixture.composition.start()
+
+        XCTAssertFalse(fixture.composition.startupFailed)
+        let snapshot = await fixture.composition.runtimeSnapshot
+        XCTAssertEqual(snapshot.status, .running)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.core], .active)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.progression], .active)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.primaryUI], .active)
+        if let progressionIndex = snapshot.activationOrder.firstIndex(
+            of: RuneScribeModuleIDs.progression
+        ), let uiIndex = snapshot.activationOrder.firstIndex(
+            of: RuneScribeModuleIDs.primaryUI
+        ) {
+            XCTAssertLessThan(progressionIndex, uiIndex)
+        } else {
+            XCTFail("Expected Progression and UI in the runtime activation order.")
+        }
+        XCTAssertEqual(
+            fixture.composition.rootPresentationStore.state,
+            .ready(moduleID: RuneScribeModuleIDs.primaryUI)
+        )
+        await fixture.composition.stop()
+    }
+
+    func testPhysicalModuleStateStoreConstructionFailureLeavesIOSUtilityRunning() async {
+        let fixture = makeFixture(moduleStateStore: nil)
+
+        await fixture.composition.start()
+
+        XCTAssertFalse(fixture.composition.startupFailed)
+        let snapshot = await fixture.composition.runtimeSnapshot
+        XCTAssertEqual(snapshot.status, .running)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.core], .active)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.progression], .failed)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.primaryUI], .active)
+        XCTAssertFalse(snapshot.activationOrder.contains(RuneScribeModuleIDs.progression))
+        XCTAssertEqual(
+            fixture.composition.rootPresentationStore.state,
+            .ready(moduleID: RuneScribeModuleIDs.primaryUI)
+        )
+        XCTAssertEqual(
+            fixture.composition.receive(lifecycle: .didBecomeActive),
+            .accepted
+        )
+        let received = await waitForInputs(1, from: fixture.inboundInputService)
+        XCTAssertEqual(
+            received.count,
+            1,
+            "failure=\(String(describing: fixture.composition.lastInputFailure))"
+        )
+        await fixture.composition.stop()
+    }
+
     func testSystemClipboardAdapterRoundTripsWithinHostedApplicationWithoutPastePrompt() async throws {
         let clipboard = SystemClipboardService()
         let originalChangeCount = await clipboard.changeCount()
@@ -166,7 +221,11 @@ final class AppHostRoutingTests: XCTestCase {
         XCTAssertGreaterThan(updatedChangeCount, originalChangeCount)
     }
 
-    private func makeFixture(startAttempt: HostedStartAttempt? = nil) -> AppHostFixture {
+    private func makeFixture(
+        startAttempt: HostedStartAttempt? = nil,
+        moduleStateStore: (any ModuleStateStore)? = InMemoryModuleStateStore(),
+        inboundFiles: any InboundFileReader = InMemoryInboundFileReader()
+    ) -> AppHostFixture {
         let secureValues = InMemorySecureValueStore()
         let protectedFiles = InMemoryProtectedFileStore()
         let shareArtifacts = InMemoryShareArtifactStore()
@@ -230,10 +289,24 @@ final class AppHostRoutingTests: XCTestCase {
         return AppHostFixture(
             composition: RuneScribeRuntimeComposition(
                 bundle: .main,
-                injectedCoreFactory: coreFactory
+                injectedCoreFactory: coreFactory,
+                moduleStateStore: moduleStateStore,
+                inboundFiles: inboundFiles
             ),
             inboundInputService: inboundInputService
         )
+    }
+
+    private func waitForInputs(
+        _ minimumCount: Int,
+        from service: RecordingInboundInputService
+    ) async -> [RuneScribeInboundInput] {
+        for _ in 0..<500 {
+            let values = await service.snapshot()
+            if values.count >= minimumCount { return values }
+            try? await Task.sleep(for: .milliseconds(1))
+        }
+        return await service.snapshot()
     }
 
     private func browsingActivity(url: URL) -> NSUserActivity {

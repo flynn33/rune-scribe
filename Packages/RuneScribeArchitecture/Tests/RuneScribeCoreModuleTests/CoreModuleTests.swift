@@ -22,6 +22,16 @@ final class CoreModuleTests: XCTestCase {
         XCTAssertFalse(
             descriptor.requestedCapabilities.contains(RuneScribeCapabilities.publishService)
         )
+        XCTAssertTrue(
+            descriptor.requestedCapabilities.contains(
+                RuneScribeCapabilities.progressionEventSubmit
+            )
+        )
+        XCTAssertTrue(
+            descriptor.requestedCapabilities.contains(
+                RuneScribeCapabilities.progressionMigrationSubmit
+            )
+        )
         XCTAssertEqual(
             descriptor.publishedEndpoints,
             RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(

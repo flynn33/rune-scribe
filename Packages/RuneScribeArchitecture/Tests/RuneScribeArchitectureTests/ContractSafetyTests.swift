@@ -22,7 +22,8 @@ final class ContractSafetyTests: XCTestCase {
         )
         XCTAssertEqual(RuneScribeServiceIDs.clock.rawValue, "ClockService")
         XCTAssertEqual(RuneScribeServiceIDs.uuid.rawValue, "UUIDService")
-        XCTAssertEqual(RuneScribeServiceIDs.all.count, 12)
+        XCTAssertEqual(RuneScribeServiceIDs.moduleStateStore.rawValue, "ModuleStateStore")
+        XCTAssertEqual(RuneScribeServiceIDs.all.count, 13)
         XCTAssertEqual(
             RuneScribeServiceKeys.secureValueStore.identifier,
             RuneScribeServiceIDs.secureValueStore
@@ -65,6 +66,10 @@ final class ContractSafetyTests: XCTestCase {
         )
         XCTAssertEqual(RuneScribeServiceKeys.clock.identifier, RuneScribeServiceIDs.clock)
         XCTAssertEqual(RuneScribeServiceKeys.uuid.identifier, RuneScribeServiceIDs.uuid)
+        XCTAssertEqual(
+            RuneScribeServiceKeys.moduleStateStore.identifier,
+            RuneScribeServiceIDs.moduleStateStore
+        )
 
         XCTAssertEqual(RuneScribeKeychain.service, "com.runescribe.keystore")
         XCTAssertEqual(

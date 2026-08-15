@@ -7,6 +7,16 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.37] - 2026-08-14
+
+- Add durable, privacy-safe Achievements, Codex progression, rewards, and
+  existing-user migration behind the runtime boundary.
+- Add the Vault/Progress experience, accessible queued unlock reveals, and
+  optional sound, haptic, and animation controls.
+- Add live earned-entitlement activation for future optional Theme providers
+  while preserving encode, decode, import, and share when Progression is
+  unavailable.
+
 ## [1.0.36] - 2026-08-11
 
 - Move platform I/O and system presentation behind runtime (#37) by @flynn33

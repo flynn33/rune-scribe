@@ -6,6 +6,11 @@ public enum ModuleKind: String, Codable, CaseIterable, Sendable {
     case ui
 }
 
+public enum ModuleCriticality: String, Codable, CaseIterable, Sendable {
+    case required
+    case optional
+}
+
 public enum SupportedPlatform: String, Codable, CaseIterable, Sendable {
     case iOS
     case macOS
@@ -68,9 +73,9 @@ public struct EntitlementRequirement: Codable, Equatable, Sendable {
     }
 
     public let kind: Kind
-    public let identifier: String
+    public let identifier: UnlockID
 
-    public init(kind: Kind, identifier: String) {
+    public init(kind: Kind, identifier: UnlockID) {
         self.kind = kind
         self.identifier = identifier
     }
@@ -87,12 +92,15 @@ public struct ModuleManifest: Codable, Equatable, Sendable {
     public let displayName: String
     public let moduleVersion: SemanticVersion
     public let moduleType: ModuleKind
+    public let criticality: ModuleCriticality
     public let supportedPlatforms: [SupportedPlatform]
     public let minimumOS: MinimumOSVersions?
     public let capabilitiesRequested: [CapabilityIdentifier]
     public let entryPoint: String
     public let runtimeRequirements: ModuleRuntimeRequirements
     public let defaultRole: ModuleRole
+    public let consumedEndpoints: [RuntimeEndpointIdentifier]
+    public let publishedEndpoints: [RuntimeEndpointIdentifier]
     public let entitlementRequirement: EntitlementRequirement?
     public let diagnosticsVisibleInProduction: Bool
 
@@ -104,12 +112,15 @@ public struct ModuleManifest: Codable, Equatable, Sendable {
         displayName: String,
         moduleVersion: SemanticVersion,
         moduleType: ModuleKind,
+        criticality: ModuleCriticality = .required,
         supportedPlatforms: [SupportedPlatform],
         minimumOS: MinimumOSVersions? = nil,
         capabilitiesRequested: [CapabilityIdentifier],
         entryPoint: String,
         runtimeRequirements: ModuleRuntimeRequirements,
         defaultRole: ModuleRole,
+        consumedEndpoints: [RuntimeEndpointIdentifier] = [],
+        publishedEndpoints: [RuntimeEndpointIdentifier] = [],
         entitlementRequirement: EntitlementRequirement? = nil,
         diagnosticsVisibleInProduction: Bool = false
     ) {
@@ -120,12 +131,15 @@ public struct ModuleManifest: Codable, Equatable, Sendable {
         self.displayName = displayName
         self.moduleVersion = moduleVersion
         self.moduleType = moduleType
+        self.criticality = criticality
         self.supportedPlatforms = supportedPlatforms
         self.minimumOS = minimumOS
         self.capabilitiesRequested = capabilitiesRequested
         self.entryPoint = entryPoint
         self.runtimeRequirements = runtimeRequirements
         self.defaultRole = defaultRole
+        self.consumedEndpoints = consumedEndpoints
+        self.publishedEndpoints = publishedEndpoints
         self.entitlementRequirement = entitlementRequirement
         self.diagnosticsVisibleInProduction = diagnosticsVisibleInProduction
     }

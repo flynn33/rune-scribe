@@ -21,7 +21,7 @@ package, binary, source copy, fetch, submodule, or local checkout.
 | [ADR-RS-005](ADR-RS-005-forward-compatibility.md) | Old-app forward compatibility | Accepted: legacy-only outbound |
 | [ADR-RS-006](ADR-RS-006-share-route-completion.md) | Share-route completion semantics | Accepted |
 | [ADR-RS-007](ADR-RS-007-themed-follow-up-transport.md) | Themed follow-up transport | Accepted; implementation deferred |
-| [ADR-RS-008](ADR-RS-008-progression-persistence.md) | Progression persistence technology | Accepted; implementation deferred |
+| [ADR-RS-008](ADR-RS-008-progression-persistence.md) | Progression persistence technology | Accepted; implemented in 1.0.37 |
 | [ADR-RS-009](ADR-RS-009-relationship-token.md) | Relationship-token derivation | Accepted |
 | [ADR-RS-010](ADR-RS-010-theme-resource-budgets.md) | Theme resource delivery and budgets | Accepted initial limits |
 | [ADR-RS-011](ADR-RS-011-game-center-records.md) | Game Center App Store record strategy | Blocked on App Store configuration review |

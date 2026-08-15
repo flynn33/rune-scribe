@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "1.0",
+  "policyProfile": "forsetti-pattern-b-standalone",
+  "runtimeVersion": "1.0.0",
+  "moduleID": "com.runescribe.module.progression",
+  "displayName": "Rune Scribe Progression",
+  "moduleVersion": "1.0.37",
+  "moduleType": "service",
+  "criticality": "optional",
+  "supportedPlatforms": [
+    "iOS",
+    "macOS"
+  ],
+  "minimumOS": {
+    "iOS": "17.0",
+    "macOS": "15.0"
+  },
+  "capabilitiesRequested": [
+    "runtime.module-state.access",
+    "resources.read",
+    "runtime.availability.read"
+  ],
+  "entryPoint": "RuneScribeProgressionModule",
+  "runtimeRequirements": {
+    "requiredServices": [
+      "ApplicationResourceLocator",
+      "ModuleStateStore"
+    ],
+    "requiredResources": [
+      {
+        "name": "module-manifest",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.progression"
+      },
+      {
+        "name": "PACKAGE-MANIFEST",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.progression"
+      },
+      {
+        "name": "Rune-Scribe-Progression-Catalog-Schema-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.progression"
+      },
+      {
+        "name": "Rune-Scribe-Progression-Catalog-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.progression"
+      },
+      {
+        "name": "Rune-Scribe-Progression-Event-Catalog-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.progression"
+      },
+      {
+        "name": "Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.progression"
+      }
+    ],
+    "requiredModuleRoles": []
+  },
+  "defaultRole": "runescribe.progression",
+  "consumedEndpoints": [],
+  "publishedEndpoints": [
+    "progression.diagnostics.summary",
+    "progression.entitlements",
+    "progression.event.apply",
+    "progression.migration.existing-user.apply",
+    "progression.migration.existing-user.page.apply",
+    "progression.recovery.rebuild",
+    "progression.reveal.acknowledge",
+    "progression.reveal.mark-presented",
+    "progression.state",
+    "progression.title.select"
+  ],
+  "entitlementRequirement": null,
+  "diagnosticsVisibleInProduction": false
+}

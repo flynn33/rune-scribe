@@ -34,12 +34,239 @@ def production_swift_files(root)
       ".git/", ".build/", "DerivedData/", "RuneScribMacParityHost/",
       "scripts/", "Packages/RuneScribeArchitecture/Sources/RuneScribeTestSupport/"
     ) ||
+      relative.include?("/Resources/Source/") ||
       relative.split("/").any? { |component| component == "Tests" || component.end_with?("Tests") }
   end
 end
 
 def without_comments(text)
   text.gsub(%r{/\*.*?\*/}m, "").lines.map { |line| line.sub(%r{//.*$}, "") }.join
+end
+
+def without_comments_preserving_lines(text)
+  text
+    .gsub(%r{/\*.*?\*/}m) { |comment| comment.gsub(/[^\n]/, " ") }
+    .lines
+    .map { |line| line.sub(%r{//.*$}, "") }
+    .join
+end
+
+MODULE_IMPORT_POLICY = {
+  "RuneScribeContracts" => %w[Foundation],
+  "RuneScribeUIPresentationContracts" => %w[Foundation SwiftUI RuneScribeContracts],
+  "RuneScribeRuntimeCore" => %w[Foundation RuneScribeContracts RuneScribeUIPresentationContracts],
+  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts AVFoundation AppKit Contacts ContactsUI CoreImage CoreTransferable LinkPresentation MessageUI Metal MetalKit Observation UIKit UniformTypeIdentifiers],
+  "RuneScribePlatform" => %w[Foundation Darwin CoreData CryptoKit RuneScribeContracts Security Contacts CoreText AudioToolbox AppKit UIKit],
+  "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine Accessibility RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
+  "RuneScribeProgressionModule" => %w[Foundation RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeTestSupport" => %w[Foundation CryptoKit RuneScribeContracts],
+}.freeze
+
+PROGRESSION_FORBIDDEN_REFERENCE_PATTERNS = [
+  [/\b(?:[A-Za-z_][A-Za-z0-9_]*)?ModuleState(?:Store|Gateway|Adapter)\b/, "raw module-state store or adapter"],
+  [/\bCoreDataStack\b/, "Core Data stack"],
+  [/\bNSManagedObject[A-Za-z0-9_]*\b/, "NSManagedObject type"],
+  [/\bNSPersistent(?:Container|Store|StoreCoordinator|StoreDescription)[A-Za-z0-9_]*\b/, "persistent-store handle"],
+  [/\b(?:NSFetchRequest|NSEntityDescription|NSBatchInsertRequest|NSBatchDeleteRequest)\b/, "Core Data request or entity type"],
+  [/\b(?:UserDefaults|CFPreferences)\b|@(?:AppStorage|SceneStorage)\b/, "preferences storage"],
+  [/\b(?:storeURL|persistentStoreURL|moduleStateStoreURL|sqliteURL|databaseURL)\b/, "physical store URL"],
+  [/\bFileHandle\b/, "file handle"],
+  [/\bFileManager\b|\b(?:Data|String)\s*\(\s*contentsOf\s*:/, "direct file API"],
+  [/\bURLSession\b|\bURLRequest\b|\bNW(?:Connection|ConnectionGroup|Listener|PathMonitor)\b/, "direct network API"],
+  [/\bSecItem(?:CopyMatching|Add|Update|Delete)\b|\bkSec[A-Z][A-Za-z0-9_]*\b|\bKeychain[A-Za-z0-9_]*\b/, "Keychain facility"],
+  [/\b(?:AVAudio[A-Za-z0-9_]*|AudioServices[A-Za-z0-9_]*|CHHaptic[A-Za-z0-9_]*|UIImpactFeedbackGenerator|UINotificationFeedbackGenerator|NSHapticFeedbackManager)\b/, "audio or haptic facility"],
+].freeze
+
+DIRECT_PEER_IMPLEMENTATION_PATTERNS = {
+  "RuneScribeCoreModule" => [
+    [/\bRuneScribeProgressionServiceActor\b/, "Progression service implementation"],
+    [/\bRuneScribeProgressionService\b/, "Progression service protocol"],
+    [/\bRuneScribeUIModule\b/, "UI module implementation"],
+  ],
+  "RuneScribeProgressionModule" => [
+    [/\bRuneScribeCoreApplicationService\b/, "Core service implementation"],
+    [/\bRuneScribe(?:OperationAware)?ApplicationService\b/, "Core application service protocol"],
+    [/\bRuneScribeUIModule\b/, "UI module implementation"],
+  ],
+  "RuneScribeUIModule" => [
+    [/\bRuneScribeCoreApplicationService\b/, "Core service implementation"],
+    [/\bRuneScribeProgressionServiceActor\b/, "Progression service implementation"],
+    [/\bRuneScribeProgressionService\b/, "Progression service protocol"],
+    [/\bRuneScribe(?:OperationAware)?ApplicationService\b/, "Core application service protocol"],
+  ],
+}.freeze
+
+UI_PROGRESSION_TRUTH_PATTERNS = [
+  [/\bProgression(?:Reducer|RuleEvaluator|RuleOperator|CatalogDependencyAnalyzer)\b/, "Progression rule engine"],
+  [/\b(?:AchievementCompletionRecord|MilestoneCompletionRecord|StatisticCounterRecord)\b/, "Progression domain record"],
+  [/\b(?:distinctCountAtLeast|bucketCountAtLeast|allListedContentUsed|completedAchievementCountAtLeast)\b/, "Progression rule calculation"],
+  [/\bProgressionEventFact\s*\(/, "Progression event creation"],
+].freeze
+
+THEME_RULE_CATALOG_PATTERNS = [
+  [/\bachievement\.[a-z0-9-]+\b/, "Achievement stable ID"],
+  [/\brule\.codex\.[a-z0-9.-]+\b/, "Progression rule stable ID"],
+  [/\bgrant-group\.[a-z0-9.-]+\b/, "Progression grant-group stable ID"],
+  [/\bProgression(?:RuleOperator|AchievementDefinition|MilestoneDefinition)\b/, "Progression rule type"],
+  [/\b(?:ProgressionEventFact|DomainEventEnvelope)\b/, "Progression event type"],
+].freeze
+
+THEME_PROGRESSION_COUPLING_PATTERNS = [
+  [/\bRuntimeProgressionEndpointCatalog\b/, "runtime Progression endpoint catalog"],
+  [/\bRuneScribeRoles\.progression\b/, "Progression runtime role"],
+  [/\bprogression\.(?:diagnostics|entitlements|event|migration|recovery|reveal|state|title)\b/, "Progression endpoint identifier"],
+].freeze
+
+def swift_imports(text)
+  pattern = /^[ \t]*(?:@[A-Za-z_][A-Za-z0-9_]*(?:\([^\n)]*\))?[ \t\r\n]+)*import[ \t]+(?:(?:typealias|struct|class|enum|protocol|let|var|func)[ \t]+)?([A-Za-z_][A-Za-z0-9_]*)/
+  text.to_enum(:scan, pattern).map do
+    match = Regexp.last_match
+    line = text.byteslice(0, match.begin(0)).count("\n") + 1
+    [match[1], line]
+  end
+end
+
+def module_source_errors(product, path, text, allowed_imports, runtime_integrity_source: nil)
+  code = without_comments_preserving_lines(text)
+  swift_imports(code).each_with_object([]) do |(imported, line), findings|
+    isolated_runtime_integrity_import = product == "RuneScribeRuntimeCore" &&
+      imported == "CryptoKit" && path == runtime_integrity_source
+    next if allowed_imports.include?(imported) || isolated_runtime_integrity_import
+    findings << "#{path}:#{line}: #{product} may not import #{imported}"
+  end
+end
+
+def progression_source_errors(path, text)
+  code = without_comments_preserving_lines(text)
+  code.lines.each_with_index.each_with_object([]) do |(line, index), findings|
+    PROGRESSION_FORBIDDEN_REFERENCE_PATTERNS.each do |pattern, label|
+      next unless line.match?(pattern)
+      findings << "#{path}:#{index + 1}: RuneScribeProgressionModule may not reference #{label}"
+    end
+  end
+end
+
+def module_boundary_source_errors(product, path, text)
+  code = without_comments_preserving_lines(text)
+  code.lines.each_with_index.each_with_object([]) do |(line, index), findings|
+    Array(DIRECT_PEER_IMPLEMENTATION_PATTERNS[product]).each do |pattern, label|
+      next unless line.match?(pattern)
+      findings << "#{path}:#{index + 1}: #{product} may not retain direct #{label} handles"
+    end
+    if product != "RuneScribeRuntimeCore" && line.match?(/\bDomainEventEnvelope\s*\(/)
+      findings << "#{path}:#{index + 1}: #{product} may not construct free-form Progression event envelopes"
+    end
+    next unless product == "RuneScribeUIModule"
+    UI_PROGRESSION_TRUTH_PATTERNS.each do |pattern, label|
+      next unless line.match?(pattern)
+      findings << "#{path}:#{index + 1}: UI may not own #{label}"
+    end
+  end
+end
+
+def theme_progression_coupling_errors(path, text)
+  code = without_comments_preserving_lines(text)
+  findings = swift_imports(code).each_with_object([]) do |(imported, line), imports|
+    if imported.match?(/Progression/)
+      imports << "#{path}:#{line}: Theme source may not import #{imported}"
+    end
+  end
+  code.lines.each_with_index.each_with_object(findings) do |(line, index), references|
+    THEME_PROGRESSION_COUPLING_PATTERNS.each do |pattern, label|
+      next unless line.match?(pattern)
+      references << "#{path}:#{index + 1}: Theme source may not reference #{label}"
+    end
+    THEME_RULE_CATALOG_PATTERNS.each do |pattern, label|
+      next unless line.match?(pattern)
+      references << "#{path}:#{index + 1}: Theme source may not own #{label}"
+    end
+  end
+end
+
+def progression_catalog_stable_id_errors(path)
+  catalog = JSON.parse(File.read(path))
+  identifiers = []
+  {
+    "Achievement" => ["achievements", "achievementID"],
+    "rule" => ["milestones", "ruleID"],
+    "content" => ["content", "contentID"],
+    "grant group" => ["grantGroups", "grantGroupID"],
+    "statistic" => ["statistics", "statisticID"],
+  }.each do |label, (collection, key)|
+    Array(catalog[collection]).each_with_index do |record, index|
+      identifier = record.is_a?(Hash) ? record[key] : nil
+      unless identifier.is_a?(String) && !identifier.empty?
+        return ["#{path}: #{label} record #{index} has an invalid stable ID"]
+      end
+      identifiers << identifier
+    end
+  end
+  nodes = catalog.dig("journeyGraph", "nodes")
+  Array(nodes).each_with_index do |record, index|
+    identifier = record.is_a?(Hash) ? record["nodeID"] : nil
+    unless identifier.is_a?(String) && !identifier.empty?
+      return ["#{path}: journey node #{index} has an invalid stable ID"]
+    end
+    identifiers << identifier
+  end
+  counts = Hash.new(0)
+  identifiers.each { |identifier| counts[identifier] += 1 }
+  duplicates = counts.select { |_identifier, count| count > 1 }.keys.sort
+  duplicates.map { |identifier| "#{path}: duplicate Progression stable ID #{identifier}" }
+rescue JSON::ParserError => error
+  ["#{path}: invalid Progression catalog JSON: #{error.message}"]
+end
+
+catalog_fixture_value = ENV["RUNESCRIBE_ARCHITECTURE_CATALOG_FIXTURE"]
+if catalog_fixture_value
+  catalog_fixture = Pathname(catalog_fixture_value)
+  unless catalog_fixture.file?
+    warn "architecture catalog fixture is not a file: #{catalog_fixture}"
+    exit 64
+  end
+  fixture_errors = progression_catalog_stable_id_errors(catalog_fixture)
+  if fixture_errors.empty?
+    puts "PASS architecture Progression catalog fixture"
+    exit 0
+  end
+  fixture_errors.each { |error| warn "ERROR #{error}" }
+  exit 1
+end
+
+fixture_root_value = ENV["RUNESCRIBE_ARCHITECTURE_MODULE_FIXTURE_ROOT"]
+fixture_product = ENV["RUNESCRIBE_ARCHITECTURE_MODULE_FIXTURE_PRODUCT"]
+if fixture_root_value || fixture_product
+  unless fixture_root_value && fixture_product
+    warn "architecture fixture mode requires both fixture root and product"
+    exit 64
+  end
+  allowed_imports = MODULE_IMPORT_POLICY[fixture_product]
+  unless allowed_imports || fixture_product.match?(/Theme/)
+    warn "architecture fixture mode does not recognize product #{fixture_product}"
+    exit 64
+  end
+  fixture_root = Pathname(fixture_root_value)
+  unless fixture_root.directory?
+    warn "architecture fixture root is not a directory: #{fixture_root}"
+    exit 64
+  end
+  fixture_errors = []
+  Dir.glob(fixture_root.join("**/*.swift").to_s).sort.each do |path|
+    source = File.read(path)
+    fixture_errors.concat(
+      module_source_errors(fixture_product, path, source, allowed_imports)
+    ) if allowed_imports
+    fixture_errors.concat(module_boundary_source_errors(fixture_product, path, source)) if allowed_imports
+    fixture_errors.concat(progression_source_errors(path, source)) if fixture_product == "RuneScribeProgressionModule"
+    fixture_errors.concat(theme_progression_coupling_errors(path, source)) if fixture_product.match?(/Theme/)
+  end
+  if fixture_errors.empty?
+    puts "PASS architecture module fixture #{fixture_product}"
+    exit 0
+  end
+  fixture_errors.each { |error| warn "ERROR #{error}" }
+  exit 1
 end
 
 def dependency_name(value)
@@ -452,6 +679,7 @@ if package_present
         "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
         "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
@@ -462,6 +690,7 @@ if package_present
         "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
         "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
@@ -481,6 +710,8 @@ if package_present
       end.sort
       expected_test_support_consumers = %w[
         RuneScribeArchitectureTests RuneScribePlatformTests
+        RuneScribeProgressionModuleTests RuneScribeRuntimeCoreTests
+        RuneScribeUIModuleTests
       ].sort
       unless test_support_consumers == expected_test_support_consumers
         errors << "package RuneScribeTestSupport consumers differ: #{test_support_consumers.join(', ')}"
@@ -501,45 +732,60 @@ if package_present
   end
 end
 
-module_import_policy = {
-  "RuneScribeContracts" => %w[Foundation],
-  "RuneScribeUIPresentationContracts" => %w[Foundation SwiftUI RuneScribeContracts],
-  "RuneScribeRuntimeCore" => %w[Foundation RuneScribeContracts RuneScribeUIPresentationContracts],
-  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts AVFoundation AppKit Contacts ContactsUI CoreImage CoreTransferable LinkPresentation MessageUI Metal MetalKit Observation UIKit UniformTypeIdentifiers],
-  "RuneScribePlatform" => %w[Foundation Darwin RuneScribeContracts Security Contacts CoreText AppKit UIKit],
-  "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto RuneScribeContracts RuneScribeRuntimeCore],
-  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
-  "RuneScribeTestSupport" => %w[Foundation RuneScribeContracts]
-}
 runtime_integrity_source = architecture_package.join(
   "Sources/RuneScribeRuntimeCore/RuntimeBundledResourceIntegrity.swift"
 ).to_s
-module_import_policy.each do |product, allowed_imports|
+MODULE_IMPORT_POLICY.each do |product, allowed_imports|
   source_root = architecture_package.join("Sources/#{product}")
   next unless source_root.directory?
   Dir.glob(source_root.join("**/*.swift").to_s).each do |path|
-    File.readlines(path).each_with_index do |line, index|
-      match = line.match(/^\s*(?:@testable\s+)?import\s+([A-Za-z_][A-Za-z0-9_]*)/)
-      next unless match
-      imported = match[1]
-      isolated_runtime_integrity_import = product == "RuneScribeRuntimeCore" &&
-        imported == "CryptoKit" && path == runtime_integrity_source
-      unless allowed_imports.include?(imported) || isolated_runtime_integrity_import
-        errors << "#{relative(path, root)}:#{index + 1}: #{product} may not import #{imported}"
-      end
-    end
+    source = File.read(path)
+    relative_path = relative(path, root)
+    errors.concat(
+      module_source_errors(
+        product,
+        relative_path,
+        source,
+        allowed_imports,
+        runtime_integrity_source: relative(runtime_integrity_source, root)
+      )
+    )
+    errors.concat(module_boundary_source_errors(product, relative_path, source))
+    errors.concat(progression_source_errors(relative_path, source)) if product == "RuneScribeProgressionModule"
   end
+end
+
+progression_catalog_paths = Dir.glob(
+  architecture_package.join(
+    "Sources/RuneScribeProgressionModule/Resources/Rune-Scribe-Progression-Catalog-v*.json"
+  ).to_s
+).sort
+if progression_catalog_paths.empty?
+  errors << "missing bundled Progression catalog for stable-ID validation"
+else
+  progression_catalog_paths.each do |progression_catalog_path|
+    errors.concat(progression_catalog_stable_id_errors(progression_catalog_path))
+  end
+end
+
+Dir.glob(
+  architecture_package.join("Sources/*Theme*/**/*.{swift,json,yaml,yml,plist}").to_s
+).sort.each do |path|
+  errors.concat(
+    theme_progression_coupling_errors(relative(path, root), File.read(path))
+  )
 end
 
 manifest_allowed_keys = %w[
   schemaVersion policyProfile runtimeVersion moduleID displayName moduleVersion
   moduleType supportedPlatforms minimumOS capabilitiesRequested entryPoint
-  runtimeRequirements defaultRole entitlementRequirement diagnosticsVisibleInProduction
+  runtimeRequirements defaultRole criticality consumedEndpoints publishedEndpoints
+  entitlementRequirement diagnosticsVisibleInProduction
 ]
 manifest_required_keys = %w[
   schemaVersion policyProfile runtimeVersion moduleID displayName moduleVersion
   moduleType supportedPlatforms capabilitiesRequested entryPoint runtimeRequirements
-  defaultRole diagnosticsVisibleInProduction
+  defaultRole criticality consumedEndpoints publishedEndpoints diagnosticsVisibleInProduction
 ]
 
 manifest_records = []
@@ -572,18 +818,44 @@ required_module_ids.each do |module_id, policy|
   errors << "#{relative_path}: runtimeVersion must be semantic" unless manifest["runtimeVersion"].to_s.match?(/\A\d+\.\d+\.\d+\z/)
   errors << "#{relative_path}: moduleVersion must be semantic" unless manifest["moduleVersion"].to_s.match?(/\A\d+\.\d+\.\d+\z/)
   errors << "#{relative_path}: moduleType must be #{policy['moduleType']}" unless manifest["moduleType"] == policy["moduleType"]
+  errors << "#{relative_path}: criticality must be required or optional" unless %w[required optional].include?(manifest["criticality"])
+  if policy.key?("criticality") && manifest["criticality"] != policy["criticality"]
+    errors << "#{relative_path}: criticality must be #{policy['criticality']}"
+  end
   errors << "#{relative_path}: defaultRole must be #{policy['defaultRole']}" unless manifest["defaultRole"] == policy["defaultRole"]
   errors << "#{relative_path}: diagnostics must remain hidden in production" unless manifest["diagnosticsVisibleInProduction"] == false
   errors << "#{relative_path}: supportedPlatforms must contain iOS and macOS" unless Array(manifest["supportedPlatforms"]).sort == %w[iOS macOS].sort
   capabilities = Array(manifest["capabilitiesRequested"])
   errors << "#{relative_path}: capabilitiesRequested must be unique strings" unless capabilities.all? { |capability| capability.is_a?(String) } && capabilities.uniq == capabilities
+  %w[consumedEndpoints publishedEndpoints].each do |key|
+    endpoints = manifest[key]
+    unless endpoints.is_a?(Array) && endpoints.all? { |endpoint| endpoint.is_a?(String) && !endpoint.empty? } && endpoints.uniq == endpoints
+      errors << "#{relative_path}: #{key} must contain unique non-empty strings"
+    end
+  end
   requirements = manifest["runtimeRequirements"]
   unless requirements.is_a?(Hash) && requirements.keys.sort == %w[requiredModuleRoles requiredResources requiredServices].sort
     errors << "#{relative_path}: runtimeRequirements must contain only requiredServices, requiredResources, and requiredModuleRoles"
   end
 
   descriptor_sources = Dir.glob(architecture_package.join("Sources/#{policy['product']}/**/*.swift").to_s)
-  unless descriptor_sources.any? { |source| File.read(source).include?(module_id) }
+  descriptor_has_id = descriptor_sources.any? { |source| File.read(source).include?(module_id) }
+  unless descriptor_has_id
+    vocabulary_sources = Dir.glob(
+      architecture_package.join("Sources/RuneScribeContracts/**/*.swift").to_s
+    )
+    constant_names = vocabulary_sources.flat_map do |source|
+      File.read(source).scan(
+        /static\s+let\s+([A-Za-z_][A-Za-z0-9_]*)\s*:\s*ModuleIdentifier\s*=\s*"#{Regexp.escape(module_id)}"/
+      ).flatten
+    end
+    descriptor_has_id = constant_names.any? do |constant_name|
+      descriptor_sources.any? do |source|
+        File.read(source).match?(/\bRuneScribeModuleIDs\.#{Regexp.escape(constant_name)}\b/)
+      end
+    end
+  end
+  unless descriptor_has_id
     errors << "#{relative_path}: no matching compiled descriptor ID in #{policy['product']}"
   end
 end
@@ -645,14 +917,13 @@ host_runtime_bypass_references = host_text.scan(/\bRuneScribeCoreApplicationServ
 host_physical_lines = host_files.sum { |path| File.readlines(path).length }
 
 host_files.each do |path|
-  File.readlines(path).each_with_index do |line, index|
-    match = line.match(/^\s*import\s+([A-Za-z_][A-Za-z0-9_]*)/)
-    next unless match
+  swift_imports(without_comments_preserving_lines(File.read(path))).each do |imported, line|
     allowed = %w[
       Foundation SwiftUI AppKit UIKit RuneScribeContracts RuneScribeRuntimeCore
-      RuneScribePlatform RuneScribeCoreModule RuneScribeUIModule RuneScribeUIRuntime
+      RuneScribePlatform RuneScribeCoreModule RuneScribeProgressionModule
+      RuneScribeUIModule RuneScribeUIRuntime
     ]
-    errors << "#{relative(path, root)}:#{index + 1}: host may not import #{match[1]}" unless allowed.include?(match[1])
+    errors << "#{relative(path, root)}:#{line}: host may not import #{imported}" unless allowed.include?(imported)
   end
 end
 

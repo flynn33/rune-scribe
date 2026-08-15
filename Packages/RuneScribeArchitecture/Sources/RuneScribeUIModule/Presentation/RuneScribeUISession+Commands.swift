@@ -82,26 +82,27 @@ extension RuneScribeUISession {
     func prepareMessageShare(
         runes: String,
         senderName: String,
-        cipherID: UUID
+        cipherID: UUID,
+        shareHandle: EncodedMessageHandle
     ) async throws -> ShareArtifactDTO {
         try await perform {
             try await requireApplicationClient().prepareMessageShare(
                 PrepareMessageShareCommand(
                     runes: runes,
                     senderName: senderName,
-                    cipherID: CipherID(rawValue: cipherID)
+                    cipherID: CipherID(rawValue: cipherID),
+                    shareHandle: shareHandle
                 )
             )
         }
     }
 
     func completeShareArtifact(
-        id: ShareArtifactID,
-        outcome: ShareArtifactOutcomeDTO
+        evidence: ShareArtifactCompletionEvidenceDTO
     ) async throws -> ShareArtifactCompletionResultDTO {
         try await perform {
             try await requireApplicationClient().completeShareArtifact(
-                CompleteShareArtifactCommand(artifactID: id, outcome: outcome)
+                CompleteShareArtifactCommand(evidence: evidence)
             )
         }
     }
@@ -128,7 +129,8 @@ extension RuneScribeUISession {
     ) async throws -> OpaqueShareTransfer {
         let runtimeIO = try requireRuntimeIOClient()
         let presentationSession = try await runtimeIO.textSharePresentationSession(
-            text
+            text,
+            artifactID: artifactID
         )
         return try await OpaqueShareTransfer.open(
             artifactID: artifactID,

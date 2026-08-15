@@ -2,13 +2,25 @@
 
 import Foundation
 
+enum CipherLibraryValidationError: Error, Equatable, Sendable {
+    case unsupportedVersion(Int)
+    case invalidVersionShape
+    case duplicateCipher
+    case invalidActiveCipher
+    case progressionEvidenceRequired
+    case progressionMigrationSeedMismatch
+}
+
 /// The persisted collection of the user's labelled ciphers, plus which one is
 /// active. Stored AES-GCM-encrypted in the Keychain (account `cipherLibrary`).
 /// Library order is the user's order — new ciphers are appended.
 struct CipherLibrary: Codable, Equatable, Sendable {
 
     /// Schema version, so the stored format can evolve safely.
-    var version: Int = 1
+    static let legacyVersion = 1
+    static let currentVersion = 2
+
+    var version: Int
 
     /// All ciphers the user has created or imported.
     var ciphers: [Cipher]
@@ -16,7 +28,23 @@ struct CipherLibrary: Codable, Equatable, Sendable {
     /// The id of the active cipher (the default used when composing a message).
     var activeID: UUID?
 
+    /// PRG-3 evidence remains separate from `Cipher`, preserving the frozen v2
+    /// cipher wire representation and all explicit cipher-share payloads.
+    var progressionLedger: CoreProgressionLedger?
+
     static let empty = CipherLibrary(ciphers: [], activeID: nil)
+
+    init(
+        version: Int = Self.legacyVersion,
+        ciphers: [Cipher],
+        activeID: UUID?,
+        progressionLedger: CoreProgressionLedger? = nil
+    ) {
+        self.version = version
+        self.ciphers = ciphers
+        self.activeID = activeID
+        self.progressionLedger = progressionLedger
+    }
 
     /// The active cipher, falling back to the first entry when the stored
     /// `activeID` is missing or no longer present.
@@ -28,7 +56,153 @@ struct CipherLibrary: Codable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case version, ciphers, activeID
+        case version, ciphers, activeID, progressionLedger
+    }
+
+    init(from decoder: Decoder) throws {
+        let dynamic = try decoder.container(keyedBy: CipherLibraryDynamicCodingKey.self)
+        let rawKeys = Set(dynamic.allKeys.map(\.stringValue))
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let decodedVersion = try container.decode(Int.self, forKey: .version)
+        let allowedKeys: Set<String>
+        switch decodedVersion {
+        case Self.legacyVersion:
+            allowedKeys = ["version", "ciphers", "activeID"]
+        case Self.currentVersion:
+            allowedKeys = ["version", "ciphers", "activeID", "progressionLedger"]
+        default:
+            throw CipherLibraryValidationError.unsupportedVersion(decodedVersion)
+        }
+        let requiredKeys: Set<String> = decodedVersion == Self.currentVersion
+            ? ["version", "ciphers", "progressionLedger"]
+            : ["version", "ciphers"]
+        guard requiredKeys.isSubset(of: rawKeys), rawKeys.isSubset(of: allowedKeys) else {
+            throw CipherLibraryValidationError.invalidVersionShape
+        }
+        version = decodedVersion
+        ciphers = try container.decode([Cipher].self, forKey: .ciphers)
+        activeID = try container.decodeIfPresent(UUID.self, forKey: .activeID)
+        progressionLedger = try container.decodeIfPresent(
+            CoreProgressionLedger.self,
+            forKey: .progressionLedger
+        )
+        try validateStoredShape()
+    }
+
+    func encode(to encoder: Encoder) throws {
+        try validateStoredShape()
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(version, forKey: .version)
+        try container.encode(ciphers, forKey: .ciphers)
+        try container.encodeIfPresent(activeID, forKey: .activeID)
+        if version == Self.currentVersion {
+            try container.encode(progressionLedger, forKey: .progressionLedger)
+        }
+    }
+
+    func migratingProgressionEvidence(
+        using seeds: CoreProgressionMigrationSeedSet
+    ) throws -> CipherLibrary {
+        if version == Self.currentVersion {
+            try validateStoredShape()
+            return self
+        }
+        guard version == Self.legacyVersion else {
+            throw CipherLibraryValidationError.unsupportedVersion(version)
+        }
+
+        let cipherIDs = Set(ciphers.map(\.id))
+        guard Set(seeds.cipherSeeds.keys) == cipherIDs else {
+            throw CipherLibraryValidationError.progressionMigrationSeedMismatch
+        }
+        let currentRelationships = Set(ciphers.compactMap { cipher in
+            cipher.contactID.map {
+                CoreProgressionRelationshipIdentity(
+                    cipherID: cipher.id,
+                    contactID: $0
+                )
+            }
+        })
+        guard Set(seeds.relationshipSeeds.keys) == currentRelationships else {
+            throw CipherLibraryValidationError.progressionMigrationSeedMismatch
+        }
+
+        let cipherSeedRecords = try ciphers.map { cipher in
+            try CoreCipherProgressionSeedRecord(
+                cipherID: cipher.id,
+                seed: seeds.cipherSeeds[cipher.id]!
+            )
+        }
+        let relationshipRecords: [CoreRelationshipProgressionRecord] = try ciphers.compactMap {
+            cipher -> CoreRelationshipProgressionRecord? in
+            guard let contactID = cipher.contactID else { return nil }
+            let identity = CoreProgressionRelationshipIdentity(
+                cipherID: cipher.id,
+                contactID: contactID
+            )
+            return try CoreRelationshipProgressionRecord(
+                identity: identity,
+                seed: seeds.relationshipSeeds[identity]!,
+                keyDeliveryState: cipher.keyDeliveryState
+            )
+        }
+        let ledger = try CoreProgressionLedger(
+            cipherSeeds: cipherSeedRecords,
+            relationships: relationshipRecords
+        )
+        let candidate = CipherLibrary(
+            version: Self.currentVersion,
+            ciphers: ciphers,
+            activeID: activeID,
+            progressionLedger: ledger
+        )
+        try candidate.validateStoredShape()
+        return candidate
+    }
+
+    func validatedProgressionLedger() throws -> CoreProgressionLedger {
+        guard version == Self.currentVersion, let progressionLedger else {
+            throw CipherLibraryValidationError.progressionEvidenceRequired
+        }
+        try progressionLedger.validate(for: ciphers)
+        return progressionLedger
+    }
+
+    func validateStoredShape() throws {
+        guard Set(ciphers.map(\.id)).count == ciphers.count else {
+            throw CipherLibraryValidationError.duplicateCipher
+        }
+        if let activeID, !ciphers.contains(where: { $0.id == activeID }) {
+            throw CipherLibraryValidationError.invalidActiveCipher
+        }
+        switch version {
+        case Self.legacyVersion:
+            guard progressionLedger == nil else {
+                throw CipherLibraryValidationError.invalidVersionShape
+            }
+        case Self.currentVersion:
+            guard let progressionLedger else {
+                throw CipherLibraryValidationError.progressionEvidenceRequired
+            }
+            try progressionLedger.validate(for: ciphers)
+        default:
+            throw CipherLibraryValidationError.unsupportedVersion(version)
+        }
+    }
+}
+
+private struct CipherLibraryDynamicCodingKey: CodingKey {
+    let stringValue: String
+    let intValue: Int?
+
+    init?(stringValue: String) {
+        self.stringValue = stringValue
+        intValue = nil
+    }
+
+    init?(intValue: Int) {
+        stringValue = String(intValue)
+        self.intValue = intValue
     }
 }
 

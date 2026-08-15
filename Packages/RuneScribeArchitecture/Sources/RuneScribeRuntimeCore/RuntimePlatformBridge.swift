@@ -69,6 +69,7 @@ actor RuntimePlatformBridge {
     private var clipboardWrite: ClipboardWriteHandlers?
     private var hasClock = false
     private var hasUUID = false
+    private var hasModuleStateStore = false
     private var generation: UInt64 = 0
     private var active = false
 
@@ -96,6 +97,7 @@ actor RuntimePlatformBridge {
         case RuneScribeServiceIDs.clipboardWrite: clipboardWrite != nil
         case RuneScribeServiceIDs.clock: hasClock
         case RuneScribeServiceIDs.uuid: hasUUID
+        case RuneScribeServiceIDs.moduleStateStore: hasModuleStateStore
         default: false
         }
     }
@@ -187,6 +189,15 @@ actor RuntimePlatformBridge {
             throw RuneScribeRuntimeError.duplicateService(RuneScribeServiceIDs.uuid)
         }
         hasUUID = true
+    }
+
+    func register(_: any ModuleStateStore) throws {
+        guard !hasModuleStateStore else {
+            throw RuneScribeRuntimeError.duplicateService(
+                RuneScribeServiceIDs.moduleStateStore
+            )
+        }
+        hasModuleStateStore = true
     }
 
     private func validate(_ expectedGeneration: UInt64, serviceID: ServiceIdentifier) throws {

@@ -1,0 +1,3407 @@
+{
+  "schemaVersion": "1.0",
+  "catalogID": "runescribe.progression.catalog",
+  "catalogVersion": 1,
+  "packageVersion": "1.0.0",
+  "status": "approved-controlling-implementation-input",
+  "effectiveDate": "2026-08-12",
+  "governingObjective": "Drive organic product usage, meaningful outward exposure, reciprocal communication, retention, and app sales through collectible cosmetic rewards without tracking purchases, installs, reviews, or recipient identity.",
+  "principles": [
+    "direct-accomplishments-not-xp",
+    "no-currency",
+    "no-streak-pressure",
+    "no-loot-boxes",
+    "cosmetic-and-experiential-rewards-only",
+    "reading-and-decoding-never-gated",
+    "automatic-permanent-irrevocable-ordinary-grants",
+    "local-first",
+    "distinct-reach-over-raw-volume",
+    "reciprocity-over-spam"
+  ],
+  "migration": {
+    "migrationVersion": 1,
+    "startingGrantGroupID": "grant-group.base.norse.included",
+    "seedSafelyDerivableCipherStatistics": true,
+    "evaluateArchivistAchievementsAfterSafeSeed": true,
+    "backfillPastShares": false,
+    "backfillPastDecodes": false,
+    "backfillDistinctRelationshipsFromDeliveredFlags": false,
+    "includedGrantReveal": "suppressed",
+    "derivedMigrationRewardsReveal": "one-combined-reveal"
+  },
+  "content": [
+    {
+      "contentID": "codex.gloamthorn",
+      "kind": "codex",
+      "displayName": "Gloamthorn Codex",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "codex.moonleaf",
+      "kind": "codex",
+      "displayName": "Moonleaf Codex",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "codex.norse",
+      "kind": "codex",
+      "displayName": "Norse Codex",
+      "countsAsArtifact": false,
+      "availability": "included",
+      "rarity": "Forged",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "codex.sunspire",
+      "kind": "codex",
+      "displayName": "Sunspire Codex",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "codex.wildwood",
+      "kind": "codex",
+      "displayName": "Wildwood Codex",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "crest.gloamthorn.gloam-sovereign",
+      "kind": "crest",
+      "displayName": "Gloam Sovereign Crest",
+      "countsAsArtifact": true,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "crest.moonleaf.moonbloom",
+      "kind": "crest",
+      "displayName": "Moonbloom Crest",
+      "countsAsArtifact": true,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "crest.norse.forge-master",
+      "kind": "crest",
+      "displayName": "Forge Master Crest",
+      "countsAsArtifact": true,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "crest.sunspire.first-light",
+      "kind": "crest",
+      "displayName": "First Light Crest",
+      "countsAsArtifact": true,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "crest.wildwood.heartwood-crown",
+      "kind": "crest",
+      "displayName": "Heartwood Crown",
+      "countsAsArtifact": true,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "frame.gloamthorn.briar-court",
+      "kind": "frame",
+      "displayName": "Briar Court Frame",
+      "countsAsArtifact": true,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "frame.moonleaf.silvervine",
+      "kind": "frame",
+      "displayName": "Silvervine Frame",
+      "countsAsArtifact": true,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "frame.norse.carved-knotwork",
+      "kind": "frame",
+      "displayName": "Carved Knotwork Frame",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "frame.progression.collector",
+      "kind": "frame",
+      "displayName": "Collector Frame",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "frame.progression.mastery",
+      "kind": "frame",
+      "displayName": "Mastery Frame",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Mythic",
+      "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "frame.sunspire.laurel-of-dawn",
+      "kind": "frame",
+      "displayName": "Laurel of Dawn",
+      "countsAsArtifact": true,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "frame.wildwood.living-root",
+      "kind": "frame",
+      "displayName": "Living Root Frame",
+      "countsAsArtifact": true,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "relic.gloamthorn.duskbriar-stele",
+      "kind": "relic",
+      "displayName": "Duskbriar Stele",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "relic.gloamthorn.nightthorn-tablet",
+      "kind": "relic",
+      "displayName": "Nightthorn Tablet",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "relic.gloamthorn.umbral-plaque",
+      "kind": "relic",
+      "displayName": "Umbral Plaque",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "relic.moonleaf.ivybound-plaque",
+      "kind": "relic",
+      "displayName": "Ivybound Plaque",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "relic.moonleaf.tablet",
+      "kind": "relic",
+      "displayName": "Moonleaf Tablet",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "relic.moonleaf.whisperbark-stele",
+      "kind": "relic",
+      "displayName": "Whisperbark Stele",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "relic.norse.ironbound-shield",
+      "kind": "relic",
+      "displayName": "Ironbound Round Shield",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "relic.norse.raven-medallion",
+      "kind": "relic",
+      "displayName": "Raven Medallion",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "relic.norse.runestone.blackstone",
+      "kind": "relic",
+      "displayName": "Blackstone Rune Stone",
+      "countsAsArtifact": true,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "relic.norse.runestone.frozen",
+      "kind": "relic",
+      "displayName": "Frozen Rune Stone",
+      "countsAsArtifact": true,
+      "availability": "seasonal-deferred",
+      "rarity": "Mythic",
+      "codexID": "codex.norse",
+      "notes": "No active v1 rule; requires a future approved Season catalog."
+    },
+    {
+      "contentID": "relic.norse.runestone.weathered",
+      "kind": "relic",
+      "displayName": "Weathered Rune Stone",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "relic.norse.sealed-parchment",
+      "kind": "relic",
+      "displayName": "Sealed Parchment",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "relic.progression.collector",
+      "kind": "relic",
+      "displayName": "Collector Relic",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "relic.sunspire.auric-stele",
+      "kind": "relic",
+      "displayName": "Auric Stele",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "relic.sunspire.dawnfire-tablet",
+      "kind": "relic",
+      "displayName": "Dawnfire Tablet",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "relic.sunspire.solvine-plaque",
+      "kind": "relic",
+      "displayName": "Solvine Plaque",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "relic.wildwood.elderbark-stele",
+      "kind": "relic",
+      "displayName": "Elderbark Stele",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "relic.wildwood.mossbound-plaque",
+      "kind": "relic",
+      "displayName": "Mossbound Plaque",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "relic.wildwood.rootsong-tablet",
+      "kind": "relic",
+      "displayName": "Rootsong Tablet",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "script.base-runes",
+      "kind": "script",
+      "displayName": "Base Rune Script",
+      "countsAsArtifact": false,
+      "availability": "included",
+      "rarity": "Forged",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "script.gloamthorn",
+      "kind": "script",
+      "displayName": "Gloamthorn Script",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "script.moonleaf",
+      "kind": "script",
+      "displayName": "Moonleaf Script",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "script.sunspire",
+      "kind": "script",
+      "displayName": "Sunspire Script",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "script.wildwood",
+      "kind": "script",
+      "displayName": "Wildwood Script",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "seal.gloamthorn.echo-wisp",
+      "kind": "seal",
+      "displayName": "Echo Wisp",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "seal.gloamthorn.eclipse-bloom",
+      "kind": "seal",
+      "displayName": "Eclipse Bloom",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "seal.gloamthorn.nightglass-moth",
+      "kind": "seal",
+      "displayName": "Nightglass Moth",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "seal.gloamthorn.pact-crown",
+      "kind": "seal",
+      "displayName": "Pact Crown",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "seal.gloamthorn.thornmoon",
+      "kind": "seal",
+      "displayName": "Thornmoon",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "seal.gloamthorn.veiled-serpent",
+      "kind": "seal",
+      "displayName": "Veiled Serpent",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "seal.moonleaf.crescentleaf",
+      "kind": "seal",
+      "displayName": "Crescentleaf",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "seal.moonleaf.echo-firefly",
+      "kind": "seal",
+      "displayName": "Echo Firefly",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "seal.moonleaf.moonwell",
+      "kind": "seal",
+      "displayName": "Moonwell",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "seal.moonleaf.night-owl",
+      "kind": "seal",
+      "displayName": "Night Owl",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "seal.moonleaf.starflower",
+      "kind": "seal",
+      "displayName": "Starflower",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "seal.moonleaf.woodland-stag",
+      "kind": "seal",
+      "displayName": "Woodland Stag",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "seal.norse.echo-rune",
+      "kind": "seal",
+      "displayName": "Echo Rune Seal",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "seal.norse.forge-flame",
+      "kind": "seal",
+      "displayName": "Forge Flame",
+      "countsAsArtifact": true,
+      "availability": "included",
+      "rarity": "Forged",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "seal.norse.forge-hammer",
+      "kind": "seal",
+      "displayName": "Forge Hammer Seal",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "seal.norse.knotwork",
+      "kind": "seal",
+      "displayName": "Knotwork Mark",
+      "countsAsArtifact": true,
+      "availability": "included",
+      "rarity": "Forged",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "seal.norse.longship",
+      "kind": "seal",
+      "displayName": "Longship Seal",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "seal.norse.raven",
+      "kind": "seal",
+      "displayName": "Raven Seal",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "seal.progression.echo",
+      "kind": "seal",
+      "displayName": "Echo Seal",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "seal.progression.relic-bearer",
+      "kind": "seal",
+      "displayName": "Relic Bearer Seal",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "seal.sunspire.dawnflower",
+      "kind": "seal",
+      "displayName": "Dawnflower",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "seal.sunspire.echo-ember",
+      "kind": "seal",
+      "displayName": "Echo Ember",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "seal.sunspire.golden-lark",
+      "kind": "seal",
+      "displayName": "Golden Lark",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "seal.sunspire.radiant-spire",
+      "kind": "seal",
+      "displayName": "Radiant Spire",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "seal.sunspire.sunleaf-crest",
+      "kind": "seal",
+      "displayName": "Sunleaf Crest",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "seal.sunspire.sunwheel",
+      "kind": "seal",
+      "displayName": "Sunwheel",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "seal.wildwood.acorn-knot",
+      "kind": "seal",
+      "displayName": "Acorn Knot",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "seal.wildwood.echo-seed",
+      "kind": "seal",
+      "displayName": "Echo Seed",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "seal.wildwood.fern-spiral",
+      "kind": "seal",
+      "displayName": "Fern Spiral",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "seal.wildwood.lantern-moth",
+      "kind": "seal",
+      "displayName": "Lantern Moth",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "seal.wildwood.rooted-tree",
+      "kind": "seal",
+      "displayName": "Rooted Tree",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Forged",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "seal.wildwood.wild-fox",
+      "kind": "seal",
+      "displayName": "Wild Fox",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "codexID": "codex.wildwood"
+    },
+    {
+      "contentID": "title.archivist",
+      "kind": "title",
+      "displayName": "Archivist",
+      "countsAsArtifact": false,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "title.listener",
+      "kind": "title",
+      "displayName": "Listener",
+      "countsAsArtifact": false,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "title.master-scribe",
+      "kind": "title",
+      "displayName": "Master Scribe",
+      "countsAsArtifact": false,
+      "availability": "permanent",
+      "rarity": "Mythic",
+      "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "title.wayfarer",
+      "kind": "title",
+      "displayName": "Wayfarer",
+      "countsAsArtifact": false,
+      "availability": "permanent",
+      "rarity": "Rare",
+      "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "unlock.codex.gloamthorn",
+      "kind": "entitlement",
+      "displayName": "Gloamthorn Codex Create and Select Right",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.gloamthorn"
+    },
+    {
+      "contentID": "unlock.codex.moonleaf",
+      "kind": "entitlement",
+      "displayName": "Moonleaf Codex Create and Select Right",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.moonleaf"
+    },
+    {
+      "contentID": "unlock.codex.norse",
+      "kind": "entitlement",
+      "displayName": "Norse Codex Create and Select Right",
+      "countsAsArtifact": false,
+      "availability": "included",
+      "rarity": "Forged",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "unlock.codex.sunspire",
+      "kind": "entitlement",
+      "displayName": "Sunspire Codex Create and Select Right",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.sunspire"
+    },
+    {
+      "contentID": "unlock.codex.wildwood",
+      "kind": "entitlement",
+      "displayName": "Wildwood Codex Create and Select Right",
+      "countsAsArtifact": false,
+      "availability": "earned",
+      "rarity": "Inscribed",
+      "codexID": "codex.wildwood"
+    }
+  ],
+  "statistics": [
+    {
+      "statisticID": "stat.message.encoded.unique",
+      "displayName": "Unique inscriptions",
+      "storage": "distinct-set",
+      "dimension": "messageToken",
+      "sourceEvents": [
+        "runescribe.message.encoded"
+      ]
+    },
+    {
+      "statisticID": "stat.share.eligible-message.unique",
+      "displayName": "Eligible unique dispatches",
+      "storage": "distinct-set",
+      "dimension": "messageToken",
+      "sourceEvents": [
+        "runescribe.share.completed"
+      ]
+    },
+    {
+      "statisticID": "stat.relationship.first-delivery.unique",
+      "displayName": "Distinct circles reached",
+      "storage": "distinct-set",
+      "dimension": "relationshipToken",
+      "sourceEvents": [
+        "runescribe.cipher.first-delivery-completed"
+      ]
+    },
+    {
+      "statisticID": "stat.message.incoming-decoded.unique",
+      "displayName": "Incoming messages decoded",
+      "storage": "distinct-set",
+      "dimension": "packageToken",
+      "sourceEvents": [
+        "runescribe.message.decoded"
+      ]
+    },
+    {
+      "statisticID": "stat.relationship.bidirectional.unique",
+      "displayName": "Bidirectional correspondents",
+      "storage": "distinct-set",
+      "dimension": "relationshipToken",
+      "sourceEvents": [
+        "runescribe.exchange.bidirectional-established"
+      ]
+    },
+    {
+      "statisticID": "stat.cipher.created-or-imported.unique",
+      "displayName": "Ciphers created or imported",
+      "storage": "distinct-set",
+      "dimension": "cipherToken",
+      "sourceEvents": [
+        "runescribe.cipher.created",
+        "runescribe.cipher.imported"
+      ]
+    },
+    {
+      "statisticID": "stat.share.relic-used.unique",
+      "displayName": "Distinct Relics used",
+      "storage": "distinct-set",
+      "dimension": "artifactID",
+      "sourceEvents": [
+        "runescribe.share.completed"
+      ],
+      "filter": "owned relic IDs only"
+    },
+    {
+      "statisticID": "stat.share.seal-used.unique",
+      "displayName": "Distinct Seals used",
+      "storage": "distinct-set",
+      "dimension": "artifactID",
+      "sourceEvents": [
+        "runescribe.share.completed"
+      ],
+      "filter": "owned seal IDs only"
+    },
+    {
+      "statisticID": "stat.share.codex-used.unique",
+      "displayName": "Distinct Codices used",
+      "storage": "distinct-set",
+      "dimension": "codexID",
+      "sourceEvents": [
+        "runescribe.share.completed"
+      ],
+      "filter": "owned Codex IDs only"
+    },
+    {
+      "statisticID": "stat.encounter.codex.unique",
+      "displayName": "Codices encountered",
+      "storage": "distinct-set",
+      "dimension": "codexID",
+      "sourceEvents": [
+        "runescribe.presentation.observed"
+      ],
+      "filter": "Codex unowned at first observation"
+    },
+    {
+      "statisticID": "stat.ownership.artifact-count",
+      "displayName": "Artifacts owned",
+      "storage": "derived",
+      "dimension": "contentID",
+      "sourceEvents": [
+        "grant-transaction"
+      ],
+      "filter": "countsAsArtifact=true"
+    },
+    {
+      "statisticID": "stat.achievement.completed-count",
+      "displayName": "Evergreen Achievements completed",
+      "storage": "derived",
+      "dimension": "achievementID",
+      "sourceEvents": [
+        "achievement-completion"
+      ],
+      "filter": "evergreen=true and excludes achievement.master-scribe when evaluating itself"
+    },
+    {
+      "statisticID": "stat.codex.share.unique-message",
+      "displayName": "Eligible shares by Codex",
+      "storage": "bucketed-distinct-set",
+      "bucket": "codexID",
+      "dimension": "messageToken",
+      "sourceEvents": [
+        "runescribe.share.completed"
+      ]
+    },
+    {
+      "statisticID": "stat.codex.incoming-decode.unique-package",
+      "displayName": "Incoming decodes by presented Codex",
+      "storage": "bucketed-distinct-set",
+      "bucket": "codexID",
+      "dimension": "packageToken",
+      "sourceEvents": [
+        "runescribe.message.decoded"
+      ]
+    },
+    {
+      "statisticID": "stat.codex.relationship-presented.unique",
+      "displayName": "Distinct relationships reached by Codex",
+      "storage": "bucketed-distinct-set",
+      "bucket": "codexID",
+      "dimension": "relationshipToken",
+      "sourceEvents": [
+        "runescribe.share.completed"
+      ],
+      "filter": "relationshipToken present and share eligible"
+    },
+    {
+      "statisticID": "stat.codex.relic-used.unique",
+      "displayName": "Relics used by Codex",
+      "storage": "bucketed-distinct-set",
+      "bucket": "codexID",
+      "dimension": "artifactID",
+      "sourceEvents": [
+        "runescribe.share.completed"
+      ],
+      "filter": "owned relic IDs only"
+    },
+    {
+      "statisticID": "stat.codex.seal-used.unique",
+      "displayName": "Seals used by Codex",
+      "storage": "bucketed-distinct-set",
+      "bucket": "codexID",
+      "dimension": "artifactID",
+      "sourceEvents": [
+        "runescribe.share.completed"
+      ],
+      "filter": "owned seal IDs only"
+    },
+    {
+      "statisticID": "stat.codex.observed.unique-package",
+      "displayName": "Incoming observations by Codex",
+      "storage": "bucketed-distinct-set",
+      "bucket": "codexID",
+      "dimension": "packageToken",
+      "sourceEvents": [
+        "runescribe.presentation.observed"
+      ]
+    }
+  ],
+  "achievements": [
+    {
+      "achievementID": "achievement.first-inscription",
+      "displayName": "First Inscription",
+      "description": "Complete your first unique inscription.",
+      "path": "scribe",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 5,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 5
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.message.encoded.unique",
+        "threshold": 1
+      },
+      "progress": {
+        "statisticID": "stat.message.encoded.unique",
+        "target": 1
+      },
+      "rewardGrantGroupID": "grant-group.first-inscription",
+      "fallbackSystemImage": "pencil.and.scribble"
+    },
+    {
+      "achievementID": "achievement.first-dispatch",
+      "displayName": "First Dispatch",
+      "description": "Complete your first eligible cipher share.",
+      "path": "courier",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 5,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 5
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.share.eligible-message.unique",
+        "threshold": 1
+      },
+      "progress": {
+        "statisticID": "stat.share.eligible-message.unique",
+        "target": 1
+      },
+      "rewardGrantGroupID": "grant-group.first-dispatch",
+      "fallbackSystemImage": "paperplane"
+    },
+    {
+      "achievementID": "achievement.echo-returns",
+      "displayName": "An Echo Returns",
+      "description": "Successfully decode your first incoming Rune Scribe message.",
+      "path": "archivist",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 10,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 10
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.message.incoming-decoded.unique",
+        "threshold": 1
+      },
+      "progress": {
+        "statisticID": "stat.message.incoming-decoded.unique",
+        "target": 1
+      },
+      "rewardGrantGroupID": "grant-group.echo-returns",
+      "fallbackSystemImage": "wave.3.right.circle"
+    },
+    {
+      "achievementID": "achievement.correspondent",
+      "displayName": "The Correspondent",
+      "description": "Establish your first bidirectional cipher relationship.",
+      "path": "archivist",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 10,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 10
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.relationship.bidirectional.unique",
+        "threshold": 1
+      },
+      "progress": {
+        "statisticID": "stat.relationship.bidirectional.unique",
+        "target": 1
+      },
+      "rewardGrantGroupID": "grant-group.correspondent",
+      "fallbackSystemImage": "arrow.left.arrow.right"
+    },
+    {
+      "achievementID": "achievement.courier-1",
+      "displayName": "Courier I",
+      "description": "Complete five eligible unique shares.",
+      "path": "courier",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 10,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 10
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.share.eligible-message.unique",
+        "threshold": 5
+      },
+      "progress": {
+        "statisticID": "stat.share.eligible-message.unique",
+        "target": 5
+      },
+      "rewardGrantGroupID": "grant-group.courier-1",
+      "fallbackSystemImage": "paperplane.circle"
+    },
+    {
+      "achievementID": "achievement.courier-2",
+      "displayName": "Courier II",
+      "description": "Complete twenty-five eligible unique shares.",
+      "path": "courier",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 20,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 20
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.share.eligible-message.unique",
+        "threshold": 25
+      },
+      "progress": {
+        "statisticID": "stat.share.eligible-message.unique",
+        "target": 25
+      },
+      "rewardGrantGroupID": "grant-group.courier-2",
+      "fallbackSystemImage": "paperplane.circle.fill"
+    },
+    {
+      "achievementID": "achievement.five-circles",
+      "displayName": "Known in Five Circles",
+      "description": "Complete first delivery to five distinct locally linked cipher relationships.",
+      "path": "courier",
+      "evergreen": true,
+      "visibility": "visible-progressive",
+      "localPointWeight": 25,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 25
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.relationship.first-delivery.unique",
+        "threshold": 5
+      },
+      "progress": {
+        "statisticID": "stat.relationship.first-delivery.unique",
+        "target": 5
+      },
+      "rewardGrantGroupID": "grant-group.codex.moonleaf.unlock",
+      "fallbackSystemImage": "circle.hexagongrid"
+    },
+    {
+      "achievementID": "achievement.archivist-1",
+      "displayName": "Archivist I",
+      "description": "Create or import five ciphers.",
+      "path": "scribe",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 10,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 10
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.cipher.created-or-imported.unique",
+        "threshold": 5
+      },
+      "progress": {
+        "statisticID": "stat.cipher.created-or-imported.unique",
+        "target": 5
+      },
+      "rewardGrantGroupID": "grant-group.archivist-1",
+      "fallbackSystemImage": "books.vertical"
+    },
+    {
+      "achievementID": "achievement.archivist-2",
+      "displayName": "Archivist II",
+      "description": "Create or import twenty ciphers.",
+      "path": "scribe",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 25,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 25
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.cipher.created-or-imported.unique",
+        "threshold": 20
+      },
+      "progress": {
+        "statisticID": "stat.cipher.created-or-imported.unique",
+        "target": 20
+      },
+      "rewardGrantGroupID": "grant-group.archivist-2",
+      "fallbackSystemImage": "books.vertical.fill"
+    },
+    {
+      "achievementID": "achievement.relic-bearer",
+      "displayName": "Relic Bearer",
+      "description": "Use three distinct owned Relics in eligible shares.",
+      "path": "cross-path",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 10,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 10
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.share.relic-used.unique",
+        "threshold": 3
+      },
+      "progress": {
+        "statisticID": "stat.share.relic-used.unique",
+        "target": 3
+      },
+      "rewardGrantGroupID": "grant-group.relic-bearer",
+      "fallbackSystemImage": "shield.lefthalf.filled"
+    },
+    {
+      "achievementID": "achievement.seal-keeper",
+      "displayName": "Seal Keeper",
+      "description": "Use five distinct owned Seals in eligible shares.",
+      "path": "cross-path",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 10,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 10
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.share.seal-used.unique",
+        "threshold": 5
+      },
+      "progress": {
+        "statisticID": "stat.share.seal-used.unique",
+        "target": 5
+      },
+      "rewardGrantGroupID": "grant-group.seal-keeper",
+      "fallbackSystemImage": "seal"
+    },
+    {
+      "achievementID": "achievement.many-worlds",
+      "displayName": "Many Worlds",
+      "description": "Complete eligible shares using two distinct Codices.",
+      "path": "cross-path",
+      "evergreen": true,
+      "visibility": "visible",
+      "localPointWeight": 20,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 20
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.share.codex-used.unique",
+        "threshold": 2
+      },
+      "progress": {
+        "statisticID": "stat.share.codex-used.unique",
+        "target": 2
+      },
+      "rewardGrantGroupID": "grant-group.many-worlds",
+      "fallbackSystemImage": "globe.americas"
+    },
+    {
+      "achievementID": "achievement.explorer",
+      "displayName": "Explorer",
+      "description": "Encounter a valid Codex you do not yet own.",
+      "path": "archivist",
+      "evergreen": true,
+      "visibility": "hidden-until-progress",
+      "localPointWeight": 10,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 10
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.encounter.codex.unique",
+        "threshold": 1
+      },
+      "progress": {
+        "statisticID": "stat.encounter.codex.unique",
+        "target": 1
+      },
+      "rewardGrantGroupID": "grant-group.explorer",
+      "fallbackSystemImage": "sparkle.magnifyingglass"
+    },
+    {
+      "achievementID": "achievement.collector",
+      "displayName": "Collector",
+      "description": "Own twenty distinct Artifacts.",
+      "path": "cross-path",
+      "evergreen": true,
+      "visibility": "visible-progressive",
+      "localPointWeight": 20,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 20
+      },
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.ownership.artifact-count",
+        "threshold": 20
+      },
+      "progress": {
+        "statisticID": "stat.ownership.artifact-count",
+        "target": 20
+      },
+      "rewardGrantGroupID": "grant-group.collector",
+      "fallbackSystemImage": "square.grid.3x3.fill"
+    },
+    {
+      "achievementID": "achievement.master-scribe",
+      "displayName": "Master Scribe",
+      "description": "Complete ten evergreen Rune Scribe Achievements.",
+      "path": "cross-path",
+      "evergreen": true,
+      "visibility": "visible-progressive",
+      "localPointWeight": 30,
+      "gameCenter": {
+        "eligible": true,
+        "status": "deferred-not-configured",
+        "permanentIdentifier": null,
+        "points": 30
+      },
+      "rule": {
+        "op": "completedAchievementCountAtLeast",
+        "threshold": 10,
+        "excludeAchievementIDs": [
+          "achievement.master-scribe"
+        ]
+      },
+      "progress": {
+        "statisticID": "stat.achievement.completed-count",
+        "target": 10,
+        "excludeAchievementIDs": [
+          "achievement.master-scribe"
+        ]
+      },
+      "rewardGrantGroupID": "grant-group.master-scribe",
+      "fallbackSystemImage": "crown"
+    }
+  ],
+  "milestones": [
+    {
+      "ruleID": "rule.codex.moonleaf.known-in-five-circles",
+      "displayName": "Known in Five Circles",
+      "description": "Unlock Moonleaf by completing the Known in Five Circles Achievement.",
+      "visibility": "visible",
+      "category": "codex-unlock",
+      "rule": {
+        "op": "achievementCompleted",
+        "achievementID": "achievement.five-circles"
+      },
+      "grantGroupID": "grant-group.codex.moonleaf.unlock",
+      "revealTier": "codex",
+      "progressComponents": [
+        {
+          "type": "achievement",
+          "achievementID": "achievement.five-circles"
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.sunspire.reciprocal-light",
+      "displayName": "Reciprocal Light",
+      "description": "Own Moonleaf, establish three bidirectional cipher relationships, and decode ten eligible incoming messages.",
+      "visibility": "visible",
+      "category": "codex-unlock",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.moonleaf"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.relationship.bidirectional.unique",
+            "threshold": 3
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.message.incoming-decoded.unique",
+            "threshold": 10
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.sunspire.unlock",
+      "revealTier": "codex",
+      "progressComponents": [
+        {
+          "type": "ownership",
+          "contentID": "codex.moonleaf"
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.relationship.bidirectional.unique",
+          "target": 3
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.message.incoming-decoded.unique",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.wildwood.roots-of-memory",
+      "displayName": "Roots of Memory",
+      "description": "Own Sunspire, reach ten distinct linked relationships, complete fifteen eligible unique shares, and use at least two Codices in eligible shares.",
+      "visibility": "visible",
+      "category": "codex-unlock",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.sunspire"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.relationship.first-delivery.unique",
+            "threshold": 10
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.share.eligible-message.unique",
+            "threshold": 15
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.share.codex-used.unique",
+            "threshold": 2
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.wildwood.unlock",
+      "revealTier": "codex",
+      "progressComponents": [
+        {
+          "type": "ownership",
+          "contentID": "codex.sunspire"
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.relationship.first-delivery.unique",
+          "target": 10
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.share.eligible-message.unique",
+          "target": 15
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.share.codex-used.unique",
+          "target": 2
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.gloamthorn.beyond-the-gloam",
+      "displayName": "Beyond the Gloam",
+      "description": "Own Wildwood, complete Master Scribe, establish five bidirectional relationships, decode twenty-five incoming messages, and complete at least five eligible shares with each of three Codices.",
+      "visibility": "visible",
+      "category": "codex-unlock",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.wildwood"
+          },
+          {
+            "op": "achievementCompleted",
+            "achievementID": "achievement.master-scribe"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.relationship.bidirectional.unique",
+            "threshold": 5
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.message.incoming-decoded.unique",
+            "threshold": 25
+          },
+          {
+            "op": "bucketCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "minimumBuckets": 3,
+            "minimumValuePerBucket": 5
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.gloamthorn.unlock",
+      "revealTier": "codex",
+      "progressComponents": [
+        {
+          "type": "ownership",
+          "contentID": "codex.wildwood"
+        },
+        {
+          "type": "achievement",
+          "achievementID": "achievement.master-scribe"
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.relationship.bidirectional.unique",
+          "target": 5
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.message.incoming-decoded.unique",
+          "target": 25
+        },
+        {
+          "type": "bucket-threshold",
+          "statisticID": "stat.codex.share.unique-message",
+          "minimumBuckets": 3,
+          "minimumValuePerBucket": 5
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.moonleaf.first-share",
+      "displayName": "First Moonleaf Dispatch",
+      "description": "Complete the first eligible unique share using Moonleaf Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.moonleaf"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 1,
+            "bucketID": "codex.moonleaf"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.moonleaf.first-share",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.moonleaf",
+          "target": 1
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.moonleaf.three-shares",
+      "displayName": "Three Moonleaf Dispatches",
+      "description": "Complete three eligible unique shares using Moonleaf Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.moonleaf"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 3,
+            "bucketID": "codex.moonleaf"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.moonleaf.three-shares",
+      "revealTier": "artifact",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.moonleaf",
+          "target": 3
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.moonleaf.incoming-five",
+      "displayName": "Five Moonleaf Echoes",
+      "description": "Decode five valid incoming messages presented with Moonleaf Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.moonleaf"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.incoming-decode.unique-package",
+            "threshold": 5,
+            "bucketID": "codex.moonleaf"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.moonleaf.incoming-five",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.incoming-decode.unique-package",
+          "bucketID": "codex.moonleaf",
+          "target": 5
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.moonleaf.ten-shares",
+      "displayName": "Ten Moonleaf Dispatches",
+      "description": "Complete ten eligible unique shares using Moonleaf Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.moonleaf"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 10,
+            "bucketID": "codex.moonleaf"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.moonleaf.ten-shares",
+      "revealTier": "artifact",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.moonleaf",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.moonleaf.encounter",
+      "displayName": "Moonleaf Echo Encounter",
+      "description": "Receive a valid message presented with Moonleaf Codex from another Scribe.",
+      "visibility": "hidden-until-progress",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.codex.observed.unique-package",
+        "threshold": 1,
+        "bucketID": "codex.moonleaf"
+      },
+      "grantGroupID": "grant-group.codex.moonleaf.encounter",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.observed.unique-package",
+          "bucketID": "codex.moonleaf",
+          "target": 1
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.moonleaf.mastery",
+      "displayName": "Moonleaf Mastery",
+      "description": "Complete the full Moonleaf Codex mastery path.",
+      "visibility": "visible",
+      "category": "codex-mastery",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.moonleaf"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 15,
+            "bucketID": "codex.moonleaf"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.relationship-presented.unique",
+            "threshold": 5,
+            "bucketID": "codex.moonleaf"
+          },
+          {
+            "op": "allListedContentUsed",
+            "statisticID": "stat.codex.relic-used.unique",
+            "bucketID": "codex.moonleaf",
+            "contentIDs": [
+              "relic.moonleaf.tablet",
+              "relic.moonleaf.ivybound-plaque",
+              "relic.moonleaf.whisperbark-stele"
+            ]
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.seal-used.unique",
+            "threshold": 4,
+            "bucketID": "codex.moonleaf"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.incoming-decode.unique-package",
+            "threshold": 5,
+            "bucketID": "codex.moonleaf"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.moonleaf.mastery",
+      "revealTier": "mastery",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.moonleaf",
+          "target": 15
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.relationship-presented.unique",
+          "bucketID": "codex.moonleaf",
+          "target": 5
+        },
+        {
+          "type": "all-content-used",
+          "statisticID": "stat.codex.relic-used.unique",
+          "bucketID": "codex.moonleaf",
+          "contentIDs": [
+            "relic.moonleaf.tablet",
+            "relic.moonleaf.ivybound-plaque",
+            "relic.moonleaf.whisperbark-stele"
+          ]
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.seal-used.unique",
+          "bucketID": "codex.moonleaf",
+          "target": 4
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.incoming-decode.unique-package",
+          "bucketID": "codex.moonleaf",
+          "target": 5
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.sunspire.first-share",
+      "displayName": "First Sunspire Dispatch",
+      "description": "Complete the first eligible unique share using Sunspire Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.sunspire"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 1,
+            "bucketID": "codex.sunspire"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.sunspire.first-share",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.sunspire",
+          "target": 1
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.sunspire.three-shares",
+      "displayName": "Three Sunspire Dispatches",
+      "description": "Complete three eligible unique shares using Sunspire Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.sunspire"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 3,
+            "bucketID": "codex.sunspire"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.sunspire.three-shares",
+      "revealTier": "artifact",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.sunspire",
+          "target": 3
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.sunspire.incoming-five",
+      "displayName": "Five Sunspire Echoes",
+      "description": "Decode five valid incoming messages presented with Sunspire Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.sunspire"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.incoming-decode.unique-package",
+            "threshold": 5,
+            "bucketID": "codex.sunspire"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.sunspire.incoming-five",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.incoming-decode.unique-package",
+          "bucketID": "codex.sunspire",
+          "target": 5
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.sunspire.ten-shares",
+      "displayName": "Ten Sunspire Dispatches",
+      "description": "Complete ten eligible unique shares using Sunspire Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.sunspire"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 10,
+            "bucketID": "codex.sunspire"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.sunspire.ten-shares",
+      "revealTier": "artifact",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.sunspire",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.sunspire.encounter",
+      "displayName": "Sunspire Echo Encounter",
+      "description": "Receive a valid message presented with Sunspire Codex from another Scribe.",
+      "visibility": "hidden-until-progress",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.codex.observed.unique-package",
+        "threshold": 1,
+        "bucketID": "codex.sunspire"
+      },
+      "grantGroupID": "grant-group.codex.sunspire.encounter",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.observed.unique-package",
+          "bucketID": "codex.sunspire",
+          "target": 1
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.sunspire.mastery",
+      "displayName": "Sunspire Mastery",
+      "description": "Complete the full Sunspire Codex mastery path.",
+      "visibility": "visible",
+      "category": "codex-mastery",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.sunspire"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 15,
+            "bucketID": "codex.sunspire"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.relationship-presented.unique",
+            "threshold": 5,
+            "bucketID": "codex.sunspire"
+          },
+          {
+            "op": "allListedContentUsed",
+            "statisticID": "stat.codex.relic-used.unique",
+            "bucketID": "codex.sunspire",
+            "contentIDs": [
+              "relic.sunspire.dawnfire-tablet",
+              "relic.sunspire.solvine-plaque",
+              "relic.sunspire.auric-stele"
+            ]
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.seal-used.unique",
+            "threshold": 4,
+            "bucketID": "codex.sunspire"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.incoming-decode.unique-package",
+            "threshold": 5,
+            "bucketID": "codex.sunspire"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.sunspire.mastery",
+      "revealTier": "mastery",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.sunspire",
+          "target": 15
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.relationship-presented.unique",
+          "bucketID": "codex.sunspire",
+          "target": 5
+        },
+        {
+          "type": "all-content-used",
+          "statisticID": "stat.codex.relic-used.unique",
+          "bucketID": "codex.sunspire",
+          "contentIDs": [
+            "relic.sunspire.dawnfire-tablet",
+            "relic.sunspire.solvine-plaque",
+            "relic.sunspire.auric-stele"
+          ]
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.seal-used.unique",
+          "bucketID": "codex.sunspire",
+          "target": 4
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.incoming-decode.unique-package",
+          "bucketID": "codex.sunspire",
+          "target": 5
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.wildwood.first-share",
+      "displayName": "First Wildwood Dispatch",
+      "description": "Complete the first eligible unique share using Wildwood Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.wildwood"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 1,
+            "bucketID": "codex.wildwood"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.wildwood.first-share",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.wildwood",
+          "target": 1
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.wildwood.three-shares",
+      "displayName": "Three Wildwood Dispatches",
+      "description": "Complete three eligible unique shares using Wildwood Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.wildwood"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 3,
+            "bucketID": "codex.wildwood"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.wildwood.three-shares",
+      "revealTier": "artifact",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.wildwood",
+          "target": 3
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.wildwood.incoming-five",
+      "displayName": "Five Wildwood Echoes",
+      "description": "Decode five valid incoming messages presented with Wildwood Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.wildwood"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.incoming-decode.unique-package",
+            "threshold": 5,
+            "bucketID": "codex.wildwood"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.wildwood.incoming-five",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.incoming-decode.unique-package",
+          "bucketID": "codex.wildwood",
+          "target": 5
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.wildwood.ten-shares",
+      "displayName": "Ten Wildwood Dispatches",
+      "description": "Complete ten eligible unique shares using Wildwood Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.wildwood"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 10,
+            "bucketID": "codex.wildwood"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.wildwood.ten-shares",
+      "revealTier": "artifact",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.wildwood",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.wildwood.encounter",
+      "displayName": "Wildwood Echo Encounter",
+      "description": "Receive a valid message presented with Wildwood Codex from another Scribe.",
+      "visibility": "hidden-until-progress",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.codex.observed.unique-package",
+        "threshold": 1,
+        "bucketID": "codex.wildwood"
+      },
+      "grantGroupID": "grant-group.codex.wildwood.encounter",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.observed.unique-package",
+          "bucketID": "codex.wildwood",
+          "target": 1
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.wildwood.mastery",
+      "displayName": "Wildwood Mastery",
+      "description": "Complete the full Wildwood Codex mastery path.",
+      "visibility": "visible",
+      "category": "codex-mastery",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.wildwood"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 15,
+            "bucketID": "codex.wildwood"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.relationship-presented.unique",
+            "threshold": 5,
+            "bucketID": "codex.wildwood"
+          },
+          {
+            "op": "allListedContentUsed",
+            "statisticID": "stat.codex.relic-used.unique",
+            "bucketID": "codex.wildwood",
+            "contentIDs": [
+              "relic.wildwood.rootsong-tablet",
+              "relic.wildwood.mossbound-plaque",
+              "relic.wildwood.elderbark-stele"
+            ]
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.seal-used.unique",
+            "threshold": 4,
+            "bucketID": "codex.wildwood"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.incoming-decode.unique-package",
+            "threshold": 5,
+            "bucketID": "codex.wildwood"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.wildwood.mastery",
+      "revealTier": "mastery",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.wildwood",
+          "target": 15
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.relationship-presented.unique",
+          "bucketID": "codex.wildwood",
+          "target": 5
+        },
+        {
+          "type": "all-content-used",
+          "statisticID": "stat.codex.relic-used.unique",
+          "bucketID": "codex.wildwood",
+          "contentIDs": [
+            "relic.wildwood.rootsong-tablet",
+            "relic.wildwood.mossbound-plaque",
+            "relic.wildwood.elderbark-stele"
+          ]
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.seal-used.unique",
+          "bucketID": "codex.wildwood",
+          "target": 4
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.incoming-decode.unique-package",
+          "bucketID": "codex.wildwood",
+          "target": 5
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.gloamthorn.first-share",
+      "displayName": "First Gloamthorn Dispatch",
+      "description": "Complete the first eligible unique share using Gloamthorn Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.gloamthorn"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 1,
+            "bucketID": "codex.gloamthorn"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.gloamthorn.first-share",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.gloamthorn",
+          "target": 1
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.gloamthorn.three-shares",
+      "displayName": "Three Gloamthorn Dispatches",
+      "description": "Complete three eligible unique shares using Gloamthorn Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.gloamthorn"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 3,
+            "bucketID": "codex.gloamthorn"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.gloamthorn.three-shares",
+      "revealTier": "artifact",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.gloamthorn",
+          "target": 3
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.gloamthorn.incoming-five",
+      "displayName": "Five Gloamthorn Echoes",
+      "description": "Decode five valid incoming messages presented with Gloamthorn Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.gloamthorn"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.incoming-decode.unique-package",
+            "threshold": 5,
+            "bucketID": "codex.gloamthorn"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.gloamthorn.incoming-five",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.incoming-decode.unique-package",
+          "bucketID": "codex.gloamthorn",
+          "target": 5
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.gloamthorn.ten-shares",
+      "displayName": "Ten Gloamthorn Dispatches",
+      "description": "Complete ten eligible unique shares using Gloamthorn Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.gloamthorn"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 10,
+            "bucketID": "codex.gloamthorn"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.gloamthorn.ten-shares",
+      "revealTier": "artifact",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.gloamthorn",
+          "target": 10
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.gloamthorn.encounter",
+      "displayName": "Gloamthorn Echo Encounter",
+      "description": "Receive a valid message presented with Gloamthorn Codex from another Scribe.",
+      "visibility": "hidden-until-progress",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.codex.observed.unique-package",
+        "threshold": 1,
+        "bucketID": "codex.gloamthorn"
+      },
+      "grantGroupID": "grant-group.codex.gloamthorn.encounter",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.observed.unique-package",
+          "bucketID": "codex.gloamthorn",
+          "target": 1
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.gloamthorn.mastery",
+      "displayName": "Gloamthorn Mastery",
+      "description": "Complete the full Gloamthorn Codex mastery path.",
+      "visibility": "visible",
+      "category": "codex-mastery",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.gloamthorn"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 15,
+            "bucketID": "codex.gloamthorn"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.relationship-presented.unique",
+            "threshold": 5,
+            "bucketID": "codex.gloamthorn"
+          },
+          {
+            "op": "allListedContentUsed",
+            "statisticID": "stat.codex.relic-used.unique",
+            "bucketID": "codex.gloamthorn",
+            "contentIDs": [
+              "relic.gloamthorn.nightthorn-tablet",
+              "relic.gloamthorn.umbral-plaque",
+              "relic.gloamthorn.duskbriar-stele"
+            ]
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.seal-used.unique",
+            "threshold": 4,
+            "bucketID": "codex.gloamthorn"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.incoming-decode.unique-package",
+            "threshold": 5,
+            "bucketID": "codex.gloamthorn"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.gloamthorn.mastery",
+      "revealTier": "mastery",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.gloamthorn",
+          "target": 15
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.relationship-presented.unique",
+          "bucketID": "codex.gloamthorn",
+          "target": 5
+        },
+        {
+          "type": "all-content-used",
+          "statisticID": "stat.codex.relic-used.unique",
+          "bucketID": "codex.gloamthorn",
+          "contentIDs": [
+            "relic.gloamthorn.nightthorn-tablet",
+            "relic.gloamthorn.umbral-plaque",
+            "relic.gloamthorn.duskbriar-stele"
+          ]
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.seal-used.unique",
+          "bucketID": "codex.gloamthorn",
+          "target": 4
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.incoming-decode.unique-package",
+          "bucketID": "codex.gloamthorn",
+          "target": 5
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.norse.echo-five",
+      "displayName": "Five Norse Echoes",
+      "description": "Decode five valid incoming messages presented with the Norse Codex.",
+      "visibility": "visible",
+      "category": "artifact-ladder",
+      "rule": {
+        "op": "distinctCountAtLeast",
+        "statisticID": "stat.codex.incoming-decode.unique-package",
+        "threshold": 5,
+        "bucketID": "codex.norse"
+      },
+      "grantGroupID": "grant-group.codex.norse.echo-five",
+      "revealTier": "micro",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.incoming-decode.unique-package",
+          "bucketID": "codex.norse",
+          "target": 5
+        }
+      ]
+    },
+    {
+      "ruleID": "rule.codex.norse.mastery",
+      "displayName": "Norse Mastery",
+      "description": "Complete the full Norse mastery path using every permanent pre-mastery Relic.",
+      "visibility": "visible",
+      "category": "codex-mastery",
+      "rule": {
+        "op": "all",
+        "conditions": [
+          {
+            "op": "contentOwned",
+            "contentID": "codex.norse"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.share.unique-message",
+            "threshold": 15,
+            "bucketID": "codex.norse"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.relationship-presented.unique",
+            "threshold": 5,
+            "bucketID": "codex.norse"
+          },
+          {
+            "op": "allListedContentUsed",
+            "statisticID": "stat.codex.relic-used.unique",
+            "bucketID": "codex.norse",
+            "contentIDs": [
+              "relic.norse.runestone.weathered",
+              "relic.norse.raven-medallion",
+              "relic.norse.ironbound-shield",
+              "relic.norse.sealed-parchment"
+            ]
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.seal-used.unique",
+            "threshold": 4,
+            "bucketID": "codex.norse"
+          },
+          {
+            "op": "distinctCountAtLeast",
+            "statisticID": "stat.codex.incoming-decode.unique-package",
+            "threshold": 5,
+            "bucketID": "codex.norse"
+          }
+        ]
+      },
+      "grantGroupID": "grant-group.codex.norse.mastery",
+      "revealTier": "mastery",
+      "progressComponents": [
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.share.unique-message",
+          "bucketID": "codex.norse",
+          "target": 15
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.relationship-presented.unique",
+          "bucketID": "codex.norse",
+          "target": 5
+        },
+        {
+          "type": "all-content-used",
+          "statisticID": "stat.codex.relic-used.unique",
+          "bucketID": "codex.norse",
+          "contentIDs": [
+            "relic.norse.runestone.weathered",
+            "relic.norse.raven-medallion",
+            "relic.norse.ironbound-shield",
+            "relic.norse.sealed-parchment"
+          ]
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.seal-used.unique",
+          "bucketID": "codex.norse",
+          "target": 4
+        },
+        {
+          "type": "statistic",
+          "statisticID": "stat.codex.incoming-decode.unique-package",
+          "bucketID": "codex.norse",
+          "target": 5
+        }
+      ]
+    }
+  ],
+  "grantGroups": [
+    {
+      "grantGroupID": "grant-group.base.norse.included",
+      "items": [
+        {
+          "contentID": "unlock.codex.norse",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "codex.norse",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "script.base-runes",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "relic.norse.runestone.weathered",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.norse.knotwork",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.norse.forge-flame",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "none",
+      "primaryContentID": "codex.norse",
+      "notes": "Applied on new store creation and existing-user migration; included grants do not play an unlock reveal."
+    },
+    {
+      "grantGroupID": "grant-group.first-inscription",
+      "items": [
+        {
+          "contentID": "seal.norse.raven",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.norse.raven"
+    },
+    {
+      "grantGroupID": "grant-group.first-dispatch",
+      "items": [
+        {
+          "contentID": "relic.norse.raven-medallion",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.norse.raven-medallion"
+    },
+    {
+      "grantGroupID": "grant-group.echo-returns",
+      "items": [
+        {
+          "contentID": "title.listener",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "title.listener"
+    },
+    {
+      "grantGroupID": "grant-group.correspondent",
+      "items": [
+        {
+          "contentID": "seal.norse.longship",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.norse.longship"
+    },
+    {
+      "grantGroupID": "grant-group.courier-1",
+      "items": [
+        {
+          "contentID": "seal.norse.forge-hammer",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.norse.forge-hammer"
+    },
+    {
+      "grantGroupID": "grant-group.courier-2",
+      "items": [
+        {
+          "contentID": "relic.norse.ironbound-shield",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.norse.ironbound-shield"
+    },
+    {
+      "grantGroupID": "grant-group.archivist-1",
+      "items": [
+        {
+          "contentID": "frame.norse.carved-knotwork",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "frame.norse.carved-knotwork"
+    },
+    {
+      "grantGroupID": "grant-group.archivist-2",
+      "items": [
+        {
+          "contentID": "title.archivist",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "relic.norse.sealed-parchment",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "title.archivist"
+    },
+    {
+      "grantGroupID": "grant-group.relic-bearer",
+      "items": [
+        {
+          "contentID": "seal.progression.relic-bearer",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.progression.relic-bearer"
+    },
+    {
+      "grantGroupID": "grant-group.seal-keeper",
+      "items": [
+        {
+          "contentID": "frame.progression.collector",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "frame.progression.collector"
+    },
+    {
+      "grantGroupID": "grant-group.many-worlds",
+      "items": [
+        {
+          "contentID": "title.wayfarer",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "title.wayfarer"
+    },
+    {
+      "grantGroupID": "grant-group.explorer",
+      "items": [
+        {
+          "contentID": "seal.progression.echo",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.progression.echo"
+    },
+    {
+      "grantGroupID": "grant-group.collector",
+      "items": [
+        {
+          "contentID": "relic.progression.collector",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.progression.collector"
+    },
+    {
+      "grantGroupID": "grant-group.master-scribe",
+      "items": [
+        {
+          "contentID": "title.master-scribe",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "frame.progression.mastery",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "title.master-scribe"
+    },
+    {
+      "grantGroupID": "grant-group.codex.moonleaf.unlock",
+      "items": [
+        {
+          "contentID": "unlock.codex.moonleaf",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "codex.moonleaf",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "script.moonleaf",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "relic.moonleaf.tablet",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.moonleaf.crescentleaf",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.moonleaf.woodland-stag",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "codex",
+      "primaryContentID": "codex.moonleaf"
+    },
+    {
+      "grantGroupID": "grant-group.codex.sunspire.unlock",
+      "items": [
+        {
+          "contentID": "unlock.codex.sunspire",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "codex.sunspire",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "script.sunspire",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "relic.sunspire.dawnfire-tablet",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.sunspire.sunleaf-crest",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.sunspire.golden-lark",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "codex",
+      "primaryContentID": "codex.sunspire"
+    },
+    {
+      "grantGroupID": "grant-group.codex.wildwood.unlock",
+      "items": [
+        {
+          "contentID": "unlock.codex.wildwood",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "codex.wildwood",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "script.wildwood",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "relic.wildwood.rootsong-tablet",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.wildwood.rooted-tree",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.wildwood.lantern-moth",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "codex",
+      "primaryContentID": "codex.wildwood"
+    },
+    {
+      "grantGroupID": "grant-group.codex.gloamthorn.unlock",
+      "items": [
+        {
+          "contentID": "unlock.codex.gloamthorn",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "codex.gloamthorn",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "script.gloamthorn",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "relic.gloamthorn.nightthorn-tablet",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.gloamthorn.thornmoon",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.gloamthorn.nightglass-moth",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "codex",
+      "primaryContentID": "codex.gloamthorn"
+    },
+    {
+      "grantGroupID": "grant-group.codex.moonleaf.first-share",
+      "items": [
+        {
+          "contentID": "seal.moonleaf.night-owl",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.moonleaf.night-owl"
+    },
+    {
+      "grantGroupID": "grant-group.codex.moonleaf.three-shares",
+      "items": [
+        {
+          "contentID": "relic.moonleaf.ivybound-plaque",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.moonleaf.ivybound-plaque"
+    },
+    {
+      "grantGroupID": "grant-group.codex.moonleaf.incoming-five",
+      "items": [
+        {
+          "contentID": "seal.moonleaf.moonwell",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.moonleaf.moonwell"
+    },
+    {
+      "grantGroupID": "grant-group.codex.moonleaf.ten-shares",
+      "items": [
+        {
+          "contentID": "relic.moonleaf.whisperbark-stele",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.moonleaf.starflower",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.moonleaf.whisperbark-stele"
+    },
+    {
+      "grantGroupID": "grant-group.codex.moonleaf.encounter",
+      "items": [
+        {
+          "contentID": "seal.moonleaf.echo-firefly",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.moonleaf.echo-firefly",
+      "notes": "Grant is durable even before Codex ownership; use remains gated by Codex ownership."
+    },
+    {
+      "grantGroupID": "grant-group.codex.moonleaf.mastery",
+      "items": [
+        {
+          "contentID": "frame.moonleaf.silvervine",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "crest.moonleaf.moonbloom",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "mastery",
+      "primaryContentID": "crest.moonleaf.moonbloom"
+    },
+    {
+      "grantGroupID": "grant-group.codex.sunspire.first-share",
+      "items": [
+        {
+          "contentID": "seal.sunspire.dawnflower",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.sunspire.dawnflower"
+    },
+    {
+      "grantGroupID": "grant-group.codex.sunspire.three-shares",
+      "items": [
+        {
+          "contentID": "relic.sunspire.solvine-plaque",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.sunspire.solvine-plaque"
+    },
+    {
+      "grantGroupID": "grant-group.codex.sunspire.incoming-five",
+      "items": [
+        {
+          "contentID": "seal.sunspire.sunwheel",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.sunspire.sunwheel"
+    },
+    {
+      "grantGroupID": "grant-group.codex.sunspire.ten-shares",
+      "items": [
+        {
+          "contentID": "relic.sunspire.auric-stele",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.sunspire.radiant-spire",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.sunspire.auric-stele"
+    },
+    {
+      "grantGroupID": "grant-group.codex.sunspire.encounter",
+      "items": [
+        {
+          "contentID": "seal.sunspire.echo-ember",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.sunspire.echo-ember",
+      "notes": "Grant is durable even before Codex ownership; use remains gated by Codex ownership."
+    },
+    {
+      "grantGroupID": "grant-group.codex.sunspire.mastery",
+      "items": [
+        {
+          "contentID": "frame.sunspire.laurel-of-dawn",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "crest.sunspire.first-light",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "mastery",
+      "primaryContentID": "crest.sunspire.first-light"
+    },
+    {
+      "grantGroupID": "grant-group.codex.wildwood.first-share",
+      "items": [
+        {
+          "contentID": "seal.wildwood.acorn-knot",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.wildwood.acorn-knot"
+    },
+    {
+      "grantGroupID": "grant-group.codex.wildwood.three-shares",
+      "items": [
+        {
+          "contentID": "relic.wildwood.mossbound-plaque",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.wildwood.mossbound-plaque"
+    },
+    {
+      "grantGroupID": "grant-group.codex.wildwood.incoming-five",
+      "items": [
+        {
+          "contentID": "seal.wildwood.fern-spiral",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.wildwood.fern-spiral"
+    },
+    {
+      "grantGroupID": "grant-group.codex.wildwood.ten-shares",
+      "items": [
+        {
+          "contentID": "relic.wildwood.elderbark-stele",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.wildwood.wild-fox",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.wildwood.elderbark-stele"
+    },
+    {
+      "grantGroupID": "grant-group.codex.wildwood.encounter",
+      "items": [
+        {
+          "contentID": "seal.wildwood.echo-seed",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.wildwood.echo-seed",
+      "notes": "Grant is durable even before Codex ownership; use remains gated by Codex ownership."
+    },
+    {
+      "grantGroupID": "grant-group.codex.wildwood.mastery",
+      "items": [
+        {
+          "contentID": "frame.wildwood.living-root",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "crest.wildwood.heartwood-crown",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "mastery",
+      "primaryContentID": "crest.wildwood.heartwood-crown"
+    },
+    {
+      "grantGroupID": "grant-group.codex.gloamthorn.first-share",
+      "items": [
+        {
+          "contentID": "seal.gloamthorn.eclipse-bloom",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.gloamthorn.eclipse-bloom"
+    },
+    {
+      "grantGroupID": "grant-group.codex.gloamthorn.three-shares",
+      "items": [
+        {
+          "contentID": "relic.gloamthorn.umbral-plaque",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.gloamthorn.umbral-plaque"
+    },
+    {
+      "grantGroupID": "grant-group.codex.gloamthorn.incoming-five",
+      "items": [
+        {
+          "contentID": "seal.gloamthorn.veiled-serpent",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.gloamthorn.veiled-serpent"
+    },
+    {
+      "grantGroupID": "grant-group.codex.gloamthorn.ten-shares",
+      "items": [
+        {
+          "contentID": "relic.gloamthorn.duskbriar-stele",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "seal.gloamthorn.pact-crown",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "artifact",
+      "primaryContentID": "relic.gloamthorn.duskbriar-stele"
+    },
+    {
+      "grantGroupID": "grant-group.codex.gloamthorn.encounter",
+      "items": [
+        {
+          "contentID": "seal.gloamthorn.echo-wisp",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.gloamthorn.echo-wisp",
+      "notes": "Grant is durable even before Codex ownership; use remains gated by Codex ownership."
+    },
+    {
+      "grantGroupID": "grant-group.codex.gloamthorn.mastery",
+      "items": [
+        {
+          "contentID": "frame.gloamthorn.briar-court",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "crest.gloamthorn.gloam-sovereign",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "mastery",
+      "primaryContentID": "crest.gloamthorn.gloam-sovereign"
+    },
+    {
+      "grantGroupID": "grant-group.codex.norse.echo-five",
+      "items": [
+        {
+          "contentID": "seal.norse.echo-rune",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "micro",
+      "primaryContentID": "seal.norse.echo-rune"
+    },
+    {
+      "grantGroupID": "grant-group.codex.norse.mastery",
+      "items": [
+        {
+          "contentID": "relic.norse.runestone.blackstone",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "crest.norse.forge-master",
+          "grantKind": "permanent"
+        }
+      ],
+      "revealTier": "mastery",
+      "primaryContentID": "relic.norse.runestone.blackstone"
+    }
+  ],
+  "journeyGraph": {
+    "nodes": [
+      {
+        "nodeID": "journey.codex.norse",
+        "contentID": "codex.norse",
+        "state": "included",
+        "gateRuleID": null,
+        "order": 0
+      },
+      {
+        "nodeID": "journey.codex.moonleaf",
+        "contentID": "codex.moonleaf",
+        "state": "earned",
+        "gateRuleID": "rule.codex.moonleaf.known-in-five-circles",
+        "order": 1
+      },
+      {
+        "nodeID": "journey.codex.sunspire",
+        "contentID": "codex.sunspire",
+        "state": "earned",
+        "gateRuleID": "rule.codex.sunspire.reciprocal-light",
+        "order": 2
+      },
+      {
+        "nodeID": "journey.codex.wildwood",
+        "contentID": "codex.wildwood",
+        "state": "earned",
+        "gateRuleID": "rule.codex.wildwood.roots-of-memory",
+        "order": 3
+      },
+      {
+        "nodeID": "journey.codex.gloamthorn",
+        "contentID": "codex.gloamthorn",
+        "state": "earned",
+        "gateRuleID": "rule.codex.gloamthorn.beyond-the-gloam",
+        "order": 4
+      }
+    ],
+    "edges": [
+      {
+        "from": "journey.codex.norse",
+        "to": "journey.codex.moonleaf"
+      },
+      {
+        "from": "journey.codex.moonleaf",
+        "to": "journey.codex.sunspire"
+      },
+      {
+        "from": "journey.codex.sunspire",
+        "to": "journey.codex.wildwood"
+      },
+      {
+        "from": "journey.codex.wildwood",
+        "to": "journey.codex.gloamthorn"
+      }
+    ]
+  },
+  "revealPolicy": {
+    "settings": [
+      {
+        "settingID": "setting.unlock-feedback.sound-enabled",
+        "type": "bool",
+        "default": true,
+        "owner": "forsetti-runtime"
+      },
+      {
+        "settingID": "setting.unlock-feedback.haptics-enabled",
+        "type": "bool",
+        "default": true,
+        "owner": "forsetti-runtime"
+      },
+      {
+        "settingID": "setting.unlock-feedback.animation-enabled",
+        "type": "bool",
+        "default": true,
+        "owner": "forsetti-runtime"
+      }
+    ],
+    "combineRule": "All completions and grants from one atomic event transaction produce one reveal bundle. Use the highest tier in the bundle and list secondary rewards within it.",
+    "safePresentationConditions": [
+      "application-unlocked",
+      "root-ui-active",
+      "no-system-share-sheet",
+      "no-message-composer",
+      "no-file-importer",
+      "no-qr-camera",
+      "no-import-confirmation",
+      "no-received-message-decode",
+      "no-security-warning-or-pin-flow"
+    ],
+    "tiers": [
+      {
+        "tier": "micro",
+        "durationSeconds": [
+          0.6,
+          0.9
+        ],
+        "visual": "Icon traces or resolves into view with one restrained glow pulse.",
+        "soundSemanticID": "effect.unlock.micro",
+        "genericFallbackResourceID": "audio.unlock.micro.default",
+        "haptic": "light-success"
+      },
+      {
+        "tier": "artifact",
+        "durationSeconds": [
+          1.0,
+          1.5
+        ],
+        "visual": "Silhouette resolves into the earned Relic or Frame; one engraving highlight passes across it.",
+        "soundSemanticID": "effect.unlock.artifact",
+        "genericFallbackResourceID": "audio.unlock.artifact.default",
+        "haptic": "success"
+      },
+      {
+        "tier": "codex",
+        "durationSeconds": [
+          2.0,
+          2.6
+        ],
+        "visual": "Locked Codex card opens, semantic color appears, and included Script/Relic/Seals are listed.",
+        "soundSemanticID": "effect.unlock.codex",
+        "genericFallbackResourceID": "audio.unlock.codex.default",
+        "haptic": "success"
+      },
+      {
+        "tier": "mastery",
+        "durationSeconds": [
+          2.0,
+          2.8
+        ],
+        "visual": "Mastery Frame assembles around the card and the Crest settles into place.",
+        "soundSemanticID": "effect.unlock.mastery",
+        "genericFallbackResourceID": "audio.unlock.mastery.default",
+        "haptic": "success"
+      }
+    ],
+    "accessibility": {
+      "reduceMotion": "Replace movement with a crossfade, single luminance change, and VoiceOver announcement.",
+      "voiceOver": "Announce the primary unlock and summarize all included rewards once.",
+      "silentMode": "Never override silent mode or seize the audio session.",
+      "dismissal": "Every reveal is immediately dismissible and remains visible later in the Vault history."
+    }
+  },
+  "gameCenterPolicy": {
+    "implementationInScope": false,
+    "localCatalogPointTotal": 220,
+    "achievementCount": 15,
+    "permanentIdentifiersFrozen": false,
+    "direction": "Rune Scribe Progression remains authoritative; Game Center will later receive a monotonic mirror only."
+  },
+  "deferred": [
+    "private-icloud-sync",
+    "game-center-runtime-integration",
+    "forge-ledger",
+    "global-limited-editions",
+    "seasonal-rules",
+    "production-theme-assets",
+    "theme-specific-unlock-audio"
+  ]
+}

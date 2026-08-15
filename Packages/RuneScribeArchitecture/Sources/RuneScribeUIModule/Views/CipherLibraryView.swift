@@ -101,11 +101,12 @@ struct CipherLibraryView: View {
             isPresented: $showExporter,
             transfer: exportTransfer,
             defaultFilename: exportFilename
-        ) { outcome in
-            if outcome == .handedOff {
+        ) { completion in
+            if case .success(let evidence) = completion,
+               evidence.report.result == .completionUnavailable {
                 status = .success("Saved \(exportFilename).\(RuneScribeWireFormat.fileExtension)")
             }
-            finishExport(outcome: outcome)
+            finishExport(completion)
         }
         .runtimeInboundFileImporter(
             isPresented: $showImporter,
@@ -113,8 +114,13 @@ struct CipherLibraryView: View {
         ) { result in
             handleImportCompletion(result)
         }
-        .sheet(item: $qrShare, onDismiss: releaseQRShare) { share in
-            QRDisplaySheet(transfer: share.transfer, label: share.label)
+        .sheet(item: $qrShare) { share in
+            QRDisplaySheet(
+                transfer: share.transfer,
+                label: share.label
+            ) { completion in
+                finishQRShare(share, completion: completion)
+            }
         }
         .sheet(isPresented: $showScanner) { scannerSheet }
         .sheet(item: $pendingScan) { pending in
@@ -448,11 +454,11 @@ struct CipherLibraryView: View {
                 RuneScribeCipherLinkShareLink(
                     transfer: share.transfer,
                     cipherLabel: cipher.label,
-                    onFinish: { outcome in
+                    onFinish: { completion in
                         completeLinkShare(
                             cipherID: cipher.id,
                             artifact: share.artifact,
-                            outcome: outcome
+                            completion: completion
                         )
                     }
                 ) {
@@ -596,16 +602,25 @@ struct CipherLibraryView: View {
         }
     }
 
-    private func finishExport(outcome: ShareArtifactOutcomeDTO) {
+    private func finishExport(_ completion: SharePresentationCompletion) {
         guard let artifact = exportArtifact else { return }
         exportArtifact = nil
         let transfer = exportTransfer
         exportTransfer = nil
         Task {
             await transfer?.close()
-            do {
-                _ = try await session.completeShareArtifact(id: artifact.id, outcome: outcome)
-            } catch {
+            switch completion {
+            case .success(let evidence) where evidence.artifactID == artifact.id:
+                do {
+                    _ = try await session.completeShareArtifact(evidence: evidence)
+                } catch {
+                    presentFailure(error)
+                }
+            case .success:
+                await session.releaseShareArtifact(id: artifact.id)
+                status = .failure("The decoder export could not be finalized.")
+            case .failure(let error):
+                await session.releaseShareArtifact(id: artifact.id)
                 presentFailure(error)
             }
         }
@@ -660,26 +675,52 @@ struct CipherLibraryView: View {
     private func completeLinkShare(
         cipherID: UUID,
         artifact: ShareArtifactDTO,
-        outcome: ShareArtifactOutcomeDTO
+        completion: SharePresentationCompletion
     ) {
         let transfer = linkArtifacts.removeValue(forKey: cipherID)?.transfer
         Task {
             await transfer?.close()
-            do {
-                _ = try await session.completeShareArtifact(id: artifact.id, outcome: outcome)
-            } catch {
+            switch completion {
+            case .success(let evidence) where evidence.artifactID == artifact.id:
+                do {
+                    _ = try await session.completeShareArtifact(evidence: evidence)
+                } catch {
+                    presentFailure(error)
+                }
+            case .success:
+                await session.releaseShareArtifact(id: artifact.id)
+                status = .failure("The cipher share could not be finalized.")
+            case .failure(let error):
+                await session.releaseShareArtifact(id: artifact.id)
                 presentFailure(error)
             }
             await prepareLinkArtifacts()
         }
     }
 
-    private func releaseQRShare() {
-        guard let share = qrShare else { return }
-        qrShare = nil
+    private func finishQRShare(
+        _ share: CipherQRShare,
+        completion: SharePresentationCompletion
+    ) {
+        if qrShare?.id == share.id {
+            qrShare = nil
+        }
         Task {
             await share.transfer.close()
-            await session.releaseShareArtifact(id: share.artifact.id)
+            switch completion {
+            case .success(let evidence) where evidence.artifactID == share.artifact.id:
+                do {
+                    _ = try await session.completeShareArtifact(evidence: evidence)
+                } catch {
+                    presentFailure(error)
+                }
+            case .success:
+                await session.releaseShareArtifact(id: share.artifact.id)
+                status = .failure("The QR share could not be finalized.")
+            case .failure(let error):
+                await session.releaseShareArtifact(id: share.artifact.id)
+                presentFailure(error)
+            }
             await prepareLinkArtifacts()
         }
     }

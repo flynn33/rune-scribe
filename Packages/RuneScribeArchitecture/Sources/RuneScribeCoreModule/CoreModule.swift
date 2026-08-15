@@ -11,7 +11,7 @@ public enum RuneScribeCoreModuleBootstrap {
 
     public static let descriptor = ModuleDescriptor(
         moduleID: "com.runescribe.module.core",
-        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(34)),
+        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(37)),
         kind: .service,
         entryPoint: "RuneScribeCoreModule",
         role: RuneScribeRoles.core,
@@ -27,6 +27,8 @@ public enum RuneScribeCoreModuleBootstrap {
             RuneScribeCapabilities.clockRead,
             RuneScribeCapabilities.uuidGenerate,
             RuneScribeCapabilities.inboundInput,
+            RuneScribeCapabilities.progressionEventSubmit,
+            RuneScribeCapabilities.progressionMigrationSubmit,
         ],
         requiredServices: [
             RuneScribeServiceIDs.secureValueStore,
@@ -75,7 +77,16 @@ public struct RuneScribeCoreModule: RuntimeConstructibleModule {
 
     public func start(context: ModuleContext) async throws {
         let runtimeIO = try await context.runtimeIOClient()
-        let service = RuneScribeCoreApplicationService(runtimeIO: runtimeIO)
+        // Progression is deliberately optional. Core retains its utility surface
+        // when the runtime cannot vend the outbox, while operation-aware calls
+        // still journal recoverable evidence in Core whenever possible.
+        let progressionOutbox = try? await context.progressionOutboxClient()
+        let existingUserMigration = try? await context.existingUserMigrationClient()
+        let service = RuneScribeCoreApplicationService(
+            runtimeIO: runtimeIO,
+            progressionOutbox: progressionOutbox,
+            existingUserMigration: existingUserMigration
+        )
         try await context.registerApplicationEndpoints(service)
         try await context.registerInboundInputEndpoint(service)
         await lifecycle.store(service)

@@ -70,8 +70,84 @@ final class RuntimeCompositionTests: XCTestCase {
         XCTAssertEqual(fixture.composition.rootPresentationStore.state, .booting)
     }
 
+    func testCompositionInstallsModuleStateStoreBeforeRuntimeActivation() async {
+        let store = InMemoryModuleStateStore()
+        let startGate = HostedActivationGate()
+        let fixture = makeFixture(startGate: startGate, moduleStateStore: store)
+        let startTask = Task { await fixture.composition.start() }
+        await startGate.waitUntilEntered()
+
+        let registeredSnapshot = await fixture.composition.runtimeSnapshot
+        XCTAssertEqual(
+            registeredSnapshot.moduleStates[RuneScribeModuleIDs.progression],
+            .eligible
+        )
+        await startGate.release()
+        await startTask.value
+
+        XCTAssertFalse(fixture.composition.startupFailed)
+        let snapshot = await fixture.composition.runtimeSnapshot
+        XCTAssertEqual(snapshot.status, .running)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.core], .active)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.progression], .active)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.primaryUI], .active)
+        if let progressionIndex = snapshot.activationOrder.firstIndex(
+            of: RuneScribeModuleIDs.progression
+        ), let uiIndex = snapshot.activationOrder.firstIndex(
+            of: RuneScribeModuleIDs.primaryUI
+        ) {
+            XCTAssertLessThan(progressionIndex, uiIndex)
+        } else {
+            XCTFail("Expected Progression and UI in the runtime activation order.")
+        }
+        let settingsHealth = await store.health(
+            namespace: ModuleStateNamespace(moduleID: "com.runescribe.runtime.settings")
+        )
+        let outboxHealth = await store.health(
+            namespace: ModuleStateNamespace(
+                moduleID: "com.runescribe.runtime.progression-outbox"
+            )
+        )
+        let progressionHealth = await store.health(
+            namespace: ModuleStateNamespace(moduleID: RuneScribeModuleIDs.progression)
+        )
+        XCTAssertEqual(settingsHealth.namespaceSchemaVersion, 1)
+        XCTAssertEqual(outboxHealth.namespaceSchemaVersion, 1)
+        XCTAssertEqual(progressionHealth.namespaceSchemaVersion, 1)
+        XCTAssertGreaterThan(progressionHealth.recordCount, 0)
+        XCTAssertEqual(
+            fixture.composition.rootPresentationStore.state,
+            .ready(moduleID: RuneScribeModuleIDs.primaryUI)
+        )
+        await fixture.composition.stop()
+    }
+
+    func testPhysicalModuleStateStoreConstructionFailureDegradesWithoutFallback() async {
+        let fixture = makeFixture(moduleStateStore: nil)
+
+        await fixture.composition.start()
+
+        XCTAssertFalse(fixture.composition.startupFailed)
+        let snapshot = await fixture.composition.runtimeSnapshot
+        XCTAssertEqual(snapshot.status, .running)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.core], .active)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.progression], .failed)
+        XCTAssertEqual(snapshot.moduleStates[RuneScribeModuleIDs.primaryUI], .active)
+        XCTAssertFalse(snapshot.activationOrder.contains(RuneScribeModuleIDs.progression))
+        XCTAssertEqual(
+            fixture.composition.rootPresentationStore.state,
+            .ready(moduleID: RuneScribeModuleIDs.primaryUI)
+        )
+        XCTAssertEqual(
+            fixture.composition.receive(lifecycle: .didBecomeActive),
+            .accepted
+        )
+        let received = await waitForInputs(1, from: fixture.inboundInputService)
+        XCTAssertEqual(received.count, 1)
+        await fixture.composition.stop()
+    }
+
     func testRuntimeInputRailPreservesMappingMetadataAndFIFOAcrossStopStart() async throws {
-        let fixture = makeFixture()
         let coldURL = URL(string: "runescribe://import?p=cold-url")!
         let coldFileData = Data("cold-runtime-composition-file".utf8)
         let detachedFileData = Data("detached-runtime-composition-file".utf8)
@@ -84,12 +160,13 @@ final class RuntimeCompositionTests: XCTestCase {
             .appendingPathComponent(
                 "RuneScribeRuntimeCompositionTests-detached-\(fixtureID).runescribe"
             )
-        try coldFileData.write(to: coldFile, options: .atomic)
-        try detachedFileData.write(to: detachedFile, options: .atomic)
-        defer {
-            try? FileManager.default.removeItem(at: coldFile)
-            try? FileManager.default.removeItem(at: detachedFile)
-        }
+        let inboundFiles = InMemoryInboundFileReader(
+            files: [
+                coldFile: coldFileData,
+                detachedFile: detachedFileData,
+            ]
+        )
+        let fixture = makeFixture(inboundFiles: inboundFiles)
 
         XCTAssertEqual(
             fixture.composition.receive(
@@ -300,7 +377,9 @@ final class RuntimeCompositionTests: XCTestCase {
     }
 
     private func makeFixture(
-        startGate: HostedActivationGate? = nil
+        startGate: HostedActivationGate? = nil,
+        moduleStateStore: (any ModuleStateStore)? = InMemoryModuleStateStore(),
+        inboundFiles: any InboundFileReader = InMemoryInboundFileReader()
     ) -> RuntimeCompositionFixture {
         let secureValues = InMemorySecureValueStore()
         let protectedFiles = InMemoryProtectedFileStore()
@@ -365,10 +444,24 @@ final class RuntimeCompositionTests: XCTestCase {
         return RuntimeCompositionFixture(
             composition: RuneScribeRuntimeComposition(
                 bundle: .main,
-                injectedCoreFactory: coreFactory
+                injectedCoreFactory: coreFactory,
+                moduleStateStore: moduleStateStore,
+                inboundFiles: inboundFiles
             ),
             inboundInputService: inboundInputService
         )
+    }
+
+    private func waitForInputs(
+        _ minimumCount: Int,
+        from service: RecordingInboundInputService
+    ) async -> [RuneScribeInboundInput] {
+        for _ in 0..<500 {
+            let values = await service.snapshot()
+            if values.count >= minimumCount { return values }
+            try? await Task.sleep(for: .milliseconds(1))
+        }
+        return await service.snapshot()
     }
 
     private func assertURL(

@@ -13,6 +13,7 @@ public enum RuneScribeServiceIDs {
     public static let clipboardWrite: ServiceIdentifier = "ClipboardWriteService"
     public static let clock: ServiceIdentifier = "ClockService"
     public static let uuid: ServiceIdentifier = "UUIDService"
+    public static let moduleStateStore: ServiceIdentifier = "ModuleStateStore"
 
     public static let all: Set<ServiceIdentifier> = [
         secureValueStore,
@@ -27,6 +28,7 @@ public enum RuneScribeServiceIDs {
         clipboardWrite,
         clock,
         uuid,
+        moduleStateStore,
     ]
 }
 
@@ -233,11 +235,18 @@ public struct ApplicationResource: Codable, Equatable, Hashable, Sendable {
     public let name: String
     public let fileExtension: String
     public let subdirectory: String?
+    public let ownerModuleID: ModuleIdentifier?
 
-    public init(name: String, fileExtension: String, subdirectory: String? = nil) {
+    public init(
+        name: String,
+        fileExtension: String,
+        subdirectory: String? = nil,
+        ownerModuleID: ModuleIdentifier? = nil
+    ) {
         self.name = name
         self.fileExtension = fileExtension
         self.subdirectory = subdirectory
+        self.ownerModuleID = ownerModuleID
     }
 
     public static let bundledRuneFont = ApplicationResource(
@@ -259,9 +268,34 @@ public struct ApplicationResource: Codable, Equatable, Hashable, Sendable {
     )
 }
 
+public enum ApplicationResourceReadError: Error, Equatable, Sendable {
+    case invalidMaximumByteCount
+    case contentTooLarge(ApplicationResource)
+}
+
 public protocol ApplicationResourceLocator: Sendable {
     func data(for resource: ApplicationResource) async throws -> Data
+    func data(
+        for resource: ApplicationResource,
+        maximumByteCount: Int
+    ) async throws -> Data
     func url(for resource: ApplicationResource) async throws -> URL
+}
+
+public extension ApplicationResourceLocator {
+    func data(
+        for resource: ApplicationResource,
+        maximumByteCount: Int
+    ) async throws -> Data {
+        guard maximumByteCount > 0 else {
+            throw ApplicationResourceReadError.invalidMaximumByteCount
+        }
+        let value = try await data(for: resource)
+        guard value.count <= maximumByteCount else {
+            throw ApplicationResourceReadError.contentTooLarge(resource)
+        }
+        return value
+    }
 }
 
 public enum RuneScribeServiceKeys {
@@ -297,4 +331,7 @@ public enum RuneScribeServiceKeys {
     )
     public static let clock = ServiceKey<any ClockProviding>(RuneScribeServiceIDs.clock)
     public static let uuid = ServiceKey<any UUIDProviding>(RuneScribeServiceIDs.uuid)
+    public static let moduleStateStore = ServiceKey<any ModuleStateStore>(
+        RuneScribeServiceIDs.moduleStateStore
+    )
 }

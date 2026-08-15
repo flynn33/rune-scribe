@@ -178,13 +178,48 @@ public enum DomainEventOrigin: String, Codable, CaseIterable, Sendable {
 
 public enum DomainEventRouteClass: String, Codable, CaseIterable, Sendable {
     case file
-    case customURL
-    case qrCode
+    case customURL = "custom-url"
+    case qrCode = "qr-code"
     case clipboard
-    case shareSheet
+    case shareSheet = "share-sheet"
     case messages
-    case airDrop
+    case airDrop = "air-drop"
+    case fileExport = "file-export"
+    case qrDisplay = "qr-display"
+    case any
     case other
+
+    public init(from decoder: Decoder) throws {
+        let value = try decoder.singleValueContainer().decode(String.self)
+        let canonicalOrLegacy: Self? = switch value {
+        case "file": .file
+        case "custom-url", "customURL": .customURL
+        case "qr-code", "qrCode": .qrCode
+        case "clipboard": .clipboard
+        case "share-sheet", "shareSheet": .shareSheet
+        case "messages": .messages
+        case "air-drop", "airDrop": .airDrop
+        case "file-export": .fileExport
+        case "qr-display": .qrDisplay
+        case "any": .any
+        case "other": .other
+        default: nil
+        }
+        guard let canonicalOrLegacy else {
+            throw DecodingError.dataCorrupted(
+                .init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Unsupported domain-event route class."
+                )
+            )
+        }
+        self = canonicalOrLegacy
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
 }
 
 public enum DomainEventProvenanceStatus: String, Codable, CaseIterable, Sendable {
@@ -260,6 +295,18 @@ public struct DomainEventPayload: Codable, Equatable, Sendable {
     }
 
     public init(from decoder: Decoder) throws {
+        let rawContainer = try decoder.container(keyedBy: PayloadCodingKey.self)
+        let allowed = Set(CodingKeys.allCases.map(\.rawValue))
+        if let unknown = rawContainer.allKeys.first(where: {
+            !allowed.contains($0.stringValue)
+        }) {
+            throw DecodingError.dataCorrupted(
+                .init(
+                    codingPath: decoder.codingPath + [unknown],
+                    debugDescription: "Unknown domain-event payload field."
+                )
+            )
+        }
         let container = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
             cipherToken: container.decodeIfPresent(CipherToken.self, forKey: .cipherToken),
@@ -284,6 +331,36 @@ public struct DomainEventPayload: Codable, Equatable, Sendable {
                 forKey: .provenanceStatus
             )
         )
+    }
+
+    private struct PayloadCodingKey: CodingKey {
+        let stringValue: String
+        let intValue: Int?
+
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+            intValue = nil
+        }
+
+        init?(intValue: Int) {
+            stringValue = String(intValue)
+            self.intValue = intValue
+        }
+    }
+
+    private enum CodingKeys: String, CodingKey, CaseIterable {
+        case cipherToken
+        case messageToken
+        case packageToken
+        case relationshipToken
+        case origin
+        case routeClass
+        case codexIDs
+        case artifactIDs
+        case keyIncluded
+        case linkedRelationship
+        case embeddedCipher
+        case provenanceStatus
     }
 }
 

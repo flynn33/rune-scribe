@@ -3,12 +3,18 @@ import Foundation
 public enum RuneScribeModuleIDs {
     public static let core: ModuleIdentifier = "com.runescribe.module.core"
     public static let primaryUI: ModuleIdentifier = "com.runescribe.module.ui"
+    public static let progression: ModuleIdentifier = "com.runescribe.module.progression"
+}
+
+public enum RuneScribeUnlockIDs {
+    public static let norseCodex = UnlockID(rawValue: "unlock.codex.norse")!
 }
 
 public enum RuneScribeRoles {
     public static let core: ModuleRole = "runescribe.core"
     public static let primaryUI: ModuleRole = "runescribe.ui.primary"
     public static let applicationHost: ModuleRole = "application.host"
+    public static let progression: ModuleRole = "runescribe.progression"
 }
 
 public enum RuneScribeCapabilities {
@@ -36,6 +42,25 @@ public enum RuneScribeCapabilities {
     public static let applicationStateRead: CapabilityIdentifier = "application.state.read"
     public static let shareUI: CapabilityIdentifier = "ui.share"
     public static let messagesUI: CapabilityIdentifier = "ui.messages"
+    public static let moduleStateAccess: CapabilityIdentifier = "runtime.module-state.access"
+    public static let runtimeSettingsRead: CapabilityIdentifier = "runtime.settings.read"
+    public static let runtimeSettingsWrite: CapabilityIdentifier = "runtime.settings.write"
+    public static let runtimeAvailabilityRead: CapabilityIdentifier =
+        "runtime.availability.read"
+    public static let progressionEventSubmit: CapabilityIdentifier =
+        "progression.events.submit"
+    public static let progressionEventApply: CapabilityIdentifier =
+        "progression.events.apply"
+    public static let progressionStateRead: CapabilityIdentifier =
+        "progression.state.read"
+    public static let progressionCommands: CapabilityIdentifier =
+        "progression.commands"
+    public static let progressionRecovery: CapabilityIdentifier =
+        "progression.recovery"
+    public static let progressionMigrationSubmit: CapabilityIdentifier =
+        "progression.migration.submit"
+    public static let progressionMigrationApply: CapabilityIdentifier =
+        "progression.migration.apply"
 
     public static let all: Set<CapabilityIdentifier> = [
         publishService,
@@ -62,6 +87,17 @@ public enum RuneScribeCapabilities {
         applicationStateRead,
         shareUI,
         messagesUI,
+        moduleStateAccess,
+        runtimeSettingsRead,
+        runtimeSettingsWrite,
+        runtimeAvailabilityRead,
+        progressionEventSubmit,
+        progressionEventApply,
+        progressionStateRead,
+        progressionCommands,
+        progressionRecovery,
+        progressionMigrationSubmit,
+        progressionMigrationApply,
     ]
 }
 

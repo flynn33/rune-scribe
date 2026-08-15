@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0",
+  "contractID": "runescribe.progression.future-theme-binding",
+  "version": 1,
+  "status": "approved",
+  "bindings": [
+    {
+      "codexID": "codex.norse",
+      "moduleID": "com.runescribe.module.theme.norse",
+      "entitlementID": "unlock.codex.norse",
+      "gate": "included",
+      "criticality": "required-base",
+      "fallback": true
+    },
+    {
+      "codexID": "codex.moonleaf",
+      "moduleID": "com.runescribe.module.theme.moonleaf",
+      "entitlementID": "unlock.codex.moonleaf",
+      "gateRuleID": "rule.codex.moonleaf.known-in-five-circles",
+      "criticality": "optional",
+      "fallbackCodexID": "codex.norse"
+    },
+    {
+      "codexID": "codex.sunspire",
+      "moduleID": "com.runescribe.module.theme.sunspire",
+      "entitlementID": "unlock.codex.sunspire",
+      "gateRuleID": "rule.codex.sunspire.reciprocal-light",
+      "criticality": "optional",
+      "fallbackCodexID": "codex.norse"
+    },
+    {
+      "codexID": "codex.wildwood",
+      "moduleID": "com.runescribe.module.theme.wildwood",
+      "entitlementID": "unlock.codex.wildwood",
+      "gateRuleID": "rule.codex.wildwood.roots-of-memory",
+      "criticality": "optional",
+      "fallbackCodexID": "codex.norse"
+    },
+    {
+      "codexID": "codex.gloamthorn",
+      "moduleID": "com.runescribe.module.theme.gloamthorn",
+      "entitlementID": "unlock.codex.gloamthorn",
+      "gateRuleID": "rule.codex.gloamthorn.beyond-the-gloam",
+      "criticality": "optional",
+      "fallbackCodexID": "codex.norse"
+    }
+  ],
+  "rules": [
+    "Theme Modules declare content and entitlement requirements only.",
+    "Progression owns rule evaluation and durable grants.",
+    "Forsetti reads the entitlement snapshot and performs live activation reconciliation.",
+    "A Theme Module never imports or calls Progression.",
+    "Ownership may restrict creation and selection but never reading or decoding."
+  ],
+  "supersessions": [
+    {
+      "source": "Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+      "path": "codices[codex.wildwood].unlockGate.requirement",
+      "old": "Complete Archivist I and Relic Bearer.",
+      "new": "Own Sunspire; reach 10 distinct linked relationships; complete 15 eligible unique shares; use at least 2 Codices in eligible shares."
+    },
+    {
+      "source": "Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+      "path": "codices[codex.gloamthorn].unlockGate.requirement",
+      "old": "Complete Master Scribe and Many Worlds.",
+      "new": "Own Wildwood; complete Master Scribe; establish 5 bidirectional relationships; decode 25 incoming messages; complete at least 5 eligible shares with each of 3 Codices."
+    }
+  ]
+}

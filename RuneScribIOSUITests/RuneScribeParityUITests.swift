@@ -44,8 +44,14 @@ final class RuneScribeParityUITests: XCTestCase {
         try auditAccessibility(in: app)
 
         app.buttons["View License"].tap()
-        XCTAssertTrue(app.staticTexts["LICENSE"].waitForExistence(timeout: 5))
-        app.buttons["Close"].firstMatch.tap()
+        let licenseAgreement = app.staticTexts.matching(
+            NSPredicate(
+                format: "label BEGINSWITH %@",
+                "RUNE SCRIBE\nEND-USER LICENSE AGREEMENT"
+            )
+        ).firstMatch
+        XCTAssertTrue(licenseAgreement.waitForExistence(timeout: 5))
+        tapCloseControl(in: app)
 
         app.buttons["Manage Contacts"].tap()
         XCTAssertTrue(app.staticTexts["CONTACTS"].waitForExistence(timeout: 5))
@@ -69,7 +75,7 @@ final class RuneScribeParityUITests: XCTestCase {
         )
         renameContact.buttons["Save"].tap()
         XCTAssertTrue(app.staticTexts["Parity Contact Edited"].waitForExistence(timeout: 5))
-        app.buttons["Close"].firstMatch.tap()
+        tapCloseControl(in: app)
 
         app.buttons["Set a PIN…"].tap()
         XCTAssertTrue(app.staticTexts["SET PIN"].waitForExistence(timeout: 5))
@@ -106,7 +112,7 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Enter Current PIN"].waitForExistence(timeout: 5))
         enterPIN("5678", in: app)
         XCTAssertTrue(app.staticTexts["No PIN"].waitForExistence(timeout: 8))
-        app.buttons["Close"].firstMatch.tap()
+        tapCloseControl(in: app)
 
         app.buttons["Manage your cipher library"].tap()
         let contactsPrompt = app.sheets["Organize ciphers by contact?"]
@@ -181,7 +187,7 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Parity Cipher Renamed"].waitForNonExistence(timeout: 8))
         XCTAssertTrue(app.staticTexts["1 cipher"].waitForExistence(timeout: 8))
 
-        app.buttons["Close"].firstMatch.tap()
+        tapCloseControl(in: app)
         app.buttons["Settings"].tap()
         app.buttons["Manage Contacts"].tap()
         XCTAssertTrue(app.staticTexts["Parity Contact Edited"].waitForExistence(timeout: 5))
@@ -191,8 +197,8 @@ final class RuneScribeParityUITests: XCTestCase {
         deleteContact.buttons["Delete"].tap()
         XCTAssertTrue(app.staticTexts["No contacts yet"].waitForExistence(timeout: 8))
 
-        app.buttons["Close"].firstMatch.tap()
-        app.buttons["Close"].firstMatch.tap()
+        tapCloseControl(in: app)
+        tapCloseControl(in: app)
         XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 8))
 
         app.open(Self.malformedImportURL)
@@ -222,7 +228,7 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Active cipher: Imported Cipher"].waitForExistence(timeout: 8))
         app.buttons["Manage your cipher library"].tap()
         XCTAssertTrue(app.staticTexts["4 ciphers"].waitForExistence(timeout: 8), app.debugDescription)
-        app.buttons["Close"].firstMatch.tap()
+        tapCloseControl(in: app)
 
         let invalidFontFile = try makeCustomFontFixtureFile(validFontBytes: false)
         app.open(invalidFontFile)
@@ -238,7 +244,7 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Active cipher: Imported Cipher"].waitForExistence(timeout: 8))
         app.buttons["Manage your cipher library"].tap()
         XCTAssertTrue(app.staticTexts["4 ciphers"].waitForExistence(timeout: 8), app.debugDescription)
-        app.buttons["Close"].firstMatch.tap()
+        tapCloseControl(in: app)
 
         let messageFile = try makeMessageFixtureFile()
         app.open(messageFile)
@@ -263,6 +269,27 @@ final class RuneScribeParityUITests: XCTestCase {
         }
     }
 
+    private func tapCloseControl(
+        in app: XCUIApplication,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let popUpButtons = app.popUpButtons.matching(identifier: "Close")
+            .allElementsBoundByIndex
+        if let popUpButton = popUpButtons.reversed().first(where: { $0.isHittable }) {
+            popUpButton.tap()
+            return
+        }
+
+        let buttons = app.buttons.matching(identifier: "Close").allElementsBoundByIndex
+        if let button = buttons.reversed().first(where: { $0.isHittable }) {
+            button.tap()
+            return
+        }
+
+        XCTFail("No hittable Close control", file: file, line: line)
+    }
+
     private func auditAccessibility(in app: XCUIApplication) throws {
         try app.performAccessibilityAudit(
             for: [.sufficientElementDescription, .hitRegion, .trait, .textClipped]
@@ -277,11 +304,14 @@ final class RuneScribeParityUITests: XCTestCase {
         let caseInsensitiveClose = app.buttons.matching(
             NSPredicate(format: "label ==[c] %@", "close")
         ).firstMatch
+        let popUpClose = app.popUpButtons["Close"].firstMatch
         let cancel = activityList.buttons["Cancel"]
         let close = activityList.buttons["Close"]
         let done = activityList.buttons["Done"]
         if systemClose.exists {
             systemClose.tap()
+        } else if popUpClose.exists {
+            popUpClose.tap()
         } else if caseInsensitiveClose.exists {
             caseInsensitiveClose.tap()
         } else if cancel.exists {

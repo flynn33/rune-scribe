@@ -1,7 +1,8 @@
 import CryptoKit
 import Foundation
 import RuneScribeContracts
-@_spi(RuntimeFileImportHost) @_spi(RuntimeResourceHost) @testable import RuneScribeRuntimeCore
+@_spi(RuntimeFileImportHost) @_spi(RuntimeResourceHost) @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
+import RuneScribeTestSupport
 import XCTest
 
 final class RuntimeIOGatewayTests: XCTestCase {
@@ -748,6 +749,58 @@ final class RuntimeIOGatewayTests: XCTestCase {
         }
     }
 
+    func testClipboardTerminalJournalRetryRetainsCompletedUtilityEvidence() async throws {
+        let store = InMemoryModuleStateStore(
+            now: { Date(timeIntervalSince1970: 9_210) }
+        )
+        let clipboard = CountingClipboardProbe(string: nil, changeCount: 0)
+        let gateway = await makeGateway(
+            writer: clipboard,
+            issueOperationContexts: true,
+            moduleStateStore: store
+        )
+        let source = authorizedUIDescriptor(
+            id: "com.runescribe.test.runtime-io-clipboard-terminal-retry"
+        )
+        let runtimeGeneration = await gateway.currentGeneration()
+        let client = try await activateClient(
+            on: gateway,
+            runtimeGeneration: runtimeGeneration,
+            descriptor: source,
+            sourceGeneration: 63
+        )
+        let artifactID = ShareArtifactID(
+            rawValue: UUID(
+                uuidString: "63000000-0000-0000-0000-000000000001"
+            )!
+        )
+        await store.injectFault(
+            at: .beforeTransactionCommit,
+            afterSuccessfulCalls: 1
+        )
+
+        do {
+            _ = try await client.setClipboardString(
+                "terminal",
+                artifactID: artifactID
+            )
+            XCTFail("Expected the first terminal journal write to fail")
+        } catch ModuleStateStoreError.injectedFailure {}
+        let afterFailure = await clipboard.state()
+        XCTAssertEqual(afterFailure.string, "terminal")
+        XCTAssertEqual(afterFailure.writeInvocations, 1)
+
+        let evidence = try await client.setClipboardString(
+            "terminal",
+            artifactID: artifactID
+        )
+        XCTAssertEqual(evidence.artifactID, artifactID)
+        XCTAssertEqual(evidence.report.routeClass, .clipboard)
+        XCTAssertEqual(evidence.report.result, .completionUnavailable)
+        let afterRetry = await clipboard.state()
+        XCTAssertEqual(afterRetry.writeInvocations, 2)
+    }
+
     func testAuthorizedCoreContactStatusRequestAndFetch() async throws {
         let expectedContacts = [
             SystemContactDTO(
@@ -1363,6 +1416,379 @@ final class RuntimeIOGatewayTests: XCTestCase {
         let event = await events.next()
         XCTAssertNil(event)
         await lease.close()
+    }
+
+    func testProgressionReadsDeclaredOwnedResourceWithBoundAndDigest() async throws {
+        let moduleID: ModuleIdentifier = "com.runescribe.test.runtime-io-progression-resource"
+        let resource = ApplicationResource(
+            name: "progression-catalog",
+            fileExtension: "json",
+            ownerModuleID: moduleID
+        )
+        let expectedData = Data("{\"catalog\":1}".utf8)
+        let resources = ApplicationResourceProbe(
+            data: expectedData,
+            url: URL(fileURLWithPath: "/tmp/progression-catalog.json")
+        )
+        let gateway = await makeGateway(resources: resources)
+        let source = authorizedResourceDescriptor(
+            id: moduleID,
+            role: RuneScribeRoles.progression,
+            requiredResources: [resource]
+        )
+        let runtimeGeneration = await gateway.currentGeneration()
+        let client = try await activateClient(
+            on: gateway,
+            runtimeGeneration: runtimeGeneration,
+            descriptor: source,
+            sourceGeneration: 901
+        )
+
+        let value = try await client.readVerifiedApplicationResource(
+            resource,
+            expectedSHA256: Data(SHA256.hash(data: expectedData)),
+            maximumByteCount: 4_096
+        )
+
+        XCTAssertEqual(value, expectedData)
+        let state = await resources.state()
+        XCTAssertEqual(state.dataRequests, [resource])
+        XCTAssertEqual(
+            state.boundedDataRequests,
+            [ApplicationResourceBoundedProbeRequest(resource: resource, maximumByteCount: 4_096)]
+        )
+    }
+
+    func testVerifiedResourceRejectsInvalidBoundOversizeAndDigestMismatch() async throws {
+        let moduleID: ModuleIdentifier = "com.runescribe.test.runtime-io-verified-failures"
+        let resource = ApplicationResource(
+            name: "progression-events",
+            fileExtension: "json",
+            ownerModuleID: moduleID
+        )
+        let data = Data("oversized-resource".utf8)
+        let resources = ApplicationResourceProbe(
+            data: data,
+            url: URL(fileURLWithPath: "/tmp/progression-events.json")
+        )
+        let gateway = await makeGateway(resources: resources)
+        let source = authorizedResourceDescriptor(
+            id: moduleID,
+            role: RuneScribeRoles.progression,
+            requiredResources: [resource]
+        )
+        let runtimeGeneration = await gateway.currentGeneration()
+        let client = try await activateClient(
+            on: gateway,
+            runtimeGeneration: runtimeGeneration,
+            descriptor: source,
+            sourceGeneration: 902
+        )
+
+        let invalidBound = await verifiedResourceFailure {
+            _ = try await client.readVerifiedApplicationResource(
+                resource,
+                expectedSHA256: Data(SHA256.hash(data: data)),
+                maximumByteCount: 0
+            )
+        }
+        XCTAssertEqual(invalidBound, .invalidMaximumByteCount)
+        var state = await resources.state()
+        XCTAssertTrue(state.dataRequests.isEmpty)
+
+        let oversized = await verifiedResourceFailure {
+            _ = try await client.readVerifiedApplicationResource(
+                resource,
+                expectedSHA256: Data(SHA256.hash(data: data)),
+                maximumByteCount: data.count - 1
+            )
+        }
+        XCTAssertEqual(oversized, .contentTooLarge)
+
+        let digestMismatch = await verifiedResourceFailure {
+            _ = try await client.readVerifiedApplicationResource(
+                resource,
+                expectedSHA256: Data(repeating: 0, count: SHA256.Digest.byteCount),
+                maximumByteCount: data.count
+            )
+        }
+        XCTAssertEqual(digestMismatch, .integrityMismatch)
+        state = await resources.state()
+        XCTAssertEqual(state.dataRequests, [resource, resource])
+    }
+
+    func testLateVerifiedResourceBytesAreRevokedAfterSourceInvalidation() async throws {
+        let moduleID: ModuleIdentifier = "com.runescribe.test.runtime-io-late-verified-resource"
+        let resource = ApplicationResource(
+            name: "late-catalog",
+            fileExtension: "json",
+            ownerModuleID: moduleID
+        )
+        let data = Data("late-verified-resource".utf8)
+        let barrier = RuntimeIOBarrier()
+        let resources = ApplicationResourceProbe(
+            data: data,
+            url: URL(fileURLWithPath: "/tmp/late-catalog.json"),
+            dataBarrier: barrier
+        )
+        let gateway = await makeGateway(resources: resources)
+        let source = authorizedResourceDescriptor(
+            id: moduleID,
+            role: RuneScribeRoles.progression,
+            requiredResources: [resource]
+        )
+        let runtimeGeneration = await gateway.currentGeneration()
+        let client = try await activateClient(
+            on: gateway,
+            runtimeGeneration: runtimeGeneration,
+            descriptor: source,
+            sourceGeneration: 904
+        )
+        let operation = Task {
+            try await client.readVerifiedApplicationResource(
+                resource,
+                expectedSHA256: Data(SHA256.hash(data: data)),
+                maximumByteCount: data.count
+            )
+        }
+
+        await barrier.waitUntilEntered()
+        await gateway.invalidateModule(moduleID, generation: 904)
+        await barrier.release()
+
+        let error = await runtimeError {
+            _ = try await operation.value
+        }
+        XCTAssertEqual(error, .staleClient(moduleID))
+        let state = await resources.state()
+        XCTAssertEqual(state.dataRequests, [resource])
+    }
+
+    func testVerifiedResourceRequiresDeclarationAndMatchingOwner() async throws {
+        let moduleID: ModuleIdentifier = "com.runescribe.test.runtime-io-resource-owner"
+        let undeclared = ApplicationResource(
+            name: "undeclared",
+            fileExtension: "json",
+            ownerModuleID: moduleID
+        )
+        let foreign = ApplicationResource(
+            name: "foreign",
+            fileExtension: "json",
+            ownerModuleID: "com.runescribe.test.runtime-io-resource-foreign"
+        )
+        let resources = ApplicationResourceProbe(
+            data: Data("{}".utf8),
+            url: URL(fileURLWithPath: "/tmp/resource.json")
+        )
+        let gateway = await makeGateway(resources: resources)
+        let source = authorizedResourceDescriptor(
+            id: moduleID,
+            role: RuneScribeRoles.progression,
+            requiredResources: [foreign]
+        )
+        let runtimeGeneration = await gateway.currentGeneration()
+        let client = try await activateClient(
+            on: gateway,
+            runtimeGeneration: runtimeGeneration,
+            descriptor: source,
+            sourceGeneration: 903
+        )
+
+        let undeclaredError = await runtimeError {
+            _ = try await client.readVerifiedApplicationResource(
+                undeclared,
+                expectedSHA256: Data(repeating: 0, count: SHA256.Digest.byteCount),
+                maximumByteCount: 100
+            )
+        }
+        XCTAssertEqual(
+            undeclaredError,
+            .resourceNotDeclared(moduleID: moduleID, resource: undeclared)
+        )
+
+        let ownerError = await runtimeError {
+            _ = try await client.readVerifiedApplicationResource(
+                foreign,
+                expectedSHA256: Data(repeating: 0, count: SHA256.Digest.byteCount),
+                maximumByteCount: 100
+            )
+        }
+        XCTAssertEqual(
+            ownerError,
+            .serviceAccessDenied(
+                moduleID: moduleID,
+                service: RuneScribeServiceIDs.applicationResourceLocator
+            )
+        )
+        let state = await resources.state()
+        XCTAssertTrue(state.dataRequests.isEmpty)
+    }
+
+    func testHostVerifiedManifestReadRequiresDeclaredMatchingOwner() async throws {
+        let moduleID: ModuleIdentifier = "com.runescribe.test.runtime-io-host-manifest"
+        let manifestResource = ApplicationResource(
+            name: "module-manifest",
+            fileExtension: "json",
+            ownerModuleID: moduleID
+        )
+        let manifestData = Data("{\"schemaVersion\":\"1.0\"}".utf8)
+        let resources = ApplicationResourceProbe(
+            data: manifestData,
+            url: URL(fileURLWithPath: "/tmp/module-manifest.json")
+        )
+        let gateway = await makeGateway(resources: resources)
+        let descriptor = authorizedResourceDescriptor(
+            id: moduleID,
+            role: RuneScribeRoles.progression,
+            requiredResources: [manifestResource]
+        )
+
+        let value = try await gateway.readHostVerifiedApplicationResource(
+            manifestResource,
+            expectedSHA256: Data(SHA256.hash(data: manifestData)),
+            maximumByteCount: 8_192,
+            descriptor: descriptor
+        )
+        XCTAssertEqual(value, manifestData)
+
+        let foreignResource = ApplicationResource(
+            name: "module-manifest",
+            fileExtension: "json",
+            ownerModuleID: "com.runescribe.test.runtime-io-other-owner"
+        )
+        let foreignDescriptor = authorizedResourceDescriptor(
+            id: moduleID,
+            role: RuneScribeRoles.progression,
+            requiredResources: [foreignResource]
+        )
+        let ownerError = await runtimeError {
+            _ = try await gateway.readHostVerifiedApplicationResource(
+                foreignResource,
+                expectedSHA256: Data(SHA256.hash(data: manifestData)),
+                maximumByteCount: 8_192,
+                descriptor: foreignDescriptor
+            )
+        }
+        XCTAssertEqual(
+            ownerError,
+            .serviceAccessDenied(
+                moduleID: moduleID,
+                service: RuneScribeServiceIDs.applicationResourceLocator
+            )
+        )
+        let state = await resources.state()
+        XCTAssertEqual(state.dataRequests, [manifestResource])
+    }
+
+    func testManifestResourceRegistrationFailsOptionalAndThrowsForRequired() async throws {
+        for criticality in [ModuleCriticality.optional, .required] {
+            let suffix = criticality.rawValue
+            let moduleID = ModuleIdentifier(
+                rawValue: "com.runescribe.test.runtime-io-resource-registration-\(suffix)"
+            )
+            let resource = ApplicationResource(
+                name: "module-manifest-\(suffix)",
+                fileExtension: "json",
+                ownerModuleID: moduleID
+            )
+            let descriptor = resourceRegistrationDescriptor(
+                moduleID: moduleID,
+                criticality: criticality,
+                manifestResource: resource
+            )
+            let manifestData = try resourceRegistrationManifestData(for: descriptor)
+            let resources = ApplicationResourceProbe(
+                data: manifestData,
+                url: URL(fileURLWithPath: "/tmp/module-manifest-\(suffix).json")
+            )
+            let runtime = RuneScribeRuntime(
+                runtimeVersion: SemanticVersion(
+                    major: UInt(1),
+                    minor: UInt(0),
+                    patch: UInt(0)
+                ),
+                platform: .macOS
+            )
+            try await runtime.installPlatformAdapter(
+                resources,
+                for: RuneScribeServiceKeys.applicationResourceLocator
+            )
+            let factory = AnyModuleFactory(descriptor: descriptor) {
+                RuntimeIORegistrationProbeModule(descriptor: descriptor)
+            }
+
+            do {
+                try await runtime.register(
+                    manifestResource: resource,
+                    expectedSHA256: Data(repeating: 0, count: SHA256.Digest.byteCount),
+                    maximumByteCount: 16_384,
+                    factory: factory
+                )
+                if criticality == .required {
+                    XCTFail("A required manifest integrity failure must throw")
+                }
+            } catch {
+                XCTAssertEqual(criticality, .required)
+                XCTAssertEqual(
+                    error as? RuntimeVerifiedApplicationResourceFailure,
+                    .integrityMismatch
+                )
+            }
+
+            let snapshot = await runtime.snapshot()
+            if criticality == .optional {
+                XCTAssertEqual(snapshot.moduleStates[moduleID], .failed)
+            } else {
+                XCTAssertNil(snapshot.moduleStates[moduleID])
+            }
+        }
+    }
+
+    func testMissingManifestResourceSurfacesFailedOptionalAvailability() async throws {
+        let moduleID: ModuleIdentifier =
+            "com.runescribe.test.runtime-io-missing-optional-manifest"
+        let resource = ApplicationResource(
+            name: "missing-module-manifest",
+            fileExtension: "json",
+            ownerModuleID: moduleID
+        )
+        let descriptor = resourceRegistrationDescriptor(
+            moduleID: moduleID,
+            criticality: .optional,
+            manifestResource: resource
+        )
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: SemanticVersion(
+                major: UInt(1),
+                minor: UInt(0),
+                patch: UInt(0)
+            ),
+            platform: .macOS
+        )
+        let factory = AnyModuleFactory(descriptor: descriptor) {
+            RuntimeIORegistrationProbeModule(descriptor: descriptor)
+        }
+
+        try await runtime.register(
+            manifestResource: resource,
+            expectedSHA256: Data(repeating: 0, count: SHA256.Digest.byteCount),
+            maximumByteCount: 16_384,
+            factory: factory
+        )
+
+        let snapshot = await runtime.snapshot()
+        XCTAssertEqual(snapshot.moduleStates[moduleID], .failed)
+        let availability = await runtime.optionalAvailabilitySnapshots()
+        XCTAssertEqual(
+            availability,
+            [
+                RuntimeOptionalModuleAvailabilitySnapshot(
+                    moduleID: moduleID,
+                    role: RuneScribeRoles.progression,
+                    lifecycleState: .failed
+                ),
+            ]
+        )
     }
 
     func testApplicationResourceLeaseIsRevokedWhenSourceInvalidates() async throws {
@@ -2081,6 +2507,209 @@ final class RuntimeIOGatewayTests: XCTestCase {
         XCTAssertEqual(closedBindingCount, 0)
     }
 
+    func testSharePresentationReportsNonterminalPresentationAndExactlyOneTerminalEvidence() async throws {
+        let artifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "60000000-0000-0000-0000-000000000012")!
+        )
+        let presentations = SharePresentationProbe(
+            url: URL(fileURLWithPath: "/tmp/runtime-io-share-evidence.txt")
+        )
+        let gateway = await makeGateway(
+            sharePresentation: presentations,
+            issueOperationContexts: true
+        )
+        let source = authorizedSharePresentationUIDescriptor(
+            id: "com.runescribe.test.runtime-io-share-presentation-evidence"
+        )
+        let runtimeGeneration = await gateway.currentGeneration()
+        let client = try await activateClient(
+            on: gateway,
+            runtimeGeneration: runtimeGeneration,
+            descriptor: source,
+            sourceGeneration: 131
+        )
+        let session = try await client.sharePresentationSession(
+            artifactID: artifactID
+        )
+        let lease = try await session.acquire()
+        let eventStream = await lease.presentationEvents()
+        var events = eventStream.makeAsyncIterator()
+
+        try await lease.reportPresented(on: .airDrop)
+        let presented = try SharePresentationReportDTO(
+            routeClass: .airDrop,
+            result: .presented
+        )
+        let presentedEvent = await events.next()
+        let bindingCountAfterPresentation = await gateway
+            .activeApplicationResourceBindingCount()
+        XCTAssertEqual(presentedEvent, .presented(presented))
+        XCTAssertEqual(bindingCountAfterPresentation, 1)
+
+        let completed = try SharePresentationReportDTO(
+            routeClass: .airDrop,
+            result: .completedBySystem
+        )
+        let evidence = try await lease.finish(completed)
+        XCTAssertEqual(evidence.artifactID, artifactID)
+        XCTAssertEqual(evidence.report, completed)
+        XCTAssertEqual(evidence.operationContext.authorityScope, .persistent)
+        let completionEvent = await events.next()
+        let endEvent = await events.next()
+        let bindingCountAfterCompletion = await gateway
+            .activeApplicationResourceBindingCount()
+        XCTAssertEqual(completionEvent, .completed(evidence))
+        XCTAssertNil(endEvent)
+        XCTAssertEqual(bindingCountAfterCompletion, 0)
+
+        let duplicateError = await runtimeError {
+            _ = try await lease.finish(completed)
+        }
+        XCTAssertEqual(
+            duplicateError,
+            .serviceUnavailable(RuneScribeServiceIDs.sharePresentation)
+        )
+    }
+
+    func testShareCompletionCapacityIsReservedBeforePlatformPresentation() async throws {
+        let presentations = SharePresentationProbe(
+            url: URL(fileURLWithPath: "/tmp/runtime-io-share-capacity.txt")
+        )
+        let gateway = await makeGateway(
+            sharePresentation: presentations,
+            issueOperationContexts: true
+        )
+        let source = authorizedSharePresentationUIDescriptor(
+            id: "com.runescribe.test.runtime-io-share-capacity"
+        )
+        let runtimeGeneration = await gateway.currentGeneration()
+        let client = try await activateClient(
+            on: gateway,
+            runtimeGeneration: runtimeGeneration,
+            descriptor: source,
+            sourceGeneration: 132
+        )
+        var leases: [RuntimeSharePresentationLease] = []
+        for index in 0..<64 {
+            let artifactID = ShareArtifactID(
+                rawValue: UUID(
+                    uuidString: String(
+                        format: "61000000-0000-0000-0000-%012x",
+                        index
+                    )
+                )!
+            )
+            let session = try await client.sharePresentationSession(
+                artifactID: artifactID
+            )
+            leases.append(try await session.acquire())
+        }
+
+        let overflowArtifactID = ShareArtifactID(
+            rawValue: UUID(
+                uuidString: "61000000-0000-0000-0000-000000000064"
+            )!
+        )
+        let overflowSession = try await client.sharePresentationSession(
+            artifactID: overflowArtifactID
+        )
+        do {
+            _ = try await overflowSession.acquire()
+            XCTFail("Expected terminal journal capacity backpressure")
+        } catch {
+            XCTAssertEqual(
+                error as? RuntimeProgressionOutboxSubmissionError,
+                .shareCompletionJournalFull
+            )
+        }
+        let state = await presentations.state()
+        XCTAssertEqual(state.requests.count, 64)
+        XCTAssertFalse(state.requests.contains(overflowArtifactID))
+
+        for lease in leases {
+            await lease.close()
+        }
+
+        let recoveredSession = try await client.sharePresentationSession(
+            artifactID: overflowArtifactID
+        )
+        let recoveredLease = try await recoveredSession.acquire()
+        let recoveredState = await presentations.state()
+        XCTAssertEqual(recoveredState.requests.count, 65)
+        XCTAssertEqual(recoveredState.requests.last, overflowArtifactID)
+        await recoveredLease.close()
+    }
+
+    func testTerminalJournalFinishIsRetryableAcrossCommitFaults() async throws {
+        for (index, fault) in [
+            (0, InMemoryModuleStateFaultPoint.beforeTransactionCommit),
+            (1, InMemoryModuleStateFaultPoint.afterTransactionCommit),
+        ] {
+            let store = InMemoryModuleStateStore(
+                now: { Date(timeIntervalSince1970: TimeInterval(9_200 + index)) }
+            )
+            let presentations = SharePresentationProbe(
+                url: URL(fileURLWithPath: "/tmp/runtime-io-share-fault.txt")
+            )
+            let gateway = await makeGateway(
+                sharePresentation: presentations,
+                issueOperationContexts: true,
+                moduleStateStore: store
+            )
+            let source = authorizedSharePresentationUIDescriptor(
+                id: ModuleIdentifier(
+                    rawValue: "com.runescribe.test.runtime-io-share-fault-\(index)"
+                )
+            )
+            let runtimeGeneration = await gateway.currentGeneration()
+            let client = try await activateClient(
+                on: gateway,
+                runtimeGeneration: runtimeGeneration,
+                descriptor: source,
+                sourceGeneration: UInt64(140 + index)
+            )
+            let artifactID = ShareArtifactID(
+                rawValue: UUID(
+                    uuidString: String(
+                        format: "62000000-0000-0000-0000-%012x",
+                        index
+                    )
+                )!
+            )
+            let session = try await client.sharePresentationSession(
+                artifactID: artifactID
+            )
+            let lease = try await session.acquire()
+            let report = try SharePresentationReportDTO(
+                routeClass: .airDrop,
+                result: .completedBySystem
+            )
+            await store.injectFault(at: fault)
+
+            if fault == .beforeTransactionCommit {
+                do {
+                    _ = try await lease.finish(report)
+                    XCTFail("Expected the first terminal journal write to fail")
+                } catch ModuleStateStoreError.injectedFailure {}
+                let retainedBindingCount = await gateway
+                    .activeApplicationResourceBindingCount()
+                XCTAssertEqual(retainedBindingCount, 1)
+            }
+            let evidence: ShareArtifactCompletionEvidenceDTO
+            do {
+                evidence = try await lease.finish(report)
+            } catch {
+                XCTFail("Terminal retry failed for \(fault): \(error)")
+                continue
+            }
+            XCTAssertEqual(evidence.artifactID, artifactID)
+            XCTAssertEqual(evidence.report, report)
+            let finalBindingCount = await gateway
+                .activeApplicationResourceBindingCount()
+            XCTAssertEqual(finalBindingCount, 0)
+        }
+    }
+
     func testDroppingSharePresentationLeaseClosesBinding() async throws {
         let artifactID = ShareArtifactID(
             rawValue: UUID(uuidString: "60000000-0000-0000-0000-000000000003")!
@@ -2655,6 +3284,17 @@ final class RuntimeIOGatewayTests: XCTestCase {
             return error as? RuneScribeRuntimeError
         }
     }
+
+    private func verifiedResourceFailure(
+        from operation: () async throws -> Void
+    ) async -> RuntimeVerifiedApplicationResourceFailure? {
+        do {
+            try await operation()
+            return nil
+        } catch {
+            return error as? RuntimeVerifiedApplicationResourceFailure
+        }
+    }
 }
 
 private struct SecureValueLookupProbeRequest: Equatable, Sendable {
@@ -3034,8 +3674,14 @@ private actor InboundImportDeliveryProbe {
     }
 }
 
+private struct ApplicationResourceBoundedProbeRequest: Equatable, Sendable {
+    let resource: ApplicationResource
+    let maximumByteCount: Int
+}
+
 private struct ApplicationResourceProbeState: Equatable, Sendable {
     let dataRequests: [ApplicationResource]
+    let boundedDataRequests: [ApplicationResourceBoundedProbeRequest]
     let urlRequests: [ApplicationResource]
 }
 
@@ -3045,6 +3691,7 @@ private actor ApplicationResourceProbe: ApplicationResourceLocator {
     private let dataBarrier: RuntimeIOBarrier?
     private let urlBarrier: RuntimeIOBarrier?
     private var dataRequests: [ApplicationResource] = []
+    private var boundedDataRequests: [ApplicationResourceBoundedProbeRequest] = []
     private var urlRequests: [ApplicationResource] = []
 
     init(
@@ -3067,6 +3714,19 @@ private actor ApplicationResourceProbe: ApplicationResourceLocator {
         return dataResult
     }
 
+    func data(
+        for resource: ApplicationResource,
+        maximumByteCount: Int
+    ) async throws -> Data {
+        boundedDataRequests.append(
+            ApplicationResourceBoundedProbeRequest(
+                resource: resource,
+                maximumByteCount: maximumByteCount
+            )
+        )
+        return try await data(for: resource)
+    }
+
     func url(for resource: ApplicationResource) async throws -> URL {
         urlRequests.append(resource)
         if let urlBarrier {
@@ -3078,6 +3738,7 @@ private actor ApplicationResourceProbe: ApplicationResourceLocator {
     func state() -> ApplicationResourceProbeState {
         ApplicationResourceProbeState(
             dataRequests: dataRequests,
+            boundedDataRequests: boundedDataRequests,
             urlRequests: urlRequests
         )
     }
@@ -3343,11 +4004,32 @@ private func makeGateway(
     fonts: (any SystemFontRegistrar)? = nil,
     sharePresentation: (any SharePresentationProviding)? = nil,
     shareArtifacts: (any ShareArtifactStore)? = nil,
+    issueOperationContexts: Bool = false,
+    moduleStateStore: InMemoryModuleStateStore? = nil,
     environment: RuntimeEnvironment = .live
 ) async -> RuntimeIOGateway {
+    let operationContextAuthority: RuntimeProgressionOutbox?
+    if issueOperationContexts {
+        let state = RuntimeModuleStateGateway(policy: .patternBFoundation)
+        try! await state.install(moduleStateStore ?? InMemoryModuleStateStore())
+        _ = await state.activateRuntime()
+        let authority = RuntimeProgressionOutbox(
+            state: state,
+            dispatcher: RuntimeOperationDispatcher(
+                policy: .patternBFoundation,
+                environment: environment
+            ),
+            environment: environment
+        )
+        await authority.activateRuntime()
+        operationContextAuthority = authority
+    } else {
+        operationContextAuthority = nil
+    }
     let gateway = RuntimeIOGateway(
         policy: .patternBFoundation,
-        environment: environment
+        environment: environment,
+        operationContextAuthority: operationContextAuthority
     )
     if let secureValues {
         await gateway.install(secureValues)
@@ -3511,6 +4193,62 @@ private func authorizedResourceDescriptor(
         requiredServices: [RuneScribeServiceIDs.applicationResourceLocator],
         requiredResources: requiredResources
     )
+}
+
+private struct RuntimeIORegistrationProbeModule: RuneScribeModule {
+    let descriptor: ModuleDescriptor
+
+    func start(context: ModuleContext) async throws {}
+    func stop() async {}
+}
+
+private func resourceRegistrationDescriptor(
+    moduleID: ModuleIdentifier,
+    criticality: ModuleCriticality,
+    manifestResource: ApplicationResource
+) -> ModuleDescriptor {
+    ModuleDescriptor(
+        moduleID: moduleID,
+        moduleVersion: SemanticVersion(
+            major: UInt(1),
+            minor: UInt(0),
+            patch: UInt(0)
+        ),
+        kind: .service,
+        criticality: criticality,
+        entryPoint: "RuntimeIORegistrationProbeModule-\(criticality.rawValue)",
+        role: RuneScribeRoles.progression,
+        requestedCapabilities: [RuneScribeCapabilities.resourceRead],
+        requiredServices: [RuneScribeServiceIDs.applicationResourceLocator],
+        requiredResources: [manifestResource]
+    )
+}
+
+private func resourceRegistrationManifestData(
+    for descriptor: ModuleDescriptor
+) throws -> Data {
+    let manifest = ModuleManifest(
+        runtimeVersion: SemanticVersion(
+            major: UInt(1),
+            minor: UInt(0),
+            patch: UInt(0)
+        ),
+        moduleID: descriptor.moduleID,
+        displayName: descriptor.entryPoint,
+        moduleVersion: descriptor.moduleVersion,
+        moduleType: descriptor.kind,
+        criticality: descriptor.criticality,
+        supportedPlatforms: [.macOS],
+        capabilitiesRequested: descriptor.requestedCapabilities.sorted(),
+        entryPoint: descriptor.entryPoint,
+        runtimeRequirements: ModuleRuntimeRequirements(
+            requiredServices: descriptor.requiredServices.sorted(),
+            requiredResources: Array(descriptor.requiredResources),
+            requiredModuleRoles: []
+        ),
+        defaultRole: descriptor.role
+    )
+    return try JSONEncoder().encode(manifest)
 }
 
 private func authorizedBundledFontCoreDescriptor(

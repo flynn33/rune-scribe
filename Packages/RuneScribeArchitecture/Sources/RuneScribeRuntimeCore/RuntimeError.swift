@@ -6,6 +6,11 @@ public enum RuneScribeRuntimeError: Error, Equatable, Sendable {
     case duplicateEntryPoint(String)
     case duplicateRole(ModuleRole)
     case manifestDescriptorMismatch(moduleID: ModuleIdentifier, field: String)
+    case invalidModuleCriticality(
+        moduleID: ModuleIdentifier,
+        expected: ModuleCriticality,
+        actual: ModuleCriticality
+    )
     case factoryDescriptorMismatch(ModuleIdentifier)
     case incompatibleRuntime(moduleID: ModuleIdentifier, minimum: SemanticVersion, actual: SemanticVersion)
     case unsupportedPlatform(moduleID: ModuleIdentifier, platform: SupportedPlatform)
@@ -17,6 +22,7 @@ public enum RuneScribeRuntimeError: Error, Equatable, Sendable {
     case missingRequiredRole(moduleID: ModuleIdentifier, role: ModuleRole)
     case dependencyCycle([ModuleIdentifier])
     case activationFailed(ModuleIdentifier)
+    case entitlementRevisionConflict(UInt64)
     case runtimeBusy
     case contextInactive(ModuleIdentifier)
     case serviceNotDeclared(moduleID: ModuleIdentifier, service: ServiceIdentifier)
@@ -68,6 +74,8 @@ extension RuneScribeRuntimeError: LocalizedError {
             "Duplicate module role: \(role.rawValue)."
         case .manifestDescriptorMismatch(let moduleID, let field):
             "Manifest and descriptor differ for \(moduleID.rawValue) at \(field)."
+        case .invalidModuleCriticality(let moduleID, let expected, let actual):
+            "Module \(moduleID.rawValue) must be \(expected.rawValue), not \(actual.rawValue)."
         case .factoryDescriptorMismatch(let moduleID):
             "Factory returned a descriptor that does not match \(moduleID.rawValue)."
         case .incompatibleRuntime(let moduleID, let minimum, let actual):
@@ -90,6 +98,8 @@ extension RuneScribeRuntimeError: LocalizedError {
             "Module activation dependencies contain a cycle."
         case .activationFailed(let moduleID):
             "Module \(moduleID.rawValue) failed to activate."
+        case .entitlementRevisionConflict(let revision):
+            "Entitlement revision \(revision) was replayed with divergent content."
         case .runtimeBusy:
             "The runtime is already starting or stopping."
         case .contextInactive(let moduleID):

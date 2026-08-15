@@ -27,7 +27,7 @@ effective only where they do not conflict with that authority.
 ## Current result
 
 The repository now has a coherent, compatibility-preserving foundation for the first
-Codex domain and package work:
+Codex domain and a complete local Progression implementation:
 
 - a versioned Cipher Record migration that preserves keys and converts the mapping into
   an explicit symbol permutation;
@@ -40,13 +40,17 @@ Codex domain and package work:
 - the frozen bounded typed `.runescribe` parser/builder and magic-first file routing;
 - permanent legacy cipher v3 and message v1 intake, with current sharing still emitting
   legacy formats only; and
+- an optional runtime-mediated Progression Module with strict approved catalogs,
+  privacy-safe durable event handoff, atomic rules and grants, versioned existing-user
+  migration, quarantine/recovery, live entitlement projection, snapshot-only UI, and an
+  accessible durable reveal queue; and
 - one superseded, nine accepted, and two explicitly blocked architecture decisions,
   plus this auditable roadmap ledger.
 
 That slice is intentionally usable without external services, a physical device,
 Contacts permission, login Keychain access, App Store Connect, iCloud, or Game Center.
-It does not declare an unused framework dependency and does not claim that theme,
-progression, cloud, or public-sharing work is complete.
+It does not declare an unused framework dependency and does not claim that production
+Theme modules, cloud synchronization, or final public-sharing work is complete.
 
 ## App-owned Forsetti remediation gate
 
@@ -94,7 +98,7 @@ contract, and physical-device transport spike all pass.
 | DOM-001…007 | 4 satisfied, 3 partial | Cipher/Script migration and an explicit delivery-state foundation exist. End-to-end legacy-font proof, selected-Codex/per-share presentation stores, and removal of the writable `delivered` compatibility rail remain. |
 | PKG-001…006 | 4 satisfied, 2 partial | The typed container, legacy readers, policy, and magic-first router exist. Complete fail-before-allocation proof, randomized malformed-input coverage, and allocation instrumentation remain in PKG-003/005. |
 | THM-001…012 | 11 not-started, 1 partial | A current UI design system exists, but no descriptor, Coordinator, Base/placeholder Theme Modules, preference/fallback service, or conformance suite exists. Local runtime registries and module contracts are prerequisites. |
-| PRO-001…016 | 14 not-started, 2 partial | Event and opaque-token contract foundations exist; the module, store, outbox, rules, catalog, atomic grants, entitlement bridge, views, quarantine, and recovery do not. |
+| PRO-001…016 | 16 satisfied | The optional module, runtime-owned store and handoff, opaque-token lifecycle, exact catalog/rules, atomic records and grants, scalable migration, entitlement projection, snapshot-only views, durable feedback queue, quarantine, and guarded recovery are implemented. Physical feedback and accessibility qualification remains separately identified in the Progression implementation report. |
 | SHR-001…017 | 7 not-started, 6 partial, 2 decision-frozen, 2 blocked-device | Current legacy share, QR, MessageUI, and completion foundations remain. Final composition and Quick Look decisions require the physical-device spike; themed work depends on PKG, THM, and PRO gates. |
 
 The per-task records in the JSON ledger are normative for status automation. A group
@@ -134,10 +138,12 @@ result and required attachment acceptance.
 2. Finish DOM-005/006/007 compatibility rendering, presentation-state ownership, and
    atomic delivery-state migration while keeping legacy decode behavior.
 3. Complete BAS-008's old/new compatibility and update-required test matrix.
-4. Complete the app-owned runtime's per-call mediation, standard ports, I/O, Settings,
-   resource, contribution, state, and live-reconciliation gates.
-5. Make the applicable compliance rules and negative mutations blocking before starting
-   the three-provider Theme scaffold.
+4. Complete the remaining app-owned runtime contribution/resource gates required by
+   production Theme modules; Progression's state, Settings, availability, and event
+   ports are already runtime-mediated.
+5. Qualify Progression feedback, silent-mode behavior, VoiceOver timing, and interrupted
+   native-route presentation on supported physical hardware before claiming those
+   device-only acceptance checks.
 6. Run SHR-001 on physical devices before selecting permanent invitation composition or
    Quick Look scope.
 

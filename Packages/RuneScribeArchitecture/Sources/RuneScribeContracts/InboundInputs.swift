@@ -132,3 +132,21 @@ public enum InboundInputDispositionDTO: String, Codable, Hashable, Sendable {
 public protocol RuneScribeInboundInputService: Sendable {
     func receive(_ input: RuneScribeInboundInput) async throws -> InboundInputDispositionDTO
 }
+
+public protocol RuneScribeOperationAwareInboundInputService:
+    RuneScribeInboundInputService
+{
+    func receive(
+        _ input: RuneScribeInboundInput,
+        context: RuntimePersistableOperationContext
+    ) async throws -> InboundInputDispositionDTO
+}
+
+public extension RuneScribeOperationAwareInboundInputService {
+    func receive(
+        _ input: RuneScribeInboundInput,
+        context _: RuntimePersistableOperationContext
+    ) async throws -> InboundInputDispositionDTO {
+        try await receive(input)
+    }
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0",
+  "packageID": "runescribe.progression-achievement.codex-package",
+  "packageVersion": "1.0.0",
+  "generatedDate": "2026-08-12",
+  "sourceSnapshotSHA256": "117e6af5caa82ece0092488f82587ebc14544054fc7510ba6e3cc1dd8945ef18",
+  "files": [
+    {
+      "path": "PACKAGE-VALIDATION-REPORT.md",
+      "bytes": 1509,
+      "sha256": "446ff8cd4dd7dcd12de3a2a971bef5143d089635821899d7d7262d199b26c85a"
+    },
+    {
+      "path": "Rune-Scribe-Progression-Acceptance-Gates-v1.0.json",
+      "bytes": 10735,
+      "sha256": "cba317b3feb3aa6568855f32e51994707455eb2ef0b75bbfbe755249b27776a8"
+    },
+    {
+      "path": "Rune-Scribe-Progression-Catalog-Schema-v1.0.json",
+      "bytes": 3108,
+      "sha256": "4c0d538229877a035ad9444d4e89a6ae13ae46cb190f9677761b945c173ed6dd"
+    },
+    {
+      "path": "Rune-Scribe-Progression-Catalog-v1.0.json",
+      "bytes": 101246,
+      "sha256": "7b7586d0749abab41aded3e9b3457b665c3a8869ae6d849f9adc55e621a5a142"
+    },
+    {
+      "path": "Rune-Scribe-Progression-Codex-Implementation-Instructions-v1.0.md",
+      "bytes": 40496,
+      "sha256": "4aa350513c133efee60aad7e1509bf78c5d375da7cdafe8eddc8e76fa339c32e"
+    },
+    {
+      "path": "Rune-Scribe-Progression-Event-Catalog-v1.0.json",
+      "bytes": 8950,
+      "sha256": "b2ae5b795f75b0c6847d195990d62365d57a7d715d20aff8f44c2c420bd8c2a9"
+    },
+    {
+      "path": "Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json",
+      "bytes": 2684,
+      "sha256": "2236c49f7e7096701c90acc17283871685577780a05aeb8b8a673f4b35d8277b"
+    },
+    {
+      "path": "Rune-Scribe-Progression-Plain-English-Overview-v1.0.md",
+      "bytes": 4184,
+      "sha256": "6dafdb1acb06589eb99c685319db471bbcfccc0ad50b05fb7483afc360c5175d"
+    },
+    {
+      "path": "SOURCE-BASIS-AND-SUPERSESSION.md",
+      "bytes": 3335,
+      "sha256": "eda7cdae2387029eb46d99f21b722dc098ae96e2f06bf270897abd5ecda2d987"
+    },
+    {
+      "path": "START-HERE.md",
+      "bytes": 2385,
+      "sha256": "9eb8f91c885bcd7c450b479d40b87d818c54577f16bcb2621c8c8d9a99b48e2e"
+    }
+  ]
+}

@@ -35,7 +35,9 @@ final class UIModuleTests: XCTestCase {
         )
         XCTAssertEqual(
             descriptor.consumedEndpoints,
-            RuntimeApplicationEndpointCatalog.applicationEndpointIDs
+            RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(
+                RuntimeProgressionEndpointCatalog.UIEndpointIDs
+            )
         )
     }
 
@@ -187,6 +189,7 @@ private enum TestSharePresentationModule {
         displayName: "Rune Scribe Test Share Presentation",
         moduleVersion: moduleVersion,
         moduleType: .ui,
+        criticality: descriptor.criticality,
         supportedPlatforms: [.iOS, .macOS],
         capabilitiesRequested: [
             RuneScribeCapabilities.rootUI,
@@ -196,7 +199,9 @@ private enum TestSharePresentationModule {
         runtimeRequirements: ModuleRuntimeRequirements(
             requiredServices: [RuneScribeServiceIDs.sharePresentation]
         ),
-        defaultRole: RuneScribeRoles.primaryUI
+        defaultRole: RuneScribeRoles.primaryUI,
+        consumedEndpoints: descriptor.consumedEndpoints.sorted(),
+        publishedEndpoints: descriptor.publishedEndpoints.sorted()
     )
 
     static func factory(

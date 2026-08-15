@@ -35,6 +35,45 @@ final class RuntimeLifecycleTests: XCTestCase {
         XCTAssertEqual(counter.value, 0)
     }
 
+    func testCoreAndUIModulesCannotDeclareOptionalCriticality() async {
+        let optionalUI = descriptor(
+            id: "com.runescribe.module.optional-ui",
+            kind: .ui,
+            criticality: .optional,
+            entryPoint: "OptionalUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI]
+        )
+        let optionalCore = descriptor(
+            id: RuneScribeModuleIDs.core,
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "OptionalCoreModule",
+            role: RuneScribeRoles.core,
+            capabilities: []
+        )
+
+        for item in [optionalUI, optionalCore] {
+            let runtime = makeRuntime()
+            do {
+                try await runtime.register(
+                    manifest: manifest(for: item),
+                    factory: factory(for: item)
+                )
+                XCTFail("Core and the sole UI module must be required.")
+            } catch {
+                XCTAssertEqual(
+                    error as? RuneScribeRuntimeError,
+                    .invalidModuleCriticality(
+                        moduleID: item.moduleID,
+                        expected: .required,
+                        actual: .optional
+                    )
+                )
+            }
+        }
+    }
+
     func testManifestDescriptorMismatchRejectsRegistrationBeforeFactoryUse() async {
         let compiledDescriptor = descriptor(
             id: "com.runescribe.module.manifest-mismatch",
@@ -131,6 +170,354 @@ final class RuntimeLifecycleTests: XCTestCase {
             snapshot.moduleStates[registeredDescriptor.moduleID],
             .failed
         )
+    }
+
+    func testOptionalManifestDecodeFailureIsRecordedWithoutBlockingRequiredModules() async throws {
+        let optional = descriptor(
+            id: "com.runescribe.module.invalid-optional-manifest",
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "InvalidOptionalManifestModule",
+            role: "runescribe.service.invalid-manifest",
+            capabilities: []
+        )
+        let core = descriptor(
+            id: "com.runescribe.module.invalid-manifest-core",
+            kind: .service,
+            entryPoint: "InvalidManifestCoreModule",
+            role: RuneScribeRoles.core,
+            capabilities: []
+        )
+        let ui = descriptor(
+            id: "com.runescribe.module.invalid-manifest-ui",
+            kind: .ui,
+            entryPoint: "InvalidManifestUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let optionalCounter = FactoryCounter()
+        let runtime = makeRuntime()
+
+        try await runtime.register(
+            manifestData: Data("{".utf8),
+            factory: factory(for: optional, counter: optionalCounter)
+        )
+        try await runtime.register(
+            manifest: manifest(for: core),
+            factory: factory(for: core)
+        )
+        try await runtime.register(
+            manifest: manifest(for: ui),
+            factory: factory(for: ui)
+        )
+
+        try await runtime.start()
+        let snapshot = await runtime.snapshot()
+
+        XCTAssertEqual(snapshot.status, .running)
+        XCTAssertEqual(snapshot.moduleStates[optional.moduleID], .failed)
+        XCTAssertEqual(snapshot.moduleStates[core.moduleID], .active)
+        XCTAssertEqual(snapshot.moduleStates[ui.moduleID], .active)
+        XCTAssertEqual(optionalCounter.value, 0)
+        await runtime.stop()
+    }
+
+    func testOptionalConstructionCatalogAndEndpointFailuresDoNotRollbackCoreOrUI() async throws {
+        let recorder = RuntimeRecorder()
+        let core = descriptor(
+            id: "com.runescribe.module.optional-failure-core",
+            kind: .service,
+            entryPoint: "OptionalFailureCoreModule",
+            role: RuneScribeRoles.core,
+            capabilities: []
+        )
+        let construction = descriptor(
+            id: "com.runescribe.module.optional-construction-failure",
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "OptionalConstructionFailureModule",
+            role: "runescribe.service.optional-construction",
+            capabilities: []
+        )
+        let catalog = descriptor(
+            id: "com.runescribe.module.optional-catalog-failure",
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "OptionalCatalogFailureModule",
+            role: "runescribe.service.optional-catalog",
+            capabilities: []
+        )
+        let missingEndpointID: RuntimeEndpointIdentifier = "optional.endpoint.missing"
+        let endpoint = descriptor(
+            id: "com.runescribe.module.optional-endpoint-failure",
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "OptionalEndpointFailureModule",
+            role: "runescribe.service.optional-endpoint",
+            capabilities: [],
+            publishedEndpoints: [missingEndpointID]
+        )
+        let ui = descriptor(
+            id: "com.runescribe.module.optional-failure-ui",
+            kind: .ui,
+            entryPoint: "OptionalFailureUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let runtime = makeRuntime()
+        let constructionFactory = AnyModuleFactory(descriptor: construction) {
+            throw ProbeFailure.injected
+        }
+
+        try await runtime.register(
+            manifest: manifest(for: core),
+            factory: factory(for: core, label: "core", recorder: recorder)
+        )
+        try await runtime.register(
+            manifest: manifest(for: construction),
+            factory: constructionFactory
+        )
+        try await runtime.register(
+            manifest: manifest(for: catalog),
+            factory: factory(for: catalog, start: { _ in throw ProbeFailure.injected })
+        )
+        try await runtime.register(
+            manifest: manifest(for: endpoint),
+            factory: factory(for: endpoint)
+        )
+        try await runtime.register(
+            manifest: manifest(for: ui),
+            factory: factory(for: ui, label: "ui", recorder: recorder)
+        )
+
+        try await runtime.start()
+        let snapshot = await runtime.snapshot()
+        let entries = await recorder.values()
+
+        XCTAssertEqual(snapshot.status, .running)
+        XCTAssertEqual(snapshot.activationOrder, [core.moduleID, ui.moduleID])
+        XCTAssertEqual(snapshot.moduleStates[construction.moduleID], .failed)
+        XCTAssertEqual(snapshot.moduleStates[catalog.moduleID], .failed)
+        XCTAssertEqual(snapshot.moduleStates[endpoint.moduleID], .failed)
+        XCTAssertEqual(snapshot.moduleStates[core.moduleID], .active)
+        XCTAssertEqual(snapshot.moduleStates[ui.moduleID], .active)
+        XCTAssertEqual(entries, ["start:core", "start:ui"])
+        await runtime.stop()
+    }
+
+    func testEarnedEntitlementActivatesOptionalModuleLiveAndGrantsAreMonotonic() async throws {
+        let recorder = RuntimeRecorder()
+        let core = descriptor(
+            id: "com.runescribe.module.live-entitlement-core",
+            kind: .service,
+            entryPoint: "LiveEntitlementCoreModule",
+            role: RuneScribeRoles.core,
+            capabilities: []
+        )
+        let theme = descriptor(
+            id: "com.runescribe.module.theme.synthetic",
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "SyntheticThemeModule",
+            role: "runescribe.theme.synthetic",
+            capabilities: [],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let ui = descriptor(
+            id: "com.runescribe.module.live-entitlement-ui",
+            kind: .ui,
+            entryPoint: "LiveEntitlementUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let moonleaf = try XCTUnwrap(UnlockID(rawValue: "unlock.codex.moonleaf"))
+        let runtime = makeRuntime()
+
+        try await runtime.register(
+            manifest: manifest(for: core),
+            factory: factory(for: core, label: "core", recorder: recorder)
+        )
+        try await runtime.register(
+            manifest: manifest(
+                for: theme,
+                entitlementRequirement: EntitlementRequirement(
+                    kind: .earned,
+                    identifier: moonleaf
+                )
+            ),
+            factory: factory(for: theme, label: "theme", recorder: recorder)
+        )
+        try await runtime.register(
+            manifest: manifest(for: ui),
+            factory: factory(for: ui, label: "ui", recorder: recorder)
+        )
+
+        try await runtime.start()
+        let initial = await runtime.snapshot()
+        XCTAssertEqual(initial.activationOrder, [core.moduleID, ui.moduleID])
+        XCTAssertEqual(initial.moduleStates[theme.moduleID], .validated)
+        XCTAssertEqual(
+            initial.entitlementSnapshot.includedUnlockIDs,
+            [RuneScribeUnlockIDs.norseCodex]
+        )
+        XCTAssertTrue(initial.entitlementSnapshot.earnedUnlockIDs.isEmpty)
+
+        let earned = try ProgressionEntitlementSnapshotDTO(
+            revision: 1,
+            capturedAt: Date(timeIntervalSince1970: 10),
+            includedUnlockIDs: [],
+            earnedUnlockIDs: [moonleaf]
+        )
+        try await runtime.reconcileEntitlements(earned)
+        let activated = await runtime.snapshot()
+        XCTAssertEqual(
+            activated.activationOrder,
+            [core.moduleID, ui.moduleID, theme.moduleID]
+        )
+        XCTAssertEqual(activated.moduleStates[theme.moduleID], .active)
+        XCTAssertEqual(
+            activated.entitlementSnapshot.includedUnlockIDs,
+            [RuneScribeUnlockIDs.norseCodex]
+        )
+        XCTAssertEqual(activated.entitlementSnapshot.earnedUnlockIDs, [moonleaf])
+
+        let emptyLaterSnapshot = try ProgressionEntitlementSnapshotDTO(
+            revision: 2,
+            capturedAt: Date(timeIntervalSince1970: 20),
+            includedUnlockIDs: [],
+            earnedUnlockIDs: []
+        )
+        try await runtime.reconcileEntitlements(emptyLaterSnapshot)
+        let semanticReplayAtDifferentTime = try ProgressionEntitlementSnapshotDTO(
+            revision: 2,
+            capturedAt: Date(timeIntervalSince1970: 21),
+            includedUnlockIDs: [],
+            earnedUnlockIDs: []
+        )
+        try await runtime.reconcileEntitlements(semanticReplayAtDifferentTime)
+        let divergentSameRevision = try ProgressionEntitlementSnapshotDTO(
+            revision: 2,
+            capturedAt: Date(timeIntervalSince1970: 22),
+            includedUnlockIDs: [],
+            earnedUnlockIDs: [
+                try XCTUnwrap(UnlockID(rawValue: "unlock.codex.sunspire")),
+            ]
+        )
+        do {
+            try await runtime.reconcileEntitlements(divergentSameRevision)
+            XCTFail("Expected divergent equal-revision entitlement replay to fail")
+        } catch RuneScribeRuntimeError.entitlementRevisionConflict(2) {}
+        let monotonic = await runtime.snapshot()
+        let values = await recorder.values()
+        XCTAssertEqual(monotonic.entitlementSnapshot.earnedUnlockIDs, [moonleaf])
+        XCTAssertEqual(values, ["start:core", "start:ui", "start:theme"])
+        await runtime.stop()
+    }
+
+    func testProgressionEntitlementEndpointActivatesEarnedOptionalModuleLive() async throws {
+        let recorder = RuntimeRecorder()
+        let core = descriptor(
+            id: "com.runescribe.module.endpoint-entitlement-core",
+            kind: .service,
+            entryPoint: "EndpointEntitlementCoreModule",
+            role: RuneScribeRoles.core,
+            capabilities: []
+        )
+        let progression = descriptor(
+            id: RuneScribeModuleIDs.progression,
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "SyntheticProgressionModule",
+            role: RuneScribeRoles.progression,
+            capabilities: [],
+            publishedEndpoints: RuntimeProgressionEndpointCatalog.publishedEndpointIDs
+        )
+        let theme = descriptor(
+            id: "com.runescribe.module.theme.endpoint-synthetic",
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "EndpointSyntheticThemeModule",
+            role: "runescribe.theme.endpoint-synthetic",
+            capabilities: [],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let ui = descriptor(
+            id: "com.runescribe.module.endpoint-entitlement-ui",
+            kind: .ui,
+            entryPoint: "EndpointEntitlementUIModule",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.rootUI],
+            requiredRoles: [RuneScribeRoles.core]
+        )
+        let moonleaf = try XCTUnwrap(UnlockID(rawValue: "unlock.codex.moonleaf"))
+        let progressionService = SyntheticProgressionService()
+        let runtime = makeRuntime()
+
+        try await runtime.register(
+            manifest: manifest(for: core),
+            factory: factory(for: core, label: "core", recorder: recorder)
+        )
+        try await runtime.register(
+            manifest: manifest(for: progression),
+            factory: factory(for: progression, start: { context in
+                try await context.registerProgressionEndpoints(progressionService)
+            })
+        )
+        try await runtime.register(
+            manifest: manifest(
+                for: theme,
+                entitlementRequirement: EntitlementRequirement(
+                    kind: .earned,
+                    identifier: moonleaf
+                )
+            ),
+            factory: factory(for: theme, label: "theme", recorder: recorder)
+        )
+        try await runtime.register(
+            manifest: manifest(for: ui),
+            factory: factory(for: ui, label: "ui", recorder: recorder)
+        )
+
+        try await runtime.start()
+        progressionService.publish(
+            try ProgressionEntitlementSnapshotDTO(
+                revision: 0,
+                capturedAt: Date(timeIntervalSince1970: 29),
+                includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                earnedUnlockIDs: []
+            )
+        )
+        progressionService.publish(
+            try ProgressionEntitlementSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 30),
+                includedUnlockIDs: [],
+                earnedUnlockIDs: [moonleaf]
+            )
+        )
+
+        for _ in 0 ..< 1_000 {
+            let current = await runtime.snapshot()
+            if current.moduleStates[theme.moduleID] == .active {
+                break
+            }
+            await Task.yield()
+        }
+        let snapshot = await runtime.snapshot()
+        let values = await recorder.values()
+
+        XCTAssertEqual(snapshot.status, .running)
+        XCTAssertEqual(snapshot.moduleStates[progression.moduleID], .active)
+        XCTAssertEqual(snapshot.moduleStates[theme.moduleID], .active)
+        XCTAssertEqual(snapshot.entitlementSnapshot.earnedUnlockIDs, [moonleaf])
+        XCTAssertTrue(snapshot.entitlementSnapshot.includedUnlockIDs.contains(
+            RuneScribeUnlockIDs.norseCodex
+        ))
+        XCTAssertEqual(values, ["start:core", "start:ui", "start:theme"])
+        await runtime.stop()
     }
 
     func testTwoNonUIModulesCoexistAndStartAndStopExactlyOnce() async throws {
@@ -233,6 +620,7 @@ final class RuntimeLifecycleTests: XCTestCase {
         let optional = descriptor(
             id: "com.runescribe.module.eligibility-optional",
             kind: .service,
+            criticality: .optional,
             entryPoint: "EligibilityOptionalModule",
             role: optionalRole,
             capabilities: []
@@ -994,6 +1382,83 @@ private struct TestValue: Codable, Equatable, Sendable {
     let value: Int
 }
 
+private enum ProbeFailure: Error {
+    case injected
+}
+
+private final class SyntheticProgressionService: RuneScribeProgressionService, @unchecked Sendable {
+    private let entitlements: AsyncStream<ProgressionEntitlementSnapshotDTO>
+    private let entitlementContinuation: AsyncStream<
+        ProgressionEntitlementSnapshotDTO
+    >.Continuation
+
+    init() {
+        var continuation: AsyncStream<ProgressionEntitlementSnapshotDTO>.Continuation!
+        entitlements = AsyncStream(bufferingPolicy: .unbounded) {
+            continuation = $0
+        }
+        entitlementContinuation = continuation
+    }
+
+    func publish(_ snapshot: ProgressionEntitlementSnapshotDTO) {
+        entitlementContinuation.yield(snapshot)
+    }
+
+    func applyEvent(
+        _ envelope: DomainEventEnvelope,
+        metadata _: RuntimeOperationMetadata
+    ) async throws -> ProgressionEventApplyResult {
+        .ignoredIneligible
+    }
+
+    func stateStream(metadata _: RuntimeOperationMetadata) -> AsyncStream<ProgressionSnapshotDTO> {
+        AsyncStream { $0.finish() }
+    }
+
+    func entitlementStream(
+        metadata _: RuntimeOperationMetadata
+    ) -> AsyncStream<ProgressionEntitlementSnapshotDTO> {
+        entitlements
+    }
+
+    func acknowledgeReveal(
+        _ command: AcknowledgeProgressionRevealCommand,
+        metadata _: RuntimeOperationMetadata
+    ) async throws {}
+
+    func selectTitle(
+        _ command: SelectProgressionTitleCommand,
+        metadata _: RuntimeOperationMetadata
+    ) async throws {}
+
+    func diagnosticsSummary(
+        metadata _: RuntimeOperationMetadata
+    ) async throws -> ProgressionDiagnosticsSummaryDTO {
+        try ProgressionDiagnosticsSummaryDTO(
+            capturedAt: Date(timeIntervalSince1970: 0),
+            availability: .available,
+            storeHealth: .loaded,
+            catalogID: ProgressionCatalogID(rawValue: "runescribe.progression.catalog"),
+            catalogVersion: ProgressionCatalogVersion(rawValue: 1),
+            stateNamespaceSchemaVersion: 1,
+            logicalRecordSchemaVersion: 1,
+            pendingOutboxCount: 0
+        )
+    }
+
+    func rebuild(
+        _ request: ProgressionRecoveryRequest,
+        metadata _: RuntimeOperationMetadata
+    ) async throws
+        -> ProgressionRecoveryResult
+    {
+        try ProgressionRecoveryResult(
+            rebuiltAt: Date(timeIntervalSince1970: 0),
+            revision: 1
+        )
+    }
+}
+
 private actor ClipboardRuntimeProbe: ClipboardReading, ClipboardWriting {
     private var storedString: String?
     private var counter: Int
@@ -1146,6 +1611,7 @@ private struct ProbeModule: RuneScribeModule {
 private func descriptor(
     id: ModuleIdentifier,
     kind: ModuleKind,
+    criticality: ModuleCriticality = .required,
     entryPoint: String,
     role: ModuleRole,
     capabilities: Set<CapabilityIdentifier>,
@@ -1164,6 +1630,7 @@ private func descriptor(
         moduleID: id,
         moduleVersion: moduleVersion,
         kind: kind,
+        criticality: criticality,
         entryPoint: entryPoint,
         role: role,
         requestedCapabilities: capabilities,
@@ -1175,13 +1642,17 @@ private func descriptor(
     )
 }
 
-private func manifest(for descriptor: ModuleDescriptor) -> ModuleManifest {
+private func manifest(
+    for descriptor: ModuleDescriptor,
+    entitlementRequirement: EntitlementRequirement? = nil
+) -> ModuleManifest {
     ModuleManifest(
         runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)),
         moduleID: descriptor.moduleID,
         displayName: descriptor.entryPoint,
         moduleVersion: descriptor.moduleVersion,
         moduleType: descriptor.kind,
+        criticality: descriptor.criticality,
         supportedPlatforms: [.macOS],
         minimumOS: MinimumOSVersions(macOS: "15.0"),
         capabilitiesRequested: descriptor.requestedCapabilities.sorted(),
@@ -1190,7 +1661,10 @@ private func manifest(for descriptor: ModuleDescriptor) -> ModuleManifest {
             requiredServices: descriptor.requiredServices.sorted(),
             requiredModuleRoles: descriptor.requiredModuleRoles.sorted()
         ),
-        defaultRole: descriptor.role
+        defaultRole: descriptor.role,
+        consumedEndpoints: descriptor.consumedEndpoints.sorted(),
+        publishedEndpoints: descriptor.publishedEndpoints.sorted(),
+        entitlementRequirement: entitlementRequirement
     )
 }
 

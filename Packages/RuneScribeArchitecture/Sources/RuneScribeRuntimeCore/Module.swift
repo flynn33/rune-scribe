@@ -5,6 +5,7 @@ public struct ModuleDescriptor: Hashable, Sendable {
     public let moduleID: ModuleIdentifier
     public let moduleVersion: SemanticVersion
     public let kind: ModuleKind
+    public let criticality: ModuleCriticality
     public let entryPoint: String
     public let role: ModuleRole
     public let requestedCapabilities: Set<CapabilityIdentifier>
@@ -19,6 +20,7 @@ public struct ModuleDescriptor: Hashable, Sendable {
         moduleID: ModuleIdentifier,
         moduleVersion: SemanticVersion,
         kind: ModuleKind,
+        criticality: ModuleCriticality = .required,
         entryPoint: String,
         role: ModuleRole,
         requestedCapabilities: Set<CapabilityIdentifier>,
@@ -32,6 +34,7 @@ public struct ModuleDescriptor: Hashable, Sendable {
         self.moduleID = moduleID
         self.moduleVersion = moduleVersion
         self.kind = kind
+        self.criticality = criticality
         self.entryPoint = entryPoint
         self.role = role
         self.requestedCapabilities = requestedCapabilities

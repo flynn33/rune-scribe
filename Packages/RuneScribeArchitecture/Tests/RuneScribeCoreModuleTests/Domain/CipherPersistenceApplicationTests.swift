@@ -1,6 +1,6 @@
 import CryptoKit
 import Foundation
-import RuneScribeContracts
+@_spi(RuntimeOperationAuthority) import RuneScribeContracts
 @testable import RuneScribeCoreModule
 @testable import RuneScribeRuntimeCore
 import XCTest
@@ -547,6 +547,418 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         XCTAssertEqual(failed.lastFailure?.code, .corruptedContent)
     }
 
+    func testProgressionMigrationPersistsOnceAndReturnsPrivacySafeSnapshot() async throws {
+        let cipherID = try XCTUnwrap(Self.legacyCipherID)
+        let contactID = try XCTUnwrap(Self.legacyContactID)
+        let store = InMemorySecureValueStore()
+        try await Self.seedLegacyLibrary(in: store)
+        let repository = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_750)),
+            uuid: FixedUUIDProvider(UUID())
+        )
+        let relationship = CoreProgressionRelationshipIdentity(
+            cipherID: cipherID,
+            contactID: contactID
+        )
+        let seeds = CoreProgressionMigrationSeedSet(
+            cipherSeeds: [cipherID: Data(repeating: 0x11, count: 32)],
+            relationshipSeeds: [relationship: Data(repeating: 0x22, count: 32)]
+        )
+
+        let utilitySnapshot = try await repository.snapshot()
+        await XCTAssertThrowsErrorAsync {
+            _ = try await repository.migrateProgressionEvidence(using: .init(
+                cipherSeeds: [:],
+                relationshipSeeds: [:]
+            ))
+        }
+        let utilityAfterFailedMigration = try await repository.snapshot()
+        XCTAssertEqual(utilityAfterFailedMigration, utilitySnapshot)
+
+        let firstMigration = try await repository.migrateProgressionEvidence(
+            using: seeds
+        )
+        let repeatedMigration = try await repository.migrateProgressionEvidence(
+            using: seeds
+        )
+        XCTAssertTrue(firstMigration.value)
+        XCTAssertFalse(repeatedMigration.value)
+        let token = try XCTUnwrap(CipherToken(rawValue: String(repeating: "a", count: 64)))
+        let migration = try await repository.progressionMigrationSnapshot(
+            cipherTokensByID: [cipherID: token]
+        )
+        XCTAssertEqual(
+            migration.ciphers,
+            [CoreProgressionMigrationCipher(cipherToken: token, origin: .generated)]
+        )
+
+        let reloaded = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_751)),
+            uuid: FixedUUIDProvider(UUID())
+        )
+        let library = try await reloaded.snapshot()
+        XCTAssertEqual(library.version, CipherLibrary.currentVersion)
+        let evidence = try XCTUnwrap(library.progressionLedger)
+        XCTAssertEqual(evidence.cipherSeeds.first?.seed, Data(repeating: 0x11, count: 32))
+        let relation = try XCTUnwrap(evidence.relationships.first)
+        XCTAssertEqual(relation.keyDeliveryState, .migratedUnverified)
+        XCTAssertFalse(relation.firstDeliveryEventCommitted)
+    }
+
+    func testUnlinkRelinkReusesPairSeedWithoutRepeatingFirstDelivery() async throws {
+        let cipherID = try XCTUnwrap(Self.legacyCipherID)
+        let firstContactID = try XCTUnwrap(Self.legacyContactID)
+        let secondContactID = UUID(
+            uuidString: "BBBBBBBB-CCCC-DDDD-EEEE-000000000001"
+        )!
+        let store = InMemorySecureValueStore()
+        try await Self.seedLegacyLibrary(in: store)
+        let repository = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_750)),
+            uuid: FixedUUIDProvider(UUID())
+        )
+        let firstIdentity = CoreProgressionRelationshipIdentity(
+            cipherID: cipherID,
+            contactID: firstContactID
+        )
+        _ = try await repository.migrateProgressionEvidence(using: .init(
+            cipherSeeds: [cipherID: Data(repeating: 1, count: 32)],
+            relationshipSeeds: [firstIdentity: Data(repeating: 2, count: 32)]
+        ))
+
+        let first = try await repository.recordRelationshipProgressionActivity(
+            cipherID: cipherID,
+            contactID: firstContactID,
+            completesKeyDelivery: true,
+            commitsFirstDeliveryEvent: true,
+            activity: .init(eligibleOutbound: true),
+            pendingBatches: [try Self.firstDeliveryPending(
+                context: Self.progressionContext(byte: 30),
+                byte: 30
+            )]
+        )
+        XCTAssertTrue(first.value.keyDeliveryTransitioned)
+        XCTAssertTrue(first.value.firstDeliveryTransitioned)
+        _ = try await repository.unlinkContacts([firstContactID])
+        _ = try await repository.assignContact(
+            cipherID: cipherID,
+            contactID: firstContactID,
+            relationshipSeed: nil,
+            pendingBatches: []
+        )
+        let relinked = try await repository.snapshot()
+        XCTAssertEqual(relinked.ciphers.first?.keyDeliveryState, .pending)
+        let samePair = try await repository.relationshipProgressionEvidence(
+            cipherID: cipherID,
+            contactID: firstContactID
+        )
+        XCTAssertEqual(samePair?.seed, Data(repeating: 2, count: 32))
+        let repeated = try await repository.recordRelationshipProgressionActivity(
+            cipherID: cipherID,
+            contactID: firstContactID,
+            completesKeyDelivery: true,
+            commitsFirstDeliveryEvent: false,
+            activity: .init(eligibleOutbound: true),
+            pendingBatches: []
+        )
+        XCTAssertTrue(repeated.value.keyDeliveryTransitioned)
+        XCTAssertFalse(repeated.value.firstDeliveryTransitioned)
+
+        _ = try await repository.unlinkContacts([firstContactID])
+        _ = try await repository.assignContact(
+            cipherID: cipherID,
+            contactID: secondContactID,
+            relationshipSeed: Data(repeating: 3, count: 32),
+            pendingBatches: []
+        )
+        let different = try await repository.recordRelationshipProgressionActivity(
+            cipherID: cipherID,
+            contactID: secondContactID,
+            completesKeyDelivery: true,
+            commitsFirstDeliveryEvent: true,
+            activity: .init(eligibleOutbound: true),
+            pendingBatches: [try Self.firstDeliveryPending(
+                context: Self.progressionContext(byte: 31),
+                byte: 31
+            )]
+        )
+        XCTAssertTrue(different.value.keyDeliveryTransitioned)
+        XCTAssertTrue(different.value.firstDeliveryTransitioned)
+        let differentPair = try await repository.relationshipProgressionEvidence(
+            cipherID: cipherID,
+            contactID: secondContactID
+        )
+        XCTAssertEqual(differentPair?.seed, Data(repeating: 3, count: 32))
+    }
+
+    func testAmbiguousAfterCommitProgressionWriteUsesAuthenticatedReadBack() async throws {
+        let cipherID = try XCTUnwrap(Self.legacyCipherID)
+        let contactID = try XCTUnwrap(Self.legacyContactID)
+        let store = InMemorySecureValueStore()
+        try await Self.seedLegacyLibrary(in: store)
+        let repository = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_750)),
+            uuid: FixedUUIDProvider(UUID())
+        )
+        _ = try await repository.snapshot()
+        await store.failNextWritesAfterCommit(
+            to: RuneScribeKeychain.cipherLibraryAccount
+        )
+
+        let mutation = try await repository.migrateProgressionEvidence(using: .init(
+            cipherSeeds: [cipherID: Data(repeating: 7, count: 32)],
+            relationshipSeeds: [
+                .init(cipherID: cipherID, contactID: contactID):
+                    Data(repeating: 8, count: 32),
+            ]
+        ))
+        XCTAssertTrue(mutation.value)
+
+        let reloaded = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_751)),
+            uuid: FixedUUIDProvider(UUID())
+        )
+        let reloadedLibrary = try await reloaded.snapshot()
+        XCTAssertEqual(reloadedLibrary, mutation.library)
+    }
+
+    func testProgressionAwareCreateCommitsDomainAndFactAtomicallyAndRejectsCollision() async throws {
+        let cipherID = try XCTUnwrap(Self.legacyCipherID)
+        let contactID = try XCTUnwrap(Self.legacyContactID)
+        let newCipherID = UUID(
+            uuidString: "CCCCCCCC-DDDD-EEEE-FFFF-000000000001"
+        )!
+        let store = InMemorySecureValueStore()
+        try await Self.seedLegacyLibrary(in: store)
+        let repository = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_750)),
+            uuid: FixedUUIDProvider(newCipherID)
+        )
+        _ = try await repository.migrateProgressionEvidence(using: .init(
+            cipherSeeds: [cipherID: Data(repeating: 1, count: 32)],
+            relationshipSeeds: [
+                .init(cipherID: cipherID, contactID: contactID):
+                    Data(repeating: 2, count: 32),
+            ]
+        ))
+        let context = try Self.progressionContext(byte: 1)
+        let pending = try Self.progressionPending(context: context, byte: 1)
+        await store.failWrites(to: RuneScribeKeychain.cipherLibraryAccount)
+
+        do {
+            _ = try await repository.createCipher(
+                label: "Atomic",
+                progressionSeed: Data(repeating: 3, count: 32),
+                pendingBatches: [pending]
+            )
+            XCTFail("Expected the before-write fault")
+        } catch let error as CipherRepositoryError {
+            XCTAssertEqual(error, .secureStorageUnavailable)
+        }
+        let unchanged = try await repository.snapshot()
+        XCTAssertNil(unchanged.ciphers.first(where: { $0.id == newCipherID }))
+        XCTAssertTrue(try XCTUnwrap(unchanged.progressionLedger).pendingBatches.isEmpty)
+
+        await store.allowWrites(to: RuneScribeKeychain.cipherLibraryAccount)
+        await store.failNextWritesAfterCommit(
+            to: RuneScribeKeychain.cipherLibraryAccount
+        )
+        let committed = try await repository.createCipher(
+            label: "Atomic",
+            progressionSeed: Data(repeating: 3, count: 32),
+            pendingBatches: [pending]
+        )
+        XCTAssertEqual(committed.value.id, newCipherID)
+        XCTAssertEqual(committed.library.progressionLedger?.pendingBatches, [pending])
+        XCTAssertEqual(
+            committed.library.progressionLedger?.cipherSeeds.first(where: {
+                $0.cipherID == newCipherID
+            })?.seed,
+            Data(repeating: 3, count: 32)
+        )
+
+        let conflicting = try CorePendingProgressionBatch(
+            context: context,
+            commandDigest: CoreProgressionDigest.canonical("conflicting"),
+            batch: pending.batch
+        )
+        await XCTAssertThrowsErrorAsync {
+            _ = try await repository.appendPendingProgressionBatches([conflicting])
+        }
+        let retainedPending = try await repository.pendingProgressionBatches()
+        XCTAssertEqual(retainedPending, [pending])
+    }
+
+    func testReceiptClearAndTerminalEvidenceSurviveRelaunchUntilExplicitRetirement() async throws {
+        let cipherID = try XCTUnwrap(Self.legacyCipherID)
+        let contactID = try XCTUnwrap(Self.legacyContactID)
+        let store = InMemorySecureValueStore()
+        try await Self.seedLegacyLibrary(in: store)
+        let repository = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_750)),
+            uuid: FixedUUIDProvider(UUID())
+        )
+        _ = try await repository.migrateProgressionEvidence(using: .init(
+            cipherSeeds: [cipherID: Data(repeating: 1, count: 32)],
+            relationshipSeeds: [
+                .init(cipherID: cipherID, contactID: contactID):
+                    Data(repeating: 2, count: 32),
+            ]
+        ))
+        let context = try Self.progressionContext(byte: 2)
+        let pending = try Self.progressionPending(context: context, byte: 2)
+        _ = try await repository.appendPendingProgressionBatches([pending])
+        let receipt = try Self.progressionReceipt(
+            context: context,
+            batch: pending.batch,
+            byte: 2
+        )
+        _ = try await repository.recordProgressionBatchReceipt(
+            context: context,
+            receipt: receipt
+        )
+
+        let afterReceipt = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_751)),
+            uuid: FixedUUIDProvider(UUID())
+        )
+        let remainingPending = try await afterReceipt.pendingProgressionBatches()
+        XCTAssertTrue(remainingPending.isEmpty)
+        let acknowledged = try await afterReceipt.acknowledgedProgressionBatches()
+        XCTAssertEqual(acknowledged.first?.batch, pending.batch)
+        _ = try await afterReceipt.clearAcknowledgedProgressionBatch(
+            context: context,
+            receipt: receipt
+        )
+
+        let handle = EncodedMessageHandle(rawValue: UUID(
+            uuidString: "DDDDDDDD-EEEE-FFFF-0000-000000000001"
+        )!)
+        let encodedRecord = try CoreEncodedMessageProgressionRecord(
+            handle: handle,
+            cipherID: cipherID,
+            originatingContext: context,
+            encodedMessageDigest: CoreProgressionDigest.canonical("encoded"),
+            messageToken: MessageToken(rawValue: String(repeating: "b", count: 64))!,
+            codexIDs: [CodexID(rawValue: "codex.norse")!],
+            artifactIDs: []
+        )
+        _ = try await afterReceipt.commitEncodedMessageProgressionEvidence(
+            encodedRecord,
+            pendingBatches: []
+        )
+        let artifactID = ShareArtifactID(rawValue: UUID(
+            uuidString: "EEEEEEEE-FFFF-0000-0000-000000000001"
+        )!)
+        let terminal = try await afterReceipt.commitShareTerminalProgression(
+            artifactID: artifactID,
+            context: context,
+            commandDigest: CoreProgressionDigest.canonical("terminal-command"),
+            resultDigest: CoreProgressionDigest.canonical("terminal-result"),
+            encodedMessageHandle: handle,
+            cipherID: nil,
+            contactID: nil,
+            completesKeyDelivery: false,
+            commitsFirstDeliveryEvent: false,
+            activity: .init(),
+            pendingBatches: []
+        )
+        XCTAssertTrue(terminal.value.inserted)
+        let retiredEncoded = try await afterReceipt.encodedMessageProgressionEvidence(
+            handle: handle
+        )
+        XCTAssertNil(retiredEncoded)
+
+        let terminalReload = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_752)),
+            uuid: FixedUUIDProvider(UUID())
+        )
+        let reloadedTerminal = try await terminalReload
+            .shareTerminalProgressionEvidence(artifactID: artifactID)
+        XCTAssertTrue(try XCTUnwrap(reloadedTerminal).cleanupPending)
+        _ = try await terminalReload.markShareTerminalCleanupComplete(
+            artifactID: artifactID
+        )
+        let retirement = try await terminalReload.retireShareTerminalEvidence(
+            artifactIDs: [artifactID]
+        )
+        XCTAssertEqual(retirement.value, 1)
+        let removedTerminal = try await terminalReload.shareTerminalProgressionEvidence(
+            artifactID: artifactID
+        )
+        XCTAssertNil(removedTerminal)
+    }
+
+    func testProgressionContactReconciliationCommitsRepairSeedsAndFactsOnce() async throws {
+        let cipherID = try XCTUnwrap(Self.legacyCipherID)
+        let oldContactID = try XCTUnwrap(Self.legacyContactID)
+        let newContactID = UUID(
+            uuidString: "ABABABAB-CDCD-EFEF-0101-000000000001"
+        )!
+        let generatedID = UUID(
+            uuidString: "ACACACAC-DEDE-F0F0-0202-000000000001"
+        )!
+        let store = InMemorySecureValueStore()
+        try await Self.seedLegacyLibrary(in: store)
+        let repository = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_750)),
+            uuid: FixedUUIDProvider(generatedID)
+        )
+        _ = try await repository.migrateProgressionEvidence(using: .init(
+            cipherSeeds: [cipherID: Data(repeating: 1, count: 32)],
+            relationshipSeeds: [
+                .init(cipherID: cipherID, contactID: oldContactID):
+                    Data(repeating: 2, count: 32),
+            ]
+        ))
+        let pending = try Self.progressionPending(
+            context: Self.progressionContext(byte: 3),
+            byte: 3
+        )
+        await store.clearOperations()
+
+        let mutation = try await repository.reconcileContactAssociations(
+            generatedSeeds: [CoreGeneratedContactProgressionSeed(
+                contact: ImportedContactCipherSeed(
+                    contactID: newContactID,
+                    displayName: "New Contact"
+                ),
+                cipherSeed: Data(repeating: 3, count: 32),
+                relationshipSeed: Data(repeating: 4, count: 32)
+            )],
+            validContactIDs: [newContactID],
+            pendingBatches: [pending]
+        )
+        XCTAssertEqual(mutation.value.changes, 2)
+        XCTAssertEqual(mutation.value.addedCiphers.map(\.id), [generatedID])
+        XCTAssertEqual(mutation.library.activeID, cipherID)
+        XCTAssertNil(mutation.library.ciphers.first(where: {
+            $0.id == cipherID
+        })?.contactID)
+        XCTAssertEqual(mutation.library.ciphers.first(where: {
+            $0.id == generatedID
+        })?.contactID, newContactID)
+        XCTAssertEqual(mutation.library.progressionLedger?.pendingBatches, [pending])
+        XCTAssertNotNil(mutation.library.progressionLedger?.relationships.first(where: {
+            $0.identity == .init(cipherID: cipherID, contactID: oldContactID)
+        }))
+        XCTAssertEqual(mutation.library.progressionLedger?.relationships.first(where: {
+            $0.identity == .init(cipherID: generatedID, contactID: newContactID)
+        })?.seed, Data(repeating: 4, count: 32))
+        let writes = await store.recordedOperations().filter(\.isWrite)
+        XCTAssertEqual(writes.count, 1)
+    }
+
     // MARK: - Frozen migration fixture
 
     private static let legacyKeyBase64 =
@@ -606,6 +1018,111 @@ final class CipherPersistenceApplicationTests: XCTestCase {
             fontRef: .bundled
         )
     }
+
+    private static func progressionContext(
+        byte: UInt8
+    ) throws -> RuntimePersistableOperationContext {
+        try RuntimePersistableOperationContext(
+            operationID: RuntimeOperationID(rawValue: "persistence-\(byte)"),
+            correlationID: RuntimeCorrelationID(
+                rawValue: "F0000000-0000-0000-0000-0000000000\(String(format: "%02x", byte))"
+            ),
+            occurredAtUTC: Date(timeIntervalSince1970: 1_700_000_000.654_321),
+            operationIdentifier: RuntimeOperationIdentifier(rawValue: "core.persistence"),
+            runtimeGeneration: 1,
+            authorityNonce: UUID(
+                uuidString: "F1000000-0000-0000-0000-0000000000\(String(format: "%02x", byte))"
+            )!,
+            authorityTag: Data(repeating: byte, count: 32),
+            authorityScope: .persistent
+        )
+    }
+
+    private static func progressionPending(
+        context: RuntimePersistableOperationContext,
+        byte: UInt8
+    ) throws -> CorePendingProgressionBatch {
+        let token = CipherToken(
+            rawValue: String(format: "%064x", Int(byte) + 100)
+        )!
+        let fact = try CoreProgressionFactFactory.cipherCreated(cipherToken: token)
+        let batch = try ProgressionEventFactBatch(
+            batchIndex: 0,
+            totalBatchCount: 1,
+            totalFactCount: 1,
+            facts: [try SlottedProgressionEventFact(
+                slot: ProgressionFactSlot(rawValue: 0),
+                fact: fact
+            )]
+        )
+        return try CorePendingProgressionBatch(
+            context: context,
+            commandDigest: CoreProgressionDigest.canonical("persistence-\(byte)"),
+            batch: batch
+        )
+    }
+
+    private static func firstDeliveryPending(
+        context: RuntimePersistableOperationContext,
+        byte: UInt8
+    ) throws -> CorePendingProgressionBatch {
+        let cipherToken = CipherToken(
+            rawValue: String(format: "%064x", Int(byte) + 200)
+        )!
+        let relationshipToken = RelationshipToken(
+            rawValue: String(format: "%064x", Int(byte) + 300)
+        )!
+        let fact = try CoreProgressionFactFactory.firstDeliveryCompleted(
+            cipherToken: cipherToken,
+            relationshipToken: relationshipToken
+        )
+        let batch = try ProgressionEventFactBatch(
+            batchIndex: 0,
+            totalBatchCount: 1,
+            totalFactCount: 1,
+            facts: [try SlottedProgressionEventFact(
+                slot: ProgressionFactSlot(rawValue: 0),
+                fact: fact
+            )]
+        )
+        return try CorePendingProgressionBatch(
+            context: context,
+            commandDigest: CoreProgressionDigest.canonical("first-delivery-\(byte)"),
+            batch: batch
+        )
+    }
+
+    private static func progressionReceipt(
+        context: RuntimePersistableOperationContext,
+        batch: ProgressionEventFactBatch,
+        byte: UInt8
+    ) throws -> ProgressionOutboxBatchReceipt {
+        try ProgressionOutboxBatchReceipt(
+            contextID: context.runtimeOperationID,
+            batchIndex: batch.batchIndex,
+            eventIDsBySlot: [
+                ProgressionFactSlot(rawValue: 0): EventID(rawValue: UUID(
+                    uuidString: "F2000000-0000-0000-0000-0000000000\(String(format: "%02x", byte))"
+                )!),
+            ],
+            correlationID: CorrelationID(rawValue: UUID(
+                uuidString: context.runtimeCorrelationID.rawValue
+            )!),
+            durableAt: Date(timeIntervalSince1970: 1_700_000_001),
+            outboxRevision: 1
+        )
+    }
+}
+
+private func XCTAssertThrowsErrorAsync(
+    _ expression: () async throws -> Void,
+    file: StaticString = #filePath,
+    line: UInt = #line
+) async {
+    do {
+        try await expression()
+        XCTFail("Expected an error", file: file, line: line)
+    } catch {}
 }
 
 private struct FixedClock: ClockProviding {
@@ -665,6 +1182,7 @@ private actor InMemorySecureValueStore: SecureValueStore {
     private var failingReadAccounts: Set<String> = []
     private var remainingReadFailures: [String: Int] = [:]
     private var failingWriteAccounts: Set<String> = []
+    private var remainingAfterCommitWriteFailures: [String: Int] = [:]
 
     func seed(_ data: Data, service: String, account: String) {
         values[Address(service: service, account: account)] = data
@@ -698,6 +1216,14 @@ private actor InMemorySecureValueStore: SecureValueStore {
         failingWriteAccounts.insert(account)
     }
 
+    func allowWrites(to account: String) {
+        failingWriteAccounts.remove(account)
+    }
+
+    func failNextWritesAfterCommit(to account: String, count: Int = 1) {
+        remainingAfterCommitWriteFailures[account] = count
+    }
+
     func data(service: String, account: String) async throws -> Data? {
         let address = Address(service: service, account: account)
         operations.append(.read(address))
@@ -720,6 +1246,10 @@ private actor InMemorySecureValueStore: SecureValueStore {
         }
         await Task.yield()
         values[address] = data
+        if let remaining = remainingAfterCommitWriteFailures[account], remaining > 0 {
+            remainingAfterCommitWriteFailures[account] = remaining - 1
+            throw StoreError.unavailable
+        }
     }
 
     func delete(service: String, account: String) async throws {

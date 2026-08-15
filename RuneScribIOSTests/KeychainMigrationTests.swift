@@ -1,6 +1,6 @@
 import Foundation
 import RuneScribeContracts
-import RuneScribeCoreModule
+@testable import RuneScribeCoreModule
 import RuneScribePlatform
 @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
@@ -105,6 +105,18 @@ final class KeychainMigrationTests: XCTestCase {
             removeShareArtifact: { try await shareArtifacts.remove(artifactID: $0) },
             removeAllShareArtifacts: { try await shareArtifacts.removeAll() }
         )
+        let expectedContactID = try XCTUnwrap(
+            UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
+        )
+        let contactRepository = EncryptedContactRepository(runtimeIO: runtimeIO)
+        _ = try await contactRepository.replace(ContactBook(contacts: [
+            Contact(
+                id: expectedContactID,
+                displayName: "Legacy Contact",
+                source: .manual,
+                createdAt: Date(timeIntervalSince1970: 1_704_164_645)
+            ),
+        ]))
         let service = RuneScribeCoreApplicationService(runtimeIO: runtimeIO)
         await service.startInboundProcessing()
         do {
@@ -119,10 +131,7 @@ final class KeychainMigrationTests: XCTestCase {
             XCTAssertEqual(snapshot.cipherLibrary.activeCipherID?.rawValue, expectedCipherID)
             XCTAssertEqual(summary.id.rawValue, expectedCipherID)
             XCTAssertEqual(summary.name, "Legacy Cipher")
-            XCTAssertEqual(
-                summary.assignedContactID?.rawValue,
-                UUID(uuidString: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
-            )
+            XCTAssertEqual(summary.assignedContactID?.rawValue, expectedContactID)
             XCTAssertTrue(summary.hasBeenDelivered)
 
             let encoded = try await service.encode(

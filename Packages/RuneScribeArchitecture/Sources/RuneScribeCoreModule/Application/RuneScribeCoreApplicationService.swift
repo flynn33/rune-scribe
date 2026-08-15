@@ -1,12 +1,26 @@
 import CryptoKit
 import Foundation
-import RuneScribeContracts
+@_spi(RuntimeOperationAuthority) import RuneScribeContracts
 import RuneScribeRuntimeCore
+
+protocol CoreExistingUserMigrationSubmitting: Sendable {
+    func submit(ciphers: [ExistingUserMigrationCipherDTO]) async throws
+}
+
+private struct RuntimeExistingUserMigrationSubmitter:
+    CoreExistingUserMigrationSubmitting
+{
+    let client: RuntimeExistingUserMigrationClient
+
+    func submit(ciphers: [ExistingUserMigrationCipherDTO]) async throws {
+        _ = try await client.submit(ciphers: ciphers)
+    }
+}
 
 /// The Core-owned, key-free application facade. Key-bearing ciphers and
 /// persistence entities remain behind the private repository actor.
-public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
-    RuneScribeInboundInputService
+public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicationService,
+    RuneScribeOperationAwareInboundInputService
 {
     private enum InitializationState {
         case notStarted
@@ -17,6 +31,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
     private struct QueuedInbound: Sendable {
         let input: RuneScribeInboundInput
+        let progressionContext: RuntimePersistableOperationContext?
         let dedupeKey: Data?
         let sequence: UInt64
     }
@@ -31,8 +46,19 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         case failed
     }
 
+    private struct ShareTerminalProgressionFingerprint: Codable, Sendable {
+        let artifactID: ShareArtifactID
+        let report: SharePresentationReportDTO
+    }
+
+    static let encodedMessageRetryWindow = 64
+
     private let repository: CipherRepository
     private let runtimeIO: RuntimeIOClient
+    private let progression: CoreProgressionCoordinator
+    private let hasProgressionOutbox: Bool
+    private let progressionOutboxClient: RuntimeProgressionOutboxClient?
+    private let existingUserMigration: (any CoreExistingUserMigrationSubmitting)?
     private let messageService = MessageService()
     private let appLock: AppLockService
     private let artifactRegistry: ShareArtifactRegistry
@@ -42,6 +68,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     private var contactManager: ContactManager? = nil
 
     private var initializationState: InitializationState = .notStarted
+    private var didSweepRelaunchedEncodedHandles = false
     private var lastKnownLibrary: CipherLibrary = .empty
     private var lastKnownContactBook: ContactBook = .empty
     private var contactAuthorization: ContactAuthorizationDTO = .notDetermined
@@ -71,6 +98,11 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     private var nextInboundSequence: UInt64 = 0
     private var acceptsSharePreparation = false
     private var shareCleanupNeedsRetry = false
+    private var shareJournalAvailable = false
+    private var pendingShareTerminalEvidence: [
+        ShareArtifactID: ShareArtifactCompletionEvidenceDTO
+    ] = [:]
+    private var isRetryingShareTerminalEvidence = false
     private var shareAuthorizationGeneration: UInt64 = 0
     private var seenInboundIDs: Set<InboundInputID> = []
     private var seenInboundIDOrder: [InboundInputID] = []
@@ -84,7 +116,11 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     private var useCaseInProgress = false
     private var useCaseWaiters: [CheckedContinuation<Void, Never>] = []
 
-    public init(runtimeIO: RuntimeIOClient) {
+    public init(
+        runtimeIO: RuntimeIOClient,
+        progressionOutbox: RuntimeProgressionOutboxClient? = nil,
+        existingUserMigration: RuntimeExistingUserMigrationClient? = nil
+    ) {
         let repository = CipherRepository(runtimeIO: runtimeIO)
         let fontCatalog = FontCatalog(runtimeIO: runtimeIO)
         let contactManager = ContactManager(
@@ -93,6 +129,16 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         )
         self.repository = repository
         self.runtimeIO = runtimeIO
+        progression = CoreProgressionCoordinator(
+            repository: repository,
+            runtimeIO: runtimeIO,
+            outbox: progressionOutbox
+        )
+        hasProgressionOutbox = progressionOutbox != nil
+        progressionOutboxClient = progressionOutbox
+        self.existingUserMigration = existingUserMigration.map {
+            RuntimeExistingUserMigrationSubmitter(client: $0)
+        }
         appLock = AppLockService(runtimeIO: runtimeIO)
         artifactRegistry = ShareArtifactRegistry(runtimeIO: runtimeIO)
         self.fontCatalog = fontCatalog
@@ -104,10 +150,50 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     init(
         runtimeIO: RuntimeIOClient,
         fontCatalog: FontCatalog?,
-        contactManager: ContactManager?
+        contactManager: ContactManager?,
+        progressionOutbox: RuntimeProgressionOutboxClient? = nil,
+        existingUserMigration: RuntimeExistingUserMigrationClient? = nil
     ) {
-        repository = CipherRepository(runtimeIO: runtimeIO)
+        let repository = CipherRepository(runtimeIO: runtimeIO)
+        self.repository = repository
         self.runtimeIO = runtimeIO
+        progression = CoreProgressionCoordinator(
+            repository: repository,
+            runtimeIO: runtimeIO,
+            outbox: progressionOutbox
+        )
+        hasProgressionOutbox = progressionOutbox != nil
+        progressionOutboxClient = progressionOutbox
+        self.existingUserMigration = existingUserMigration.map {
+            RuntimeExistingUserMigrationSubmitter(client: $0)
+        }
+        appLock = AppLockService(runtimeIO: runtimeIO)
+        artifactRegistry = ShareArtifactRegistry(runtimeIO: runtimeIO)
+        self.fontCatalog = fontCatalog
+        self.contactManager = contactManager
+        fontIntegration = fontCatalog
+        contactIntegration = contactManager
+    }
+
+    init(
+        runtimeIO: RuntimeIOClient,
+        fontCatalog: FontCatalog?,
+        contactManager: ContactManager?,
+        progressionTransport: (any CoreProgressionOutboxTransport)?,
+        progressionTokens: any CoreProgressionTokenDeriving,
+        existingUserMigration: (any CoreExistingUserMigrationSubmitting)? = nil
+    ) {
+        let repository = CipherRepository(runtimeIO: runtimeIO)
+        self.repository = repository
+        self.runtimeIO = runtimeIO
+        progression = CoreProgressionCoordinator(
+            repository: repository,
+            tokens: progressionTokens,
+            outbox: progressionTransport
+        )
+        hasProgressionOutbox = progressionTransport != nil
+        progressionOutboxClient = nil
+        self.existingUserMigration = existingUserMigration
         appLock = AppLockService(runtimeIO: runtimeIO)
         artifactRegistry = ShareArtifactRegistry(runtimeIO: runtimeIO)
         self.fontCatalog = fontCatalog
@@ -127,11 +213,28 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     // MARK: - Messages
 
     public func encode(_ command: EncodeMessageCommand) async throws -> EncodedMessageResult {
+        try await encode(command, progressionContext: nil)
+    }
+
+    public func encode(
+        _ command: EncodeMessageCommand,
+        context: RuntimePersistableOperationContext
+    ) async throws -> EncodedMessageResult {
+        try await encode(command, progressionContext: context)
+    }
+
+    private func encode(
+        _ command: EncodeMessageCommand,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws -> EncodedMessageResult {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
 
         do {
             try await requireUnlocked()
+            let progressionReady = await progressionEvidenceIsReady(
+                for: progressionContext
+            )
             let library = try await repository.snapshot()
             let cipher: Cipher?
             if let requestedID = command.cipherID?.rawValue {
@@ -146,10 +249,81 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             }
 
             let runes = try messageService.compose(command.plaintext, with: cipher)
-            await adoptSuccessfulRead(library)
+            var resultLibrary = library
+            var shareHandle: EncodedMessageHandle?
+            var instrumentationStatus: ProgressionInstrumentationStatusDTO = .unavailable
+
+            if let progressionContext, progressionReady {
+                do {
+                    await compactEncodedMessageEvidenceForNewHandle()
+                    let messageToken = try await progression.messageToken()
+                    let handle = EncodedMessageHandle(
+                        rawValue: try await runtimeIO.nextUUID()
+                    )
+                    var pending: [CorePendingProgressionBatch] = []
+                    if let cipherSeed = try await repository
+                        .cipherProgressionSeed(cipherID: cipher.id) {
+                        do {
+                            let cipherToken = try await progression.cipherToken(
+                                for: cipherSeed
+                            )
+                            pending = try progressionBatches(
+                                context: progressionContext,
+                                facts: [try CoreProgressionFactFactory.messageEncoded(
+                                    messageToken: messageToken,
+                                    cipherToken: cipherToken
+                                )]
+                            )
+                        } catch {
+                            // Preserve the random message token and logical
+                            // share handle even if only HMAC derivation fails.
+                            pending = []
+                        }
+                    }
+                    let record = try CoreEncodedMessageProgressionRecord(
+                        handle: handle,
+                        cipherID: cipher.id,
+                        originatingContext: progressionContext,
+                        encodedMessageDigest: CoreProgressionCoordinator.commandDigest(runes),
+                        messageToken: messageToken,
+                        codexIDs: [CoreProgressionFactFactory.implicitNorseCodexID],
+                        artifactIDs: []
+                    )
+                    let mutation = try await repository
+                        .commitEncodedMessageProgressionEvidence(
+                            record,
+                            pendingBatches: pending
+                        )
+                    do {
+                        try await artifactRegistry.retainEncodedMessageHandle(handle)
+                    } catch {
+                        _ = try? await repository
+                            .abandonEncodedMessageProgressionEvidence(handle: handle)
+                        throw error
+                    }
+                    resultLibrary = mutation.library
+                    shareHandle = handle
+                    instrumentationStatus = pending.isEmpty
+                        ? .degraded
+                        : await instrumentationStatusAfterDrain(
+                            evidenceWasRetained: true
+                        )
+                } catch {
+                    // Encoding is a utility operation. A progression-only
+                    // failure is surfaced in the typed result and never drops
+                    // the authenticated rune output.
+                    instrumentationStatus = .degraded
+                }
+            } else if progressionContext != nil {
+                instrumentationStatus = hasProgressionOutbox ? .degraded : .unavailable
+            }
+
+            await adoptSuccessfulRead(resultLibrary)
             return EncodedMessageResult(
                 runes: runes,
-                cipherID: CipherID(rawValue: cipher.id)
+                cipherID: CipherID(rawValue: cipher.id),
+                shareHandle: shareHandle,
+                progressionInstrumentationStatus: instrumentationStatus
             )
         } catch {
             throw await record(error)
@@ -181,13 +355,71 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     // MARK: - Cipher library
 
     public func createCipher(_ command: CreateCipherCommand) async throws -> CipherSummary {
+        try await createCipher(command, progressionContext: nil)
+    }
+
+    public func createCipher(
+        _ command: CreateCipherCommand,
+        context: RuntimePersistableOperationContext
+    ) async throws -> CipherSummary {
+        try await createCipher(command, progressionContext: context)
+    }
+
+    private func createCipher(
+        _ command: CreateCipherCommand,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws -> CipherSummary {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
 
         do {
             try await requireUnlocked()
-            let mutation = try await repository.createCipher(label: command.name)
+            let progressionReady = await progressionEvidenceIsReady(
+                for: progressionContext
+            )
+            let mutation: CipherRepositoryMutation<Cipher>
+            var retainedFacts = false
+            if progressionReady {
+                let seed = await resilientCipherProgressionSeed()
+                var pending: [CorePendingProgressionBatch] = []
+                if let progressionContext {
+                    do {
+                        let token = try await progression.cipherToken(for: seed)
+                        pending = try progressionBatches(
+                            context: progressionContext,
+                            facts: [try CoreProgressionFactFactory.cipherCreated(
+                                cipherToken: token
+                            )]
+                        )
+                    } catch {
+                        // The randomized encrypted seed remains useful for a
+                        // future snapshot even when token derivation is down.
+                        pending = []
+                    }
+                }
+                do {
+                    mutation = try await repository.createCipher(
+                        label: command.name,
+                        progressionSeed: seed,
+                        pendingBatches: pending
+                    )
+                    retainedFacts = !pending.isEmpty
+                } catch let error as CoreProgressionEvidenceError {
+                    guard error == .collectionLimitExceeded else {
+                        throw error
+                    }
+                    mutation = try await repository
+                        .createCipherWithoutProgressionEvidence(
+                        label: command.name,
+                        pendingBatches: pending
+                    )
+                    retainedFacts = !pending.isEmpty
+                }
+            } else {
+                mutation = try await repository.createCipher(label: command.name)
+            }
             await adoptMutation(mutation.library)
+            if retainedFacts { _ = await progression.drain() }
             return Self.summary(for: mutation.value, in: mutation.library)
         } catch {
             throw await record(error)
@@ -217,13 +449,64 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     }
 
     public func deleteCipher(id: CipherID) async throws {
+        try await deleteCipher(id: id, progressionContext: nil)
+    }
+
+    public func deleteCipher(
+        id: CipherID,
+        context: RuntimePersistableOperationContext
+    ) async throws {
+        try await deleteCipher(id: id, progressionContext: context)
+    }
+
+    private func deleteCipher(
+        id: CipherID,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
 
         do {
             try await requireUnlocked()
-            let mutation = try await repository.deleteCipher(id: id.rawValue)
+            let progressionReady = await progressionEvidenceIsReady(
+                for: progressionContext
+            )
+            let mutation: CipherRepositoryMutation<Bool>
+            var retainedFacts = false
+            if progressionReady {
+                let library = try await repository.snapshot()
+                let createsReplacement = library.ciphers.count == 1
+                    && library.ciphers.first?.id == id.rawValue
+                let replacementSeed = createsReplacement
+                    ? await resilientCipherProgressionSeed()
+                    : nil
+                var pending: [CorePendingProgressionBatch] = []
+                if let progressionContext, let replacementSeed {
+                    do {
+                        let token = try await progression.cipherToken(
+                            for: replacementSeed
+                        )
+                        pending = try progressionBatches(
+                            context: progressionContext,
+                            facts: [try CoreProgressionFactFactory.cipherCreated(
+                                cipherToken: token
+                            )]
+                        )
+                    } catch {
+                        pending = []
+                    }
+                }
+                mutation = try await repository.deleteCipher(
+                    id: id.rawValue,
+                    replacementProgressionSeed: replacementSeed,
+                    pendingBatches: pending
+                )
+                retainedFacts = !pending.isEmpty
+            } else {
+                mutation = try await repository.deleteCipher(id: id.rawValue)
+            }
             await adoptMutation(mutation.library)
+            if retainedFacts { _ = await progression.drain() }
         } catch {
             throw await record(error)
         }
@@ -243,15 +526,62 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     }
 
     public func assignContact(_ command: AssignContactCommand) async throws {
+        try await assignContact(command, progressionContext: nil)
+    }
+
+    public func assignContact(
+        _ command: AssignContactCommand,
+        context: RuntimePersistableOperationContext
+    ) async throws {
+        try await assignContact(command, progressionContext: context)
+    }
+
+    private func assignContact(
+        _ command: AssignContactCommand,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
 
         do {
             try await requireUnlocked()
-            let mutation = try await repository.assignContact(
-                cipherID: command.cipherID.rawValue,
-                contactID: command.contactID?.rawValue
+            let progressionReady = await progressionEvidenceIsReady(
+                for: progressionContext
             )
+            let mutation: CipherRepositoryMutation<Bool>
+            if progressionReady {
+                let relationshipSeed: Data?
+                if let contactID = command.contactID?.rawValue,
+                   try await repository.relationshipProgressionEvidence(
+                       cipherID: command.cipherID.rawValue,
+                       contactID: contactID
+                   ) == nil {
+                    relationshipSeed = await resilientRelationshipProgressionSeed()
+                } else {
+                    relationshipSeed = nil
+                }
+                do {
+                    mutation = try await repository.assignContact(
+                        cipherID: command.cipherID.rawValue,
+                        contactID: command.contactID?.rawValue,
+                        relationshipSeed: relationshipSeed,
+                        pendingBatches: []
+                    )
+                } catch let error as CoreProgressionEvidenceError {
+                    guard error == .collectionLimitExceeded else { throw error }
+                    mutation = try await repository
+                        .assignContactWithoutProgressionEvidence(
+                        cipherID: command.cipherID.rawValue,
+                        contactID: command.contactID?.rawValue,
+                        pendingBatches: []
+                    )
+                }
+            } else {
+                mutation = try await repository.assignContact(
+                    cipherID: command.cipherID.rawValue,
+                    contactID: command.contactID?.rawValue
+                )
+            }
             await adoptMutation(mutation.library)
         } catch {
             throw await record(error)
@@ -261,16 +591,34 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     // MARK: - P4B operations
 
     public func createContact(_ command: CreateContactCommand) async throws -> ContactSummary {
+        try await createContact(command, progressionContext: nil)
+    }
+
+    public func createContact(
+        _ command: CreateContactCommand,
+        context: RuntimePersistableOperationContext
+    ) async throws -> ContactSummary {
+        try await createContact(command, progressionContext: context)
+    }
+
+    private func createContact(
+        _ command: CreateContactCommand,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws -> ContactSummary {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
         var contactCommitMayHaveOccurred = false
         do {
             try await requireUnlocked()
             guard let contactManager else { throw unavailableError() }
+            _ = await progressionEvidenceIsReady(for: progressionContext)
             _ = try await repository.snapshot()
             contactCommitMayHaveOccurred = true
             let mutation = try await contactManager.create(command)
-            let library = try await reconcileContactAssociations(in: mutation.book)
+            let library = try await reconcileContactAssociations(
+                in: mutation.book,
+                progressionContext: progressionContext
+            )
             await adoptContactMutation(mutation.book, library: library)
             return Self.contactSummary(
                 mutation.value,
@@ -285,16 +633,34 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     }
 
     public func updateContact(_ command: UpdateContactCommand) async throws -> ContactSummary {
+        try await updateContact(command, progressionContext: nil)
+    }
+
+    public func updateContact(
+        _ command: UpdateContactCommand,
+        context: RuntimePersistableOperationContext
+    ) async throws -> ContactSummary {
+        try await updateContact(command, progressionContext: context)
+    }
+
+    private func updateContact(
+        _ command: UpdateContactCommand,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws -> ContactSummary {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
         var contactCommitMayHaveOccurred = false
         do {
             try await requireUnlocked()
             guard let contactManager else { throw unavailableError() }
+            _ = await progressionEvidenceIsReady(for: progressionContext)
             _ = try await repository.snapshot()
             contactCommitMayHaveOccurred = true
             let mutation = try await contactManager.update(command)
-            let library = try await reconcileContactAssociations(in: mutation.book)
+            let library = try await reconcileContactAssociations(
+                in: mutation.book,
+                progressionContext: progressionContext
+            )
             await adoptContactMutation(mutation.book, library: library)
             return Self.contactSummary(
                 mutation.value,
@@ -309,16 +675,34 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     }
 
     public func deleteContacts(ids: Set<ContactID>) async throws {
+        try await deleteContacts(ids: ids, progressionContext: nil)
+    }
+
+    public func deleteContacts(
+        ids: Set<ContactID>,
+        context: RuntimePersistableOperationContext
+    ) async throws {
+        try await deleteContacts(ids: ids, progressionContext: context)
+    }
+
+    private func deleteContacts(
+        ids: Set<ContactID>,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
         var contactCommitMayHaveOccurred = false
         do {
             try await requireUnlocked()
             guard let contactManager else { throw unavailableError() }
+            _ = await progressionEvidenceIsReady(for: progressionContext)
             _ = try await repository.snapshot()
             contactCommitMayHaveOccurred = true
             let removal = try await contactManager.delete(ids: Set(ids.map(\.rawValue)))
-            let library = try await reconcileContactAssociations(in: removal.book)
+            let library = try await reconcileContactAssociations(
+                in: removal.book,
+                progressionContext: progressionContext
+            )
             await adoptContactMutation(removal.book, library: library)
         } catch {
             if contactCommitMayHaveOccurred {
@@ -329,16 +713,32 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     }
 
     public func deleteAllImportedContacts() async throws {
+        try await deleteAllImportedContacts(progressionContext: nil)
+    }
+
+    public func deleteAllImportedContacts(
+        context: RuntimePersistableOperationContext
+    ) async throws {
+        try await deleteAllImportedContacts(progressionContext: context)
+    }
+
+    private func deleteAllImportedContacts(
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
         var contactCommitMayHaveOccurred = false
         do {
             try await requireUnlocked()
             guard let contactManager else { throw unavailableError() }
+            _ = await progressionEvidenceIsReady(for: progressionContext)
             _ = try await repository.snapshot()
             contactCommitMayHaveOccurred = true
             let removal = try await contactManager.deleteAllImported()
-            let library = try await reconcileContactAssociations(in: removal.book)
+            let library = try await reconcileContactAssociations(
+                in: removal.book,
+                progressionContext: progressionContext
+            )
             await adoptContactMutation(removal.book, library: library)
         } catch {
             if contactCommitMayHaveOccurred {
@@ -349,16 +749,34 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     }
 
     public func importContacts(_ command: ImportContactsCommand) async throws -> [ContactSummary] {
+        try await importContacts(command, progressionContext: nil)
+    }
+
+    public func importContacts(
+        _ command: ImportContactsCommand,
+        context: RuntimePersistableOperationContext
+    ) async throws -> [ContactSummary] {
+        try await importContacts(command, progressionContext: context)
+    }
+
+    private func importContacts(
+        _ command: ImportContactsCommand,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws -> [ContactSummary] {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
         var contactCommitMayHaveOccurred = false
         do {
             try await requireUnlocked()
             guard let contactManager else { throw unavailableError() }
+            _ = await progressionEvidenceIsReady(for: progressionContext)
             _ = try await repository.snapshot()
             contactCommitMayHaveOccurred = true
             let contactMutation = try await contactManager.importContacts(command)
-            let library = try await reconcileContactAssociations(in: contactMutation.book)
+            let library = try await reconcileContactAssociations(
+                in: contactMutation.book,
+                progressionContext: progressionContext
+            )
             await adoptContactMutation(contactMutation.book, library: library)
             let counts = Self.linkedCounts(in: library)
             return contactMutation.added.map {
@@ -398,6 +816,20 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     public func prepareCipherShare(
         _ command: PrepareCipherShareCommand
     ) async throws -> ShareArtifactDTO {
+        try await prepareCipherShare(command, persistsMetadata: false)
+    }
+
+    public func prepareCipherShare(
+        _ command: PrepareCipherShareCommand,
+        context _: RuntimePersistableOperationContext
+    ) async throws -> ShareArtifactDTO {
+        try await prepareCipherShare(command, persistsMetadata: true)
+    }
+
+    private func prepareCipherShare(
+        _ command: PrepareCipherShareCommand,
+        persistsMetadata: Bool
+    ) async throws -> ShareArtifactDTO {
         let requestGeneration = shareAuthorizationGeneration
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
@@ -429,14 +861,16 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                     contentType: RuneScribeWireFormat.contentType,
                     fileExtension: RuneScribeWireFormat.fileExtension,
                     requiresKeyDelivery: true,
-                    messageCipherID: nil
+                    messageCipherID: nil,
+                    persistsMetadata: persistsMetadata
                 )
             case .link, .qrCode:
                 let url = try payload.url(name: command.displayName)
                 artifact = try await artifactRegistry.createLink(
                     url: url,
                     id: artifactID,
-                    displayName: command.displayName ?? cipher.label
+                    displayName: command.displayName ?? cipher.label,
+                    persistsMetadata: persistsMetadata
                 )
             }
             try await validatePreparedArtifactStillActive(
@@ -453,6 +887,21 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     public func prepareMessageShare(
         _ command: PrepareMessageShareCommand
     ) async throws -> ShareArtifactDTO {
+        try await prepareMessageShare(command, persistsMetadata: false)
+    }
+
+    public func prepareMessageShare(
+        _ command: PrepareMessageShareCommand,
+        context _: RuntimePersistableOperationContext
+    ) async throws -> ShareArtifactDTO {
+        try await prepareMessageShare(command, persistsMetadata: true)
+    }
+
+    private func prepareMessageShare(
+        _ command: PrepareMessageShareCommand,
+        persistsMetadata: Bool
+    ) async throws -> ShareArtifactDTO {
+        await retryPendingShareTerminalEvidence()
         let requestGeneration = shareAuthorizationGeneration
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
@@ -467,6 +916,21 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 throw RuneScribeProductError.failure(
                     RuneScribeFailureDTO(code: .itemNotFound)
                 )
+            }
+
+            var retainedShareHandle: EncodedMessageHandle?
+            if let shareHandle = command.shareHandle,
+               let evidence = try await repository
+                .encodedMessageProgressionEvidence(handle: shareHandle) {
+                guard evidence.cipherID == cipher.id,
+                      evidence.encodedMessageDigest
+                        == (try CoreProgressionCoordinator.commandDigest(command.runes))
+                else {
+                    throw RuneScribeProductError.failure(
+                        RuneScribeFailureDTO(code: .invalidInput)
+                    )
+                }
+                retainedShareHandle = shareHandle
             }
 
             let includeKey = MessageSend.shouldIncludeKey(cipher)
@@ -496,12 +960,16 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                     contentType: RuneScribeWireFormat.contentType,
                     fileExtension: RuneScribeWireFormat.fileExtension,
                     requiresKeyDelivery: true,
-                    messageCipherID: cipher.id
+                    messageCipherID: cipher.id,
+                    encodedMessageHandle: retainedShareHandle,
+                    persistsMetadata: persistsMetadata
                 )
             } else {
-                artifact = await artifactRegistry.createOpaqueMessage(
+                artifact = try await artifactRegistry.createOpaqueMessage(
                     id: artifactID,
-                    cipherID: cipher.id
+                    cipherID: cipher.id,
+                    encodedMessageHandle: retainedShareHandle,
+                    persistsMetadata: persistsMetadata
                 )
             }
             try await validatePreparedArtifactStillActive(
@@ -518,11 +986,37 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     public func completeShareArtifact(
         _ command: CompleteShareArtifactCommand
     ) async throws -> ShareArtifactCompletionResultDTO {
+        if let evidence = command.evidence {
+            return try await completeShareArtifact(
+                evidence: evidence
+            )
+        }
+        return try await completeLegacyShareArtifact(command)
+    }
+
+    public func completeShareArtifact(
+        _ command: CompleteShareArtifactCommand,
+        context _: RuntimePersistableOperationContext
+    ) async throws -> ShareArtifactCompletionResultDTO {
+        guard let evidence = command.evidence else {
+            return try await completeLegacyShareArtifact(command)
+        }
+        return try await completeShareArtifact(evidence: evidence)
+    }
+
+    private func completeLegacyShareArtifact(
+        _ command: CompleteShareArtifactCommand
+    ) async throws -> ShareArtifactCompletionResultDTO {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
 
         do {
             let artifact = try await artifactRegistry.artifact(id: command.artifactID)
+            guard artifact.encodedMessageHandle == nil else {
+                throw RuneScribeProductError.failure(
+                    RuneScribeFailureDTO(code: .invalidInput)
+                )
+            }
             var recordedDelivery = false
             if let cipherID = artifact.messageCipherID,
                MessageSend.shouldRecordDelivery(
@@ -545,7 +1039,260 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         }
     }
 
+    private func completeShareArtifact(
+        evidence: ShareArtifactCompletionEvidenceDTO
+    ) async throws -> ShareArtifactCompletionResultDTO {
+        await acquireUseCasePermit()
+        defer { releaseUseCasePermit() }
+
+        do {
+            let fingerprint = ShareTerminalProgressionFingerprint(
+                artifactID: evidence.artifactID,
+                report: evidence.report
+            )
+            let commandDigest = try CoreProgressionCoordinator.commandDigest(
+                fingerprint
+            )
+            let resultDigest = try CoreProgressionCoordinator.commandDigest(
+                evidence.report
+            )
+            let contextDigest = try CoreProgressionDigest.canonical(
+                evidence.operationContext
+            )
+            let durable = try await artifactRegistry.journalTerminal(evidence)
+            pendingShareTerminalEvidence[evidence.artifactID] = evidence
+
+            if let completed = durable.completionDisposition {
+                pendingShareTerminalEvidence.removeValue(forKey: evidence.artifactID)
+                do {
+                    try await compactCompletedShareTerminalEvidence()
+                } catch {
+                    shareCleanupNeedsRetry = true
+                    return .retainedForRetry
+                }
+                return completed
+            }
+
+            let progressionReady = await progressionEvidenceIsReady(
+                for: evidence.operationContext
+            )
+            guard progressionReady else {
+                do {
+                    try await artifactRegistry.releaseTerminalArtifact(durable)
+                } catch {
+                    shareCleanupNeedsRetry = true
+                }
+                shareCleanupNeedsRetry = true
+                return .retainedForRetry
+            }
+
+            if let terminal = try await repository.shareTerminalProgressionEvidence(
+                artifactID: evidence.artifactID
+            ) {
+                guard terminal.contextDigest == contextDigest,
+                      terminal.commandDigest == commandDigest,
+                      terminal.resultDigest == resultDigest
+                else {
+                    throw RuneScribeProductError.failure(
+                        RuneScribeFailureDTO(code: .invalidInput)
+                    )
+                }
+                if terminal.cleanupPending {
+                    do {
+                        try await artifactRegistry.releaseTerminalArtifact(durable)
+                        let cleanup = try await repository
+                            .markShareTerminalCleanupComplete(
+                            artifactID: evidence.artifactID
+                        )
+                        await adoptMutation(cleanup.library)
+                    } catch {
+                        shareCleanupNeedsRetry = true
+                        return .retainedForRetry
+                    }
+                }
+                let disposition = durable.plannedDisposition ?? .released
+                do {
+                    _ = try await artifactRegistry.completeTerminal(
+                        artifactID: evidence.artifactID,
+                        disposition: disposition
+                    )
+                    try await compactCompletedShareTerminalEvidence()
+                } catch {
+                    shareCleanupNeedsRetry = true
+                    return .retainedForRetry
+                }
+                pendingShareTerminalEvidence.removeValue(forKey: evidence.artifactID)
+                shareCleanupNeedsRetry = !pendingShareTerminalEvidence.isEmpty
+                return disposition
+            }
+
+            let encodedRecord: CoreEncodedMessageProgressionRecord?
+            if let handle = durable.encodedMessageHandle {
+                guard let record = try await repository
+                    .encodedMessageProgressionEvidence(handle: handle)
+                else {
+                    throw RuneScribeProductError.failure(
+                        RuneScribeFailureDTO(code: .itemNotFound)
+                    )
+                }
+                encodedRecord = record
+            } else {
+                encodedRecord = nil
+            }
+
+            let library = try await repository.snapshot()
+            let cipher = durable.messageCipherID.flatMap { cipherID in
+                library.ciphers.first { $0.id == cipherID }
+            }
+            let contactID = cipher?.contactID
+            let relationship: CoreRelationshipProgressionRecord?
+            if let cipher, let contactID {
+                relationship = try await repository.relationshipProgressionEvidence(
+                    cipherID: cipher.id,
+                    contactID: contactID
+                )
+            } else {
+                relationship = nil
+            }
+            let relationshipToken: RelationshipToken?
+            if let relationship {
+                relationshipToken = try? await progression.relationshipToken(
+                    for: relationship.seed
+                )
+            } else {
+                relationshipToken = nil
+            }
+
+            let eligible = evidence.report.isEligibleTerminal(
+                requiresKeyDelivery: durable.requiresKeyDelivery
+            )
+            let domainLinked = cipher != nil && contactID != nil
+            let linkedRelationship = relationship != nil
+            let completesKeyDelivery = eligible
+                && durable.requiresKeyDelivery
+                && domainLinked
+                && cipher?.keyDeliveryState.requiresDelivery == true
+            let needsFirstDeliveryEvent = eligible
+                && linkedRelationship
+                && relationship?.firstDeliveryEventCommitted == false
+                && (completesKeyDelivery
+                    || relationship?.keyDeliveryState == .completed)
+            let establishesBidirectional = eligible
+                && linkedRelationship
+                && relationshipToken != nil
+                && relationship?.hasAuthenticatedInbound == true
+                && relationship?.bidirectionalEventCommitted == false
+
+            var facts: [ProgressionEventFact] = []
+            if let encodedRecord,
+               let share = try CoreProgressionFactFactory.shareCompleted(
+                   report: evidence.report,
+                   messageToken: encodedRecord.messageToken,
+                   codexIDs: encodedRecord.codexIDs,
+                   artifactIDs: encodedRecord.artifactIDs,
+                   keyIncluded: durable.requiresKeyDelivery,
+                   relationshipToken: relationshipToken,
+                   linkedRelationship: linkedRelationship
+               ) {
+                facts.append(share)
+            }
+            var commitsFirstDeliveryEvent = false
+            if needsFirstDeliveryEvent, let cipher, let relationshipToken,
+               let cipherSeed = try await repository.cipherProgressionSeed(
+                   cipherID: cipher.id
+               ), let cipherToken = try? await progression.cipherToken(
+                   for: cipherSeed
+               ), let firstDelivery = try? CoreProgressionFactFactory
+                   .firstDeliveryCompleted(
+                       cipherToken: cipherToken,
+                       relationshipToken: relationshipToken
+                   ) {
+                facts.append(firstDelivery)
+                commitsFirstDeliveryEvent = true
+            }
+            if establishesBidirectional, let relationshipToken {
+                facts.append(try CoreProgressionFactFactory.bidirectionalEstablished(
+                    relationshipToken: relationshipToken
+                ))
+            }
+            let batches = try progressionBatches(
+                context: evidence.operationContext,
+                facts: facts
+            )
+            let plannedDisposition: ShareArtifactCompletionResultDTO =
+                completesKeyDelivery ? .deliveryRecorded : .released
+            let planned = try await artifactRegistry.planTerminalDisposition(
+                artifactID: evidence.artifactID,
+                disposition: plannedDisposition
+            )
+            let mutation = try await repository.commitShareTerminalProgression(
+                artifactID: evidence.artifactID,
+                context: evidence.operationContext,
+                commandDigest: commandDigest,
+                resultDigest: resultDigest,
+                // A terminal consumes the artifact lease, not the logical
+                // encoded result. UI reparses a fresh artifact for the same
+                // handle; semantic message-token dedupe remains authoritative.
+                encodedMessageHandle: nil,
+                cipherID: domainLinked ? cipher?.id : nil,
+                contactID: domainLinked ? contactID : nil,
+                completesKeyDelivery: completesKeyDelivery,
+                commitsFirstDeliveryEvent: commitsFirstDeliveryEvent,
+                activity: CoreProgressionRelationshipActivity(
+                    eligibleOutbound: eligible && linkedRelationship,
+                    bidirectionalCommitted: establishesBidirectional
+                ),
+                pendingBatches: batches
+            )
+            await adoptMutation(mutation.library)
+            guard mutation.value.keyDeliveryTransitioned
+                    == (plannedDisposition == .deliveryRecorded)
+            else {
+                throw ShareArtifactRegistryError.terminalEvidenceCollision
+            }
+            let drainResult: CoreProgressionDrainResult? = batches.isEmpty
+                ? nil
+                : await progression.drain()
+
+            do {
+                try await artifactRegistry.releaseTerminalArtifact(planned)
+                let cleanup = try await repository.markShareTerminalCleanupComplete(
+                    artifactID: evidence.artifactID
+                )
+                await adoptMutation(cleanup.library)
+                _ = try await artifactRegistry.completeTerminal(
+                    artifactID: evidence.artifactID,
+                    disposition: plannedDisposition
+                )
+                try await compactCompletedShareTerminalEvidence()
+                pendingShareTerminalEvidence.removeValue(forKey: evidence.artifactID)
+            } catch {
+                shareCleanupNeedsRetry = true
+                return .retainedForRetry
+            }
+
+            if drainResult != nil, drainResult != .durable {
+                return .retainedForRetry
+            }
+            shareCleanupNeedsRetry = !pendingShareTerminalEvidence.isEmpty
+            return plannedDisposition
+        } catch {
+            if pendingShareTerminalEvidence[evidence.artifactID] != nil {
+                if let intent = try? await artifactRegistry.terminalIntent(
+                    artifactID: evidence.artifactID
+                ) {
+                    try? await artifactRegistry.releaseTerminalArtifact(intent)
+                }
+                shareCleanupNeedsRetry = true
+                return .retainedForRetry
+            }
+            throw await record(error)
+        }
+    }
+
     public func releaseShareArtifact(id: ShareArtifactID) async {
+        await acquireUseCasePermit()
+        defer { releaseUseCasePermit() }
         do {
             try await artifactRegistry.release(id: id)
         } catch {
@@ -554,7 +1301,57 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         }
     }
 
+    private func retryPendingShareTerminalEvidence() async {
+        guard !isRetryingShareTerminalEvidence,
+              !pendingShareTerminalEvidence.isEmpty
+        else { return }
+        isRetryingShareTerminalEvidence = true
+        defer { isRetryingShareTerminalEvidence = false }
+        let retained = pendingShareTerminalEvidence.values.sorted {
+            if $0.operationContext.runtimeOccurredAtUTC
+                != $1.operationContext.runtimeOccurredAtUTC {
+                return $0.operationContext.runtimeOccurredAtUTC
+                    < $1.operationContext.runtimeOccurredAtUTC
+            }
+            return $0.artifactID.rawValue.uuidString
+                < $1.artifactID.rawValue.uuidString
+        }
+        for evidence in retained {
+            _ = try? await completeShareArtifact(evidence: evidence)
+        }
+    }
+
+    private func restoreDurableShareTerminalEvidence() async throws {
+        let intents = try await artifactRegistry.terminalIntents()
+        for intent in intents {
+            guard let evidence = intent.terminalEvidence else {
+                throw ShareArtifactRegistryError.storageUnavailable
+            }
+            if let retained = pendingShareTerminalEvidence[intent.artifactID] {
+                guard retained == evidence else {
+                    throw ShareArtifactRegistryError.terminalEvidenceCollision
+                }
+            } else {
+                pendingShareTerminalEvidence[intent.artifactID] = evidence
+            }
+        }
+    }
+
     public func importFile(_ input: InboundFileDTO) async throws -> ImportResultDTO {
+        try await importFile(input, progressionContext: nil)
+    }
+
+    public func importFile(
+        _ input: InboundFileDTO,
+        context: RuntimePersistableOperationContext
+    ) async throws -> ImportResultDTO {
+        try await importFile(input, progressionContext: context)
+    }
+
+    private func importFile(
+        _ input: InboundFileDTO,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws -> ImportResultDTO {
         await acquireUseCasePermit()
         defer { releaseUseCasePermit() }
 
@@ -579,7 +1376,11 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             let result = try await ingestFileData(
                 data,
                 dedupeKey: dedupeKey,
-                source: .file
+                source: .file,
+                progressionRoute: Self.progressionRoute(
+                    for: input.metadata.source
+                ),
+                progressionContext: progressionContext
             )
             return result
         } catch {
@@ -633,6 +1434,20 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     }
 
     public func confirmImport(_ command: ConfirmImportCommand) async throws -> CipherSummary {
+        try await confirmImport(command, progressionContext: nil)
+    }
+
+    public func confirmImport(
+        _ command: ConfirmImportCommand,
+        context: RuntimePersistableOperationContext
+    ) async throws -> CipherSummary {
+        try await confirmImport(command, progressionContext: context)
+    }
+
+    private func confirmImport(
+        _ command: ConfirmImportCommand,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async throws -> CipherSummary {
         await acquireUseCasePermit()
         var cancellationGeneration: UInt64?
 
@@ -672,10 +1487,54 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 generation: generation
             )
             committingImportIDs.insert(command.importID)
-            let mutation = try await repository.importCipher(
-                pending.payload,
-                label: command.name
+            let progressionReady = await progressionEvidenceIsReady(
+                for: progressionContext
             )
+            let mutation: CipherRepositoryMutation<Cipher>
+            var retainedFacts = false
+            if progressionReady {
+                let seed = await resilientCipherProgressionSeed()
+                var batches: [CorePendingProgressionBatch] = []
+                if let progressionContext {
+                    do {
+                        let token = try await progression.cipherToken(for: seed)
+                        batches = try progressionBatches(
+                            context: progressionContext,
+                            facts: [try CoreProgressionFactFactory.cipherImported(
+                                cipherToken: token,
+                                routeClass: Self.progressionRoute(for: pending.source)
+                            )]
+                        )
+                    } catch {
+                        batches = []
+                    }
+                }
+                do {
+                    mutation = try await repository.importCipher(
+                        pending.payload,
+                        label: command.name,
+                        progressionSeed: seed,
+                        pendingBatches: batches
+                    )
+                    retainedFacts = !batches.isEmpty
+                } catch let error as CoreProgressionEvidenceError {
+                    guard error == .collectionLimitExceeded else {
+                        throw error
+                    }
+                    mutation = try await repository
+                        .importCipherWithoutProgressionEvidence(
+                        pending.payload,
+                        label: command.name,
+                        pendingBatches: batches
+                    )
+                    retainedFacts = !batches.isEmpty
+                }
+            } else {
+                mutation = try await repository.importCipher(
+                    pending.payload,
+                    label: command.name
+                )
+            }
             await refreshFontSummaries(for: mutation.library)
             removePendingImport(pending)
             confirmingImportIDs.remove(command.importID)
@@ -683,6 +1542,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             importCancellationGenerations.removeValue(forKey: command.importID)
             importState = ImportStateDTO(phase: .completed)
             await adoptMutation(mutation.library)
+            if retainedFacts { _ = await progression.drain() }
             let summary = Self.summary(for: mutation.value, in: mutation.library)
             releaseUseCasePermit()
             await drainInboundQueueIfPossible()
@@ -854,18 +1714,58 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         }
         inboundStarted = true
         do {
+            if let progressionOutboxClient {
+                do {
+                    let outstanding = try await progressionOutboxClient
+                        .outstandingShareCompletionArtifactIDs()
+                    _ = try await artifactRegistry.reconcilePreparedArtifacts(
+                        retaining: outstanding
+                    )
+                } catch {
+                    // Query failure is fail-safe: retain all prepared linkage.
+                    shareCleanupNeedsRetry = true
+                }
+            }
+            do {
+                try await restoreDurableShareTerminalEvidence()
+                shareJournalAvailable = true
+                await retryPendingShareTerminalEvidence()
+            } catch {
+                // Legacy/direct utility remains available without the optional
+                // durable share rail. Operation-aware preparation still fails
+                // closed when it attempts to persist its descriptor.
+                shareJournalAvailable = false
+                shareCleanupNeedsRetry = true
+            }
             // A new activation must first prove that no stale key-bearing
-            // artifact survived the previous lifetime.
-            try await artifactRegistry.releaseAll()
+            // artifact survived the previous lifetime. Prepared metadata and
+            // exact terminal intents remain encrypted for Runtime redelivery.
+            try await artifactRegistry.releaseAll(
+                updatingDurableJournal: shareJournalAvailable
+            )
+            if shareJournalAvailable {
+                await retryPendingShareTerminalEvidence()
+            }
+            if shareJournalAvailable,
+               pendingShareTerminalEvidence.isEmpty {
+                try await reconcileRelaunchedShareTerminalEvidence()
+            }
+            if shareJournalAvailable {
+                await sweepRelaunchedEncodedHandles()
+            }
+            if let current = try? await repository.snapshot() {
+                lastKnownLibrary = current
+            }
             let capturedAt = await snapshotTimestamp()
             acceptsSharePreparation = true
-            if shareCleanupNeedsRetry,
+            if pendingShareTerminalEvidence.isEmpty,
+               shareCleanupNeedsRetry,
                lastFailure?.code == .shareUnavailable {
                 lastFailure = nil
                 revision &+= 1
                 broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
             }
-            shareCleanupNeedsRetry = false
+            shareCleanupNeedsRetry = !pendingShareTerminalEvidence.isEmpty
         } catch {
             acceptsSharePreparation = false
             shareCleanupNeedsRetry = true
@@ -879,13 +1779,16 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     public func stopInboundProcessing() async {
         acceptsSharePreparation = false
         shareAuthorizationGeneration &+= 1
+        await retryPendingShareTerminalEvidence()
         await acquireUseCasePermit()
         inboundStarted = false
         do {
             let wasRetryingCleanup = shareCleanupNeedsRetry
-            try await artifactRegistry.releaseAll()
+            try await artifactRegistry.releaseAll(
+                updatingDurableJournal: shareJournalAvailable
+            )
             let capturedAt = await snapshotTimestamp()
-            shareCleanupNeedsRetry = false
+            shareCleanupNeedsRetry = !pendingShareTerminalEvidence.isEmpty
             if wasRetryingCleanup,
                lastFailure?.code == .shareUnavailable {
                 lastFailure = nil
@@ -904,6 +1807,20 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     public func receive(
         _ input: RuneScribeInboundInput
     ) async throws -> InboundInputDispositionDTO {
+        await enqueueInbound(input, progressionContext: nil)
+    }
+
+    public func receive(
+        _ input: RuneScribeInboundInput,
+        context: RuntimePersistableOperationContext
+    ) async throws -> InboundInputDispositionDTO {
+        await enqueueInbound(input, progressionContext: context)
+    }
+
+    private func enqueueInbound(
+        _ input: RuneScribeInboundInput,
+        progressionContext: RuntimePersistableOperationContext?
+    ) async -> InboundInputDispositionDTO {
         guard Self.hasBoundedInboundMetadata(input) else {
             return await rejectInbound(code: .invalidInput)
         }
@@ -927,6 +1844,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
         let queued = QueuedInbound(
             input: input,
+            progressionContext: progressionContext,
             dedupeKey: dedupeKey,
             sequence: nextInboundSequence
         )
@@ -956,11 +1874,17 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     }
 
     private func processInbound(
-        _ input: RuneScribeInboundInput
+        _ queued: QueuedInbound
     ) async throws -> InboundInputDispositionDTO {
+        let input = queued.input
         switch input {
         case .file(let file):
-            let result = try await importFile(file)
+            let result: ImportResultDTO
+            if let context = queued.progressionContext {
+                result = try await importFile(file, context: context)
+            } else {
+                result = try await importFile(file)
+            }
             switch result.disposition {
             case .duplicate: return .duplicate
             case .ignored: return .ignored
@@ -1006,7 +1930,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                           let probe = inboundDataQueue.first,
                           case .file = probe.input {
                     do {
-                        let disposition = try await processInbound(probe.input)
+                        let disposition = try await processInbound(probe)
                         guard disposition == .duplicate else { return }
                     } catch {
                         // The pending presentation remains authoritative while
@@ -1035,7 +1959,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             }
             var retainsSourceDedupeKey = false
             do {
-                let disposition = try await processInbound(next.input)
+                let disposition = try await processInbound(next)
                 if disposition == .accepted,
                    let sourceKey = next.dedupeKey,
                    Self.requiresClearPresentation(next.input) {
@@ -1140,12 +2064,279 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         }
     }
 
+    // MARK: - Optional progression evidence
+
+    /// Existing direct-service callers remain on the v1 utility rail until an
+    /// operation-aware context or the production outbox is present. Once a
+    /// library is v2, every mutation continues through the v2 APIs even if the
+    /// optional outbox is temporarily unavailable.
+    private func progressionEvidenceIsReady(
+        for context: RuntimePersistableOperationContext?
+    ) async -> Bool {
+        do {
+            let library = try await repository.snapshot()
+            if library.version == CipherLibrary.currentVersion { return true }
+            guard context != nil || hasProgressionOutbox else { return false }
+            let migrated = try await progression.migrateEvidenceIfNeeded()
+            return migrated.version == CipherLibrary.currentVersion
+        } catch {
+            return false
+        }
+    }
+
+    /// Progression token entropy is optional instrumentation. Once the library
+    /// is v2, utility mutations still need a valid encrypted seed even when the
+    /// injected token provider is unavailable, so fall back to fresh local
+    /// cryptographic randomness and omit only facts that cannot be derived.
+    private func resilientCipherProgressionSeed() async -> Data {
+        (try? await progression.cipherSeed()) ?? Self.randomizedProgressionSeed()
+    }
+
+    private func resilientRelationshipProgressionSeed() async -> Data {
+        (try? await progression.relationshipSeed())
+            ?? Self.randomizedProgressionSeed()
+    }
+
+    private nonisolated static func randomizedProgressionSeed() -> Data {
+        SymmetricKey(size: .bits256).withUnsafeBytes { Data($0) }
+    }
+
+    private func progressionBatches(
+        context: RuntimePersistableOperationContext,
+        facts: [ProgressionEventFact]
+    ) throws -> [CorePendingProgressionBatch] {
+        try CoreProgressionCoordinator.pendingBatches(
+            context: context,
+            commandDigest: CoreProgressionCoordinator.commandDigest(facts),
+            facts: facts
+        )
+    }
+
+    private func instrumentationStatusAfterDrain(
+        evidenceWasRetained: Bool
+    ) async -> ProgressionInstrumentationStatusDTO {
+        guard evidenceWasRetained else { return .degraded }
+        switch await progression.drain() {
+        case .durable:
+            return .durable
+        case .retainedForRetry, .unavailable:
+            return .retainedForRetry
+        }
+    }
+
+    /// Startup retries the Runtime-owned, schema-keyed handoff from encrypted
+    /// Core evidence. Handoff failure cannot block utility and does not erase
+    /// the randomized seeds needed to derive the exact same snapshot later.
+    private func reconcileProgressionAtStartup(
+        _ library: CipherLibrary
+    ) async -> CipherLibrary {
+        guard hasProgressionOutbox || existingUserMigration != nil,
+              let migrated = try? await progression.migrateEvidenceIfNeeded()
+        else { return library }
+
+        let reconciled = await reconcileDeferredFirstDeliveryEvents(in: migrated)
+
+        if let existingUserMigration,
+           let coreSnapshot = try? await progression.existingUserMigrationSnapshot(),
+           let ciphers = try? Self.existingUserMigrationCiphers(
+               from: coreSnapshot
+           ) {
+            try? await existingUserMigration.submit(ciphers: ciphers)
+        }
+        if hasProgressionOutbox {
+            _ = await progression.drain()
+        }
+        return reconciled
+    }
+
+    /// If crypto delivery committed while token derivation was unavailable,
+    /// retry only the missing first-delivery fact with fresh Runtime authority.
+    /// Migrated-unverified legacy delivery is deliberately ineligible here.
+    private func reconcileDeferredFirstDeliveryEvents(
+        in library: CipherLibrary
+    ) async -> CipherLibrary {
+        guard hasProgressionOutbox,
+              let ledger = try? await repository.progressionEvidenceSnapshot()
+        else { return library }
+        var current = library
+        let deferred = ledger.relationships.filter {
+            $0.keyDeliveryState == .completed
+                && $0.hasEligibleOutbound
+                && !$0.firstDeliveryEventCommitted
+        }
+        for relationship in deferred {
+            do {
+                let identity = relationship.identity
+                guard let cipherSeed = try await repository.cipherProgressionSeed(
+                    cipherID: identity.cipherID
+                ) else { continue }
+                let context = try await progression.issueContext(
+                    for: .coreReconciliation
+                )
+                let fact = try CoreProgressionFactFactory.firstDeliveryCompleted(
+                    cipherToken: try await progression.cipherToken(for: cipherSeed),
+                    relationshipToken: try await progression.relationshipToken(
+                        for: relationship.seed
+                    )
+                )
+                let batches = try progressionBatches(
+                    context: context,
+                    facts: [fact]
+                )
+                let mutation = try await repository.recordRelationshipProgressionActivity(
+                    cipherID: identity.cipherID,
+                    contactID: identity.contactID,
+                    completesKeyDelivery: false,
+                    commitsFirstDeliveryEvent: true,
+                    activity: .init(),
+                    pendingBatches: batches
+                )
+                current = mutation.library
+            } catch {
+                // Encrypted state remains retryable on the next activation.
+                continue
+            }
+        }
+        return current
+    }
+
+    static func existingUserMigrationDTO(
+        from snapshot: CoreProgressionMigrationSnapshot
+    ) throws -> ExistingUserMigrationSnapshotDTO {
+        try ExistingUserMigrationSnapshotDTO(
+            ciphers: existingUserMigrationCiphers(from: snapshot)
+        )
+    }
+
+    static func existingUserMigrationCiphers(
+        from snapshot: CoreProgressionMigrationSnapshot
+    ) throws -> [ExistingUserMigrationCipherDTO] {
+        try snapshot.ciphers.map { cipher in
+            let origin: DomainEventOrigin = switch cipher.origin {
+            case .generated: .generated
+            case .imported: .imported
+            }
+            return try ExistingUserMigrationCipherDTO(
+                cipherToken: cipher.cipherToken,
+                origin: origin
+            )
+        }
+    }
+
+    /// Logical encoded handles are process-session leases. Their already
+    /// committed event batches are independent encrypted records, so a new Core
+    /// service may discard stale handles only after first attempting receipt and
+    /// pending-fact reconciliation. This runs once per service construction.
+    private func sweepRelaunchedEncodedHandles() async {
+        guard !didSweepRelaunchedEncodedHandles else { return }
+        guard let ledger = try? await repository.progressionEvidenceSnapshot()
+        else { return }
+        for record in ledger.encodedMessages {
+            let retained: Bool
+            do {
+                retained = try await artifactRegistry.hasRetainedArtifact(
+                    encodedMessageHandle: record.handle
+                )
+            } catch {
+                return
+            }
+            guard !retained else { continue }
+            if let mutation = try? await repository
+                .abandonEncodedMessageProgressionEvidence(handle: record.handle),
+               mutation.value {
+                try? await artifactRegistry.releaseEncodedMessageHandle(record.handle)
+            }
+        }
+        didSweepRelaunchedEncodedHandles = true
+    }
+
+    /// Keeps the session-scoped handle rail below its repository hard cap.
+    /// Persisted chronology is authoritative; any handle still referenced by
+    /// a prepared artifact or incomplete terminal remains protected.
+    private func compactEncodedMessageEvidenceForNewHandle() async {
+        guard let ledger = try? await repository.progressionEvidenceSnapshot()
+        else { return }
+        var remaining = ledger.encodedMessages.count
+        guard remaining >= Self.encodedMessageRetryWindow else { return }
+        guard let chronology = try? await artifactRegistry
+            .encodedMessageHandleChronology()
+        else { return }
+        let records = Dictionary(uniqueKeysWithValues: ledger.encodedMessages.map {
+            ($0.handle, $0)
+        })
+        for stale in chronology where records[stale] == nil {
+            try? await artifactRegistry.releaseEncodedMessageHandle(stale)
+        }
+        for handle in chronology where remaining >= Self.encodedMessageRetryWindow {
+            guard let record = records[handle] else { continue }
+            let isRetained: Bool
+            do {
+                isRetained = try await artifactRegistry.hasRetainedArtifact(
+                    encodedMessageHandle: record.handle
+                )
+            } catch {
+                return
+            }
+            guard !isRetained else { continue }
+            if let mutation = try? await repository
+                .abandonEncodedMessageProgressionEvidence(handle: record.handle),
+               mutation.value {
+                remaining -= 1
+                try? await artifactRegistry.releaseEncodedMessageHandle(
+                    record.handle
+                )
+            }
+        }
+    }
+
+    /// Registry tombstones retain the deterministic retry window. Any older
+    /// cleanup-complete repository tombstone is now redundant and may be
+    /// compacted without touching pending facts or incomplete cleanup.
+    private func compactCompletedShareTerminalEvidence() async throws {
+        let retained = try await artifactRegistry.retainedCompletedTerminalIDs()
+        let incomplete = Set(try await artifactRegistry.terminalIntents().map(
+            \.artifactID
+        ))
+        let ledger = try await repository.progressionEvidenceSnapshot()
+        let retired: Set<ShareArtifactID> = Set(
+            ledger.shareTerminals.compactMap { terminal -> ShareArtifactID? in
+            guard !terminal.cleanupPending,
+                  !retained.contains(terminal.artifactID),
+                  !incomplete.contains(terminal.artifactID)
+            else { return nil }
+            return terminal.artifactID
+        })
+        guard !retired.isEmpty else { return }
+        let mutation = try await repository.retireShareTerminalEvidence(
+            artifactIDs: retired
+        )
+        await adoptMutation(mutation.library)
+    }
+
+    /// Global startup cleanup proves that no artifact from the prior process is
+    /// still externally addressable. Its terminal tombstones can therefore be
+    /// completed and retired before new callbacks become possible.
+    private func reconcileRelaunchedShareTerminalEvidence() async throws {
+        guard !didSweepRelaunchedEncodedHandles,
+              let ledger = try? await repository.progressionEvidenceSnapshot()
+        else { return }
+        let pendingCleanup = ledger.shareTerminals.filter(\.cleanupPending)
+        for terminal in pendingCleanup {
+            _ = try await repository.markShareTerminalCleanupComplete(
+                artifactID: terminal.artifactID
+            )
+        }
+        try await compactCompletedShareTerminalEvidence()
+    }
+
     // MARK: - Import/message internals
 
     private func ingestFileData(
         _ data: Data,
         dedupeKey: Data,
-        source: ImportSourceDTO
+        source: ImportSourceDTO,
+        progressionRoute: DomainEventRouteClass,
+        progressionContext: RuntimePersistableOperationContext?
     ) async throws -> ImportResultDTO {
         guard !activeImportDedupeKeys.contains(dedupeKey) else {
             restoreImportStateAfterDuplicate()
@@ -1168,11 +2359,58 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             )
 
         case .message(let payload, let fontBytes):
+            let progressionReady = await progressionEvidenceIsReady(
+                for: progressionContext
+            )
+            var admittedPackageToken: PackageToken?
+            var admissionEvidenceRetained = false
+            if progressionReady, let progressionContext {
+                do {
+                    let packageToken = try await progression.packageToken(
+                        for: data
+                    )
+                    let fact = try CoreProgressionFactFactory.messageImported(
+                        packageToken: packageToken,
+                        routeClass: progressionRoute,
+                        embeddedCipher: payload.embeddedCipher != nil
+                    )
+                    let batches = try progressionBatches(
+                        context: progressionContext,
+                        facts: [fact]
+                    )
+                    _ = try await repository.appendPendingProgressionBatches(batches)
+                    admittedPackageToken = packageToken
+                    admissionEvidenceRetained = true
+                    // Admission is committed before AEAD and may be drained
+                    // immediately; failure leaves the exact batch encrypted.
+                    _ = await progression.drain()
+                } catch {
+                    // Package utility remains available. A later decoded fact is
+                    // deliberately suppressed unless its admission fact was
+                    // durably retained first.
+                }
+            }
+
             let capturedAt = await snapshotTimestamp()
             messageState = MessageStateDTO(phase: .receiving)
             revision &+= 1
             broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
             do {
+                // Optional instrumentation entropy must never become a
+                // prerequisite for authenticated message utility. A missing
+                // seed keeps a new embedded cipher transient and skips only a
+                // new relationship record; AEAD can still succeed.
+                let embeddedCipherSeed: Data? = if progressionReady
+                    && payload.embeddedCipher != nil {
+                    await resilientCipherProgressionSeed()
+                } else {
+                    nil
+                }
+                let relationshipSeed: Data? = if progressionReady {
+                    await resilientRelationshipProgressionSeed()
+                } else {
+                    nil
+                }
                 let mutation = try await MessageImportUseCase.ingest(
                     payload: payload,
                     fontBytes: fontBytes,
@@ -1180,13 +2418,22 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                     messageService: messageService,
                     fontIntegration: fontIntegration,
                     contactIntegration: contactIntegration,
-                    runtimeIO: runtimeIO
+                    runtimeIO: runtimeIO,
+                    progression: progression,
+                    usesProgressionEvidence: progressionReady,
+                    admittedPackageToken: admissionEvidenceRetained
+                        ? admittedPackageToken
+                        : nil,
+                    progressionRoute: progressionRoute,
+                    embeddedCipherProgressionSeed: embeddedCipherSeed,
+                    relationshipProgressionSeed: relationshipSeed
                 )
+                let resultingLibrary = mutation.library
                 if let contactManager,
                    let contactBook = try? await contactManager.snapshot() {
                     lastKnownContactBook = contactBook
                 }
-                await refreshFontSummaries(for: mutation.library)
+                await refreshFontSummaries(for: resultingLibrary)
                 rememberHandledDedupeKey(dedupeKey)
                 messageDedupeKeys[mutation.message.id] = dedupeKey
                 messageState = MessageStateDTO(
@@ -1194,7 +2441,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                     pendingMessage: mutation.message
                 )
                 importState = ImportStateDTO(phase: .completed)
-                await adoptMutation(mutation.library)
+                await adoptMutation(resultingLibrary)
                 return ImportResultDTO(
                     disposition: .receivedMessage,
                     receivedMessageID: mutation.message.id
@@ -1338,14 +2585,20 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             var library = try await repository.snapshot()
             let loadedLock = try await appLock.state()
             if let contactManager {
+                let reconciliationContext = try? await progression.issueContext(
+                    for: .coreReconciliation
+                )
                 let state = try await Self.recoverAndReconcileContactAssociations(
                     contactManager: contactManager,
-                    repository: repository
+                    repository: repository,
+                    progression: progression,
+                    progressionContext: reconciliationContext
                 )
                 library = state.library
                 lastKnownContactBook = state.book
                 contactAuthorization = await contactManager.authorizationStatus()
             }
+            library = await reconcileProgressionAtStartup(library)
             if let fontCatalog {
                 // Shipping launch treated font-registration failures as
                 // nonfatal. Strict catalog operations remain available to the
@@ -1382,6 +2635,36 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         case .clipboard: .clipboard
         case .qrScanner: .qrCode
         default: .link
+        }
+    }
+
+    private static func progressionRoute(
+        for source: ImportSourceDTO
+    ) -> DomainEventRouteClass {
+        switch source {
+        case .file, .embeddedMessage:
+            return .file
+        case .link:
+            return .customURL
+        case .qrCode:
+            return .qrCode
+        case .clipboard:
+            return .clipboard
+        }
+    }
+
+    private static func progressionRoute(
+        for source: InboundDeliverySourceDTO
+    ) -> DomainEventRouteClass {
+        switch source {
+        case .qrScanner:
+            return .qrCode
+        case .clipboard:
+            return .clipboard
+        case .webBrowsingActivity:
+            return .customURL
+        case .applicationOpen, .sceneOpen, .fileImporter:
+            return .file
         }
     }
 
@@ -1422,14 +2705,20 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 var library = try await repository.snapshot()
                 let loadedLock = try await appLock.state()
                 if let contactManager {
+                    let reconciliationContext = try? await progression.issueContext(
+                        for: .coreReconciliation
+                    )
                     let state = try await Self.recoverAndReconcileContactAssociations(
                         contactManager: contactManager,
-                        repository: repository
+                        repository: repository,
+                        progression: progression,
+                        progressionContext: reconciliationContext
                     )
                     library = state.library
                     lastKnownContactBook = state.book
                     contactAuthorization = await contactManager.authorizationStatus()
                 }
+                library = await reconcileProgressionAtStartup(library)
                 if let fontCatalog {
                     _ = try? await fontCatalog.registerAvailableFonts()
                 }
@@ -1497,11 +2786,14 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
     /// message contacts remain valid association targets, while only persisted
     /// system imports require an automatically generated linked cipher.
     private func reconcileContactAssociations(
-        in book: ContactBook
+        in book: ContactBook,
+        progressionContext: RuntimePersistableOperationContext? = nil
     ) async throws -> CipherLibrary {
         try await Self.reconcileContactAssociations(
             book: book,
-            repository: repository
+            repository: repository,
+            progression: progression,
+            progressionContext: progressionContext
         ).library
     }
 
@@ -1514,11 +2806,13 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         -> ReconciledContactState? {
         guard let contactManager else { return nil }
         let repository = repository
+        let progression = progression
         let repair = Task.detached(priority: nil) {
             do {
                 let state = try await Self.recoverAndReconcileContactAssociations(
                     contactManager: contactManager,
-                    repository: repository
+                    repository: repository,
+                    progression: progression
                 )
                 return ContactRepairOutcome.repaired(state)
             } catch {
@@ -1540,9 +2834,11 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
 
     private nonisolated static func reconcileContactAssociations(
         book: ContactBook,
-        repository: CipherRepository
+        repository: CipherRepository,
+        progression: CoreProgressionCoordinator,
+        progressionContext: RuntimePersistableOperationContext? = nil
     ) async throws -> ReconciledContactState {
-        let seeds = book.contacts.compactMap { contact -> ImportedContactCipherSeed? in
+        let contacts = book.contacts.compactMap { contact -> ImportedContactCipherSeed? in
             guard contact.source == .imported,
                   contact.appleContactID != nil
             else { return nil }
@@ -1551,32 +2847,136 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
                 displayName: contact.displayName
             )
         }
-        let mutation = try await repository.reconcileContactAssociations(
-            systemImportedSeeds: seeds,
-            validContactIDs: Set(book.contacts.map(\.id))
-        )
+        let validContactIDs = Set(book.contacts.map(\.id))
+        let current = try await repository.snapshot()
+        let mutation: CipherRepositoryMutation<Int>
+        if current.version == CipherLibrary.currentVersion {
+            let uniqueContacts = Dictionary(
+                contacts.map { ($0.contactID, $0) },
+                uniquingKeysWith: { first, _ in first }
+            ).values.sorted { $0.contactID.uuidString < $1.contactID.uuidString }
+            var generatedSeeds: [CoreGeneratedContactProgressionSeed] = []
+            for contact in uniqueContacts where !current.ciphers.contains(where: {
+                $0.contactID == contact.contactID
+            }) {
+                generatedSeeds.append(CoreGeneratedContactProgressionSeed(
+                    contact: contact,
+                    cipherSeed: (try? await progression.cipherSeed())
+                        ?? Self.randomizedProgressionSeed(),
+                    relationshipSeed: (try? await progression.relationshipSeed())
+                        ?? Self.randomizedProgressionSeed()
+                ))
+            }
+            var batches: [CorePendingProgressionBatch] = []
+            if let progressionContext, !generatedSeeds.isEmpty {
+                do {
+                    var facts: [ProgressionEventFact] = []
+                    for seed in generatedSeeds {
+                        facts.append(try CoreProgressionFactFactory.cipherCreated(
+                            cipherToken: try await progression.cipherToken(
+                                for: seed.cipherSeed
+                            )
+                        ))
+                    }
+                    batches = try CoreProgressionCoordinator.pendingBatches(
+                        context: progressionContext,
+                        commandDigest: CoreProgressionCoordinator.commandDigest(facts),
+                        facts: facts
+                    )
+                } catch {
+                    batches = []
+                }
+            }
+            let progressed: CipherRepositoryMutation<
+                CoreProgressionContactReconciliationResult
+            >
+            let retainedBatches = !batches.isEmpty
+            do {
+                progressed = try await repository.reconcileContactAssociations(
+                    generatedSeeds: generatedSeeds,
+                    validContactIDs: validContactIDs,
+                    pendingBatches: batches
+                )
+            } catch let error as CoreProgressionEvidenceError {
+                guard error == .collectionLimitExceeded else {
+                    throw error
+                }
+                progressed = try await repository
+                    .reconcileContactAssociationsWithoutProgressionEvidence(
+                    generatedSeeds: generatedSeeds,
+                    validContactIDs: validContactIDs,
+                    pendingBatches: batches
+                )
+            }
+            if retainedBatches { _ = await progression.drain() }
+            mutation = CipherRepositoryMutation(
+                value: progressed.value.changes,
+                library: progressed.library
+            )
+        } else {
+            mutation = try await repository.reconcileContactAssociations(
+                systemImportedSeeds: contacts,
+                validContactIDs: validContactIDs
+            )
+        }
         return ReconciledContactState(book: book, library: mutation.library)
     }
 
     private nonisolated static func recoverAndReconcileContactAssociations(
         contactManager: ContactManager,
-        repository: CipherRepository
+        repository: CipherRepository,
+        progression: CoreProgressionCoordinator,
+        progressionContext: RuntimePersistableOperationContext? = nil
     ) async throws -> ReconciledContactState {
         if let recovery = try await contactManager.prepareMessageAssociationRecovery() {
             let validContactIDs = Set(recovery.book.contacts.map(\.id))
             let restoredContactID = recovery.intent.previousContactID.flatMap {
                 validContactIDs.contains($0) ? $0 : nil
             }
-            let restored = try await repository.assignContact(
-                cipherID: recovery.intent.cipherID,
-                contactID: restoredContactID
-            )
+            let current = try await repository.snapshot()
+            let restored: CipherRepositoryMutation<Bool>
+            if current.version == CipherLibrary.currentVersion {
+                let relationshipSeed: Data?
+                if let restoredContactID,
+                   try await repository.relationshipProgressionEvidence(
+                       cipherID: recovery.intent.cipherID,
+                       contactID: restoredContactID
+                   ) == nil {
+                    relationshipSeed = (try? await progression.relationshipSeed())
+                        ?? Self.randomizedProgressionSeed()
+                } else {
+                    relationshipSeed = nil
+                }
+                do {
+                    restored = try await repository.assignContact(
+                        cipherID: recovery.intent.cipherID,
+                        contactID: restoredContactID,
+                        relationshipSeed: relationshipSeed,
+                        pendingBatches: []
+                    )
+                } catch let error as CoreProgressionEvidenceError {
+                    guard error == .collectionLimitExceeded else { throw error }
+                    restored = try await repository
+                        .assignContactWithoutProgressionEvidence(
+                        cipherID: recovery.intent.cipherID,
+                        contactID: restoredContactID,
+                        pendingBatches: []
+                    )
+                }
+            } else {
+                restored = try await repository.assignContact(
+                    cipherID: recovery.intent.cipherID,
+                    contactID: restoredContactID
+                )
+            }
             guard restored.value else {
                 throw MessageImportError.cipherAssociationUnavailable
             }
             let state = try await reconcileContactAssociations(
                 book: recovery.book,
-                repository: repository
+                repository: repository,
+                progression: progression,
+                progressionContext: progressionContext
             )
             try await contactManager.completeMessageAssociationRecovery(
                 recovery.intent
@@ -1587,7 +2987,9 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
         let book = try await contactManager.snapshot()
         return try await reconcileContactAssociations(
             book: book,
-            repository: repository
+            repository: repository,
+            progression: progression,
+            progressionContext: progressionContext
         )
     }
 
@@ -1828,7 +3230,9 @@ public actor RuneScribeCoreApplicationService: RuneScribeApplicationService,
             switch registryError {
             case .artifactNotFound:
                 return RuneScribeFailureDTO(code: .itemNotFound)
-            case .storageUnavailable:
+            case .terminalEvidenceCollision:
+                return RuneScribeFailureDTO(code: .invalidInput)
+            case .terminalJournalFull, .storageUnavailable:
                 return RuneScribeFailureDTO(code: .shareUnavailable)
             }
         }

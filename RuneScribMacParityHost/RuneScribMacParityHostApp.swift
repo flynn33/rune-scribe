@@ -34,7 +34,8 @@ private final class RuneScribMacParityHostDelegate: NSObject,
 
 /// Isolated verification host. Product state and adapters are created only by
 /// the hosted unit tests. The optional native-share self-test uses synthetic
-/// files and same-process AppKit events, then exits without touching user data.
+/// files, a same-process AppKit trigger, and public presentation-handle
+/// dismissal, then exits without touching user data.
 @main
 struct RuneScribMacParityHostApp: App {
     @NSApplicationDelegateAdaptor(RuneScribMacParityHostDelegate.self)
@@ -66,14 +67,14 @@ private final class NativeShareSelfTest {
             let fileResult = try await runFileShare(using: activeFixture)
             let linkResult = try await runCipherLinkShare(using: activeFixture)
             report = NativeShareSelfTestReport(
-                version: 1,
+                version: 2,
                 file: fileResult,
                 link: linkResult,
                 passed: fileResult.passed && linkResult.passed
             )
         } catch let failure as NativeShareSelfTestFailure {
             report = NativeShareSelfTestReport(
-                version: 1,
+                version: 2,
                 file: .notRun,
                 link: .notRun,
                 passed: false,
@@ -81,7 +82,7 @@ private final class NativeShareSelfTest {
             )
         } catch {
             report = NativeShareSelfTestReport(
-                version: 1,
+                version: 2,
                 file: .notRun,
                 link: .notRun,
                 passed: false,
@@ -108,23 +109,23 @@ private final class NativeShareSelfTest {
     ) async throws -> NativeShareStepReport {
         let transfer = try await fixture.makeFileTransfer()
         var triggerCount = 0
-        var finishOutcome: ShareArtifactOutcomeDTO?
+        var finishCompletion: SharePresentationCompletion?
         var presentation: RuneScribeSharePresentationHandle?
         let view = AnyView(
             RuneScribeFileShareLink(
                 transfer: transfer,
                 onShareTriggered: { triggerCount += 1 },
-                onFinish: { finishOutcome = $0 },
+                onFinish: { finishCompletion = $0 },
                 onPresentation: { presentation = $0 }
             )
             .frame(width: 260, height: 100)
         )
         do {
-            let report = try presentAndDismiss(
+            let report = try await presentAndDismiss(
                 view: view,
                 triggerCount: { triggerCount },
-                finishOutcome: { finishOutcome },
-                presentationReady: { (presentation?.proposedServiceCount ?? 0) > 0 }
+                finishCompletion: { finishCompletion },
+                presentation: { presentation }
             )
             await transfer.close()
             return report
@@ -139,14 +140,14 @@ private final class NativeShareSelfTest {
     ) async throws -> NativeShareStepReport {
         let transfer = try await fixture.makeLinkTransfer()
         var triggerCount = 0
-        var finishOutcome: ShareArtifactOutcomeDTO?
+        var finishCompletion: SharePresentationCompletion?
         var presentation: RuneScribeSharePresentationHandle?
         let view = AnyView(
             RuneScribeCipherLinkShareLink(
                 transfer: transfer,
                 cipherLabel: "Synthetic Cipher",
                 onShareTriggered: { triggerCount += 1 },
-                onFinish: { finishOutcome = $0 },
+                onFinish: { finishCompletion = $0 },
                 onPresentation: { presentation = $0 }
             ) {
                 Label("Share", systemImage: "square.and.arrow.up")
@@ -155,11 +156,11 @@ private final class NativeShareSelfTest {
             .frame(width: 260, height: 100)
         )
         do {
-            let report = try presentAndDismiss(
+            let report = try await presentAndDismiss(
                 view: view,
                 triggerCount: { triggerCount },
-                finishOutcome: { finishOutcome },
-                presentationReady: { (presentation?.proposedServiceCount ?? 0) > 0 }
+                finishCompletion: { finishCompletion },
+                presentation: { presentation }
             )
             await transfer.close()
             return report
@@ -172,9 +173,9 @@ private final class NativeShareSelfTest {
     private func presentAndDismiss(
         view: AnyView,
         triggerCount: () -> Int,
-        finishOutcome: () -> ShareArtifactOutcomeDTO?,
-        presentationReady: () -> Bool
-    ) throws -> NativeShareStepReport {
+        finishCompletion: () -> SharePresentationCompletion?,
+        presentation: () -> RuneScribeSharePresentationHandle?
+    ) async throws -> NativeShareStepReport {
         guard let screen = NSScreen.main ?? NSScreen.screens.first else {
             throw NativeShareSelfTestFailure.noScreen
         }
@@ -196,11 +197,12 @@ private final class NativeShareSelfTest {
         window.contentView = hostingView
         window.makeKeyAndOrderFront(nil)
         window.orderFrontRegardless()
+        NSApp.activate()
         defer { window.orderOut(nil) }
 
         hostingView.layoutSubtreeIfNeeded()
-        guard waitUntil(timeout: 2, predicate: { window.isVisible }) else {
-            throw NativeShareSelfTestFailure.hostNotActive
+        guard await waitUntil(timeout: 2, predicate: { window.isVisible }) else {
+            throw NativeShareSelfTestFailure.hostWindowNotVisible
         }
 
         let clickPoint = NSPoint(x: size.width / 2, y: size.height / 2)
@@ -224,28 +226,32 @@ private final class NativeShareSelfTest {
         hitView.mouseDown(with: mouseDown)
         hitView.mouseUp(with: mouseUp)
 
-        guard waitUntil(timeout: 2, predicate: { triggerCount() == 1 }) else {
+        guard await waitUntil(timeout: 2, predicate: { triggerCount() == 1 }) else {
             throw NativeShareSelfTestFailure.triggerCountMismatch
         }
-        guard waitUntil(timeout: 5, predicate: presentationReady) else {
+        guard await waitUntil(timeout: 5, predicate: {
+            (presentation()?.proposedServiceCount ?? 0) > 0
+        }) else {
             throw NativeShareSelfTestFailure.pickerDidNotPresent
         }
+        guard let presentationHandle = presentation() else {
+            throw NativeShareSelfTestFailure.pickerDidNotPresent
+        }
+        presentationHandle.close()
 
-        let escapeWindowNumber = NSApp.keyWindow?.windowNumber ?? window.windowNumber
-        let escapeDown = try keyEvent(type: .keyDown, windowNumber: escapeWindowNumber)
-        let escapeUp = try keyEvent(type: .keyUp, windowNumber: escapeWindowNumber)
-        NSApp.sendEvent(escapeDown)
-        NSApp.sendEvent(escapeUp)
-
-        guard waitUntil(timeout: 5, predicate: {
-            finishOutcome() == .cancelled
+        guard await waitUntil(timeout: 5, predicate: {
+            guard case .success(let evidence)? = finishCompletion() else {
+                return false
+            }
+            return evidence.report.routeClass == .shareSheet
+                && evidence.report.result == .cancelled
         }) else {
-            throw NativeShareSelfTestFailure.pickerDidNotDismiss
+            throw NativeShareSelfTestFailure.presentationHandleDidNotDismiss
         }
         return NativeShareStepReport(
             triggerCount: 1,
             nativePickerPresented: true,
-            dismissedByLocalEscape: true
+            dismissedByHandleClose: true
         )
     }
 
@@ -272,35 +278,14 @@ private final class NativeShareSelfTest {
         return event
     }
 
-    private func keyEvent(
-        type: NSEvent.EventType,
-        windowNumber: Int
-    ) throws -> NSEvent {
-        guard let event = NSEvent.keyEvent(
-            with: type,
-            location: .zero,
-            modifierFlags: [],
-            timestamp: ProcessInfo.processInfo.systemUptime,
-            windowNumber: windowNumber,
-            context: nil,
-            characters: "\u{1B}",
-            charactersIgnoringModifiers: "\u{1B}",
-            isARepeat: false,
-            keyCode: 53
-        ) else {
-            throw NativeShareSelfTestFailure.eventCreationFailed
-        }
-        return event
-    }
-
     private func waitUntil(
         timeout: TimeInterval,
         predicate: () -> Bool
-    ) -> Bool {
+    ) async -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
         repeat {
             if predicate() { return true }
-            RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.02))
+            try? await Task<Never, Never>.sleep(for: .milliseconds(20))
         } while Date() < deadline
         return predicate()
     }
@@ -347,6 +332,9 @@ private final class NativeShareRuntimeFixture {
         let clientCapture = NativeShareRuntimeClientCapture()
 
         do {
+            let moduleStateStore = try AppleSQLiteModuleStateStore(
+                applicationSupportDirectory: temporaryRoot
+            )
             try await runtime.register(
                 manifest: NativeShareRuntimeModule.manifest,
                 factory: AnyModuleFactory(
@@ -358,6 +346,10 @@ private final class NativeShareRuntimeFixture {
             try await runtime.installPlatformAdapter(
                 shareArtifacts,
                 for: RuneScribeServiceKeys.sharePresentation
+            )
+            try await runtime.installPlatformAdapter(
+                moduleStateStore,
+                for: RuneScribeServiceKeys.moduleStateStore
             )
             try await runtime.start()
             return NativeShareRuntimeFixture(
@@ -506,18 +498,18 @@ private struct NativeShareSelfTestReport: Codable {
 private struct NativeShareStepReport: Codable {
     let triggerCount: Int
     let nativePickerPresented: Bool
-    let dismissedByLocalEscape: Bool
+    let dismissedByHandleClose: Bool
 
     var passed: Bool {
         triggerCount == 1
             && nativePickerPresented
-            && dismissedByLocalEscape
+            && dismissedByHandleClose
     }
 
     static let notRun = NativeShareStepReport(
         triggerCount: 0,
         nativePickerPresented: false,
-        dismissedByLocalEscape: false
+        dismissedByHandleClose: false
     )
 }
 
@@ -525,11 +517,11 @@ private enum NativeShareSelfTestFailure: String, Error {
     case invalidFixture
     case runtimeClientUnavailable
     case noScreen
-    case hostNotActive
+    case hostWindowNotVisible
     case controlNotHittable
     case eventCreationFailed
     case pickerDidNotPresent
     case triggerCountMismatch
-    case pickerDidNotDismiss
+    case presentationHandleDidNotDismiss
     case unexpected
 }
