@@ -7,6 +7,14 @@ automatically when a pull request is merged into `main` (see
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.38] - 2026-08-15
+
+- Add the Theme contract, runtime coordinator, and required Norse Base provider
+  while keeping production Elven series providers out of the shipping app.
+- Record Elven Series blocking-remediation evidence: DEV-ELVEN-001 and
+  DEV-ELVEN-002 passed; DEV-ELVEN-003 through DEV-ELVEN-009 remain blocked
+  pending source corrections.
+
 ## [1.0.37] - 2026-08-14
 
 - Add durable, privacy-safe Achievements, Codex progression, rewards, and

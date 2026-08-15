@@ -142,8 +142,10 @@ result and required attachment acceptance.
 2. Finish DOM-005/006/007 compatibility rendering, presentation-state ownership, and
    atomic delivery-state migration while keeping legacy decode behavior.
 3. Complete BAS-008's old/new compatibility and update-required test matrix.
-4. Resolve the recorded Elven Series design, stable-ID, geometry, resource-role, and
-   provenance deviations before producing or integrating any Elven assets or providers.
+4. Keep Elven Series Phase C blocked until DEV-ELVEN-003 through DEV-ELVEN-009
+   receive source, geometry, topology, resource-role, and provenance corrections.
+   DEV-ELVEN-001 and DEV-ELVEN-002 are resolved in the remediation ledger and
+   evidence under `docs/verification/elven-remediation/`.
 5. Qualify Progression feedback, silent-mode behavior, VoiceOver timing, and interrupted
    native-route presentation on supported physical hardware before claiming those
    device-only acceptance checks.

@@ -12,7 +12,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-731%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-814%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -51,7 +51,12 @@ A product of **Raven Forge Software**.
   the text frame itself transforms.
 - **🎨 Crafted interface** — a Metal-rendered Norse background, a bundled
   **Noto Sans Runic** font so every rune renders sharply, and one cohesive design
-  system across both platforms.
+  system across both platforms. Appearance is now driven by the runtime Theme
+  coordinator and the required Norse Base provider; production Elven series
+  providers are not shipped.
+- **🏆 Local Journey** — optional Achievements, Codex gates, and the Vault/Progress
+  view stay on-device. Unlock reveals are queued accessibly, and encode/decode
+  still work if Progression is unavailable.
 - **🎬 Cold-launch intro** — a short, skippable Raven Forge splash video plays on
   first open and at most once every **30 days** thereafter (tap anywhere or **Skip**),
   bypassed automatically if the video asset isn't bundled.
@@ -273,7 +278,7 @@ repository status is:
 | P06 | Uniform module contracts, policy classes, and generated catalog | Planned |
 | P07 | State, contribution, resource, and diagnostics registries | Planned |
 | P08 | Live-gate reconciliation and optional-failure isolation | Planned |
-| P09 | Theme-module readiness scaffold and sole-UI rendering | Planned |
+| P09 | Theme-module readiness scaffold and sole-UI rendering | Complete |
 | P10 | Typed durable event and coordination rail | Planned |
 | P11 | Permanent compliance guards, negative mutations, and CI | Planned |
 | P12 | Full Xcode, parity, device, final audit, and handoff | Planned |
@@ -299,12 +304,16 @@ The locked roadmap evolves Rune Scribe in deliberately separated stages:
 7. Add private iCloud progression sync and optional Game Center reporting.
 8. Replace placeholders with reviewed production themes.
 
-The repository now includes the behavior-preserving modular foundation and the optional
-local Progression Module: approved Achievements, Codex gates, the Vault/Progress view,
-durable unlock reveals, and privacy-safe existing-user migration. Production Theme
-providers, cloud synchronization, and Game Center remain disabled. Later Theme and
-sharing work remains gated by the local runtime, compatibility, and physical-device
-program; there is no external-framework prerequisite.
+The repository now includes the behavior-preserving modular foundation, the optional
+local Progression Module, and the Phase A/B Theme scaffold: approved Achievements,
+Codex gates, the Vault/Progress view, durable unlock reveals, privacy-safe
+existing-user migration, the runtime Theme coordinator, and the required Norse Base
+provider. Production Elven series providers, cloud synchronization, and Game Center
+remain disabled. Elven Series findings DEV-ELVEN-001 and DEV-ELVEN-002 are resolved
+in the remediation ledger; DEV-ELVEN-003 through DEV-ELVEN-009 still block Phase C
+source and provider work. Later Theme and sharing work remains gated by those
+findings, the local runtime, compatibility, and the physical-device program; there
+is no external-framework prerequisite.
 
 Current architecture and dependency authority lives in the
 [controlling Forsetti policy](docs/architecture/FORSETTI_CONTROLLING_POLICY.md),
@@ -366,9 +375,11 @@ Packages/RuneScribeArchitecture/
 │   ├── RuneScribePlatform/       Keychain, files, Contacts, fonts and system adapters
 │   ├── RuneScribeCoreModule/     Domain, crypto, persistence, import and app lock
 │   ├── RuneScribeProgressionModule/ Local achievements, grants, migration and recovery
+│   ├── RuneScribeThemeCoordinatorModule/ Runtime Theme selection, fallback and diagnostics
+│   ├── RuneScribeNorseThemeModule/ Required Norse Base provider and verified resources
 │   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        731 Swift package tests
+└── Tests/                        814 Swift package tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -424,7 +435,7 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package currently contains **731 package tests**, supplemented by
+The local Swift package currently contains **814 package tests**, supplemented by
 repository architecture guards, hosted macOS/iOS tests, iPhone/iPad UI parity, and an
 isolated macOS parity host. The package suite uses deterministic in-memory adapters and
 does not access the operator's login Keychain.
@@ -435,6 +446,7 @@ does not access the operator's login Keychain.
 | Core domain | AES-GCM, rune codec, ciphers, encrypted repositories, contacts, imports, fonts, PIN lock, privacy-safe progression evidence and share lifetime |
 | Compatibility | Exact cipher v3/message v1 fixtures, encrypted existing-install fixtures, links, routes and no-rewrite migration |
 | Progression | Exact catalog/rule boundaries, atomic grants, deduplication, scalable migration, quarantine, rebuild, catalog upgrade and fault injection |
+| Theme | Versioned contracts, coordinator selection/fallback, Norse Base resources, and synthetic provider conformance |
 | UI Module | Session projection, sensitive-state cleanup, routing, attachment policy, sharing, Vault snapshots and durable accessible reveals |
 | Platform adapters | Keychain contract, protected files and SQLite state, scoped inbound reads, Contacts, fonts, resources, feedback, clipboard and share artifacts |
 | Hosted and parity tests | Composition, isolated Simulator Keychain migration, native share outcomes, accessibility, iPhone/iPad and macOS product flows |
@@ -459,7 +471,9 @@ under the SIL Open Font License. © Raven Forge Software. All rights reserved.
 Detailed guides, architecture deep-dives, and diagrams live in the
 **[project wiki](https://github.com/flynn33/rune-scribe/wiki)** and the tracked
 [`docs`](docs) directory. Start with [Roadmap Alignment](docs/architecture/RoadmapAlignment.md)
-for the current implementation boundary and dependencies.
+for the current implementation boundary and dependencies. Elven Series status is in
+the [resolution ledger](docs/verification/ElvenSeriesBlockingResolutionLedger.md) and
+[final audit](docs/verification/ElvenSeriesBlockingRemediationFinalAudit.md).
 
 <div align="center">
 

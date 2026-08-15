@@ -377,22 +377,23 @@ shipping target.
 |---|---|---|
 | Generic Theme scaffold | PASS | THM-001 through THM-012 satisfied; runtime-owned contracts, registries, Coordinator, common UI, and conformance suite implemented |
 | Norse Base prerequisite | PASS | Required provider, exact Script mapping, exact font bytes, 42 verified resources, permanent fallback |
-| Four Elven providers | BLOCKED | Phase D cannot begin before Phase C and DEV-ELVEN-001 through DEV-ELVEN-009 disposition |
-| Stable Elven IDs | BLOCKED | DEV-ELVEN-001 and DEV-ELVEN-002 |
+| Four Elven providers | BLOCKED | Phase D cannot begin before Phase C and DEV-ELVEN-003 through DEV-ELVEN-009 disposition |
+| Stable Elven IDs | PASS | DEV-ELVEN-001 and DEV-ELVEN-002 resolved in the remediation ledger |
 | Elven production resources and budgets | BLOCKED | DEV-ELVEN-003 through DEV-ELVEN-009 |
 | Elven fonts and source fidelity | BLOCKED | Production source work is not authorized |
-| Elven Progression gates | BLOCKED | Conflicting identifiers and authority remain unresolved |
+| Elven Progression gates | PASS | Identifier mappings and Future Theme Binding authority are recorded |
 | Themed share/receive integration | BLOCKED | No Phase F change; outbound policy remains frozen |
 | Automated final regression evidence | PASS | 814 package tests, both Release builds, both parity runs, both static guards, and 74 shipping checks passed |
 | Physical-device evidence | PENDING | No physical-device run; not the sole remaining boundary |
-| Zero unresolved findings | FAIL | Nine blocking deviations remain open |
+| Zero unresolved findings | FAIL | DEV-ELVEN-003 through DEV-ELVEN-009 remain open |
 | Overall package delivery | **FAIL / BLOCKED** | Phase A/B pass does not satisfy Phase C through Phase G or resolve the deviation report |
 
 ## Required next authority
 
 Production Elven work can resume only after an authoritative, traceable disposition
-for every finding DEV-ELVEN-001 through DEV-ELVEN-009. The disposition must correct or
-explicitly amend the controlling inputs; it cannot be represented by a silent stable-ID
-substitution, topology change, asset normalization, or test exception. After that
-disposition, implementation must restart at Phase C and repeat all earlier Phase A/B
-gates before advancing.
+for every remaining finding DEV-ELVEN-003 through DEV-ELVEN-009. DEV-ELVEN-001 and
+DEV-ELVEN-002 already have recorded mappings and binding authority. Remaining
+dispositions must correct or explicitly amend the controlling inputs; they cannot be
+represented by a silent topology change, asset normalization, or test exception.
+After that disposition, implementation must restart at Phase C and repeat all earlier
+Phase A/B gates before advancing.
