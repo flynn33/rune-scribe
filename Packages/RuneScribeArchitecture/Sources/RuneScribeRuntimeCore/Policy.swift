@@ -14,14 +14,49 @@ public struct CapabilityVocabulary: Sendable {
 }
 
 public struct CapabilityPolicy: Sendable {
-    private let allowedRolesByCapability: [CapabilityIdentifier: Set<ModuleRole>]
+    private let allowedPolicyClassesByCapability: [
+        CapabilityIdentifier: Set<ModulePolicyClass>
+    ]
 
-    public init(allowedRolesByCapability: [CapabilityIdentifier: Set<ModuleRole>]) {
-        self.allowedRolesByCapability = allowedRolesByCapability
+    public init(
+        allowedRolesByCapability: [CapabilityIdentifier: Set<ModuleRole>],
+        additionalPolicyClassesByCapability: [
+            CapabilityIdentifier: Set<ModulePolicyClass>
+        ] = [:]
+    ) {
+        var mapped = allowedRolesByCapability.mapValues { roles in
+            Set(roles.map(ModulePolicyClass.init(role:)))
+        }
+        for (capability, policyClasses) in additionalPolicyClassesByCapability {
+            mapped[capability, default: []].formUnion(policyClasses)
+        }
+        allowedPolicyClassesByCapability = mapped
+    }
+
+    public init(
+        allowedPolicyClassesByCapability: [
+            CapabilityIdentifier: Set<ModulePolicyClass>
+        ]
+    ) {
+        self.allowedPolicyClassesByCapability = allowedPolicyClassesByCapability
     }
 
     public func allows(_ capability: CapabilityIdentifier, for role: ModuleRole) -> Bool {
-        allowedRolesByCapability[capability]?.contains(role) == true
+        allows(capability, for: ModulePolicyClass(role: role))
+    }
+
+    public func allows(
+        _ capability: CapabilityIdentifier,
+        for policyClass: ModulePolicyClass
+    ) -> Bool {
+        allowedPolicyClassesByCapability[capability]?.contains(policyClass) == true
+    }
+
+    public func allows(
+        _ capability: CapabilityIdentifier,
+        for descriptor: ModuleDescriptor
+    ) -> Bool {
+        allows(capability, for: descriptor.policyClass)
     }
 }
 
@@ -30,17 +65,39 @@ public struct ServiceAccessRule: Hashable, Sendable {
     public let requiredCapability: CapabilityIdentifier
     public let publisherRoles: Set<ModuleRole>
     public let consumerRoles: Set<ModuleRole>
+    public let publisherPolicyClasses: Set<ModulePolicyClass>
+    public let consumerPolicyClasses: Set<ModulePolicyClass>
 
     public init(
         serviceID: ServiceIdentifier,
         requiredCapability: CapabilityIdentifier,
         publisherRoles: Set<ModuleRole>,
-        consumerRoles: Set<ModuleRole>
+        consumerRoles: Set<ModuleRole>,
+        additionalPublisherPolicyClasses: Set<ModulePolicyClass> = [],
+        additionalConsumerPolicyClasses: Set<ModulePolicyClass> = []
     ) {
         self.serviceID = serviceID
         self.requiredCapability = requiredCapability
         self.publisherRoles = publisherRoles
         self.consumerRoles = consumerRoles
+        publisherPolicyClasses = Set(
+            publisherRoles.map(ModulePolicyClass.init(role:))
+        ).union(additionalPublisherPolicyClasses)
+        consumerPolicyClasses = Set(
+            consumerRoles.map(ModulePolicyClass.init(role:))
+        ).union(additionalConsumerPolicyClasses)
+    }
+
+    public func allowsPublisher(_ descriptor: ModuleDescriptor) -> Bool {
+        publisherPolicyClasses.contains(descriptor.policyClass)
+    }
+
+    public func allowsPublisher(role: ModuleRole) -> Bool {
+        publisherPolicyClasses.contains(ModulePolicyClass(role: role))
+    }
+
+    public func allowsConsumer(_ descriptor: ModuleDescriptor) -> Bool {
+        consumerPolicyClasses.contains(descriptor.policyClass)
     }
 }
 
@@ -60,15 +117,18 @@ public struct RuntimePolicy: Sendable {
     public let vocabulary: CapabilityVocabulary
     public let capabilities: CapabilityPolicy
     public let services: ServiceAccessPolicy
+    public let settings: RuntimeSettingAccessPolicy
 
     public init(
         vocabulary: CapabilityVocabulary,
         capabilities: CapabilityPolicy,
-        services: ServiceAccessPolicy
+        services: ServiceAccessPolicy,
+        settings: RuntimeSettingAccessPolicy = .denyAll
     ) {
         self.vocabulary = vocabulary
         self.capabilities = capabilities
         self.services = services
+        self.settings = settings
     }
 
     public static let patternBFoundation = RuntimePolicy(
@@ -91,7 +151,10 @@ public struct RuntimePolicy: Sendable {
                 RuneScribeRoles.primaryUI,
                 RuneScribeRoles.progression,
             ],
-            RuneScribeCapabilities.fontRegistration: [RuneScribeRoles.core],
+            RuneScribeCapabilities.fontRegistration: [
+                RuneScribeRoles.core,
+                RuneScribeRoles.primaryUI,
+            ],
             RuneScribeCapabilities.contactRead: [RuneScribeRoles.core],
             RuneScribeCapabilities.clipboardRead: [RuneScribeRoles.core],
             RuneScribeCapabilities.clipboardWrite: [RuneScribeRoles.primaryUI],
@@ -128,10 +191,44 @@ public struct RuntimePolicy: Sendable {
                 RuneScribeRoles.applicationHost,
             ],
             RuneScribeCapabilities.progressionCommands: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.themeStateRead: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.themeSelection: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.themeResourceRead: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.progressionRecovery: [RuneScribeRoles.applicationHost],
             RuneScribeCapabilities.progressionMigrationSubmit: [RuneScribeRoles.core],
             RuneScribeCapabilities.progressionMigrationApply: [
                 RuneScribeRoles.applicationHost,
+            ],
+        ], additionalPolicyClassesByCapability: [
+            RuneScribeCapabilities.contributionPublish: [
+                RuneScribePolicyClasses.themeProvider,
+            ],
+            RuneScribeCapabilities.contributionRead: [
+                RuneScribePolicyClasses.themeCoordinator,
+            ],
+            RuneScribeCapabilities.opaqueResourcePublish: [
+                RuneScribePolicyClasses.themeProvider,
+            ],
+            RuneScribeCapabilities.opaqueResourceResolve: [
+                RuneScribePolicyClasses.themeCoordinator,
+            ],
+            RuneScribeCapabilities.resourceRead: [
+                RuneScribePolicyClasses.themeProvider,
+            ],
+            RuneScribeCapabilities.runtimeSettingsRead: [
+                RuneScribePolicyClasses.themeCoordinator,
+            ],
+            RuneScribeCapabilities.runtimeSettingsWrite: [
+                RuneScribePolicyClasses.themeCoordinator,
+            ],
+            RuneScribeCapabilities.runtimeAvailabilityRead: [
+                RuneScribePolicyClasses.themeCoordinator,
+            ],
+            RuneScribeCapabilities.publishEvents: [
+                RuneScribePolicyClasses.themeCoordinator,
+            ],
+            RuneScribeCapabilities.themeDiagnostics: [
+                RuneScribePolicyClasses.supportTooling,
             ],
         ]),
         services: ServiceAccessPolicy(rules: [
@@ -173,13 +270,16 @@ public struct RuntimePolicy: Sendable {
                     RuneScribeRoles.core,
                     RuneScribeRoles.primaryUI,
                     RuneScribeRoles.progression,
+                ],
+                additionalConsumerPolicyClasses: [
+                    RuneScribePolicyClasses.themeProvider,
                 ]
             ),
             ServiceAccessRule(
                 serviceID: RuneScribeServiceIDs.systemFontRegistrar,
                 requiredCapability: RuneScribeCapabilities.fontRegistration,
                 publisherRoles: [RuneScribeRoles.applicationHost],
-                consumerRoles: [RuneScribeRoles.core]
+                consumerRoles: [RuneScribeRoles.core, RuneScribeRoles.primaryUI]
             ),
             ServiceAccessRule(
                 serviceID: RuneScribeServiceIDs.contactAccess,
@@ -223,6 +323,42 @@ public struct RuntimePolicy: Sendable {
                 publisherRoles: [RuneScribeRoles.applicationHost],
                 consumerRoles: [RuneScribeRoles.primaryUI]
             ),
-        ])
+        ]),
+        settings: RuntimeSettingAccessPolicy(
+            writableSettingIDsByPolicyClass: [
+                RuneScribePolicyClasses.primaryUI: [
+                    RuneScribeRuntimeSettings.unlockFeedbackSoundEnabled,
+                    RuneScribeRuntimeSettings.unlockFeedbackHapticsEnabled,
+                    RuneScribeRuntimeSettings.unlockFeedbackAnimationEnabled,
+                ],
+                RuneScribePolicyClasses.themeCoordinator: [
+                    RuneScribeRuntimeSettings.selectedCodex,
+                ],
+            ]
+        )
+    )
+}
+
+public struct RuntimeSettingAccessPolicy: Sendable {
+    private let writableSettingIDsByPolicyClass: [
+        ModulePolicyClass: Set<RuntimeSettingID>
+    ]
+
+    public init(
+        writableSettingIDsByPolicyClass: [
+            ModulePolicyClass: Set<RuntimeSettingID>
+        ]
+    ) {
+        self.writableSettingIDsByPolicyClass = writableSettingIDsByPolicyClass
+    }
+
+    public func writableSettingIDs(
+        for policyClass: ModulePolicyClass
+    ) -> Set<RuntimeSettingID> {
+        writableSettingIDsByPolicyClass[policyClass] ?? []
+    }
+
+    public static let denyAll = RuntimeSettingAccessPolicy(
+        writableSettingIDsByPolicyClass: [:]
     )
 }

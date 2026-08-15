@@ -43,14 +43,18 @@ Codex domain and a complete local Progression implementation:
 - an optional runtime-mediated Progression Module with strict approved catalogs,
   privacy-safe durable event handoff, atomic rules and grants, versioned existing-user
   migration, quarantine/recovery, live entitlement projection, snapshot-only UI, and an
-  accessible durable reveal queue; and
+  accessible durable reveal queue;
+- a versioned semantic Theme contract, generic owned contribution and opaque-resource
+  registries, a runtime-owned Theme Coordinator, semantic common UI presentation, and
+  a required Norse Base provider with exact Base Script and font compatibility; and
 - one superseded, nine accepted, and two explicitly blocked architecture decisions,
   plus this auditable roadmap ledger.
 
 That slice is intentionally usable without external services, a physical device,
 Contacts permission, login Keychain access, App Store Connect, iCloud, or Game Center.
-It does not declare an unused framework dependency and does not claim that production
-Theme modules, cloud synchronization, or final public-sharing work is complete.
+It does not declare an unused framework dependency and does not claim that optional
+production Theme series, cloud synchronization, or final public-sharing work is
+complete.
 
 ## App-owned Forsetti remediation gate
 
@@ -97,7 +101,7 @@ contract, and physical-device transport spike all pass.
 | MOD-001…013 | 8 satisfied, 4 transitional, 1 partial | Historical Core/UI separation, adapters, ingress, lock gating, architecture tests, and hosted tests exist. Runtime mediation, manifests, and bootstrap remain incomplete under the controlling policy. |
 | DOM-001…007 | 4 satisfied, 3 partial | Cipher/Script migration and an explicit delivery-state foundation exist. End-to-end legacy-font proof, selected-Codex/per-share presentation stores, and removal of the writable `delivered` compatibility rail remain. |
 | PKG-001…006 | 4 satisfied, 2 partial | The typed container, legacy readers, policy, and magic-first router exist. Complete fail-before-allocation proof, randomized malformed-input coverage, and allocation instrumentation remain in PKG-003/005. |
-| THM-001…012 | 11 not-started, 1 partial | A current UI design system exists, but no descriptor, Coordinator, Base/placeholder Theme Modules, preference/fallback service, or conformance suite exists. Local runtime registries and module contracts are prerequisites. |
+| THM-001…012 | 12 satisfied | Versioned contracts, generic owned registries, the Coordinator, semantic UI, required Norse Base, two deliberately different synthetic providers, runtime selection/fallback, debug diagnostics, and the shared conformance suite are implemented. Optional production Theme series remain separate work. |
 | PRO-001…016 | 16 satisfied | The optional module, runtime-owned store and handoff, opaque-token lifecycle, exact catalog/rules, atomic records and grants, scalable migration, entitlement projection, snapshot-only views, durable feedback queue, quarantine, and guarded recovery are implemented. Physical feedback and accessibility qualification remains separately identified in the Progression implementation report. |
 | SHR-001…017 | 7 not-started, 6 partial, 2 decision-frozen, 2 blocked-device | Current legacy share, QR, MessageUI, and completion foundations remain. Final composition and Quick Look decisions require the physical-device spike; themed work depends on PKG, THM, and PRO gates. |
 
@@ -138,9 +142,8 @@ result and required attachment acceptance.
 2. Finish DOM-005/006/007 compatibility rendering, presentation-state ownership, and
    atomic delivery-state migration while keeping legacy decode behavior.
 3. Complete BAS-008's old/new compatibility and update-required test matrix.
-4. Complete the remaining app-owned runtime contribution/resource gates required by
-   production Theme modules; Progression's state, Settings, availability, and event
-   ports are already runtime-mediated.
+4. Resolve the recorded Elven Series design, stable-ID, geometry, resource-role, and
+   provenance deviations before producing or integrating any Elven assets or providers.
 5. Qualify Progression feedback, silent-mode behavior, VoiceOver timing, and interrupted
    native-route presentation on supported physical hardware before claiming those
    device-only acceptance checks.

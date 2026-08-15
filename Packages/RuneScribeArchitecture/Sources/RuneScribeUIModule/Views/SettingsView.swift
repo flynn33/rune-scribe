@@ -25,6 +25,7 @@ struct SettingsView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
+                    appearancePanel
                     progressAndFeedbackPanel
                     appLockPanel
                     contactsPanel
@@ -49,6 +50,118 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showVaultProgress) {
             VaultProgressView()
+        }
+    }
+
+    // MARK: - Appearance
+
+    private var appearancePanel: some View {
+        RunePanel(title: "Appearance", systemImage: "paintpalette", accent: .runeBlue) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Choose one available Codex. This changes presentation only; your ciphers and messages stay the same.")
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let snapshot = session.themeSnapshot {
+                    ForEach(snapshot.providers, id: \.codexID) { provider in
+                        Button {
+                            Task { await session.selectCodex(provider.codexID) }
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: providerIcon(provider))
+                                    .frame(width: 20)
+                                    .foregroundColor(
+                                        provider.isSelected ? .runeSelected : .runeSilver
+                                    )
+                                    .accessibilityHidden(true)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(provider.displayName)
+                                        .font(.body.weight(.semibold))
+                                        .foregroundColor(.runeTextPrimary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    Text(providerStatus(provider))
+                                        .font(.caption)
+                                        .foregroundColor(.runeSilver)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                .layoutPriority(1)
+                                Spacer(minLength: 8)
+                                if provider.isSelected {
+                                    Text("Selected")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundColor(.runeSelected)
+                                        .fixedSize(horizontal: true, vertical: false)
+                                }
+                            }
+                            .padding(.vertical, 6)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(!provider.isSelectable || provider.isSelected)
+                        .accessibilityLabel(provider.displayName)
+                        .accessibilityValue(providerAccessibilityStatus(provider))
+                        .accessibilityHint(
+                            provider.isSelectable && !provider.isSelected
+                                ? "Selects this Codex appearance"
+                                : ""
+                        )
+                    }
+
+                    if snapshot.fallbackReason != .none {
+                        Label(
+                            "Your preferred Codex is unavailable. The Base appearance is active.",
+                            systemImage: "arrow.uturn.backward.circle"
+                        )
+                        .font(.footnote)
+                        .foregroundColor(.runeWarning)
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+                } else {
+                    Label(
+                        "Codex appearances are temporarily unavailable.",
+                        systemImage: "info.circle"
+                    )
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                }
+
+                if let error = session.themeSelectionError {
+                    Label(error, systemImage: "exclamationmark.triangle")
+                        .font(.footnote)
+                        .foregroundColor(.runeWarning)
+                }
+            }
+        }
+    }
+
+    private func providerStatus(_ provider: ThemeProviderSummaryDTO) -> String {
+        if provider.isSelected { return "Available" }
+        switch provider.state {
+        case .available:
+            return provider.isOwned ? "Available" : "Not owned"
+        case .locked:
+            return "Locked"
+        case .unavailable:
+            return "Temporarily unavailable"
+        case .incompatible:
+            return "Requires a newer app or system"
+        case .invalidResources:
+            return "Unavailable because required resources could not be verified"
+        }
+    }
+
+    private func providerAccessibilityStatus(_ provider: ThemeProviderSummaryDTO) -> String {
+        provider.isSelected ? "Available and selected" : providerStatus(provider)
+    }
+
+    private func providerIcon(_ provider: ThemeProviderSummaryDTO) -> String {
+        if provider.isSelected { return "checkmark.circle.fill" }
+        switch provider.state {
+        case .available: return "circle"
+        case .locked: return "lock.fill"
+        case .unavailable, .invalidResources: return "exclamationmark.circle"
+        case .incompatible: return "arrow.up.circle"
         }
     }
 
@@ -122,7 +235,7 @@ struct SettingsView: View {
         )) {
             Label(title, systemImage: systemImage)
                 .font(.body)
-                .foregroundColor(.white)
+                .foregroundColor(.runeTextPrimary)
         }
         .toggleStyle(.switch)
         .accessibilityHint("Does not hide unlock text")
@@ -143,7 +256,7 @@ struct SettingsView: View {
 
                 infoRow("Status",
                         session.isPINSet ? "PIN set" : "No PIN",
-                        color: session.isPINSet ? .green : .runeSilver)
+                        color: session.isPINSet ? .runeSuccess : .runeSilver)
 
                 if session.isPINSet {
                     HStack(spacing: 12) {
@@ -197,7 +310,7 @@ struct SettingsView: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text("Rune Scribe")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.runeTextPrimary)
                     Spacer()
                     Text("v\(appVersion) (\(buildNumber))")
                         .font(.system(size: 12, design: .monospaced))
@@ -208,7 +321,7 @@ struct SettingsView: View {
                     .font(.system(size: 12, weight: .semibold, design: .monospaced))
                     .foregroundColor(.runeGold)
 
-                Text("Rune Scribe turns your messages into Norse runes with a private substitution cipher that stays encrypted on your device.")
+                Text("Rune Scribe turns your messages into private symbolic inscriptions that stay encrypted on your device.")
                     .font(.system(size: 12))
                     .foregroundColor(.runeSilver)
                     .lineSpacing(2)
@@ -259,7 +372,11 @@ struct SettingsView: View {
     }
 
     @ViewBuilder
-    private func infoRow(_ label: String, _ value: String, color: Color = .white) -> some View {
+    private func infoRow(
+        _ label: String,
+        _ value: String,
+        color: Color = .runeTextPrimary
+    ) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(label.uppercased())
                 .font(.system(size: 10, weight: .semibold, design: .monospaced))

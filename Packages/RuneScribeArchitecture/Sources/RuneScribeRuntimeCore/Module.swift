@@ -8,6 +8,7 @@ public struct ModuleDescriptor: Hashable, Sendable {
     public let criticality: ModuleCriticality
     public let entryPoint: String
     public let role: ModuleRole
+    public let policyClass: ModulePolicyClass
     public let requestedCapabilities: Set<CapabilityIdentifier>
     public let requiredServices: Set<ServiceIdentifier>
     public let requiredResources: Set<ApplicationResource>
@@ -23,6 +24,7 @@ public struct ModuleDescriptor: Hashable, Sendable {
         criticality: ModuleCriticality = .required,
         entryPoint: String,
         role: ModuleRole,
+        policyClass: ModulePolicyClass? = nil,
         requestedCapabilities: Set<CapabilityIdentifier>,
         requiredServices: Set<ServiceIdentifier> = [],
         requiredResources: Set<ApplicationResource> = [],
@@ -37,6 +39,7 @@ public struct ModuleDescriptor: Hashable, Sendable {
         self.criticality = criticality
         self.entryPoint = entryPoint
         self.role = role
+        self.policyClass = policyClass ?? ModulePolicyClass(role: role)
         self.requestedCapabilities = requestedCapabilities
         self.requiredServices = requiredServices
         self.requiredResources = requiredResources

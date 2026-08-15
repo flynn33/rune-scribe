@@ -99,6 +99,7 @@ public struct ModuleManifest: Codable, Equatable, Sendable {
     public let entryPoint: String
     public let runtimeRequirements: ModuleRuntimeRequirements
     public let defaultRole: ModuleRole
+    public let policyClass: ModulePolicyClass?
     public let consumedEndpoints: [RuntimeEndpointIdentifier]
     public let publishedEndpoints: [RuntimeEndpointIdentifier]
     public let entitlementRequirement: EntitlementRequirement?
@@ -119,6 +120,7 @@ public struct ModuleManifest: Codable, Equatable, Sendable {
         entryPoint: String,
         runtimeRequirements: ModuleRuntimeRequirements,
         defaultRole: ModuleRole,
+        policyClass: ModulePolicyClass? = nil,
         consumedEndpoints: [RuntimeEndpointIdentifier] = [],
         publishedEndpoints: [RuntimeEndpointIdentifier] = [],
         entitlementRequirement: EntitlementRequirement? = nil,
@@ -138,9 +140,14 @@ public struct ModuleManifest: Codable, Equatable, Sendable {
         self.entryPoint = entryPoint
         self.runtimeRequirements = runtimeRequirements
         self.defaultRole = defaultRole
+        self.policyClass = policyClass
         self.consumedEndpoints = consumedEndpoints
         self.publishedEndpoints = publishedEndpoints
         self.entitlementRequirement = entitlementRequirement
         self.diagnosticsVisibleInProduction = diagnosticsVisibleInProduction
+    }
+
+    public var effectivePolicyClass: ModulePolicyClass {
+        policyClass ?? ModulePolicyClass(role: defaultRole)
     }
 }

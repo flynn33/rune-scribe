@@ -4,16 +4,16 @@ import RuneScribeContracts
 public struct RuntimeSettingsClient: Sendable {
     private let gateway: RuntimeSettingsGateway
     private let lease: ModuleContextLease
-    private let canWrite: Bool
+    private let writableSettingIDs: Set<RuntimeSettingID>
 
     init(
         gateway: RuntimeSettingsGateway,
         lease: ModuleContextLease,
-        canWrite: Bool
+        writableSettingIDs: Set<RuntimeSettingID>
     ) {
         self.gateway = gateway
         self.lease = lease
-        self.canWrite = canWrite
+        self.writableSettingIDs = writableSettingIDs
     }
 
     public func snapshot() async throws -> RuntimeSettingsSnapshotDTO {
@@ -27,10 +27,10 @@ public struct RuntimeSettingsClient: Sendable {
         _ command: SetRuntimeSettingCommand
     ) async throws -> RuntimeSettingDTO {
         try await lease.requireActive()
-        guard canWrite else {
-            throw RuneScribeRuntimeError.capabilityDenied(
+        guard writableSettingIDs.contains(command.settingID) else {
+            throw RuneScribeRuntimeError.settingWriteDenied(
                 moduleID: lease.moduleID,
-                capability: RuneScribeCapabilities.runtimeSettingsWrite
+                settingID: command.settingID
             )
         }
         let result = try await gateway.set(command)

@@ -52,6 +52,7 @@ public actor RuneScribeRuntime {
     private struct Registration: Sendable {
         let manifest: ModuleManifest
         let factory: AnyModuleFactory
+        let themeDiscovery: ThemeDescriptor?
     }
 
     private struct ActiveModule: Sendable {
@@ -77,11 +78,14 @@ public actor RuneScribeRuntime {
     private let progressionOutbox: RuntimeProgressionOutbox
     private let existingUserMigrationHandoff: RuntimeExistingUserMigrationHandoff
     private let rootPresentationGateway = RuntimeRootPresentationGateway()
+    private let contributionRegistry: RuntimeContributionRegistry
+    private let opaqueResourceRegistry = RuntimeOpaqueResourceRegistry()
     private let events = RuntimeEventBus()
     private let messages = DirectedMessageRouter()
 
     private var registrations: [ModuleIdentifier: Registration] = [:]
     private var failedOptionalDescriptors: [ModuleIdentifier: ModuleDescriptor] = [:]
+    private var failedOptionalThemeDiscoveries: [ModuleIdentifier: ThemeDescriptor] = [:]
     private var entryPoints: Set<String> = []
     private var roles: Set<ModuleRole> = []
     private var moduleStates: [ModuleIdentifier: ModuleLifecycleState] = [:]
@@ -107,6 +111,17 @@ public actor RuneScribeRuntime {
         self.policy = policy
         self.eligibility = eligibility
         self.environment = environment
+        contributionRegistry = RuntimeContributionRegistry(
+            publishCapabilityID: RuneScribeCapabilities.contributionPublish,
+            readCapabilityID: RuneScribeCapabilities.contributionRead,
+            authorization: { descriptor, capability in
+                policy.capabilities.allows(
+                    capability,
+                    for: descriptor.policyClass
+                )
+            },
+            canonicalRules: RuntimeContributionCatalog.canonicalRules
+        )
         let initialEntitlements = Self.initialEntitlementSnapshot(environment: environment)
         entitlementSnapshot = initialEntitlements
         lastObservedEntitlementSnapshot = initialEntitlements
@@ -157,6 +172,17 @@ public actor RuneScribeRuntime {
         self.policy = policy
         self.eligibility = eligibility
         self.environment = environment
+        contributionRegistry = RuntimeContributionRegistry(
+            publishCapabilityID: RuneScribeCapabilities.contributionPublish,
+            readCapabilityID: RuneScribeCapabilities.contributionRead,
+            authorization: { descriptor, capability in
+                policy.capabilities.allows(
+                    capability,
+                    for: descriptor.policyClass
+                )
+            },
+            canonicalRules: RuntimeContributionCatalog.canonicalRules
+        )
         let initialEntitlements = Self.initialEntitlementSnapshot(environment: environment)
         entitlementSnapshot = initialEntitlements
         lastObservedEntitlementSnapshot = initialEntitlements
@@ -196,7 +222,8 @@ public actor RuneScribeRuntime {
 
     public func register(
         manifest: ModuleManifest,
-        factory: AnyModuleFactory
+        factory: AnyModuleFactory,
+        themeDiscovery: ThemeDescriptor? = nil
     ) throws {
         guard registrations[manifest.moduleID] == nil,
               failedOptionalDescriptors[manifest.moduleID] == nil
@@ -218,7 +245,17 @@ public actor RuneScribeRuntime {
             policy: policy
         )
 
-        registrations[manifest.moduleID] = Registration(manifest: manifest, factory: factory)
+        try Self.validateThemeDiscovery(
+            themeDiscovery,
+            manifest: manifest,
+            module: factory.descriptor
+        )
+
+        registrations[manifest.moduleID] = Registration(
+            manifest: manifest,
+            factory: factory,
+            themeDiscovery: themeDiscovery
+        )
         entryPoints.insert(manifest.entryPoint)
         roles.insert(manifest.defaultRole)
         moduleStates[manifest.moduleID] = .registered
@@ -226,7 +263,8 @@ public actor RuneScribeRuntime {
 
     public func register(
         manifestData: Data,
-        factory: AnyModuleFactory
+        factory: AnyModuleFactory,
+        themeDiscovery: ThemeDescriptor? = nil
     ) throws {
         try ModuleManifestValidator.validateCriticality(factory.descriptor)
         let moduleID = factory.descriptor.moduleID
@@ -237,12 +275,19 @@ public actor RuneScribeRuntime {
         }
         do {
             let manifest = try ModuleManifestDecoder.decode(manifestData)
-            try register(manifest: manifest, factory: factory)
+            try register(
+                manifest: manifest,
+                factory: factory,
+                themeDiscovery: themeDiscovery
+            )
         } catch {
             guard factory.descriptor.criticality == .optional else {
                 throw error
             }
-            recordOptionalRegistrationFailure(factory.descriptor)
+            recordOptionalRegistrationFailure(
+                factory.descriptor,
+                themeDiscovery: themeDiscovery
+            )
         }
     }
 
@@ -250,7 +295,8 @@ public actor RuneScribeRuntime {
         manifestResource: ApplicationResource,
         expectedSHA256: Data,
         maximumByteCount: Int,
-        factory: AnyModuleFactory
+        factory: AnyModuleFactory,
+        themeDiscovery: ThemeDescriptor? = nil
     ) async throws {
         try ModuleManifestValidator.validateCriticality(factory.descriptor)
         let moduleID = factory.descriptor.moduleID
@@ -267,18 +313,68 @@ public actor RuneScribeRuntime {
                     maximumByteCount: maximumByteCount,
                     descriptor: factory.descriptor
                 )
-            try register(manifestData: manifestData, factory: factory)
+            try register(
+                manifestData: manifestData,
+                factory: factory,
+                themeDiscovery: themeDiscovery
+            )
         } catch {
             guard factory.descriptor.criticality == .optional else {
                 throw error
             }
-            recordOptionalRegistrationFailure(factory.descriptor)
+            recordOptionalRegistrationFailure(
+                factory.descriptor,
+                themeDiscovery: themeDiscovery
+            )
         }
     }
 
-    private func recordOptionalRegistrationFailure(_ descriptor: ModuleDescriptor) {
+    private func recordOptionalRegistrationFailure(
+        _ descriptor: ModuleDescriptor,
+        themeDiscovery: ThemeDescriptor? = nil
+    ) {
         failedOptionalDescriptors[descriptor.moduleID] = descriptor
+        failedOptionalThemeDiscoveries[descriptor.moduleID] = themeDiscovery
         moduleStates[descriptor.moduleID] = .failed
+    }
+
+    private static func validateThemeDiscovery(
+        _ discovery: ThemeDescriptor?,
+        manifest: ModuleManifest,
+        module: ModuleDescriptor
+    ) throws {
+        guard let discovery else { return }
+        try RuntimeContributionCatalog.validateThemeDescriptor(
+            discovery,
+            RuntimeThemeContributionCatalog.key(for: discovery.codex.id),
+            module
+        )
+        guard module.policyClass == RuneScribePolicyClasses.themeProvider,
+              manifest.effectivePolicyClass == RuneScribePolicyClasses.themeProvider
+        else {
+            throw RuntimeContributionRegistryError.canonicalIdentityMismatch(
+                RuntimeThemeContributionCatalog.key(for: discovery.codex.id)
+            )
+        }
+        let requirement = manifest.entitlementRequirement
+        switch discovery.criticality {
+        case .requiredBase:
+            guard requirement?.kind == .always,
+                  requirement?.identifier == RuneScribeUnlockIDs.norseCodex
+            else {
+                throw RuntimeContributionRegistryError.canonicalCriticalityMismatch(
+                    RuntimeThemeContributionCatalog.key(for: discovery.codex.id)
+                )
+            }
+        case .optional:
+            guard requirement?.kind == .earned,
+                  requirement?.identifier == discovery.codex.entitlementID
+            else {
+                throw RuntimeContributionRegistryError.canonicalCriticalityMismatch(
+                    RuntimeThemeContributionCatalog.key(for: discovery.codex.id)
+                )
+            }
+        }
     }
 
     private func authorizePlatformAdapterInstallation(
@@ -290,7 +386,7 @@ public actor RuneScribeRuntime {
         }
         guard serviceID == expected,
               let rule = policy.services.rule(for: serviceID),
-              rule.publisherRoles.contains(RuneScribeRoles.applicationHost)
+              rule.allowsPublisher(role: RuneScribeRoles.applicationHost)
         else {
             throw RuneScribeRuntimeError.hostServiceAccessDenied(serviceID)
         }
@@ -390,12 +486,15 @@ public actor RuneScribeRuntime {
         await settingsGateway.activateRuntime()
         await availabilityGateway.activateRuntime(
             optionalModules: optionalAvailabilitySnapshots(),
+            themeProviders: themeProviderAvailabilitySnapshots(),
             entitlementSnapshot: entitlementSnapshot
         )
         await progressionOutbox.activateRuntime()
         await existingUserMigrationHandoff.activateRuntime()
         _ = await runtimeIOGateway.activateRuntime()
         _ = await rootPresentationGateway.activateRuntime()
+        _ = await contributionRegistry.activateRuntime()
+        _ = await opaqueResourceRegistry.activateRuntime()
         if stopRequestedWhileStarting {
             await finishInterruptedStart()
             return
@@ -490,6 +589,8 @@ public actor RuneScribeRuntime {
             await moduleStateGateway.deactivateRuntime()
             await platformBridge.deactivateRuntime()
             await rootPresentationGateway.deactivateRuntime()
+            await contributionRegistry.deactivateRuntime()
+            await opaqueResourceRegistry.deactivateRuntime()
             resumeStopWaiters()
             throw error
         }
@@ -518,6 +619,8 @@ public actor RuneScribeRuntime {
             await moduleStateGateway.deactivateRuntime()
             await platformBridge.deactivateRuntime()
             await rootPresentationGateway.deactivateRuntime()
+            await contributionRegistry.deactivateRuntime()
+            await opaqueResourceRegistry.deactivateRuntime()
             await hostIngress.flush()
             if status == .stopped {
                 return
@@ -546,6 +649,8 @@ public actor RuneScribeRuntime {
         await moduleStateGateway.deactivateRuntime()
         await platformBridge.deactivateRuntime()
         await rootPresentationGateway.deactivateRuntime()
+        await contributionRegistry.deactivateRuntime()
+        await opaqueResourceRegistry.deactivateRuntime()
         await hostIngress.flush()
         await stopActivatedModules(markFailed: false)
         activeUIModuleID = nil
@@ -590,8 +695,30 @@ public actor RuneScribeRuntime {
     private func publishAvailabilitySnapshot() async {
         await availabilityGateway.update(
             optionalModules: optionalAvailabilitySnapshots(),
+            themeProviders: themeProviderAvailabilitySnapshots(),
             entitlementSnapshot: entitlementSnapshot
         )
+    }
+
+    private func themeProviderAvailabilitySnapshots()
+        -> [RuntimeThemeProviderAvailabilitySnapshot]
+    {
+        var snapshots = registrations.values.compactMap { registration in
+            registration.themeDiscovery.map {
+                RuntimeThemeProviderAvailabilitySnapshot(
+                    descriptor: $0,
+                    lifecycleState: moduleStates[registration.manifest.moduleID]
+                        ?? .registered
+                )
+            }
+        }
+        snapshots.append(contentsOf: failedOptionalThemeDiscoveries.values.map {
+            RuntimeThemeProviderAvailabilitySnapshot(
+                descriptor: $0,
+                lifecycleState: .failed
+            )
+        })
+        return snapshots.sorted { $0.descriptor.codex.id < $1.descriptor.codex.id }
     }
 
     public func reconcileEntitlements(
@@ -910,6 +1037,14 @@ public actor RuneScribeRuntime {
                 descriptor: registration.factory.descriptor,
                 generation: moduleGeneration
             )
+            try await contributionRegistry.activateModule(
+                descriptor: registration.factory.descriptor,
+                generation: moduleGeneration
+            )
+            try await opaqueResourceRegistry.activateModule(
+                descriptor: registration.factory.descriptor,
+                generation: moduleGeneration
+            )
         } catch {
             await dispatcher.invalidateModule(moduleID: moduleID, failed: true)
             await runtimeIOGateway.invalidateModule(
@@ -924,11 +1059,20 @@ public actor RuneScribeRuntime {
                 moduleID,
                 generation: moduleGeneration
             )
+            await contributionRegistry.invalidateModule(
+                moduleID,
+                generation: moduleGeneration
+            )
+            await opaqueResourceRegistry.invalidateModule(
+                moduleID,
+                generation: moduleGeneration
+            )
             moduleStates[moduleID] = .failed
             throw RuneScribeRuntimeError.activationFailed(moduleID)
         }
         let context = ModuleContext(
             descriptor: registration.factory.descriptor,
+            runtimePlatform: platform,
             policy: policy,
             events: events,
             messages: messages,
@@ -945,6 +1089,10 @@ public actor RuneScribeRuntime {
             existingUserMigrationHandoff: existingUserMigrationHandoff,
             rootPresentationGateway: rootPresentationGateway,
             rootPresentationGeneration: await rootPresentationGateway.currentGeneration(),
+            contributionRegistry: contributionRegistry,
+            contributionRegistryGeneration: await contributionRegistry.currentGeneration(),
+            opaqueResourceRegistry: opaqueResourceRegistry,
+            opaqueResourceRegistryGeneration: await opaqueResourceRegistry.currentGeneration(),
             environment: environment,
             lease: lease
         )
@@ -1000,6 +1148,8 @@ public actor RuneScribeRuntime {
         await moduleStateGateway.deactivateRuntime()
         await platformBridge.deactivateRuntime()
         await rootPresentationGateway.deactivateRuntime()
+        await contributionRegistry.deactivateRuntime()
+        await opaqueResourceRegistry.deactivateRuntime()
         await hostIngress.flush()
         await stopActivatedModules(markFailed: false)
         activeUIModuleID = nil

@@ -11,6 +11,7 @@ struct CipherViewState: Identifiable, Equatable, Sendable {
     let delivered: Bool
     let publicIdentifier: String
     let fontName: String
+    let fontSource: FontSourceDTO
 
     var contractID: CipherID {
         CipherID(rawValue: id)

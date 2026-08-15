@@ -58,16 +58,13 @@ extension Font {
     /// A rune font at `size`. Defaults to the bundled Noto Sans Runic — which covers the
     /// entire Unicode Runic block, so no rune renders as a missing-glyph box (default system
     /// fonts lack U+16F1–U+16F8) — but accepts a cipher's resolved font name. Registered by
-    /// the application service during launch; falls back to the system font.
-    static func runic(_ size: CGFloat, fontName: String = "Noto Sans Runic") -> Font {
-        .custom(fontName, size: size)
-    }
-}
-
-/// Resolves the key-free font name supplied by the application snapshot.
-enum RuneFont {
-    static func name(for cipher: CipherViewState?) -> String {
-        cipher?.fontName ?? "Noto Sans Runic"
+    /// the runtime-mediated presentation rail; falls back to the system font.
+    @MainActor
+    static func runic(_ size: CGFloat, fontName: String? = nil) -> Font {
+        .custom(
+            fontName ?? RuneThemePaletteInterpreter.fontPostScriptName,
+            size: size
+        )
     }
 }
 
@@ -125,40 +122,13 @@ struct RuneHeader: View {
                 endPoint: .bottom
             )
 
-            VStack(spacing: 6) {
-                Text(runic)
-                    .font(.system(size: 27, weight: .bold))
-                    .foregroundColor(.runeGold)
-                    .shadow(color: Color.runeGold.opacity(0.35), radius: 9, y: 1)
-                Text(subtitle.uppercased())
-                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                    .tracking(5)
-                    .foregroundColor(.runeSilver)
-            }
-
-            if !trailingButtons.isEmpty {
-                VStack {
-                    HStack(spacing: 10) {
-                        Spacer()
-                        ForEach(trailingButtons) { button in
-                            Button(action: button.action) {
-                                Image(systemName: button.systemImage)
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundColor(.runeSilver)
-                                    .frame(width: 28, height: 28)
-                                    .background(Circle().fill(Color.runeNavy.opacity(0.55)))
-                                    .overlay(Circle().strokeBorder(Color.runeSilver.opacity(0.30), lineWidth: 1))
-                                    .frame(width: 44, height: 44)
-                                    .contentShape(Circle())
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(button.help)
-                            .help(button.help)
-                        }
-                    }
-                    Spacer()
+            if trailingButtons.isEmpty {
+                wordmark
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    centeredHeaderContent
+                    compactHeaderContent
                 }
-                .padding(14)
             }
         }
         .frame(height: height)
@@ -168,6 +138,106 @@ struct RuneHeader: View {
                 .fill(Color.runeGold.opacity(0.35))
                 .frame(height: 1)
         }
+    }
+
+    private var actionRowWidth: CGFloat {
+        let buttonCount = CGFloat(trailingButtons.count)
+        return buttonCount * 44 + max(0, buttonCount - 1) * 10
+    }
+
+    private var wordmark: some View {
+        VStack(spacing: 6) {
+            Canvas { context, size in
+                var glyphContext = context
+                glyphContext.addFilter(
+                    .shadow(color: Color.runeGold.opacity(0.35), radius: 9, y: 1)
+                )
+
+                let resolved = glyphContext.resolve(
+                    Text(runic)
+                        .font(.runic(27))
+                        .foregroundColor(.runeGold)
+                )
+                let measured = resolved.measure(
+                    in: CGSize(width: 10_000, height: size.height)
+                )
+                let horizontalScale = measured.width > 0 ? size.width / measured.width : 1
+                let verticalScale = measured.height > 0 ? size.height / measured.height : 1
+                let scale = min(1, horizontalScale, verticalScale)
+
+                glyphContext.translateBy(x: size.width / 2, y: size.height / 2)
+                glyphContext.scaleBy(x: scale, y: scale)
+                glyphContext.draw(resolved, at: .zero, anchor: .center)
+            }
+            .frame(
+                minWidth: 80,
+                idealWidth: min(280, max(140, CGFloat(runic.count) * 19)),
+                maxWidth: .infinity,
+                minHeight: 34,
+                maxHeight: 34
+            )
+            .accessibilityHidden(true)
+            Text(subtitle.uppercased())
+                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                .tracking(5)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .foregroundColor(.runeSilver)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(subtitle)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    private var centeredHeaderContent: some View {
+        HStack(spacing: 8) {
+            Color.clear
+                .frame(width: actionRowWidth, height: 44)
+                .accessibilityHidden(true)
+            wordmark
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(maxHeight: .infinity)
+            actionRow
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var compactHeaderContent: some View {
+        HStack(spacing: 8) {
+            wordmark
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .layoutPriority(1)
+            actionRow
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var actionRow: some View {
+        HStack(spacing: 10) {
+            ForEach(trailingButtons) { button in
+                Button(action: button.action) {
+                    Image(systemName: button.systemImage)
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundColor(.runeSilver)
+                        .frame(width: 28, height: 28)
+                        .background(Circle().fill(Color.runeNavy.opacity(0.55)))
+                        .overlay(
+                            Circle().strokeBorder(
+                                Color.runeSilver.opacity(0.30),
+                                lineWidth: 1
+                            )
+                        )
+                        .frame(width: 44, height: 44)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(button.help)
+                .help(button.help)
+            }
+        }
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 }
 

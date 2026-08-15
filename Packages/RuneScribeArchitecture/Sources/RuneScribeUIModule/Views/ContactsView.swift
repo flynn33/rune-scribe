@@ -303,7 +303,7 @@ struct ContactsView: View {
                     Image(systemName: selection.contains(contact.id) ? "checkmark.circle.fill" : "circle")
                         .foregroundColor(selection.contains(contact.id) ? .runeBlue : .runeSilver)
                 }
-                Text(contact.displayName).font(.system(size: 15, weight: .bold)).foregroundColor(.white).lineLimit(1)
+                Text(contact.displayName).font(.system(size: 15, weight: .bold)).foregroundColor(.runeTextPrimary).lineLimit(1)
                 Spacer()
                 badge(contact.source == .imported ? "IMPORTED" : "MANUAL",
                       color: contact.source == .imported ? .runeBlue : .runeSilver)
@@ -328,7 +328,7 @@ struct ContactsView: View {
                 .help("Rename \(contact.displayName)")
                 .accessibilityLabel("Rename \(contact.displayName)")
                 Button { deleteTarget = contact; showDelete = true } label: {
-                    Image(systemName: "trash").foregroundColor(.red.opacity(0.85))
+                    Image(systemName: "trash").foregroundColor(.runeDanger.opacity(0.85))
                 }
                 .buttonStyle(.plain)
                 .help("Delete \(contact.displayName)")
@@ -346,7 +346,7 @@ struct ContactsView: View {
     private func metaLine(_ icon: String, _ value: String) -> some View {
         HStack(spacing: 6) {
             Image(systemName: icon).font(.system(size: 10)).foregroundColor(.runeSilver)
-            Text(value).font(.system(size: 11, design: .monospaced)).foregroundColor(.white.opacity(0.85))
+            Text(value).font(.system(size: 11, design: .monospaced)).foregroundColor(.runeTextPrimary.opacity(0.85))
         }
     }
 

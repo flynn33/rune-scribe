@@ -461,6 +461,53 @@ final class PlatformAdapterTests: XCTestCase {
         let postScriptName = try await CoreTextFontRegistrar()
             .postScriptName(forFontData: bundledFontData)
         XCTAssertEqual(postScriptName, "NotoSansRunic-Regular")
+
+        let registrar = CoreTextFontRegistrar()
+        let firstRegistration = try await registrar.registerFont(bundledFontData)
+        let secondRegistration = try await registrar.registerFont(bundledFontData)
+        XCTAssertEqual(
+            firstRegistration,
+            RegisteredFontDTO(postScriptName: "NotoSansRunic-Regular")
+        )
+        XCTAssertEqual(
+            secondRegistration,
+            RegisteredFontDTO(postScriptName: "NotoSansRunic-Regular")
+        )
+    }
+
+    func testFontAdapterAcceptsDuplicateNameOnlyForMatchingRegisteredBytes() async throws {
+        let fontData = Data([1, 2, 3])
+        let duplicateNameCode = 305
+        let matchingRegistrar = CoreTextFontRegistrar(
+            operations: FontOperations(
+                postScriptName: { $0 == fontData ? "FixtureFont-Regular" : nil },
+                register: { _ in .failed(duplicateNameCode) },
+                registeredFontMatches: { $0 == fontData }
+            )
+        )
+
+        let registration = try await matchingRegistrar.registerFont(fontData)
+        XCTAssertEqual(
+            registration,
+            RegisteredFontDTO(postScriptName: "FixtureFont-Regular")
+        )
+
+        let mismatchedRegistrar = CoreTextFontRegistrar(
+            operations: FontOperations(
+                postScriptName: { $0 == fontData ? "FixtureFont-Regular" : nil },
+                register: { _ in .failed(duplicateNameCode) },
+                registeredFontMatches: { _ in false }
+            )
+        )
+        do {
+            _ = try await mismatchedRegistrar.registerFont(fontData)
+            XCTFail("Expected a mismatched duplicate font name to fail")
+        } catch {
+            XCTAssertEqual(
+                error as? CoreTextFontRegistrarError,
+                .registrationFailed(duplicateNameCode)
+            )
+        }
     }
 
     func testResourceAndDeterministicAdapters() async throws {

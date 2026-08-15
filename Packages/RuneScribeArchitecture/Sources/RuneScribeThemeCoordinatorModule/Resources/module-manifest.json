@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0",
+  "policyProfile": "forsetti-pattern-b-standalone",
+  "runtimeVersion": "1.0.0",
+  "moduleID": "com.runescribe.module.theme-coordinator",
+  "displayName": "Rune Scribe Theme Coordinator",
+  "moduleVersion": "1.0.0",
+  "moduleType": "service",
+  "criticality": "required",
+  "supportedPlatforms": [
+    "iOS",
+    "macOS"
+  ],
+  "minimumOS": {
+    "iOS": "17.0",
+    "macOS": "15.0"
+  },
+  "capabilitiesRequested": [
+    "runtime.contributions.read",
+    "runtime.resources.opaque.resolve",
+    "runtime.settings.read",
+    "runtime.settings.write",
+    "runtime.availability.read",
+    "runtime.events.publish"
+  ],
+  "entryPoint": "RuneScribeThemeCoordinatorModule",
+  "runtimeRequirements": {
+    "requiredServices": [],
+    "requiredResources": [],
+    "requiredModuleRoles": [
+      "runescribe.theme.norse"
+    ]
+  },
+  "defaultRole": "runescribe.theme.coordinator",
+  "policyClass": "policy.theme-coordinator",
+  "consumedEndpoints": [],
+  "publishedEndpoints": [
+    "theme.codex.select",
+    "theme.diagnostics.summary",
+    "theme.resource.resolve",
+    "theme.state",
+    "theme.state.current"
+  ],
+  "entitlementRequirement": null,
+  "diagnosticsVisibleInProduction": false
+}

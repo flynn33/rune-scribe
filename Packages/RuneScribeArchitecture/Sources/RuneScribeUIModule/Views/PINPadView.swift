@@ -44,7 +44,7 @@ struct PINPadView: View {
 
             Text(error ?? " ")
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
-                .foregroundColor(.red)
+                .foregroundColor(.runeDanger)
                 .opacity(error == nil ? 0 : 1)
 
             pad

@@ -2233,6 +2233,40 @@ final class RuntimeIOGatewayTests: XCTestCase {
         XCTAssertEqual(state.registrationRequests, [registrationData])
     }
 
+    func testAuthorizedPrimaryUIFontNameAndRegistrationForwardData() async throws {
+        let fontData = Data("theme-font-data".utf8)
+        let expectedRegistration = RegisteredFontDTO(
+            postScriptName: "SelectedTheme-Regular"
+        )
+        let fonts = SystemFontRegistrarProbe(
+            postScriptName: "SelectedTheme-Regular",
+            registeredFont: expectedRegistration
+        )
+        let gateway = await makeGateway(fonts: fonts)
+        let source = ioDescriptor(
+            id: "com.runescribe.test.runtime-io-authorized-ui-fonts",
+            role: RuneScribeRoles.primaryUI,
+            capabilities: [RuneScribeCapabilities.fontRegistration],
+            requiredServices: [RuneScribeServiceIDs.systemFontRegistrar]
+        )
+        let runtimeGeneration = await gateway.currentGeneration()
+        let client = try await activateClient(
+            on: gateway,
+            runtimeGeneration: runtimeGeneration,
+            descriptor: source,
+            sourceGeneration: 102
+        )
+
+        let postScriptName = try await client.systemFontPostScriptName(for: fontData)
+        let registeredFont = try await client.registerSystemFont(fontData)
+
+        XCTAssertEqual(postScriptName, "SelectedTheme-Regular")
+        XCTAssertEqual(registeredFont, expectedRegistration)
+        let state = await fonts.state()
+        XCTAssertEqual(state.postScriptNameRequests, [fontData])
+        XCTAssertEqual(state.registrationRequests, [fontData])
+    }
+
     func testUnavailableSystemFontRegistrarFailsClosed() async throws {
         let gateway = await makeGateway()
         let source = authorizedFontCoreDescriptor(
@@ -2267,8 +2301,8 @@ final class RuntimeIOGatewayTests: XCTestCase {
         )
         let gateway = await makeGateway(fonts: fonts)
         let roleDenied = ioDescriptor(
-            id: "com.runescribe.test.runtime-io-ui-fonts",
-            role: RuneScribeRoles.primaryUI,
+            id: "com.runescribe.test.runtime-io-progression-fonts",
+            role: RuneScribeRoles.progression,
             capabilities: [RuneScribeCapabilities.fontRegistration],
             requiredServices: [RuneScribeServiceIDs.systemFontRegistrar]
         )

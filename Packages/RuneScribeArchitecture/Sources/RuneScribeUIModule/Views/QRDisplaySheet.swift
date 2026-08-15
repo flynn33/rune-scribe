@@ -45,7 +45,7 @@ struct QRDisplaySheet: View {
                 VStack(spacing: RuneMetrics.sectionGap) {
                     Text(label)
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.runeTextPrimary)
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
 

@@ -79,7 +79,96 @@ final class ManifestValidationTests: XCTestCase {
         XCTAssertEqual(manifest.criticality, .optional)
         XCTAssertEqual(manifest.consumedEndpoints, ["test.input"])
         XCTAssertEqual(manifest.publishedEndpoints, ["test.output"])
+        XCTAssertNil(manifest.policyClass)
+        XCTAssertEqual(
+            manifest.effectivePolicyClass,
+            ModulePolicyClass(role: manifest.defaultRole)
+        )
         XCTAssertFalse(manifest.diagnosticsVisibleInProduction)
+    }
+
+    func testExplicitPolicyClassIsStrictAndMustMatchDescriptor() throws {
+        var root = try validManifestObject()
+        root["policyClass"] = RuneScribePolicyClasses.themeProvider.rawValue
+        let manifest = try ModuleManifestDecoder.decode(try data(root))
+        XCTAssertEqual(manifest.policyClass, RuneScribePolicyClasses.themeProvider)
+        XCTAssertEqual(
+            manifest.effectivePolicyClass,
+            RuneScribePolicyClasses.themeProvider
+        )
+
+        let descriptor = ModuleDescriptor(
+            moduleID: manifest.moduleID,
+            moduleVersion: manifest.moduleVersion,
+            kind: manifest.moduleType,
+            criticality: manifest.criticality,
+            entryPoint: manifest.entryPoint,
+            role: manifest.defaultRole,
+            policyClass: RuneScribePolicyClasses.themeProvider,
+            requestedCapabilities: Set(manifest.capabilitiesRequested),
+            consumedEndpoints: Set(manifest.consumedEndpoints),
+            publishedEndpoints: Set(manifest.publishedEndpoints)
+        )
+        let policy = RuntimePolicy(
+            vocabulary: CapabilityVocabulary(
+                knownCapabilities: Set(manifest.capabilitiesRequested)
+            ),
+            capabilities: CapabilityPolicy(
+                allowedPolicyClassesByCapability: Dictionary(
+                    uniqueKeysWithValues: manifest.capabilitiesRequested.map {
+                        ($0, Set([RuneScribePolicyClasses.themeProvider]))
+                    }
+                )
+            ),
+            services: ServiceAccessPolicy(rules: [])
+        )
+        XCTAssertNoThrow(
+            try ModuleManifestValidator.validate(
+                manifest: manifest,
+                descriptor: descriptor,
+                runtimeVersion: manifest.runtimeVersion,
+                platform: .macOS,
+                policy: policy
+            )
+        )
+
+        let mismatchedDescriptor = ModuleDescriptor(
+            moduleID: descriptor.moduleID,
+            moduleVersion: descriptor.moduleVersion,
+            kind: descriptor.kind,
+            criticality: descriptor.criticality,
+            entryPoint: descriptor.entryPoint,
+            role: descriptor.role,
+            policyClass: RuneScribePolicyClasses.themeCoordinator,
+            requestedCapabilities: descriptor.requestedCapabilities,
+            consumedEndpoints: descriptor.consumedEndpoints,
+            publishedEndpoints: descriptor.publishedEndpoints
+        )
+        XCTAssertThrowsError(
+            try ModuleManifestValidator.validate(
+                manifest: manifest,
+                descriptor: mismatchedDescriptor,
+                runtimeVersion: manifest.runtimeVersion,
+                platform: .macOS,
+                policy: policy
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .manifestDescriptorMismatch(
+                    moduleID: manifest.moduleID,
+                    field: "policyClass"
+                )
+            )
+        }
+
+        root["policyClass"] = "Invalid Policy Class"
+        XCTAssertThrowsError(try ModuleManifestDecoder.decode(try data(root))) { error in
+            XCTAssertEqual(
+                error as? ManifestDecodingError,
+                .invalidField(path: "$.policyClass", reason: "Invalid identifier.")
+            )
+        }
     }
 
     func testDecoderAcceptsOwnedResourceAndRejectsUnknownResourceField() throws {

@@ -60,6 +60,8 @@ MODULE_IMPORT_POLICY = {
   "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto RuneScribeContracts RuneScribeRuntimeCore],
   "RuneScribeUIModule" => %w[Foundation SwiftUI Combine Accessibility RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
   "RuneScribeProgressionModule" => %w[Foundation RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeThemeCoordinatorModule" => %w[Foundation RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeNorseThemeModule" => %w[Foundation CryptoKit RuneScribeContracts RuneScribeRuntimeCore],
   "RuneScribeTestSupport" => %w[Foundation CryptoKit RuneScribeContracts],
 }.freeze
 
@@ -127,12 +129,22 @@ def swift_imports(text)
   end
 end
 
-def module_source_errors(product, path, text, allowed_imports, runtime_integrity_source: nil)
+def module_source_errors(
+  product,
+  path,
+  text,
+  allowed_imports,
+  runtime_integrity_source: nil,
+  ui_image_decode_source: nil
+)
   code = without_comments_preserving_lines(text)
   swift_imports(code).each_with_object([]) do |(imported, line), findings|
     isolated_runtime_integrity_import = product == "RuneScribeRuntimeCore" &&
       imported == "CryptoKit" && path == runtime_integrity_source
-    next if allowed_imports.include?(imported) || isolated_runtime_integrity_import
+    isolated_ui_image_decode_import = product == "RuneScribeUIRuntime" &&
+      imported == "ImageIO" && path == ui_image_decode_source
+    next if allowed_imports.include?(imported) ||
+      isolated_runtime_integrity_import || isolated_ui_image_decode_import
     findings << "#{path}:#{line}: #{product} may not import #{imported}"
   end
 end
@@ -680,6 +692,8 @@ if package_present
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
         "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeThemeCoordinatorModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeNorseThemeModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
         "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
@@ -691,6 +705,8 @@ if package_present
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
         "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeThemeCoordinatorModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeNorseThemeModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
         "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
@@ -711,7 +727,7 @@ if package_present
       expected_test_support_consumers = %w[
         RuneScribeArchitectureTests RuneScribePlatformTests
         RuneScribeProgressionModuleTests RuneScribeRuntimeCoreTests
-        RuneScribeUIModuleTests
+        RuneScribeThemeCoordinatorModuleTests RuneScribeUIModuleTests
       ].sort
       unless test_support_consumers == expected_test_support_consumers
         errors << "package RuneScribeTestSupport consumers differ: #{test_support_consumers.join(', ')}"
@@ -735,19 +751,24 @@ end
 runtime_integrity_source = architecture_package.join(
   "Sources/RuneScribeRuntimeCore/RuntimeBundledResourceIntegrity.swift"
 ).to_s
+ui_image_decode_source = architecture_package.join(
+  "Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift"
+).to_s
 MODULE_IMPORT_POLICY.each do |product, allowed_imports|
   source_root = architecture_package.join("Sources/#{product}")
   next unless source_root.directory?
   Dir.glob(source_root.join("**/*.swift").to_s).each do |path|
-    source = File.read(path)
     relative_path = relative(path, root)
+    next if relative_path.include?("/Resources/Source/")
+    source = File.read(path)
     errors.concat(
       module_source_errors(
         product,
         relative_path,
         source,
         allowed_imports,
-        runtime_integrity_source: relative(runtime_integrity_source, root)
+        runtime_integrity_source: relative(runtime_integrity_source, root),
+        ui_image_decode_source: relative(ui_image_decode_source, root)
       )
     )
     errors.concat(module_boundary_source_errors(product, relative_path, source))
@@ -780,7 +801,7 @@ manifest_allowed_keys = %w[
   schemaVersion policyProfile runtimeVersion moduleID displayName moduleVersion
   moduleType supportedPlatforms minimumOS capabilitiesRequested entryPoint
   runtimeRequirements defaultRole criticality consumedEndpoints publishedEndpoints
-  entitlementRequirement diagnosticsVisibleInProduction
+  entitlementRequirement diagnosticsVisibleInProduction policyClass
 ]
 manifest_required_keys = %w[
   schemaVersion policyProfile runtimeVersion moduleID displayName moduleVersion
@@ -821,6 +842,9 @@ required_module_ids.each do |module_id, policy|
   errors << "#{relative_path}: criticality must be required or optional" unless %w[required optional].include?(manifest["criticality"])
   if policy.key?("criticality") && manifest["criticality"] != policy["criticality"]
     errors << "#{relative_path}: criticality must be #{policy['criticality']}"
+  end
+  if policy.key?("policyClass") && manifest["policyClass"] != policy["policyClass"]
+    errors << "#{relative_path}: policyClass must be #{policy['policyClass']}"
   end
   errors << "#{relative_path}: defaultRole must be #{policy['defaultRole']}" unless manifest["defaultRole"] == policy["defaultRole"]
   errors << "#{relative_path}: diagnostics must remain hidden in production" unless manifest["diagnosticsVisibleInProduction"] == false
@@ -921,6 +945,7 @@ host_files.each do |path|
     allowed = %w[
       Foundation SwiftUI AppKit UIKit RuneScribeContracts RuneScribeRuntimeCore
       RuneScribePlatform RuneScribeCoreModule RuneScribeProgressionModule
+      RuneScribeNorseThemeModule RuneScribeThemeCoordinatorModule
       RuneScribeUIModule RuneScribeUIRuntime
     ]
     errors << "#{relative(path, root)}:#{line}: host may not import #{imported}" unless allowed.include?(imported)

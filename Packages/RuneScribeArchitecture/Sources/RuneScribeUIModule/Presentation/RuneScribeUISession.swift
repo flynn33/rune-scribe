@@ -14,6 +14,9 @@ final class RuneScribeUISession: ObservableObject {
     @Published private(set) var availabilitySnapshot: RuntimeAvailabilitySnapshot?
     @Published var progressionSnapshot: ProgressionSnapshotDTO?
     @Published var progressionRailState: OptionalProgressionRailState = .unavailable
+    @Published private(set) var themeSnapshot: ThemeCoordinatorSnapshotDTO?
+    @Published private(set) var themeScriptPresentation = ThemeScriptPresentation.baseFallback
+    @Published var themeSelectionError: String?
     @Published var runtimeSettingsSnapshot: RuntimeSettingsSnapshotDTO?
     @Published var settingsRailState: OptionalProgressionRailState = .unavailable
     @Published var unlockFeedbackPreferences = UnlockFeedbackPreferences.defaults
@@ -29,6 +32,7 @@ final class RuneScribeUISession: ObservableObject {
     private var runtimeIOHandle: RuntimeIOClient?
     private var availabilityClientHandle: RuntimeAvailabilityClient?
     var progressionClientHandle: RuntimeProgressionClient?
+    private var themeCoordinatorClientHandle: RuntimeThemeCoordinatorClient?
     var runtimeSettingsClientHandle: RuntimeSettingsClient?
     var unlockFeedbackClientHandle: RuntimeUnlockFeedbackClient?
 
@@ -37,6 +41,10 @@ final class RuneScribeUISession: ObservableObject {
     private var menuTask: Task<Void, Never>?
     private var availabilityTask: Task<Void, Never>?
     var progressionTask: Task<Void, Never>?
+    private var themeTask: Task<Void, Never>?
+    private var themeResourceTask: Task<Void, Never>?
+    private var themeAdoptionGeneration: UInt64 = 0
+    private var latestThemeCoordinatorRevision: UInt64?
     var settingsTask: Task<Void, Never>?
     var observationGeneration: UInt64 = 0
     var revealQueue = ProgressionRevealQueueModel()
@@ -46,6 +54,7 @@ final class RuneScribeUISession: ObservableObject {
         runtimeIO: RuntimeIOClient,
         availabilityClient: RuntimeAvailabilityClient? = nil,
         progressionClient: RuntimeProgressionClient? = nil,
+        themeCoordinatorClient: RuntimeThemeCoordinatorClient? = nil,
         runtimeSettingsClient: RuntimeSettingsClient? = nil,
         unlockFeedbackClient: RuntimeUnlockFeedbackClient? = nil,
         inboundFileImportSession: RuntimeInboundFileImportSession = .unavailable,
@@ -56,6 +65,7 @@ final class RuneScribeUISession: ObservableObject {
         runtimeIOHandle = runtimeIO
         availabilityClientHandle = availabilityClient
         progressionClientHandle = progressionClient
+        themeCoordinatorClientHandle = themeCoordinatorClient
         runtimeSettingsClientHandle = runtimeSettingsClient
         unlockFeedbackClientHandle = unlockFeedbackClient
         self.inboundFileImportSession = inboundFileImportSession
@@ -69,6 +79,8 @@ final class RuneScribeUISession: ObservableObject {
         menuTask?.cancel()
         availabilityTask?.cancel()
         progressionTask?.cancel()
+        themeTask?.cancel()
+        themeResourceTask?.cancel()
         settingsTask?.cancel()
     }
 
@@ -122,8 +134,36 @@ final class RuneScribeUISession: ObservableObject {
                 }
             }
         }
+        if let themeCoordinatorClientHandle {
+            themeTask = Task { @MainActor [weak self, themeCoordinatorClientHandle] in
+                for await envelope in themeCoordinatorClientHandle.stateEnvelopes {
+                    guard !Task.isCancelled,
+                          let self,
+                          observationGeneration == generation
+                    else { return }
+                    adoptTheme(envelope.payload)
+                }
+            }
+        }
         startOptionalProgressionObservation(generation: generation)
         startOptionalSettingsObservation(generation: generation)
+    }
+
+    /// Loads and commits the required Base Theme before the root view is made
+    /// visible. This prevents first-frame surfaces from referencing a provider
+    /// font that has not yet crossed the runtime registration boundary.
+    func prepareInitialTheme() async throws {
+        guard themeSnapshot == nil,
+              let themeCoordinatorClientHandle
+        else { return }
+
+        let snapshot = try await themeCoordinatorClientHandle.snapshot()
+        latestThemeCoordinatorRevision = snapshot.revision
+        themeAdoptionGeneration &+= 1
+        try await resolveAndCommitTheme(
+            snapshot,
+            adoptionGeneration: themeAdoptionGeneration
+        )
     }
 
     func stop() async {
@@ -132,21 +172,33 @@ final class RuneScribeUISession: ObservableObject {
         let menuTask = self.menuTask
         let availabilityTask = self.availabilityTask
         let progressionTask = self.progressionTask
+        let themeTask = self.themeTask
+        let themeResourceTask = self.themeResourceTask
         let settingsTask = self.settingsTask
         stateTask?.cancel()
         menuTask?.cancel()
         availabilityTask?.cancel()
         progressionTask?.cancel()
+        themeTask?.cancel()
+        themeResourceTask?.cancel()
         settingsTask?.cancel()
         self.stateTask = nil
         self.menuTask = nil
         self.availabilityTask = nil
         self.progressionTask = nil
+        self.themeTask = nil
+        self.themeResourceTask = nil
+        themeAdoptionGeneration &+= 1
+        latestThemeCoordinatorRevision = nil
         self.settingsTask = nil
         snapshot = nil
         availabilitySnapshot = nil
         progressionSnapshot = nil
         progressionRailState = .unavailable
+        themeSnapshot = nil
+        themeScriptPresentation = .baseFallback
+        themeSelectionError = nil
+        RuneThemePaletteInterpreter.reset()
         runtimeSettingsSnapshot = nil
         settingsRailState = .unavailable
         unlockFeedbackPreferences = .defaults
@@ -162,6 +214,7 @@ final class RuneScribeUISession: ObservableObject {
         runtimeIOHandle = nil
         availabilityClientHandle = nil
         progressionClientHandle = nil
+        themeCoordinatorClientHandle = nil
         runtimeSettingsClientHandle = nil
         unlockFeedbackClientHandle = nil
         await resourcePresentation.close()
@@ -169,6 +222,8 @@ final class RuneScribeUISession: ObservableObject {
         await menuTask?.value
         await availabilityTask?.value
         await progressionTask?.value
+        await themeTask?.value
+        await themeResourceTask?.value
         await settingsTask?.value
     }
 
@@ -189,13 +244,29 @@ final class RuneScribeUISession: ObservableObject {
                 contactID: summary.assignedContactID?.rawValue,
                 delivered: summary.hasBeenDelivered,
                 publicIdentifier: summary.publicIdentifier,
-                fontName: fonts[summary.fontID]?.displayName ?? "Noto Sans Runic"
+                fontName: fonts[summary.fontID]?.displayName ?? "Noto Sans Runic",
+                fontSource: fonts[summary.fontID]?.source ?? .bundled
             )
         }
     }
 
     var activeCipher: CipherViewState? {
         ciphers.first(where: \.isActive)
+    }
+
+    var inscriptionFontPostScriptName: String {
+        ThemeScriptFontSelector.postScriptName(
+            themePostScriptName: themeScriptPresentation.fontPostScriptName,
+            cipherFontName: activeCipher?.fontName,
+            cipherFontSource: activeCipher?.fontSource
+        )
+    }
+
+    var inscriptionVectorDataByToken: [String: Data] {
+        guard ThemeScriptFontSelector.usesThemeVectors(
+            cipherFontSource: activeCipher?.fontSource
+        ) else { return [:] }
+        return themeScriptPresentation.vectorDataByToken
     }
 
     var contacts: [ContactViewState] {
@@ -240,6 +311,25 @@ final class RuneScribeUISession: ObservableObject {
         self.route = RuneScribeUIRouteRequest(route: route)
     }
 
+    func selectCodex(_ codexID: CodexID) async {
+        guard let themeCoordinatorClientHandle else {
+            themeSelectionError = "Appearance choices are temporarily unavailable."
+            return
+        }
+        do {
+            let snapshot = try await themeCoordinatorClientHandle.selectCodex(
+                SelectThemeCodexCommand(
+                    codexID: codexID,
+                    expectedSnapshotRevision: latestThemeCoordinatorRevision
+                        ?? themeSnapshot?.revision
+                )
+            )
+            adoptTheme(snapshot)
+        } catch {
+            themeSelectionError = "That Codex is not available right now."
+        }
+    }
+
     func consumeRoute(id: UUID) {
         guard route?.id == id else { return }
         route = nil
@@ -272,7 +362,9 @@ final class RuneScribeUISession: ObservableObject {
             contactID: summary.assignedContactID?.rawValue,
             delivered: summary.hasBeenDelivered,
             publicIdentifier: summary.publicIdentifier,
-            fontName: fontName
+            fontName: fontName,
+            fontSource: snapshot?.fonts.first(where: { $0.id == summary.fontID })?.source
+                ?? .bundled
         )
     }
 
@@ -350,6 +442,161 @@ final class RuneScribeUISession: ObservableObject {
         lastError = nextSnapshot.lastFailure.map(Self.message(for:))
         adoptImportPresentation(nextSnapshot.importState)
         adoptMessagePresentation(nextSnapshot.messageState)
+    }
+
+    private func adoptTheme(_ nextSnapshot: ThemeCoordinatorSnapshotDTO) {
+        latestThemeCoordinatorRevision = nextSnapshot.revision
+        scheduleThemeResourceAdoption(nextSnapshot)
+    }
+
+    private func scheduleThemeResourceAdoption(
+        _ snapshot: ThemeCoordinatorSnapshotDTO
+    ) {
+        themeResourceTask?.cancel()
+        themeAdoptionGeneration &+= 1
+        let adoptionGeneration = themeAdoptionGeneration
+        themeResourceTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                try await resolveAndCommitTheme(
+                    snapshot,
+                    adoptionGeneration: adoptionGeneration
+                )
+            } catch is CancellationError {
+                return
+            } catch {
+                guard themeAdoptionGeneration == adoptionGeneration else { return }
+                themeSelectionError =
+                    "The selected appearance could not be loaded. The previous appearance remains active."
+            }
+        }
+    }
+
+    private func resolveAndCommitTheme(
+        _ snapshot: ThemeCoordinatorSnapshotDTO,
+        adoptionGeneration: UInt64
+    ) async throws {
+        guard let themeCoordinatorClientHandle,
+              let runtimeIOHandle
+        else {
+            throw ThemePresentationResourceError.stateUnavailable
+        }
+        let plan = try ThemePresentationResourcePlan(
+            descriptor: snapshot.effectiveTheme
+        )
+        let resolved = try await Self.resolveThemeResources(
+            plan: plan,
+            client: themeCoordinatorClientHandle
+        )
+        try Task.checkCancellation()
+
+        var registeredFontName = plan.expectedFontPostScriptName
+            ?? ThemeScriptPresentation.baseFallback.fontPostScriptName
+        if let fontResourceID = plan.fontResourceID {
+            guard let font = resolved[fontResourceID] else {
+                throw ThemePresentationResourceError.missing(fontResourceID)
+            }
+            let inspectedName = try await runtimeIOHandle.systemFontPostScriptName(
+                for: font.data
+            )
+            guard inspectedName == plan.expectedFontPostScriptName else {
+                throw ThemePresentationResourceError.fontIdentityMismatch
+            }
+            let registered = try await runtimeIOHandle.registerSystemFont(font.data)
+            guard registered.postScriptName == inspectedName else {
+                throw ThemePresentationResourceError.fontIdentityMismatch
+            }
+            registeredFontName = registered.postScriptName
+        }
+
+        let vectorData = try Dictionary(
+            uniqueKeysWithValues: plan.vectorResourceIDByToken.map { token, resourceID in
+                guard let resource = resolved[resourceID] else {
+                    throw ThemePresentationResourceError.missing(resourceID)
+                }
+                return (token, resource.data)
+            }
+        )
+        guard let staticBase = resolved[plan.backgroundStaticResourceID],
+              let reduceMotion = resolved[plan.backgroundReduceMotionResourceID],
+              let highContrast = resolved[plan.backgroundHighContrastResourceID]
+        else {
+            throw ThemePresentationResourceError.missing(
+                plan.backgroundStaticResourceID
+            )
+        }
+        let parameters = plan.backgroundRendererParametersResourceID.flatMap {
+            resolved[$0]?.data
+        }
+
+        try Task.checkCancellation()
+        guard themeAdoptionGeneration == adoptionGeneration else {
+            throw CancellationError()
+        }
+        do {
+            try resourcePresentation.installThemeBackground(
+                staticBaseData: staticBase.data,
+                reduceMotionData: reduceMotion.data,
+                highContrastData: highContrast.data,
+                rendererParametersData: parameters
+            )
+        } catch is RuntimeThemeBackgroundParameterError {
+            // Optional animation parameters may fail closed while the three
+            // validated static variants remain usable.
+        }
+        RuneThemePaletteInterpreter.install(snapshot.effectiveTheme)
+        themeScriptPresentation = ThemeScriptPresentation(
+            scriptID: plan.scriptID,
+            fontPostScriptName: registeredFontName,
+            vectorDataByToken: vectorData
+        )
+        themeSnapshot = snapshot
+        themeSelectionError = nil
+    }
+
+    private static func resolveThemeResources(
+        plan: ThemePresentationResourcePlan,
+        client: RuntimeThemeCoordinatorClient
+    ) async throws -> [ThemeResourceID: ResolvedThemeResourceDTO] {
+        var resourceIDs = Set([
+            plan.backgroundStaticResourceID,
+            plan.backgroundReduceMotionResourceID,
+            plan.backgroundHighContrastResourceID,
+        ])
+        if let fontResourceID = plan.fontResourceID {
+            resourceIDs.insert(fontResourceID)
+        }
+        if let parameters = plan.backgroundRendererParametersResourceID {
+            resourceIDs.insert(parameters)
+        }
+        resourceIDs.formUnion(plan.vectorResourceIDByToken.values)
+
+        return try await withThrowingTaskGroup(
+            of: (ThemeResourceID, ResolvedThemeResourceDTO).self,
+            returning: [ThemeResourceID: ResolvedThemeResourceDTO].self
+        ) { group in
+            for resourceID in resourceIDs {
+                group.addTask {
+                    let resource = try await client.resolveResource(
+                        ResolveThemeResourceRequestDTO(
+                            codexID: plan.codexID,
+                            resourceID: resourceID
+                        )
+                    )
+                    guard resource.codexID == plan.codexID,
+                          resource.resourceID == resourceID
+                    else {
+                        throw ThemePresentationResourceError.identityMismatch
+                    }
+                    return (resourceID, resource)
+                }
+            }
+            var result: [ThemeResourceID: ResolvedThemeResourceDTO] = [:]
+            for try await (resourceID, resource) in group {
+                result[resourceID] = resource
+            }
+            return result
+        }
     }
 
     private func adoptImportPresentation(_ state: ImportStateDTO) {

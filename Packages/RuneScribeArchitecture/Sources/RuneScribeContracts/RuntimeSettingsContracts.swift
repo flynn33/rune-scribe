@@ -145,6 +145,9 @@ public enum RuneScribeRuntimeSettings {
     public static let unlockFeedbackAnimationEnabled = RuntimeSettingID(
         rawValue: "setting.unlock-feedback.animation-enabled"
     )!
+    public static let selectedCodex = RuntimeSettingID(
+        rawValue: "setting.appearance.selected-codex"
+    )!
 
     public static let descriptors: [RuntimeSettingDescriptor] = [
         RuntimeSettingDescriptor(
@@ -158,6 +161,12 @@ public enum RuneScribeRuntimeSettings {
         RuntimeSettingDescriptor(
             settingID: unlockFeedbackAnimationEnabled,
             defaultValue: .boolean(true)
+        ),
+        RuntimeSettingDescriptor(
+            settingID: selectedCodex,
+            defaultValue: .text(
+                RuntimeSettingText(rawValue: RuneScribeCodexIDs.norse.rawValue)!
+            )
         ),
     ]
 }

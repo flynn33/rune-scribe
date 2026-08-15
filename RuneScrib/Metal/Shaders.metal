@@ -1,20 +1,12 @@
-// RuneScrib/Metal/Shaders.metal
-// Norse-inspired animated background shader.
-
 #include <metal_stdlib>
 using namespace metal;
-
-// MARK: - Vertex Stage
 
 struct VertexOut {
     float4 position [[position]];
     float2 uv;
 };
 
-/// Full-screen quad vertex shader.
-/// Draws 2 triangles covering clip space [-1,1] × [-1,1].
 vertex VertexOut vertex_fullscreen(uint vid [[vertex_id]]) {
-    // Triangle strip: 4 vertices forming a quad
     const float2 positions[4] = {
         float2(-1.0, -1.0),
         float2( 1.0, -1.0),
@@ -34,56 +26,73 @@ vertex VertexOut vertex_fullscreen(uint vid [[vertex_id]]) {
     return out;
 }
 
-// MARK: - Fragment Stage
-
 struct FragmentUniforms {
-    float time;
-    float2 resolution;
+    float4 timeAndResolution;
+    float4 baseColorA;
+    float4 baseColorB;
+    float4 bandParameters;
+    float4 bandColorAndStrength;
+    float4 columnParameters;
+    float4 columnColor;
+    float4 highlightColorAndStrength;
+    float4 highlightAndVignette;
+    float4 shimmerParameters;
 };
 
-/// Animated Norse-inspired background.
-/// Palette: deep navy base, electric blue mid-tones, gold runic highlights.
 fragment float4 fragment_rune_background(
     VertexOut        in         [[stage_in]],
     constant FragmentUniforms& uniforms [[buffer(0)]]
 ) {
     float2 uv = in.uv;
-    float t   = uniforms.time;
+    float t = uniforms.timeAndResolution.x;
+    float3 base = mix(
+        uniforms.baseColorA.rgb,
+        uniforms.baseColorB.rgb,
+        uv.y
+    );
 
-    // ── Layer 1: Base gradient (deep navy → midnight purple) ────────────────
-    float3 colorA = float3(0.03, 0.04, 0.12);   // deep navy
-    float3 colorB = float3(0.08, 0.03, 0.18);   // midnight purple
-    float3 base   = mix(colorA, colorB, uv.y);
+    float bands = sin(
+        (uv.x - uv.y) * uniforms.bandParameters.x
+        + t * uniforms.bandParameters.y
+    );
+    bands = smoothstep(
+        uniforms.bandParameters.z,
+        uniforms.bandParameters.w,
+        bands
+    );
+    base = mix(
+        base,
+        base + uniforms.bandColorAndStrength.rgb,
+        bands * uniforms.bandColorAndStrength.w
+    );
 
-    // ── Layer 2: Diagonal scan lines (rune-band effect) ─────────────────────
-    float bands = sin((uv.x - uv.y) * 18.0 + t * 0.25);
-    bands = smoothstep(0.85, 1.0, bands);
-    float3 bandColor = float3(0.06, 0.08, 0.22);
-    base = mix(base, base + bandColor, bands * 0.4);
+    float columns = abs(sin(
+        uv.x * uniforms.columnParameters.x
+        + t * uniforms.columnParameters.y
+    ));
+    columns = pow(columns, uniforms.columnParameters.z);
+    base += uniforms.columnColor.rgb
+        * columns
+        * uniforms.columnParameters.w;
 
-    // ── Layer 3: Vertical energy columns ────────────────────────────────────
-    float cols = abs(sin(uv.x * 9.0 + t * 0.15));
-    cols = pow(cols, 6.0);
-    float3 colColor = float3(0.1, 0.3, 0.6);    // electric blue
-    base += colColor * cols * 0.12;
-
-    // ── Layer 4: Gold runic glow pulses ─────────────────────────────────────
     float pulse1 = sin(uv.x * 24.0 + t * 0.6) * cos(uv.y * 16.0 - t * 0.4);
     float pulse2 = sin(uv.x * 11.0 - t * 0.3) * sin(uv.y * 19.0 + t * 0.5);
-    float rune   = abs(pulse1 * pulse2);
-    rune = pow(rune, 7.0);                       // sharp highlights only
+    float highlights = abs(pulse1 * pulse2);
+    highlights = pow(highlights, uniforms.highlightAndVignette.x);
+    base += uniforms.highlightColorAndStrength.rgb
+        * highlights
+        * uniforms.highlightColorAndStrength.w;
 
-    float3 goldColor = float3(0.82, 0.60, 0.08); // Norse gold
-    base += goldColor * rune * 0.9;
-
-    // ── Layer 5: Vignette (darken edges) ────────────────────────────────────
     float2 center = uv - 0.5;
-    float vignette = 1.0 - dot(center, center) * 1.8;
+    float vignette = 1.0
+        - dot(center, center) * uniforms.highlightAndVignette.y;
     vignette = saturate(vignette);
     base *= vignette;
 
-    // ── Layer 6: Subtle shimmer ──────────────────────────────────────────────
-    float shimmer = sin(t * 2.1 + uv.x * 40.0) * 0.012;
+    float shimmer = sin(
+        t * uniforms.shimmerParameters.x
+        + uv.x * uniforms.shimmerParameters.y
+    ) * uniforms.shimmerParameters.z;
     base += float3(shimmer);
 
     return float4(saturate(base), 1.0);

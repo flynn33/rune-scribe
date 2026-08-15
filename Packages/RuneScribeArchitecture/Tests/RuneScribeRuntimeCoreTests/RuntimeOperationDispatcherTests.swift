@@ -437,6 +437,83 @@ final class RuntimeOperationDispatcherTests: XCTestCase {
         XCTAssertEqual(error, .staleClient(harness.sourceID))
     }
 
+    func testStartupAllowsActivatingSourceReadOnlyQueryToActiveDestination() async throws {
+        let harness = try await makeStartupReadHarness(
+            queryHandler: { "read:\($0)" },
+            commandHandler: { "write:\($0)" }
+        )
+
+        let response = try await harness.queryClient.fetch(
+            "value",
+            from: harness.queryKey
+        )
+
+        XCTAssertEqual(response, "read:value")
+        let ledger = await harness.dispatcher.ledgerSnapshot()
+        let record = try XCTUnwrap(ledger.last)
+        XCTAssertEqual(record.endpointKind, .query)
+        XCTAssertEqual(record.metadata.sourceModuleID, harness.sourceID)
+        XCTAssertEqual(record.metadata.destinationModuleID, harness.providerID)
+        XCTAssertEqual(record.outcome, .succeeded)
+        XCTAssertNotNil(record.completedAtUTC)
+    }
+
+    func testStartupDeniesActivatingSourceCommandBeforeRuntimeRunning() async throws {
+        let commandCounter = RuntimeInvocationCounter()
+        let harness = try await makeStartupReadHarness(
+            queryHandler: { "read:\($0)" },
+            commandHandler: { value in
+                await commandCounter.record()
+                return "write:\(value)"
+            }
+        )
+
+        let error = await runtimeError {
+            _ = try await harness.commandClient.send(
+                "value",
+                to: harness.commandKey
+            )
+        }
+
+        XCTAssertEqual(error, .runtimeNotRunning)
+        let commandInvocationCount = await commandCounter.value()
+        XCTAssertEqual(commandInvocationCount, 0)
+        let ledger = await harness.dispatcher.ledgerSnapshot()
+        let record = try XCTUnwrap(ledger.last)
+        XCTAssertEqual(record.endpointKind, .command)
+        XCTAssertEqual(record.outcome, .denied(.runtimeUnavailable))
+        XCTAssertNotNil(record.completedAtUTC)
+    }
+
+    func testStartupQueryDiscardsResultAfterSourceInvalidation() async throws {
+        let barrier = RuntimeTestBarrier()
+        let harness = try await makeStartupReadHarness(
+            queryHandler: { value in
+                await barrier.suspend()
+                return "late:\(value)"
+            },
+            commandHandler: { "write:\($0)" }
+        )
+        let operation = Task {
+            try await harness.queryClient.fetch(
+                "value",
+                from: harness.queryKey
+            )
+        }
+        await barrier.waitForArrivals(1)
+
+        await harness.dispatcher.invalidateModule(moduleID: harness.sourceID)
+        await barrier.releaseAll()
+
+        let error = await runtimeError { _ = try await operation.value }
+        XCTAssertEqual(error, .staleClient(harness.sourceID))
+        let ledger = await harness.dispatcher.ledgerSnapshot()
+        let record = try XCTUnwrap(ledger.last)
+        XCTAssertEqual(record.endpointKind, .query)
+        XCTAssertEqual(record.outcome, .denied(.staleClient))
+        XCTAssertNotNil(record.completedAtUTC)
+    }
+
     func testResponseSchemaOverrideIsDeniedBeforeHandler() async throws {
         let counter = RuntimeInvocationCounter()
         let harness = try await makeHarness { value in
@@ -1450,6 +1527,95 @@ final class RuntimeOperationDispatcherTests: XCTestCase {
         )
     }
 
+    private func makeStartupReadHarness(
+        queryHandler: @escaping @Sendable (String) async throws -> String,
+        commandHandler: @escaping @Sendable (String) async throws -> String
+    ) async throws -> RuntimeStartupReadHarness {
+        let dispatcher = RuntimeOperationDispatcher(
+            policy: .patternBFoundation,
+            environment: .live
+        )
+        let providerID: ModuleIdentifier = "test.startup-read.provider"
+        let sourceID: ModuleIdentifier = "test.startup-read.source"
+        let queryID: RuntimeEndpointIdentifier = "test.startup-read.query"
+        let commandID: RuntimeEndpointIdentifier = "test.startup-read.command"
+        let queryKey = RuntimeEndpointDescriptor<String, String>(
+            endpointID: queryID,
+            kind: .query,
+            destination: .role(RuneScribeRoles.core),
+            requestSchemaVersion: RuntimeSchemaVersions.v1,
+            responseSchemaVersion: RuntimeSchemaVersions.v1,
+            requiredCapability: RuneScribeCapabilities.applicationCommands,
+            privacyClass: .internalData,
+            maximumRequestBytes: 1_024,
+            maximumResponseBytes: 1_024
+        ).key
+        let commandKey = RuntimeEndpointDescriptor<String, String>(
+            endpointID: commandID,
+            kind: .command,
+            destination: .role(RuneScribeRoles.core),
+            requestSchemaVersion: RuntimeSchemaVersions.v1,
+            responseSchemaVersion: RuntimeSchemaVersions.v1,
+            requiredCapability: RuneScribeCapabilities.applicationCommands,
+            privacyClass: .internalData,
+            maximumRequestBytes: 1_024,
+            maximumResponseBytes: 1_024
+        ).key
+        await dispatcher.registerModule(
+            testDescriptor(
+                id: providerID,
+                role: RuneScribeRoles.core,
+                capabilities: [],
+                published: [queryID, commandID]
+            )
+        )
+        await dispatcher.registerModule(
+            testDescriptor(
+                id: sourceID,
+                role: RuneScribeRoles.primaryUI,
+                capabilities: [RuneScribeCapabilities.applicationCommands],
+                consumed: [queryID, commandID]
+            )
+        )
+        _ = await dispatcher.beginRuntimeStart()
+        let providerGeneration = try await dispatcher.beginActivation(
+            moduleID: providerID
+        )
+        try await dispatcher.registerEndpoint(
+            ownerModuleID: providerID,
+            ownerGeneration: providerGeneration,
+            key: queryKey,
+            handler: { _, value in try await queryHandler(value) }
+        )
+        try await dispatcher.registerEndpoint(
+            ownerModuleID: providerID,
+            ownerGeneration: providerGeneration,
+            key: commandKey,
+            handler: { _, value in try await commandHandler(value) }
+        )
+        try await dispatcher.markActive(
+            moduleID: providerID,
+            generation: providerGeneration
+        )
+        let sourceGeneration = try await dispatcher.beginActivation(
+            moduleID: sourceID
+        )
+        let lease = try await dispatcher.makeLease(
+            sourceModuleID: sourceID,
+            sourceGeneration: sourceGeneration,
+            destination: .role(RuneScribeRoles.core)
+        )
+        return RuntimeStartupReadHarness(
+            dispatcher: dispatcher,
+            queryKey: queryKey,
+            commandKey: commandKey,
+            queryClient: RuntimeQueryClient(dispatcher: dispatcher, lease: lease),
+            commandClient: RuntimeCommandClient(dispatcher: dispatcher, lease: lease),
+            providerID: providerID,
+            sourceID: sourceID
+        )
+    }
+
     private func assertSingleRejectedCall(
         dispatcher: RuntimeOperationDispatcher,
         expectedError: RuneScribeRuntimeError,
@@ -1492,6 +1658,16 @@ private struct RuntimeStateHarness: Sendable {
     let providerID: ModuleIdentifier
     let descriptor: RuntimeStateEndpointDescriptor<String>
     let client: RuntimeStateClient
+}
+
+private struct RuntimeStartupReadHarness: Sendable {
+    let dispatcher: RuntimeOperationDispatcher
+    let queryKey: RuntimeEndpointKey<String, String>
+    let commandKey: RuntimeEndpointKey<String, String>
+    let queryClient: RuntimeQueryClient
+    let commandClient: RuntimeCommandClient
+    let providerID: ModuleIdentifier
+    let sourceID: ModuleIdentifier
 }
 
 private func testDescriptor(

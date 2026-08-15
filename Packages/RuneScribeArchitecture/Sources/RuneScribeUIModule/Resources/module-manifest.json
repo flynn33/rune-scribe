@@ -29,14 +29,19 @@
     "runtime.settings.read",
     "runtime.settings.write",
     "progression.state.read",
-    "progression.commands"
+    "progression.commands",
+    "theme.state.read",
+    "theme.selection",
+    "theme.resources.read",
+    "fonts.register"
   ],
   "entryPoint": "RuneScribeUIModule",
   "runtimeRequirements": {
     "requiredServices": [
       "ApplicationResourceLocator",
       "ClipboardWriteService",
-      "SharePresentationService"
+      "SharePresentationService",
+      "SystemFontRegistrar"
     ],
     "requiredResources": [
       {
@@ -51,7 +56,8 @@
       }
     ],
     "requiredModuleRoles": [
-      "runescribe.core"
+      "runescribe.core",
+      "runescribe.theme.coordinator"
     ]
   },
   "defaultRole": "runescribe.ui.primary",
@@ -91,7 +97,11 @@
     "progression.reveal.acknowledge",
     "progression.reveal.mark-presented",
     "progression.state",
-    "progression.title.select"
+    "progression.title.select",
+    "theme.codex.select",
+    "theme.resource.resolve",
+    "theme.state",
+    "theme.state.current"
   ],
   "publishedEndpoints": [],
   "entitlementRequirement": null,

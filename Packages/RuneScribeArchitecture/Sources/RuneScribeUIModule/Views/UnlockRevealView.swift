@@ -75,7 +75,7 @@ struct UnlockRevealView: View {
                         .foregroundColor(.runeGoldBright)
                     Text(reveal.primaryRewardPresentation.displayName)
                         .font(.title3.bold())
-                        .foregroundColor(.white)
+                        .foregroundColor(.runeTextPrimary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -109,7 +109,7 @@ struct UnlockRevealView: View {
                             systemImage: "plus.circle.fill"
                         )
                         .font(.subheadline)
-                        .foregroundColor(.white)
+                        .foregroundColor(.runeTextPrimary)
                     }
                 }
             }

@@ -2,6 +2,7 @@
 
 import SwiftUI
 import Foundation
+import RuneScribeUIRuntime
 
 /// The in-place transformation animation: the output is inscribed one glyph at a
 /// time, left to right. Each landing glyph flares bright, then dims to its resting
@@ -27,6 +28,7 @@ struct RuneInscriptionText: View {
     let direction: Direction
     var fontSize: CGFloat = 24
     var fontName: String = "Noto Sans Runic"
+    var vectorDataByToken: [String: Data] = [:]
     var settled: Bool = false
 
     init(source: String,
@@ -35,6 +37,7 @@ struct RuneInscriptionText: View {
          direction: Direction,
          fontSize: CGFloat = 24,
          fontName: String = "Noto Sans Runic",
+         vectorDataByToken: [String: Data] = [:],
          settled: Bool = false) {
         // The cipher maps one character to one character, so source and target are
         // always the same length. Pad with spaces (a no-op glyph) only as defensive
@@ -48,6 +51,7 @@ struct RuneInscriptionText: View {
         self.direction = direction
         self.fontSize = fontSize
         self.fontName = fontName
+        self.vectorDataByToken = vectorDataByToken
         self.settled = settled
     }
 
@@ -76,8 +80,20 @@ struct RuneInscriptionText: View {
 
     // MARK: - Body
 
+    var usesVectorPresentation: Bool {
+        settled && direction == .encode && !vectorDataByToken.isEmpty
+    }
+
     var body: some View {
-        if settled {
+        if usesVectorPresentation {
+            RuntimeThemeVectorText(
+                text: String(targetChars),
+                glyphDataByTextToken: vectorDataByToken,
+                pointSize: fontSize,
+                color: direction == .encode ? .runeGold : .runeTextPrimary,
+                lineSpacing: 7
+            )
+        } else if settled {
             glyphText(finalAttributed)
                 .textSelection(.enabled)
         } else {
@@ -121,7 +137,7 @@ struct RuneInscriptionText: View {
 
     private var finalAttributed: AttributedString {
         var result = AttributedString()
-        let base: Color = direction == .encode ? Self.gold : Self.settledDecode
+        let base: Color = direction == .encode ? .runeGold : .runeTextPrimary
         for character in targetChars {
             var piece = AttributedString(String(character))
             piece.foregroundColor = base
@@ -133,19 +149,24 @@ struct RuneInscriptionText: View {
     // MARK: - Glyph Styling
 
     private func settledColor(flare: Double) -> Color {
-        let base = direction == .encode ? Self.goldRGB : Self.settledDecodeRGB
-        return Self.lerp(base, Self.flareRGB, flare)
+        let palette = RuneThemePaletteInterpreter.current
+        let baseColor = direction == .encode
+            ? palette.accentPrimary
+            : palette.textPrimary
+        let base = RuneThemePaletteInterpreter.rgba(baseColor)
+        let flareColor = RuneThemePaletteInterpreter.rgba(palette.focus)
+        return Self.lerp(
+            (base.red, base.green, base.blue),
+            (flareColor.red, flareColor.green, flareColor.blue),
+            flare
+        )
     }
 
     // MARK: - Colours
 
-    private static let gold = Color(red: 0.831, green: 0.592, blue: 0.102)
-    private static let settledDecode = Color(red: 0.86, green: 0.88, blue: 0.93)
-    private static let sourceColor = Color(red: 0.55, green: 0.58, blue: 0.66).opacity(0.55)
-
-    private static let goldRGB: (Double, Double, Double)          = (0.831, 0.592, 0.102)
-    private static let settledDecodeRGB: (Double, Double, Double)  = (0.86, 0.88, 0.93)
-    private static let flareRGB: (Double, Double, Double)          = (1.0, 0.97, 0.84)
+    private static var sourceColor: Color {
+        .runeSilver.opacity(0.55)
+    }
 
     private static func lerp(_ a: (Double, Double, Double),
                              _ b: (Double, Double, Double),

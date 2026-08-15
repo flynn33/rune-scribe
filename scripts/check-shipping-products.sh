@@ -609,63 +609,99 @@ check_exact_module_bundle() {
 
 macos_core_bundles="$temporary_directory/macos-core-bundles"
 macos_progression_bundles="$temporary_directory/macos-progression-bundles"
+macos_theme_coordinator_bundles="$temporary_directory/macos-theme-coordinator-bundles"
+macos_norse_theme_bundles="$temporary_directory/macos-norse-theme-bundles"
 macos_ui_bundles="$temporary_directory/macos-ui-bundles"
 ios_core_bundles="$temporary_directory/ios-core-bundles"
 ios_progression_bundles="$temporary_directory/ios-progression-bundles"
+ios_theme_coordinator_bundles="$temporary_directory/ios-theme-coordinator-bundles"
+ios_norse_theme_bundles="$temporary_directory/ios-norse-theme-bundles"
 ios_ui_bundles="$temporary_directory/ios-ui-bundles"
 
 write_module_bundle_list "$macos_resources" "RuneScribeArchitecture_RuneScribeCoreModule" "$macos_core_bundles"
 write_module_bundle_list "$macos_resources" "RuneScribeArchitecture_RuneScribeProgressionModule" "$macos_progression_bundles"
+write_module_bundle_list "$macos_resources" "RuneScribeArchitecture_RuneScribeThemeCoordinatorModule" "$macos_theme_coordinator_bundles"
+write_module_bundle_list "$macos_resources" "RuneScribeArchitecture_RuneScribeNorseThemeModule" "$macos_norse_theme_bundles"
 write_module_bundle_list "$macos_resources" "RuneScribeArchitecture_RuneScribeUIModule" "$macos_ui_bundles"
 write_module_bundle_list "$ios_resources" "RuneScribeArchitecture_RuneScribeCoreModule" "$ios_core_bundles"
 write_module_bundle_list "$ios_resources" "RuneScribeArchitecture_RuneScribeProgressionModule" "$ios_progression_bundles"
+write_module_bundle_list "$ios_resources" "RuneScribeArchitecture_RuneScribeThemeCoordinatorModule" "$ios_theme_coordinator_bundles"
+write_module_bundle_list "$ios_resources" "RuneScribeArchitecture_RuneScribeNorseThemeModule" "$ios_norse_theme_bundles"
 write_module_bundle_list "$ios_resources" "RuneScribeArchitecture_RuneScribeUIModule" "$ios_ui_bundles"
 
 check_exact_module_bundle "$macos_core_bundles" "macOS product contains exactly one Core module resource bundle"
 check_exact_module_bundle "$macos_progression_bundles" "macOS product contains exactly one Progression module resource bundle"
+check_exact_module_bundle "$macos_theme_coordinator_bundles" "macOS product contains exactly one Theme Coordinator module resource bundle"
+check_exact_module_bundle "$macos_norse_theme_bundles" "macOS product contains exactly one Norse Theme module resource bundle"
 check_exact_module_bundle "$macos_ui_bundles" "macOS product contains exactly one UI module resource bundle"
 check_exact_module_bundle "$ios_core_bundles" "iOS product contains exactly one Core module resource bundle"
 check_exact_module_bundle "$ios_progression_bundles" "iOS product contains exactly one Progression module resource bundle"
+check_exact_module_bundle "$ios_theme_coordinator_bundles" "iOS product contains exactly one Theme Coordinator module resource bundle"
+check_exact_module_bundle "$ios_norse_theme_bundles" "iOS product contains exactly one Norse Theme module resource bundle"
 check_exact_module_bundle "$ios_ui_bundles" "iOS product contains exactly one UI module resource bundle"
 
 macos_core_bundle=$(first_module_bundle "$macos_core_bundles")
 macos_progression_bundle=$(first_module_bundle "$macos_progression_bundles")
+macos_theme_coordinator_bundle=$(first_module_bundle "$macos_theme_coordinator_bundles")
+macos_norse_theme_bundle=$(first_module_bundle "$macos_norse_theme_bundles")
 macos_ui_bundle=$(first_module_bundle "$macos_ui_bundles")
 ios_core_bundle=$(first_module_bundle "$ios_core_bundles")
 ios_progression_bundle=$(first_module_bundle "$ios_progression_bundles")
+ios_theme_coordinator_bundle=$(first_module_bundle "$ios_theme_coordinator_bundles")
+ios_norse_theme_bundle=$(first_module_bundle "$ios_norse_theme_bundles")
 ios_ui_bundle=$(first_module_bundle "$ios_ui_bundles")
 
 macos_core_resource_root=""
 macos_progression_resource_root=""
+macos_theme_coordinator_resource_root=""
+macos_norse_theme_resource_root=""
 macos_ui_resource_root=""
 ios_core_resource_root=""
 ios_progression_resource_root=""
+ios_theme_coordinator_resource_root=""
+ios_norse_theme_resource_root=""
 ios_ui_resource_root=""
 [ -n "$macos_core_bundle" ] && macos_core_resource_root=$(module_resource_root "$macos_core_bundle")
 [ -n "$macos_progression_bundle" ] && macos_progression_resource_root=$(module_resource_root "$macos_progression_bundle")
+[ -n "$macos_theme_coordinator_bundle" ] && macos_theme_coordinator_resource_root=$(module_resource_root "$macos_theme_coordinator_bundle")
+[ -n "$macos_norse_theme_bundle" ] && macos_norse_theme_resource_root=$(module_resource_root "$macos_norse_theme_bundle")
 [ -n "$macos_ui_bundle" ] && macos_ui_resource_root=$(module_resource_root "$macos_ui_bundle")
 [ -n "$ios_core_bundle" ] && ios_core_resource_root=$(module_resource_root "$ios_core_bundle")
 [ -n "$ios_progression_bundle" ] && ios_progression_resource_root=$(module_resource_root "$ios_progression_bundle")
+[ -n "$ios_theme_coordinator_bundle" ] && ios_theme_coordinator_resource_root=$(module_resource_root "$ios_theme_coordinator_bundle")
+[ -n "$ios_norse_theme_bundle" ] && ios_norse_theme_resource_root=$(module_resource_root "$ios_norse_theme_bundle")
 [ -n "$ios_ui_bundle" ] && ios_ui_resource_root=$(module_resource_root "$ios_ui_bundle")
 
 macos_core_manifest=""
 macos_progression_manifest=""
+macos_theme_coordinator_manifest=""
+macos_norse_theme_manifest=""
 macos_ui_manifest=""
 ios_core_manifest=""
 ios_progression_manifest=""
+ios_theme_coordinator_manifest=""
+ios_norse_theme_manifest=""
 ios_ui_manifest=""
 [ -n "$macos_core_resource_root" ] && macos_core_manifest="$macos_core_resource_root/module-manifest.json"
 [ -n "$macos_progression_resource_root" ] && macos_progression_manifest="$macos_progression_resource_root/module-manifest.json"
+[ -n "$macos_theme_coordinator_resource_root" ] && macos_theme_coordinator_manifest="$macos_theme_coordinator_resource_root/module-manifest.json"
+[ -n "$macos_norse_theme_resource_root" ] && macos_norse_theme_manifest="$macos_norse_theme_resource_root/module-manifest.json"
 [ -n "$macos_ui_resource_root" ] && macos_ui_manifest="$macos_ui_resource_root/module-manifest.json"
 [ -n "$ios_core_resource_root" ] && ios_core_manifest="$ios_core_resource_root/module-manifest.json"
 [ -n "$ios_progression_resource_root" ] && ios_progression_manifest="$ios_progression_resource_root/module-manifest.json"
+[ -n "$ios_theme_coordinator_resource_root" ] && ios_theme_coordinator_manifest="$ios_theme_coordinator_resource_root/module-manifest.json"
+[ -n "$ios_norse_theme_resource_root" ] && ios_norse_theme_manifest="$ios_norse_theme_resource_root/module-manifest.json"
 [ -n "$ios_ui_resource_root" ] && ios_ui_manifest="$ios_ui_resource_root/module-manifest.json"
 
 check_nonempty_file "$macos_core_manifest" "macOS Core module manifest resource is present"
 check_nonempty_file "$macos_progression_manifest" "macOS Progression module manifest resource is present"
+check_nonempty_file "$macos_theme_coordinator_manifest" "macOS Theme Coordinator module manifest resource is present"
+check_nonempty_file "$macos_norse_theme_manifest" "macOS Norse Theme module manifest resource is present"
 check_nonempty_file "$macos_ui_manifest" "macOS UI module manifest resource is present"
 check_nonempty_file "$ios_core_manifest" "iOS Core module manifest resource is present"
 check_nonempty_file "$ios_progression_manifest" "iOS Progression module manifest resource is present"
+check_nonempty_file "$ios_theme_coordinator_manifest" "iOS Theme Coordinator module manifest resource is present"
+check_nonempty_file "$ios_norse_theme_manifest" "iOS Norse Theme module manifest resource is present"
 check_nonempty_file "$ios_ui_manifest" "iOS UI module manifest resource is present"
 
 if [ "$(module_bundle_count "$macos_progression_bundles")" -eq 1 ] && \
@@ -756,36 +792,154 @@ RUBY
   fi
 fi
 
+if [ "$(module_bundle_count "$macos_theme_coordinator_bundles")" -eq 1 ] && \
+   [ "$(module_bundle_count "$macos_norse_theme_bundles")" -eq 1 ] && \
+   [ "$(module_bundle_count "$ios_theme_coordinator_bundles")" -eq 1 ] && \
+   [ "$(module_bundle_count "$ios_norse_theme_bundles")" -eq 1 ]; then
+  if ruby -rdigest - \
+      "$macos_theme_coordinator_resource_root" "$macos_norse_theme_resource_root" \
+      "$ios_theme_coordinator_resource_root" "$ios_norse_theme_resource_root" \
+      >"$temporary_directory/theme-resource-errors" <<'RUBY'
+roots = {
+  "macOS Theme Coordinator" => ARGV.fetch(0),
+  "macOS Norse Theme" => ARGV.fetch(1),
+  "iOS Theme Coordinator" => ARGV.fetch(2),
+  "iOS Norse Theme" => ARGV.fetch(3)
+}
+errors = []
+
+expected_by_module = {
+  "Theme Coordinator" => {
+    "module-manifest.json" => [
+      1215,
+      "aaa6a0e08f4b7ae9c1fa39a26990dbd7909824aaf6efae08492ab8f86f48507c"
+    ]
+  },
+  "Norse Theme" => {
+    "NorseBaseLocalizations-en-US-v1.0.json" => [
+      3799,
+      "5151ffb31d7d3622b067422e959d2054ff095ef35f92ca25b1bf4bfcb1de2949"
+    ],
+    "NorseBasePlaceholderAssets-v1.0.json" => [
+      1_019_985,
+      "3a488cfbec99d79f8e776e52e57504c049312d865ba85a336068a2641e8b07d2"
+    ],
+    "NorseBaseScriptFallback-v1.0.json" => [
+      3012,
+      "b4c6b17c75a29faeed7c51f9c34d975b4c8b10c0522f7c3212b8471e53fd2cac"
+    ],
+    "NorseBaseVisualResources-v1.0.json" => [
+      3385,
+      "ede2823478bf8afa7838fe3b6e6965d9e76e6eefd2b745e45431abc68aa0fc38"
+    ],
+    "NotoSansRunic-Regular.ttf" => [
+      55_800,
+      "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
+    ],
+    "module-manifest.json" => [
+      2151,
+      "f0d3588fef8a4accc6f1769e07367ee6f4da99473eff4c77f75ffc0f4e0716fe"
+    ]
+  }
+}
+
+def inventory(root)
+  packaging_entries = ["Info.plist", "_CodeSignature"]
+  Dir.children(root).reject { |entry| packaging_entries.include?(entry) }.sort
+end
+
+roots.each do |label, root|
+  module_name = label.end_with?("Theme Coordinator") ? "Theme Coordinator" : "Norse Theme"
+  expected = expected_by_module.fetch(module_name)
+  actual_inventory = inventory(root)
+  unless actual_inventory == expected.keys.sort
+    errors << "#{label} resource inventory differs: #{actual_inventory.join(', ')}"
+  end
+
+  expected.each do |name, (expected_bytes, expected_sha256)|
+    resource_path = File.join(root, name)
+    unless File.file?(resource_path) && !File.symlink?(resource_path)
+      errors << "#{label} resource #{name} is missing or is not a regular file"
+      next
+    end
+
+    bytes = File.size(resource_path)
+    sha256 = Digest::SHA256.file(resource_path).hexdigest
+    errors << "#{label} resource #{name} byte count differs" unless bytes == expected_bytes
+    errors << "#{label} resource #{name} SHA-256 differs" unless sha256 == expected_sha256
+  end
+end
+
+expected_by_module.each do |module_name, expected|
+  expected.each_key do |name|
+    macos_path = File.join(roots.fetch("macOS #{module_name}"), name)
+    ios_path = File.join(roots.fetch("iOS #{module_name}"), name)
+    next unless File.file?(macos_path) && File.file?(ios_path)
+    errors << "#{module_name} resource #{name} differs between platforms" unless File.binread(macos_path) == File.binread(ios_path)
+  end
+end
+
+puts errors
+exit(errors.empty? ? 0 : 1)
+RUBY
+  then
+    pass_check "Theme bundles preserve exact inventories, byte counts, SHA-256 values, source exclusion, and cross-platform parity"
+  else
+    validation_detail=false
+    while IFS= read -r error; do
+      if [ -n "$error" ]; then
+        validation_detail=true
+        printf 'DETAIL: Theme resource: %s\n' "$error" >&2
+      fi
+    done <"$temporary_directory/theme-resource-errors"
+    [ "$validation_detail" = true ] || printf 'DETAIL: Theme resource validator did not return diagnostics.\n' >&2
+    fail_check "Theme bundles differ from their exact resource contracts"
+  fi
+fi
+
 if [ -s "$macos_core_manifest" ] && [ -s "$macos_progression_manifest" ] && \
+   [ -s "$macos_theme_coordinator_manifest" ] && [ -s "$macos_norse_theme_manifest" ] && \
    [ -s "$macos_ui_manifest" ] && [ -s "$ios_core_manifest" ] && \
-   [ -s "$ios_progression_manifest" ] && [ -s "$ios_ui_manifest" ]; then
-  if ruby -rjson - "$macos_core_manifest" "$macos_progression_manifest" "$macos_ui_manifest" \
-      "$ios_core_manifest" "$ios_progression_manifest" "$ios_ui_manifest" \
+   [ -s "$ios_progression_manifest" ] && [ -s "$ios_theme_coordinator_manifest" ] && \
+   [ -s "$ios_norse_theme_manifest" ] && [ -s "$ios_ui_manifest" ]; then
+  if ruby -rjson - "$macos_core_manifest" "$macos_progression_manifest" \
+      "$macos_theme_coordinator_manifest" "$macos_norse_theme_manifest" "$macos_ui_manifest" \
+      "$ios_core_manifest" "$ios_progression_manifest" \
+      "$ios_theme_coordinator_manifest" "$ios_norse_theme_manifest" "$ios_ui_manifest" \
       "$temporary_directory/macos-info.json" "$temporary_directory/ios-info.json" \
       >"$temporary_directory/manifest-errors" <<'RUBY'
-paths = ARGV.take(6)
-macos_info = JSON.parse(File.read(ARGV.fetch(6)))
-ios_info = JSON.parse(File.read(ARGV.fetch(7)))
+paths = ARGV.take(10)
+macos_info = JSON.parse(File.read(ARGV.fetch(10)))
+ios_info = JSON.parse(File.read(ARGV.fetch(11)))
 errors = []
 
 expectations = [
-  ["com.runescribe.module.core", "service", "RuneScribeCoreModule"],
-  ["com.runescribe.module.progression", "service", "RuneScribeProgressionModule"],
-  ["com.runescribe.module.ui", "ui", "RuneScribeUIModule"]
+  ["com.runescribe.module.core", "service", "RuneScribeCoreModule", "Core", nil, "app"],
+  ["com.runescribe.module.progression", "service", "RuneScribeProgressionModule", "Progression", nil, "app"],
+  ["com.runescribe.module.theme-coordinator", "service", "RuneScribeThemeCoordinatorModule", "Theme Coordinator", "policy.theme-coordinator", "1.0.0"],
+  ["com.runescribe.module.theme.norse", "service", "RuneScribeNorseThemeModule", "Norse Theme", "policy.theme-provider", "1.0.0"],
+  ["com.runescribe.module.ui", "ui", "RuneScribeUIModule", "UI", nil, "app"]
 ]
 
 paths.each_with_index do |path, index|
   manifest = JSON.parse(File.read(path))
-  expected = expectations[index % 3]
-  platform = index < 3 ? "macOS" : "iOS"
-  errors << "#{platform} #{expected[1]} manifest moduleID differs" unless manifest["moduleID"] == expected[0]
-  errors << "#{platform} #{expected[1]} manifest moduleType differs" unless manifest["moduleType"] == expected[1]
-  errors << "#{platform} #{expected[1]} manifest entryPoint differs" unless manifest["entryPoint"] == expected[2]
-  errors << "#{platform} #{expected[1]} manifest policy profile differs" unless manifest["policyProfile"] == "forsetti-pattern-b-standalone"
-  errors << "#{platform} #{expected[1]} production diagnostics are enabled" unless manifest["diagnosticsVisibleInProduction"] == false
-  errors << "#{platform} #{expected[1]} supported platforms differ" unless manifest["supportedPlatforms"] == ["iOS", "macOS"]
-  expected_version = platform == "macOS" ? macos_info["CFBundleShortVersionString"] : ios_info["CFBundleShortVersionString"]
-  errors << "#{platform} #{expected[1]} module version differs from the app" unless manifest["moduleVersion"] == expected_version
+  expected = expectations[index % 5]
+  platform = index < 5 ? "macOS" : "iOS"
+  label = expected[3]
+  errors << "#{platform} #{label} manifest moduleID differs" unless manifest["moduleID"] == expected[0]
+  errors << "#{platform} #{label} manifest moduleType differs" unless manifest["moduleType"] == expected[1]
+  errors << "#{platform} #{label} manifest entryPoint differs" unless manifest["entryPoint"] == expected[2]
+  errors << "#{platform} #{label} manifest policy class differs" unless manifest["policyClass"] == expected[4]
+  errors << "#{platform} #{label} manifest policy profile differs" unless manifest["policyProfile"] == "forsetti-pattern-b-standalone"
+  errors << "#{platform} #{label} production diagnostics are enabled" unless manifest["diagnosticsVisibleInProduction"] == false
+  errors << "#{platform} #{label} supported platforms differ" unless manifest["supportedPlatforms"] == ["iOS", "macOS"]
+  expected_version = if expected[5] == "app"
+    platform == "macOS" ? macos_info["CFBundleShortVersionString"] : ios_info["CFBundleShortVersionString"]
+  else
+    expected[5]
+  end
+  version_contract = expected[5] == "app" ? "the app" : "the exact contract version"
+  errors << "#{platform} #{label} module version differs from #{version_contract}" unless manifest["moduleVersion"] == expected_version
 
   next unless expected[0] == "com.runescribe.module.progression"
 
@@ -829,9 +983,75 @@ paths.each_with_index do |path, index|
   end
 end
 
-errors << "Core module manifest differs between platforms" unless File.binread(paths[0]) == File.binread(paths[3])
-errors << "Progression module manifest differs between platforms" unless File.binread(paths[1]) == File.binread(paths[4])
-errors << "UI module manifest differs between platforms" unless File.binread(paths[2]) == File.binread(paths[5])
+paths.each_with_index do |path, index|
+  manifest = JSON.parse(File.read(path))
+  expected = expectations[index % 5]
+  platform = index < 5 ? "macOS" : "iOS"
+
+  case expected[0]
+  when "com.runescribe.module.theme-coordinator"
+    expected_requirements = {
+      "requiredServices" => [],
+      "requiredResources" => [],
+      "requiredModuleRoles" => ["runescribe.theme.norse"]
+    }
+    expected_capabilities = [
+      "runtime.contributions.read",
+      "runtime.resources.opaque.resolve",
+      "runtime.settings.read",
+      "runtime.settings.write",
+      "runtime.availability.read",
+      "runtime.events.publish"
+    ]
+    expected_endpoints = [
+      "theme.codex.select",
+      "theme.diagnostics.summary",
+      "theme.resource.resolve",
+      "theme.state",
+      "theme.state.current"
+    ]
+
+    errors << "#{platform} Theme Coordinator criticality differs" unless manifest["criticality"] == "required"
+    errors << "#{platform} Theme Coordinator default role differs" unless manifest["defaultRole"] == "runescribe.theme.coordinator"
+    errors << "#{platform} Theme Coordinator runtime requirements differ" unless manifest["runtimeRequirements"] == expected_requirements
+    errors << "#{platform} Theme Coordinator requested capabilities differ" unless manifest["capabilitiesRequested"] == expected_capabilities
+    errors << "#{platform} Theme Coordinator published endpoints differ" unless manifest["publishedEndpoints"] == expected_endpoints
+    errors << "#{platform} Theme Coordinator consumed endpoints differ" unless manifest["consumedEndpoints"] == []
+    errors << "#{platform} Theme Coordinator entitlement requirement differs" unless manifest["entitlementRequirement"].nil?
+  when "com.runescribe.module.theme.norse"
+    owner = "com.runescribe.module.theme.norse"
+    expected_requirements = {
+      "requiredServices" => ["ApplicationResourceLocator"],
+      "requiredResources" => [
+        { "name" => "module-manifest", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
+        { "name" => "NorseBaseScriptFallback-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
+        { "name" => "NorseBaseVisualResources-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
+        { "name" => "NorseBaseLocalizations-en-US-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
+        { "name" => "NotoSansRunic-Regular", "fileExtension" => "ttf", "subdirectory" => nil, "ownerModuleID" => owner },
+        { "name" => "NorseBasePlaceholderAssets-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner }
+      ],
+      "requiredModuleRoles" => []
+    }
+    expected_entitlement = { "kind" => "always", "identifier" => "unlock.codex.norse" }
+    expected_capabilities = [
+      "resources.read",
+      "runtime.contributions.publish",
+      "runtime.resources.opaque.publish"
+    ]
+
+    errors << "#{platform} Norse Theme criticality differs" unless manifest["criticality"] == "required"
+    errors << "#{platform} Norse Theme default role differs" unless manifest["defaultRole"] == "runescribe.theme.norse"
+    errors << "#{platform} Norse Theme runtime requirements differ" unless manifest["runtimeRequirements"] == expected_requirements
+    errors << "#{platform} Norse Theme requested capabilities differ" unless manifest["capabilitiesRequested"] == expected_capabilities
+    errors << "#{platform} Norse Theme published endpoints differ" unless manifest["publishedEndpoints"] == []
+    errors << "#{platform} Norse Theme consumed endpoints differ" unless manifest["consumedEndpoints"] == []
+    errors << "#{platform} Norse Theme entitlement requirement differs" unless manifest["entitlementRequirement"] == expected_entitlement
+  end
+end
+
+expectations.each_index do |index|
+  errors << "#{expectations[index][3]} module manifest differs between platforms" unless File.binread(paths[index]) == File.binread(paths[index + 5])
+end
 
 puts errors
 exit(errors.empty? ? 0 : 1)
@@ -1005,6 +1225,8 @@ inspect_linkage() {
     RuneScribePlatform \
     RuneScribeCoreModule \
     RuneScribeProgressionModule \
+    RuneScribeThemeCoordinatorModule \
+    RuneScribeNorseThemeModule \
     RuneScribeUIModule
   do
     if grep -Fq "$module" "$symbols"; then
@@ -1078,13 +1300,26 @@ shipping_products = [
   "RuneScribePlatform",
   "RuneScribeCoreModule",
   "RuneScribeProgressionModule",
+  "RuneScribeThemeCoordinatorModule",
+  "RuneScribeNorseThemeModule",
+  "RuneScribeUIModule"
+]
+app_product_names = [
+  "RuneScribeContracts",
+  "RuneScribeRuntimeCore",
+  "RuneScribeUIRuntime",
+  "RuneScribePlatform",
+  "RuneScribeCoreModule",
+  "RuneScribeProgressionModule",
+  "RuneScribeNorseThemeModule",
+  "RuneScribeThemeCoordinatorModule",
   "RuneScribeUIModule"
 ]
 presentation_contract_products = ["RuneScribeUIPresentationContracts"]
 test_only_products = ["RuneScribeTestSupport"]
 all_products = [shipping_products.first] + presentation_contract_products +
   shipping_products.drop(1) + test_only_products
-expected_app_dependencies = shipping_products.map do |product|
+expected_app_dependencies = app_product_names.map do |product|
   { "package" => "RuneScribeArchitecture", "product" => product }
 end
 
@@ -1180,6 +1415,8 @@ expected_test_target_names = [
   "RuneScribePlatformTests",
   "RuneScribeCoreModuleTests",
   "RuneScribeProgressionModuleTests",
+  "RuneScribeNorseThemeModuleTests",
+  "RuneScribeThemeCoordinatorModuleTests",
   "RuneScribeUIModuleTests",
   "RuneScribeArchitectureTests"
 ]
@@ -1194,6 +1431,8 @@ expected_edges = {
   "RuneScribePlatform" => ["RuneScribeContracts"],
   "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
   "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeThemeCoordinatorModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeNorseThemeModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
   "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
   "RuneScribeTestSupport" => ["RuneScribeContracts"]
 }
@@ -1225,10 +1464,24 @@ expected_test_edges = {
     "RuneScribeRuntimeCore",
     "RuneScribeTestSupport"
   ],
-  "RuneScribeUIModuleTests" => [
+  "RuneScribeNorseThemeModuleTests" => [
     "RuneScribeContracts",
+    "RuneScribeNorseThemeModule",
+    "RuneScribeRuntimeCore"
+  ],
+  "RuneScribeThemeCoordinatorModuleTests" => [
+    "RuneScribeContracts",
+    "RuneScribeNorseThemeModule",
     "RuneScribeRuntimeCore",
     "RuneScribeTestSupport",
+    "RuneScribeThemeCoordinatorModule"
+  ],
+  "RuneScribeUIModuleTests" => [
+    "RuneScribeContracts",
+    "RuneScribeNorseThemeModule",
+    "RuneScribeRuntimeCore",
+    "RuneScribeTestSupport",
+    "RuneScribeThemeCoordinatorModule",
     "RuneScribeUIPresentationContracts",
     "RuneScribeUIRuntime",
     "RuneScribeUIModule"
@@ -1239,7 +1492,9 @@ expected_test_edges = {
     "RuneScribeUIRuntime",
     "RuneScribePlatform",
     "RuneScribeCoreModule",
+    "RuneScribeNorseThemeModule",
     "RuneScribeProgressionModule",
+    "RuneScribeThemeCoordinatorModule",
     "RuneScribeUIModule",
     "RuneScribeTestSupport"
   ]
@@ -1257,13 +1512,30 @@ unless progression_target.is_a?(Hash) && progression_target["resources"] == expe
   errors << "Package.swift Progression resource processing declaration differs"
 end
 
+theme_coordinator_target = package_targets.find do |target|
+  target["name"] == "RuneScribeThemeCoordinatorModule"
+end
+unless theme_coordinator_target.is_a?(Hash) &&
+    theme_coordinator_target["resources"] == expected_progression_resources
+  errors << "Package.swift Theme Coordinator resource processing declaration differs"
+end
+
+norse_theme_target = package_targets.find do |target|
+  target["name"] == "RuneScribeNorseThemeModule"
+end
+unless norse_theme_target.is_a?(Hash) &&
+    norse_theme_target["resources"] == expected_progression_resources &&
+    norse_theme_target["exclude"] == ["Resources/Source"]
+  errors << "Package.swift Norse Theme resource processing or source exclusion differs"
+end
+
 test_support_package_consumers = target_edges.each_with_object([]) do |(target, dependencies), consumers|
   consumers << target if dependencies.include?("RuneScribeTestSupport")
 end.sort
 unless test_support_package_consumers == %w[
   RuneScribeArchitectureTests RuneScribePlatformTests
   RuneScribeProgressionModuleTests RuneScribeRuntimeCoreTests
-  RuneScribeUIModuleTests
+  RuneScribeThemeCoordinatorModuleTests RuneScribeUIModuleTests
 ].sort
   errors << "Package.swift RuneScribeTestSupport consumers differ"
 end
@@ -1437,12 +1709,12 @@ expected_compiled_sources = %w[
   product_names = product_objects.map do |object|
     object["productName"] if object.is_a?(Hash) && object["isa"] == "XCSwiftPackageProductDependency"
   end
-  errors << "generated project #{target_name} package products differ" unless product_names == shipping_products
+  errors << "generated project #{target_name} package products differ" unless product_names == app_product_names
   errors << "generated project #{target_name} package product identifiers are duplicated" unless product_ids.uniq == product_ids
   product_objects.each_with_index do |object, index|
     expected_object = {
       "isa" => "XCSwiftPackageProductDependency",
-      "productName" => shipping_products[index]
+      "productName" => app_product_names[index]
     }
     errors << "generated project #{target_name} package product object differs" unless object == expected_object
   end

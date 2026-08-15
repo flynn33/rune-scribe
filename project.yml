@@ -55,6 +55,10 @@ targets:
       - package: RuneScribeArchitecture
         product: RuneScribeProgressionModule
       - package: RuneScribeArchitecture
+        product: RuneScribeNorseThemeModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeCoordinatorModule
+      - package: RuneScribeArchitecture
         product: RuneScribeUIModule
     # An explicit, XcodeGen-managed Info.plist is required because the
     # runescribe:// URL scheme is a nested array that GENERATE_INFOPLIST_FILE can't
@@ -142,6 +146,10 @@ targets:
         product: RuneScribeCoreModule
       - package: RuneScribeArchitecture
         product: RuneScribeProgressionModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeNorseThemeModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeCoordinatorModule
       - package: RuneScribeArchitecture
         product: RuneScribeUIModule
     # An explicit, XcodeGen-managed Info.plist is required because the

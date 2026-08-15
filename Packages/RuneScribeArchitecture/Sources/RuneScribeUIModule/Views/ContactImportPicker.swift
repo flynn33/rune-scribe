@@ -111,7 +111,7 @@ struct ContactImportPicker: View {
             Image(systemName: "magnifyingglass").foregroundColor(.runeSilver)
             TextField("Search contacts", text: $search)
                 .textFieldStyle(.plain)
-                .foregroundColor(.white)
+                .foregroundColor(.runeTextPrimary)
             if !search.isEmpty {
                 Button { search = "" } label: {
                     Image(systemName: "xmark.circle.fill")
@@ -164,7 +164,7 @@ struct ContactImportPicker: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(contact.displayName)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.white)
+                        .foregroundColor(.runeTextPrimary)
                         .lineLimit(1)
                     if let sub = contact.phones.first ?? contact.emails.first {
                         Text(sub)
@@ -214,7 +214,7 @@ struct ContactImportPicker: View {
         centered {
             VStack(spacing: 12) {
                 Image(systemName: icon).font(.system(size: 32)).foregroundColor(.runeSilver.opacity(0.6))
-                Text(title).font(.system(size: 15, weight: .bold)).foregroundColor(.white)
+                Text(title).font(.system(size: 15, weight: .bold)).foregroundColor(.runeTextPrimary)
                 Text(detail)
                     .font(.system(size: 12))
                     .foregroundColor(.runeSilver)

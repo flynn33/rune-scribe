@@ -1,13 +1,14 @@
 import Foundation
 import RuneScribeContracts
 import RuneScribeCoreModule
+import RuneScribeNorseThemeModule
 import RuneScribePlatform
 import RuneScribeProgressionModule
 import RuneScribeRuntimeCore
+import RuneScribeThemeCoordinatorModule
 import RuneScribeUIModule
 import RuneScribeUIRuntime
-@MainActor
-final class RuneScribeRuntimeComposition {
+@MainActor final class RuneScribeRuntimeComposition {
     private let runtime: RuneScribeRuntime
     private let coreFactory: AnyModuleFactory
     private let secureValues: any SecureValueStore
@@ -45,8 +46,9 @@ final class RuneScribeRuntimeComposition {
         protectedFiles = AppleProtectedFileStore()
         self.inboundFiles = inboundFiles
         self.shareArtifacts = shareArtifacts
-        resources = BundleApplicationResourceLocator(bundle: bundle,
-            moduleBundles: RuneScribeProgressionModuleBootstrap.ownerScopedResourceBundles)
+        let moduleBundles = RuneScribeProgressionModuleBootstrap.ownerScopedResourceBundles
+            .merging(RuneScribeNorseThemeModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
+        resources = BundleApplicationResourceLocator(bundle: bundle, moduleBundles: moduleBundles)
         fonts = CoreTextFontRegistrar()
         contacts = SystemContactAccessService()
         clipboardRead = systemClipboard
@@ -55,15 +57,11 @@ final class RuneScribeRuntimeComposition {
         uuid = SystemUUIDProvider()
         self.moduleStateStore = moduleStateStore
         coreFactory = injectedCoreFactory ?? RuneScribeCoreModuleBootstrap.factory()
-        let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-        let buildNumber = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String
+        let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, buildNumber = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String
         let rootPresentationStore = RootViewPresentationStore()
         self.rootPresentationStore = rootPresentationStore
         rootPresentationAdapter = rootPresentationStore.runtimeHostAdapter(
-            productMetadata: RuneScribeUIProductMetadata(
-                version: version ?? "—",
-                buildNumber: buildNumber ?? "—"
-            )
+            productMetadata: RuneScribeUIProductMetadata(version: version ?? "—", buildNumber: buildNumber ?? "—")
         )
         let runtime = RuneScribeRuntime(runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)), platform: Self.platform)
         self.runtime = runtime
@@ -155,6 +153,8 @@ final class RuneScribeRuntimeComposition {
         try await runtime.installPlatformAdapter(resources, for: RuneScribeServiceKeys.applicationResourceLocator)
         if let moduleStateStore { try await runtime.installPlatformAdapter(moduleStateStore, for: RuneScribeServiceKeys.moduleStateStore) }
         try await runtime.register(manifest: RuneScribeCoreModuleBootstrap.manifest(), factory: coreFactory)
+        try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeCoordinatorModuleBootstrap.register(with: runtime)
         try await RuneScribeProgressionModuleBootstrap.register(with: runtime)
         try await runtime.register(manifest: RuneScribeUIModuleBootstrap.manifest(), factory: RuneScribeUIModuleBootstrap.factory())
         try await runtime.installStandardPort(

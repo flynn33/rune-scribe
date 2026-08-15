@@ -419,6 +419,90 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
         await secondRuntime.stop()
     }
 
+    func testSettingsWriteScopeSeparatesPrimaryUIAndThemeCoordinator() async throws {
+        let store = InMemoryModuleStateStore(now: { Date(timeIntervalSince1970: 2_500) })
+        let capture = RuntimeRailClientCapture()
+        let version = SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0))
+        let runtime = RuneScribeRuntime(runtimeVersion: version, platform: .macOS)
+        let core = railCoreDescriptor(version: version)
+        let ui = railUIDescriptor(version: version)
+        let coordinator = themeCoordinatorSettingsDescriptor(version: version)
+
+        try await runtime.register(
+            manifest: railManifest(for: core, runtimeVersion: version),
+            factory: AnyModuleFactory(
+                descriptor: core,
+                make: { RuntimeRailTestModule(descriptor: core) { _ in } }
+            )
+        )
+        try await runtime.register(
+            manifest: railManifest(for: ui, runtimeVersion: version),
+            factory: AnyModuleFactory(
+                descriptor: ui,
+                make: {
+                    RuntimeRailTestModule(descriptor: ui) { context in
+                        await capture.setSettingsClient(
+                            try await context.runtimeSettingsClient()
+                        )
+                    }
+                }
+            )
+        )
+        try await runtime.register(
+            manifest: railManifest(for: coordinator, runtimeVersion: version),
+            factory: AnyModuleFactory(
+                descriptor: coordinator,
+                make: {
+                    RuntimeRailTestModule(descriptor: coordinator) { context in
+                        await capture.setCoordinatorSettingsClient(
+                            try await context.runtimeSettingsClient()
+                        )
+                    }
+                }
+            )
+        )
+        try await runtime.installPlatformAdapter(
+            store,
+            for: RuneScribeServiceKeys.moduleStateStore
+        )
+        try await runtime.start()
+
+        let capturedPrimaryUIClient = await capture.settingsClient()
+        let capturedCoordinatorClient = await capture.coordinatorSettingsClient()
+        let primaryUIClient = try XCTUnwrap(capturedPrimaryUIClient)
+        let coordinatorClient = try XCTUnwrap(capturedCoordinatorClient)
+        let elven = try XCTUnwrap(RuntimeSettingText(rawValue: "codex.elven"))
+        let command = SetRuntimeSettingCommand(
+            settingID: RuneScribeRuntimeSettings.selectedCodex,
+            value: .text(elven),
+            expectedRevision: 0
+        )
+
+        do {
+            _ = try await primaryUIClient.set(command)
+            XCTFail("Expected selected Codex write to be denied for primary UI")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .settingWriteDenied(
+                    moduleID: RuneScribeModuleIDs.primaryUI,
+                    settingID: RuneScribeRuntimeSettings.selectedCodex
+                )
+            )
+        }
+
+        let stored = try await coordinatorClient.set(command)
+        XCTAssertEqual(stored.settingID, RuneScribeRuntimeSettings.selectedCodex)
+        XCTAssertEqual(stored.value, .text(elven))
+        let visibleToPrimaryUI = try await primaryUIClient.snapshot()
+        XCTAssertEqual(
+            visibleToPrimaryUI[RuneScribeRuntimeSettings.selectedCodex],
+            .text(elven)
+        )
+
+        await runtime.stop()
+    }
+
     func testSettingsSnapshotAndTextRejectUnboundedOrAmbiguousValues() throws {
         let setting = RuntimeSettingDTO(
             settingID: RuneScribeRuntimeSettings.unlockFeedbackSoundEnabled,
@@ -534,6 +618,7 @@ private struct UncheckedSettingsSnapshot: Encodable {
 private actor RuntimeRailClientCapture {
     private var storedModuleStateClient: RuntimeModuleStateClient?
     private var storedSettingsClient: RuntimeSettingsClient?
+    private var storedCoordinatorSettingsClient: RuntimeSettingsClient?
     private var storedOutboxClient: RuntimeProgressionOutboxClient?
 
     func setModuleStateClient(_ value: RuntimeModuleStateClient) {
@@ -544,12 +629,19 @@ private actor RuntimeRailClientCapture {
         storedSettingsClient = value
     }
 
+    func setCoordinatorSettingsClient(_ value: RuntimeSettingsClient) {
+        storedCoordinatorSettingsClient = value
+    }
+
     func setOutboxClient(_ value: RuntimeProgressionOutboxClient) {
         storedOutboxClient = value
     }
 
     func moduleStateClient() -> RuntimeModuleStateClient? { storedModuleStateClient }
     func settingsClient() -> RuntimeSettingsClient? { storedSettingsClient }
+    func coordinatorSettingsClient() -> RuntimeSettingsClient? {
+        storedCoordinatorSettingsClient
+    }
     func outboxClient() -> RuntimeProgressionOutboxClient? { storedOutboxClient }
 }
 
@@ -625,6 +717,24 @@ private func progressionRailDescriptor(version: SemanticVersion) -> ModuleDescri
     )
 }
 
+private func themeCoordinatorSettingsDescriptor(
+    version: SemanticVersion
+) -> ModuleDescriptor {
+    ModuleDescriptor(
+        moduleID: RuneScribeModuleIDs.themeCoordinator,
+        moduleVersion: version,
+        kind: .service,
+        entryPoint: "RuntimeRailThemeCoordinator",
+        role: RuneScribeRoles.themeCoordinator,
+        policyClass: RuneScribePolicyClasses.themeCoordinator,
+        requestedCapabilities: [
+            RuneScribeCapabilities.runtimeSettingsRead,
+            RuneScribeCapabilities.runtimeSettingsWrite,
+        ],
+        requiredModuleRoles: [RuneScribeRoles.core]
+    )
+}
+
 private func railManifest(
     for descriptor: ModuleDescriptor,
     runtimeVersion: SemanticVersion
@@ -644,6 +754,7 @@ private func railManifest(
             requiredModuleRoles: descriptor.requiredModuleRoles.sorted()
         ),
         defaultRole: descriptor.role,
+        policyClass: descriptor.policyClass,
         consumedEndpoints: descriptor.consumedEndpoints.sorted(),
         publishedEndpoints: descriptor.publishedEndpoints.sorted()
     )

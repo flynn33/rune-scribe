@@ -236,7 +236,7 @@ struct ContentView: View {
             case .editing:
                 TextEditor(text: $inputText)
                     .font(.system(size: glyphSize, design: .monospaced))
-                    .foregroundColor(.white)
+                    .foregroundColor(.runeTextPrimary)
                     .scrollContentBackground(.hidden)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
@@ -261,7 +261,8 @@ struct ContentView: View {
                                         start: transformStart,
                                         direction: transformDirection,
                                         fontSize: glyphSize,
-                                        fontName: RuneFont.name(for: session.activeCipher),
+                                        fontName: session.inscriptionFontPostScriptName,
+                                        vectorDataByToken: session.inscriptionVectorDataByToken,
                                         settled: boxPhase == .result)
                         .padding(.horizontal, 15)
                         .padding(.vertical, 15)
@@ -472,7 +473,7 @@ struct ContentView: View {
                 HStack(spacing: 6) {
                     Text(session.activeCipher?.label ?? "No Cipher")
                         .font(.system(size: 13, weight: .semibold, design: .monospaced))
-                        .foregroundColor(.white)
+                        .foregroundColor(.runeTextPrimary)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     Image(systemName: "chevron.up.chevron.down")

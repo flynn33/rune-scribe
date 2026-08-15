@@ -1,4 +1,6 @@
+import CoreGraphics
 import Foundation
+import PDFKit
 import RuneScribeContracts
 @_spi(RuntimeResourceHost) @testable import RuneScribeRuntimeCore
 @testable import RuneScribeUIRuntime
@@ -6,6 +8,352 @@ import XCTest
 
 @MainActor
 final class RuntimeApplicationResourcePresentationTests: XCTestCase {
+    func testThemeBackgroundParametersDecodeEveryBoundedRendererField() throws {
+        let parameters = try RuntimeThemeBackgroundParameters.decode(
+            from: validThemeBackgroundParameters
+        )
+
+        XCTAssertEqual(parameters.rendererID, "fragment-rune-background")
+        XCTAssertEqual(parameters.baseGradient.map(\.rawValue), ["#080A1E", "#14082E"])
+        XCTAssertEqual(parameters.bandFrequency, 18)
+        XCTAssertEqual(parameters.bandThreshold, [0.85, 1])
+        XCTAssertEqual(parameters.bandColor.rawValue, "#0F1438")
+        XCTAssertEqual(parameters.columnColor.rawValue, "#1A4D99")
+        XCTAssertEqual(parameters.highlightColor.rawValue, "#D19914")
+        XCTAssertEqual(parameters.shimmerStrength, 0.012)
+    }
+
+    func testThemeBackgroundParametersRejectNoncanonicalAndUnsafeValues() throws {
+        var lowercase = try themeBackgroundParameterObject()
+        var lowercaseParameters = try XCTUnwrap(
+            lowercase["rendererParameters"] as? [String: Any]
+        )
+        lowercaseParameters["bandColor"] = "#0f1438"
+        lowercase["rendererParameters"] = lowercaseParameters
+        XCTAssertThrowsError(
+            try RuntimeThemeBackgroundParameters.decode(
+                from: try JSONSerialization.data(withJSONObject: lowercase)
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? RuntimeThemeBackgroundParameterError,
+                .invalidField("color")
+            )
+        }
+
+        var unsafe = try themeBackgroundParameterObject()
+        var unsafeParameters = try XCTUnwrap(
+            unsafe["rendererParameters"] as? [String: Any]
+        )
+        unsafeParameters["shimmerStrength"] = 0.75
+        unsafe["rendererParameters"] = unsafeParameters
+        XCTAssertThrowsError(
+            try RuntimeThemeBackgroundParameters.decode(
+                from: try JSONSerialization.data(withJSONObject: unsafe)
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? RuntimeThemeBackgroundParameterError,
+                .invalidField("shimmerStrength")
+            )
+        }
+
+        var unexpected = try themeBackgroundParameterObject()
+        var unexpectedParameters = try XCTUnwrap(
+            unexpected["rendererParameters"] as? [String: Any]
+        )
+        unexpectedParameters["unapprovedField"] = 1
+        unexpected["rendererParameters"] = unexpectedParameters
+        XCTAssertThrowsError(
+            try RuntimeThemeBackgroundParameters.decode(
+                from: try JSONSerialization.data(withJSONObject: unexpected)
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? RuntimeThemeBackgroundParameterError,
+                .malformedDocument
+            )
+        }
+    }
+
+    func testThemeBackgroundInstallRetainsStaticVariantsWhenParametersFail() throws {
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: nil
+        )
+
+        XCTAssertThrowsError(
+            try presentation.installThemeBackground(
+                staticBaseData: validThemeBackgroundImage,
+                reduceMotionData: validThemeBackgroundImage,
+                highContrastData: validThemeBackgroundImage,
+                rendererParametersData: Data("not-json".utf8)
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? RuntimeThemeBackgroundParameterError,
+                .malformedDocument
+            )
+        }
+
+        XCTAssertNotNil(presentation.staticThemeBackgroundImage)
+        XCTAssertNotNil(presentation.reduceMotionThemeBackgroundImage)
+        XCTAssertNotNil(presentation.highContrastThemeBackgroundImage)
+        XCTAssertNil(presentation.themeBackgroundParameters)
+        XCTAssertEqual(presentation.themeBackgroundRevision, 1)
+    }
+
+    func testThemeBackgroundInstallAndClearReplaceTheWholeConfiguration() throws {
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: nil
+        )
+        try presentation.installThemeBackground(
+            staticBaseData: validThemeBackgroundImage,
+            reduceMotionData: validThemeBackgroundImage,
+            highContrastData: validThemeBackgroundImage,
+            rendererParametersData: validThemeBackgroundParameters
+        )
+        XCTAssertEqual(
+            presentation.themeBackgroundParameters?.rendererID,
+            "fragment-rune-background"
+        )
+
+        presentation.clearThemeBackground()
+
+        XCTAssertNil(presentation.staticThemeBackgroundImage)
+        XCTAssertNil(presentation.reduceMotionThemeBackgroundImage)
+        XCTAssertNil(presentation.highContrastThemeBackgroundImage)
+        XCTAssertNil(presentation.themeBackgroundParameters)
+        XCTAssertEqual(presentation.themeBackgroundRevision, 2)
+    }
+
+    func testThemeBackgroundInstallRejectsMetadataOnlyRaster() {
+        let cache = RuntimeThemeDecodedResourceCache()
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: nil,
+            decodedResourceCache: cache
+        )
+
+        XCTAssertThrowsError(
+            try presentation.installThemeBackground(
+                staticBaseData: metadataOnlyThemeBackgroundImage,
+                reduceMotionData: validThemeBackgroundImage,
+                highContrastData: validThemeBackgroundImage,
+                rendererParametersData: nil
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? RuntimeThemeBackgroundInstallationError,
+                .invalidStaticBaseData
+            )
+        }
+        XCTAssertNil(presentation.staticThemeBackgroundImage)
+        XCTAssertEqual(cache.decodedImageValidationCount, 0)
+        XCTAssertEqual(cache.entryCount, 0)
+    }
+
+    func testThemeBackgroundRendererUniformLayoutMatchesMetalABI() {
+        XCTAssertEqual(
+            RuntimeThemeBackgroundRendererABI.actualFragmentUniformByteCount,
+            RuntimeThemeBackgroundRendererABI.expectedFragmentUniformByteCount
+        )
+        XCTAssertEqual(
+            RuntimeThemeBackgroundRendererABI.expectedFragmentUniformByteCount,
+            160
+        )
+        XCTAssertTrue(RuntimeThemeBackgroundRendererABI.isValid)
+    }
+
+    func testDecodedThemeResourcePreflightEnforcesADRLimits() throws {
+        XCTAssertEqual(
+            RuntimeThemeDecodedResourceCache.maximumEncodedImageByteCount,
+            8 * 1_024 * 1_024
+        )
+        XCTAssertEqual(
+            RuntimeThemeDecodedResourceCache.maximumPixelDimension,
+            4_096
+        )
+        XCTAssertEqual(
+            RuntimeThemeDecodedResourceCache.maximumDecodedByteCount,
+            64 * 1_024 * 1_024
+        )
+        XCTAssertEqual(
+            try RuntimeThemeDecodedResourceCache.validatedDecodedByteCount(
+                width: 4_096,
+                height: 4_096
+            ),
+            64 * 1_024 * 1_024
+        )
+        XCTAssertThrowsError(
+            try RuntimeThemeDecodedResourceCache.validatedDecodedByteCount(
+                width: 4_097,
+                height: 1
+            )
+        ) { error in
+            XCTAssertEqual(
+                error as? RuntimeThemeDecodedResourceError,
+                .invalidPixelDimensions
+            )
+        }
+
+        let cache = RuntimeThemeDecodedResourceCache()
+        let handle = try cache.prepareImage(data: validThemeBackgroundImage)
+        XCTAssertEqual(handle.encodedByteCount, validThemeBackgroundImage.count)
+        XCTAssertEqual(handle.pixelWidth, 1)
+        XCTAssertEqual(handle.pixelHeight, 1)
+        XCTAssertEqual(handle.decodedByteCount, 4)
+        XCTAssertEqual(cache.entryCount, 0)
+        XCTAssertEqual(cache.totalDecodedByteCount, 0)
+    }
+
+    func testDecodedThemeResourceCacheDeduplicatesEvictsAndReleases() throws {
+        let cache = RuntimeThemeDecodedResourceCache(
+            maximumDecodedByteCount: 4,
+            maximumEntryCount: 2
+        )
+        let first = try cache.prepareImage(data: validThemeBackgroundImage)
+        let second = try cache.prepareImage(
+            data: validThemeBackgroundImage + Data([0])
+        )
+        cache.retain([first, second])
+
+        XCTAssertNotNil(cache.image(for: first))
+        XCTAssertNotNil(cache.image(for: first))
+        XCTAssertEqual(cache.decodedImageCreationCount, 1)
+        XCTAssertEqual(cache.decodedImageCount, 1)
+        XCTAssertEqual(cache.entryCount, 1)
+        XCTAssertEqual(cache.totalDecodedByteCount, 4)
+
+        XCTAssertNotNil(cache.image(for: second))
+        XCTAssertEqual(cache.decodedImageCreationCount, 2)
+        XCTAssertEqual(cache.decodedImageCount, 1)
+        XCTAssertEqual(cache.entryCount, 1)
+        XCTAssertEqual(cache.totalDecodedByteCount, 4)
+
+        cache.release([first, second])
+        XCTAssertEqual(cache.decodedImageCount, 0)
+        XCTAssertEqual(cache.entryCount, 0)
+        XCTAssertEqual(cache.totalDecodedByteCount, 0)
+
+        XCTAssertNotNil(cache.image(for: first))
+        cache.purge()
+        XCTAssertEqual(cache.decodedImageCount, 0)
+        XCTAssertEqual(cache.entryCount, 0)
+        XCTAssertEqual(cache.totalDecodedByteCount, 0)
+    }
+
+    func testDecodedThemeResourceReleaseWaitsForLastOwner() throws {
+        let cache = RuntimeThemeDecodedResourceCache()
+        let handle = try cache.prepareImage(data: validThemeBackgroundImage)
+        cache.retain([handle])
+        cache.retain([handle])
+
+        XCTAssertNotNil(cache.image(for: handle))
+        XCTAssertEqual(cache.decodedImageCreationCount, 1)
+        cache.release([handle])
+        XCTAssertEqual(cache.entryCount, 1)
+        XCTAssertNotNil(cache.image(for: handle))
+        XCTAssertEqual(cache.decodedImageCreationCount, 1)
+
+        cache.release([handle])
+        XCTAssertEqual(cache.entryCount, 0)
+        XCTAssertEqual(cache.totalDecodedByteCount, 0)
+    }
+
+    func testDecodedVectorResourceIsRasterizedOnceAndReused() throws {
+        let cache = RuntimeThemeDecodedResourceCache()
+        let data = try makeThemeVectorPDF(
+            width: 2,
+            height: 3,
+            rotationAngle: 90
+        )
+        let handle = try cache.prepareImage(data: data)
+
+        XCTAssertEqual(handle.pixelWidth, 3)
+        XCTAssertEqual(handle.pixelHeight, 2)
+        XCTAssertEqual(handle.decodedByteCount, 24)
+        XCTAssertNotNil(cache.image(for: data))
+        XCTAssertNotNil(cache.image(for: handle))
+        XCTAssertEqual(cache.decodedImageCreationCount, 1)
+        XCTAssertEqual(cache.decodedImageCount, 1)
+        XCTAssertEqual(cache.totalDecodedByteCount, 24)
+    }
+
+    func testThemeBackgroundSelectionUsesOneBoundedAccessibilityVariant() throws {
+        let cache = RuntimeThemeDecodedResourceCache(
+            maximumDecodedByteCount: 4,
+            maximumEntryCount: 3
+        )
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: nil,
+            decodedResourceCache: cache
+        )
+        try presentation.installThemeBackground(
+            staticBaseData: validThemeBackgroundImage,
+            reduceMotionData: validThemeBackgroundImage + Data([0]),
+            highContrastData: validThemeBackgroundImage + Data([1]),
+            rendererParametersData: validThemeBackgroundParameters
+        )
+
+        XCTAssertEqual(cache.entryCount, 0)
+        XCTAssertEqual(cache.totalDecodedByteCount, 0)
+        XCTAssertEqual(cache.decodedImageValidationCount, 3)
+        XCTAssertEqual(
+            presentation.themeBackgroundPresentationVariant(
+                reduceMotion: false,
+                increasedContrast: false
+            ),
+            .staticBase
+        )
+        XCTAssertEqual(
+            presentation.themeBackgroundPresentationVariant(
+                reduceMotion: true,
+                increasedContrast: false
+            ),
+            .reduceMotion
+        )
+        XCTAssertEqual(
+            presentation.themeBackgroundPresentationVariant(
+                reduceMotion: false,
+                increasedContrast: true
+            ),
+            .highContrast
+        )
+        XCTAssertEqual(
+            presentation.themeBackgroundPresentationVariant(
+                reduceMotion: true,
+                increasedContrast: true
+            ),
+            .highContrast
+        )
+
+        XCTAssertNotNil(presentation.staticThemeBackgroundImage)
+        XCTAssertEqual(cache.decodedImageCount, 1)
+        XCTAssertEqual(cache.totalDecodedByteCount, 4)
+        XCTAssertNotNil(presentation.reduceMotionThemeBackgroundImage)
+        XCTAssertEqual(cache.decodedImageCount, 1)
+        XCTAssertEqual(cache.totalDecodedByteCount, 4)
+        XCTAssertNotNil(presentation.highContrastThemeBackgroundImage)
+        XCTAssertEqual(cache.decodedImageCount, 1)
+        XCTAssertEqual(cache.totalDecodedByteCount, 4)
+        XCTAssertEqual(cache.decodedImageCreationCount, 3)
+
+        presentation.clearThemeBackground()
+        XCTAssertEqual(cache.decodedImageCount, 0)
+        XCTAssertEqual(cache.entryCount, 0)
+        XCTAssertEqual(cache.totalDecodedByteCount, 0)
+        XCTAssertEqual(
+            presentation.themeBackgroundPresentationVariant(
+                reduceMotion: false,
+                increasedContrast: false
+            ),
+            .semanticFallback
+        )
+    }
+
     func testSplashPresentationAcquiresLazilyAndFinishesExactlyOnce() async throws {
         let fixture = try await makeFixture(resource: .splashVideo)
         let presentation = RuntimeApplicationResourcePresentation(
@@ -125,6 +473,140 @@ final class RuntimeApplicationResourcePresentationTests: XCTestCase {
         let state = await fixture.provider.state()
         XCTAssertEqual(state.urlRequests, [.defaultMetalLibrary])
     }
+
+    func testMetalCancellationClosesLeaseAcquiredBeforeCancellation() async throws {
+        let fixture = try await makeFixture(resource: .defaultMetalLibrary)
+        let acquiredLease = try await fixture.session.acquire()
+        let acquiredBindingCount = await fixture.gateway
+            .activeApplicationResourceBindingCount()
+        XCTAssertEqual(acquiredBindingCount, 1)
+
+        let gate = ResourceLeaseGate()
+        let suspendedSession = RuntimeApplicationResourceSession {
+            await gate.wait()
+            return acquiredLease
+        }
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: suspendedSession
+        )
+        let task = Task { @MainActor in
+            await presentation.startMetal()
+        }
+        let acquisitionIsSuspended = await conditionEventually {
+            await gate.isWaiting
+        }
+        XCTAssertTrue(acquisitionIsSuspended)
+
+        task.cancel()
+        await gate.resume()
+        await task.value
+
+        XCTAssertNil(presentation.metalResource)
+        let bindingClosed = await bindingCountEventuallyEquals(
+            0,
+            on: fixture.gateway
+        )
+        XCTAssertTrue(bindingClosed)
+    }
+}
+
+private let validThemeBackgroundImage = Data(
+    base64Encoded: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+)!
+
+private let metadataOnlyThemeBackgroundImage = Data(
+    base64Encoded: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVRub3QtemxpYi1kYXRhFEFebgAAAABJRU5ErkJggg=="
+)!
+
+private let validThemeBackgroundParameters = Data(
+    #"""
+    {
+      "schemaVersion": "1.0",
+      "rendererParameters": {
+        "rendererID": "fragment-rune-background",
+        "baseGradient": ["#080A1E", "#14082E"],
+        "bandFrequency": 18.0,
+        "bandTimeScale": 0.25,
+        "bandThreshold": [0.85, 1.0],
+        "bandColor": "#0F1438",
+        "bandStrength": 0.4,
+        "columnFrequency": 9.0,
+        "columnTimeScale": 0.15,
+        "columnExponent": 6.0,
+        "columnColor": "#1A4D99",
+        "columnStrength": 0.12,
+        "highlightColor": "#D19914",
+        "highlightExponent": 7.0,
+        "highlightStrength": 0.9,
+        "vignetteStrength": 1.8,
+        "shimmerTimeScale": 2.1,
+        "shimmerFrequency": 40.0,
+        "shimmerStrength": 0.012
+      }
+    }
+    """#.utf8
+)
+
+private func themeBackgroundParameterObject() throws -> [String: Any] {
+    try XCTUnwrap(
+        JSONSerialization.jsonObject(with: validThemeBackgroundParameters)
+            as? [String: Any]
+    )
+}
+
+private func makeThemeVectorPDF(
+    width: CGFloat,
+    height: CGFloat,
+    rotationAngle: Int = 0
+) throws -> Data {
+    let data = NSMutableData()
+    guard let consumer = CGDataConsumer(data: data as CFMutableData) else {
+        throw RuntimeThemeDecodedResourceError.unsupportedImage
+    }
+    var mediaBox = CGRect(x: 0, y: 0, width: width, height: height)
+    guard let context = CGContext(
+        consumer: consumer,
+        mediaBox: &mediaBox,
+        nil
+    ) else {
+        throw RuntimeThemeDecodedResourceError.unsupportedImage
+    }
+    context.beginPDFPage(nil)
+    context.setFillColor(gray: 1, alpha: 1)
+    context.fill(mediaBox)
+    context.endPDFPage()
+    context.closePDF()
+    let pdfData = data as Data
+    guard rotationAngle != 0 else { return pdfData }
+    guard let document = PDFDocument(data: pdfData),
+          let page = document.page(at: 0)
+    else {
+        throw RuntimeThemeDecodedResourceError.unsupportedImage
+    }
+    page.rotation = rotationAngle
+    guard let rotatedData = document.dataRepresentation() else {
+        throw RuntimeThemeDecodedResourceError.unsupportedImage
+    }
+    return rotatedData
+}
+
+private actor ResourceLeaseGate {
+    private var continuation: CheckedContinuation<Void, Never>?
+    private(set) var isWaiting = false
+
+    func wait() async {
+        isWaiting = true
+        await withCheckedContinuation { continuation in
+            self.continuation = continuation
+        }
+    }
+
+    func resume() {
+        continuation?.resume()
+        continuation = nil
+        isWaiting = false
+    }
 }
 
 private struct ResourcePresentationFixture {
@@ -214,6 +696,18 @@ private func conditionEventually(
 ) async -> Bool {
     for _ in 0..<1_000 {
         if predicate() {
+            return true
+        }
+        await Task.yield()
+    }
+    return false
+}
+
+private func conditionEventually(
+    _ predicate: @escaping @Sendable () async -> Bool
+) async -> Bool {
+    for _ in 0..<1_000 {
+        if await predicate() {
             return true
         }
         await Task.yield()

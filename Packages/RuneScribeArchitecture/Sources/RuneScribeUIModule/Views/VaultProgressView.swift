@@ -240,18 +240,18 @@ struct VaultProgressView: View {
                             .background(
                                 Capsule()
                                     .fill(section == item
-                                          ? Color.runeGold.opacity(0.22)
+                                          ? Color.runeSelected.opacity(0.22)
                                           : Color.runeParchment)
                             )
                             .overlay(
                                 Capsule().strokeBorder(
-                                    section == item ? Color.runeGold : Color.runeSilver.opacity(0.2),
+                                    section == item ? Color.runeSelected : Color.runeSilver.opacity(0.2),
                                     lineWidth: 1
                                 )
                             )
                     }
                     .buttonStyle(.plain)
-                    .foregroundColor(section == item ? .runeGoldBright : .white)
+                    .foregroundColor(section == item ? .runeSelected : .runeTextPrimary)
                     .accessibilityValue(section == item ? "Selected" : "Not selected")
                 }
             }
@@ -340,7 +340,7 @@ struct VaultProgressView: View {
         return VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
             Text("The Journey")
                 .font(.title2.bold())
-                .foregroundColor(.white)
+                .foregroundColor(.runeTextPrimary)
             Text("Codices unlock permanently as every listed component is completed. Later activity never removes an unlocked Codex.")
                 .font(.body)
                 .foregroundColor(.runeSilver)
@@ -446,7 +446,7 @@ struct VaultProgressView: View {
         VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
             Text("Achievements")
                 .font(.title2.bold())
-                .foregroundColor(.white)
+                .foregroundColor(.runeTextPrimary)
 
             ForEach(ProgressionAchievementPath.allCases, id: \.self) { path in
                 let items = snapshot.achievements.filter {
@@ -519,7 +519,7 @@ struct VaultProgressView: View {
         VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
             Text("Statistics")
                 .font(.title2.bold())
-                .foregroundColor(.white)
+                .foregroundColor(.runeTextPrimary)
             Text("On-device totals only. Names, message text, keys, contacts, and package contents are never shown here.")
                 .font(.body)
                 .foregroundColor(.runeSilver)
@@ -540,7 +540,7 @@ struct VaultProgressView: View {
                         Spacer(minLength: 12)
                         Text(statistic.value.formatted())
                             .font(.title2.bold().monospacedDigit())
-                            .foregroundColor(.white)
+                            .foregroundColor(.runeTextPrimary)
                     }
                     .accessibilityElement(children: .combine)
                     .accessibilityValue(statistic.value.formatted())
@@ -564,7 +564,7 @@ struct VaultProgressView: View {
         return VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
             Text("Vault")
                 .font(.title2.bold())
-                .foregroundColor(.white)
+                .foregroundColor(.runeTextPrimary)
             Text("Only content granted to this installation appears in the Vault.")
                 .font(.body)
                 .foregroundColor(.runeSilver)
@@ -639,7 +639,7 @@ struct VaultProgressView: View {
         VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
             Text("Archive")
                 .font(.title2.bold())
-                .foregroundColor(.white)
+                .foregroundColor(.runeTextPrimary)
             Text("A record of encountered Codices and artifacts. Encountered does not mean owned.")
                 .font(.body)
                 .foregroundColor(.runeSilver)
@@ -670,7 +670,7 @@ struct VaultProgressView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Label("Encountered", systemImage: "eye")
                     .font(.subheadline.bold())
-                    .foregroundColor(.white)
+                    .foregroundColor(.runeTextPrimary)
                 Text("Type: \(VaultProgressPresentation.contentKindLabel(entry.kind))")
                     .font(.footnote)
                     .foregroundColor(.runeSilver)

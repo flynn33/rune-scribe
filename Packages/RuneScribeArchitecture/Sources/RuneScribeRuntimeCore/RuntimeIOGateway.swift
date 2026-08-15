@@ -2454,7 +2454,7 @@ actor RuntimeIOGateway {
         guard source.descriptor.role == RuneScribeRoles.primaryUI,
               policy.capabilities.allows(
                 RuneScribeCapabilities.fileImportUI,
-                for: source.descriptor.role
+                for: source.descriptor.policyClass
               )
         else {
             throw RuneScribeRuntimeError.serviceAccessDenied(
@@ -2523,8 +2523,8 @@ actor RuntimeIOGateway {
         }
         guard policy.capabilities.allows(
             rule.requiredCapability,
-            for: descriptor.role
-        ), rule.consumerRoles.contains(descriptor.role) else {
+            for: descriptor.policyClass
+        ), rule.allowsConsumer(descriptor) else {
             throw RuneScribeRuntimeError.serviceAccessDenied(
                 moduleID: descriptor.moduleID,
                 service: serviceID
@@ -2679,8 +2679,8 @@ actor RuntimeIOGateway {
         }
         guard policy.capabilities.allows(
             rule.requiredCapability,
-            for: source.descriptor.role
-        ), rule.consumerRoles.contains(source.descriptor.role) else {
+            for: source.descriptor.policyClass
+        ), rule.allowsConsumer(source.descriptor) else {
             throw RuneScribeRuntimeError.serviceAccessDenied(
                 moduleID: lease.sourceModuleID,
                 service: serviceID
