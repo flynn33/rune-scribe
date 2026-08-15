@@ -1,5 +1,5 @@
 import Foundation
-import RuneScribeContracts
+@_spi(RuntimeOperationAuthority) import RuneScribeContracts
 
 public struct RuntimeClipboardSnapshot: Equatable, Sendable {
     public let changeCount: Int
@@ -32,6 +32,13 @@ public enum RuntimeBundledFontFailure: Error, Equatable, Sendable {
     case integrityMismatch
     case unreadableFont
     case registrationFailed
+}
+
+public enum RuntimeVerifiedApplicationResourceFailure: Error, Equatable, Sendable {
+    case invalidMaximumByteCount
+    case resourceUnavailable
+    case contentTooLarge
+    case integrityMismatch
 }
 
 public struct RuntimeApplicationResourceSession: Sendable {
@@ -108,6 +115,13 @@ public enum RuntimeApplicationResourceEvent: Equatable, Sendable {
 }
 
 @_spi(RuntimeResourceHost)
+public enum RuntimeSharePresentationEvent: Equatable, Sendable {
+    case presented(SharePresentationReportDTO)
+    case completed(ShareArtifactCompletionEvidenceDTO)
+    case revoked
+}
+
+@_spi(RuntimeResourceHost)
 public enum RuntimeResolvedShareContent: Equatable, Sendable {
     case artifact(URL)
     case text(String)
@@ -181,21 +195,78 @@ private actor RuntimeApplicationResourceEventSignal {
     }
 }
 
+private actor RuntimeSharePresentationEventSignal {
+    typealias Continuation = AsyncStream<RuntimeSharePresentationEvent>.Continuation
+
+    private var terminalEvent: RuntimeSharePresentationEvent?
+    private var isTerminated = false
+    private var continuations: [UUID: Continuation] = [:]
+
+    func makeStream() -> AsyncStream<RuntimeSharePresentationEvent> {
+        let continuationID = UUID()
+        return AsyncStream { continuation in
+            if isTerminated {
+                if let terminalEvent { continuation.yield(terminalEvent) }
+                continuation.finish()
+                return
+            }
+            continuations[continuationID] = continuation
+            continuation.onTermination = { @Sendable [weak self] _ in
+                Task { await self?.removeContinuation(continuationID) }
+            }
+        }
+    }
+
+    func yield(_ event: RuntimeSharePresentationEvent) {
+        guard !isTerminated else { return }
+        for continuation in continuations.values { continuation.yield(event) }
+    }
+
+    func terminate(with event: RuntimeSharePresentationEvent?) {
+        guard !isTerminated else { return }
+        isTerminated = true
+        terminalEvent = event
+        let current = continuations.values
+        continuations.removeAll(keepingCapacity: false)
+        for continuation in current {
+            if let event { continuation.yield(event) }
+            continuation.finish()
+        }
+    }
+
+    private func removeContinuation(_ continuationID: UUID) {
+        continuations.removeValue(forKey: continuationID)
+    }
+}
+
 private final class RuntimeSharePresentationLeaseStorage: Sendable {
     let content: RuntimeResolvedShareContent
     let eventSignal: RuntimeApplicationResourceEventSignal
+    let presentationEventSignal: RuntimeSharePresentationEventSignal
     let finishOperation: @Sendable (ShareArtifactOutcomeDTO) async throws -> Void
+    let reportPresentedOperation: @Sendable (ShareRouteClassDTO) async throws -> Void
+    let finishReportOperation: @Sendable (
+        SharePresentationReportDTO
+    ) async throws -> ShareArtifactCompletionEvidenceDTO
     let closeOperation: @Sendable () async -> Void
 
     fileprivate init(
         content: RuntimeResolvedShareContent,
         eventSignal: RuntimeApplicationResourceEventSignal,
+        presentationEventSignal: RuntimeSharePresentationEventSignal,
         finish: @escaping @Sendable (ShareArtifactOutcomeDTO) async throws -> Void,
+        reportPresented: @escaping @Sendable (ShareRouteClassDTO) async throws -> Void,
+        finishReport: @escaping @Sendable (
+            SharePresentationReportDTO
+        ) async throws -> ShareArtifactCompletionEvidenceDTO,
         close: @escaping @Sendable () async -> Void
     ) {
         self.content = content
         self.eventSignal = eventSignal
+        self.presentationEventSignal = presentationEventSignal
         finishOperation = finish
+        reportPresentedOperation = reportPresented
+        finishReportOperation = finishReport
         closeOperation = close
     }
 
@@ -241,23 +312,44 @@ public struct RuntimeSharePresentationLease: Sendable {
     public func events() async -> AsyncStream<RuntimeApplicationResourceEvent> {
         await storage.eventSignal.makeStream()
     }
+    public func presentationEvents() async -> AsyncStream<RuntimeSharePresentationEvent> {
+        await storage.presentationEventSignal.makeStream()
+    }
 
     fileprivate init(
         content: RuntimeResolvedShareContent,
         eventSignal: RuntimeApplicationResourceEventSignal,
+        presentationEventSignal: RuntimeSharePresentationEventSignal,
         finish: @escaping @Sendable (ShareArtifactOutcomeDTO) async throws -> Void,
+        reportPresented: @escaping @Sendable (ShareRouteClassDTO) async throws -> Void,
+        finishReport: @escaping @Sendable (
+            SharePresentationReportDTO
+        ) async throws -> ShareArtifactCompletionEvidenceDTO,
         close: @escaping @Sendable () async -> Void
     ) {
         storage = RuntimeSharePresentationLeaseStorage(
             content: content,
             eventSignal: eventSignal,
+            presentationEventSignal: presentationEventSignal,
             finish: finish,
+            reportPresented: reportPresented,
+            finishReport: finishReport,
             close: close
         )
     }
 
     public func finish(_ outcome: ShareArtifactOutcomeDTO) async throws {
         try await storage.finishOperation(outcome)
+    }
+
+    public func reportPresented(on routeClass: ShareRouteClassDTO) async throws {
+        try await storage.reportPresentedOperation(routeClass)
+    }
+
+    public func finish(
+        _ report: SharePresentationReportDTO
+    ) async throws -> ShareArtifactCompletionEvidenceDTO {
+        try await storage.finishReportOperation(report)
     }
 
     public func close() async {
@@ -309,6 +401,10 @@ public struct RuntimeIOClient: Sendable {
     private let clipboardSnapshotOperation: @Sendable () async throws
         -> RuntimeClipboardSnapshot
     private let setClipboardStringOperation: @Sendable (String) async throws -> Void
+    private let setClipboardShareOperation: @Sendable (
+        String,
+        ShareArtifactID
+    ) async throws -> ShareArtifactCompletionEvidenceDTO
     private let contactAuthorizationStatusOperation: @Sendable () async throws
         -> ContactAuthorizationDTO
     private let requestContactAccessOperation: @Sendable () async throws -> Bool
@@ -323,11 +419,20 @@ public struct RuntimeIOClient: Sendable {
     private let applicationResourceSessionOperation: @Sendable (
         ApplicationResource
     ) async throws -> RuntimeApplicationResourceSession
+    private let readVerifiedApplicationResourceOperation: @Sendable (
+        ApplicationResource,
+        Data,
+        Int
+    ) async throws -> Data
     private let sharePresentationSessionOperation: @Sendable (
         ShareArtifactID
     ) async throws -> RuntimeSharePresentationSession
     private let textSharePresentationSessionOperation: @Sendable (
         String
+    ) async throws -> RuntimeSharePresentationSession
+    private let textSharePresentationSessionWithArtifactOperation: @Sendable (
+        String,
+        ShareArtifactID
     ) async throws -> RuntimeSharePresentationSession
     private let registerBundledSystemFontOperation: @Sendable (
         ApplicationResource,
@@ -411,6 +516,13 @@ public struct RuntimeIOClient: Sendable {
         setClipboardStringOperation = {
             try await gateway.setClipboardString($0, lease: lease)
         }
+        setClipboardShareOperation = {
+            try await gateway.setClipboardString(
+                $0,
+                artifactID: $1,
+                lease: lease
+            )
+        }
         contactAuthorizationStatusOperation = {
             try await gateway.contactAuthorizationStatus(lease: lease)
         }
@@ -432,11 +544,26 @@ public struct RuntimeIOClient: Sendable {
         applicationResourceSessionOperation = {
             try await gateway.applicationResourceSession($0, lease: lease)
         }
+        readVerifiedApplicationResourceOperation = {
+            try await gateway.readVerifiedApplicationResource(
+                $0,
+                expectedSHA256: $1,
+                maximumByteCount: $2,
+                lease: lease
+            )
+        }
         sharePresentationSessionOperation = {
             try await gateway.sharePresentationSession($0, lease: lease)
         }
         textSharePresentationSessionOperation = {
             try await gateway.textSharePresentationSession($0, lease: lease)
+        }
+        textSharePresentationSessionWithArtifactOperation = {
+            try await gateway.textSharePresentationSession(
+                $0,
+                artifactID: $1,
+                lease: lease
+            )
         }
         registerBundledSystemFontOperation = {
             try await gateway.registerBundledSystemFont(
@@ -596,6 +723,15 @@ public struct RuntimeIOClient: Sendable {
                 RuneScribeServiceIDs.applicationResourceLocator
             )
         },
+        readVerifiedApplicationResource: @escaping @Sendable (
+            ApplicationResource,
+            Data,
+            Int
+        ) async throws -> Data = { _, _, _ in
+            throw RuneScribeRuntimeError.serviceUnavailable(
+                RuneScribeServiceIDs.applicationResourceLocator
+            )
+        },
         sharePresentationSession: @escaping @Sendable (
             ShareArtifactID
         ) async throws -> RuntimeSharePresentationSession = { _ in
@@ -682,14 +818,24 @@ public struct RuntimeIOClient: Sendable {
         nextUUIDOperation = nextUUID
         clipboardSnapshotOperation = clipboardSnapshot
         setClipboardStringOperation = setClipboardString
+        setClipboardShareOperation = { value, _ in
+            try await setClipboardString(value)
+            throw RuneScribeRuntimeError.serviceUnavailable(
+                RuneScribeServiceIDs.sharePresentation
+            )
+        }
         contactAuthorizationStatusOperation = contactAuthorizationStatus
         requestContactAccessOperation = requestContactAccess
         fetchSystemContactsOperation = fetchSystemContacts
         readInboundFileOperation = readInboundFile
         inboundFileImportSessionOperation = inboundFileImportSession
         applicationResourceSessionOperation = applicationResourceSession
+        readVerifiedApplicationResourceOperation = readVerifiedApplicationResource
         sharePresentationSessionOperation = sharePresentationSession
         textSharePresentationSessionOperation = textSharePresentationSession
+        textSharePresentationSessionWithArtifactOperation = { text, _ in
+            try await textSharePresentationSession(text)
+        }
         registerBundledSystemFontOperation = registerBundledSystemFont
         systemFontPostScriptNameOperation = systemFontPostScriptName
         registerSystemFontOperation = registerSystemFont
@@ -764,6 +910,13 @@ public struct RuntimeIOClient: Sendable {
         try await setClipboardStringOperation(value)
     }
 
+    public func setClipboardString(
+        _ value: String,
+        artifactID: ShareArtifactID
+    ) async throws -> ShareArtifactCompletionEvidenceDTO {
+        try await setClipboardShareOperation(value, artifactID)
+    }
+
     public func contactAuthorizationStatus() async throws -> ContactAuthorizationDTO {
         try await contactAuthorizationStatusOperation()
     }
@@ -797,6 +950,18 @@ public struct RuntimeIOClient: Sendable {
         try await applicationResourceSessionOperation(resource)
     }
 
+    public func readVerifiedApplicationResource(
+        _ resource: ApplicationResource,
+        expectedSHA256: Data,
+        maximumByteCount: Int
+    ) async throws -> Data {
+        try await readVerifiedApplicationResourceOperation(
+            resource,
+            expectedSHA256,
+            maximumByteCount
+        )
+    }
+
     public func sharePresentationSession(
         artifactID: ShareArtifactID
     ) async throws -> RuntimeSharePresentationSession {
@@ -807,6 +972,13 @@ public struct RuntimeIOClient: Sendable {
         _ text: String
     ) async throws -> RuntimeSharePresentationSession {
         try await textSharePresentationSessionOperation(text)
+    }
+
+    public func textSharePresentationSession(
+        _ text: String,
+        artifactID: ShareArtifactID
+    ) async throws -> RuntimeSharePresentationSession {
+        try await textSharePresentationSessionWithArtifactOperation(text, artifactID)
     }
 
     public func registerBundledSystemFont(
@@ -860,6 +1032,8 @@ public struct RuntimeIOClient: Sendable {
 
 actor RuntimeIOGateway {
     static let maximumInboundFileByteCount = 16 * 1_024 * 1_024
+    static let maximumApplicationResourceByteCount = 16 * 1_024 * 1_024
+    static let maximumBundledFontByteCount = 8 * 1_024 * 1_024
 
     private struct ActiveSource: Sendable {
         let descriptor: ModuleDescriptor
@@ -907,7 +1081,7 @@ actor RuntimeIOGateway {
     }
 
     private struct ResourceHandlers: Sendable {
-        let data: @Sendable (ApplicationResource) async throws -> Data
+        let data: @Sendable (ApplicationResource, Int) async throws -> Data
         let url: @Sendable (ApplicationResource) async throws -> URL
     }
 
@@ -920,6 +1094,10 @@ actor RuntimeIOGateway {
         let isSharePresentation: Bool
         let shareArtifactID: ShareArtifactID?
         let eventSignal: RuntimeApplicationResourceEventSignal
+        let presentationEventSignal: RuntimeSharePresentationEventSignal?
+        let shareOperationID: RuntimeOperationID?
+        let shareCorrelationID: RuntimeCorrelationID?
+        var hasReportedPresentation: Bool
     }
 
     private struct FontHandlers: Sendable {
@@ -942,6 +1120,7 @@ actor RuntimeIOGateway {
 
     private let policy: RuntimePolicy
     private let environment: RuntimeEnvironment
+    private let operationContextAuthority: RuntimeProgressionOutbox?
     private var runtimeGeneration: UInt64 = 0
     private var runtimeIsActive = false
     private var sources: [ModuleIdentifier: ActiveSource] = [:]
@@ -962,10 +1141,12 @@ actor RuntimeIOGateway {
 
     init(
         policy: RuntimePolicy,
-        environment: RuntimeEnvironment = .live
+        environment: RuntimeEnvironment = .live,
+        operationContextAuthority: RuntimeProgressionOutbox? = nil
     ) {
         self.policy = policy
         self.environment = environment
+        self.operationContextAuthority = operationContextAuthority
     }
 
     func install(_ provider: any SecureValueStore) {
@@ -1045,7 +1226,9 @@ actor RuntimeIOGateway {
 
     func install(_ provider: any ApplicationResourceLocator) {
         resources = ResourceHandlers(
-            data: { try await provider.data(for: $0) },
+            data: {
+                try await provider.data(for: $0, maximumByteCount: $1)
+            },
             url: { try await provider.url(for: $0) }
         )
     }
@@ -1279,6 +1462,58 @@ actor RuntimeIOGateway {
         )
     }
 
+    func setClipboardString(
+        _ value: String,
+        artifactID: ShareArtifactID,
+        lease: RuntimeIOLease
+    ) async throws -> ShareArtifactCompletionEvidenceDTO {
+        guard let operationContextAuthority else {
+            throw RuneScribeRuntimeError.serviceUnavailable(
+                RuneScribeServiceIDs.sharePresentation
+            )
+        }
+        do {
+            try await operationContextAuthority.reserveShareCompletion(
+                for: artifactID
+            )
+        } catch ModuleStateStoreError.unavailable {
+            // Clipboard utility remains available when optional persistence is
+            // absent; the terminal handoff below will surface degraded state.
+        }
+        let report = try SharePresentationReportDTO(
+            routeClass: .clipboard,
+            result: .completionUnavailable
+        )
+        let context = try await operationContextAuthority.issueOperationContext(
+            operationID: RuntimeOperationID(
+                "\(environment.nextUUID().uuidString.lowercased())-share"
+            ),
+            correlationID: RuntimeCorrelationID(
+                environment.nextUUID().uuidString.lowercased()
+            ),
+            occurredAtUTC: environment.now(),
+            operationIdentifier: "io.share.clipboard.complete",
+            runtimeGeneration: lease.runtimeGeneration
+        )
+        let evidence = try ShareArtifactCompletionEvidenceDTO(
+            artifactID: artifactID,
+            report: report,
+            operationContext: context
+        )
+        do {
+            try await setClipboardString(value, lease: lease)
+        } catch {
+            await operationContextAuthority.cancelShareCompletionReservation(
+                for: artifactID
+            )
+            throw error
+        }
+        // Once clipboard utility succeeds, retain the reservation across a
+        // transient journal failure so an exact caller retry can finish it.
+        try await operationContextAuthority.journalShareCompletion(evidence)
+        return evidence
+    }
+
     func contactAuthorizationStatus(
         lease: RuntimeIOLease
     ) async throws -> ContactAuthorizationDTO {
@@ -1390,6 +1625,43 @@ actor RuntimeIOGateway {
         }
     }
 
+    func readVerifiedApplicationResource(
+        _ resource: ApplicationResource,
+        expectedSHA256: Data,
+        maximumByteCount: Int,
+        lease: RuntimeIOLease
+    ) async throws -> Data {
+        let handler = try authorizedResourceHandlers(resource, lease: lease).data
+        return try await verifiedApplicationResourceData(
+            expectedSHA256: expectedSHA256,
+            maximumByteCount: maximumByteCount,
+            read: {
+                try await self.invoke(
+                    lease: lease,
+                    serviceID: RuneScribeServiceIDs.applicationResourceLocator,
+                    operation: { try await handler(resource, maximumByteCount) }
+                )
+            }
+        )
+    }
+
+    func readHostVerifiedApplicationResource(
+        _ resource: ApplicationResource,
+        expectedSHA256: Data,
+        maximumByteCount: Int,
+        descriptor: ModuleDescriptor
+    ) async throws -> Data {
+        let handler = try authorizedHostResourceHandlers(
+            resource,
+            descriptor: descriptor
+        ).data
+        return try await verifiedApplicationResourceData(
+            expectedSHA256: expectedSHA256,
+            maximumByteCount: maximumByteCount,
+            read: { try await handler(resource, maximumByteCount) }
+        )
+    }
+
     func sharePresentationSession(
         _ artifactID: ShareArtifactID,
         lease: RuntimeIOLease
@@ -1409,7 +1681,25 @@ actor RuntimeIOGateway {
             serviceID: RuneScribeServiceIDs.sharePresentation
         )
         return RuntimeSharePresentationSession { [self] in
-            try await acquireTextSharePresentation(text, lease: lease)
+            try await acquireTextSharePresentation(text, artifactID: nil, lease: lease)
+        }
+    }
+
+    func textSharePresentationSession(
+        _ text: String,
+        artifactID: ShareArtifactID,
+        lease: RuntimeIOLease
+    ) throws -> RuntimeSharePresentationSession {
+        _ = try validateAuthorization(
+            lease,
+            serviceID: RuneScribeServiceIDs.sharePresentation
+        )
+        return RuntimeSharePresentationSession { [self] in
+            try await acquireTextSharePresentation(
+                text,
+                artifactID: artifactID,
+                lease: lease
+            )
         }
     }
 
@@ -1418,29 +1708,25 @@ actor RuntimeIOGateway {
         expectedSHA256: Data,
         lease: RuntimeIOLease
     ) async throws -> RegisteredFontDTO {
-        let resourceHandler = try authorizedResourceHandlers(
-            resource,
-            lease: lease
-        ).data
-        let fontHandlers = try authorizedFontHandlers(lease: lease)
         let data: Data
         do {
-            data = try await invoke(
+            data = try await readVerifiedApplicationResource(
+                resource,
+                expectedSHA256: expectedSHA256,
+                maximumByteCount: Self.maximumBundledFontByteCount,
                 lease: lease,
-                serviceID: RuneScribeServiceIDs.applicationResourceLocator,
-                operation: { try await resourceHandler(resource) }
             )
         } catch let error as RuneScribeRuntimeError {
             throw error
-        } catch {
-            throw RuntimeBundledFontFailure.resourceUnavailable
+        } catch let failure as RuntimeVerifiedApplicationResourceFailure {
+            switch failure {
+            case .integrityMismatch:
+                throw RuntimeBundledFontFailure.integrityMismatch
+            case .invalidMaximumByteCount, .resourceUnavailable, .contentTooLarge:
+                throw RuntimeBundledFontFailure.resourceUnavailable
+            }
         }
-        guard RuntimeBundledResourceIntegrity.matchesSHA256(
-            expectedSHA256,
-            data: data
-        ) else {
-            throw RuntimeBundledFontFailure.integrityMismatch
-        }
+        let fontHandlers = try authorizedFontHandlers(lease: lease)
         let postScriptName: String
         do {
             postScriptName = try await invoke(
@@ -1550,7 +1836,11 @@ actor RuntimeIOGateway {
             lease: lease,
             isSharePresentation: false,
             shareArtifactID: nil,
-            eventSignal: eventSignal
+            eventSignal: eventSignal,
+            presentationEventSignal: nil,
+            shareOperationID: nil,
+            shareCorrelationID: nil,
+            hasReportedPresentation: false
         )
         return RuntimeApplicationResourceLease(
             url: url,
@@ -1568,14 +1858,33 @@ actor RuntimeIOGateway {
         let handler = try authorizedSharePresentationHandler(lease: lease)
         try Task.checkCancellation()
 
+        if let operationContextAuthority {
+            do {
+                try await operationContextAuthority.reserveShareCompletion(
+                    for: artifactID
+                )
+            } catch ModuleStateStoreError.unavailable {
+                // The optional instrumentation store must not disable sharing.
+            }
+        }
+
         nextResourceBindingID &+= 1
         let bindingID = nextResourceBindingID
         let eventSignal = RuntimeApplicationResourceEventSignal()
+        let presentationEventSignal = RuntimeSharePresentationEventSignal()
         resourceBindings[bindingID] = ResourceBinding(
             lease: lease,
             isSharePresentation: true,
             shareArtifactID: artifactID,
-            eventSignal: eventSignal
+            eventSignal: eventSignal,
+            presentationEventSignal: presentationEventSignal,
+            shareOperationID: RuntimeOperationID(
+                "\(environment.nextUUID().uuidString.lowercased())-share"
+            ),
+            shareCorrelationID: RuntimeCorrelationID(
+                environment.nextUUID().uuidString.lowercased()
+            ),
+            hasReportedPresentation: false
         )
         do {
             let url = try await invoke(
@@ -1592,10 +1901,23 @@ actor RuntimeIOGateway {
             return RuntimeSharePresentationLease(
                 content: .artifact(url),
                 eventSignal: eventSignal,
+                presentationEventSignal: presentationEventSignal,
                 finish: { [self] outcome in
                     try await finishSharePresentationBinding(
                         bindingID,
                         outcome: outcome
+                    )
+                },
+                reportPresented: { [self] routeClass in
+                    try await reportSharePresentationBinding(
+                        bindingID,
+                        routeClass: routeClass
+                    )
+                },
+                finishReport: { [self] report in
+                    try await finishSharePresentationBinding(
+                        bindingID,
+                        report: report
                     )
                 },
                 close: { [self] in
@@ -1610,6 +1932,7 @@ actor RuntimeIOGateway {
 
     private func acquireTextSharePresentation(
         _ text: String,
+        artifactID: ShareArtifactID?,
         lease: RuntimeIOLease
     ) async throws -> RuntimeSharePresentationLease {
         _ = try validateAuthorization(
@@ -1618,14 +1941,33 @@ actor RuntimeIOGateway {
         )
         try Task.checkCancellation()
 
+        if let artifactID, let operationContextAuthority {
+            do {
+                try await operationContextAuthority.reserveShareCompletion(
+                    for: artifactID
+                )
+            } catch ModuleStateStoreError.unavailable {
+                // The optional instrumentation store must not disable sharing.
+            }
+        }
+
         nextResourceBindingID &+= 1
         let bindingID = nextResourceBindingID
         let eventSignal = RuntimeApplicationResourceEventSignal()
+        let presentationEventSignal = RuntimeSharePresentationEventSignal()
         resourceBindings[bindingID] = ResourceBinding(
             lease: lease,
             isSharePresentation: true,
-            shareArtifactID: nil,
-            eventSignal: eventSignal
+            shareArtifactID: artifactID,
+            eventSignal: eventSignal,
+            presentationEventSignal: presentationEventSignal,
+            shareOperationID: RuntimeOperationID(
+                "\(environment.nextUUID().uuidString.lowercased())-share"
+            ),
+            shareCorrelationID: RuntimeCorrelationID(
+                environment.nextUUID().uuidString.lowercased()
+            ),
+            hasReportedPresentation: false
         )
         do {
             _ = try validateAuthorization(
@@ -1636,10 +1978,23 @@ actor RuntimeIOGateway {
             return RuntimeSharePresentationLease(
                 content: .text(text),
                 eventSignal: eventSignal,
+                presentationEventSignal: presentationEventSignal,
                 finish: { [self] outcome in
                     try await finishSharePresentationBinding(
                         bindingID,
                         outcome: outcome
+                    )
+                },
+                reportPresented: { [self] routeClass in
+                    try await reportSharePresentationBinding(
+                        bindingID,
+                        routeClass: routeClass
+                    )
+                },
+                finishReport: { [self] report in
+                    try await finishSharePresentationBinding(
+                        bindingID,
+                        report: report
                     )
                 },
                 close: { [self] in
@@ -1656,7 +2011,38 @@ actor RuntimeIOGateway {
         guard let binding = resourceBindings.removeValue(forKey: bindingID) else {
             return
         }
+        if let artifactID = binding.shareArtifactID {
+            await operationContextAuthority?.cancelShareCompletionReservation(
+                for: artifactID
+            )
+        }
         await binding.eventSignal.terminate(with: nil)
+        await binding.presentationEventSignal?.terminate(with: nil)
+    }
+
+    private func reportSharePresentationBinding(
+        _ bindingID: UInt64,
+        routeClass: ShareRouteClassDTO
+    ) async throws {
+        guard var binding = resourceBindings[bindingID],
+              binding.isSharePresentation
+        else {
+            throw RuneScribeRuntimeError.serviceUnavailable(
+                RuneScribeServiceIDs.sharePresentation
+            )
+        }
+        _ = try validateAuthorization(
+            binding.lease,
+            serviceID: RuneScribeServiceIDs.sharePresentation
+        )
+        guard !binding.hasReportedPresentation else { return }
+        binding.hasReportedPresentation = true
+        resourceBindings[bindingID] = binding
+        let report = try SharePresentationReportDTO(
+            routeClass: routeClass,
+            result: .presented
+        )
+        await binding.presentationEventSignal?.yield(.presented(report))
     }
 
     private func finishSharePresentationBinding(
@@ -1678,10 +2064,89 @@ actor RuntimeIOGateway {
         } catch {
             resourceBindings.removeValue(forKey: bindingID)
             await binding.eventSignal.terminate(with: .revoked)
+            await binding.presentationEventSignal?.terminate(with: .revoked)
             throw error
         }
         resourceBindings.removeValue(forKey: bindingID)
+        if let artifactID = binding.shareArtifactID {
+            await operationContextAuthority?.cancelShareCompletionReservation(
+                for: artifactID
+            )
+        }
         await binding.eventSignal.terminate(with: .completed(outcome))
+        await binding.presentationEventSignal?.terminate(with: nil)
+    }
+
+    private func finishSharePresentationBinding(
+        _ bindingID: UInt64,
+        report: SharePresentationReportDTO
+    ) async throws -> ShareArtifactCompletionEvidenceDTO {
+        guard report.isTerminal else {
+            throw ShareCompletionContractError.nonterminalEvidence
+        }
+        guard let binding = resourceBindings[bindingID],
+              binding.isSharePresentation,
+              let artifactID = binding.shareArtifactID,
+              let operationID = binding.shareOperationID,
+              let correlationID = binding.shareCorrelationID,
+              let operationContextAuthority
+        else {
+            throw RuneScribeRuntimeError.serviceUnavailable(
+                RuneScribeServiceIDs.sharePresentation
+            )
+        }
+        do {
+            _ = try validateAuthorization(
+                binding.lease,
+                serviceID: RuneScribeServiceIDs.sharePresentation
+            )
+        } catch {
+            resourceBindings.removeValue(forKey: bindingID)
+            await binding.eventSignal.terminate(with: .revoked)
+            await binding.presentationEventSignal?.terminate(with: .revoked)
+            throw error
+        }
+        let context = try await operationContextAuthority.issueOperationContext(
+            operationID: operationID,
+            correlationID: correlationID,
+            occurredAtUTC: environment.now(),
+            operationIdentifier: "io.share.presentation.complete",
+            runtimeGeneration: binding.lease.runtimeGeneration
+        )
+        let evidence = try ShareArtifactCompletionEvidenceDTO(
+            artifactID: artifactID,
+            report: report,
+            operationContext: context
+        )
+        // A transient journal failure leaves the binding and its reservation
+        // intact so the exact terminal callback can be retried.
+        try await operationContextAuthority.journalShareCompletion(evidence)
+        resourceBindings.removeValue(forKey: bindingID)
+        await binding.eventSignal.terminate(
+            with: .completed(legacyOutcome(for: report))
+        )
+        await binding.presentationEventSignal?.terminate(
+            with: .completed(evidence)
+        )
+        return evidence
+    }
+
+    private func legacyOutcome(
+        for report: SharePresentationReportDTO
+    ) -> ShareArtifactOutcomeDTO {
+        switch report.result {
+        case .sentConfirmed:
+            .messageSent(
+                requiredAttachmentAccepted:
+                    report.requiredAttachmentAccepted ?? false
+            )
+        case .completedBySystem:
+            .handedOff
+        case .failed:
+            .failed
+        case .cancelled, .completionUnavailable, .presented:
+            .cancelled
+        }
     }
 
     func activeApplicationResourceBindingCount() -> Int {
@@ -1692,7 +2157,13 @@ actor RuntimeIOGateway {
         let bindings = resourceBindings.values
         resourceBindings.removeAll(keepingCapacity: true)
         for binding in bindings {
+            if let artifactID = binding.shareArtifactID {
+                await operationContextAuthority?.cancelShareCompletionReservation(
+                    for: artifactID
+                )
+            }
             await binding.eventSignal.terminate(with: .revoked)
+            await binding.presentationEventSignal?.terminate(with: .revoked)
         }
     }
 
@@ -1713,7 +2184,13 @@ actor RuntimeIOGateway {
             guard let binding = resourceBindings.removeValue(forKey: bindingID) else {
                 continue
             }
+            if let artifactID = binding.shareArtifactID {
+                await operationContextAuthority?.cancelShareCompletionReservation(
+                    for: artifactID
+                )
+            }
             await binding.eventSignal.terminate(with: .revoked)
+            await binding.presentationEventSignal?.terminate(with: .revoked)
         }
     }
 
@@ -1727,7 +2204,13 @@ actor RuntimeIOGateway {
             guard let binding = resourceBindings.removeValue(forKey: bindingID) else {
                 continue
             }
+            if let artifactID = binding.shareArtifactID {
+                await operationContextAuthority?.cancelShareCompletionReservation(
+                    for: artifactID
+                )
+            }
             await binding.eventSignal.terminate(with: .revoked)
+            await binding.presentationEventSignal?.terminate(with: .revoked)
         }
     }
 
@@ -1739,7 +2222,13 @@ actor RuntimeIOGateway {
             guard let binding = resourceBindings.removeValue(forKey: bindingID) else {
                 continue
             }
+            if let artifactID = binding.shareArtifactID {
+                await operationContextAuthority?.cancelShareCompletionReservation(
+                    for: artifactID
+                )
+            }
             await binding.eventSignal.terminate(with: .revoked)
+            await binding.presentationEventSignal?.terminate(with: .revoked)
         }
     }
 
@@ -1993,12 +2482,109 @@ actor RuntimeIOGateway {
                 resource: resource
             )
         }
+        guard resource.ownerModuleID == nil
+                || resource.ownerModuleID == source.descriptor.moduleID
+        else {
+            throw RuneScribeRuntimeError.serviceAccessDenied(
+                moduleID: lease.sourceModuleID,
+                service: RuneScribeServiceIDs.applicationResourceLocator
+            )
+        }
         guard let resources else {
             throw RuneScribeRuntimeError.serviceUnavailable(
                 RuneScribeServiceIDs.applicationResourceLocator
             )
         }
         return resources
+    }
+
+    private func authorizedHostResourceHandlers(
+        _ resource: ApplicationResource,
+        descriptor: ModuleDescriptor
+    ) throws -> ResourceHandlers {
+        let serviceID = RuneScribeServiceIDs.applicationResourceLocator
+        guard descriptor.requiredServices.contains(serviceID) else {
+            throw RuneScribeRuntimeError.serviceNotDeclared(
+                moduleID: descriptor.moduleID,
+                service: serviceID
+            )
+        }
+        guard let rule = policy.services.rule(for: serviceID) else {
+            throw RuneScribeRuntimeError.serviceAccessDenied(
+                moduleID: descriptor.moduleID,
+                service: serviceID
+            )
+        }
+        guard descriptor.requestedCapabilities.contains(rule.requiredCapability) else {
+            throw RuneScribeRuntimeError.serviceCapabilityMissing(
+                moduleID: descriptor.moduleID,
+                service: serviceID
+            )
+        }
+        guard policy.capabilities.allows(
+            rule.requiredCapability,
+            for: descriptor.role
+        ), rule.consumerRoles.contains(descriptor.role) else {
+            throw RuneScribeRuntimeError.serviceAccessDenied(
+                moduleID: descriptor.moduleID,
+                service: serviceID
+            )
+        }
+        guard descriptor.requiredResources.contains(resource) else {
+            throw RuneScribeRuntimeError.resourceNotDeclared(
+                moduleID: descriptor.moduleID,
+                resource: resource
+            )
+        }
+        guard resource.ownerModuleID == descriptor.moduleID else {
+            throw RuneScribeRuntimeError.serviceAccessDenied(
+                moduleID: descriptor.moduleID,
+                service: serviceID
+            )
+        }
+        guard let resources else {
+            throw RuneScribeRuntimeError.serviceUnavailable(serviceID)
+        }
+        return resources
+    }
+
+    private func verifiedApplicationResourceData(
+        expectedSHA256: Data,
+        maximumByteCount: Int,
+        read: @Sendable () async throws -> Data
+    ) async throws -> Data {
+        guard maximumByteCount > 0,
+              maximumByteCount <= Self.maximumApplicationResourceByteCount
+        else {
+            throw RuntimeVerifiedApplicationResourceFailure.invalidMaximumByteCount
+        }
+        let value: Data
+        do {
+            value = try await read()
+        } catch let error as RuneScribeRuntimeError {
+            throw error
+        } catch let failure as RuntimeVerifiedApplicationResourceFailure {
+            throw failure
+        } catch let readError as ApplicationResourceReadError {
+            switch readError {
+            case .invalidMaximumByteCount:
+                throw RuntimeVerifiedApplicationResourceFailure.invalidMaximumByteCount
+            case .contentTooLarge:
+                throw RuntimeVerifiedApplicationResourceFailure.contentTooLarge
+            }
+        } catch {
+            throw RuntimeVerifiedApplicationResourceFailure.resourceUnavailable
+        }
+        guard value.count <= maximumByteCount else {
+            throw RuntimeVerifiedApplicationResourceFailure.contentTooLarge
+        }
+        guard RuntimeBundledResourceIntegrity.matchesSHA256(
+            expectedSHA256,
+            data: value
+        ) else {
+            throw RuntimeVerifiedApplicationResourceFailure.integrityMismatch
+        }
+        return value
     }
 
     private func authorizedSharePresentationHandler(

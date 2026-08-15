@@ -86,7 +86,11 @@ public struct RuntimePolicy: Sendable {
             RuneScribeCapabilities.inboundFileRead: [RuneScribeRoles.core],
             RuneScribeCapabilities.fileImportUI: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.shareArtifactStorage: [RuneScribeRoles.core],
-            RuneScribeCapabilities.resourceRead: [RuneScribeRoles.core, RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.resourceRead: [
+                RuneScribeRoles.core,
+                RuneScribeRoles.primaryUI,
+                RuneScribeRoles.progression,
+            ],
             RuneScribeCapabilities.fontRegistration: [RuneScribeRoles.core],
             RuneScribeCapabilities.contactRead: [RuneScribeRoles.core],
             RuneScribeCapabilities.clipboardRead: [RuneScribeRoles.core],
@@ -97,10 +101,38 @@ public struct RuntimePolicy: Sendable {
                 RuneScribeRoles.core,
                 RuneScribeRoles.applicationHost,
             ],
-            RuneScribeCapabilities.applicationCommands: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.applicationCommands: [
+                RuneScribeRoles.primaryUI,
+                RuneScribeRoles.applicationHost,
+            ],
             RuneScribeCapabilities.applicationStateRead: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.shareUI: [RuneScribeRoles.primaryUI],
             RuneScribeCapabilities.messagesUI: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.moduleStateAccess: [
+                RuneScribeRoles.core,
+                RuneScribeRoles.progression,
+            ],
+            RuneScribeCapabilities.runtimeSettingsRead: [
+                RuneScribeRoles.primaryUI,
+                RuneScribeRoles.progression,
+            ],
+            RuneScribeCapabilities.runtimeSettingsWrite: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.runtimeAvailabilityRead: [
+                RuneScribeRoles.primaryUI,
+                RuneScribeRoles.progression,
+            ],
+            RuneScribeCapabilities.progressionEventSubmit: [RuneScribeRoles.core],
+            RuneScribeCapabilities.progressionEventApply: [RuneScribeRoles.applicationHost],
+            RuneScribeCapabilities.progressionStateRead: [
+                RuneScribeRoles.primaryUI,
+                RuneScribeRoles.applicationHost,
+            ],
+            RuneScribeCapabilities.progressionCommands: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.progressionRecovery: [RuneScribeRoles.applicationHost],
+            RuneScribeCapabilities.progressionMigrationSubmit: [RuneScribeRoles.core],
+            RuneScribeCapabilities.progressionMigrationApply: [
+                RuneScribeRoles.applicationHost,
+            ],
         ]),
         services: ServiceAccessPolicy(rules: [
             ServiceAccessRule(
@@ -137,7 +169,11 @@ public struct RuntimePolicy: Sendable {
                 serviceID: RuneScribeServiceIDs.applicationResourceLocator,
                 requiredCapability: RuneScribeCapabilities.resourceRead,
                 publisherRoles: [RuneScribeRoles.applicationHost],
-                consumerRoles: [RuneScribeRoles.core, RuneScribeRoles.primaryUI]
+                consumerRoles: [
+                    RuneScribeRoles.core,
+                    RuneScribeRoles.primaryUI,
+                    RuneScribeRoles.progression,
+                ]
             ),
             ServiceAccessRule(
                 serviceID: RuneScribeServiceIDs.systemFontRegistrar,
@@ -174,6 +210,18 @@ public struct RuntimePolicy: Sendable {
                 requiredCapability: RuneScribeCapabilities.uuidGenerate,
                 publisherRoles: [RuneScribeRoles.applicationHost],
                 consumerRoles: [RuneScribeRoles.core]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.moduleStateStore,
+                requiredCapability: RuneScribeCapabilities.moduleStateAccess,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.core, RuneScribeRoles.progression]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeUnlockFeedback.serviceID,
+                requiredCapability: RuneScribeCapabilities.resolveService,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.primaryUI]
             ),
         ])
     )

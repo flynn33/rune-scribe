@@ -33,9 +33,16 @@ public struct ModuleContext: Sendable {
     private let moduleGeneration: UInt64
     private let runtimeIOGateway: RuntimeIOGateway
     private let runtimeIOGeneration: UInt64
+    private let moduleStateGateway: RuntimeModuleStateGateway
+    private let moduleStateGeneration: UInt64
+    private let settingsGateway: RuntimeSettingsGateway
+    private let availabilityGateway: RuntimeAvailabilityGateway
+    private let unlockFeedbackGateway: RuntimeUnlockFeedbackGateway
+    private let progressionOutbox: RuntimeProgressionOutbox
+    private let existingUserMigrationHandoff: RuntimeExistingUserMigrationHandoff
     private let rootPresentationGateway: RuntimeRootPresentationGateway
     private let rootPresentationGeneration: UInt64
-    private let environment: RuntimeEnvironment
+    let environment: RuntimeEnvironment
     let lease: ModuleContextLease
 
     init(
@@ -47,6 +54,13 @@ public struct ModuleContext: Sendable {
         moduleGeneration: UInt64,
         runtimeIOGateway: RuntimeIOGateway,
         runtimeIOGeneration: UInt64,
+        moduleStateGateway: RuntimeModuleStateGateway,
+        moduleStateGeneration: UInt64,
+        settingsGateway: RuntimeSettingsGateway,
+        availabilityGateway: RuntimeAvailabilityGateway,
+        unlockFeedbackGateway: RuntimeUnlockFeedbackGateway,
+        progressionOutbox: RuntimeProgressionOutbox,
+        existingUserMigrationHandoff: RuntimeExistingUserMigrationHandoff,
         rootPresentationGateway: RuntimeRootPresentationGateway,
         rootPresentationGeneration: UInt64,
         environment: RuntimeEnvironment,
@@ -62,6 +76,13 @@ public struct ModuleContext: Sendable {
         self.moduleGeneration = moduleGeneration
         self.runtimeIOGateway = runtimeIOGateway
         self.runtimeIOGeneration = runtimeIOGeneration
+        self.moduleStateGateway = moduleStateGateway
+        self.moduleStateGeneration = moduleStateGeneration
+        self.settingsGateway = settingsGateway
+        self.availabilityGateway = availabilityGateway
+        self.unlockFeedbackGateway = unlockFeedbackGateway
+        self.progressionOutbox = progressionOutbox
+        self.existingUserMigrationHandoff = existingUserMigrationHandoff
         self.rootPresentationGateway = rootPresentationGateway
         self.rootPresentationGeneration = rootPresentationGeneration
         self.environment = environment
@@ -92,6 +113,19 @@ public struct ModuleContext: Sendable {
             descriptor: descriptor,
             handler: handler
         )
+    }
+
+    func progressionOutboxSnapshotForDiagnostics() async throws
+        -> RuntimeProgressionOutboxSnapshot
+    {
+        try await lease.requireActive()
+        return try await progressionOutbox.snapshot()
+    }
+
+    func persistableOperationContext(
+        from metadata: RuntimeOperationMetadata
+    ) async throws -> RuntimePersistableOperationContext {
+        try await progressionOutbox.issueOperationContext(from: metadata)
     }
 
     public func registerRuntimeMenuCommandEndpoint(
@@ -162,6 +196,64 @@ public struct ModuleContext: Sendable {
         )
     }
 
+    public func moduleStateClient() async throws -> RuntimeModuleStateClient {
+        try await lease.requireActive()
+        return try await moduleStateGateway.makeClient(
+            descriptor: descriptor,
+            moduleGeneration: moduleGeneration,
+            runtimeGeneration: moduleStateGeneration
+        )
+    }
+
+    public func runtimeSettingsClient() async throws -> RuntimeSettingsClient {
+        try await requireCapability(RuneScribeCapabilities.runtimeSettingsRead)
+        let canWrite = descriptor.requestedCapabilities.contains(
+            RuneScribeCapabilities.runtimeSettingsWrite
+        ) && policy.capabilities.allows(
+            RuneScribeCapabilities.runtimeSettingsWrite,
+            for: role
+        )
+        return RuntimeSettingsClient(
+            gateway: settingsGateway,
+            lease: lease,
+            canWrite: canWrite
+        )
+    }
+
+    public func progressionOutboxClient() async throws
+        -> RuntimeProgressionOutboxClient
+    {
+        try await requireCapability(RuneScribeCapabilities.progressionEventSubmit)
+        return RuntimeProgressionOutboxClient(
+            gateway: progressionOutbox,
+            lease: lease,
+            sourceModuleID: moduleID
+        )
+    }
+
+    public func existingUserMigrationClient() async throws
+        -> RuntimeExistingUserMigrationClient
+    {
+        try await requireCapability(
+            RuneScribeCapabilities.progressionMigrationSubmit
+        )
+        return RuntimeExistingUserMigrationClient(
+            gateway: existingUserMigrationHandoff,
+            lease: lease,
+            sourceModuleID: moduleID
+        )
+    }
+
+    public func runtimeAvailabilityClient() async throws -> RuntimeAvailabilityClient {
+        try await requireCapability(RuneScribeCapabilities.runtimeAvailabilityRead)
+        return RuntimeAvailabilityClient(gateway: availabilityGateway, lease: lease)
+    }
+
+    public func unlockFeedbackClient() async throws -> RuntimeUnlockFeedbackClient? {
+        try await requireCapability(RuneScribeCapabilities.resolveService)
+        return await unlockFeedbackGateway.makeClient(lease: lease)
+    }
+
     public func rootPresentationClient() async throws
         -> RuntimeRootPresentationClient
     {
@@ -224,6 +316,10 @@ public struct ModuleContext: Sendable {
             generation: moduleGeneration
         )
         await runtimeIOGateway.invalidateModule(
+            moduleID,
+            generation: moduleGeneration
+        )
+        await moduleStateGateway.invalidateModule(
             moduleID,
             generation: moduleGeneration
         )

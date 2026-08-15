@@ -1,0 +1,713 @@
+import Foundation
+import RuneScribeContracts
+import SwiftUI
+
+enum VaultProgressSection: String, CaseIterable, Identifiable, Sendable {
+    case journey = "Journey"
+    case achievements = "Achievements"
+    case statistics = "Statistics"
+    case vault = "Vault"
+    case archive = "Archive"
+
+    var id: String { rawValue }
+
+    var systemImage: String {
+        switch self {
+        case .journey: "map"
+        case .achievements: "medal"
+        case .statistics: "chart.bar.xaxis"
+        case .vault: "lock.open"
+        case .archive: "books.vertical"
+        }
+    }
+}
+
+enum ProgressionAchievementPath: String, CaseIterable, Sendable {
+    case scribe = "Scribe"
+    case courier = "Courier"
+    case archivist = "Archivist"
+    case crossPath = "Cross-path"
+}
+
+struct AchievementCardPresentation: Equatable, Sendable {
+    let title: String
+    let summary: String
+    let systemImage: String
+    let status: String
+    let progressValue: UInt64
+    let progressTarget: UInt64
+    let points: UInt16
+    let rewardCount: Int
+    let completedAt: Date?
+    let isSecretPlaceholder: Bool
+}
+
+enum VaultProgressPresentation {
+    private static let scribeIDs: Set<String> = [
+        "achievement.first-inscription",
+        "achievement.archivist-1",
+        "achievement.archivist-2",
+    ]
+    private static let courierIDs: Set<String> = [
+        "achievement.first-dispatch",
+        "achievement.courier-1",
+        "achievement.courier-2",
+        "achievement.five-circles",
+    ]
+    private static let archivistIDs: Set<String> = [
+        "achievement.echo-returns",
+        "achievement.correspondent",
+        "achievement.explorer",
+    ]
+
+    static func journeyColumnCount(for width: CGFloat) -> Int {
+        width >= 720 ? 2 : 1
+    }
+
+    static func achievementPath(
+        for achievementID: AchievementID
+    ) -> ProgressionAchievementPath {
+        let rawValue = achievementID.rawValue
+        if scribeIDs.contains(rawValue) { return .scribe }
+        if courierIDs.contains(rawValue) { return .courier }
+        if archivistIDs.contains(rawValue) { return .archivist }
+        return .crossPath
+    }
+
+    static func achievementCard(
+        for achievement: ProgressionAchievementDTO
+    ) -> AchievementCardPresentation {
+        if achievement.isHidden && achievement.completedAt == nil {
+            return AchievementCardPresentation(
+                title: "Hidden Achievement",
+                summary: "Keep exploring to discover this achievement.",
+                systemImage: "questionmark.diamond",
+                status: "Undiscovered",
+                progressValue: 0,
+                progressTarget: 1,
+                points: 0,
+                rewardCount: 0,
+                completedAt: nil,
+                isSecretPlaceholder: true
+            )
+        }
+
+        return AchievementCardPresentation(
+            title: achievement.presentation.displayName,
+            summary: achievement.presentation.summary ?? "Achievement details unavailable.",
+            systemImage: achievement.presentation.fallbackSystemImageName,
+            status: achievement.completedAt == nil ? "In progress" : "Completed",
+            progressValue: achievement.progress.current,
+            progressTarget: achievement.progress.target,
+            points: achievement.localPointWeight,
+            rewardCount: rewardCount(achievement.rewards),
+            completedAt: achievement.completedAt,
+            isSecretPlaceholder: false
+        )
+    }
+
+    static func rewardCount(_ rewards: ProgressionRewardSummaryDTO) -> Int {
+        rewards.codexIDs.count
+            + rewards.contentIDs.count
+            + rewards.entitlementIDs.count
+            + rewards.titleIDs.count
+            + rewards.crestIDs.count
+    }
+
+    static func ownedContent(
+        from ownership: [ProgressionOwnershipDTO]
+    ) -> [ProgressionOwnershipDTO] {
+        ownership.filter { $0.state == .owned }
+    }
+
+    static func providerLabel(
+        availability: ProgressionProviderAvailability,
+        renderState: ProgressionContentRenderState
+    ) -> String {
+        switch (availability, renderState) {
+        case (.active, .providerAvailable):
+            "Provider active"
+        case (.failed, .providerFailed):
+            "Provider unavailable — standard presentation in use"
+        case (.eligible, .genericFallback):
+            "Provider eligible — standard presentation in use"
+        default:
+            "Standard presentation"
+        }
+    }
+
+    static func archiveTitle(for entry: ProgressionArchiveEntryDTO) -> String {
+        switch entry.supportState {
+        case .known: entry.presentation.displayName
+        case .unsupported: "Unsupported encountered content"
+        case .unknown: "Unknown encountered content"
+        }
+    }
+
+    static func archiveSupportLabel(
+        _ state: ProgressionArchiveSupportState
+    ) -> String {
+        switch state {
+        case .known: "Known"
+        case .unsupported: "Unsupported — shown generically"
+        case .unknown: "Unknown — shown generically"
+        }
+    }
+
+    static func contentKindLabel(_ kind: ProgressionContentKind) -> String {
+        switch kind {
+        case .codex: "Codex"
+        case .crest: "Crest"
+        case .entitlement: "Entitlement"
+        case .frame: "Frame"
+        case .relic: "Relic"
+        case .script: "Script"
+        case .seal: "Seal"
+        case .title: "Title"
+        case .unknown: "Unknown"
+        }
+    }
+
+    static func provenanceLabel(_ status: DomainEventProvenanceStatus) -> String {
+        switch status {
+        case .absent: "No provenance"
+        case .unverified: "Unverified provenance"
+        case .verified: "Verified provenance"
+        case .invalid: "Invalid provenance"
+        case .unsupported: "Unsupported provenance"
+        }
+    }
+}
+
+struct VaultProgressView: View {
+    @EnvironmentObject private var session: RuneScribeUISession
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var section: VaultProgressSection = .journey
+
+    var body: some View {
+        VStack(spacing: 0) {
+            RuneHeader(
+                runic: "ᚹᚨᚢᛚᛏ",
+                subtitle: "Vault & Progress",
+                trailingButtons: [
+                    RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() },
+                ]
+            )
+
+            sectionPicker
+
+            Group {
+                switch session.progressionRailState {
+                case .loading:
+                    loadingView
+                case .unavailable:
+                    unavailableView
+                case .available, .degraded:
+                    if let snapshot = session.progressionSnapshot {
+                        availableContent(snapshot)
+                    } else {
+                        unavailableView
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .background(Color.runeNavy)
+        .preferredColorScheme(.dark)
+        .modifier(VaultProgressFrameModifier())
+        .alert("Progress Unavailable", isPresented: Binding(
+            get: { session.progressionCommandError != nil },
+            set: { if !$0 { session.dismissProgressionCommandError() } }
+        )) {
+            Button("OK") { session.dismissProgressionCommandError() }
+        } message: {
+            Text(session.progressionCommandError ?? "")
+        }
+    }
+
+    private var sectionPicker: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(VaultProgressSection.allCases) { item in
+                    Button {
+                        section = item
+                    } label: {
+                        Label(item.rawValue, systemImage: item.systemImage)
+                            .font(.subheadline.weight(.semibold))
+                            .padding(.horizontal, 12)
+                            .frame(minHeight: 44)
+                            .background(
+                                Capsule()
+                                    .fill(section == item
+                                          ? Color.runeGold.opacity(0.22)
+                                          : Color.runeParchment)
+                            )
+                            .overlay(
+                                Capsule().strokeBorder(
+                                    section == item ? Color.runeGold : Color.runeSilver.opacity(0.2),
+                                    lineWidth: 1
+                                )
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundColor(section == item ? .runeGoldBright : .white)
+                    .accessibilityValue(section == item ? "Selected" : "Not selected")
+                }
+            }
+            .padding(.horizontal, RuneMetrics.pad)
+            .padding(.vertical, 12)
+        }
+        .background(Color.runeNavy)
+    }
+
+    private var loadingView: some View {
+        VStack(spacing: 14) {
+            ProgressView().tint(.runeGold)
+            Text("Loading local progress…")
+                .foregroundColor(.runeSilver)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var unavailableView: some View {
+        VStack {
+            RunePanel(title: "Progress", systemImage: "circle.dashed", accent: .runeSilver) {
+                Label(
+                    "Progress and Vault details are temporarily unavailable. Rune Scribe remains ready for messages and ciphers.",
+                    systemImage: "info.circle"
+                )
+                .font(.body)
+                .foregroundColor(.runeSilver)
+                .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: 560)
+        }
+        .padding(RuneMetrics.pad)
+    }
+
+    @ViewBuilder
+    private func availableContent(_ snapshot: ProgressionSnapshotDTO) -> some View {
+        VStack(spacing: 0) {
+            if session.progressionRailState == .degraded {
+                Label(
+                    "Progress is read-only while local records recover.",
+                    systemImage: "exclamationmark.triangle"
+                )
+                .font(.footnote.weight(.semibold))
+                .foregroundColor(.runeGoldBright)
+                .padding(.horizontal, RuneMetrics.pad)
+                .padding(.bottom, 8)
+                .accessibilityLabel("Progress is read only while local records recover")
+            }
+
+            GeometryReader { proxy in
+                ScrollView {
+                    switch section {
+                    case .journey:
+                        journey(snapshot, width: proxy.size.width)
+                    case .achievements:
+                        achievements(snapshot)
+                    case .statistics:
+                        statistics(snapshot)
+                    case .vault:
+                        vault(snapshot)
+                    case .archive:
+                        archive(snapshot)
+                    }
+                }
+                .scrollIndicators(.automatic)
+            }
+        }
+    }
+
+    private func journey(
+        _ snapshot: ProgressionSnapshotDTO,
+        width: CGFloat
+    ) -> some View {
+        let columnCount = VaultProgressPresentation.journeyColumnCount(for: width)
+        let columns = Array(
+            repeating: GridItem(.flexible(), spacing: RuneMetrics.sectionGap, alignment: .top),
+            count: columnCount
+        )
+        let ownershipByCodex = Dictionary(
+            uniqueKeysWithValues: snapshot.ownership.compactMap { item -> (CodexID, ProgressionOwnershipDTO)? in
+                guard case .codex(let codexID) = item.reference else { return nil }
+                return (codexID, item)
+            }
+        )
+
+        return VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
+            Text("The Journey")
+                .font(.title2.bold())
+                .foregroundColor(.white)
+            Text("Codices unlock permanently as every listed component is completed. Later activity never removes an unlocked Codex.")
+                .font(.body)
+                .foregroundColor(.runeSilver)
+                .fixedSize(horizontal: false, vertical: true)
+
+            LazyVGrid(columns: columns, alignment: .leading, spacing: RuneMetrics.sectionGap) {
+                ForEach(snapshot.codexGates.sorted(by: { $0.journeyOrder < $1.journeyOrder }), id: \.codexID) { gate in
+                    journeyCard(gate, ownership: ownershipByCodex[gate.codexID])
+                }
+            }
+
+            if snapshot.codexGates.isEmpty {
+                emptyState(
+                    title: "Journey not available",
+                    detail: "Codex requirements will appear when the Progression provider supplies them."
+                )
+            }
+        }
+        .padding(RuneMetrics.pad)
+    }
+
+    private func journeyCard(
+        _ gate: ProgressionCodexGateDTO,
+        ownership: ProgressionOwnershipDTO?
+    ) -> some View {
+        RunePanel(
+            title: gate.presentation.displayName,
+            systemImage: gate.presentation.fallbackSystemImageName,
+            accent: gate.unlockedAt == nil ? .runeBlue : .runeGold
+        ) {
+            VStack(alignment: .leading, spacing: 10) {
+                Label(
+                    gate.unlockedAt == nil ? "In progress" : "Permanently unlocked",
+                    systemImage: gate.unlockedAt == nil ? "circle.dashed" : "checkmark.seal.fill"
+                )
+                .font(.subheadline.bold())
+                .foregroundColor(gate.unlockedAt == nil ? .runeSilver : .runeGoldBright)
+
+                if let summary = gate.presentation.summary {
+                    Text(summary)
+                        .font(.body)
+                        .foregroundColor(.runeSilver)
+                }
+
+                ProgressView(
+                    value: Double(gate.progress.current),
+                    total: Double(gate.progress.target)
+                )
+                .tint(gate.unlockedAt == nil ? .runeBlue : .runeGold)
+                .accessibilityLabel("Codex progress")
+                .accessibilityValue("\(gate.progress.current) of \(gate.progress.target)")
+
+                Label(
+                    "\(gate.completedRuleCount) of \(gate.requiredRuleCount) requirements complete",
+                    systemImage: "list.bullet.clipboard"
+                )
+                .font(.footnote)
+                .foregroundColor(.runeSilver)
+
+                if !gate.components.isEmpty {
+                    VStack(alignment: .leading, spacing: 7) {
+                        ForEach(gate.components, id: \.componentID) { component in
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                Image(systemName: component.isComplete
+                                      ? "checkmark.circle.fill"
+                                      : "circle.dashed")
+                                    .accessibilityHidden(true)
+                                Text(component.label)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                Text("\(component.current)/\(component.target)")
+                                    .monospacedDigit()
+                            }
+                            .font(.footnote)
+                            .foregroundColor(component.isComplete ? .runeGoldBright : .runeSilver)
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel(component.label)
+                            .accessibilityValue(
+                                "\(component.isComplete ? "Complete" : "In progress"), "
+                                    + "\(component.current) of \(component.target)"
+                            )
+                        }
+                    }
+                }
+
+                if let ownership {
+                    Text(VaultProgressPresentation.providerLabel(
+                        availability: ownership.providerAvailability,
+                        renderState: ownership.renderState
+                    ))
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                } else {
+                    Text("Standard Codex card")
+                        .font(.footnote)
+                        .foregroundColor(.runeSilver)
+                }
+            }
+            .accessibilityElement(children: .combine)
+        }
+    }
+
+    private func achievements(_ snapshot: ProgressionSnapshotDTO) -> some View {
+        VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
+            Text("Achievements")
+                .font(.title2.bold())
+                .foregroundColor(.white)
+
+            ForEach(ProgressionAchievementPath.allCases, id: \.self) { path in
+                let items = snapshot.achievements.filter {
+                    VaultProgressPresentation.achievementPath(for: $0.achievementID) == path
+                }
+                if !items.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(path.rawValue)
+                            .font(.headline)
+                            .foregroundColor(.runeGoldBright)
+                        ForEach(items, id: \.achievementID) { achievement in
+                            achievementCard(achievement)
+                        }
+                    }
+                }
+            }
+
+            if snapshot.achievements.isEmpty {
+                emptyState(
+                    title: "Achievements not available",
+                    detail: "Achievement progress will appear when local progress is available."
+                )
+            }
+        }
+        .padding(RuneMetrics.pad)
+    }
+
+    private func achievementCard(_ achievement: ProgressionAchievementDTO) -> some View {
+        let card = VaultProgressPresentation.achievementCard(for: achievement)
+        return RunePanel(
+            title: card.title,
+            systemImage: card.systemImage,
+            accent: card.completedAt == nil ? .runeBlue : .runeGold
+        ) {
+            VStack(alignment: .leading, spacing: 9) {
+                Label(
+                    card.status,
+                    systemImage: card.completedAt == nil ? "circle.dashed" : "checkmark.circle.fill"
+                )
+                .font(.subheadline.bold())
+                .foregroundColor(card.completedAt == nil ? .runeSilver : .runeGoldBright)
+
+                Text(card.summary)
+                    .font(.body)
+                    .foregroundColor(.runeSilver)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if !card.isSecretPlaceholder {
+                    ProgressView(value: Double(card.progressValue), total: Double(card.progressTarget))
+                        .tint(card.completedAt == nil ? .runeBlue : .runeGold)
+                        .accessibilityLabel("Achievement progress")
+                        .accessibilityValue("\(card.progressValue) of \(card.progressTarget)")
+
+                    Text("\(card.points) points • \(card.rewardCount) rewards")
+                        .font(.footnote.monospacedDigit())
+                        .foregroundColor(.runeSilver)
+
+                    if let completedAt = card.completedAt {
+                        Text("Completed \(completedAt.formatted(date: .abbreviated, time: .omitted))")
+                            .font(.footnote)
+                            .foregroundColor(.runeSilver)
+                    }
+                }
+            }
+            .accessibilityElement(children: .combine)
+        }
+    }
+
+    private func statistics(_ snapshot: ProgressionSnapshotDTO) -> some View {
+        VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
+            Text("Statistics")
+                .font(.title2.bold())
+                .foregroundColor(.white)
+            Text("On-device totals only. Names, message text, keys, contacts, and package contents are never shown here.")
+                .font(.body)
+                .foregroundColor(.runeSilver)
+                .fixedSize(horizontal: false, vertical: true)
+
+            ForEach(snapshot.statistics, id: \.statisticID) { statistic in
+                RunePanel(
+                    title: statistic.presentation.displayName,
+                    systemImage: statistic.presentation.fallbackSystemImageName,
+                    accent: .runeBlue
+                ) {
+                    HStack(alignment: .firstTextBaseline) {
+                        if let summary = statistic.presentation.summary {
+                            Text(summary)
+                                .font(.body)
+                                .foregroundColor(.runeSilver)
+                        }
+                        Spacer(minLength: 12)
+                        Text(statistic.value.formatted())
+                            .font(.title2.bold().monospacedDigit())
+                            .foregroundColor(.white)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityValue(statistic.value.formatted())
+                }
+            }
+
+            if snapshot.statistics.isEmpty {
+                emptyState(
+                    title: "No statistics yet",
+                    detail: "Privacy-safe local totals will appear after activity is recorded."
+                )
+            }
+        }
+        .padding(RuneMetrics.pad)
+    }
+
+    private func vault(_ snapshot: ProgressionSnapshotDTO) -> some View {
+        let ownedContent = VaultProgressPresentation.ownedContent(from: snapshot.ownership)
+        let ownedTitles = snapshot.titles.filter(\.isOwned)
+
+        return VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
+            Text("Vault")
+                .font(.title2.bold())
+                .foregroundColor(.white)
+            Text("Only content granted to this installation appears in the Vault.")
+                .font(.body)
+                .foregroundColor(.runeSilver)
+
+            RunePanel(title: "Selected Title", systemImage: "textformat", accent: .runeGold) {
+                Picker("Selected Title", selection: Binding(
+                    get: { snapshot.selectedTitleID },
+                    set: { titleID in
+                        Task { await session.selectProgressionTitle(titleID) }
+                    }
+                )) {
+                    Text("No title").tag(Optional<TitleID>.none)
+                    ForEach(ownedTitles, id: \.titleID) { title in
+                        Text(title.presentation.displayName)
+                            .tag(Optional(title.titleID))
+                    }
+                }
+                .pickerStyle(.menu)
+                .disabled(session.progressionRailState != .available)
+                .accessibilityHint("Selects the title shown by Rune Scribe")
+            }
+
+            ForEach(ownedContent.indices, id: \.self) { index in
+                ownedContentCard(ownedContent[index])
+            }
+
+            if ownedContent.isEmpty {
+                emptyState(
+                    title: "Vault is empty",
+                    detail: "Permanently granted Codices, titles, relics, seals, scripts, frames, and crests will appear here."
+                )
+            }
+        }
+        .padding(RuneMetrics.pad)
+    }
+
+    private func ownedContentCard(_ item: ProgressionOwnershipDTO) -> some View {
+        RunePanel(
+            title: item.presentation.displayName,
+            systemImage: item.presentation.fallbackSystemImageName,
+            accent: .runeGold
+        ) {
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Owned", systemImage: "checkmark.seal.fill")
+                    .font(.subheadline.bold())
+                    .foregroundColor(.runeGoldBright)
+                Text("Type: \(VaultProgressPresentation.contentKindLabel(item.kind))")
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                Text(VaultProgressPresentation.providerLabel(
+                    availability: item.providerAvailability,
+                    renderState: item.renderState
+                ))
+                .font(.footnote)
+                .foregroundColor(.runeSilver)
+                Text(item.sourceRuleIDs.isEmpty
+                     ? "Source: local grant"
+                     : "Source: \(item.sourceRuleIDs.count) progression grant rules")
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                if let grantedAt = item.grantedAt {
+                    Text("Granted \(grantedAt.formatted(date: .abbreviated, time: .omitted))")
+                        .font(.footnote)
+                        .foregroundColor(.runeSilver)
+                }
+            }
+            .accessibilityElement(children: .combine)
+        }
+    }
+
+    private func archive(_ snapshot: ProgressionSnapshotDTO) -> some View {
+        VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
+            Text("Archive")
+                .font(.title2.bold())
+                .foregroundColor(.white)
+            Text("A record of encountered Codices and artifacts. Encountered does not mean owned.")
+                .font(.body)
+                .foregroundColor(.runeSilver)
+                .fixedSize(horizontal: false, vertical: true)
+
+            ForEach(snapshot.archive.indices, id: \.self) { index in
+                archiveCard(snapshot.archive[index])
+            }
+
+            if snapshot.archive.isEmpty {
+                emptyState(
+                    title: "No encounters yet",
+                    detail: "Encountered Codices and artifacts will appear without granting ownership."
+                )
+            }
+        }
+        .padding(RuneMetrics.pad)
+    }
+
+    private func archiveCard(_ entry: ProgressionArchiveEntryDTO) -> some View {
+        RunePanel(
+            title: VaultProgressPresentation.archiveTitle(for: entry),
+            systemImage: entry.supportState != .known
+                ? "questionmark.square.dashed"
+                : entry.presentation.fallbackSystemImageName,
+            accent: .runeSilver
+        ) {
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Encountered", systemImage: "eye")
+                    .font(.subheadline.bold())
+                    .foregroundColor(.white)
+                Text("Type: \(VaultProgressPresentation.contentKindLabel(entry.kind))")
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                Text(VaultProgressPresentation.archiveSupportLabel(entry.supportState))
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                Text("First seen \(entry.firstEncounteredAt.formatted(date: .abbreviated, time: .omitted))")
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                Text("Last seen \(entry.lastEncounteredAt.formatted(date: .abbreviated, time: .omitted))")
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                Text("\(entry.encounterCount) encounters • \(VaultProgressPresentation.provenanceLabel(entry.provenanceStatus))")
+                    .font(.footnote.monospacedDigit())
+                    .foregroundColor(.runeSilver)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityHint("Archive encounter record; this does not indicate ownership")
+        }
+    }
+
+    private func emptyState(title: String, detail: String) -> some View {
+        RunePanel(title: title, systemImage: "tray", accent: .runeSilver) {
+            Text(detail)
+                .font(.body)
+                .foregroundColor(.runeSilver)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+private struct VaultProgressFrameModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        #if os(macOS)
+        content.frame(minWidth: 820, idealWidth: 900, minHeight: 680, idealHeight: 760)
+        #else
+        content.frame(maxWidth: .infinity, maxHeight: .infinity)
+        #endif
+    }
+}

@@ -519,6 +519,71 @@ final class PlatformAdapterTests: XCTestCase {
         XCTAssertEqual(locatedData, expectedData)
     }
 
+    func testBundleResourceLocatorRoutesOwnedBundlesAndBoundsReads() async throws {
+        let root = temporaryDirectory(named: "OwnedBundles")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let hostBundle = try makeFixtureBundle(
+            root: root,
+            name: "Host",
+            identifier: "com.runescribe.platform-tests.host",
+            resourceName: "catalog",
+            resourceData: Data("host".utf8)
+        )
+        let progressionData = Data("progression-catalog".utf8)
+        let progressionBundle = try makeFixtureBundle(
+            root: root,
+            name: "Progression",
+            identifier: "com.runescribe.platform-tests.progression",
+            resourceName: "catalog",
+            resourceData: progressionData
+        )
+        let moduleID: ModuleIdentifier = "com.runescribe.module.progression"
+        let resource = ApplicationResource(
+            name: "catalog",
+            fileExtension: "json",
+            ownerModuleID: moduleID
+        )
+        let locator = BundleApplicationResourceLocator(
+            bundle: hostBundle,
+            moduleBundles: [moduleID: progressionBundle]
+        )
+
+        let value = try await locator.data(
+            for: resource,
+            maximumByteCount: progressionData.count
+        )
+        XCTAssertEqual(value, progressionData)
+
+        do {
+            _ = try await locator.data(
+                for: resource,
+                maximumByteCount: progressionData.count - 1
+            )
+            XCTFail("Expected the bounded read to reject an oversized resource")
+        } catch {
+            XCTAssertEqual(
+                error as? ApplicationResourceReadError,
+                .contentTooLarge(resource)
+            )
+        }
+
+        let missingOwner: ModuleIdentifier = "com.runescribe.module.missing"
+        let missingResource = ApplicationResource(
+            name: "catalog",
+            fileExtension: "json",
+            ownerModuleID: missingOwner
+        )
+        do {
+            _ = try await locator.url(for: missingResource)
+            XCTFail("Expected an unregistered module bundle to fail closed")
+        } catch {
+            XCTAssertEqual(
+                error as? ApplicationResourceLocatorError,
+                .ownerBundleUnavailable(missingOwner)
+            )
+        }
+    }
+
     func testShareArtifactStoreScopesWritesAndCleanup() async throws {
         let root = temporaryDirectory(named: "ShareArtifacts")
         defer { try? FileManager.default.removeItem(at: root) }
@@ -696,6 +761,43 @@ final class PlatformAdapterTests: XCTestCase {
         } catch {
             XCTAssertEqual(error as? AppleShareArtifactStoreError, .unknownArtifact)
         }
+    }
+
+    private func makeFixtureBundle(
+        root: URL,
+        name: String,
+        identifier: String,
+        resourceName: String,
+        resourceData: Data
+    ) throws -> Bundle {
+        let bundleURL = root.appendingPathComponent("\(name).bundle", isDirectory: true)
+        #if os(macOS)
+        let contentsURL = bundleURL.appendingPathComponent("Contents", isDirectory: true)
+        let resourcesURL = contentsURL.appendingPathComponent("Resources", isDirectory: true)
+        let infoURL = contentsURL.appendingPathComponent("Info.plist")
+        #else
+        let resourcesURL = bundleURL
+        let infoURL = bundleURL.appendingPathComponent("Info.plist")
+        #endif
+        try FileManager.default.createDirectory(
+            at: resourcesURL,
+            withIntermediateDirectories: true
+        )
+        let info: [String: Any] = [
+            "CFBundleIdentifier": identifier,
+            "CFBundleName": name,
+            "CFBundlePackageType": "BNDL",
+        ]
+        try PropertyListSerialization.data(
+            fromPropertyList: info,
+            format: .xml,
+            options: 0
+        ).write(to: infoURL, options: .atomic)
+        try resourceData.write(
+            to: resourcesURL.appendingPathComponent("\(resourceName).json"),
+            options: .atomic
+        )
+        return try XCTUnwrap(Bundle(url: bundleURL))
     }
 
     private func temporaryDirectory(named name: String) -> URL {

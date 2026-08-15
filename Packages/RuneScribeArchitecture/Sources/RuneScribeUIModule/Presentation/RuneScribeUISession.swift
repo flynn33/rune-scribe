@@ -11,6 +11,14 @@ final class RuneScribeUISession: ObservableObject {
     @Published var importErrorMessage: String?
     @Published var messageErrorMessage: String?
     @Published private(set) var route: RuneScribeUIRouteRequest?
+    @Published private(set) var availabilitySnapshot: RuntimeAvailabilitySnapshot?
+    @Published var progressionSnapshot: ProgressionSnapshotDTO?
+    @Published var progressionRailState: OptionalProgressionRailState = .unavailable
+    @Published var runtimeSettingsSnapshot: RuntimeSettingsSnapshotDTO?
+    @Published var settingsRailState: OptionalProgressionRailState = .unavailable
+    @Published var unlockFeedbackPreferences = UnlockFeedbackPreferences.defaults
+    @Published var activeReveal: ProgressionRevealSummaryDTO?
+    @Published var progressionCommandError: String?
 
     let resourcePresentation: RuntimeApplicationResourcePresentation
     let inboundFileImportSession: RuntimeInboundFileImportSession
@@ -19,21 +27,37 @@ final class RuneScribeUISession: ObservableObject {
 
     private var applicationClientHandle: RuntimeApplicationClient?
     private var runtimeIOHandle: RuntimeIOClient?
+    private var availabilityClientHandle: RuntimeAvailabilityClient?
+    var progressionClientHandle: RuntimeProgressionClient?
+    var runtimeSettingsClientHandle: RuntimeSettingsClient?
+    var unlockFeedbackClientHandle: RuntimeUnlockFeedbackClient?
 
     var contactSystemIdentifiers: [UUID: String] = [:]
     private var stateTask: Task<Void, Never>?
     private var menuTask: Task<Void, Never>?
-    private var observationGeneration: UInt64 = 0
+    private var availabilityTask: Task<Void, Never>?
+    var progressionTask: Task<Void, Never>?
+    var settingsTask: Task<Void, Never>?
+    var observationGeneration: UInt64 = 0
+    var revealQueue = ProgressionRevealQueueModel()
 
     init(
         applicationClient: RuntimeApplicationClient,
         runtimeIO: RuntimeIOClient,
+        availabilityClient: RuntimeAvailabilityClient? = nil,
+        progressionClient: RuntimeProgressionClient? = nil,
+        runtimeSettingsClient: RuntimeSettingsClient? = nil,
+        unlockFeedbackClient: RuntimeUnlockFeedbackClient? = nil,
         inboundFileImportSession: RuntimeInboundFileImportSession = .unavailable,
         resourcePresentation: RuntimeApplicationResourcePresentation,
         productMetadata: RuneScribeUIProductMetadata
     ) {
         applicationClientHandle = applicationClient
         runtimeIOHandle = runtimeIO
+        availabilityClientHandle = availabilityClient
+        progressionClientHandle = progressionClient
+        runtimeSettingsClientHandle = runtimeSettingsClient
+        unlockFeedbackClientHandle = unlockFeedbackClient
         self.inboundFileImportSession = inboundFileImportSession
         self.resourcePresentation = resourcePresentation
         appVersion = productMetadata.version
@@ -43,6 +67,9 @@ final class RuneScribeUISession: ObservableObject {
     deinit {
         stateTask?.cancel()
         menuTask?.cancel()
+        availabilityTask?.cancel()
+        progressionTask?.cancel()
+        settingsTask?.cancel()
     }
 
     func start() throws {
@@ -73,17 +100,59 @@ final class RuneScribeUISession: ObservableObject {
                 }
             }
         }
+        if let availabilityClientHandle {
+            availabilityTask = Task { @MainActor [weak self, availabilityClientHandle] in
+                do {
+                    let initial = try await availabilityClientHandle.snapshot()
+                    guard !Task.isCancelled,
+                          let self,
+                          observationGeneration == generation
+                    else { return }
+                    availabilitySnapshot = initial
+
+                    let snapshots = try await availabilityClientHandle.snapshots()
+                    for await snapshot in snapshots {
+                        guard !Task.isCancelled,
+                              observationGeneration == generation
+                        else { return }
+                        availabilitySnapshot = snapshot
+                    }
+                } catch {
+                    return
+                }
+            }
+        }
+        startOptionalProgressionObservation(generation: generation)
+        startOptionalSettingsObservation(generation: generation)
     }
 
     func stop() async {
         observationGeneration &+= 1
         let stateTask = self.stateTask
         let menuTask = self.menuTask
+        let availabilityTask = self.availabilityTask
+        let progressionTask = self.progressionTask
+        let settingsTask = self.settingsTask
         stateTask?.cancel()
         menuTask?.cancel()
+        availabilityTask?.cancel()
+        progressionTask?.cancel()
+        settingsTask?.cancel()
         self.stateTask = nil
         self.menuTask = nil
+        self.availabilityTask = nil
+        self.progressionTask = nil
+        self.settingsTask = nil
         snapshot = nil
+        availabilitySnapshot = nil
+        progressionSnapshot = nil
+        progressionRailState = .unavailable
+        runtimeSettingsSnapshot = nil
+        settingsRailState = .unavailable
+        unlockFeedbackPreferences = .defaults
+        activeReveal = nil
+        progressionCommandError = nil
+        resetRevealPresentationState()
         lastError = nil
         importErrorMessage = nil
         messageErrorMessage = nil
@@ -91,9 +160,16 @@ final class RuneScribeUISession: ObservableObject {
         contactSystemIdentifiers.removeAll()
         applicationClientHandle = nil
         runtimeIOHandle = nil
+        availabilityClientHandle = nil
+        progressionClientHandle = nil
+        runtimeSettingsClientHandle = nil
+        unlockFeedbackClientHandle = nil
         await resourcePresentation.close()
         await stateTask?.value
         await menuTask?.value
+        await availabilityTask?.value
+        await progressionTask?.value
+        await settingsTask?.value
     }
 
     var isLoading: Bool {

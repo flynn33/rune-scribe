@@ -3,45 +3,72 @@ import RuneScribeUIRuntime
 import XCTest
 
 final class NativeShareOutcomeTests: XCTestCase {
-    func testActivityOutcomeMapsPublicCompletionStates() {
-        XCTAssertEqual(
-            RuneScribeActivityOutcomeMapper.outcome(completed: true, error: nil),
-            .handedOff
+    func testActivityReportMapsTypedRouteAndCompletionStates() {
+        let airDrop = RuneScribeActivityReportMapper.report(
+            activityType: .airDrop,
+            completed: true,
+            error: nil
         )
-        XCTAssertEqual(
-            RuneScribeActivityOutcomeMapper.outcome(completed: false, error: nil),
-            .cancelled
+        XCTAssertEqual(airDrop.routeClass, .airDrop)
+        XCTAssertEqual(airDrop.result, .completedBySystem)
+
+        let shareSheet = RuneScribeActivityReportMapper.report(
+            activityType: .mail,
+            completed: true,
+            error: nil
         )
-        XCTAssertEqual(
-            RuneScribeActivityOutcomeMapper.outcome(
-                completed: true,
-                error: FixtureError.failed
-            ),
-            .failed
+        XCTAssertEqual(shareSheet.routeClass, .shareSheet)
+        XCTAssertEqual(shareSheet.result, .completedBySystem)
+
+        let cancelled = RuneScribeActivityReportMapper.report(
+            activityType: nil,
+            completed: false,
+            error: nil
         )
-        XCTAssertEqual(
-            RuneScribeActivityOutcomeMapper.outcome(
-                completed: false,
-                error: FixtureError.failed
-            ),
-            .failed
+        XCTAssertEqual(cancelled.routeClass, .shareSheet)
+        XCTAssertEqual(cancelled.result, .cancelled)
+
+        let failed = RuneScribeActivityReportMapper.report(
+            activityType: .airDrop,
+            completed: true,
+            error: FixtureError.failed
         )
+        XCTAssertEqual(failed.routeClass, .airDrop)
+        XCTAssertEqual(failed.result, .failed)
     }
 
     func testActivityCompletionGateSuppressesDisappearFallbackAfterCompletion() {
         var gate = RuneScribeActivityCompletionGate()
 
-        XCTAssertEqual(gate.accept(completed: true, error: nil), .handedOff)
-        XCTAssertNil(gate.accept(completed: false, error: nil))
+        let accepted = gate.accept(
+            activityType: .airDrop,
+            completed: true,
+            error: nil
+        )
+        XCTAssertEqual(accepted?.routeClass, .airDrop)
+        XCTAssertEqual(accepted?.result, .completedBySystem)
+        XCTAssertNil(gate.accept(activityType: nil, completed: false, error: nil))
         XCTAssertTrue(gate.hasCompleted)
     }
 
     func testActivityCompletionGateAcceptsDisappearFallbackOnlyOnce() {
         var gate = RuneScribeActivityCompletionGate()
 
-        XCTAssertEqual(gate.accept(completed: false, error: nil), .cancelled)
-        XCTAssertNil(gate.accept(completed: true, error: nil))
-        XCTAssertNil(gate.accept(completed: false, error: FixtureError.failed))
+        let accepted = gate.accept(
+            activityType: nil,
+            completed: false,
+            error: nil
+        )
+        XCTAssertEqual(accepted?.routeClass, .shareSheet)
+        XCTAssertEqual(accepted?.result, .cancelled)
+        XCTAssertNil(gate.accept(activityType: .airDrop, completed: true, error: nil))
+        XCTAssertNil(
+            gate.accept(
+                activityType: .mail,
+                completed: false,
+                error: FixtureError.failed
+            )
+        )
         XCTAssertTrue(gate.hasCompleted)
     }
 }

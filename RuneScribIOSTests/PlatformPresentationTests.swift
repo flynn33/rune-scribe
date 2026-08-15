@@ -30,57 +30,79 @@ final class PlatformPresentationTests: XCTestCase {
         XCTAssertTrue(gate.hasCompleted)
     }
 
-    func testMessageComposeMapsSentCancelledAndFailedResults() {
+    func testMessageComposeMapsSentCancelledAndFailedResults() throws {
         XCTAssertEqual(
-            MessageComposeOutcomeMapper.outcome(
+            MessageComposeReportMapper.report(
                 for: .sent,
                 requiredAttachmentWasPresent: false,
                 requiredAttachmentAccepted: false
             ),
-            .messageSent(requiredAttachmentAccepted: false)
+            try SharePresentationReportDTO(
+                routeClass: .messages,
+                result: .sentConfirmed,
+                requiredAttachmentAccepted: false
+            )
         )
         XCTAssertEqual(
-            MessageComposeOutcomeMapper.outcome(
+            MessageComposeReportMapper.report(
                 for: .cancelled,
                 requiredAttachmentWasPresent: true,
                 requiredAttachmentAccepted: true
             ),
-            .cancelled
+            try SharePresentationReportDTO(
+                routeClass: .messages,
+                result: .cancelled
+            )
         )
         XCTAssertEqual(
-            MessageComposeOutcomeMapper.outcome(
+            MessageComposeReportMapper.report(
                 for: .failed,
                 requiredAttachmentWasPresent: true,
                 requiredAttachmentAccepted: true
             ),
-            .failed
+            try SharePresentationReportDTO(
+                routeClass: .messages,
+                result: .failed
+            )
         )
     }
 
-    func testMessageComposeReportsRequiredAttachmentOnlyWhenComposerAcceptedIt() {
+    func testMessageComposeReportsRequiredAttachmentOnlyWhenComposerAcceptedIt() throws {
         XCTAssertEqual(
-            MessageComposeOutcomeMapper.outcome(
+            MessageComposeReportMapper.report(
                 for: .sent,
                 requiredAttachmentWasPresent: true,
                 requiredAttachmentAccepted: true
             ),
-            .messageSent(requiredAttachmentAccepted: true)
+            try SharePresentationReportDTO(
+                routeClass: .messages,
+                result: .sentConfirmed,
+                requiredAttachmentAccepted: true
+            )
         )
         XCTAssertEqual(
-            MessageComposeOutcomeMapper.outcome(
+            MessageComposeReportMapper.report(
                 for: .sent,
                 requiredAttachmentWasPresent: true,
                 requiredAttachmentAccepted: false
             ),
-            .messageSent(requiredAttachmentAccepted: false)
+            try SharePresentationReportDTO(
+                routeClass: .messages,
+                result: .sentConfirmed,
+                requiredAttachmentAccepted: false
+            )
         )
         XCTAssertEqual(
-            MessageComposeOutcomeMapper.outcome(
+            MessageComposeReportMapper.report(
                 for: .sent,
                 requiredAttachmentWasPresent: false,
                 requiredAttachmentAccepted: true
             ),
-            .messageSent(requiredAttachmentAccepted: false)
+            try SharePresentationReportDTO(
+                routeClass: .messages,
+                result: .sentConfirmed,
+                requiredAttachmentAccepted: false
+            )
         )
     }
 
@@ -117,9 +139,25 @@ final class PlatformPresentationTests: XCTestCase {
     func testMessageComposeCompletionGateEmitsOnlyFirstTerminalOutcome() {
         var gate = MessageComposeCompletionGate()
 
-        XCTAssertEqual(gate.accept(.failed), .failed)
-        XCTAssertNil(gate.accept(.messageSent(requiredAttachmentAccepted: true)))
-        XCTAssertNil(gate.accept(.cancelled))
+        let failed = MessageComposeReportMapper.report(
+            for: .failed,
+            requiredAttachmentWasPresent: true,
+            requiredAttachmentAccepted: true
+        )
+        let sent = MessageComposeReportMapper.report(
+            for: .sent,
+            requiredAttachmentWasPresent: true,
+            requiredAttachmentAccepted: true
+        )
+        let cancelled = MessageComposeReportMapper.report(
+            for: .cancelled,
+            requiredAttachmentWasPresent: true,
+            requiredAttachmentAccepted: true
+        )
+
+        XCTAssertEqual(gate.accept(failed), failed)
+        XCTAssertNil(gate.accept(sent))
+        XCTAssertNil(gate.accept(cancelled))
         XCTAssertTrue(gate.hasCompleted)
     }
 }

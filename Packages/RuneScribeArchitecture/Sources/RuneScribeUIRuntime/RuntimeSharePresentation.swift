@@ -18,6 +18,47 @@ public enum OpaqueSharePresentationError: Error, Equatable, Sendable {
     case revoked
 }
 
+public typealias SharePresentationCompletion = Result<
+    ShareArtifactCompletionEvidenceDTO,
+    any Error
+>
+
+public enum FileExportTerminalResult: Equatable, Sendable {
+    case saved
+    case cancelled
+    case failed
+}
+
+public enum RuneScribeUtilityShareReportMapper {
+    public static func fileExport(
+        _ result: FileExportTerminalResult
+    ) -> SharePresentationReportDTO {
+        let routeResult: ShareRouteResultDTO = switch result {
+        case .saved: .completionUnavailable
+        case .cancelled: .cancelled
+        case .failed: .failed
+        }
+        return try! SharePresentationReportDTO(
+            routeClass: .fileExport,
+            result: routeResult
+        )
+    }
+
+    public static var clipboardCompletion: SharePresentationReportDTO {
+        try! SharePresentationReportDTO(
+            routeClass: .clipboard,
+            result: .completionUnavailable
+        )
+    }
+
+    public static var qrDisplayCompletion: SharePresentationReportDTO {
+        try! SharePresentationReportDTO(
+            routeClass: .qrDisplay,
+            result: .completionUnavailable
+        )
+    }
+}
+
 /// Runtime-owned lease for one artifact presentation. The platform URL remains
 /// private to RuneScribeUIRuntime and is invalidated with the originating
 /// runtime/module generation.
@@ -26,26 +67,30 @@ public final class OpaqueShareTransfer: ObservableObject {
     public let artifactID: ShareArtifactID
 
     @Published public private(set) var isAvailable = true
-    @Published public private(set) var outcome: ShareArtifactOutcomeDTO?
+    @Published public private(set) var presentationReport: SharePresentationReportDTO?
+    @Published public private(set) var completionEvidence: ShareArtifactCompletionEvidenceDTO?
 
     private let lease: RuntimeSharePresentationLease
     private var eventTask: Task<Void, Never>?
     private var isClosed = false
+    private var hasBegunTerminalFinish = false
 
     private init(
         artifactID: ShareArtifactID,
-        lease: RuntimeSharePresentationLease
+        lease: RuntimeSharePresentationLease,
+        presentationEvents: AsyncStream<RuntimeSharePresentationEvent>
     ) {
         self.artifactID = artifactID
         self.lease = lease
         eventTask = Task { @MainActor [weak self] in
-            let events = await lease.events()
-            for await event in events {
+            for await event in presentationEvents {
                 switch event {
+                case .presented(let report):
+                    self?.presentationReport = report
+                case .completed(let evidence):
+                    self?.markCompleted(evidence)
                 case .revoked:
                     self?.markRevoked()
-                case .completed(let outcome):
-                    self?.markCompleted(outcome)
                 }
             }
         }
@@ -57,7 +102,13 @@ public final class OpaqueShareTransfer: ObservableObject {
     ) async throws -> OpaqueShareTransfer {
         let lease = try await session.acquire()
         try Task.checkCancellation()
-        return OpaqueShareTransfer(artifactID: artifactID, lease: lease)
+        let presentationEvents = await lease.presentationEvents()
+        try Task.checkCancellation()
+        return OpaqueShareTransfer(
+            artifactID: artifactID,
+            lease: lease,
+            presentationEvents: presentationEvents
+        )
     }
 
     public func close() async {
@@ -69,11 +120,39 @@ public final class OpaqueShareTransfer: ObservableObject {
         await lease.close()
     }
 
-    public func finish(_ outcome: ShareArtifactOutcomeDTO) async throws {
-        guard !isClosed else {
+    public func reportPresented(on routeClass: ShareRouteClassDTO) async throws {
+        guard !isClosed, !hasBegunTerminalFinish else {
             throw OpaqueSharePresentationError.revoked
         }
-        try await lease.finish(outcome)
+        try await lease.reportPresented(on: routeClass)
+    }
+
+    public func finish(
+        _ report: SharePresentationReportDTO
+    ) async throws -> ShareArtifactCompletionEvidenceDTO {
+        guard report.isTerminal,
+              !isClosed,
+              !hasBegunTerminalFinish
+        else {
+            throw OpaqueSharePresentationError.revoked
+        }
+        hasBegunTerminalFinish = true
+        do {
+            let evidence = try await lease.finish(report)
+            markCompleted(evidence)
+            return evidence
+        } catch {
+            hasBegunTerminalFinish = false
+            throw error
+        }
+    }
+
+    public func finishClipboardCopy() async throws -> ShareArtifactCompletionEvidenceDTO {
+        try await finish(RuneScribeUtilityShareReportMapper.clipboardCompletion)
+    }
+
+    public func finishQRDisplay() async throws -> ShareArtifactCompletionEvidenceDTO {
+        try await finish(RuneScribeUtilityShareReportMapper.qrDisplayCompletion)
     }
 
     deinit {
@@ -119,16 +198,18 @@ public final class OpaqueShareTransfer: ObservableObject {
     private func markRevoked() {
         guard !isClosed else { return }
         isClosed = true
+        hasBegunTerminalFinish = true
         isAvailable = false
         eventTask?.cancel()
         eventTask = nil
     }
 
-    private func markCompleted(_ outcome: ShareArtifactOutcomeDTO) {
+    private func markCompleted(_ evidence: ShareArtifactCompletionEvidenceDTO) {
         guard !isClosed else { return }
         isClosed = true
+        hasBegunTerminalFinish = true
         isAvailable = false
-        self.outcome = outcome
+        completionEvidence = evidence
         eventTask?.cancel()
         eventTask = nil
     }
@@ -158,7 +239,7 @@ private struct RuntimeShareArtifactExporterModifier: ViewModifier {
     @Binding var isPresented: Bool
     @ObservedObject var transfer: OpaqueShareTransfer
     let defaultFilename: String
-    let onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void
+    let onFinish: @MainActor (SharePresentationCompletion) -> Void
 
     private var item: RuntimeShareExportArtifact? {
         guard let url = transfer.presentationURL else { return nil }
@@ -174,12 +255,29 @@ private struct RuntimeShareArtifactExporterModifier: ViewModifier {
         ) { result in
             switch result {
             case .success:
-                onFinish(.handedOff)
+                finish(with: .saved)
             case .failure:
-                onFinish(.failed)
+                finish(with: .failed)
             }
         } onCancellation: {
-            onFinish(.cancelled)
+            finish(with: .cancelled)
+        }
+        .onChange(of: isPresented, initial: true) { _, presented in
+            guard presented else { return }
+            Task { @MainActor in
+                try? await transfer.reportPresented(on: .fileExport)
+            }
+        }
+    }
+
+    private func finish(with result: FileExportTerminalResult) {
+        Task { @MainActor in
+            do {
+                let report = RuneScribeUtilityShareReportMapper.fileExport(result)
+                onFinish(.success(try await transfer.finish(report)))
+            } catch {
+                onFinish(.failure(error))
+            }
         }
     }
 }
@@ -189,7 +287,7 @@ public extension View {
         isPresented: Binding<Bool>,
         transfer: OpaqueShareTransfer?,
         defaultFilename: String,
-        onFinish: @escaping @MainActor (ShareArtifactOutcomeDTO) -> Void
+        onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void
     ) -> some View {
         Group {
             if let transfer {

@@ -495,6 +495,7 @@ final class InboundInputForwarderTests: XCTestCase {
             displayName: descriptor.entryPoint,
             moduleVersion: descriptor.moduleVersion,
             moduleType: descriptor.kind,
+            criticality: descriptor.criticality,
             supportedPlatforms: [.macOS],
             minimumOS: MinimumOSVersions(macOS: "15.0"),
             capabilitiesRequested: descriptor.requestedCapabilities.sorted(),
@@ -503,7 +504,9 @@ final class InboundInputForwarderTests: XCTestCase {
                 requiredServices: descriptor.requiredServices.sorted(),
                 requiredModuleRoles: descriptor.requiredModuleRoles.sorted()
             ),
-            defaultRole: descriptor.role
+            defaultRole: descriptor.role,
+            consumedEndpoints: descriptor.consumedEndpoints.sorted(),
+            publishedEndpoints: descriptor.publishedEndpoints.sorted()
         )
     }
 

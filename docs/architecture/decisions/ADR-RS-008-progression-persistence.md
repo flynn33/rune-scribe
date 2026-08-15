@@ -2,24 +2,24 @@
 
 **Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
 
-**Status:** Accepted; implementation deferred to Wave 3
+**Status:** Accepted; local implementation completed in 1.0.37, cloud deferred
 **Date:** 2026-08-09
 
 ## Decision
 
 Progression is a local-first service-module responsibility behind a neutral repository
-contract. The first implementation uses a versioned Core Data store backed by SQLite;
-tests use an in-memory repository. Private CloudKit mirroring is introduced only in
-Wave 5A, after the local event, deduplication, transaction, migration, and quarantine
-contracts are stable.
+contract. The first implementation uses the runtime-owned protected SQLite module-state
+adapter; tests use an in-memory adapter through the same contract. Private CloudKit
+mirroring may be considered only in Wave 5A, after the local event, deduplication,
+transaction, migration, and quarantine contracts are stable.
 
 The local schema contains versioned event/deduplication records, per-device statistic
 shards, distinct-token sets, Achievement progress/completion, ownership grants,
-Encounters, selected Codex/Title preferences, pending Game Center reports, catalog
-version, and future reset generation. Stable event, operation, grant, and content IDs
-are uniqueness keys. One transaction records an eligible event, updates derived
-statistics, completes any matching Achievement or milestone, and grants its Codex,
-Artifact, or Title reward.
+Encounters, selected Title, reveals, migration evidence, catalog version, diagnostics,
+and quarantine/recovery state. Stable event, operation, grant, and content IDs are
+uniqueness keys. One transaction records an eligible event, updates derived statistics,
+completes any matching Achievement or milestone, and grants its Codex, Artifact, or
+Title reward.
 
 The future private-cloud mapping mirrors those logical record classes rather than the
 local SQLite layout. Merge is set union for completions, grants, ownership, and tokens;
@@ -38,11 +38,11 @@ Migrations are explicit, version-stepped, idempotent, and preserve the pre-migra
 store until validation succeeds. Reset remains unavailable until a synchronized
 reset-generation or tombstone design is accepted.
 
-Core Data is preferred to a custom SQLite or JSON implementation because it provides
-typed migrations, transactions, an in-memory test store, Apple data-protection support,
-and the supported private CloudKit mirroring path while leaving merge policy explicit.
-Direct CloudKit-only storage would weaken offline-first testing and a custom database
-would duplicate migration and cloud-mirroring machinery.
+The implemented SQLite adapter is intentionally generic and runtime-owned. It provides
+protected local storage, atomic bounded transactions, paged scans, integrity digests,
+ambiguous-commit receipts, and physical quarantine without exposing a database handle
+or path to Progression. Direct CloudKit-only storage would weaken offline-first testing;
+JSON files or a module-owned database would violate the runtime boundary.
 
 ## Consequences
 
@@ -51,3 +51,13 @@ would duplicate migration and cloud-mirroring machinery.
 - Replayed events are harmless and interrupted transactions cannot split completion
   from its grant.
 - Cloud configuration cannot be used to bypass Wave 3 persistence tests.
+
+## Implementation note
+
+The shipping implementation keeps the physical Core Data/SQLite stack runtime-owned
+and exposes only the generic `ModuleStateStore` contract to Progression. Progression
+defines and validates its versioned logical records, while the runtime adapter owns
+file location, protection, integrity digests, transaction receipts, paging, physical
+quarantine, and bounded mutation/byte limits. See
+[ProgressionArchitecture.md](../ProgressionArchitecture.md) for the implemented ports,
+event flow, migration, reveal protocol, and recovery behavior.

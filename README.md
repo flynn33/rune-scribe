@@ -12,7 +12,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-444%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-731%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -299,10 +299,12 @@ The locked roadmap evolves Rune Scribe in deliberately separated stages:
 7. Add private iCloud progression sync and optional Game Center reporting.
 8. Replace placeholders with reviewed production themes.
 
-The repository currently contains the behavior-preserving modular foundation. Visible
-Codex, progression, cloud, and Game Center features are not enabled. Theme and
-Progression feature work remains gated on completing the local runtime-remediation and
-compliance program; there is no external-framework prerequisite.
+The repository now includes the behavior-preserving modular foundation and the optional
+local Progression Module: approved Achievements, Codex gates, the Vault/Progress view,
+durable unlock reveals, and privacy-safe existing-user migration. Production Theme
+providers, cloud synchronization, and Game Center remain disabled. Later Theme and
+sharing work remains gated by the local runtime, compatibility, and physical-device
+program; there is no external-framework prerequisite.
 
 Current architecture and dependency authority lives in the
 [controlling Forsetti policy](docs/architecture/FORSETTI_CONTROLLING_POLICY.md),
@@ -363,9 +365,10 @@ Packages/RuneScribeArchitecture/
 │   ├── RuneScribeUIRuntime/      Native system-presentation boundary
 │   ├── RuneScribePlatform/       Keychain, files, Contacts, fonts and system adapters
 │   ├── RuneScribeCoreModule/     Domain, crypto, persistence, import and app lock
+│   ├── RuneScribeProgressionModule/ Local achievements, grants, migration and recovery
 │   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        444 Swift package tests
+└── Tests/                        731 Swift package tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -421,18 +424,19 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package currently contains **444 XCTest tests**, supplemented by
+The local Swift package currently contains **731 package tests**, supplemented by
 repository architecture guards, hosted macOS/iOS tests, iPhone/iPad UI parity, and an
 isolated macOS parity host. The package suite uses deterministic in-memory adapters and
 does not access the operator's login Keychain.
 
 | Suite | What it covers |
 |---|---|
-| Runtime and architecture | Manifest validation, capability denial, factory lifecycle, exactly one UI Module, dependency and shipping-product guards |
-| Core domain | AES-GCM, rune codec, ciphers, encrypted repositories, contacts, imports, fonts, PIN lock and share lifetime |
+| Runtime and architecture | Manifest validation, capability denial, optional isolation, durable outbox/migration handoff, factory lifecycle, exactly one UI Module, dependency and shipping-product guards |
+| Core domain | AES-GCM, rune codec, ciphers, encrypted repositories, contacts, imports, fonts, PIN lock, privacy-safe progression evidence and share lifetime |
 | Compatibility | Exact cipher v3/message v1 fixtures, encrypted existing-install fixtures, links, routes and no-rewrite migration |
-| UI Module | Session projection, sensitive-state cleanup, routing, attachment policy, sharing and representative view rendering |
-| Platform adapters | Keychain contract, protected files, scoped inbound reads, Contacts, fonts, resources, clipboard and share artifacts |
+| Progression | Exact catalog/rule boundaries, atomic grants, deduplication, scalable migration, quarantine, rebuild, catalog upgrade and fault injection |
+| UI Module | Session projection, sensitive-state cleanup, routing, attachment policy, sharing, Vault snapshots and durable accessible reveals |
+| Platform adapters | Keychain contract, protected files and SQLite state, scoped inbound reads, Contacts, fonts, resources, feedback, clipboard and share artifacts |
 | Hosted and parity tests | Composition, isolated Simulator Keychain migration, native share outcomes, accessibility, iPhone/iPad and macOS product flows |
 
 Some behaviors can only be release-qualified on physical hardware. The retained device

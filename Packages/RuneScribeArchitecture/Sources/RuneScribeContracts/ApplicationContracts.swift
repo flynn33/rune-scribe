@@ -355,11 +355,27 @@ public struct EncodeMessageCommand: Sendable {
 public struct EncodedMessageResult: Equatable, Sendable {
     public let runes: String
     public let cipherID: CipherID
+    public let shareHandle: EncodedMessageHandle?
+    public let progressionInstrumentationStatus: ProgressionInstrumentationStatusDTO
 
-    public init(runes: String, cipherID: CipherID) {
+    public init(
+        runes: String,
+        cipherID: CipherID,
+        shareHandle: EncodedMessageHandle? = nil,
+        progressionInstrumentationStatus: ProgressionInstrumentationStatusDTO = .unavailable
+    ) {
         self.runes = runes
         self.cipherID = cipherID
+        self.shareHandle = shareHandle
+        self.progressionInstrumentationStatus = progressionInstrumentationStatus
     }
+}
+
+public enum ProgressionInstrumentationStatusDTO: String, Codable, Sendable {
+    case durable
+    case retainedForRetry = "retained-for-retry"
+    case degraded
+    case unavailable
 }
 
 public struct DecodeMessageCommand: Sendable {
@@ -487,11 +503,18 @@ public struct PrepareMessageShareCommand: Sendable {
     public let runes: String
     public let senderName: String
     public let cipherID: CipherID
+    public let shareHandle: EncodedMessageHandle?
 
-    public init(runes: String, senderName: String, cipherID: CipherID) {
+    public init(
+        runes: String,
+        senderName: String,
+        cipherID: CipherID,
+        shareHandle: EncodedMessageHandle? = nil
+    ) {
         self.runes = runes
         self.senderName = senderName
         self.cipherID = cipherID
+        self.shareHandle = shareHandle
     }
 }
 
@@ -544,10 +567,30 @@ public enum ShareArtifactOutcomeDTO: Codable, Equatable, Hashable, Sendable {
 public struct CompleteShareArtifactCommand: Codable, Equatable, Hashable, Sendable {
     public let artifactID: ShareArtifactID
     public let outcome: ShareArtifactOutcomeDTO
+    public let evidence: ShareArtifactCompletionEvidenceDTO?
 
     public init(artifactID: ShareArtifactID, outcome: ShareArtifactOutcomeDTO) {
         self.artifactID = artifactID
         self.outcome = outcome
+        evidence = nil
+    }
+
+    public init(evidence: ShareArtifactCompletionEvidenceDTO) {
+        artifactID = evidence.artifactID
+        self.evidence = evidence
+        switch evidence.report.result {
+        case .sentConfirmed:
+            outcome = .messageSent(
+                requiredAttachmentAccepted:
+                    evidence.report.requiredAttachmentAccepted ?? false
+            )
+        case .completedBySystem:
+            outcome = .handedOff
+        case .failed:
+            outcome = .failed
+        case .cancelled, .completionUnavailable, .presented:
+            outcome = .cancelled
+        }
     }
 }
 

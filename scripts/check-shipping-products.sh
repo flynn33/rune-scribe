@@ -560,41 +560,224 @@ check_file_type "$ios_resources/NotoSansRunic-Regular.ttf" "TrueType Font" "iOS 
 check_file_type "$ios_resources/raven-forge-spp-splash.mp4" "ISO Media" "iOS splash video is present and valid"
 check_file_type "$ios_resources/default.metallib" "MetalLib" "iOS Metal shader library is present and valid"
 
-find_module_manifest() {
+write_module_bundle_list() {
   local root=$1
   local bundle_name=$2
-  find "$root" -type f -path "*/${bundle_name}.bundle/*" -name module-manifest.json -print -quit
+  local output=$3
+
+  find "$root" -type d -name "${bundle_name}.bundle" -print0 >"$output"
 }
 
-macos_core_manifest=$(find_module_manifest "$macos_resources" "RuneScribeArchitecture_RuneScribeCoreModule")
-macos_ui_manifest=$(find_module_manifest "$macos_resources" "RuneScribeArchitecture_RuneScribeUIModule")
-ios_core_manifest=$(find_module_manifest "$ios_resources" "RuneScribeArchitecture_RuneScribeCoreModule")
-ios_ui_manifest=$(find_module_manifest "$ios_resources" "RuneScribeArchitecture_RuneScribeUIModule")
+module_bundle_count() {
+  ruby -e '
+    entries = File.binread(ARGV.fetch(0)).split("\0", -1)
+    entries.pop if entries.last == ""
+    puts entries.length
+  ' "$1"
+}
+
+first_module_bundle() {
+  ruby -e '
+    entries = File.binread(ARGV.fetch(0)).split("\0", -1)
+    entries.pop if entries.last == ""
+    STDOUT.write(entries.first.to_s)
+  ' "$1"
+}
+
+module_resource_root() {
+  local bundle=$1
+
+  if [ -d "$bundle/Contents/Resources" ]; then
+    printf '%s\n' "$bundle/Contents/Resources"
+  else
+    printf '%s\n' "$bundle"
+  fi
+}
+
+check_exact_module_bundle() {
+  local list=$1
+  local label=$2
+  local count
+
+  count=$(module_bundle_count "$list")
+  if [ "$count" -eq 1 ]; then
+    pass_check "$label"
+  else
+    fail_check "$label (found $count)"
+  fi
+}
+
+macos_core_bundles="$temporary_directory/macos-core-bundles"
+macos_progression_bundles="$temporary_directory/macos-progression-bundles"
+macos_ui_bundles="$temporary_directory/macos-ui-bundles"
+ios_core_bundles="$temporary_directory/ios-core-bundles"
+ios_progression_bundles="$temporary_directory/ios-progression-bundles"
+ios_ui_bundles="$temporary_directory/ios-ui-bundles"
+
+write_module_bundle_list "$macos_resources" "RuneScribeArchitecture_RuneScribeCoreModule" "$macos_core_bundles"
+write_module_bundle_list "$macos_resources" "RuneScribeArchitecture_RuneScribeProgressionModule" "$macos_progression_bundles"
+write_module_bundle_list "$macos_resources" "RuneScribeArchitecture_RuneScribeUIModule" "$macos_ui_bundles"
+write_module_bundle_list "$ios_resources" "RuneScribeArchitecture_RuneScribeCoreModule" "$ios_core_bundles"
+write_module_bundle_list "$ios_resources" "RuneScribeArchitecture_RuneScribeProgressionModule" "$ios_progression_bundles"
+write_module_bundle_list "$ios_resources" "RuneScribeArchitecture_RuneScribeUIModule" "$ios_ui_bundles"
+
+check_exact_module_bundle "$macos_core_bundles" "macOS product contains exactly one Core module resource bundle"
+check_exact_module_bundle "$macos_progression_bundles" "macOS product contains exactly one Progression module resource bundle"
+check_exact_module_bundle "$macos_ui_bundles" "macOS product contains exactly one UI module resource bundle"
+check_exact_module_bundle "$ios_core_bundles" "iOS product contains exactly one Core module resource bundle"
+check_exact_module_bundle "$ios_progression_bundles" "iOS product contains exactly one Progression module resource bundle"
+check_exact_module_bundle "$ios_ui_bundles" "iOS product contains exactly one UI module resource bundle"
+
+macos_core_bundle=$(first_module_bundle "$macos_core_bundles")
+macos_progression_bundle=$(first_module_bundle "$macos_progression_bundles")
+macos_ui_bundle=$(first_module_bundle "$macos_ui_bundles")
+ios_core_bundle=$(first_module_bundle "$ios_core_bundles")
+ios_progression_bundle=$(first_module_bundle "$ios_progression_bundles")
+ios_ui_bundle=$(first_module_bundle "$ios_ui_bundles")
+
+macos_core_resource_root=""
+macos_progression_resource_root=""
+macos_ui_resource_root=""
+ios_core_resource_root=""
+ios_progression_resource_root=""
+ios_ui_resource_root=""
+[ -n "$macos_core_bundle" ] && macos_core_resource_root=$(module_resource_root "$macos_core_bundle")
+[ -n "$macos_progression_bundle" ] && macos_progression_resource_root=$(module_resource_root "$macos_progression_bundle")
+[ -n "$macos_ui_bundle" ] && macos_ui_resource_root=$(module_resource_root "$macos_ui_bundle")
+[ -n "$ios_core_bundle" ] && ios_core_resource_root=$(module_resource_root "$ios_core_bundle")
+[ -n "$ios_progression_bundle" ] && ios_progression_resource_root=$(module_resource_root "$ios_progression_bundle")
+[ -n "$ios_ui_bundle" ] && ios_ui_resource_root=$(module_resource_root "$ios_ui_bundle")
+
+macos_core_manifest=""
+macos_progression_manifest=""
+macos_ui_manifest=""
+ios_core_manifest=""
+ios_progression_manifest=""
+ios_ui_manifest=""
+[ -n "$macos_core_resource_root" ] && macos_core_manifest="$macos_core_resource_root/module-manifest.json"
+[ -n "$macos_progression_resource_root" ] && macos_progression_manifest="$macos_progression_resource_root/module-manifest.json"
+[ -n "$macos_ui_resource_root" ] && macos_ui_manifest="$macos_ui_resource_root/module-manifest.json"
+[ -n "$ios_core_resource_root" ] && ios_core_manifest="$ios_core_resource_root/module-manifest.json"
+[ -n "$ios_progression_resource_root" ] && ios_progression_manifest="$ios_progression_resource_root/module-manifest.json"
+[ -n "$ios_ui_resource_root" ] && ios_ui_manifest="$ios_ui_resource_root/module-manifest.json"
 
 check_nonempty_file "$macos_core_manifest" "macOS Core module manifest resource is present"
+check_nonempty_file "$macos_progression_manifest" "macOS Progression module manifest resource is present"
 check_nonempty_file "$macos_ui_manifest" "macOS UI module manifest resource is present"
 check_nonempty_file "$ios_core_manifest" "iOS Core module manifest resource is present"
+check_nonempty_file "$ios_progression_manifest" "iOS Progression module manifest resource is present"
 check_nonempty_file "$ios_ui_manifest" "iOS UI module manifest resource is present"
 
-if [ -s "$macos_core_manifest" ] && [ -s "$macos_ui_manifest" ] && \
-   [ -s "$ios_core_manifest" ] && [ -s "$ios_ui_manifest" ]; then
-  if ruby -rjson - "$macos_core_manifest" "$macos_ui_manifest" "$ios_core_manifest" "$ios_ui_manifest" \
+if [ "$(module_bundle_count "$macos_progression_bundles")" -eq 1 ] && \
+   [ "$(module_bundle_count "$ios_progression_bundles")" -eq 1 ]; then
+  if ruby -rdigest - "$macos_progression_resource_root" "$ios_progression_resource_root" \
+      >"$temporary_directory/progression-resource-errors" <<'RUBY'
+macos_root = ARGV.fetch(0)
+ios_root = ARGV.fetch(1)
+errors = []
+
+expected = {
+  "PACKAGE-MANIFEST.json" => [
+    2064,
+    "93984e063bcdb0e8408a6bc8e95ccf9902efcca67b7358ecb99c2494c04993f9"
+  ],
+  "Rune-Scribe-Progression-Catalog-Schema-v1.0.json" => [
+    3108,
+    "4c0d538229877a035ad9444d4e89a6ae13ae46cb190f9677761b945c173ed6dd"
+  ],
+  "Rune-Scribe-Progression-Catalog-v1.0.json" => [
+    101246,
+    "7b7586d0749abab41aded3e9b3457b665c3a8869ae6d849f9adc55e621a5a142"
+  ],
+  "Rune-Scribe-Progression-Event-Catalog-v1.0.json" => [
+    8950,
+    "b2ae5b795f75b0c6847d195990d62365d57a7d715d20aff8f44c2c420bd8c2a9"
+  ],
+  "Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json" => [
+    2684,
+    "2236c49f7e7096701c90acc17283871685577780a05aeb8b8a673f4b35d8277b"
+  ],
+  "module-manifest.json" => [
+    2494,
+    "bfd270c3d2dbad0b18f1c5127327e881d047697a98cab4115850003db80cd3a3"
+  ]
+}
+
+def inventory(root)
+  packaging_entries = ["Info.plist", "_CodeSignature"]
+  Dir.children(root).reject { |entry| packaging_entries.include?(entry) }.sort
+end
+
+{
+  "macOS" => macos_root,
+  "iOS" => ios_root
+}.each do |platform, root|
+  actual_inventory = inventory(root)
+  unless actual_inventory == expected.keys.sort
+    errors << "#{platform} Progression resource inventory differs: #{actual_inventory.join(', ')}"
+  end
+
+  expected.each do |name, (expected_bytes, expected_sha256)|
+    path = File.join(root, name)
+    unless File.file?(path) && !File.symlink?(path)
+      errors << "#{platform} Progression resource #{name} is missing or is not a regular file"
+      next
+    end
+
+    bytes = File.size(path)
+    sha256 = Digest::SHA256.file(path).hexdigest
+    errors << "#{platform} Progression resource #{name} byte count differs" unless bytes == expected_bytes
+    errors << "#{platform} Progression resource #{name} SHA-256 differs" unless sha256 == expected_sha256
+  end
+end
+
+expected.each_key do |name|
+  macos_path = File.join(macos_root, name)
+  ios_path = File.join(ios_root, name)
+  next unless File.file?(macos_path) && File.file?(ios_path)
+  errors << "Progression resource #{name} differs between platforms" unless File.binread(macos_path) == File.binread(ios_path)
+end
+
+puts errors
+exit(errors.empty? ? 0 : 1)
+RUBY
+  then
+    pass_check "Progression bundles preserve the exact six-file byte, SHA-256, and cross-platform resource contract"
+  else
+    validation_detail=false
+    while IFS= read -r error; do
+      if [ -n "$error" ]; then
+        validation_detail=true
+        printf 'DETAIL: Progression resource: %s\n' "$error" >&2
+      fi
+    done <"$temporary_directory/progression-resource-errors"
+    [ "$validation_detail" = true ] || printf 'DETAIL: Progression resource validator did not return diagnostics.\n' >&2
+    fail_check "Progression bundles differ from the exact six-file resource contract"
+  fi
+fi
+
+if [ -s "$macos_core_manifest" ] && [ -s "$macos_progression_manifest" ] && \
+   [ -s "$macos_ui_manifest" ] && [ -s "$ios_core_manifest" ] && \
+   [ -s "$ios_progression_manifest" ] && [ -s "$ios_ui_manifest" ]; then
+  if ruby -rjson - "$macos_core_manifest" "$macos_progression_manifest" "$macos_ui_manifest" \
+      "$ios_core_manifest" "$ios_progression_manifest" "$ios_ui_manifest" \
       "$temporary_directory/macos-info.json" "$temporary_directory/ios-info.json" \
       >"$temporary_directory/manifest-errors" <<'RUBY'
-paths = ARGV.take(4)
-macos_info = JSON.parse(File.read(ARGV.fetch(4)))
-ios_info = JSON.parse(File.read(ARGV.fetch(5)))
+paths = ARGV.take(6)
+macos_info = JSON.parse(File.read(ARGV.fetch(6)))
+ios_info = JSON.parse(File.read(ARGV.fetch(7)))
 errors = []
 
 expectations = [
   ["com.runescribe.module.core", "service", "RuneScribeCoreModule"],
+  ["com.runescribe.module.progression", "service", "RuneScribeProgressionModule"],
   ["com.runescribe.module.ui", "ui", "RuneScribeUIModule"]
 ]
 
 paths.each_with_index do |path, index|
   manifest = JSON.parse(File.read(path))
-  expected = expectations[index % 2]
-  platform = index < 2 ? "macOS" : "iOS"
+  expected = expectations[index % 3]
+  platform = index < 3 ? "macOS" : "iOS"
   errors << "#{platform} #{expected[1]} manifest moduleID differs" unless manifest["moduleID"] == expected[0]
   errors << "#{platform} #{expected[1]} manifest moduleType differs" unless manifest["moduleType"] == expected[1]
   errors << "#{platform} #{expected[1]} manifest entryPoint differs" unless manifest["entryPoint"] == expected[2]
@@ -603,10 +786,52 @@ paths.each_with_index do |path, index|
   errors << "#{platform} #{expected[1]} supported platforms differ" unless manifest["supportedPlatforms"] == ["iOS", "macOS"]
   expected_version = platform == "macOS" ? macos_info["CFBundleShortVersionString"] : ios_info["CFBundleShortVersionString"]
   errors << "#{platform} #{expected[1]} module version differs from the app" unless manifest["moduleVersion"] == expected_version
+
+  next unless expected[0] == "com.runescribe.module.progression"
+
+  owner = "com.runescribe.module.progression"
+  expected_required_resources = [
+    { "name" => "module-manifest", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
+    { "name" => "PACKAGE-MANIFEST", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
+    { "name" => "Rune-Scribe-Progression-Catalog-Schema-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
+    { "name" => "Rune-Scribe-Progression-Catalog-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
+    { "name" => "Rune-Scribe-Progression-Event-Catalog-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
+    { "name" => "Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner }
+  ]
+  expected_required_services = ["ApplicationResourceLocator", "ModuleStateStore"]
+  expected_published_endpoints = [
+    "progression.diagnostics.summary",
+    "progression.entitlements",
+    "progression.event.apply",
+    "progression.migration.existing-user.apply",
+    "progression.migration.existing-user.page.apply",
+    "progression.recovery.rebuild",
+    "progression.reveal.acknowledge",
+    "progression.reveal.mark-presented",
+    "progression.state",
+    "progression.title.select"
+  ]
+  requirements = manifest["runtimeRequirements"]
+
+  errors << "#{platform} Progression criticality is not optional" unless manifest["criticality"] == "optional"
+  unless requirements.is_a?(Hash)
+    errors << "#{platform} Progression runtime requirements are missing"
+    next
+  end
+  unless requirements["requiredResources"] == expected_required_resources
+    errors << "#{platform} Progression owner-scoped required resource declarations differ"
+  end
+  unless requirements["requiredServices"] == expected_required_services
+    errors << "#{platform} Progression required services differ"
+  end
+  unless manifest["publishedEndpoints"] == expected_published_endpoints
+    errors << "#{platform} Progression published endpoints differ"
+  end
 end
 
-errors << "Core module manifest differs between platforms" unless File.binread(paths[0]) == File.binread(paths[2])
-errors << "UI module manifest differs between platforms" unless File.binread(paths[1]) == File.binread(paths[3])
+errors << "Core module manifest differs between platforms" unless File.binread(paths[0]) == File.binread(paths[3])
+errors << "Progression module manifest differs between platforms" unless File.binread(paths[1]) == File.binread(paths[4])
+errors << "UI module manifest differs between platforms" unless File.binread(paths[2]) == File.binread(paths[5])
 
 puts errors
 exit(errors.empty? ? 0 : 1)
@@ -779,6 +1004,7 @@ inspect_linkage() {
     RuneScribeUIRuntime \
     RuneScribePlatform \
     RuneScribeCoreModule \
+    RuneScribeProgressionModule \
     RuneScribeUIModule
   do
     if grep -Fq "$module" "$symbols"; then
@@ -851,10 +1077,13 @@ shipping_products = [
   "RuneScribeUIRuntime",
   "RuneScribePlatform",
   "RuneScribeCoreModule",
+  "RuneScribeProgressionModule",
   "RuneScribeUIModule"
 ]
+presentation_contract_products = ["RuneScribeUIPresentationContracts"]
 test_only_products = ["RuneScribeTestSupport"]
-all_products = shipping_products + test_only_products
+all_products = [shipping_products.first] + presentation_contract_products +
+  shipping_products.drop(1) + test_only_products
 expected_app_dependencies = shipping_products.map do |product|
   { "package" => "RuneScribeArchitecture", "product" => product }
 end
@@ -910,6 +1139,14 @@ errors << "iOS source entitlement dictionary differs" unless ios_source_entitlem
   end
 end
 
+macos_release_settings = project.dig(
+  "targets", "RuneScrib-macOS", "settings", "configs", "Release"
+)
+unless macos_release_settings.is_a?(Hash) &&
+    macos_release_settings["CODE_SIGN_INJECT_BASE_ENTITLEMENTS"] == "NO"
+  errors << "project.yml macOS Release base-entitlement injection is not disabled"
+end
+
 package_product_rows = package.fetch("products", [])
 package_products = package_product_rows.map { |product| product["name"] }
 errors << "Package.swift public products differ" unless package_products == all_products
@@ -937,13 +1174,27 @@ end
 regular_target_names = package_targets.select { |target| target["type"] == "regular" }.map { |target| target["name"] }
 errors << "Package.swift regular target set differs" unless regular_target_names == all_products
 
+test_target_names = package_targets.select { |target| target["type"] == "test" }.map { |target| target["name"] }
+expected_test_target_names = [
+  "RuneScribeRuntimeCoreTests",
+  "RuneScribePlatformTests",
+  "RuneScribeCoreModuleTests",
+  "RuneScribeProgressionModuleTests",
+  "RuneScribeUIModuleTests",
+  "RuneScribeArchitectureTests"
+]
+errors << "Package.swift test target set differs" unless test_target_names == expected_test_target_names
+errors << "Package.swift complete target order differs" unless package_targets.map { |target| target["name"] } == all_products + expected_test_target_names
+
 expected_edges = {
   "RuneScribeContracts" => [],
-  "RuneScribeRuntimeCore" => ["RuneScribeContracts"],
-  "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeUIPresentationContracts" => ["RuneScribeContracts"],
+  "RuneScribeRuntimeCore" => ["RuneScribeContracts", "RuneScribeUIPresentationContracts"],
+  "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
   "RuneScribePlatform" => ["RuneScribeContracts"],
   "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-  "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIRuntime"],
+  "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
   "RuneScribeTestSupport" => ["RuneScribeContracts"]
 }
 
@@ -951,10 +1202,69 @@ expected_edges.each do |target, edges|
   errors << "Package.swift target edges differ for #{target}" unless target_edges[target] == edges
 end
 
+
+expected_test_edges = {
+  "RuneScribeRuntimeCoreTests" => [
+    "RuneScribeContracts",
+    "RuneScribeRuntimeCore",
+    "RuneScribeTestSupport",
+    "RuneScribeUIPresentationContracts"
+  ],
+  "RuneScribePlatformTests" => [
+    "RuneScribeContracts",
+    "RuneScribePlatform",
+    "RuneScribeTestSupport"
+  ],
+  "RuneScribeCoreModuleTests" => [
+    "RuneScribeCoreModule",
+    "RuneScribeRuntimeCore"
+  ],
+  "RuneScribeProgressionModuleTests" => [
+    "RuneScribeContracts",
+    "RuneScribeProgressionModule",
+    "RuneScribeRuntimeCore",
+    "RuneScribeTestSupport"
+  ],
+  "RuneScribeUIModuleTests" => [
+    "RuneScribeContracts",
+    "RuneScribeRuntimeCore",
+    "RuneScribeTestSupport",
+    "RuneScribeUIPresentationContracts",
+    "RuneScribeUIRuntime",
+    "RuneScribeUIModule"
+  ],
+  "RuneScribeArchitectureTests" => [
+    "RuneScribeContracts",
+    "RuneScribeRuntimeCore",
+    "RuneScribeUIRuntime",
+    "RuneScribePlatform",
+    "RuneScribeCoreModule",
+    "RuneScribeProgressionModule",
+    "RuneScribeUIModule",
+    "RuneScribeTestSupport"
+  ]
+}
+
+expected_test_edges.each do |target, edges|
+  errors << "Package.swift target edges differ for #{target}" unless target_edges[target] == edges
+end
+
+progression_target = package_targets.find { |target| target["name"] == "RuneScribeProgressionModule" }
+expected_progression_resources = [
+  { "path" => "Resources", "rule" => { "process" => {} } }
+]
+unless progression_target.is_a?(Hash) && progression_target["resources"] == expected_progression_resources
+  errors << "Package.swift Progression resource processing declaration differs"
+end
+
 test_support_package_consumers = target_edges.each_with_object([]) do |(target, dependencies), consumers|
   consumers << target if dependencies.include?("RuneScribeTestSupport")
 end.sort
-unless test_support_package_consumers == %w[RuneScribeArchitectureTests RuneScribePlatformTests].sort
+unless test_support_package_consumers == %w[
+  RuneScribeArchitectureTests RuneScribePlatformTests
+  RuneScribeProgressionModuleTests RuneScribeRuntimeCoreTests
+  RuneScribeUIModuleTests
+].sort
   errors << "Package.swift RuneScribeTestSupport consumers differ"
 end
 
@@ -1164,6 +1474,10 @@ expected_compiled_sources = %w[
     settings = configuration.fetch("buildSettings", {})
     unless settings["CODE_SIGN_ENTITLEMENTS"] == expected_entitlement_paths.fetch(target_name)
       errors << "generated project #{target_name} #{configuration['name']} entitlement source differs"
+    end
+    if target_name == "RuneScrib-macOS" && configuration["name"] == "Release" &&
+        settings["CODE_SIGN_INJECT_BASE_ENTITLEMENTS"] != "NO"
+      errors << "generated project macOS Release base-entitlement injection is not disabled"
     end
     forbidden_build_settings.each do |setting|
       errors << "generated project #{target_name} #{configuration['name']} injects #{setting}" if settings.key?(setting)

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct RuntimeContractIdentifier<Domain>: RawRepresentable, Hashable, Sendable,
+public struct RuntimeContractIdentifier<Domain>: RawRepresentable, Codable, Hashable, Sendable,
     Comparable, ExpressibleByStringLiteral, CustomStringConvertible
 {
     public let rawValue: String

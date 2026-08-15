@@ -9,9 +9,11 @@ public enum ModuleManifestValidator {
         platform: SupportedPlatform,
         policy: RuntimePolicy
     ) throws {
+        try validateCriticality(descriptor)
         try requireEqual(manifest.moduleID, descriptor.moduleID, moduleID: manifest.moduleID, field: "moduleID")
         try requireEqual(manifest.moduleVersion, descriptor.moduleVersion, moduleID: manifest.moduleID, field: "moduleVersion")
         try requireEqual(manifest.moduleType, descriptor.kind, moduleID: manifest.moduleID, field: "moduleType")
+        try requireEqual(manifest.criticality, descriptor.criticality, moduleID: manifest.moduleID, field: "criticality")
         try requireEqual(manifest.entryPoint, descriptor.entryPoint, moduleID: manifest.moduleID, field: "entryPoint")
         try requireEqual(manifest.defaultRole, descriptor.role, moduleID: manifest.moduleID, field: "defaultRole")
         try requireEqual(
@@ -37,6 +39,18 @@ public enum ModuleManifestValidator {
             descriptor.requiredModuleRoles,
             moduleID: manifest.moduleID,
             field: "runtimeRequirements.requiredModuleRoles"
+        )
+        try requireEqual(
+            Set(manifest.consumedEndpoints),
+            descriptor.consumedEndpoints,
+            moduleID: manifest.moduleID,
+            field: "consumedEndpoints"
+        )
+        try requireEqual(
+            Set(manifest.publishedEndpoints),
+            descriptor.publishedEndpoints,
+            moduleID: manifest.moduleID,
+            field: "publishedEndpoints"
         )
 
         guard runtimeVersion >= manifest.runtimeVersion else {
@@ -119,6 +133,19 @@ public enum ModuleManifestValidator {
                     service: service
                 )
             }
+        }
+    }
+
+    static func validateCriticality(_ descriptor: ModuleDescriptor) throws {
+        let mustBeRequired = descriptor.kind == .ui
+            || descriptor.moduleID == RuneScribeModuleIDs.core
+            || descriptor.role == RuneScribeRoles.core
+        guard !mustBeRequired || descriptor.criticality == .required else {
+            throw RuneScribeRuntimeError.invalidModuleCriticality(
+                moduleID: descriptor.moduleID,
+                expected: .required,
+                actual: descriptor.criticality
+            )
         }
     }
 

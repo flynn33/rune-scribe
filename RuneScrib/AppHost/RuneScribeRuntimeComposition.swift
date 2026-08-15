@@ -2,17 +2,17 @@ import Foundation
 import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
+import RuneScribeProgressionModule
 import RuneScribeRuntimeCore
 import RuneScribeUIModule
 import RuneScribeUIRuntime
-
 @MainActor
 final class RuneScribeRuntimeComposition {
     private let runtime: RuneScribeRuntime
     private let coreFactory: AnyModuleFactory
     private let secureValues: any SecureValueStore
     private let protectedFiles: any ProtectedFileStore
-    private let inboundFiles: any InboundFileReader = AppleInboundFileReader()
+    private let inboundFiles: any InboundFileReader
     private let shareArtifacts: AppleShareArtifactStore
     private let resources: any ApplicationResourceLocator
     private let fonts: any SystemFontRegistrar
@@ -21,32 +21,39 @@ final class RuneScribeRuntimeComposition {
     private let clipboardWrite: any ClipboardWriting
     private let clock: any ClockProviding
     private let uuid: any UUIDProviding
+    private let moduleStateStore: (any ModuleStateStore)?
     private let rootPresentationAdapter: RuntimeRootPresentationHostAdapter
-    private var isConfigured = false
+    private var isConfigured = false, startIsInFlight = false
     private var activationState: RuntimeActivationState = .idle
     private var activationGeneration: UInt64 = 0
-    private var startIsInFlight = false
     private var startCompletionWaiters: [CheckedContinuation<Void, Never>] = []
     private var stopOperation: Task<Void, Never>?
     let rootPresentationStore: RootViewPresentationStore
     private(set) var startupFailed = false
     var inputDeliveryFailed: Bool { runtime.hostIngressSnapshot.hasDeliveryFailures }
-    var lastInputFailure: RuntimeHostIngressFailure? {
-        runtime.hostIngressSnapshot.lastFailure
-    }
-    init(bundle: Bundle = .main, injectedCoreFactory: AnyModuleFactory? = nil) {
+    var lastInputFailure: RuntimeHostIngressFailure? { runtime.hostIngressSnapshot.lastFailure }
+    var runtimeSnapshot: RuntimeSnapshot { get async { await runtime.snapshot() } }
+    init(
+        bundle: Bundle = .main,
+        injectedCoreFactory: AnyModuleFactory? = nil,
+        moduleStateStore: (any ModuleStateStore)? = try? AppleSQLiteModuleStateStore(),
+        inboundFiles: any InboundFileReader = AppleInboundFileReader()
+    ) {
         let shareArtifacts = AppleShareArtifactStore()
         let systemClipboard = SystemClipboardService()
         secureValues = AppleKeychainStore()
         protectedFiles = AppleProtectedFileStore()
+        self.inboundFiles = inboundFiles
         self.shareArtifacts = shareArtifacts
-        resources = BundleApplicationResourceLocator(bundle: bundle)
+        resources = BundleApplicationResourceLocator(bundle: bundle,
+            moduleBundles: RuneScribeProgressionModuleBootstrap.ownerScopedResourceBundles)
         fonts = CoreTextFontRegistrar()
         contacts = SystemContactAccessService()
         clipboardRead = systemClipboard
         clipboardWrite = systemClipboard
         clock = SystemClock()
         uuid = SystemUUIDProvider()
+        self.moduleStateStore = moduleStateStore
         coreFactory = injectedCoreFactory ?? RuneScribeCoreModuleBootstrap.factory()
         let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         let buildNumber = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String
@@ -145,7 +152,10 @@ final class RuneScribeRuntimeComposition {
         runtime.submit(.menu(command))
     }
     private func configure() async throws {
+        try await runtime.installPlatformAdapter(resources, for: RuneScribeServiceKeys.applicationResourceLocator)
+        if let moduleStateStore { try await runtime.installPlatformAdapter(moduleStateStore, for: RuneScribeServiceKeys.moduleStateStore) }
         try await runtime.register(manifest: RuneScribeCoreModuleBootstrap.manifest(), factory: coreFactory)
+        try await RuneScribeProgressionModuleBootstrap.register(with: runtime)
         try await runtime.register(manifest: RuneScribeUIModuleBootstrap.manifest(), factory: RuneScribeUIModuleBootstrap.factory())
         try await runtime.installStandardPort(
             rootPresentationAdapter,
@@ -156,13 +166,13 @@ final class RuneScribeRuntimeComposition {
         try await runtime.installPlatformAdapter(inboundFiles, for: RuneScribeServiceKeys.inboundFileReader)
         try await runtime.installPlatformAdapter(shareArtifacts, for: RuneScribeServiceKeys.shareArtifactStore)
         try await runtime.installPlatformAdapter(shareArtifacts, for: RuneScribeServiceKeys.sharePresentation)
-        try await runtime.installPlatformAdapter(resources, for: RuneScribeServiceKeys.applicationResourceLocator)
         try await runtime.installPlatformAdapter(fonts, for: RuneScribeServiceKeys.systemFontRegistrar)
         try await runtime.installPlatformAdapter(contacts, for: RuneScribeServiceKeys.contactAccess)
         try await runtime.installPlatformAdapter(clipboardRead, for: RuneScribeServiceKeys.clipboardRead)
         try await runtime.installPlatformAdapter(clipboardWrite, for: RuneScribeServiceKeys.clipboardWrite)
         try await runtime.installPlatformAdapter(clock, for: RuneScribeServiceKeys.clock)
         try await runtime.installPlatformAdapter(uuid, for: RuneScribeServiceKeys.uuid)
+        try await runtime.installPlatformAdapter(AppleUnlockFeedbackService(), for: RuneScribeUnlockFeedback.serviceKey)
     }
     private static var platform: SupportedPlatform {
         #if os(macOS)

@@ -1,5 +1,6 @@
 // RuneScrib/Views/QRDisplaySheet.swift
 
+import RuneScribeContracts
 import RuneScribeUIRuntime
 import SwiftUI
 
@@ -13,13 +14,31 @@ struct QRDisplaySheet: View {
 
     let transfer: OpaqueShareTransfer
     let label: String
+    let onFinish: @MainActor (SharePresentationCompletion) -> Void
+
+    @State private var hasBegunFinish = false
+
+    init(
+        transfer: OpaqueShareTransfer,
+        label: String,
+        onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void = { _ in }
+    ) {
+        self.transfer = transfer
+        self.label = label
+        self.onFinish = onFinish
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
                 runic: "ᛊᚺᚨᚱᛖ",
                 subtitle: "Share via QR",
-                trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() }]
+                trailingButtons: [RuneHeaderButton(
+                    systemImage: "xmark",
+                    help: "Close"
+                ) {
+                    finish(dismissWhenFinished: true)
+                }]
             )
 
             ScrollView {
@@ -46,6 +65,14 @@ struct QRDisplaySheet: View {
         .runeSheetFrame()
         .background(Color.runeNavy)
         .preferredColorScheme(.dark)
+        .onAppear {
+            Task { @MainActor in
+                try? await transfer.reportPresented(on: .qrDisplay)
+            }
+        }
+        .onDisappear {
+            finish(dismissWhenFinished: false)
+        }
     }
 
     @ViewBuilder
@@ -65,6 +92,21 @@ struct QRDisplaySheet: View {
                 .font(.system(size: 12))
                 .foregroundColor(.runeSilver)
                 .frame(height: 240)
+        }
+    }
+
+    private func finish(dismissWhenFinished: Bool) {
+        guard !hasBegunFinish else { return }
+        hasBegunFinish = true
+        Task { @MainActor in
+            do {
+                onFinish(.success(try await transfer.finishQRDisplay()))
+            } catch {
+                onFinish(.failure(error))
+            }
+            if dismissWhenFinished {
+                dismiss()
+            }
         }
     }
 }

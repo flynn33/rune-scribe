@@ -16,17 +16,20 @@ public struct RuntimeSnapshot: Equatable, Sendable {
     public let moduleStates: [ModuleIdentifier: ModuleLifecycleState]
     public let activationOrder: [ModuleIdentifier]
     public let activeUIModuleID: ModuleIdentifier?
+    public let entitlementSnapshot: ProgressionEntitlementSnapshotDTO
 
     public init(
         status: RuntimeStatus,
         moduleStates: [ModuleIdentifier: ModuleLifecycleState],
         activationOrder: [ModuleIdentifier],
-        activeUIModuleID: ModuleIdentifier?
+        activeUIModuleID: ModuleIdentifier?,
+        entitlementSnapshot: ProgressionEntitlementSnapshotDTO
     ) {
         self.status = status
         self.moduleStates = moduleStates
         self.activationOrder = activationOrder
         self.activeUIModuleID = activeUIModuleID
+        self.entitlementSnapshot = entitlementSnapshot
     }
 }
 
@@ -67,17 +70,27 @@ public actor RuneScribeRuntime {
     private let startCoordinator: any RuntimeStartCoordinating
     private let platformBridge = RuntimePlatformBridge()
     private let runtimeIOGateway: RuntimeIOGateway
+    private let moduleStateGateway: RuntimeModuleStateGateway
+    private let settingsGateway: RuntimeSettingsGateway
+    private let availabilityGateway: RuntimeAvailabilityGateway
+    private let unlockFeedbackGateway = RuntimeUnlockFeedbackGateway()
+    private let progressionOutbox: RuntimeProgressionOutbox
+    private let existingUserMigrationHandoff: RuntimeExistingUserMigrationHandoff
     private let rootPresentationGateway = RuntimeRootPresentationGateway()
     private let events = RuntimeEventBus()
     private let messages = DirectedMessageRouter()
 
     private var registrations: [ModuleIdentifier: Registration] = [:]
+    private var failedOptionalDescriptors: [ModuleIdentifier: ModuleDescriptor] = [:]
     private var entryPoints: Set<String> = []
     private var roles: Set<ModuleRole> = []
     private var moduleStates: [ModuleIdentifier: ModuleLifecycleState] = [:]
     private var activeModules: [ModuleIdentifier: ActiveModule] = [:]
     private var activationOrder: [ModuleIdentifier] = []
     private var activeUIModuleID: ModuleIdentifier?
+    private var entitlementSnapshot: ProgressionEntitlementSnapshotDTO
+    private var lastObservedEntitlementSnapshot: ProgressionEntitlementSnapshotDTO
+    private var entitlementObservationTask: Task<Void, Never>?
     private var status: RuntimeStatus = .idle
     private var stopRequestedWhileStarting = false
     private var stopWaiters: [CheckedContinuation<Void, Never>] = []
@@ -94,10 +107,32 @@ public actor RuneScribeRuntime {
         self.policy = policy
         self.eligibility = eligibility
         self.environment = environment
-        dispatcher = RuntimeOperationDispatcher(policy: policy, environment: environment)
+        let initialEntitlements = Self.initialEntitlementSnapshot(environment: environment)
+        entitlementSnapshot = initialEntitlements
+        lastObservedEntitlementSnapshot = initialEntitlements
+        let dispatcher = RuntimeOperationDispatcher(policy: policy, environment: environment)
+        self.dispatcher = dispatcher
+        let moduleStateGateway = RuntimeModuleStateGateway(policy: policy)
+        self.moduleStateGateway = moduleStateGateway
+        settingsGateway = RuntimeSettingsGateway(
+            state: moduleStateGateway,
+            environment: environment
+        )
+        availabilityGateway = RuntimeAvailabilityGateway(environment: environment)
+        progressionOutbox = RuntimeProgressionOutbox(
+            state: moduleStateGateway,
+            dispatcher: dispatcher,
+            environment: environment
+        )
+        existingUserMigrationHandoff = RuntimeExistingUserMigrationHandoff(
+            state: moduleStateGateway,
+            dispatcher: dispatcher,
+            environment: environment
+        )
         let runtimeIOGateway = RuntimeIOGateway(
             policy: policy,
-            environment: environment
+            environment: environment,
+            operationContextAuthority: progressionOutbox
         )
         self.runtimeIOGateway = runtimeIOGateway
         hostIngress = RuntimeHostIngressRail(
@@ -122,10 +157,32 @@ public actor RuneScribeRuntime {
         self.policy = policy
         self.eligibility = eligibility
         self.environment = environment
-        dispatcher = RuntimeOperationDispatcher(policy: policy, environment: environment)
+        let initialEntitlements = Self.initialEntitlementSnapshot(environment: environment)
+        entitlementSnapshot = initialEntitlements
+        lastObservedEntitlementSnapshot = initialEntitlements
+        let dispatcher = RuntimeOperationDispatcher(policy: policy, environment: environment)
+        self.dispatcher = dispatcher
+        let moduleStateGateway = RuntimeModuleStateGateway(policy: policy)
+        self.moduleStateGateway = moduleStateGateway
+        settingsGateway = RuntimeSettingsGateway(
+            state: moduleStateGateway,
+            environment: environment
+        )
+        availabilityGateway = RuntimeAvailabilityGateway(environment: environment)
+        progressionOutbox = RuntimeProgressionOutbox(
+            state: moduleStateGateway,
+            dispatcher: dispatcher,
+            environment: environment
+        )
+        existingUserMigrationHandoff = RuntimeExistingUserMigrationHandoff(
+            state: moduleStateGateway,
+            dispatcher: dispatcher,
+            environment: environment
+        )
         let runtimeIOGateway = RuntimeIOGateway(
             policy: policy,
-            environment: environment
+            environment: environment,
+            operationContextAuthority: progressionOutbox
         )
         self.runtimeIOGateway = runtimeIOGateway
         hostIngress = RuntimeHostIngressRail(
@@ -141,7 +198,9 @@ public actor RuneScribeRuntime {
         manifest: ModuleManifest,
         factory: AnyModuleFactory
     ) throws {
-        guard registrations[manifest.moduleID] == nil else {
+        guard registrations[manifest.moduleID] == nil,
+              failedOptionalDescriptors[manifest.moduleID] == nil
+        else {
             throw RuneScribeRuntimeError.duplicateModuleID(manifest.moduleID)
         }
         guard !entryPoints.contains(manifest.entryPoint) else {
@@ -163,6 +222,63 @@ public actor RuneScribeRuntime {
         entryPoints.insert(manifest.entryPoint)
         roles.insert(manifest.defaultRole)
         moduleStates[manifest.moduleID] = .registered
+    }
+
+    public func register(
+        manifestData: Data,
+        factory: AnyModuleFactory
+    ) throws {
+        try ModuleManifestValidator.validateCriticality(factory.descriptor)
+        let moduleID = factory.descriptor.moduleID
+        guard registrations[moduleID] == nil,
+              failedOptionalDescriptors[moduleID] == nil
+        else {
+            throw RuneScribeRuntimeError.duplicateModuleID(moduleID)
+        }
+        do {
+            let manifest = try ModuleManifestDecoder.decode(manifestData)
+            try register(manifest: manifest, factory: factory)
+        } catch {
+            guard factory.descriptor.criticality == .optional else {
+                throw error
+            }
+            recordOptionalRegistrationFailure(factory.descriptor)
+        }
+    }
+
+    public func register(
+        manifestResource: ApplicationResource,
+        expectedSHA256: Data,
+        maximumByteCount: Int,
+        factory: AnyModuleFactory
+    ) async throws {
+        try ModuleManifestValidator.validateCriticality(factory.descriptor)
+        let moduleID = factory.descriptor.moduleID
+        guard registrations[moduleID] == nil,
+              failedOptionalDescriptors[moduleID] == nil
+        else {
+            throw RuneScribeRuntimeError.duplicateModuleID(moduleID)
+        }
+        do {
+            let manifestData = try await runtimeIOGateway
+                .readHostVerifiedApplicationResource(
+                    manifestResource,
+                    expectedSHA256: expectedSHA256,
+                    maximumByteCount: maximumByteCount,
+                    descriptor: factory.descriptor
+                )
+            try register(manifestData: manifestData, factory: factory)
+        } catch {
+            guard factory.descriptor.criticality == .optional else {
+                throw error
+            }
+            recordOptionalRegistrationFailure(factory.descriptor)
+        }
+    }
+
+    private func recordOptionalRegistrationFailure(_ descriptor: ModuleDescriptor) {
+        failedOptionalDescriptors[descriptor.moduleID] = descriptor
+        moduleStates[descriptor.moduleID] = .failed
     }
 
     private func authorizePlatformAdapterInstallation(
@@ -192,6 +308,27 @@ public actor RuneScribeRuntime {
     public func installPlatformAdapter(_ value: any ClipboardWriting, for key: ServiceKey<any ClipboardWriting>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.clipboardWrite); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
     public func installPlatformAdapter(_ value: any ClockProviding, for key: ServiceKey<any ClockProviding>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.clock); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
     public func installPlatformAdapter(_ value: any UUIDProviding, for key: ServiceKey<any UUIDProviding>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.uuid); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
+    public func installPlatformAdapter(
+        _ value: any UnlockFeedbackProviding,
+        for key: ServiceKey<any UnlockFeedbackProviding>
+    ) async throws {
+        try authorizePlatformAdapterInstallation(
+            key.identifier,
+            expected: RuneScribeUnlockFeedback.serviceID
+        )
+        try await unlockFeedbackGateway.install(value)
+    }
+    public func installPlatformAdapter(
+        _ value: any ModuleStateStore,
+        for key: ServiceKey<any ModuleStateStore>
+    ) async throws {
+        try authorizePlatformAdapterInstallation(
+            key.identifier,
+            expected: RuneScribeServiceIDs.moduleStateStore
+        )
+        try await platformBridge.register(value)
+        try await moduleStateGateway.install(value)
+    }
 
     public func installStandardPort(
         _ adapter: RuntimeRootPresentationHostAdapter,
@@ -237,6 +374,7 @@ public actor RuneScribeRuntime {
 
         status = .starting
         stopRequestedWhileStarting = false
+        cancelEntitlementObservation()
         await startCoordinator.beforeInfrastructureActivation()
         if stopRequestedWhileStarting {
             await finishInterruptedStart()
@@ -248,6 +386,14 @@ public actor RuneScribeRuntime {
             return
         }
         _ = await platformBridge.activateRuntime()
+        _ = await moduleStateGateway.activateRuntime()
+        await settingsGateway.activateRuntime()
+        await availabilityGateway.activateRuntime(
+            optionalModules: optionalAvailabilitySnapshots(),
+            entitlementSnapshot: entitlementSnapshot
+        )
+        await progressionOutbox.activateRuntime()
+        await existingUserMigrationHandoff.activateRuntime()
         _ = await runtimeIOGateway.activateRuntime()
         _ = await rootPresentationGateway.activateRuntime()
         if stopRequestedWhileStarting {
@@ -258,7 +404,7 @@ public actor RuneScribeRuntime {
         activationOrder = []
 
         do {
-            let eligible = await eligibleRegistrations()
+            let eligible = try await eligibleRegistrations()
             for registration in eligible {
                 await dispatcher.registerModule(registration.factory.descriptor)
             }
@@ -282,13 +428,22 @@ public actor RuneScribeRuntime {
             activeUIModuleID = uiModules[0].manifest.moduleID
             let plan = try activationPlan(for: eligible)
             for registration in plan {
-                try await activate(registration)
+                do {
+                    try await activate(registration)
+                } catch {
+                    guard registration.factory.descriptor.criticality == .optional else {
+                        throw error
+                    }
+                }
+                await publishAvailabilitySnapshot()
                 if stopRequestedWhileStarting {
                     await finishInterruptedStart()
                     return
                 }
             }
             await dispatcher.markRuntimeRunning()
+            await progressionOutbox.runtimeDidStart()
+            await existingUserMigrationHandoff.runtimeDidStart()
             if stopRequestedWhileStarting {
                 await finishInterruptedStart()
                 return
@@ -308,6 +463,9 @@ public actor RuneScribeRuntime {
             }
             hostIngress.noteSuccessfulActivation()
             status = .running
+            await publishAvailabilitySnapshot()
+            startEntitlementObservation()
+            await reconcileEligibleOptionalModules()
         } catch {
             if stopRequestedWhileStarting {
                 await finishInterruptedStart()
@@ -321,10 +479,16 @@ public actor RuneScribeRuntime {
             activeUIModuleID = nil
             activationOrder = []
             status = .failed
+            cancelEntitlementObservation()
             hostIngress.suspend()
             await dispatcher.beginRuntimeStop()
-            await platformBridge.deactivateRuntime()
             await runtimeIOGateway.deactivateRuntime()
+            await progressionOutbox.deactivateRuntime()
+            await existingUserMigrationHandoff.deactivateRuntime()
+            await settingsGateway.deactivateRuntime()
+            await availabilityGateway.deactivateRuntime()
+            await moduleStateGateway.deactivateRuntime()
+            await platformBridge.deactivateRuntime()
             await rootPresentationGateway.deactivateRuntime()
             resumeStopWaiters()
             throw error
@@ -333,6 +497,7 @@ public actor RuneScribeRuntime {
 
     public func stop() async {
         if status == .idle || status == .stopped {
+            cancelEntitlementObservation()
             hostIngress.suspend()
             hostIngress.resumeAdmissions()
             status = .stopped
@@ -341,11 +506,17 @@ public actor RuneScribeRuntime {
         if status == .starting {
             stopRequestedWhileStarting = true
             status = .stopping
+            cancelEntitlementObservation()
             hostIngress.quiesceAdmissions()
             hostIngress.suspend()
             await dispatcher.beginRuntimeStop()
-            await platformBridge.deactivateRuntime()
             await runtimeIOGateway.deactivateRuntime()
+            await progressionOutbox.deactivateRuntime()
+            await existingUserMigrationHandoff.deactivateRuntime()
+            await settingsGateway.deactivateRuntime()
+            await availabilityGateway.deactivateRuntime()
+            await moduleStateGateway.deactivateRuntime()
+            await platformBridge.deactivateRuntime()
             await rootPresentationGateway.deactivateRuntime()
             await hostIngress.flush()
             if status == .stopped {
@@ -360,14 +531,20 @@ public actor RuneScribeRuntime {
         }
 
         status = .stopping
+        cancelEntitlementObservation()
         hostIngress.quiesceAdmissions()
         await dispatcher.beginRuntimeQuiesce()
         await startCoordinator.afterClientQuiesceBeforeIngressDrain()
         await hostIngress.flush()
         hostIngress.suspend()
         await dispatcher.beginRuntimeStop()
-        await platformBridge.deactivateRuntime()
         await runtimeIOGateway.deactivateRuntime()
+        await progressionOutbox.deactivateRuntime()
+        await existingUserMigrationHandoff.deactivateRuntime()
+        await settingsGateway.deactivateRuntime()
+        await availabilityGateway.deactivateRuntime()
+        await moduleStateGateway.deactivateRuntime()
+        await platformBridge.deactivateRuntime()
         await rootPresentationGateway.deactivateRuntime()
         await hostIngress.flush()
         await stopActivatedModules(markFailed: false)
@@ -382,41 +559,236 @@ public actor RuneScribeRuntime {
             status: status,
             moduleStates: moduleStates,
             activationOrder: activationOrder,
-            activeUIModuleID: activeUIModuleID
+            activeUIModuleID: activeUIModuleID,
+            entitlementSnapshot: entitlementSnapshot
         )
+    }
+
+    func optionalAvailabilitySnapshots()
+        -> [RuntimeOptionalModuleAvailabilitySnapshot]
+    {
+        var snapshots: [RuntimeOptionalModuleAvailabilitySnapshot] =
+            registrations.values.compactMap { registration in
+            let descriptor = registration.factory.descriptor
+            guard descriptor.criticality == .optional else { return nil }
+            return RuntimeOptionalModuleAvailabilitySnapshot(
+                moduleID: descriptor.moduleID,
+                role: descriptor.role,
+                lifecycleState: moduleStates[descriptor.moduleID] ?? .registered
+            )
+        }
+        snapshots.append(contentsOf: failedOptionalDescriptors.values.map { descriptor in
+            RuntimeOptionalModuleAvailabilitySnapshot(
+                moduleID: descriptor.moduleID,
+                role: descriptor.role,
+                lifecycleState: .failed
+            )
+        })
+        return snapshots.sorted { $0.moduleID < $1.moduleID }
+    }
+
+    private func publishAvailabilitySnapshot() async {
+        await availabilityGateway.update(
+            optionalModules: optionalAvailabilitySnapshots(),
+            entitlementSnapshot: entitlementSnapshot
+        )
+    }
+
+    public func reconcileEntitlements(
+        _ incoming: ProgressionEntitlementSnapshotDTO
+    ) async throws {
+        guard incoming.revision >= lastObservedEntitlementSnapshot.revision else {
+            return
+        }
+        if incoming.revision == lastObservedEntitlementSnapshot.revision {
+            guard Self.hasSameEntitlementTruth(
+                incoming,
+                lastObservedEntitlementSnapshot
+            ) else {
+                throw RuneScribeRuntimeError.entitlementRevisionConflict(incoming.revision)
+            }
+            lastObservedEntitlementSnapshot = incoming
+            return
+        }
+
+        let included = Set(entitlementSnapshot.includedUnlockIDs)
+            .union(incoming.includedUnlockIDs)
+            .union([RuneScribeUnlockIDs.norseCodex])
+        let earned = Set(entitlementSnapshot.earnedUnlockIDs)
+            .union(incoming.earnedUnlockIDs)
+        entitlementSnapshot = try ProgressionEntitlementSnapshotDTO(
+            revision: incoming.revision,
+            capturedAt: max(entitlementSnapshot.capturedAt, incoming.capturedAt),
+            includedUnlockIDs: included.sorted(),
+            earnedUnlockIDs: earned.sorted()
+        )
+        lastObservedEntitlementSnapshot = incoming
+        await publishAvailabilitySnapshot()
+
+        guard status == .running else { return }
+        await reconcileEligibleOptionalModules()
+        await publishAvailabilitySnapshot()
+    }
+
+    private static func hasSameEntitlementTruth(
+        _ lhs: ProgressionEntitlementSnapshotDTO,
+        _ rhs: ProgressionEntitlementSnapshotDTO
+    ) -> Bool {
+        lhs.revision == rhs.revision &&
+            Set(lhs.includedUnlockIDs) == Set(rhs.includedUnlockIDs) &&
+            Set(lhs.earnedUnlockIDs) == Set(rhs.earnedUnlockIDs)
     }
 
     public func callLedgerSnapshot() async -> [RuntimeCallLedgerRecord] {
         await dispatcher.ledgerSnapshot()
     }
 
-    private func eligibleRegistrations() async -> [Registration] {
+    private func eligibleRegistrations() async throws -> [Registration] {
         var result: [Registration] = []
         for registration in registrations.values.sorted(by: registrationOrder) {
             moduleStates[registration.manifest.moduleID] = .validated
-            if await eligibility.isEligible(registration.manifest) {
+            if await isEligible(registration) {
                 moduleStates[registration.manifest.moduleID] = .eligible
                 result.append(registration)
+            } else if registration.factory.descriptor.criticality == .required {
+                moduleStates[registration.manifest.moduleID] = .failed
+                throw RuneScribeRuntimeError.activationFailed(
+                    registration.manifest.moduleID
+                )
             }
         }
         return result
     }
 
-    private func activationPlan(for eligible: [Registration]) throws -> [Registration] {
+    private func isEligible(_ registration: Registration) async -> Bool {
+        guard await eligibility.isEligible(registration.manifest) else {
+            return false
+        }
+        guard let requirement = registration.manifest.entitlementRequirement else {
+            return true
+        }
+        switch requirement.kind {
+        case .always:
+            return true
+        case .earned:
+            return entitlementSnapshot.earnedUnlockIDs.contains(requirement.identifier)
+        case .purchase, .composite:
+            return false
+        }
+    }
+
+    private func reconcileEligibleOptionalModules() async {
+        let activeIDs = Set(activeModules.keys)
+        var candidates: [Registration] = []
+
+        for registration in registrations.values.sorted(by: registrationOrder) {
+            let descriptor = registration.factory.descriptor
+            guard descriptor.criticality == .optional,
+                  !activeIDs.contains(descriptor.moduleID),
+                  moduleStates[descriptor.moduleID] != .failed
+            else { continue }
+
+            moduleStates[descriptor.moduleID] = .validated
+            if await isEligible(registration) {
+                moduleStates[descriptor.moduleID] = .eligible
+                candidates.append(registration)
+                await dispatcher.registerModule(descriptor)
+            }
+        }
+
+        let activeRoles = Set(activeModules.values.map { $0.module.descriptor.role })
+        guard let plan = try? activationPlan(
+            for: candidates,
+            satisfiedRoles: activeRoles
+        ) else { return }
+
+        for registration in plan {
+            do {
+                try await activate(registration)
+                if registration.factory.descriptor.role == RuneScribeRoles.progression {
+                    await progressionOutbox.progressionDidActivate()
+                    await existingUserMigrationHandoff.progressionDidActivate()
+                    startEntitlementObservation()
+                }
+            } catch {}
+        }
+    }
+
+    private func startEntitlementObservation() {
+        cancelEntitlementObservation()
+        let dispatcher = dispatcher
+        entitlementObservationTask = Task { [weak self] in
+            do {
+                let stream = try await dispatcher.progressionEntitlementStream()
+                for await envelope in stream {
+                    guard !Task.isCancelled else { return }
+                    try await self?.reconcileEntitlements(envelope.payload)
+                }
+            } catch {}
+        }
+    }
+
+    private func cancelEntitlementObservation() {
+        entitlementObservationTask?.cancel()
+        entitlementObservationTask = nil
+    }
+
+    private static func initialEntitlementSnapshot(
+        environment: RuntimeEnvironment
+    ) -> ProgressionEntitlementSnapshotDTO {
+        try! ProgressionEntitlementSnapshotDTO(
+            revision: 0,
+            capturedAt: environment.now(),
+            includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+            earnedUnlockIDs: []
+        )
+    }
+
+    private func activationPlan(
+        for eligible: [Registration],
+        satisfiedRoles: Set<ModuleRole> = []
+    ) throws -> [Registration] {
+        var candidates = eligible
+
+        while true {
+            let availableRoles = satisfiedRoles.union(candidates.map(\.manifest.defaultRole))
+            let missingDependencies = candidates.compactMap { registration -> (Registration, ModuleRole)? in
+                guard let role = registration.factory.descriptor.requiredModuleRoles
+                    .sorted()
+                    .first(where: { !availableRoles.contains($0) })
+                else { return nil }
+                return (registration, role)
+            }
+            guard !missingDependencies.isEmpty else { break }
+
+            if let requiredFailure = missingDependencies.first(where: {
+                $0.0.factory.descriptor.criticality == .required
+            }) {
+                throw RuneScribeRuntimeError.missingRequiredRole(
+                    moduleID: requiredFailure.0.manifest.moduleID,
+                    role: requiredFailure.1
+                )
+            }
+
+            let failedIDs = Set(missingDependencies.map { $0.0.manifest.moduleID })
+            for moduleID in failedIDs {
+                moduleStates[moduleID] = .failed
+            }
+            candidates.removeAll { failedIDs.contains($0.manifest.moduleID) }
+        }
+
         let byRole = Dictionary(
-            uniqueKeysWithValues: eligible.map { ($0.manifest.defaultRole, $0) }
+            uniqueKeysWithValues: candidates.map { ($0.manifest.defaultRole, $0) }
         )
-        let byID = Dictionary(uniqueKeysWithValues: eligible.map { ($0.manifest.moduleID, $0) })
-        let serviceIDs = Set(
-            eligible
-                .filter { $0.manifest.moduleType == .service }
-                .map(\.manifest.moduleID)
-        )
+        let byID = Dictionary(uniqueKeysWithValues: candidates.map { ($0.manifest.moduleID, $0) })
         var dependencies: [ModuleIdentifier: Set<ModuleIdentifier>] = [:]
 
-        for registration in eligible {
+        for registration in candidates {
             var moduleDependencies = Set<ModuleIdentifier>()
             for role in registration.factory.descriptor.requiredModuleRoles.sorted() {
+                if satisfiedRoles.contains(role) {
+                    continue
+                }
                 guard let dependency = byRole[role] else {
                     throw RuneScribeRuntimeError.missingRequiredRole(
                         moduleID: registration.manifest.moduleID,
@@ -424,10 +796,6 @@ public actor RuneScribeRuntime {
                     )
                 }
                 moduleDependencies.insert(dependency.manifest.moduleID)
-            }
-            if registration.manifest.moduleType == .ui {
-                moduleDependencies.formUnion(serviceIDs)
-                moduleDependencies.remove(registration.manifest.moduleID)
             }
             dependencies[registration.manifest.moduleID] = moduleDependencies
         }
@@ -437,9 +805,26 @@ public actor RuneScribeRuntime {
             let ready = dependencies
                 .filter { $0.value.isEmpty }
                 .map(\.key)
-                .sorted()
+                .sorted { lhs, rhs in
+                    guard let lhsRegistration = byID[lhs],
+                          let rhsRegistration = byID[rhs]
+                    else { return lhs < rhs }
+                    let lhsPriority = activationPriority(lhsRegistration)
+                    let rhsPriority = activationPriority(rhsRegistration)
+                    return lhsPriority == rhsPriority ? lhs < rhs : lhsPriority < rhsPriority
+                }
             guard !ready.isEmpty else {
-                throw RuneScribeRuntimeError.dependencyCycle(dependencies.keys.sorted())
+                let cycleIDs = dependencies.keys.sorted()
+                let includesRequired = cycleIDs.contains {
+                    byID[$0]?.factory.descriptor.criticality == .required
+                }
+                guard !includesRequired else {
+                    throw RuneScribeRuntimeError.dependencyCycle(cycleIDs)
+                }
+                for moduleID in cycleIDs {
+                    moduleStates[moduleID] = .failed
+                }
+                break
             }
             for moduleID in ready {
                 guard let registration = byID[moduleID] else { continue }
@@ -453,13 +838,37 @@ public actor RuneScribeRuntime {
         return plan
     }
 
+    private func activationPriority(_ registration: Registration) -> Int {
+        switch (
+            registration.factory.descriptor.criticality,
+            registration.manifest.moduleType
+        ) {
+        case (.required, .service): 0
+        case (.optional, .service): 1
+        case (.required, .ui): 2
+        case (.optional, .ui): 3
+        }
+    }
+
     private func activate(_ registration: Registration) async throws {
         let moduleID = registration.manifest.moduleID
         moduleStates[moduleID] = .activating
 
+        for requiredRole in registration.factory.descriptor.requiredModuleRoles.sorted() {
+            let roleIsActive = activeModules.values.contains {
+                $0.module.descriptor.role == requiredRole
+            }
+            guard roleIsActive else {
+                moduleStates[moduleID] = .failed
+                await dispatcher.invalidateModule(moduleID: moduleID, failed: true)
+                throw RuneScribeRuntimeError.activationFailed(moduleID)
+            }
+        }
+
         for serviceID in registration.factory.descriptor.requiredServices.sorted() {
             guard await platformBridge.contains(serviceID) else {
                 moduleStates[moduleID] = .failed
+                await dispatcher.invalidateModule(moduleID: moduleID, failed: true)
                 throw RuneScribeRuntimeError.activationFailed(moduleID)
             }
         }
@@ -469,10 +878,12 @@ public actor RuneScribeRuntime {
             module = try registration.factory.makeModule()
         } catch {
             moduleStates[moduleID] = .failed
+            await dispatcher.invalidateModule(moduleID: moduleID, failed: true)
             throw RuneScribeRuntimeError.activationFailed(moduleID)
         }
         guard module.descriptor == registration.factory.descriptor else {
             moduleStates[moduleID] = .failed
+            await dispatcher.invalidateModule(moduleID: moduleID, failed: true)
             throw RuneScribeRuntimeError.factoryDescriptorMismatch(moduleID)
         }
 
@@ -481,12 +892,17 @@ public actor RuneScribeRuntime {
             moduleGeneration = try await dispatcher.beginActivation(moduleID: moduleID)
         } catch {
             moduleStates[moduleID] = .failed
+            await dispatcher.invalidateModule(moduleID: moduleID, failed: true)
             throw RuneScribeRuntimeError.activationFailed(moduleID)
         }
 
         let lease = ModuleContextLease(moduleID: moduleID)
         do {
             try await runtimeIOGateway.activateModule(
+                descriptor: registration.factory.descriptor,
+                generation: moduleGeneration
+            )
+            try await moduleStateGateway.activateModule(
                 descriptor: registration.factory.descriptor,
                 generation: moduleGeneration
             )
@@ -497,6 +913,10 @@ public actor RuneScribeRuntime {
         } catch {
             await dispatcher.invalidateModule(moduleID: moduleID, failed: true)
             await runtimeIOGateway.invalidateModule(
+                moduleID,
+                generation: moduleGeneration
+            )
+            await moduleStateGateway.invalidateModule(
                 moduleID,
                 generation: moduleGeneration
             )
@@ -516,6 +936,13 @@ public actor RuneScribeRuntime {
             moduleGeneration: moduleGeneration,
             runtimeIOGateway: runtimeIOGateway,
             runtimeIOGeneration: await runtimeIOGateway.currentGeneration(),
+            moduleStateGateway: moduleStateGateway,
+            moduleStateGeneration: await moduleStateGateway.currentGeneration(),
+            settingsGateway: settingsGateway,
+            availabilityGateway: availabilityGateway,
+            unlockFeedbackGateway: unlockFeedbackGateway,
+            progressionOutbox: progressionOutbox,
+            existingUserMigrationHandoff: existingUserMigrationHandoff,
             rootPresentationGateway: rootPresentationGateway,
             rootPresentationGeneration: await rootPresentationGateway.currentGeneration(),
             environment: environment,
@@ -562,10 +989,16 @@ public actor RuneScribeRuntime {
 
     private func finishInterruptedStart() async {
         status = .stopping
+        cancelEntitlementObservation()
         hostIngress.suspend()
         await dispatcher.beginRuntimeStop()
-        await platformBridge.deactivateRuntime()
         await runtimeIOGateway.deactivateRuntime()
+        await progressionOutbox.deactivateRuntime()
+        await existingUserMigrationHandoff.deactivateRuntime()
+        await settingsGateway.deactivateRuntime()
+        await availabilityGateway.deactivateRuntime()
+        await moduleStateGateway.deactivateRuntime()
+        await platformBridge.deactivateRuntime()
         await rootPresentationGateway.deactivateRuntime()
         await hostIngress.flush()
         await stopActivatedModules(markFailed: false)

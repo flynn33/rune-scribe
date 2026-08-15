@@ -1520,6 +1520,7 @@ private func testManifest(for descriptor: ModuleDescriptor) -> ModuleManifest {
         displayName: descriptor.entryPoint,
         moduleVersion: descriptor.moduleVersion,
         moduleType: descriptor.kind,
+        criticality: descriptor.criticality,
         supportedPlatforms: [.macOS],
         minimumOS: MinimumOSVersions(macOS: "15.0"),
         capabilitiesRequested: descriptor.requestedCapabilities.sorted(),
@@ -1528,7 +1529,9 @@ private func testManifest(for descriptor: ModuleDescriptor) -> ModuleManifest {
             requiredServices: descriptor.requiredServices.sorted(),
             requiredModuleRoles: descriptor.requiredModuleRoles.sorted()
         ),
-        defaultRole: descriptor.role
+        defaultRole: descriptor.role,
+        consumedEndpoints: descriptor.consumedEndpoints.sorted(),
+        publishedEndpoints: descriptor.publishedEndpoints.sorted()
     )
 }
 

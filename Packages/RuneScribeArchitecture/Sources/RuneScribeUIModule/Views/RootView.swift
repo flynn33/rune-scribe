@@ -1,3 +1,4 @@
+import RuneScribeContracts
 import RuneScribeUIRuntime
 import SwiftUI
 
@@ -10,6 +11,31 @@ enum RootImportFailurePresentation {
         showSplash: Bool
     ) -> Bool {
         message != nil && !hasPendingImport && !isLocked && !showSplash
+    }
+}
+
+enum RootRevealSafetyPolicy {
+    static func shouldBlock(
+        showSplash: Bool,
+        isLocked: Bool,
+        importPhase: ImportPhaseDTO?,
+        messagePhase: MessagePhaseDTO?,
+        hasPendingImport: Bool,
+        hasPendingMessage: Bool,
+        hasSecurityOrFailurePresentation: Bool
+    ) -> Bool {
+        let importIsActive = importPhase == .validating
+            || importPhase == .awaitingConfirmation
+            || importPhase == .importing
+        let receivedMessageIsDecoding = messagePhase == .receiving
+            || messagePhase == .received
+        return showSplash
+            || isLocked
+            || importIsActive
+            || receivedMessageIsDecoding
+            || hasPendingImport
+            || hasPendingMessage
+            || hasSecurityOrFailurePresentation
     }
 }
 
@@ -32,9 +58,29 @@ struct RootView: View {
         )
     }
 
+    private var revealIsBlockedAtRoot: Bool {
+        RootRevealSafetyPolicy.shouldBlock(
+            showSplash: showSplash,
+            isLocked: session.isLocked,
+            importPhase: session.snapshot?.importState.phase,
+            messagePhase: session.snapshot?.messageState.phase,
+            hasPendingImport: session.pendingImport != nil,
+            hasPendingMessage: session.pendingMessage != nil,
+            hasSecurityOrFailurePresentation: session.importErrorMessage != nil
+                || session.messageErrorMessage != nil
+                || session.lastError != nil
+        )
+    }
+
     var body: some View {
         ZStack {
             ContentView()
+
+            if let reveal = session.activeReveal,
+               !revealIsBlockedAtRoot {
+                UnlockRevealView(reveal: reveal)
+                    .zIndex(0.5)
+            }
 
             if session.isLocked {
                 LockView()
@@ -53,6 +99,9 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: session.isLocked)
+        .onChange(of: revealIsBlockedAtRoot, initial: true) { _, isBlocked in
+            session.setRevealBlocker(.rootPresentation, active: isBlocked)
+        }
         .sheet(item: Binding(
             get: { (showSplash || session.isLocked) ? nil : session.pendingImport },
             set: {

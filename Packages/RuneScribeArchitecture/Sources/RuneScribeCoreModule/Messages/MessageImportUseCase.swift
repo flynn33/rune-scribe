@@ -19,84 +19,369 @@ enum MessageImportUseCase {
         messageService: MessageService,
         fontIntegration: (any CoreFontIntegrating)?,
         contactIntegration: (any CoreMessageContactAssociating)?,
-        runtimeIO: RuntimeIOClient
+        runtimeIO: RuntimeIOClient,
+        progression: CoreProgressionCoordinator,
+        usesProgressionEvidence: Bool,
+        admittedPackageToken: PackageToken?,
+        progressionRoute: DomainEventRouteClass,
+        embeddedCipherProgressionSeed: Data?,
+        relationshipProgressionSeed: Data?
     ) async throws -> MessageImportMutation {
-        var transientCandidate: Cipher?
-        var library: CipherLibrary
-
+        let prepared: PreparedMessageCipher?
+        let initialLibrary: CipherLibrary
         if let embedded = payload.embeddedCipher {
-            // Font installation on inbound messages remains best effort: inability
-            // to render a custom face must never prevent authenticated decryption.
+            // Rendering compatibility remains best effort and is unrelated to
+            // whether the authenticated envelope can be opened.
             if let fontIntegration {
                 try? await fontIntegration.ensureAvailable(
                     reference: embedded.fontRef,
                     suppliedBytes: fontBytes
                 )
             }
-            switch try await repository.ingestMessageCipher(
+            let candidate = try await repository.prepareMessageCipher(
                 embedded,
                 label: payload.senderName
-            ) {
-            case .existing(let cipher, let current), .persisted(let cipher, let current):
-                transientCandidate = cipher
-                library = current
-            case .transient(let cipher, _):
-                transientCandidate = cipher
-                library = (try? await repository.snapshot()) ?? .empty
-            }
+            )
+            prepared = candidate
+            initialLibrary = candidate.library
         } else {
-            library = try await repository.snapshot()
+            prepared = nil
+            initialLibrary = try await repository.snapshot()
         }
 
         var candidates: [Cipher] = []
-        if let transientCandidate {
-            candidates.append(transientCandidate)
-        }
-        candidates.append(contentsOf: library.ciphers.filter { stored in
-            stored.id != transientCandidate?.id
+        if let prepared { candidates.append(prepared.cipher) }
+        candidates.append(contentsOf: initialLibrary.ciphers.filter { stored in
+            stored.id != prepared?.cipher.id
         })
 
+        // No cipher, contact, or relationship mutation occurs before this
+        // authentication boundary.
         let decoded = try messageService.read(
             envelope: payload.envelope,
             tryingCiphers: candidates
         )
 
-        if library.ciphers.contains(where: { $0.id == decoded.cipher.id }),
+        if !usesProgressionEvidence {
+            return try await commitLegacyImport(
+                payload: payload,
+                prepared: prepared,
+                decoded: decoded,
+                initialLibrary: initialLibrary,
+                repository: repository,
+                contactIntegration: contactIntegration,
+                runtimeIO: runtimeIO
+            )
+        }
+
+        return try await commitProgressionImport(
+            payload: payload,
+            prepared: prepared,
+            decoded: decoded,
+            initialLibrary: initialLibrary,
+            repository: repository,
+            contactIntegration: contactIntegration,
+            runtimeIO: runtimeIO,
+            progression: progression,
+            admittedPackageToken: admittedPackageToken,
+            progressionRoute: progressionRoute,
+            embeddedCipherProgressionSeed: embeddedCipherProgressionSeed,
+            relationshipProgressionSeed: relationshipProgressionSeed
+        )
+    }
+
+    private static func commitLegacyImport(
+        payload: MessageSharePayload,
+        prepared: PreparedMessageCipher?,
+        decoded: (plaintext: String, cipher: Cipher),
+        initialLibrary: CipherLibrary,
+        repository: CipherRepository,
+        contactIntegration: (any CoreMessageContactAssociating)?,
+        runtimeIO: RuntimeIOClient
+    ) async throws -> MessageImportMutation {
+        var durableCipher = decoded.cipher
+        var library = initialLibrary
+        if let embedded = payload.embeddedCipher,
+           prepared?.cipher.id == decoded.cipher.id {
+            let ingestion = try await repository.ingestMessageCipher(
+                embedded,
+                label: payload.senderName
+            )
+            switch ingestion {
+            case .existing(let cipher, let current),
+                 .persisted(let cipher, let current):
+                durableCipher = cipher
+                library = current
+            case .transient(let cipher, _):
+                durableCipher = cipher
+            }
+        }
+
+        if library.ciphers.contains(where: { $0.id == durableCipher.id }),
            let contactIntegration {
-            let prepared = try await contactIntegration.prepareImportedContact(
+            let preparedContact = try await contactIntegration.prepareImportedContact(
                 named: payload.senderName
             )
-            if decoded.cipher.contactID != prepared.contact.id
-                || prepared.requiresCommit {
+            if durableCipher.contactID != preparedContact.contact.id
+                || preparedContact.requiresCommit {
                 let intent = try await contactIntegration.stageMessageAssociation(
-                    prepared,
-                    cipherID: decoded.cipher.id,
-                    previousContactID: decoded.cipher.contactID
+                    preparedContact,
+                    cipherID: durableCipher.id,
+                    previousContactID: durableCipher.contactID
                 )
                 let associated = try await repository.assignContact(
-                   cipherID: decoded.cipher.id,
-                   contactID: prepared.contact.id
+                    cipherID: durableCipher.id,
+                    contactID: preparedContact.contact.id
                 )
                 guard associated.value else {
                     throw MessageImportError.cipherAssociationUnavailable
                 }
                 library = associated.library
-                if prepared.requiresCommit {
-                    _ = try await contactIntegration.commitPreparedImportedContact(prepared)
+                if preparedContact.requiresCommit {
+                    _ = try await contactIntegration.commitPreparedImportedContact(
+                        preparedContact
+                    )
                 }
                 try await contactIntegration.completeMessageAssociation(intent)
             }
         }
 
         return MessageImportMutation(
-            message: ReceivedMessageDTO(
-                id: MessageID(rawValue: try await runtimeIO.nextUUID()),
-                plaintext: decoded.plaintext,
-                senderName: payload.senderName,
-                cipherID: CipherID(rawValue: decoded.cipher.id),
-                cipherName: decoded.cipher.label
+            message: try await receivedMessage(
+                payload: payload,
+                decoded: decoded,
+                cipher: durableCipher,
+                runtimeIO: runtimeIO
             ),
             library: library
+        )
+    }
+
+    private static func commitProgressionImport(
+        payload: MessageSharePayload,
+        prepared: PreparedMessageCipher?,
+        decoded: (plaintext: String, cipher: Cipher),
+        initialLibrary: CipherLibrary,
+        repository: CipherRepository,
+        contactIntegration: (any CoreMessageContactAssociating)?,
+        runtimeIO: RuntimeIOClient,
+        progression: CoreProgressionCoordinator,
+        admittedPackageToken: PackageToken?,
+        progressionRoute: DomainEventRouteClass,
+        embeddedCipherProgressionSeed: Data?,
+        relationshipProgressionSeed: Data?
+    ) async throws -> MessageImportMutation {
+        let persistsPreparedCipher = prepared?.requiresPersistence == true
+            && prepared?.cipher.id == decoded.cipher.id
+        let canPersistDecodedCipher = !persistsPreparedCipher
+            || embeddedCipherProgressionSeed != nil
+
+        var preparedContact: PreparedMessageContact?
+        var targetContactID = decoded.cipher.contactID
+        if canPersistDecodedCipher, let contactIntegration {
+            let candidate = try await contactIntegration.prepareImportedContact(
+                named: payload.senderName
+            )
+            let existing = try? await repository.relationshipProgressionEvidence(
+                cipherID: decoded.cipher.id,
+                contactID: candidate.contact.id
+            )
+            if existing != nil || relationshipProgressionSeed != nil {
+                preparedContact = candidate
+                targetContactID = candidate.contact.id
+            }
+        }
+
+        var relationship: CoreRelationshipProgressionRecord? = if let targetContactID {
+            try? await repository.relationshipProgressionEvidence(
+                cipherID: decoded.cipher.id,
+                contactID: targetContactID
+            )
+        } else {
+            nil
+        }
+        var finalRelationshipSeed = relationship?.seed
+        if finalRelationshipSeed == nil, targetContactID != nil {
+            finalRelationshipSeed = relationshipProgressionSeed
+        }
+        if targetContactID != nil, finalRelationshipSeed == nil {
+            // Do not make fresh relationship entropy a message-read
+            // dependency. Existing contact metadata remains untouched.
+            targetContactID = nil
+            preparedContact = nil
+            relationship = nil
+        }
+
+        let relationshipToken: RelationshipToken?
+        if let finalRelationshipSeed {
+            relationshipToken = try? await progression.relationshipToken(
+                for: finalRelationshipSeed
+            )
+        } else {
+            relationshipToken = nil
+        }
+        let establishesBidirectional = relationshipToken != nil
+            && relationship?.hasEligibleOutbound == true
+            && relationship?.bidirectionalEventCommitted == false
+
+        var batches: [CorePendingProgressionBatch] = []
+        if let admittedPackageToken,
+           let context = try? await progression.issueContext(
+               for: .coreReconciliation
+           ) {
+            do {
+                var facts = [try CoreProgressionFactFactory.messageDecoded(
+                    packageToken: admittedPackageToken,
+                    relationshipToken: relationshipToken
+                )]
+                facts.append(try CoreProgressionFactFactory.presentationObserved(
+                    packageToken: admittedPackageToken,
+                    codexIDs: [CoreProgressionFactFactory.implicitNorseCodexID]
+                ))
+                if persistsPreparedCipher,
+                   let embeddedCipherProgressionSeed,
+                   let cipherToken = try? await progression.cipherToken(
+                       for: embeddedCipherProgressionSeed
+                   ), let imported = try? CoreProgressionFactFactory.cipherImported(
+                       cipherToken: cipherToken,
+                       routeClass: progressionRoute
+                   ) {
+                    facts.append(imported)
+                }
+                if establishesBidirectional, let relationshipToken {
+                    facts.append(try CoreProgressionFactFactory.bidirectionalEstablished(
+                        relationshipToken: relationshipToken
+                    ))
+                }
+                batches = try CoreProgressionCoordinator.pendingBatches(
+                    context: context,
+                    commandDigest: CoreProgressionCoordinator.commandDigest(facts),
+                    facts: facts
+                )
+            } catch {
+                // Optional fact construction never changes authenticated
+                // message utility or its durable cipher/contact association.
+                batches = []
+            }
+        }
+
+        guard canPersistDecodedCipher else {
+            let retained = try? await repository.appendPendingProgressionBatches(
+                batches
+            )
+            if retained != nil { _ = await progression.drain() }
+            return MessageImportMutation(
+                message: try await receivedMessage(
+                    payload: payload,
+                    decoded: decoded,
+                    cipher: decoded.cipher,
+                    runtimeIO: runtimeIO
+                ),
+                library: retained?.library ?? initialLibrary
+            )
+        }
+
+        let needsContactCommit = preparedContact.map {
+            decoded.cipher.contactID != $0.contact.id || $0.requiresCommit
+        } ?? false
+        var associationIntent: MessageContactAssociationIntent?
+        if needsContactCommit, let preparedContact, let contactIntegration {
+            associationIntent = try await contactIntegration.stageMessageAssociation(
+                preparedContact,
+                cipherID: decoded.cipher.id,
+                previousContactID: decoded.cipher.contactID
+            )
+            // The recovery intent makes this ordering safe: Core facts cannot
+            // claim a linked relationship unless the contact already exists.
+            if preparedContact.requiresCommit {
+                _ = try await contactIntegration.commitPreparedImportedContact(
+                    preparedContact
+                )
+            }
+        }
+
+        let activity = CoreProgressionRelationshipActivity(
+            authenticatedInbound: targetContactID != nil
+                && relationshipToken != nil
+                && !batches.isEmpty,
+            bidirectionalCommitted: establishesBidirectional
+                && !batches.isEmpty
+        )
+        let ingestion: MessageCipherIngestionResult
+        do {
+            ingestion = try await repository.commitAuthenticatedMessageImport(
+                candidate: decoded.cipher,
+                persistCandidate: persistsPreparedCipher,
+                contactID: targetContactID,
+                cipherProgressionSeed: embeddedCipherProgressionSeed,
+                relationshipProgressionSeed: relationship == nil
+                    ? finalRelationshipSeed
+                    : nil,
+                activity: activity,
+                pendingBatches: batches
+            )
+        } catch let error as CoreProgressionEvidenceError {
+            guard error == .collectionLimitExceeded else {
+                throw error
+            }
+            // Seed/relationship capacity is optional. The authenticated
+            // cipher/contact commit and its exact decoded fact group remain
+            // atomic while every existing evidence row is preserved.
+            ingestion = try await repository
+                .commitAuthenticatedMessageImportWithoutProgressionEvidence(
+                candidate: decoded.cipher,
+                persistCandidate: persistsPreparedCipher,
+                contactID: targetContactID,
+                activity: activity,
+                pendingBatches: batches
+            )
+        }
+
+        let committedCipher: Cipher
+        let committedLibrary: CipherLibrary
+        switch ingestion {
+        case .existing(let cipher, let library),
+             .persisted(let cipher, let library):
+            committedCipher = cipher
+            committedLibrary = library
+            if preparedContact != nil, let contactIntegration, needsContactCommit {
+                if let associationIntent {
+                    try await contactIntegration.completeMessageAssociation(
+                        associationIntent
+                    )
+                }
+            }
+            _ = await progression.drain()
+        case .transient(_, let failure):
+            // The staged recovery intent remains authoritative. AppService
+            // removes any just-created contact and restores the prior cipher
+            // binding before it reports the failed durable mutation.
+            throw failure
+        }
+
+        return MessageImportMutation(
+            message: try await receivedMessage(
+                payload: payload,
+                decoded: decoded,
+                cipher: committedCipher,
+                runtimeIO: runtimeIO
+            ),
+            library: committedLibrary
+        )
+    }
+
+    private static func receivedMessage(
+        payload: MessageSharePayload,
+        decoded: (plaintext: String, cipher: Cipher),
+        cipher: Cipher,
+        runtimeIO: RuntimeIOClient
+    ) async throws -> ReceivedMessageDTO {
+        ReceivedMessageDTO(
+            id: MessageID(rawValue: try await runtimeIO.nextUUID()),
+            plaintext: decoded.plaintext,
+            senderName: payload.senderName,
+            cipherID: CipherID(rawValue: cipher.id),
+            cipherName: cipher.label
         )
     }
 }

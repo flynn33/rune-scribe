@@ -19,12 +19,15 @@ public enum ModuleManifestDecoder {
         "displayName",
         "moduleVersion",
         "moduleType",
+        "criticality",
         "supportedPlatforms",
         "minimumOS",
         "capabilitiesRequested",
         "entryPoint",
         "runtimeRequirements",
         "defaultRole",
+        "consumedEndpoints",
+        "publishedEndpoints",
         "entitlementRequirement",
         "diagnosticsVisibleInProduction",
     ]
@@ -37,11 +40,14 @@ public enum ModuleManifestDecoder {
         "displayName",
         "moduleVersion",
         "moduleType",
+        "criticality",
         "supportedPlatforms",
         "capabilitiesRequested",
         "entryPoint",
         "runtimeRequirements",
         "defaultRole",
+        "consumedEndpoints",
+        "publishedEndpoints",
         "diagnosticsVisibleInProduction",
     ]
 
@@ -99,7 +105,7 @@ public enum ModuleManifestDecoder {
             for (index, value) in values.enumerated() {
                 try checkFields(
                     value,
-                    allowed: ["name", "fileExtension", "subdirectory"],
+                    allowed: ["name", "fileExtension", "subdirectory", "ownerModuleID"],
                     required: ["name", "fileExtension"],
                     path: "$.runtimeRequirements.requiredResources[\(index)]"
                 )
@@ -199,13 +205,26 @@ public enum ModuleManifestDecoder {
         )
         try requireUnique(
             manifest.runtimeRequirements.requiredResources.map {
-                [$0.subdirectory ?? "", $0.name, $0.fileExtension].joined(separator: "/")
+                [
+                    $0.ownerModuleID?.rawValue ?? "",
+                    $0.subdirectory ?? "",
+                    $0.name,
+                    $0.fileExtension,
+                ].joined(separator: "/")
             },
             path: "$.runtimeRequirements.requiredResources"
         )
         try requireUnique(
             manifest.runtimeRequirements.requiredModuleRoles.map(\.rawValue),
             path: "$.runtimeRequirements.requiredModuleRoles"
+        )
+        try requireUnique(
+            manifest.consumedEndpoints.map(\.rawValue),
+            path: "$.consumedEndpoints"
+        )
+        try requireUnique(
+            manifest.publishedEndpoints.map(\.rawValue),
+            path: "$.publishedEndpoints"
         )
         for role in manifest.runtimeRequirements.requiredModuleRoles {
             try requireMatch(
@@ -235,6 +254,20 @@ public enum ModuleManifestDecoder {
                 capability.rawValue,
                 pattern: #"^[a-z][a-z0-9._-]+$"#,
                 path: "$.capabilitiesRequested"
+            )
+        }
+        for endpoint in manifest.consumedEndpoints {
+            try requireMatch(
+                endpoint.rawValue,
+                pattern: #"^[a-z][a-z0-9._-]+$"#,
+                path: "$.consumedEndpoints"
+            )
+        }
+        for endpoint in manifest.publishedEndpoints {
+            try requireMatch(
+                endpoint.rawValue,
+                pattern: #"^[a-z][a-z0-9._-]+$"#,
+                path: "$.publishedEndpoints"
             )
         }
         for service in manifest.runtimeRequirements.requiredServices {
@@ -268,19 +301,18 @@ public enum ModuleManifestDecoder {
                     )
                 }
             }
+            if let ownerModuleID = resource.ownerModuleID {
+                try requireMatch(
+                    ownerModuleID.rawValue,
+                    pattern: #"^com\.runescribe\.module\.[a-z0-9.-]+$"#,
+                    path: "$.runtimeRequirements.requiredResources.ownerModuleID"
+                )
+            }
         }
         guard manifest.diagnosticsVisibleInProduction == false else {
             throw ManifestDecodingError.invalidField(
                 path: "$.diagnosticsVisibleInProduction",
                 reason: "Production module diagnostics must be disabled."
-            )
-        }
-        if let requirement = manifest.entitlementRequirement,
-           requirement.identifier.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        {
-            throw ManifestDecodingError.invalidField(
-                path: "$.entitlementRequirement.identifier",
-                reason: "Identifier must not be empty."
             )
         }
     }

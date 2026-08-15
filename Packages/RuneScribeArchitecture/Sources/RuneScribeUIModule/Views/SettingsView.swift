@@ -1,5 +1,6 @@
 // RuneScrib/Views/SettingsView.swift
 
+import RuneScribeContracts
 import SwiftUI
 
 /// App settings: the 4-digit app-lock PIN, an About section attributing the app
@@ -12,6 +13,7 @@ struct SettingsView: View {
     @State private var pinFlow: PINFlowView.Mode?
     @State private var showLicense = false
     @State private var showContacts = false
+    @State private var showVaultProgress = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,6 +25,7 @@ struct SettingsView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
+                    progressAndFeedbackPanel
                     appLockPanel
                     contactsPanel
                     aboutPanel
@@ -44,6 +47,85 @@ struct SettingsView: View {
         .sheet(isPresented: $showContacts) {
             ContactsView()
         }
+        .sheet(isPresented: $showVaultProgress) {
+            VaultProgressView()
+        }
+    }
+
+    // MARK: - Progress and Feedback
+
+    private var progressAndFeedbackPanel: some View {
+        RunePanel(title: "Progress & Feedback", systemImage: "medal", accent: .runeGold) {
+            VStack(alignment: .leading, spacing: 12) {
+                Button { showVaultProgress = true } label: {
+                    Label("Open Vault & Progress", systemImage: "archivebox.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(RuneScribButtonStyle())
+
+                Text("Unlock text always remains visible. These switches independently control optional feedback.")
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if session.settingsRailState == .unavailable {
+                    Label(
+                        "Feedback settings are temporarily unavailable. Current defaults remain in effect.",
+                        systemImage: "info.circle"
+                    )
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                    .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    feedbackToggle(
+                        "Sound",
+                        systemImage: "speaker.wave.2",
+                        settingID: RuneScribeRuntimeSettings.unlockFeedbackSoundEnabled,
+                        value: session.unlockFeedbackPreferences.soundEnabled
+                    )
+                    feedbackToggle(
+                        "Haptic",
+                        systemImage: "waveform.path",
+                        settingID: RuneScribeRuntimeSettings.unlockFeedbackHapticsEnabled,
+                        value: session.unlockFeedbackPreferences.hapticEnabled
+                    )
+                    feedbackToggle(
+                        "Animation",
+                        systemImage: "sparkles",
+                        settingID: RuneScribeRuntimeSettings.unlockFeedbackAnimationEnabled,
+                        value: session.unlockFeedbackPreferences.animationEnabled
+                    )
+
+                    if session.settingsRailState == .degraded {
+                        Label("A setting could not be saved. Try again.", systemImage: "exclamationmark.triangle")
+                            .font(.footnote)
+                            .foregroundColor(.runeGoldBright)
+                    }
+                }
+            }
+        }
+    }
+
+    private func feedbackToggle(
+        _ title: String,
+        systemImage: String,
+        settingID: RuntimeSettingID,
+        value: Bool
+    ) -> some View {
+        Toggle(isOn: Binding(
+            get: { value },
+            set: { enabled in
+                Task {
+                    await session.setUnlockFeedbackSetting(settingID, enabled: enabled)
+                }
+            }
+        )) {
+            Label(title, systemImage: systemImage)
+                .font(.body)
+                .foregroundColor(.white)
+        }
+        .toggleStyle(.switch)
+        .accessibilityHint("Does not hide unlock text")
     }
 
     // MARK: - App Lock

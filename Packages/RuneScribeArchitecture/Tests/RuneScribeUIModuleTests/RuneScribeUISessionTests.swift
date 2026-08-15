@@ -1,7 +1,10 @@
+#if os(macOS)
 import AppKit
+#endif
 import Foundation
-import RuneScribeContracts
+@_spi(RuntimeOperationAuthority) import RuneScribeContracts
 @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
+import RuneScribeTestSupport
 @testable import RuneScribeUIModule
 import RuneScribeUIRuntime
 import SwiftUI
@@ -636,6 +639,59 @@ final class RuneScribeUISessionTests: XCTestCase {
         await runtime.stop()
     }
 
+    func testAvailabilityProjectionAppliesRuntimeSnapshotsAndStopsObserving() async throws {
+        let service = ControllableApplicationService()
+        let (session, runtime) = try await makeSession(applicationService: service)
+        try session.start()
+
+        let initialProjectionArrived = await eventually {
+            session.availabilitySnapshot != nil
+        }
+        XCTAssertTrue(initialProjectionArrived)
+        XCTAssertEqual(
+            session.availabilitySnapshot?.entitlementSnapshot.includedUnlockIDs,
+            [RuneScribeUnlockIDs.norseCodex]
+        )
+        XCTAssertEqual(
+            session.availabilitySnapshot?.entitlementSnapshot.earnedUnlockIDs,
+            []
+        )
+
+        let earnedUnlockID = UnlockID(rawValue: "unlock.codex.synthetic")!
+        let updatedEntitlements = try ProgressionEntitlementSnapshotDTO(
+            revision: 1,
+            capturedAt: Date(timeIntervalSince1970: 1_000),
+            includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+            earnedUnlockIDs: [earnedUnlockID]
+        )
+        try await runtime.reconcileEntitlements(updatedEntitlements)
+
+        let updatedProjectionArrived = await eventually {
+            session.availabilitySnapshot?.entitlementSnapshot.revision == 1
+                && session.availabilitySnapshot?.entitlementSnapshot.earnedUnlockIDs
+                    == [earnedUnlockID]
+        }
+        XCTAssertTrue(updatedProjectionArrived)
+
+        await session.stop()
+        XCTAssertNil(session.availabilitySnapshot)
+
+        try await runtime.reconcileEntitlements(
+            ProgressionEntitlementSnapshotDTO(
+                revision: 2,
+                capturedAt: Date(timeIntervalSince1970: 2_000),
+                includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                earnedUnlockIDs: [
+                    earnedUnlockID,
+                    UnlockID(rawValue: "unlock.codex.late")!,
+                ]
+            )
+        )
+        for _ in 0..<20 { await Task.yield() }
+        XCTAssertNil(session.availabilitySnapshot)
+        await runtime.stop()
+    }
+
     func testStopReleasesClientWithoutTakingOwnershipFromRuntimeShareProvider() async throws {
         var service: ControllableApplicationService? = ControllableApplicationService()
         var shareOwner: LifetimeProbe? = LifetimeProbe()
@@ -676,7 +732,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertTrue(runtimeOwnersReleased)
     }
 
-    func testModuleActivationToleratesMissingOptionalVisualResources() async throws {
+    func testModuleActivationToleratesMissingOptionalResourcesAndProgressionRails() async throws {
         let rootStore = RootViewPresentationStore()
         let applicationService = ControllableApplicationService()
         let runtime = RuneScribeRuntime(
@@ -718,6 +774,12 @@ final class RuneScribeUISessionTests: XCTestCase {
             rootStore.state,
             .ready(moduleID: RuneScribeUIModuleBootstrap.moduleID)
         )
+        let runningSnapshot = await runtime.snapshot()
+        XCTAssertEqual(
+            runningSnapshot.moduleStates[RuneScribeUIModuleBootstrap.moduleID],
+            .active
+        )
+        XCTAssertNil(runningSnapshot.moduleStates[RuneScribeModuleIDs.progression])
 
         let (nilResourceSession, nilResourceRuntime) = try await makeSession(
             applicationService: ControllableApplicationService(),
@@ -798,8 +860,28 @@ final class RuneScribeUISessionTests: XCTestCase {
         await assertSanitizedFailure {
             _ = try await session.importContacts([contact])
         }
+        let completionContext = try RuntimePersistableOperationContext(
+            operationID: "ui-session-share-completion",
+            correlationID: "85500000-0000-0000-0000-000000000001",
+            occurredAtUTC: Date(timeIntervalSince1970: 1_700_000_000),
+            operationIdentifier: "io.share.presentation.complete",
+            runtimeGeneration: 1,
+            authorityNonce: UUID(
+                uuidString: "85500000-0000-0000-0000-000000000002"
+            )!,
+            authorityTag: Data(repeating: 0x85, count: 32),
+            authorityScope: .persistent
+        )
+        let completionEvidence = try ShareArtifactCompletionEvidenceDTO(
+            artifactID: artifactID,
+            report: SharePresentationReportDTO(
+                routeClass: .shareSheet,
+                result: .completedBySystem
+            ),
+            operationContext: completionContext
+        )
         await assertSanitizedFailure {
-            _ = try await session.completeShareArtifact(id: artifactID, outcome: .handedOff)
+            _ = try await session.completeShareArtifact(evidence: completionEvidence)
         }
         await session.stop()
         await runtime.stop()
@@ -1008,7 +1090,118 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertTrue(gate.begin(for: second), "A terminal completion must permit the next artifact")
     }
 
-    func testContentViewLockCleanupClearsSensitiveStateAndCancelsArtifactOnce() throws {
+    func testSharePresentationForwardsRuntimeEvidenceAndPresentedIsNonterminal() async throws {
+        let service = ControllableApplicationService(
+            shareCompletionResult: .released
+        )
+        let fixture = try await makeSession(applicationService: service)
+        let artifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "86000000-0000-0000-0000-000000000001")!
+        )
+        let transfer = try await fixture.session.shareTransfer(for: artifactID)
+
+        try await transfer.reportPresented(on: .shareSheet)
+
+        XCTAssertTrue(transfer.isAvailable)
+        XCTAssertNil(transfer.completionEvidence)
+        let commandsAfterPresentation = await service.recordedShareCompletionCommands()
+        XCTAssertTrue(commandsAfterPresentation.isEmpty)
+        let presentationObserved = await eventually {
+            transfer.presentationReport?.result == .presented
+        }
+        XCTAssertTrue(presentationObserved)
+
+        let report = try SharePresentationReportDTO(
+            routeClass: .shareSheet,
+            result: .completedBySystem
+        )
+        let evidence = try await transfer.finish(report)
+        let completionResult = try await fixture.session.completeShareArtifact(
+            evidence: evidence
+        )
+
+        XCTAssertEqual(completionResult, .released)
+        XCTAssertFalse(transfer.isAvailable)
+        XCTAssertEqual(transfer.completionEvidence, evidence)
+        XCTAssertEqual(evidence.artifactID, artifactID)
+        let commands = await service.recordedShareCompletionCommands()
+        XCTAssertFalse(commands.isEmpty)
+        XCTAssertTrue(commands.allSatisfy { $0.evidence == evidence })
+        do {
+            _ = try await transfer.finish(report)
+            XCTFail("A completed transfer must reject a duplicate terminal callback")
+        } catch {
+            XCTAssertEqual(error as? OpaqueSharePresentationError, .revoked)
+        }
+        var commandsAfterDuplicate = await service.recordedShareCompletionCommands()
+        for _ in 0 ..< 500 where commandsAfterDuplicate.count < 2 {
+            try? await Task.sleep(for: .milliseconds(2))
+            commandsAfterDuplicate = await service.recordedShareCompletionCommands()
+        }
+        XCTAssertEqual(
+            commandsAfterDuplicate.count,
+            2,
+            "Immediate UI forwarding and durable Runtime replay must both arrive"
+        )
+        XCTAssertTrue(commandsAfterDuplicate.allSatisfy { $0.evidence == evidence })
+        XCTAssertEqual(commandsAfterDuplicate.compactMap { $0.evidence?.operationContext }, [
+            evidence.operationContext,
+            evidence.operationContext,
+        ])
+        let logicalEffects = await service.recordedLogicalShareCompletionEffectCount()
+        XCTAssertEqual(
+            logicalEffects,
+            1,
+            "Identical transport replays must retain one logical terminal effect"
+        )
+
+        await fixture.session.stop()
+        await fixture.runtime.stop()
+    }
+
+    func testPrepareMessageShareForwardsPerEncodeHandle() async throws {
+        let artifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "86100000-0000-0000-0000-000000000001")!
+        )
+        let artifact = ShareArtifactDTO(
+            id: artifactID,
+            reference: .opaque(artifactID),
+            displayName: "Rune Scribe Message",
+            contentType: "text/plain",
+            fileExtension: nil,
+            lifetime: .singleUse,
+            requiresKeyDelivery: false
+        )
+        let service = ControllableApplicationService(
+            preparedMessageArtifact: artifact
+        )
+        let fixture = try await makeSession(applicationService: service)
+        let cipherID = UUID(uuidString: "86100000-0000-0000-0000-000000000002")!
+        let handle = EncodedMessageHandle(
+            rawValue: UUID(uuidString: "86100000-0000-0000-0000-000000000003")!
+        )
+
+        let prepared = try await fixture.session.prepareMessageShare(
+            runes: "ᚱᚢᚾᛖ",
+            senderName: "Freya",
+            cipherID: cipherID,
+            shareHandle: handle
+        )
+
+        XCTAssertEqual(prepared, artifact)
+        let commands = await service.recordedPrepareMessageShareCommands()
+        let command = try XCTUnwrap(commands.first)
+        XCTAssertEqual(commands.count, 1)
+        XCTAssertEqual(command.runes, "ᚱᚢᚾᛖ")
+        XCTAssertEqual(command.senderName, "Freya")
+        XCTAssertEqual(command.cipherID, CipherID(rawValue: cipherID))
+        XCTAssertEqual(command.shareHandle, handle)
+
+        await fixture.session.stop()
+        await fixture.runtime.stop()
+    }
+
+    func testContentViewLockCleanupClearsSensitiveStateAndReleasesArtifactOnce() throws {
         let packageRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
@@ -1041,14 +1234,14 @@ final class RuneScribeUISessionTests: XCTestCase {
             "showMessageCompose = false",
             "showNewContact = false",
             "resetNewContact()",
-            "beginMessageArtifactCompletion(outcome: .cancelled)",
+            "releaseMessageArtifact()",
         ] {
             XCTAssertTrue(
                 lockCleanup.contains(requiredStatement),
                 "Lock cleanup must contain: \(requiredStatement)"
             )
         }
-        XCTAssertFalse(lockCleanup.contains("releaseMessageArtifact()"))
+        XCTAssertFalse(lockCleanup.contains("beginMessageArtifactCompletion"))
         XCTAssertFalse(lockCleanup.contains("pendingMessageArtifact = nil"))
 
         let action = try sourceSection(
@@ -1109,11 +1302,13 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
         XCTAssertTrue(beginCompletion.contains("pendingMessageArtifact"))
         XCTAssertTrue(
-            beginCompletion.contains("messageArtifactCompletionGate.begin(for: artifact.id)")
+            beginCompletion.contains(
+                "messageArtifactCompletionGate.begin(for: evidence.artifactID)"
+            )
         )
         XCTAssertTrue(
             beginCompletion.contains(
-                "completePreparedArtifact(artifact: artifact, outcome: outcome)"
+                "completePreparedArtifact(artifact: artifact, evidence: evidence)"
             )
         )
 
@@ -1143,7 +1338,7 @@ final class RuneScribeUISessionTests: XCTestCase {
             messageFinished.range(of: "showMessageCompose = false")
         )
         let beginsCompletion = try XCTUnwrap(
-            messageFinished.range(of: "beginMessageArtifactCompletion(outcome: outcome)")
+            messageFinished.range(of: "handleShareCompletion(completion)")
         )
         XCTAssertLessThan(
             messageFinished.distance(from: messageFinished.startIndex, to: hidesComposer.lowerBound),
@@ -1198,6 +1393,62 @@ final class RuneScribeUISessionTests: XCTestCase {
         }
     }
 
+    func testContentViewRepreparesWithSameHandleAfterEveryTerminalLease() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let source = try String(
+            contentsOf: packageRoot
+                .appendingPathComponent("Sources", isDirectory: true)
+                .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+                .appendingPathComponent("Views", isDirectory: true)
+                .appendingPathComponent("ContentView.swift"),
+            encoding: .utf8
+        )
+
+        let action = try sourceSection(
+            source,
+            from: "    private func performAction(generation: UInt64) async {",
+            to: "    private func returnToEditing() {"
+        )
+        XCTAssertTrue(action.contains("guard let shareHandle = result.shareHandle"))
+        XCTAssertTrue(action.contains("shareHandle: share.shareHandle"))
+        XCTAssertTrue(action.contains("messageSharePreparation = preparedShare"))
+
+        let terminalFailure = try sourceSection(
+            source,
+            from: "    private func recoverMessageArtifactAfterTerminalFailure(",
+            to: "    private func beginMessageArtifactCompletion("
+        )
+        XCTAssertTrue(terminalFailure.contains("session.releaseShareArtifact(id: artifact.id)"))
+        XCTAssertTrue(
+            terminalFailure.contains("prepareReplacementMessageArtifact(using: preparation)")
+        )
+
+        let completion = try sourceSection(
+            source,
+            from: "    private func completePreparedArtifact(",
+            to: "    private func prepareReplacementMessageArtifact("
+        )
+        XCTAssertTrue(completion.contains("session.completeShareArtifact(evidence: evidence)"))
+        XCTAssertTrue(completion.contains("pendingMessageArtifact = nil"))
+        XCTAssertTrue(completion.contains("prepareReplacementMessageArtifact(using: preparation)"))
+        XCTAssertFalse(completion.contains("retainedForRetry"))
+
+        let replacement = try sourceSection(
+            source,
+            from: "    private func prepareReplacementMessageArtifact(",
+            to: "    private func selectActiveCipher("
+        )
+        XCTAssertTrue(replacement.contains("shareHandle: preparation.shareHandle"))
+        XCTAssertTrue(replacement.contains("session.shareTransfer(for: preparedArtifact.id)"))
+        XCTAssertTrue(replacement.contains("artifactID: preparedArtifact.id"))
+        XCTAssertTrue(replacement.contains("pendingMessageArtifact = artifact"))
+        XCTAssertTrue(replacement.contains("pendingMessageTransfer = transfer"))
+    }
+
+    #if os(macOS)
     func testRepresentativeUserFacingViewsRenderForParityInspection() async throws {
         let service = ControllableApplicationService()
         let (session, runtime) = try await makeSession(applicationService: service)
@@ -1299,6 +1550,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         await session.stop()
         await runtime.stop()
     }
+    #endif
 
     private func makeSession(
         applicationService: ControllableApplicationService,
@@ -1317,6 +1569,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         let session = RuneScribeUISession(
             applicationClient: harness.client,
             runtimeIO: runtimeIO ?? harness.runtimeIO,
+            availabilityClient: harness.availabilityClient,
             resourcePresentation: resourcePresentation
                 ?? RuntimeApplicationResourcePresentation(
                     splashVideo: nil,
@@ -1334,6 +1587,7 @@ final class RuneScribeUISessionTests: XCTestCase {
     ) async throws -> (
         client: RuntimeApplicationClient,
         runtimeIO: RuntimeIOClient,
+        availabilityClient: RuntimeAvailabilityClient,
         runtime: RuneScribeRuntime,
         capture: ApplicationClientCapture
     ) {
@@ -1355,6 +1609,10 @@ final class RuneScribeUISessionTests: XCTestCase {
             sharePresentation,
             for: RuneScribeServiceKeys.sharePresentation
         )
+        try await runtime.installPlatformAdapter(
+            InMemoryModuleStateStore(),
+            for: RuneScribeServiceKeys.moduleStateStore
+        )
         try await runtime.register(
             manifest: TestCoreModule.manifest,
             factory: TestCoreModule.factory(applicationService: applicationService)
@@ -1367,6 +1625,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         return (
             try await capture.requireClient(),
             try await capture.requireRuntimeIOClient(),
+            try await capture.requireAvailabilityClient(),
             runtime,
             capture
         )
@@ -1387,15 +1646,16 @@ final class RuneScribeUISessionTests: XCTestCase {
     private func eventually(
         _ predicate: @escaping @MainActor () -> Bool
     ) async -> Bool {
-        for _ in 0..<1_000 {
+        for _ in 0..<500 {
             if predicate() {
                 return true
             }
-            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(2))
         }
         return predicate()
     }
 
+    #if os(macOS)
     private func renderPNG(_ view: AnyView, size: CGSize) throws -> Data {
         let hostingView = NSHostingView(rootView: view.frame(width: size.width, height: size.height))
         hostingView.frame = NSRect(origin: .zero, size: size)
@@ -1410,6 +1670,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         hostingView.cacheDisplay(in: hostingView.bounds, to: bitmap)
         return try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
     }
+    #endif
 
     private func writeParityArtifactIfRequested(_ data: Data, name: String) throws {
         guard let path = ProcessInfo.processInfo.environment["RUNESCRIBE_PARITY_ARTIFACT_DIR"] else {
@@ -1659,17 +1920,28 @@ private actor ControllableApplicationService:
     private let createdCipher: CipherSummary?
     private let systemContacts: [SystemContactDTO]?
     private let inboundGate: InboundReceiveGate?
+    private let shareCompletionResult: ShareArtifactCompletionResultDTO?
+    private let preparedMessageArtifact: ShareArtifactDTO?
+    private var shareCompletionCommands: [CompleteShareArtifactCommand] = []
+    private var logicalShareCompletionEvidence: [
+        ShareArtifactID: ShareArtifactCompletionEvidenceDTO
+    ] = [:]
+    private var prepareMessageShareCommands: [PrepareMessageShareCommand] = []
     nonisolated let states: AsyncStream<RuneScribeApplicationSnapshot>
     nonisolated let stateContinuation: AsyncStream<RuneScribeApplicationSnapshot>.Continuation
 
     init(
         createdCipher: CipherSummary? = nil,
         systemContacts: [SystemContactDTO]? = nil,
-        inboundGate: InboundReceiveGate? = nil
+        inboundGate: InboundReceiveGate? = nil,
+        shareCompletionResult: ShareArtifactCompletionResultDTO? = nil,
+        preparedMessageArtifact: ShareArtifactDTO? = nil
     ) {
         self.createdCipher = createdCipher
         self.systemContacts = systemContacts
         self.inboundGate = inboundGate
+        self.shareCompletionResult = shareCompletionResult
+        self.preparedMessageArtifact = preparedMessageArtifact
         let stateChannel = AsyncStream.makeStream(
             of: RuneScribeApplicationSnapshot.self,
             bufferingPolicy: .bufferingNewest(16)
@@ -1761,13 +2033,35 @@ private actor ControllableApplicationService:
     func prepareMessageShare(
         _ command: PrepareMessageShareCommand
     ) async throws -> ShareArtifactDTO {
+        prepareMessageShareCommands.append(command)
+        if let preparedMessageArtifact { return preparedMessageArtifact }
         throw StubError.unexpectedCommand
+    }
+
+    func recordedPrepareMessageShareCommands() -> [PrepareMessageShareCommand] {
+        prepareMessageShareCommands
     }
 
     func completeShareArtifact(
         _ command: CompleteShareArtifactCommand
     ) async throws -> ShareArtifactCompletionResultDTO {
+        shareCompletionCommands.append(command)
+        guard let evidence = command.evidence else { throw StubError.unexpectedCommand }
+        if let existing = logicalShareCompletionEvidence[evidence.artifactID] {
+            guard existing == evidence else { throw StubError.unexpectedCommand }
+        } else {
+            logicalShareCompletionEvidence[evidence.artifactID] = evidence
+        }
+        if let shareCompletionResult { return shareCompletionResult }
         throw StubError.unexpectedCommand
+    }
+
+    func recordedShareCompletionCommands() -> [CompleteShareArtifactCommand] {
+        shareCompletionCommands
+    }
+
+    func recordedLogicalShareCompletionEffectCount() -> Int {
+        logicalShareCompletionEvidence.count
     }
 
     func releaseShareArtifact(id: ShareArtifactID) async {}
@@ -1859,11 +2153,14 @@ private enum TestCoreModule {
         displayName: "Rune Scribe Test Core",
         moduleVersion: moduleVersion,
         moduleType: .service,
+        criticality: descriptor.criticality,
         supportedPlatforms: [.iOS, .macOS],
         capabilitiesRequested: [RuneScribeCapabilities.inboundInput],
         entryPoint: descriptor.entryPoint,
         runtimeRequirements: ModuleRuntimeRequirements(),
-        defaultRole: RuneScribeRoles.core
+        defaultRole: RuneScribeRoles.core,
+        consumedEndpoints: descriptor.consumedEndpoints.sorted(),
+        publishedEndpoints: descriptor.publishedEndpoints.sorted()
     )
 
     static func factory(
@@ -1900,6 +2197,7 @@ private enum TestApplicationClientModule {
             RuneScribeCapabilities.applicationStateRead,
             RuneScribeCapabilities.rootUI,
             RuneScribeCapabilities.shareUI,
+            RuneScribeCapabilities.runtimeAvailabilityRead,
         ],
         requiredServices: [RuneScribeServiceIDs.sharePresentation],
         requiredModuleRoles: [RuneScribeRoles.core],
@@ -1911,19 +2209,23 @@ private enum TestApplicationClientModule {
         displayName: "Rune Scribe Test Application Client",
         moduleVersion: TestCoreModule.moduleVersion,
         moduleType: .ui,
+        criticality: descriptor.criticality,
         supportedPlatforms: [.iOS, .macOS],
         capabilitiesRequested: [
             RuneScribeCapabilities.applicationCommands,
             RuneScribeCapabilities.applicationStateRead,
             RuneScribeCapabilities.rootUI,
             RuneScribeCapabilities.shareUI,
+            RuneScribeCapabilities.runtimeAvailabilityRead,
         ],
         entryPoint: descriptor.entryPoint,
         runtimeRequirements: ModuleRuntimeRequirements(
             requiredServices: [RuneScribeServiceIDs.sharePresentation],
             requiredModuleRoles: [RuneScribeRoles.core]
         ),
-        defaultRole: RuneScribeRoles.primaryUI
+        defaultRole: RuneScribeRoles.primaryUI,
+        consumedEndpoints: descriptor.consumedEndpoints.sorted(),
+        publishedEndpoints: descriptor.publishedEndpoints.sorted()
     )
 
     static func factory(capture: ApplicationClientCapture) -> AnyModuleFactory {
@@ -1938,15 +2240,18 @@ private actor ApplicationClientCapture {
 
     private var client: RuntimeApplicationClient?
     private var runtimeIOClient: RuntimeIOClient?
+    private var availabilityClient: RuntimeAvailabilityClient?
     private var clientFactory: ClientFactory?
 
     func store(
         _ client: RuntimeApplicationClient,
         runtimeIOClient: RuntimeIOClient,
+        availabilityClient: RuntimeAvailabilityClient,
         clientFactory: @escaping ClientFactory
     ) {
         self.client = client
         self.runtimeIOClient = runtimeIOClient
+        self.availabilityClient = availabilityClient
         self.clientFactory = clientFactory
     }
 
@@ -1958,6 +2263,11 @@ private actor ApplicationClientCapture {
     func requireRuntimeIOClient() throws -> RuntimeIOClient {
         guard let runtimeIOClient else { throw StubError.unexpectedCommand }
         return runtimeIOClient
+    }
+
+    func requireAvailabilityClient() throws -> RuntimeAvailabilityClient {
+        guard let availabilityClient else { throw StubError.unexpectedCommand }
+        return availabilityClient
     }
 
     func makeClient() async throws -> RuntimeApplicationClient {
@@ -1973,9 +2283,11 @@ private struct ApplicationClientModule: RuneScribeModule {
     func start(context: ModuleContext) async throws {
         let client = try await context.applicationClient()
         let runtimeIOClient = try await context.runtimeIOClient()
+        let availabilityClient = try await context.runtimeAvailabilityClient()
         await capture.store(
             client,
             runtimeIOClient: runtimeIOClient,
+            availabilityClient: availabilityClient,
             clientFactory: { try await context.applicationClient() }
         )
     }

@@ -30,8 +30,10 @@ The current module identities are:
 | Purpose | Identifier |
 |---|---|
 | Core module | `com.runescribe.module.core` |
+| Progression module | `com.runescribe.module.progression` |
 | Primary UI module | `com.runescribe.module.ui` |
 | Core role | `runescribe.core` |
+| Progression role | `runescribe.progression` |
 | Primary UI role | `runescribe.ui.primary` |
 | Host role | `application.host` |
 
@@ -41,14 +43,21 @@ Capabilities are closed over [`RuneScribeCapabilities.all`](../../Packages/RuneS
 
 | Module | Requested capabilities | Required services | Required roles |
 |---|---|---|---|
-| Core | `runtime.service.publish`, `runtime.events.publish`, `storage.keychain`, `storage.protected-files`, `files.inbound.read`, `storage.share-artifacts`, `resources.read`, `fonts.register`, `contacts.read`, `clipboard.read`, `clock.read`, `uuid.generate`, `application.inbound-input` | secure values, protected files, bounded inbound file reader, share artifact store, app resources, font registrar, Contacts access, clipboard read, clock, UUID | none |
-| UI | `runtime.service.resolve`, `application.commands`, `application.state.read`, `ui.root`, `resources.read`, `clipboard.write`, `ui.share`, `ui.messages` | application facade, app resources, clipboard write | `runescribe.core` |
+| Core | `runtime.events.publish`, `storage.keychain`, `storage.protected-files`, `storage.share-artifacts`, `resources.read`, `fonts.register`, `contacts.read`, `clipboard.read`, `clock.read`, `uuid.generate`, `application.inbound-input`, `progression.events.submit`, `progression.migration.submit` | secure values, protected files, share artifact store, app resources, font registrar, Contacts access, clipboard read, clock, UUID | none |
+| Progression | `runtime.module-state.access`, `resources.read`, `runtime.availability.read` | app resources, module state | none |
+| UI | `runtime.service.resolve`, `application.commands`, `application.state.read`, `ui.root`, `resources.read`, `clipboard.write`, `ui.file-import`, `ui.share`, `ui.messages`, `runtime.availability.read`, `runtime.settings.read`, `runtime.settings.write`, `progression.state.read`, `progression.commands` | app resources, clipboard write, share presentation | `runescribe.core` |
 
-The JSON manifests are [`Core`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json) and [`UI`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json). Their compiled descriptors are in [`CoreModule.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift) and [`UIModule.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift).
+The JSON manifests are [`Core`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json), [`Progression`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/module-manifest.json), and [`UI`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json). Their compiled descriptors live in each module's bootstrap source.
 
 The runtime checks equality for module identity, version, kind, entry point, role, requested capabilities, required services, and required roles. Published services are compiled descriptor declarations: Core declares `RuneScribeApplicationService` and `RuneScribeInboundInputService`. Runtime activation verifies both were actually published before marking Core active.
 
-Both current manifests have no entitlement requirement, and the runtime uses [`AlwaysEligibleProvider`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Module.swift). `ModuleEligibilityProviding` remains the single injected eligibility seam; there is no duplicate entitlement API and no purchase, achievement, unlock, or progression implementation.
+The shipping graph now contains Core, optional Progression, and UI manifests. Included
+shipping modules have no earned-entitlement requirement. Runtime availability remains
+the only eligibility seam for optional providers; it can reconcile a future provider's
+requirement against Progression's live entitlement snapshot without a direct module
+reference or restart. There is no purchase eligibility API. The implemented
+Achievement, unlock, migration, and availability ports are described in
+[ProgressionArchitecture.md](ProgressionArchitecture.md).
 
 ## Service policy
 

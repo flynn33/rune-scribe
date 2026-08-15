@@ -33,6 +33,16 @@ public struct MessageID: UUIDBackedIdentifier {
     }
 }
 
+/// Opaque handle for retaining per-encode share evidence without deriving an
+/// identity from runes, ciphertext, or a public cipher identifier.
+public struct EncodedMessageHandle: UUIDBackedIdentifier {
+    public let rawValue: UUID
+
+    public init(rawValue: UUID) {
+        self.rawValue = rawValue
+    }
+}
+
 public struct ImportID: UUIDBackedIdentifier {
     public let rawValue: UUID
 
@@ -165,7 +175,7 @@ public struct PrivacySafeToken<Domain>: RawRepresentable, Codable, Hashable, Sen
         lhs.rawValue < rhs.rawValue
     }
 
-    public var description: String { rawValue }
+    public var description: String { "<redacted-token>" }
 }
 
 public enum CodexIdentifierDomain: Sendable {}
@@ -178,6 +188,17 @@ public enum EffectIdentifierDomain: Sendable {}
 public enum AchievementIdentifierDomain: Sendable {}
 public enum RuleIdentifierDomain: Sendable {}
 public enum UnlockIdentifierDomain: Sendable {}
+public enum StatisticIdentifierDomain: Sendable {}
+public enum GrantGroupIdentifierDomain: Sendable {}
+public enum GrantTransactionIdentifierDomain: Sendable {}
+public enum TitleIdentifierDomain: Sendable {}
+public enum CrestIdentifierDomain: Sendable {}
+public enum RevealIdentifierDomain: Sendable {}
+public enum ProgressionCatalogIdentifierDomain: Sendable {}
+public enum ProgressionRejectionIdentifierDomain: Sendable {}
+public enum ModuleStateCollectionIdentifierDomain: Sendable {}
+public enum ModuleStateRecordIdentifierDomain: Sendable {}
+public enum RuntimeSettingIdentifierDomain: Sendable {}
 public enum PackageKindIdentifierDomain: Sendable {}
 public enum PackageVersionIdentifierDomain: Sendable {}
 public enum EligibilityReasonIdentifierDomain: Sendable {}
@@ -197,6 +218,21 @@ public typealias EffectID = RoadmapStringIdentifier<EffectIdentifierDomain>
 public typealias AchievementID = RoadmapStringIdentifier<AchievementIdentifierDomain>
 public typealias RuleID = RoadmapStringIdentifier<RuleIdentifierDomain>
 public typealias UnlockID = RoadmapStringIdentifier<UnlockIdentifierDomain>
+public typealias StatisticID = RoadmapStringIdentifier<StatisticIdentifierDomain>
+public typealias GrantGroupID = RoadmapStringIdentifier<GrantGroupIdentifierDomain>
+/// Identifies one committed apply transaction. This is deliberately distinct
+/// from the stable catalog identity of a `GrantGroupID`.
+public typealias GrantTransactionID = RoadmapStringIdentifier<GrantTransactionIdentifierDomain>
+public typealias TitleID = RoadmapStringIdentifier<TitleIdentifierDomain>
+public typealias CrestID = RoadmapStringIdentifier<CrestIdentifierDomain>
+public typealias RevealID = RoadmapStringIdentifier<RevealIdentifierDomain>
+public typealias ProgressionCatalogID = RoadmapStringIdentifier<ProgressionCatalogIdentifierDomain>
+public typealias ProgressionRejectionCode =
+    RoadmapStringIdentifier<ProgressionRejectionIdentifierDomain>
+public typealias ModuleStateCollectionID =
+    RoadmapStringIdentifier<ModuleStateCollectionIdentifierDomain>
+public typealias ModuleStateRecordID = RoadmapStringIdentifier<ModuleStateRecordIdentifierDomain>
+public typealias RuntimeSettingID = RoadmapStringIdentifier<RuntimeSettingIdentifierDomain>
 public typealias PackageKindID = RoadmapStringIdentifier<PackageKindIdentifierDomain>
 public typealias PackageVersionID = RoadmapStringIdentifier<PackageVersionIdentifierDomain>
 public typealias EligibilityReasonID = RoadmapStringIdentifier<EligibilityReasonIdentifierDomain>
@@ -207,6 +243,42 @@ public typealias CipherToken = PrivacySafeToken<CipherTokenDomain>
 public typealias MessageToken = PrivacySafeToken<MessageTokenDomain>
 public typealias PackageToken = PrivacySafeToken<PackageTokenDomain>
 public typealias RelationshipToken = PrivacySafeToken<RelationshipTokenDomain>
+
+/// The catalog JSON represents `catalogVersion` as a positive integer. Keeping
+/// that wire shape here prevents a semantic version or display string from
+/// being accepted accidentally.
+public struct ProgressionCatalogVersion: RawRepresentable, Codable, Hashable, Sendable,
+    Comparable
+{
+    public let rawValue: UInt64
+
+    public init?(rawValue: UInt64) {
+        guard rawValue > 0 else { return nil }
+        self.rawValue = rawValue
+    }
+
+    public init(from decoder: Decoder) throws {
+        let value = try decoder.singleValueContainer().decode(UInt64.self)
+        guard let version = Self(rawValue: value) else {
+            throw DecodingError.dataCorrupted(
+                .init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Progression catalog versions must be positive integers."
+                )
+            )
+        }
+        self = version
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+
+    public static func < (lhs: Self, rhs: Self) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+}
 
 enum RoadmapIdentifierSyntax {
     static let maximumIdentifierUTF8Count = 96

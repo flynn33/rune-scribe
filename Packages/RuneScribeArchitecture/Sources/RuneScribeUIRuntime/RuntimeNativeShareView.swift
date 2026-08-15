@@ -34,13 +34,13 @@ public final class RuneScribeSharePresentationHandle {
 public struct RuneScribeFileShareLink: View {
     @ObservedObject private var transfer: OpaqueShareTransfer
     private let onShareTriggered: @MainActor () -> Void
-    private let onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void
+    private let onFinish: @MainActor (SharePresentationCompletion) -> Void
     private let onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void
 
     public init(
         transfer: OpaqueShareTransfer,
         onShareTriggered: @escaping @MainActor () -> Void = {},
-        onFinish: @escaping @MainActor (ShareArtifactOutcomeDTO) -> Void = { _ in },
+        onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void = { _ in },
         onPresentation: @escaping @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in }
     ) {
         self.transfer = transfer
@@ -65,6 +65,7 @@ public struct RuneScribeFileShareLink: View {
                 accessibilityLabel: "Share",
                 help: "Share via Messages, Mail…",
                 onShareTriggered: onShareTriggered,
+                onPresented: reportPresented,
                 onFinish: finish,
                 onPresentation: onPresentation
             )
@@ -73,6 +74,7 @@ public struct RuneScribeFileShareLink: View {
         RuneScribeIOSActivityButton(
             payload: .file(presentationURL),
             onShareTriggered: onShareTriggered,
+            onPresented: reportPresented,
             onFinish: finish
         ) {
             Label("Share", systemImage: "square.and.arrow.up")
@@ -87,13 +89,18 @@ public struct RuneScribeFileShareLink: View {
         }
     }
 
-    private func finish(_ outcome: ShareArtifactOutcomeDTO) {
+    private func reportPresented(on routeClass: ShareRouteClassDTO) {
+        Task { @MainActor in
+            try? await transfer.reportPresented(on: routeClass)
+        }
+    }
+
+    private func finish(_ report: SharePresentationReportDTO) {
         Task { @MainActor in
             do {
-                try await transfer.finish(outcome)
-                onFinish(outcome)
+                onFinish(.success(try await transfer.finish(report)))
             } catch {
-                onFinish(.failed)
+                onFinish(.failure(error))
             }
         }
     }
@@ -102,13 +109,13 @@ public struct RuneScribeFileShareLink: View {
 public struct RuneScribeTextShareLink: View {
     @ObservedObject private var transfer: OpaqueShareTransfer
     private let onShareTriggered: @MainActor () -> Void
-    private let onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void
+    private let onFinish: @MainActor (SharePresentationCompletion) -> Void
     private let onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void
 
     public init(
         transfer: OpaqueShareTransfer,
         onShareTriggered: @escaping @MainActor () -> Void = {},
-        onFinish: @escaping @MainActor (ShareArtifactOutcomeDTO) -> Void = { _ in },
+        onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void = { _ in },
         onPresentation: @escaping @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in }
     ) {
         self.transfer = transfer
@@ -133,6 +140,7 @@ public struct RuneScribeTextShareLink: View {
                         accessibilityLabel: "Share",
                         help: "Share via Messages, Mail…",
                         onShareTriggered: onShareTriggered,
+                        onPresented: reportPresented,
                         onFinish: finish,
                         onPresentation: onPresentation
                     )
@@ -141,6 +149,7 @@ public struct RuneScribeTextShareLink: View {
                 RuneScribeIOSActivityButton(
                     payload: .text(text),
                     onShareTriggered: onShareTriggered,
+                    onPresented: reportPresented,
                     onFinish: finish
                 ) {
                     Label("Share", systemImage: "square.and.arrow.up")
@@ -155,13 +164,18 @@ public struct RuneScribeTextShareLink: View {
         }
     }
 
-    private func finish(_ outcome: ShareArtifactOutcomeDTO) {
+    private func reportPresented(on routeClass: ShareRouteClassDTO) {
+        Task { @MainActor in
+            try? await transfer.reportPresented(on: routeClass)
+        }
+    }
+
+    private func finish(_ report: SharePresentationReportDTO) {
         Task { @MainActor in
             do {
-                try await transfer.finish(outcome)
-                onFinish(outcome)
+                onFinish(.success(try await transfer.finish(report)))
             } catch {
-                onFinish(.failed)
+                onFinish(.failure(error))
             }
         }
     }
@@ -173,7 +187,7 @@ public struct RuneScribeCipherLinkShareLink<Label: View>: View {
     @ObservedObject private var transfer: OpaqueShareTransfer
     private let cipherLabel: String
     private let onShareTriggered: @MainActor () -> Void
-    private let onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void
+    private let onFinish: @MainActor (SharePresentationCompletion) -> Void
     private let onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void
     private let label: () -> Label
 
@@ -181,7 +195,7 @@ public struct RuneScribeCipherLinkShareLink<Label: View>: View {
         transfer: OpaqueShareTransfer,
         cipherLabel: String,
         onShareTriggered: @escaping @MainActor () -> Void = {},
-        onFinish: @escaping @MainActor (ShareArtifactOutcomeDTO) -> Void = { _ in },
+        onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void = { _ in },
         onPresentation: @escaping @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in },
         @ViewBuilder label: @escaping () -> Label
     ) {
@@ -210,6 +224,7 @@ public struct RuneScribeCipherLinkShareLink<Label: View>: View {
                     accessibilityLabel: "Share \(cipherLabel)",
                     help: "Share via Messages, Mail…",
                     onShareTriggered: onShareTriggered,
+                    onPresented: reportPresented,
                     onFinish: finish,
                     onPresentation: onPresentation
                 )
@@ -225,6 +240,7 @@ public struct RuneScribeCipherLinkShareLink<Label: View>: View {
                     + "can decode my messages."
             ),
             onShareTriggered: onShareTriggered,
+            onPresented: reportPresented,
             onFinish: finish,
             label: label
         )
@@ -238,26 +254,43 @@ public struct RuneScribeCipherLinkShareLink<Label: View>: View {
         }
     }
 
-    private func finish(_ outcome: ShareArtifactOutcomeDTO) {
+    private func reportPresented(on routeClass: ShareRouteClassDTO) {
+        Task { @MainActor in
+            try? await transfer.reportPresented(on: routeClass)
+        }
+    }
+
+    private func finish(_ report: SharePresentationReportDTO) {
         Task { @MainActor in
             do {
-                try await transfer.finish(outcome)
-                onFinish(outcome)
+                onFinish(.success(try await transfer.finish(report)))
             } catch {
-                onFinish(.failed)
+                onFinish(.failure(error))
             }
         }
     }
 }
 
 #if os(iOS)
-public enum RuneScribeActivityOutcomeMapper {
-    public static func outcome(
+public enum RuneScribeActivityReportMapper {
+    public static func report(
+        activityType: UIActivity.ActivityType?,
         completed: Bool,
         error: (any Error)?
-    ) -> ShareArtifactOutcomeDTO {
-        if error != nil { return .failed }
-        return completed ? .handedOff : .cancelled
+    ) -> SharePresentationReportDTO {
+        let routeClass: ShareRouteClassDTO = activityType == .airDrop
+            ? .airDrop
+            : .shareSheet
+        let result: ShareRouteResultDTO
+        if error != nil {
+            result = .failed
+        } else {
+            result = completed ? .completedBySystem : .cancelled
+        }
+        return try! SharePresentationReportDTO(
+            routeClass: routeClass,
+            result: result
+        )
     }
 }
 
@@ -267,12 +300,14 @@ public struct RuneScribeActivityCompletionGate {
     public init() {}
 
     public mutating func accept(
+        activityType: UIActivity.ActivityType?,
         completed: Bool,
         error: (any Error)?
-    ) -> ShareArtifactOutcomeDTO? {
+    ) -> SharePresentationReportDTO? {
         guard !hasCompleted else { return nil }
         hasCompleted = true
-        return RuneScribeActivityOutcomeMapper.outcome(
+        return RuneScribeActivityReportMapper.report(
+            activityType: activityType,
             completed: completed,
             error: error
         )
@@ -283,7 +318,8 @@ public struct RuneScribeActivityCompletionGate {
 private struct RuneScribeIOSActivityButton<Label: View>: View {
     let payload: RuneScribeIOSActivityPayload
     let onShareTriggered: @MainActor () -> Void
-    let onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void
+    let onPresented: @MainActor (ShareRouteClassDTO) -> Void
+    let onFinish: @MainActor (SharePresentationReportDTO) -> Void
     @ViewBuilder let label: () -> Label
 
     @State private var presentation: RuneScribeIOSActivityPresentation?
@@ -294,8 +330,9 @@ private struct RuneScribeIOSActivityButton<Label: View>: View {
             onShareTriggered()
             presentation = RuneScribeIOSActivityPresentation(
                 payload: payload,
-                onFinish: { outcome in
-                    onFinish(outcome)
+                onPresented: onPresented,
+                onFinish: { report in
+                    onFinish(report)
                     presentation = nil
                 }
             )
@@ -361,23 +398,38 @@ private final class RuneScribeIOSActivityPresentation: Identifiable {
     let activityItems: [Any]
 
     private var completionGate = RuneScribeActivityCompletionGate()
-    private let onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void
+    private var hasReportedPresentation = false
+    private let onPresented: @MainActor (ShareRouteClassDTO) -> Void
+    private let onFinish: @MainActor (SharePresentationReportDTO) -> Void
 
     init(
         payload: RuneScribeIOSActivityPayload,
-        onFinish: @escaping @MainActor (ShareArtifactOutcomeDTO) -> Void
+        onPresented: @escaping @MainActor (ShareRouteClassDTO) -> Void,
+        onFinish: @escaping @MainActor (SharePresentationReportDTO) -> Void
     ) {
         self.payload = payload
         activityItems = payload.activityItems
+        self.onPresented = onPresented
         self.onFinish = onFinish
     }
 
-    func complete(completed: Bool, error: (any Error)?) {
-        guard let outcome = completionGate.accept(
+    func reportPresentedIfNeeded() {
+        guard !hasReportedPresentation else { return }
+        hasReportedPresentation = true
+        onPresented(.shareSheet)
+    }
+
+    func complete(
+        activityType: UIActivity.ActivityType? = nil,
+        completed: Bool,
+        error: (any Error)?
+    ) {
+        guard let report = completionGate.accept(
+            activityType: activityType,
             completed: completed,
             error: error
         ) else { return }
-        onFinish(outcome)
+        onFinish(report)
     }
 
     func cancelIfNeeded() {
@@ -485,14 +537,19 @@ private final class RuneScribeIOSActivityPresenterController: UIViewController,
             applicationActivities: nil
         )
         controller.completionWithItemsHandler = {
-            [weak self, weak controller, presentation] _, completed, _, error in
+            [weak self, weak controller, presentation] activityType, completed, _, error in
             guard let controller else {
-                presentation.complete(completed: completed, error: error)
+                presentation.complete(
+                    activityType: activityType,
+                    completed: completed,
+                    error: error
+                )
                 return
             }
             self?.finishActivePresentation(
                 presentation,
                 controller: controller,
+                activityType: activityType,
                 completed: completed,
                 error: error
             )
@@ -505,6 +562,7 @@ private final class RuneScribeIOSActivityPresenterController: UIViewController,
         }
         activityController = controller
         activePresentation = presentation
+        presentation.reportPresentedIfNeeded()
         present(controller, animated: true)
         controller.presentationController?.delegate = self
     }
@@ -512,10 +570,15 @@ private final class RuneScribeIOSActivityPresenterController: UIViewController,
     private func finishActivePresentation(
         _ presentation: RuneScribeIOSActivityPresentation,
         controller: UIActivityViewController,
+        activityType: UIActivity.ActivityType?,
         completed: Bool,
         error: (any Error)?
     ) {
-        presentation.complete(completed: completed, error: error)
+        presentation.complete(
+            activityType: activityType,
+            completed: completed,
+            error: error
+        )
         guard activityController === controller,
               activePresentation?.id == presentation.id else { return }
         dismissTrackedController(
@@ -629,6 +692,30 @@ private final class RuneScribeIOSActivityItemSource: NSObject,
 #endif
 
 #if os(macOS)
+public enum RuneScribeMacSharingServiceReportMapper {
+    public static func routeClass(
+        for sharingService: NSSharingService?
+    ) -> ShareRouteClassDTO {
+        guard let sharingService,
+              let airDrop = NSSharingService(named: .sendViaAirDrop),
+              sharingService == airDrop
+        else {
+            return .shareSheet
+        }
+        return .airDrop
+    }
+
+    public static func report(
+        for sharingService: NSSharingService?,
+        result: ShareRouteResultDTO
+    ) -> SharePresentationReportDTO {
+        try! SharePresentationReportDTO(
+            routeClass: routeClass(for: sharingService),
+            result: result
+        )
+    }
+}
+
 private enum RuneScribeMacSharePayload {
     case file(URL)
     case text(String)
@@ -656,7 +743,8 @@ private struct RuneScribeMacShareControl: NSViewRepresentable {
     let accessibilityLabel: String
     let help: String
     let onShareTriggered: @MainActor () -> Void
-    let onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void
+    let onPresented: @MainActor (ShareRouteClassDTO) -> Void
+    let onFinish: @MainActor (SharePresentationReportDTO) -> Void
     let onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void
 
     func makeNSView(context: Context) -> RuneScribeMacShareView {
@@ -666,6 +754,7 @@ private struct RuneScribeMacShareControl: NSViewRepresentable {
             accessibilityLabel: accessibilityLabel,
             help: help,
             onShareTriggered: onShareTriggered,
+            onPresented: onPresented,
             onFinish: onFinish,
             onPresentation: onPresentation
         )
@@ -678,6 +767,7 @@ private struct RuneScribeMacShareControl: NSViewRepresentable {
             accessibilityLabel: accessibilityLabel,
             help: help,
             onShareTriggered: onShareTriggered,
+            onPresented: onPresented,
             onFinish: onFinish,
             onPresentation: onPresentation
         )
@@ -695,7 +785,8 @@ private final class RuneScribeMacShareView: NSView,
 {
     private var payload: RuneScribeMacSharePayload = .file(URL(fileURLWithPath: "/dev/null"))
     private var onShareTriggered: @MainActor () -> Void = {}
-    private var onFinish: @MainActor (ShareArtifactOutcomeDTO) -> Void = { _ in }
+    private var onPresented: @MainActor (ShareRouteClassDTO) -> Void = { _ in }
+    private var onFinish: @MainActor (SharePresentationReportDTO) -> Void = { _ in }
     private var onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in }
     private var picker: NSSharingServicePicker?
     private var chosenService: NSSharingService?
@@ -731,11 +822,13 @@ private final class RuneScribeMacShareView: NSView,
         accessibilityLabel: String,
         help: String,
         onShareTriggered: @escaping @MainActor () -> Void,
-        onFinish: @escaping @MainActor (ShareArtifactOutcomeDTO) -> Void,
+        onPresented: @escaping @MainActor (ShareRouteClassDTO) -> Void,
+        onFinish: @escaping @MainActor (SharePresentationReportDTO) -> Void,
         onPresentation: @escaping @MainActor (RuneScribeSharePresentationHandle) -> Void
     ) {
         self.payload = payload
         self.onShareTriggered = onShareTriggered
+        self.onPresented = onPresented
         self.onFinish = onFinish
         self.onPresentation = onPresentation
         toolTip = help
@@ -768,7 +861,7 @@ private final class RuneScribeMacShareView: NSView,
     func cancelPresentation() {
         guard let picker else { return }
         picker.close()
-        finish(.cancelled)
+        finish(result: .cancelled)
     }
 
     private func presentPicker() {
@@ -783,16 +876,21 @@ private final class RuneScribeMacShareView: NSView,
         }
         presentationHandle = handle
         onPresentation(handle)
+        onPresented(.shareSheet)
         picker.show(relativeTo: bounds, of: self, preferredEdge: .minY)
     }
 
-    private func finish(_ outcome: ShareArtifactOutcomeDTO) {
+    private func finish(result: ShareRouteResultDTO) {
         guard !didFinish else { return }
         didFinish = true
+        let report = RuneScribeMacSharingServiceReportMapper.report(
+            for: chosenService,
+            result: result
+        )
         picker = nil
         chosenService = nil
         presentationHandle = nil
-        onFinish(outcome)
+        onFinish(report)
     }
 
     func sharingServicePicker(
@@ -809,7 +907,7 @@ private final class RuneScribeMacShareView: NSView,
         didChoose service: NSSharingService?
     ) {
         guard let service else {
-            finish(.cancelled)
+            finish(result: .cancelled)
             return
         }
         chosenService = service
@@ -831,7 +929,8 @@ private final class RuneScribeMacShareView: NSView,
     }
 
     func sharingService(_ sharingService: NSSharingService, didShareItems items: [Any]) {
-        finish(.handedOff)
+        chosenService = sharingService
+        finish(result: .completedBySystem)
     }
 
     func sharingService(
@@ -839,7 +938,8 @@ private final class RuneScribeMacShareView: NSView,
         didFailToShareItems items: [Any],
         error: any Error
     ) {
-        finish(.failed)
+        chosenService = sharingService
+        finish(result: .failed)
     }
 }
 #endif

@@ -264,13 +264,76 @@ public actor RuntimeOperationDispatcher {
         modules[RuntimeHostIdentity.moduleID] = RuntimeModuleDispatchRecord(
             moduleID: RuntimeHostIdentity.moduleID,
             role: RuneScribeRoles.applicationHost,
-            capabilities: [RuneScribeCapabilities.inboundInput],
-            consumedEndpoints: consumedEndpoints,
+            capabilities: [
+                RuneScribeCapabilities.applicationCommands,
+                RuneScribeCapabilities.inboundInput,
+                RuneScribeCapabilities.progressionEventApply,
+                RuneScribeCapabilities.progressionStateRead,
+                RuneScribeCapabilities.progressionRecovery,
+                RuneScribeCapabilities.progressionMigrationApply,
+            ],
+            consumedEndpoints: consumedEndpoints.union([
+                RuntimeApplicationEndpointCatalog.completeShareArtifact
+                    .descriptor.endpointID,
+                RuntimeProgressionEndpointCatalog.applyEvent.descriptor.endpointID,
+                RuntimeProgressionEndpointCatalog.entitlements.endpointID,
+                RuntimeProgressionEndpointCatalog.rebuild.descriptor.endpointID,
+                RuntimeProgressionEndpointCatalog.applyExistingUserMigration
+                    .descriptor.endpointID,
+                RuntimeProgressionEndpointCatalog.applyExistingUserMigrationPage
+                    .descriptor.endpointID,
+            ]),
             publishedEndpoints: [],
             generation: previousGeneration &+ 1,
             lifecycle: .active
         )
         sourceCallTimes.removeValue(forKey: RuntimeHostIdentity.moduleID)
+    }
+
+    func progressionOutboxCommandClient() throws -> RuntimeCommandClient {
+        let sourceGeneration = try currentGeneration(moduleID: RuntimeHostIdentity.moduleID)
+        let lease = try makeLease(
+            sourceModuleID: RuntimeHostIdentity.moduleID,
+            sourceGeneration: sourceGeneration,
+            destination: .role(RuneScribeRoles.progression)
+        )
+        return RuntimeCommandClient(dispatcher: self, lease: lease)
+    }
+
+    func shareCompletionCommandClient() throws -> RuntimeCommandClient {
+        let sourceGeneration = try currentGeneration(
+            moduleID: RuntimeHostIdentity.moduleID
+        )
+        let lease = try makeLease(
+            sourceModuleID: RuntimeHostIdentity.moduleID,
+            sourceGeneration: sourceGeneration,
+            destination: .role(RuneScribeRoles.core)
+        )
+        return RuntimeCommandClient(dispatcher: self, lease: lease)
+    }
+
+    func progressionMigrationCommandClient() throws -> RuntimeCommandClient {
+        let sourceGeneration = try currentGeneration(moduleID: RuntimeHostIdentity.moduleID)
+        let lease = try makeLease(
+            sourceModuleID: RuntimeHostIdentity.moduleID,
+            sourceGeneration: sourceGeneration,
+            destination: .role(RuneScribeRoles.progression)
+        )
+        return RuntimeCommandClient(dispatcher: self, lease: lease)
+    }
+
+    func progressionEntitlementStream() async throws
+        -> RuntimeStateStream<ProgressionEntitlementSnapshotDTO>
+    {
+        let sourceGeneration = try currentGeneration(moduleID: RuntimeHostIdentity.moduleID)
+        let lease = try makeLease(
+            sourceModuleID: RuntimeHostIdentity.moduleID,
+            sourceGeneration: sourceGeneration,
+            destination: .role(RuneScribeRoles.progression)
+        )
+        return try await RuntimeStateClient(dispatcher: self, lease: lease).subscribe(
+            to: RuntimeProgressionEndpointCatalog.entitlements
+        )
     }
 
     func replaceDeclarations(

@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "runescribe.progression.catalog.schema.v1",
+  "title": "Rune Scribe Progression Catalog v1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "catalogID",
+    "catalogVersion",
+    "content",
+    "statistics",
+    "achievements",
+    "milestones",
+    "grantGroups",
+    "journeyGraph",
+    "revealPolicy"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "catalogID": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+    },
+    "catalogVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "content": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "contentID",
+          "kind",
+          "displayName"
+        ],
+        "properties": {
+          "contentID": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "statistics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "statisticID",
+          "storage"
+        ],
+        "properties": {
+          "statisticID": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+          },
+          "storage": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "achievements": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "required": [
+          "achievementID",
+          "displayName",
+          "localPointWeight",
+          "rule"
+        ],
+        "properties": {
+          "achievementID": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+          },
+          "localPointWeight": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      }
+    },
+    "milestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "ruleID",
+          "displayName",
+          "rule",
+          "grantGroupID"
+        ],
+        "properties": {
+          "ruleID": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+          },
+          "grantGroupID": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+          }
+        }
+      }
+    },
+    "grantGroups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "grantGroupID",
+          "items",
+          "revealTier"
+        ],
+        "properties": {
+          "grantGroupID": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

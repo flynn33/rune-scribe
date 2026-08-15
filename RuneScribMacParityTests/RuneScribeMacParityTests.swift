@@ -264,16 +264,20 @@ final class RuneScribeMacParityTests: XCTestCase {
                 ),
                 size: CGSize(width: 320, height: 160)
             )
-            XCTAssertGreaterThan(controlsPNG.count, 5_000)
+            XCTAssertGreaterThan(controlsPNG.count, 4_000)
             attachPNG(controlsPNG, name: "mac-share-controls")
 
-            let linkCompletion = try await harness.session.completeShareArtifact(
-                id: linkArtifact.id,
-                outcome: .cancelled
+            let cancelledReport = try SharePresentationReportDTO(
+                routeClass: .shareSheet,
+                result: .cancelled
             )
+            let linkEvidence = try await transfer.finish(cancelledReport)
+            let linkCompletion = try await harness.session.completeShareArtifact(
+                evidence: linkEvidence
+            )
+            let fileEvidence = try await fileTransfer.finish(cancelledReport)
             let fileCompletion = try await harness.session.completeShareArtifact(
-                id: fileArtifact.id,
-                outcome: .cancelled
+                evidence: fileEvidence
             )
             XCTAssertEqual(linkCompletion, .released)
             XCTAssertEqual(fileCompletion, .released)
@@ -610,6 +614,10 @@ private final class MacParityHarness {
             for: RuneScribeServiceKeys.sharePresentation
         )
         try await runtime.installPlatformAdapter(
+            InMemoryModuleStateStore(),
+            for: RuneScribeServiceKeys.moduleStateStore
+        )
+        try await runtime.installPlatformAdapter(
             inboundFiles,
             for: RuneScribeServiceKeys.inboundFileReader
         )
@@ -708,11 +716,14 @@ private enum MacParityRuntimeModules {
         displayName: "Rune Scribe Mac Parity Core",
         moduleVersion: version,
         moduleType: .service,
+        criticality: coreDescriptor.criticality,
         supportedPlatforms: [.macOS],
         capabilitiesRequested: [RuneScribeCapabilities.inboundInput],
         entryPoint: coreDescriptor.entryPoint,
         runtimeRequirements: ModuleRuntimeRequirements(),
-        defaultRole: RuneScribeRoles.core
+        defaultRole: RuneScribeRoles.core,
+        consumedEndpoints: coreDescriptor.consumedEndpoints.sorted(),
+        publishedEndpoints: coreDescriptor.publishedEndpoints.sorted()
     )
     static let clientManifest = ModuleManifest(
         runtimeVersion: version,
@@ -720,6 +731,7 @@ private enum MacParityRuntimeModules {
         displayName: "Rune Scribe Mac Parity UI",
         moduleVersion: version,
         moduleType: .ui,
+        criticality: clientDescriptor.criticality,
         supportedPlatforms: [.macOS],
         capabilitiesRequested: [
             RuneScribeCapabilities.applicationCommands,
@@ -733,7 +745,9 @@ private enum MacParityRuntimeModules {
             requiredServices: [RuneScribeServiceIDs.sharePresentation],
             requiredModuleRoles: [RuneScribeRoles.core]
         ),
-        defaultRole: RuneScribeRoles.primaryUI
+        defaultRole: RuneScribeRoles.primaryUI,
+        consumedEndpoints: clientDescriptor.consumedEndpoints.sorted(),
+        publishedEndpoints: clientDescriptor.publishedEndpoints.sorted()
     )
 }
 

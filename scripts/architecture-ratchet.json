@@ -17,6 +17,7 @@
     "RuneScribeUIRuntime",
     "RuneScribePlatform",
     "RuneScribeCoreModule",
+    "RuneScribeProgressionModule",
     "RuneScribeUIModule"
   ],
   "testOnlyProducts": [
@@ -26,11 +27,19 @@
     "com.runescribe.module.core": {
       "product": "RuneScribeCoreModule",
       "moduleType": "service",
+      "criticality": "required",
       "defaultRole": "runescribe.core"
+    },
+    "com.runescribe.module.progression": {
+      "product": "RuneScribeProgressionModule",
+      "moduleType": "service",
+      "criticality": "optional",
+      "defaultRole": "runescribe.progression"
     },
     "com.runescribe.module.ui": {
       "product": "RuneScribeUIModule",
       "moduleType": "ui",
+      "criticality": "required",
       "defaultRole": "runescribe.ui.primary"
     }
   },
@@ -44,7 +53,7 @@
     "moduleManifestsMissing": {
       "maximum": 0,
       "owner": "RuntimeFoundation",
-      "reason": "Both shipping module manifests are required.",
+      "reason": "All three shipping module manifests are required.",
       "removalPhase": "P2"
     },
     "projectPackageReferenceMissing": {
@@ -56,7 +65,7 @@
     "projectProductDependenciesMissing": {
       "maximum": 0,
       "owner": "BuildConfiguration",
-      "reason": "Both shipping hosts must link all six required app-owned products.",
+      "reason": "Both shipping hosts must link all seven required app-owned products.",
       "removalPhase": "P2"
     },
     "architectureTestTargetMissing": {

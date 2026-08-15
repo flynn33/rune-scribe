@@ -1,0 +1,309 @@
+{
+  "schemaVersion": "1.0",
+  "catalogID": "runescribe.progression.event-catalog",
+  "catalogVersion": 1,
+  "status": "approved-controlling-implementation-input",
+  "effectiveDate": "2026-08-12",
+  "eventEnvelope": "Use RuneScribeContracts.DomainEventEnvelope and extend only through versioned, bounded, typed fields. No free-form dictionary.",
+  "applyOutcomes": [
+    "applied",
+    "duplicate",
+    "ignored-ineligible",
+    "rejected-permanent",
+    "deferred-unsupported-schema",
+    "deferred-store-unavailable"
+  ],
+  "acknowledgeOutboxOn": [
+    "applied",
+    "duplicate",
+    "ignored-ineligible",
+    "rejected-permanent"
+  ],
+  "retainOutboxOn": [
+    "deferred-unsupported-schema",
+    "deferred-store-unavailable"
+  ],
+  "events": [
+    {
+      "eventType": "runescribe.cipher.created",
+      "producer": "RuneScribeCoreModule",
+      "emissionPoint": "after durable generated-cipher commit",
+      "requiredPayload": [
+        "cipherToken",
+        "origin"
+      ],
+      "requiredValues": {
+        "origin": "generated"
+      },
+      "semanticDedupe": [
+        "cipherToken"
+      ],
+      "updates": [
+        "stat.cipher.created-or-imported.unique"
+      ],
+      "notes": "Never include CipherID, public identifier, label, key bytes, or contact data."
+    },
+    {
+      "eventType": "runescribe.cipher.imported",
+      "producer": "RuneScribeCoreModule",
+      "emissionPoint": "after confirmed imported-cipher commit",
+      "requiredPayload": [
+        "cipherToken",
+        "origin",
+        "routeClass"
+      ],
+      "requiredValues": {
+        "origin": "imported"
+      },
+      "semanticDedupe": [
+        "cipherToken"
+      ],
+      "updates": [
+        "stat.cipher.created-or-imported.unique"
+      ]
+    },
+    {
+      "eventType": "runescribe.message.encoded",
+      "producer": "RuneScribeCoreModule",
+      "emissionPoint": "after authenticated encryption and decorative encoding succeed for a new logical operation",
+      "requiredPayload": [
+        "messageToken",
+        "cipherToken",
+        "origin",
+        "codexIDs"
+      ],
+      "requiredValues": {
+        "origin": "generated"
+      },
+      "semanticDedupe": [
+        "messageToken"
+      ],
+      "updates": [
+        "stat.message.encoded.unique"
+      ],
+      "notes": "No plaintext, runes, ciphertext, envelope, or key material."
+    },
+    {
+      "eventType": "runescribe.share.completed",
+      "producer": "RuneScribeCoreModule through Forsetti terminal-share normalization",
+      "emissionPoint": "after one eligible terminal route result and before artifact cleanup",
+      "requiredPayload": [
+        "messageToken",
+        "routeClass",
+        "codexIDs",
+        "keyIncluded",
+        "linkedRelationship"
+      ],
+      "optionalPayload": [
+        "relationshipToken",
+        "artifactIDs"
+      ],
+      "semanticDedupe": [
+        "messageToken",
+        "codexIDs"
+      ],
+      "updates": [
+        "stat.share.eligible-message.unique",
+        "stat.share.relic-used.unique",
+        "stat.share.seal-used.unique",
+        "stat.share.codex-used.unique",
+        "stat.codex.share.unique-message",
+        "stat.codex.relationship-presented.unique",
+        "stat.codex.relic-used.unique",
+        "stat.codex.seal-used.unique"
+      ],
+      "notes": "Only emitted as eligible when the route matrix authorizes the terminal result."
+    },
+    {
+      "eventType": "runescribe.cipher.first-delivery-completed",
+      "producer": "RuneScribeCoreModule",
+      "emissionPoint": "after pending-to-completed key-delivery state transition caused by an eligible terminal share result",
+      "requiredPayload": [
+        "cipherToken",
+        "relationshipToken",
+        "keyIncluded",
+        "linkedRelationship"
+      ],
+      "requiredValues": {
+        "keyIncluded": true,
+        "linkedRelationship": true
+      },
+      "semanticDedupe": [
+        "relationshipToken"
+      ],
+      "updates": [
+        "stat.relationship.first-delivery.unique"
+      ],
+      "notes": "Existing delivered flags are not backfilled into this event."
+    },
+    {
+      "eventType": "runescribe.message.imported",
+      "producer": "RuneScribeCoreModule",
+      "emissionPoint": "after a valid incoming message package is admitted",
+      "requiredPayload": [
+        "packageToken",
+        "origin",
+        "routeClass",
+        "codexIDs",
+        "embeddedCipher"
+      ],
+      "requiredValues": {
+        "origin": "imported"
+      },
+      "optionalPayload": [
+        "artifactIDs",
+        "provenanceStatus"
+      ],
+      "semanticDedupe": [
+        "packageToken"
+      ],
+      "updates": []
+    },
+    {
+      "eventType": "runescribe.message.decoded",
+      "producer": "RuneScribeCoreModule",
+      "emissionPoint": "after authenticated decryption of an incoming package succeeds",
+      "requiredPayload": [
+        "packageToken",
+        "origin",
+        "codexIDs"
+      ],
+      "requiredValues": {
+        "origin": "imported"
+      },
+      "optionalPayload": [
+        "relationshipToken",
+        "artifactIDs",
+        "provenanceStatus"
+      ],
+      "semanticDedupe": [
+        "packageToken"
+      ],
+      "updates": [
+        "stat.message.incoming-decoded.unique",
+        "stat.codex.incoming-decode.unique-package"
+      ]
+    },
+    {
+      "eventType": "runescribe.exchange.bidirectional-established",
+      "producer": "RuneScribeCoreModule",
+      "emissionPoint": "once when a relationship aggregate changes from one-way to qualifying two-way activity",
+      "requiredPayload": [
+        "relationshipToken"
+      ],
+      "semanticDedupe": [
+        "relationshipToken"
+      ],
+      "updates": [
+        "stat.relationship.bidirectional.unique"
+      ]
+    },
+    {
+      "eventType": "runescribe.presentation.observed",
+      "producer": "RuneScribeCoreModule",
+      "emissionPoint": "after validating known presentation IDs in an incoming package, regardless of current ownership",
+      "requiredPayload": [
+        "packageToken",
+        "codexIDs"
+      ],
+      "optionalPayload": [
+        "artifactIDs",
+        "provenanceStatus"
+      ],
+      "semanticDedupe": [
+        "packageToken",
+        "codexIDs",
+        "artifactIDs"
+      ],
+      "updates": [
+        "stat.encounter.codex.unique",
+        "stat.codex.observed.unique-package"
+      ],
+      "notes": "Progression decides whether an observation becomes an Encounter; Core does not query ownership."
+    }
+  ],
+  "shareRoutePolicy": [
+    {
+      "routeClass": "messages",
+      "terminalResult": "sent-confirmed",
+      "requiresAttachmentAcceptedWhenKeyDelivery": true,
+      "progressionEligible": true,
+      "firstDeliveryEligible": true
+    },
+    {
+      "routeClass": "share-sheet",
+      "terminalResult": "completed-by-system",
+      "requiresAttachmentAcceptedWhenKeyDelivery": false,
+      "progressionEligible": true,
+      "firstDeliveryEligible": true,
+      "notes": "Does not imply recipient identity, reading, install, or purchase."
+    },
+    {
+      "routeClass": "air-drop",
+      "terminalResult": "completed-by-system",
+      "requiresAttachmentAcceptedWhenKeyDelivery": false,
+      "progressionEligible": true,
+      "firstDeliveryEligible": true
+    },
+    {
+      "routeClass": "file-export",
+      "terminalResult": "completion-unavailable",
+      "progressionEligible": false,
+      "firstDeliveryEligible": false
+    },
+    {
+      "routeClass": "clipboard",
+      "terminalResult": "completion-unavailable",
+      "progressionEligible": false,
+      "firstDeliveryEligible": false
+    },
+    {
+      "routeClass": "qr-display",
+      "terminalResult": "completion-unavailable",
+      "progressionEligible": false,
+      "firstDeliveryEligible": false
+    },
+    {
+      "routeClass": "any",
+      "terminalResult": "presented",
+      "progressionEligible": false,
+      "firstDeliveryEligible": false
+    },
+    {
+      "routeClass": "any",
+      "terminalResult": "cancelled",
+      "progressionEligible": false,
+      "firstDeliveryEligible": false
+    },
+    {
+      "routeClass": "any",
+      "terminalResult": "failed",
+      "progressionEligible": false,
+      "firstDeliveryEligible": false
+    }
+  ],
+  "forbiddenData": [
+    "plaintext",
+    "encrypted-payload-bytes",
+    "cipher-key-material",
+    "full-decorative-mapping",
+    "phone-number",
+    "email-address",
+    "contact-name",
+    "raw-contacts-identifier",
+    "share-recipient-identity",
+    "game-center-player-id",
+    "clipboard-contents",
+    "file-or-package-bytes"
+  ],
+  "eligibilityReasonIDs": [
+    "eligibility.eligible.domain-commit",
+    "eligibility.eligible.share-completed-by-system",
+    "eligibility.eligible.message-sent-confirmed",
+    "eligibility.ineligible.cancelled",
+    "eligibility.ineligible.failed",
+    "eligibility.ineligible.completion-unavailable",
+    "eligibility.ineligible.required-attachment-not-accepted",
+    "eligibility.informational.presented-only"
+  ]
+}
