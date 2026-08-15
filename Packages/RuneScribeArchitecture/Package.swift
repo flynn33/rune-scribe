@@ -22,6 +22,14 @@ let package = Package(
             name: "RuneScribeProgressionModule",
             targets: ["RuneScribeProgressionModule"]
         ),
+        .library(
+            name: "RuneScribeThemeCoordinatorModule",
+            targets: ["RuneScribeThemeCoordinatorModule"]
+        ),
+        .library(
+            name: "RuneScribeNorseThemeModule",
+            targets: ["RuneScribeNorseThemeModule"]
+        ),
         .library(name: "RuneScribeUIModule", targets: ["RuneScribeUIModule"]),
         .library(name: "RuneScribeTestSupport", targets: ["RuneScribeTestSupport"]),
     ],
@@ -60,6 +68,17 @@ let package = Package(
         .target(
             name: "RuneScribeProgressionModule",
             dependencies: ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "RuneScribeThemeCoordinatorModule",
+            dependencies: ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "RuneScribeNorseThemeModule",
+            dependencies: ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+            exclude: ["Resources/Source"],
             resources: [.process("Resources")]
         ),
         .target(
@@ -107,11 +126,31 @@ let package = Package(
             ]
         ),
         .testTarget(
+            name: "RuneScribeNorseThemeModuleTests",
+            dependencies: [
+                "RuneScribeContracts",
+                "RuneScribeNorseThemeModule",
+                "RuneScribeRuntimeCore",
+            ]
+        ),
+        .testTarget(
+            name: "RuneScribeThemeCoordinatorModuleTests",
+            dependencies: [
+                "RuneScribeContracts",
+                "RuneScribeNorseThemeModule",
+                "RuneScribeRuntimeCore",
+                "RuneScribeTestSupport",
+                "RuneScribeThemeCoordinatorModule",
+            ]
+        ),
+        .testTarget(
             name: "RuneScribeUIModuleTests",
             dependencies: [
                 "RuneScribeContracts",
+                "RuneScribeNorseThemeModule",
                 "RuneScribeRuntimeCore",
                 "RuneScribeTestSupport",
+                "RuneScribeThemeCoordinatorModule",
                 "RuneScribeUIPresentationContracts",
                 "RuneScribeUIRuntime",
                 "RuneScribeUIModule",
@@ -125,7 +164,9 @@ let package = Package(
                 "RuneScribeUIRuntime",
                 "RuneScribePlatform",
                 "RuneScribeCoreModule",
+                "RuneScribeNorseThemeModule",
                 "RuneScribeProgressionModule",
+                "RuneScribeThemeCoordinatorModule",
                 "RuneScribeUIModule",
                 "RuneScribeTestSupport",
             ]

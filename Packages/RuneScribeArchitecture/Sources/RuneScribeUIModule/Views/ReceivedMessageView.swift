@@ -29,13 +29,13 @@ struct ReceivedMessageView: View {
                     RuneEyebrow(title: "From", systemImage: "person.crop.circle.fill")
                     Text(pending.senderName)
                         .font(.system(size: 15, weight: .semibold, design: .monospaced))
-                        .foregroundColor(.white)
+                        .foregroundColor(.runeTextPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     RunePanel(title: "Decoded Message", systemImage: "envelope.open.fill") {
                         Text(pending.plaintext)
                             .font(.system(size: 15, design: .monospaced))
-                            .foregroundColor(.white)
+                            .foregroundColor(.runeTextPrimary)
                             .textSelection(.enabled)
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(

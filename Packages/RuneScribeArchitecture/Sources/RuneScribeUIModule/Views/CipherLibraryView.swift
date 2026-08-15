@@ -302,7 +302,7 @@ struct CipherLibraryView: View {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
                 Text(cipher.label)
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(.runeTextPrimary)
                     .lineLimit(1)
                 Spacer()
                 if isActive { badge("ACTIVE", color: .runeGold) }
@@ -360,7 +360,7 @@ struct CipherLibraryView: View {
                 HStack(spacing: 6) {
                     Text(session.contact(id: cipher.contactID)?.displayName ?? "No contact")
                         .font(.system(size: 12, weight: .semibold, design: .monospaced))
-                        .foregroundColor(cipher.contactID == nil ? .runeSilver : .white)
+                        .foregroundColor(cipher.contactID == nil ? .runeSilver : .runeTextPrimary)
                         .lineLimit(1)
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.system(size: 9))
@@ -484,7 +484,7 @@ struct CipherLibraryView: View {
             cardIconButton("pencil", help: "Rename \(cipher.label)") {
                 renameTarget = cipher; renameLabel = cipher.label; showRename = true
             }
-            cardIconButton("trash", help: "Delete \(cipher.label)", tint: .red.opacity(0.85)) {
+            cardIconButton("trash", help: "Delete \(cipher.label)", tint: .runeDanger.opacity(0.85)) {
                 deleteTarget = cipher; showDelete = true
             }
         }
@@ -511,7 +511,7 @@ struct CipherLibraryView: View {
                 .foregroundColor(.runeSilver)
             Text(value)
                 .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(.white.opacity(0.85))
+                .foregroundColor(.runeTextPrimary.opacity(0.85))
         }
     }
 
@@ -544,9 +544,9 @@ struct CipherLibraryView: View {
         case .idle:
             EmptyView()
         case .success(let message):
-            footer(message, systemImage: "checkmark.circle.fill", color: .green)
+            footer(message, systemImage: "checkmark.circle.fill", color: .runeSuccess)
         case .failure(let message):
-            footer(message, systemImage: "xmark.circle.fill", color: .red)
+            footer(message, systemImage: "xmark.circle.fill", color: .runeDanger)
         }
     }
 

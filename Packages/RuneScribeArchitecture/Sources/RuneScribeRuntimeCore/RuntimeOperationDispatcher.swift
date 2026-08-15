@@ -91,6 +91,7 @@ struct RuntimeClientLease: Sendable {
 private struct RuntimeModuleDispatchRecord: Sendable {
     let moduleID: ModuleIdentifier
     let role: ModuleRole
+    let policyClass: ModulePolicyClass
     let capabilities: Set<CapabilityIdentifier>
     var consumedEndpoints: Set<RuntimeEndpointIdentifier>
     var publishedEndpoints: Set<RuntimeEndpointIdentifier>
@@ -251,6 +252,7 @@ public actor RuntimeOperationDispatcher {
         modules[descriptor.moduleID] = RuntimeModuleDispatchRecord(
             moduleID: descriptor.moduleID,
             role: descriptor.role,
+            policyClass: descriptor.policyClass,
             capabilities: descriptor.requestedCapabilities,
             consumedEndpoints: descriptor.consumedEndpoints,
             publishedEndpoints: descriptor.publishedEndpoints,
@@ -264,6 +266,7 @@ public actor RuntimeOperationDispatcher {
         modules[RuntimeHostIdentity.moduleID] = RuntimeModuleDispatchRecord(
             moduleID: RuntimeHostIdentity.moduleID,
             role: RuneScribeRoles.applicationHost,
+            policyClass: RuneScribePolicyClasses.applicationHost,
             capabilities: [
                 RuneScribeCapabilities.applicationCommands,
                 RuneScribeCapabilities.inboundInput,
@@ -679,13 +682,17 @@ public actor RuntimeOperationDispatcher {
                 try validateAfterCall(
                     lease: lease,
                     endpoint: endpoint,
-                    allowStartingState: false
+                    allowStartingSource: expectedKind == .query
                 )
                 throw handlerError
             }
             inFlight.removeValue(forKey: operationID)
 
-            try validateAfterCall(lease: lease, endpoint: endpoint)
+            try validateAfterCall(
+                lease: lease,
+                endpoint: endpoint,
+                allowStartingSource: expectedKind == .query
+            )
             let responseBytes = RuntimePayloadSizer.byteCount(
                 response,
                 maximum: endpoint.descriptor.maximumResponseBytes
@@ -1051,7 +1058,7 @@ public actor RuntimeOperationDispatcher {
             try validateAfterCall(
                 lease: lease,
                 endpoint: endpoint,
-                allowStartingState: true
+                allowStartingSource: true
             )
             return true
         } catch {
@@ -1141,7 +1148,7 @@ public actor RuntimeOperationDispatcher {
         guard let endpoint = endpoints[endpointID], endpoint.ownerGeneration == ownerGeneration else {
             throw RuneScribeRuntimeError.staleClient(lease.destinationModuleID)
         }
-        try validateAfterCall(lease: lease, endpoint: endpoint, allowStartingState: true)
+        try validateAfterCall(lease: lease, endpoint: endpoint, allowStartingSource: true)
         let byteCount = RuntimePayloadSizer.byteCount(
             state,
             maximum: endpoint.descriptor.maximumResponseBytes
@@ -1185,7 +1192,7 @@ public actor RuntimeOperationDispatcher {
         try validateAfterCall(
             lease: lease,
             endpoint: endpoint,
-            allowStartingState: true
+            allowStartingSource: true
         )
     }
 
@@ -1312,7 +1319,7 @@ public actor RuntimeOperationDispatcher {
         guard source.generation == lease.sourceGeneration else {
             throw RuneScribeRuntimeError.staleClient(lease.sourceModuleID)
         }
-        let activationAllowed = expectedKind == .state
+        let activationAllowed = (expectedKind == .state || expectedKind == .query)
             && runtimeIsStarting
             && source.lifecycle == .activating
         let quiescingIngressAllowed = runtimeIsQuiescing
@@ -1360,7 +1367,10 @@ public actor RuntimeOperationDispatcher {
         endpoint: RuntimeEndpointEntry
     ) throws {
         guard source.capabilities.contains(endpoint.descriptor.requiredCapability),
-              policy.capabilities.allows(endpoint.descriptor.requiredCapability, for: source.role)
+              policy.capabilities.allows(
+                endpoint.descriptor.requiredCapability,
+                for: source.policyClass
+              )
         else {
             throw RuneScribeRuntimeError.capabilityDenied(moduleID: source.moduleID, capability: endpoint.descriptor.requiredCapability)
         }
@@ -1423,16 +1433,19 @@ public actor RuntimeOperationDispatcher {
     private func validateAfterCall(
         lease: RuntimeClientLease,
         endpoint: RuntimeEndpointEntry,
-        allowStartingState: Bool = false
+        allowStartingSource: Bool = false
     ) throws {
+        let startingSourceAllowed = runtimeIsStarting
+            && allowStartingSource
+            && (endpoint.descriptor.kind == .state || endpoint.descriptor.kind == .query)
         let quiescingIngressAllowed = runtimeIsQuiescing
             && endpoint.descriptor.kind == .ingress
             && lease.sourceModuleID == RuntimeHostIdentity.moduleID
         let existingStateRelayAllowed = runtimeIsQuiescing
-            && allowStartingState
+            && allowStartingSource
             && endpoint.descriptor.kind == .state
         guard runtimeIsRunning
-                || (allowStartingState && runtimeIsStarting)
+                || startingSourceAllowed
                 || quiescingIngressAllowed
                 || existingStateRelayAllowed
         else {
@@ -1444,7 +1457,7 @@ public actor RuntimeOperationDispatcher {
         guard let source = modules[lease.sourceModuleID],
               source.generation == lease.sourceGeneration,
               source.lifecycle == .active
-                || (allowStartingState && source.lifecycle == .activating)
+                || (startingSourceAllowed && source.lifecycle == .activating)
         else {
             throw RuneScribeRuntimeError.staleClient(lease.sourceModuleID)
         }

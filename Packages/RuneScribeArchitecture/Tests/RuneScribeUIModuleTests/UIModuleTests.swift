@@ -31,12 +31,15 @@ final class UIModuleTests: XCTestCase {
                 RuneScribeServiceIDs.applicationResourceLocator,
                 RuneScribeServiceIDs.clipboardWrite,
                 RuneScribeServiceIDs.sharePresentation,
+                RuneScribeServiceIDs.systemFontRegistrar,
             ]
         )
         XCTAssertEqual(
             descriptor.consumedEndpoints,
             RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(
                 RuntimeProgressionEndpointCatalog.UIEndpointIDs
+            ).union(
+                RuntimeThemeEndpointCatalog.UIEndpointIDs
             )
         )
     }

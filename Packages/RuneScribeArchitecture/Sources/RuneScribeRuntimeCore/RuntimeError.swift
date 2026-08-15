@@ -16,6 +16,7 @@ public enum RuneScribeRuntimeError: Error, Equatable, Sendable {
     case unsupportedPlatform(moduleID: ModuleIdentifier, platform: SupportedPlatform)
     case unknownCapability(moduleID: ModuleIdentifier, capability: CapabilityIdentifier)
     case capabilityDenied(moduleID: ModuleIdentifier, capability: CapabilityIdentifier)
+    case settingWriteDenied(moduleID: ModuleIdentifier, settingID: RuntimeSettingID)
     case serviceMappingMissing(moduleID: ModuleIdentifier, service: ServiceIdentifier)
     case noEligibleUIModule
     case multipleEligibleUIModules([ModuleIdentifier])
@@ -86,6 +87,8 @@ extension RuneScribeRuntimeError: LocalizedError {
             "Module \(moduleID.rawValue) requests unknown capability \(capability.rawValue)."
         case .capabilityDenied(let moduleID, let capability):
             "Module \(moduleID.rawValue) is not allowed capability \(capability.rawValue)."
+        case .settingWriteDenied(let moduleID, let settingID):
+            "Module \(moduleID.rawValue) is not allowed to write \(settingID.rawValue)."
         case .serviceMappingMissing(let moduleID, let service):
             "Module \(moduleID.rawValue) declares unmapped service \(service.rawValue)."
         case .noEligibleUIModule:

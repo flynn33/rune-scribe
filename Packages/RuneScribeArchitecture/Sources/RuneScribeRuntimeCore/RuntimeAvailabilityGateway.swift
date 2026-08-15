@@ -17,6 +17,19 @@ public struct RuntimeOptionalModuleAvailabilitySnapshot: Equatable, Sendable {
     }
 }
 
+public struct RuntimeThemeProviderAvailabilitySnapshot: Equatable, Sendable {
+    public let descriptor: ThemeDescriptor
+    public let lifecycleState: ModuleLifecycleState
+
+    public init(
+        descriptor: ThemeDescriptor,
+        lifecycleState: ModuleLifecycleState
+    ) {
+        self.descriptor = descriptor
+        self.lifecycleState = lifecycleState
+    }
+}
+
 /// Immutable, runtime-owned availability state suitable for presentation by
 /// the sole UI module. It reports optional feature lifecycle and canonical
 /// entitlements without exposing or retaining any optional module instance.
@@ -24,17 +37,22 @@ public struct RuntimeAvailabilitySnapshot: Equatable, Sendable {
     public let revision: UInt64
     public let capturedAt: Date
     public let optionalModules: [RuntimeOptionalModuleAvailabilitySnapshot]
+    public let themeProviders: [RuntimeThemeProviderAvailabilitySnapshot]
     public let entitlementSnapshot: ProgressionEntitlementSnapshotDTO
 
     public init(
         revision: UInt64,
         capturedAt: Date,
         optionalModules: [RuntimeOptionalModuleAvailabilitySnapshot],
+        themeProviders: [RuntimeThemeProviderAvailabilitySnapshot] = [],
         entitlementSnapshot: ProgressionEntitlementSnapshotDTO
     ) {
         self.revision = revision
         self.capturedAt = capturedAt
         self.optionalModules = optionalModules.sorted { $0.moduleID < $1.moduleID }
+        self.themeProviders = themeProviders.sorted {
+            $0.descriptor.codex.id < $1.descriptor.codex.id
+        }
         self.entitlementSnapshot = entitlementSnapshot
     }
 
@@ -46,17 +64,23 @@ public struct RuntimeAvailabilitySnapshot: Equatable, Sendable {
 public struct RuntimeAvailabilityClient: Sendable {
     private let gateway: RuntimeAvailabilityGateway
     private let lease: ModuleContextLease
+    private let includesThemeProviders: Bool
 
-    init(gateway: RuntimeAvailabilityGateway, lease: ModuleContextLease) {
+    init(
+        gateway: RuntimeAvailabilityGateway,
+        lease: ModuleContextLease,
+        includesThemeProviders: Bool = false
+    ) {
         self.gateway = gateway
         self.lease = lease
+        self.includesThemeProviders = includesThemeProviders
     }
 
     public func snapshot() async throws -> RuntimeAvailabilitySnapshot {
         try await lease.requireActive()
         let value = try await gateway.snapshot()
         try await lease.requireActive()
-        return value
+        return filtered(value)
     }
 
     public func snapshots() async throws -> AsyncStream<RuntimeAvailabilitySnapshot> {
@@ -67,7 +91,7 @@ public struct RuntimeAvailabilityClient: Sendable {
                 for await value in source {
                     do {
                         try await lease.requireActive()
-                        continuation.yield(value)
+                        continuation.yield(filtered(value))
                     } catch {
                         continuation.finish()
                         return
@@ -77,6 +101,19 @@ public struct RuntimeAvailabilityClient: Sendable {
             }
             continuation.onTermination = { _ in task.cancel() }
         }
+    }
+
+    private func filtered(
+        _ snapshot: RuntimeAvailabilitySnapshot
+    ) -> RuntimeAvailabilitySnapshot {
+        guard !includesThemeProviders else { return snapshot }
+        return RuntimeAvailabilitySnapshot(
+            revision: snapshot.revision,
+            capturedAt: snapshot.capturedAt,
+            optionalModules: snapshot.optionalModules,
+            themeProviders: [],
+            entitlementSnapshot: snapshot.entitlementSnapshot
+        )
     }
 }
 
@@ -95,6 +132,7 @@ actor RuntimeAvailabilityGateway {
 
     func activateRuntime(
         optionalModules: [RuntimeOptionalModuleAvailabilitySnapshot],
+        themeProviders: [RuntimeThemeProviderAvailabilitySnapshot],
         entitlementSnapshot: ProgressionEntitlementSnapshotDTO
     ) {
         runtimeIsActive = true
@@ -103,18 +141,24 @@ actor RuntimeAvailabilityGateway {
             revision: revision,
             capturedAt: environment.now(),
             optionalModules: optionalModules,
+            themeProviders: themeProviders,
             entitlementSnapshot: entitlementSnapshot
         )
     }
 
     func update(
         optionalModules: [RuntimeOptionalModuleAvailabilitySnapshot],
+        themeProviders: [RuntimeThemeProviderAvailabilitySnapshot],
         entitlementSnapshot: ProgressionEntitlementSnapshotDTO
     ) {
         guard runtimeIsActive else { return }
         let sortedModules = optionalModules.sorted { $0.moduleID < $1.moduleID }
+        let sortedThemeProviders = themeProviders.sorted {
+            $0.descriptor.codex.id < $1.descriptor.codex.id
+        }
         if let latest,
            latest.optionalModules == sortedModules,
+           latest.themeProviders == sortedThemeProviders,
            latest.entitlementSnapshot == entitlementSnapshot
         {
             return
@@ -125,6 +169,7 @@ actor RuntimeAvailabilityGateway {
             revision: revision,
             capturedAt: environment.now(),
             optionalModules: sortedModules,
+            themeProviders: sortedThemeProviders,
             entitlementSnapshot: entitlementSnapshot
         )
         latest = snapshot

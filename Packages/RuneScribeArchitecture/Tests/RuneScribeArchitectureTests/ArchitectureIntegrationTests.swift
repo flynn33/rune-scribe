@@ -1,9 +1,11 @@
 import Foundation
 import RuneScribeContracts
 import RuneScribeCoreModule
+import RuneScribeNorseThemeModule
 import RuneScribePlatform
 @_spi(RuntimeTesting) import RuneScribeRuntimeCore
 import RuneScribeTestSupport
+import RuneScribeThemeCoordinatorModule
 import RuneScribeUIModule
 import RuneScribeUIRuntime
 import XCTest
@@ -19,6 +21,7 @@ final class ArchitectureIntegrationTests: XCTestCase {
             ),
             platform: .macOS
         )
+        try await registerHostPlatformServices(on: runtime)
 
         try await runtime.register(
             manifest: RuneScribeUIModuleBootstrap.manifest(),
@@ -28,7 +31,8 @@ final class ArchitectureIntegrationTests: XCTestCase {
             manifest: RuneScribeCoreModuleBootstrap.manifest(),
             factory: RuneScribeCoreModuleBootstrap.factory()
         )
-        try await registerHostPlatformServices(on: runtime)
+        try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeCoordinatorModuleBootstrap.register(with: runtime)
         let rootPresentationAdapter = await MainActor.run {
             rootStore.runtimeHostAdapter(productMetadata: .unavailable)
         }
@@ -42,10 +46,17 @@ final class ArchitectureIntegrationTests: XCTestCase {
         XCTAssertEqual(running.status, .running)
         XCTAssertEqual(
             running.activationOrder,
-            [RuneScribeModuleIDs.core, RuneScribeModuleIDs.primaryUI]
+            [
+                RuneScribeModuleIDs.core,
+                RuneScribeModuleIDs.norseTheme,
+                RuneScribeModuleIDs.themeCoordinator,
+                RuneScribeModuleIDs.primaryUI,
+            ]
         )
         XCTAssertEqual(running.activeUIModuleID, RuneScribeModuleIDs.primaryUI)
         XCTAssertEqual(running.moduleStates[RuneScribeModuleIDs.core], .active)
+        XCTAssertEqual(running.moduleStates[RuneScribeModuleIDs.norseTheme], .active)
+        XCTAssertEqual(running.moduleStates[RuneScribeModuleIDs.themeCoordinator], .active)
         XCTAssertEqual(running.moduleStates[RuneScribeModuleIDs.primaryUI], .active)
         let runningRootState = await MainActor.run { rootStore.state }
         XCTAssertEqual(
@@ -57,6 +68,8 @@ final class ArchitectureIntegrationTests: XCTestCase {
         let stopped = await runtime.snapshot()
         XCTAssertEqual(stopped.status, .stopped)
         XCTAssertEqual(stopped.moduleStates[RuneScribeModuleIDs.core], .stopped)
+        XCTAssertEqual(stopped.moduleStates[RuneScribeModuleIDs.norseTheme], .stopped)
+        XCTAssertEqual(stopped.moduleStates[RuneScribeModuleIDs.themeCoordinator], .stopped)
         XCTAssertEqual(stopped.moduleStates[RuneScribeModuleIDs.primaryUI], .stopped)
         let stoppedRootState = await MainActor.run { rootStore.state }
         XCTAssertEqual(stoppedRootState, .booting)
@@ -70,11 +83,19 @@ final class ArchitectureIntegrationTests: XCTestCase {
         let moonleaf = try XCTUnwrap(UnlockID(rawValue: "unlock.codex.moonleaf"))
         let progression = optionalProgressionDescriptor(version: runtimeVersion)
         let theme = optionalThemeDescriptor(version: runtimeVersion)
+        let underlyingStore = InMemoryModuleStateStore()
+        let failingStore = ProgressionNamespaceFailingStore(base: underlyingStore)
+        let shareArtifacts = try await registerHostPlatformServices(
+            on: runtime,
+            moduleStateStore: failingStore
+        )
 
         try await runtime.register(
             manifest: RuneScribeCoreModuleBootstrap.manifest(),
             factory: RuneScribeCoreModuleBootstrap.factory()
         )
+        try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeCoordinatorModuleBootstrap.register(with: runtime)
         try await runtime.register(
             manifest: integrationManifest(for: progression, runtimeVersion: runtimeVersion),
             factory: AnyModuleFactory(descriptor: progression) {
@@ -106,13 +127,6 @@ final class ArchitectureIntegrationTests: XCTestCase {
                     await uiCapture.store(application: application, availability: availability)
                 }
             }
-        )
-
-        let underlyingStore = InMemoryModuleStateStore()
-        let failingStore = ProgressionNamespaceFailingStore(base: underlyingStore)
-        let shareArtifacts = try await registerHostPlatformServices(
-            on: runtime,
-            moduleStateStore: failingStore
         )
 
         do {
@@ -271,15 +285,16 @@ final class ArchitectureIntegrationTests: XCTestCase {
             "RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf"
         )
         let bundledFontData = try Data(contentsOf: bundledFontURL)
-        let resources: any ApplicationResourceLocator = MappedApplicationResourceLocator(
-            locations: [
+        let resources: any ApplicationResourceLocator = IntegrationApplicationResources(
+            standardLocations: [
                 .bundledRuneFont: bundledFontURL,
                 .splashVideo: URL(fileURLWithPath: "/fixture/splash.mp4"),
                 .defaultMetalLibrary: URL(fileURLWithPath: "/fixture/default.metallib"),
-            ]
+            ],
+            norseBundle: RuneScribeNorseThemeModuleBootstrap.resourceBundle
         )
         let fonts: any SystemFontRegistrar = InMemoryFontRegistrar(
-            namesByData: [bundledFontData: "Noto Sans Runic"]
+            namesByData: [bundledFontData: "NotoSansRunic-Regular"]
         )
         let contacts: any ContactAccessService = InMemoryContactAccessService()
         let clipboard = InMemoryClipboardService()
@@ -335,6 +350,35 @@ final class ArchitectureIntegrationTests: XCTestCase {
             for: RuneScribeServiceKeys.moduleStateStore
         )
         return shareArtifacts
+    }
+}
+
+private struct IntegrationApplicationResources: ApplicationResourceLocator {
+    let standardLocations: [ApplicationResource: URL]
+    let norseBundle: Bundle
+
+    func data(for resource: ApplicationResource) async throws -> Data {
+        try Data(contentsOf: try location(for: resource))
+    }
+
+    func url(for resource: ApplicationResource) async throws -> URL {
+        try location(for: resource)
+    }
+
+    private func location(for resource: ApplicationResource) throws -> URL {
+        if resource.ownerModuleID == RuneScribeModuleIDs.norseTheme,
+           let location = norseBundle.url(
+               forResource: resource.name,
+               withExtension: resource.fileExtension,
+               subdirectory: resource.subdirectory
+           )
+        {
+            return location
+        }
+        guard let location = standardLocations[resource] else {
+            throw MappedApplicationResourceLocatorError.resourceNotFound(resource)
+        }
+        return location
     }
 }
 

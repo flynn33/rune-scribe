@@ -24,6 +24,9 @@ actor ModuleContextLease {
 public struct ModuleContext: Sendable {
     public let moduleID: ModuleIdentifier
     public let role: ModuleRole
+    public let policyClass: ModulePolicyClass
+    public let runtimePlatform: SupportedPlatform
+    public let permitsThemeDiagnostics: Bool
 
     let descriptor: ModuleDescriptor
     let policy: RuntimePolicy
@@ -42,11 +45,16 @@ public struct ModuleContext: Sendable {
     private let existingUserMigrationHandoff: RuntimeExistingUserMigrationHandoff
     private let rootPresentationGateway: RuntimeRootPresentationGateway
     private let rootPresentationGeneration: UInt64
+    private let contributionRegistry: RuntimeContributionRegistry
+    private let contributionRegistryGeneration: UInt64
+    private let opaqueResourceRegistry: RuntimeOpaqueResourceRegistry
+    private let opaqueResourceRegistryGeneration: UInt64
     let environment: RuntimeEnvironment
     let lease: ModuleContextLease
 
     init(
         descriptor: ModuleDescriptor,
+        runtimePlatform: SupportedPlatform,
         policy: RuntimePolicy,
         events: RuntimeEventBus,
         messages: DirectedMessageRouter,
@@ -63,11 +71,18 @@ public struct ModuleContext: Sendable {
         existingUserMigrationHandoff: RuntimeExistingUserMigrationHandoff,
         rootPresentationGateway: RuntimeRootPresentationGateway,
         rootPresentationGeneration: UInt64,
+        contributionRegistry: RuntimeContributionRegistry,
+        contributionRegistryGeneration: UInt64,
+        opaqueResourceRegistry: RuntimeOpaqueResourceRegistry,
+        opaqueResourceRegistryGeneration: UInt64,
         environment: RuntimeEnvironment,
         lease: ModuleContextLease
     ) {
         moduleID = descriptor.moduleID
         role = descriptor.role
+        policyClass = descriptor.policyClass
+        self.runtimePlatform = runtimePlatform
+        permitsThemeDiagnostics = environment.permitsThemeDiagnostics
         self.descriptor = descriptor
         self.policy = policy
         self.events = events
@@ -85,6 +100,10 @@ public struct ModuleContext: Sendable {
         self.existingUserMigrationHandoff = existingUserMigrationHandoff
         self.rootPresentationGateway = rootPresentationGateway
         self.rootPresentationGeneration = rootPresentationGeneration
+        self.contributionRegistry = contributionRegistry
+        self.contributionRegistryGeneration = contributionRegistryGeneration
+        self.opaqueResourceRegistry = opaqueResourceRegistry
+        self.opaqueResourceRegistryGeneration = opaqueResourceRegistryGeneration
         self.environment = environment
         self.lease = lease
     }
@@ -100,6 +119,14 @@ public struct ModuleContext: Sendable {
             key: key,
             handler: handler
         )
+    }
+
+    public func runtimeTimestamp() -> Date {
+        environment.now()
+    }
+
+    public func runtimeOperatingSystemVersion() -> RuntimeOperatingSystemVersion {
+        environment.operatingSystemVersion()
     }
 
     public func registerStateEndpoint<State: Sendable>(
@@ -211,12 +238,14 @@ public struct ModuleContext: Sendable {
             RuneScribeCapabilities.runtimeSettingsWrite
         ) && policy.capabilities.allows(
             RuneScribeCapabilities.runtimeSettingsWrite,
-            for: role
+            for: descriptor.policyClass
         )
         return RuntimeSettingsClient(
             gateway: settingsGateway,
             lease: lease,
-            canWrite: canWrite
+            writableSettingIDs: canWrite
+                ? policy.settings.writableSettingIDs(for: descriptor.policyClass)
+                : []
         )
     }
 
@@ -246,7 +275,12 @@ public struct ModuleContext: Sendable {
 
     public func runtimeAvailabilityClient() async throws -> RuntimeAvailabilityClient {
         try await requireCapability(RuneScribeCapabilities.runtimeAvailabilityRead)
-        return RuntimeAvailabilityClient(gateway: availabilityGateway, lease: lease)
+        return RuntimeAvailabilityClient(
+            gateway: availabilityGateway,
+            lease: lease,
+            includesThemeProviders: policyClass
+                == RuneScribePolicyClasses.themeCoordinator
+        )
     }
 
     public func unlockFeedbackClient() async throws -> RuntimeUnlockFeedbackClient? {
@@ -263,6 +297,54 @@ public struct ModuleContext: Sendable {
             sourceModuleGeneration: moduleGeneration,
             runtimeGeneration: rootPresentationGeneration,
             policy: policy
+        )
+    }
+
+    public func contributionPublisherClient() async throws
+        -> RuntimeContributionPublisherClient
+    {
+        try await lease.requireActive()
+        return try await contributionRegistry.makePublisherClient(
+            sourceModuleID: moduleID,
+            sourceModuleGeneration: moduleGeneration,
+            runtimeGeneration: contributionRegistryGeneration
+        )
+    }
+
+    public func contributionReaderClient() async throws
+        -> RuntimeContributionReaderClient
+    {
+        try await lease.requireActive()
+        return try await contributionRegistry.makeReaderClient(
+            sourceModuleID: moduleID,
+            sourceModuleGeneration: moduleGeneration,
+            runtimeGeneration: contributionRegistryGeneration
+        )
+    }
+
+    func opaqueResourceProviderClient() async throws
+        -> RuntimeOpaqueResourceProviderClient
+    {
+        try await lease.requireActive()
+        return try await opaqueResourceRegistry.makeProviderClient(
+            sourceModuleID: moduleID,
+            sourceModuleGeneration: moduleGeneration,
+            runtimeGeneration: opaqueResourceRegistryGeneration,
+            policy: policy,
+            requiredCapability: RuneScribeCapabilities.opaqueResourcePublish
+        )
+    }
+
+    public func opaqueResourceResolverClient() async throws
+        -> RuntimeOpaqueResourceResolverClient
+    {
+        try await lease.requireActive()
+        return try await opaqueResourceRegistry.makeResolverClient(
+            sourceModuleID: moduleID,
+            sourceModuleGeneration: moduleGeneration,
+            runtimeGeneration: opaqueResourceRegistryGeneration,
+            policy: policy,
+            requiredCapability: RuneScribeCapabilities.opaqueResourceResolve
         )
     }
 
@@ -323,6 +405,14 @@ public struct ModuleContext: Sendable {
             moduleID,
             generation: moduleGeneration
         )
+        await contributionRegistry.invalidateModule(
+            moduleID,
+            generation: moduleGeneration
+        )
+        await opaqueResourceRegistry.invalidateModule(
+            moduleID,
+            generation: moduleGeneration
+        )
         await lease.deactivate()
         await events.removeSubscriptions(ownedBy: moduleID)
         await messages.removeDestination(ownedBy: moduleID)
@@ -331,7 +421,7 @@ public struct ModuleContext: Sendable {
     private func requireCapability(_ capability: CapabilityIdentifier) async throws {
         try await lease.requireActive()
         guard descriptor.requestedCapabilities.contains(capability),
-              policy.capabilities.allows(capability, for: role)
+              policy.capabilities.allows(capability, for: descriptor.policyClass)
         else {
             throw RuneScribeRuntimeError.capabilityDenied(
                 moduleID: moduleID,

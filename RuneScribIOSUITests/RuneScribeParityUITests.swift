@@ -353,14 +353,12 @@ final class RuneScribeParityUITests: XCTestCase {
     }
 
     private func replaceText(in field: XCUIElement, with replacement: String) {
-        field.tap()
         let existingCharacterCount = (field.value as? String)?.count ?? 0
-        field.typeKey("a", modifierFlags: .command)
-        field.typeKey(XCUIKeyboardKey.delete.rawValue, modifierFlags: [])
-        if (field.value as? String)?.isEmpty != true {
-            for _ in 0..<existingCharacterCount {
-                field.typeKey(XCUIKeyboardKey.delete.rawValue, modifierFlags: [])
-            }
+        field.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).tap()
+        if existingCharacterCount > 0 {
+            field.typeText(
+                String(repeating: XCUIKeyboardKey.delete.rawValue, count: existingCharacterCount)
+            )
         }
         field.typeText(replacement)
     }

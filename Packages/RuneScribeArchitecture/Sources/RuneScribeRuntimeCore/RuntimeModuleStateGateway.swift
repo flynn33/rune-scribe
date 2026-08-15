@@ -114,7 +114,7 @@ actor RuntimeModuleStateGateway {
         if descriptor.requestedCapabilities.contains(RuneScribeCapabilities.moduleStateAccess) {
             guard policy.capabilities.allows(
                 RuneScribeCapabilities.moduleStateAccess,
-                for: descriptor.role
+                for: descriptor.policyClass
             ) else {
                 throw RuneScribeRuntimeError.capabilityDenied(
                     moduleID: descriptor.moduleID,
@@ -140,7 +140,7 @@ actor RuntimeModuleStateGateway {
         ),
         policy.capabilities.allows(
             RuneScribeCapabilities.moduleStateAccess,
-            for: descriptor.role
+            for: descriptor.policyClass
         ) else {
             throw RuneScribeRuntimeError.capabilityDenied(
                 moduleID: descriptor.moduleID,

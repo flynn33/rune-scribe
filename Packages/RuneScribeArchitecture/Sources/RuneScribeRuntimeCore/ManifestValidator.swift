@@ -17,6 +17,12 @@ public enum ModuleManifestValidator {
         try requireEqual(manifest.entryPoint, descriptor.entryPoint, moduleID: manifest.moduleID, field: "entryPoint")
         try requireEqual(manifest.defaultRole, descriptor.role, moduleID: manifest.moduleID, field: "defaultRole")
         try requireEqual(
+            manifest.effectivePolicyClass,
+            descriptor.policyClass,
+            moduleID: manifest.moduleID,
+            field: "policyClass"
+        )
+        try requireEqual(
             Set(manifest.capabilitiesRequested),
             descriptor.requestedCapabilities,
             moduleID: manifest.moduleID,
@@ -74,7 +80,7 @@ public enum ModuleManifestValidator {
                     capability: capability
                 )
             }
-            guard policy.capabilities.allows(capability, for: descriptor.role) else {
+            guard policy.capabilities.allows(capability, for: descriptor.policyClass) else {
                 throw RuneScribeRuntimeError.capabilityDenied(
                     moduleID: manifest.moduleID,
                     capability: capability
@@ -99,14 +105,17 @@ public enum ModuleManifestValidator {
                 )
             }
             guard descriptor.requestedCapabilities.contains(rule.requiredCapability),
-                  policy.capabilities.allows(rule.requiredCapability, for: descriptor.role)
+                  policy.capabilities.allows(
+                    rule.requiredCapability,
+                    for: descriptor.policyClass
+                  )
             else {
                 throw RuneScribeRuntimeError.serviceCapabilityMissing(
                     moduleID: manifest.moduleID,
                     service: service
                 )
             }
-            guard rule.consumerRoles.contains(descriptor.role) else {
+            guard rule.allowsConsumer(descriptor) else {
                 throw RuneScribeRuntimeError.serviceAccessDenied(
                     moduleID: manifest.moduleID,
                     service: service
@@ -127,7 +136,7 @@ public enum ModuleManifestValidator {
                     service: service
                 )
             }
-            guard rule.publisherRoles.contains(descriptor.role) else {
+            guard rule.allowsPublisher(descriptor) else {
                 throw RuneScribeRuntimeError.serviceAccessDenied(
                     moduleID: manifest.moduleID,
                     service: service

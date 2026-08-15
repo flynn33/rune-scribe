@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "1.0",
+  "policyProfile": "forsetti-pattern-b-standalone",
+  "runtimeVersion": "1.0.0",
+  "moduleID": "com.runescribe.module.theme.norse",
+  "displayName": "Rune Scribe Norse Base Theme",
+  "moduleVersion": "1.0.0",
+  "moduleType": "service",
+  "criticality": "required",
+  "supportedPlatforms": [
+    "iOS",
+    "macOS"
+  ],
+  "minimumOS": {
+    "iOS": "17.0",
+    "macOS": "15.0"
+  },
+  "capabilitiesRequested": [
+    "resources.read",
+    "runtime.contributions.publish",
+    "runtime.resources.opaque.publish"
+  ],
+  "entryPoint": "RuneScribeNorseThemeModule",
+  "runtimeRequirements": {
+    "requiredServices": [
+      "ApplicationResourceLocator"
+    ],
+    "requiredResources": [
+      {
+        "name": "module-manifest",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "NorseBaseScriptFallback-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "NorseBaseVisualResources-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "NorseBaseLocalizations-en-US-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "NotoSansRunic-Regular",
+        "fileExtension": "ttf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "NorseBasePlaceholderAssets-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      }
+    ],
+    "requiredModuleRoles": []
+  },
+  "defaultRole": "runescribe.theme.norse",
+  "policyClass": "policy.theme-provider",
+  "consumedEndpoints": [],
+  "publishedEndpoints": [],
+  "entitlementRequirement": {
+    "kind": "always",
+    "identifier": "unlock.codex.norse"
+  },
+  "diagnosticsVisibleInProduction": false
+}

@@ -33,19 +33,29 @@ public enum RuneScribeUIModuleBootstrap {
             RuneScribeCapabilities.runtimeSettingsWrite,
             RuneScribeCapabilities.progressionStateRead,
             RuneScribeCapabilities.progressionCommands,
+            RuneScribeCapabilities.themeStateRead,
+            RuneScribeCapabilities.themeSelection,
+            RuneScribeCapabilities.themeResourceRead,
+            RuneScribeCapabilities.fontRegistration,
         ],
         requiredServices: [
             RuneScribeServiceIDs.applicationResourceLocator,
             RuneScribeServiceIDs.clipboardWrite,
             RuneScribeServiceIDs.sharePresentation,
+            RuneScribeServiceIDs.systemFontRegistrar,
         ],
         requiredResources: [
             .splashVideo,
             .defaultMetalLibrary,
         ],
-        requiredModuleRoles: [RuneScribeRoles.core],
+        requiredModuleRoles: [
+            RuneScribeRoles.core,
+            RuneScribeRoles.themeCoordinator,
+        ],
         consumedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(
             RuntimeProgressionEndpointCatalog.UIEndpointIDs
+        ).union(
+            RuntimeThemeEndpointCatalog.UIEndpointIDs
         )
     )
 
@@ -83,6 +93,7 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
         let runtimeIO = try await context.runtimeIOClient()
         let availabilityClient = try await context.runtimeAvailabilityClient()
         let progressionClient = try? await context.progressionClient()
+        let themeCoordinatorClient = try await context.themeCoordinatorClient()
         let runtimeSettingsClient = try? await context.runtimeSettingsClient()
         let unlockFeedbackClient = try? await context.unlockFeedbackClient()
         let rootPresentationClient = try await context.rootPresentationClient()
@@ -109,6 +120,7 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
             runtimeIO: runtimeIO,
             availabilityClient: availabilityClient,
             progressionClient: progressionClient,
+            themeCoordinatorClient: themeCoordinatorClient,
             runtimeSettingsClient: runtimeSettingsClient,
             unlockFeedbackClient: unlockFeedbackClient,
             inboundFileImportSession: inboundFileImportSession,
@@ -117,6 +129,7 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
         )
 
         do {
+            try await session.prepareInitialTheme()
             try session.start()
             let contribution = RootViewContribution(moduleID: descriptor.moduleID) {
                 AnyView(RootView(session: session))

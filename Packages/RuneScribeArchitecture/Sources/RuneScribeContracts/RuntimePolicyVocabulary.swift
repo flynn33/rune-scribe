@@ -4,10 +4,17 @@ public enum RuneScribeModuleIDs {
     public static let core: ModuleIdentifier = "com.runescribe.module.core"
     public static let primaryUI: ModuleIdentifier = "com.runescribe.module.ui"
     public static let progression: ModuleIdentifier = "com.runescribe.module.progression"
+    public static let themeCoordinator: ModuleIdentifier =
+        "com.runescribe.module.theme-coordinator"
+    public static let norseTheme: ModuleIdentifier = "com.runescribe.module.theme.norse"
 }
 
 public enum RuneScribeUnlockIDs {
     public static let norseCodex = UnlockID(rawValue: "unlock.codex.norse")!
+}
+
+public enum RuneScribeCodexIDs {
+    public static let norse = CodexID(rawValue: "codex.norse")!
 }
 
 public enum RuneScribeRoles {
@@ -15,6 +22,20 @@ public enum RuneScribeRoles {
     public static let primaryUI: ModuleRole = "runescribe.ui.primary"
     public static let applicationHost: ModuleRole = "application.host"
     public static let progression: ModuleRole = "runescribe.progression"
+    public static let themeCoordinator: ModuleRole = "runescribe.theme.coordinator"
+    public static let norseTheme: ModuleRole = "runescribe.theme.norse"
+}
+
+public enum RuneScribePolicyClasses {
+    public static let core = ModulePolicyClass(role: RuneScribeRoles.core)
+    public static let primaryUI = ModulePolicyClass(role: RuneScribeRoles.primaryUI)
+    public static let applicationHost = ModulePolicyClass(
+        role: RuneScribeRoles.applicationHost
+    )
+    public static let progression = ModulePolicyClass(role: RuneScribeRoles.progression)
+    public static let themeProvider: ModulePolicyClass = "policy.theme-provider"
+    public static let themeCoordinator: ModulePolicyClass = "policy.theme-coordinator"
+    public static let supportTooling: ModulePolicyClass = "policy.support-tooling"
 }
 
 public enum RuneScribeCapabilities {
@@ -61,6 +82,18 @@ public enum RuneScribeCapabilities {
         "progression.migration.submit"
     public static let progressionMigrationApply: CapabilityIdentifier =
         "progression.migration.apply"
+    public static let contributionPublish: CapabilityIdentifier =
+        "runtime.contributions.publish"
+    public static let contributionRead: CapabilityIdentifier =
+        "runtime.contributions.read"
+    public static let opaqueResourcePublish: CapabilityIdentifier =
+        "runtime.resources.opaque.publish"
+    public static let opaqueResourceResolve: CapabilityIdentifier =
+        "runtime.resources.opaque.resolve"
+    public static let themeStateRead: CapabilityIdentifier = "theme.state.read"
+    public static let themeSelection: CapabilityIdentifier = "theme.selection"
+    public static let themeResourceRead: CapabilityIdentifier = "theme.resources.read"
+    public static let themeDiagnostics: CapabilityIdentifier = "theme.diagnostics"
 
     public static let all: Set<CapabilityIdentifier> = [
         publishService,
@@ -98,6 +131,14 @@ public enum RuneScribeCapabilities {
         progressionRecovery,
         progressionMigrationSubmit,
         progressionMigrationApply,
+        contributionPublish,
+        contributionRead,
+        opaqueResourcePublish,
+        opaqueResourceResolve,
+        themeStateRead,
+        themeSelection,
+        themeResourceRead,
+        themeDiagnostics,
     ]
 }
 

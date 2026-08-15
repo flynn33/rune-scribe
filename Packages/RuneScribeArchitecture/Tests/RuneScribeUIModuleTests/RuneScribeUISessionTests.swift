@@ -3,8 +3,10 @@ import AppKit
 #endif
 import Foundation
 @_spi(RuntimeOperationAuthority) import RuneScribeContracts
+import RuneScribeNorseThemeModule
 @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
+import RuneScribeThemeCoordinatorModule
 @testable import RuneScribeUIModule
 import RuneScribeUIRuntime
 import SwiftUI
@@ -735,26 +737,23 @@ final class RuneScribeUISessionTests: XCTestCase {
     func testModuleActivationToleratesMissingOptionalResourcesAndProgressionRails() async throws {
         let rootStore = RootViewPresentationStore()
         let applicationService = ControllableApplicationService()
+        let fontRegistrar = ThemeFontRegistrarProbe(suspendsRegistration: true)
         let runtime = RuneScribeRuntime(
             runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)),
             platform: .macOS
         )
 
-        try await runtime.register(
-            manifest: TestCoreModule.manifest,
-            factory: TestCoreModule.factory(applicationService: applicationService)
-        )
-        try await runtime.register(
-            manifest: RuneScribeUIModuleBootstrap.manifest(),
-            factory: RuneScribeUIModuleBootstrap.factory()
-        )
-        try await runtime.installStandardPort(
-            rootStore.runtimeHostAdapter(productMetadata: .unavailable),
-            for: .standard
+        try await runtime.installPlatformAdapter(
+            NorseOnlyApplicationResources(),
+            for: RuneScribeServiceKeys.applicationResourceLocator
         )
         try await runtime.installPlatformAdapter(
-            MissingApplicationResources(),
-            for: RuneScribeServiceKeys.applicationResourceLocator
+            fontRegistrar,
+            for: RuneScribeServiceKeys.systemFontRegistrar
+        )
+        try await runtime.installPlatformAdapter(
+            InMemoryModuleStateStore(),
+            for: RuneScribeServiceKeys.moduleStateStore
         )
         try await runtime.installPlatformAdapter(
             LifetimeClipboard(),
@@ -768,8 +767,33 @@ final class RuneScribeUISessionTests: XCTestCase {
             SharePresentationProbe(),
             for: RuneScribeServiceKeys.sharePresentation
         )
+        try await runtime.register(
+            manifest: TestCoreModule.manifest,
+            factory: TestCoreModule.factory(applicationService: applicationService)
+        )
+        try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await runtime.register(
+            manifest: RuneScribeThemeCoordinatorModuleBootstrap.manifest(),
+            factory: RuneScribeThemeCoordinatorModuleBootstrap.factory()
+        )
+        try await runtime.register(
+            manifest: RuneScribeUIModuleBootstrap.manifest(),
+            factory: RuneScribeUIModuleBootstrap.factory()
+        )
+        try await runtime.installStandardPort(
+            rootStore.runtimeHostAdapter(productMetadata: .unavailable),
+            for: .standard
+        )
 
-        try await runtime.start()
+        let startTask = Task { try await runtime.start() }
+        await fontRegistrar.waitUntilRegistrationSuspended()
+        XCTAssertEqual(
+            rootStore.state,
+            .booting,
+            "The root must remain hidden until the Base Theme font is registered"
+        )
+        await fontRegistrar.releaseRegistration()
+        try await startTask.value
         XCTAssertEqual(
             rootStore.state,
             .ready(moduleID: RuneScribeUIModuleBootstrap.moduleID)
@@ -779,7 +803,25 @@ final class RuneScribeUISessionTests: XCTestCase {
             runningSnapshot.moduleStates[RuneScribeUIModuleBootstrap.moduleID],
             .active
         )
+        XCTAssertEqual(
+            runningSnapshot.moduleStates[RuneScribeModuleIDs.norseTheme],
+            .active
+        )
+        XCTAssertEqual(
+            runningSnapshot.moduleStates[RuneScribeModuleIDs.themeCoordinator],
+            .active
+        )
         XCTAssertNil(runningSnapshot.moduleStates[RuneScribeModuleIDs.progression])
+        let fontState = await fontRegistrar.state()
+        let fontURL = try XCTUnwrap(
+            RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
+                forResource: "NotoSansRunic-Regular",
+                withExtension: "ttf"
+            )
+        )
+        let expectedFontData = try Data(contentsOf: fontURL)
+        XCTAssertEqual(fontState.postScriptNameRequests, [expectedFontData])
+        XCTAssertEqual(fontState.registrationRequests, [expectedFontData])
 
         let (nilResourceSession, nilResourceRuntime) = try await makeSession(
             applicationService: ControllableApplicationService(),
@@ -1780,7 +1822,8 @@ final class RuneScribeUISessionTests: XCTestCase {
             contactID: nil,
             delivered: false,
             publicIdentifier: "1234567890ABCDEF",
-            fontName: "Elder Runes"
+            fontName: "Elder Runes",
+            fontSource: .imported
         )
     }
 }
@@ -2126,6 +2169,85 @@ private struct MissingApplicationResources: ApplicationResourceLocator {
 
     func url(for resource: ApplicationResource) async throws -> URL {
         throw MissingResourceError.unavailable
+    }
+}
+
+private struct NorseOnlyApplicationResources: ApplicationResourceLocator {
+    func data(for resource: ApplicationResource) async throws -> Data {
+        try Data(contentsOf: location(for: resource))
+    }
+
+    func url(for resource: ApplicationResource) async throws -> URL {
+        try location(for: resource)
+    }
+
+    private func location(for resource: ApplicationResource) throws -> URL {
+        guard resource.ownerModuleID == RuneScribeModuleIDs.norseTheme,
+              let url = RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
+                  forResource: resource.name,
+                  withExtension: resource.fileExtension,
+                  subdirectory: resource.subdirectory
+              )
+        else {
+            throw MissingResourceError.unavailable
+        }
+        return url
+    }
+}
+
+private struct ThemeFontRegistrarProbeState: Sendable {
+    let postScriptNameRequests: [Data]
+    let registrationRequests: [Data]
+}
+
+private actor ThemeFontRegistrarProbe: SystemFontRegistrar {
+    private let suspendsRegistration: Bool
+    private var postScriptNameRequests: [Data] = []
+    private var registrationRequests: [Data] = []
+    private var registrationSuspended = false
+    private var registrationReleased = false
+    private var suspensionWaiters: [CheckedContinuation<Void, Never>] = []
+    private var releaseWaiter: CheckedContinuation<Void, Never>?
+
+    init(suspendsRegistration: Bool = false) {
+        self.suspendsRegistration = suspendsRegistration
+    }
+
+    func postScriptName(forFontData data: Data) async throws -> String {
+        postScriptNameRequests.append(data)
+        return "NotoSansRunic-Regular"
+    }
+
+    func registerFont(_ data: Data) async throws -> RegisteredFontDTO {
+        registrationRequests.append(data)
+        if suspendsRegistration {
+            registrationSuspended = true
+            let waiters = suspensionWaiters
+            suspensionWaiters.removeAll()
+            waiters.forEach { $0.resume() }
+            if !registrationReleased {
+                await withCheckedContinuation { releaseWaiter = $0 }
+            }
+        }
+        return RegisteredFontDTO(postScriptName: "NotoSansRunic-Regular")
+    }
+
+    func waitUntilRegistrationSuspended() async {
+        guard !registrationSuspended else { return }
+        await withCheckedContinuation { suspensionWaiters.append($0) }
+    }
+
+    func releaseRegistration() {
+        registrationReleased = true
+        releaseWaiter?.resume()
+        releaseWaiter = nil
+    }
+
+    func state() -> ThemeFontRegistrarProbeState {
+        ThemeFontRegistrarProbeState(
+            postScriptNameRequests: postScriptNameRequests,
+            registrationRequests: registrationRequests
+        )
     }
 }
 

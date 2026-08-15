@@ -93,7 +93,7 @@ struct QRScannerView: View {
                 .foregroundColor(.runeSilver)
             Text("Camera access is off")
                 .font(.system(size: 15, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(.runeTextPrimary)
             Text("Allow camera access for Rune Scribe in Settings to scan a cipher QR code.")
                 .font(.system(size: 12))
                 .foregroundColor(.runeSilver)

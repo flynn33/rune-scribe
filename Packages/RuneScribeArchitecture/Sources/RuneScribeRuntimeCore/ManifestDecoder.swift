@@ -26,6 +26,7 @@ public enum ModuleManifestDecoder {
         "entryPoint",
         "runtimeRequirements",
         "defaultRole",
+        "policyClass",
         "consumedEndpoints",
         "publishedEndpoints",
         "entitlementRequirement",
@@ -191,6 +192,13 @@ public enum ModuleManifestDecoder {
             pattern: #"^[a-z][a-z0-9._-]+$"#,
             path: "$.defaultRole"
         )
+        if let policyClass = manifest.policyClass {
+            try requireMatch(
+                policyClass.rawValue,
+                pattern: #"^[a-z][a-z0-9._-]+$"#,
+                path: "$.policyClass"
+            )
+        }
         guard !manifest.supportedPlatforms.isEmpty else {
             throw ManifestDecodingError.invalidField(
                 path: "$.supportedPlatforms",

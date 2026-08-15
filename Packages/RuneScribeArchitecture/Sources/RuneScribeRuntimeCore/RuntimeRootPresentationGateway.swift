@@ -199,7 +199,7 @@ actor RuntimeRootPresentationGateway {
     ) throws {
         let capability = RuneScribeCapabilities.rootUI
         guard descriptor.requestedCapabilities.contains(capability),
-              policy.capabilities.allows(capability, for: descriptor.role)
+              policy.capabilities.allows(capability, for: descriptor.policyClass)
         else {
             throw RuneScribeRuntimeError.capabilityDenied(
                 moduleID: descriptor.moduleID,

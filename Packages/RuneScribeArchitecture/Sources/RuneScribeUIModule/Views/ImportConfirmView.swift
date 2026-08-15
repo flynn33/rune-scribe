@@ -137,7 +137,7 @@ struct ImportConfirmView: View {
         TextField("Cipher name", text: $name)
             .textFieldStyle(.plain)
             .font(.system(size: 15, design: .monospaced))
-            .foregroundColor(.white)
+            .foregroundColor(.runeTextPrimary)
         #endif
     }
 
@@ -177,8 +177,7 @@ private struct RuneCipherNameTextField: UIViewRepresentable {
         let field = UITextField()
         field.backgroundColor = .clear
         field.font = .monospacedSystemFont(ofSize: 15, weight: .regular)
-        field.textColor = .white
-        field.tintColor = .white
+        applyThemeColors(to: field)
         field.placeholder = "Cipher name"
         field.accessibilityLabel = "Cipher name"
         field.returnKeyType = .done
@@ -195,7 +194,13 @@ private struct RuneCipherNameTextField: UIViewRepresentable {
         if field.text != text {
             field.text = text
         }
+        applyThemeColors(to: field)
         context.coordinator.text = $text
+    }
+
+    private func applyThemeColors(to field: UITextField) {
+        field.textColor = UIColor(Color.runeTextPrimary)
+        field.tintColor = UIColor(Color.runeKeyboardFocus)
     }
 
     final class Coordinator: NSObject, UITextFieldDelegate {

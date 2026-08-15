@@ -35,6 +35,73 @@ final class RuntimeLifecycleTests: XCTestCase {
         XCTAssertEqual(counter.value, 0)
     }
 
+    func testDistinctProviderRolesSharePolicyClassWithoutWeakeningRoleUniqueness()
+        async throws
+    {
+        let capability = RuneScribeCapabilities.publishEvents
+        let sharedPolicyClass = RuneScribePolicyClasses.themeProvider
+        let policy = RuntimePolicy(
+            vocabulary: CapabilityVocabulary(knownCapabilities: [capability]),
+            capabilities: CapabilityPolicy(allowedPolicyClassesByCapability: [
+                capability: [sharedPolicyClass],
+            ]),
+            services: ServiceAccessPolicy(rules: [])
+        )
+        let first = descriptor(
+            id: "com.runescribe.module.provider-first",
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "FirstProviderModule",
+            role: "runescribe.provider.first",
+            policyClass: sharedPolicyClass,
+            capabilities: [capability]
+        )
+        let second = descriptor(
+            id: "com.runescribe.module.provider-second",
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "SecondProviderModule",
+            role: "runescribe.provider.second",
+            policyClass: sharedPolicyClass,
+            capabilities: [capability]
+        )
+        let duplicateRole = descriptor(
+            id: "com.runescribe.module.provider-duplicate-role",
+            kind: .service,
+            criticality: .optional,
+            entryPoint: "DuplicateRoleProviderModule",
+            role: first.role,
+            policyClass: sharedPolicyClass,
+            capabilities: [capability]
+        )
+        let runtime = makeRuntime(policy: policy)
+
+        try await runtime.register(
+            manifest: manifest(for: first, policyClass: sharedPolicyClass),
+            factory: factory(for: first)
+        )
+        try await runtime.register(
+            manifest: manifest(for: second, policyClass: sharedPolicyClass),
+            factory: factory(for: second)
+        )
+
+        do {
+            try await runtime.register(
+                manifest: manifest(
+                    for: duplicateRole,
+                    policyClass: sharedPolicyClass
+                ),
+                factory: factory(for: duplicateRole)
+            )
+            XCTFail("A shared policy class must not relax routable role uniqueness")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .duplicateRole(first.role)
+            )
+        }
+    }
+
     func testCoreAndUIModulesCannotDeclareOptionalCriticality() async {
         let optionalUI = descriptor(
             id: "com.runescribe.module.optional-ui",
@@ -1614,6 +1681,7 @@ private func descriptor(
     criticality: ModuleCriticality = .required,
     entryPoint: String,
     role: ModuleRole,
+    policyClass: ModulePolicyClass? = nil,
     capabilities: Set<CapabilityIdentifier>,
     requiredServices: Set<ServiceIdentifier> = [],
     publishedServices: Set<ServiceIdentifier> = [],
@@ -1633,6 +1701,7 @@ private func descriptor(
         criticality: criticality,
         entryPoint: entryPoint,
         role: role,
+        policyClass: policyClass,
         requestedCapabilities: capabilities,
         requiredServices: requiredServices,
         publishedServices: publishedServices,
@@ -1644,7 +1713,8 @@ private func descriptor(
 
 private func manifest(
     for descriptor: ModuleDescriptor,
-    entitlementRequirement: EntitlementRequirement? = nil
+    entitlementRequirement: EntitlementRequirement? = nil,
+    policyClass: ModulePolicyClass? = nil
 ) -> ModuleManifest {
     ModuleManifest(
         runtimeVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(0)),
@@ -1662,6 +1732,7 @@ private func manifest(
             requiredModuleRoles: descriptor.requiredModuleRoles.sorted()
         ),
         defaultRole: descriptor.role,
+        policyClass: policyClass,
         consumedEndpoints: descriptor.consumedEndpoints.sorted(),
         publishedEndpoints: descriptor.publishedEndpoints.sorted(),
         entitlementRequirement: entitlementRequirement
