@@ -47,6 +47,9 @@ Codex domain and a complete local Progression implementation:
 - a versioned semantic Theme contract, generic owned contribution and opaque-resource
   registries, a runtime-owned Theme Coordinator, semantic common UI presentation, and
   a required Norse Base provider with exact Base Script and font compatibility; and
+- a validated Elven Series recovery boundary with all nine findings passing together,
+  a corrected v3 resource package, and Phase C production actively continuing outside
+  the shipping application; and
 - one superseded, nine accepted, and two explicitly blocked architecture decisions,
   plus this auditable roadmap ledger.
 
@@ -142,10 +145,10 @@ result and required attachment acceptance.
 2. Finish DOM-005/006/007 compatibility rendering, presentation-state ownership, and
    atomic delivery-state migration while keeping legacy decode behavior.
 3. Complete BAS-008's old/new compatibility and update-required test matrix.
-4. Keep Elven Series Phase C blocked until DEV-ELVEN-003 through DEV-ELVEN-009
-   receive source, geometry, topology, resource-role, and provenance corrections.
-   DEV-ELVEN-001 and DEV-ELVEN-002 are resolved in the remediation ledger and
-   evidence under `docs/verification/elven-remediation/`.
+4. Continue Elven Series Phase C from the validated all-nine recovery boundary.
+   Complete the remaining Relic derivatives, Seal exports, font evidence, and share
+   resource declarations recorded in `docs/verification/elven-recovery-v3/` before
+   beginning Phase D provider targets.
 5. Qualify Progression feedback, silent-mode behavior, VoiceOver timing, and interrupted
    native-route presentation on supported physical hardware before claiming those
    device-only acceptance checks.

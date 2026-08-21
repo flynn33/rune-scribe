@@ -10,6 +10,7 @@ as a string of Unicode runes. Send a friend your cipher — by QR, iMessage, lin
 or file — and they can read it; without it, the runes are just runes.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.38%20build%2038-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
 ![Tests](https://img.shields.io/badge/tests-814%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
@@ -228,12 +229,18 @@ flowchart TD
     Host --> Platform[RuneScribePlatform<br/>Apple adapters]
     Runtime --> Core[RuneScribeCoreModule<br/>cipher · contacts · import · security]
     Runtime --> UI[RuneScribeUIModule<br/>only user-facing UI module]
+    Runtime --> Progression[RuneScribeProgressionModule<br/>optional local journey · records · grants]
+    Runtime --> ThemeCoordinator[RuneScribeThemeCoordinatorModule<br/>selection · availability · fallback]
+    Runtime --> NorseTheme[RuneScribeNorseThemeModule<br/>required Base provider]
     UI --> UIRuntime[RuneScribeUIRuntime<br/>native system presentation]
     Runtime --> Presentation[RuneScribeUIPresentationContracts<br/>typed root-presentation port]
     UI -. root contribution .-> Presentation
     UIRuntime -. presentation adapter .-> Presentation
     Core -. neutral protocols and DTOs .-> Contracts[RuneScribeContracts]
     UI -. neutral protocols and DTOs .-> Contracts
+    Progression -. neutral protocols and DTOs .-> Contracts
+    ThemeCoordinator -. neutral protocols and DTOs .-> Contracts
+    NorseTheme -. neutral protocols and DTOs .-> Contracts
     Platform -. neutral protocols and DTOs .-> Contracts
     TestSupport[RuneScribeTestSupport<br/>test-only in-memory adapters] -. tests only .-> Contracts
 ```
@@ -246,6 +253,12 @@ persistent Settings, lifecycle, resources, and system-presentation sessions.
 `RuneScribeUIRuntime` contains the narrow Apple presentation bridges, while the UI
 module retains product views and normalized state only. Runtime modules do not import
 one another, and test support is excluded from shipping products.
+
+The current applications link nine shipping package products: Contracts, Runtime
+Core, UI Runtime, Platform, Core Module, Progression Module, Theme Coordinator, Norse
+Base Theme, and the sole UI Module. Optional Progression failure falls back without
+blocking cipher workflows, and the Norse Base provider remains required. No production
+Elven provider target is linked into either application.
 
 The current source is being remediated to that target. Existing provider-object,
 platform-I/O, Settings, and lifecycle deviations are tracked explicitly and are not
@@ -309,11 +322,13 @@ local Progression Module, and the Phase A/B Theme scaffold: approved Achievement
 Codex gates, the Vault/Progress view, durable unlock reveals, privacy-safe
 existing-user migration, the runtime Theme coordinator, and the required Norse Base
 provider. Production Elven series providers, cloud synchronization, and Game Center
-remain disabled. Elven Series findings DEV-ELVEN-001 and DEV-ELVEN-002 are resolved
-in the remediation ledger; DEV-ELVEN-003 through DEV-ELVEN-009 still block Phase C
-source and provider work. Later Theme and sharing work remains gated by those
-findings, the local runtime, compatibility, and the physical-device program; there
-is no external-framework prerequisite.
+remain disabled. All nine Elven Series recovery findings pass simultaneously, the
+corrected v3 production package is validated, and Phase C resource production has
+resumed. Phase C remains in progress; its remaining Relic derivatives, Seal exports,
+font evidence, and share-resource declarations must finish before Phase D provider
+targets begin. Later Theme and sharing work also remains gated by the local runtime,
+compatibility, and physical-device program; there is no external-framework
+prerequisite.
 
 Current architecture and dependency authority lives in the
 [controlling Forsetti policy](docs/architecture/FORSETTI_CONTROLLING_POLICY.md),
@@ -472,8 +487,11 @@ Detailed guides, architecture deep-dives, and diagrams live in the
 **[project wiki](https://github.com/flynn33/rune-scribe/wiki)** and the tracked
 [`docs`](docs) directory. Start with [Roadmap Alignment](docs/architecture/RoadmapAlignment.md)
 for the current implementation boundary and dependencies. Elven Series status is in
-the [resolution ledger](docs/verification/ElvenSeriesBlockingResolutionLedger.md) and
-[final audit](docs/verification/ElvenSeriesBlockingRemediationFinalAudit.md).
+the [resolution ledger](docs/verification/ElvenSeriesBlockingResolutionLedger.md),
+[recovery state](docs/verification/elven-recovery-v3/RecoveryState.json), and
+[current final audit](docs/verification/elven-recovery-v3/RecoveryFinalAudit.md).
+Run `scripts/check-documentation-alignment.py` to verify release versions, roadmap
+status, recovery authority, and publication policy together.
 
 <div align="center">
 

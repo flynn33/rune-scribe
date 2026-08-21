@@ -1,4 +1,4 @@
-// RuneScrib/Models/AppLicense.swift
+// Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/ProductContent/AppLicense.swift
 
 import Foundation
 

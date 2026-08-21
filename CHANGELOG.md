@@ -1,19 +1,20 @@
 # Changelog
 
-All notable changes to Rune Scribe are recorded here. New entries are added
-automatically when a pull request is merged into `main` (see
-`.github/workflows/version-bump.yml`). The format follows
+All notable changes to Rune Scribe are recorded here. Entries are maintained with
+release work and reviewed against the project version before merge. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
-## [1.0.38] - 2026-08-15
+## [1.0.38] - 2026-08-21
 
 - Add the Theme contract, runtime coordinator, and required Norse Base provider
   while keeping production Elven series providers out of the shipping app.
-- Record Elven Series blocking-remediation evidence: DEV-ELVEN-001 and
-  DEV-ELVEN-002 passed; DEV-ELVEN-003 through DEV-ELVEN-009 remain blocked
-  pending source corrections.
+- Align the Core, Progression, and UI module descriptors, manifests, and pinned
+  resource hashes with version 1.0.38 build 38.
+- Rebuild and validate the corrected Elven Series v3 production package: all nine
+  recovery findings pass simultaneously, Phase C is unblocked and in progress, and
+  production Elven providers remain outside the shipping app until later phases.
 
 ## [1.0.37] - 2026-08-14
 
