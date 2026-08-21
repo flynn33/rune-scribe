@@ -3,7 +3,8 @@
 > **Historical rejected audit, superseded 2026-08-21.** Its v2 claims and paths do
 > not establish recovery closure. The current accepted evidence is
 > [`elven-recovery-v3/RecoveryFinalAudit.md`](elven-recovery-v3/RecoveryFinalAudit.md)
-> and [`elven-recovery-v3/RecoveryState.json`](elven-recovery-v3/RecoveryState.json).
+> and the [`Phase C final audit`](elven-phase-c/PhaseCFinalAudit.md). Phase C is
+> complete and ready for Phase D; Phase D has not started.
 
 **Task package:** earlier Elven Series implementation package v2.0
 **Repository root:** `/Users/jimdaley/GitHub/Rune-Scribe`  

@@ -7,9 +7,14 @@
 - All nine recovery findings: **PASS**
 - Corrected v3 package: **PASS**
 - Remediation status: **PASS / UNBLOCKED FOR PHASE C**
-- Phase C continuation status: **IN_PROGRESS**
+- Phase C completion status: **PASS / READY FOR PHASE D**
+- Phase D status: **NOT STARTED**
+- Physical-device-only checks: **PENDING_PHYSICAL_DEVICE**
 
-The recovery boundary is closed. Phase C has resumed with validated production resources, but the remaining Phase C deliverables listed below are not complete and Phase D has not started.
+The recovery boundary remains closed and accepted. Phase C is complete and ready for
+Phase D. Phase D has not started. The historical recovery evidence below remains the
+authority for v3.0; current Phase C completion evidence is recorded in
+[`../elven-phase-c/PhaseCFinalAudit.md`](../elven-phase-c/PhaseCFinalAudit.md).
 
 ## Repository Boundary
 
@@ -119,13 +124,20 @@ The corrected-v3 result is nine passing findings, no failed findings, zero gener
 
 ## Phase C Continuation
 
-Phase C resumed through a deterministic production pipeline. Completed work includes 128 glyph SVG masters, four static fonts, 64 declared shipping outputs, 20 resource records, 12 layout profiles, 12 layout fixtures, seven topology review renders, two anchor overlays, and 189 source-provenance records.
+Phase C completed through the deterministic production pipeline at audited source commit
+`f5b74658bb6ec4d3ac251f532a4d92d389c2a2db`. The completed v3.1 package contains
+56 logical resources, 184 materialized outputs, and 198 provenance records. This
+includes the complete 12-Relic derivative matrix, 24 Seal vector/fallback matrices,
+four font and Script evidence sets, and all share, accessibility, fallback, recipe,
+budget, and integrity declarations.
 
-Remaining Phase C work is explicit:
+The intended 488-file package and a distinct clean rebuild are byte-identical. Their
+deterministic ZIP archives are each 25,869,236 bytes with SHA-256
+`858290e05e8024b991ce736e1abbb9bded920420662407caaf8a0a03b4f9073e`.
+Eight of eight Phase C validator scopes, 53 of 53 negative mutations, and all nine
+DEV-ELVEN regressions pass. Font registration passes for all four exact binaries on
+macOS and iOS Simulator.
 
-- Complete all 12 Relic master, thumbnail, static-share, and high-contrast derivative sets.
-- Produce the required Seal shipping vectors and monochrome fallbacks.
-- Add the full font character-map, metrics, PostScript-name, multi-size specimen, long-inscription, confusability, registration, and fallback evidence.
-- Complete remaining share artwork and resource declarations before Phase D Theme Module targets begin.
-
-Therefore, the recovery is **PASS / UNBLOCKED FOR PHASE C**, while Phase C itself remains **IN_PROGRESS**.
+The recovery remains **PASS / UNBLOCKED FOR PHASE C** as a historical boundary, and
+Phase C is now **PASS / READY FOR PHASE D**. Phase D remains **NOT STARTED**. The
+hardware and distribution rows listed above remain `PENDING_PHYSICAL_DEVICE`.

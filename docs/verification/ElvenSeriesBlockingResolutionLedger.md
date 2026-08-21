@@ -1,12 +1,16 @@
-# Elven Series Blocking Resolution Ledger v1.1
+# Elven Series Blocking Resolution Ledger v1.2
 
-**Status:** recovery boundary closed; Phase C in progress
+**Status:** recovery boundary closed; Phase C complete; ready for Phase D
 
 **Date:** 2026-08-21
 
 **Canonical source:** `/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0`
 
-**Corrected package:** `/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0`
+**Immutable recovery baseline:** `/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0`
+
+**Completed Phase C package:** `/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1`
+
+**Completed Phase C archive:** `/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1.zip`
 
 This ledger summarizes the live recovery disposition. Earlier v2 remediation records
 under `docs/verification/elven-remediation/` are retained as historical evidence and
@@ -17,7 +21,7 @@ do not control current status.
 1. Forsetti controlling policy and neutral contracts
 2. Repository Progression catalog and Future Theme Binding Contract
 3. Current recovery controls and simultaneous validator
-4. Corrected v3 package as generated output
+4. Immutable corrected v3.0 recovery package and validated v3.1 Phase C output
 5. Earlier reports and prose as historical evidence only
 
 ## Finding status
@@ -48,6 +52,10 @@ earlier partial evidence.
 - `docs/verification/elven-recovery-v3/RecoveryState.json`:
   `PASS / UNBLOCKED FOR PHASE C`.
 - `docs/verification/elven-recovery-v3/PhaseCContinuation.json`: Phase C is
-  `IN_PROGRESS`; Phase D has not started.
+  `PASS / READY FOR PHASE D`; Phase D not started.
+- `docs/verification/elven-phase-c/PhaseCFinalAudit.md`: 56 logical resources,
+  184 shipping outputs, and 198 provenance records pass deterministic regeneration,
+  mutation, font-registration, package, and repository acceptance.
 - Physical-device qualification remains pending only for the rows identified in
-  `docs/verification/elven-recovery-v3/PhaseABRegression.json`.
+  `docs/verification/elven-recovery-v3/PhaseABRegression.json`; its status remains
+  `PENDING_PHYSICAL_DEVICE` and is not upgraded by Simulator or hosted evidence.

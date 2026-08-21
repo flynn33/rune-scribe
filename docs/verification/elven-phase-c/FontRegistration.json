@@ -1,0 +1,108 @@
+{
+  "errors": [],
+  "expectedFontCount": 4,
+  "generatedAtUTC": "2026-08-21T14:30:00Z",
+  "packageVersion": "3.1.0",
+  "platforms": [
+    {
+      "command": "xcodebuild -project ElvenFontRegistrationProbe.xcodeproj -scheme FontRegistrationMacProbe -destination 'platform=macOS' -derivedDataPath <ephemeral-derived-data> -resultBundlePath <ephemeral-result-bundle> test",
+      "device": null,
+      "fonts": [
+        {
+          "errorCode": null,
+          "expectedPostScriptName": "RavenForgeGloamthornScript-Regular",
+          "filename": "Shipping/gloamthorn/script/gloamthorn-script-primary.ttf",
+          "registered": true,
+          "resolvedPostScriptName": "RavenForgeGloamthornScript-Regular",
+          "resourceID": "resource.script.gloamthorn.output.script-font",
+          "sha256": "a2cf3dd18a4e1bbf4a11b3995307873820c8715a17f4e745cd61fae6f92a65b3",
+          "status": "PASS"
+        },
+        {
+          "errorCode": null,
+          "expectedPostScriptName": "RavenForgeMoonleafScript-Regular",
+          "filename": "Shipping/moonleaf/script/moonleaf-script-primary.ttf",
+          "registered": true,
+          "resolvedPostScriptName": "RavenForgeMoonleafScript-Regular",
+          "resourceID": "resource.script.moonleaf.output.script-font",
+          "sha256": "7fa08b061fbbe897e4305dea1bf456ec87b491a2c34e2df4cf2f6845647f0f3e",
+          "status": "PASS"
+        },
+        {
+          "errorCode": null,
+          "expectedPostScriptName": "RavenForgeSunspireScript-Regular",
+          "filename": "Shipping/sunspire/script/sunspire-script-primary.ttf",
+          "registered": true,
+          "resolvedPostScriptName": "RavenForgeSunspireScript-Regular",
+          "resourceID": "resource.script.sunspire.output.script-font",
+          "sha256": "af4394a11b37bbd0a7cfa276e727a26a505a2712a6a54847488a38f2f4ca79ab",
+          "status": "PASS"
+        },
+        {
+          "errorCode": null,
+          "expectedPostScriptName": "RavenForgeWildwoodScript-Regular",
+          "filename": "Shipping/wildwood/script/wildwood-script-primary.ttf",
+          "registered": true,
+          "resolvedPostScriptName": "RavenForgeWildwoodScript-Regular",
+          "resourceID": "resource.script.wildwood.output.script-font",
+          "sha256": "ad40e0285989a37f008be604de4e7a7687f016a0c8e97e709fd8848d1caf0093",
+          "status": "PASS"
+        }
+      ],
+      "platform": "macOS",
+      "runtimeVersion": "26.6.1",
+      "status": "PASS"
+    },
+    {
+      "command": "xcodebuild -project ElvenFontRegistrationProbe.xcodeproj -scheme FontRegistrationIOSProbe -destination 'platform=iOS Simulator,id=SELECTED_SIMULATOR' -derivedDataPath <ephemeral-derived-data> -resultBundlePath <ephemeral-result-bundle> test",
+      "device": "iPhone 17 Pro Max",
+      "fonts": [
+        {
+          "errorCode": null,
+          "expectedPostScriptName": "RavenForgeGloamthornScript-Regular",
+          "filename": "Shipping/gloamthorn/script/gloamthorn-script-primary.ttf",
+          "registered": true,
+          "resolvedPostScriptName": "RavenForgeGloamthornScript-Regular",
+          "resourceID": "resource.script.gloamthorn.output.script-font",
+          "sha256": "a2cf3dd18a4e1bbf4a11b3995307873820c8715a17f4e745cd61fae6f92a65b3",
+          "status": "PASS"
+        },
+        {
+          "errorCode": null,
+          "expectedPostScriptName": "RavenForgeMoonleafScript-Regular",
+          "filename": "Shipping/moonleaf/script/moonleaf-script-primary.ttf",
+          "registered": true,
+          "resolvedPostScriptName": "RavenForgeMoonleafScript-Regular",
+          "resourceID": "resource.script.moonleaf.output.script-font",
+          "sha256": "7fa08b061fbbe897e4305dea1bf456ec87b491a2c34e2df4cf2f6845647f0f3e",
+          "status": "PASS"
+        },
+        {
+          "errorCode": null,
+          "expectedPostScriptName": "RavenForgeSunspireScript-Regular",
+          "filename": "Shipping/sunspire/script/sunspire-script-primary.ttf",
+          "registered": true,
+          "resolvedPostScriptName": "RavenForgeSunspireScript-Regular",
+          "resourceID": "resource.script.sunspire.output.script-font",
+          "sha256": "af4394a11b37bbd0a7cfa276e727a26a505a2712a6a54847488a38f2f4ca79ab",
+          "status": "PASS"
+        },
+        {
+          "errorCode": null,
+          "expectedPostScriptName": "RavenForgeWildwoodScript-Regular",
+          "filename": "Shipping/wildwood/script/wildwood-script-primary.ttf",
+          "registered": true,
+          "resolvedPostScriptName": "RavenForgeWildwoodScript-Regular",
+          "resourceID": "resource.script.wildwood.output.script-font",
+          "sha256": "ad40e0285989a37f008be604de4e7a7687f016a0c8e97e709fd8848d1caf0093",
+          "status": "PASS"
+        }
+      ],
+      "platform": "iOS Simulator",
+      "runtimeVersion": "26.2",
+      "status": "PASS"
+    }
+  ],
+  "schemaVersion": 1,
+  "status": "PASS"
+}

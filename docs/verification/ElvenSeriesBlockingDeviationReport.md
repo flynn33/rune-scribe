@@ -2,10 +2,10 @@
 
 > **Historical snapshot, superseded 2026-08-21.** This report records the blocker
 > state observed on 2026-08-15. The current recovery state is
-> `PASS / UNBLOCKED FOR PHASE C`; all nine findings pass in
-> [`elven-recovery-v3/RecoveryState.json`](elven-recovery-v3/RecoveryState.json), and
-> Phase C is now in progress. The body below is retained as forensic evidence and is
-> not current status authority.
+> `PASS / UNBLOCKED FOR PHASE C`; all nine findings pass, Phase C is complete and
+> ready for Phase D, and Phase D has not started. See the
+> [`Phase C final audit`](elven-phase-c/PhaseCFinalAudit.md). The body below is
+> retained as forensic evidence and is not current status authority.
 
 **Status:** OPEN — Phase A and Phase B are complete. DEV-ELVEN-001 and DEV-ELVEN-002
 are resolved. Phase C production asset work and all Elven-dependent phases remain

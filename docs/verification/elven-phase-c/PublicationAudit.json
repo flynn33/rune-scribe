@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "packageVersion": "3.1.0",
+  "repositoryBranch": "feature/elven-phase-c-production",
+  "sourceCommit": "f5b74658bb6ec4d3ac251f532a4d92d389c2a2db",
+  "packageAudit": {
+    "validatorScope": "publication",
+    "status": "PASS",
+    "packageFilesScanned": 488,
+    "repositoryPublicationFilesScanned": 6,
+    "issueCount": 0,
+    "issueCodes": []
+  },
+  "repositoryAudit": {
+    "status": "PASS",
+    "pathsChecked": true,
+    "trackedTextChecked": true,
+    "branchChecked": true,
+    "commitMetadataChecked": true,
+    "pullRequestMetadataRequiredBeforePublication": true
+  },
+  "largeExternalArtifactsCommitted": false,
+  "externalArchivePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1.zip",
+  "commands": [
+    "python3 scripts/validate-elven-phase-c-package.py --package-root /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1 --repo-root /Users/jimdaley/GitHub/Rune-Scribe-Elven-Phase-C --output docs/verification/elven-phase-c/PhaseCValidation.json --scope aggregate",
+    "python3 scripts/check-documentation-alignment.py"
+  ],
+  "errors": []
+}

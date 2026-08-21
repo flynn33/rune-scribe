@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "generatedAtUTC": "2026-08-21T14:30:00Z",
+  "packageVersion": "3.1.0",
+  "packageRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1",
+  "archive": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1.zip",
+  "physicalFileCount": 488,
+  "packageByteTotal": 30388586,
+  "manifestEntryCount": 487,
+  "logicalResourceCount": 56,
+  "shippingOutputCount": 184,
+  "provenanceRecordCount": 198,
+  "resourceClasses": [
+    {"assetClass": "script", "logicalResourceCount": 4, "outputCount": 12},
+    {"assetClass": "background", "logicalResourceCount": 4, "outputCount": 12},
+    {"assetClass": "vault", "logicalResourceCount": 4, "outputCount": 16},
+    {"assetClass": "relic", "logicalResourceCount": 12, "outputCount": 48},
+    {"assetClass": "seal", "logicalResourceCount": 24, "outputCount": 72},
+    {"assetClass": "frame", "logicalResourceCount": 4, "outputCount": 12},
+    {"assetClass": "crest", "logicalResourceCount": 4, "outputCount": 12}
+  ],
+  "completeFileInventory": {
+    "path": "PACKAGE-MANIFEST.json",
+    "entryCount": 487,
+    "physicalFileCountIncludesManifest": true,
+    "sha256": "d55f4b7c0f74eaf2b396ceb664f25ba086f50b7033052cd0f0a18d407c8a31da"
+  },
+  "completeOutputMatrix": {
+    "packagePath": "Validation/phase-c-output-matrix.json",
+    "repositoryEvidencePath": "docs/verification/elven-phase-c/PhaseCOutputMatrix.json",
+    "sha256": "3789c0161964ef708ebb727b142ca3856c1afd1c73d51f65b575cce34b227c4f"
+  },
+  "hashes": [
+    {"path": "PACKAGE-MANIFEST.json", "sha256": "d55f4b7c0f74eaf2b396ceb664f25ba086f50b7033052cd0f0a18d407c8a31da"},
+    {"path": "Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json", "sha256": "515f0e03e653c78117d7bbaa602e5ba2263af91e6742a07f70daa31d5dbc0252"},
+    {"path": "Provenance/Asset-Provenance-v3.1.json", "sha256": "19bf6bdc907fc105ae353afc312ebe3502f1e7b22b1b37685fb80a18d93366b5"},
+    {"path": "Validation/phase-c-output-matrix.json", "sha256": "3789c0161964ef708ebb727b142ca3856c1afd1c73d51f65b575cce34b227c4f"},
+    {"path": "Validation/font-registration.json", "sha256": "9a859a69c6d814f68186f714a2c35aa4844fd72c506e75da5f320af12a24f14f"},
+    {"path": "Validation/deterministic-regeneration.json", "sha256": "185716ff8e7366fce59e1f70552ad1e36492314b1f05be7d6482394e74112198"},
+    {"path": "Validation/fonts/font-evidence.json", "sha256": "e0cf29bd7df6c0fe7e879d9e6eaee4c12c70c88d8ea97f6d073d4cd3f4d35296"},
+    {"path": "Validation/seals/seal-recognition.json", "sha256": "9a5106b03ad15b105c54d7eab16e67e99b3e6b7917a5ed8c2765dfc4a4ace254"},
+    {"path": "Validation/share/share-layouts.json", "sha256": "f0f8602831e4da019af246b80950b3b5da5e051352a635ef1e6a02c870acd87b"},
+    {"path": "Validation/layout-fixtures.json", "sha256": "6e26300eca5bdf01b8f6503b685fe373d4564b6665989c2bdfdf36e6096d835e"},
+    {"path": "Validation/geometry/anchor-safety.json", "sha256": "9e7f3d0b6a8bfa95a9815f7c4d936289fcc55b9118971e6174eb727132ccd93d"},
+    {"path": "Validation/topology/smallest-output-recognition.json", "sha256": "5d923236d669d0df4f09c617538e261696b9f3b4e502377d440939ec115883ce"},
+    {"path": "Validation/recipes/recipe-catalog.json", "sha256": "f50d6e83d552ec9a7d087fa94dd9ede01fd176bbc33f4340368c3740960b50f5"}
+  ],
+  "treeSHA256": "01415e0a5a43305c3989ac020adb2558045a16b05fdb888f17b2c07a08bf2b1e",
+  "archiveByteLength": 25869236,
+  "archiveSHA256": "858290e05e8024b991ce736e1abbb9bded920420662407caaf8a0a03b4f9073e",
+  "archiveMemberCount": 488,
+  "archiveExtractionRoot": "Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1",
+  "archiveIntegrity": "PASS",
+  "symlinkCount": 0,
+  "errors": []
+}

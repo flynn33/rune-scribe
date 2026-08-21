@@ -10,8 +10,11 @@ Current status and acceptance evidence live in:
 - `../elven-recovery-v3/RecoveryState.json`
 - `../elven-recovery-v3/FullPackageValidation.json`
 - `../elven-recovery-v3/RecoveryFinalAudit.md`
+- `../elven-phase-c/PhaseCFinalAudit.md`
 - `../elven-recovery-v3/findings/DEV-ELVEN-001.json` through
   `../elven-recovery-v3/findings/DEV-ELVEN-009.json`
 
-The authoritative recovery status is `PASS / UNBLOCKED FOR PHASE C`. Phase C remains
-`IN_PROGRESS`, and Phase D has not started.
+The authoritative recovery status remains `PASS / UNBLOCKED FOR PHASE C`. Phase C is
+complete and ready for Phase D, Phase D has not started, and physical-device evidence
+remains `PENDING_PHYSICAL_DEVICE` where identified. The historical files below do not
+override those current boundaries.

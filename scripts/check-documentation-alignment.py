@@ -165,6 +165,10 @@ require(phase_c.get("physicalDeviceStatus") == "PENDING_PHYSICAL_DEVICE", "Phase
 phase_c_record = json.loads(read("docs/verification/elven-recovery-v3/PhaseCContinuation.json"))
 for key in ("status", "outcome", "firstIncompletePhase", "phaseDStatus", "physicalDeviceStatus"):
     require(phase_c_record.get(key) == phase_c.get(key), f"Phase C continuation records disagree on {key}")
+require(
+    phase_c_record.get("sourceFilesChanged") == phase_c.get("sourceFilesChanged"),
+    "Phase C continuation records disagree on sourceFilesChanged",
+)
 package = phase_c_record.get("package", {})
 require(package.get("logicalResourceCount") == 56, "Phase C logical resource count differs")
 require(package.get("shippingOutputCount") == 184, "Phase C shipping output count differs")
@@ -172,7 +176,7 @@ require(package.get("provenanceRecordCount") == 198, "Phase C provenance count d
 require(phase_c_record.get("remainingWork") == [], "Phase C continuation retains unfinished work")
 
 phase_c_evidence = {
-    "docs/verification/elven-phase-c/AllNineRegression.json": ("status", "PASS"),
+    "docs/verification/elven-phase-c/AllNineRegression.json": (("summary", "status"), "PASS"),
     "docs/verification/elven-phase-c/PhaseCValidation.json": ("status", "PASS"),
     "docs/verification/elven-phase-c/PhaseCValidatorMutations.json": ("status", "PASS"),
     "docs/verification/elven-phase-c/DeterministicRegeneration.json": ("status", "PASS"),
@@ -181,9 +185,15 @@ phase_c_evidence = {
     "docs/verification/elven-phase-c/RepositoryRegression.json": ("status", "PASS"),
     "docs/verification/elven-phase-c/PublicationAudit.json": ("status", "PASS"),
 }
-for relative, (key, expected) in phase_c_evidence.items():
+for relative, (key_path, expected) in phase_c_evidence.items():
     record = json.loads(read(relative))
-    require(record.get(key) == expected, f"{relative} is not {expected}")
+    value = record
+    for key in key_path if isinstance(key_path, tuple) else (key_path,):
+        value = value.get(key) if isinstance(value, dict) else None
+    require(value == expected, f"{relative} is not {expected}")
+
+for command in phase_c_record.get("commands", []):
+    require("<intended-" not in command and "<clean-" not in command, "Phase C command retains a path placeholder")
 
 current_status_docs = {
     "README.md": readme,
