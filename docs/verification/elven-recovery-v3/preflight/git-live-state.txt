@@ -1,0 +1,40 @@
+Captured: 2026-08-21 America/Chicago
+
+Primary checkout
+root: /Users/jimdaley/GitHub/Rune-Scribe
+branch: runtime-owned-io-presentation
+HEAD: af60a3c62d4b7828f3ab944504e06036ece4129e
+origin/main after fetch: feea59eed6b84fddacf3924c650d895fabe2e745
+preservation: left untouched; separate worktree created
+status:
+ M docs/verification/elven-remediation/ElvenSupplementalAudit.json
+ M docs/verification/elven-remediation/source-discovery/source-discovery.json
+ M docs/verification/elven-remediation/source-discovery/source-discovery.md
+?? docs/verification/elven-remediation/DEV-ELVEN-008-009-remediation-audit.json
+?? docs/verification/elven-remediation/DEV-ELVEN-009-outputfact-repair.json
+?? docs/verification/elven-remediation/DEV-ELVEN-audit-before.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-RunFinal.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-current.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-run.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-test.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-test2.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-test3.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-test4.json
+?? docs/verification/elven-remediation/source-discovery.json
+?? docs/verification/elven-remediation/source-discovery.md
+
+Recovery worktree
+root: /Users/jimdaley/GitHub/Rune-Scribe-Elven-Recovery-v3
+branch: elven-recovery-v3
+starting HEAD: feea59eed6b84fddacf3924c650d895fabe2e745
+origin/main at start: feea59eed6b84fddacf3924c650d895fabe2e745
+initial status: clean
+
+Recent origin/main history at start
+feea59e Remove GitHub Actions workflow .github/workflows/version-bump.yml to stop runner spend.
+2b83b8c Remove GitHub Actions workflow .github/workflows/unit-tests.yml to stop runner spend.
+31cee70 Record Elven remediation evidence and theme status
+990a10e Merge pull request #41 from flynn33/runtime-owned-io-presentation
+af60a3c chore: update Elven remediation reports and evidence
+65a7fe3 Merge pull request #40 from flynn33/runtime-owned-io-presentation
+88be380 Implement theme foundation and Norse baseline module
