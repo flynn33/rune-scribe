@@ -41,6 +41,10 @@ def main() -> int:
     parser.add_argument("state", type=Path)
     arguments = parser.parse_args()
     state_path = arguments.state.resolve()
+    if len(state_path.parents) < 4:
+        print(json.dumps({"status": "FAIL", "errors": ["State path is not inside the expected repository documentation tree."]}, indent=2))
+        return 1
+    current_repo_root = state_path.parents[3]
     errors: list[str] = []
 
     try:
@@ -171,12 +175,24 @@ def main() -> int:
         errors.append("full validation contains skipped or waived checks")
 
     continuation = state.get("phaseCContinuation", {})
-    if continuation.get("status") not in ("IN_PROGRESS", "PASS"):
-        errors.append("Phase C continuation has not started")
-    if not continuation.get("sourceFilesChanged") or not continuation.get("evidencePaths"):
-        errors.append("Phase C continuation lacks source changes or evidence")
+    if continuation.get("status") != "PASS":
+        errors.append("Phase C continuation is not PASS")
+    if continuation.get("outcome") != "PHASE C: PASS / READY FOR PHASE D":
+        errors.append("Phase C continuation outcome differs")
+    if continuation.get("firstIncompletePhase") != "Phase D - Build the four Theme Modules":
+        errors.append("Phase C continuation does not identify Phase D as the next incomplete phase")
+    if continuation.get("phaseDStatus") != "NOT_STARTED":
+        errors.append("Phase D must remain NOT_STARTED")
+    if continuation.get("physicalDeviceStatus") != "PENDING_PHYSICAL_DEVICE":
+        errors.append("Phase C physical-device status differs")
+    if not continuation.get("sourceFilesChanged") or not continuation.get("commands") or not continuation.get("results") or not continuation.get("evidencePaths"):
+        errors.append("Phase C continuation lacks source changes, commands, results, or evidence")
+    if continuation.get("remainingWork"):
+        errors.append("Phase C continuation retains unfinished work")
+    if not continuation.get("physicalDevicePending"):
+        errors.append("Phase C continuation omits pending physical-device work")
     for relative in continuation.get("evidencePaths", []):
-        if not (repo_root / relative).is_file():
+        if not (current_repo_root / relative).is_file():
             errors.append(f"Phase C evidence is unresolved: {relative}")
 
     if state.get("recoveryStatus") != "PASS / UNBLOCKED FOR PHASE C":

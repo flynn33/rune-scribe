@@ -82,7 +82,8 @@ require(
     "README version badge differs from project version",
 )
 require("All nine Elven Series recovery findings pass simultaneously" in readme, "README lacks current recovery result")
-require("Phase C remains in progress" in readme, "README lacks current Phase C boundary")
+require("Phase C is complete and ready for Phase D" in readme, "README lacks current Phase C result")
+require("Phase D has not started" in readme, "README lacks the Phase D boundary")
 
 submission = read("docs/APP_STORE_SUBMISSION.md")
 require(
@@ -94,7 +95,8 @@ require(f"| **Build** | `{build}` |" in submission, "App Store packet build diff
 require(f"## What ships in {marketing}" in submission, "App Store packet summary differs")
 
 roadmap = read("docs/architecture/RoadmapAlignment.md")
-require("Continue Elven Series Phase C" in roadmap, "roadmap lacks current Elven next gate")
+require("Phase C is complete and ready for Phase D" in roadmap, "roadmap lacks the completed Phase C result")
+require("Phase D has not started" in roadmap, "roadmap lacks the Phase D boundary")
 require("validated Elven Series recovery boundary" in roadmap, "roadmap lacks recovery result")
 require("Keep Elven Series Phase C blocked" not in roadmap, "roadmap retains superseded Phase C blocker")
 
@@ -115,8 +117,10 @@ for relative in ("docs/architecture/ModuleGraph.md", "docs/architecture/Forsetti
 
 ledger = read("docs/verification/ElvenSeriesBlockingResolutionLedger.md")
 require("stat.message.incoming-decoded.unique" in ledger, "resolution ledger lacks canonical decode statistic")
-require(ledger.count("| PASS |") == 9, "resolution ledger does not record exactly nine passing findings")
-require("Phase C in progress" in ledger, "resolution ledger lacks current Phase C status")
+passing_findings = re.findall(r"^\| DEV-ELVEN-\d{3} \| PASS \|", ledger, re.MULTILINE)
+require(len(passing_findings) == 9, "resolution ledger does not record exactly nine passing findings")
+require("Phase C complete; ready for Phase D" in ledger, "resolution ledger lacks current Phase C status")
+require("Phase D not started" in ledger, "resolution ledger lacks the Phase D boundary")
 
 historical_reports = (
     "docs/verification/ElvenSeriesBlockingDeviationReport.md",
@@ -152,7 +156,34 @@ findings = recovery.get("findings", [])
 require(len(findings) == 9, "recovery state does not contain exactly nine findings")
 require(all(item.get("status") == "PASS" for item in findings), "recovery state contains a nonpassing finding")
 phase_c = recovery.get("phaseCContinuation", {})
-require(phase_c.get("status") == "IN_PROGRESS", "Phase C continuation status differs")
+require(phase_c.get("status") == "PASS", "Phase C continuation status differs")
+require(phase_c.get("outcome") == "PHASE C: PASS / READY FOR PHASE D", "Phase C outcome differs")
+require(phase_c.get("firstIncompletePhase") == "Phase D - Build the four Theme Modules", "Phase C next phase differs")
+require(phase_c.get("phaseDStatus") == "NOT_STARTED", "Phase D status differs")
+require(phase_c.get("physicalDeviceStatus") == "PENDING_PHYSICAL_DEVICE", "Phase C physical-device status differs")
+
+phase_c_record = json.loads(read("docs/verification/elven-recovery-v3/PhaseCContinuation.json"))
+for key in ("status", "outcome", "firstIncompletePhase", "phaseDStatus", "physicalDeviceStatus"):
+    require(phase_c_record.get(key) == phase_c.get(key), f"Phase C continuation records disagree on {key}")
+package = phase_c_record.get("package", {})
+require(package.get("logicalResourceCount") == 56, "Phase C logical resource count differs")
+require(package.get("shippingOutputCount") == 184, "Phase C shipping output count differs")
+require(package.get("provenanceRecordCount") == 198, "Phase C provenance count differs")
+require(phase_c_record.get("remainingWork") == [], "Phase C continuation retains unfinished work")
+
+phase_c_evidence = {
+    "docs/verification/elven-phase-c/AllNineRegression.json": ("status", "PASS"),
+    "docs/verification/elven-phase-c/PhaseCValidation.json": ("status", "PASS"),
+    "docs/verification/elven-phase-c/PhaseCValidatorMutations.json": ("status", "PASS"),
+    "docs/verification/elven-phase-c/DeterministicRegeneration.json": ("status", "PASS"),
+    "docs/verification/elven-phase-c/FinalPackageComparison.json": ("status", "PASS"),
+    "docs/verification/elven-phase-c/PackageInventory.json": ("status", "PASS"),
+    "docs/verification/elven-phase-c/RepositoryRegression.json": ("status", "PASS"),
+    "docs/verification/elven-phase-c/PublicationAudit.json": ("status", "PASS"),
+}
+for relative, (key, expected) in phase_c_evidence.items():
+    record = json.loads(read(relative))
+    require(record.get(key) == expected, f"{relative} is not {expected}")
 
 current_status_docs = {
     "README.md": readme,
@@ -210,4 +241,4 @@ if ERRORS:
         print(f"FAIL {error}")
     sys.exit(1)
 
-print(f"Documentation alignment passed: version {marketing} build {build}, nine recovery findings, Phase C in progress.")
+print(f"Documentation alignment passed: version {marketing} build {build}, nine recovery findings, Phase C complete and ready for Phase D; Phase D not started.")
