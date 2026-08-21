@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "findingID": "DEV-ELVEN-002",
+  "status": "PASS",
+  "authority": ["v3 recovery directive", "repository Future Theme Binding Contract"],
+  "originalDefect": "Wildwood and Gloamthorn bindings drifted from the repository-owned contract and retained competing gate prose.",
+  "priorClaim": "PASS",
+  "priorDisposition": "REJECTED_PARTIAL",
+  "canonicalSourceChanges": ["scripts/build-elven-production-assets.py", "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json"],
+  "generatedOutputs": ["Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json"],
+  "validators": [{"name":"Elven production package validator","command":"python3 scripts/validate-elven-production-package.py --package-root /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0 --repo-root /Users/jimdaley/GitHub/Rune-Scribe-Elven-Recovery-v3 --output docs/verification/elven-recovery-v3/FullPackageValidation.json","result":"PASS","failureMutationProven":false}],
+  "stableIDs": ["codex.wildwood", "com.runescribe.module.theme.wildwood", "unlock.codex.wildwood", "rule.codex.wildwood.roots-of-memory", "codex.gloamthorn", "com.runescribe.module.theme.gloamthorn", "unlock.codex.gloamthorn", "rule.codex.gloamthorn.beyond-the-gloam"],
+  "hashes": [{"path":"Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json","sha256":"2236c49f7e7096701c90acc17283871685577780a05aeb8b8a673f4b35d8277b"},{"path":"Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json","sha256":"fdf707eda1ba2fc6e43afadbbbcf1d5690b6c926c3ffd519d12a3ed65502b3bc"}],
+  "acceptanceCriteria": [{"criterion":"Wildwood and Gloamthorn match the repository contract with no second gate authority","result":"PASS","evidence":["docs/verification/elven-recovery-v3/FullPackageValidation.json"]}],
+  "unresolvedSubcriteria": [],
+  "specificBlockedAsset": null
+}

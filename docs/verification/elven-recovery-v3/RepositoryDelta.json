@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "acceptedPhaseABMerge": "65a7fe3267c754de8db07f6f243f8965c7c84e04",
+  "priorEvidenceHead": "af60a3c62d4b7828f3ab944504e06036ece4129e",
+  "priorEvidenceMerge": "990a10e52bb178f34bd864f6b08b0cc518ff08e2",
+  "priorFollowup": "31cee707638358c0a45c58bffdd14fad3780287a",
+  "currentBase": "feea59eed6b84fddacf3924c650d895fabe2e745",
+  "summary": {
+    "priorEvidenceCommitFileCount": 13,
+    "followupCommitFileCount": 7,
+    "repositoryProductionSourceChangedByPriorEvidenceCommit": false,
+    "externalPackageSourceChangedByPriorEvidenceCommit": true,
+    "laterWorkflowRemovalCommitsPreserved": true
+  },
+  "priorEvidenceCommitPaths": [
+    "docs/verification/ElvenSeriesBlockingDeviationReport.md",
+    "docs/verification/ElvenSeriesBlockingRemediationFinalAudit.md",
+    "docs/verification/ElvenSeriesBlockingResolutionLedger.md",
+    "docs/verification/ThemeScaffoldAndNorseBaseImplementationReport.md",
+    "docs/verification/elven-remediation/DEV-ELVEN-001-progression-identifier-audit.json",
+    "docs/verification/elven-remediation/DEV-ELVEN-002-theme-binding-drift.json",
+    "docs/verification/elven-remediation/ElvenAuditConfig.json",
+    "docs/verification/elven-remediation/ElvenSeriesRemediationState.json",
+    "docs/verification/elven-remediation/ElvenSourceInventory.json",
+    "docs/verification/elven-remediation/ElvenSupplementalAudit.json",
+    "docs/verification/elven-remediation/phaseAB-regression-check.json",
+    "docs/verification/elven-remediation/source-discovery/source-discovery.json",
+    "docs/verification/elven-remediation/source-discovery/source-discovery.md"
+  ],
+  "followupCommitPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "RuneScrib.xcodeproj/project.pbxproj",
+    "docs/architecture/RoadmapAlignment.md",
+    "docs/verification/ElvenSeriesBlockingDeviationReport.md",
+    "docs/verification/ThemeScaffoldAndNorseBaseImplementationReport.md",
+    "project.yml"
+  ],
+  "findings": [
+    {
+      "id": "GIT-001",
+      "result": "PASS",
+      "statement": "The prior evidence commit changed reports and generated evidence only; it changed no repository production source, provider, renderer, SVG master, resource declaration, or package validator."
+    },
+    {
+      "id": "GIT-002",
+      "result": "PASS",
+      "statement": "The version and generated-project changes in the follow-up commit are unrelated current history and remain preserved."
+    },
+    {
+      "id": "GIT-003",
+      "result": "FAIL",
+      "statement": "README, changelog, roadmap, deviation-report, and scaffold-report claims that findings 001 and 002 passed are unsupported and must be corrected from live v3 evidence."
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "auditedSourceCommit": "30200aa45365d9442fe68d548e97cbbf237e815c",
+  "commands": [
+    "swift test --package-path Packages/RuneScribeArchitecture",
+    "scripts/check-architecture.sh",
+    "scripts/check-roadmap-alignment.sh",
+    "xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Release -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-elven-v3-macos-release CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= build",
+    "xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -configuration Release -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2' -derivedDataPath /tmp/runescribe-elven-v3-ios-release CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= build",
+    "scripts/check-shipping-products.sh --macos-app /tmp/runescribe-elven-v3-macos-release/Build/Products/Release/RuneScrib.app --ios-app /tmp/runescribe-elven-v3-ios-release/Build/Products/Release-iphonesimulator/RuneScrib.app",
+    "xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-elven-v3-macos-debug CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= test -only-testing:RuneScribTests -only-testing:RuneScribArchitectureTests/ArchitectureGuardrailTests"
+  ],
+  "results": [
+    {
+      "gate": "Swift package tests",
+      "result": "PASS",
+      "detail": "725 XCTest and 89 Swift Testing cases passed; 814 total, zero failures."
+    },
+    {
+      "gate": "Architecture guard",
+      "result": "PASS",
+      "detail": "All 17 ratchets passed."
+    },
+    {
+      "gate": "Roadmap alignment guard",
+      "result": "PASS",
+      "detail": "92 tasks and 12 decisions verified."
+    },
+    {
+      "gate": "macOS Release build",
+      "result": "PASS",
+      "detail": "Universal Release app built and locally signed."
+    },
+    {
+      "gate": "iOS Simulator Release build",
+      "result": "PASS",
+      "detail": "Universal Simulator Release app built and locally signed."
+    },
+    {
+      "gate": "Shipping product inspection",
+      "result": "PASS",
+      "detail": "74 checks, zero failures, including resource integrity and cross-platform parity."
+    },
+    {
+      "gate": "Hosted macOS tests",
+      "result": "PASS",
+      "detail": "11 app-host compatibility/composition tests and 9 architecture guardrail tests passed."
+    }
+  ],
+  "reportOnlyObservation": {
+    "status": "NOT_A_PASS_GATE",
+    "detail": "The current Forsetti report-only scanner returned 6 pass, 12 violation, 1 pending, and 1 not-evaluated rule. Its full mutation suite was stopped after confirming the inherited FG-006 baseline violation conflicts with a fixture that assumes FG-006 begins at pass. This observation is not used as Phase A/B acceptance evidence."
+  },
+  "physicalDevicePending": [
+    "FP-009 Contacts authorization and picker behavior on signed hardware",
+    "FP-015 cold and warm document ingress through Files, Messages, and AirDrop",
+    "FP-020 QR readability using a separate physical camera",
+    "FP-021 iOS camera permission, scan, cancel, denied, and fallback behavior",
+    "FP-022 Messages attachment delivery, cancellation, failure, and sent behavior",
+    "FP-023 real share destinations and AirDrop completion/cancellation behavior",
+    "FP-030 physical-device lock and background lifecycle with PIN enabled",
+    "Distribution identity, provisioning, signed archive installation, and release-device launch"
+  ],
+  "physicalDeviceStatus": "PENDING_PHYSICAL_DEVICE"
+}

@@ -1,0 +1,410 @@
+{
+  "schemaVersion": 1,
+  "tool": "compare_tree_hashes.py",
+  "originalRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0",
+  "candidateRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0",
+  "summary": {
+    "originalFileCount": 197,
+    "candidateFileCount": 205,
+    "originalBytes": 22824443,
+    "candidateBytes": 31428730,
+    "addedCount": 8,
+    "removedCount": 0,
+    "modifiedCount": 15,
+    "unchangedCount": 182
+  },
+  "added": [
+    {
+      "path": "card.gloamthorn.codex.png",
+      "bytes": 2034642,
+      "sha256": "c75e00bf1fc91077988fab596cc6d8e05b84ccaba6f0ce57087a3b859c10cb20"
+    },
+    {
+      "path": "card.moonleaf.codex.png",
+      "bytes": 2034642,
+      "sha256": "c75e00bf1fc91077988fab596cc6d8e05b84ccaba6f0ce57087a3b859c10cb20"
+    },
+    {
+      "path": "card.sunspire.codex.png",
+      "bytes": 2034642,
+      "sha256": "c75e00bf1fc91077988fab596cc6d8e05b84ccaba6f0ce57087a3b859c10cb20"
+    },
+    {
+      "path": "card.wildwood.codex.png",
+      "bytes": 2034642,
+      "sha256": "c75e00bf1fc91077988fab596cc6d8e05b84ccaba6f0ce57087a3b859c10cb20"
+    },
+    {
+      "path": "codex.gloamthorn.background.0.bin",
+      "bytes": 62,
+      "sha256": "79b4c9c002bd13cc70704a2f96e67bbd1acbda596f3db5d09cc0403ca92ce305"
+    },
+    {
+      "path": "codex.moonleaf.background.0.bin",
+      "bytes": 60,
+      "sha256": "50445e603e0d9194c14d23f557a07dd9ad918fc1a423402debea969c4beeeae9"
+    },
+    {
+      "path": "codex.sunspire.background.0.bin",
+      "bytes": 60,
+      "sha256": "420591ccae6579b1b8db6d06dd2dcb572953a9da81648083d1c8cf7bba496261"
+    },
+    {
+      "path": "codex.wildwood.background.0.bin",
+      "bytes": 60,
+      "sha256": "c91811dc25b3e6895cf872fe4c632807266232a7e00a65d7d808d3c4696c7a16"
+    }
+  ],
+  "removed": [],
+  "modified": [
+    {
+      "path": "PACKAGE-MANIFEST.json",
+      "original": {
+        "bytes": 45574,
+        "sha256": "46a9ca790e5d1f98232cf3532c9a0f996132e036ebc05d32db82c6509af24dd9"
+      },
+      "candidate": {
+        "bytes": 45766,
+        "sha256": "889f78317d88aa662b8bb44a41b2e7f289802792448bd368af6db70631dcfbb7"
+      }
+    },
+    {
+      "path": "Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json",
+      "original": {
+        "bytes": 78475,
+        "sha256": "752bcf17e2607bbdd7b5006e4fe0c999c4f58943cd3168046ff20e2cf5482b8f"
+      },
+      "candidate": {
+        "bytes": 542407,
+        "sha256": "979da250227a64b719aa67d558328dac6d21caacbdae096bf91839f3d30142e3"
+      }
+    },
+    {
+      "path": "Source-Masters/Crests/gloamthorn/gloam-sovereign.svg",
+      "original": {
+        "bytes": 1294,
+        "sha256": "af7d8156fc86aacd144d316dc728bfc0a6e484dd56a53487b1f76c12de01efe9"
+      },
+      "candidate": {
+        "bytes": 1286,
+        "sha256": "f4bbf505d2e4d221f16d07f5767c3bd6acec0eca4ccec6d6833c3ac7f9dfb5b9"
+      }
+    },
+    {
+      "path": "Source-Masters/Crests/moonleaf/moonbloom.svg",
+      "original": {
+        "bytes": 1035,
+        "sha256": "5580a53a7f7ade29c9d9784bd2ec805aa7b5b7e5cf329ca3f01b3eaf11ad79bd"
+      },
+      "candidate": {
+        "bytes": 1027,
+        "sha256": "5ec63d1d88ba69dbb55458372cbae15ba2880285fcaadc0cd9aa08bf5adc88a2"
+      }
+    },
+    {
+      "path": "Source-Masters/Crests/sunspire/first-light.svg",
+      "original": {
+        "bytes": 1063,
+        "sha256": "027483f43849f1a2f07c64f46449cdc18cb6e024c21f42d5baab85c1b6b9ddaf"
+      },
+      "candidate": {
+        "bytes": 1055,
+        "sha256": "80b14ca1e4378cf4c79116f778010084b11c1996c03c6f042669be8c836760ab"
+      }
+    },
+    {
+      "path": "Source-Masters/Crests/wildwood/heartwood-crown.svg",
+      "original": {
+        "bytes": 994,
+        "sha256": "ca2edaabd8afa04c93f5929a1cc1e69a60239383ead94c88ef11a0aae9632613"
+      },
+      "candidate": {
+        "bytes": 986,
+        "sha256": "ed8f26506716547723ffaa96dc2d65a6581e56e4b9f2249d881e431c6945b88c"
+      }
+    },
+    {
+      "path": "Source-Masters/Frames/gloamthorn/briar-court.svg",
+      "original": {
+        "bytes": 2089,
+        "sha256": "db74836dbb47f78fa23e0c573afb3540d4a224544bf0fb6c26b9c88a1834b543"
+      },
+      "candidate": {
+        "bytes": 2317,
+        "sha256": "666e8f61af1f2f25c3920e59597b8aaf1b45f6b6b4f52a9b2ab09a46d9fb390e"
+      }
+    },
+    {
+      "path": "Source-Masters/Frames/moonleaf/silvervine.svg",
+      "original": {
+        "bytes": 2584,
+        "sha256": "a10f035f9258f6fb5a6a876d047857e9181138aba4f6d2fe101e5a8d47114716"
+      },
+      "candidate": {
+        "bytes": 2730,
+        "sha256": "5a1dd71f3b9b815f6b297fd08bc511685a7a2f71e80257c25160cc67227bb3c2"
+      }
+    },
+    {
+      "path": "Source-Masters/Frames/sunspire/laurel-of-dawn.svg",
+      "original": {
+        "bytes": 3410,
+        "sha256": "67369f4333892650f78680f1be1288ceb1c572f417c72132fb02353350319da0"
+      },
+      "candidate": {
+        "bytes": 3638,
+        "sha256": "9da9f52dad840835071bd2e49dc2408849958b79d0ed9703552b2f304c09ee2f"
+      }
+    },
+    {
+      "path": "Source-Masters/Frames/wildwood/living-root.svg",
+      "original": {
+        "bytes": 2101,
+        "sha256": "314bf5af6ce1d2bd6b089022bfbb4b80cc8a0fc6777eb813a9f10dccd20f09a3"
+      },
+      "candidate": {
+        "bytes": 2324,
+        "sha256": "fe3706d0a789ebff2e936f5223d5fd8ec4db66440177e8b8028a811922f23018"
+      }
+    },
+    {
+      "path": "Source-Masters/Relic-Geometry/sunspire/dawnfire-tablet-geometry.svg",
+      "original": {
+        "bytes": 1255,
+        "sha256": "712d476413472b3d9ceeb11c92a9da938c1d6b30f5dd094726a929aab731f43f"
+      },
+      "candidate": {
+        "bytes": 1198,
+        "sha256": "f82d1115a2787e8285d7bbf66707ba65f0a5a4e5f7061fbbc1245778bf324e8a"
+      }
+    },
+    {
+      "path": "Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg",
+      "original": {
+        "bytes": 1206,
+        "sha256": "460afb80cc741aa94f04dc33204824e1c139e8071b71e0fa7bcbe8c8b787d2d6"
+      },
+      "candidate": {
+        "bytes": 1194,
+        "sha256": "e8a2f2ad2e9c8a3d2ed48f010eeca6db44cde674fce2f3b1c399baf4b59bdddf"
+      }
+    },
+    {
+      "path": "Source-Masters/Seals/moonleaf/echo-firefly.svg",
+      "original": {
+        "bytes": 1202,
+        "sha256": "400712a18f3874a1cb97eb11e0c71409fc7db8aeec40ae0bc9a49f08e14afaef"
+      },
+      "candidate": {
+        "bytes": 1413,
+        "sha256": "f343975362c03094c194003e4bfdf54874a9fde07f615ef30a6b2ef9d766c84a"
+      }
+    },
+    {
+      "path": "Source-Masters/Seals/moonleaf/night-owl.svg",
+      "original": {
+        "bytes": 1286,
+        "sha256": "2fe28054b65c3b559a406915f7a0cfef105ecfdd19e2818e4314ca460df8a7f7"
+      },
+      "candidate": {
+        "bytes": 1492,
+        "sha256": "e6a6c33dcbff9b6fb9aa4a95df4a55e7a91a5161cc775845c4fd4645fa3d4f3f"
+      }
+    },
+    {
+      "path": "Source-Masters/Seals/wildwood/wild-fox.svg",
+      "original": {
+        "bytes": 1272,
+        "sha256": "6df8969929c99d05b1db6cdebaba47fca59b162e37c7bab16cd9db8b307b2bcd"
+      },
+      "candidate": {
+        "bytes": 1484,
+        "sha256": "9d6bba0e96c088b3f455672fd126c466d798e33486326121e63e3c4971779d20"
+      }
+    }
+  ],
+  "unchanged": [
+    "PACKAGE-VALIDATION-REPORT.md",
+    "README.md",
+    "Rune-Scribe-Elven-Series-Codex-Implementation-Instructions-v1.0.md",
+    "Rune-Scribe-Elven-Series-Production-Design-Spec-v1.0.md",
+    "Source-Masters/Glyphs/gloamthorn/glyph-00.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-01.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-02.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-03.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-04.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-05.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-06.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-07.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-08.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-09.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-10.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-11.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-12.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-13.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-14.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-15.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-16.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-17.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-18.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-19.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-20.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-21.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-22.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-23.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-24.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-25.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-26.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-27.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-28.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-29.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-30.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-31.svg",
+    "Source-Masters/Glyphs/gloamthorn/glyph-master.json",
+    "Source-Masters/Glyphs/gloamthorn/specimen-32.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-00.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-01.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-02.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-03.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-04.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-05.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-06.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-07.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-08.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-09.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-10.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-11.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-12.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-13.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-14.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-15.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-16.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-17.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-18.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-19.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-20.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-21.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-22.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-23.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-24.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-25.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-26.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-27.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-28.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-29.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-30.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-31.svg",
+    "Source-Masters/Glyphs/moonleaf/glyph-master.json",
+    "Source-Masters/Glyphs/moonleaf/specimen-32.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-00.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-01.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-02.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-03.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-04.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-05.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-06.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-07.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-08.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-09.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-10.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-11.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-12.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-13.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-14.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-15.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-16.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-17.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-18.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-19.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-20.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-21.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-22.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-23.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-24.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-25.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-26.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-27.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-28.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-29.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-30.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-31.svg",
+    "Source-Masters/Glyphs/sunspire/glyph-master.json",
+    "Source-Masters/Glyphs/sunspire/specimen-32.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-00.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-01.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-02.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-03.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-04.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-05.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-06.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-07.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-08.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-09.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-10.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-11.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-12.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-13.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-14.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-15.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-16.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-17.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-18.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-19.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-20.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-21.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-22.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-23.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-24.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-25.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-26.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-27.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-28.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-29.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-30.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-31.svg",
+    "Source-Masters/Glyphs/wildwood/glyph-master.json",
+    "Source-Masters/Glyphs/wildwood/specimen-32.svg",
+    "Source-Masters/README.md",
+    "Source-Masters/Relic-Geometry/gloamthorn/duskbriar-stele-geometry.svg",
+    "Source-Masters/Relic-Geometry/gloamthorn/nightthorn-tablet-geometry.svg",
+    "Source-Masters/Relic-Geometry/gloamthorn/umbral-plaque-geometry.svg",
+    "Source-Masters/Relic-Geometry/moonleaf/ivybound-plaque-geometry.svg",
+    "Source-Masters/Relic-Geometry/moonleaf/tablet-geometry.svg",
+    "Source-Masters/Relic-Geometry/moonleaf/whisperbark-stele-geometry.svg",
+    "Source-Masters/Relic-Geometry/sunspire/auric-stele-geometry.svg",
+    "Source-Masters/Relic-Geometry/sunspire/solvine-plaque-geometry.svg",
+    "Source-Masters/Relic-Geometry/wildwood/elderbark-stele-geometry.svg",
+    "Source-Masters/Relic-Geometry/wildwood/rootsong-tablet-geometry.svg",
+    "Source-Masters/Seals/gloamthorn/echo-wisp.svg",
+    "Source-Masters/Seals/gloamthorn/eclipse-bloom.svg",
+    "Source-Masters/Seals/gloamthorn/nightglass-moth.svg",
+    "Source-Masters/Seals/gloamthorn/pact-crown.svg",
+    "Source-Masters/Seals/gloamthorn/thornmoon.svg",
+    "Source-Masters/Seals/gloamthorn/veiled-serpent.svg",
+    "Source-Masters/Seals/moonleaf/crescentleaf.svg",
+    "Source-Masters/Seals/moonleaf/moonwell.svg",
+    "Source-Masters/Seals/moonleaf/starflower.svg",
+    "Source-Masters/Seals/moonleaf/woodland-stag.svg",
+    "Source-Masters/Seals/sunspire/dawnflower.svg",
+    "Source-Masters/Seals/sunspire/echo-ember.svg",
+    "Source-Masters/Seals/sunspire/golden-lark.svg",
+    "Source-Masters/Seals/sunspire/radiant-spire.svg",
+    "Source-Masters/Seals/sunspire/sunleaf-crest.svg",
+    "Source-Masters/Seals/sunspire/sunwheel.svg",
+    "Source-Masters/Seals/wildwood/acorn-knot.svg",
+    "Source-Masters/Seals/wildwood/echo-seed.svg",
+    "Source-Masters/Seals/wildwood/fern-spiral.svg",
+    "Source-Masters/Seals/wildwood/lantern-moth.svg",
+    "Source-Masters/Seals/wildwood/rooted-tree.svg",
+    "Visual-References/01-moonleaf-vault.png",
+    "Visual-References/02-moonleaf-compose.png",
+    "Visual-References/03-moonleaf-codex-detail.png",
+    "Visual-References/04-moonleaf-received.png",
+    "Visual-References/05-moonleaf-tablet-detail.png",
+    "Visual-References/06-moonleaf-long-inscription.png",
+    "Visual-References/07-moonleaf-relic-gallery.png",
+    "Visual-References/08-sunspire-relic-gallery.png",
+    "Visual-References/09-wildwood-relic-gallery.png",
+    "Visual-References/10-gloamthorn-relic-gallery.png"
+  ]
+}

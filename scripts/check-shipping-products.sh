@@ -735,7 +735,7 @@ expected = {
   ],
   "module-manifest.json" => [
     2494,
-    "bfd270c3d2dbad0b18f1c5127327e881d047697a98cab4115850003db80cd3a3"
+    "b6a25bb50010cf68c68c94dd6331a8a30ff27fcdb90872c61e2b628e508f4ca7"
   ]
 }
 

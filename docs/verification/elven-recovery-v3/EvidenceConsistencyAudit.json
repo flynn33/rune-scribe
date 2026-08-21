@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "auditedRepositoryCommit": "feea59eed6b84fddacf3924c650d895fabe2e745",
+  "auditedOriginalRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0",
+  "auditedPriorCorrectedRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v2.0",
+  "summary": {
+    "issueCount": 17,
+    "criticalCount": 5,
+    "highCount": 12
+  },
+  "issues": [
+    {"severity":"HIGH","id":"PATH-001","statement":"Committed state, inventory, and final audit mix the noncanonical RuneForge path with the verified RavenForge root; the RuneForge directory does not exist."},
+    {"severity":"HIGH","id":"GIT-001","statement":"The committed final audit records the same stale commit at both boundaries despite later evidence commits."},
+    {"severity":"HIGH","id":"PROVENANCE-001","statement":"The committed final audit claims provenance evidence while finding 009 is NOT_STARTED."},
+    {"severity":"HIGH","id":"REGRESSION-001","statement":"The Phase A/B check parses report prose and does not exercise software."},
+    {"severity":"CRITICAL","id":"FINDING-001-MAPPING","statement":"The committed finding 001 audit maps the decode statistic to stat.messages-decoded; the current catalog authority is stat.message.incoming-decoded.unique."},
+    {"severity":"CRITICAL","id":"FINDING-001-STATE","statement":"The committed state separately records the forbidden stat.messages-decoded.unique identifier."},
+    {"severity":"HIGH","id":"PACKAGE-001","statement":"The committed state lists two package files while the live v2 directory contains 205 files."},
+    {"severity":"CRITICAL","id":"PACKAGE-002","statement":"The claimed v2 archive is absent from its recorded path."},
+    {"severity":"CRITICAL","id":"PACKAGE-003","statement":"The v2 package manifest contains 197 entries while the directory contains 205 files, and recorded sizes and hashes for modified files are stale."},
+    {"severity":"HIGH","id":"FINDING-002-EVIDENCE","statement":"The committed binding report contains no input hashes, comparisons, expected records, or actual records."},
+    {"severity":"HIGH","id":"FINDING-003-IDENTITY","statement":"The prior audit configuration has no distinct Umbral Plaque and Nightthorn Tablet identity checks."},
+    {"severity":"HIGH","id":"FINDING-006-COVERAGE","statement":"The committed topology configuration covers three of seven required assets."},
+    {"severity":"CRITICAL","id":"FINDING-006-TOPOLOGY","statement":"Later v2 frame edits remain incomplete: Laurel has two rather than four sun nodes and no enamel group; Living Root lacks separate moss-patch and four-leaf-bud groups; Briar Court has two rather than four amethyst nodes."},
+    {"severity":"HIGH","id":"FINDING-006-WILD-FOX","statement":"The later Wild Fox group contains one path rather than two controlled botanical curls."},
+    {"severity":"HIGH","id":"FINDING-008-OUTPUTS","statement":"Four required background outputs are 60 to 62 byte placeholder files and cannot be production resources."},
+    {"severity":"HIGH","id":"FINDING-008-CARDS","statement":"All four added Codex card PNG files are byte-identical, so they do not represent distinct module assets."},
+    {"severity":"HIGH","id":"SUPPLEMENTAL-001","statement":"The supplemental result reports pass while explicitly leaving geometry, renderer, accessibility, platform, and binding validators outstanding."}
+  ],
+  "restartFinding": "DEV-ELVEN-001"
+}
