@@ -1,0 +1,68 @@
+name: ElvenFontRegistrationProbe
+options:
+  bundleIdPrefix: com.ravenforge.validation
+  deploymentTarget:
+    macOS: "15.0"
+    iOS: "17.0"
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    GENERATE_INFOPLIST_FILE: YES
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "-"
+    DEVELOPMENT_TEAM: ""
+targets:
+  FontRegistrationIOSHost:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Host
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ravenforge.validation.font-registration-host
+        PRODUCT_NAME: FontRegistrationIOSHost
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+  FontRegistrationMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: Shared
+      - path: Fixtures
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ravenforge.validation.font-registration-mac-tests
+  FontRegistrationIOSTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Shared
+      - path: Fixtures
+        buildPhase: resources
+    dependencies:
+      - target: FontRegistrationIOSHost
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ravenforge.validation.font-registration-ios-tests
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/FontRegistrationIOSHost.app/FontRegistrationIOSHost"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+schemes:
+  FontRegistrationMacProbe:
+    build:
+      targets:
+        FontRegistrationMacTests: [test]
+    test:
+      targets:
+        - FontRegistrationMacTests
+  FontRegistrationIOSProbe:
+    build:
+      targets:
+        FontRegistrationIOSHost: all
+        FontRegistrationIOSTests: [test]
+    test:
+      targets:
+        - FontRegistrationIOSTests
