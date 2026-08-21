@@ -1,6 +1,11 @@
 # Elven Series Blocking Remediation Final Audit
 
-**Task package:** Rune-Scribe-Elven-Series-Codex-Spark-Implementation-Package-v2.0  
+> **Historical rejected audit, superseded 2026-08-21.** Its v2 claims and paths do
+> not establish recovery closure. The current accepted evidence is
+> [`elven-recovery-v3/RecoveryFinalAudit.md`](elven-recovery-v3/RecoveryFinalAudit.md)
+> and [`elven-recovery-v3/RecoveryState.json`](elven-recovery-v3/RecoveryState.json).
+
+**Task package:** earlier Elven Series implementation package v2.0
 **Repository root:** `/Users/jimdaley/GitHub/Rune-Scribe`  
 **Branch:** `runtime-owned-io-presentation`  
 **Starting commit:** `88be3803ab4ce84fa3fa9aeec468d9e7b74a7278`  

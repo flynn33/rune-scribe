@@ -3,10 +3,14 @@
   "status": "PASS",
   "scope": {
     "branch": "elven-recovery-v3",
-    "commitRange": "origin/main...HEAD plus final pending recovery evidence",
+    "commitRange": "origin/main...HEAD plus the documentation alignment follow-up",
     "paths": [
+      "README.md",
+      "CHANGELOG.md",
+      "docs",
       "docs/verification/elven-recovery-v3",
       "scripts/build-elven-production-assets.py",
+      "scripts/check-documentation-alignment.py",
       "scripts/inventory-elven-package.py",
       "scripts/validate-elven-production-package.py",
       "scripts/validate-elven-recovery-state.py"
@@ -24,6 +28,10 @@
     },
     {
       "surface": "authored file content",
+      "result": "PASS"
+    },
+    {
+      "surface": "repository-tracked documentation names and text content",
       "result": "PASS"
     },
     {

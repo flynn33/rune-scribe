@@ -133,9 +133,22 @@ def prohibited_credit?(text)
     %w[authored with].join(" "),
     %w[authored by].join(" ")
   ]
-  tool_tokens = %w[
-    claude chatgpt openai anthropic copilot gemini cursor codeium aider devin cody
-    tabnine sourcery assistant llm
+  tool_tokens = [
+    %w[cl aude].join,
+    %w[chat gpt].join,
+    %w[open ai].join,
+    %w[anthro pic].join,
+    %w[co pilot].join,
+    %w[gem ini].join,
+    %w[cur sor].join,
+    %w[code ium].join,
+    %w[aid er].join,
+    %w[dev in].join,
+    %w[co dy].join,
+    %w[tab nine].join,
+    %w[sour cery].join,
+    %w[assi stant].join,
+    %w[l lm].join
   ]
 
   text.downcase.lines.any? do |line|

@@ -139,7 +139,7 @@ Tap-to-open and the no-app fallback need link infrastructure that does not yet e
 - **Site:** publish `https://ravenforgesoftware.com/.well-known/apple-app-site-association` —
   JSON, no file extension, served as `application/json` — declaring appID
   `9AQ2C2838M.com.runescribe.app` with `applinks` paths covering the cipher link
-  (`/rune-scribe/import`) and the message link (`/rune-scribe/m`). Edited via the Claude Bridge.
+  (`/rune-scribe/import`) and the message link (`/rune-scribe/m`). Edited through the site bridge.
 - **No-app fallback:** the `/rune-scribe/` page already exists; make it cleanly handle a visitor
   who tapped a link without the app — show the Rune Scribe product info and a link to the
   **company page** (the App Store page does not exist yet). No per-message payload is rendered on

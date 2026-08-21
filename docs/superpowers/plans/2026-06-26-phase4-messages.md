@@ -1,5 +1,8 @@
 # Rune Scribe — Phase 4: Apple Messages Send & Key Auto-Exchange — Implementation Plan
 
+> **Historical plan.** Publication-sensitive bridge identifiers have been neutralized.
+> Do not execute its site commands; current deployment records are authoritative.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Send an encrypted Rune Scribe message over Apple Messages / the native Share sheet, auto-exchanging the cipher key on the first message to a contact, with a tap-to-open receive flow that imports the key, decrypts, and shows the message — falling back to the website for recipients without the app.
@@ -33,7 +36,7 @@
 - `RuneScrib/Views/ContentView.swift` — Share (both platforms) + Send-via-iMessage (iOS) in the result row; key-included indicator. [Task 8]
 - `Config/RuneScrib-iOS.entitlements`, `Config/RuneScrib-macOS.entitlements` — `+ associated-domains: applinks:ravenforgesoftware.com`. [Task 9]
 
-**Cross-repo (website, Claude Bridge):**
+**Cross-repo (website, site bridge):**
 - `https://ravenforgesoftware.com/.well-known/apple-app-site-association` + `/rune-scribe/` no-app fallback. [Task 10]
 
 **Order:** Tasks 1→8 are app code in dependency order (model → service → wire → intake → routing → views → send). Tasks 9–10 (entitlement + website) can land in parallel; end-to-end tap-to-open is verified on device after 6+9+10.
@@ -2180,14 +2183,14 @@ Steps:
 
 ---
 
-### Task 10: Website: apple-app-site-association + /rune-scribe/ no-app fallback (cross-repo, Claude Bridge)
+### Task 10: Website: apple-app-site-association + /rune-scribe/ no-app fallback (cross-repo, site bridge)
 
-**Cross-repo / website-only task.** No changes land in `/Volumes/NVME/GitHub/rune-scrib`. All work is done against **ravenforgesoftware.com** via the **Claude Bridge** WordPress REST plugin (see memory `ravenforge-claude-bridge`). The app-side entitlement (`com.apple.developer.associated-domains = ["applinks:ravenforgesoftware.com"]` in both `Config/*.entitlements`) is already shipped by the entitlements task — this task makes the **server** half of the Universal Link contract work and gives no-app visitors a sane landing.
+**Cross-repo / website-only task.** No changes land in `/Volumes/NVME/GitHub/rune-scrib`. All work is done against **ravenforgesoftware.com** via the **site bridge** WordPress REST plugin (see memory `ravenforge-site-bridge`). The app-side entitlement (`com.apple.developer.associated-domains = ["applinks:ravenforgesoftware.com"]` in both `Config/*.entitlements`) is already shipped by the entitlements task — this task makes the **server** half of the Universal Link contract work and gives no-app visitors a sane landing.
 
-> **Prereq — bridge auth.** This task needs a live `X-Claude-Bridge-Key` token (provided per-session by the user; not persisted). All `curl` calls below assume it is exported once:
+> **Prereq — bridge auth.** This task needs a live `X-Site-Bridge-Key` token (provided per-session by the user; not persisted). All `curl` calls below assume it is exported once:
 > ```bash
 > export RF_BRIDGE_KEY='<token-from-user>'
-> export RF_BASE='https://ravenforgesoftware.com/wp-json/claude-bridge/v1'
+> export RF_BASE='https://ravenforgesoftware.com/wp-json/site-bridge/v1'
 > ```
 >
 > **Why a WP handler, not a static file.** Verified 2026-06-26: the site's docroot does NOT serve arbitrary static files — `GET /robots.txt` returns `content-type: text/html` (WordPress intercepts it), and `GET /.well-known/apple-app-site-association` 404s through WP. The bridge `files` root is `wp-content` (NOT the docroot), so a file dropped via the bridge would not be reachable at `/.well-known/...` anyway. The robust, bridge-only fix is a `template_redirect` handler in the theme that emits the JSON with `Content-Type: application/json`. This mirrors the favicon fix pattern (a `functions.php` edit applied via `POST /files/write`).
@@ -2195,7 +2198,7 @@ Steps:
 **Files (all on ravenforgesoftware.com, via bridge — no local repo files):**
 - Modify (via `POST /files/write`, full overwrite): `themes/ravenforge/functions.php` — append an AASA `template_redirect` handler (and matching `init` rewrite rule). Anchor: end of file, after the existing `get_site_icon_url` favicon filter added in the 2026-06-20 favicon fix.
 - Verify-only (no edit expected): `/rune-scribe/` page (WP page id 93, default template, `wp:html` content) — confirm no-app fallback content + company link; confirm it renders no query-param/per-message payload. Edit via `PUT /pages/93` ONLY if the company link is found missing.
-- Snapshot (local, before risky edit): `/Volumes/NVME/Claude/.rf-snapshots/aasa-<timestamp>/` — capture `functions.php` source, the rendered `/rune-scribe/` HTML, and the page 93 record.
+- Snapshot (local, before risky edit): `/Volumes/NVME/SiteBridge/.rf-snapshots/aasa-<timestamp>/` — capture `functions.php` source, the rendered `/rune-scribe/` HTML, and the page 93 record.
 
 > Note: this is config/content infra on a live WordPress site, not Swift logic — there is no XCTest. "Tests" here are `curl` assertions against the live endpoints (the web analog of build-verified UI). Each step shows the exact command and the expected response, then a commit-equivalent (the bridge `POST /flush/cache` + a `git`-free record). Because the work is on a remote host there is no `git commit`; the completion record is the snapshot dir + a memory upsert.
 
@@ -2204,16 +2207,16 @@ Steps:
 - [ ] **1. Snapshot before editing (required by the bridge convention).** Capture the three artifacts so the `functions.php` overwrite is reversible.
   ```bash
   TS=$(date +%Y%m%dT%H%M%S)
-  SNAP="/Volumes/NVME/Claude/.rf-snapshots/aasa-$TS"
+  SNAP="/Volumes/NVME/SiteBridge/.rf-snapshots/aasa-$TS"
   mkdir -p "$SNAP"
   # theme functions.php (bridge files root is wp-content; path is relative to it)
   curl -s -X POST "$RF_BASE/files/read" \
-    -H "X-Claude-Bridge-Key: $RF_BRIDGE_KEY" -H 'Content-Type: application/json' \
+    -H "X-Site-Bridge-Key: $RF_BRIDGE_KEY" -H 'Content-Type: application/json' \
     -d '{"path":"themes/ravenforge/functions.php"}' \
     | python3 -c 'import sys,json;print(json.load(sys.stdin).get("content",""))' > "$SNAP/functions.php"
   # rendered rune-scribe page + page record
   curl -s "https://ravenforgesoftware.com/rune-scribe/" > "$SNAP/rune-scribe.html"
-  curl -s "$RF_BASE/pages/93" -H "X-Claude-Bridge-Key: $RF_BRIDGE_KEY" > "$SNAP/page-93.json"
+  curl -s "$RF_BASE/pages/93" -H "X-Site-Bridge-Key: $RF_BRIDGE_KEY" > "$SNAP/page-93.json"
   ls -la "$SNAP"
   ```
   Expected: three non-empty files in `$SNAP` (`functions.php` > 0 bytes, `rune-scribe.html` containing `<title>Rune Scribe`, `page-93.json` valid JSON). **Stop and re-check auth** if `functions.php` is empty (bad/expired bridge key).
@@ -2313,7 +2316,7 @@ PHP
   Then POST that JSON:
   ```bash
   python3 - "$NEW" <<'PY' | curl -s -X POST "$RF_BASE/files/write" \
-        -H "X-Claude-Bridge-Key: $RF_BRIDGE_KEY" -H 'Content-Type: application/json' -d @-
+        -H "X-Site-Bridge-Key: $RF_BRIDGE_KEY" -H 'Content-Type: application/json' -d @-
   import json,sys
   body=open(sys.argv[1]).read()
   sys.stdout.write(json.dumps({"path":"themes/ravenforge/functions.php","content":body}))
@@ -2322,7 +2325,7 @@ PHP
   ```
   Then flush WP cache:
   ```bash
-  curl -s -X POST "$RF_BASE/flush/cache" -H "X-Claude-Bridge-Key: $RF_BRIDGE_KEY"; echo
+  curl -s -X POST "$RF_BASE/flush/cache" -H "X-Site-Bridge-Key: $RF_BRIDGE_KEY"; echo
   ```
 
 - [ ] **4. Green "test": AASA returns 200 + application/json, valid body, no redirect.**
@@ -2379,19 +2382,19 @@ PHP
 
 - [ ] **6. Commit-equivalent: flush cache, archive the diff, record the decision.** There is no `git` on the remote host; the "commit" is the cache flush plus a local record and a memory note. (No AI attribution anywhere — same rule as the app repo.)
   ```bash
-  curl -s -X POST "$RF_BASE/flush/cache" -H "X-Claude-Bridge-Key: $RF_BRIDGE_KEY"; echo
+  curl -s -X POST "$RF_BASE/flush/cache" -H "X-Site-Bridge-Key: $RF_BRIDGE_KEY"; echo
   # archive the pushed file alongside the snapshot for an auditable before/after
   cp "$SNAP/functions.php"     "$SNAP/functions.php.before"
   cp "$SNAP/functions.php.new" "$SNAP/functions.php.after"
   diff -u "$SNAP/functions.php.before" "$SNAP/functions.php.after" | tee "$SNAP/functions.diff"
   ```
   Then persist a durable note (memory MCP) so a future session knows the AASA lives in the theme, not a static file:
-  - `memory_store { project: "/Volumes/NVME/GitHub/rune-scrib", key: "phase4/aasa-on-ravenforge", type: "reference", tags: "universal-links aasa ravenforge bridge", content: "Rune Scribe AASA is served by a template_redirect priority-0 handler ravenforge_apple_app_site_association() in themes/ravenforge/functions.php (NOT a static /.well-known file — docroot doesn't serve static files; bridge files root is wp-content). Returns 200 + application/json for /.well-known/apple-app-site-association with appIDs:[9AQ2C2838M.com.runescribe.app], components /rune-scribe/import* and /rune-scribe/m*. /rune-scribe/ page (id 93) is the no-app fallback (product info + /products/ + /contact/ links; never reflects query params). Snapshot+diff in /Volumes/NVME/Claude/.rf-snapshots/aasa-<ts>/." }`
+  - `memory_store { project: "/Volumes/NVME/GitHub/rune-scrib", key: "phase4/aasa-on-ravenforge", type: "reference", tags: "universal-links aasa ravenforge bridge", content: "Rune Scribe AASA is served by a template_redirect priority-0 handler ravenforge_apple_app_site_association() in themes/ravenforge/functions.php (NOT a static /.well-known file — docroot doesn't serve static files; bridge files root is wp-content). Returns 200 + application/json for /.well-known/apple-app-site-association with appIDs:[9AQ2C2838M.com.runescribe.app], components /rune-scribe/import* and /rune-scribe/m*. /rune-scribe/ page (id 93) is the no-app fallback (product info + /products/ + /contact/ links; never reflects query params). Snapshot+diff in /Volumes/NVME/SiteBridge/.rf-snapshots/aasa-<ts>/." }`
 
 - [ ] **7. Flag the deferred Apple-side requirements (out of scope for this website task).** The AASA being correct is necessary but NOT sufficient for Universal Links to actually open the app. Record explicitly in the plan (and tell the user) that final end-to-end behavior additionally requires, OUTSIDE this task:
   - A **real signed build** installed on-device (the `associated-domains` entitlement only takes effect in a properly provisioned build with Team `9AQ2C2838M` / bundle `com.runescribe.app` — already wired in `Config/*.entitlements`, Task earlier). Simulator/dev-unsigned builds do not exercise Apple's AASA fetch.
   - **Apple's AASA CDN cache.** On first install iOS fetches the AASA via Apple's CDN, which caches it; changes can take time to propagate, and during development the device must either reinstall or use a build with `applinks:…?mode=developer` associated-domain to bypass the cache. There is nothing to do on the website for this — note it so a failed first-tap test on-device is not misdiagnosed as a server bug.
-  - **When the App Store page exists**, revisit `/rune-scribe/` (id 93) to add a real Download/App Store button to the CTA + the product card on `page-products.php` (per memory `ravenforge-claude-bridge`: "a Download button can be dropped into the page CTA + the card once the App Store link exists"). Out of scope now (no live App Store URL).
+  - **When the App Store page exists**, revisit `/rune-scribe/` (id 93) to add a real Download/App Store button to the CTA + the product card on `page-products.php` (per memory `ravenforge-site-bridge`: "a Download button can be dropped into the page CTA + the card once the App Store link exists"). Out of scope now (no live App Store URL).
 
 
 ---

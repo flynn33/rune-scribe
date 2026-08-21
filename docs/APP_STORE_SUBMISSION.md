@@ -3,7 +3,7 @@
 Ready-to-paste material for App Store Connect (iOS App Store and Mac App Store).
 Keep this file in sync when shipping a new marketing version.
 
-**Last prepared for:** 1.0.33 (build 33) — 2026-07-31
+**Last prepared for:** 1.0.38 (build 38) — 2026-08-21
 
 ---
 
@@ -11,8 +11,8 @@ Keep this file in sync when shipping a new marketing version.
 
 | Field | Value |
 |--------|--------|
-| **Version** | `1.0.33` |
-| **Build** | `33` |
+| **Version** | `1.0.38` |
+| **Build** | `38` |
 | **Bundle ID** | `com.runescribe.app` |
 | **Display name** | Rune Scribe |
 | **Category** | Lifestyle (`public.app-category.lifestyle`) |
@@ -32,20 +32,21 @@ Sources of truth in the repo:
 ### Short
 
 ```
-• Intro video at most once every 30 days
-• Cipher Library Share now sends a tap-to-open import link
-• Export still shares full .runescribe files
+• Adds an optional on-device Journey with achievements and unlocks
+• Adds the Vault/Progress collection and accessible reveal queue
+• Introduces runtime-managed appearance with the Norse Base theme
 ```
 
 ### Full
 
 ```
-This update improves day-to-day use and cipher sharing:
+This update adds a private, optional Journey while preserving Rune Scribe's offline workflows:
 
-• The Raven Forge intro video plays on first launch, then at most once every 30 days (still skippable).
-• Sharing a cipher from Cipher Library now sends a runescribe:// import link. Recipients with the app can tap the link in Messages, Mail, or Notes to open Rune Scribe and import the cipher.
-• Export still creates a full .runescribe decoder file when you need a file instead of a link.
-• QR codes for cipher sharing work as before.
+• Earn on-device achievements and milestones from normal encode, decode, import, and sharing activity.
+• Review progress, collected rewards, and available appearance choices in Vault/Progress.
+• Unlock reveals are queued, resumable, and respect reduced-motion and feedback settings.
+• Appearance is now coordinated through the required Norse Base theme; optional production theme series are not included in this build.
+• Encryption, ciphers, progression records, and preferences remain on-device with no account or server.
 ```
 
 ---
@@ -65,6 +66,7 @@ HOW TO DEMO
 5. Cipher Library → Share on a cipher: system share sheet offers a runescribe://import link. Opening that link on a device with Rune Scribe installed presents Import Cipher.
 6. Cipher Library → Export produces a .runescribe file; Import… re-imports it.
 7. QR: show QR for a cipher; Scan QR Code (iOS) or Camera to import.
+8. Open Vault/Progress to review the local Journey, achievement progress, and collected rewards. The app remains usable if Progression is unavailable.
 
 ENCRYPTION
 • AES-256-GCM (CryptoKit) for messages and for the on-device cipher library.
@@ -126,7 +128,8 @@ Peer key handoff is manual (link / QR / file). There is no proprietary transport
 
 Use the full text from [`EULA.md`](../EULA.md) as the App Store Connect custom license if not using Apple’s standard EULA.
 
-The same text is shown in-app under **Settings → View License** (`RuneScrib/Models/AppLicense.swift`).
+The same text is shown in-app under **Settings → View License**
+(`Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/ProductContent/AppLicense.swift`).
 
 ---
 
@@ -180,7 +183,7 @@ Info.plist highlights (`Config/RuneScrib-*-Info.plist` / `project.yml`):
 
 ### Before upload
 
-- [ ] Version and build match App Store Connect (`1.0.33` / `33` for this packet)
+- [ ] Version and build match App Store Connect (`1.0.38` / `38` for this packet)
 - [ ] Release notes pasted (What’s New)
 - [ ] Review notes pasted
 - [ ] Privacy answers set
@@ -188,18 +191,21 @@ Info.plist highlights (`Config/RuneScrib-*-Info.plist` / `project.yml`):
 - [ ] Custom EULA attached if required
 - [ ] Screenshots and description current for both platforms
 - [ ] Smoke-test Share deep link and intro cadence on device
+- [ ] Smoke-test Vault/Progress, reveal accessibility, and feedback settings on device
 
 ---
 
-## What shipped in 1.0.33
+## What ships in 1.0.38
 
 Internal summary for this submission:
 
-1. Cold-launch intro plays at most once every **30 days**
-2. Cipher Library **Share** sends a `runescribe://import` deep link (tap-to-import); **Export** still provides `.runescribe` files
-3. Marketing version **1.0.33**, build **33**
+1. Optional on-device Progression with approved achievements, milestones, durable records, and privacy-safe existing-user migration
+2. Vault/Progress, Collection, Archive, and accessible queued unlock reveals
+3. Runtime-owned Theme coordination and required Norse Base appearance provider
+4. Core, Progression, and UI module descriptors and manifests aligned to the application release
+5. Marketing version **1.0.38**, build **38**
 
-Related PR: https://github.com/flynn33/rune-scribe/pull/33
+Related PR: https://github.com/flynn33/rune-scribe/pull/42
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)
 

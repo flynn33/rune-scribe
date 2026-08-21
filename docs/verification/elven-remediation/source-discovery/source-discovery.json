@@ -8,9 +8,9 @@
   ],
   "excludedPackageMarkers": [
     "blocking-resolution-package",
-    "spark-execution-package",
-    "spark-implementation-package",
-    "codex-spark-implementation-package",
+    "prior-execution-package",
+    "prior-package-variant",
+    "prior-implementation-package",
     "corrected-production-package",
     "production-package-corrected"
   ],

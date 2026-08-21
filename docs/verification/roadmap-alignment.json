@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.1",
-  "asOfDate": "2026-08-15",
+  "asOfDate": "2026-08-21",
   "authority": {
     "systemSpec": {
       "path": "docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md",
@@ -52,8 +52,8 @@
       "dependsOn": [],
       "items": [
         {"id":"BAS-001","status":"satisfied","dependsOn":[],"evidence":["docs/verification/ForsettiMigrationBaseline.md"],"notes":"The byte-exact source baseline and reconciliation revision are recorded."},
-        {"id":"BAS-002","status":"satisfied","dependsOn":["BAS-001"],"evidence":["docs/verification/BuildAndTestReport.md","docs/verification/p7-test-matrix.json"],"notes":"Recorded macOS and iOS build/test rails exist; the post-alignment SwiftPM run passed 310 of 310 without interactive credentials."},
-        {"id":"BAS-003","status":"satisfied","dependsOn":["BAS-001"],"evidence":["README.md","docs/verification/BuildAndTestReport.md"],"notes":"README reports the measured 310-package-test and 17-architecture-check suites rather than the pre-migration monolith counts."},
+        {"id":"BAS-002","status":"satisfied","dependsOn":["BAS-001"],"evidence":["docs/verification/BuildAndTestReport.md","docs/verification/elven-recovery-v3/PhaseABRegression.json","docs/verification/p7-test-matrix.json"],"notes":"Recorded macOS and iOS build/test rails exist; the current Swift package regression passed 814 tests without interactive credentials."},
+        {"id":"BAS-003","status":"satisfied","dependsOn":["BAS-001"],"evidence":["README.md","docs/verification/BuildAndTestReport.md","docs/verification/elven-recovery-v3/PhaseABRegression.json"],"notes":"README reports the current 814-package-test and 17-architecture-ratchet suites while the historical build report retains its snapshot counts."},
         {"id":"BAS-004","status":"satisfied","dependsOn":["BAS-003"],"evidence":["Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift","docs/verification/feature-parity-matrix.json"],"notes":"Current cipher, message, link, QR, encrypted-library, contact, and font compatibility fixtures are covered by repository tests and parity evidence."},
         {"id":"BAS-005","status":"not-applicable","dependsOn":["BAS-004"],"evidence":["docs/architecture/RoadmapAlignment.md"],"notes":"No separately approved scrubbed real user sample was supplied; synthetic golden fixtures remain authoritative."},
         {"id":"BAS-006","status":"blocked-device","dependsOn":["BAS-001"],"evidence":["docs/verification/feature-parity-matrix.json","docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Seven historical parity cases and the new share-composition matrix require physical-device evidence."},

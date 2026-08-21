@@ -1,5 +1,11 @@
 # Theme Scaffold and Norse Base Implementation Report
 
+> **Historical Phase A/B report.** Its Phase A and Phase B results remain valid, but
+> its package-level blocker status was superseded on 2026-08-21. All nine recovery
+> findings now pass, the recovery is `PASS / UNBLOCKED FOR PHASE C`, and Phase C is
+> `IN_PROGRESS`; see
+> [`elven-recovery-v3/RecoveryFinalAudit.md`](elven-recovery-v3/RecoveryFinalAudit.md).
+
 **Recorded:** 2026-08-15
 
 **Repository baseline:** `e8c76537082829ef1e2292eb8fa21ca78740aaa2`

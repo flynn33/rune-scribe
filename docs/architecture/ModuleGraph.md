@@ -135,7 +135,13 @@ The manifests live with their module implementations:
 
 The compiled descriptors live in [`CoreModule.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift) and [`UIModule.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift). Runtime registration compares identity, version, kind, entry point, role, requested capabilities, required services, and required roles. Publication is a compiled descriptor property checked against the service access policy and verified after `start(context:)` returns.
 
-The strict JSON decoder accepts only the current schema keys. Both manifests target iOS and macOS, require runtime `1.0.0`, carry module version `1.0.34`, use no current entitlement requirement, and disable production diagnostics. Unknown fields and duplicate array entries fail before activation.
+At the recorded snapshot, the strict JSON decoder accepted only the schema keys then in
+force. The Core and UI manifests targeted iOS and macOS, required runtime `1.0.0`,
+carried module version `1.0.34`, used no entitlement requirement, and disabled
+production diagnostics. Unknown fields and duplicate array entries failed before
+activation. Current Core, Progression, and UI module version `1.0.38` is recorded in
+their compiled descriptors and manifests; the current graph is governed by the
+controlling policy and `project.yml`, not this snapshot.
 
 ## Composition and activation sequence
 

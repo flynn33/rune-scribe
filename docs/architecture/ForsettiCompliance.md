@@ -84,7 +84,13 @@ The two bundled manifests are:
 - [`RuneScribeCoreModule/Resources/module-manifest.json`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json), service role `runescribe.core`;
 - [`RuneScribeUIModule/Resources/module-manifest.json`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json), UI role `runescribe.ui.primary`.
 
-Both declare schema `1.0`, policy profile `forsetti-pattern-b-standalone`, minimum runtime `1.0.0`, module version `1.0.34`, iOS 17/macOS 15 support, no entitlement requirement, and production diagnostics disabled. The runtime compares each decoded manifest with its compiled `ModuleDescriptor` before a factory can be used. It does not invoke a registered factory closure until activation. Core and UI factories each create a fresh module when invoked; UI service resolution, session creation, resource resolution, and root presentation occur only in `start(context:)`.
+At the recorded snapshot, both declared schema `1.0`, policy profile
+`forsetti-pattern-b-standalone`, minimum runtime `1.0.0`, module version `1.0.34`, iOS
+17/macOS 15 support, no entitlement requirement, and production diagnostics disabled.
+The runtime compared each decoded manifest with its compiled `ModuleDescriptor` before
+a factory could be used. Current Core, Progression, and UI module version `1.0.38` is
+recorded in their compiled descriptors and manifests. Current activation and mediation
+authority is the controlling policy and live source, not this historical snapshot.
 
 Both current modules use `AlwaysEligibleProvider`. Core has no required module role. UI requires `runescribe.core`; the runtime also orders every eligible service module before the UI. Core must publish both declared descriptor services before its activation succeeds. The UI can then resolve the application facade and contribute its root view.
 
