@@ -65,6 +65,8 @@ OUTPUT_ROLES = {
     "vault": {"vault.card", "vault.locked-silhouette", "vault.encountered", "vault.selected"},
     "frame": {"frame.vector-master", "frame.static-fallback", "frame.thumbnail"},
     "crest": {"crest.vector-master", "crest.static-fallback", "crest.thumbnail"},
+    "relic": {"relic.master", "relic.thumbnail", "relic.static-share-fallback", "relic.high-contrast"},
+    "seal": {"seal.vector-master", "seal.monochrome-fallback", "seal.thumbnail"},
 }
 
 
@@ -145,6 +147,10 @@ def actual_media_type(path: Path) -> str:
         return "application/pdf"
     if path.suffix.lower() == ".ttf":
         return "font/ttf"
+    if path.suffix.lower() == ".otf":
+        return "font/otf"
+    if path.suffix.lower() in {".heif", ".heic"}:
+        return "image/heif"
     return mimetypes.guess_type(path.name)[0] or "application/octet-stream"
 
 
@@ -197,6 +203,7 @@ def main() -> int:
 
     manifest_path = root / "Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json"
     manifest = load_json(manifest_path)
+    phase_c_complete = manifest.get("phaseCOutputMatrix") is not None or str(manifest.get("packageVersion", "")).startswith("3.1")
     codices = {item["codexID"]: item for item in manifest["codices"]}
     relics = [relic for codex in codices.values() for relic in codex["relics"]]
 
@@ -271,7 +278,21 @@ def main() -> int:
         third.check(relic.get("sourceMasterDimensions") == [1600, 1200], f"{relic['assetID']} descriptor dimensions mismatch")
         third.check(relic.get("preferredAspectRatio") == "4:3", f"{relic['assetID']} aspect mismatch")
         derivatives = relic.get("squareDerivatives", [])
-        third.check(len(derivatives) == 1 and derivatives[0].get("dimensions") == [1200, 1200] and derivatives[0].get("cropRectangle") == [200, 0, 1200, 1200], f"{relic['assetID']} lacks explicit square crop")
+        derivative = derivatives[0] if len(derivatives) == 1 else {}
+        derivative_dimensions = derivative.get("dimensions", [])
+        square_dimensions = (
+            isinstance(derivative_dimensions, list)
+            and len(derivative_dimensions) == 2
+            and derivative_dimensions[0] == derivative_dimensions[1]
+            and isinstance(derivative_dimensions[0], int)
+            and derivative_dimensions[0] > 0
+        )
+        explicit_crop = derivative.get("cropRectangle") == [200, 0, 1200, 1200]
+        if phase_c_complete:
+            explicit_crop = explicit_crop and derivative.get("allowStretch") is False
+        else:
+            square_dimensions = derivative_dimensions == [1200, 1200]
+        third.check(len(derivatives) == 1 and square_dimensions and explicit_crop, f"{relic['assetID']} lacks explicit square crop")
     identities = Counter(item["assetID"] for item in relics)
     for identity in ("relic.gloamthorn.umbral-plaque", "relic.gloamthorn.nightthorn-tablet"):
         third.check(identities[identity] == 1, f"{identity} does not have exactly one artifact record")
@@ -296,25 +317,49 @@ def main() -> int:
 
     fourth = findings["DEV-ELVEN-004"]
     geometry_evidence = load_json(root / "Validation/geometry/anchor-safety.json")
-    fourth.check(len(geometry_evidence["records"]) == 2, "anchor evidence does not cover both affected Relics")
-    for record in geometry_evidence["records"]:
+    geometry_records = geometry_evidence["records"]
+    expected_geometry_sources = (
+        {item["geometrySourceMaster"] for item in relics}
+        if phase_c_complete
+        else {
+            "Source-Masters/Relic-Geometry/sunspire/dawnfire-tablet-geometry.svg",
+            "Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg",
+        }
+    )
+    fourth.check(
+        {item.get("sourceMaster") for item in geometry_records} == expected_geometry_sources,
+        "anchor evidence source coverage differs from the required Relic set",
+    )
+    for record in geometry_records:
         source = root / record["sourceMaster"]
         parsed = ET.parse(source).getroot()
-        rectangles = [item for item in parsed.iter() if tag(item) == "rect"]
         circles = [item for item in parsed.iter() if tag(item) == "circle" and item.attrib.get("stroke") == "#cc5500"]
-        outer, safe = rectangles[1], rectangles[2]
-        outer_rect = tuple(float(outer.attrib[key]) for key in ("x", "y", "width", "height"))
-        safe_rect = tuple(float(safe.attrib[key]) for key in ("x", "y", "width", "height"))
-        expanded = (safe_rect[0] - 24, safe_rect[1] - 24, safe_rect[0] + safe_rect[2] + 24, safe_rect[1] + safe_rect[3] + 24)
-        fourth.check(len(circles) >= 2, f"{record['sourceMaster']} has fewer than two anchors")
-        for circle in circles:
-            cx, cy, radius = (float(circle.attrib[key]) for key in ("cx", "cy", "r"))
+        anchors = record.get("anchors", [])
+        viewbox = svg_viewbox(source)
+        outer_rect = viewbox
+        expanded = tuple(float(item) for item in record.get("expandedGlyphSafeRegion", []))
+        fourth.check(len(anchors) >= 1 and len(circles) == len(anchors), f"{record['sourceMaster']} anchor evidence/topology count differs")
+        fourth.check(len(expanded) == 4, f"{record['sourceMaster']} expanded safe region is incomplete")
+        for index, anchor in enumerate(anchors):
+            center = anchor.get("center", [])
+            fourth.check(len(center) == 2 and isinstance(anchor.get("radius"), (int, float)), f"{record['sourceMaster']} anchor geometry is incomplete")
+            if len(center) != 2 or not isinstance(anchor.get("radius"), (int, float)) or len(expanded) != 4:
+                continue
+            cx, cy = (float(item) for item in center)
+            radius = float(anchor["radius"])
             inside = cx - radius >= outer_rect[0] and cx + radius <= outer_rect[0] + outer_rect[2] and cy - radius >= outer_rect[1] and cy + radius <= outer_rect[1] + outer_rect[3]
             nearest = (min(max(cx, expanded[0]), expanded[2]), min(max(cy, expanded[1]), expanded[3]))
             distance = math.hypot(cx - nearest[0], cy - nearest[1])
             fourth.check(inside, f"anchor outside Relic bounds in {record['sourceMaster']}")
             fourth.check(distance > radius, f"anchor intersects expanded safe region in {record['sourceMaster']}")
             fourth.check(distance + 24 - radius >= 24, f"anchor clearance below 24px in {record['sourceMaster']}")
+            fourth.check(anchor.get("insideRelicBounds") == inside, f"anchor inside-bounds evidence mismatch in {record['sourceMaster']}")
+            fourth.check(anchor.get("intersectsExpandedSafeRegion") == (distance <= radius), f"anchor intersection evidence mismatch in {record['sourceMaster']}")
+            fourth.check(abs(float(anchor.get("clearanceFromGlyphSafeRegion", -1)) - (distance + 24 - radius)) < 0.01, f"anchor clearance evidence mismatch in {record['sourceMaster']}")
+            if index < len(circles):
+                circle = circles[index]
+                actual = tuple(float(circle.attrib[key]) for key in ("cx", "cy", "r"))
+                fourth.check(actual == (cx, cy, radius), f"anchor evidence differs from SVG topology in {record['sourceMaster']}")
         fourth.check((root / record["overlay"]).is_file(), f"overlay missing for {record['sourceMaster']}")
     fourth.check(all(item.get("maximumLineFixtureDoesNotTouchSeal") and item.get("minimumScaleFixtureDoesNotTouchSeal") for item in fixtures["records"]), "layout fixture reports protected-region contact")
     fourth.record("Recomputed circle-versus-expanded-rectangle geometry and matched two overlays")
@@ -356,7 +401,18 @@ def main() -> int:
 
     eighth = findings["DEV-ELVEN-008"]
     resources = manifest.get("resourceCatalog", [])
-    eighth.check(len(resources) == 20, "resource catalog is not exactly 20 records")
+    expected_class_counts = Counter({item: 1 for item in ("script", "background", "vault", "frame", "crest")})
+    if phase_c_complete:
+        expected_class_counts.update({"relic": 3, "seal": 6})
+    expected_resource_count = len(codices) * sum(expected_class_counts.values())
+    expected_output_count = len(codices) * sum(
+        count * len(OUTPUT_ROLES[asset_class])
+        for asset_class, count in expected_class_counts.items()
+    )
+    eighth.check(
+        len(resources) == expected_resource_count,
+        f"resource catalog count mismatch: expected {expected_resource_count}, found {len(resources)}",
+    )
     per_module_classes: Dict[str, Counter[str]] = defaultdict(Counter)
     output_catalog: Dict[str, Dict[str, Any]] = {}
     module_bytes: Dict[str, int] = defaultdict(int)
@@ -393,9 +449,12 @@ def main() -> int:
                     eighth.check(codepoints == set(range(0x16A0, 0x16C0)), f"font cmap mismatch {relative}")
                     font.close()
     for codex_id in codices:
-        eighth.check(per_module_classes[codex_id] == Counter({item: 1 for item in OUTPUT_ROLES}), f"{codex_id} class coverage mismatch")
+        eighth.check(per_module_classes[codex_id] == expected_class_counts, f"{codex_id} class coverage mismatch")
         eighth.check(module_bytes[codex_id] <= 64 * 1024 * 1024, f"{codex_id} exceeds complete-module budget")
-    eighth.check(len(output_catalog) == 64, "shipping output catalog is not exactly 64 files")
+    eighth.check(
+        len(output_catalog) == expected_output_count,
+        f"shipping output count mismatch: expected {expected_output_count}, found {len(output_catalog)}",
+    )
     shipping_files = {item.relative_to(root).as_posix() for item in (root / "Shipping").rglob("*") if item.is_file()}
     eighth.check(set(output_catalog) == shipping_files, "shipping tree and output catalog differ")
     eighth.record(f"Validated {len(resources)} resources and {len(output_catalog)} materialized outputs")
@@ -411,7 +470,10 @@ def main() -> int:
         if item.is_file()
     }
     provenance_sources = {item.get("sourceMasterPath") for item in records}
-    ninth.check(len(records) == manifest.get("provenanceRecordCount") == 189, "provenance record count mismatch")
+    ninth.check(
+        len(records) == manifest.get("provenanceRecordCount"),
+        "provenance record count differs from manifest",
+    )
     ninth.check(provenance_sources == sources, "provenance source coverage differs from source tree")
     provenance_outputs: Dict[str, Dict[str, Any]] = {}
     prohibited_values = {"", "unknown", "tbd", "todo", "pending", "automation"}
