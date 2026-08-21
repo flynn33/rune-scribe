@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "1.0",
+  "catalogContract": "Rune Scribe Progression/Achievement Package v1.0",
+  "authorityRule": "Progression owns achievement, milestone, ownership, encounter, and grant truth. Norse Theme declares content IDs only. Forsetti reconciles the two.",
+  "codex": {
+    "contentID": "codex.norse",
+    "entitlementID": "unlock.codex.norse",
+    "entitlementKind": "always",
+    "initialGrantPolicy": {
+      "newInstall": "Grant silently during first-run state creation.",
+      "existingUserMigration": "Grant silently and idempotently. Do not replay a Codex-unlocked sound or animation.",
+      "revocable": false
+    }
+  },
+  "grants": [
+    {
+      "contentID": "script.base-runes",
+      "trigger": "grant.base.norse",
+      "grantTiming": "with-base-codex",
+      "revealPolicy": "none"
+    },
+    {
+      "contentID": "relic.norse.runestone.weathered",
+      "trigger": "grant.base.norse",
+      "grantTiming": "with-base-codex",
+      "revealPolicy": "none"
+    },
+    {
+      "contentID": "seal.norse.knotwork",
+      "trigger": "grant.base.norse",
+      "grantTiming": "with-base-codex",
+      "revealPolicy": "none"
+    },
+    {
+      "contentID": "seal.norse.forge-flame",
+      "trigger": "grant.base.norse",
+      "grantTiming": "with-base-codex",
+      "revealPolicy": "none"
+    },
+    {
+      "contentID": "seal.norse.raven",
+      "trigger": "achievement.first-inscription",
+      "revealEffectID": "effect.norse.reveal-minor",
+      "soundCueID": "sound.norse.unlock-minor"
+    },
+    {
+      "contentID": "relic.norse.raven-medallion",
+      "trigger": "achievement.first-dispatch",
+      "revealEffectID": "effect.norse.reveal-relic",
+      "soundCueID": "sound.norse.unlock-relic"
+    },
+    {
+      "contentID": "seal.norse.longship",
+      "trigger": "achievement.correspondent",
+      "revealEffectID": "effect.norse.reveal-minor",
+      "soundCueID": "sound.norse.unlock-minor"
+    },
+    {
+      "contentID": "seal.norse.forge-hammer",
+      "trigger": "achievement.courier-1",
+      "revealEffectID": "effect.norse.reveal-minor",
+      "soundCueID": "sound.norse.unlock-minor"
+    },
+    {
+      "contentID": "relic.norse.ironbound-shield",
+      "trigger": "achievement.courier-2",
+      "revealEffectID": "effect.norse.reveal-relic",
+      "soundCueID": "sound.norse.unlock-relic"
+    },
+    {
+      "contentID": "frame.norse.carved-knotwork",
+      "trigger": "achievement.archivist-1",
+      "revealEffectID": "effect.norse.reveal-relic",
+      "soundCueID": "sound.norse.unlock-relic"
+    },
+    {
+      "contentID": "relic.norse.sealed-parchment",
+      "trigger": "achievement.archivist-2",
+      "revealEffectID": "effect.norse.reveal-relic",
+      "soundCueID": "sound.norse.unlock-relic"
+    },
+    {
+      "contentID": "seal.norse.echo-rune",
+      "trigger": "rule.codex.norse.echo-five",
+      "ruleMeaning": "Decode five valid incoming messages whose authenticated presentation metadata names codex.norse.",
+      "revealEffectID": "effect.norse.reveal-minor",
+      "soundCueID": "sound.norse.unlock-minor"
+    },
+    {
+      "contentID": "relic.norse.runestone.blackstone",
+      "trigger": "rule.codex.norse.mastery",
+      "ruleMeaning": "Complete the approved Norse mastery rule from the Progression package.",
+      "revealEffectID": "effect.norse.reveal-mastery",
+      "soundCueID": "sound.norse.unlock-mastery"
+    },
+    {
+      "contentID": "crest.norse.forge-master",
+      "trigger": "rule.codex.norse.mastery",
+      "ruleMeaning": "Granted atomically with the Blackstone Rune Stone.",
+      "revealEffectID": "effect.norse.reveal-mastery",
+      "soundCueID": "sound.norse.unlock-mastery"
+    },
+    {
+      "contentID": "relic.norse.runestone.frozen",
+      "trigger": "rule.season.winter.frozen-runestone",
+      "status": "reserved-inactive",
+      "ruleMeaning": "Future approved winter Season challenge. Do not invent or activate this rule in the Norse module implementation package."
+    }
+  ],
+  "reconciliation": {
+    "onGrant": "Forsetti refreshes the runtime-composed ownership/selectability snapshot without restart.",
+    "onMissingThemeResource": "Ownership remains; item is marked unavailable; Norse Base fallback or runtime emergency snapshot preserves readability.",
+    "onDuplicateEvent": "No duplicate grant, reveal, sound, or haptic.",
+    "crossDevice": "A synchronized grant already celebrated elsewhere appears as a quiet New in Vault badge rather than replaying the full reveal."
+  },
+  "identifierReconciliationInstruction": "Before implementation, compare every trigger ID with the live Progression catalog produced from the separately approved Progression package. If a trigger identifier differs, update this binding file and implementation references to the live stable identifier; never rename the Norse content IDs."
+}

@@ -86,7 +86,7 @@ struct ContactsView: View {
     private var base: some View {
         VStack(spacing: 0) {
             RuneHeader(
-                runic: "ᚲᛟᚾᛏᚪᚲᛏᛋ",
+                slot: .contacts,
                 subtitle: "Contacts",
                 trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() }]
             )

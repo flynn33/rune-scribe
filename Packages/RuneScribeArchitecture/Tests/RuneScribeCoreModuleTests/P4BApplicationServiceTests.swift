@@ -647,9 +647,9 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(imported.name, "Confirmed Legacy")
         XCTAssertNil(confirmedSnapshot.importState.pending)
         let validations = await registrar.inspectedFontData()
-        XCTAssertEqual(validations, [bundledFontBytes])
+        XCTAssertEqual(validations, [])
         let registrations = await registrar.registeredFontData()
-        XCTAssertEqual(registrations, [bundledFontBytes])
+        XCTAssertEqual(registrations, [])
         await service.stopInboundProcessing()
 
         let reconstructed = fullService(
@@ -1314,8 +1314,8 @@ final class P4BApplicationServiceTests: XCTestCase {
         )
         XCTAssertTrue(fontSummary.isRegistered)
         let registeredFontData = await registrar.registeredFontData()
-        XCTAssertEqual(registeredFontData.count, 2)
-        XCTAssertTrue(registeredFontData.contains(bundledFontBytes))
+        XCTAssertEqual(registeredFontData.count, 1)
+        XCTAssertFalse(registeredFontData.contains(bundledFontBytes))
         XCTAssertTrue(registeredFontData.contains(importedFontBytes))
 
         XCTAssertTrue(snapshot.lockState.isPINSet)
@@ -2359,7 +2359,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         }
         return try Data(
             contentsOf: repositoryRoot.appendingPathComponent(
-                "RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf"
+                "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf"
             )
         )
     }

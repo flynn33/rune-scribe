@@ -75,7 +75,7 @@ struct CipherLibraryView: View {
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
-                runic: "ᚲᛁᛈᚺᛖᚱᛋ",
+                slot: .cipherLibrary,
                 subtitle: "Cipher Library",
                 trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() }]
             )

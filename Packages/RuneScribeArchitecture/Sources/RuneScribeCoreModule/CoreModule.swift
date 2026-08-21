@@ -20,7 +20,6 @@ public enum RuneScribeCoreModuleBootstrap {
             RuneScribeCapabilities.keychainStorage,
             RuneScribeCapabilities.protectedFileStorage,
             RuneScribeCapabilities.shareArtifactStorage,
-            RuneScribeCapabilities.resourceRead,
             RuneScribeCapabilities.fontRegistration,
             RuneScribeCapabilities.contactRead,
             RuneScribeCapabilities.clipboardRead,
@@ -34,15 +33,11 @@ public enum RuneScribeCoreModuleBootstrap {
             RuneScribeServiceIDs.secureValueStore,
             RuneScribeServiceIDs.protectedFileStore,
             RuneScribeServiceIDs.shareArtifactStore,
-            RuneScribeServiceIDs.applicationResourceLocator,
             RuneScribeServiceIDs.systemFontRegistrar,
             RuneScribeServiceIDs.contactAccess,
             RuneScribeServiceIDs.clipboardRead,
             RuneScribeServiceIDs.clock,
             RuneScribeServiceIDs.uuid,
-        ],
-        requiredResources: [
-            .bundledRuneFont,
         ],
         publishedEndpoints: RuntimeApplicationEndpointCatalog.applicationEndpointIDs.union(
             RuntimeApplicationEndpointCatalog.ingressEndpointIDs

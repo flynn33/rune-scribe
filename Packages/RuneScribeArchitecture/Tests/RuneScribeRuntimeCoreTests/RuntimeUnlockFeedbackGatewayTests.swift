@@ -71,7 +71,11 @@ final class RuntimeUnlockFeedbackGatewayTests: XCTestCase {
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
 
-        XCTAssertEqual(Set(object.keys), ["tier", "soundEnabled", "hapticEnabled"])
+        XCTAssertEqual(
+            Set(object.keys),
+            ["tier", "codexID", "soundEnabled", "hapticEnabled"]
+        )
+        XCTAssertEqual(request.codexID, RuneScribeCodexIDs.norse)
         XCTAssertEqual(request.soundSemanticID, .mastery)
         XCTAssertEqual(request.fallbackResourceID, .mastery)
         let encoded = try XCTUnwrap(String(data: data, encoding: .utf8))

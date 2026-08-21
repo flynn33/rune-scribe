@@ -10,7 +10,6 @@
 		00C20D49F14613A66733DD1B /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = CF4ADC70BD29BA2CE0411ABA /* RuneScribeTestSupport */; };
 		01C55610EF12C17DA83396B2 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
 		056BD5AEE7E613EDF8E57B83 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = 1602D1A139FE82FFA3C040DF /* RuneScribePlatform */; };
-		059BA5D329AA9280083DF044 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		0F2990FFD15A155F37384B6C /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = FC00F092BEFF6E296536B9D8 /* RuneScribeCoreModule */; };
 		199233F0AC33FEF97975F320 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */; };
 		1CC0EAA7DFAE0294F058AAD4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */; };
@@ -42,10 +41,8 @@
 		99B4D5CC341ADAAD426D63CF /* KeychainMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */; };
 		9AA4B4737E553835B70F9291 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = B3DFFDF31121756FBA7CFE9C /* RuneScribePlatform */; };
 		9B01C258EBB2B91127ABE1BC /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 13B5BAB3ED96974D3FAE69DD /* RuneScribeUIRuntime */; };
-		9EFFE214115C8E88F90F758F /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		A700A5151432D38B2EA96278 /* RuneScribeProgressionModule in Frameworks */ = {isa = PBXBuildFile; productRef = 8C00F16A3B8AA272BD3510BF /* RuneScribeProgressionModule */; };
 		A86EDA53424B9C65FC09E8D5 /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5E51F0E25CDF33AA3544E166 /* RuneScribeRuntimeCore */; };
-		ACCFADEC7CC38129C840E861 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		AD024D560D851D28CD7A1FDD /* NativeShareOutcomeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */; };
 		ADE58C68BC79EBBE8A2CA9C5 /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */; };
 		B011B6247C5A28BCF3FFDEA9 /* RuneScribeParityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */; };
@@ -53,17 +50,18 @@
 		B98E838AC8959237CB19A737 /* RuneScribeProgressionModule in Frameworks */ = {isa = PBXBuildFile; productRef = 4C674DBE6F68251A40CF79DC /* RuneScribeProgressionModule */; };
 		C0CF74DC37DD18955598A48F /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = B9866BDCD5A898F67A3260A2 /* RuneScribeTestSupport */; };
 		C305C65784148EA3C86B0EDC /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = 32499190D69DF97439CD3DDF /* RuneScribeThemeCoordinatorModule */; };
-		D8AFBCE3366CC1C34C988AA8 /* NotoSansRunic-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */; };
 		DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		DCF8F4F29B85C086E1ED3EC6 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */; };
 		DF507FCE9560AFB1813D59E7 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = CE59E4D588F69BF2E639C88F /* RuneScribePlatform */; };
 		DF96354EF55869EE06DB0AB6 /* RuneScribMacParityHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */; };
 		E0D344E8AB8FD067801E6E67 /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 76FB922C8FCA530F81C93F60 /* RuneScribeContracts */; };
+		E187EDBC3B3509BEB5A9FD01 /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 415BD6C69E96BAF82603E6EB /* RuneScribeTestSupport */; };
 		E8945513767815C9E3871E78 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */; };
 		F3C8BD65A026CB058E9873F9 /* RuneScribeMacParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */; };
 		F7A6DCFC817B53A36467433D /* ArchitectureGuardrailTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */; };
-		F9A85A1AA048475516E0F38A /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 415BD6C69E96BAF82603E6EB /* RuneScribeTestSupport */; };
+		F9A85A1AA048475516E0F38A /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = BCC1F886916AC74985CB05A1 /* RuneScribeNorseThemeModule */; };
 		FAE1E2AAB9525E7A3C4E51DC /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
+		FC8ADA1356B2126E5526B008 /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 6373255684CB8CBAFDAFDA71 /* RuneScribeNorseThemeModule */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,7 +108,6 @@
 		6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainMigrationTests.swift; sourceTree = "<group>"; };
 		70806C8FC5D83F211738FAAD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */ = {isa = PBXFileReference; path = "raven-forge-spp-splash.mp4"; sourceTree = "<group>"; };
-		78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NotoSansRunic-Regular.ttf"; sourceTree = "<group>"; };
 		8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchitectureGuardrailTests.swift; sourceTree = "<group>"; };
 		84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeCompositionTests.swift; sourceTree = "<group>"; };
 		88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityBaselineTests.swift; sourceTree = "<group>"; };
@@ -172,7 +169,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9A85A1AA048475516E0F38A /* RuneScribeTestSupport in Frameworks */,
+				F9A85A1AA048475516E0F38A /* RuneScribeNorseThemeModule in Frameworks */,
+				E187EDBC3B3509BEB5A9FD01 /* RuneScribeTestSupport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -181,6 +179,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				00C20D49F14613A66733DD1B /* RuneScribeTestSupport in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D357E29F8F57D81605914EFA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FC8ADA1356B2126E5526B008 /* RuneScribeNorseThemeModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -248,7 +254,6 @@
 		7C5FDB5E16F112EAD70C17D8 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
-				78B9DBCB1B063EF2C6D49431 /* NotoSansRunic-Regular.ttf */,
 				B6164CCB0C4A4342270DC5CA /* OFL.txt */,
 			);
 			path = Fonts;
@@ -350,7 +355,7 @@
 			buildConfigurationList = F36B8D5D0B12F0CA0E1A1E91 /* Build configuration list for PBXNativeTarget "RuneScribIOSUITests" */;
 			buildPhases = (
 				09913040E6AB412E27A36DD5 /* Sources */,
-				6ABABD57A8BCA66F0377F836 /* Resources */,
+				D357E29F8F57D81605914EFA /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -359,6 +364,7 @@
 			);
 			name = RuneScribIOSUITests;
 			packageProductDependencies = (
+				6373255684CB8CBAFDAFDA71 /* RuneScribeNorseThemeModule */,
 			);
 			productName = RuneScribIOSUITests;
 			productReference = 4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */;
@@ -467,7 +473,6 @@
 			buildConfigurationList = C5578A7B4655C4175187DA6B /* Build configuration list for PBXNativeTarget "RuneScribMacParityTests" */;
 			buildPhases = (
 				637F403A3BEF27E71F1A4CBE /* Sources */,
-				7EFFAEEB440D9B6FA54AE6DB /* Resources */,
 				A7A0F1AEFE31077919969F7A /* Frameworks */,
 			);
 			buildRules = (
@@ -477,6 +482,7 @@
 			);
 			name = RuneScribMacParityTests;
 			packageProductDependencies = (
+				BCC1F886916AC74985CB05A1 /* RuneScribeNorseThemeModule */,
 				415BD6C69E96BAF82603E6EB /* RuneScribeTestSupport */,
 			);
 			productName = RuneScribMacParityTests;
@@ -594,25 +600,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				973EBAFA7B1E6A25FAE46B58 /* Assets.xcassets in Resources */,
-				059BA5D329AA9280083DF044 /* NotoSansRunic-Regular.ttf in Resources */,
 				FAE1E2AAB9525E7A3C4E51DC /* OFL.txt in Resources */,
 				DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		6ABABD57A8BCA66F0377F836 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				ACCFADEC7CC38129C840E861 /* NotoSansRunic-Regular.ttf in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7EFFAEEB440D9B6FA54AE6DB /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				9EFFE214115C8E88F90F758F /* NotoSansRunic-Regular.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -621,7 +610,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				584241169D94C9A2AA41FD95 /* Assets.xcassets in Resources */,
-				D8AFBCE3366CC1C34C988AA8 /* NotoSansRunic-Regular.ttf in Resources */,
 				34A07D593701D17AEC1FC143 /* OFL.txt in Resources */,
 				38049FACD09DEBB67B1C6DAF /* raven-forge-spp-splash.mp4 in Resources */,
 			);
@@ -1371,6 +1359,10 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeRuntimeCore;
 		};
+		6373255684CB8CBAFDAFDA71 /* RuneScribeNorseThemeModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeNorseThemeModule;
+		};
 		6CB0F11D349F8C67B5821299 /* RuneScribeUIModule */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeUIModule;
@@ -1410,6 +1402,10 @@
 		B9866BDCD5A898F67A3260A2 /* RuneScribeTestSupport */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeTestSupport;
+		};
+		BCC1F886916AC74985CB05A1 /* RuneScribeNorseThemeModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeNorseThemeModule;
 		};
 		C2F0441EABEA238EBD5DF206 /* RuneScribeThemeCoordinatorModule */ = {
 			isa = XCSwiftPackageProductDependency;

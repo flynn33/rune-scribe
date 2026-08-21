@@ -182,6 +182,7 @@ public enum ThemeArtifactAvailability: String, Codable, Hashable, Sendable {
     case earned
     case encountered
     case mastery
+    case reservedInactive = "reserved-inactive"
 }
 
 public struct ThemeSemanticColor: RawRepresentable, Codable, Hashable, Sendable {
@@ -1670,8 +1671,16 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
             role: ThemeResourceRoleID,
             media: Set<ThemeResourceMediaType>
         ) throws {
+            try require(resourceID, roles: [role], media: media)
+        }
+
+        func require(
+            _ resourceID: ThemeResourceID,
+            roles: Set<ThemeResourceRoleID>,
+            media: Set<ThemeResourceMediaType>
+        ) throws {
             guard let reference = resourcesByID[resourceID],
-                  reference.role == role,
+                  roles.contains(reference.role),
                   media.contains(reference.mediaType)
             else {
                 throw ThemeDescriptorValidationError.resourceSemanticMismatch(
@@ -1703,7 +1712,7 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
             try require(relic.primaryResourceID, role: ThemeResourceRoles.relicMaster, media: stillMedia)
             try require(
                 relic.thumbnailResourceID,
-                role: ThemeResourceRoles.relicThumbnail,
+                roles: [ThemeResourceRoles.relicThumbnail, ThemeResourceRoles.relicMaster],
                 media: thumbnailMedia
             )
             try require(
@@ -1713,7 +1722,10 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
             )
             try require(
                 relic.highContrastResourceID,
-                role: ThemeResourceRoles.relicHighContrast,
+                roles: [
+                    ThemeResourceRoles.relicHighContrast,
+                    ThemeResourceRoles.relicStaticShareFallback,
+                ],
                 media: stillMedia
             )
         }
@@ -1725,7 +1737,10 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
             )
             try require(
                 seal.monochromeFallbackResourceID,
-                role: ThemeResourceRoles.sealMonochromeFallback,
+                roles: [
+                    ThemeResourceRoles.sealMonochromeFallback,
+                    ThemeResourceRoles.sealThumbnail,
+                ],
                 media: stillMedia
             )
             try require(
@@ -1765,7 +1780,10 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
         )
         try require(
             codex.background.reduceMotionResourceID,
-            role: ThemeResourceRoles.backgroundReduceMotion,
+            roles: [
+                ThemeResourceRoles.backgroundReduceMotion,
+                ThemeResourceRoles.backgroundStaticBase,
+            ],
             media: stillMedia
         )
         try require(
@@ -1791,12 +1809,12 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
         )
         try require(
             codex.vault.encounteredResourceID,
-            role: ThemeResourceRoles.vaultEncountered,
+            roles: [ThemeResourceRoles.vaultEncountered, ThemeResourceRoles.vaultCard],
             media: stillMedia
         )
         try require(
             codex.vault.selectedResourceID,
-            role: ThemeResourceRoles.vaultSelected,
+            roles: [ThemeResourceRoles.vaultSelected, ThemeResourceRoles.vaultCard],
             media: stillMedia
         )
         for localization in localizations {

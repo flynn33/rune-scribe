@@ -18,7 +18,7 @@ struct SettingsView: View {
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
-                runic: "ᛋᛖᛏᛏᛁᛜᛋ",
+                slot: .settings,
                 subtitle: "Settings",
                 trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() }]
             )

@@ -6,7 +6,7 @@ import RuneScribeContracts
 import XCTest
 
 final class FontCatalogTests: XCTestCase {
-    func testRegistersFixedBundledIdentityThroughInjectedResourceAndRegistrar() async throws {
+    func testBundledIdentityResolvesWithoutCoreResourceAccessOrRegistration() async throws {
         let bytes = try bundledFontData()
         XCTAssertEqual(Data(SHA256.hash(data: bytes)), FontRef.bundled.sha256)
         let registrar = FontRegistrarFake(names: [bytes: "Noto Sans Runic"])
@@ -22,15 +22,17 @@ final class FontCatalogTests: XCTestCase {
         let name = await catalog.registeredPostScriptName(for: .bundled)
         let summary = await catalog.summary(for: .bundled)
         let registered = await registrar.registeredBytes()
-        XCTAssertTrue(isRegistered)
-        XCTAssertEqual(name, "Noto Sans Runic")
+        let resolved = try await catalog.resolve(.bundled)
+        XCTAssertFalse(isRegistered)
+        XCTAssertNil(name)
+        XCTAssertEqual(resolved, "Noto Sans Runic")
         XCTAssertEqual(summary.id, .bundledRuneFont)
         XCTAssertEqual(summary.contentHash, Self.hex(FontRef.bundled.sha256))
-        XCTAssertTrue(summary.isRegistered)
-        XCTAssertEqual(registered, [bytes])
+        XCTAssertFalse(summary.isRegistered)
+        XCTAssertEqual(registered, [])
     }
 
-    func testEnsuringRegisteredBundledFontDoesNotRegisterItAgain() async throws {
+    func testEnsuringBundledFontIsACompatibilityNoOpForCore() async throws {
         let bytes = try bundledFontData()
         let registrar = FontRegistrarFake(names: [bytes: "Noto Sans Runic"])
         let catalog = FontCatalog(
@@ -44,8 +46,8 @@ final class FontCatalogTests: XCTestCase {
 
         let lookups = await registrar.nameLookupBytes()
         let registrations = await registrar.registeredBytes()
-        XCTAssertEqual(lookups, [bytes])
-        XCTAssertEqual(registrations, [bytes])
+        XCTAssertEqual(lookups, [])
+        XCTAssertEqual(registrations, [])
     }
 
     func testCorruptCustomEntryIsQuarantinedWithoutBlockingValidFontRegistration() async throws {
@@ -78,7 +80,7 @@ final class FontCatalogTests: XCTestCase {
         let storedReport = await catalog.registrationReport()
         XCTAssertEqual(report.registeredCustomCount, 1)
         XCTAssertEqual(report.skipped, [.invalidContentAddress])
-        XCTAssertTrue(registered.contains(bundled))
+        XCTAssertFalse(registered.contains(bundled))
         XCTAssertTrue(registered.contains(valid))
         XCTAssertFalse(registered.contains(Data("corrupt".utf8)))
         XCTAssertEqual(storedReport, report)
@@ -322,9 +324,8 @@ final class FontCatalogTests: XCTestCase {
             repository.deleteLastPathComponent()
         }
         let font = repository
-            .appendingPathComponent("RuneScrib")
-            .appendingPathComponent("Resources")
-            .appendingPathComponent("Fonts")
+            .appendingPathComponent("Packages/RuneScribeArchitecture/Sources")
+            .appendingPathComponent("RuneScribeNorseThemeModule/Resources")
             .appendingPathComponent("NotoSansRunic-Regular.ttf")
         return try Data(contentsOf: font)
     }

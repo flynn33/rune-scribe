@@ -5,15 +5,17 @@ import RuneScribeRuntimeCore
 
 public enum NorseBaseThemeResourceError: Error, Equatable, Sendable {
     case resourceByteCountMismatch(resource: String, expected: Int, actual: Int)
+    case invalidIntegrityManifest
     case invalidScriptFallback
     case invalidVisualCatalog
     case invalidLocalizationCatalog
-    case invalidPlaceholderCatalog
-    case placeholderAssetMismatch(String)
+    case invalidProgressionBindings
+    case invalidGeometry(String)
     case resourcePayloadSetMismatch
+    case resourceBudgetExceeded(String)
 }
 
-public struct NorseBaseBundledResourceDescriptor: Equatable, Sendable {
+public struct NorseBaseBundledResourceDescriptor: Equatable, Hashable, Sendable {
     public let resource: ApplicationResource
     public let expectedByteCount: Int
     public let expectedSHA256Hex: String
@@ -23,52 +25,24 @@ public struct NorseBaseBundledResourceDescriptor: Equatable, Sendable {
 }
 
 public enum NorseBaseBundledResourceCatalog {
-    private static let owner = RuneScribeModuleIDs.norseTheme
-
-    public static let moduleManifest = resource("module-manifest", "json")
-    public static let scriptFallback = resource("NorseBaseScriptFallback-v1.0", "json")
-    public static let visualResources = resource("NorseBaseVisualResources-v1.0", "json")
-    public static let localizations = resource("NorseBaseLocalizations-en-US-v1.0", "json")
-    public static let notoSansRunic = resource("NotoSansRunic-Regular", "ttf")
-    public static let placeholderAssets = resource("NorseBasePlaceholderAssets-v1.0", "json")
-
-    public static let scriptFallbackDescriptor = descriptor(
-        scriptFallback,
-        3_012,
-        "b4c6b17c75a29faeed7c51f9c34d975b4c8b10c0522f7c3212b8471e53fd2cac",
-        8 * 1_024
+    public static let moduleManifest = NorseApplicationResourceCatalog.moduleManifest
+    public static let integrityManifest = NorseApplicationResourceCatalog.integrityManifest
+    public static let integrityManifestDescriptor = descriptor(
+        integrityManifest,
+        24_610,
+        "8bfb935ca4d3b82bdee00ce0f21756811e0d34460c9002dfed4c56ce13f1eb0a",
+        32 * 1_024
     )
-    public static let visualResourcesDescriptor = descriptor(
-        visualResources,
-        3_385,
-        "ede2823478bf8afa7838fe3b6e6965d9e76e6eefd2b745e45431abc68aa0fc38",
-        8 * 1_024
-    )
-    public static let localizationsDescriptor = descriptor(
-        localizations,
-        3_799,
-        "5151ffb31d7d3622b067422e959d2054ff095ef35f92ca25b1bf4bfcb1de2949",
-        8 * 1_024
-    )
+    public static let notoSansRunic = NorseApplicationResourceCatalog.notoSansRunic
     public static let notoSansRunicDescriptor = descriptor(
         notoSansRunic,
         55_800,
         "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b",
         8 * 1_024 * 1_024
     )
-    public static let placeholderAssetsDescriptor = descriptor(
-        placeholderAssets,
-        1_019_985,
-        "3a488cfbec99d79f8e776e52e57504c049312d865ba85a336068a2641e8b07d2",
-        2 * 1_024 * 1_024
-    )
 
     public static var all: Set<ApplicationResource> {
-        [moduleManifest, scriptFallback, visualResources, localizations, notoSansRunic, placeholderAssets]
-    }
-
-    private static func resource(_ name: String, _ fileExtension: String) -> ApplicationResource {
-        ApplicationResource(name: name, fileExtension: fileExtension, ownerModuleID: owner)
+        Set([moduleManifest, integrityManifest] + NorseBaseThemeResourceCatalog.definitions.map(\.resource))
     }
 
     private static func descriptor(
@@ -96,49 +70,40 @@ public struct ValidatedNorseBaseTheme: Sendable {
     }
 }
 
+public struct NorseBaseThemeResourceBudgetReport: Equatable, Sendable {
+    public let uniquePhysicalBytes: Int
+    public let staticImageBytes: Int
+    public let fontBytes: Int
+    public let animationBytes: Int
+    public let soundBytes: Int
+    public let largestResourceBytes: Int
+}
+
 public enum NorseBaseThemeResources {
-    public static func loadValidated(
-        using runtimeIO: RuntimeIOClient
-    ) async throws -> ValidatedNorseBaseTheme {
-        let scriptMapping = try await read(
-            NorseBaseBundledResourceCatalog.scriptFallbackDescriptor,
+    public static func loadValidated(using runtimeIO: RuntimeIOClient) async throws -> ValidatedNorseBaseTheme {
+        let manifestData = try await read(
+            NorseBaseBundledResourceCatalog.integrityManifestDescriptor,
             using: runtimeIO
         )
-        let backgroundParameters = try await read(
-            NorseBaseBundledResourceCatalog.visualResourcesDescriptor,
-            using: runtimeIO
-        )
-        let localizations = try await read(
-            NorseBaseBundledResourceCatalog.localizationsDescriptor,
-            using: runtimeIO
-        )
-        let font = try await read(
-            NorseBaseBundledResourceCatalog.notoSansRunicDescriptor,
-            using: runtimeIO
-        )
-        let placeholderCatalog = try await read(
-            NorseBaseBundledResourceCatalog.placeholderAssetsDescriptor,
-            using: runtimeIO
-        )
+        guard NorseProductionManifest.validate(manifestData) else {
+            throw NorseBaseThemeResourceError.invalidIntegrityManifest
+        }
 
-        try validateScriptFallback(scriptMapping)
-        try validateVisualCatalog(backgroundParameters)
-        try validateLocalizationCatalog(localizations)
-        let assets = try validatedPlaceholderAssets(placeholderCatalog)
-
-        var payloads: [ThemeResourceID: Data] = [
-            NorseBaseThemeResourceIDs.font: font,
-            NorseBaseThemeResourceIDs.scriptMapping: scriptMapping,
-            NorseBaseThemeResourceIDs.backgroundParameters: backgroundParameters,
-            NorseBaseThemeResourceIDs.localization: localizations,
-        ]
+        var payloads: [ThemeResourceID: Data] = [:]
+        var physicalPayloads: [ApplicationResource: Data] = [:]
         for definition in NorseBaseThemeResourceCatalog.definitions {
-            guard let assetID = definition.placeholderAssetID else { continue }
-            guard let data = assets[assetID] else {
-                throw NorseBaseThemeResourceError.placeholderAssetMismatch(assetID)
+            let data: Data
+            if let cached = physicalPayloads[definition.resource] {
+                data = cached
+            } else {
+                data = try await read(definition.bundledDescriptor, using: runtimeIO)
+                physicalPayloads[definition.resource] = data
             }
             payloads[definition.id] = data
         }
+
+        try validateSemanticJSON(payloads)
+        _ = try budgetReport(physicalPayloads: physicalPayloads)
 
         let descriptor = NorseBaseThemeDescriptorFactory.discoveryDescriptor
         guard Set(payloads.keys) == Set(descriptor.resources.map(\.id)),
@@ -147,6 +112,51 @@ public enum NorseBaseThemeResources {
             throw NorseBaseThemeResourceError.resourcePayloadSetMismatch
         }
         return ValidatedNorseBaseTheme(descriptor: descriptor, resourcePayloads: payloads)
+    }
+
+    public static func budgetReport(
+        physicalPayloads: [ApplicationResource: Data]
+    ) throws -> NorseBaseThemeResourceBudgetReport {
+        let uniqueDefinitions = Dictionary(
+            NorseBaseThemeResourceCatalog.definitions.map { ($0.resource, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        let unique = physicalPayloads.compactMap { resource, data in
+            uniqueDefinitions[resource].map { ($0, data.count) }
+        }
+        let staticBytes = unique.filter { [.png, .heif, .pdf].contains($0.0.mediaType) }
+            .reduce(0) { $0 + $1.1 }
+        let fontBytes = unique.filter { [.ttf, .otf].contains($0.0.mediaType) }
+            .reduce(0) { $0 + $1.1 }
+        let animationBytes = unique.filter { $0.0.role.rawValue == "unlock-animation-cue" }
+            .reduce(0) { $0 + $1.1 }
+        let soundBytes = unique.filter { [.wav, .caf, .m4a].contains($0.0.mediaType) }
+            .reduce(0) { $0 + $1.1 }
+        let total = unique.reduce(0) { $0 + $1.1 }
+        let largest = unique.map(\.1).max() ?? 0
+        guard staticBytes <= 32 * 1_024 * 1_024 else {
+            throw NorseBaseThemeResourceError.resourceBudgetExceeded("static-images")
+        }
+        guard fontBytes <= 16 * 1_024 * 1_024 else {
+            throw NorseBaseThemeResourceError.resourceBudgetExceeded("fonts")
+        }
+        guard animationBytes <= 16 * 1_024 * 1_024 else {
+            throw NorseBaseThemeResourceError.resourceBudgetExceeded("animations")
+        }
+        guard soundBytes <= 8 * 1_024 * 1_024 else {
+            throw NorseBaseThemeResourceError.resourceBudgetExceeded("sounds")
+        }
+        guard largest <= 8 * 1_024 * 1_024, total <= 64 * 1_024 * 1_024 else {
+            throw NorseBaseThemeResourceError.resourceBudgetExceeded("complete-theme")
+        }
+        return NorseBaseThemeResourceBudgetReport(
+            uniquePhysicalBytes: total,
+            staticImageBytes: staticBytes,
+            fontBytes: fontBytes,
+            animationBytes: animationBytes,
+            soundBytes: soundBytes,
+            largestResourceBytes: largest
+        )
     }
 
     private static func read(
@@ -168,167 +178,106 @@ public enum NorseBaseThemeResources {
         return data
     }
 
-    private static func validateScriptFallback(_ data: Data) throws {
-        struct ScriptFallback: Decodable {
-            struct FontReference: Decodable {
-                let id: String
-                let version: Int
-                let postScriptName: String
-            }
-            struct Glyph: Decodable {
-                let canonicalValue: Int
-                let glyphID: String
-                let textToken: String
-            }
-            let schemaVersion: String
-            let scriptID: String
-            let fontReference: FontReference
-            let portability: String
-            let glyphs: [Glyph]
-        }
+    private static func validateSemanticJSON(_ payloads: [ThemeResourceID: Data]) throws {
+        guard let mapping = payloads[NorseBaseThemeResourceIDs.scriptMapping],
+              let mappingRoot = try? JSONSerialization.jsonObject(with: mapping) as? [String: Any],
+              mappingRoot["schemaVersion"] as? String == "1.0",
+              mappingRoot["scriptID"] as? String == "script.base-runes",
+              let symbols = mappingRoot["glyphs"] as? [[String: Any]],
+              symbols.count == ThemeCanonicalSymbolSet.symbolCount
+        else { throw NorseBaseThemeResourceError.invalidScriptFallback }
 
-        let expectedGlyphIDs = (0 ..< ThemeCanonicalSymbolSet.symbolCount).map {
-            String(format: "glyph.base-runes.%02d", $0)
-        }
-        guard let value = try? JSONDecoder().decode(ScriptFallback.self, from: data),
-              value.schemaVersion == "1.0",
-              value.scriptID == "script.base-runes",
-              value.fontReference.id == "noto-sans-runic",
-              value.fontReference.version == 1,
-              value.fontReference.postScriptName == "NotoSansRunic-Regular",
-              value.portability == "unicode-portable",
-              value.glyphs.count == ThemeCanonicalSymbolSet.symbolCount,
-              value.glyphs.map(\.canonicalValue) == Array(0 ..< ThemeCanonicalSymbolSet.symbolCount),
-              value.glyphs.map(\.glyphID) == expectedGlyphIDs,
-              value.glyphs.map(\.textToken) == ThemeCanonicalSymbolSet.transportTokens
-        else {
-            throw NorseBaseThemeResourceError.invalidScriptFallback
-        }
-    }
-
-    private static func validateVisualCatalog(_ data: Data) throws {
-        guard let object = try? JSONSerialization.jsonObject(with: data),
-              let root = object as? [String: Any],
-              root["schemaVersion"] as? String == "1.0",
-              root["purpose"] as? String == "norse-base-conformance-presentation",
-              let palette = root["semanticPalette"] as? [String: Any],
-              palette["backgroundPrimary"] as? String == "#080A1E",
-              palette["accentPrimary"] as? String == "#D4971A",
-              let parameters = root["rendererParameters"] as? [String: Any],
-              parameters["rendererID"] as? String == "fragment-rune-background",
-              let relics = root["relics"] as? [[String: Any]], relics.count == 3,
-              let seals = root["seals"] as? [[String: Any]], seals.count == 6
+        guard let palette = payloads[NorseBaseThemeResourceIDs.palette],
+              let paletteRoot = try? JSONSerialization.jsonObject(with: palette) as? [String: Any],
+              paletteRoot["codexID"] as? String == "codex.norse",
+              let tokens = paletteRoot["tokens"] as? [String: Any],
+              tokens.count >= 13,
+              let headings = payloads[NorseBaseThemeResourceIDs.headings],
+              let headingRoot = try? JSONSerialization.jsonObject(with: headings) as? [String: Any],
+              let slots = headingRoot["decorativeHeadingSlots"] as? [String: Any],
+              slots.count == 13
         else { throw NorseBaseThemeResourceError.invalidVisualCatalog }
-    }
 
-    private static func validateLocalizationCatalog(_ data: Data) throws {
-        guard let object = try? JSONSerialization.jsonObject(with: data),
-              let root = object as? [String: Any],
-              root["schemaVersion"] as? String == "1.0",
-              root["locale"] as? String == "en-US",
-              let strings = root["strings"] as? [String: Any], !strings.isEmpty
+        guard let localization = payloads[NorseBaseThemeResourceIDs.localization],
+              let localizationRoot = try? JSONSerialization.jsonObject(with: localization) as? [String: Any],
+              localizationRoot["locale"] as? String == "en"
         else { throw NorseBaseThemeResourceError.invalidLocalizationCatalog }
-    }
 
-    private static func validatedPlaceholderAssets(_ data: Data) throws -> [String: Data] {
-        struct PlaceholderCatalog: Decodable {
-            struct Asset: Decodable {
-                struct PixelSize: Decodable {
-                    let width: Int
-                    let height: Int
-                }
-                let id: String
-                let mediaType: String
-                let byteLength: Int
-                let sha256: String
-                let pixelSize: PixelSize?
-                let data: Data
-            }
-            let schemaVersion: String
-            let generator: String
-            let assets: [Asset]
-        }
+        guard let bindings = payloads[NorseBaseThemeResourceIDs.progressionBindings],
+              let bindingRoot = try? JSONSerialization.jsonObject(with: bindings) as? [String: Any],
+              let grants = bindingRoot["grants"] as? [[String: Any]],
+              Set(grants.compactMap { $0["contentID"] as? String }).isSuperset(of: NorseProgressionBindingCatalog.contentIDs),
+              grants.allSatisfy({ ($0["trigger"] as? String)?.isEmpty == false })
+        else { throw NorseBaseThemeResourceError.invalidProgressionBindings }
 
-        guard let catalog = try? JSONDecoder().decode(PlaceholderCatalog.self, from: data),
-              catalog.schemaVersion == "1.0",
-              catalog.generator == "make_norse_base_placeholders.swift",
-              catalog.assets.count == NorseBasePlaceholderAssetCatalog.definitions.count
-        else { throw NorseBaseThemeResourceError.invalidPlaceholderCatalog }
-
-        var result: [String: Data] = [:]
-        for asset in catalog.assets {
-            guard result[asset.id] == nil,
-                  let expected = NorseBasePlaceholderAssetCatalog.byID[asset.id],
-                  asset.mediaType == expected.mediaType.rawValue,
-                  asset.byteLength == expected.byteCount,
-                  asset.data.count == expected.byteCount,
-                  asset.sha256 == expected.sha256Hex,
-                  sha256Hex(asset.data) == expected.sha256Hex,
-                  asset.pixelSize?.width == expected.pixelWidth,
-                  asset.pixelSize?.height == expected.pixelHeight
-            else { throw NorseBaseThemeResourceError.placeholderAssetMismatch(asset.id) }
-            result[asset.id] = asset.data
+        for (artifactID, geometryID) in NorseBaseThemeResourceIDs.geometryResourceIDs {
+            guard let geometry = payloads[geometryID],
+                  let root = try? JSONSerialization.jsonObject(with: geometry) as? [String: Any],
+                  root["artifactID"] as? String == artifactID.rawValue,
+                  let area = root["normalizedInscriptionSafeArea"] as? [String: Any],
+                  let x = area["x"] as? Double,
+                  let y = area["y"] as? Double,
+                  let width = area["width"] as? Double,
+                  let height = area["height"] as? Double,
+                  x >= 0, y >= 0, width > 0, height > 0,
+                  x + width <= 1, y + height <= 1
+            else { throw NorseBaseThemeResourceError.invalidGeometry(artifactID.rawValue) }
         }
-        guard Set(result.keys) == Set(NorseBasePlaceholderAssetCatalog.byID.keys) else {
-            throw NorseBaseThemeResourceError.invalidPlaceholderCatalog
-        }
-        return result
     }
 }
 
 enum NorseBaseThemeResourceIDs {
-    static let font = id("resource.norse.font.noto-sans-runic")
-    static let scriptMapping = id("resource.norse.script.base-runes.mapping")
-    static let scriptFallback = id("resource.norse.script.base-runes.static")
-    static let localization = id("resource.norse.localization.en-us")
-    static let backgroundStatic = id("resource.norse.background.static")
-    static let backgroundReduceMotion = id("resource.norse.background.reduce-motion")
-    static let backgroundHighContrast = id("resource.norse.background.high-contrast")
-    static let backgroundParameters = id("resource.norse.background.parameters")
-    static let vaultCard = id("resource.norse.vault.card")
-    static let vaultLocked = id("resource.norse.vault.locked")
-    static let vaultEncountered = id("resource.norse.vault.encountered")
-    static let vaultSelected = id("resource.norse.vault.selected")
+    static let font = id("resource.font.norse.noto-sans-runic")
+    static let scriptMapping = id("resource.script.norse.mapping")
+    static let scriptFallback = id("resource.script.norse.specimen")
+    static let palette = id("resource.palette.norse.semantic")
+    static let headings = id("resource.headings.norse")
+    static let localization = id("resource.localization.norse.en")
+    static let progressionBindings = id("resource.progression-bindings.norse")
+    static let backgroundStatic = id("resource.background.norse.forge.static")
+    static let backgroundReduceMotion = backgroundStatic
+    static let backgroundHighContrast = id("resource.background.norse.high-contrast")
+    static let backgroundParameters = id("resource.background.norse.profile")
+    static let vaultCard = id("resource.codex-card.norse")
+    static let vaultLocked = id("resource.codex-silhouette.norse")
+    static let vaultEncountered = vaultCard
+    static let vaultSelected = vaultCard
+    static let frameVector = id("resource.frame.norse.carved-knotwork.vector")
+    static let frameStatic = id("resource.frame.norse.carved-knotwork.static-fallback")
+    static let crestVector = id("resource.crest.norse.forge-master.vector")
+    static let crestStatic = id("resource.crest.norse.forge-master.static-fallback")
 
-    static let relicResourceIDs: [ArtifactID: RelicResourceIDs] = [
-        artifactID("relic.norse.runestone.weathered"): RelicResourceIDs(
-            primary: id("resource.norse.relic.weathered.primary"),
-            thumbnail: id("resource.norse.relic.weathered.thumbnail"),
-            staticFallback: id("resource.norse.relic.weathered.static"),
-            highContrast: id("resource.norse.relic.weathered.high-contrast")
-        ),
-        artifactID("relic.norse.raven-medallion"): RelicResourceIDs(
-            primary: id("resource.norse.relic.raven-medallion.primary"),
-            thumbnail: id("resource.norse.relic.raven-medallion.thumbnail"),
-            staticFallback: id("resource.norse.relic.raven-medallion.static"),
-            highContrast: id("resource.norse.relic.raven-medallion.high-contrast")
-        ),
-        artifactID("relic.norse.sealed-parchment"): RelicResourceIDs(
-            primary: id("resource.norse.relic.sealed-parchment.primary"),
-            thumbnail: id("resource.norse.relic.sealed-parchment.thumbnail"),
-            staticFallback: id("resource.norse.relic.sealed-parchment.static"),
-            highContrast: id("resource.norse.relic.sealed-parchment.high-contrast")
-        ),
-    ]
+    static let relicResourceIDs: [ArtifactID: RelicResourceIDs] = Dictionary(
+        uniqueKeysWithValues: NorseProgressionBindingCatalog.relicIDs.map { artifact in
+            let suffix = artifact.rawValue.replacingOccurrences(of: "relic.norse.", with: "")
+            return (artifact, RelicResourceIDs(
+                primary: id("resource.relic.norse.\(suffix).art"),
+                thumbnail: id("resource.relic.norse.\(suffix).art"),
+                staticFallback: id("resource.share-fallback.norse.\(suffix)"),
+                highContrast: id("resource.share-fallback.norse.\(suffix)")
+            ))
+        }
+    )
 
-    static let sealResourceIDs: [ArtifactID: SealResourceIDs] = [
-        artifactID("seal.norse.knotwork"): sealResources("knotwork"),
-        artifactID("seal.norse.forge-flame"): sealResources("forge-flame"),
-        artifactID("seal.norse.raven"): sealResources("raven"),
-        artifactID("seal.norse.longship"): sealResources("longship"),
-        artifactID("seal.norse.forge-hammer"): sealResources("forge-hammer"),
-        artifactID("seal.norse.echo-rune"): sealResources("echo-rune"),
-    ]
+    static let sealResourceIDs: [ArtifactID: SealResourceIDs] = Dictionary(
+        uniqueKeysWithValues: NorseProgressionBindingCatalog.sealIDs.map { artifact in
+            let suffix = artifact.rawValue.replacingOccurrences(of: "seal.norse.", with: "")
+            return (artifact, SealResourceIDs(
+                vector: id("resource.seal.norse.\(suffix).vector"),
+                monochrome: id("resource.seal.norse.\(suffix).thumbnail"),
+                thumbnail: id("resource.seal.norse.\(suffix).thumbnail")
+            ))
+        }
+    )
 
-    private static func sealResources(_ name: String) -> SealResourceIDs {
-        SealResourceIDs(
-            vector: id("resource.norse.seal.\(name).vector"),
-            monochrome: id("resource.norse.seal.\(name).monochrome"),
-            thumbnail: id("resource.norse.seal.\(name).thumbnail")
-        )
-    }
-    private static func id(_ value: String) -> ThemeResourceID { ThemeResourceID(rawValue: value)! }
-    private static func artifactID(_ value: String) -> ArtifactID { ArtifactID(rawValue: value)! }
+    static let geometryResourceIDs: [ArtifactID: ThemeResourceID] = Dictionary(
+        uniqueKeysWithValues: NorseProgressionBindingCatalog.relicIDs.map { artifact in
+            let suffix = artifact.rawValue.replacingOccurrences(of: "relic.norse.", with: "")
+            return (artifact, id("resource.relic.norse.\(suffix).geometry"))
+        }
+    )
+
+    fileprivate static func id(_ value: String) -> ThemeResourceID { ThemeResourceID(rawValue: value)! }
 }
 
 struct RelicResourceIDs: Sendable {
@@ -344,73 +293,26 @@ struct SealResourceIDs: Sendable {
     let thumbnail: ThemeResourceID
 }
 
-struct NorseBasePlaceholderAssetDefinition: Sendable {
-    let id: String
-    let mediaType: ThemeResourceMediaType
-    let byteCount: Int
-    let sha256Hex: String
-    let pixelWidth: Int?
-    let pixelHeight: Int?
+enum NorseProgressionBindingCatalog {
+    static let relicIDs = [
+        "relic.norse.runestone.weathered", "relic.norse.raven-medallion",
+        "relic.norse.ironbound-shield", "relic.norse.sealed-parchment",
+        "relic.norse.runestone.blackstone", "relic.norse.runestone.frozen",
+    ].map { ArtifactID(rawValue: $0)! }
+    static let sealIDs = [
+        "seal.norse.knotwork", "seal.norse.forge-flame", "seal.norse.raven",
+        "seal.norse.longship", "seal.norse.forge-hammer", "seal.norse.echo-rune",
+    ].map { ArtifactID(rawValue: $0)! }
+    static let contentIDs = Set(
+        ["script.base-runes", "frame.norse.carved-knotwork", "crest.norse.forge-master"]
+            + relicIDs.map(\.rawValue) + sealIDs.map(\.rawValue)
+    )
 }
 
-enum NorseBasePlaceholderAssetCatalog {
-    static let definitions: [NorseBasePlaceholderAssetDefinition] = [
-        asset("background-0", .png, 176_255, "1c4c4d9411b03bc4daad351b0406f13584d86ef255492b460cb591ab4c27426a", 1_024, 1_024),
-        asset("background-1", .png, 166_171, "cca5d27b9112c32f934ad7344552431c7d6d9ed99697e531d6278d3d35f17bc3", 1_024, 1_024),
-        asset("background-2", .png, 22_216, "1079da5d3ead27f640bd4a849aaa77fbdcf681edf1d3d59c77a2ebf882b55f45", 1_024, 1_024),
-        asset("relic-raven-medallion-high-contrast", .png, 41_289, "92d0eebeccd88b0dda83cf885e036ea1453b77abbd7d352fdeb7193ab52103f8", 1_024, 1_024),
-        asset("relic-raven-medallion-master", .png, 55_498, "c91bbfc32d840948d7280433df8af699242982a5b5c35b376267b9b5a262cef4", 1_024, 1_024),
-        asset("relic-raven-medallion-thumbnail", .png, 9_843, "5e3da19c554ee981977812cc7cbf12b680956ffbc002892685f7893bdb87b429", 256, 256),
-        asset("relic-sealed-parchment-high-contrast", .png, 26_064, "ee00979ee19a779beefe5e7c649e1abb4288b207a6922d61e347404a21b05843", 1_024, 1_024),
-        asset("relic-sealed-parchment-master", .png, 29_339, "6bf6c6a40707e06c270be5fbc16da538030bab12ec724ba1aa991bc7f01b1489", 1_024, 1_024),
-        asset("relic-sealed-parchment-thumbnail", .png, 4_152, "51fe0e97a5de4bab0a4c41581a6945599b20c0684497f3fad1d211eeb21666a6", 256, 256),
-        asset("relic-weathered-high-contrast", .png, 37_513, "a8cb314b6e9ec39ca0850d28e00633ffec08148270172ce410adac5980935972", 1_024, 1_024),
-        asset("relic-weathered-master", .png, 50_401, "840cbe21bae98e4386a3dfee261f302c8fee28f43f414a4c9f05327638ce6e0c", 1_024, 1_024),
-        asset("relic-weathered-thumbnail", .png, 7_903, "7039ab2ab91e0b2025dd5044af1494a1e4d3e9c0c95ab89fe2d421f213fd53a3", 256, 256),
-        asset("script-fallback", .png, 23_176, "f437c7e7b30c761acd5a4014418d0ae9bb00bcd894c1da9e341ba1d2f2dd7878", 1_024, 256),
-        asset("seal-echo-rune-raster", .png, 9_787, "5b7f1cc4a09544f19092041a618a9b7c4818f06d553ac257d0d0fee7bc4fa171", 256, 256),
-        asset("seal-echo-rune-vector", .pdf, 957, "45a33efa0ccca8e55998c10616d0025fd5b5c0439df08aaf7a6831cbe933f361"),
-        asset("seal-forge-flame-raster", .png, 9_121, "784324d8e49d2aa4affb4b1480bbe69187303e920dbafc2917f4f3440a270182", 256, 256),
-        asset("seal-forge-flame-vector", .pdf, 809, "6516959bcfbff31598c340106089bb6a929e2eb6bde3b5f9a950156cd3ef52cc"),
-        asset("seal-forge-hammer-raster", .png, 12_276, "aca95225a4eb89c95ac1d3e7e135af158961e53df87149e6f4e7642c252cd8f8", 256, 256),
-        asset("seal-forge-hammer-vector", .pdf, 920, "ac3b7a446fc23dd74b016a8520a894a0af581755186c463f57dd1cdf6f0c88fb"),
-        asset("seal-knotwork-raster", .png, 10_187, "91f04aa58485eecc7c4ff433659024ddfb9dd6cab8d6b6b089820bdbc694f5cc", 256, 256),
-        asset("seal-knotwork-vector", .pdf, 770, "2d43815babc140ab34fa62402ec96d7aa7cd6b83f01720093b92c37c1a8535b0"),
-        asset("seal-longship-raster", .png, 10_846, "b28e6528f7f6662500398481cc57c731a35ea7b4cbee71bc803612f94fb6d67a", 256, 256),
-        asset("seal-longship-vector", .pdf, 882, "8d547e178929d9936acfe7695b8352cda83d6226a75132a9e0a317e29dcfca79"),
-        asset("seal-raven-raster", .png, 11_261, "edda9e79bb9415f0deeb7fc3c32a9932c03ad9ffb8a8c3fb0bee8225e23ad2af", 256, 256),
-        asset("seal-raven-vector", .pdf, 845, "512b9811407af74f2e1261741e75e0c6f92938f890100d1e2a4ac2c251408234"),
-        asset("vault-0", .png, 10_100, "5ff6cbef00ea56e69c16285d14d4e6a53d4cfff272de05f52f0aba79d8748d3a", 512, 320),
-        asset("vault-1", .png, 8_979, "2fd60bd5ca82bd148cadef6231f86319bd435041e0b501e58b26031c56df09a4", 512, 320),
-        asset("vault-2", .png, 12_035, "c5c2d4c9e1440799cdeee7570508096606a1f321e31d114bd3f104e301620891", 512, 320),
-        asset("vault-3", .png, 9_264, "fb32c94b68d0e0ac41c46428c0e7fa47c86bdc68936ed07936158706c65579f8", 512, 320),
-    ]
-
-    static let byID = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
-
-    private static func asset(
-        _ id: String,
-        _ mediaType: ThemeResourceMediaType,
-        _ byteCount: Int,
-        _ sha256Hex: String,
-        _ pixelWidth: Int? = nil,
-        _ pixelHeight: Int? = nil
-    ) -> NorseBasePlaceholderAssetDefinition {
-        NorseBasePlaceholderAssetDefinition(
-            id: id,
-            mediaType: mediaType,
-            byteCount: byteCount,
-            sha256Hex: sha256Hex,
-            pixelWidth: pixelWidth,
-            pixelHeight: pixelHeight
-        )
-    }
-}
-
-struct NorseBaseThemeResourceDefinition: Sendable {
-    enum Rights: Sendable { case font, presentation }
-
+struct NorseBaseThemeResourceDefinition: Equatable, Sendable {
+    enum Rights: Equatable, Sendable { case font, presentation }
     let id: ThemeResourceID
+    let resource: ApplicationResource
     let role: ThemeResourceRoleID
     let mediaType: ThemeResourceMediaType
     let requirement: ThemeResourceRequirement
@@ -419,140 +321,30 @@ struct NorseBaseThemeResourceDefinition: Sendable {
     let pixelWidth: Int?
     let pixelHeight: Int?
     let rights: Rights
-    let placeholderAssetID: String?
+
+    var bundledDescriptor: NorseBaseBundledResourceDescriptor {
+        NorseBaseBundledResourceDescriptor(
+            resource: resource,
+            expectedByteCount: byteCount,
+            expectedSHA256Hex: sha256Hex,
+            maximumByteCount: max(byteCount, 1) + 1
+        )
+    }
 }
 
 enum NorseBaseThemeResourceCatalog {
     static let definitions: [NorseBaseThemeResourceDefinition] = {
-        var result = [
-            bundled(
-                NorseBaseThemeResourceIDs.font,
-                ThemeResourceRoles.scriptFont,
-                .ttf,
-                NorseBaseBundledResourceCatalog.notoSansRunicDescriptor,
-                rights: .font
-            ),
-            bundled(
-                NorseBaseThemeResourceIDs.scriptMapping,
-                role("script.mapping"),
-                .json,
-                NorseBaseBundledResourceCatalog.scriptFallbackDescriptor
-            ),
-            bundled(
-                NorseBaseThemeResourceIDs.backgroundParameters,
-                ThemeResourceRoles.backgroundRendererParameters,
-                .json,
-                NorseBaseBundledResourceCatalog.visualResourcesDescriptor
-            ),
-            bundled(
-                NorseBaseThemeResourceIDs.localization,
-                ThemeResourceRoles.localizationStrings,
-                .json,
-                NorseBaseBundledResourceCatalog.localizationsDescriptor
-            ),
-            placeholder(
-                NorseBaseThemeResourceIDs.scriptFallback,
-                ThemeResourceRoles.scriptStaticFallback,
-                "script-fallback"
-            ),
-            placeholder(
-                NorseBaseThemeResourceIDs.backgroundStatic,
-                ThemeResourceRoles.backgroundStaticBase,
-                "background-0"
-            ),
-            placeholder(
-                NorseBaseThemeResourceIDs.backgroundReduceMotion,
-                ThemeResourceRoles.backgroundReduceMotion,
-                "background-1"
-            ),
-            placeholder(
-                NorseBaseThemeResourceIDs.backgroundHighContrast,
-                ThemeResourceRoles.backgroundHighContrast,
-                "background-2"
-            ),
-            placeholder(NorseBaseThemeResourceIDs.vaultCard, ThemeResourceRoles.vaultCard, "vault-0"),
-            placeholder(
-                NorseBaseThemeResourceIDs.vaultLocked,
-                ThemeResourceRoles.vaultLockedSilhouette,
-                "vault-1"
-            ),
-            placeholder(
-                NorseBaseThemeResourceIDs.vaultEncountered,
-                ThemeResourceRoles.vaultEncountered,
-                "vault-2"
-            ),
-            placeholder(
-                NorseBaseThemeResourceIDs.vaultSelected,
-                ThemeResourceRoles.vaultSelected,
-                "vault-3"
-            ),
-        ]
-
-        let relicAssets: [(ArtifactID, String)] = [
-            (ArtifactID(rawValue: "relic.norse.runestone.weathered")!, "relic-weathered"),
-            (ArtifactID(rawValue: "relic.norse.raven-medallion")!, "relic-raven-medallion"),
-            (ArtifactID(rawValue: "relic.norse.sealed-parchment")!, "relic-sealed-parchment"),
-        ]
-        for (artifactID, assetPrefix) in relicAssets {
-            let resourceIDs = NorseBaseThemeResourceIDs.relicResourceIDs[artifactID]!
-            result.append(contentsOf: [
-                placeholder(resourceIDs.primary, ThemeResourceRoles.relicMaster, "\(assetPrefix)-master"),
-                placeholder(resourceIDs.thumbnail, ThemeResourceRoles.relicThumbnail, "\(assetPrefix)-thumbnail"),
-                placeholder(
-                    resourceIDs.staticFallback,
-                    ThemeResourceRoles.relicStaticShareFallback,
-                    "\(assetPrefix)-master"
-                ),
-                placeholder(
-                    resourceIDs.highContrast,
-                    ThemeResourceRoles.relicHighContrast,
-                    "\(assetPrefix)-high-contrast"
-                ),
-            ])
-        }
-
-        let sealAssets: [(ArtifactID, String)] = [
-            (ArtifactID(rawValue: "seal.norse.knotwork")!, "seal-knotwork"),
-            (ArtifactID(rawValue: "seal.norse.forge-flame")!, "seal-forge-flame"),
-            (ArtifactID(rawValue: "seal.norse.raven")!, "seal-raven"),
-            (ArtifactID(rawValue: "seal.norse.longship")!, "seal-longship"),
-            (ArtifactID(rawValue: "seal.norse.forge-hammer")!, "seal-forge-hammer"),
-            (ArtifactID(rawValue: "seal.norse.echo-rune")!, "seal-echo-rune"),
-        ]
-        for (artifactID, assetPrefix) in sealAssets {
-            let resourceIDs = NorseBaseThemeResourceIDs.sealResourceIDs[artifactID]!
-            result.append(contentsOf: [
-                placeholder(
-                    resourceIDs.vector,
-                    ThemeResourceRoles.sealVectorMaster,
-                    "\(assetPrefix)-vector"
-                ),
-                placeholder(
-                    resourceIDs.monochrome,
-                    ThemeResourceRoles.sealMonochromeFallback,
-                    "\(assetPrefix)-raster"
-                ),
-                placeholder(
-                    resourceIDs.thumbnail,
-                    ThemeResourceRoles.sealThumbnail,
-                    "\(assetPrefix)-raster"
-                ),
-            ])
-        }
-        return result.sorted { $0.id.rawValue < $1.id.rawValue }
+        let values = NorseProductionManifest.definitions + supplementalDefinitions
+        precondition(Set(values.map(\.id)).count == values.count, "Duplicate Norse resource handle")
+        return values.sorted { $0.id.rawValue < $1.id.rawValue }
     }()
 
-    static func references(
-        fontRightsID: ThemeProvenanceID,
-        presentationRightsID: ThemeProvenanceID
-    ) throws -> [ThemeResourceReference] {
+    static func references(fontRightsID: ThemeProvenanceID, presentationRightsID: ThemeProvenanceID) throws -> [ThemeResourceReference] {
         try definitions.map { definition in
             let pixelSize: ThemePixelSize?
             if let width = definition.pixelWidth, let height = definition.pixelHeight {
                 pixelSize = try ThemePixelSize(width: UInt32(width), height: UInt32(height))
-            } else {
-                pixelSize = nil
-            }
+            } else { pixelSize = nil }
             return try ThemeResourceReference(
                 id: definition.id,
                 role: definition.role,
@@ -569,57 +361,208 @@ enum NorseBaseThemeResourceCatalog {
     }
 
     static func validates(_ payloads: [ThemeResourceID: Data]) -> Bool {
-        guard Set(payloads.keys) == Set(definitions.map(\.id)) else { return false }
-        return definitions.allSatisfy { definition in
+        Set(payloads.keys) == Set(definitions.map(\.id)) && definitions.allSatisfy { definition in
             guard let data = payloads[definition.id] else { return false }
             return data.count == definition.byteCount && sha256Hex(data) == definition.sha256Hex
         }
     }
 
-    private static func bundled(
-        _ id: ThemeResourceID,
-        _ role: ThemeResourceRoleID,
-        _ mediaType: ThemeResourceMediaType,
-        _ bundled: NorseBaseBundledResourceDescriptor,
-        rights: NorseBaseThemeResourceDefinition.Rights = .presentation
-    ) -> NorseBaseThemeResourceDefinition {
-        NorseBaseThemeResourceDefinition(
-            id: id,
-            role: role,
-            mediaType: mediaType,
-            requirement: .required,
-            sha256Hex: bundled.expectedSHA256Hex,
-            byteCount: bundled.expectedByteCount,
-            pixelWidth: nil,
-            pixelHeight: nil,
-            rights: rights,
-            placeholderAssetID: nil
-        )
+    private static let supplementalDefinitions: [NorseBaseThemeResourceDefinition] = {
+        var result: [NorseBaseThemeResourceDefinition] = []
+        let sealPNGs: [(String, Int, String)] = [
+            ("echo-rune", 159_691, "f98d9f2de501b78586363c3abe0b4949142bdd46523bc2e7c6a4e5d95da6aa36"),
+            ("forge-flame", 145_780, "431f95199fd660c29d73d381236b7570bd70da380bf9cdbbd5ffefdfb89d9d2d"),
+            ("forge-hammer", 154_174, "5734f5802b5af981ea8691fb720e1e258f32eaf5e7cd38eb447c86fd0f98b126"),
+            ("knotwork", 163_306, "b08af25f444603ef8ae702d0317db5eb8dc072e518fb5a0d3ab296166e0091b6"),
+            ("longship", 155_920, "0dd5edbb301588219bbc4d12a07d24e558f47db794ee5e9150f650be1b0e769f"),
+            ("raven", 152_556, "8ffb0a2bd84838e6142e16130dff93277929cc442629edda2af7570537789448"),
+        ]
+        for (name, bytes, hash) in sealPNGs {
+            let thumbnailID = NorseBaseThemeResourceIDs.id("resource.seal.norse.\(name).thumbnail")
+            let physical = definition(thumbnailID, ThemeResourceRoles.sealThumbnail, .png, bytes, hash, 1_024, 1_024)
+            result.append(physical)
+        }
+        result.append(definition(NorseBaseThemeResourceIDs.frameStatic, ThemeResourceRoles.frameStaticFallback, .png, 120_537, "632dc82de68d83a8ecec315d7ca7bbda54bbf242b3d5afed3691af0af0d4d36a", 1_600, 1_200))
+        result.append(definition(NorseBaseThemeResourceIDs.crestStatic, ThemeResourceRoles.crestStaticFallback, .png, 123_379, "50a2620294a19c3fa6be7129e1d4973c90ee7abea3fe71ce5640f60ca4a6635f", 1_024, 1_024))
+        return result
+    }()
+
+    private static func definition(_ id: ThemeResourceID, _ role: ThemeResourceRoleID, _ media: ThemeResourceMediaType, _ bytes: Int, _ hash: String, _ width: Int? = nil, _ height: Int? = nil) -> NorseBaseThemeResourceDefinition {
+        guard let resource = NorseApplicationResourceCatalog.resourcesByHandle[id.rawValue] else {
+            preconditionFailure("Missing canonical Norse application resource for \(id.rawValue)")
+        }
+        return NorseBaseThemeResourceDefinition(id: id, resource: resource, role: role, mediaType: media, requirement: .required, sha256Hex: hash, byteCount: bytes, pixelWidth: width, pixelHeight: height, rights: .presentation)
+    }
+}
+
+private enum NorseProductionManifest {
+    struct Manifest: Decodable { let resources: [Resource] }
+    struct Resource: Decodable {
+        struct Dimensions: Decodable { let width: Int; let height: Int }
+        let resourceHandle: String
+        let semanticRole: String
+        let mediaType: String
+        let byteLength: Int
+        let sha256: String
+        let requiredForActiveContent: Bool
+        let dimensions: Dimensions?
     }
 
-    private static func placeholder(
-        _ id: ThemeResourceID,
-        _ role: ThemeResourceRoleID,
-        _ assetID: String
-    ) -> NorseBaseThemeResourceDefinition {
-        let asset = NorseBasePlaceholderAssetCatalog.byID[assetID]!
+    private static let frozenResources: [Resource] = [
+        seed("resource.relic.norse.runestone.weathered.art", "relic-art", "image/png", 2_100_882, "9c235fd40b841e16d35be138cf1f46a5061dd8eee79208e8982208b46d647da9", true, 1_600, 1_200),
+        seed("resource.relic.norse.runestone.weathered.geometry", "relic-geometry", "application/json", 714, "c2ac57230859c86055a58d8c46cda281bc96dc8166954f47b6bdd9276e0fb9e1", true),
+        seed("resource.share-fallback.norse.runestone.weathered", "static-share-fallback", "image/png", 2_444_821, "5d732b386160b227ec933a4e070ae85227f13b7dccf0dc2a22f47809c08d4c1b", true, 1_600, 1_200),
+        seed("resource.relic.norse.raven-medallion.art", "relic-art", "image/png", 1_602_486, "460bb7db51c8734b4e6a0807fbe1e76303209a791ef8b5e4b4c5c687338628e7", true, 1_200, 1_200),
+        seed("resource.relic.norse.raven-medallion.geometry", "relic-geometry", "application/json", 578, "ea0037cc3fc2761134e1f1bd2b8e3d0bfc077e1e7ac37910921ba07d5336f36b", true),
+        seed("resource.share-fallback.norse.raven-medallion", "static-share-fallback", "image/png", 2_498_330, "22f0891d8bff407e5b497e1edba3936076e8779e5007d5366bcb7bee13ebf84d", true, 1_600, 1_200),
+        seed("resource.relic.norse.ironbound-shield.art", "relic-art", "image/png", 1_664_406, "f10b581420cfd660a3439dbe8ad9c54d0b3c85eeb9c5162ca3f59a48124bf566", true, 1_200, 1_200),
+        seed("resource.relic.norse.ironbound-shield.geometry", "relic-geometry", "application/json", 684, "b4877308e848f256f3b76e46eed115f215c0166446a0895292418a53759f0f5c", true),
+        seed("resource.share-fallback.norse.ironbound-shield", "static-share-fallback", "image/png", 2_557_201, "14388717a88b3a0a980bb27a16fb030605c071997cd821ee71a450f0c8038dfa", true, 1_600, 1_200),
+        seed("resource.relic.norse.sealed-parchment.art", "relic-art", "image/png", 1_772_507, "f15b28ab19e84e1164cf1f3b605d931ab49ccd88b40e3b759226a15e4531ac00", true, 1_600, 1_200),
+        seed("resource.relic.norse.sealed-parchment.geometry", "relic-geometry", "application/json", 697, "8d08b882893002da5afd9f8e06e7a0f3f81a109f72584cbc3ea2c3add37cfae6", true),
+        seed("resource.share-fallback.norse.sealed-parchment", "static-share-fallback", "image/png", 2_353_385, "f734c1f40d4e5499d2732c4050827841ac888da2f88959b4db27ddd600479569", true, 1_600, 1_200),
+        seed("resource.relic.norse.runestone.blackstone.art", "relic-art", "image/png", 2_285_375, "9f161594f50105824675a6c13f808ed4f0f3ca490fd62e05e9b56d81e24c018f", true, 1_600, 1_200),
+        seed("resource.relic.norse.runestone.blackstone.geometry", "relic-geometry", "application/json", 713, "0c3b1345f13650fb1a961b20ed5af381a57d10624eae2c850cfd08e9220c0aab", true),
+        seed("resource.share-fallback.norse.runestone.blackstone", "static-share-fallback", "image/png", 2_568_492, "e65e90b71d9cd5a0e3c97f38b450f8341b372c80403bb8d523c813b7930cec08", true, 1_600, 1_200),
+        seed("resource.relic.norse.runestone.frozen.art", "relic-art", "image/png", 2_249_646, "1540532b89c6c0f4f3f0c18727803a02d6f97dd22d7906dba6882ebdee963995", false, 1_600, 1_200),
+        seed("resource.relic.norse.runestone.frozen.geometry", "relic-geometry", "application/json", 705, "6e48ec956828f06166b4629e38e0707eb74ee7c657c874b3afe2f43b4bfb908c", false),
+        seed("resource.share-fallback.norse.runestone.frozen", "static-share-fallback", "image/png", 2_503_093, "fe9c9963d5d0a7264b43c058d2e1926cb5e2ebe75ecdd737a9231e4c0c51a417", false, 1_600, 1_200),
+        seed("resource.seal.norse.knotwork.vector", "seal-vector", "application/pdf", 3_057, "90a0241c4d22b189bb4e5d31ee34de5c6bcdb5ae6bb07ae0a70c649179a37722", true),
+        seed("resource.seal.norse.forge-flame.vector", "seal-vector", "application/pdf", 3_017, "4e7236d8848448e190bc0891f3b2256c6b7a9145a310288f229f5c1fde51371b", true),
+        seed("resource.seal.norse.raven.vector", "seal-vector", "application/pdf", 3_110, "7205f8ead9ad3aa80300ea5e092c8c445bbfcdb0993a533d48935da12f145836", true),
+        seed("resource.seal.norse.longship.vector", "seal-vector", "application/pdf", 3_145, "1eb0f40d4171befeac3a6d3cfa67efc726a0d5da2289f7efc93c164db2f5fc2c", true),
+        seed("resource.seal.norse.forge-hammer.vector", "seal-vector", "application/pdf", 3_190, "8e0e1facae3f15895223655a7ec2921bed11fbf310d008a1934a98cf1ba0f481", true),
+        seed("resource.seal.norse.echo-rune.vector", "seal-vector", "application/pdf", 3_046, "d9c0ce6b4a1e461ef6b7082cbd00aeebc683340bdea4a41a6cb5d4a4899d4c18", true),
+        seed("resource.frame.norse.carved-knotwork.vector", "frame-vector", "application/pdf", 4_385, "7b293065bfada998c44a2e84a1b0346d2e8d2f961a54333562e5924c40c9e2e4", true),
+        seed("resource.crest.norse.forge-master.vector", "crest-vector", "application/pdf", 2_963, "17f399835e761534fa911cd44dd5be1a73142f1d895d1681f75c5da2e7fe34b7", true),
+        seed("resource.codex-card.norse", "codex-card", "image/png", 998_363, "79a1d46b20fe5958c33dd387ffb854d00147c3f47769116ec0ee6a409a521fd0", true, 1_200, 1_600),
+        seed("resource.codex-silhouette.norse", "codex-silhouette", "image/png", 663_322, "821251ccb12aaaba43dd853e99f1090b041755e5ae16c37b472efb00daa92261", true, 1_200, 1_600),
+        seed("resource.background.norse.forge.static", "reduce-motion-background", "image/png", 480_562, "2280566de99926bd1c078d9f26cf437c5cde1fa72c274834825c133b5b4f3b31", true, 2_048, 2_048),
+        seed("resource.background.norse.high-contrast", "high-contrast-background", "image/png", 419_519, "a9a59d3e1587561c9059628a2abf2a1bb871a0428f7838e67e5e31edbc0d01d2", true, 1_920, 1_920),
+        seed("resource.background.norse.profile", "background-parameter-record", "application/json", 1_678, "136e1285f0188665ea6a05578fd010138a9da9e629fd1ae26e796ac85087e1be", true),
+        seed("resource.palette.norse.semantic", "semantic-palette", "application/json", 2_556, "33403c431735ae92c81816667e3c4040f16da3ff1b0846533a539d024a48652c", true),
+        seed("resource.headings.norse", "decorative-heading-catalog", "application/json", 779, "190a7682b2e4b40251aca028841223e4624b87448534fb3c1fc2a855d586d1e4", true),
+        seed("resource.script.norse.mapping", "script-mapping", "application/json", 4_552, "c66c76259ac7c8e4ac9ad0c42417f49ad4546d6901e339612dec6ef243627264", true),
+        seed("resource.script.norse.specimen", "script-specimen", "image/png", 91_927, "ddace76f9dc0bbb11cdc485a71ed1f22b5e4788d8d5429e1902f1ded623d5627", false, 1_600, 960),
+        seed("resource.accessibility.norse.en", "accessibility-localization", "application/json", 2_972, "376354f0c3fcf408b4bfdde894f1e38689ad83dd84d451d0202956af79d1c257", true),
+        seed("resource.localization.norse.en", "content-localization", "application/json", 9_043, "58afc0693e8a35808c0776c6cd25069432cbd9b7227bd080ff0fa2bf4fe4a868", true),
+        seed("resource.progression-bindings.norse", "progression-binding-catalog", "application/json", 4_826, "eeaaa67d71f3e8f3466fdd2a76b56f8ff673fa50325c7e17225223412f795bca", true),
+        seed("resource.sound.norse.unlock-minor", "unlock-sound-candidate", "audio/wav", 157_484, "86ff6f83532792c120885c4177fbf4577aea4d9c93ce1a00ae92ef675d663231", true),
+        seed("resource.effect.norse.reveal-minor", "unlock-animation-cue", "application/json", 638, "7886f75c160e25dfca5afa836b5ba0a87bf0669eee7da7f40ab441c855f11eb5", true),
+        seed("resource.sound.norse.unlock-relic", "unlock-sound-candidate", "audio/wav", 245_804, "fd03dc2727db17991724175ad4de0e8441ceb635157869147e3ec4c4246d17d0", true),
+        seed("resource.effect.norse.reveal-relic", "unlock-animation-cue", "application/json", 797, "1f72a5bdd443ea8edb38604c90d7de8c5b6cefa18f486b7ddee918996a22cb0f", true),
+        seed("resource.sound.norse.unlock-codex", "unlock-sound-candidate", "audio/wav", 422_444, "92002d43b73dfbb6240ab8c3166b5044f9ebec9dc919925934774875caaa92f8", true),
+        seed("resource.effect.norse.reveal-codex", "unlock-animation-cue", "application/json", 960, "7bb5b550ad37ea2cebf7619d78c165a62101b4e9a7b0d1dcee78801768161b4d", true),
+        seed("resource.sound.norse.unlock-mastery", "unlock-sound-candidate", "audio/wav", 508_844, "a5e4be793829f6abc73727f6441894d79d0e93b548f754dc35005aac529f2682", true),
+        seed("resource.effect.norse.reveal-mastery", "unlock-animation-cue", "application/json", 882, "8abd4c76f20243d2da901a4a87ba5a691efadadc669a75da23b1e53f8f59364f", true),
+        seed("resource.font.norse.noto-sans-runic", "required-base-script-font", "font/ttf", 55_800, "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b", true),
+    ]
+
+    static let definitions: [NorseBaseThemeResourceDefinition] = {
+        guard let values = makeDefinitions(frozenResources), values.count == 47 else {
+            preconditionFailure("Invalid frozen Norse resource catalog")
+        }
+        return values
+    }()
+    static let byID = Dictionary(uniqueKeysWithValues: definitions.map { ($0.id, $0) })
+
+    static func definition(_ id: ThemeResourceID) -> NorseBaseThemeResourceDefinition? { byID[id] }
+
+    static func validate(_ data: Data) -> Bool {
+        guard let manifest = try? JSONDecoder().decode(Manifest.self, from: data),
+              let decodedDefinitions = makeDefinitions(manifest.resources)
+        else { return false }
+        return decodedDefinitions == definitions
+    }
+
+    private static func makeDefinitions(
+        _ resources: [Resource]
+    ) -> [NorseBaseThemeResourceDefinition]? {
+        var values: [NorseBaseThemeResourceDefinition] = []
+        values.reserveCapacity(resources.count)
+        for resource in resources {
+            guard let value = makeDefinition(resource) else { return nil }
+            values.append(value)
+        }
+        guard Set(values.map(\.id)).count == values.count else { return nil }
+        return values
+    }
+
+    private static func makeDefinition(
+        _ resource: Resource
+    ) -> NorseBaseThemeResourceDefinition? {
+        guard let id = ThemeResourceID(rawValue: resource.resourceHandle),
+              let applicationResource = NorseApplicationResourceCatalog.resourcesByHandle[resource.resourceHandle],
+              let media = ThemeResourceMediaType(rawValue: resource.mediaType)
+        else { return nil }
         return NorseBaseThemeResourceDefinition(
             id: id,
-            role: role,
-            mediaType: asset.mediaType,
-            requirement: .required,
-            sha256Hex: asset.sha256Hex,
-            byteCount: asset.byteCount,
-            pixelWidth: asset.pixelWidth,
-            pixelHeight: asset.pixelHeight,
-            rights: .presentation,
-            placeholderAssetID: assetID
+            resource: applicationResource,
+            role: semanticRole(for: id, fallback: resource.semanticRole),
+            mediaType: media,
+            requirement: requiredResourceIDs.contains(id) || resource.requiredForActiveContent ? .required : .optional,
+            sha256Hex: resource.sha256,
+            byteCount: resource.byteLength,
+            pixelWidth: resource.dimensions?.width,
+            pixelHeight: resource.dimensions?.height,
+            rights: id == NorseBaseThemeResourceIDs.font ? .font : .presentation
         )
     }
 
-    private static func role(_ value: String) -> ThemeResourceRoleID {
-        ThemeResourceRoleID(rawValue: value)!
+    private static func seed(
+        _ resourceHandle: String,
+        _ semanticRole: String,
+        _ mediaType: String,
+        _ byteLength: Int,
+        _ sha256: String,
+        _ requiredForActiveContent: Bool,
+        _ width: Int? = nil,
+        _ height: Int? = nil
+    ) -> Resource {
+        Resource(
+            resourceHandle: resourceHandle,
+            semanticRole: semanticRole,
+            mediaType: mediaType,
+            byteLength: byteLength,
+            sha256: sha256,
+            requiredForActiveContent: requiredForActiveContent,
+            dimensions: width.flatMap { width in
+                height.map { Resource.Dimensions(width: width, height: $0) }
+            }
+        )
     }
+
+    private static func semanticRole(for id: ThemeResourceID, fallback: String) -> ThemeResourceRoleID {
+        if id == NorseBaseThemeResourceIDs.font { return ThemeResourceRoles.scriptFont }
+        if id == NorseBaseThemeResourceIDs.scriptFallback { return ThemeResourceRoles.scriptStaticFallback }
+        if NorseBaseThemeResourceIDs.relicResourceIDs.values.contains(where: { $0.primary == id }) { return ThemeResourceRoles.relicMaster }
+        if NorseBaseThemeResourceIDs.relicResourceIDs.values.contains(where: { $0.staticFallback == id }) { return ThemeResourceRoles.relicStaticShareFallback }
+        if NorseBaseThemeResourceIDs.sealResourceIDs.values.contains(where: { $0.vector == id }) { return ThemeResourceRoles.sealVectorMaster }
+        if id == NorseBaseThemeResourceIDs.frameVector { return ThemeResourceRoles.frameVectorMaster }
+        if id == NorseBaseThemeResourceIDs.crestVector { return ThemeResourceRoles.crestVectorMaster }
+        if id == NorseBaseThemeResourceIDs.backgroundStatic { return ThemeResourceRoles.backgroundStaticBase }
+        if id == NorseBaseThemeResourceIDs.backgroundHighContrast { return ThemeResourceRoles.backgroundHighContrast }
+        if id == NorseBaseThemeResourceIDs.backgroundParameters { return ThemeResourceRoles.backgroundRendererParameters }
+        if id == NorseBaseThemeResourceIDs.vaultCard { return ThemeResourceRoles.vaultCard }
+        if id == NorseBaseThemeResourceIDs.vaultLocked { return ThemeResourceRoles.vaultLockedSilhouette }
+        if id == NorseBaseThemeResourceIDs.localization { return ThemeResourceRoles.localizationStrings }
+        return ThemeResourceRoleID(rawValue: fallback)!
+    }
+
+    private static let requiredResourceIDs: Set<ThemeResourceID> = {
+        var ids: Set<ThemeResourceID> = [
+            NorseBaseThemeResourceIDs.font, NorseBaseThemeResourceIDs.scriptFallback,
+            NorseBaseThemeResourceIDs.backgroundStatic,
+            NorseBaseThemeResourceIDs.backgroundHighContrast, NorseBaseThemeResourceIDs.backgroundParameters,
+            NorseBaseThemeResourceIDs.vaultCard, NorseBaseThemeResourceIDs.vaultLocked,
+            NorseBaseThemeResourceIDs.localization,
+        ]
+        ids.formUnion(NorseBaseThemeResourceIDs.relicResourceIDs.values.flatMap { [$0.primary, $0.staticFallback] })
+        ids.formUnion(NorseBaseThemeResourceIDs.sealResourceIDs.values.map(\.vector))
+        ids.insert(NorseBaseThemeResourceIDs.frameVector)
+        ids.insert(NorseBaseThemeResourceIDs.crestVector)
+        return ids
+    }()
 }
 
 private func sha256Hex(_ data: Data) -> String {

@@ -33,7 +33,7 @@ struct PINFlowView: View {
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
-                runic: headerRunic,
+                slot: headerSlot,
                 subtitle: headerSubtitle,
                 trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Cancel") { dismiss() }]
             )
@@ -133,11 +133,11 @@ struct PINFlowView: View {
 
     // MARK: - Copy
 
-    private var headerRunic: String {
+    private var headerSlot: ThemeHeadingSlot {
         switch mode {
-        case .set:     return "ᛋᛖᛏ ᛈᛁᚾ"
-        case .change:  return "ᚲᚺᚨᚾᚷᛖ"
-        case .disable: return "ᛞᛁᛋᚨᛒᛚᛖ"
+        case .set: .pinSet
+        case .change: .pinChange
+        case .disable: .pinDisable
         }
     }
 

@@ -3,11 +3,8 @@ import RuneScribeContracts
 
 public enum NorseBaseThemeDescriptorFactory {
     public static let discoveryDescriptor: ThemeDescriptor = {
-        do {
-            return try make()
-        } catch {
-            preconditionFailure("Invalid frozen Norse Base Theme descriptor: \(error)")
-        }
+        do { return try make() }
+        catch { preconditionFailure("Invalid frozen Norse Base Theme descriptor: \(error)") }
     }()
 
     public static func make() throws -> ThemeDescriptor {
@@ -15,13 +12,13 @@ public enum NorseBaseThemeDescriptorFactory {
         let presentationRightsID = provenanceID("rights.norse.base")
         let fontRightsID = provenanceID("rights.norse.font.noto")
         let scriptID = ScriptID(rawValue: "script.base-runes")!
+        let relics = try makeRelics(codexID: codexID, rightsID: presentationRightsID)
 
         let script = try ThemeScriptDescriptor(
             id: scriptID,
             displayName: localized("script.base-runes.name", "Base Rune Script"),
             portability: .unicodePortable,
-            glyphs: try ThemeCanonicalSymbolSet.transportTokens.enumerated().map {
-                index, token in
+            glyphs: try ThemeCanonicalSymbolSet.transportTokens.enumerated().map { index, token in
                 try ThemeScriptGlyph(
                     canonicalValue: UInt8(index),
                     glyphID: glyphID(String(format: "glyph.base-runes.%02d", index)),
@@ -31,9 +28,7 @@ public enum NorseBaseThemeDescriptorFactory {
             fontResourceID: NorseBaseThemeResourceIDs.font,
             fontReferenceID: ThemeFontReferenceID(rawValue: "noto-sans-runic")!,
             fontVersion: 1,
-            fontPostScriptName: ThemeFontPostScriptName(
-                rawValue: "NotoSansRunic-Regular"
-            ),
+            fontPostScriptName: ThemeFontPostScriptName(rawValue: "NotoSansRunic-Regular"),
             staticFallbackResourceID: NorseBaseThemeResourceIDs.scriptFallback,
             fallbackScriptID: scriptID,
             recommendedPointSizes: ThemeScalarRange(minimum: 12, maximum: 64),
@@ -46,26 +41,24 @@ public enum NorseBaseThemeDescriptorFactory {
             rightsID: fontRightsID
         )
 
-        let relics = try makeRelics(codexID: codexID, rightsID: presentationRightsID)
-        let seals = try makeSeals(codexID: codexID, rightsID: presentationRightsID)
         let background = try ThemeBackgroundDescriptor(
-            id: ThemeBackgroundID(rawValue: "background.norse.rune-metal")!,
-            displayName: localized("background.norse.name", "Rune Background"),
+            id: ThemeBackgroundID(rawValue: "background.norse.forge-v1")!,
+            displayName: localized("background.norse.name", "Norse Forge Background"),
             staticBaseResourceID: NorseBaseThemeResourceIDs.backgroundStatic,
             reduceMotionResourceID: NorseBaseThemeResourceIDs.backgroundReduceMotion,
             highContrastResourceID: NorseBaseThemeResourceIDs.backgroundHighContrast,
-            optionalMotionResourceID: nil,
             rendererParametersResourceID: NorseBaseThemeResourceIDs.backgroundParameters,
             motionIntensity: .subtle,
             performanceClass: .standard,
             parallaxAllowed: false,
             accessibility: accessibility(
                 "background.norse",
-                label: "Norse rune background",
-                hint: "Provides the current Rune Scribe background treatment."
+                label: "Dark Norse forge background",
+                hint: "Uses restrained gold and blue forge light behind the workspace."
             ),
             rightsID: presentationRightsID
         )
+
         let vault = try ThemeVaultDescriptor(
             id: ThemeVaultID(rawValue: "vault.norse")!,
             grouping: localized("vault.norse.grouping", "Norse Collection"),
@@ -75,8 +68,8 @@ public enum NorseBaseThemeDescriptorFactory {
             selectedResourceID: NorseBaseThemeResourceIDs.vaultSelected,
             accessibility: accessibility(
                 "vault.norse",
-                label: "Norse Codex collection",
-                hint: "Shows Base Codex ownership and selection states without relying on color alone."
+                label: "Norse Founding Codex collection",
+                hint: "Shows ownership, availability, and selection with text and shape as well as color."
             ),
             rightsID: presentationRightsID
         )
@@ -85,36 +78,28 @@ public enum NorseBaseThemeDescriptorFactory {
             id: codexID,
             entitlementID: RuneScribeUnlockIDs.norseCodex,
             displayName: localized("codex.norse.name", "Norse Codex"),
-            shortDescription: localized(
-                "codex.norse.description.short",
-                "Rune Scribe's permanent Base Codex."
-            ),
+            shortDescription: localized("codex.norse.tagline", "The Founding Codex."),
             longDescription: localized(
-                "codex.norse.description.long",
-                "The permanent Base Codex extracted from Rune Scribe's current presentation."
+                "codex.norse.description",
+                "The permanent Rune Scribe Base Codex, shaped from weathered stone, forged iron, aged parchment, and restrained knotwork."
             ),
             accessibility: accessibility(
                 "codex.norse",
-                label: "Norse Base Codex",
-                hint: "Uses the permanent Base Codex presentation."
+                label: "Norse Founding Codex",
+                hint: "Rune Scribe's permanent, always-owned Base Codex."
             ),
             palette: try palette(),
             primaryScriptID: scriptID,
             fallbackScriptID: scriptID,
-            defaultRelicID: ArtifactID(rawValue: "relic.norse.runestone.weathered")!,
+            defaultRelicID: artifactID("relic.norse.runestone.weathered"),
             scripts: [script],
             relics: relics,
-            seals: seals,
-            frames: [],
-            crests: [],
+            seals: try makeSeals(codexID: codexID, rightsID: presentationRightsID),
+            frames: try makeFrames(relics: relics, codexID: codexID, rightsID: presentationRightsID),
+            crests: try makeCrests(codexID: codexID, rightsID: presentationRightsID),
             background: background,
             vault: vault,
             rightsID: presentationRightsID
-        )
-
-        let resources = try NorseBaseThemeResourceCatalog.references(
-            fontRightsID: fontRightsID,
-            presentationRightsID: presentationRightsID
         )
 
         return try ThemeDescriptor(
@@ -132,7 +117,10 @@ public enum NorseBaseThemeDescriptorFactory {
             ],
             fallbackCodexID: codexID,
             codex: codex,
-            resources: resources,
+            resources: try NorseBaseThemeResourceCatalog.references(
+                fontRightsID: fontRightsID,
+                presentationRightsID: presentationRightsID
+            ),
             localizations: [
                 try ThemeLocalizationDescriptor(
                     localeIdentifier: "en-US",
@@ -143,12 +131,12 @@ public enum NorseBaseThemeDescriptorFactory {
             rights: [
                 try ThemeRightsMetadata(
                     id: presentationRightsID,
-                    creatorTool: "Rune Scribe repository extraction",
-                    creationDate: "2026-08-15",
-                    origin: .derived,
+                    creatorTool: "Raven Forge Studios approved Norse production package",
+                    creationDate: "2026-08-21",
+                    origin: .original,
                     rightsOwner: "Raven Forge Studios",
-                    sourceReference: "RuneTheme.swift; RuneScribButtonStyle.swift; Shaders.metal; progression catalog",
-                    exportSettings: "deterministic semantic JSON version 1.0",
+                    sourceReference: "Rune Scribe Norse Theme Module package version 1.0",
+                    exportSettings: "Approved production PNG, PDF, JSON, and WAV resources",
                     licenseNotice: "All rights reserved."
                 ),
                 try ThemeRightsMetadata(
@@ -157,9 +145,9 @@ public enum NorseBaseThemeDescriptorFactory {
                     creationDate: "2026-06-19",
                     origin: .derived,
                     rightsOwner: "The Noto Project Authors",
-                    sourceReference: "RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf",
-                    exportSettings: "exact byte-preserving copy",
-                    licenseNotice: "SIL Open Font License 1.1; see RuneScrib/Resources/Fonts/OFL.txt"
+                    sourceReference: "NotoSansRunic-Regular.ttf",
+                    exportSettings: "Exact byte-preserving resource migration",
+                    licenseNotice: "SIL Open Font License 1.1; see Third-Party-Notices."
                 ),
             ]
         )
@@ -169,63 +157,33 @@ public enum NorseBaseThemeDescriptorFactory {
         codexID: CodexID,
         rightsID: ThemeProvenanceID
     ) throws -> [ThemeRelicDescriptor] {
-        let definitions: [(String, String, String, ThemeRarityToken, ThemeArtifactAvailability, Bool, UInt16, UInt16)] = [
-            (
-                "relic.norse.runestone.weathered",
-                "Weathered Rune Stone",
-                "The default Base Codex Rune Stone presentation.",
-                .forged,
-                .included,
-                true,
-                4,
-                5
-            ),
-            (
-                "relic.norse.raven-medallion",
-                "Raven Medallion",
-                "A round medallion Relic presentation.",
-                .inscribed,
-                .earned,
-                false,
-                1,
-                1
-            ),
-            (
-                "relic.norse.sealed-parchment",
-                "Sealed Parchment",
-                "A sealed parchment Relic presentation.",
-                .inscribed,
-                .earned,
-                false,
-                4,
-                3
-            ),
+        let definitions: [RelicDefinition] = [
+            RelicDefinition(id: "relic.norse.runestone.weathered", name: "Weathered Rune Stone", description: "A broad weathered stone canvas framed in forged iron and restrained knotwork. The dependable Norse surface for short and long inscriptions.", rarity: .forged, availability: .included, isDefault: true, width: 4, height: 3, safeArea: (0.19, 0.22, 0.62, 0.57), anchors: [(0.16, 0.83, .lowerLeft), (0.84, 0.83, .lowerRight)], maximumLines: 7),
+            RelicDefinition(id: "relic.norse.raven-medallion", name: "Raven Medallion", description: "A circular forged medallion with a pale stone face and raven crest, intended for concise messages.", rarity: .inscribed, availability: .earned, width: 1, height: 1, safeArea: (0.275, 0.30, 0.45, 0.43), anchors: [(0.50, 0.82, .bottomCenter)], maximumLines: 2),
+            RelicDefinition(id: "relic.norse.ironbound-shield", name: "Ironbound Round Shield", description: "A round wooden shield reinforced with iron, with a protected central field for compact inscriptions.", rarity: .inscribed, availability: .earned, width: 1, height: 1, safeArea: (0.285, 0.285, 0.43, 0.43), anchors: [(0.23, 0.76, .lowerLeft), (0.77, 0.76, .lowerRight)], maximumLines: 4),
+            RelicDefinition(id: "relic.norse.sealed-parchment", name: "Sealed Parchment", description: "A wide sheet of aged parchment held by forged fittings and a raven seal, optimized for longer messages.", rarity: .inscribed, availability: .earned, width: 4, height: 3, safeArea: (0.23, 0.22, 0.54, 0.55), anchors: [(0.20, 0.80, .lowerLeft), (0.78, 0.77, .lowerRight)], maximumLines: 7),
+            RelicDefinition(id: "relic.norse.runestone.blackstone", name: "Blackstone Rune Stone", description: "A ceremonial black stone tablet crossed by restrained gold and blue forge-light cracks, awarded for Norse mastery.", rarity: .rare, availability: .mastery, width: 4, height: 3, safeArea: (0.20, 0.22, 0.60, 0.56), anchors: [(0.16, 0.83, .lowerLeft), (0.84, 0.83, .lowerRight)], maximumLines: 7),
+            RelicDefinition(id: "relic.norse.runestone.frozen", name: "Frozen Rune Stone", description: "A pale rune stone edged with frost and ice, reserved for a separately approved winter Season challenge.", rarity: .mythic, availability: .reservedInactive, width: 4, height: 3, safeArea: (0.20, 0.22, 0.60, 0.56), anchors: [(0.16, 0.83, .lowerLeft), (0.84, 0.83, .lowerRight)], maximumLines: 7),
         ]
-        return try definitions.map {
-            rawID, name, description, rarity, availability, isDefault, width, height in
-            let artifactID = ArtifactID(rawValue: rawID)!
-            let resources = NorseBaseThemeResourceIDs.relicResourceIDs[artifactID]!
-            let key = rawID
-            let layout = try layout(
-                id: ThemeLayoutPresetID(rawValue: "layout.\(rawID)")!,
-                width: width,
-                height: height
-            )
+
+        return try definitions.map { definition in
+            let id = artifactID(definition.id)
+            let resources = NorseBaseThemeResourceIDs.relicResourceIDs[id]!
+            let layout = try makeLayout(definition)
             return try ThemeRelicDescriptor(
                 metadata: artifact(
-                    id: artifactID,
+                    id: id,
                     codexID: codexID,
-                    key: key,
-                    name: name,
-                    description: description,
-                    rarity: rarity,
-                    availability: availability,
-                    accessibilityHint: isDefault
-                        ? "Uses the default upright stone conformance silhouette."
-                        : "Uses a distinct Base Codex conformance silhouette.",
+                    name: definition.name,
+                    description: definition.description,
+                    rarity: definition.rarity,
+                    availability: definition.availability,
+                    accessibilityHint: definition.id.hasSuffix(".frozen")
+                        ? "Reserved and unavailable until a separately approved winter challenge grants it."
+                        : "Uses a bounded inscription area and approved seal anchors.",
                     rightsID: rightsID
                 ),
-                isDefault: isDefault,
+                isDefault: definition.isDefault,
                 primaryResourceID: resources.primary,
                 thumbnailResourceID: resources.thumbnail,
                 staticFallbackResourceID: resources.staticFallback,
@@ -236,146 +194,84 @@ public enum NorseBaseThemeDescriptorFactory {
         }
     }
 
-    private static func makeSeals(
-        codexID: CodexID,
-        rightsID: ThemeProvenanceID
-    ) throws -> [ThemeSealDescriptor] {
-        let definitions: [(String, String, ThemeRarityToken, ThemeArtifactAvailability)] = [
-            ("seal.norse.knotwork", "Knotwork Mark", .forged, .included),
-            ("seal.norse.forge-flame", "Forge Flame", .forged, .included),
-            ("seal.norse.raven", "Raven Seal", .inscribed, .earned),
-            ("seal.norse.longship", "Longship Seal", .inscribed, .earned),
-            ("seal.norse.forge-hammer", "Forge Hammer Seal", .inscribed, .earned),
-            ("seal.norse.echo-rune", "Echo Rune Seal", .rare, .earned),
+    private static func makeSeals(codexID: CodexID, rightsID: ThemeProvenanceID) throws -> [ThemeSealDescriptor] {
+        let definitions: [(String, String, String, ThemeRarityToken, ThemeArtifactAvailability)] = [
+            ("seal.norse.knotwork", "Knotwork Mark", "An interlaced gold knot surrounding a small blue center stone.", .forged, .included),
+            ("seal.norse.forge-flame", "Forge Flame", "A gold forge flame with a restrained blue inner flame.", .forged, .included),
+            ("seal.norse.raven", "Raven Seal", "A silver raven in profile on a dark forged medallion.", .inscribed, .earned),
+            ("seal.norse.longship", "Longship Seal", "A longship above a single blue wave, representing sustained correspondence.", .inscribed, .earned),
+            ("seal.norse.forge-hammer", "Forge Hammer Seal", "A forged hammer with a small blue spark.", .inscribed, .earned),
+            ("seal.norse.echo-rune", "Echo Rune Seal", "A central rune between expanding gold and blue echo arcs.", .rare, .earned),
         ]
-        return try definitions.map { rawID, name, rarity, availability in
-            let artifactID = ArtifactID(rawValue: rawID)!
-            let resources = NorseBaseThemeResourceIDs.sealResourceIDs[artifactID]!
+        return try definitions.map { rawID, name, description, rarity, availability in
+            let id = artifactID(rawID)
+            let resources = NorseBaseThemeResourceIDs.sealResourceIDs[id]!
             return try ThemeSealDescriptor(
-                metadata: artifact(
-                    id: artifactID,
-                    codexID: codexID,
-                    key: rawID,
-                    name: name,
-                    description: "The \(name).",
-                    rarity: rarity,
-                    availability: availability,
-                    accessibilityHint: "Places the \(name) mark at an approved anchor.",
-                    rightsID: rightsID
-                ),
+                metadata: artifact(id: id, codexID: codexID, name: name, description: description, rarity: rarity, availability: availability, accessibilityHint: "Places the \(name) at an approved anchor without covering the inscription.", rightsID: rightsID),
                 vectorResourceID: resources.vector,
                 monochromeFallbackResourceID: resources.monochrome,
                 thumbnailResourceID: resources.thumbnail,
-                allowedScale: ThemeScalarRange(minimum: 0.1, maximum: 0.3),
+                allowedScale: ThemeScalarRange(minimum: 0.10, maximum: 0.30),
                 scaleReference: .relicShortEdge,
                 allowedAnchors: [.lowerLeft, .lowerRight, .bottomCenter, .topCenter]
             )
         }
     }
 
-    private static func layout(
-        id: ThemeLayoutPresetID,
-        width: UInt16,
-        height: UInt16
-    ) throws -> ThemeShareLayoutPreset {
-        try ThemeShareLayoutPreset(
-            id: id,
-            aspectRatio: ThemeAspectRatio(width: width, height: height),
+    private static func makeFrames(relics: [ThemeRelicDescriptor], codexID: CodexID, rightsID: ThemeProvenanceID) throws -> [ThemeFrameDescriptor] {
+        [try ThemeFrameDescriptor(
+            metadata: artifact(id: artifactID("frame.norse.carved-knotwork"), codexID: codexID, name: "Carved Knotwork Frame", description: "A carved silver-and-gold knotwork border with restrained corner ornaments.", rarity: .inscribed, availability: .earned, accessibilityHint: "Adds a decorative border without changing or obscuring the message.", rightsID: rightsID),
+            vectorResourceID: NorseBaseThemeResourceIDs.frameVector,
+            staticFallbackResourceID: NorseBaseThemeResourceIDs.frameStatic,
+            compatibleRelicIDs: relics.map(\.metadata.id),
+            allowsStaticShare: true
+        )]
+    }
+
+    private static func makeCrests(codexID: CodexID, rightsID: ThemeProvenanceID) throws -> [ThemeCrestDescriptor] {
+        [try ThemeCrestDescriptor(
+            metadata: artifact(id: artifactID("crest.norse.forge-master"), codexID: codexID, name: "Forge Master Crest", description: "A shield-shaped crest showing an anvil, blue flame, and paired silver wings.", rarity: .rare, availability: .mastery, accessibilityHint: "Marks Norse mastery without replacing the message label.", rightsID: rightsID),
+            vectorResourceID: NorseBaseThemeResourceIDs.crestVector,
+            staticFallbackResourceID: NorseBaseThemeResourceIDs.crestStatic
+        )]
+    }
+
+    private static func makeLayout(_ definition: RelicDefinition) throws -> ThemeShareLayoutPreset {
+        let safe = definition.safeArea
+        return try ThemeShareLayoutPreset(
+            id: ThemeLayoutPresetID(rawValue: "layout.\(definition.id)")!,
+            aspectRatio: ThemeAspectRatio(width: definition.width, height: definition.height),
             relicBounds: ThemeNormalizedRegion(x: 0, y: 0, width: 1, height: 1),
-            contentSafeRegion: ThemeNormalizedRegion(
-                x: 0.05,
-                y: 0.05,
-                width: 0.9,
-                height: 0.85
-            ),
-            glyphSafeRegion: ThemeNormalizedRegion(
-                x: 0.12,
-                y: 0.12,
-                width: 0.76,
-                height: 0.5
-            ),
-            sealAnchors: [
-                ThemeSealAnchor(
-                    category: .lowerLeft,
-                    point: try ThemeNormalizedPoint(x: 0.15, y: 0.82)
-                ),
-                ThemeSealAnchor(
-                    category: .lowerRight,
-                    point: try ThemeNormalizedPoint(x: 0.85, y: 0.82)
-                ),
-                ThemeSealAnchor(
-                    category: .bottomCenter,
-                    point: try ThemeNormalizedPoint(x: 0.5, y: 0.82)
-                ),
-                ThemeSealAnchor(
-                    category: .topCenter,
-                    point: try ThemeNormalizedPoint(x: 0.5, y: 0.08)
-                ),
-            ],
-            maximumGlyphLines: 8,
+            contentSafeRegion: ThemeNormalizedRegion(x: 0.08, y: 0.08, width: 0.84, height: 0.82),
+            glyphSafeRegion: ThemeNormalizedRegion(x: safe.0, y: safe.1, width: safe.2, height: safe.3),
+            sealAnchors: try definition.anchors.map { x, y, category in
+                ThemeSealAnchor(category: category, point: try ThemeNormalizedPoint(x: x, y: y))
+            },
+            maximumGlyphLines: definition.maximumLines,
             minimumGlyphScale: 0.5,
             overflowBehavior: .standardAlternate,
-            attributionRegion: ThemeNormalizedRegion(
-                x: 0.05,
-                y: 0.93,
-                width: 0.9,
-                height: 0.05
-            ),
-            provenanceRegion: ThemeNormalizedRegion(
-                x: 0.05,
-                y: 0.87,
-                width: 0.4,
-                height: 0.04
-            ),
-            serialNumberRegion: ThemeNormalizedRegion(
-                x: 0.55,
-                y: 0.87,
-                width: 0.4,
-                height: 0.04
-            ),
-            qrSafeRegion: ThemeNormalizedRegion(
-                x: 0.72,
-                y: 0.64,
-                width: 0.16,
-                height: 0.16
-            ),
+            attributionRegion: ThemeNormalizedRegion(x: 0.08, y: 0.93, width: 0.84, height: 0.04),
+            provenanceRegion: ThemeNormalizedRegion(x: 0.08, y: 0.88, width: 0.38, height: 0.04),
+            serialNumberRegion: ThemeNormalizedRegion(x: 0.54, y: 0.88, width: 0.38, height: 0.04),
+            qrSafeRegion: ThemeNormalizedRegion(x: 0.74, y: 0.69, width: 0.14, height: 0.14),
             thumbnailCrop: ThemeNormalizedRegion(x: 0, y: 0, width: 1, height: 1)
         )
     }
 
-    private static func artifact(
-        id: ArtifactID,
-        codexID: CodexID,
-        key: String,
-        name: String,
-        description: String,
-        rarity: ThemeRarityToken,
-        availability: ThemeArtifactAvailability,
-        accessibilityHint: String,
-        rightsID: ThemeProvenanceID
-    ) throws -> ThemeArtifactMetadata {
+    private static func artifact(id: ArtifactID, codexID: CodexID, name: String, description: String, rarity: ThemeRarityToken, availability: ThemeArtifactAvailability, accessibilityHint: String, rightsID: ThemeProvenanceID) throws -> ThemeArtifactMetadata {
         try ThemeArtifactMetadata(
             id: id,
             codexID: codexID,
-            displayName: localized("\(key).name", name),
-            description: localized("\(key).description", description),
+            displayName: localized("\(id.rawValue).name", name),
+            description: localized("\(id.rawValue).description", description),
             rarity: rarity,
             availability: availability,
-            accessibility: accessibility(
-                key,
-                label: name,
-                hint: accessibilityHint
-            ),
+            accessibility: accessibility(id.rawValue, label: name, hint: accessibilityHint),
             rightsID: rightsID
         )
     }
 
-    private static func accessibility(
-        _ keyPrefix: String,
-        label: String,
-        hint: String,
-        hidesRedundantGlyphs: Bool = false
-    ) throws -> ThemeAccessibilityMetadata {
+    private static func accessibility(_ keyPrefix: String, label: String, hint: String, hidesRedundantGlyphs: Bool = false) throws -> ThemeAccessibilityMetadata {
         try ThemeAccessibilityMetadata(
             label: localized("\(keyPrefix).accessibility-label", label),
             hint: localized("\(keyPrefix).accessibility-hint", hint),
@@ -385,72 +281,61 @@ public enum NorseBaseThemeDescriptorFactory {
         )
     }
 
-    private static func localized(
-        _ key: String,
-        _ fallbackValue: String
-    ) throws -> ThemeLocalizedText {
-        try ThemeLocalizedText(
-            key: ThemeLocalizationKey(rawValue: key)!,
-            fallbackValue: fallbackValue
-        )
+    private static func localized(_ key: String, _ fallbackValue: String) throws -> ThemeLocalizedText {
+        try ThemeLocalizedText(key: ThemeLocalizationKey(rawValue: key)!, fallbackValue: fallbackValue)
     }
 
     private static func palette() throws -> ThemeSemanticPalette {
-        let colors: [String: ThemeSemanticColor] = Dictionary(uniqueKeysWithValues: [
-            "backgroundPrimary": "#080A1E",
-            "backgroundSecondary": "#14082E",
-            "surfacePrimary": "#1A1E30",
-            "surfaceElevated": "#1A1E30",
-            "textPrimary": "#FFFFFF",
-            "textSecondary": "#A0A8B8",
-            "textInverse": "#080A1E",
-            "accentPrimary": "#D4971A",
-            "accentSecondary": "#3A7FD5",
-            "success": "#34C759",
-            "warning": "#D4971A",
-            "danger": "#FF3B30",
-            "information": "#3A7FD5",
-            "locked": "#A0A8B8",
-            "encountered": "#3A7FD5",
-            "unavailable": "#8E8E93",
-            "selected": "#D4971A",
-            "focus": "#EEBE45",
-            "keyboardFocus": "#3A7FD5",
-        ].map { ($0.key, ThemeSemanticColor(rawValue: $0.value)!) })
+        let color: (String) -> ThemeSemanticColor = { ThemeSemanticColor(rawValue: $0)! }
         return try ThemeSemanticPalette(
-            backgroundPrimary: colors["backgroundPrimary"]!,
-            backgroundSecondary: colors["backgroundSecondary"]!,
-            surfacePrimary: colors["surfacePrimary"]!,
-            surfaceElevated: colors["surfaceElevated"]!,
-            textPrimary: colors["textPrimary"]!,
-            textSecondary: colors["textSecondary"]!,
-            textInverse: colors["textInverse"]!,
-            accentPrimary: colors["accentPrimary"]!,
-            accentSecondary: colors["accentSecondary"]!,
-            success: colors["success"]!,
-            warning: colors["warning"]!,
-            danger: colors["danger"]!,
-            information: colors["information"]!,
-            locked: colors["locked"]!,
-            encountered: colors["encountered"]!,
-            unavailable: colors["unavailable"]!,
-            selected: colors["selected"]!,
-            focus: colors["focus"]!,
-            keyboardFocus: colors["keyboardFocus"]!,
+            backgroundPrimary: color("#080A1E"), backgroundSecondary: color("#14082E"),
+            surfacePrimary: color("#1A1E30"), surfaceElevated: color("#252A3C"),
+            textPrimary: color("#F4EFE5"), textSecondary: color("#A0A8B8"),
+            textInverse: color("#080A1E"), accentPrimary: color("#D4971A"),
+            accentSecondary: color("#3A7FD5"), success: color("#34C759"),
+            warning: color("#D4971A"), danger: color("#FF3B30"),
+            information: color("#3A7FD5"), locked: color("#A0A8B8"),
+            encountered: color("#3A7FD5"), unavailable: color("#8E8E93"),
+            selected: color("#D4971A"), focus: color("#EEBE45"),
+            keyboardFocus: color("#3A7FD5"),
             rarityAccents: [
-                ThemeRarityAccent(rarity: .forged, color: colors["textSecondary"]!),
-                ThemeRarityAccent(rarity: .inscribed, color: colors["accentSecondary"]!),
-                ThemeRarityAccent(rarity: .rare, color: colors["accentPrimary"]!),
-                ThemeRarityAccent(rarity: .mythic, color: colors["focus"]!),
+                ThemeRarityAccent(rarity: .forged, color: color("#A0A8B8")),
+                ThemeRarityAccent(rarity: .inscribed, color: color("#3A7FD5")),
+                ThemeRarityAccent(rarity: .rare, color: color("#D4971A")),
+                ThemeRarityAccent(rarity: .mythic, color: color("#EEBE45")),
             ]
         )
     }
 
-    private static func provenanceID(_ value: String) -> ThemeProvenanceID {
-        ThemeProvenanceID(rawValue: value)!
-    }
+    private static func provenanceID(_ value: String) -> ThemeProvenanceID { ThemeProvenanceID(rawValue: value)! }
+    private static func glyphID(_ value: String) -> ThemeGlyphID { ThemeGlyphID(rawValue: value)! }
+    private static func artifactID(_ value: String) -> ArtifactID { ArtifactID(rawValue: value)! }
+}
 
-    private static func glyphID(_ value: String) -> ThemeGlyphID {
-        ThemeGlyphID(rawValue: value)!
+private struct RelicDefinition {
+    let id: String
+    let name: String
+    let description: String
+    let rarity: ThemeRarityToken
+    let availability: ThemeArtifactAvailability
+    let isDefault: Bool
+    let width: UInt16
+    let height: UInt16
+    let safeArea: (Double, Double, Double, Double)
+    let anchors: [(Double, Double, ThemeSealAnchorCategory)]
+    let maximumLines: UInt8
+
+    init(id: String, name: String, description: String, rarity: ThemeRarityToken, availability: ThemeArtifactAvailability, isDefault: Bool = false, width: UInt16, height: UInt16, safeArea: (Double, Double, Double, Double), anchors: [(Double, Double, ThemeSealAnchorCategory)], maximumLines: UInt8) {
+        self.id = id
+        self.name = name
+        self.description = description
+        self.rarity = rarity
+        self.availability = availability
+        self.isDefault = isDefault
+        self.width = width
+        self.height = height
+        self.safeArea = safeArea
+        self.anchors = anchors
+        self.maximumLines = maximumLines
     }
 }

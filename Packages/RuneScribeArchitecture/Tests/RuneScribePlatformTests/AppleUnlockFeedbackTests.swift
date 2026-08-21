@@ -107,6 +107,25 @@ final class AppleUnlockFeedbackTests: XCTestCase {
         XCTAssertEqual(Set(recorder.loadedFilenames).count, 4)
     }
 
+    func testVerifiedProviderSoundReplacesGenericFallbackForOneReveal() async {
+        let recorder = FeedbackOperationsRecorder()
+        let service = AppleUnlockFeedbackService(operations: recorder.operations)
+        let providerSound = Data("verified-provider-wave".utf8)
+
+        await service.perform(
+            UnlockFeedbackRequestDTO(
+                tier: .artifact,
+                soundEnabled: true,
+                hapticEnabled: true
+            ),
+            providerSoundData: providerSound
+        )
+
+        XCTAssertEqual(recorder.playedProviderSounds, [providerSound])
+        XCTAssertEqual(recorder.playedSounds, [])
+        XCTAssertEqual(recorder.hapticCount, 1)
+    }
+
     func testPlaybackBoundaryDoesNotUseAudioSessionOrUIPlaybackFrameworks() throws {
         let packageRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
@@ -233,6 +252,7 @@ private final class FeedbackOperationsRecorder: @unchecked Sendable {
     private var nextSoundID: SystemSoundID = 1
     private var _loadedFilenames: [String] = []
     private var _playedSounds: [SystemSoundID] = []
+    private var _playedProviderSounds: [Data] = []
     private var _hapticCount = 0
 
     lazy var operations = AppleUnlockFeedbackOperations(
@@ -246,6 +266,9 @@ private final class FeedbackOperationsRecorder: @unchecked Sendable {
         playSound: { [self] soundID in
             lock.withLock { _playedSounds.append(soundID) }
         },
+        playProviderSound: { [self] data in
+            lock.withLock { _playedProviderSounds.append(data) }
+        },
         disposeSound: { _ in },
         performHaptic: { [self] in
             lock.withLock { _hapticCount += 1 }
@@ -258,6 +281,10 @@ private final class FeedbackOperationsRecorder: @unchecked Sendable {
 
     var playedSounds: [SystemSoundID] {
         lock.withLock { _playedSounds }
+    }
+
+    var playedProviderSounds: [Data] {
+        lock.withLock { _playedProviderSounds }
     }
 
     var hapticCount: Int {

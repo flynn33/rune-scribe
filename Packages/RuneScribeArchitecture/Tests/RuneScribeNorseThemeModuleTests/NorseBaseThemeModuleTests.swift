@@ -35,7 +35,10 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             [
                 "relic.norse.runestone.weathered",
                 "relic.norse.raven-medallion",
+                "relic.norse.ironbound-shield",
                 "relic.norse.sealed-parchment",
+                "relic.norse.runestone.blackstone",
+                "relic.norse.runestone.frozen",
             ]
         )
         XCTAssertEqual(
@@ -49,9 +52,22 @@ final class NorseBaseThemeModuleTests: XCTestCase {
                 "seal.norse.echo-rune",
             ]
         )
+        XCTAssertEqual(descriptor.codex.frames.map { $0.metadata.id.rawValue }, [
+            "frame.norse.carved-knotwork",
+        ])
+        XCTAssertEqual(descriptor.codex.crests.map { $0.metadata.id.rawValue }, [
+            "crest.norse.forge-master",
+        ])
+        XCTAssertEqual(
+            descriptor.codex.relics.last?.metadata.availability,
+            .reservedInactive
+        )
         XCTAssertNil(descriptor.codex.background.optionalMotionResourceID)
-        XCTAssertEqual(descriptor.resources.count, 42)
-        XCTAssertTrue(descriptor.resources.allSatisfy { $0.requirement == .required })
+        XCTAssertEqual(descriptor.resources.count, 55)
+        XCTAssertEqual(
+            descriptor.resources.filter { $0.requirement == .optional }.map(\.id.rawValue),
+            ["resource.relic.norse.runestone.frozen.geometry"]
+        )
     }
 
     func testDiscoveryDescriptorUsesExactSemanticResourceBindings() throws {
@@ -74,7 +90,7 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         )
         assertResource(
             descriptor.codex.background.reduceMotionResourceID,
-            role: ThemeResourceRoles.backgroundReduceMotion,
+            role: ThemeResourceRoles.backgroundStaticBase,
             media: .png,
             in: resources
         )
@@ -98,19 +114,20 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         )
         assertResource(
             descriptor.codex.vault.encounteredResourceID,
-            role: ThemeResourceRoles.vaultEncountered,
+            role: ThemeResourceRoles.vaultCard,
             media: .png,
             in: resources
         )
         assertResource(
             descriptor.codex.vault.selectedResourceID,
-            role: ThemeResourceRoles.vaultSelected,
+            role: ThemeResourceRoles.vaultCard,
             media: .png,
             in: resources
         )
         for relic in descriptor.codex.relics {
             assertResource(relic.primaryResourceID, role: ThemeResourceRoles.relicMaster, media: .png, in: resources)
-            assertResource(relic.thumbnailResourceID, role: ThemeResourceRoles.relicThumbnail, media: .png, in: resources)
+            XCTAssertEqual(relic.thumbnailResourceID, relic.primaryResourceID)
+            assertResource(relic.thumbnailResourceID, role: ThemeResourceRoles.relicMaster, media: .png, in: resources)
             assertResource(
                 relic.staticFallbackResourceID,
                 role: ThemeResourceRoles.relicStaticShareFallback,
@@ -119,16 +136,17 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             )
             assertResource(
                 relic.highContrastResourceID,
-                role: ThemeResourceRoles.relicHighContrast,
+                role: ThemeResourceRoles.relicStaticShareFallback,
                 media: .png,
                 in: resources
             )
         }
         for seal in descriptor.codex.seals {
             assertResource(seal.vectorResourceID, role: ThemeResourceRoles.sealVectorMaster, media: .pdf, in: resources)
+            XCTAssertEqual(seal.monochromeFallbackResourceID, seal.thumbnailResourceID)
             assertResource(
                 seal.monochromeFallbackResourceID,
-                role: ThemeResourceRoles.sealMonochromeFallback,
+                role: ThemeResourceRoles.sealThumbnail,
                 media: .png,
                 in: resources
             )
@@ -143,7 +161,7 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         )
         assertResource(
             NorseBaseThemeResourceIDs.scriptMapping,
-            role: ThemeResourceRoleID(rawValue: "script.mapping")!,
+            role: ThemeResourceRoleID(rawValue: "script-mapping")!,
             media: .json,
             in: resources
         )
@@ -179,6 +197,11 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             Set(manifest.runtimeRequirements.requiredResources),
             NorseBaseBundledResourceCatalog.all
         )
+        XCTAssertEqual(NorseApplicationResourceCatalog.resourcesByHandle.count, 55)
+        XCTAssertEqual(
+            Set(NorseApplicationResourceCatalog.resourcesByHandle.values),
+            Set(NorseBaseThemeResourceCatalog.definitions.map(\.resource))
+        )
         XCTAssertEqual(
             sha256Hex(manifestData),
             RuneScribeNorseThemeModuleBootstrap.manifestExpectedSHA256Hex
@@ -201,9 +224,9 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             .deletingLastPathComponent()
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-        let originalFont = try Data(contentsOf: repositoryRoot
-            .appendingPathComponent("RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf"))
-        XCTAssertEqual(copiedFont, originalFont)
+        let legacyFont = repositoryRoot
+            .appendingPathComponent("RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyFont.path))
         XCTAssertEqual(
             sha256Hex(copiedFont),
             "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
@@ -286,6 +309,76 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         let runtimeSnapshot = await runtime.snapshot()
         XCTAssertEqual(runtimeSnapshot.status, .running)
         await runtime.stop()
+    }
+
+    func testProductionResourcesPassPhysicalBudgetsWithoutChargingLogicalReuseTwice() throws {
+        let bundle = RuneScribeNorseThemeModuleBootstrap.resourceBundle
+        var payloads: [ApplicationResource: Data] = [:]
+        for definition in NorseBaseThemeResourceCatalog.definitions {
+            guard payloads[definition.resource] == nil else { continue }
+            let url = try XCTUnwrap(bundle.url(
+                forResource: definition.resource.name,
+                withExtension: definition.resource.fileExtension
+            ))
+            payloads[definition.resource] = try Data(contentsOf: url)
+        }
+        let report = try NorseBaseThemeResources.budgetReport(
+            physicalPayloads: payloads
+        )
+        XCTAssertEqual(report.uniquePhysicalBytes, 31_879_723)
+        XCTAssertEqual(report.staticImageBytes, 30_455_573)
+        XCTAssertEqual(report.fontBytes, 55_800)
+        XCTAssertEqual(report.animationBytes, 3_277)
+        XCTAssertEqual(report.soundBytes, 1_334_576)
+        XCTAssertEqual(report.largestResourceBytes, 2_568_492)
+    }
+
+    func testProgressionBindingsUseOnlyLiveAchievementIdentifiers() throws {
+        let bindingsURL = try XCTUnwrap(
+            RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
+                forResource: "Norse-Progression-Bindings-v1.0",
+                withExtension: "json"
+            )
+        )
+        let bindingsRoot = try XCTUnwrap(
+            JSONSerialization.jsonObject(
+                with: Data(contentsOf: bindingsURL)
+            ) as? [String: Any]
+        )
+        let grants = try XCTUnwrap(bindingsRoot["grants"] as? [[String: Any]])
+        let boundAchievements = Set(
+            grants.compactMap { $0["trigger"] as? String }
+                .filter { $0.hasPrefix("achievement.") }
+        )
+
+        var repositoryRoot = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 { repositoryRoot.deleteLastPathComponent() }
+        let progressionURL = repositoryRoot.appendingPathComponent(
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/Rune-Scribe-Progression-Catalog-v1.0.json"
+        )
+        let progressionRoot = try XCTUnwrap(
+            JSONSerialization.jsonObject(
+                with: Data(contentsOf: progressionURL)
+            ) as? [String: Any]
+        )
+        let achievements = try XCTUnwrap(
+            progressionRoot["achievements"] as? [[String: Any]]
+        )
+        let liveAchievementIDs = Set(
+            achievements.compactMap { $0["achievementID"] as? String }
+        )
+
+        XCTAssertTrue(boundAchievements.isSubset(of: liveAchievementIDs))
+        XCTAssertEqual(boundAchievements.count, 7)
+        XCTAssertTrue(
+            boundAchievements.isDisjoint(with: [
+                "achievement.the-correspondent",
+                "achievement.courier-i",
+                "achievement.courier-ii",
+                "achievement.archivist-i",
+                "achievement.archivist-ii",
+            ])
+        )
     }
 
     private func assertResource(

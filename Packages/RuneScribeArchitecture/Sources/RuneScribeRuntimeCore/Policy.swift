@@ -330,6 +330,8 @@ public struct RuntimePolicy: Sendable {
                     RuneScribeRuntimeSettings.unlockFeedbackSoundEnabled,
                     RuneScribeRuntimeSettings.unlockFeedbackHapticsEnabled,
                     RuneScribeRuntimeSettings.unlockFeedbackAnimationEnabled,
+                    RuneScribeRuntimeSettings.selectedRelicByCodex,
+                    RuneScribeRuntimeSettings.selectedSealByCodex,
                 ],
                 RuneScribePolicyClasses.themeCoordinator: [
                     RuneScribeRuntimeSettings.selectedCodex,

@@ -15,6 +15,11 @@ public enum RuntimeSettingValue: Codable, Equatable, Sendable {
         guard case .boolean(let value) = self else { return nil }
         return value
     }
+
+    public var textValue: RuntimeSettingText? {
+        guard case .text(let value) = self else { return nil }
+        return value
+    }
 }
 
 public struct RuntimeSettingText: RawRepresentable, Codable, Equatable, Hashable, Sendable {
@@ -148,6 +153,12 @@ public enum RuneScribeRuntimeSettings {
     public static let selectedCodex = RuntimeSettingID(
         rawValue: "setting.appearance.selected-codex"
     )!
+    public static let selectedRelicByCodex = RuntimeSettingID(
+        rawValue: "setting.appearance.selected-relic-by-codex"
+    )!
+    public static let selectedSealByCodex = RuntimeSettingID(
+        rawValue: "setting.appearance.selected-seal-by-codex"
+    )!
 
     public static let descriptors: [RuntimeSettingDescriptor] = [
         RuntimeSettingDescriptor(
@@ -166,6 +177,20 @@ public enum RuneScribeRuntimeSettings {
             settingID: selectedCodex,
             defaultValue: .text(
                 RuntimeSettingText(rawValue: RuneScribeCodexIDs.norse.rawValue)!
+            )
+        ),
+        RuntimeSettingDescriptor(
+            settingID: selectedRelicByCodex,
+            defaultValue: .text(
+                RuntimeSettingText(
+                    rawValue: "codex.norse=relic.norse.runestone.weathered"
+                )!
+            )
+        ),
+        RuntimeSettingDescriptor(
+            settingID: selectedSealByCodex,
+            defaultValue: .text(
+                RuntimeSettingText(rawValue: "codex.norse=seal.norse.knotwork")!
             )
         ),
     ]

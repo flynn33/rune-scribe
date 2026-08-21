@@ -51,6 +51,7 @@ struct UnlockFeedbackFallbackResourceDescriptor: Equatable, Sendable {
 struct AppleUnlockFeedbackOperations: @unchecked Sendable {
     let makeSound: @Sendable (URL) -> SystemSoundID?
     let playSound: @Sendable (SystemSoundID) -> Void
+    let playProviderSound: @Sendable (Data) -> Void
     let disposeSound: @Sendable (SystemSoundID) -> Void
     let performHaptic: @MainActor @Sendable () -> Void
 
@@ -63,6 +64,32 @@ struct AppleUnlockFeedbackOperations: @unchecked Sendable {
         },
         playSound: { soundID in
             AudioServicesPlaySystemSound(soundID)
+        },
+        playProviderSound: { data in
+            let directory = FileManager.default.temporaryDirectory
+                .appendingPathComponent("RuneScribeUnlockFeedback", isDirectory: true)
+            try? FileManager.default.createDirectory(
+                at: directory,
+                withIntermediateDirectories: true
+            )
+            let url = directory.appendingPathComponent(UUID().uuidString + ".wav")
+            do {
+                try data.write(to: url, options: [.atomic])
+                var soundID = SystemSoundID()
+                guard AudioServicesCreateSystemSoundID(
+                    url as CFURL,
+                    &soundID
+                ) == kAudioServicesNoError else {
+                    try? FileManager.default.removeItem(at: url)
+                    return
+                }
+                AudioServicesPlaySystemSoundWithCompletion(soundID) {
+                    AudioServicesDisposeSystemSoundID(soundID)
+                    try? FileManager.default.removeItem(at: url)
+                }
+            } catch {
+                try? FileManager.default.removeItem(at: url)
+            }
         },
         disposeSound: { soundID in
             AudioServicesDisposeSystemSoundID(soundID)
@@ -86,7 +113,7 @@ struct AppleUnlockFeedbackOperations: @unchecked Sendable {
 /// activates or reconfigures an audio session, so iOS retains silent-mode and
 /// system-volume behavior and existing audio is not taken over.
 @MainActor
-public final class AppleUnlockFeedbackService: UnlockFeedbackProviding {
+public final class AppleUnlockFeedbackService: ThemeUnlockFeedbackProviding {
     private let operations: AppleUnlockFeedbackOperations
     private var sounds: [UnlockFeedbackFallbackResourceID: SystemSoundID] = [:]
 
@@ -113,8 +140,17 @@ public final class AppleUnlockFeedbackService: UnlockFeedbackProviding {
     }
 
     public func perform(_ request: UnlockFeedbackRequestDTO) async {
-        if request.soundEnabled,
-           let soundID = sounds[request.fallbackResourceID] {
+        await perform(request, providerSoundData: nil)
+    }
+
+    public func perform(
+        _ request: UnlockFeedbackRequestDTO,
+        providerSoundData: Data?
+    ) async {
+        if request.soundEnabled, let providerSoundData {
+            operations.playProviderSound(providerSoundData)
+        } else if request.soundEnabled,
+                  let soundID = sounds[request.fallbackResourceID] {
             operations.playSound(soundID)
         }
         if request.hapticEnabled {

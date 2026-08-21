@@ -74,12 +74,12 @@ public actor RuneScribeRuntime {
     private let moduleStateGateway: RuntimeModuleStateGateway
     private let settingsGateway: RuntimeSettingsGateway
     private let availabilityGateway: RuntimeAvailabilityGateway
-    private let unlockFeedbackGateway = RuntimeUnlockFeedbackGateway()
+    private let unlockFeedbackGateway: RuntimeUnlockFeedbackGateway
     private let progressionOutbox: RuntimeProgressionOutbox
     private let existingUserMigrationHandoff: RuntimeExistingUserMigrationHandoff
     private let rootPresentationGateway = RuntimeRootPresentationGateway()
     private let contributionRegistry: RuntimeContributionRegistry
-    private let opaqueResourceRegistry = RuntimeOpaqueResourceRegistry()
+    private let opaqueResourceRegistry: RuntimeOpaqueResourceRegistry
     private let events = RuntimeEventBus()
     private let messages = DirectedMessageRouter()
 
@@ -111,6 +111,11 @@ public actor RuneScribeRuntime {
         self.policy = policy
         self.eligibility = eligibility
         self.environment = environment
+        let opaqueResourceRegistry = RuntimeOpaqueResourceRegistry()
+        self.opaqueResourceRegistry = opaqueResourceRegistry
+        unlockFeedbackGateway = RuntimeUnlockFeedbackGateway(
+            resources: opaqueResourceRegistry
+        )
         contributionRegistry = RuntimeContributionRegistry(
             publishCapabilityID: RuneScribeCapabilities.contributionPublish,
             readCapabilityID: RuneScribeCapabilities.contributionRead,
@@ -172,6 +177,11 @@ public actor RuneScribeRuntime {
         self.policy = policy
         self.eligibility = eligibility
         self.environment = environment
+        let opaqueResourceRegistry = RuntimeOpaqueResourceRegistry()
+        self.opaqueResourceRegistry = opaqueResourceRegistry
+        unlockFeedbackGateway = RuntimeUnlockFeedbackGateway(
+            resources: opaqueResourceRegistry
+        )
         contributionRegistry = RuntimeContributionRegistry(
             publishCapabilityID: RuneScribeCapabilities.contributionPublish,
             readCapabilityID: RuneScribeCapabilities.contributionRead,

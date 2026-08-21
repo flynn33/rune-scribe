@@ -12,6 +12,8 @@ struct ThemePresentationResourcePlan: Equatable, Sendable {
     let backgroundReduceMotionResourceID: ThemeResourceID
     let backgroundHighContrastResourceID: ThemeResourceID
     let backgroundRendererParametersResourceID: ThemeResourceID?
+    let decorativeHeadingResourceID: ThemeResourceID?
+    let unlockAnimationResourceIDByTier: [String: ThemeResourceID]
 
     init(descriptor: ThemeDescriptor) throws {
         guard let script = descriptor.codex.scripts.first(where: {
@@ -35,7 +37,95 @@ struct ThemePresentationResourcePlan: Equatable, Sendable {
         backgroundHighContrastResourceID = descriptor.codex.background.highContrastResourceID
         backgroundRendererParametersResourceID =
             descriptor.codex.background.rendererParametersResourceID
+        decorativeHeadingResourceID = descriptor.resources.first(where: {
+            $0.role.rawValue == "decorative-heading-catalog"
+        })?.id
+        unlockAnimationResourceIDByTier = ThemeUnlockCueSelector.resourceIDsByTier(
+            role: "unlock-animation-cue",
+            descriptor: descriptor
+        )
     }
+}
+
+enum ThemeUnlockCueSelector {
+    static func resourceIDsByTier(
+        role: String,
+        descriptor: ThemeDescriptor
+    ) -> [String: ThemeResourceID] {
+        ProgressionRevealTier.allCases.reduce(into: [:]) { result, tier in
+            let suffix = resourceSuffix(for: tier)
+            let matches = descriptor.resources.filter {
+                $0.role.rawValue == role && $0.id.rawValue.hasSuffix(suffix)
+            }
+            if matches.count == 1 {
+                result[tier.rawValue] = matches[0].id
+            }
+        }
+    }
+
+    static func animationDuration(_ data: Data?) -> Double? {
+        guard let data,
+              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let duration = root["durationSeconds"] as? Double,
+              duration.isFinite,
+              (0.3 ... 3.0).contains(duration)
+        else { return nil }
+        return duration
+    }
+
+    private static func resourceSuffix(for tier: ProgressionRevealTier) -> String {
+        switch tier {
+        case .micro: "reveal-minor"
+        case .artifact: "reveal-relic"
+        case .codex: "reveal-codex"
+        case .mastery: "reveal-mastery"
+        }
+    }
+}
+
+enum ThemeHeadingSlot: String, CaseIterable, Sendable {
+    case workspace = "workspace.main"
+    case settings
+    case receivedMessage = "received-message"
+    case contacts
+    case qrScan = "qr-scan"
+    case share
+    case license
+    case `import`
+    case cipherLibrary = "cipher-library"
+    case appLocked = "app-locked"
+    case pinSet = "pin-set"
+    case pinChange = "pin-change"
+    case pinDisable = "pin-disable"
+    case vault
+}
+
+@MainActor
+enum RuneThemeHeadingInterpreter {
+    private(set) static var current: [ThemeHeadingSlot: String] = [:]
+
+    static func install(_ data: Data?) {
+        guard let data,
+              let object = try? JSONSerialization.jsonObject(with: data),
+              let root = object as? [String: Any],
+              let rawSlots = root["decorativeHeadingSlots"] as? [String: String]
+        else {
+            current = [:]
+            return
+        }
+        current = Dictionary(uniqueKeysWithValues: rawSlots.compactMap { raw, value in
+            guard let slot = ThemeHeadingSlot(rawValue: raw),
+                  !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            else { return nil }
+            return (slot, value)
+        })
+    }
+
+    static func value(for slot: ThemeHeadingSlot, fallback: String) -> String {
+        current[slot] ?? fallback
+    }
+
+    static func reset() { current = [:] }
 }
 
 struct ThemeScriptPresentation: Equatable, Sendable {

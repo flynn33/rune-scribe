@@ -7,6 +7,64 @@ import RuneScribeTestSupport
 import XCTest
 
 final class ThemeCoordinatorConformanceTests: XCTestCase {
+    func testDamagedRequiredNorseFontUsesEmergencyPresentationWithoutStoppingRuntime()
+        async throws
+    {
+        let unavailableFont = NorseBaseBundledResourceCatalog.notoSansRunic
+        let harness = try await makeHarness(
+            providers: [],
+            unavailableBaseResource: unavailableFont
+        )
+        defer { Task { await harness.runtime.stop() } }
+
+        let snapshot = try await harness.probe.waitForSnapshot {
+            $0.isEmergencyPresentation
+        }
+        XCTAssertEqual(snapshot.effectiveCodexID, RuneScribeCodexIDs.norse)
+        XCTAssertEqual(snapshot.fallbackReason, .invalidResources)
+        let base = try XCTUnwrap(
+            provider(in: snapshot, codexID: RuneScribeCodexIDs.norse)
+        )
+        XCTAssertEqual(base.state, .invalidResources)
+        XCTAssertTrue(base.isOwned)
+        XCTAssertFalse(base.isSelectable)
+        XCTAssertTrue(base.isSelected)
+
+        let fontID = try XCTUnwrap(
+            snapshot.effectiveTheme.codex.scripts.first?.fontResourceID
+        )
+        do {
+            _ = try await harness.probe.resolve(
+                ResolveThemeResourceRequestDTO(
+                    codexID: RuneScribeCodexIDs.norse,
+                    resourceID: fontID
+                )
+            )
+            XCTFail("Emergency presentation must not expose an unverified font")
+        } catch {
+            XCTAssertEqual(
+                error as? ThemeCoordinatorModuleError,
+                .resourceUnavailable(
+                    ResolveThemeResourceRequestDTO(
+                        codexID: RuneScribeCodexIDs.norse,
+                        resourceID: fontID
+                    )
+                )
+            )
+        }
+
+        let runtimeSnapshot = await harness.runtime.snapshot()
+        XCTAssertEqual(runtimeSnapshot.status, .running)
+        XCTAssertEqual(
+            runtimeSnapshot.moduleStates[RuneScribeModuleIDs.norseTheme],
+            .active
+        )
+        XCTAssertEqual(
+            runtimeSnapshot.moduleStates[RuneScribeModuleIDs.themeCoordinator],
+            .active
+        )
+    }
+
     func testLockedProvidersActivateSelectResolveAndFallBackAfterRevocation()
         async throws
     {
@@ -419,7 +477,8 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
         providers: [ProviderRegistration],
         permitsDiagnostics: Bool = false,
         includeDiagnosticsClient: Bool = false,
-        serviceCapture: ThemeCoordinatorServiceCapture? = nil
+        serviceCapture: ThemeCoordinatorServiceCapture? = nil,
+        unavailableBaseResource: ApplicationResource? = nil
     ) async throws -> CoordinatorHarness {
         let syntheticPayloadSource = SyntheticThemePayloadSource()
         let runtime = RuneScribeRuntime(
@@ -435,7 +494,9 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
             )
         )
         try await runtime.installPlatformAdapter(
-            CoordinatorNorseResourceLocator(),
+            CoordinatorNorseResourceLocator(
+                unavailableResource: unavailableBaseResource
+            ),
             for: RuneScribeServiceKeys.applicationResourceLocator
         )
         try await runtime.installPlatformAdapter(
@@ -1185,6 +1246,12 @@ private struct CoordinatorTestModule: RuneScribeModule {
 }
 
 private struct CoordinatorNorseResourceLocator: ApplicationResourceLocator, Sendable {
+    let unavailableResource: ApplicationResource?
+
+    init(unavailableResource: ApplicationResource? = nil) {
+        self.unavailableResource = unavailableResource
+    }
+
     func data(for resource: ApplicationResource) async throws -> Data {
         try Data(contentsOf: try location(for: resource))
     }
@@ -1194,7 +1261,8 @@ private struct CoordinatorNorseResourceLocator: ApplicationResourceLocator, Send
     }
 
     private func location(for resource: ApplicationResource) throws -> URL {
-        guard resource.ownerModuleID == RuneScribeModuleIDs.norseTheme,
+        guard resource != unavailableResource,
+              resource.ownerModuleID == RuneScribeModuleIDs.norseTheme,
               let location = RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
                   forResource: resource.name,
                   withExtension: resource.fileExtension,

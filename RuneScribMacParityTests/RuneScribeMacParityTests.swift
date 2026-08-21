@@ -3,6 +3,7 @@ import CryptoKit
 import Foundation
 import RuneScribeContracts
 @testable import RuneScribeCoreModule
+import RuneScribeNorseThemeModule
 import RuneScribePlatform
 @_spi(RuntimeFileImportHost) @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
@@ -297,7 +298,7 @@ final class RuneScribeMacParityTests: XCTestCase {
         _ operation: (MacParityHarness) async throws -> Void
     ) async throws {
         let fontURL = try XCTUnwrap(
-            Bundle(for: Self.self).url(
+            RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
                 forResource: "NotoSansRunic-Regular",
                 withExtension: "ttf"
             )

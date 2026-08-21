@@ -31,7 +31,7 @@ struct QRDisplaySheet: View {
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
-                runic: "ᛊᚺᚨᚱᛖ",
+                slot: .share,
                 subtitle: "Share via QR",
                 trailingButtons: [RuneHeaderButton(
                     systemImage: "xmark",

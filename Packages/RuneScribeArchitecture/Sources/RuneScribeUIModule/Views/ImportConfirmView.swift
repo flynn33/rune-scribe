@@ -60,7 +60,7 @@ struct ImportConfirmView: View {
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
-                runic: "ᛁᛗᛈᛟᚱᛏ",
+                slot: .import,
                 subtitle: "Import Cipher",
                 trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Cancel") {
                     cancelImport()

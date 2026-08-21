@@ -16,12 +16,15 @@ final class RuneScribeUISession: ObservableObject {
     @Published var progressionRailState: OptionalProgressionRailState = .unavailable
     @Published private(set) var themeSnapshot: ThemeCoordinatorSnapshotDTO?
     @Published private(set) var themeScriptPresentation = ThemeScriptPresentation.baseFallback
+    var themeUnlockAnimationDataByTier: [String: Data] = [:]
     @Published var themeSelectionError: String?
     @Published var runtimeSettingsSnapshot: RuntimeSettingsSnapshotDTO?
     @Published var settingsRailState: OptionalProgressionRailState = .unavailable
     @Published var unlockFeedbackPreferences = UnlockFeedbackPreferences.defaults
     @Published var activeReveal: ProgressionRevealSummaryDTO?
     @Published var progressionCommandError: String?
+    @Published var selectedThemeRelicID: ArtifactID?
+    @Published var selectedThemeSealID: ArtifactID?
 
     let resourcePresentation: RuntimeApplicationResourcePresentation
     let inboundFileImportSession: RuntimeInboundFileImportSession
@@ -197,13 +200,17 @@ final class RuneScribeUISession: ObservableObject {
         progressionRailState = .unavailable
         themeSnapshot = nil
         themeScriptPresentation = .baseFallback
+        themeUnlockAnimationDataByTier = [:]
         themeSelectionError = nil
         RuneThemePaletteInterpreter.reset()
+        RuneThemeHeadingInterpreter.reset()
         runtimeSettingsSnapshot = nil
         settingsRailState = .unavailable
         unlockFeedbackPreferences = .defaults
         activeReveal = nil
         progressionCommandError = nil
+        selectedThemeRelicID = nil
+        selectedThemeSealID = nil
         resetRevealPresentationState()
         lastError = nil
         importErrorMessage = nil
@@ -476,6 +483,22 @@ final class RuneScribeUISession: ObservableObject {
         _ snapshot: ThemeCoordinatorSnapshotDTO,
         adoptionGeneration: UInt64
     ) async throws {
+        if snapshot.isEmergencyPresentation {
+            try Task.checkCancellation()
+            guard themeAdoptionGeneration == adoptionGeneration else {
+                throw CancellationError()
+            }
+            resourcePresentation.clearThemeBackground()
+            RuneThemePaletteInterpreter.reset()
+            RuneThemeHeadingInterpreter.reset()
+            themeScriptPresentation = .baseFallback
+            themeUnlockAnimationDataByTier = [:]
+            themeSnapshot = snapshot
+            reconcileThemeArtifactSelections()
+            themeSelectionError =
+                "Norse appearance resources are unavailable. Rune Scribe is using its emergency system presentation; message data and decode remain available."
+            return
+        }
         guard let themeCoordinatorClientHandle,
               let runtimeIOHandle
         else {
@@ -545,13 +568,63 @@ final class RuneScribeUISession: ObservableObject {
             // validated static variants remain usable.
         }
         RuneThemePaletteInterpreter.install(snapshot.effectiveTheme)
+        RuneThemeHeadingInterpreter.install(
+            plan.decorativeHeadingResourceID.flatMap { resolved[$0]?.data }
+        )
         themeScriptPresentation = ThemeScriptPresentation(
             scriptID: plan.scriptID,
             fontPostScriptName: registeredFontName,
             vectorDataByToken: vectorData
         )
+        themeUnlockAnimationDataByTier = Dictionary(
+            uniqueKeysWithValues: plan.unlockAnimationResourceIDByTier.compactMap {
+                tier, resourceID in
+                resolved[resourceID].map { (tier, $0.data) }
+            }
+        )
         themeSnapshot = snapshot
+        reconcileThemeArtifactSelections()
         themeSelectionError = nil
+    }
+
+    func reconcileThemeArtifactSelections() {
+        guard let theme = themeSnapshot?.effectiveTheme else {
+            selectedThemeRelicID = nil
+            selectedThemeSealID = nil
+            return
+        }
+        let codexID = theme.codex.id
+        let owned = Set((progressionSnapshot?.ownership ?? []).compactMap { item -> ArtifactID? in
+            guard item.state == .owned, case .artifact(let id) = item.reference else { return nil }
+            return id
+        })
+        let relicPreference = Self.themeSelectionMap(
+            runtimeSettingsSnapshot?[RuneScribeRuntimeSettings.selectedRelicByCodex]?.textValue?.rawValue
+        )[codexID.rawValue]
+        let sealPreference = Self.themeSelectionMap(
+            runtimeSettingsSnapshot?[RuneScribeRuntimeSettings.selectedSealByCodex]?.textValue?.rawValue
+        )[codexID.rawValue]
+        let selectableRelics = theme.codex.relics.filter {
+            $0.metadata.availability == .included || owned.contains($0.metadata.id)
+        }
+        let selectableSeals = theme.codex.seals.filter {
+            $0.metadata.availability == .included || owned.contains($0.metadata.id)
+        }
+        selectedThemeRelicID = relicPreference.flatMap(ArtifactID.init(rawValue:)).flatMap { preferred in
+            selectableRelics.contains(where: { $0.metadata.id == preferred }) ? preferred : nil
+        } ?? theme.codex.defaultRelicID
+        selectedThemeSealID = sealPreference.flatMap(ArtifactID.init(rawValue:)).flatMap { preferred in
+            selectableSeals.contains(where: { $0.metadata.id == preferred }) ? preferred : nil
+        } ?? selectableSeals.first?.metadata.id
+    }
+
+    static func themeSelectionMap(_ rawValue: String?) -> [String: String] {
+        guard let rawValue else { return [:] }
+        return rawValue.split(separator: ";").compactMap { entry -> (String, String)? in
+            let parts = entry.split(separator: "=", maxSplits: 1).map(String.init)
+            guard parts.count == 2, !parts[0].isEmpty, !parts[1].isEmpty else { return nil }
+            return (parts[0], parts[1])
+        }.reduce(into: [:]) { result, pair in result[pair.0] = pair.1 }
     }
 
     private static func resolveThemeResources(
@@ -568,6 +641,10 @@ final class RuneScribeUISession: ObservableObject {
         }
         if let parameters = plan.backgroundRendererParametersResourceID {
             resourceIDs.insert(parameters)
+        }
+        resourceIDs.formUnion(plan.unlockAnimationResourceIDByTier.values)
+        if let headings = plan.decorativeHeadingResourceID {
+            resourceIDs.insert(headings)
         }
         resourceIDs.formUnion(plan.vectorResourceIDByToken.values)
 

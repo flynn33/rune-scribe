@@ -48,16 +48,14 @@ actor FontCatalog: CoreFontIntegrating {
         self.runtimeIO = runtimeIO
     }
 
-    /// Registers the fixed shipping font and all content-addressed imported
-    /// fonts. The bundled font and directory listing remain boot-critical.
+    /// Registers content-addressed imported fonts. The required Base Theme
+    /// owns and registers the fixed shipping font before UI presentation.
     /// Individual custom entries are quarantined in a key-free report so one
     /// damaged imported file cannot prevent the application from starting.
     @discardableResult
     func registerAvailableFonts() async throws -> FontCatalogRegistrationReport {
         await acquireMutationPermit()
         defer { releaseMutationPermit() }
-
-        try await registerBundledFontIfNeeded()
 
         let paths: [ProtectedPath]
         do {
@@ -139,11 +137,9 @@ actor FontCatalog: CoreFontIntegrating {
         _ = try await postScriptName(for: bytes)
 
         if reference == .bundled {
-            try await registerValidated(
-                bytes,
-                digest: Self.digestHex(reference.sha256),
-                validateName: false
-            )
+            // The Base Theme resource path is the sole registration owner.
+            // Exact supplied bytes are accepted for compatibility validation
+            // but Core does not perform a second process-wide registration.
             return
         }
 
@@ -201,9 +197,6 @@ actor FontCatalog: CoreFontIntegrating {
         }
 
         if reference == .bundled {
-            await acquireMutationPermit()
-            defer { releaseMutationPermit() }
-            try await registerBundledFontIfNeeded()
             return
         }
 
@@ -241,36 +234,6 @@ actor FontCatalog: CoreFontIntegrating {
             source: isBundled ? .bundled : .imported,
             isRegistered: registeredName != nil
         )
-    }
-
-    private func registerBundledFontIfNeeded() async throws {
-        let digest = Self.digestHex(FontRef.bundled.sha256)
-        guard registeredNamesByDigest[digest] == nil else { return }
-        do {
-            let registered = try await runtimeIO.registerBundledSystemFont(
-                .bundledRuneFont,
-                expectedSHA256: FontRef.bundled.sha256
-            )
-            guard !registered.postScriptName.isEmpty else {
-                throw FontCatalogError.cannotRegister
-            }
-            registeredNamesByDigest[digest] = registered.postScriptName
-        } catch let error as RuntimeBundledFontFailure {
-            switch error {
-            case .resourceUnavailable:
-                throw FontCatalogError.resourceUnavailable
-            case .integrityMismatch:
-                throw FontCatalogError.hashMismatch
-            case .unreadableFont:
-                throw FontCatalogError.unreadableFont
-            case .registrationFailed:
-                throw FontCatalogError.cannotRegister
-            }
-        } catch let error as FontCatalogError {
-            throw error
-        } catch {
-            throw FontCatalogError.cannotRegister
-        }
     }
 
     private func validate(_ bytes: Data, expecting reference: FontRef) throws {

@@ -97,6 +97,14 @@ check_file_type() {
   fi
 }
 
+check_absent() {
+  if [ ! -e "$1" ]; then
+    pass_check "$2"
+  else
+    fail_check "$2 (unexpected file is present)"
+  fi
+}
+
 temporary_directory=$(mktemp -d "${TMPDIR:-/tmp}/RuneScribe-shipping-check.XXXXXX") || exit 2
 trap 'rm -rf "$temporary_directory"' EXIT
 
@@ -545,7 +553,7 @@ fi
 
 check_nonempty_file "$macos_resources/Assets.car" "macOS compiled asset catalog is present"
 check_file_type "$macos_resources/AppIcon.icns" "Mac OS X icon" "macOS app icon is present and valid"
-check_file_type "$macos_resources/NotoSansRunic-Regular.ttf" "TrueType Font" "macOS Runic font is present and valid"
+check_absent "$macos_resources/NotoSansRunic-Regular.ttf" "macOS app root does not duplicate the Norse module font"
 check_file_type "$macos_resources/raven-forge-spp-splash.mp4" "ISO Media" "macOS splash video is present and valid"
 check_file_type "$macos_resources/default.metallib" "MetalLib" "macOS Metal shader library is present and valid"
 
@@ -556,7 +564,7 @@ if [ -n "$ios_icon" ] && file -b "$ios_icon" 2>/dev/null | grep -Fq 'PNG image d
 else
   fail_check "iOS app icon is missing or invalid"
 fi
-check_file_type "$ios_resources/NotoSansRunic-Regular.ttf" "TrueType Font" "iOS Runic font is present and valid"
+check_absent "$ios_resources/NotoSansRunic-Regular.ttf" "iOS app root does not duplicate the Norse module font"
 check_file_type "$ios_resources/raven-forge-spp-splash.mp4" "ISO Media" "iOS splash video is present and valid"
 check_file_type "$ios_resources/default.metallib" "MetalLib" "iOS Metal shader library is present and valid"
 
@@ -796,7 +804,7 @@ if [ "$(module_bundle_count "$macos_theme_coordinator_bundles")" -eq 1 ] && \
    [ "$(module_bundle_count "$macos_norse_theme_bundles")" -eq 1 ] && \
    [ "$(module_bundle_count "$ios_theme_coordinator_bundles")" -eq 1 ] && \
    [ "$(module_bundle_count "$ios_norse_theme_bundles")" -eq 1 ]; then
-  if ruby -rdigest - \
+  if ruby -rdigest -rjson - \
       "$macos_theme_coordinator_resource_root" "$macos_norse_theme_resource_root" \
       "$ios_theme_coordinator_resource_root" "$ios_norse_theme_resource_root" \
       >"$temporary_directory/theme-resource-errors" <<'RUBY'
@@ -815,33 +823,50 @@ expected_by_module = {
       "aaa6a0e08f4b7ae9c1fa39a26990dbd7909824aaf6efae08492ab8f86f48507c"
     ]
   },
-  "Norse Theme" => {
-    "NorseBaseLocalizations-en-US-v1.0.json" => [
-      3799,
-      "5151ffb31d7d3622b067422e959d2054ff095ef35f92ca25b1bf4bfcb1de2949"
-    ],
-    "NorseBasePlaceholderAssets-v1.0.json" => [
-      1_019_985,
-      "3a488cfbec99d79f8e776e52e57504c049312d865ba85a336068a2641e8b07d2"
-    ],
-    "NorseBaseScriptFallback-v1.0.json" => [
-      3012,
-      "b4c6b17c75a29faeed7c51f9c34d975b4c8b10c0522f7c3212b8471e53fd2cac"
-    ],
-    "NorseBaseVisualResources-v1.0.json" => [
-      3385,
-      "ede2823478bf8afa7838fe3b6e6965d9e76e6eefd2b745e45431abc68aa0fc38"
-    ],
-    "NotoSansRunic-Regular.ttf" => [
-      55_800,
-      "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
-    ],
-    "module-manifest.json" => [
-      2151,
-      "f0d3588fef8a4accc6f1769e07367ee6f4da99473eff4c77f75ffc0f4e0716fe"
-    ]
-  }
+  "Norse Theme" => {}
 }
+
+norse_integrity_name = "Norse-Resource-Integrity-Manifest-v1.0.json"
+norse_integrity_contract = [
+  24_610,
+  "8bfb935ca4d3b82bdee00ce0f21756811e0d34460c9002dfed4c56ce13f1eb0a"
+]
+norse_fixed_resources = {
+  "module-manifest.json" => [
+    11_726,
+    "cd7d1d28ef3efff04daf2f6ad9103dc83d174e00470592a9d918d187ac8cb804"
+  ],
+  norse_integrity_name => norse_integrity_contract,
+  "crest.norse.forge-master.png" => [123_379, "50a2620294a19c3fa6be7129e1d4973c90ee7abea3fe71ce5640f60ca4a6635f"],
+  "frame.norse.carved-knotwork.png" => [120_537, "632dc82de68d83a8ecec315d7ca7bbda54bbf242b3d5afed3691af0af0d4d36a"],
+  "seal.norse.echo-rune.png" => [159_691, "f98d9f2de501b78586363c3abe0b4949142bdd46523bc2e7c6a4e5d95da6aa36"],
+  "seal.norse.forge-flame.png" => [145_780, "431f95199fd660c29d73d381236b7570bd70da380bf9cdbbd5ffefdfb89d9d2d"],
+  "seal.norse.forge-hammer.png" => [154_174, "5734f5802b5af981ea8691fb720e1e258f32eaf5e7cd38eb447c86fd0f98b126"],
+  "seal.norse.knotwork.png" => [163_306, "b08af25f444603ef8ae702d0317db5eb8dc072e518fb5a0d3ab296166e0091b6"],
+  "seal.norse.longship.png" => [155_920, "0dd5edbb301588219bbc4d12a07d24e558f47db794ee5e9150f650be1b0e769f"],
+  "seal.norse.raven.png" => [152_556, "8ffb0a2bd84838e6142e16130dff93277929cc442629edda2af7570537789448"]
+}
+
+norse_root = roots.fetch("macOS Norse Theme")
+norse_integrity_path = File.join(norse_root, norse_integrity_name)
+if !File.file?(norse_integrity_path) || File.size(norse_integrity_path) != norse_integrity_contract[0] ||
+   Digest::SHA256.file(norse_integrity_path).hexdigest != norse_integrity_contract[1]
+  errors << "macOS Norse Theme frozen integrity manifest is missing or invalid"
+else
+  begin
+    integrity = JSON.parse(File.read(norse_integrity_path))
+    resources = integrity.fetch("resources")
+    errors << "Norse Theme integrity manifest does not declare exactly 47 production resources" unless resources.length == 47
+    manifest_resources = resources.to_h do |resource|
+      [File.basename(resource.fetch("path")), [resource.fetch("byteLength"), resource.fetch("sha256")]]
+    end
+    errors << "Norse Theme integrity manifest has colliding shipping basenames" unless manifest_resources.length == resources.length
+    errors << "Norse Theme fixed resources collide with the frozen manifest" unless (manifest_resources.keys & norse_fixed_resources.keys).empty?
+    expected_by_module["Norse Theme"] = manifest_resources.merge(norse_fixed_resources)
+  rescue JSON::ParserError, KeyError, TypeError => error
+    errors << "Norse Theme integrity manifest cannot define the shipping inventory: #{error.class}"
+  end
+end
 
 def inventory(root)
   packaging_entries = ["Info.plist", "_CodeSignature"]
@@ -1020,18 +1045,8 @@ paths.each_with_index do |path, index|
     errors << "#{platform} Theme Coordinator entitlement requirement differs" unless manifest["entitlementRequirement"].nil?
   when "com.runescribe.module.theme.norse"
     owner = "com.runescribe.module.theme.norse"
-    expected_requirements = {
-      "requiredServices" => ["ApplicationResourceLocator"],
-      "requiredResources" => [
-        { "name" => "module-manifest", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
-        { "name" => "NorseBaseScriptFallback-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
-        { "name" => "NorseBaseVisualResources-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
-        { "name" => "NorseBaseLocalizations-en-US-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner },
-        { "name" => "NotoSansRunic-Regular", "fileExtension" => "ttf", "subdirectory" => nil, "ownerModuleID" => owner },
-        { "name" => "NorseBasePlaceholderAssets-v1.0", "fileExtension" => "json", "subdirectory" => nil, "ownerModuleID" => owner }
-      ],
-      "requiredModuleRoles" => []
-    }
+    requirements = manifest["runtimeRequirements"]
+    required_resources = requirements.is_a?(Hash) ? requirements["requiredResources"] : nil
     expected_entitlement = { "kind" => "always", "identifier" => "unlock.codex.norse" }
     expected_capabilities = [
       "resources.read",
@@ -1041,7 +1056,16 @@ paths.each_with_index do |path, index|
 
     errors << "#{platform} Norse Theme criticality differs" unless manifest["criticality"] == "required"
     errors << "#{platform} Norse Theme default role differs" unless manifest["defaultRole"] == "runescribe.theme.norse"
-    errors << "#{platform} Norse Theme runtime requirements differ" unless manifest["runtimeRequirements"] == expected_requirements
+    errors << "#{platform} Norse Theme runtime requirements are missing" unless requirements.is_a?(Hash)
+    errors << "#{platform} Norse Theme required services differ" unless requirements.is_a?(Hash) && requirements["requiredServices"] == ["ApplicationResourceLocator"]
+    errors << "#{platform} Norse Theme required module roles differ" unless requirements.is_a?(Hash) && requirements["requiredModuleRoles"] == []
+    unless required_resources.is_a?(Array) && required_resources.length == 57
+      errors << "#{platform} Norse Theme does not declare exactly 57 required resources"
+    else
+      identities = required_resources.map { |resource| [resource["name"], resource["fileExtension"]] }
+      errors << "#{platform} Norse Theme required resource identities are not unique" unless identities.uniq.length == 57
+      errors << "#{platform} Norse Theme required resources are not flat owner-scoped declarations" unless required_resources.all? { |resource| resource["subdirectory"].nil? && resource["ownerModuleID"] == owner }
+    end
     errors << "#{platform} Norse Theme requested capabilities differ" unless manifest["capabilitiesRequested"] == expected_capabilities
     errors << "#{platform} Norse Theme published endpoints differ" unless manifest["publishedEndpoints"] == []
     errors << "#{platform} Norse Theme consumed endpoints differ" unless manifest["consumedEndpoints"] == []

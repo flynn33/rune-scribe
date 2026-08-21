@@ -26,6 +26,7 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         let preferredCodexID: CodexID?
         let effectiveCodexID: CodexID
         let fallbackReason: ThemeSelectionFallbackReason
+        let isEmergencyPresentation: Bool
         let effectiveTheme: ThemeDescriptor
         let providers: [ThemeProviderSummaryDTO]
     }
@@ -417,8 +418,8 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
 
         guard let base = records[RuneScribeCodexIDs.norse],
               base.ownerModuleID == RuneScribeModuleIDs.norseTheme,
-              base.state == .available,
-              base.isSelectable
+              base.isOwned,
+              (base.isSelectable || base.state == .invalidResources)
         else {
             throw ThemeCoordinatorModuleError.baseProviderUnavailable
         }
@@ -427,10 +428,16 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         let reconciledSettingsRecordRevision = settingsSnapshot?.settings.first(where: {
             $0.settingID == RuneScribeRuntimeSettings.selectedCodex
         })?.revision ?? 0
-        let selection = Self.effectiveSelection(
-            preference: preference,
-            providers: records
-        )
+        let isEmergencyPresentation = base.state == .invalidResources
+        let selection: (
+            effectiveCodexID: CodexID,
+            reason: ThemeSelectionFallbackReason
+        ) = isEmergencyPresentation
+            ? (
+                effectiveCodexID: RuneScribeCodexIDs.norse,
+                reason: .invalidResources
+            )
+            : Self.effectiveSelection(preference: preference, providers: records)
         let summaries = records.values.map { provider in
             ThemeProviderSummaryDTO(
                 codexID: provider.descriptor.codex.id,
@@ -447,6 +454,7 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             preferredCodexID: preference.codexID,
             effectiveCodexID: selection.effectiveCodexID,
             fallbackReason: selection.reason,
+            isEmergencyPresentation: isEmergencyPresentation,
             effectiveTheme: effectiveTheme,
             providers: summaries
         )
@@ -476,7 +484,8 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
                 effectiveCodexID: content.effectiveCodexID,
                 fallbackReason: content.fallbackReason,
                 effectiveTheme: content.effectiveTheme,
-                providers: content.providers
+                providers: content.providers,
+                isEmergencyPresentation: content.isEmergencyPresentation
             )
             latestContent = content
             latestSnapshot = snapshot

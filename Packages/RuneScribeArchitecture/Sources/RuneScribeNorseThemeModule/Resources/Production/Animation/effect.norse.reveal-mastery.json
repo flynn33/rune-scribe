@@ -1,0 +1,42 @@
+{
+  "id": "effect.norse.reveal-mastery",
+  "rewardClasses": [
+    "mastery"
+  ],
+  "durationSeconds": 2.65,
+  "layers": [
+    {
+      "type": "frameAssembly",
+      "resourceRole": "frame.norse.carved-knotwork",
+      "start": 0.0,
+      "duration": 1.05
+    },
+    {
+      "type": "crestSettle",
+      "resourceRole": "crest.norse.forge-master",
+      "start": 0.72,
+      "duration": 0.78,
+      "fromScale": 1.12
+    },
+    {
+      "type": "forgeGlow",
+      "start": 1.08,
+      "duration": 1.1,
+      "colorRole": "accent.primary",
+      "maximumOpacity": 0.38
+    },
+    {
+      "type": "singleSparkRing",
+      "start": 1.26,
+      "duration": 0.74,
+      "particleCount": 16,
+      "particleRadiusPoints": 1.8
+    }
+  ],
+  "soundCueID": "sound.norse.unlock-mastery",
+  "haptic": "success",
+  "reduceMotion": {
+    "type": "crossfade-staged",
+    "durationSeconds": 0.9
+  }
+}

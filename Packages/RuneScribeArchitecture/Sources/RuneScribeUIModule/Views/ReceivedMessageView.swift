@@ -19,7 +19,7 @@ struct ReceivedMessageView: View {
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
-                runic: "ᛗᛖᛋᛋᚨᚷᛖ",
+                slot: .receivedMessage,
                 subtitle: "Message",
                 trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() }]
             )

@@ -579,6 +579,29 @@ actor RuntimeOpaqueResourceRegistry {
         return ResolvedOpaqueResource(metadata: resource.metadata, data: resource.data)
     }
 
+    func unlockFeedbackSoundData(
+        codexID: CodexID,
+        semanticID: UnlockFeedbackSoundSemanticID
+    ) -> Data? {
+        guard isRuntimeActive else { return nil }
+        let expectedSuffix: String = switch semanticID {
+        case .micro: "unlock-minor"
+        case .artifact: "unlock-relic"
+        case .codex: "unlock-codex"
+        case .mastery: "unlock-mastery"
+        }
+        let namespace = RuntimeThemeContributionCatalog.resourceNamespace(
+            for: codexID
+        )
+        let matches = resources.values.filter {
+            $0.metadata.handle.namespace == namespace
+                && $0.metadata.semanticRole == "unlock-sound-cue"
+                && $0.metadata.handle.resourceID.rawValue.hasSuffix(expectedSuffix)
+        }
+        guard matches.count == 1 else { return nil }
+        return matches[0].data
+    }
+
     fileprivate func changes(
         for lease: RuntimeOpaqueResourceLease
     ) throws -> AsyncStream<UInt64> {
@@ -886,11 +909,6 @@ actor RuntimeOpaqueResourceRegistry {
     private static func isValidPDF(_ data: Data) -> Bool {
         guard data.starts(with: Data("%PDF-".utf8)),
               Data(data.suffix(1_024)).range(of: Data("%%EOF".utf8)) != nil,
-              let text = String(data: data, encoding: .isoLatin1),
-              text.range(
-                  of: #"/Type\s*/Page(?:\s|/|>>)"#,
-                  options: .regularExpression
-              ) != nil,
               pdfDimensions(data) != nil
         else { return false }
         return true
@@ -1003,29 +1021,7 @@ actor RuntimeOpaqueResourceRegistry {
     }
 
     private static func pdfDimensions(_ data: Data) -> (width: Double, height: Double)? {
-        guard let text = String(data: data, encoding: .isoLatin1),
-              let expression = try? NSRegularExpression(
-                  pattern: #"/MediaBox\s*\[\s*([-+]?(?:\d+(?:\.\d*)?|\.\d+))\s+([-+]?(?:\d+(?:\.\d*)?|\.\d+))\s+([-+]?(?:\d+(?:\.\d*)?|\.\d+))\s+([-+]?(?:\d+(?:\.\d*)?|\.\d+))\s*\]"#
-              ),
-              let match = expression.firstMatch(
-                  in: text,
-                  range: NSRange(text.startIndex ..< text.endIndex, in: text)
-              )
-        else { return nil }
-        let values = (1 ... 4).compactMap { index -> Double? in
-            let range = match.range(at: index)
-            guard range.location != NSNotFound,
-                  let swiftRange = Range(range, in: text)
-            else { return nil }
-            return Double(text[swiftRange])
-        }
-        guard values.count == 4 else { return nil }
-        let width = values[2] - values[0]
-        let height = values[3] - values[1]
-        guard width.isFinite, height.isFinite, width > 0, height > 0 else {
-            return nil
-        }
-        return (width, height)
+        RuntimePDFResourceValidation.singlePageDimensions(data)
     }
 
     private static func isValidISOBaseMediaFile(

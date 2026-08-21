@@ -21,15 +21,18 @@ public enum UnlockFeedbackFallbackResourceID: String, Codable, CaseIterable, Sen
 
 public struct UnlockFeedbackRequestDTO: Codable, Equatable, Sendable {
     public let tier: ProgressionRevealTier
+    public let codexID: CodexID
     public let soundEnabled: Bool
     public let hapticEnabled: Bool
 
     public init(
         tier: ProgressionRevealTier,
+        codexID: CodexID = RuneScribeCodexIDs.norse,
         soundEnabled: Bool,
         hapticEnabled: Bool
     ) {
         self.tier = tier
+        self.codexID = codexID
         self.soundEnabled = soundEnabled
         self.hapticEnabled = hapticEnabled
     }
@@ -57,6 +60,16 @@ public struct UnlockFeedbackRequestDTO: Codable, Equatable, Sendable {
 /// semantic request through RuntimeCore and never imports playback frameworks.
 public protocol UnlockFeedbackProviding: Sendable {
     func perform(_ request: UnlockFeedbackRequestDTO) async
+}
+
+/// Optional platform refinement used when Forsetti has resolved and verified
+/// a selected Theme's opaque sound cue. Implementations must retain their
+/// generic fallback when the provider bytes are absent or unusable.
+public protocol ThemeUnlockFeedbackProviding: UnlockFeedbackProviding {
+    func perform(
+        _ request: UnlockFeedbackRequestDTO,
+        providerSoundData: Data?
+    ) async
 }
 
 public enum RuneScribeUnlockFeedback {
