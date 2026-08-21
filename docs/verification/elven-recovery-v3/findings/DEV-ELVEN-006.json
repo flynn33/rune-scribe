@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "findingID": "DEV-ELVEN-006",
+  "status": "PASS",
+  "authority": ["v3 recovery directive", "approved design prose and source masters"],
+  "originalDefect": "Seven report-listed visual features were absent from or unsupported by actual SVG topology.",
+  "priorClaim": "NOT_STARTED",
+  "priorDisposition": "NO_ACCEPTABLE_IMPLEMENTATION",
+  "canonicalSourceChanges": ["scripts/build-elven-production-assets.py", "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0/Source-Masters/Seals", "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0/Source-Masters/Frames"],
+  "generatedOutputs": ["Validation/topology/smallest-output-recognition.json", "Validation/topology/*-smallest.png"],
+  "validators": [{"name":"Elven production package validator","command":"python3 scripts/validate-elven-production-package.py --package-root /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0 --repo-root /Users/jimdaley/GitHub/Rune-Scribe-Elven-Recovery-v3 --output docs/verification/elven-recovery-v3/FullPackageValidation.json","result":"PASS","failureMutationProven":false}],
+  "stableIDs": ["feature.echo-firefly.leaf-trail", "feature.night-owl.crescent", "feature.wild-fox.botanical-curls", "feature.silvervine-frame.moon-gem", "feature.laurel-of-dawn.sun-nodes", "feature.living-root.moss-patches", "feature.briar-court.amethyst-nodes"],
+  "hashes": [{"path":"Validation/topology/smallest-output-recognition.json","sha256":"fb3b2a61b3faca2360eed9cb0d3641bf76f07ab1163a7522201420e4e23c755a"}],
+  "acceptanceCriteria": [{"criterion":"All seven semantic topology groups contain renderable geometry with reviewed 192px output and accessibility text","result":"PASS","evidence":["docs/verification/elven-recovery-v3/FullPackageValidation.json","Validation/topology/smallest-output-recognition.json"]}],
+  "unresolvedSubcriteria": [],
+  "specificBlockedAsset": null
+}

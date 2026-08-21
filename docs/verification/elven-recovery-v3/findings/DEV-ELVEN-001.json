@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "findingID": "DEV-ELVEN-001",
+  "status": "PASS",
+  "authority": ["v3 recovery directive", "repository Progression catalog"],
+  "originalDefect": "The rejected package used invalid achievement and statistic identifiers and did not prove exact canonical resolution.",
+  "priorClaim": "PASS",
+  "priorDisposition": "REJECTED_UNSUPPORTED",
+  "canonicalSourceChanges": [
+    "scripts/build-elven-production-assets.py",
+    "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0/Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json"
+  ],
+  "generatedOutputs": ["Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json"],
+  "validators": [{"name":"Elven production package validator","command":"python3 scripts/validate-elven-production-package.py --package-root /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0 --repo-root /Users/jimdaley/GitHub/Rune-Scribe-Elven-Recovery-v3 --output docs/verification/elven-recovery-v3/FullPackageValidation.json","result":"PASS","failureMutationProven":false}],
+  "stableIDs": ["achievement.correspondent", "achievement.archivist-1", "stat.message.incoming-decoded.unique"],
+  "hashes": [{"path":"Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json","sha256":"fdf707eda1ba2fc6e43afadbbbcf1d5690b6c926c3ffd519d12a3ed65502b3bc"}],
+  "acceptanceCriteria": [{"criterion":"Zero invalid identifiers, exact canonical resolution, mapping evidence, and Progression-owned evaluation","result":"PASS","evidence":["docs/verification/elven-recovery-v3/FullPackageValidation.json"]}],
+  "unresolvedSubcriteria": [],
+  "specificBlockedAsset": null
+}

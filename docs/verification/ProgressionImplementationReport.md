@@ -44,7 +44,7 @@ The verified Progression target currently contains these exact resources:
 | `Rune-Scribe-Progression-Catalog-v1.0.json` | 101,246 | `7b7586d0749abab41aded3e9b3457b665c3a8869ae6d849f9adc55e621a5a142` |
 | `Rune-Scribe-Progression-Event-Catalog-v1.0.json` | 8,950 | `b2ae5b795f75b0c6847d195990d62365d57a7d715d20aff8f44c2c420bd8c2a9` |
 | `Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json` | 2,684 | `2236c49f7e7096701c90acc17283871685577780a05aeb8b8a673f4b35d8277b` |
-| `module-manifest.json` | 2,494 | `bfd270c3d2dbad0b18f1c5127327e881d047697a98cab4115850003db80cd3a3` |
+| `module-manifest.json` | 2,494 | `b6a25bb50010cf68c68c94dd6331a8a30ff27fcdb90872c61e2b628e508f4ca7` |
 
 The optional feedback resources are mono PCM16 WAV files at 22.05 kHz and total
 242,728 bytes:
@@ -260,7 +260,7 @@ The implemented areas are:
   and terminal-share recovery;
 - snapshot-only Progression views, durable reveal presentation, runtime Settings, and
   native share-route normalization;
-- app-host composition, package/project membership, version 1.0.37 build 37, and module
+- app-host composition, package/project membership, version 1.0.38 build 38, and module
   manifests;
 - architecture, shipping, and negative-mutation guards; and
 - Progression architecture, ADR status, roadmap alignment, changelog, and this report.

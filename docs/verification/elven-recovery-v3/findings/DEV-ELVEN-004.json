@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "findingID": "DEV-ELVEN-004",
+  "status": "PASS",
+  "authority": ["v3 recovery directive", "Relic geometry masters"],
+  "originalDefect": "Four lower Seal anchors intersected protected regions on Dawnfire Tablet and Mossbound Plaque.",
+  "priorClaim": "NOT_STARTED",
+  "priorDisposition": "NO_ACCEPTABLE_IMPLEMENTATION",
+  "canonicalSourceChanges": ["scripts/build-elven-production-assets.py", "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0/Source-Masters/Relic-Geometry/sunspire/dawnfire-tablet-geometry.svg", "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0/Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg"],
+  "generatedOutputs": ["Validation/geometry/anchor-safety.json", "Validation/geometry/dawnfire-tablet-geometry-anchor-overlay.png", "Validation/geometry/mossbound-plaque-geometry-anchor-overlay.png"],
+  "validators": [{"name":"Elven production package validator","command":"python3 scripts/validate-elven-production-package.py --package-root /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0 --repo-root /Users/jimdaley/GitHub/Rune-Scribe-Elven-Recovery-v3 --output docs/verification/elven-recovery-v3/FullPackageValidation.json","result":"PASS","failureMutationProven":false}],
+  "stableIDs": ["relic.sunspire.dawnfire-tablet", "relic.wildwood.mossbound-plaque"],
+  "hashes": [{"path":"Validation/geometry/anchor-safety.json","sha256":"57744ba0ddb9ca0f0600988fe1d9b9da0a90cafb911437e6a06d38d92bc8bb3e"}],
+  "acceptanceCriteria": [{"criterion":"All anchors in bounds with zero protected-region intersections, at least 24px clearance, and matching overlays","result":"PASS","evidence":["docs/verification/elven-recovery-v3/FullPackageValidation.json","Validation/geometry/anchor-safety.json"]}],
+  "unresolvedSubcriteria": [],
+  "specificBlockedAsset": null
+}

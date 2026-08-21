@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": {
+    "branch": "elven-recovery-v3",
+    "commitRange": "origin/main...HEAD plus final pending recovery evidence",
+    "paths": [
+      "docs/verification/elven-recovery-v3",
+      "scripts/build-elven-production-assets.py",
+      "scripts/inventory-elven-package.py",
+      "scripts/validate-elven-production-package.py",
+      "scripts/validate-elven-recovery-state.py"
+    ],
+    "externalPackage": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0"
+  },
+  "checks": [
+    {
+      "surface": "branch name",
+      "result": "PASS"
+    },
+    {
+      "surface": "authored file and directory names",
+      "result": "PASS"
+    },
+    {
+      "surface": "authored file content",
+      "result": "PASS"
+    },
+    {
+      "surface": "commit subjects and metadata",
+      "result": "PASS"
+    },
+    {
+      "surface": "external package names and text content",
+      "result": "PASS"
+    },
+    {
+      "surface": "publication title and body",
+      "result": "PASS"
+    }
+  ],
+  "result": "No automated authorship attribution is present on any audited publication surface. Existing product-domain uses of the word Codex identify an Elven Series content feature and are not authorship claims."
+}
