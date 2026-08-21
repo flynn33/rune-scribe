@@ -1,0 +1,46 @@
+{
+  "id": "effect.norse.reveal-codex",
+  "rewardClasses": [
+    "codex"
+  ],
+  "durationSeconds": 2.2,
+  "layers": [
+    {
+      "type": "lockResolve",
+      "start": 0.0,
+      "duration": 0.42
+    },
+    {
+      "type": "knotworkTrace",
+      "resourceRole": "frame.norse.carved-knotwork",
+      "start": 0.25,
+      "duration": 0.86,
+      "strokeRole": "accent.highlight"
+    },
+    {
+      "type": "backgroundColorBloom",
+      "start": 0.38,
+      "duration": 0.92,
+      "fromRole": "background.primary",
+      "toRole": "accent.secondary",
+      "maximumOpacity": 0.22
+    },
+    {
+      "type": "includedContentReveal",
+      "start": 1.12,
+      "duration": 0.72,
+      "sequence": [
+        "script",
+        "default-relic",
+        "included-seal-1",
+        "included-seal-2"
+      ]
+    }
+  ],
+  "soundCueID": "sound.norse.unlock-codex",
+  "haptic": "success",
+  "reduceMotion": {
+    "type": "crossfade-staged",
+    "durationSeconds": 0.8
+  }
+}

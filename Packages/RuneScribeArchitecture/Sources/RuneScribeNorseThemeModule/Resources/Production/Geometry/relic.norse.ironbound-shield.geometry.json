@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "artifactID": "relic.norse.ironbound-shield",
+  "displayName": "Ironbound Round Shield",
+  "canvasPixels": {
+    "width": 1200,
+    "height": 1200
+  },
+  "normalizedInscriptionSafeArea": {
+    "type": "ellipse",
+    "x": 0.285,
+    "y": 0.285,
+    "width": 0.43,
+    "height": 0.43
+  },
+  "sealAnchors": [
+    {
+      "id": "lower-right",
+      "x": 0.77,
+      "y": 0.76,
+      "radius": 0.075
+    },
+    {
+      "id": "lower-left",
+      "x": 0.23,
+      "y": 0.76,
+      "radius": 0.075
+    }
+  ],
+  "messageCapacity": "medium",
+  "minimumGlyphSizePoints": 18,
+  "maximumLines": 4,
+  "textAlignment": "center",
+  "requiresNonColorSelectionCue": true
+}

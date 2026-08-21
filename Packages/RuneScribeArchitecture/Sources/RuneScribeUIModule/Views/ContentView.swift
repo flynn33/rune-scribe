@@ -126,7 +126,7 @@ struct ContentView: View {
             VStack(spacing: 0) {
 
                 RuneHeader(
-                    runic: "ᚱᚢᚾᛖ ᛋᚲᚱᛁᛒᛖ",
+                    slot: .workspace,
                     subtitle: "Rune Scribe",
                     trailingButtons: [
                         RuneHeaderButton(systemImage: "archivebox.fill",
@@ -143,6 +143,8 @@ struct ContentView: View {
                 VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
 
                     activeCipherBar
+
+                    artifactSelectionBar
 
                     if let active = session.activeCipher {
                         if let contact = session.contact(id: active.contactID) {
@@ -500,6 +502,80 @@ struct ContentView: View {
         .background(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous).fill(Color.runeParchment))
         .overlay(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
             .strokeBorder(Color.runeGold.opacity(0.22), lineWidth: 1))
+    }
+
+    private var artifactSelectionBar: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "photo.artframe")
+                .font(.system(size: 12))
+                .foregroundColor(.runeBlue)
+                .accessibilityHidden(true)
+
+            artifactMenu(
+                title: "Relic",
+                selectedID: session.selectedThemeRelicID,
+                items: session.themeRelicItems,
+                kind: .relic
+            )
+
+            Divider().frame(height: 22)
+
+            artifactMenu(
+                title: "Seal",
+                selectedID: session.selectedThemeSealID,
+                items: session.themeSealItems,
+                kind: .seal
+            )
+        }
+        .padding(.horizontal, 12)
+        .frame(minHeight: 44)
+        .background(
+            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                .fill(Color.runeParchment)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                .strokeBorder(Color.runeBlue.opacity(0.22), lineWidth: 1)
+        )
+    }
+
+    private func artifactMenu(
+        title: String,
+        selectedID: ArtifactID?,
+        items: [ThemeArtifactPickerItem],
+        kind: ThemeArtifactSelectionKind
+    ) -> some View {
+        Menu {
+            ForEach(items) { item in
+                Button {
+                    Task { await session.selectThemeArtifact(item.id, kind: kind) }
+                } label: {
+                    Label(
+                        item.name,
+                        systemImage: item.isSelected
+                            ? "checkmark"
+                            : (item.isOwned ? "circle" : "lock.fill")
+                    )
+                }
+                .disabled(!item.isSelectable)
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title.uppercased())
+                    .font(.caption2.weight(.semibold))
+                    .foregroundColor(.runeSilver)
+                Text(items.first(where: { $0.id == selectedID })?.name ?? "Unavailable")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(.runeTextPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .menuIndicator(.visible)
+        .disabled(items.allSatisfy { !$0.isSelectable })
+        .accessibilityLabel("Selected \(title)")
+        .accessibilityValue(items.first(where: { $0.id == selectedID })?.name ?? "Unavailable")
     }
 
     // MARK: - Compose Recipient

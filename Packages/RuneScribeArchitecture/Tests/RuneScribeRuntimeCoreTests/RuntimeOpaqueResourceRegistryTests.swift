@@ -1,4 +1,5 @@
 import CryptoKit
+import CoreGraphics
 import Foundation
 import RuneScribeContracts
 @testable import RuneScribeRuntimeCore
@@ -534,6 +535,105 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
             data: quickTimeBrandedAsMP4,
             equals: .mediaTypeMismatch(mp4.resourceID)
         )
+    }
+
+    func testCompressedObjectStreamPDFIsAcceptedAndMultipagePDFFailsClosed()
+        async throws
+    {
+        let fixture = try await makeFixture()
+        var repositoryRoot = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 { repositoryRoot.deleteLastPathComponent() }
+        let approvedURL = repositoryRoot.appendingPathComponent(
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.raven.pdf"
+        )
+        let approved = try Data(contentsOf: approvedURL)
+        XCTAssertNotNil(approved.range(of: Data("/ObjStm".utf8)))
+        let approvedDeclaration = makeDeclaration(
+            id: "vector.compressed-object-stream",
+            role: "seal.vector-master",
+            mediaType: .pdf,
+            data: approved
+        )
+        try await fixture.provider.register(
+            .init(
+                namespace: "namespace.compressed-object-stream",
+                declarations: [approvedDeclaration],
+                payloads: [
+                    .init(resourceID: approvedDeclaration.resourceID, data: approved),
+                ]
+            )
+        )
+        let resolved = try await fixture.resolver.resolve(
+            OpaqueResourceHandle(
+                namespace: "namespace.compressed-object-stream",
+                resourceID: approvedDeclaration.resourceID
+            )
+        )
+        XCTAssertEqual(resolved.data, approved)
+
+        let multipageStorage = NSMutableData()
+        let consumer = try XCTUnwrap(CGDataConsumer(data: multipageStorage))
+        var mediaBox = CGRect(x: 0, y: 0, width: 128, height: 128)
+        let context = try XCTUnwrap(
+            CGContext(consumer: consumer, mediaBox: &mediaBox, nil)
+        )
+        context.beginPDFPage(nil)
+        context.endPDFPage()
+        context.beginPDFPage(nil)
+        context.endPDFPage()
+        context.closePDF()
+        let multipage = multipageStorage as Data
+        let multipageDeclaration = makeDeclaration(
+            id: "vector.multipage",
+            role: "seal.vector-master",
+            mediaType: .pdf,
+            data: multipage
+        )
+        await assertRegistration(
+            fixture.provider,
+            namespace: "namespace.multipage",
+            declaration: multipageDeclaration,
+            data: multipage,
+            equals: .mediaTypeMismatch(multipageDeclaration.resourceID)
+        )
+    }
+
+    func testUnlockFeedbackSoundResolutionUsesVerifiedSelectedCodexResource()
+        async throws
+    {
+        let fixture = try await makeFixture()
+        var repositoryRoot = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 { repositoryRoot.deleteLastPathComponent() }
+        let soundURL = repositoryRoot.appendingPathComponent(
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Audio/sound.norse.unlock-relic.wav"
+        )
+        let sound = try Data(contentsOf: soundURL)
+        let declaration = makeDeclaration(
+            id: "resource.sound.norse.unlock-relic",
+            role: "unlock-sound-cue",
+            mediaType: .wav,
+            data: sound
+        )
+        try await fixture.provider.register(
+            .init(
+                namespace: OpaqueResourceNamespaceID(
+                    rawValue: RuneScribeCodexIDs.norse.rawValue
+                ),
+                declarations: [declaration],
+                payloads: [.init(resourceID: declaration.resourceID, data: sound)]
+            )
+        )
+
+        let resolved = await fixture.registry.unlockFeedbackSoundData(
+            codexID: RuneScribeCodexIDs.norse,
+            semanticID: .artifact
+        )
+        XCTAssertEqual(resolved, sound)
+        let unavailable = await fixture.registry.unlockFeedbackSoundData(
+            codexID: RuneScribeCodexIDs.norse,
+            semanticID: .mastery
+        )
+        XCTAssertNil(unavailable)
     }
 
     func testModuleGenerationReplacementRemovesResourcesWithoutExplicitInvalidation() async throws {

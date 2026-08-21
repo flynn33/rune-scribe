@@ -1,0 +1,709 @@
+{
+  "schemaVersion": "1.0",
+  "manifestID": "resource-integrity.norse.v1",
+  "moduleID": "com.runescribe.module.theme.norse",
+  "generationScope": "Handoff recommended shipping candidates. Codex must regenerate against final live shipping resources after any approved conversion or optimization.",
+  "resources": [
+    {
+      "resourceHandle": "resource.relic.norse.runestone.weathered.art",
+      "path": "Resources/Relics/ShippingCandidates/relic.norse.runestone.weathered.png",
+      "semanticRole": "relic-art",
+      "mediaType": "image/png",
+      "byteLength": 2100882,
+      "sha256": "9c235fd40b841e16d35be138cf1f46a5061dd8eee79208e8982208b46d647da9",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1600,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.runestone.weathered.geometry",
+      "path": "Resources/Relics/Geometry/relic.norse.runestone.weathered.geometry.json",
+      "semanticRole": "relic-geometry",
+      "mediaType": "application/json",
+      "byteLength": 714,
+      "sha256": "c2ac57230859c86055a58d8c46cda281bc96dc8166954f47b6bdd9276e0fb9e1",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.share-fallback.norse.runestone.weathered",
+      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.runestone.weathered.png",
+      "semanticRole": "static-share-fallback",
+      "mediaType": "image/png",
+      "byteLength": 2444821,
+      "sha256": "5d732b386160b227ec933a4e070ae85227f13b7dccf0dc2a22f47809c08d4c1b",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1600,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.raven-medallion.art",
+      "path": "Resources/Relics/ShippingCandidates/relic.norse.raven-medallion.png",
+      "semanticRole": "relic-art",
+      "mediaType": "image/png",
+      "byteLength": 1602486,
+      "sha256": "460bb7db51c8734b4e6a0807fbe1e76303209a791ef8b5e4b4c5c687338628e7",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1200,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.raven-medallion.geometry",
+      "path": "Resources/Relics/Geometry/relic.norse.raven-medallion.geometry.json",
+      "semanticRole": "relic-geometry",
+      "mediaType": "application/json",
+      "byteLength": 578,
+      "sha256": "ea0037cc3fc2761134e1f1bd2b8e3d0bfc077e1e7ac37910921ba07d5336f36b",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.share-fallback.norse.raven-medallion",
+      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.raven-medallion.png",
+      "semanticRole": "static-share-fallback",
+      "mediaType": "image/png",
+      "byteLength": 2498330,
+      "sha256": "22f0891d8bff407e5b497e1edba3936076e8779e5007d5366bcb7bee13ebf84d",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1600,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.ironbound-shield.art",
+      "path": "Resources/Relics/ShippingCandidates/relic.norse.ironbound-shield.png",
+      "semanticRole": "relic-art",
+      "mediaType": "image/png",
+      "byteLength": 1664406,
+      "sha256": "f10b581420cfd660a3439dbe8ad9c54d0b3c85eeb9c5162ca3f59a48124bf566",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1200,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.ironbound-shield.geometry",
+      "path": "Resources/Relics/Geometry/relic.norse.ironbound-shield.geometry.json",
+      "semanticRole": "relic-geometry",
+      "mediaType": "application/json",
+      "byteLength": 684,
+      "sha256": "b4877308e848f256f3b76e46eed115f215c0166446a0895292418a53759f0f5c",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.share-fallback.norse.ironbound-shield",
+      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.ironbound-shield.png",
+      "semanticRole": "static-share-fallback",
+      "mediaType": "image/png",
+      "byteLength": 2557201,
+      "sha256": "14388717a88b3a0a980bb27a16fb030605c071997cd821ee71a450f0c8038dfa",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1600,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.sealed-parchment.art",
+      "path": "Resources/Relics/ShippingCandidates/relic.norse.sealed-parchment.png",
+      "semanticRole": "relic-art",
+      "mediaType": "image/png",
+      "byteLength": 1772507,
+      "sha256": "f15b28ab19e84e1164cf1f3b605d931ab49ccd88b40e3b759226a15e4531ac00",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1600,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.sealed-parchment.geometry",
+      "path": "Resources/Relics/Geometry/relic.norse.sealed-parchment.geometry.json",
+      "semanticRole": "relic-geometry",
+      "mediaType": "application/json",
+      "byteLength": 697,
+      "sha256": "8d08b882893002da5afd9f8e06e7a0f3f81a109f72584cbc3ea2c3add37cfae6",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.share-fallback.norse.sealed-parchment",
+      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.sealed-parchment.png",
+      "semanticRole": "static-share-fallback",
+      "mediaType": "image/png",
+      "byteLength": 2353385,
+      "sha256": "f734c1f40d4e5499d2732c4050827841ac888da2f88959b4db27ddd600479569",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1600,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.runestone.blackstone.art",
+      "path": "Resources/Relics/ShippingCandidates/relic.norse.runestone.blackstone.png",
+      "semanticRole": "relic-art",
+      "mediaType": "image/png",
+      "byteLength": 2285375,
+      "sha256": "9f161594f50105824675a6c13f808ed4f0f3ca490fd62e05e9b56d81e24c018f",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1600,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.runestone.blackstone.geometry",
+      "path": "Resources/Relics/Geometry/relic.norse.runestone.blackstone.geometry.json",
+      "semanticRole": "relic-geometry",
+      "mediaType": "application/json",
+      "byteLength": 713,
+      "sha256": "0c3b1345f13650fb1a961b20ed5af381a57d10624eae2c850cfd08e9220c0aab",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.share-fallback.norse.runestone.blackstone",
+      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.runestone.blackstone.png",
+      "semanticRole": "static-share-fallback",
+      "mediaType": "image/png",
+      "byteLength": 2568492,
+      "sha256": "e65e90b71d9cd5a0e3c97f38b450f8341b372c80403bb8d523c813b7930cec08",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1600,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.runestone.frozen.art",
+      "path": "Resources/Relics/ShippingCandidates/relic.norse.runestone.frozen.png",
+      "semanticRole": "relic-art",
+      "mediaType": "image/png",
+      "byteLength": 2249646,
+      "sha256": "1540532b89c6c0f4f3f0c18727803a02d6f97dd22d7906dba6882ebdee963995",
+      "requiredForActiveContent": false,
+      "activeInV1": false,
+      "dimensions": {
+        "width": 1600,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.relic.norse.runestone.frozen.geometry",
+      "path": "Resources/Relics/Geometry/relic.norse.runestone.frozen.geometry.json",
+      "semanticRole": "relic-geometry",
+      "mediaType": "application/json",
+      "byteLength": 705,
+      "sha256": "6e48ec956828f06166b4629e38e0707eb74ee7c657c874b3afe2f43b4bfb908c",
+      "requiredForActiveContent": false,
+      "activeInV1": false
+    },
+    {
+      "resourceHandle": "resource.share-fallback.norse.runestone.frozen",
+      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.runestone.frozen.png",
+      "semanticRole": "static-share-fallback",
+      "mediaType": "image/png",
+      "byteLength": 2503093,
+      "sha256": "fe9c9963d5d0a7264b43c058d2e1926cb5e2ebe75ecdd737a9231e4c0c51a417",
+      "requiredForActiveContent": false,
+      "activeInV1": false,
+      "dimensions": {
+        "width": 1600,
+        "height": 1200
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.seal.norse.knotwork.vector",
+      "path": "Resources/Seals/ShippingCandidates/seal.norse.knotwork.pdf",
+      "semanticRole": "seal-vector",
+      "mediaType": "application/pdf",
+      "byteLength": 3057,
+      "sha256": "90a0241c4d22b189bb4e5d31ee34de5c6bcdb5ae6bb07ae0a70c649179a37722",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "pageCount": 1,
+      "firstPagePoints": {
+        "width": 768.0,
+        "height": 768.0
+      }
+    },
+    {
+      "resourceHandle": "resource.seal.norse.forge-flame.vector",
+      "path": "Resources/Seals/ShippingCandidates/seal.norse.forge-flame.pdf",
+      "semanticRole": "seal-vector",
+      "mediaType": "application/pdf",
+      "byteLength": 3017,
+      "sha256": "4e7236d8848448e190bc0891f3b2256c6b7a9145a310288f229f5c1fde51371b",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "pageCount": 1,
+      "firstPagePoints": {
+        "width": 768.0,
+        "height": 768.0
+      }
+    },
+    {
+      "resourceHandle": "resource.seal.norse.raven.vector",
+      "path": "Resources/Seals/ShippingCandidates/seal.norse.raven.pdf",
+      "semanticRole": "seal-vector",
+      "mediaType": "application/pdf",
+      "byteLength": 3110,
+      "sha256": "7205f8ead9ad3aa80300ea5e092c8c445bbfcdb0993a533d48935da12f145836",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "pageCount": 1,
+      "firstPagePoints": {
+        "width": 768.0,
+        "height": 768.0
+      }
+    },
+    {
+      "resourceHandle": "resource.seal.norse.longship.vector",
+      "path": "Resources/Seals/ShippingCandidates/seal.norse.longship.pdf",
+      "semanticRole": "seal-vector",
+      "mediaType": "application/pdf",
+      "byteLength": 3145,
+      "sha256": "1eb0f40d4171befeac3a6d3cfa67efc726a0d5da2289f7efc93c164db2f5fc2c",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "pageCount": 1,
+      "firstPagePoints": {
+        "width": 768.0,
+        "height": 768.0
+      }
+    },
+    {
+      "resourceHandle": "resource.seal.norse.forge-hammer.vector",
+      "path": "Resources/Seals/ShippingCandidates/seal.norse.forge-hammer.pdf",
+      "semanticRole": "seal-vector",
+      "mediaType": "application/pdf",
+      "byteLength": 3190,
+      "sha256": "8e0e1facae3f15895223655a7ec2921bed11fbf310d008a1934a98cf1ba0f481",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "pageCount": 1,
+      "firstPagePoints": {
+        "width": 768.0,
+        "height": 768.0
+      }
+    },
+    {
+      "resourceHandle": "resource.seal.norse.echo-rune.vector",
+      "path": "Resources/Seals/ShippingCandidates/seal.norse.echo-rune.pdf",
+      "semanticRole": "seal-vector",
+      "mediaType": "application/pdf",
+      "byteLength": 3046,
+      "sha256": "d9c0ce6b4a1e461ef6b7082cbd00aeebc683340bdea4a41a6cb5d4a4899d4c18",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "pageCount": 1,
+      "firstPagePoints": {
+        "width": 768.0,
+        "height": 768.0
+      }
+    },
+    {
+      "resourceHandle": "resource.frame.norse.carved-knotwork.vector",
+      "path": "Resources/Frame/frame.norse.carved-knotwork.pdf",
+      "semanticRole": "frame-vector",
+      "mediaType": "application/pdf",
+      "byteLength": 4385,
+      "sha256": "7b293065bfada998c44a2e84a1b0346d2e8d2f961a54333562e5924c40c9e2e4",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "pageCount": 1,
+      "firstPagePoints": {
+        "width": 1200.0,
+        "height": 900.0
+      }
+    },
+    {
+      "resourceHandle": "resource.crest.norse.forge-master.vector",
+      "path": "Resources/Crest/crest.norse.forge-master.pdf",
+      "semanticRole": "crest-vector",
+      "mediaType": "application/pdf",
+      "byteLength": 2963,
+      "sha256": "17f399835e761534fa911cd44dd5be1a73142f1d895d1681f75c5da2e7fe34b7",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "pageCount": 1,
+      "firstPagePoints": {
+        "width": 768.0,
+        "height": 768.0
+      }
+    },
+    {
+      "resourceHandle": "resource.codex-card.norse",
+      "path": "Resources/CodexCard/codex-card.norse.v1.png",
+      "semanticRole": "codex-card",
+      "mediaType": "image/png",
+      "byteLength": 998363,
+      "sha256": "79a1d46b20fe5958c33dd387ffb854d00147c3f47769116ec0ee6a409a521fd0",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1200,
+        "height": 1600
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.codex-silhouette.norse",
+      "path": "Resources/CodexCard/codex-silhouette.norse.v1.png",
+      "semanticRole": "codex-silhouette",
+      "mediaType": "image/png",
+      "byteLength": 663322,
+      "sha256": "821251ccb12aaaba43dd853e99f1090b041755e5ae16c37b472efb00daa92261",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1200,
+        "height": 1600
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.background.norse.forge.static",
+      "path": "Resources/Background/background.norse.forge.static.png",
+      "semanticRole": "reduce-motion-background",
+      "mediaType": "image/png",
+      "byteLength": 480562,
+      "sha256": "2280566de99926bd1c078d9f26cf437c5cde1fa72c274834825c133b5b4f3b31",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 2048,
+        "height": 2048
+      },
+      "colorMode": "P"
+    },
+    {
+      "resourceHandle": "resource.background.norse.high-contrast",
+      "path": "Resources/Background/background.norse.high-contrast.png",
+      "semanticRole": "high-contrast-background",
+      "mediaType": "image/png",
+      "byteLength": 419519,
+      "sha256": "a9a59d3e1587561c9059628a2abf2a1bb871a0428f7838e67e5e31edbc0d01d2",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1920,
+        "height": 1920
+      },
+      "colorMode": "P"
+    },
+    {
+      "resourceHandle": "resource.background.norse.profile",
+      "path": "Machine-Readable/Norse-Background-Profile-v1.0.json",
+      "semanticRole": "background-parameter-record",
+      "mediaType": "application/json",
+      "byteLength": 1678,
+      "sha256": "136e1285f0188665ea6a05578fd010138a9da9e629fd1ae26e796ac85087e1be",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.palette.norse.semantic",
+      "path": "Machine-Readable/Norse-Semantic-Palette-v1.0.json",
+      "semanticRole": "semantic-palette",
+      "mediaType": "application/json",
+      "byteLength": 2556,
+      "sha256": "33403c431735ae92c81816667e3c4040f16da3ff1b0846533a539d024a48652c",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.headings.norse",
+      "path": "Machine-Readable/Norse-Decorative-Heading-Slots-v1.0.json",
+      "semanticRole": "decorative-heading-catalog",
+      "mediaType": "application/json",
+      "byteLength": 779,
+      "sha256": "190a7682b2e4b40251aca028841223e4624b87448534fb3c1fc2a855d586d1e4",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.script.norse.mapping",
+      "path": "Machine-Readable/Norse-Script-Mapping-v1.0.json",
+      "semanticRole": "script-mapping",
+      "mediaType": "application/json",
+      "byteLength": 4552,
+      "sha256": "c66c76259ac7c8e4ac9ad0c42417f49ad4546d6901e339612dec6ef243627264",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.script.norse.specimen",
+      "path": "Resources/Script/script.base-runes.specimen.png",
+      "semanticRole": "script-specimen",
+      "mediaType": "image/png",
+      "byteLength": 91927,
+      "sha256": "ddace76f9dc0bbb11cdc485a71ed1f22b5e4788d8d5429e1902f1ded623d5627",
+      "requiredForActiveContent": false,
+      "activeInV1": true,
+      "dimensions": {
+        "width": 1600,
+        "height": 960
+      },
+      "colorMode": "RGBA"
+    },
+    {
+      "resourceHandle": "resource.accessibility.norse.en",
+      "path": "Resources/Localization/norse-accessibility.en.json",
+      "semanticRole": "accessibility-localization",
+      "mediaType": "application/json",
+      "byteLength": 2972,
+      "sha256": "376354f0c3fcf408b4bfdde894f1e38689ad83dd84d451d0202956af79d1c257",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.localization.norse.en",
+      "path": "Resources/Localization/norse-content.en.json",
+      "semanticRole": "content-localization",
+      "mediaType": "application/json",
+      "byteLength": 9043,
+      "sha256": "58afc0693e8a35808c0776c6cd25069432cbd9b7227bd080ff0fa2bf4fe4a868",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.progression-bindings.norse",
+      "path": "Machine-Readable/Norse-Progression-Bindings-v1.0.json",
+      "semanticRole": "progression-binding-catalog",
+      "mediaType": "application/json",
+      "byteLength": 4826,
+      "sha256": "eeaaa67d71f3e8f3466fdd2a76b56f8ff673fa50325c7e17225223412f795bca",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.sound.norse.unlock-minor",
+      "path": "Resources/Audio/sound.norse.unlock-minor.wav",
+      "semanticRole": "unlock-sound-candidate",
+      "mediaType": "audio/wav",
+      "byteLength": 157484,
+      "sha256": "86ff6f83532792c120885c4177fbf4577aea4d9c93ce1a00ae92ef675d663231",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 2,
+        "sampleWidthBytes": 2,
+        "frameCount": 39360,
+        "durationSeconds": 0.82
+      }
+    },
+    {
+      "resourceHandle": "resource.effect.norse.reveal-minor",
+      "path": "Resources/Animation/effect.norse.reveal-minor.json",
+      "semanticRole": "unlock-animation-cue",
+      "mediaType": "application/json",
+      "byteLength": 638,
+      "sha256": "7886f75c160e25dfca5afa836b5ba0a87bf0669eee7da7f40ab441c855f11eb5",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.sound.norse.unlock-relic",
+      "path": "Resources/Audio/sound.norse.unlock-relic.wav",
+      "semanticRole": "unlock-sound-candidate",
+      "mediaType": "audio/wav",
+      "byteLength": 245804,
+      "sha256": "fd03dc2727db17991724175ad4de0e8441ceb635157869147e3ec4c4246d17d0",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 2,
+        "sampleWidthBytes": 2,
+        "frameCount": 61440,
+        "durationSeconds": 1.28
+      }
+    },
+    {
+      "resourceHandle": "resource.effect.norse.reveal-relic",
+      "path": "Resources/Animation/effect.norse.reveal-relic.json",
+      "semanticRole": "unlock-animation-cue",
+      "mediaType": "application/json",
+      "byteLength": 797,
+      "sha256": "1f72a5bdd443ea8edb38604c90d7de8c5b6cefa18f486b7ddee918996a22cb0f",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.sound.norse.unlock-codex",
+      "path": "Resources/Audio/sound.norse.unlock-codex.wav",
+      "semanticRole": "unlock-sound-candidate",
+      "mediaType": "audio/wav",
+      "byteLength": 422444,
+      "sha256": "92002d43b73dfbb6240ab8c3166b5044f9ebec9dc919925934774875caaa92f8",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 2,
+        "sampleWidthBytes": 2,
+        "frameCount": 105600,
+        "durationSeconds": 2.2
+      }
+    },
+    {
+      "resourceHandle": "resource.effect.norse.reveal-codex",
+      "path": "Resources/Animation/effect.norse.reveal-codex.json",
+      "semanticRole": "unlock-animation-cue",
+      "mediaType": "application/json",
+      "byteLength": 960,
+      "sha256": "7bb5b550ad37ea2cebf7619d78c165a62101b4e9a7b0d1dcee78801768161b4d",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.sound.norse.unlock-mastery",
+      "path": "Resources/Audio/sound.norse.unlock-mastery.wav",
+      "semanticRole": "unlock-sound-candidate",
+      "mediaType": "audio/wav",
+      "byteLength": 508844,
+      "sha256": "a5e4be793829f6abc73727f6441894d79d0e93b548f754dc35005aac529f2682",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "audio": {
+        "sampleRate": 48000,
+        "channels": 2,
+        "sampleWidthBytes": 2,
+        "frameCount": 127200,
+        "durationSeconds": 2.65
+      }
+    },
+    {
+      "resourceHandle": "resource.effect.norse.reveal-mastery",
+      "path": "Resources/Animation/effect.norse.reveal-mastery.json",
+      "semanticRole": "unlock-animation-cue",
+      "mediaType": "application/json",
+      "byteLength": 882,
+      "sha256": "8abd4c76f20243d2da901a4a87ba5a691efadadc669a75da23b1e53f8f59364f",
+      "requiredForActiveContent": true,
+      "activeInV1": true
+    },
+    {
+      "resourceHandle": "resource.font.norse.noto-sans-runic",
+      "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+      "semanticRole": "required-base-script-font",
+      "mediaType": "font/ttf",
+      "byteLength": 55800,
+      "sha256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b",
+      "requiredForActiveContent": true,
+      "activeInV1": true,
+      "includedInHandoff": true
+    }
+  ],
+  "budgetSummary": {
+    "encodedDescriptor": {
+      "actualBytes": 3745,
+      "limitBytes": 262144,
+      "pass": true
+    },
+    "largestStaticImage": {
+      "actualBytes": 2568492,
+      "limitBytes": 8388608,
+      "largestDimensions": {
+        "width": 2048,
+        "height": 2048
+      },
+      "dimensionLimit": 4096,
+      "pass": true
+    },
+    "staticImageCatalog": {
+      "actualBytes": 24501578,
+      "limitBytes": 33554432,
+      "pass": true
+    },
+    "fontCatalog": {
+      "actualBytes": 55800,
+      "limitBytes": 16777216,
+      "pass": true
+    },
+    "animationCatalog": {
+      "actualBytes": 3277,
+      "limitBytes": 16777216,
+      "pass": true
+    },
+    "largestSound": {
+      "actualBytes": 508844,
+      "limitBytes": 2097152,
+      "pass": true
+    },
+    "soundCatalog": {
+      "actualBytes": 1334576,
+      "limitBytes": 8388608,
+      "pass": true
+    },
+    "completeThemeResources": {
+      "actualBytes": 25950900,
+      "limitBytes": 67108864,
+      "pass": true
+    }
+  },
+  "sourceOnlyExclusions": [
+    "SVG source masters",
+    "visual reference boards",
+    "repository source snapshots",
+    "implementation documents",
+    "proof PNGs when a PDF is the selected shipping representation"
+  ],
+  "formatPolicy": {
+    "acceptedShippingFormats": [
+      "JSON",
+      "PNG",
+      "HEIF",
+      "PDF",
+      "TTF",
+      "OTF",
+      "MP4",
+      "MOV",
+      "M4A",
+      "CAF",
+      "WAV"
+    ],
+    "rejectedShippingFormats": [
+      "SVG",
+      "archive",
+      "shader source",
+      "HTML",
+      "remote URL",
+      "executable code"
+    ]
+  }
+}

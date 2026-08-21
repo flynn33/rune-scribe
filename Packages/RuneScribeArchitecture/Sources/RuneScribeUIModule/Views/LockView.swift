@@ -16,7 +16,7 @@ struct LockView: View {
             Color.runeNavy.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                RuneHeader(runic: "ᚱᚢᚾᛖ ᛚᛟᚲ", subtitle: "Locked")
+                RuneHeader(slot: .appLocked, subtitle: "Locked")
 
                 GeometryReader { proxy in
                     ScrollView {

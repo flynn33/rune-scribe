@@ -67,6 +67,111 @@ final class SemanticThemePresentationTests: XCTestCase {
             descriptor.codex.background.rendererParametersResourceID
         )
         XCTAssertTrue(plan.vectorResourceIDByToken.isEmpty)
+        XCTAssertEqual(plan.unlockAnimationResourceIDByTier.count, 4)
+    }
+
+    func testNorseUnlockAnimationParametersDriveAllRevealTierDurations() throws {
+        let plan = try ThemePresentationResourcePlan(
+            descriptor: RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        )
+        let expected: [(ProgressionRevealTier, Double)] = [
+            (.micro, 0.78),
+            (.artifact, 1.28),
+            (.codex, 2.2),
+            (.mastery, 2.65),
+        ]
+        for (tier, duration) in expected {
+            let resourceID = try XCTUnwrap(
+                plan.unlockAnimationResourceIDByTier[tier.rawValue]
+            )
+            let reference = try XCTUnwrap(
+                RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor.resources
+                    .first(where: { $0.id == resourceID })
+            )
+            let url = try XCTUnwrap(
+                RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
+                    forResource: URL(fileURLWithPath: resourceID.rawValue).lastPathComponent
+                        .replacingOccurrences(of: "resource.effect.norse.", with: "effect.norse."),
+                    withExtension: "json"
+                )
+            )
+            XCTAssertEqual(reference.role.rawValue, "unlock-animation-cue")
+            XCTAssertEqual(
+                ThemeUnlockCueSelector.animationDuration(try Data(contentsOf: url)),
+                duration
+            )
+        }
+        XCTAssertNil(ThemeUnlockCueSelector.animationDuration(Data("{}".utf8)))
+    }
+
+    func testDecorativeHeadingCatalogInstallsAllApprovedSlotsAndFailsClosed() throws {
+        defer { RuneThemeHeadingInterpreter.reset() }
+        let url = try XCTUnwrap(
+            RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
+                forResource: "Norse-Decorative-Heading-Slots-v1.0",
+                withExtension: "json"
+            )
+        )
+
+        RuneThemeHeadingInterpreter.install(try Data(contentsOf: url))
+
+        XCTAssertEqual(RuneThemeHeadingInterpreter.current.count, 13)
+        XCTAssertNotEqual(
+            RuneThemeHeadingInterpreter.value(for: .workspace, fallback: "Rune Scribe"),
+            "Rune Scribe"
+        )
+        XCTAssertEqual(
+            RuneThemeHeadingInterpreter.value(for: .vault, fallback: "Vault"),
+            "Vault"
+        )
+
+        RuneThemeHeadingInterpreter.install(Data("{".utf8))
+        XCTAssertEqual(RuneThemeHeadingInterpreter.current, [:])
+        XCTAssertEqual(
+            RuneThemeHeadingInterpreter.value(for: .settings, fallback: "Settings"),
+            "Settings"
+        )
+    }
+
+    func testUIModuleSourcesContainNoHardCodedRunicLiterals() throws {
+        var repositoryRoot = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 { repositoryRoot.deleteLastPathComponent() }
+        let sources = repositoryRoot.appendingPathComponent(
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"
+        )
+        let enumerator = try XCTUnwrap(
+            FileManager.default.enumerator(
+                at: sources,
+                includingPropertiesForKeys: [.isRegularFileKey]
+            )
+        )
+        var violatingFiles: [String] = []
+        for case let url as URL in enumerator where url.pathExtension == "swift" {
+            let text = try String(contentsOf: url, encoding: .utf8)
+            if text.unicodeScalars.contains(where: { (0x16A0 ... 0x16FF).contains($0.value) }) {
+                violatingFiles.append(url.lastPathComponent)
+            }
+        }
+        XCTAssertEqual(violatingFiles, [])
+    }
+
+    func testPerCodexArtifactSelectionTextIsDeterministicAndFailClosed() {
+        XCTAssertEqual(
+            RuneScribeUISession.themeSelectionMap(
+                "codex.elven=relic.elven.one;codex.norse=relic.norse.raven-medallion"
+            ),
+            [
+                "codex.elven": "relic.elven.one",
+                "codex.norse": "relic.norse.raven-medallion",
+            ]
+        )
+        XCTAssertEqual(
+            RuneScribeUISession.themeSelectionMap(
+                "broken;=missing;codex.norse=first;codex.norse=second"
+            ),
+            ["codex.norse": "second"]
+        )
+        XCTAssertEqual(RuneScribeUISession.themeSelectionMap(nil), [:])
     }
 
     func testImportedCipherFontIsTheExplicitThemeScriptCompatibilityException() {
@@ -147,29 +252,16 @@ final class SemanticThemePresentationTests: XCTestCase {
 
     #if os(macOS)
     func testVectorPresentationRendersARealProviderPDFGlyph() throws {
-        struct PlaceholderCatalog: Decodable {
-            struct Asset: Decodable {
-                let mediaType: String
-                let data: Data
-            }
-            let assets: [Asset]
-        }
         let url = try XCTUnwrap(
             RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
-                forResource: "NorseBasePlaceholderAssets-v1.0",
-                withExtension: "json"
+                forResource: "seal.norse.raven",
+                withExtension: "pdf"
             )
         )
-        let catalog = try JSONDecoder().decode(
-            PlaceholderCatalog.self,
-            from: Data(contentsOf: url)
-        )
-        let vector = try XCTUnwrap(
-            catalog.assets.first(where: { $0.mediaType == "application/pdf" })
-        )
+        let vector = try Data(contentsOf: url)
         let view = RuntimeThemeVectorText(
             text: "ᚠ",
-            glyphDataByTextToken: ["ᚠ": vector.data],
+            glyphDataByTextToken: ["ᚠ": vector],
             pointSize: 72,
             color: .black
         )

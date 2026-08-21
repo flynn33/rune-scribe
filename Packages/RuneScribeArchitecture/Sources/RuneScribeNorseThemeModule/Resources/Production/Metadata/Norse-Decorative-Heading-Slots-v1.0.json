@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "codexID": "codex.norse",
+  "decorativeHeadingSlots": {
+    "workspace.main": "ᚱᚢᚾᛖ ᛋᚲᚱᛁᛒᛖ",
+    "settings": "ᛋᛖᛏᛏᛁᛜᛋ",
+    "received-message": "ᛗᛖᛋᛋᚨᚷᛖ",
+    "contacts": "ᚲᛟᚾᛏᚪᚲᛏᛋ",
+    "qr-scan": "ᛊᚲᚨᚾ",
+    "share": "ᛊᚺᚨᚱᛖ",
+    "license": "ᛚᛁᚲᛖᚾᛋᛖ",
+    "import": "ᛁᛗᛈᛟᚱᛏ",
+    "cipher-library": "ᚲᛁᛈᚺᛖᚱᛋ",
+    "app-locked": "ᚱᚢᚾᛖ ᛚᛟᚲ",
+    "pin-set": "ᛋᛖᛏ ᛈᛁᚾ",
+    "pin-change": "ᚲᚺᚨᚾᚷᛖ",
+    "pin-disable": "ᛞᛁᛋᚨᛒᛚᛖ"
+  },
+  "accessibilityPolicy": "Decorative headings are hidden from VoiceOver when the adjacent localized subtitle communicates the same destination."
+}

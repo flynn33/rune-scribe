@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "1.0",
+  "locale": "en",
+  "series": {
+    "series.founding-codex": {
+      "name": "Founding Codex"
+    }
+  },
+  "codex": {
+    "codex.norse": {
+      "name": "Norse Codex",
+      "tagline": "The Founding Codex",
+      "shortDescription": "Weathered stone, forged iron, restrained knotwork, and the permanent Base Rune Script.",
+      "longDescription": "The permanent founding Codex of Rune Scribe. Norse is always installed, always owned, and always available as the secure presentation fallback."
+    }
+  },
+  "script": {
+    "script.base-runes": {
+      "name": "Base Rune Script",
+      "description": "Rune Scribe’s original 32-symbol Unicode-portable visual alphabet."
+    }
+  },
+  "relics": {
+    "relic.norse.runestone.weathered": {
+      "name": "Weathered Rune Stone",
+      "description": "A broad weathered stone canvas framed in forged iron and restrained knotwork. The dependable Norse surface for short and long inscriptions."
+    },
+    "relic.norse.raven-medallion": {
+      "name": "Raven Medallion",
+      "description": "A circular forged medallion with a pale stone face and raven crest, intended for concise messages."
+    },
+    "relic.norse.ironbound-shield": {
+      "name": "Ironbound Round Shield",
+      "description": "A round wooden shield reinforced with iron, with a protected central field for compact inscriptions."
+    },
+    "relic.norse.sealed-parchment": {
+      "name": "Sealed Parchment",
+      "description": "A wide sheet of aged parchment held by forged fittings and a raven seal, optimized for longer messages."
+    },
+    "relic.norse.runestone.blackstone": {
+      "name": "Blackstone Rune Stone",
+      "description": "A ceremonial black stone tablet crossed by restrained gold and blue forge-light cracks, awarded for Norse mastery."
+    },
+    "relic.norse.runestone.frozen": {
+      "name": "Frozen Rune Stone",
+      "description": "A pale rune stone edged with frost and ice, reserved for a separately approved winter Season challenge."
+    }
+  },
+  "seals": {
+    "seal.norse.knotwork": {
+      "name": "Knotwork Mark",
+      "description": "An interlaced gold knot surrounding a small blue center stone."
+    },
+    "seal.norse.forge-flame": {
+      "name": "Forge Flame",
+      "description": "A gold forge flame with a restrained blue inner flame."
+    },
+    "seal.norse.raven": {
+      "name": "Raven Seal",
+      "description": "A silver raven in profile on a dark forged medallion."
+    },
+    "seal.norse.longship": {
+      "name": "Longship Seal",
+      "description": "A longship above a single blue wave, representing sustained correspondence."
+    },
+    "seal.norse.forge-hammer": {
+      "name": "Forge Hammer Seal",
+      "description": "A forged hammer with a small blue spark."
+    },
+    "seal.norse.echo-rune": {
+      "name": "Echo Rune Seal",
+      "description": "A central rune between expanding gold and blue echo arcs, earned through incoming Norse-presented messages."
+    }
+  },
+  "frames": {
+    "frame.norse.carved-knotwork": {
+      "name": "Carved Knotwork Frame",
+      "description": "A carved silver-and-gold knotwork border with restrained corner ornaments."
+    }
+  },
+  "crests": {
+    "crest.norse.forge-master": {
+      "name": "Forge Master Crest",
+      "description": "A shield-shaped crest showing an anvil, blue flame, and paired silver wings."
+    }
+  },
+  "statusLabels": {
+    "included": "Included",
+    "owned": "Owned",
+    "selected": "Selected",
+    "locked": "Locked",
+    "unavailable": "Unavailable",
+    "reserved": "Reserved",
+    "foundingCodex": "Founding Codex",
+    "alwaysAvailable": "Always Available"
+  },
+  "requirements": {
+    "achievement.first-inscription": "Complete your first unique inscription.",
+    "achievement.first-dispatch": "Complete your first eligible share.",
+    "achievement.correspondent": "Establish your first bidirectional cipher relationship.",
+    "achievement.courier-1": "Complete five eligible unique shares.",
+    "achievement.courier-2": "Complete twenty-five eligible unique shares.",
+    "achievement.archivist-1": "Create or import five ciphers.",
+    "achievement.archivist-2": "Create or import twenty ciphers.",
+    "rule.codex.norse.echo-five": "Decode five valid incoming messages presented with the Norse Codex.",
+    "rule.codex.norse.mastery": "Complete the approved Norse mastery requirements.",
+    "rule.season.winter.frozen-runestone": "Reserved for a future approved winter Season challenge."
+  },
+  "strings": {
+    "series.founding-codex.name": "Founding Codex",
+    "codex.norse.name": "Norse Codex",
+    "codex.norse.tagline": "The Founding Codex",
+    "codex.norse.short-description": "Weathered stone, forged iron, restrained knotwork, and the permanent Base Rune Script.",
+    "codex.norse.long-description": "The permanent founding Codex of Rune Scribe. Norse is always installed, always owned, and always available as the secure presentation fallback.",
+    "script.base-runes.name": "Base Rune Script",
+    "script.base-runes.description": "Rune Scribe’s original 32-symbol Unicode-portable visual alphabet.",
+    "relic.norse.runestone.weathered.name": "Weathered Rune Stone",
+    "relic.norse.runestone.weathered.description": "A broad weathered stone canvas framed in forged iron and restrained knotwork. The dependable Norse surface for short and long inscriptions.",
+    "relic.norse.raven-medallion.name": "Raven Medallion",
+    "relic.norse.raven-medallion.description": "A circular forged medallion with a pale stone face and raven crest, intended for concise messages.",
+    "relic.norse.ironbound-shield.name": "Ironbound Round Shield",
+    "relic.norse.ironbound-shield.description": "A round wooden shield reinforced with iron, with a protected central field for compact inscriptions.",
+    "relic.norse.sealed-parchment.name": "Sealed Parchment",
+    "relic.norse.sealed-parchment.description": "A wide sheet of aged parchment held by forged fittings and a raven seal, optimized for longer messages.",
+    "relic.norse.runestone.blackstone.name": "Blackstone Rune Stone",
+    "relic.norse.runestone.blackstone.description": "A ceremonial black stone tablet crossed by restrained gold and blue forge-light cracks, awarded for Norse mastery.",
+    "relic.norse.runestone.frozen.name": "Frozen Rune Stone",
+    "relic.norse.runestone.frozen.description": "A pale rune stone edged with frost and ice, reserved for a separately approved winter Season challenge.",
+    "seal.norse.knotwork.name": "Knotwork Mark",
+    "seal.norse.knotwork.description": "An interlaced gold knot surrounding a small blue center stone.",
+    "seal.norse.forge-flame.name": "Forge Flame",
+    "seal.norse.forge-flame.description": "A gold forge flame with a restrained blue inner flame.",
+    "seal.norse.raven.name": "Raven Seal",
+    "seal.norse.raven.description": "A silver raven in profile on a dark forged medallion.",
+    "seal.norse.longship.name": "Longship Seal",
+    "seal.norse.longship.description": "A longship above a single blue wave, representing sustained correspondence.",
+    "seal.norse.forge-hammer.name": "Forge Hammer Seal",
+    "seal.norse.forge-hammer.description": "A forged hammer with a small blue spark.",
+    "seal.norse.echo-rune.name": "Echo Rune Seal",
+    "seal.norse.echo-rune.description": "A central rune between expanding gold and blue echo arcs, earned through incoming Norse-presented messages.",
+    "frame.norse.carved-knotwork.name": "Carved Knotwork Frame",
+    "frame.norse.carved-knotwork.description": "A carved silver-and-gold knotwork border with restrained corner ornaments.",
+    "crest.norse.forge-master.name": "Forge Master Crest",
+    "crest.norse.forge-master.description": "A shield-shaped crest showing an anvil, blue flame, and paired silver wings.",
+    "status.included": "Included",
+    "status.owned": "Owned",
+    "status.selected": "Selected",
+    "status.locked": "Locked",
+    "status.unavailable": "Unavailable",
+    "status.reserved": "Reserved",
+    "status.foundingCodex": "Founding Codex",
+    "status.alwaysAvailable": "Always Available",
+    "requirement.achievement.first-inscription": "Complete your first unique inscription.",
+    "requirement.achievement.first-dispatch": "Complete your first eligible share.",
+    "requirement.achievement.correspondent": "Establish your first bidirectional cipher relationship.",
+    "requirement.achievement.courier-1": "Complete five eligible unique shares.",
+    "requirement.achievement.courier-2": "Complete twenty-five eligible unique shares.",
+    "requirement.achievement.archivist-1": "Create or import five ciphers.",
+    "requirement.achievement.archivist-2": "Create or import twenty ciphers.",
+    "requirement.rule.codex.norse.echo-five": "Decode five valid incoming messages presented with the Norse Codex.",
+    "requirement.rule.codex.norse.mastery": "Complete the approved Norse mastery requirements.",
+    "requirement.rule.season.winter.frozen-runestone": "Reserved for a future approved winter Season challenge."
+  }
+}

@@ -514,6 +514,33 @@ final class ThemeContractTests: XCTestCase {
         )
     }
 
+    func testSemanticResourceReuseAllowsOnlyExplicitlyCompatibleRoles() throws {
+        let reusedThumbnail = try decodeDescriptor { object in
+            var codex = object["codex"] as! [String: Any]
+            var relics = codex["relics"] as! [[String: Any]]
+            relics[0]["thumbnailResourceID"] = relics[0]["primaryResourceID"]
+            codex["relics"] = relics
+            object["codex"] = codex
+        }
+        XCTAssertEqual(
+            reusedThumbnail.codex.relics[0].thumbnailResourceID,
+            reusedThumbnail.codex.relics[0].primaryResourceID
+        )
+
+        XCTAssertThrowsError(
+            try decodeDescriptor { object in
+                var codex = object["codex"] as! [String: Any]
+                var relics = codex["relics"] as! [[String: Any]]
+                let background = codex["background"] as! [String: Any]
+                relics[0]["thumbnailResourceID"] = background["staticBaseResourceID"]
+                codex["relics"] = relics
+                object["codex"] = codex
+            }
+        ) { error in
+            XCTAssertNotNil(error as? DecodingError)
+        }
+    }
+
     func testDescriptorBindsEverySemanticResourceFamilyToRoleAndMedia() throws {
         let mutations: [(resourceID: String, invalidMedia: String)] = [
             ("resource.script.font", ThemeResourceMediaType.json.rawValue),

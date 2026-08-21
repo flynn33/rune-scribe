@@ -269,9 +269,10 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: RuneScribIOSUITests
-      - path: RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf
     dependencies:
       - target: RuneScrib-iOS
+      - package: RuneScribeArchitecture
+        product: RuneScribeNorseThemeModule
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.ios-ui-tests
@@ -333,9 +334,10 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: RuneScribMacParityTests
-      - path: RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf
     dependencies:
       - target: RuneScribMacParityHost
+      - package: RuneScribeArchitecture
+        product: RuneScribeNorseThemeModule
       - package: RuneScribeArchitecture
         product: RuneScribeTestSupport
     settings:

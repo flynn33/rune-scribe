@@ -1,0 +1,208 @@
+{
+  "schemaVersion": "1.0",
+  "scriptID": "script.base-runes",
+  "version": 1,
+  "portability": "unicodePortable",
+  "renderingFont": {
+    "fontRefID": "noto-sans-runic",
+    "version": 1,
+    "sha256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b",
+    "repositorySourcePath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+    "fileBytesIntentionallyNotBundledInThisInstructionPackage": false
+  },
+  "glyphs": [
+    {
+      "value": 0,
+      "glyphID": "base-rune-00",
+      "textToken": "ᚠ",
+      "unicodeScalar": "U+16A0"
+    },
+    {
+      "value": 1,
+      "glyphID": "base-rune-01",
+      "textToken": "ᚡ",
+      "unicodeScalar": "U+16A1"
+    },
+    {
+      "value": 2,
+      "glyphID": "base-rune-02",
+      "textToken": "ᚢ",
+      "unicodeScalar": "U+16A2"
+    },
+    {
+      "value": 3,
+      "glyphID": "base-rune-03",
+      "textToken": "ᚣ",
+      "unicodeScalar": "U+16A3"
+    },
+    {
+      "value": 4,
+      "glyphID": "base-rune-04",
+      "textToken": "ᚤ",
+      "unicodeScalar": "U+16A4"
+    },
+    {
+      "value": 5,
+      "glyphID": "base-rune-05",
+      "textToken": "ᚥ",
+      "unicodeScalar": "U+16A5"
+    },
+    {
+      "value": 6,
+      "glyphID": "base-rune-06",
+      "textToken": "ᚦ",
+      "unicodeScalar": "U+16A6"
+    },
+    {
+      "value": 7,
+      "glyphID": "base-rune-07",
+      "textToken": "ᚧ",
+      "unicodeScalar": "U+16A7"
+    },
+    {
+      "value": 8,
+      "glyphID": "base-rune-08",
+      "textToken": "ᚨ",
+      "unicodeScalar": "U+16A8"
+    },
+    {
+      "value": 9,
+      "glyphID": "base-rune-09",
+      "textToken": "ᚩ",
+      "unicodeScalar": "U+16A9"
+    },
+    {
+      "value": 10,
+      "glyphID": "base-rune-10",
+      "textToken": "ᚪ",
+      "unicodeScalar": "U+16AA"
+    },
+    {
+      "value": 11,
+      "glyphID": "base-rune-11",
+      "textToken": "ᚫ",
+      "unicodeScalar": "U+16AB"
+    },
+    {
+      "value": 12,
+      "glyphID": "base-rune-12",
+      "textToken": "ᚬ",
+      "unicodeScalar": "U+16AC"
+    },
+    {
+      "value": 13,
+      "glyphID": "base-rune-13",
+      "textToken": "ᚭ",
+      "unicodeScalar": "U+16AD"
+    },
+    {
+      "value": 14,
+      "glyphID": "base-rune-14",
+      "textToken": "ᚮ",
+      "unicodeScalar": "U+16AE"
+    },
+    {
+      "value": 15,
+      "glyphID": "base-rune-15",
+      "textToken": "ᚯ",
+      "unicodeScalar": "U+16AF"
+    },
+    {
+      "value": 16,
+      "glyphID": "base-rune-16",
+      "textToken": "ᚰ",
+      "unicodeScalar": "U+16B0"
+    },
+    {
+      "value": 17,
+      "glyphID": "base-rune-17",
+      "textToken": "ᚱ",
+      "unicodeScalar": "U+16B1"
+    },
+    {
+      "value": 18,
+      "glyphID": "base-rune-18",
+      "textToken": "ᚲ",
+      "unicodeScalar": "U+16B2"
+    },
+    {
+      "value": 19,
+      "glyphID": "base-rune-19",
+      "textToken": "ᚳ",
+      "unicodeScalar": "U+16B3"
+    },
+    {
+      "value": 20,
+      "glyphID": "base-rune-20",
+      "textToken": "ᚴ",
+      "unicodeScalar": "U+16B4"
+    },
+    {
+      "value": 21,
+      "glyphID": "base-rune-21",
+      "textToken": "ᚵ",
+      "unicodeScalar": "U+16B5"
+    },
+    {
+      "value": 22,
+      "glyphID": "base-rune-22",
+      "textToken": "ᚶ",
+      "unicodeScalar": "U+16B6"
+    },
+    {
+      "value": 23,
+      "glyphID": "base-rune-23",
+      "textToken": "ᚷ",
+      "unicodeScalar": "U+16B7"
+    },
+    {
+      "value": 24,
+      "glyphID": "base-rune-24",
+      "textToken": "ᚸ",
+      "unicodeScalar": "U+16B8"
+    },
+    {
+      "value": 25,
+      "glyphID": "base-rune-25",
+      "textToken": "ᚹ",
+      "unicodeScalar": "U+16B9"
+    },
+    {
+      "value": 26,
+      "glyphID": "base-rune-26",
+      "textToken": "ᚺ",
+      "unicodeScalar": "U+16BA"
+    },
+    {
+      "value": 27,
+      "glyphID": "base-rune-27",
+      "textToken": "ᚻ",
+      "unicodeScalar": "U+16BB"
+    },
+    {
+      "value": 28,
+      "glyphID": "base-rune-28",
+      "textToken": "ᚼ",
+      "unicodeScalar": "U+16BC"
+    },
+    {
+      "value": 29,
+      "glyphID": "base-rune-29",
+      "textToken": "ᚽ",
+      "unicodeScalar": "U+16BD"
+    },
+    {
+      "value": 30,
+      "glyphID": "base-rune-30",
+      "textToken": "ᚾ",
+      "unicodeScalar": "U+16BE"
+    },
+    {
+      "value": 31,
+      "glyphID": "base-rune-31",
+      "textToken": "ᚿ",
+      "unicodeScalar": "U+16BF"
+    }
+  ],
+  "compatibilityRule": "Do not reorder, replace, duplicate, or reassign any value, glyph ID, text token, or Unicode scalar."
+}

@@ -1,0 +1,38 @@
+{
+  "id": "effect.norse.reveal-relic",
+  "rewardClasses": [
+    "relic",
+    "frame"
+  ],
+  "durationSeconds": 1.28,
+  "layers": [
+    {
+      "type": "silhouetteResolve",
+      "resourceRole": "reward-art",
+      "start": 0.0,
+      "duration": 0.72,
+      "fromBlurRadius": 14,
+      "fromOpacity": 0.25
+    },
+    {
+      "type": "engravingIllumination",
+      "start": 0.36,
+      "duration": 0.64,
+      "colorRole": "accent.highlight",
+      "direction": "center-out"
+    },
+    {
+      "type": "singleSparkRing",
+      "start": 0.58,
+      "duration": 0.48,
+      "particleCount": 10,
+      "particleRadiusPoints": 1.5
+    }
+  ],
+  "soundCueID": "sound.norse.unlock-relic",
+  "haptic": "success-light",
+  "reduceMotion": {
+    "type": "crossfade-highlight",
+    "durationSeconds": 0.5
+  }
+}

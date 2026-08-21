@@ -10,7 +10,7 @@ struct LicenseView: View {
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
-                runic: "ᛚᛁᚲᛖᚾᛋᛖ",
+                slot: .license,
                 subtitle: "License",
                 trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Close") { dismiss() }]
             )

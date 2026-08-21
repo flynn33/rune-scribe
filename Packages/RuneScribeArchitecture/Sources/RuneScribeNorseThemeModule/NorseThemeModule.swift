@@ -42,7 +42,7 @@ public enum RuneScribeNorseThemeModuleBootstrap {
         try await runtime.register(
             manifestResource: manifestResource,
             expectedSHA256: manifestExpectedSHA256,
-            maximumByteCount: 8 * 1_024,
+            maximumByteCount: 16 * 1_024,
             factory: factory(),
             themeDiscovery: discoveryDescriptor
         )
@@ -61,7 +61,7 @@ public enum RuneScribeNorseThemeModuleBootstrap {
     }
 
     public static let manifestExpectedSHA256Hex =
-        "f0d3588fef8a4accc6f1769e07367ee6f4da99473eff4c77f75ffc0f4e0716fe"
+        "cd7d1d28ef3efff04daf2f6ad9103dc83d174e00470592a9d918d187ac8cb804"
 
     private static func data(fromHex value: String) -> Data {
         var bytes = [UInt8]()
@@ -84,11 +84,23 @@ public struct RuneScribeNorseThemeModule: RuntimeConstructibleModule {
 
     public func start(context: ModuleContext) async throws {
         let runtimeIO = try await context.runtimeIOClient()
-        let theme = try await NorseBaseThemeResources.loadValidated(using: runtimeIO)
-        try await context.publishTheme(
-            descriptor: theme.descriptor,
-            resourcePayloads: theme.resourcePayloads
-        )
+        do {
+            let theme = try await NorseBaseThemeResources.loadValidated(using: runtimeIO)
+            try await context.publishTheme(
+                descriptor: theme.descriptor,
+                resourcePayloads: theme.resourcePayloads
+            )
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            // Shipping validation rejects missing Base resources. If installed
+            // bytes become unreadable, retain the descriptor contribution so
+            // the coordinator can expose its runtime-owned emergency snapshot
+            // without blocking Core encode/decode readiness.
+            try await context.publishThemeDescriptor(
+                RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+            )
+        }
     }
 
     public func stop() async {}

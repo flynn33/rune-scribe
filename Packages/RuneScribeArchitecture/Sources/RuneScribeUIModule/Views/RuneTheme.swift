@@ -106,10 +106,14 @@ struct RuneHeaderButton: Identifiable {
 /// a legibility scrim, an optional top-right action, and a hairline gold rule along
 /// the bottom. Fixed height keeps all views vertically aligned.
 struct RuneHeader: View {
-    let runic: String
+    let slot: ThemeHeadingSlot
     let subtitle: String
     var height: CGFloat = RuneMetrics.headerHeight
     var trailingButtons: [RuneHeaderButton] = []
+
+    private var decorativeHeading: String {
+        RuneThemeHeadingInterpreter.value(for: slot, fallback: subtitle)
+    }
 
     var body: some View {
         ZStack {
@@ -154,7 +158,7 @@ struct RuneHeader: View {
                 )
 
                 let resolved = glyphContext.resolve(
-                    Text(runic)
+                    Text(decorativeHeading)
                         .font(.runic(27))
                         .foregroundColor(.runeGold)
                 )
@@ -171,7 +175,7 @@ struct RuneHeader: View {
             }
             .frame(
                 minWidth: 80,
-                idealWidth: min(280, max(140, CGFloat(runic.count) * 19)),
+                idealWidth: min(280, max(140, CGFloat(decorativeHeading.count) * 19)),
                 maxWidth: .infinity,
                 minHeight: 34,
                 maxHeight: 34
@@ -237,7 +241,7 @@ struct RuneHeader: View {
                 .help(button.help)
             }
         }
-        .frame(maxHeight: .infinity, alignment: .top)
+        .frame(height: max(44, height - 28), alignment: .top)
     }
 }
 

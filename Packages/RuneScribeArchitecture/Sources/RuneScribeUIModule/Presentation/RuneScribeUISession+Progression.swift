@@ -492,6 +492,8 @@ extension RuneScribeUISession {
            let unlockFeedbackClientHandle {
             let request = UnlockFeedbackRequestDTO(
                 tier: reveal.tier,
+                codexID: themeSnapshot?.effectiveCodexID
+                    ?? RuneScribeCodexIDs.norse,
                 soundEnabled: unlockFeedbackPreferences.soundEnabled,
                 hapticEnabled: unlockFeedbackPreferences.hapticEnabled
             )
@@ -501,8 +503,11 @@ extension RuneScribeUISession {
         }
         return UnlockRevealPresentationPlan(
             revealID: revealID,
-            sequenceDurationSeconds: ProgressionRevealPresentationPolicy
-                .sequenceDurationSeconds(for: reveal.tier),
+            sequenceDurationSeconds: ThemeUnlockCueSelector.animationDuration(
+                themeUnlockAnimationDataByTier[reveal.tier.rawValue]
+            ) ?? ProgressionRevealPresentationPolicy.sequenceDurationSeconds(
+                for: reveal.tier
+            ),
             visualMode: disposition.isStatic
                 ? .none
                 : ProgressionRevealPresentationPolicy.visualMode(
@@ -537,12 +542,14 @@ extension RuneScribeUISession {
         if progressionRailState == .unavailable {
             interruptActiveReveal()
         }
+        reconcileThemeArtifactSelections()
     }
 
     private func adoptRuntimeSettingsSnapshot(_ snapshot: RuntimeSettingsSnapshotDTO) {
         runtimeSettingsSnapshot = snapshot
         unlockFeedbackPreferences = UnlockFeedbackPreferences(snapshot: snapshot)
         settingsRailState = .available
+        reconcileThemeArtifactSelections()
     }
 
     private func applyFeedbackPreference(

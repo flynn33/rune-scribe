@@ -11,6 +11,70 @@ import RuneScribeUIRuntime
 import XCTest
 
 final class ArchitectureIntegrationTests: XCTestCase {
+    func testDamagedNorseResourceKeepsCoreEncodeDecodeAvailable() async throws {
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 0),
+            platform: .macOS
+        )
+        let capture = EmergencyFallbackUICapture()
+        try await registerHostPlatformServices(
+            on: runtime,
+            unavailableNorseResource: NorseBaseBundledResourceCatalog.notoSansRunic
+        )
+        try await runtime.register(
+            manifest: RuneScribeCoreModuleBootstrap.manifest(),
+            factory: RuneScribeCoreModuleBootstrap.factory()
+        )
+        try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeCoordinatorModuleBootstrap.register(with: runtime)
+        try await runtime.register(
+            manifest: RuneScribeUIModuleBootstrap.manifest(),
+            factory: AnyModuleFactory(descriptor: RuneScribeUIModuleBootstrap.descriptor) {
+                IntegrationTestModule(descriptor: RuneScribeUIModuleBootstrap.descriptor) {
+                    context in
+                    await capture.store(
+                        application: try await context.applicationClient(),
+                        theme: try await context.themeCoordinatorClient()
+                    )
+                }
+            }
+        )
+
+        try await runtime.start()
+        defer { Task { await runtime.stop() } }
+        let capturedApplication = await capture.applicationClient()
+        let capturedTheme = await capture.themeClient()
+        let application = try XCTUnwrap(capturedApplication)
+        let theme = try XCTUnwrap(capturedTheme)
+        let themeSnapshot = try await theme.snapshot()
+        XCTAssertTrue(themeSnapshot.isEmergencyPresentation)
+        XCTAssertEqual(themeSnapshot.fallbackReason, .invalidResources)
+
+        let cipher = try await application.createCipher(
+            CreateCipherCommand(name: "Emergency Presentation Decode")
+        )
+        let encoded = try await application.encode(
+            EncodeMessageCommand(
+                plaintext: "Readable despite damaged presentation bytes",
+                cipherID: cipher.id
+            )
+        )
+        let decoded = try await application.decode(
+            DecodeMessageCommand(runes: encoded.runes)
+        )
+        XCTAssertEqual(decoded.plaintext, "Readable despite damaged presentation bytes")
+        XCTAssertEqual(decoded.cipherID, cipher.id)
+
+        let running = await runtime.snapshot()
+        XCTAssertEqual(running.status, .running)
+        XCTAssertEqual(running.moduleStates[RuneScribeModuleIDs.core], .active)
+        XCTAssertEqual(running.moduleStates[RuneScribeModuleIDs.norseTheme], .active)
+        XCTAssertEqual(
+            running.moduleStates[RuneScribeModuleIDs.themeCoordinator],
+            .active
+        )
+    }
+
     func testBundledSkeletonBootsNonUIBeforeExactlyOneUI() async throws {
         let rootStore = await MainActor.run { RootViewPresentationStore() }
         let runtime = RuneScribeRuntime(
@@ -273,7 +337,8 @@ final class ArchitectureIntegrationTests: XCTestCase {
     @discardableResult
     private func registerHostPlatformServices(
         on runtime: RuneScribeRuntime,
-        moduleStateStore: any ModuleStateStore = InMemoryModuleStateStore()
+        moduleStateStore: any ModuleStateStore = InMemoryModuleStateStore(),
+        unavailableNorseResource: ApplicationResource? = nil
     ) async throws -> InMemoryShareArtifactStore {
         let secureValues: any SecureValueStore = InMemorySecureValueStore()
         let protectedFiles: any ProtectedFileStore = InMemoryProtectedFileStore()
@@ -282,7 +347,7 @@ final class ArchitectureIntegrationTests: XCTestCase {
         var repositoryRoot = URL(fileURLWithPath: #filePath)
         for _ in 0..<5 { repositoryRoot.deleteLastPathComponent() }
         let bundledFontURL = repositoryRoot.appendingPathComponent(
-            "RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf"
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf"
         )
         let bundledFontData = try Data(contentsOf: bundledFontURL)
         let resources: any ApplicationResourceLocator = IntegrationApplicationResources(
@@ -291,7 +356,8 @@ final class ArchitectureIntegrationTests: XCTestCase {
                 .splashVideo: URL(fileURLWithPath: "/fixture/splash.mp4"),
                 .defaultMetalLibrary: URL(fileURLWithPath: "/fixture/default.metallib"),
             ],
-            norseBundle: RuneScribeNorseThemeModuleBootstrap.resourceBundle
+            norseBundle: RuneScribeNorseThemeModuleBootstrap.resourceBundle,
+            unavailableNorseResource: unavailableNorseResource
         )
         let fonts: any SystemFontRegistrar = InMemoryFontRegistrar(
             namesByData: [bundledFontData: "NotoSansRunic-Regular"]
@@ -356,6 +422,7 @@ final class ArchitectureIntegrationTests: XCTestCase {
 private struct IntegrationApplicationResources: ApplicationResourceLocator {
     let standardLocations: [ApplicationResource: URL]
     let norseBundle: Bundle
+    let unavailableNorseResource: ApplicationResource?
 
     func data(for resource: ApplicationResource) async throws -> Data {
         try Data(contentsOf: try location(for: resource))
@@ -366,6 +433,9 @@ private struct IntegrationApplicationResources: ApplicationResourceLocator {
     }
 
     private func location(for resource: ApplicationResource) throws -> URL {
+        guard resource != unavailableNorseResource else {
+            throw MappedApplicationResourceLocatorError.resourceNotFound(resource)
+        }
         if resource.ownerModuleID == RuneScribeModuleIDs.norseTheme,
            let location = norseBundle.url(
                forResource: resource.name,
@@ -380,6 +450,22 @@ private struct IntegrationApplicationResources: ApplicationResourceLocator {
         }
         return location
     }
+}
+
+private actor EmergencyFallbackUICapture {
+    private var application: RuntimeApplicationClient?
+    private var theme: RuntimeThemeCoordinatorClient?
+
+    func store(
+        application: RuntimeApplicationClient,
+        theme: RuntimeThemeCoordinatorClient
+    ) {
+        self.application = application
+        self.theme = theme
+    }
+
+    func applicationClient() -> RuntimeApplicationClient? { application }
+    func themeClient() -> RuntimeThemeCoordinatorClient? { theme }
 }
 
 private struct IntegrationTestModule: RuneScribeModule {

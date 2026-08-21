@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "1.0",
+  "codexID": "codex.norse",
+  "source": "Current hard-coded Rune Scribe presentation extracted into semantic roles without visual redesign.",
+  "tokens": {
+    "background.primary": {
+      "hex": "#080A1E",
+      "rgba": [
+        0.031,
+        0.039,
+        0.118,
+        1
+      ]
+    },
+    "background.secondary": {
+      "hex": "#14082E",
+      "rgba": [
+        0.08,
+        0.03,
+        0.18,
+        1
+      ]
+    },
+    "surface.primary": {
+      "hex": "#1A1E30",
+      "rgba": [
+        0.102,
+        0.118,
+        0.188,
+        1
+      ]
+    },
+    "surface.elevated": {
+      "hex": "#252A3C",
+      "rgba": [
+        0.145,
+        0.165,
+        0.235,
+        1
+      ]
+    },
+    "surface.inscription.light": {
+      "hex": "#B8B3A7",
+      "rgba": [
+        0.722,
+        0.702,
+        0.655,
+        1
+      ]
+    },
+    "surface.inscription.dark": {
+      "hex": "#11151C",
+      "rgba": [
+        0.067,
+        0.082,
+        0.11,
+        1
+      ]
+    },
+    "accent.primary": {
+      "hex": "#D4971A",
+      "rgba": [
+        0.831,
+        0.592,
+        0.102,
+        1
+      ]
+    },
+    "accent.highlight": {
+      "hex": "#EEBE45",
+      "rgba": [
+        0.933,
+        0.745,
+        0.271,
+        1
+      ]
+    },
+    "accent.secondary": {
+      "hex": "#3A7FD5",
+      "rgba": [
+        0.227,
+        0.498,
+        0.835,
+        1
+      ]
+    },
+    "text.primary": {
+      "hex": "#F4EFE5",
+      "rgba": [
+        0.957,
+        0.937,
+        0.898,
+        1
+      ]
+    },
+    "text.secondary": {
+      "hex": "#A0A8B8",
+      "rgba": [
+        0.627,
+        0.659,
+        0.722,
+        1
+      ]
+    },
+    "border.primary": {
+      "hex": "#A0A8B8",
+      "rgba": [
+        0.627,
+        0.659,
+        0.722,
+        0.35
+      ]
+    },
+    "selection.glow": {
+      "hex": "#EEBE45",
+      "rgba": [
+        0.933,
+        0.745,
+        0.271,
+        0.42
+      ]
+    },
+    "disabled.opacity": {
+      "number": 0.55
+    }
+  },
+  "materialParameters": {
+    "cornerRadiusScale": 1.0,
+    "panelOpacity": 0.93,
+    "metalSpecular": 0.62,
+    "stoneRoughness": 0.78,
+    "parchmentRoughness": 0.88,
+    "shadowOpacity": 0.35,
+    "shadowRadiusPoints": 10
+  },
+  "highContrastOverrides": {
+    "background.primary": "#03050A",
+    "surface.primary": "#111620",
+    "accent.primary": "#F2C44F",
+    "accent.highlight": "#FFF0A3",
+    "accent.secondary": "#74B6FF",
+    "text.primary": "#FFFFFF",
+    "text.secondary": "#D8DFEA",
+    "border.primary": "#FFFFFF"
+  }
+}

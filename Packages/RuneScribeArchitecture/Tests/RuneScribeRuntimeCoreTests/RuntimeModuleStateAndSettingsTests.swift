@@ -391,6 +391,14 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
             defaults[RuneScribeRuntimeSettings.unlockFeedbackSoundEnabled],
             .boolean(true)
         )
+        XCTAssertEqual(
+            defaults[RuneScribeRuntimeSettings.selectedRelicByCodex]?.textValue?.rawValue,
+            "codex.norse=relic.norse.runestone.weathered"
+        )
+        XCTAssertEqual(
+            defaults[RuneScribeRuntimeSettings.selectedSealByCodex]?.textValue?.rawValue,
+            "codex.norse=seal.norse.knotwork"
+        )
         let stored = try await firstClient.set(
             SetRuntimeSettingCommand(
                 settingID: RuneScribeRuntimeSettings.unlockFeedbackSoundEnabled,
@@ -499,6 +507,31 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
             visibleToPrimaryUI[RuneScribeRuntimeSettings.selectedCodex],
             .text(elven)
         )
+
+        let relicValue = try XCTUnwrap(
+            RuntimeSettingText(
+                rawValue: "codex.norse=relic.norse.raven-medallion"
+            )
+        )
+        let relicCommand = SetRuntimeSettingCommand(
+            settingID: RuneScribeRuntimeSettings.selectedRelicByCodex,
+            value: .text(relicValue),
+            expectedRevision: 0
+        )
+        let storedRelic = try await primaryUIClient.set(relicCommand)
+        XCTAssertEqual(storedRelic.value, .text(relicValue))
+        do {
+            _ = try await coordinatorClient.set(relicCommand)
+            XCTFail("Theme coordinator must not own per-Codex artifact preferences")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeRuntimeError,
+                .settingWriteDenied(
+                    moduleID: RuneScribeModuleIDs.themeCoordinator,
+                    settingID: RuneScribeRuntimeSettings.selectedRelicByCodex
+                )
+            )
+        }
 
         await runtime.stop()
     }

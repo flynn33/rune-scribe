@@ -20,7 +20,6 @@
     "storage.keychain",
     "storage.protected-files",
     "storage.share-artifacts",
-    "resources.read",
     "fonts.register",
     "contacts.read",
     "clipboard.read",
@@ -36,20 +35,13 @@
       "SecureValueStore",
       "ProtectedFileStore",
       "ShareArtifactStore",
-      "ApplicationResourceLocator",
       "SystemFontRegistrar",
       "ContactAccessService",
       "ClipboardService",
       "ClockService",
       "UUIDService"
     ],
-    "requiredResources": [
-      {
-        "name": "NotoSansRunic-Regular",
-        "fileExtension": "ttf",
-        "subdirectory": null
-      }
-    ],
+    "requiredResources": [],
     "requiredModuleRoles": []
   },
   "defaultRole": "runescribe.core",

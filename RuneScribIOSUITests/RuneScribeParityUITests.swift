@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import RuneScribeNorseThemeModule
 import XCTest
 
 @MainActor
@@ -212,6 +213,10 @@ final class RuneScribeParityUITests: XCTestCase {
         try auditAccessibility(in: app)
         app.buttons["Import"].tap()
         XCTAssertTrue(app.buttons["Active cipher: Baseline Legacy"].waitForExistence(timeout: 8))
+        XCTAssertTrue(
+            app.staticTexts["SHARED CIPHER"].waitForNonExistence(timeout: 8),
+            app.debugDescription
+        )
 
         let cipherFile = try makeCipherFixtureFile()
         app.open(cipherFile)
@@ -219,6 +224,10 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertEqual(app.textFields["Cipher name"].value as? String, "Imported Cipher")
         app.buttons["Import"].tap()
         XCTAssertTrue(app.buttons["Active cipher: Imported Cipher"].waitForExistence(timeout: 8))
+        XCTAssertTrue(
+            app.staticTexts["SHARED CIPHER"].waitForNonExistence(timeout: 8),
+            app.debugDescription
+        )
 
         let customFontFile = try makeCustomFontFixtureFile(validFontBytes: true)
         app.open(customFontFile)
@@ -226,7 +235,12 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertEqual(app.textFields["Cipher name"].value as? String, "Imported Cipher")
         app.buttons["Import"].tap()
         XCTAssertTrue(app.buttons["Active cipher: Imported Cipher"].waitForExistence(timeout: 8))
+        XCTAssertTrue(
+            app.staticTexts["SHARED CIPHER"].waitForNonExistence(timeout: 8),
+            app.debugDescription
+        )
         app.buttons["Manage your cipher library"].tap()
+        XCTAssertTrue(app.staticTexts["CIPHER LIBRARY"].waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertTrue(app.staticTexts["4 ciphers"].waitForExistence(timeout: 8), app.debugDescription)
         tapCloseControl(in: app)
 
@@ -242,7 +256,12 @@ final class RuneScribeParityUITests: XCTestCase {
         )
         app.buttons.matching(identifier: "xmark").firstMatch.tap()
         XCTAssertTrue(app.buttons["Active cipher: Imported Cipher"].waitForExistence(timeout: 8))
+        XCTAssertTrue(
+            app.staticTexts["SHARED CIPHER"].waitForNonExistence(timeout: 8),
+            app.debugDescription
+        )
         app.buttons["Manage your cipher library"].tap()
+        XCTAssertTrue(app.staticTexts["CIPHER LIBRARY"].waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertTrue(app.staticTexts["4 ciphers"].waitForExistence(timeout: 8), app.debugDescription)
         tapCloseControl(in: app)
 
@@ -395,7 +414,7 @@ final class RuneScribeParityUITests: XCTestCase {
 
     private func makeCustomFontFixtureFile(validFontBytes: Bool) throws -> URL {
         let fontURL = try XCTUnwrap(
-            Bundle(for: RuneScribeParityUITests.self)
+            RuneScribeNorseThemeModuleBootstrap.resourceBundle
                 .url(forResource: "NotoSansRunic-Regular", withExtension: "ttf")
         )
         let fontBytes = try Data(contentsOf: fontURL)

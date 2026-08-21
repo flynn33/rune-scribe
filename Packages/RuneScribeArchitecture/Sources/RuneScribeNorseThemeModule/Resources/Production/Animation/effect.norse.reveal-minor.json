@@ -1,0 +1,32 @@
+{
+  "id": "effect.norse.reveal-minor",
+  "rewardClasses": [
+    "achievement",
+    "seal",
+    "title"
+  ],
+  "durationSeconds": 0.78,
+  "layers": [
+    {
+      "type": "outlineTrace",
+      "resourceRole": "reward-icon",
+      "start": 0.0,
+      "duration": 0.42,
+      "strokeRole": "accent.highlight"
+    },
+    {
+      "type": "glowPulse",
+      "start": 0.24,
+      "duration": 0.44,
+      "colorRole": "accent.primary",
+      "maximumOpacity": 0.42,
+      "maximumScale": 1.04
+    }
+  ],
+  "soundCueID": "sound.norse.unlock-minor",
+  "haptic": "light",
+  "reduceMotion": {
+    "type": "crossfade",
+    "durationSeconds": 0.35
+  }
+}

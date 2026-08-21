@@ -1,3 +1,4 @@
+import Foundation
 import RuneScribeContracts
 
 public struct RuntimeUnlockFeedbackClient: Sendable {
@@ -20,7 +21,14 @@ public struct RuntimeUnlockFeedbackClient: Sendable {
 }
 
 actor RuntimeUnlockFeedbackGateway {
-    private var performHandler: (@Sendable (UnlockFeedbackRequestDTO) async -> Void)?
+    private let resources: RuntimeOpaqueResourceRegistry?
+    private var performHandler: (
+        @Sendable (UnlockFeedbackRequestDTO, Data?) async -> Void
+    )?
+
+    init(resources: RuntimeOpaqueResourceRegistry? = nil) {
+        self.resources = resources
+    }
 
     func install(_ provider: any UnlockFeedbackProviding) throws {
         guard performHandler == nil else {
@@ -28,8 +36,17 @@ actor RuntimeUnlockFeedbackGateway {
                 RuneScribeUnlockFeedback.serviceID
             )
         }
-        performHandler = { request in
-            await provider.perform(request)
+        if let provider = provider as? any ThemeUnlockFeedbackProviding {
+            performHandler = { request, providerSoundData in
+                await provider.perform(
+                    request,
+                    providerSoundData: providerSoundData
+                )
+            }
+        } else {
+            performHandler = { request, _ in
+                await provider.perform(request)
+            }
         }
     }
 
@@ -44,6 +61,10 @@ actor RuntimeUnlockFeedbackGateway {
                 RuneScribeUnlockFeedback.serviceID
             )
         }
-        await performHandler(request)
+        let providerSoundData = await resources?.unlockFeedbackSoundData(
+            codexID: request.codexID,
+            semanticID: request.soundSemanticID
+        )
+        await performHandler(request, providerSoundData)
     }
 }

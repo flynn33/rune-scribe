@@ -44,7 +44,7 @@ struct QRScannerView: View {
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
-                runic: "ᛊᚲᚨᚾ",
+                slot: .qrScan,
                 subtitle: "Scan QR",
                 trailingButtons: [
                     RuneHeaderButton(systemImage: "xmark", help: "Close") {

@@ -456,7 +456,9 @@ final class PlatformAdapterTests: XCTestCase {
         }
 
         let bundledFontURL = repositoryRoot()
-            .appendingPathComponent("RuneScrib/Resources/Fonts/NotoSansRunic-Regular.ttf")
+            .appendingPathComponent(
+                "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf"
+            )
         let bundledFontData = try Data(contentsOf: bundledFontURL)
         let postScriptName = try await CoreTextFontRegistrar()
             .postScriptName(forFontData: bundledFontData)

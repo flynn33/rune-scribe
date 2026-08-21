@@ -68,6 +68,7 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
     public let preferredCodexID: CodexID?
     public let effectiveCodexID: CodexID
     public let fallbackReason: ThemeSelectionFallbackReason
+    public let isEmergencyPresentation: Bool
     public let effectiveTheme: ThemeDescriptor
     public let providers: [ThemeProviderSummaryDTO]
 
@@ -78,7 +79,8 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
         effectiveCodexID: CodexID,
         fallbackReason: ThemeSelectionFallbackReason,
         effectiveTheme: ThemeDescriptor,
-        providers: [ThemeProviderSummaryDTO]
+        providers: [ThemeProviderSummaryDTO],
+        isEmergencyPresentation: Bool = false
     ) throws {
         guard capturedAt.timeIntervalSinceReferenceDate.isFinite else {
             throw ThemeCoordinatorContractError.invalidCapturedAt
@@ -103,15 +105,18 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
                     || (provider.isOwned && provider.state == .available))
                 && (!provider.isSelected
                     || (provider.isOwned
-                        && provider.isSelectable
-                        && provider.state == .available))
+                        && ((provider.isSelectable && provider.state == .available)
+                            || (isEmergencyPresentation
+                                && provider.codexID == RuneScribeCodexIDs.norse
+                                && provider.state == .invalidResources
+                                && !provider.isSelectable))))
         }) else {
             throw ThemeCoordinatorContractError.invalidProviderState
         }
         let selected = providers.filter(\.isSelected)
         guard selected.count == 1,
               selected[0].codexID == effectiveCodexID,
-              selected[0].isSelectable,
+              (selected[0].isSelectable || isEmergencyPresentation),
               selected[0].moduleID.rawValue == effectiveTheme.moduleID.rawValue
         else {
             throw ThemeCoordinatorContractError.invalidSelectionState
@@ -120,13 +125,21 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
             $0.codexID == RuneScribeCodexIDs.norse
         }),
             base.moduleID == RuneScribeModuleIDs.norseTheme,
-            base.state == .available,
             base.isOwned,
-            base.isSelectable
+            isEmergencyPresentation
+                ? (base.state == .invalidResources && !base.isSelectable)
+                : (base.state == .available && base.isSelectable)
         else {
             throw ThemeCoordinatorContractError.missingBaseProvider
         }
-        switch fallbackReason {
+        if isEmergencyPresentation {
+            guard effectiveCodexID == RuneScribeCodexIDs.norse,
+                  fallbackReason == .invalidResources
+            else {
+                throw ThemeCoordinatorContractError.invalidFallbackState
+            }
+        } else {
+            switch fallbackReason {
         case .none:
             guard preferredCodexID == effectiveCodexID else {
                 throw ThemeCoordinatorContractError.invalidFallbackState
@@ -145,12 +158,14 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
                 throw ThemeCoordinatorContractError.invalidFallbackState
             }
         }
+        }
 
         self.revision = revision
         self.capturedAt = capturedAt
         self.preferredCodexID = preferredCodexID
         self.effectiveCodexID = effectiveCodexID
         self.fallbackReason = fallbackReason
+        self.isEmergencyPresentation = isEmergencyPresentation
         self.effectiveTheme = effectiveTheme
         self.providers = providers.sorted { $0.codexID < $1.codexID }
     }
@@ -170,7 +185,11 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
                 forKey: .fallbackReason
             ),
             effectiveTheme: container.decode(ThemeDescriptor.self, forKey: .effectiveTheme),
-            providers: container.decode([ThemeProviderSummaryDTO].self, forKey: .providers)
+            providers: container.decode([ThemeProviderSummaryDTO].self, forKey: .providers),
+            isEmergencyPresentation: try container.decodeIfPresent(
+                Bool.self,
+                forKey: .isEmergencyPresentation
+            ) ?? false
         )
     }
 }

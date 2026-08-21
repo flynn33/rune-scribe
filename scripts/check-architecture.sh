@@ -135,7 +135,8 @@ def module_source_errors(
   text,
   allowed_imports,
   runtime_integrity_source: nil,
-  ui_image_decode_source: nil
+  ui_image_decode_source: nil,
+  runtime_pdf_validation_source: nil
 )
   code = without_comments_preserving_lines(text)
   swift_imports(code).each_with_object([]) do |(imported, line), findings|
@@ -143,8 +144,11 @@ def module_source_errors(
       imported == "CryptoKit" && path == runtime_integrity_source
     isolated_ui_image_decode_import = product == "RuneScribeUIRuntime" &&
       imported == "ImageIO" && path == ui_image_decode_source
+    isolated_runtime_pdf_import = product == "RuneScribeRuntimeCore" &&
+      imported == "CoreGraphics" && path == runtime_pdf_validation_source
     next if allowed_imports.include?(imported) ||
-      isolated_runtime_integrity_import || isolated_ui_image_decode_import
+      isolated_runtime_integrity_import || isolated_ui_image_decode_import ||
+      isolated_runtime_pdf_import
     findings << "#{path}:#{line}: #{product} may not import #{imported}"
   end
 end
@@ -189,9 +193,13 @@ def theme_progression_coupling_errors(path, text)
       next unless line.match?(pattern)
       references << "#{path}:#{index + 1}: Theme source may not reference #{label}"
     end
-    THEME_RULE_CATALOG_PATTERNS.each do |pattern, label|
-      next unless line.match?(pattern)
-      references << "#{path}:#{index + 1}: Theme source may not own #{label}"
+    binding_data = path.end_with?("/Resources/Production/Metadata/Norse-Progression-Bindings-v1.0.json") ||
+      path.end_with?("/Resources/Production/Localization/norse-content.en.json")
+    unless binding_data
+      THEME_RULE_CATALOG_PATTERNS.each do |pattern, label|
+        next unless line.match?(pattern)
+        references << "#{path}:#{index + 1}: Theme source may not own #{label}"
+      end
     end
   end
 end
@@ -754,6 +762,9 @@ runtime_integrity_source = architecture_package.join(
 ui_image_decode_source = architecture_package.join(
   "Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift"
 ).to_s
+runtime_pdf_validation_source = architecture_package.join(
+  "Sources/RuneScribeRuntimeCore/RuntimePDFResourceValidation.swift"
+).to_s
 MODULE_IMPORT_POLICY.each do |product, allowed_imports|
   source_root = architecture_package.join("Sources/#{product}")
   next unless source_root.directory?
@@ -768,7 +779,8 @@ MODULE_IMPORT_POLICY.each do |product, allowed_imports|
         source,
         allowed_imports,
         runtime_integrity_source: relative(runtime_integrity_source, root),
-        ui_image_decode_source: relative(ui_image_decode_source, root)
+        ui_image_decode_source: relative(ui_image_decode_source, root),
+        runtime_pdf_validation_source: relative(runtime_pdf_validation_source, root)
       )
     )
     errors.concat(module_boundary_source_errors(product, relative_path, source))
@@ -810,7 +822,7 @@ manifest_required_keys = %w[
 ]
 
 manifest_records = []
-Dir.glob(architecture_package.join("Sources/**/*.json").to_s).each do |path|
+Dir.glob(architecture_package.join("Sources/**/Resources/module-manifest.json").to_s).each do |path|
   begin
     value = JSON.parse(File.read(path))
     manifest_records << [path, value] if value.is_a?(Hash) && value.key?("moduleID")

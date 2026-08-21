@@ -47,7 +47,7 @@ struct ContactImportPicker: View {
     var body: some View {
         VStack(spacing: 0) {
             RuneHeader(
-                runic: "ᚲᛟᚾᛏᚪᚲᛏᛋ",
+                slot: .contacts,
                 subtitle: "Import Selected",
                 trailingButtons: [RuneHeaderButton(systemImage: "xmark", help: "Cancel") { dismiss() }]
             )
