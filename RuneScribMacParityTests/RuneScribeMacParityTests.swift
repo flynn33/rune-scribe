@@ -149,7 +149,8 @@ final class RuneScribeMacParityTests: XCTestCase {
             let validPath = try ProtectedPath.fontsDirectory
                 .appending("\(validDigest).ttf")
             let persistedValidFont = try await harness.protectedFiles.read(
-                relativePath: validPath
+                relativePath: validPath,
+                maximumByteCount: RuneScribePackageResource.maximumDataLength
             )
             XCTAssertEqual(
                 persistedValidFont,
@@ -282,7 +283,8 @@ final class RuneScribeMacParityTests: XCTestCase {
             let invalidPath = try ProtectedPath.fontsDirectory
                 .appending("\(invalidDigest).ttf")
             let persistedInvalidFont = try await harness.protectedFiles.read(
-                relativePath: invalidPath
+                relativePath: invalidPath,
+                maximumByteCount: RuneScribePackageResource.maximumDataLength
             )
             XCTAssertNil(persistedInvalidFont)
             let persistedFontPaths = try await harness.protectedFiles.contents(
@@ -658,7 +660,10 @@ private final class MacParityHarness {
                 try await secureValues.delete(service: $0, account: $1)
             },
             readProtectedFile: {
-                try await protectedFiles.read(relativePath: $0)
+                try await protectedFiles.read(
+                    relativePath: $0,
+                    maximumByteCount: $1
+                )
             },
             writeProtectedFile: {
                 try await protectedFiles.write($0, relativePath: $1)
