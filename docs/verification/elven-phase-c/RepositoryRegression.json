@@ -1,7 +1,9 @@
 {
   "schemaVersion": 1,
   "status": "PASS",
-  "sourceCommit": "f5b74658bb6ec4d3ac251f532a4d92d389c2a2db",
+  "applicationVersion": "1.0.38",
+  "applicationBuild": "38",
+  "auditedSourceCommit": "f5b74658bb6ec4d3ac251f532a4d92d389c2a2db",
   "environment": {
     "macOS": "26.6.1 (25G76)",
     "xcode": "26.2 (17C52)",
@@ -118,16 +120,5 @@
     "finding": "ComplianceGuardTests/testActivationCompletenessCallRemovalReportsOnlyFG006 expected a passing FG-006 baseline while the inherited report-only baseline remains violation.",
     "disposition": "Not an acceptance gate and not remediated in this Phase C resource task."
   },
-  "physicalDeviceStatus": "PENDING_PHYSICAL_DEVICE",
-  "physicalDevicePending": [
-    "FP-009 Contacts authorization and picker behavior on signed hardware",
-    "FP-015 cold and warm document ingress through Files, Messages, and AirDrop",
-    "FP-020 QR readability using a separate physical camera",
-    "FP-021 iOS camera permission, scan, cancel, denied, and fallback behavior",
-    "FP-022 Messages attachment delivery, cancellation, failure, and sent behavior",
-    "FP-023 real share destinations and AirDrop completion/cancellation behavior",
-    "FP-030 physical-device lock and background lifecycle with PIN enabled",
-    "Distribution identity, provisioning, signed archive installation, and release-device launch"
-  ],
   "errors": []
 }

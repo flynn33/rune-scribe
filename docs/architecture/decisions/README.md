@@ -25,7 +25,7 @@ package, binary, source copy, fetch, submodule, or local checkout.
 | [ADR-RS-009](ADR-RS-009-relationship-token.md) | Relationship-token derivation | Accepted |
 | [ADR-RS-010](ADR-RS-010-theme-resource-budgets.md) | Theme resource delivery and budgets | Accepted initial limits |
 | [ADR-RS-011](ADR-RS-011-game-center-records.md) | Game Center App Store record strategy | Blocked on App Store configuration review |
-| [ADR-RS-012](ADR-RS-012-cipher-invitation-presentation.md) | Cipher-invitation presentation | Blocked on physical-device spike |
+| [ADR-RS-012](ADR-RS-012-cipher-invitation-presentation.md) | Cipher-invitation presentation | Accepted interim; owner-operated hardware observation optional |
 
 Reversing an accepted decision requires a successor record that identifies the
 compatibility, migration, security, privacy, distribution, and rollback impact.

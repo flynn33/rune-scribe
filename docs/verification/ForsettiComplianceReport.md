@@ -5,6 +5,9 @@
 > based on provider lookup or retained service objects are superseded and are not current
 > compliance claims. The current authority is the
 > [controlling Forsetti policy](../architecture/FORSETTI_CONTROLLING_POLICY.md).
+> Hardware-only classifications in the body are owner-operated optional observations
+> outside Agent Coding scope and do not affect acceptance, completion, blocker status,
+> residual work, PASS/FAIL, or pull-request readiness.
 
 ## Executive result
 

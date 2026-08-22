@@ -1,6 +1,13 @@
 # Rune Scribe Migration Decisions
 
-> **Historical decision record:** Migration facts and compatibility anchors remain evidence, but conflicting architecture conclusions are superseded by the [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md). In particular, provider-object retention, raw platform-adapter retention, lookup-time authorization, and any external dependency direction are not current guidance.
+> **Historical decision record:** Migration facts and compatibility anchors remain evidence,
+> but conflicting architecture conclusions are superseded by the
+> [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md). The current application is
+> version 1.0.38 build 38. Hardware-only classifications in this historical record are
+> owner-operated optional observations outside Agent Coding scope and have no acceptance,
+> completion, blocker, residual-work, PASS/FAIL, or pull-request-readiness effect. In
+> particular, provider-object retention, raw platform-adapter retention, lookup-time
+> authorization, and any external dependency direction are not current guidance.
 
 ## Record scope
 
@@ -145,11 +152,11 @@ Core owns format parsing, encryption, state, and migration decisions; Platform o
 - one UI-owned observable session for navigation and presentation;
 - runtime services and typed streams for cross-boundary coordination.
 
-Delete application-specific notification names and post/publisher flows. Retain only the local `AVPlayerItem.didPlayToEndTimeNotification` observer inside `VideoSplashView`, paired with removal in the same type.
+Delete application-specific notification names and post/publisher flows. Retain only the local `AVPlayerItem.didPlayToEndTimeNotification` observer inside runtime application-resource presentation, paired with removal in the same type.
 
 **Consequences.** The architecture ratchet requires zero app-owned singleton declarations, zero named legacy singleton references, zero feature notification calls, zero application-specific notification names, and zero unexpected `NotificationCenter` uses. Its only notification allowance is the two local media observer calls.
 
-**Evidence.** [`architecture-ratchet.json`](../../scripts/architecture-ratchet.json), [`check-architecture.sh`](../../scripts/check-architecture.sh), [`VideoSplashView.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VideoSplashView.swift), `T-012`, and `T-013`.
+**Evidence.** [`architecture-ratchet.json`](../../scripts/architecture-ratchet.json), [`check-architecture.sh`](../../scripts/check-architecture.sh), [`RuntimeApplicationResourcePresentation.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift), `T-012`, and `T-013`.
 
 ## ADR-009: Remove migration bridges before architecture closure
 
@@ -178,7 +185,7 @@ The committed cleanup removed `RuneScribePlatformBoundary`; the unused `Entitlem
 
 **Consequences.** Key-bearing link URLs do not enter snapshots, events, logs, or Codable DTO fields. App lock cancels and cleans UI presentation state without bypassing Core completion. Required Messages attachments fail closed and first delivery is recorded only after the required attachment was accepted and the message was sent.
 
-**Evidence.** [`ShareArtifactRegistry.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/ShareArtifactRegistry.swift), [`OpaqueSharePresentation.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/OpaqueSharePresentation.swift), [`MessageComposeView.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/MessageComposeView.swift), `T-027`, and the native-share records in the P7 ledger.
+**Evidence.** [`ShareArtifactRegistry.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/ShareArtifactRegistry.swift), [`RuntimeSharePresentation.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeSharePresentation.swift), [`RuntimeMessageComposeView.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift), `T-027`, and the native-share records in the P7 ledger.
 
 ## Resulting migration closure
 

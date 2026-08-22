@@ -1,5 +1,13 @@
 # Progression Implementation Report
 
+> **Historical implementation snapshot.** Hardware-only gate classifications in the
+> body were recorded under a superseded acceptance policy. They are now owner-operated
+> optional observations outside Agent Coding scope and do not affect acceptance,
+> completion, blocker status, residual work, PASS/FAIL, or pull-request readiness. The
+> current disposition is recorded in
+> [`NorseThemeModuleImplementationReport.md`](NorseThemeModuleImplementationReport.md)
+> and the [current roadmap](../architecture/RoadmapAlignment.md).
+
 ## Preflight
 
 - Package: `runescribe.progression-achievement.codex-package` version `1.0.0`

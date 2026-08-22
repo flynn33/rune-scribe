@@ -23,4 +23,7 @@ The current policy is therefore **legacy-only outbound compatibility**:
 Product review must later choose compatibility mode, dual-item sharing, a
 minimum-version transition, or an explicitly accepted vNext-only rollout. Enabling
 vNext outbound requires an old/new compatibility matrix, rollback behavior, update
-copy, and physical-device evidence for supported destinations.
+copy, and reproducible supported-environment validation for each destination contract.
+Owner-operated hardware-only observation is optional outside Agent Coding scope and
+has no acceptance, completion, blocker, residual-work, PASS/FAIL, or pull-request
+readiness effect.

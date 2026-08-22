@@ -1,5 +1,11 @@
 {
   "schemaVersion": "1.0",
+  "recordClassification": "HISTORICAL_SNAPSHOT",
+  "currentPolicy": {
+    "hardwareOnlyObservations": "OWNER_OPERATED_OPTIONAL",
+    "agentCodingStatus": "OUTSIDE_SCOPE",
+    "gatingEffect": "NONE"
+  },
   "matrixID": "rune-scribe-forsetti-tests-v1",
   "normativeSources": [
     "Forsetti implementation package v1.0/test-matrix.json",

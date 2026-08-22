@@ -3,7 +3,7 @@
 Ready-to-paste material for App Store Connect (iOS App Store and Mac App Store).
 Keep this file in sync when shipping a new marketing version.
 
-**Last prepared for:** 1.0.38 (build 38) — 2026-08-21
+**Last prepared for:** 1.0.38 (build 38) — 2026-08-22
 
 ---
 
@@ -190,8 +190,14 @@ Info.plist highlights (`Config/RuneScrib-*-Info.plist` / `project.yml`):
 - [ ] Export compliance answered
 - [ ] Custom EULA attached if required
 - [ ] Screenshots and description current for both platforms
-- [ ] Smoke-test Share deep link and intro cadence on device
-- [ ] Smoke-test Vault/Progress, reveal accessibility, and feedback settings on device
+- [x] Supported Simulator and hosted coverage verifies Share deep-link routing and
+  intro cadence
+- [x] Supported Simulator and hosted coverage verifies Vault/Progress, reveal
+  accessibility, and feedback settings
+
+Hardware-only observations are owner-operated optional validation outside Agent Coding
+scope. They do not affect acceptance, completion, blocker status, residual work,
+PASS/FAIL, upload readiness, or pull-request readiness.
 
 ---
 
@@ -205,7 +211,10 @@ Internal summary for this submission:
 4. Core, Progression, and UI module descriptors and manifests aligned to the application release
 5. Marketing version **1.0.38**, build **38**
 
-Related PR: https://github.com/flynn33/rune-scribe/pull/42
+Related merged PRs: [#42](https://github.com/flynn33/rune-scribe/pull/42),
+[#43](https://github.com/flynn33/rune-scribe/pull/43),
+[#44](https://github.com/flynn33/rune-scribe/pull/44), and
+[#45](https://github.com/flynn33/rune-scribe/pull/45)
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)
 

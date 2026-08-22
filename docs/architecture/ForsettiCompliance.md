@@ -16,7 +16,14 @@ source, binary, package, submodule, build-time, or runtime dependency. That app-
 model is permanent. Required entitlement, reconciliation, contribution, resource, and
 service behavior must be implemented inside Rune Scribe without external Forsetti code.
 
-This architecture status is separate from release qualification. The committed verification ledgers record all automatable architecture gates as passed, while seven feature-parity cases remain explicitly classified as physical-device validation in [`feature-parity-matrix.json`](../verification/feature-parity-matrix.json). This document does not convert those external gates into a release pass.
+This historical architecture status is separate from the current Agent Coding boundary.
+The committed ledgers record the supported automated evidence, while the seven
+hardware-only classifications in
+[`feature-parity-matrix.json`](../verification/feature-parity-matrix.json) remain a
+historical snapshot. Under the current controlling policy, those observations are
+owner-operated optional validation outside Agent Coding scope and do not affect
+acceptance, completion, blocker status, residual work, PASS/FAIL, or pull-request
+readiness.
 
 ## Pattern B implementation
 
@@ -57,7 +64,7 @@ The arrows above describe runtime composition. Compile-time dependencies are str
 | Factory registration | Runtime closure invocation is lazy. Both shipping factories construct a fresh module only when invoked during activation; UI factory creation neither creates a module nor presents a root. | [`CoreModule.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift), [`UIModule.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift) |
 | Deterministic lifecycle | Eligible modules are topologically ordered, service modules precede the UI, failed starts roll back in reverse order, stop is idempotent, and stopped contexts lose services, subscriptions, and message destinations. | [`Runtime.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift), `T-006` and `T-009` |
 | No app-owned boundary singleton | The composition root owns concrete instances; Core publishes a scoped facade; UI owns one observable session. The architecture ratchet records zero app-owned singleton declarations and zero legacy singleton references. | [`RuneScribeRuntimeComposition.swift`](../../RuneScrib/AppHost/RuneScribeRuntimeComposition.swift), [`architecture-ratchet.json`](../../scripts/architecture-ratchet.json), `T-012` |
-| No cross-module `NotificationCenter` | Product coordination uses typed services and streams. The only allowed `NotificationCenter.default` calls are the add/remove pair for the local `AVPlayerItem` completion observer in `VideoSplashView`. | [`VideoSplashView.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VideoSplashView.swift), [`check-architecture.sh`](../../scripts/check-architecture.sh), `T-013` |
+| No cross-module `NotificationCenter` | Product coordination uses typed services and streams. The only allowed `NotificationCenter.default` calls are the add/remove pair for the local `AVPlayerItem` completion observer in runtime application-resource presentation. | [`RuntimeApplicationResourcePresentation.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift), [`check-architecture.sh`](../../scripts/check-architecture.sh), `T-013` |
 | Secret-safe boundaries | Contracts expose key-free summaries, opaque share references, typed failure codes, and a non-serializable `PINInput` access closure. Raw keys, PIN values, persistence records, and payload bytes remain inside Core or Platform. | [`ApplicationContracts.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ApplicationContracts.swift), [`ContractSafetyTests.swift`](../../Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/ContractSafetyTests.swift), `T-027` |
 | Framework machinery is invisible | The UI module supplies existing product screens; the host presents boot, product root, or recovery state. There is no module-management interface. | [`RootViewPresentation.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RootViewPresentation.swift), [`RootView.swift`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift), feature-parity evidence |
 | No external Forsetti code | The guard must permanently reject package/import/product references, fetched code, vendored source, binaries, submodules, and local checkout paths. | [`Package.swift`](../../Packages/RuneScribeArchitecture/Package.swift), [`check-architecture.sh`](../../scripts/check-architecture.sh), `T-010`, [controlling policy](FORSETTI_CONTROLLING_POLICY.md) |

@@ -2,8 +2,12 @@
 
 > **Historical Phase A/B report.** Its Phase A and Phase B results remain valid, but
 > its package-level blocker status was superseded on 2026-08-21. All nine recovery
-> findings now pass, the recovery is `PASS / UNBLOCKED FOR PHASE C`, and Phase C is
-> complete and ready for Phase D. Phase D has not started; see the
+> findings now pass. Current recovery is `PASS / CLOSED`, its accepted transition
+> outcome was `PASS / UNBLOCKED FOR PHASE C`, and the corrected v3.1 package is
+> `ACCEPTED`. The current outcome is `PHASE C: PASS / MERGED TO MAIN` via PR #45 at
+> merge commit
+> `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
+> Phase D is READY FOR AUTHORIZATION / NOT STARTED; see the
 > [`Phase C final audit`](elven-phase-c/PhaseCFinalAudit.md).
 
 **Recorded:** 2026-08-15

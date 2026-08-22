@@ -1,5 +1,7 @@
 {
   "schemaVersion": 1,
+  "applicationVersion": "1.0.38",
+  "applicationBuild": "38",
   "documentID": "runescribe.elven.recovery-state",
   "taskPackageVersion": "3.0",
   "repository": {
@@ -40,7 +42,11 @@
       "All 20 selected hosted tests passed."
     ],
     "evidencePath": "docs/verification/elven-recovery-v3/PhaseABRegression.json",
-    "physicalDevicePending": ["FP-009", "FP-015", "FP-020", "FP-021", "FP-022", "FP-023", "FP-030", "distribution signing and installation"]
+    "ownerOperatedOptionalValidation": {
+      "scope": "HARDWARE_ONLY",
+      "status": "OUTSIDE_AGENT_SCOPE",
+      "gatingEffect": "NONE"
+    }
   },
   "findings": [
     {
@@ -218,12 +224,20 @@
     "skippedOrWaivedChecks": []
   },
   "phaseCContinuation": {
+    "applicationVersion": "1.0.38",
+    "applicationBuild": "38",
     "firstIncompletePhase": "Phase D - Build the four Theme Modules",
     "status": "PASS",
-    "outcome": "PHASE C: PASS / READY FOR PHASE D",
+    "outcome": "PHASE C: PASS / MERGED TO MAIN",
+    "correctedV31PackageStatus": "ACCEPTED",
+    "pullRequestNumber": 45,
+    "pullRequestState": "MERGED",
+    "targetBranch": "main",
+    "mergeCommit": "e9e0e0c8814aaa107d7480e070f14a6fe9b09975",
+    "phaseDReadiness": "READY_FOR_AUTHORIZATION",
     "phaseDStatus": "NOT_STARTED",
-    "physicalDeviceStatus": "PENDING_PHYSICAL_DEVICE",
-    "sourceCommit": "f5b74658bb6ec4d3ac251f532a4d92d389c2a2db",
+    "auditedSourceCommit": "f5b74658bb6ec4d3ac251f532a4d92d389c2a2db",
+    "evidenceCommit": "ee47191d131dfe3b6b3e446bc4bd88e07bc9960f",
     "sourceFilesChanged": [
       "RuneScribTests/CompatibilityBaselineTests.swift",
       "scripts/build-elven-production-assets.py",
@@ -252,7 +266,6 @@
       "The intended and clean-regenerated 488-file trees and 25,869,236-byte deterministic archives are identical."
     ],
     "remainingWork": [],
-    "physicalDevicePending": ["FP-009", "FP-015", "FP-020", "FP-021", "FP-022", "FP-023", "FP-030", "distribution signing, installation, and release-device launch"],
     "evidencePaths": [
       "docs/verification/elven-recovery-v3/PhaseCContinuation.json",
       "docs/verification/elven-phase-c/PhaseCFinalAudit.md",
@@ -265,5 +278,6 @@
       "docs/verification/elven-phase-c/PublicationAudit.json"
     ]
   },
-  "recoveryStatus": "PASS / UNBLOCKED FOR PHASE C"
+  "recoveryAcceptanceOutcome": "PASS / UNBLOCKED FOR PHASE C",
+  "recoveryStatus": "PASS / CLOSED"
 }

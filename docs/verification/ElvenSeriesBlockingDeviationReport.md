@@ -1,9 +1,12 @@
 # Package-Required Elven Series Blocking Deviation Report
 
 > **Historical snapshot, superseded 2026-08-21.** This report records the blocker
-> state observed on 2026-08-15. The current recovery state is
-> `PASS / UNBLOCKED FOR PHASE C`; all nine findings pass, Phase C is complete and
-> ready for Phase D, and Phase D has not started. See the
+> state observed on 2026-08-15. Current recovery is `PASS / CLOSED`; its accepted
+> transition outcome was `PASS / UNBLOCKED FOR PHASE C`. All nine findings pass, and
+> the corrected v3.1 package is `ACCEPTED`. The current outcome is
+> `PHASE C: PASS / MERGED TO MAIN` via PR #45 at merge commit
+> `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
+> Phase D is READY FOR AUTHORIZATION / NOT STARTED. See the
 > [`Phase C final audit`](elven-phase-c/PhaseCFinalAudit.md). The body below is
 > retained as forensic evidence and is not current status authority.
 

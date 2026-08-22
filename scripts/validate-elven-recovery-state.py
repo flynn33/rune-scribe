@@ -14,6 +14,14 @@ from typing import Any, Iterable
 CANONICAL_STAT = "stat.message.incoming-decoded.unique"
 FORBIDDEN_STAT_IDS = {"stat.messages-decoded", "stat.messages-decoded.unique"}
 EXPECTED_FINDINGS = {f"DEV-ELVEN-{index:03d}" for index in range(1, 10)}
+RECOVERY_STATUS = "PASS / CLOSED"
+RECOVERY_ACCEPTANCE_OUTCOME = "PASS / UNBLOCKED FOR PHASE C"
+PHASE_C_OUTCOME = "PHASE C: PASS / MERGED TO MAIN"
+APPLICATION_VERSION = "1.0.38"
+APPLICATION_BUILD = "38"
+AUDITED_SOURCE_COMMIT = "f5b74658bb6ec4d3ac251f532a4d92d389c2a2db"
+EVIDENCE_COMMIT = "ee47191d131dfe3b6b3e446bc4bd88e07bc9960f"
+MERGE_COMMIT = "e9e0e0c8814aaa107d7480e070f14a6fe9b09975"
 
 
 def flatten(value: Any) -> Iterable[str]:
@@ -52,6 +60,11 @@ def main() -> int:
     except Exception as error:
         print(json.dumps({"status": "FAIL", "errors": [f"Unable to parse state: {error}"]}, indent=2))
         return 1
+
+    if state.get("applicationVersion") != APPLICATION_VERSION:
+        errors.append("recovery state application version differs")
+    if state.get("applicationBuild") != APPLICATION_BUILD:
+        errors.append("recovery state application build differs")
 
     repository = state.get("repository", {})
     repo_root = Path(repository.get("root", "missing"))
@@ -106,8 +119,15 @@ def main() -> int:
     phase_ab_evidence = phase_ab.get("evidencePath")
     if not phase_ab_evidence or not (repo_root / phase_ab_evidence).is_file():
         errors.append("Phase A/B evidence path is unresolved")
-    if not phase_ab.get("physicalDevicePending"):
-        errors.append("physical-device pending work is not recorded")
+    if "physicalDeviceStatus" in phase_ab or "physicalDevicePending" in phase_ab:
+        errors.append("current Phase A/B state retains a hardware gate or residual-work field")
+    owner_validation = phase_ab.get("ownerOperatedOptionalValidation", {})
+    if owner_validation.get("scope") != "HARDWARE_ONLY":
+        errors.append("Phase A/B owner-operated observation scope differs")
+    if owner_validation.get("status") != "OUTSIDE_AGENT_SCOPE":
+        errors.append("Phase A/B owner-operated observation must be outside Agent Coding scope")
+    if owner_validation.get("gatingEffect") != "NONE":
+        errors.append("Phase A/B owner-operated observation must have no gating effect")
 
     findings = state.get("findings", [])
     finding_ids = {item.get("id") for item in findings if isinstance(item, dict)}
@@ -175,28 +195,50 @@ def main() -> int:
         errors.append("full validation contains skipped or waived checks")
 
     continuation = state.get("phaseCContinuation", {})
+    if continuation.get("applicationVersion") != APPLICATION_VERSION:
+        errors.append("Phase C application version differs")
+    if continuation.get("applicationBuild") != APPLICATION_BUILD:
+        errors.append("Phase C application build differs")
     if continuation.get("status") != "PASS":
         errors.append("Phase C continuation is not PASS")
-    if continuation.get("outcome") != "PHASE C: PASS / READY FOR PHASE D":
+    if continuation.get("outcome") != PHASE_C_OUTCOME:
         errors.append("Phase C continuation outcome differs")
+    if continuation.get("correctedV31PackageStatus") != "ACCEPTED":
+        errors.append("corrected v3.1 package must be ACCEPTED")
     if continuation.get("firstIncompletePhase") != "Phase D - Build the four Theme Modules":
         errors.append("Phase C continuation does not identify Phase D as the next incomplete phase")
+    if continuation.get("phaseDReadiness") != "READY_FOR_AUTHORIZATION":
+        errors.append("Phase D must be ready for authorization")
     if continuation.get("phaseDStatus") != "NOT_STARTED":
         errors.append("Phase D must remain NOT_STARTED")
-    if continuation.get("physicalDeviceStatus") != "PENDING_PHYSICAL_DEVICE":
-        errors.append("Phase C physical-device status differs")
+    if continuation.get("pullRequestNumber") != 45:
+        errors.append("Phase C pull request number differs")
+    if continuation.get("pullRequestState") != "MERGED":
+        errors.append("Phase C pull request must be MERGED")
+    if continuation.get("targetBranch") != "main":
+        errors.append("Phase C target branch must be main")
+    if continuation.get("mergeCommit") != MERGE_COMMIT:
+        errors.append("Phase C merge commit differs")
+    if continuation.get("auditedSourceCommit") != AUDITED_SOURCE_COMMIT:
+        errors.append("Phase C audited source commit differs")
+    if continuation.get("evidenceCommit") != EVIDENCE_COMMIT:
+        errors.append("Phase C evidence commit differs")
     if not continuation.get("sourceFilesChanged") or not continuation.get("commands") or not continuation.get("results") or not continuation.get("evidencePaths"):
         errors.append("Phase C continuation lacks source changes, commands, results, or evidence")
-    if continuation.get("remainingWork"):
-        errors.append("Phase C continuation retains unfinished work")
-    if not continuation.get("physicalDevicePending"):
-        errors.append("Phase C continuation omits pending physical-device work")
+    if continuation.get("remainingWork") != []:
+        errors.append("Phase C continuation remainingWork must be present and empty")
+    if "physicalDeviceStatus" in continuation:
+        errors.append("Phase C continuation retains hardware status")
+    if "physicalDevicePending" in continuation:
+        errors.append("Phase C continuation retains hardware procedures")
     for relative in continuation.get("evidencePaths", []):
         if not (current_repo_root / relative).is_file():
             errors.append(f"Phase C evidence is unresolved: {relative}")
 
-    if state.get("recoveryStatus") != "PASS / UNBLOCKED FOR PHASE C":
-        errors.append("recoveryStatus must be PASS / UNBLOCKED FOR PHASE C")
+    if state.get("recoveryAcceptanceOutcome") != RECOVERY_ACCEPTANCE_OUTCOME:
+        errors.append("recoveryAcceptanceOutcome must preserve the Phase C acceptance result")
+    if state.get("recoveryStatus") != RECOVERY_STATUS:
+        errors.append("recoveryStatus must be PASS / CLOSED")
 
     report = {"status": "PASS" if not errors else "FAIL", "errors": errors}
     print(json.dumps(report, indent=2))
