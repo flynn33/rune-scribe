@@ -268,7 +268,8 @@ prohibited.
 
 See [Module Graph](docs/architecture/ModuleGraph.md),
 [Contracts and Capabilities](docs/architecture/ContractsAndCapabilities.md), and
-[Roadmap Alignment](docs/architecture/RoadmapAlignment.md) for historical evidence. The
+[Roadmap Alignment](docs/architecture/RoadmapAlignment.md) for current status and
+retained historical evidence. The
 [controlling Forsetti policy](docs/architecture/FORSETTI_CONTROLLING_POLICY.md) defines
 the current boundary and dependency rules.
 
@@ -276,9 +277,9 @@ the current boundary and dependency rules.
 
 ## 🗺 Implementation roadmap
 
-The remediation program is intentionally incremental: every phase must preserve the
-shipping cipher workflows while tightening one architectural boundary. The current
-repository status is:
+The remediation program for version 1.0.38 build 38 is intentionally incremental:
+every phase must preserve the shipping cipher workflows while tightening one
+architectural boundary. The current repository status is:
 
 | Phase | Scope | Status |
 | --- | --- | --- |
@@ -294,7 +295,7 @@ repository status is:
 | P09 | Theme-module readiness scaffold and sole-UI rendering | Complete |
 | P10 | Typed durable event and coordination rail | Planned |
 | P11 | Permanent compliance guards, negative mutations, and CI | Planned |
-| P12 | Full Xcode, parity, device, final audit, and handoff | Planned |
+| P12 | Full Xcode, supported-environment parity, final audit, and handoff | Planned |
 
 P04 has landed the runtime I/O gateway, normalized inbound-file delivery, opaque
 resource and share leases, the metatype-only module factory, and typed root
@@ -302,6 +303,10 @@ presentation. Its remaining phase closure work is tracked by the report-only FG-
 finding. FG-016 remains open across the later resource, theme, and permanent-guard
 phases; neither finding is treated as a pass simply because the package and focused
 tests build successfully.
+
+Hardware-only observations are owner-operated optional validation outside these phase
+statuses. They do not affect acceptance, completion, blocker status, residual work,
+PASS/FAIL, or pull-request readiness.
 
 ### Product roadmap
 
@@ -322,13 +327,18 @@ local Progression Module, and the Phase A/B Theme scaffold: approved Achievement
 Codex gates, the Vault/Progress view, durable unlock reveals, privacy-safe
 existing-user migration, the runtime Theme coordinator, and the required Norse Base
 provider. Production Elven series providers, cloud synchronization, and Game Center
-remain disabled. All nine Elven Series recovery findings pass simultaneously. The
-corrected v3.1 production package contains 56 logical resources and 184 shipping
+remain disabled. Recovery is PASS / CLOSED.
+All nine Elven Series recovery findings pass simultaneously. The corrected v3.1
+package is ACCEPTED and contains 56 logical resources and 184 shipping
 outputs with complete provenance and deterministic-regeneration evidence.
-Phase C is complete and ready for Phase D. Phase D has not started, and no production
-Elven provider target has been added to the shipping app. Later Theme and sharing work also
-remains gated by the local runtime, compatibility, and physical-device program; there
-is no external-framework prerequisite.
+Phase C is PASS / MERGED TO MAIN via PR #45 at merge commit
+`e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
+Phase D is READY FOR AUTHORIZATION / NOT STARTED, and no production Elven provider
+target has been added to the shipping app.
+Later Theme and sharing implementation remains gated by the local runtime and
+compatibility program; there is no external-framework prerequisite. Hardware-only
+release observations are owner-operated outside Agent Coding scope and do not gate
+agent completion, PASS/FAIL, or pull-request readiness.
 
 Current architecture and dependency authority lives in the
 [controlling Forsetti policy](docs/architecture/FORSETTI_CONTROLLING_POLICY.md),
@@ -467,10 +477,10 @@ does not access the operator's login Keychain.
 | Platform adapters | Keychain contract, protected files and SQLite state, scoped inbound reads, Contacts, fonts, resources, feedback, clipboard and share artifacts |
 | Hosted and parity tests | Composition, isolated Simulator Keychain migration, native share outcomes, accessibility, iPhone/iPad and macOS product flows |
 
-Some behaviors can only be release-qualified on physical hardware. The retained device
-matrix covers Contacts permission, inbound file handoff, QR generation/scanning,
-MessageUI, system sharing, and background locking; Simulator coverage is not presented
-as a substitute for those gates.
+The retained hardware-only matrix is owner-operated optional release validation outside
+Agent Coding scope. It is not an acceptance criterion, completion gate, blocker,
+residual-work item, PASS/FAIL input, or pull-request readiness criterion. Simulator and
+hosted evidence remains labeled by the environment in which it was observed.
 
 ---
 

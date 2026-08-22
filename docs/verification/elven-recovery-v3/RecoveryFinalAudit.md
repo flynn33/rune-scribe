@@ -2,18 +2,21 @@
 
 ## Outcome
 
+- Application release: **version 1.0.38 build 38**
 - Prior attempt audit: **PASS**
 - Phase A/B regression: **PASS**
 - All nine recovery findings: **PASS**
 - Corrected v3 package: **PASS**
-- Remediation status: **PASS / UNBLOCKED FOR PHASE C**
-- Phase C completion status: **PASS / READY FOR PHASE D**
-- Phase D status: **NOT STARTED**
-- Physical-device-only checks: **PENDING_PHYSICAL_DEVICE**
+- Recovery acceptance outcome: **PASS / UNBLOCKED FOR PHASE C**
+- Current recovery status: **PASS / CLOSED**
+- Corrected v3.1 package: **ACCEPTED**
+- Current completion outcome: **PHASE C: PASS / MERGED TO MAIN**
+- Phase D status: **READY FOR AUTHORIZATION / NOT STARTED**
 
-The recovery boundary remains closed and accepted. Phase C is complete and ready for
-Phase D. Phase D has not started. The historical recovery evidence below remains the
-authority for v3.0; current Phase C completion evidence is recorded in
+Recovery is PASS / CLOSED. Phase C is PASS / MERGED TO MAIN
+via PR #45 at merge commit `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
+Phase D is READY FOR AUTHORIZATION / NOT STARTED. The historical recovery evidence
+below remains the authority for v3.0; current Phase C completion evidence is recorded in
 [`../elven-phase-c/PhaseCFinalAudit.md`](../elven-phase-c/PhaseCFinalAudit.md).
 
 ## Repository Boundary
@@ -65,7 +68,12 @@ Detailed evidence is recorded in `RepositoryDelta.json`, `ExternalTreeDiff.json`
 
 The current Forsetti report-only scanner separately reported six passing, 12 violating, one pending, and one not-evaluated rule. Its mutation suite exposed an inherited FG-006 fixture contradiction: the fixture assumes an initial passing state while the baseline report already marks FG-006 as a violation. This observation is not an acceptance gate and is not used to claim Phase A/B success.
 
-The following checks remain pending because they require signed physical hardware or distribution credentials: FP-009, FP-015, FP-020, FP-021, FP-022, FP-023, FP-030, and distribution signing, installation, and launch.
+The 2026-08-21 Phase A/B snapshot recorded FP-009, FP-015, FP-020, FP-021, FP-022,
+FP-023, FP-030, and distribution validation as `PENDING_PHYSICAL_DEVICE`. That
+historical disposition is preserved. Under the current controlling policy, those
+procedures are owner-operated optional validation outside Agent Coding scope and do
+not affect acceptance, completion, blocker status, residual work, PASS/FAIL, or
+pull-request readiness.
 
 ## Recovery Findings
 
@@ -138,6 +146,8 @@ Eight of eight Phase C validator scopes, 53 of 53 negative mutations, and all ni
 DEV-ELVEN regressions pass. Font registration passes for all four exact binaries on
 macOS and iOS Simulator.
 
-The recovery remains **PASS / UNBLOCKED FOR PHASE C** as a historical boundary, and
-Phase C is now **PASS / READY FOR PHASE D**. Phase D remains **NOT STARTED**. The
-hardware and distribution rows listed above remain `PENDING_PHYSICAL_DEVICE`.
+The recovery acceptance outcome remains **PASS / UNBLOCKED FOR PHASE C** as a
+historical transition record. Current recovery status is **PASS / CLOSED**, and Phase C
+is **PASS / MERGED TO MAIN** via PR #45 at merge commit
+`e9e0e0c8814aaa107d7480e070f14a6fe9b09975`. Phase D is
+**READY FOR AUTHORIZATION / NOT STARTED**.

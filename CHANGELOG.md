@@ -6,7 +6,7 @@ release work and reviewed against the project version before merge. The format f
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
-## [1.0.38] - 2026-08-21
+## [1.0.38] - 2026-08-22
 
 - Add the Theme contract, runtime coordinator, and required Norse Base provider
   while keeping production Elven series providers out of the shipping app.
@@ -14,8 +14,15 @@ release work and reviewed against the project version before merge. The format f
   resource hashes with version 1.0.38 build 38.
 - Complete and validate the corrected Elven Series v3.1 production package with 56
   logical resources, 184 shipping outputs, complete provenance, and deterministic
-  regeneration. All nine recovery findings continue to pass simultaneously; Phase D
-  has not started, and production Elven providers remain outside the shipping app.
+  regeneration. Recovery is PASS / CLOSED, the corrected v3.1 package is ACCEPTED,
+  and all nine recovery findings continue to pass simultaneously. The
+  outcome is PHASE C: PASS / MERGED TO MAIN via PR #45 at merge commit
+  `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
+  Phase D is READY FOR AUTHORIZATION / NOT STARTED, and production Elven providers
+  remain outside the shipping app.
+- Align the version 1.0.38 build 38 README roadmap, architecture decisions, historical
+  verification banners, machine-readable status, and fail-closed documentation guards
+  with the merged Phase C boundary and owner-operated optional hardware observations.
 
 ## [1.0.37] - 2026-08-14
 

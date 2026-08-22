@@ -1,8 +1,12 @@
-# Elven Series Blocking Resolution Ledger v1.2
+# Elven Series Blocking Resolution Ledger v1.3
 
-**Status:** recovery boundary closed; Phase C complete; ready for Phase D
+**Status:** Recovery: PASS / CLOSED; Phase C: PASS / MERGED TO MAIN via PR #45 at
+merge commit `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`; Phase D: READY FOR AUTHORIZATION /
+NOT STARTED
 
-**Date:** 2026-08-21
+**Application:** version 1.0.38 build 38
+
+**Date:** 2026-08-22
 
 **Canonical source:** `/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0`
 
@@ -50,12 +54,13 @@ earlier partial evidence.
 - `docs/verification/elven-recovery-v3/FullPackageValidation.json`: nine findings
   pass, no failed finding, zero general errors, no skips or waivers.
 - `docs/verification/elven-recovery-v3/RecoveryState.json`:
+  Recovery is `PASS / CLOSED`; its accepted transition outcome remains
   `PASS / UNBLOCKED FOR PHASE C`.
-- `docs/verification/elven-recovery-v3/PhaseCContinuation.json`: Phase C is
-  `PASS / READY FOR PHASE D`; Phase D not started.
+- `docs/verification/elven-recovery-v3/PhaseCContinuation.json`:
+  the corrected v3.1 package is `ACCEPTED`; `PHASE C: PASS / MERGED TO MAIN` via
+  PR #45 at merge commit
+  `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`; the next-phase boundary is
+  `Phase D: READY FOR AUTHORIZATION / NOT STARTED`.
 - `docs/verification/elven-phase-c/PhaseCFinalAudit.md`: 56 logical resources,
   184 shipping outputs, and 198 provenance records pass deterministic regeneration,
   mutation, font-registration, package, and repository acceptance.
-- Physical-device qualification remains pending only for the rows identified in
-  `docs/verification/elven-recovery-v3/PhaseABRegression.json`; its status remains
-  `PENDING_PHYSICAL_DEVICE` and is not upgraded by Simulator or hosted evidence.

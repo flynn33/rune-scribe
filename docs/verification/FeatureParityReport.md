@@ -1,5 +1,11 @@
 # Rune Scribe Feature Parity Report
 
+> **Historical qualification snapshot.** Hardware-only classifications in the body
+> are owner-operated optional observations outside Agent Coding scope under the current
+> policy. They do not affect acceptance, completion, blocker status, residual work,
+> PASS/FAIL, or pull-request readiness. Current status is governed by the
+> [Forsetti supersession index](../architecture/ForsettiSupersessionIndex.md).
+
 ## Result
 
 **Status:** `CODE COMPLETE — EXTERNAL VALIDATION REMAINS`

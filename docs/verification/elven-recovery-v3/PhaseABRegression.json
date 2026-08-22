@@ -1,5 +1,11 @@
 {
   "schemaVersion": 1,
+  "recordClassification": "HISTORICAL_SNAPSHOT",
+  "currentPolicy": {
+    "hardwareOnlyObservations": "OWNER_OPERATED_OPTIONAL",
+    "agentCodingStatus": "OUTSIDE_SCOPE",
+    "gatingEffect": "NONE"
+  },
   "status": "PASS",
   "auditedSourceCommit": "30200aa45365d9442fe68d548e97cbbf237e815c",
   "commands": [

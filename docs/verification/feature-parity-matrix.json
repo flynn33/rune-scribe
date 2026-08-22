@@ -1,5 +1,11 @@
 {
   "schemaVersion": "1.0",
+  "recordClassification": "HISTORICAL_SNAPSHOT",
+  "currentPolicy": {
+    "hardwareOnlyObservations": "OWNER_OPERATED_OPTIONAL",
+    "agentCodingStatus": "OUTSIDE_SCOPE",
+    "gatingEffect": "NONE"
+  },
   "baseline": "P0 behavior baseline at a3d5a86; current executable evidence through the recorded P8 final package, hosted, UI, native-share, build, and shipping gates.",
   "evidencePolicy": "A passed status is used only when the listed evidence satisfies every applicable verification mode. In-progress rows retain exact missing non-device evidence. Device-validation-required is used only when automatable and non-device checks are complete and the remaining behavior genuinely requires signed physical hardware.",
   "summary": {

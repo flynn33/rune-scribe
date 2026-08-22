@@ -2,8 +2,17 @@
   "schemaVersion": 1,
   "status": "PASS",
   "packageVersion": "3.1.0",
-  "repositoryBranch": "feature/elven-phase-c-production",
-  "sourceCommit": "f5b74658bb6ec4d3ac251f532a4d92d389c2a2db",
+  "applicationVersion": "1.0.38",
+  "applicationBuild": "38",
+  "sourceBranch": "feature/elven-phase-c-production",
+  "auditedSourceCommit": "f5b74658bb6ec4d3ac251f532a4d92d389c2a2db",
+  "evidenceCommit": "ee47191d131dfe3b6b3e446bc4bd88e07bc9960f",
+  "pullRequestNumber": 45,
+  "pullRequestState": "MERGED",
+  "targetBranch": "main",
+  "mergeCommit": "e9e0e0c8814aaa107d7480e070f14a6fe9b09975",
+  "mergedAtUTC": "2026-08-22T11:30:03Z",
+  "pullRequestMetadataChecked": true,
   "packageAudit": {
     "validatorScope": "publication",
     "status": "PASS",
@@ -17,14 +26,14 @@
     "pathsChecked": true,
     "trackedTextChecked": true,
     "branchChecked": true,
-    "commitMetadataChecked": true,
-    "pullRequestMetadataRequiredBeforePublication": true
+    "commitMetadataChecked": true
   },
   "largeExternalArtifactsCommitted": false,
   "externalArchivePath": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1.zip",
   "commands": [
     "python3 scripts/validate-elven-phase-c-package.py --package-root /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1 --repo-root /Users/jimdaley/GitHub/Rune-Scribe-Elven-Phase-C --output docs/verification/elven-phase-c/PhaseCValidation.json --scope aggregate",
-    "python3 scripts/check-documentation-alignment.py"
+    "python3 scripts/check-documentation-alignment.py",
+    "gh pr view 45 --json number,state,mergedAt,mergeCommit,headRefName,baseRefName"
   ],
   "errors": []
 }

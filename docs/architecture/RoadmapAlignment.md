@@ -4,6 +4,8 @@
 
 ## Authority and scope
 
+**Current application:** version 1.0.38 build 38
+
 The hash-locked [Codex System Specification](../product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md)
 and [Current-App Delta and Implementation Roadmap](../product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md)
 remain authority only for nonconflicting product requirements, compatibility anchors,
@@ -11,7 +13,7 @@ and sequencing evidence. They do not control framework ownership, runtime mediat
 operational I/O, Settings, or dependency direction. Their repository SHA-256 values are
 respectively
 `7c4c460815064fca87a6769766fb875f267eb692795bbab2635eec5d55d8f88d` and
-`884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4`.
+`1c6e3cf79e6cd60d105c848a5fab65418daac799ae94db0d0c61504fc2c5679a`.
 
 The exhaustive machine-readable status is
 [`roadmap-alignment.json`](../verification/roadmap-alignment.json). It records all 92
@@ -47,11 +49,14 @@ Codex domain and a complete local Progression implementation:
 - a versioned semantic Theme contract, generic owned contribution and opaque-resource
   registries, a runtime-owned Theme Coordinator, semantic common UI presentation, and
   a required Norse Base provider with exact Base Script and font compatibility; and
-- a validated Elven Series recovery boundary with all nine findings passing together
-  and a corrected v3.1 package containing 56 logical resources and 184 shipping
-  outputs. Phase C is complete and ready for Phase D; Phase D has not started, and
-  production Elven providers remain outside the shipping application; and
-- one superseded, nine accepted, and two explicitly blocked architecture decisions,
+- a validated Elven Series recovery boundary that is PASS / CLOSED, with all nine
+  findings passing together and an ACCEPTED corrected v3.1 package containing 56
+  logical resources and 184 shipping outputs. Phase C is PASS / MERGED TO MAIN via
+  PR #45 at merge commit
+  `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
+  Phase D is READY FOR AUTHORIZATION / NOT STARTED, and production Elven providers
+  remain outside the shipping application; and
+- one superseded and eleven current architecture decisions with explicit dispositions,
   plus this auditable roadmap ledger.
 
 That slice is intentionally usable without external services, a physical device,
@@ -87,30 +92,33 @@ flowchart LR
     DOM --> SHR["Wave 4<br/>Artifacts and sharing"]
     THM --> SHR
     PRO --> SHR
-    DEVICE["Physical-device<br/>share spike"] --> SHR
 ```
 
-The graph is a gate, not just a preferred order. Theme Modules cannot be finalized
-against missing runtime contribution/resource APIs. Progression cannot activate earned
-providers without live eligibility reconciliation. Themed sharing cannot promise
+The graph is an Agent Coding gate, not just a preferred order. Theme Modules cannot be
+finalized against missing runtime contribution/resource APIs. Progression cannot
+activate earned providers without live eligibility reconciliation. Themed sharing cannot promise
 portable presentation until the Theme scaffold, package validation, progression event
-contract, and physical-device transport spike all pass.
+contract, and supported-environment validations pass. Hardware-only observations are
+owner-operated outside this graph.
 
 ## Work-package status
 
 | Group | Current ledger | Dependency and evidence |
 |---|---|---|
-| BAS-001…010 | 6 satisfied, 2 partial, 1 blocked-device, 1 not-applicable | P8 baseline/build/fixture evidence remains; ADRs and repository policy exist. The old/new destination matrix and documentation checklist remain partial; physical capture requires devices. |
+| BAS-001…010 | 6 satisfied, 2 partial, 1 owner-optional, 1 not-applicable | P8 baseline/build/fixture evidence remains; ADRs and repository policy exist. The old/new destination matrix and documentation checklist remain partial; owner-operated parity observation is optional and non-gating. |
 | FOR-001…011 | 11 superseded | The former external-release work packages are retained as historical identifiers; local runtime remediation is governed by the controlling policy and remediation phases. |
 | MOD-001…013 | 8 satisfied, 4 transitional, 1 partial | Historical Core/UI separation, adapters, ingress, lock gating, architecture tests, and hosted tests exist. Runtime mediation, manifests, and bootstrap remain incomplete under the controlling policy. |
 | DOM-001…007 | 4 satisfied, 3 partial | Cipher/Script migration and an explicit delivery-state foundation exist. End-to-end legacy-font proof, selected-Codex/per-share presentation stores, and removal of the writable `delivered` compatibility rail remain. |
 | PKG-001…006 | 4 satisfied, 2 partial | The typed container, legacy readers, policy, and magic-first router exist. Complete fail-before-allocation proof, randomized malformed-input coverage, and allocation instrumentation remain in PKG-003/005. |
 | THM-001…012 | 12 satisfied | Versioned contracts, generic owned registries, the Coordinator, semantic UI, required Norse Base, two deliberately different synthetic providers, runtime selection/fallback, debug diagnostics, and the shared conformance suite are implemented. Optional production Theme series remain separate work. |
-| PRO-001…016 | 16 satisfied | The optional module, runtime-owned store and handoff, opaque-token lifecycle, exact catalog/rules, atomic records and grants, scalable migration, entitlement projection, snapshot-only views, durable feedback queue, quarantine, and guarded recovery are implemented. Physical feedback and accessibility qualification remains separately identified in the Progression implementation report. |
-| SHR-001…017 | 7 not-started, 6 partial, 2 decision-frozen, 2 blocked-device | Current legacy share, QR, MessageUI, and completion foundations remain. Final composition and Quick Look decisions require the physical-device spike; themed work depends on PKG, THM, and PRO gates. |
+| PRO-001…016 | 16 satisfied | The optional module, runtime-owned store and handoff, opaque-token lifecycle, exact catalog/rules, atomic records and grants, scalable migration, entitlement projection, snapshot-only views, durable feedback queue, quarantine, and guarded recovery are implemented. Owner-operated feedback and accessibility observations are optional outside Agent Coding scope. |
+| SHR-001…017 | 7 not-started, 6 partial, 2 decision-frozen, 2 owner-optional | Current legacy share, QR, MessageUI, and completion foundations remain. Themed source and contract work depends on PKG, THM, and PRO gates; owner-operated destination observations are optional and non-gating. |
 
 The per-task records in the JSON ledger are normative for status automation. A group
 summary never upgrades a child task or removes its explicit `dependsOn` edges.
+Hardware-only rows in that broader product ledger are owner-operated observations
+outside Agent Coding scope. They do not block agent-task completion, determine an
+agent PASS/FAIL result, create residual agent work, or gate pull-request readiness.
 
 ## Frozen compatibility and safety decisions
 
@@ -147,14 +155,11 @@ result and required attachment acceptance.
    atomic delivery-state migration while keeping legacy decode behavior.
 3. Complete BAS-008's old/new compatibility and update-required test matrix.
 4. Preserve the completed Elven Series Phase C evidence and its validated v3.1
-   production package. Phase C is complete and ready for Phase D. Phase D has not
-   started and remains a separately authorized provider-target gate.
-5. Qualify Progression feedback, silent-mode behavior, VoiceOver timing, and interrupted
-   native-route presentation on supported physical hardware before claiming those
-   device-only acceptance checks.
-6. Run SHR-001 on physical devices before selecting permanent invitation composition or
-   Quick Look scope.
-
-These gates preserve unattended development: package, architecture, and ad-hoc-signed
-Simulator/macOS tests should be preferred until a task explicitly requires external
-configuration or physical-device evidence.
+   production package. Phase C is PASS / MERGED TO MAIN via PR #45 at merge commit
+   `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
+   Phase D is READY FOR AUTHORIZATION / NOT STARTED and remains a separately
+   authorized provider-target gate.
+Owner-operated hardware-only observations remain outside these executable Agent Coding
+gates. Supported simulators, hosted tests, deterministic test doubles, platform builds,
+static inspection, architecture guards, negative mutations, and reproducible artifact
+validation provide the applicable unattended evidence.

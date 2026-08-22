@@ -1,5 +1,13 @@
 {
   "schemaVersion": 1,
+  "recordClassification": "HISTORICAL_REJECTED_ATTEMPT",
+  "currentPolicy": {
+    "currentAuthority": "docs/verification/elven-recovery-v3/RecoveryState.json",
+    "recoveryStatus": "PASS / CLOSED",
+    "hardwareOnlyObservations": "OWNER_OPERATED_OPTIONAL",
+    "agentCodingStatus": "OUTSIDE_SCOPE",
+    "gatingEffect": "NONE"
+  },
   "documentID": "runescribe.elven.remediation-state",
   "taskPackageVersion": "2.0",
   "repository": {

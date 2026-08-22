@@ -20,8 +20,9 @@ root = Pathname(ARGV.fetch(0)).realpath
 alignment_path = Pathname(ARGV.fetch(1)).expand_path
 
 EXPECTED_TOP_LEVEL_KEYS = %w[
-  schemaVersion asOfDate authority sourcePriority forsettiPolicy statusVocabulary taskCount taskGroups
+  schemaVersion asOfDate applicationVersion authority sourcePriority forsettiPolicy statusVocabulary taskCount taskGroups
 ].freeze
+EXPECTED_APPLICATION_VERSION_KEYS = %w[marketing build].freeze
 EXPECTED_AUTHORITY_KEYS = %w[
   systemSpec implementationRoadmap repositoryAuditBaseline
 ].freeze
@@ -32,9 +33,10 @@ EXPECTED_FORSETTI_POLICY_KEYS = %w[
 EXPECTED_GROUP_KEYS = %w[prefix wave dependsOn items].freeze
 EXPECTED_ITEM_KEYS = %w[id status dependsOn evidence notes].freeze
 EXPECTED_STATUSES = %w[
-  satisfied transitional partial decision-frozen superseded blocked-device
+  satisfied transitional partial decision-frozen superseded owner-optional
   not-started not-applicable
 ].freeze
+OWNER_OPTIONAL_TASKS = %w[BAS-006 SHR-001 SHR-015].freeze
 EXPECTED_SOURCE_PRIORITY = [
   "active operator instructions",
   "active implementation package and machine-readable controls",
@@ -61,7 +63,7 @@ EXPECTED_DOCUMENTS = {
   },
   "implementationRoadmap" => {
     "path" => "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md",
-    "sha256" => "884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4"
+    "sha256" => "1c6e3cf79e6cd60d105c848a5fab65418daac799ae94db0d0c61504fc2c5679a"
   }
 }.freeze
 EXPECTED_FORSETTI_POLICY = {
@@ -167,6 +169,12 @@ def validate(document, root)
     Date.iso8601(document["asOfDate"])
   rescue ArgumentError, TypeError
     errors << "asOfDate must be an ISO-8601 calendar date"
+  end
+
+  application_version = document["applicationVersion"]
+  if exact_keys(application_version, EXPECTED_APPLICATION_VERSION_KEYS, "applicationVersion", errors)
+    errors << "applicationVersion.marketing must be 1.0.38" unless application_version["marketing"] == "1.0.38"
+    errors << "applicationVersion.build must be 38" unless application_version["build"] == "38"
   end
 
   authority = document["authority"]
@@ -276,6 +284,22 @@ def validate(document, root)
   errors << "task IDs must be unique" unless ids.uniq == ids
   errors << "task IDs must match the exact roadmap universe" unless ids == expected_ids
 
+  owner_optional_ids = all_items
+    .select { |item| item["status"] == "owner-optional" }
+    .map { |item| item["id"] }
+  unless owner_optional_ids == OWNER_OPTIONAL_TASKS
+    errors << "owner-optional tasks must be exactly #{OWNER_OPTIONAL_TASKS.join(', ')}"
+  end
+  all_items.each do |item|
+    if item["status"] == "owner-optional" && !Array(item["dependsOn"]).empty?
+      errors << "owner-optional task #{item['id']} may not retain dependencies"
+    end
+    blocked_optional = Array(item["dependsOn"]) & OWNER_OPTIONAL_TASKS
+    unless blocked_optional.empty?
+      errors << "task #{item['id']} may not depend on owner-optional #{blocked_optional.join(', ')}"
+    end
+  end
+
   permitted_dependencies = (expected_ids + (1..12).map { |number| format("ADR-RS-%03d", number) }).to_set
   groups.each_with_index do |group, group_index|
     next unless group.is_a?(Hash)
@@ -330,7 +354,7 @@ def validate(document, root)
     status_line = text.lines.find { |line| line.match?(/\*\*Status:\*\*/i) }
     expected_status = if index.zero?
                         /Superseded/i
-                      elsif index < 10
+                      elsif index < 10 || index == 11
                         /Accepted/i
                       else
                         /Blocked/i

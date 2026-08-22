@@ -2,18 +2,24 @@
 
 ## Outcome
 
-**PHASE C: PASS / READY FOR PHASE D**
+**PHASE C: PASS / MERGED TO MAIN**
 
-The recovery boundary remains closed and accepted. Phase C is complete and ready for
-Phase D. Phase D has not started. Physical-device-only checks remain
-`PENDING_PHYSICAL_DEVICE`.
+Recovery is PASS / CLOSED, and the corrected v3.1 package is ACCEPTED. Phase C is PASS /
+MERGED TO MAIN via PR #45 at merge commit
+`e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
+Phase D is READY FOR AUTHORIZATION / NOT STARTED.
 
 ## Source and package boundary
 
 | Field | Value |
 | --- | --- |
+| Application version | `1.0.38` |
+| Application build | `38` |
 | Audited source commit | `f5b74658bb6ec4d3ac251f532a4d92d389c2a2db` |
-| Branch | `feature/elven-phase-c-production` |
+| Source branch | `feature/elven-phase-c-production` |
+| Evidence commit | `ee47191d131dfe3b6b3e446bc4bd88e07bc9960f` |
+| Merged pull request | `#45` |
+| Merge commit on `main` | `e9e0e0c8814aaa107d7480e070f14a6fe9b09975` |
 | Canonical source | `/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0` |
 | Immutable recovery baseline | `/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0` |
 | Completed Phase C package | `/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1` |
@@ -105,13 +111,7 @@ is not an acceptance gate and was not remediated in this production-resource tas
 Exact commands, destinations, results, and result-bundle paths are recorded in
 [`RepositoryRegression.json`](RepositoryRegression.json).
 
-## Remaining external qualification
-
-Physical-device and distribution-only checks were not converted to passes. FP-009,
-FP-015, FP-020, FP-021, FP-022, FP-023, FP-030, distribution signing, installation,
-and release-device launch remain `PENDING_PHYSICAL_DEVICE`.
-
 No Elven Theme Module target was created or integrated. No Progression rule, sharing
 behavior, cryptography, cipher identity, message format, Norse behavior, application
-version, or App Store metadata changed. Phase D remains `NOT_STARTED` and requires a
-separate task.
+version, or App Store metadata changed. Phase D is READY FOR AUTHORIZATION / NOT
+STARTED and requires separate authorization.

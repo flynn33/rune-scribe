@@ -1,6 +1,10 @@
 {
   "schemaVersion": "1.1",
-  "asOfDate": "2026-08-21",
+  "asOfDate": "2026-08-22",
+  "applicationVersion": {
+    "marketing": "1.0.38",
+    "build": "38"
+  },
   "authority": {
     "systemSpec": {
       "path": "docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md",
@@ -8,7 +12,7 @@
     },
     "implementationRoadmap": {
       "path": "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md",
-      "sha256": "884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4"
+      "sha256": "1c6e3cf79e6cd60d105c848a5fab65418daac799ae94db0d0c61504fc2c5679a"
     },
     "repositoryAuditBaseline": "b7e3da24a6e0a78fe1866c7b8f2bafb8140ea14e"
   },
@@ -40,7 +44,7 @@
     "partial": "Some required behavior or evidence exists, but the work package is not complete.",
     "decision-frozen": "The governing decision is accepted; production implementation remains outstanding.",
     "superseded": "The historical work package is retained for traceability but no longer directs implementation.",
-    "blocked-device": "Completion requires physical-device or destination evidence that unattended local tests cannot supply.",
+    "owner-optional": "Owner-operated hardware-only observation outside Agent Coding scope with no completion, blocking, residual-work, PASS/FAIL, or pull-request-readiness effect.",
     "not-started": "No qualifying production implementation exists.",
     "not-applicable": "The conditional task has no approved input to include."
   },
@@ -56,7 +60,7 @@
         {"id":"BAS-003","status":"satisfied","dependsOn":["BAS-001"],"evidence":["README.md","docs/verification/BuildAndTestReport.md","docs/verification/elven-recovery-v3/PhaseABRegression.json","docs/verification/elven-phase-c/RepositoryRegression.json"],"notes":"README reports the current 826-package-test and 17-architecture-ratchet suites while the historical build report retains its snapshot counts."},
         {"id":"BAS-004","status":"satisfied","dependsOn":["BAS-003"],"evidence":["Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift","docs/verification/feature-parity-matrix.json"],"notes":"Current cipher, message, link, QR, encrypted-library, contact, and font compatibility fixtures are covered by repository tests and parity evidence."},
         {"id":"BAS-005","status":"not-applicable","dependsOn":["BAS-004"],"evidence":["docs/architecture/RoadmapAlignment.md"],"notes":"No separately approved scrubbed real user sample was supplied; synthetic golden fixtures remain authoritative."},
-        {"id":"BAS-006","status":"blocked-device","dependsOn":["BAS-001"],"evidence":["docs/verification/feature-parity-matrix.json","docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Seven historical parity cases and the new share-composition matrix require physical-device evidence."},
+        {"id":"BAS-006","status":"owner-optional","dependsOn":[],"evidence":["docs/verification/feature-parity-matrix.json","docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Owner-operated hardware-only parity observation is optional, outside Agent Coding scope, and has no gating effect."},
         {"id":"BAS-007","status":"satisfied","dependsOn":["BAS-001"],"evidence":["docs/architecture/decisions/README.md"],"notes":"ADR-RS-001 through ADR-RS-012 have explicit statuses and decisions."},
         {"id":"BAS-008","status":"partial","dependsOn":["BAS-004","BAS-007"],"evidence":["docs/architecture/decisions/ADR-RS-005-forward-compatibility.md","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/RuneScribePackageTests.swift"],"notes":"Legacy-only outbound is frozen and initial old/new intake coverage exists; the destination and update-required matrix remains incomplete."},
         {"id":"BAS-009","status":"satisfied","dependsOn":["BAS-001"],"evidence":["scripts/check-architecture.sh","scripts/architecture-ratchet.json"],"notes":"The consumer-repository architecture policy and executable guard exist."},
@@ -175,22 +179,22 @@
       "wave": "4",
       "dependsOn": ["PKG-001","THM-012","PRO-009"],
       "items": [
-        {"id":"SHR-001","status":"blocked-device","dependsOn":["BAS-006","BAS-007"],"evidence":["docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"The required public-destination behavior can be decided only from physical-device evidence."},
+        {"id":"SHR-001","status":"owner-optional","dependsOn":[],"evidence":["docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Owner-operated public-destination observation is optional, outside Agent Coding scope, and has no gating effect."},
         {"id":"SHR-002","status":"not-started","dependsOn":["THM-004","THM-005"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No Artifact or static-preview renderer exists."},
         {"id":"SHR-003","status":"decision-frozen","dependsOn":["THM-012","SHR-002"],"evidence":["docs/architecture/decisions/ADR-RS-010-theme-resource-budgets.md"],"notes":"Initial resource budgets are frozen; crop, contrast, and text-safe renderer conformance remains."},
         {"id":"SHR-004","status":"not-started","dependsOn":["PKG-001","THM-009","SHR-002","SHR-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No themed Share Builder exists."},
         {"id":"SHR-005","status":"not-started","dependsOn":["SHR-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"Current sharing is not Codex-aware Quick Share."},
         {"id":"SHR-006","status":"partial","dependsOn":["BAS-007","DOM-007","PKG-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift","docs/architecture/decisions/ADR-RS-007-themed-follow-up-transport.md"],"notes":"Legacy first-delivery key inclusion exists; established themed packages remain deferred under legacy-only outbound."},
-        {"id":"SHR-007","status":"partial","dependsOn":["BAS-007","PKG-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/CipherSharePayload.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Import/LinkRouter.swift","docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Legacy cipher file, link, and QR composition exists; final Artifact transport awaits the spike."},
-        {"id":"SHR-008","status":"partial","dependsOn":["BAS-007","SHR-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ApplicationContracts.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift","RuneScribIOSTests/NativeShareOutcomeTests.swift","docs/architecture/decisions/ADR-RS-006-share-route-completion.md"],"notes":"Current adapters report useful terminal outcomes; the normalized operation/correlation vocabulary is not wired end-to-end."},
+        {"id":"SHR-007","status":"partial","dependsOn":["BAS-007","PKG-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/CipherSharePayload.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Import/LinkRouter.swift","docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Legacy cipher file, link, and QR composition exists; final Artifact transport source and contract implementation remain."},
+        {"id":"SHR-008","status":"partial","dependsOn":["BAS-007"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ApplicationContracts.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift","RuneScribIOSTests/NativeShareOutcomeTests.swift","docs/architecture/decisions/ADR-RS-006-share-route-completion.md"],"notes":"Current adapters report useful terminal outcomes; the normalized operation/correlation vocabulary is not wired end-to-end."},
         {"id":"SHR-009","status":"not-started","dependsOn":["PRO-002","SHR-008"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift"],"notes":"Stable event vocabulary exists, but share and first-delivery event emission does not."},
         {"id":"SHR-010","status":"decision-frozen","dependsOn":["PKG-001","THM-001"],"evidence":["docs/architecture/decisions/ADR-RS-004-typed-runescribe-container.md"],"notes":"The presentation section is allocated and bounded; its metadata schema and outbound use remain."},
         {"id":"SHR-011","status":"partial","dependsOn":["BAS-007","PKG-003","THM-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/Formats/RuneScribePackage.swift","docs/architecture/decisions/ADR-RS-010-theme-resource-budgets.md"],"notes":"Container preview/resource section bounds exist; media decode, hash table, and safe-preview validation remain."},
         {"id":"SHR-012","status":"not-started","dependsOn":["THM-009","PKG-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No locked, unavailable, or unknown-Codex Base fallback exists."},
         {"id":"SHR-013","status":"not-started","dependsOn":["PRO-007","SHR-009","SHR-012"],"evidence":["Packages/RuneScribeArchitecture/Package.swift"],"notes":"No Encounter recording exists."},
         {"id":"SHR-014","status":"not-started","dependsOn":["SHR-010","SHR-013"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"],"notes":"No provenance detail UI or verification status exists."},
-        {"id":"SHR-015","status":"blocked-device","dependsOn":["SHR-001"],"evidence":["docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Quick Look extension scope is conditional on physical-device spike value."},
-        {"id":"SHR-016","status":"partial","dependsOn":["SHR-001","SHR-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRDisplaySheet.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRScannerView.swift","docs/verification/feature-parity-matrix.json"],"notes":"Current QR and generic share fallbacks exist; themed Artifact scan/print reliability evidence remains."},
+        {"id":"SHR-015","status":"owner-optional","dependsOn":[],"evidence":["docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Owner-operated Quick Look scope observation is optional, outside Agent Coding scope, and has no gating effect."},
+        {"id":"SHR-016","status":"partial","dependsOn":["SHR-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRDisplaySheet.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRScannerView.swift","docs/verification/feature-parity-matrix.json"],"notes":"Current QR and generic share fallbacks exist; themed Artifact scan/print reliability evidence remains."},
         {"id":"SHR-017","status":"partial","dependsOn":["BAS-008","PKG-002","PKG-004","SHR-006","SHR-007","SHR-012"],"evidence":["Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/RuneScribePackageTests.swift"],"notes":"Legacy and initial vNext intake are tested; the full old/new and update-required destination matrix remains."}
       ]
     }

@@ -1,6 +1,12 @@
 # Rune Scribe — Phase 4 (revised): File-based, server-free sharing
 
-**Status:** Approved by owner 2026-06-27. Supersedes the Universal-Link / AASA approach in
+> **Historical implementation plan.** This record preserves the approved build-20 design
+> transition; the current application is version 1.0.38 build 38. Hardware-only procedures
+> in the historical task body are owner-operated optional observations outside Agent Coding
+> scope and have no acceptance, completion, blocker, residual-work, PASS/FAIL, or
+> pull-request-readiness effect.
+
+**Historical status:** Approved by owner 2026-06-27. Supersedes the Universal-Link / AASA approach in
 the 2026-06-25 Phase 4 spec and the 2026-06-26 plan (Task 9/10), which are **withdrawn**.
 **Branch:** `feature/messages`.
 
@@ -89,5 +95,7 @@ An outbound iMessage carries three things:
     ImportConfirm font test; add `ContactBook/ContactManager/KeyManagerLink` bulk-remove tests.
     No tests that present `MFMessageComposeViewController` or hit the Keychain.
 20. Verify via the GitHub **unit-tests** workflow only (no local `xcodebuild test`). Commit/PR
-    with **no AI attribution**. Manual QA on hardware: "Open in Rune Scribe" on a tapped
-    attachment (iOS) and an AirDrop/Finder-opened file at cold launch (macOS, security-scoped).
+    with **no AI attribution**. The historical hardware observations for "Open in Rune
+    Scribe" on a tapped attachment (iOS) and an AirDrop/Finder-opened file at cold launch
+    (macOS, security-scoped) are owner-operated optional validation outside Agent Coding
+    scope and do not affect completion or pull-request readiness.
