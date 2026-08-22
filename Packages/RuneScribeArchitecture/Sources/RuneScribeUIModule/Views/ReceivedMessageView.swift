@@ -46,6 +46,18 @@ struct ReceivedMessageView: View {
                             .contentShape(Rectangle())
                     }
 
+                    if let presentation = pending.presentation {
+                        RunePanel(
+                            title: "Sender Presentation",
+                            systemImage: "sparkles.rectangle.stack.fill"
+                        ) {
+                            ReceivedPresentationSummary(
+                                model: ReceivedPresentationViewModel(presentation),
+                                safePreviewData: pending.safePreviewData
+                            )
+                        }
+                    }
+
                     Text("Decoded with the “\(pending.cipherName)” cipher.")
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundColor(.runeSilver.opacity(0.8))

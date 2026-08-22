@@ -199,6 +199,11 @@ public struct RuntimePolicy: Sendable {
             RuneScribeCapabilities.progressionMigrationApply: [
                 RuneScribeRoles.applicationHost,
             ],
+            RuneScribeCapabilities.cloudSync: [RuneScribeRoles.applicationHost],
+            RuneScribeCapabilities.gameCenterReporting: [RuneScribeRoles.applicationHost],
+            RuneScribeCapabilities.cloudGameCenterStatusRead: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.gameCenterOptIn: [RuneScribeRoles.primaryUI],
+            RuneScribeCapabilities.cloudAccountRebind: [RuneScribeRoles.primaryUI],
         ], additionalPolicyClassesByCapability: [
             RuneScribeCapabilities.contributionPublish: [
                 RuneScribePolicyClasses.themeProvider,
@@ -318,6 +323,18 @@ public struct RuntimePolicy: Sendable {
                 consumerRoles: [RuneScribeRoles.core, RuneScribeRoles.progression]
             ),
             ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.cloudSyncTransport,
+                requiredCapability: RuneScribeCapabilities.cloudSync,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.applicationHost]
+            ),
+            ServiceAccessRule(
+                serviceID: RuneScribeServiceIDs.gameCenterReporting,
+                requiredCapability: RuneScribeCapabilities.gameCenterReporting,
+                publisherRoles: [RuneScribeRoles.applicationHost],
+                consumerRoles: [RuneScribeRoles.applicationHost]
+            ),
+            ServiceAccessRule(
                 serviceID: RuneScribeUnlockFeedback.serviceID,
                 requiredCapability: RuneScribeCapabilities.resolveService,
                 publisherRoles: [RuneScribeRoles.applicationHost],
@@ -332,6 +349,9 @@ public struct RuntimePolicy: Sendable {
                     RuneScribeRuntimeSettings.unlockFeedbackAnimationEnabled,
                     RuneScribeRuntimeSettings.selectedRelicByCodex,
                     RuneScribeRuntimeSettings.selectedSealByCodex,
+                    RuneScribeRuntimeSettings.selectedFrameByCodex,
+                    RuneScribeRuntimeSettings.contactsImportPrompted,
+                    RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds,
                 ],
                 RuneScribePolicyClasses.themeCoordinator: [
                     RuneScribeRuntimeSettings.selectedCodex,

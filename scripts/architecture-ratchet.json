@@ -20,6 +20,12 @@
     "RuneScribeProgressionModule",
     "RuneScribeThemeCoordinatorModule",
     "RuneScribeNorseThemeModule",
+    "RuneScribeThemeMoonleafModule",
+    "RuneScribeThemeSunspireModule",
+    "RuneScribeThemeWildwoodModule",
+    "RuneScribeThemeGloamthornModule",
+    "RuneScribeCloudSyncModule",
+    "RuneScribeGameCenterModule",
     "RuneScribeUIModule"
   ],
   "testOnlyProducts": [
@@ -52,6 +58,34 @@
       "defaultRole": "runescribe.theme.norse",
       "policyClass": "policy.theme-provider"
     },
+    "com.runescribe.module.theme.moonleaf": {
+      "product": "RuneScribeThemeMoonleafModule",
+      "moduleType": "service",
+      "criticality": "optional",
+      "defaultRole": "runescribe.theme.moonleaf",
+      "policyClass": "policy.theme-provider"
+    },
+    "com.runescribe.module.theme.sunspire": {
+      "product": "RuneScribeThemeSunspireModule",
+      "moduleType": "service",
+      "criticality": "optional",
+      "defaultRole": "runescribe.theme.sunspire",
+      "policyClass": "policy.theme-provider"
+    },
+    "com.runescribe.module.theme.wildwood": {
+      "product": "RuneScribeThemeWildwoodModule",
+      "moduleType": "service",
+      "criticality": "optional",
+      "defaultRole": "runescribe.theme.wildwood",
+      "policyClass": "policy.theme-provider"
+    },
+    "com.runescribe.module.theme.gloamthorn": {
+      "product": "RuneScribeThemeGloamthornModule",
+      "moduleType": "service",
+      "criticality": "optional",
+      "defaultRole": "runescribe.theme.gloamthorn",
+      "policyClass": "policy.theme-provider"
+    },
     "com.runescribe.module.ui": {
       "product": "RuneScribeUIModule",
       "moduleType": "ui",
@@ -69,7 +103,7 @@
     "moduleManifestsMissing": {
       "maximum": 0,
       "owner": "RuntimeFoundation",
-      "reason": "All five shipping module manifests are required.",
+      "reason": "All nine shipping lifecycle-module manifests are required.",
       "removalPhase": "P2"
     },
     "projectPackageReferenceMissing": {
@@ -81,7 +115,7 @@
     "projectProductDependenciesMissing": {
       "maximum": 0,
       "owner": "BuildConfiguration",
-      "reason": "Both shipping hosts must link all nine required app-owned products.",
+      "reason": "Both shipping hosts must link all fifteen required app-owned products.",
       "removalPhase": "P2"
     },
     "architectureTestTargetMissing": {
@@ -157,9 +191,9 @@
       "removalPhase": "P6"
     },
     "hostPhysicalLines": {
-      "maximum": 300,
+      "maximum": 340,
       "owner": "HostMigration",
-      "reason": "The host is limited to composition, runtime activation, typed OS input conversion, and neutral root presentation.",
+      "reason": "The host is limited to composition, runtime activation, exact optional-provider registration, typed OS input conversion, and neutral root presentation.",
       "removalPhase": "P6"
     }
   }

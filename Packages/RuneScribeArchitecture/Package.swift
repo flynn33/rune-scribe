@@ -30,6 +30,30 @@ let package = Package(
             name: "RuneScribeNorseThemeModule",
             targets: ["RuneScribeNorseThemeModule"]
         ),
+        .library(
+            name: "RuneScribeThemeMoonleafModule",
+            targets: ["RuneScribeThemeMoonleafModule"]
+        ),
+        .library(
+            name: "RuneScribeThemeSunspireModule",
+            targets: ["RuneScribeThemeSunspireModule"]
+        ),
+        .library(
+            name: "RuneScribeThemeWildwoodModule",
+            targets: ["RuneScribeThemeWildwoodModule"]
+        ),
+        .library(
+            name: "RuneScribeThemeGloamthornModule",
+            targets: ["RuneScribeThemeGloamthornModule"]
+        ),
+        .library(
+            name: "RuneScribeCloudSyncModule",
+            targets: ["RuneScribeCloudSyncModule"]
+        ),
+        .library(
+            name: "RuneScribeGameCenterModule",
+            targets: ["RuneScribeGameCenterModule"]
+        ),
         .library(name: "RuneScribeUIModule", targets: ["RuneScribeUIModule"]),
         .library(name: "RuneScribeTestSupport", targets: ["RuneScribeTestSupport"]),
     ],
@@ -42,7 +66,10 @@ let package = Package(
         .target(
             name: "RuneScribeRuntimeCore",
             dependencies: [
+                "RuneScribeCloudSyncModule",
                 "RuneScribeContracts",
+                "RuneScribeGameCenterModule",
+                "RuneScribeProgressionSyncDomain",
                 "RuneScribeUIPresentationContracts",
             ]
         ),
@@ -67,8 +94,16 @@ let package = Package(
         ),
         .target(
             name: "RuneScribeProgressionModule",
-            dependencies: ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+            dependencies: [
+                "RuneScribeContracts",
+                "RuneScribeProgressionSyncDomain",
+                "RuneScribeRuntimeCore",
+            ],
             resources: [.process("Resources")]
+        ),
+        .target(
+            name: "RuneScribeProgressionSyncDomain",
+            dependencies: ["RuneScribeContracts"]
         ),
         .target(
             name: "RuneScribeThemeCoordinatorModule",
@@ -79,6 +114,35 @@ let package = Package(
             name: "RuneScribeNorseThemeModule",
             dependencies: ["RuneScribeContracts", "RuneScribeRuntimeCore"],
             exclude: ["Resources/Source"],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "RuneScribeThemeMoonleafModule",
+            dependencies: ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "RuneScribeThemeSunspireModule",
+            dependencies: ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "RuneScribeThemeWildwoodModule",
+            dependencies: ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "RuneScribeThemeGloamthornModule",
+            dependencies: ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "RuneScribeCloudSyncModule",
+            dependencies: ["RuneScribeProgressionSyncDomain"]
+        ),
+        .target(
+            name: "RuneScribeGameCenterModule",
+            dependencies: ["RuneScribeContracts"],
             resources: [.process("Resources")]
         ),
         .target(
@@ -98,7 +162,10 @@ let package = Package(
         .testTarget(
             name: "RuneScribeRuntimeCoreTests",
             dependencies: [
+                "RuneScribeCloudSyncModule",
                 "RuneScribeContracts",
+                "RuneScribeGameCenterModule",
+                "RuneScribeProgressionSyncDomain",
                 "RuneScribeRuntimeCore",
                 "RuneScribeTestSupport",
                 "RuneScribeUIPresentationContracts",
@@ -121,6 +188,7 @@ let package = Package(
             dependencies: [
                 "RuneScribeContracts",
                 "RuneScribeProgressionModule",
+                "RuneScribeProgressionSyncDomain",
                 "RuneScribeRuntimeCore",
                 "RuneScribeTestSupport",
             ]
@@ -132,6 +200,66 @@ let package = Package(
                 "RuneScribeNorseThemeModule",
                 "RuneScribeRuntimeCore",
             ]
+        ),
+        .testTarget(
+            name: "RuneScribeThemeMoonleafModuleTests",
+            dependencies: [
+                "RuneScribeContracts",
+                "RuneScribeNorseThemeModule",
+                "RuneScribeProgressionModule",
+                "RuneScribeRuntimeCore",
+                "RuneScribeTestSupport",
+                "RuneScribeThemeCoordinatorModule",
+                "RuneScribeThemeMoonleafModule",
+            ]
+        ),
+        .testTarget(
+            name: "RuneScribeThemeSunspireModuleTests",
+            dependencies: [
+                "RuneScribeContracts",
+                "RuneScribeNorseThemeModule",
+                "RuneScribeProgressionModule",
+                "RuneScribeRuntimeCore",
+                "RuneScribeTestSupport",
+                "RuneScribeThemeCoordinatorModule",
+                "RuneScribeThemeSunspireModule",
+            ]
+        ),
+        .testTarget(
+            name: "RuneScribeThemeWildwoodModuleTests",
+            dependencies: [
+                "RuneScribeContracts",
+                "RuneScribeNorseThemeModule",
+                "RuneScribeProgressionModule",
+                "RuneScribeRuntimeCore",
+                "RuneScribeTestSupport",
+                "RuneScribeThemeCoordinatorModule",
+                "RuneScribeThemeWildwoodModule",
+            ]
+        ),
+        .testTarget(
+            name: "RuneScribeThemeGloamthornModuleTests",
+            dependencies: [
+                "RuneScribeContracts",
+                "RuneScribeNorseThemeModule",
+                "RuneScribeProgressionModule",
+                "RuneScribeRuntimeCore",
+                "RuneScribeTestSupport",
+                "RuneScribeThemeCoordinatorModule",
+                "RuneScribeThemeGloamthornModule",
+            ]
+        ),
+        .testTarget(
+            name: "RuneScribeCloudSyncModuleTests",
+            dependencies: [
+                "RuneScribeCloudSyncModule",
+                "RuneScribeContracts",
+                "RuneScribeProgressionSyncDomain",
+            ]
+        ),
+        .testTarget(
+            name: "RuneScribeGameCenterModuleTests",
+            dependencies: ["RuneScribeGameCenterModule", "RuneScribeContracts"]
         ),
         .testTarget(
             name: "RuneScribeThemeCoordinatorModuleTests",
@@ -151,6 +279,10 @@ let package = Package(
                 "RuneScribeRuntimeCore",
                 "RuneScribeTestSupport",
                 "RuneScribeThemeCoordinatorModule",
+                "RuneScribeThemeGloamthornModule",
+                "RuneScribeThemeMoonleafModule",
+                "RuneScribeThemeSunspireModule",
+                "RuneScribeThemeWildwoodModule",
                 "RuneScribeUIPresentationContracts",
                 "RuneScribeUIRuntime",
                 "RuneScribeUIModule",
@@ -166,7 +298,11 @@ let package = Package(
                 "RuneScribeCoreModule",
                 "RuneScribeNorseThemeModule",
                 "RuneScribeProgressionModule",
+                "RuneScribeThemeGloamthornModule",
                 "RuneScribeThemeCoordinatorModule",
+                "RuneScribeThemeMoonleafModule",
+                "RuneScribeThemeSunspireModule",
+                "RuneScribeThemeWildwoodModule",
                 "RuneScribeUIModule",
                 "RuneScribeTestSupport",
             ]

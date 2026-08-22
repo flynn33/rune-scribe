@@ -2,27 +2,32 @@
 
 **Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
 
-**Status:** Accepted interim; owner-operated hardware observation optional
+**Status:** Accepted; typed file Artifact with QR and link fallbacks
 **Date:** 2026-08-09
 
 ## Decision
 
-Keep the current cipher link, file, and QR invitation paths until separately authorized
-implementation work selects a reliable public transport. Candidate image, URL, file,
-Quick Look, multi-item, MessageUI, and generic-share routes must be validated through
-supported simulators, hosted tests, deterministic test doubles, platform builds,
-static inspection, negative route mutations, and reproducible artifact checks.
+Use the typed `.runescribe` file as the authoritative themed cipher-invitation Artifact.
+It contains the validated Core invitation plus bounded presentation metadata and a
+static 4:3 safe preview. Compact offline link and QR invitation paths remain available
+as legacy-compatible fallbacks and continue through the same validated intake rail.
 
-No permanent choice is made yet between image-led sharing, file-led sharing, dual-item
-composition, a Quick Look thumbnail extension, or a dedicated iMessage extension.
-Owner-operated hardware-only observations may supplement the automated record, but are
-optional outside Agent Coding scope. They do not affect acceptance, completion,
-blocker status, residual work, PASS/FAIL, or pull-request readiness.
+Before rendering a requested installed provider, the receiver resolves the selected
+Script, Relic, Seal, and optional Frame against that provider's installed inventory and
+verifies every referenced resource's role, media type, byte length, dimensions, and
+SHA-256 digest. Unknown selections are incompatible and resource drift is corrupt; both
+use the Norse fallback. Presentation rejection never blocks admission or decryption of
+an otherwise valid Core payload.
 
-## Exit evidence
+No Quick Look or dedicated iMessage extension is required. Owner-operated hardware-only
+observations may supplement the automated record but remain optional pre-ship work and
+do not change the source-complete transport decision.
 
-Record supported-environment destination results, cancellation and completion
+## Evidence boundary
+
+The completion evidence records supported-environment destination results, cancellation and completion
 callbacks, attachment state transitions, lifecycle behavior, fallbacks, visible
 warnings, error paths, accessibility assertions, and deterministic artifacts. The
-successor decision must preserve offline QR/social/print fallback, first-delivery key
-warnings, bounded resources, and the compatibility policy in ADR-RS-005.
+implementation preserves offline QR/social/print fallback, first-delivery key warnings,
+bounded resources, and the compatibility policy in ADR-RS-005. Physical public-share
+destinations remain in the owner checklist.

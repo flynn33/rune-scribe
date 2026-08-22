@@ -53,6 +53,7 @@ public enum ThemeCoordinatorContractError: Error, Equatable, Sendable {
     case invalidEffectiveTheme
     case invalidSelectionState
     case invalidProviderState
+    case invalidPresentationInventory
     case missingBaseProvider
     case invalidFallbackState
     case resourceIntegrityMismatch
@@ -71,6 +72,7 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
     public let isEmergencyPresentation: Bool
     public let effectiveTheme: ThemeDescriptor
     public let providers: [ThemeProviderSummaryDTO]
+    public let presentationInventories: [SharePresentationProviderInventory]
 
     public init(
         revision: UInt64,
@@ -80,6 +82,7 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
         fallbackReason: ThemeSelectionFallbackReason,
         effectiveTheme: ThemeDescriptor,
         providers: [ThemeProviderSummaryDTO],
+        presentationInventories: [SharePresentationProviderInventory] = [],
         isEmergencyPresentation: Bool = false
     ) throws {
         guard capturedAt.timeIntervalSinceReferenceDate.isFinite else {
@@ -98,6 +101,24 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
         }
         guard effectiveTheme.codex.id == effectiveCodexID else {
             throw ThemeCoordinatorContractError.invalidEffectiveTheme
+        }
+        let effectiveInventory = try SharePresentationProviderInventory(
+            descriptor: effectiveTheme
+        )
+        let normalizedInventories = presentationInventories.isEmpty
+            ? [effectiveInventory]
+            : presentationInventories
+        guard normalizedInventories.count <= Self.maximumProviderCount,
+              Set(normalizedInventories.map(\.codexID)).count
+                == normalizedInventories.count,
+              normalizedInventories.allSatisfy({ inventory in
+                  providers.contains { $0.codexID == inventory.codexID }
+              }),
+              normalizedInventories.first(where: {
+                  $0.codexID == effectiveCodexID
+              }) == effectiveInventory
+        else {
+            throw ThemeCoordinatorContractError.invalidPresentationInventory
         }
         guard providers.allSatisfy({ provider in
             !provider.displayName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -168,6 +189,9 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
         self.isEmergencyPresentation = isEmergencyPresentation
         self.effectiveTheme = effectiveTheme
         self.providers = providers.sorted { $0.codexID < $1.codexID }
+        self.presentationInventories = normalizedInventories.sorted {
+            $0.codexID < $1.codexID
+        }
     }
 
     public init(from decoder: Decoder) throws {
@@ -186,6 +210,10 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
             ),
             effectiveTheme: container.decode(ThemeDescriptor.self, forKey: .effectiveTheme),
             providers: container.decode([ThemeProviderSummaryDTO].self, forKey: .providers),
+            presentationInventories: try container.decodeIfPresent(
+                [SharePresentationProviderInventory].self,
+                forKey: .presentationInventories
+            ) ?? [],
             isEmergencyPresentation: try container.decodeIfPresent(
                 Bool.self,
                 forKey: .isEmergencyPresentation

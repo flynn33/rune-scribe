@@ -249,26 +249,18 @@ final class ArchitectureIntegrationTests: XCTestCase {
             )
             XCTAssertEqual(messageArtifact.reference, .opaque(messageArtifact.id))
             XCTAssertFalse(messageArtifact.requiresKeyDelivery)
-            let messageCompletion = try await application.completeShareArtifact(
-                CompleteShareArtifactCommand(
-                    artifactID: messageArtifact.id,
-                    outcome: .cancelled
-                )
-            )
-            XCTAssertEqual(messageCompletion, .released)
+            try await application.releaseShareArtifact(id: messageArtifact.id)
+            let messageArtifactRetained = await shareArtifacts.contains(messageArtifact.id)
+            XCTAssertFalse(messageArtifactRetained)
 
             let cipherArtifact = try await application.prepareCipherShare(
                 PrepareCipherShareCommand(cipherID: cipher.id, representation: .file)
             )
             let cipherShareData = await shareArtifacts.data(for: cipherArtifact.id)
             let importData = try XCTUnwrap(cipherShareData)
-            let cipherCompletion = try await application.completeShareArtifact(
-                CompleteShareArtifactCommand(
-                    artifactID: cipherArtifact.id,
-                    outcome: .cancelled
-                )
-            )
-            XCTAssertEqual(cipherCompletion, .released)
+            try await application.releaseShareArtifact(id: cipherArtifact.id)
+            let cipherArtifactRetained = await shareArtifacts.contains(cipherArtifact.id)
+            XCTAssertFalse(cipherArtifactRetained)
             try await application.deleteCipher(id: cipher.id)
 
             let imported = try await application.importFile(

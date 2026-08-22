@@ -5,6 +5,10 @@ Keep this file in sync when shipping a new marketing version.
 
 **Last prepared for:** 1.0.38 (build 38) — 2026-08-22
 
+> **No-ship boundary:** this repository update prepares source-controlled copy only.
+> It does not create or change App Store Connect records, archive/export either app,
+> sign for distribution, notarize, upload, release, or begin rollout.
+
 ---
 
 ## Version
@@ -32,21 +36,22 @@ Sources of truth in the repo:
 ### Short
 
 ```
-• Adds an optional on-device Journey with achievements and unlocks
-• Adds the Vault/Progress collection and accessible reveal queue
-• Introduces runtime-managed appearance with the Norse Base theme
+• Adds four unlockable Elven Codices and themed message Artifacts
+• Adds optional private Journey sync across your Apple devices
+• Adds optional Game Center achievement reporting
 ```
 
 ### Full
 
 ```
-This update adds a private, optional Journey while preserving Rune Scribe's offline workflows:
+This update completes Rune Scribe's Codex journey while preserving local encryption and offline use:
 
-• Earn on-device achievements and milestones from normal encode, decode, import, and sharing activity.
-• Review progress, collected rewards, and available appearance choices in Vault/Progress.
-• Unlock reveals are queued, resumable, and respect reduced-motion and feedback settings.
-• Appearance is now coordinated through the required Norse Base theme; optional production theme series are not included in this build.
-• Encryption, ciphers, progression records, and preferences remain on-device with no account or server.
+• Unlock Moonleaf, Sunspire, Wildwood, and Gloamthorn Codices from the local Journey.
+• Choose owned Relics, Seals, and Frames for a static themed message preview.
+• Receive themed files safely even when their Codex is locked or unavailable.
+• Optionally mirror progression through your private iCloud database.
+• Optionally report the evergreen achievement catalog to Game Center.
+• Cipher keys, contacts, plaintext, and full messages stay out of iCloud and Game Center.
 ```
 
 ---
@@ -56,17 +61,24 @@ This update adds a private, optional Journey while preserving Rune Scribe's offl
 Paste into App Store Connect → App Review Information → Notes.
 
 ```
-Rune Scribe is a fully offline encrypted messaging utility. No accounts, no servers, no network API calls.
+Rune Scribe is a local-first encrypted messaging utility. It has no proprietary account,
+message relay, analytics backend, or advertising service. Optional private iCloud
+progression sync and optional Game Center reporting use the signed-in Apple account;
+both may be declined and are never required for first run or cipher/message utility.
 
 HOW TO DEMO
 1. Launch the app. You may see a short skippable intro (Skip or wait).
 2. Optional: Settings → set a 4-digit App Lock PIN, then background and return to verify lock.
 3. Cipher Library → New Cipher (or use the default).
-4. On the main screen: type a short message → Rune Scribe → Share or Send via iMessage (iOS).
+4. On the main screen, choose available Relic/Seal/Frame appearance defaults, type a
+   short message → Rune Scribe → Share or Send via iMessage (iOS).
 5. Cipher Library → Share on a cipher: system share sheet offers a runescribe://import link. Opening that link on a device with Rune Scribe installed presents Import Cipher.
-6. Cipher Library → Export produces a .runescribe file; Import… re-imports it.
+6. Cipher Library → Export produces a typed themed .runescribe file; Import… re-imports it.
 7. QR: show QR for a cipher; Scan QR Code (iOS) or Camera to import.
-8. Open Vault/Progress to review the local Journey, achievement progress, and collected rewards. The app remains usable if Progression is unavailable.
+8. Open Vault/Progress to review the local Journey, achievement progress, Encounters,
+   and collected rewards. The app remains usable if Progression is unavailable.
+9. Optional: Settings shows private-sync and Game Center state. Decline or remain
+   offline to verify that all local cipher, message, and unlock behavior still works.
 
 ENCRYPTION
 • AES-256-GCM (CryptoKit) for messages and for the on-device cipher library.
@@ -77,17 +89,19 @@ URL SCHEME
 • runescribe:// — cipher import deep links (CFBundleURLTypes). Not Universal Links; no associated domains.
 
 DOCUMENT TYPE
-• .runescribe (UTI com.runescribe.runescribe) — cipher packages and message attachments, distinguished by version byte.
+• .runescribe (UTI com.runescribe.runescribe) — typed or exact legacy cipher/message packages, distinguished by container magic or legacy version byte.
 
 PERMISSIONS
 • Camera (iOS only): scan cipher QR codes; frames processed on-device, not stored or uploaded.
-• Contacts: optional organization of ciphers by person; data stays on device, never uploaded.
+• Contacts: optional organization of ciphers by person; contact data stays on device and is prohibited from private progression sync.
 
 MAC
 • App Sandbox + Hardened Runtime.
 • Automatic import of cipher files from Messages is not claimed on Mac; use Import, open file, or paste runescribe:// link (see docs/platform-notes.md).
 
-NO DEMO ACCOUNT REQUIRED — all features work offline after install.
+NO DEMO ACCOUNT REQUIRED — local encryption, sharing, Journey, appearance, and Vault
+features work without iCloud or Game Center. Live service checks require the review
+device's Apple service configuration and are not mandatory for first run.
 ```
 
 ---
@@ -96,7 +110,7 @@ NO DEMO ACCOUNT REQUIRED — all features work offline after install.
 
 | Question | Answer |
 |----------|--------|
-| **Data collection** | **No** (no analytics, ads, or backend) |
+| **Developer data collection** | **No** (no analytics, ads, proprietary account, or developer backend) |
 | **Linked to user** | N/A |
 | **Used for tracking** | **No** |
 
@@ -105,7 +119,23 @@ Local-only surfaces (not uploaded):
 - **Contacts** — optional; on-device organization of ciphers; never uploaded  
 - **Camera** — iOS QR scan only; frames processed on-device, not saved or sent  
 
-**Privacy policy URL:** use the live Raven Forge privacy page if published; otherwise the company site (`https://ravenforgesoftware.com/`) until a dedicated policy URL exists.
+Optional Apple-service fields:
+
+- **Private iCloud database** — progression identifiers, completion dates, owned
+  content IDs, Encounter tokens, device-shard counters, selected Codex, pending Game
+  Center reports, logical clocks, and bounded quarantine diagnostics only.
+- **Game Center** — stable achievement identifiers and monotonic completion percentage
+  only after user opt-in.
+
+The cloud codec rejects plaintext, keys, Keychain material, full messages, package
+bytes, contact identity, raw relationship identifiers, QR content, and private logs.
+Confirm the final App Store privacy questionnaire against the enabled Apple services
+before upload; this file does not submit those answers.
+
+**Privacy policy source:** publish [PRIVACY.md](PRIVACY.md) unchanged at the dedicated
+Raven Forge privacy URL before upload, then enter that live URL in App Store Connect.
+The source policy is complete; publication and App Store entry remain owner-only and
+not performed by this work.
 
 ---
 
@@ -148,6 +178,9 @@ The same text is shown in-app under **Settings → View License**
 ### iOS (`Config/RuneScrib-iOS.entitlements`)
 
 - Keychain access group: `$(AppIdentifierPrefix)com.runescribe.app`
+- Game Center capability
+- Private iCloud container: `iCloud.com.runescribe.app`
+- CloudKit service and key-value store declarations
 - No associated domains / Universal Links
 
 ### macOS (`Config/RuneScrib-macOS.entitlements`)
@@ -155,6 +188,9 @@ The same text is shown in-app under **Settings → View License**
 - `com.apple.security.app-sandbox`
 - `com.apple.security.personal-information.addressbook` (Contacts)
 - `com.apple.security.files.user-selected.read-write` (import/export)
+- Game Center capability
+- Private iCloud container: `iCloud.com.runescribe.app`
+- CloudKit service and key-value store declarations
 
 Info.plist highlights (`Config/RuneScrib-*-Info.plist` / `project.yml`):
 
@@ -166,6 +202,10 @@ Info.plist highlights (`Config/RuneScrib-*-Info.plist` / `project.yml`):
 ---
 
 ## Archive & upload checklist
+
+This is an owner-operated future checklist. No item in the archive, export, signing,
+notarization, upload, record-creation, or rollout sequence was executed by the
+roadmap-completion work.
 
 ### iOS
 
@@ -194,6 +234,11 @@ Info.plist highlights (`Config/RuneScrib-*-Info.plist` / `project.yml`):
   intro cadence
 - [x] Supported Simulator and hosted coverage verifies Vault/Progress, reveal
   accessibility, and feedback settings
+- [x] Deterministic adapters verify private-sync merge/offline/account/corruption policy
+- [x] Deterministic adapters verify Game Center mapping/opt-in/outbox/retry policy
+- [ ] Owner configures the iCloud container and validates private-database account changes
+- [ ] Owner creates/groups Game Center records, uploads approved images/localizations,
+  and validates sandbox behavior on both platforms
 
 Hardware-only observations are owner-operated optional validation outside Agent Coding
 scope. They do not affect acceptance, completion, blocker status, residual work,
@@ -201,20 +246,17 @@ PASS/FAIL, upload readiness, or pull-request readiness.
 
 ---
 
-## What ships in 1.0.38
+## Source-complete 1.0.38 candidate
 
-Internal summary for this submission:
+Internal summary for owner testing; this is **not a shipment claim**:
 
 1. Optional on-device Progression with approved achievements, milestones, durable records, and privacy-safe existing-user migration
 2. Vault/Progress, Collection, Archive, and accessible queued unlock reveals
-3. Runtime-owned Theme coordination and required Norse Base appearance provider
-4. Core, Progression, and UI module descriptors and manifests aligned to the application release
-5. Marketing version **1.0.38**, build **38**
-
-Related merged PRs: [#42](https://github.com/flynn33/rune-scribe/pull/42),
-[#43](https://github.com/flynn33/rune-scribe/pull/43),
-[#44](https://github.com/flynn33/rune-scribe/pull/44), and
-[#45](https://github.com/flynn33/rune-scribe/pull/45)
+3. Runtime-owned Theme coordination, required Norse Base, and four production Elven providers
+4. Themed typed-package sharing/receiving, static preview, Encounter and provenance state
+5. Local-first private progression synchronization and optional Game Center policy
+6. Core, runtime, providers, Progression, Cloud, Game Center, and UI boundaries guarded
+7. Marketing version **1.0.38**, build **38**, with owner test required and no upload performed
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)
 

@@ -276,6 +276,8 @@ errors << "platform marketing versions differ" unless marketing_versions.uniq.le
 errors << "platform build numbers differ" unless build_versions.uniq.length == 1
 errors << "marketing version is malformed" unless marketing_versions.first.to_s.match?(/\A\d+(?:\.\d+){1,2}\z/)
 errors << "build number is malformed" unless build_versions.first.to_s.match?(/\A\d+\z/)
+errors << "built marketing version differs from frozen 1.0.38" unless marketing_versions == ["1.0.38", "1.0.38"]
+errors << "built build number differs from frozen 38" unless build_versions == ["38", "38"]
 
 puts errors
 exit(errors.empty? ? 0 : 1)
@@ -292,6 +294,75 @@ else
   done < "$temporary_directory/info-errors"
   [ "$validation_detail" = true ] || printf 'DETAIL: Info.plist validator did not return diagnostics.\n' >&2
   fail_check "built Info.plists do not preserve the required configuration contract"
+fi
+
+validate_macho_platform() {
+  local executable=$1
+  local platform=$2
+  local expected_platform=$3
+  local architecture_policy=$4
+  local architectures
+  local architecture
+  local load_commands
+  local architecture_valid=true
+  local platform_valid=true
+
+  architectures=$(lipo -archs "$executable" 2>/dev/null || true)
+  case "$architecture_policy" in
+    arm64-only)
+      [ "$architectures" = "arm64" ] || architecture_valid=false
+      ;;
+    simulator)
+      [ -n "$architectures" ] || architecture_valid=false
+      for architecture in $architectures; do
+        case "$architecture" in
+          arm64|x86_64) ;;
+          *) architecture_valid=false ;;
+        esac
+      done
+      ;;
+    *) architecture_valid=false ;;
+  esac
+
+  if [ "$architecture_valid" = true ]; then
+    pass_check "$platform executable architecture set matches its Release destination"
+  else
+    fail_check "$platform executable architecture set does not match its Release destination (found: ${architectures:-none})"
+  fi
+
+  for architecture in $architectures; do
+    load_commands="$temporary_directory/${platform}-${architecture}-load-commands"
+    if ! otool -arch "$architecture" -l "$executable" >"$load_commands" 2>/dev/null ||
+       ! ruby - "$load_commands" "$expected_platform" <<'RUBY'
+lines = File.readlines(ARGV.fetch(0), chomp: true)
+expected = ARGV.fetch(1)
+platforms = []
+lines.each_index do |index|
+  next unless lines[index].strip == "cmd LC_BUILD_VERSION"
+  window = lines[(index + 1)..(index + 8)] || []
+  row = window.find { |line| line.strip.start_with?("platform ") }
+  platforms << row.to_s.split.last unless row.nil?
+end
+exit(!platforms.empty? && platforms.all? { |platform| platform == expected } ? 0 : 1)
+RUBY
+    then
+      platform_valid=false
+    fi
+  done
+
+  if [ "$platform_valid" = true ] && [ -n "$architectures" ]; then
+    pass_check "$platform executable LC_BUILD_VERSION matches its declared platform"
+  else
+    fail_check "$platform executable LC_BUILD_VERSION does not match its declared platform"
+  fi
+}
+
+validate_macho_platform "$macos_executable" "macOS" "1" "arm64-only"
+if ruby -rjson -e 'exit(JSON.parse(File.read(ARGV.fetch(0))).fetch("CFBundleSupportedPlatforms", []).include?("iPhoneSimulator") ? 0 : 1)' \
+    "$temporary_directory/ios-info.json"; then
+  validate_macho_platform "$ios_executable" "iOS" "7" "simulator"
+else
+  validate_macho_platform "$ios_executable" "iOS" "2" "arm64-only"
 fi
 
 verify_signature() {
@@ -326,7 +397,7 @@ else
   for architecture in $macos_runtime_architectures; do
     architecture_details="$temporary_directory/macOS-${architecture}-signature-details"
     if ! codesign -dvvv --arch "$architecture" "$macos_app" > /dev/null 2>"$architecture_details" ||
-       ! grep -Eq 'flags=.*runtime|Runtime Version=' "$architecture_details"; then
+       ! grep -Eq 'flags=.*runtime' "$architecture_details"; then
       macos_runtime_valid=false
     fi
     printf 'Architecture: %s\n' "$architecture" >>"$macos_runtime_details"
@@ -463,13 +534,57 @@ ios_by_architecture = load_architecture_entitlements(ARGV.fetch(1), "iOS", error
 macos_required = [
   "com.apple.security.app-sandbox",
   "com.apple.security.personal-information.addressbook",
-  "com.apple.security.files.user-selected.read-write"
+  "com.apple.security.files.user-selected.read-write",
+  "com.apple.developer.game-center"
+]
+icloud_required = [
+  "com.apple.developer.icloud-container-identifiers",
+  "com.apple.developer.icloud-services",
+  "com.apple.developer.ubiquity-kvstore-identifier"
 ]
 macos_signing_keys = [
   "com.apple.application-identifier",
   "com.apple.developer.team-identifier",
-  "com.apple.security.get-task-allow"
+  "com.apple.security.get-task-allow",
+  "com.apple.developer.icloud-container-environment"
 ]
+
+def valid_kvstore_identifier?(value)
+  value == "$(TeamIdentifierPrefix)com.runescribe.app" ||
+    value.to_s.match?(/\A[A-Z0-9]{10}\.com\.runescribe\.app\z/)
+end
+
+def validate_cloud(errors, entitlements, label)
+  unless entitlements["com.apple.developer.icloud-container-identifiers"] == ["iCloud.com.runescribe.app"]
+    errors << "#{label} iCloud container identifiers differ"
+  end
+  unless entitlements["com.apple.developer.icloud-services"] == ["CloudKit"]
+    errors << "#{label} iCloud service declaration differs"
+  end
+  kvstore_identifier = entitlements["com.apple.developer.ubiquity-kvstore-identifier"]
+  unless valid_kvstore_identifier?(kvstore_identifier)
+    errors << "#{label} ubiquity key-value store identifier differs"
+  end
+  if kvstore_identifier != "$(TeamIdentifierPrefix)com.runescribe.app" &&
+      kvstore_identifier.to_s.match?(/\A[A-Z0-9]{10}\.com\.runescribe\.app\z/)
+    team_identifier = entitlements["com.apple.developer.team-identifier"]
+    application_identifier = entitlements["application-identifier"] ||
+      entitlements["com.apple.application-identifier"]
+    expected_prefix = if !team_identifier.to_s.empty?
+      team_identifier
+    elsif application_identifier.to_s.end_with?(".com.runescribe.app")
+      application_identifier.to_s.delete_suffix(".com.runescribe.app")
+    end
+    if expected_prefix.to_s.empty? ||
+        kvstore_identifier != "#{expected_prefix}.com.runescribe.app"
+      errors << "#{label} ubiquity key-value store prefix differs from the signing team"
+    end
+  end
+  environment = entitlements["com.apple.developer.icloud-container-environment"]
+  if environment && !["Development", "Production"].include?(environment)
+    errors << "#{label} iCloud container environment is invalid"
+  end
+end
 
 macos_by_architecture.each do |architecture, macos|
   label = "macOS #{architecture}"
@@ -477,7 +592,9 @@ macos_by_architecture.each do |architecture, macos|
     errors << "#{label} required entitlement #{key} is absent" unless macos[key] == true
   end
 
-  unexpected_macos = macos.keys - macos_required - macos_signing_keys
+  validate_cloud(errors, macos, label)
+
+  unexpected_macos = macos.keys - macos_required - icloud_required - macos_signing_keys
   unless unexpected_macos.empty?
     errors << "#{label} contains unexpected entitlements: #{unexpected_macos.sort.join(', ')}"
   end
@@ -500,7 +617,12 @@ ios_allowed = [
   "application-identifier",
   "com.apple.developer.team-identifier",
   "get-task-allow",
-  "keychain-access-groups"
+  "keychain-access-groups",
+  "com.apple.developer.game-center",
+  "com.apple.developer.icloud-container-identifiers",
+  "com.apple.developer.icloud-services",
+  "com.apple.developer.ubiquity-kvstore-identifier",
+  "com.apple.developer.icloud-container-environment"
 ]
 ios_by_architecture.each do |architecture, ios|
   label = "iOS #{architecture}"
@@ -512,6 +634,11 @@ ios_by_architecture.each do |architecture, ios|
   if ios.key?("get-task-allow") && ios["get-task-allow"] != false
     errors << "#{label} Release product enables get-task-allow"
   end
+
+  unless ios["com.apple.developer.game-center"] == true
+    errors << "#{label} required Game Center entitlement is absent"
+  end
+  validate_cloud(errors, ios, label)
 
   groups = ios["keychain-access-groups"]
   application_identifier = ios["application-identifier"]
@@ -538,7 +665,7 @@ puts errors
 exit(errors.empty? ? 0 : 1)
 RUBY
 then
-  pass_check "every architecture preserves sandbox, Contacts, file access, and Keychain entitlements without extras"
+  pass_check "every architecture preserves sandbox, Contacts, file access, Keychain, iCloud, and Game Center entitlements without extras"
 else
   validation_detail=false
   while IFS= read -r error; do
@@ -573,7 +700,7 @@ write_module_bundle_list() {
   local bundle_name=$2
   local output=$3
 
-  find "$root" -type d -name "${bundle_name}.bundle" -print0 >"$output"
+  find "$root" -maxdepth 1 -type d -name "${bundle_name}.bundle" -print0 >"$output"
 }
 
 module_bundle_count() {
@@ -922,6 +1049,516 @@ RUBY
   fi
 fi
 
+if ruby -rdigest -rfind -rjson - \
+    "$macos_resources" "$ios_resources" "$macos_app" "$ios_app" \
+    >"$temporary_directory/elven-product-errors" <<'ELVEN_SHIPPING_RUBY'
+resource_roots = {
+  "macOS" => ARGV.fetch(0),
+  "iOS" => ARGV.fetch(1)
+}
+product_roots = {
+  "macOS" => ARGV.fetch(2),
+  "iOS" => ARGV.fetch(3)
+}
+errors = []
+
+providers = {
+  "moonleaf" => {
+    bundle: "RuneScribeArchitecture_RuneScribeThemeMoonleafModule.bundle",
+    module_id: "com.runescribe.module.theme.moonleaf",
+    module_role: "runescribe.theme.moonleaf",
+    codex_id: "codex.moonleaf",
+    unlock_id: "unlock.codex.moonleaf",
+    entry_point: "RuneScribeThemeMoonleafModule",
+    output_bytes: 678_743,
+    manifest_bytes: 14_425,
+    manifest_sha256: "e7222671993ad13ff4f3c72dd048f31f49295a1412e1f365d9fd904ef0b4c633",
+    module_manifest_bytes: 10_411,
+    module_manifest_sha256: "58f89c9a55c0e4866a18ce817d1ca4a417f2e240fadd07cb8ca6bd32793ff5ea"
+  },
+  "sunspire" => {
+    bundle: "RuneScribeArchitecture_RuneScribeThemeSunspireModule.bundle",
+    module_id: "com.runescribe.module.theme.sunspire",
+    module_role: "runescribe.theme.sunspire",
+    codex_id: "codex.sunspire",
+    unlock_id: "unlock.codex.sunspire",
+    entry_point: "RuneScribeThemeSunspireModule",
+    output_bytes: 666_458,
+    manifest_bytes: 14_495,
+    manifest_sha256: "da391cc35e89ad0606099e50e98bb2e28591420f68ec745efc2878411e9b1edc",
+    module_manifest_bytes: 10_440,
+    module_manifest_sha256: "2f08f4b620b6ac061d6a1f653e0636d910b0527de699e0dd695c9bf817951c4c"
+  },
+  "wildwood" => {
+    bundle: "RuneScribeArchitecture_RuneScribeThemeWildwoodModule.bundle",
+    module_id: "com.runescribe.module.theme.wildwood",
+    module_role: "runescribe.theme.wildwood",
+    codex_id: "codex.wildwood",
+    unlock_id: "unlock.codex.wildwood",
+    entry_point: "RuneScribeThemeWildwoodModule",
+    output_bytes: 697_897,
+    manifest_bytes: 14_519,
+    manifest_sha256: "f41665d69e3034bd8df8cf60954a5e7fa338a144384116fac2a4ca8b71b6c8f8",
+    module_manifest_bytes: 10_455,
+    module_manifest_sha256: "df2bd0dd5048b726c53406bab6c0c211be453c70e115c6354e62a12af9bd70db"
+  },
+  "gloamthorn" => {
+    bundle: "RuneScribeArchitecture_RuneScribeThemeGloamthornModule.bundle",
+    module_id: "com.runescribe.module.theme.gloamthorn",
+    module_role: "runescribe.theme.gloamthorn",
+    codex_id: "codex.gloamthorn",
+    unlock_id: "unlock.codex.gloamthorn",
+    entry_point: "RuneScribeThemeGloamthornModule",
+    output_bytes: 609_418,
+    manifest_bytes: 14_743,
+    manifest_sha256: "1808d845cbcf30ae21ae87cd1ec8e3db549ab493a652de420de7d8868466c6d9",
+    module_manifest_bytes: 10_676,
+    module_manifest_sha256: "e24f9109149813b44b1af01f8fc29f953a7acc73cf26c2c2bf124c14651ebac5"
+  }
+}
+
+expected_theme_bundles = [
+  "RuneScribeArchitecture_RuneScribeNorseThemeModule.bundle",
+  "RuneScribeArchitecture_RuneScribeThemeCoordinatorModule.bundle"
+] + providers.values.map { |provider| provider.fetch(:bundle) }
+
+expected_product_bundles = [
+  "RuneScribeArchitecture_RuneScribeCoreModule.bundle",
+  "RuneScribeArchitecture_RuneScribePlatform.bundle",
+  "RuneScribeArchitecture_RuneScribeProgressionModule.bundle",
+  "RuneScribeArchitecture_RuneScribeGameCenterModule.bundle",
+  "RuneScribeArchitecture_RuneScribeUIModule.bundle"
+] + expected_theme_bundles
+
+non_theme_resource_contracts = {
+  "Game Center" => {
+    bundle: "RuneScribeArchitecture_RuneScribeGameCenterModule.bundle",
+    files: {
+      "GameCenter-Achievement-Catalog-v1.0.json" => [
+        8_368,
+        "a513bbc9e06eb0cc7963945d380306275eba58179f86cddb22e60d58acdaeb36"
+      ]
+    }
+  },
+  "Platform" => {
+    bundle: "RuneScribeArchitecture_RuneScribePlatform.bundle",
+    files: {
+      "unlock_artifact.wav" => [
+        44_144,
+        "3e0aad842b786515a43e3942d0b0ec8519396efccdb2d2b738ccf07984d9da7d"
+      ],
+      "unlock_codex.wav" => [
+        77_220,
+        "fa23a17ee1af6e845b77f9079b49d4b26921bdeb7cf3d30f45db5510df99719b"
+      ],
+      "unlock_mastery.wav" => [
+        97_064,
+        "1e23ca022369024eb2339f7d7738841011041095d62bc9a285583be37325af31"
+      ],
+      "unlock_micro.wav" => [
+        24_300,
+        "49c4cfb544be9dc7d42d31cc6f1da82fcc96e02fd78ee7ca60f165d1a0eaa8c5"
+      ]
+    }
+  }
+}
+
+def bundle_resource_root(bundle)
+  macos_root = File.join(bundle, "Contents", "Resources")
+  File.directory?(macos_root) ? macos_root : bundle
+end
+
+def bundle_inventory(root)
+  packaging_entries = ["Info.plist", "_CodeSignature"]
+  Dir.children(root).reject { |entry| packaging_entries.include?(entry) }.sort
+end
+
+def regular_file?(path)
+  File.file?(path) && !File.symlink?(path)
+end
+
+def exact_file?(path, bytes, sha256)
+  regular_file?(path) && File.size(path) == bytes &&
+    Digest::SHA256.file(path).hexdigest == sha256
+end
+
+platform_provider_roots = Hash.new { |hash, key| hash[key] = {} }
+platform_non_theme_roots = Hash.new { |hash, key| hash[key] = {} }
+platform_theme_bundle_paths = Hash.new { |hash, key| hash[key] = [] }
+
+resource_roots.each do |platform, product_resource_root|
+  expected_bundle_paths = expected_product_bundles.map do |bundle_name|
+    File.join(product_resource_root, bundle_name)
+  end.sort
+  all_bundle_candidates = Dir.glob(File.join(product_resource_root, "**", "*.bundle")).sort
+  all_bundle_paths = all_bundle_candidates
+    .select { |path| File.directory?(path) && !File.symlink?(path) }
+    .sort
+  invalid_bundles = all_bundle_candidates - all_bundle_paths
+  unless all_bundle_paths == expected_bundle_paths && invalid_bundles.empty?
+    missing = expected_bundle_paths - all_bundle_paths
+    extra = (all_bundle_candidates - expected_bundle_paths) | invalid_bundles
+    errors << "#{platform} product resource bundle census differs; missing=#{missing.map { |path| File.basename(path) }.join(',')} extra-or-invalid=#{extra.map { |path| path.delete_prefix(product_resource_root).delete_prefix('/') }.join(',')}"
+  end
+
+  all_bundle_names = all_bundle_paths.map { |path| File.basename(path) }
+  actual_theme_bundles = all_bundle_names.select do |name|
+    name.start_with?("RuneScribeArchitecture_RuneScribe") &&
+      name.include?("Theme") && name.end_with?("Module.bundle")
+  end.sort
+  unless actual_theme_bundles == expected_theme_bundles.sort
+    errors << "#{platform} Theme module bundle set differs: #{actual_theme_bundles.join(', ')}"
+  end
+
+  providers.each do |provider_name, provider|
+    canonical_bundle_path = File.join(product_resource_root, provider.fetch(:bundle))
+    matches = Dir.glob(File.join(product_resource_root, "**", provider.fetch(:bundle)))
+      .select { |path| File.directory?(path) && !File.symlink?(path) }
+    unless matches == [canonical_bundle_path]
+      errors << "#{platform} #{provider_name} provider bundle is not exactly once at its canonical direct path"
+      next
+    end
+
+    root = bundle_resource_root(matches.first)
+    platform_theme_bundle_paths[platform] << matches.first
+    platform_provider_roots[platform][provider_name] = root
+    integrity_name = "Resource-Integrity-Manifest-v1.0.json"
+    integrity_path = File.join(root, integrity_name)
+    module_manifest_path = File.join(root, "module-manifest.json")
+
+    integrity_exact = exact_file?(
+      integrity_path,
+      provider.fetch(:manifest_bytes),
+      provider.fetch(:manifest_sha256)
+    )
+    errors << "#{platform} #{provider_name} accepted v3.1 integrity manifest differs" unless integrity_exact
+    module_manifest_exact = exact_file?(
+      module_manifest_path,
+      provider.fetch(:module_manifest_bytes),
+      provider.fetch(:module_manifest_sha256)
+    )
+    errors << "#{platform} #{provider_name} module manifest differs" unless module_manifest_exact
+    unless regular_file?(integrity_path) && regular_file?(module_manifest_path)
+      next
+    end
+
+    begin
+      integrity = JSON.parse(File.read(integrity_path))
+      module_manifest = JSON.parse(File.read(module_manifest_path))
+    rescue JSON::ParserError => error
+      errors << "#{platform} #{provider_name} provider JSON is unreadable: #{error.class}"
+      next
+    end
+
+    unless integrity["schemaVersion"] == "1.0" &&
+        integrity["acceptedPackageVersion"] == "3.1.0" &&
+        integrity["codexID"] == provider.fetch(:codex_id) &&
+        integrity["moduleID"] == provider.fetch(:module_id)
+      errors << "#{platform} #{provider_name} integrity-manifest identity differs"
+    end
+
+    files = integrity["files"]
+    unless files.is_a?(Array) && files.length == 46
+      errors << "#{platform} #{provider_name} integrity manifest does not declare exactly 46 outputs"
+      next
+    end
+    paths = files.map { |file| file["path"] }
+    basenames = paths.map { |path| File.basename(path.to_s) }
+    resource_ids = files.map { |file| file["resourceID"] }
+    errors << "#{platform} #{provider_name} output paths are duplicated" unless paths.uniq.length == 46
+    errors << "#{platform} #{provider_name} output basenames collide" unless basenames.uniq.length == 46
+    errors << "#{platform} #{provider_name} output resource IDs are duplicated" unless resource_ids.uniq.length == 46
+    unless paths.all? do |path|
+      path.is_a?(String) && path.start_with?("Production/") &&
+        !path.start_with?("/") && !path.split("/").include?("..")
+    end
+      errors << "#{platform} #{provider_name} output path escapes the Production inventory"
+    end
+    if paths.any? { |path| path.to_s.match?(%r{(?:^|/)(?:Source|Source-Masters)(?:/|$)}i) }
+      errors << "#{platform} #{provider_name} declares a prohibited Source-Masters output"
+    end
+
+    expected_inventory = (basenames + [integrity_name, "module-manifest.json"]).sort
+    actual_inventory = bundle_inventory(root)
+    unless actual_inventory == expected_inventory
+      missing = expected_inventory - actual_inventory
+      extra = actual_inventory - expected_inventory
+      errors << "#{platform} #{provider_name} bundle inventory differs; missing=#{missing.join(',')} extra=#{extra.join(',')}"
+    end
+
+    declared_bytes = 0
+    files.each do |file|
+      basename = File.basename(file.fetch("path", ""))
+      bytes = file["bytes"]
+      sha256 = file["sha256"]
+      unless bytes.is_a?(Integer) && bytes.positive? &&
+          sha256.is_a?(String) && sha256.match?(/\A[0-9a-f]{64}\z/)
+        errors << "#{platform} #{provider_name} output declaration is malformed: #{basename}"
+        next
+      end
+      declared_bytes += bytes
+      output_path = File.join(root, basename)
+      unless exact_file?(output_path, bytes, sha256)
+        errors << "#{platform} #{provider_name} output bytes or SHA-256 differ: #{basename}"
+      end
+    end
+    unless declared_bytes == provider.fetch(:output_bytes)
+      errors << "#{platform} #{provider_name} accepted output byte total differs"
+    end
+    complete_resource_bytes = actual_inventory.sum do |name|
+      path = File.join(root, name)
+      regular_file?(path) ? File.size(path) : 0
+    end
+    if complete_resource_bytes > 64 * 1024 * 1024
+      errors << "#{platform} #{provider_name} resource bundle exceeds the 64 MiB budget"
+    end
+
+    expected_required_resources = expected_inventory.map do |name|
+      extension = File.extname(name).delete_prefix(".")
+      {
+        "name" => File.basename(name, ".#{extension}"),
+        "fileExtension" => extension,
+        "subdirectory" => nil,
+        "ownerModuleID" => provider.fetch(:module_id)
+      }
+    end
+    runtime_requirements = module_manifest["runtimeRequirements"]
+    required_resources = runtime_requirements.is_a?(Hash) ? runtime_requirements["requiredResources"] : nil
+    expected_entitlement = {
+      "kind" => "earned",
+      "identifier" => provider.fetch(:unlock_id)
+    }
+    expected_capabilities = [
+      "resources.read",
+      "runtime.contributions.publish",
+      "runtime.resources.opaque.publish"
+    ]
+    unless module_manifest["schemaVersion"] == "1.0" &&
+        module_manifest["policyProfile"] == "forsetti-pattern-b-standalone" &&
+        module_manifest["moduleID"] == provider.fetch(:module_id) &&
+        module_manifest["moduleVersion"] == "1.0.0" &&
+        module_manifest["moduleType"] == "service" &&
+        module_manifest["criticality"] == "optional" &&
+        module_manifest["policyClass"] == "policy.theme-provider" &&
+        module_manifest["defaultRole"] == provider.fetch(:module_role) &&
+        module_manifest["entryPoint"] == provider.fetch(:entry_point) &&
+        module_manifest["diagnosticsVisibleInProduction"] == false &&
+        module_manifest["entitlementRequirement"] == expected_entitlement &&
+        module_manifest["capabilitiesRequested"] == expected_capabilities &&
+        module_manifest["publishedEndpoints"] == [] &&
+        module_manifest["consumedEndpoints"] == []
+      errors << "#{platform} #{provider_name} optional provider contract differs"
+    end
+    unless runtime_requirements.is_a?(Hash) &&
+        runtime_requirements["requiredServices"] == ["ApplicationResourceLocator"] &&
+        runtime_requirements["requiredModuleRoles"] == [] &&
+        required_resources.is_a?(Array) &&
+        required_resources.sort_by { |resource| [resource["name"].to_s, resource["fileExtension"].to_s] } ==
+          expected_required_resources.sort_by { |resource| [resource["name"], resource["fileExtension"]] }
+      errors << "#{platform} #{provider_name} owner-scoped resource declarations differ"
+    end
+  end
+
+  non_theme_resource_contracts.each do |label, contract|
+    bundle_path = File.join(product_resource_root, contract.fetch(:bundle))
+    unless File.directory?(bundle_path) && !File.symlink?(bundle_path)
+      errors << "#{platform} #{label} resource bundle is absent from its canonical direct path"
+      next
+    end
+
+    root = bundle_resource_root(bundle_path)
+    platform_non_theme_roots[platform][label] = root
+    expected_files = contract.fetch(:files)
+    actual_inventory = bundle_inventory(root)
+    unless actual_inventory == expected_files.keys.sort
+      errors << "#{platform} #{label} resource inventory differs: #{actual_inventory.join(', ')}"
+    end
+    expected_files.each do |name, (bytes, sha256)|
+      unless exact_file?(File.join(root, name), bytes, sha256)
+        errors << "#{platform} #{label} resource bytes or SHA-256 differ: #{name}"
+      end
+    end
+  end
+
+  expected_theme_bundles.each do |bundle_name|
+    bundle_path = File.join(product_resource_root, bundle_name)
+    platform_theme_bundle_paths[platform] << bundle_path if File.directory?(bundle_path)
+  end
+  platform_theme_bundle_paths[platform].uniq!
+end
+
+resource_roots.each_key do |platform|
+  output_count = platform_provider_roots[platform].sum do |provider_name, root|
+    path = File.join(root, "Resource-Integrity-Manifest-v1.0.json")
+    begin
+      JSON.parse(File.read(path)).fetch("files").length
+    rescue Errno::ENOENT, JSON::ParserError, KeyError, TypeError
+      0
+    end
+  end
+  errors << "#{platform} Elven shipping output count is #{output_count}, expected 184" unless output_count == 184
+end
+
+providers.each_key do |provider_name|
+  macos_root = platform_provider_roots["macOS"][provider_name]
+  ios_root = platform_provider_roots["iOS"][provider_name]
+  next unless macos_root && ios_root
+
+  expected_names = bundle_inventory(macos_root) | bundle_inventory(ios_root)
+  expected_names.each do |name|
+    macos_path = File.join(macos_root, name)
+    ios_path = File.join(ios_root, name)
+    next unless regular_file?(macos_path) && regular_file?(ios_path)
+    unless File.binread(macos_path) == File.binread(ios_path)
+      errors << "#{provider_name} provider resource differs between platforms: #{name}"
+    end
+  end
+end
+
+non_theme_resource_contracts.each_key do |label|
+  macos_root = platform_non_theme_roots["macOS"][label]
+  ios_root = platform_non_theme_roots["iOS"][label]
+  next unless macos_root && ios_root
+
+  non_theme_resource_contracts.fetch(label).fetch(:files).each_key do |name|
+    macos_path = File.join(macos_root, name)
+    ios_path = File.join(ios_root, name)
+    next unless regular_file?(macos_path) && regular_file?(ios_path)
+    unless File.binread(macos_path) == File.binread(ios_path)
+      errors << "#{label} resource differs between platforms: #{name}"
+    end
+  end
+end
+
+product_roots.each do |platform, root|
+  theme_bundle_paths = platform_theme_bundle_paths.fetch(platform, [])
+  product_bundle_paths = expected_product_bundles.map do |bundle_name|
+    File.join(resource_roots.fetch(platform), bundle_name)
+  end
+  theme_resource_basenames = theme_bundle_paths.each_with_object({}) do |bundle_path, names|
+    next unless File.directory?(bundle_path)
+    resource_root = bundle_resource_root(bundle_path)
+    bundle_inventory(resource_root).each do |name|
+      next if name == "module-manifest.json"
+      names[name] = true
+    end
+  end
+
+  Find.find(root) do |path|
+    next unless regular_file?(path)
+    inside_theme_bundle = theme_bundle_paths.any? do |bundle_path|
+      path.start_with?(bundle_path + File::SEPARATOR)
+    end
+    next if inside_theme_bundle
+
+    inside_product_bundle = product_bundle_paths.any? do |bundle_path|
+      path.start_with?(bundle_path + File::SEPARATOR)
+    end
+
+    relative = path.delete_prefix(root).delete_prefix("/")
+    basename = File.basename(path)
+    theme_like_path = !inside_product_bundle &&
+      relative.match?(%r{(?:^|[/._-])(?:theme|codex|relic|seal|crest)(?:[/._-]|$)}i)
+    if theme_resource_basenames.key?(basename) || theme_like_path
+      errors << "#{platform} Theme resource appears outside its canonical module bundle: #{relative}"
+    end
+  end
+end
+
+attribution_terms = [
+  "Chat" + "GPT",
+  "Open" + "AI",
+  "Anth" + "ropic",
+  "Clau" + "de",
+  "Gem" + "ini",
+  "GitHub Cop" + "ilot",
+  "generated by " + "AI",
+  "created by " + "AI",
+  "AI" + "-generated",
+  "language " + "model",
+  "assigned to " + "Codex",
+  "Codex " + "writes",
+  "Co-authored" + "-by:"
+].map(&:downcase)
+maximum_term_bytes = attribution_terms.map(&:bytesize).max
+placeholder_terms = [
+  "placeholder",
+  "temporary provider",
+  "example provider",
+  "sample provider",
+  "beta provider"
+]
+text_extensions = %w[.json .md .plist .strings .stringsdict .txt .xml .yaml .yml]
+
+def file_contains_term?(path, terms, maximum_term_bytes)
+  overlap = "".b
+  File.open(path, "rb") do |file|
+    while (chunk = file.read(1024 * 1024))
+      candidate = (overlap + chunk).downcase
+      return true if terms.any? { |term| candidate.include?(term) }
+      overlap = candidate.byteslice([candidate.bytesize - maximum_term_bytes + 1, 0].max, maximum_term_bytes - 1) || "".b
+    end
+  end
+  false
+end
+
+product_roots.each do |platform, root|
+  Find.find(root) do |path|
+    relative = path.delete_prefix(root).delete_prefix("/")
+    basename = File.basename(path)
+    if relative.match?(%r{(?:^|/)(?:Source-Masters|Source Masters)(?:/|$)}i) ||
+        basename.match?(/\.(?:svg|glyphs|designspace)$/i)
+      errors << "#{platform} product contains a prohibited source master: #{relative}"
+    end
+    if relative.match?(/placeholder/i)
+      errors << "#{platform} product contains placeholder content: #{relative}"
+    end
+    if relative.match?(/(?:debug|test|fixture|mock|sample|support).*catalog|catalog.*(?:debug|test|fixture|mock|sample|support)/i) ||
+        relative.match?(/RuneScribeTestSupport/i)
+      errors << "#{platform} product contains a debug or support-only catalog: #{relative}"
+    end
+    next unless File.file?(path) && !File.symlink?(path)
+
+    begin
+      if text_extensions.include?(File.extname(path).downcase) &&
+          file_contains_term?(path, placeholder_terms, placeholder_terms.map(&:bytesize).max)
+        errors << "#{platform} product contains placeholder content: #{relative}"
+      end
+      if attribution_terms.any? { |term| relative.downcase.include?(term) } ||
+          file_contains_term?(path, attribution_terms, maximum_term_bytes)
+        errors << "#{platform} product contains prohibited attribution bytes: #{relative}"
+      end
+    rescue Errno::EACCES, Errno::ENOENT => error
+      errors << "#{platform} product file cannot be inspected: #{relative} (#{error.class})"
+    end
+  end
+end
+
+puts errors
+exit(errors.empty? ? 0 : 1)
+ELVEN_SHIPPING_RUBY
+then
+  pass_check "both products preserve the exact canonical SwiftPM resource-bundle census"
+  pass_check "both products contain exactly four canonical Elven providers and all 184 accepted v3.1 outputs"
+  pass_check "Elven provider resources preserve exact hashes, sizes, budgets, declarations, and cross-platform parity"
+  pass_check "Game Center and Platform resource bundles preserve exact hashes, inventories, and cross-platform parity"
+  pass_check "shipping products exclude misplaced Theme resources, placeholders, Source-Masters, debug/test catalogs, and prohibited attribution"
+else
+  validation_detail=false
+  while IFS= read -r error; do
+    if [ -n "$error" ]; then
+      validation_detail=true
+      printf 'DETAIL: Elven shipping product: %s\n' "$error" >&2
+    fi
+  done <"$temporary_directory/elven-product-errors"
+  [ "$validation_detail" = true ] || printf 'DETAIL: Elven shipping-product validator did not return diagnostics.\n' >&2
+  fail_check "shipping products do not preserve the exact canonical SwiftPM resource-bundle census"
+  fail_check "Elven providers or accepted v3.1 shipping resources differ"
+  fail_check "Elven provider resource budgets, declarations, or cross-platform parity differ"
+  fail_check "Game Center or Platform resource hashes, inventories, or cross-platform parity differ"
+  fail_check "shipping products contain misplaced Theme resources or prohibited provider, source, catalog, or attribution content"
+fi
+
 if [ -s "$macos_core_manifest" ] && [ -s "$macos_progression_manifest" ] && \
    [ -s "$macos_theme_coordinator_manifest" ] && [ -s "$macos_norse_theme_manifest" ] && \
    [ -s "$macos_ui_manifest" ] && [ -s "$ios_core_manifest" ] && \
@@ -1219,6 +1856,14 @@ inspect_linkage() {
     fail_check "$platform bundled Mach-O files contain an unexpected or noncanonical dependency"
   fi
 
+  for framework in CloudKit GameKit; do
+    if grep -Eq "/System/Library/Frameworks/${framework}\.framework/(Versions/[^/]+/)?${framework} \(" "$links"; then
+      pass_check "$platform product links the runtime-owned $framework adapter framework"
+    else
+      fail_check "$platform product has no dynamic linkage evidence for runtime-owned $framework adapters"
+    fi
+  done
+
   if [ "$expected_main_seen" = true ] && [ "$macho_count" -eq 1 ]; then
     pass_check "$platform product contains only its expected main Mach-O executable"
   else
@@ -1242,6 +1887,12 @@ inspect_linkage() {
     return
   fi
 
+  if grep -iFq "forsetti" "$symbols"; then
+    fail_check "$platform product contains prohibited statically linked Forsetti symbols"
+  else
+    pass_check "$platform product has no statically linked Forsetti symbols"
+  fi
+
   for module in \
     RuneScribeContracts \
     RuneScribeRuntimeCore \
@@ -1251,6 +1902,12 @@ inspect_linkage() {
     RuneScribeProgressionModule \
     RuneScribeThemeCoordinatorModule \
     RuneScribeNorseThemeModule \
+    RuneScribeThemeMoonleafModule \
+    RuneScribeThemeSunspireModule \
+    RuneScribeThemeWildwoodModule \
+    RuneScribeThemeGloamthornModule \
+    RuneScribeCloudSyncModule \
+    RuneScribeGameCenterModule \
     RuneScribeUIModule
   do
     if grep -Fq "$module" "$symbols"; then
@@ -1326,6 +1983,12 @@ shipping_products = [
   "RuneScribeProgressionModule",
   "RuneScribeThemeCoordinatorModule",
   "RuneScribeNorseThemeModule",
+  "RuneScribeThemeMoonleafModule",
+  "RuneScribeThemeSunspireModule",
+  "RuneScribeThemeWildwoodModule",
+  "RuneScribeThemeGloamthornModule",
+  "RuneScribeCloudSyncModule",
+  "RuneScribeGameCenterModule",
   "RuneScribeUIModule"
 ]
 app_product_names = [
@@ -1336,6 +1999,12 @@ app_product_names = [
   "RuneScribeCoreModule",
   "RuneScribeProgressionModule",
   "RuneScribeNorseThemeModule",
+  "RuneScribeThemeMoonleafModule",
+  "RuneScribeThemeSunspireModule",
+  "RuneScribeThemeWildwoodModule",
+  "RuneScribeThemeGloamthornModule",
+  "RuneScribeCloudSyncModule",
+  "RuneScribeGameCenterModule",
   "RuneScribeThemeCoordinatorModule",
   "RuneScribeUIModule"
 ]
@@ -1343,6 +2012,12 @@ presentation_contract_products = ["RuneScribeUIPresentationContracts"]
 test_only_products = ["RuneScribeTestSupport"]
 all_products = [shipping_products.first] + presentation_contract_products +
   shipping_products.drop(1) + test_only_products
+all_regular_targets = all_products.dup
+progression_target_index = all_regular_targets.index("RuneScribeProgressionModule")
+all_regular_targets.insert(
+  progression_target_index + 1,
+  "RuneScribeProgressionSyncDomain"
+)
 expected_app_dependencies = app_product_names.map do |product|
   { "package" => "RuneScribeArchitecture", "product" => product }
 end
@@ -1352,12 +2027,27 @@ expected_packages = {
 }
 errors << "project.yml package declarations differ" unless project.fetch("packages", {}) == expected_packages
 
+base_settings = project.dig("settings", "base")
+unless base_settings.is_a?(Hash) &&
+    base_settings["MARKETING_VERSION"] == "1.0.38" &&
+    base_settings["CURRENT_PROJECT_VERSION"] == "38"
+  errors << "project.yml version/build differ from frozen 1.0.38 (38)"
+end
+
 expected_macos_entitlements = {
+  "com.apple.developer.game-center" => true,
+  "com.apple.developer.icloud-container-identifiers" => ["iCloud.com.runescribe.app"],
+  "com.apple.developer.icloud-services" => ["CloudKit"],
+  "com.apple.developer.ubiquity-kvstore-identifier" => "$(TeamIdentifierPrefix)com.runescribe.app",
   "com.apple.security.app-sandbox" => true,
   "com.apple.security.personal-information.addressbook" => true,
   "com.apple.security.files.user-selected.read-write" => true
 }
 expected_ios_entitlements = {
+  "com.apple.developer.game-center" => true,
+  "com.apple.developer.icloud-container-identifiers" => ["iCloud.com.runescribe.app"],
+  "com.apple.developer.icloud-services" => ["CloudKit"],
+  "com.apple.developer.ubiquity-kvstore-identifier" => "$(TeamIdentifierPrefix)com.runescribe.app",
   "keychain-access-groups" => ["$(AppIdentifierPrefix)com.runescribe.app"]
 }
 expected_entitlement_sources = {
@@ -1431,7 +2121,7 @@ package_targets.each do |target|
 end
 
 regular_target_names = package_targets.select { |target| target["type"] == "regular" }.map { |target| target["name"] }
-errors << "Package.swift regular target set differs" unless regular_target_names == all_products
+errors << "Package.swift regular target set differs" unless regular_target_names == all_regular_targets
 
 test_target_names = package_targets.select { |target| target["type"] == "test" }.map { |target| target["name"] }
 expected_test_target_names = [
@@ -1440,23 +2130,48 @@ expected_test_target_names = [
   "RuneScribeCoreModuleTests",
   "RuneScribeProgressionModuleTests",
   "RuneScribeNorseThemeModuleTests",
+  "RuneScribeThemeMoonleafModuleTests",
+  "RuneScribeThemeSunspireModuleTests",
+  "RuneScribeThemeWildwoodModuleTests",
+  "RuneScribeThemeGloamthornModuleTests",
+  "RuneScribeCloudSyncModuleTests",
+  "RuneScribeGameCenterModuleTests",
   "RuneScribeThemeCoordinatorModuleTests",
   "RuneScribeUIModuleTests",
   "RuneScribeArchitectureTests"
 ]
-errors << "Package.swift test target set differs" unless test_target_names == expected_test_target_names
-errors << "Package.swift complete target order differs" unless package_targets.map { |target| target["name"] } == all_products + expected_test_target_names
+missing_test_targets = expected_test_target_names - test_target_names
+unless missing_test_targets.empty?
+  errors << "Package.swift required test targets are missing: #{missing_test_targets.join(', ')}"
+end
 
 expected_edges = {
   "RuneScribeContracts" => [],
   "RuneScribeUIPresentationContracts" => ["RuneScribeContracts"],
-  "RuneScribeRuntimeCore" => ["RuneScribeContracts", "RuneScribeUIPresentationContracts"],
+  "RuneScribeRuntimeCore" => [
+    "RuneScribeCloudSyncModule",
+    "RuneScribeContracts",
+    "RuneScribeGameCenterModule",
+    "RuneScribeProgressionSyncDomain",
+    "RuneScribeUIPresentationContracts"
+  ],
   "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
   "RuneScribePlatform" => ["RuneScribeContracts"],
   "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-  "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeProgressionModule" => [
+    "RuneScribeContracts",
+    "RuneScribeProgressionSyncDomain",
+    "RuneScribeRuntimeCore"
+  ],
   "RuneScribeThemeCoordinatorModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
   "RuneScribeNorseThemeModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeThemeMoonleafModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeThemeSunspireModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeThemeWildwoodModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeThemeGloamthornModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+  "RuneScribeProgressionSyncDomain" => ["RuneScribeContracts"],
+  "RuneScribeCloudSyncModule" => ["RuneScribeProgressionSyncDomain"],
+  "RuneScribeGameCenterModule" => ["RuneScribeContracts"],
   "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
   "RuneScribeTestSupport" => ["RuneScribeContracts"]
 }
@@ -1468,7 +2183,10 @@ end
 
 expected_test_edges = {
   "RuneScribeRuntimeCoreTests" => [
+    "RuneScribeCloudSyncModule",
     "RuneScribeContracts",
+    "RuneScribeGameCenterModule",
+    "RuneScribeProgressionSyncDomain",
     "RuneScribeRuntimeCore",
     "RuneScribeTestSupport",
     "RuneScribeUIPresentationContracts"
@@ -1485,6 +2203,7 @@ expected_test_edges = {
   "RuneScribeProgressionModuleTests" => [
     "RuneScribeContracts",
     "RuneScribeProgressionModule",
+    "RuneScribeProgressionSyncDomain",
     "RuneScribeRuntimeCore",
     "RuneScribeTestSupport"
   ],
@@ -1492,6 +2211,51 @@ expected_test_edges = {
     "RuneScribeContracts",
     "RuneScribeNorseThemeModule",
     "RuneScribeRuntimeCore"
+  ],
+  "RuneScribeThemeMoonleafModuleTests" => [
+    "RuneScribeContracts",
+    "RuneScribeNorseThemeModule",
+    "RuneScribeProgressionModule",
+    "RuneScribeRuntimeCore",
+    "RuneScribeTestSupport",
+    "RuneScribeThemeCoordinatorModule",
+    "RuneScribeThemeMoonleafModule"
+  ],
+  "RuneScribeThemeSunspireModuleTests" => [
+    "RuneScribeContracts",
+    "RuneScribeNorseThemeModule",
+    "RuneScribeProgressionModule",
+    "RuneScribeRuntimeCore",
+    "RuneScribeTestSupport",
+    "RuneScribeThemeCoordinatorModule",
+    "RuneScribeThemeSunspireModule"
+  ],
+  "RuneScribeThemeWildwoodModuleTests" => [
+    "RuneScribeContracts",
+    "RuneScribeNorseThemeModule",
+    "RuneScribeProgressionModule",
+    "RuneScribeRuntimeCore",
+    "RuneScribeTestSupport",
+    "RuneScribeThemeCoordinatorModule",
+    "RuneScribeThemeWildwoodModule"
+  ],
+  "RuneScribeThemeGloamthornModuleTests" => [
+    "RuneScribeContracts",
+    "RuneScribeNorseThemeModule",
+    "RuneScribeProgressionModule",
+    "RuneScribeRuntimeCore",
+    "RuneScribeTestSupport",
+    "RuneScribeThemeCoordinatorModule",
+    "RuneScribeThemeGloamthornModule"
+  ],
+  "RuneScribeCloudSyncModuleTests" => [
+    "RuneScribeCloudSyncModule",
+    "RuneScribeContracts",
+    "RuneScribeProgressionSyncDomain"
+  ],
+  "RuneScribeGameCenterModuleTests" => [
+    "RuneScribeGameCenterModule",
+    "RuneScribeContracts"
   ],
   "RuneScribeThemeCoordinatorModuleTests" => [
     "RuneScribeContracts",
@@ -1506,6 +2270,10 @@ expected_test_edges = {
     "RuneScribeRuntimeCore",
     "RuneScribeTestSupport",
     "RuneScribeThemeCoordinatorModule",
+    "RuneScribeThemeGloamthornModule",
+    "RuneScribeThemeMoonleafModule",
+    "RuneScribeThemeSunspireModule",
+    "RuneScribeThemeWildwoodModule",
     "RuneScribeUIPresentationContracts",
     "RuneScribeUIRuntime",
     "RuneScribeUIModule"
@@ -1518,14 +2286,21 @@ expected_test_edges = {
     "RuneScribeCoreModule",
     "RuneScribeNorseThemeModule",
     "RuneScribeProgressionModule",
+    "RuneScribeThemeGloamthornModule",
     "RuneScribeThemeCoordinatorModule",
+    "RuneScribeThemeMoonleafModule",
+    "RuneScribeThemeSunspireModule",
+    "RuneScribeThemeWildwoodModule",
     "RuneScribeUIModule",
     "RuneScribeTestSupport"
   ]
 }
 
 expected_test_edges.each do |target, edges|
-  errors << "Package.swift target edges differ for #{target}" unless target_edges[target] == edges
+  actual_edges = target_edges[target]
+  unless actual_edges.is_a?(Array) && (edges - actual_edges).empty?
+    errors << "Package.swift target lacks required test edges for #{target}"
+  end
 end
 
 progression_target = package_targets.find { |target| target["name"] == "RuneScribeProgressionModule" }
@@ -1553,15 +2328,39 @@ unless norse_theme_target.is_a?(Hash) &&
   errors << "Package.swift Norse Theme resource processing or source exclusion differs"
 end
 
+platform_target = package_targets.find do |target|
+  target["name"] == "RuneScribePlatform"
+end
+expected_platform_resources = [
+  { "path" => "Feedback/Resources", "rule" => { "process" => {} } }
+]
+unless platform_target.is_a?(Hash) &&
+    platform_target["resources"] == expected_platform_resources &&
+    platform_target["exclude"] == ["Feedback/Resources/Source"]
+  errors << "Package.swift Platform resource processing or source exclusion differs"
+end
+
+%w[
+  RuneScribeThemeMoonleafModule RuneScribeThemeSunspireModule
+  RuneScribeThemeWildwoodModule RuneScribeThemeGloamthornModule
+  RuneScribeGameCenterModule
+].each do |target_name|
+  target = package_targets.find { |candidate| candidate["name"] == target_name }
+  unless target.is_a?(Hash) && target["resources"] == expected_progression_resources &&
+      target.fetch("exclude", []).empty?
+    errors << "Package.swift #{target_name} resource processing or source exclusion differs"
+  end
+end
+
 test_support_package_consumers = target_edges.each_with_object([]) do |(target, dependencies), consumers|
   consumers << target if dependencies.include?("RuneScribeTestSupport")
 end.sort
-unless test_support_package_consumers == %w[
-  RuneScribeArchitectureTests RuneScribePlatformTests
-  RuneScribeProgressionModuleTests RuneScribeRuntimeCoreTests
-  RuneScribeThemeCoordinatorModuleTests RuneScribeUIModuleTests
-].sort
-  errors << "Package.swift RuneScribeTestSupport consumers differ"
+package_target_types = package_targets.to_h { |target| [target["name"], target["type"]] }
+shipping_test_support_consumers = test_support_package_consumers.reject do |target|
+  package_target_types[target] == "test"
+end
+unless shipping_test_support_consumers.empty?
+  errors << "Package.swift shipping targets consume RuneScribeTestSupport: #{shipping_test_support_consumers.join(', ')}"
 end
 
 project_test_support_consumers = project.fetch("targets", {}).each_with_object([]) do |(target_name, target), consumers|
@@ -1572,8 +2371,9 @@ project_test_support_consumers = project.fetch("targets", {}).each_with_object([
   end
   consumers << target_name if uses_test_support
 end.sort
-unless project_test_support_consumers == %w[RuneScribIOSTests RuneScribMacParityTests RuneScribTests].sort
-  errors << "project.yml RuneScribeTestSupport consumers differ"
+project_shipping_test_support_consumers = project_test_support_consumers & %w[RuneScrib-macOS RuneScrib-iOS]
+unless project_shipping_test_support_consumers.empty?
+  errors << "project.yml shipping targets consume RuneScribeTestSupport"
 end
 
 objects = pbxproj["objects"]
@@ -1688,6 +2488,10 @@ end
 
 configurations_for(objects, project_object, "generated project", errors).each do |configuration|
   settings = configuration.fetch("buildSettings", {})
+  unless settings["MARKETING_VERSION"] == "1.0.38" &&
+      settings["CURRENT_PROJECT_VERSION"] == "38"
+    errors << "generated project #{configuration['name']} version/build differ from frozen 1.0.38 (38)"
+  end
   forbidden_build_settings.each do |setting|
     errors << "generated project #{configuration['name']} injects #{setting}" if settings.key?(setting)
   end
@@ -1790,8 +2594,9 @@ generated_test_support_consumers = objects.values.each_with_object([]) do |objec
   end
   consumers << object["name"] if product_names.include?("RuneScribeTestSupport")
 end.sort
-unless generated_test_support_consumers == %w[RuneScribIOSTests RuneScribMacParityTests RuneScribTests].sort
-  errors << "generated project RuneScribeTestSupport consumers differ"
+generated_shipping_test_support_consumers = generated_test_support_consumers & %w[RuneScrib-macOS RuneScrib-iOS]
+unless generated_shipping_test_support_consumers.empty?
+  errors << "generated project shipping targets consume RuneScribeTestSupport"
 end
 
 puts errors

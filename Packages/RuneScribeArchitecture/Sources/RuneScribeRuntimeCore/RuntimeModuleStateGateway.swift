@@ -333,6 +333,24 @@ actor RuntimeModuleStateGateway {
         )
     }
 
+    func runtimeQuarantineRecord(
+        namespace: ModuleStateNamespace,
+        key: ModuleStateRecordKey,
+        expectedRevision: UInt64,
+        diagnosticCode: String
+    ) async throws -> ModuleStateHealthSnapshot {
+        guard expectedRevision > 0,
+              isBoundedDiagnosticCode(diagnosticCode)
+        else { throw ModuleStateStoreError.invalidRequest }
+        let store = try validatedRuntimeStore()
+        return try await store.quarantineRecord(
+            namespace: namespace,
+            key: key,
+            expectedRevision: expectedRevision,
+            diagnosticCode: diagnosticCode
+        )
+    }
+
     private func validatedRuntimeStore() throws -> any ModuleStateStore {
         guard runtimeIsActive else { throw RuneScribeRuntimeError.runtimeNotRunning }
         guard let store else { throw ModuleStateStoreError.unavailable }

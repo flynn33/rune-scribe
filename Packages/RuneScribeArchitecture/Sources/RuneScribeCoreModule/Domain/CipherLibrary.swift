@@ -272,8 +272,8 @@ extension CipherLibrary {
         return copy
     }
 
-    /// Marks the cipher with `cipherID` as delivered (no-op if not found). Touches nothing else.
-    func markingDelivered(cipherID: UUID) -> CipherLibrary {
+    /// Completes key delivery for `cipherID` (no-op if not found). Touches nothing else.
+    func completingKeyDelivery(cipherID: UUID) -> CipherLibrary {
         var copy = self
         if let i = copy.ciphers.firstIndex(where: { $0.id == cipherID }) {
             copy.ciphers[i].completeKeyDelivery()

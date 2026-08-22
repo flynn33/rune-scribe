@@ -69,6 +69,122 @@ extension RuneScribeCoreApplicationService {
 }
 
 final class P4BApplicationServiceTests: XCTestCase {
+    func testPresentationCommandsWriteVNextFilesAndNilPreservesLegacyRails() async throws {
+        let secure = P4BSecureStore()
+        let artifacts = P4BShareStore()
+        let service = RuneScribeCoreApplicationService(
+            secureValueStore: secure,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
+            clock: P4BClock(),
+            uuid: P4BUUIDs()
+        )
+        await service.startInboundProcessing()
+        let cipher = try await service.createCipher(CreateCipherCommand(name: "Phase F"))
+        let selection = try SharePresentationSelection(
+            codexID: CodexID(rawValue: "codex.moonleaf")!,
+            scriptID: ScriptID(rawValue: "script.moonleaf")!,
+            relicID: ArtifactID(rawValue: "relic.moonleaf.tablet")!,
+            sealID: ArtifactID(rawValue: "seal.moonleaf.firefly")!
+        )
+        let previewData = try XCTUnwrap(Data(base64Encoded:
+            "iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAABKADAAQAAAABAAAAAwAAAABUhAAoAAAAFklEQVQIHWM09k37z4AEmJDYYCaGAABbcAHrQYPA8AAAAABJRU5ErkJggg=="
+        ))
+        let previewDigest = ThemeSHA256Digest(rawValue: SHA256.hash(
+            data: previewData
+        ).map { String(format: "%02x", $0) }.joined())!
+        let metadata = try SharePresentationMetadata(
+            selection: selection,
+            safePreview: ShareSafePreviewMetadata(
+                mediaType: .png,
+                byteLength: UInt32(previewData.count),
+                pixelSize: ThemePixelSize(width: 4, height: 3),
+                sha256: previewDigest
+            ),
+            compatibility: SharePresentationCompatibilityFlags.safePreviewPresent
+                .union(.norseInteractiveFallback)
+        )
+        let presentation = try OutboundSharePresentationDTO(
+            metadata: metadata,
+            safePreviewData: previewData
+        )
+
+        let encoded = try await service.encode(
+            EncodeMessageCommand(plaintext: "vNext", cipherID: cipher.id)
+        )
+        let themedMessage = try await service.prepareMessageShare(
+            PrepareMessageShareCommand(
+                runes: encoded.runes,
+                senderName: "Sender",
+                cipherID: cipher.id,
+                presentation: presentation
+            )
+        )
+        XCTAssertEqual(themedMessage.reference, .file(themedMessage.id))
+        XCTAssertFalse(themedMessage.requiresKeyDelivery)
+        let storedThemedMessage = await artifacts.createdData(id: themedMessage.id)
+        let messageData = try XCTUnwrap(storedThemedMessage)
+        let messagePackage = try RuneScribePackage(decoding: messageData)
+        XCTAssertEqual(messagePackage.kind, .encryptedMessage)
+        XCTAssertEqual(messagePackage.sharePresentation().metadata?.selection, selection)
+        XCTAssertNil(
+            try MessageSharePayload(decoding: messagePackage.corePayload).embeddedCipher
+        )
+
+        let inboundURL = try temporaryFile(containing: messageData)
+        defer { try? FileManager.default.removeItem(at: inboundURL) }
+        let received = try await service.importFile(inboundFile(inboundURL))
+        XCTAssertEqual(received.disposition, .receivedMessage)
+        let receivedSnapshot = try await currentSnapshot(from: service)
+        let receivedMessage = try XCTUnwrap(
+            receivedSnapshot.messageState.pendingMessage
+        )
+        XCTAssertEqual(receivedMessage.presentation?.requestedSelection, selection)
+        XCTAssertEqual(
+            receivedMessage.presentation?.effectiveCodexID,
+            RuneScribeCodexIDs.norse
+        )
+        XCTAssertEqual(
+            receivedMessage.presentation?.renderMode,
+            .norseInteractiveFallback
+        )
+        XCTAssertEqual(receivedMessage.safePreviewData, previewData)
+
+        let legacyMessage = try await service.prepareMessageShare(
+            PrepareMessageShareCommand(
+                runes: encoded.runes,
+                senderName: "Sender",
+                cipherID: cipher.id
+            )
+        )
+        XCTAssertEqual(legacyMessage.reference, .opaque(legacyMessage.id))
+        let storedLegacyMessage = await artifacts.createdData(id: legacyMessage.id)
+        XCTAssertNil(storedLegacyMessage)
+
+        let themedCipher = try await service.prepareCipherShare(
+            PrepareCipherShareCommand(
+                cipherID: cipher.id,
+                representation: .file,
+                presentation: presentation
+            )
+        )
+        let storedThemedCipher = await artifacts.createdData(id: themedCipher.id)
+        let cipherData = try XCTUnwrap(storedThemedCipher)
+        let cipherPackage = try RuneScribePackage(decoding: cipherData)
+        XCTAssertEqual(cipherPackage.kind, .cipherInvitation)
+        XCTAssertEqual(cipherPackage.sharePresentation().metadata?.selection, selection)
+
+        let legacyCipher = try await service.prepareCipherShare(
+            PrepareCipherShareCommand(
+                cipherID: cipher.id,
+                representation: .file
+            )
+        )
+        let storedLegacyCipher = await artifacts.createdData(id: legacyCipher.id)
+        let legacyCipherData = try XCTUnwrap(storedLegacyCipher)
+        XCTAssertFalse(RuneScribePackage.hasMagic(legacyCipherData))
+        XCTAssertEqual(legacyCipherData.first, UInt8(RuneScribeWireFormat.cipherVersion))
+    }
+
     func testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup() async throws {
         let secure = P4BSecureStore()
         let artifacts = P4BShareStore()
@@ -1184,7 +1300,7 @@ final class P4BApplicationServiceTests: XCTestCase {
             version: 1,
             sha256: importedFontDigest
         )
-        let frozenCipher = Cipher(
+        var frozenCipher = Cipher(
             id: cipherID,
             label: "Legacy Cipher",
             origin: .generated,
@@ -1193,9 +1309,9 @@ final class P4BApplicationServiceTests: XCTestCase {
             keyMaterial: frozenCipherKey,
             decorativeMapping: Array((0..<32).reversed()),
             fontRef: .bundled,
-            contactID: contactID,
-            delivered: true
+            contactID: contactID
         )
+        frozenCipher.completeKeyDelivery()
         let importedFontCipher = Cipher(
             id: importedFontCipherID,
             label: "Imported Font Cipher",

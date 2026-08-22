@@ -1,0 +1,335 @@
+{
+  "schemaVersion": "1.0",
+  "policyProfile": "forsetti-pattern-b-standalone",
+  "runtimeVersion": "1.0.0",
+  "moduleID": "com.runescribe.module.theme.gloamthorn",
+  "displayName": "Rune Scribe Gloamthorn Codex Theme",
+  "moduleVersion": "1.0.0",
+  "moduleType": "service",
+  "criticality": "optional",
+  "supportedPlatforms": [
+    "iOS",
+    "macOS"
+  ],
+  "minimumOS": {
+    "iOS": "17.0",
+    "macOS": "15.0"
+  },
+  "capabilitiesRequested": [
+    "resources.read",
+    "runtime.contributions.publish",
+    "runtime.resources.opaque.publish"
+  ],
+  "entryPoint": "RuneScribeThemeGloamthornModule",
+  "runtimeRequirements": {
+    "requiredServices": [
+      "ApplicationResourceLocator"
+    ],
+    "requiredResources": [
+      {
+        "name": "module-manifest",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "Resource-Integrity-Manifest-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-background-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-background-reduce-motion",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-background-static",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-gloam-sovereign-static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-gloam-sovereign-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-gloam-sovereign-vector",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-briar-court-static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-briar-court-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-briar-court-vector",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-duskbriar-stele-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-duskbriar-stele-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-duskbriar-stele-static-share-fallback",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-duskbriar-stele-thumbnail",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-nightthorn-tablet-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-nightthorn-tablet-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-nightthorn-tablet-static-share-fallback",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-nightthorn-tablet-thumbnail",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-umbral-plaque-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-umbral-plaque-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-umbral-plaque-static-share-fallback",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-umbral-plaque-thumbnail",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-script-primary",
+        "fileExtension": "ttf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-script-specimen",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-script-static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-echo-wisp-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-echo-wisp-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-echo-wisp-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-eclipse-bloom-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-eclipse-bloom-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-eclipse-bloom-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-nightglass-moth-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-nightglass-moth-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-nightglass-moth-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-pact-crown-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-pact-crown-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-pact-crown-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-thornmoon-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-thornmoon-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-thornmoon-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-veiled-serpent-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-veiled-serpent-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-veiled-serpent-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-vault-card",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-vault-encountered",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-vault-locked",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      },
+      {
+        "name": "gloamthorn-vault-selected",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.gloamthorn"
+      }
+    ],
+    "requiredModuleRoles": [
+
+    ]
+  },
+  "defaultRole": "runescribe.theme.gloamthorn",
+  "policyClass": "policy.theme-provider",
+  "consumedEndpoints": [
+
+  ],
+  "publishedEndpoints": [
+
+  ],
+  "entitlementRequirement": {
+    "kind": "earned",
+    "identifier": "unlock.codex.gloamthorn"
+  },
+  "diagnosticsVisibleInProduction": false
+}

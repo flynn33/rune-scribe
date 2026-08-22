@@ -57,6 +57,18 @@ targets:
       - package: RuneScribeArchitecture
         product: RuneScribeNorseThemeModule
       - package: RuneScribeArchitecture
+        product: RuneScribeThemeMoonleafModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeSunspireModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeWildwoodModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeGloamthornModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeCloudSyncModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeGameCenterModule
+      - package: RuneScribeArchitecture
         product: RuneScribeThemeCoordinatorModule
       - package: RuneScribeArchitecture
         product: RuneScribeUIModule
@@ -91,6 +103,12 @@ targets:
     entitlements:
       path: Config/RuneScrib-macOS.entitlements
       properties:
+        com.apple.developer.game-center: true
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.runescribe.app
+        com.apple.developer.icloud-services:
+          - CloudKit
+        com.apple.developer.ubiquity-kvstore-identifier: "$(TeamIdentifierPrefix)com.runescribe.app"
         com.apple.security.app-sandbox: true
         com.apple.security.personal-information.addressbook: true
         com.apple.security.files.user-selected.read-write: true
@@ -149,6 +167,18 @@ targets:
       - package: RuneScribeArchitecture
         product: RuneScribeNorseThemeModule
       - package: RuneScribeArchitecture
+        product: RuneScribeThemeMoonleafModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeSunspireModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeWildwoodModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeGloamthornModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeCloudSyncModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeGameCenterModule
+      - package: RuneScribeArchitecture
         product: RuneScribeThemeCoordinatorModule
       - package: RuneScribeArchitecture
         product: RuneScribeUIModule
@@ -203,6 +233,12 @@ targets:
     entitlements:
       path: Config/RuneScrib-iOS.entitlements
       properties:
+        com.apple.developer.game-center: true
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.runescribe.app
+        com.apple.developer.icloud-services:
+          - CloudKit
+        com.apple.developer.ubiquity-kvstore-identifier: "$(TeamIdentifierPrefix)com.runescribe.app"
         keychain-access-groups:
           - "$(AppIdentifierPrefix)com.runescribe.app"
     settings:
@@ -225,6 +261,8 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: RuneScribTests
+      - path: Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift
+        group: CompatibilityMatrix
     dependencies:
       - target: RuneScrib-macOS
       - package: RuneScribeArchitecture
@@ -250,6 +288,8 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: RuneScribIOSTests
+      - path: Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift
+        group: CompatibilityMatrix
     dependencies:
       - target: RuneScrib-iOS
       - package: RuneScribeArchitecture
@@ -273,6 +313,14 @@ targets:
       - target: RuneScrib-iOS
       - package: RuneScribeArchitecture
         product: RuneScribeNorseThemeModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeMoonleafModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeSunspireModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeWildwoodModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeGloamthornModule
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.ios-ui-tests
@@ -334,10 +382,20 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: RuneScribMacParityTests
+      - path: Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift
+        group: CompatibilityMatrix
     dependencies:
       - target: RuneScribMacParityHost
       - package: RuneScribeArchitecture
         product: RuneScribeNorseThemeModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeMoonleafModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeSunspireModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeWildwoodModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeGloamthornModule
       - package: RuneScribeArchitecture
         product: RuneScribeTestSupport
     settings:

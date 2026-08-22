@@ -22,13 +22,13 @@ extension RuneScribeUISession {
     }
 
     func deleteCipher(id: UUID) async throws {
-        try await perform {
+        return try await perform {
             try await requireApplicationClient().deleteCipher(id: CipherID(rawValue: id))
         }
     }
 
     func setActive(id: UUID) async throws {
-        try await perform {
+        return try await perform {
             try await requireApplicationClient().setActiveCipher(
                 SetActiveCipherCommand(cipherID: CipherID(rawValue: id))
             )
@@ -68,15 +68,30 @@ extension RuneScribeUISession {
         displayName: String?,
         representation: ShareRepresentationDTO
     ) async throws -> ShareArtifactDTO {
-        try await perform {
+        let presentationPreparation: OutboundSharePresentationPreparation
+        if representation == .file {
+            presentationPreparation = await makeOutboundSharePresentationWithLegacyFallback(
+                inscription: displayName ?? "Rune Scribe cipher invitation",
+                accessibilityLabel: "Rune Scribe themed cipher invitation"
+            )
+        } else {
+            presentationPreparation = OutboundSharePresentationPreparation(
+                presentation: nil,
+                status: .idle
+            )
+        }
+        let artifact = try await perform {
             try await requireApplicationClient().prepareCipherShare(
                 PrepareCipherShareCommand(
                     cipherID: CipherID(rawValue: cipherID),
                     displayName: displayName,
-                    representation: representation
+                    representation: representation,
+                    presentation: presentationPreparation.presentation
                 )
             )
         }
+        recordOutboundSharePresentationStatus(presentationPreparation.status)
+        return artifact
     }
 
     func prepareMessageShare(
@@ -85,16 +100,23 @@ extension RuneScribeUISession {
         cipherID: UUID,
         shareHandle: EncodedMessageHandle
     ) async throws -> ShareArtifactDTO {
-        try await perform {
+        let presentationPreparation = await makeOutboundSharePresentationWithLegacyFallback(
+            inscription: runes,
+            accessibilityLabel: "Rune Scribe themed encrypted message"
+        )
+        let artifact = try await perform {
             try await requireApplicationClient().prepareMessageShare(
                 PrepareMessageShareCommand(
                     runes: runes,
                     senderName: senderName,
                     cipherID: CipherID(rawValue: cipherID),
-                    shareHandle: shareHandle
+                    shareHandle: shareHandle,
+                    presentation: presentationPreparation.presentation
                 )
             )
         }
+        recordOutboundSharePresentationStatus(presentationPreparation.status)
+        return artifact
     }
 
     func completeShareArtifact(

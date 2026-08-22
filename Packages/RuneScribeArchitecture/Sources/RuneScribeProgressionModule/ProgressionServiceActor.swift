@@ -1,6 +1,12 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeProgressionSyncDomain
 import RuneScribeRuntimeCore
+
+struct ProgressionExternalSyncState: Equatable, Sendable {
+    let snapshot: ProgressionSnapshotDTO
+    let projection: RuntimeProgressionExternalProjection
+}
 
 enum ProgressionProviderAvailabilityProjection {
     static func availability(
@@ -52,6 +58,7 @@ public actor RuneScribeProgressionServiceActor: RuneScribeProgressionService,
     ] = [:]
     private var runtimeAvailabilityRevision: UInt64?
     private var runtimeAvailabilityTask: Task<Void, Never>?
+    private var stateStreamTerminalReason: ProgressionExternalSyncTerminalReason?
     private var stateContinuations: [String: AsyncStream<ProgressionSnapshotDTO>.Continuation] = [:]
     private var entitlementContinuations:
         [String: AsyncStream<ProgressionEntitlementSnapshotDTO>.Continuation] = [:]
@@ -667,6 +674,250 @@ public actor RuneScribeProgressionServiceActor: RuneScribeProgressionService,
         }
     }
 
+    func externalSyncState(capturedAt: Date) async throws -> ProgressionExternalSyncState {
+        ProgressionExternalSyncState(
+            snapshot: try ProgressionSnapshotBuilder.snapshot(
+                state: state,
+                bundle: bundle,
+                capturedAt: capturedAt,
+                providerAvailabilityByCodexID: providerAvailabilityByCodexID
+            ),
+            projection: try await externalProjection()
+        )
+    }
+
+    func applyExternalMerge(
+        _ delivery: RuntimeProgressionExternalMergeDelivery
+    ) async throws -> ProgressionExternalSyncState {
+        let metadata = delivery.operationMetadata
+        guard metadata.operationIdentifier.rawValue == "progression.external-merge.apply",
+              metadata.destinationModuleID == RuneScribeModuleIDs.progression,
+              !recoveryOnly
+        else { throw ProgressionDomainError.invalidRecord("external-merge-authority") }
+        let digest = try commandDigest("external-merge", delivery.projection)
+        if try await repository.commandReceipt(
+            metadata: metadata,
+            commandDigest: digest,
+            generation: state.projection.metadata.activeGeneration
+        ) != nil {
+            try await refreshAndPublish(capturedAt: metadata.timestampUTC)
+            return try await externalSyncState(capturedAt: metadata.timestampUTC)
+        }
+
+        let existingDistinctTokens = try await repository.distinctTokens(
+            generation: state.projection.metadata.activeGeneration,
+            maximumRevision: state.projection.metadata.revision
+        )
+        let reduced = try ProgressionReducer.applyExternalMerge(
+            delivery.projection,
+            to: state.projection,
+            transactionID: commandTransactionID(metadata),
+            appliedAt: metadata.timestampUTC,
+            existingDistinctTokens: existingDistinctTokens,
+            bundle: bundle
+        )
+        var projection = reduced.projection
+        let (revision, overflow) = projection.metadata.revision.addingReportingOverflow(1)
+        let (commandReceiptCount, commandOverflow) = projection.metadata.commandReceiptCount
+            .addingReportingOverflow(1)
+        let (distinctTokenCount, distinctOverflow) = projection.metadata.distinctTokenCount
+            .addingReportingOverflow(UInt64(reduced.newDistinctTokens.count))
+        guard !overflow, !commandOverflow, !distinctOverflow else {
+            throw ProgressionDomainError.invalidRecord("revision-overflow")
+        }
+        projection.metadata.revision = revision
+        projection.metadata.lastMutationAt = metadata.timestampUTC
+        projection.metadata.commandReceiptCount = commandReceiptCount
+        projection.metadata.distinctTokenCount = distinctTokenCount
+        let receipt = commandReceipt(
+            metadata: metadata,
+            digest: digest,
+            resultRevision: revision
+        )
+        _ = try await repository.commit(
+            before: state,
+            after: projection,
+            additions: ProgressionCommitAdditions(
+                distinctTokenUpserts: reduced.newDistinctTokens,
+                commandReceipt: receipt
+            ),
+            transactionID: commandTransactionID(metadata)
+        )
+        try await refreshAndPublish(capturedAt: metadata.timestampUTC)
+        return try await externalSyncState(capturedAt: metadata.timestampUTC)
+    }
+
+    private func externalProjection() async throws -> RuntimeProgressionExternalProjection {
+        guard let initializedAt = state.projection.metadata.initializedAt else {
+            throw ProgressionDomainError.invalidRecord("external-sync-initialized-at")
+        }
+        let completions = Dictionary(uniqueKeysWithValues: state.projection.records(
+            matching: { logical -> (AchievementID, Date)? in
+                guard case let .achievementCompletion(record) = logical else { return nil }
+                return (record.achievementID, record.completedAt)
+            }
+        ))
+        let milestoneCompletionDates = Dictionary(uniqueKeysWithValues: state.projection.records(
+            matching: { logical -> (RuleID, Date)? in
+                guard case let .milestoneCompletion(record) = logical else { return nil }
+                return (record.ruleID, record.completedAt)
+            }
+        ))
+        let counters = state.projection.records { logical -> RuntimeProgressionCounterFact? in
+            guard case let .statisticCounter(record) = logical else { return nil }
+            return RuntimeProgressionCounterFact(
+                statisticID: record.statisticID,
+                codexID: record.bucketID,
+                value: record.value
+            )
+        }
+        let distinctRecords = try await repository.distinctTokens(
+            generation: state.projection.metadata.activeGeneration,
+            maximumRevision: state.projection.metadata.revision
+        )
+        guard UInt64(distinctRecords.count) == state.projection.metadata.distinctTokenCount else {
+            throw ProgressionDomainError.invalidRecord("external-sync-distinct-count")
+        }
+        var distinctTokens: [RuntimeProgressionDistinctTokenFact] = []
+        distinctTokens.reserveCapacity(distinctRecords.count)
+        for record in distinctRecords {
+            let firstObservedAt: Date
+            if let stored = record.firstObservedAt {
+                firstObservedAt = stored
+            } else if let order = try await repository.appliedEventOrderRecord(
+                record.firstAppliedRevision,
+                generation: state.projection.metadata.activeGeneration
+            ) {
+                firstObservedAt = order.envelope.occurredAt
+            } else {
+                firstObservedAt = initializedAt
+            }
+            distinctTokens.append(try RuntimeProgressionDistinctTokenFact(
+                statisticID: record.statisticID,
+                codexID: record.bucketID,
+                opaqueTokenDigest: record.cloudOpaqueTokenDigest,
+                firstObservedAt: firstObservedAt
+            ))
+        }
+        let achievements = state.projection.records {
+            logical -> RuntimeProgressionAchievementFact? in
+            guard case let .achievementProgress(record) = logical else { return nil }
+            return RuntimeProgressionAchievementFact(
+                achievementID: record.achievementID,
+                current: record.current,
+                target: record.target,
+                completedAt: completions[record.achievementID]
+            )
+        }
+        let milestones = state.projection.records {
+            logical -> RuntimeProgressionMilestoneFact? in
+            guard case let .milestoneCompletion(record) = logical else { return nil }
+            return RuntimeProgressionMilestoneFact(
+                ruleID: record.ruleID,
+                completedAt: record.completedAt
+            )
+        }
+        let grants = state.projection.records { logical -> RuntimeProgressionGrantFact? in
+            guard case let .grant(record) = logical else { return nil }
+            let firstGrantedAt: Date = switch record.source {
+            case let .achievement(achievementID):
+                completions[achievementID] ?? record.grantedAt ?? initializedAt
+            case let .milestone(ruleID):
+                milestoneCompletionDates[ruleID] ?? record.grantedAt ?? initializedAt
+            case .migration:
+                record.grantedAt ?? initializedAt
+            }
+            return RuntimeProgressionGrantFact(
+                grantID: record.transactionID,
+                contentID: record.contentID.rawValue,
+                firstGrantedAt: firstGrantedAt,
+                provenanceMaterial: record.source.key
+            )
+        }
+        let owned = state.projection.records { logical -> String? in
+            guard case let .ownership(record) = logical else { return nil }
+            return record.contentID.rawValue
+        }
+        let unlocks = state.projection.records { logical -> UnlockID? in
+            guard case let .entitlement(record) = logical else { return nil }
+            return record.entitlementID
+        }
+        let titles = state.projection.records { logical -> TitleID? in
+            guard case let .ownership(record) = logical,
+                  bundle.catalog.content(id: record.contentID)?.kind == .title
+            else { return nil }
+            return TitleID(rawValue: record.contentID.rawValue)
+        }
+        let encounters = state.projection.records {
+            logical -> RuntimeProgressionEncounterFact? in
+            guard case let .encounter(record) = logical else { return nil }
+            return RuntimeProgressionEncounterFact(
+                codexID: record.codexID,
+                artifactIDs: record.artifactIDs,
+                firstEncounteredAt: record.firstEncounteredAt,
+                lastEncounteredAt: record.lastEncounteredAt,
+                encounterCount: record.encounterCount
+            )
+        }
+        let selectedTitleRecord: TitleSelectionRecord? = if case let .titleSelection(record)? =
+            state.projection.records["title-selection"]
+        {
+            record
+        } else {
+            nil
+        }
+        return RuntimeProgressionExternalProjection(
+            catalogVersion: state.projection.metadata.catalogVersion.rawValue,
+            localRevision: state.projection.metadata.revision,
+            initializedAt: initializedAt,
+            counters: counters,
+            distinctTokens: distinctTokens,
+            achievements: achievements,
+            milestones: milestones,
+            grants: grants,
+            ownedContentIDs: owned,
+            unlockIDs: unlocks,
+            titleIDs: titles,
+            encounters: encounters,
+            selectedTitleID: selectedTitleRecord?.selectedTitleID,
+            selectedTitleUpdatedAt: selectedTitleRecord?.selectedAt,
+            knownStatisticIDs: bundle.catalog.statistics.map(\.statisticID),
+            knownAchievementIDs: bundle.catalog.achievements.map(\.achievementID),
+            knownMilestoneRuleIDs: bundle.catalog.milestones.map(\.ruleID),
+            knownContentIDs: bundle.catalog.content.map(\.contentID.rawValue),
+            knownArtifactIDs: bundle.catalog.content.compactMap { definition in
+                guard definition.countsAsArtifact else { return nil }
+                return ArtifactID(rawValue: definition.contentID.rawValue)
+            },
+            knownUnlockIDs: bundle.catalog.content.compactMap { definition in
+                guard definition.kind == .entitlement else { return nil }
+                return UnlockID(rawValue: definition.contentID.rawValue)
+            },
+            knownTitleIDs: bundle.catalog.content.compactMap { definition in
+                guard definition.kind == .title else { return nil }
+                return TitleID(rawValue: definition.contentID.rawValue)
+            },
+            statisticSchemas: bundle.catalog.statistics.map { definition in
+                let transport: RuntimeProgressionStatisticTransport
+                switch definition.storage {
+                case .distinctSet, .bucketedDistinctSet:
+                    transport = .distinctToken
+                case .derived:
+                    transport = .derivedOmitted
+                }
+                return RuntimeProgressionStatisticSchema(
+                    statisticID: definition.statisticID,
+                    transport: transport,
+                    requiresCodexBucket: definition.bucket == .codexID
+                )
+            },
+            knownCodexIDs: bundle.catalog.content.compactMap { definition in
+                guard definition.kind == .codex else { return nil }
+                return CodexID(rawValue: definition.contentID.rawValue)
+            }
+        )
+    }
+
     public nonisolated func entitlementStream(
         metadata: RuntimeOperationMetadata
     ) -> AsyncStream<ProgressionEntitlementSnapshotDTO> {
@@ -852,7 +1103,7 @@ public actor RuneScribeProgressionServiceActor: RuneScribeProgressionService,
         try projection.upsert(.titleSelection(TitleSelectionRecord(
             generation: projection.metadata.activeGeneration,
             selectedTitleID: command.titleID,
-            selectedAt: command.titleID == nil ? nil : metadata.timestampUTC
+            selectedAt: metadata.timestampUTC
         )))
         let (revision, overflow) = projection.metadata.revision.addingReportingOverflow(1)
         let (commandReceiptCount, commandOverflow) = projection.metadata.commandReceiptCount
@@ -1451,12 +1702,18 @@ public actor RuneScribeProgressionServiceActor: RuneScribeProgressionService,
         )
         guard projected != providerAvailabilityByCodexID else { return }
         providerAvailabilityByCodexID = projected
-        guard let stateSnapshot = try? ProgressionSnapshotBuilder.snapshot(
-            state: state,
-            bundle: bundle,
-            capturedAt: snapshot.capturedAt,
-            providerAvailabilityByCodexID: providerAvailabilityByCodexID
-        ) else { return }
+        let stateSnapshot: ProgressionSnapshotDTO
+        do {
+            stateSnapshot = try ProgressionSnapshotBuilder.snapshot(
+                state: state,
+                bundle: bundle,
+                capturedAt: snapshot.capturedAt,
+                providerAvailabilityByCodexID: providerAvailabilityByCodexID
+            )
+        } catch {
+            terminateStateStreams(reason: .snapshotProjectionFailed)
+            return
+        }
         for continuation in stateContinuations.values {
             continuation.yield(stateSnapshot)
         }
@@ -1539,18 +1796,32 @@ public actor RuneScribeProgressionServiceActor: RuneScribeProgressionService,
         metadata: RuntimeOperationMetadata
     ) {
         stateContinuations.removeValue(forKey: key)?.finish()
-        stateContinuations[key] = continuation
-        if let snapshot = try? ProgressionSnapshotBuilder.snapshot(
-            state: state,
-            bundle: bundle,
-            capturedAt: metadata.timestampUTC,
-            providerAvailabilityByCodexID: providerAvailabilityByCodexID
-        ) {
-            continuation.yield(snapshot)
-        } else {
+        guard stateStreamTerminalReason == nil else {
             continuation.finish()
-            stateContinuations.removeValue(forKey: key)
+            return
         }
+        stateContinuations[key] = continuation
+        do {
+            let snapshot = try ProgressionSnapshotBuilder.snapshot(
+                state: state,
+                bundle: bundle,
+                capturedAt: metadata.timestampUTC,
+                providerAvailabilityByCodexID: providerAvailabilityByCodexID
+            )
+            continuation.yield(snapshot)
+        } catch {
+            terminateStateStreams(reason: .snapshotProjectionFailed)
+        }
+    }
+
+    func stateStreamTerminationReason() -> ProgressionExternalSyncTerminalReason? {
+        stateStreamTerminalReason
+    }
+
+    private func terminateStateStreams(reason: ProgressionExternalSyncTerminalReason) {
+        stateStreamTerminalReason = reason
+        for continuation in stateContinuations.values { continuation.finish() }
+        stateContinuations.removeAll()
     }
 
     private func addEntitlementContinuation(
@@ -1946,5 +2217,6 @@ private func sameDistinctTokenIdentity(
         lhs.statisticID == rhs.statisticID &&
         lhs.bucketID == rhs.bucketID &&
         lhs.tokenDigest == rhs.tokenDigest &&
-        lhs.canonicalToken == rhs.canonicalToken
+        lhs.canonicalToken == rhs.canonicalToken &&
+        lhs.externalOpaqueTokenDigest == rhs.externalOpaqueTokenDigest
 }

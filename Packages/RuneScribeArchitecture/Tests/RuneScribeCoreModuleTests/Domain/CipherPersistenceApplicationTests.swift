@@ -68,7 +68,7 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         XCTAssertEqual(cipher.decorativeMapping, Array((0..<32).reversed()))
         XCTAssertEqual(cipher.fontRef, .bundled)
         XCTAssertEqual(cipher.contactID, contactID)
-        XCTAssertTrue(cipher.delivered)
+        XCTAssertTrue(cipher.hasCompletedKeyDelivery)
 
         let operations = await store.recordedOperations()
         XCTAssertEqual(

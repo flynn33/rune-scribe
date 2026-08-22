@@ -17,6 +17,48 @@ enum FileRouterError: Error, Equatable, Sendable {
 enum RoutedInboundFile: Sendable {
     case cipher(payload: CipherSharePayload, fontBytes: Data?)
     case message(payload: MessageSharePayload, fontBytes: Data?)
+    case themedCipher(
+        payload: CipherSharePayload,
+        fontBytes: Data?,
+        presentation: SharePresentationIntake
+    )
+    case themedMessage(
+        payload: MessageSharePayload,
+        fontBytes: Data?,
+        presentation: SharePresentationIntake
+    )
+}
+
+extension RoutedInboundFile {
+    var cipherComponents: (
+        payload: CipherSharePayload,
+        fontBytes: Data?,
+        presentation: SharePresentationIntake
+    )? {
+        switch self {
+        case .cipher(let payload, let fontBytes):
+            (payload, fontBytes, .absent)
+        case .themedCipher(let payload, let fontBytes, let presentation):
+            (payload, fontBytes, presentation)
+        case .message, .themedMessage:
+            nil
+        }
+    }
+
+    var messageComponents: (
+        payload: MessageSharePayload,
+        fontBytes: Data?,
+        presentation: SharePresentationIntake
+    )? {
+        switch self {
+        case .message(let payload, let fontBytes):
+            (payload, fontBytes, .absent)
+        case .themedMessage(let payload, let fontBytes, let presentation):
+            (payload, fontBytes, presentation)
+        case .cipher, .themedCipher:
+            nil
+        }
+    }
 }
 
 /// Strict Core parser for the shared `.runescribe` file rail. The leading byte
@@ -52,16 +94,31 @@ enum FileRouter {
     private static func decodePackage(_ data: Data) throws -> RoutedInboundFile {
         do {
             let package = try RuneScribePackage(decoding: data)
+            let presentation = package.sharePresentation(trustStore: .production)
             switch package.kind {
             case .cipherInvitation:
                 let payload = try CipherSharePayload(decoding: package.corePayload)
                 let fontBytes = try package.legacyFontBytes(matching: payload.fontRef)
+                if presentation.metadata != nil {
+                    return .themedCipher(
+                        payload: payload,
+                        fontBytes: fontBytes,
+                        presentation: presentation
+                    )
+                }
                 return .cipher(payload: payload, fontBytes: fontBytes)
             case .encryptedMessage:
                 let payload = try MessageSharePayload(decoding: package.corePayload)
                 let fontBytes = try package.legacyFontBytes(
                     matching: payload.embeddedCipher?.fontRef
                 )
+                if presentation.metadata != nil {
+                    return .themedMessage(
+                        payload: payload,
+                        fontBytes: fontBytes,
+                        presentation: presentation
+                    )
+                }
                 return .message(payload: payload, fontBytes: fontBytes)
             }
         } catch let packageError as RuneScribePackageError {

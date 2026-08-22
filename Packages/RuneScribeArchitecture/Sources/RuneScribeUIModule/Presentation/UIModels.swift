@@ -12,6 +12,7 @@ struct CipherViewState: Identifiable, Equatable, Sendable {
     let publicIdentifier: String
     let fontName: String
     let fontSource: FontSourceDTO
+    let fontIsRegistered: Bool
 
     var contractID: CipherID {
         CipherID(rawValue: id)
@@ -76,6 +77,8 @@ struct PendingMessageViewState: Identifiable, Equatable, Sendable {
     let senderName: String
     let cipherID: UUID
     let cipherName: String
+    let presentation: ReceivedSharePresentation?
+    let safePreviewData: Data?
 
     init(_ message: ReceivedMessageDTO) {
         id = message.id
@@ -83,5 +86,25 @@ struct PendingMessageViewState: Identifiable, Equatable, Sendable {
         senderName = message.senderName
         cipherID = message.cipherID.rawValue
         cipherName = message.cipherName
+        presentation = message.presentation
+        safePreviewData = message.safePreviewData
+    }
+
+    init(
+        _ message: ReceivedMessageDTO,
+        themeSnapshot: ThemeCoordinatorSnapshotDTO?
+    ) {
+        id = message.id
+        plaintext = message.plaintext
+        senderName = message.senderName
+        cipherID = message.cipherID.rawValue
+        cipherName = message.cipherName
+        presentation = message.presentation.map {
+            ReceivedPresentationAvailabilityBinding.resolve(
+                $0,
+                against: themeSnapshot
+            )
+        }
+        safePreviewData = message.safePreviewData
     }
 }

@@ -18,6 +18,10 @@ public enum OpaqueSharePresentationError: Error, Equatable, Sendable {
     case revoked
 }
 
+private struct CapturedSharePresentationError: Error, @unchecked Sendable {
+    let underlying: any Error
+}
+
 public typealias SharePresentationCompletion = Result<
     ShareArtifactCompletionEvidenceDTO,
     any Error
@@ -59,6 +63,29 @@ public enum RuneScribeUtilityShareReportMapper {
     }
 }
 
+enum RuntimeQRCodeRenderer {
+    static func image(
+        message: String,
+        scale: CGFloat = 12,
+        correctionLevel: String = "M"
+    ) -> CGImage? {
+        guard !message.isEmpty,
+              message.utf8.count <= 16_384,
+              scale.isFinite,
+              (1...32).contains(scale),
+              ["L", "M", "Q", "H"].contains(correctionLevel)
+        else { return nil }
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = Data(message.utf8)
+        filter.correctionLevel = correctionLevel
+        guard let output = filter.outputImage else { return nil }
+        let scaled = output.transformed(
+            by: CGAffineTransform(scaleX: scale, y: scale)
+        )
+        return CIContext().createCGImage(scaled, from: scaled.extent)
+    }
+}
+
 /// Runtime-owned lease for one artifact presentation. The platform URL remains
 /// private to RuneScribeUIRuntime and is invalidated with the originating
 /// runtime/module generation.
@@ -68,10 +95,15 @@ public final class OpaqueShareTransfer: ObservableObject {
 
     @Published public private(set) var isAvailable = true
     @Published public private(set) var presentationReport: SharePresentationReportDTO?
+    @Published public private(set) var presentationDiagnosticCode: String?
     @Published public private(set) var completionEvidence: ShareArtifactCompletionEvidenceDTO?
 
     private let lease: RuntimeSharePresentationLease
     private var eventTask: Task<Void, Never>?
+    private var presentationReportTask: Task<
+        Result<SharePresentationReportDTO, CapturedSharePresentationError>,
+        Never
+    >?
     private var isClosed = false
     private var hasBegunTerminalFinish = false
 
@@ -117,14 +149,51 @@ public final class OpaqueShareTransfer: ObservableObject {
         isAvailable = false
         eventTask?.cancel()
         eventTask = nil
+        presentationReportTask?.cancel()
+        presentationReportTask = nil
         await lease.close()
+    }
+
+    public func beginReportingPresented(on routeClass: ShareRouteClassDTO) {
+        guard !isClosed, !hasBegunTerminalFinish else {
+            presentationDiagnosticCode = "share.presentation.presented-report-failed"
+            return
+        }
+        guard presentationReportTask == nil else { return }
+        let lease = lease
+        let report = try! SharePresentationReportDTO(
+            routeClass: routeClass,
+            result: .presented
+        )
+        presentationReportTask = Task { @MainActor [weak self] in
+            do {
+                try await lease.reportPresented(on: routeClass)
+                self?.presentationReport = report
+                return .success(report)
+            } catch {
+                self?.presentationDiagnosticCode =
+                    "share.presentation.presented-report-failed"
+                return .failure(CapturedSharePresentationError(underlying: error))
+            }
+        }
     }
 
     public func reportPresented(on routeClass: ShareRouteClassDTO) async throws {
         guard !isClosed, !hasBegunTerminalFinish else {
+            presentationDiagnosticCode = "share.presentation.presented-report-failed"
             throw OpaqueSharePresentationError.revoked
         }
-        try await lease.reportPresented(on: routeClass)
+        beginReportingPresented(on: routeClass)
+        guard let presentationReportTask else {
+            presentationDiagnosticCode = "share.presentation.presented-report-failed"
+            throw OpaqueSharePresentationError.unavailable
+        }
+        switch await presentationReportTask.value {
+        case .success:
+            return
+        case .failure(let captured):
+            throw captured.underlying
+        }
     }
 
     public func finish(
@@ -137,13 +206,31 @@ public final class OpaqueShareTransfer: ObservableObject {
             throw OpaqueSharePresentationError.revoked
         }
         hasBegunTerminalFinish = true
+        if let presentationReportTask {
+            switch await presentationReportTask.value {
+            case .success:
+                break
+            case .failure(let captured):
+                hasBegunTerminalFinish = false
+                throw captured.underlying
+            }
+        }
         do {
             let evidence = try await lease.finish(report)
             markCompleted(evidence)
             return evidence
-        } catch {
+        } catch is CancellationError {
             hasBegunTerminalFinish = false
-            throw error
+            throw CancellationError()
+        } catch {
+            do {
+                let evidence = try await lease.finish(report)
+                markCompleted(evidence)
+                return evidence
+            } catch {
+                hasBegunTerminalFinish = false
+                throw error
+            }
         }
     }
 
@@ -157,20 +244,16 @@ public final class OpaqueShareTransfer: ObservableObject {
 
     deinit {
         eventTask?.cancel()
+        presentationReportTask?.cancel()
     }
 
     @MainActor
     public func qrCodeImage(scale: CGFloat = 12) -> Image? {
         guard let presentationURL else { return nil }
-        let filter = CIFilter.qrCodeGenerator()
-        filter.message = Data(presentationURL.absoluteString.utf8)
-        filter.correctionLevel = "M"
-        guard let output = filter.outputImage else { return nil }
-        let scaled = output.transformed(
-            by: CGAffineTransform(scaleX: scale, y: scale)
-        )
-        let context = CIContext()
-        guard let image = context.createCGImage(scaled, from: scaled.extent) else {
+        guard let image = RuntimeQRCodeRenderer.image(
+            message: presentationURL.absoluteString,
+            scale: scale
+        ) else {
             return nil
         }
         #if os(macOS)
@@ -202,6 +285,8 @@ public final class OpaqueShareTransfer: ObservableObject {
         isAvailable = false
         eventTask?.cancel()
         eventTask = nil
+        presentationReportTask?.cancel()
+        presentationReportTask = nil
     }
 
     private func markCompleted(_ evidence: ShareArtifactCompletionEvidenceDTO) {
@@ -264,9 +349,7 @@ private struct RuntimeShareArtifactExporterModifier: ViewModifier {
         }
         .onChange(of: isPresented, initial: true) { _, presented in
             guard presented else { return }
-            Task { @MainActor in
-                try? await transfer.reportPresented(on: .fileExport)
-            }
+            transfer.beginReportingPresented(on: .fileExport)
         }
     }
 

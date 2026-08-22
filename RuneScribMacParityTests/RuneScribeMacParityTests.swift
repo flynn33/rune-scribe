@@ -7,6 +7,7 @@ import RuneScribeNorseThemeModule
 import RuneScribePlatform
 @_spi(RuntimeFileImportHost) @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
+import RuneScribeThemeMoonleafModule
 @testable import RuneScribeUIModule
 import RuneScribeUIRuntime
 import SwiftUI
@@ -72,14 +73,30 @@ final class RuneScribeMacParityTests: XCTestCase {
 
     func testCustomFontSuccessAndFailureProjectThroughRealSession() async throws {
         try await withHarness { harness in
+            let productionFontBytes = try productionMoonleafFontBytes()
+            let productionFontReference = FontRef(
+                id: "mac-custom",
+                version: 1,
+                sha256: Data(SHA256.hash(data: productionFontBytes))
+            )
+            let compatibilityScript = try ScriptDescriptor.legacyCompatibility(
+                fontRef: productionFontReference
+            )
+            XCTAssertEqual(compatibilityScript.portability, .fontDependent)
+            XCTAssertEqual(compatibilityScript.renderingFont, productionFontReference)
+            XCTAssertEqual(
+                compatibilityScript.portableAlphabet,
+                ScriptDescriptor.baseRune.portableAlphabet
+            )
+
             let validURL = URL(
                 fileURLWithPath: "/in-memory-input/mac-valid-custom-font.runescribe"
             )
             let validFixture = try makeCipherFile(
                 publicID: Data([0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7]),
                 fontID: "mac-custom",
-                expectedFontBytes: Self.validCustomFontBytes,
-                suppliedFontBytes: Self.validCustomFontBytes
+                expectedFontBytes: productionFontBytes,
+                suppliedFontBytes: productionFontBytes
             )
             await harness.inboundFiles.set(validFixture, for: validURL)
 
@@ -128,7 +145,7 @@ final class RuneScribeMacParityTests: XCTestCase {
             }
             XCTAssertTrue(importedStateObserved)
 
-            let validDigest = Self.digestHex(Self.validCustomFontBytes)
+            let validDigest = Self.digestHex(productionFontBytes)
             let validPath = try ProtectedPath.fontsDirectory
                 .appending("\(validDigest).ttf")
             let persistedValidFont = try await harness.protectedFiles.read(
@@ -136,17 +153,76 @@ final class RuneScribeMacParityTests: XCTestCase {
             )
             XCTAssertEqual(
                 persistedValidFont,
-                Self.validCustomFontBytes
+                productionFontBytes
             )
-            let customFontRegistered = await harness.fontRegistrar.isRegistered(
-                Self.validCustomFontBytes
+            let inspectedPostScriptName = try await harness.fontRegistrar.postScriptName(
+                forFontData: productionFontBytes
             )
-            XCTAssertTrue(customFontRegistered)
+            XCTAssertEqual(inspectedPostScriptName, Self.moonleafPostScriptName)
             XCTAssertTrue(harness.session.snapshot?.fonts.contains {
                 $0.id == FontID(rawValue: "mac-custom")
                     && $0.source == .imported
                     && $0.isRegistered
+                    && $0.displayName == Self.moonleafPostScriptName
             } == true)
+            let activeImportedCipher = try XCTUnwrap(harness.session.activeCipher)
+            XCTAssertEqual(activeImportedCipher.fontSource, .imported)
+            XCTAssertTrue(activeImportedCipher.fontIsRegistered)
+            XCTAssertEqual(activeImportedCipher.fontName, Self.moonleafPostScriptName)
+            XCTAssertEqual(
+                harness.session.inscriptionFontPostScriptName,
+                Self.moonleafPostScriptName
+            )
+            XCTAssertTrue(harness.session.inscriptionVectorDataByToken.isEmpty)
+            let resolvedFont = try XCTUnwrap(
+                NSFont(name: harness.session.inscriptionFontPostScriptName, size: 32)
+            )
+            XCTAssertEqual(resolvedFont.fontName, Self.moonleafPostScriptName)
+
+            let plaintext = "Moonleaf parity specimen"
+            let encoded = try await harness.session.encode(
+                plaintext,
+                cipherID: activeImportedCipher.id
+            )
+            let decoded = try await harness.session.decode(encoded.runes)
+            XCTAssertEqual(decoded.plaintext, plaintext)
+            XCTAssertEqual(decoded.cipherID.rawValue, activeImportedCipher.id)
+
+            let encodedInscription = RuneInscriptionText(
+                source: plaintext,
+                target: encoded.runes,
+                start: .distantPast,
+                direction: .encode,
+                fontSize: 32,
+                fontName: harness.session.inscriptionFontPostScriptName,
+                vectorDataByToken: harness.session.inscriptionVectorDataByToken,
+                settled: true
+            )
+            XCTAssertFalse(encodedInscription.usesVectorPresentation)
+            let encodedPNG = try renderPNG(
+                AnyView(encodedInscription.padding(16)),
+                size: CGSize(width: 600, height: 180)
+            )
+            let decodedPNG = try renderPNG(
+                AnyView(
+                    RuneInscriptionText(
+                        source: encoded.runes,
+                        target: decoded.plaintext,
+                        start: .distantPast,
+                        direction: .decode,
+                        fontSize: 32,
+                        fontName: harness.session.inscriptionFontPostScriptName,
+                        vectorDataByToken: harness.session.inscriptionVectorDataByToken,
+                        settled: true
+                    )
+                    .padding(16)
+                ),
+                size: CGSize(width: 600, height: 180)
+            )
+            XCTAssertGreaterThan(encodedPNG.count, 2_000)
+            XCTAssertGreaterThan(decodedPNG.count, 2_000)
+            attachPNG(encodedPNG, name: "mac-moonleaf-encoded-inscription")
+            attachPNG(decodedPNG, name: "mac-moonleaf-decoded-inscription")
 
             let invalidURL = URL(
                 fileURLWithPath: "/in-memory-input/mac-invalid-custom-font.runescribe"
@@ -217,6 +293,65 @@ final class RuneScribeMacParityTests: XCTestCase {
                 persistedFontPaths,
                 [validPath]
             )
+
+            try await harness.protectedFiles.remove(relativePath: validPath)
+            let unavailableHarness = try await harness.makeRelaunchedHarness()
+            do {
+                try await unavailableHarness.start()
+                let unavailableStateObserved = await eventually {
+                    unavailableHarness.session.activeCipher?.label == "Mac Custom Font"
+                        && unavailableHarness.session.isLoading == false
+                }
+                XCTAssertTrue(unavailableStateObserved)
+                let unavailableCipher = try XCTUnwrap(
+                    unavailableHarness.session.activeCipher
+                )
+                XCTAssertEqual(unavailableCipher.fontSource, .imported)
+                XCTAssertFalse(unavailableCipher.fontIsRegistered)
+                XCTAssertNotEqual(
+                    unavailableHarness.session.inscriptionFontPostScriptName,
+                    Self.moonleafPostScriptName
+                )
+                XCTAssertEqual(
+                    unavailableHarness.session.inscriptionFontPostScriptName,
+                    unavailableHarness.session.themeScriptPresentation.fontPostScriptName
+                )
+                XCTAssertEqual(
+                    unavailableHarness.session.inscriptionVectorDataByToken,
+                    unavailableHarness.session.themeScriptPresentation.vectorDataByToken
+                )
+                XCTAssertTrue(
+                    ThemeScriptFontSelector.usesThemeVectors(
+                        cipherFontSource: unavailableCipher.fontSource,
+                        cipherFontIsRegistered: unavailableCipher.fontIsRegistered
+                    )
+                )
+                let fallbackInscription = RuneInscriptionText(
+                    source: "A",
+                    target: "ᚠ",
+                    start: .distantPast,
+                    direction: .encode,
+                    fontSize: 32,
+                    fontName: unavailableHarness.session.inscriptionFontPostScriptName,
+                    vectorDataByToken: unavailableHarness.session
+                        .inscriptionVectorDataByToken,
+                    settled: true
+                )
+                XCTAssertEqual(
+                    fallbackInscription.usesVectorPresentation,
+                    !unavailableHarness.session.inscriptionVectorDataByToken.isEmpty
+                )
+                let fallbackPNG = try renderPNG(
+                    AnyView(fallbackInscription.padding(16)),
+                    size: CGSize(width: 320, height: 120)
+                )
+                XCTAssertGreaterThan(fallbackPNG.count, 1_000)
+                attachPNG(fallbackPNG, name: "mac-unavailable-font-theme-fallback")
+                await unavailableHarness.stop()
+            } catch {
+                await unavailableHarness.stop()
+                throw error
+            }
         }
     }
 
@@ -303,11 +438,8 @@ final class RuneScribeMacParityTests: XCTestCase {
                 withExtension: "ttf"
             )
         )
-        let bundledFontBytes = try Data(contentsOf: fontURL)
         let harness = try await MacParityHarness(
-            bundledFontURL: fontURL,
-            bundledFontBytes: bundledFontBytes,
-            validCustomFontBytes: Self.validCustomFontBytes
+            bundledFontURL: fontURL
         )
         do {
             try await harness.start()
@@ -345,6 +477,19 @@ final class RuneScribeMacParityTests: XCTestCase {
         )
         return try CipherSharePayload(cipher: cipher)
             .encodedFile(fontBytes: suppliedFontBytes)
+    }
+
+    private func productionMoonleafFontBytes() throws -> Data {
+        let url = try XCTUnwrap(
+            RuneScribeThemeMoonleafModuleBootstrap.resourceBundle.url(
+                forResource: "moonleaf-script-primary",
+                withExtension: "ttf"
+            )
+        )
+        let data = try Data(contentsOf: url)
+        XCTAssertEqual(data.count, Self.moonleafFontByteCount)
+        XCTAssertEqual(Self.digestHex(data), Self.moonleafFontSHA256Hex)
+        return data
     }
 
     private func renderPNG(_ view: AnyView, size: CGSize) throws -> Data {
@@ -444,9 +589,15 @@ final class RuneScribeMacParityTests: XCTestCase {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }
 
-    private static let validCustomFontBytes = Data(
-        "deterministic-mac-custom-font".utf8
-    )
+    private static let moonleafFontByteCount = 111_892
+    private static let moonleafFontSHA256Hex =
+        "7fa08b061fbbe897e4305dea1bf456ec87b491a2c34e2df4cf2f6845647f0f3e"
+    private static let moonleafPostScriptName = "RavenForgeMoonleafScript-Regular"
+}
+
+private struct MacParityPersistentState: Sendable {
+    let secureValues = InMemorySecureValueStore()
+    let protectedFiles = InMemoryProtectedFileStore()
 }
 
 @MainActor
@@ -455,17 +606,20 @@ private final class MacParityHarness {
     let service: RuneScribeCoreApplicationService
     let inboundFiles: InMemoryInboundFileReader
     let protectedFiles: InMemoryProtectedFileStore
-    let fontRegistrar: InMemoryFontRegistrar
+    let fontRegistrar: CoreTextFontRegistrar
 
+    private let bundledFontURL: URL
+    private let persistentState: MacParityPersistentState
     private let shareArtifacts: AppleShareArtifactStore
     private let runtime: RuneScribeRuntime
     private let temporaryRoot: URL
 
     init(
         bundledFontURL: URL,
-        bundledFontBytes: Data,
-        validCustomFontBytes: Data
+        persistentState: MacParityPersistentState = MacParityPersistentState()
     ) async throws {
+        self.bundledFontURL = bundledFontURL
+        self.persistentState = persistentState
         temporaryRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "RuneScribeMacParityTests-\(UUID().uuidString)",
@@ -476,8 +630,8 @@ private final class MacParityHarness {
             withIntermediateDirectories: false
         )
 
-        let secureValues = InMemorySecureValueStore()
-        let protectedFiles = InMemoryProtectedFileStore()
+        let secureValues = persistentState.secureValues
+        let protectedFiles = persistentState.protectedFiles
         let inboundFiles = InMemoryInboundFileReader()
         let shareArtifacts = AppleShareArtifactStore(
             temporaryDirectory: temporaryRoot.appendingPathComponent(
@@ -488,12 +642,7 @@ private final class MacParityHarness {
         let resources = MappedApplicationResourceLocator(
             locations: [.bundledRuneFont: bundledFontURL]
         )
-        let fontRegistrar = InMemoryFontRegistrar(
-            namesByData: [
-                bundledFontBytes: "Noto Sans Runic",
-                validCustomFontBytes: "Rune Scribe Custom",
-            ]
-        )
+        let fontRegistrar = CoreTextFontRegistrar()
         let contacts = InMemoryContactAccessService(authorizationStatus: .denied)
         let clipboard = InMemoryClipboardService()
         let clock = SystemClock()
@@ -670,6 +819,13 @@ private final class MacParityHarness {
 
     func importSelectedFile(_ fileURL: URL) async throws -> ImportResultDTO {
         try await session.inboundFileImportSession.importSelectedFile(fileURL)
+    }
+
+    func makeRelaunchedHarness() async throws -> MacParityHarness {
+        try await MacParityHarness(
+            bundledFontURL: bundledFontURL,
+            persistentState: persistentState
+        )
     }
 }
 

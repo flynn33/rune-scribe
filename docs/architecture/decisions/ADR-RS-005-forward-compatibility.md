@@ -2,28 +2,29 @@
 
 **Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
 
-**Status:** Accepted: legacy-only outbound until product review
+**Status:** Accepted: vNext themed outbound with legacy compatibility
 **Date:** 2026-08-09
+**Transition authorized:** 2026-08-22
 
 ## Decision
 
-Current production sharing continues to emit only the established cipher v3 and
-message v1 transports. A typed-container reader, builder, and fixtures may be developed
-behind tests, but no shipping route emits `RSCRPKG\n` content until product review
-selects and approves a transition policy.
+The normal customized file path emits the bounded typed container beginning with
+`RSCRPKG\n`. Cipher invitations and encrypted messages carry an authoritative Core
+payload plus optional, nonsecret presentation metadata, a validated 4:3 safe preview,
+and provenance state. Established-message packages do not resend the key.
 
-The current policy is therefore **legacy-only outbound compatibility**:
+Compatibility remains explicit and reversible:
 
-- New builds continue reading all supported legacy content.
-- Old builds continue receiving the exact formats they already understand.
-- No Codex metadata is appended to legacy message trailing bytes; legacy readers treat
-  those bytes as font data.
-- No visible Codex feature depends on vNext outbound content while this policy applies.
+- New builds continue reading exact legacy cipher v3 and message v1 content.
+- Link and QR invitation paths retain their compact legacy representation.
+- Callers that omit an outbound presentation request deliberately receive the legacy
+  writer, providing a source-controlled rollback switch.
+- Optional or malformed presentation never changes Core payload admission or message
+  decryption; known future required sections produce an update-required result.
+- Presentation bytes are never appended to a legacy payload where an older reader
+  could mistake them for font data.
 
-Product review must later choose compatibility mode, dual-item sharing, a
-minimum-version transition, or an explicitly accepted vNext-only rollout. Enabling
-vNext outbound requires an old/new compatibility matrix, rollback behavior, update
-copy, and reproducible supported-environment validation for each destination contract.
-Owner-operated hardware-only observation is optional outside Agent Coding scope and
-has no acceptance, completion, blocker, residual-work, PASS/FAIL, or pull-request
-readiness effect.
+The destination matrix covers legacy and vNext readers, unknown optional and required
+sections, future payload versions, and unavailable presentation providers. Physical
+destination observation remains an owner pre-ship activity and does not alter the
+source-complete transition decision.

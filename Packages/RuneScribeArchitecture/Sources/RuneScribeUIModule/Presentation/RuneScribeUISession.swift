@@ -20,11 +20,18 @@ final class RuneScribeUISession: ObservableObject {
     @Published var themeSelectionError: String?
     @Published var runtimeSettingsSnapshot: RuntimeSettingsSnapshotDTO?
     @Published var settingsRailState: OptionalProgressionRailState = .unavailable
+    @Published var runtimePresentationSettingsReady = false
+    @Published var contactsImportPrompted = false
+    @Published var splashLastShownAt: Date?
+    @Published private(set) var cloudGameCenterStatus: RuntimeCloudGameCenterStatusSnapshotDTO?
+    @Published private(set) var cloudGameCenterError: String?
     @Published var unlockFeedbackPreferences = UnlockFeedbackPreferences.defaults
     @Published var activeReveal: ProgressionRevealSummaryDTO?
     @Published var progressionCommandError: String?
     @Published var selectedThemeRelicID: ArtifactID?
     @Published var selectedThemeSealID: ArtifactID?
+    @Published var selectedThemeFrameID: ArtifactID?
+    @Published private(set) var outboundSharePresentationStatus: OutboundSharePresentationStatus = .idle
 
     let resourcePresentation: RuntimeApplicationResourcePresentation
     let inboundFileImportSession: RuntimeInboundFileImportSession
@@ -32,11 +39,12 @@ final class RuneScribeUISession: ObservableObject {
     let buildNumber: String
 
     private var applicationClientHandle: RuntimeApplicationClient?
-    private var runtimeIOHandle: RuntimeIOClient?
+    var runtimeIOHandle: RuntimeIOClient?
     private var availabilityClientHandle: RuntimeAvailabilityClient?
     var progressionClientHandle: RuntimeProgressionClient?
-    private var themeCoordinatorClientHandle: RuntimeThemeCoordinatorClient?
+    var themeCoordinatorClientHandle: RuntimeThemeCoordinatorClient?
     var runtimeSettingsClientHandle: RuntimeSettingsClient?
+    private var cloudGameCenterStatusClientHandle: RuntimeCloudGameCenterStatusClient?
     var unlockFeedbackClientHandle: RuntimeUnlockFeedbackClient?
 
     var contactSystemIdentifiers: [UUID: String] = [:]
@@ -49,6 +57,7 @@ final class RuneScribeUISession: ObservableObject {
     private var themeAdoptionGeneration: UInt64 = 0
     private var latestThemeCoordinatorRevision: UInt64?
     var settingsTask: Task<Void, Never>?
+    private var cloudGameCenterStatusTask: Task<Void, Never>?
     var observationGeneration: UInt64 = 0
     var revealQueue = ProgressionRevealQueueModel()
 
@@ -59,6 +68,7 @@ final class RuneScribeUISession: ObservableObject {
         progressionClient: RuntimeProgressionClient? = nil,
         themeCoordinatorClient: RuntimeThemeCoordinatorClient? = nil,
         runtimeSettingsClient: RuntimeSettingsClient? = nil,
+        cloudGameCenterStatusClient: RuntimeCloudGameCenterStatusClient? = nil,
         unlockFeedbackClient: RuntimeUnlockFeedbackClient? = nil,
         inboundFileImportSession: RuntimeInboundFileImportSession = .unavailable,
         resourcePresentation: RuntimeApplicationResourcePresentation,
@@ -70,6 +80,7 @@ final class RuneScribeUISession: ObservableObject {
         progressionClientHandle = progressionClient
         themeCoordinatorClientHandle = themeCoordinatorClient
         runtimeSettingsClientHandle = runtimeSettingsClient
+        cloudGameCenterStatusClientHandle = cloudGameCenterStatusClient
         unlockFeedbackClientHandle = unlockFeedbackClient
         self.inboundFileImportSession = inboundFileImportSession
         self.resourcePresentation = resourcePresentation
@@ -85,6 +96,7 @@ final class RuneScribeUISession: ObservableObject {
         themeTask?.cancel()
         themeResourceTask?.cancel()
         settingsTask?.cancel()
+        cloudGameCenterStatusTask?.cancel()
     }
 
     func start() throws {
@@ -150,6 +162,7 @@ final class RuneScribeUISession: ObservableObject {
         }
         startOptionalProgressionObservation(generation: generation)
         startOptionalSettingsObservation(generation: generation)
+        startCloudGameCenterStatusObservation(generation: generation)
     }
 
     /// Loads and commits the required Base Theme before the root view is made
@@ -178,6 +191,7 @@ final class RuneScribeUISession: ObservableObject {
         let themeTask = self.themeTask
         let themeResourceTask = self.themeResourceTask
         let settingsTask = self.settingsTask
+        let cloudGameCenterStatusTask = self.cloudGameCenterStatusTask
         stateTask?.cancel()
         menuTask?.cancel()
         availabilityTask?.cancel()
@@ -185,6 +199,7 @@ final class RuneScribeUISession: ObservableObject {
         themeTask?.cancel()
         themeResourceTask?.cancel()
         settingsTask?.cancel()
+        cloudGameCenterStatusTask?.cancel()
         self.stateTask = nil
         self.menuTask = nil
         self.availabilityTask = nil
@@ -194,6 +209,7 @@ final class RuneScribeUISession: ObservableObject {
         themeAdoptionGeneration &+= 1
         latestThemeCoordinatorRevision = nil
         self.settingsTask = nil
+        self.cloudGameCenterStatusTask = nil
         snapshot = nil
         availabilitySnapshot = nil
         progressionSnapshot = nil
@@ -206,11 +222,17 @@ final class RuneScribeUISession: ObservableObject {
         RuneThemeHeadingInterpreter.reset()
         runtimeSettingsSnapshot = nil
         settingsRailState = .unavailable
+        runtimePresentationSettingsReady = false
+        contactsImportPrompted = false
+        splashLastShownAt = nil
+        cloudGameCenterStatus = nil
+        cloudGameCenterError = nil
         unlockFeedbackPreferences = .defaults
         activeReveal = nil
         progressionCommandError = nil
         selectedThemeRelicID = nil
         selectedThemeSealID = nil
+        selectedThemeFrameID = nil
         resetRevealPresentationState()
         lastError = nil
         importErrorMessage = nil
@@ -223,6 +245,7 @@ final class RuneScribeUISession: ObservableObject {
         progressionClientHandle = nil
         themeCoordinatorClientHandle = nil
         runtimeSettingsClientHandle = nil
+        cloudGameCenterStatusClientHandle = nil
         unlockFeedbackClientHandle = nil
         await resourcePresentation.close()
         await stateTask?.value
@@ -232,6 +255,71 @@ final class RuneScribeUISession: ObservableObject {
         await themeTask?.value
         await themeResourceTask?.value
         await settingsTask?.value
+        await cloudGameCenterStatusTask?.value
+    }
+
+    func requestGameCenterOptIn() async {
+        await submitGameCenterParticipation(.optIn)
+    }
+
+    func submitGameCenterParticipation(
+        _ intent: RuntimeGameCenterParticipationIntentDTO
+    ) async {
+        guard let cloudGameCenterStatusClientHandle else {
+            cloudGameCenterError = "Game Center is unavailable. Your local progress is unaffected."
+            return
+        }
+        do {
+            try await cloudGameCenterStatusClientHandle.submit(intent)
+            cloudGameCenterError = nil
+        } catch {
+            cloudGameCenterError = intent == .optIn
+                ? "Game Center could not connect. Your local progress is unaffected."
+                : "Game Center mirroring could not be stopped. Your local progress is unaffected."
+        }
+    }
+
+    func rebindCloudAccount() async {
+        guard let cloudGameCenterStatusClientHandle else {
+            cloudGameCenterError = "iCloud sync is unavailable. Your local progress is unaffected."
+            return
+        }
+        do {
+            try await cloudGameCenterStatusClientHandle.rebindCloudAccount()
+            cloudGameCenterError = nil
+        } catch {
+            cloudGameCenterError = "iCloud sync could not resume. Your local progress is unaffected."
+        }
+    }
+
+    private func startCloudGameCenterStatusObservation(generation: UInt64) {
+        guard let cloudGameCenterStatusClientHandle else { return }
+        cloudGameCenterStatusTask = Task {
+            @MainActor [weak self, cloudGameCenterStatusClientHandle] in
+            do {
+                let initial = try await cloudGameCenterStatusClientHandle.snapshot()
+                guard !Task.isCancelled,
+                      let self,
+                      observationGeneration == generation
+                else { return }
+                cloudGameCenterStatus = initial
+
+                let snapshots = try await cloudGameCenterStatusClientHandle.snapshots()
+                for await snapshot in snapshots {
+                    guard !Task.isCancelled,
+                          observationGeneration == generation
+                    else { return }
+                    cloudGameCenterStatus = snapshot
+                }
+            } catch {
+                guard !Task.isCancelled,
+                      let self,
+                      observationGeneration == generation
+                else { return }
+                cloudGameCenterError =
+                    "Cloud and Game Center status is unavailable. Your local progress is unaffected."
+            }
+        }
     }
 
     var isLoading: Bool {
@@ -242,7 +330,8 @@ final class RuneScribeUISession: ObservableObject {
         guard let snapshot else { return [] }
         let fonts = Dictionary(uniqueKeysWithValues: snapshot.fonts.map { ($0.id, $0) })
         return snapshot.cipherLibrary.ciphers.map { summary in
-            CipherViewState(
+            let font = fonts[summary.fontID]
+            return CipherViewState(
                 id: summary.id.rawValue,
                 label: summary.name,
                 origin: summary.origin,
@@ -251,8 +340,9 @@ final class RuneScribeUISession: ObservableObject {
                 contactID: summary.assignedContactID?.rawValue,
                 delivered: summary.hasBeenDelivered,
                 publicIdentifier: summary.publicIdentifier,
-                fontName: fonts[summary.fontID]?.displayName ?? "Noto Sans Runic",
-                fontSource: fonts[summary.fontID]?.source ?? .bundled
+                fontName: font?.displayName ?? "Noto Sans Runic",
+                fontSource: font?.source ?? .bundled,
+                fontIsRegistered: font?.isRegistered ?? false
             )
         }
     }
@@ -265,13 +355,15 @@ final class RuneScribeUISession: ObservableObject {
         ThemeScriptFontSelector.postScriptName(
             themePostScriptName: themeScriptPresentation.fontPostScriptName,
             cipherFontName: activeCipher?.fontName,
-            cipherFontSource: activeCipher?.fontSource
+            cipherFontSource: activeCipher?.fontSource,
+            cipherFontIsRegistered: activeCipher?.fontIsRegistered ?? false
         )
     }
 
     var inscriptionVectorDataByToken: [String: Data] {
         guard ThemeScriptFontSelector.usesThemeVectors(
-            cipherFontSource: activeCipher?.fontSource
+            cipherFontSource: activeCipher?.fontSource,
+            cipherFontIsRegistered: activeCipher?.fontIsRegistered ?? false
         ) else { return [:] }
         return themeScriptPresentation.vectorDataByToken
     }
@@ -303,7 +395,9 @@ final class RuneScribeUISession: ObservableObject {
     }
 
     var pendingMessage: PendingMessageViewState? {
-        snapshot?.messageState.pendingMessage.map(PendingMessageViewState.init)
+        snapshot?.messageState.pendingMessage.map {
+            PendingMessageViewState($0, themeSnapshot: themeSnapshot)
+        }
     }
 
     func ciphers(forContact contactID: UUID) -> [CipherViewState] {
@@ -358,8 +452,7 @@ final class RuneScribeUISession: ObservableObject {
         if let current = ciphers.first(where: { $0.id == summary.id.rawValue }) {
             return current
         }
-        let fontName = snapshot?.fonts.first(where: { $0.id == summary.fontID })?.displayName
-            ?? "Noto Sans Runic"
+        let font = snapshot?.fonts.first(where: { $0.id == summary.fontID })
         return CipherViewState(
             id: summary.id.rawValue,
             label: summary.name,
@@ -369,9 +462,9 @@ final class RuneScribeUISession: ObservableObject {
             contactID: summary.assignedContactID?.rawValue,
             delivered: summary.hasBeenDelivered,
             publicIdentifier: summary.publicIdentifier,
-            fontName: fontName,
-            fontSource: snapshot?.fonts.first(where: { $0.id == summary.fontID })?.source
-                ?? .bundled
+            fontName: font?.displayName ?? "Noto Sans Runic",
+            fontSource: font?.source ?? .bundled,
+            fontIsRegistered: font?.isRegistered ?? false
         )
     }
 
@@ -392,6 +485,16 @@ final class RuneScribeUISession: ObservableObject {
 
     func dismissLastError() {
         lastError = nil
+    }
+
+    func dismissOutboundSharePresentationStatus() {
+        outboundSharePresentationStatus = .idle
+    }
+
+    func recordOutboundSharePresentationStatus(
+        _ status: OutboundSharePresentationStatus
+    ) {
+        outboundSharePresentationStatus = status
     }
 
     func requireApplicationClient() throws -> RuntimeApplicationClient {
@@ -591,6 +694,7 @@ final class RuneScribeUISession: ObservableObject {
         guard let theme = themeSnapshot?.effectiveTheme else {
             selectedThemeRelicID = nil
             selectedThemeSealID = nil
+            selectedThemeFrameID = nil
             return
         }
         let codexID = theme.codex.id
@@ -598,33 +702,32 @@ final class RuneScribeUISession: ObservableObject {
             guard item.state == .owned, case .artifact(let id) = item.reference else { return nil }
             return id
         })
-        let relicPreference = Self.themeSelectionMap(
-            runtimeSettingsSnapshot?[RuneScribeRuntimeSettings.selectedRelicByCodex]?.textValue?.rawValue
-        )[codexID.rawValue]
-        let sealPreference = Self.themeSelectionMap(
-            runtimeSettingsSnapshot?[RuneScribeRuntimeSettings.selectedSealByCodex]?.textValue?.rawValue
-        )[codexID.rawValue]
+        let relicPreference = runtimeSettingsSnapshot?
+            .artifactSelections(for: .relic)[codexID]
+        let sealPreference = runtimeSettingsSnapshot?
+            .artifactSelections(for: .seal)[codexID]
+        let framePreference = runtimeSettingsSnapshot?
+            .artifactSelections(for: .frame)[codexID]
         let selectableRelics = theme.codex.relics.filter {
             $0.metadata.availability == .included || owned.contains($0.metadata.id)
         }
         let selectableSeals = theme.codex.seals.filter {
             $0.metadata.availability == .included || owned.contains($0.metadata.id)
         }
-        selectedThemeRelicID = relicPreference.flatMap(ArtifactID.init(rawValue:)).flatMap { preferred in
+        let selectableFrames = theme.codex.frames.filter {
+            ($0.metadata.availability == .included || owned.contains($0.metadata.id))
+                && $0.allowsStaticShare
+        }
+        selectedThemeRelicID = relicPreference.flatMap { preferred in
             selectableRelics.contains(where: { $0.metadata.id == preferred }) ? preferred : nil
         } ?? theme.codex.defaultRelicID
-        selectedThemeSealID = sealPreference.flatMap(ArtifactID.init(rawValue:)).flatMap { preferred in
+        selectedThemeSealID = sealPreference.flatMap { preferred in
             selectableSeals.contains(where: { $0.metadata.id == preferred }) ? preferred : nil
         } ?? selectableSeals.first?.metadata.id
-    }
-
-    static func themeSelectionMap(_ rawValue: String?) -> [String: String] {
-        guard let rawValue else { return [:] }
-        return rawValue.split(separator: ";").compactMap { entry -> (String, String)? in
-            let parts = entry.split(separator: "=", maxSplits: 1).map(String.init)
-            guard parts.count == 2, !parts[0].isEmpty, !parts[1].isEmpty else { return nil }
-            return (parts[0], parts[1])
-        }.reduce(into: [:]) { result, pair in result[pair.0] = pair.1 }
+        selectedThemeFrameID = framePreference.flatMap {
+            preferred in
+            selectableFrames.contains(where: { $0.metadata.id == preferred }) ? preferred : nil
+        }
     }
 
     private static func resolveThemeResources(

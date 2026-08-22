@@ -8,21 +8,32 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [1.0.38] - 2026-08-22
 
-- Add the Theme contract, runtime coordinator, and required Norse Base provider
-  while keeping production Elven series providers out of the shipping app.
-- Align the Core, Progression, and UI module descriptors, manifests, and pinned
-  resource hashes with version 1.0.38 build 38.
+- Complete the source-controlled roadmap program while retaining version 1.0.38 build
+  38 and a strict no-ship boundary.
+- Add the Moonleaf, Sunspire, Wildwood, and Gloamthorn production Theme providers from
+  the accepted v3.1 corpus: 56 logical resources and 184 hash-pinned shipping outputs.
+- Add runtime-persisted Codex/Relic/Seal/Frame defaults, deterministic 4:3 Artifact
+  rendering, themed vNext cipher/message files, legacy readers and fallbacks, safe
+  receiving, Encounter facts, and provenance state.
+- Add local-first private progression synchronization policy and runtime-owned
+  CloudKit transport, plus optional Game Center mapping/reporting with the frozen
+  15-achievement, 220-point catalog. Neither service can grant local ownership or
+  carry message/key material.
+- Harden typed-package allocation ordering, malformed-input coverage, imported-font
+  rendering, explicit key-delivery transitions, destination compatibility, privacy,
+  accessibility, resource budgets, placeholder checks, and architecture guards.
 - Complete and validate the corrected Elven Series v3.1 production package with 56
   logical resources, 184 shipping outputs, complete provenance, and deterministic
   regeneration. Recovery is PASS / CLOSED, the corrected v3.1 package is ACCEPTED,
   and all nine recovery findings continue to pass simultaneously. The
   outcome is PHASE C: PASS / MERGED TO MAIN via PR #45 at merge commit
   `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
-  Phase D is READY FOR AUTHORIZATION / NOT STARTED, and production Elven providers
-  remain outside the shipping app.
+  The roadmap-completion branch begins after that accepted Phase C history; it does not
+  rewrite or replace the Phase C evidence.
 - Align the version 1.0.38 build 38 README roadmap, architecture decisions, historical
-  verification banners, machine-readable status, and fail-closed documentation guards
-  with the merged Phase C boundary and owner-operated optional hardware observations.
+  verification boundary, 124-task machine-readable status, App Store/support sources,
+  and fail-closed documentation guards. Physical-device, live-service, signing,
+  archive/export, notarization, upload, rollout, and shipment remain owner work.
 
 ## [1.0.37] - 2026-08-14
 

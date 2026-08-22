@@ -141,9 +141,7 @@ public struct MessageComposeView: UIViewControllerRepresentable {
         case .presentComposer(let accepted):
             context.coordinator.requiredAttachmentAccepted = accepted
             if let attachment {
-                Task { @MainActor in
-                    try? await attachment.reportPresented(on: .messages)
-                }
+                attachment.beginReportingPresented(on: .messages)
             }
             return composer
         case .fail:

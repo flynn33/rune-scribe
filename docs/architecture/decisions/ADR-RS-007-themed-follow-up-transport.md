@@ -2,7 +2,7 @@
 
 **Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
 
-**Status:** Accepted; implementation deferred to Wave 4
+**Status:** Accepted; implemented for the source-complete Wave 4 path
 **Date:** 2026-08-09
 
 ## Decision
@@ -15,5 +15,7 @@ encrypted envelope and presentation metadata but does not resend the key.
 Manual **Copy Runes** remains a compatibility action. It is not the authoritative
 transport for a customized Artifact and does not promise Script portability.
 
-This decision does not change current outbound behavior while ADR-RS-005 remains
-legacy-only. It becomes active only with the reviewed Wave 4 rollout.
+ADR-RS-005 now authorizes this path. The UI freezes one runtime-persisted presentation
+selection for each operation; Core validates that bounded record and constructs the
+typed package. Terminal delivery evidence remains authoritative for progression, and
+the explicit no-presentation command path retains the legacy writer for rollback.

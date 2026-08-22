@@ -264,6 +264,8 @@ public struct ReceivedMessageDTO: Equatable, Sendable {
     public let senderName: String
     public let cipherID: CipherID
     public let cipherName: String
+    public let presentation: ReceivedSharePresentation?
+    public let safePreviewData: Data?
 
     public init(
         id: MessageID,
@@ -277,6 +279,32 @@ public struct ReceivedMessageDTO: Equatable, Sendable {
         self.senderName = senderName
         self.cipherID = cipherID
         self.cipherName = cipherName
+        presentation = nil
+        safePreviewData = nil
+    }
+
+    public init(
+        id: MessageID,
+        plaintext: String,
+        senderName: String,
+        cipherID: CipherID,
+        cipherName: String,
+        presentation: ReceivedSharePresentation?,
+        safePreviewData: Data?
+    ) throws {
+        guard safePreviewData.map({
+            $0.count <= Int(ShareSafePreviewMetadata.maximumByteLength)
+                && presentation?.safePreviewStatus == .valid
+        }) ?? true else {
+            throw SharePresentationContractError.invalidSafePreview
+        }
+        self.id = id
+        self.plaintext = plaintext
+        self.senderName = senderName
+        self.cipherID = cipherID
+        self.cipherName = cipherName
+        self.presentation = presentation
+        self.safePreviewData = safePreviewData
     }
 }
 
@@ -487,15 +515,18 @@ public struct PrepareCipherShareCommand: Codable, Equatable, Sendable {
     public let cipherID: CipherID
     public let displayName: String?
     public let representation: ShareRepresentationDTO
+    public let presentation: OutboundSharePresentationDTO?
 
     public init(
         cipherID: CipherID,
         displayName: String? = nil,
-        representation: ShareRepresentationDTO
+        representation: ShareRepresentationDTO,
+        presentation: OutboundSharePresentationDTO? = nil
     ) {
         self.cipherID = cipherID
         self.displayName = displayName
         self.representation = representation
+        self.presentation = presentation
     }
 }
 
@@ -504,17 +535,20 @@ public struct PrepareMessageShareCommand: Sendable {
     public let senderName: String
     public let cipherID: CipherID
     public let shareHandle: EncodedMessageHandle?
+    public let presentation: OutboundSharePresentationDTO?
 
     public init(
         runes: String,
         senderName: String,
         cipherID: CipherID,
-        shareHandle: EncodedMessageHandle? = nil
+        shareHandle: EncodedMessageHandle? = nil,
+        presentation: OutboundSharePresentationDTO? = nil
     ) {
         self.runes = runes
         self.senderName = senderName
         self.cipherID = cipherID
         self.shareHandle = shareHandle
+        self.presentation = presentation
     }
 }
 

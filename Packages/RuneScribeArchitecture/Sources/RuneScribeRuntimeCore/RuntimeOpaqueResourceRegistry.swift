@@ -767,6 +767,24 @@ actor RuntimeOpaqueResourceRegistry {
         else {
             throw RuntimeOpaqueResourceError.imageDimensionExceeded(declaration.resourceID)
         }
+        if declaration.mediaType == .heif || declaration.mediaType == .heic {
+            let candidates = Self.heifDimensionCandidates(data)
+            guard !candidates.isEmpty else {
+                throw RuntimeOpaqueResourceError.pixelSizeMismatch(declaration.resourceID)
+            }
+            guard candidates.allSatisfy({
+                $0.width <= budget.maximumImageDimension
+                    && $0.height <= budget.maximumImageDimension
+            }) else {
+                throw RuntimeOpaqueResourceError.imageDimensionExceeded(declaration.resourceID)
+            }
+            guard candidates.contains(where: {
+                $0.width == expected.width && $0.height == expected.height
+            }) else {
+                throw RuntimeOpaqueResourceError.pixelSizeMismatch(declaration.resourceID)
+            }
+            return
+        }
         guard let dimensions = Self.rasterDimensions(
             data,
             mediaType: declaration.mediaType
@@ -866,7 +884,7 @@ actor RuntimeOpaqueResourceRegistry {
             matches = pngDimensions(data) != nil
         case .heif, .heic:
             matches = isISOBaseMediaFile(data)
-                && heifDimensions(data) != nil
+                && !heifDimensionCandidates(data).isEmpty
         case .pdf:
             matches = isValidPDF(data)
         case .trueTypeFont:
@@ -1000,9 +1018,19 @@ actor RuntimeOpaqueResourceRegistry {
     }
 
     private static func heifDimensions(_ data: Data) -> (width: Int, height: Int)? {
-        guard isISOBaseMediaFile(data) else { return nil }
+        heifDimensionCandidates(data).first
+    }
+
+    /// HEIF containers may place auxiliary-image properties before the primary image.
+    /// Retain every structurally valid `ispe` candidate so validation can match the
+    /// descriptor's declared primary dimensions without accepting an arbitrary first box.
+    private static func heifDimensionCandidates(
+        _ data: Data
+    ) -> [(width: Int, height: Int)] {
+        guard isISOBaseMediaFile(data) else { return [] }
         let marker = Data("ispe".utf8)
         var searchStart = data.startIndex
+        var dimensions: [(width: Int, height: Int)] = []
         while searchStart < data.endIndex,
               let range = data.range(of: marker, in: searchStart ..< data.endIndex)
         {
@@ -1012,12 +1040,12 @@ actor RuntimeOpaqueResourceRegistry {
                 let width = readUInt32(data, at: typeOffset + 8)
                 let height = readUInt32(data, at: typeOffset + 12)
                 if boxSize >= 20, width > 0, height > 0 {
-                    return (width, height)
+                    dimensions.append((width, height))
                 }
             }
             searchStart = range.upperBound
         }
-        return nil
+        return dimensions
     }
 
     private static func pdfDimensions(_ data: Data) -> (width: Double, height: Double)? {

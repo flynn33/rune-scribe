@@ -29,6 +29,8 @@ public enum RuneScribeServiceIDs {
         clock,
         uuid,
         moduleStateStore,
+        cloudSyncTransport,
+        gameCenterReporting,
     ]
 }
 

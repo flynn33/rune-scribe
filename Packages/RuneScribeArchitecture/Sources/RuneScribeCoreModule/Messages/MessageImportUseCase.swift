@@ -25,7 +25,8 @@ enum MessageImportUseCase {
         admittedPackageToken: PackageToken?,
         progressionRoute: DomainEventRouteClass,
         embeddedCipherProgressionSeed: Data?,
-        relationshipProgressionSeed: Data?
+        relationshipProgressionSeed: Data?,
+        presentation: SharePresentationIntake = .absent
     ) async throws -> MessageImportMutation {
         let prepared: PreparedMessageCipher?
         let initialLibrary: CipherLibrary
@@ -70,7 +71,8 @@ enum MessageImportUseCase {
                 initialLibrary: initialLibrary,
                 repository: repository,
                 contactIntegration: contactIntegration,
-                runtimeIO: runtimeIO
+                runtimeIO: runtimeIO,
+                presentation: presentation
             )
         }
 
@@ -86,7 +88,8 @@ enum MessageImportUseCase {
             admittedPackageToken: admittedPackageToken,
             progressionRoute: progressionRoute,
             embeddedCipherProgressionSeed: embeddedCipherProgressionSeed,
-            relationshipProgressionSeed: relationshipProgressionSeed
+            relationshipProgressionSeed: relationshipProgressionSeed,
+            presentation: presentation
         )
     }
 
@@ -97,7 +100,8 @@ enum MessageImportUseCase {
         initialLibrary: CipherLibrary,
         repository: CipherRepository,
         contactIntegration: (any CoreMessageContactAssociating)?,
-        runtimeIO: RuntimeIOClient
+        runtimeIO: RuntimeIOClient,
+        presentation: SharePresentationIntake
     ) async throws -> MessageImportMutation {
         var durableCipher = decoded.cipher
         var library = initialLibrary
@@ -151,7 +155,9 @@ enum MessageImportUseCase {
                 payload: payload,
                 decoded: decoded,
                 cipher: durableCipher,
-                runtimeIO: runtimeIO
+                runtimeIO: runtimeIO,
+                presentation: presentation,
+                encounterRecordingStatus: .unavailable
             ),
             library: library
         )
@@ -169,7 +175,8 @@ enum MessageImportUseCase {
         admittedPackageToken: PackageToken?,
         progressionRoute: DomainEventRouteClass,
         embeddedCipherProgressionSeed: Data?,
-        relationshipProgressionSeed: Data?
+        relationshipProgressionSeed: Data?,
+        presentation: SharePresentationIntake
     ) async throws -> MessageImportMutation {
         let persistsPreparedCipher = prepared?.requiresPersistence == true
             && prepared?.cipher.id == decoded.cipher.id
@@ -225,18 +232,26 @@ enum MessageImportUseCase {
             && relationship?.bidirectionalEventCommitted == false
 
         var batches: [CorePendingProgressionBatch] = []
-        if let admittedPackageToken,
-           let context = try? await progression.issueContext(
-               for: .coreReconciliation
-           ) {
+        if let admittedPackageToken {
             do {
+                let context = try await progression.issueContext(
+                    for: .coreReconciliation
+                )
+                let projection = SharePresentationProgressionProjection.inbound(
+                    presentation
+                )
                 var facts = [try CoreProgressionFactFactory.messageDecoded(
                     packageToken: admittedPackageToken,
-                    relationshipToken: relationshipToken
+                    relationshipToken: relationshipToken,
+                    codexIDs: projection.codexIDs,
+                    artifactIDs: projection.artifactIDs,
+                    provenanceStatus: projection.provenanceStatus
                 )]
                 facts.append(try CoreProgressionFactFactory.presentationObserved(
                     packageToken: admittedPackageToken,
-                    codexIDs: [CoreProgressionFactFactory.implicitNorseCodexID]
+                    codexIDs: projection.codexIDs,
+                    artifactIDs: projection.artifactIDs,
+                    provenanceStatus: projection.provenanceStatus
                 ))
                 if persistsPreparedCipher,
                    let embeddedCipherProgressionSeed,
@@ -270,12 +285,18 @@ enum MessageImportUseCase {
                 batches
             )
             if retained != nil { _ = await progression.drain() }
+            let encounterRecordingStatus: ShareEncounterRecordingStatus =
+                presentation.metadata != nil && !batches.isEmpty && retained != nil
+                    ? .recorded
+                    : .unavailable
             return MessageImportMutation(
                 message: try await receivedMessage(
                     payload: payload,
                     decoded: decoded,
                     cipher: decoded.cipher,
-                    runtimeIO: runtimeIO
+                    runtimeIO: runtimeIO,
+                    presentation: presentation,
+                    encounterRecordingStatus: encounterRecordingStatus
                 ),
                 library: retained?.library ?? initialLibrary
             )
@@ -364,7 +385,12 @@ enum MessageImportUseCase {
                 payload: payload,
                 decoded: decoded,
                 cipher: committedCipher,
-                runtimeIO: runtimeIO
+                runtimeIO: runtimeIO,
+                presentation: presentation,
+                encounterRecordingStatus: presentation.metadata != nil
+                    && !batches.isEmpty
+                    ? .recorded
+                    : .unavailable
             ),
             library: committedLibrary
         )
@@ -374,14 +400,31 @@ enum MessageImportUseCase {
         payload: MessageSharePayload,
         decoded: (plaintext: String, cipher: Cipher),
         cipher: Cipher,
-        runtimeIO: RuntimeIOClient
+        runtimeIO: RuntimeIOClient,
+        presentation: SharePresentationIntake,
+        encounterRecordingStatus: ShareEncounterRecordingStatus
     ) async throws -> ReceivedMessageDTO {
-        ReceivedMessageDTO(
+        let receivedPresentation: ReceivedSharePresentation?
+        if let metadata = presentation.metadata {
+            receivedPresentation = try SharePresentationResolver.resolve(
+                metadata: metadata,
+                providerAvailability: metadata.selection.codexID
+                    == RuneScribeCodexIDs.norse ? .available : .unknown,
+                safePreviewStatus: presentation.safePreviewStatus,
+                provenanceStatus: presentation.provenanceStatus,
+                encounterRecordingStatus: encounterRecordingStatus
+            )
+        } else {
+            receivedPresentation = nil
+        }
+        return try ReceivedMessageDTO(
             id: MessageID(rawValue: try await runtimeIO.nextUUID()),
             plaintext: decoded.plaintext,
             senderName: payload.senderName,
             cipherID: CipherID(rawValue: cipher.id),
-            cipherName: cipher.label
+            cipherName: cipher.label,
+            presentation: receivedPresentation,
+            safePreviewData: presentation.safePreviewData
         )
     }
 }

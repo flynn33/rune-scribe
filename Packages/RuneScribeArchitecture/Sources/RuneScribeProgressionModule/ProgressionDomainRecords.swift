@@ -1,5 +1,6 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 
 enum ProgressionDomainError: Error, Equatable, Sendable {
     case invalidRecord(String)
@@ -300,7 +301,10 @@ struct DistinctTokenRecord: Codable, Equatable, Sendable {
     let statisticID: StatisticID
     let bucketID: CodexID?
     let tokenDigest: String
-    let canonicalToken: String
+    let canonicalToken: String?
+    let externalOpaqueTokenDigest: String?
+    let firstObservedAt: Date?
+    let sourceExternalMergeTransactionID: UUID?
     let firstAppliedRevision: UInt64
 
     init(
@@ -308,6 +312,7 @@ struct DistinctTokenRecord: Codable, Equatable, Sendable {
         statisticID: StatisticID,
         bucketID: CodexID?,
         canonicalToken: String,
+        firstObservedAt: Date? = nil,
         firstAppliedRevision: UInt64
     ) {
         schemaVersion = ProgressionRecordConstants.schemaVersion
@@ -316,14 +321,73 @@ struct DistinctTokenRecord: Codable, Equatable, Sendable {
         self.bucketID = bucketID
         tokenDigest = ProgressionDeterminism.digest128(canonicalToken)
         self.canonicalToken = canonicalToken
+        externalOpaqueTokenDigest = nil
+        self.firstObservedAt = firstObservedAt
+        sourceExternalMergeTransactionID = nil
         self.firstAppliedRevision = firstAppliedRevision
+    }
+
+    init(
+        generation: String,
+        statisticID: StatisticID,
+        bucketID: CodexID?,
+        externalOpaqueTokenDigest: String,
+        firstObservedAt: Date,
+        sourceExternalMergeTransactionID: UUID,
+        firstAppliedRevision: UInt64
+    ) {
+        schemaVersion = ProgressionRecordConstants.schemaVersion
+        self.generation = generation
+        self.statisticID = statisticID
+        self.bucketID = bucketID
+        tokenDigest = externalOpaqueTokenDigest
+        canonicalToken = nil
+        self.externalOpaqueTokenDigest = externalOpaqueTokenDigest
+        self.firstObservedAt = firstObservedAt
+        self.sourceExternalMergeTransactionID = sourceExternalMergeTransactionID
+        self.firstAppliedRevision = firstAppliedRevision
+    }
+
+    init(generation: String, copying record: DistinctTokenRecord) {
+        schemaVersion = ProgressionRecordConstants.schemaVersion
+        self.generation = generation
+        statisticID = record.statisticID
+        bucketID = record.bucketID
+        tokenDigest = record.tokenDigest
+        canonicalToken = record.canonicalToken
+        externalOpaqueTokenDigest = record.externalOpaqueTokenDigest
+        firstObservedAt = record.firstObservedAt
+        sourceExternalMergeTransactionID = record.sourceExternalMergeTransactionID
+        firstAppliedRevision = record.firstAppliedRevision
+    }
+
+    var cloudOpaqueTokenDigest: String {
+        externalOpaqueTokenDigest ?? RuntimeIntegrityDigest.sha256Hex(
+            Data("progression-distinct|\(tokenDigest)".utf8)
+        )
     }
 
     func validate() throws {
         try validateGeneration(schemaVersion, generation)
-        guard !canonicalToken.isEmpty,
-              canonicalToken.utf8.count <= 256,
-              tokenDigest == ProgressionDeterminism.digest128(canonicalToken),
+        let isLocal: Bool
+        if let canonicalToken {
+            isLocal = !canonicalToken.isEmpty &&
+                canonicalToken.utf8.count <= 256 &&
+                tokenDigest == ProgressionDeterminism.digest128(canonicalToken) &&
+                externalOpaqueTokenDigest == nil &&
+                sourceExternalMergeTransactionID == nil
+        } else {
+            isLocal = false
+        }
+        let isExternal = canonicalToken == nil &&
+            externalOpaqueTokenDigest == tokenDigest &&
+            sourceExternalMergeTransactionID != nil &&
+            tokenDigest.utf8.count == 64 &&
+            tokenDigest.utf8.allSatisfy({ byte in
+                (48 ... 57).contains(byte) || (97 ... 102).contains(byte)
+            })
+        guard (isLocal || isExternal),
+              firstObservedAt.map(isFinite) ?? true,
               firstAppliedRevision > 0
         else { throw ProgressionDomainError.invalidRecord("distinct-token") }
     }
@@ -390,6 +454,7 @@ struct AchievementCompletionRecord: Codable, Equatable, Sendable {
     let completedAt: Date
     let sourceEventID: EventID?
     let sourceExistingUserMigrationTransactionID: UUID?
+    let sourceExternalMergeTransactionID: UUID?
 
     init(
         generation: String,
@@ -403,6 +468,7 @@ struct AchievementCompletionRecord: Codable, Equatable, Sendable {
         self.completedAt = completedAt
         self.sourceEventID = sourceEventID
         sourceExistingUserMigrationTransactionID = nil
+        sourceExternalMergeTransactionID = nil
     }
 
     init(
@@ -418,13 +484,51 @@ struct AchievementCompletionRecord: Codable, Equatable, Sendable {
         sourceEventID = nil
         self.sourceExistingUserMigrationTransactionID =
             sourceExistingUserMigrationTransactionID
+        sourceExternalMergeTransactionID = nil
+    }
+
+    init(
+        generation: String,
+        achievementID: AchievementID,
+        completedAt: Date,
+        sourceExternalMergeTransactionID: UUID
+    ) {
+        schemaVersion = ProgressionRecordConstants.schemaVersion
+        self.generation = generation
+        self.achievementID = achievementID
+        self.completedAt = completedAt
+        sourceEventID = nil
+        sourceExistingUserMigrationTransactionID = nil
+        self.sourceExternalMergeTransactionID = sourceExternalMergeTransactionID
+    }
+
+    init(
+        generation: String,
+        preservingProvenance record: AchievementCompletionRecord,
+        completedAt: Date,
+        sourceExternalMergeTransactionID: UUID
+    ) {
+        schemaVersion = ProgressionRecordConstants.schemaVersion
+        self.generation = generation
+        achievementID = record.achievementID
+        self.completedAt = completedAt
+        sourceEventID = record.sourceEventID
+        sourceExistingUserMigrationTransactionID =
+            record.sourceExistingUserMigrationTransactionID
+        self.sourceExternalMergeTransactionID = sourceExternalMergeTransactionID
     }
 
     func validate() throws {
         try validateGeneration(schemaVersion, generation)
+        let authoritativeOriginCount = [
+            sourceEventID != nil,
+            sourceExistingUserMigrationTransactionID != nil,
+        ].filter { $0 }.count
         guard isFinite(completedAt),
-              (sourceEventID == nil) !=
-                (sourceExistingUserMigrationTransactionID == nil)
+              authoritativeOriginCount == 1 || (
+                authoritativeOriginCount == 0 &&
+                    sourceExternalMergeTransactionID != nil
+              )
         else {
             throw ProgressionDomainError.invalidRecord("achievement-completion")
         }
@@ -436,7 +540,8 @@ struct MilestoneCompletionRecord: Codable, Equatable, Sendable {
     let generation: String
     let ruleID: RuleID
     let completedAt: Date
-    let sourceEventID: EventID
+    let sourceEventID: EventID?
+    let sourceExternalMergeTransactionID: UUID?
 
     init(generation: String, ruleID: RuleID, completedAt: Date, sourceEventID: EventID) {
         schemaVersion = ProgressionRecordConstants.schemaVersion
@@ -444,11 +549,42 @@ struct MilestoneCompletionRecord: Codable, Equatable, Sendable {
         self.ruleID = ruleID
         self.completedAt = completedAt
         self.sourceEventID = sourceEventID
+        sourceExternalMergeTransactionID = nil
+    }
+
+    init(
+        generation: String,
+        ruleID: RuleID,
+        completedAt: Date,
+        sourceExternalMergeTransactionID: UUID
+    ) {
+        schemaVersion = ProgressionRecordConstants.schemaVersion
+        self.generation = generation
+        self.ruleID = ruleID
+        self.completedAt = completedAt
+        sourceEventID = nil
+        self.sourceExternalMergeTransactionID = sourceExternalMergeTransactionID
+    }
+
+    init(
+        generation: String,
+        preservingProvenance record: MilestoneCompletionRecord,
+        completedAt: Date,
+        sourceExternalMergeTransactionID: UUID
+    ) {
+        schemaVersion = ProgressionRecordConstants.schemaVersion
+        self.generation = generation
+        ruleID = record.ruleID
+        self.completedAt = completedAt
+        sourceEventID = record.sourceEventID
+        self.sourceExternalMergeTransactionID = sourceExternalMergeTransactionID
     }
 
     func validate() throws {
         try validateGeneration(schemaVersion, generation)
-        guard isFinite(completedAt) else {
+        guard isFinite(completedAt),
+              sourceEventID != nil || sourceExternalMergeTransactionID != nil
+        else {
             throw ProgressionDomainError.invalidRecord("milestone-completion")
         }
     }
@@ -494,6 +630,16 @@ struct GrantRecord: Codable, Equatable, Sendable {
         self.grantedAt = grantedAt
     }
 
+    init(generation: String, copying record: GrantRecord, grantedAt: Date?) {
+        schemaVersion = ProgressionRecordConstants.schemaVersion
+        self.generation = generation
+        grantGroupID = record.grantGroupID
+        contentID = record.contentID
+        source = record.source
+        transactionID = record.transactionID
+        self.grantedAt = grantedAt
+    }
+
     func validate() throws {
         try validateGeneration(schemaVersion, generation)
         let permitsRuntimeOwnedBootstrapTime: Bool
@@ -525,6 +671,14 @@ struct OwnershipRecord: Codable, Equatable, Sendable {
         self.generation = generation
         self.contentID = contentID
         self.sourceGrantKeys = sourceGrantKeys.sorted()
+        self.grantedAt = grantedAt
+    }
+
+    init(generation: String, copying record: OwnershipRecord, grantedAt: Date?) {
+        schemaVersion = ProgressionRecordConstants.schemaVersion
+        self.generation = generation
+        contentID = record.contentID
+        sourceGrantKeys = record.sourceGrantKeys
         self.grantedAt = grantedAt
     }
 
@@ -568,6 +722,19 @@ struct ProgressionEntitlementRecord: Codable, Equatable, Sendable {
         self.entitlementID = entitlementID
         self.contentID = contentID
         self.source = source
+        self.grantedAt = grantedAt
+    }
+
+    init(
+        generation: String,
+        copying record: ProgressionEntitlementRecord,
+        grantedAt: Date?
+    ) {
+        schemaVersion = ProgressionRecordConstants.schemaVersion
+        self.generation = generation
+        entitlementID = record.entitlementID
+        contentID = record.contentID
+        source = record.source
         self.grantedAt = grantedAt
     }
 
@@ -689,7 +856,9 @@ struct TitleSelectionRecord: Codable, Equatable, Sendable {
 
     func validate() throws {
         try validateGeneration(schemaVersion, generation)
-        guard (selectedTitleID == nil) == (selectedAt == nil), isFinite(selectedAt) else {
+        guard selectedTitleID == nil || selectedAt != nil,
+              isFinite(selectedAt)
+        else {
             throw ProgressionDomainError.invalidRecord("title-selection")
         }
     }
@@ -1465,6 +1634,12 @@ private func isFinite(_ date: Date?) -> Bool {
 func existingUserMigrationGrantTransactionID(_ transactionID: UUID) -> GrantTransactionID {
     GrantTransactionID(
         rawValue: "transaction.existing-user-migration.\(transactionID.uuidString.lowercased())"
+    )!
+}
+
+func externalMergeGrantTransactionID(_ transactionID: UUID) -> GrantTransactionID {
+    GrantTransactionID(
+        rawValue: "transaction.external-merge.\(transactionID.uuidString.lowercased())"
     )!
 }
 

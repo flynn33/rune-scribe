@@ -48,14 +48,11 @@ struct RootView: View {
     /// Created once with the process-owned session, so a background/foreground
     /// transition never re-evaluates the cold-launch splash schedule.
     @State private var showSplash: Bool
+    @State private var didEvaluateColdLaunchSplash = false
 
     init(session: RuneScribeUISession) {
         self.session = session
-        _showSplash = State(
-            initialValue: RuntimeSplashSchedule.shouldShow(
-                resourceAvailable: session.resourcePresentation.hasSplashVideo
-            )
-        )
+        _showSplash = State(initialValue: false)
     }
 
     private var revealIsBlockedAtRoot: Bool {
@@ -90,8 +87,9 @@ struct RootView: View {
 
             if showSplash {
                 session.resourcePresentation.makeSplashView {
-                    RuntimeSplashSchedule.markShown()
+                    let shownAt = Date()
                     withAnimation(.easeInOut(duration: 0.45)) { showSplash = false }
+                    Task { await session.markSplashShown(at: shownAt) }
                 }
                 .transition(.opacity)
                 .zIndex(2)
@@ -99,6 +97,9 @@ struct RootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: session.isLocked)
+        .onChange(of: session.runtimePresentationSettingsReady, initial: true) { _, _ in
+            evaluateColdLaunchSplashIfReady()
+        }
         .onChange(of: revealIsBlockedAtRoot, initial: true) { _, isBlocked in
             session.setRevealBlocker(.rootPresentation, active: isBlocked)
         }
@@ -179,10 +180,37 @@ struct RootView: View {
         } message: {
             Text(session.lastError ?? "")
         }
+        .alert("Standard Share Appearance Used", isPresented: Binding(
+            get: {
+                session.outboundSharePresentationStatus.userVisibleMessage != nil
+                    && session.lastError == nil
+                    && session.importErrorMessage == nil
+                    && session.messageErrorMessage == nil
+                    && !session.isLocked
+                    && !showSplash
+            },
+            set: { if !$0 { session.dismissOutboundSharePresentationStatus() } }
+        )) {
+            Button("OK") { session.dismissOutboundSharePresentationStatus() }
+        } message: {
+            Text(session.outboundSharePresentationStatus.userVisibleMessage ?? "")
+        }
         .environmentObject(session)
         .environment(
             \.runtimeApplicationResourcePresentation,
             session.resourcePresentation
+        )
+    }
+
+    private func evaluateColdLaunchSplashIfReady() {
+        guard session.runtimePresentationSettingsReady,
+              !didEvaluateColdLaunchSplash
+        else { return }
+        didEvaluateColdLaunchSplash = true
+        showSplash = RuntimeSplashSchedule.shouldShow(
+            resourceAvailable: session.resourcePresentation.hasSplashVideo,
+            now: Date(),
+            lastShownAt: session.splashLastShownAt
         )
     }
 

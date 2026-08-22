@@ -43,6 +43,7 @@ public struct ModuleContext: Sendable {
     private let unlockFeedbackGateway: RuntimeUnlockFeedbackGateway
     private let progressionOutbox: RuntimeProgressionOutbox
     private let existingUserMigrationHandoff: RuntimeExistingUserMigrationHandoff
+    private let cloudGameCenterCoordinator: RuntimeCloudGameCenterCoordinator
     private let rootPresentationGateway: RuntimeRootPresentationGateway
     private let rootPresentationGeneration: UInt64
     private let contributionRegistry: RuntimeContributionRegistry
@@ -69,6 +70,7 @@ public struct ModuleContext: Sendable {
         unlockFeedbackGateway: RuntimeUnlockFeedbackGateway,
         progressionOutbox: RuntimeProgressionOutbox,
         existingUserMigrationHandoff: RuntimeExistingUserMigrationHandoff,
+        cloudGameCenterCoordinator: RuntimeCloudGameCenterCoordinator,
         rootPresentationGateway: RuntimeRootPresentationGateway,
         rootPresentationGeneration: UInt64,
         contributionRegistry: RuntimeContributionRegistry,
@@ -98,6 +100,7 @@ public struct ModuleContext: Sendable {
         self.unlockFeedbackGateway = unlockFeedbackGateway
         self.progressionOutbox = progressionOutbox
         self.existingUserMigrationHandoff = existingUserMigrationHandoff
+        self.cloudGameCenterCoordinator = cloudGameCenterCoordinator
         self.rootPresentationGateway = rootPresentationGateway
         self.rootPresentationGeneration = rootPresentationGeneration
         self.contributionRegistry = contributionRegistry
@@ -260,6 +263,26 @@ public struct ModuleContext: Sendable {
         )
     }
 
+    /// Reserved for the built-in Progression service. The returned value exposes
+    /// no platform transport and cannot be used to grant Progression state.
+    public func progressionExternalSyncClient() async throws
+        -> RuntimeProgressionExternalSyncClient
+    {
+        try await lease.requireActive()
+        guard moduleID == RuneScribeModuleIDs.progression,
+              role == RuneScribeRoles.progression
+        else {
+            throw RuneScribeRuntimeError.capabilityDenied(
+                moduleID: moduleID,
+                capability: RuneScribeCapabilities.cloudSync
+            )
+        }
+        return RuntimeProgressionExternalSyncClient(
+            coordinator: cloudGameCenterCoordinator,
+            lease: lease
+        )
+    }
+
     public func existingUserMigrationClient() async throws
         -> RuntimeExistingUserMigrationClient
     {
@@ -280,6 +303,30 @@ public struct ModuleContext: Sendable {
             lease: lease,
             includesThemeProviders: policyClass
                 == RuneScribePolicyClasses.themeCoordinator
+        )
+    }
+
+    public func cloudGameCenterStatusClient() async throws
+        -> RuntimeCloudGameCenterStatusClient
+    {
+        try await requireCapability(RuneScribeCapabilities.cloudGameCenterStatusRead)
+        let canManageGameCenterParticipation = descriptor.requestedCapabilities.contains(
+            RuneScribeCapabilities.gameCenterOptIn
+        ) && policy.capabilities.allows(
+            RuneScribeCapabilities.gameCenterOptIn,
+            for: descriptor.policyClass
+        )
+        let canRebindCloudAccount = descriptor.requestedCapabilities.contains(
+            RuneScribeCapabilities.cloudAccountRebind
+        ) && policy.capabilities.allows(
+            RuneScribeCapabilities.cloudAccountRebind,
+            for: descriptor.policyClass
+        )
+        return RuntimeCloudGameCenterStatusClient(
+            coordinator: cloudGameCenterCoordinator,
+            lease: lease,
+            canManageGameCenterParticipation: canManageGameCenterParticipation,
+            canRebindCloudAccount: canRebindCloudAccount
         )
     }
 

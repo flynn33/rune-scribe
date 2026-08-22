@@ -2,16 +2,17 @@
 
 **Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
 
-**Status:** Accepted; local implementation completed in 1.0.37, cloud deferred
+**Status:** Accepted; local-first persistence and private-cloud policy implemented
 **Date:** 2026-08-09
 
 ## Decision
 
 Progression is a local-first service-module responsibility behind a neutral repository
 contract. The first implementation uses the runtime-owned protected SQLite module-state
-adapter; tests use an in-memory adapter through the same contract. Private CloudKit
-mirroring may be considered only in Wave 5A, after the local event, deduplication,
-transaction, migration, and quarantine contracts are stable.
+adapter; tests use an in-memory adapter through the same contract. The Wave 5A
+implementation adds a runtime-owned private CloudKit transport, bounded logical cloud
+records, deterministic merge policy, offline queue, account-generation isolation, and
+quarantine while leaving the local validated store authoritative.
 
 The local schema contains versioned event/deduplication records, per-device statistic
 shards, distinct-token sets, Achievement progress/completion, ownership grants,
@@ -21,8 +22,8 @@ uniqueness keys. One transaction records an eligible event, updates derived stat
 completes any matching Achievement or milestone, and grants its Codex, Artifact, or
 Title reward.
 
-The future private-cloud mapping mirrors those logical record classes rather than the
-local SQLite layout. Merge is set union for completions, grants, ownership, and tokens;
+The private-cloud mapping mirrors those logical record classes rather than the local
+SQLite layout. Merge is set union for completions, grants, ownership, and tokens;
 earliest valid date for first completion/grant; earliest and latest dates for
 Encounters; maximum per device shard; maximum per Achievement for pending reports; and
 logical last-write-wins with availability fallback for selection. Local load results
@@ -35,8 +36,8 @@ categories, and future sync metadata. It must never contain cipher keys, cipher 
 plaintext, contact identity, PIN material, or message contents.
 
 Migrations are explicit, version-stepped, idempotent, and preserve the pre-migration
-store until validation succeeds. Reset remains unavailable until a synchronized
-reset-generation or tombstone design is accepted.
+store until validation succeeds. Reset is deliberately unavailable in schema version
+1; generation values other than zero are rejected and mutation-tested.
 
 The implemented SQLite adapter is intentionally generic and runtime-owned. It provides
 protected local storage, atomic bounded transactions, paged scans, integrity digests,
@@ -50,7 +51,10 @@ JSON files or a module-owned database would violate the runtime boundary.
   Center.
 - Replayed events are harmless and interrupted transactions cannot split completion
   from its grant.
-- Cloud configuration cannot be used to bypass Wave 3 persistence tests.
+- Missing, denied, offline, changing, or corrupt cloud state cannot bypass local
+  persistence or revoke an earned grant.
+- Source entitlements declare the deterministic private container, while account,
+  container, and production provisioning remain owner pre-ship work.
 
 ## Implementation note
 

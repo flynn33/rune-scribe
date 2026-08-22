@@ -1,0 +1,335 @@
+{
+  "schemaVersion": "1.0",
+  "policyProfile": "forsetti-pattern-b-standalone",
+  "runtimeVersion": "1.0.0",
+  "moduleID": "com.runescribe.module.theme.moonleaf",
+  "displayName": "Rune Scribe Moonleaf Codex Theme",
+  "moduleVersion": "1.0.0",
+  "moduleType": "service",
+  "criticality": "optional",
+  "supportedPlatforms": [
+    "iOS",
+    "macOS"
+  ],
+  "minimumOS": {
+    "iOS": "17.0",
+    "macOS": "15.0"
+  },
+  "capabilitiesRequested": [
+    "resources.read",
+    "runtime.contributions.publish",
+    "runtime.resources.opaque.publish"
+  ],
+  "entryPoint": "RuneScribeThemeMoonleafModule",
+  "runtimeRequirements": {
+    "requiredServices": [
+      "ApplicationResourceLocator"
+    ],
+    "requiredResources": [
+      {
+        "name": "module-manifest",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "Resource-Integrity-Manifest-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-background-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-background-reduce-motion",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-background-static",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-moonbloom-static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-moonbloom-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-moonbloom-vector",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-silvervine-static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-silvervine-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-silvervine-vector",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-ivybound-plaque-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-ivybound-plaque-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-ivybound-plaque-static-share-fallback",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-ivybound-plaque-thumbnail",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-tablet-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-tablet-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-tablet-static-share-fallback",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-tablet-thumbnail",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-whisperbark-stele-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-whisperbark-stele-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-whisperbark-stele-static-share-fallback",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-whisperbark-stele-thumbnail",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-script-primary",
+        "fileExtension": "ttf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-script-specimen",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-script-static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-crescentleaf-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-crescentleaf-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-crescentleaf-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-echo-firefly-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-echo-firefly-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-echo-firefly-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-moonwell-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-moonwell-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-moonwell-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-night-owl-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-night-owl-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-night-owl-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-starflower-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-starflower-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-starflower-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-woodland-stag-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-woodland-stag-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-woodland-stag-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-vault-card",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-vault-encountered",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-vault-locked",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-vault-selected",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      }
+    ],
+    "requiredModuleRoles": [
+
+    ]
+  },
+  "defaultRole": "runescribe.theme.moonleaf",
+  "policyClass": "policy.theme-provider",
+  "consumedEndpoints": [
+
+  ],
+  "publishedEndpoints": [
+
+  ],
+  "entitlementRequirement": {
+    "kind": "earned",
+    "identifier": "unlock.codex.moonleaf"
+  },
+  "diagnosticsVisibleInProduction": false
+}

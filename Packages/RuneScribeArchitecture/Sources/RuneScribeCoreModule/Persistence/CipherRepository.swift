@@ -526,7 +526,7 @@ actor CipherRepository {
 
     /// Idempotently records successful first-delivery handoff without changing
     /// the key, contact association, active selection, or any other cipher.
-    func markDelivered(cipherID: UUID) async throws -> CipherRepositoryMutation<Bool> {
+    func completeKeyDelivery(cipherID: UUID) async throws -> CipherRepositoryMutation<Bool> {
         await acquireMutationPermit()
         defer { releaseMutationPermit() }
 
@@ -534,10 +534,10 @@ actor CipherRepository {
         guard let cipher = current.ciphers.first(where: { $0.id == cipherID }) else {
             return CipherRepositoryMutation(value: false, library: current)
         }
-        guard !cipher.delivered else {
+        guard !cipher.hasCompletedKeyDelivery else {
             return CipherRepositoryMutation(value: true, library: current)
         }
-        var candidate = current.markingDelivered(cipherID: cipherID)
+        var candidate = current.completingKeyDelivery(cipherID: cipherID)
         if current.version == CipherLibrary.currentVersion,
            let contactID = cipher.contactID {
             var ledger = try Self.progressionLedger(in: current)

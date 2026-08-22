@@ -6,6 +6,120 @@ import Foundation
 import XCTest
 
 final class CoreApplicationProgressionIntegrationTests: XCTestCase {
+    func testRuntimeAwareCompletionRejectsEvidenceFreeKeyDeliveryArtifact() async throws {
+        let harness = CoreProgressionHarness()
+        let outbox = CoreIntegrationOutbox()
+        let service = harness.service(outbox: outbox)
+        await service.startInboundProcessing()
+        let cipherID = try await Self.firstCipherID(from: service)
+        try await service.assignContact(
+            AssignContactCommand(
+                cipherID: cipherID,
+                contactID: ContactID(rawValue: UUID(
+                    uuidString: "A0000000-0000-0000-0000-000000000201"
+                )!)
+            ),
+            context: try Self.context(201)
+        )
+        let encoded = try await service.encode(
+            EncodeMessageCommand(plaintext: "authority required", cipherID: cipherID),
+            context: try Self.context(202)
+        )
+        let artifact = try await service.prepareMessageShare(
+            PrepareMessageShareCommand(
+                runes: encoded.runes,
+                senderName: "Sender",
+                cipherID: cipherID,
+                shareHandle: try XCTUnwrap(encoded.shareHandle)
+            ),
+            context: try Self.context(203)
+        )
+        XCTAssertTrue(artifact.requiresKeyDelivery)
+
+        do {
+            _ = try await service.completeShareArtifact(
+                CompleteShareArtifactCommand(
+                    artifactID: artifact.id,
+                    outcome: .handedOff
+                ),
+                context: try Self.context(204)
+            )
+            XCTFail("Runtime-aware completion must require Runtime-minted evidence")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeProductError,
+                .failure(RuneScribeFailureDTO(code: .invalidInput))
+            )
+        }
+
+        let retainedArtifactCount = await harness.artifacts.count()
+        XCTAssertEqual(retainedArtifactCount, 1)
+        let library = try await CipherRepository(runtimeIO: harness.runtimeIO).snapshot()
+        XCTAssertTrue(try XCTUnwrap(library.ciphers.first {
+            $0.id == cipherID.rawValue
+        }).keyDeliveryState.requiresDelivery)
+    }
+
+    func testFirstDeliveryAllowsOnlyOneLiveKeyBearingArtifactPerCipher() async throws {
+        let harness = CoreProgressionHarness()
+        let outbox = CoreIntegrationOutbox()
+        let service = harness.service(outbox: outbox)
+        await service.startInboundProcessing()
+        let cipherID = try await Self.firstCipherID(from: service)
+        try await service.assignContact(
+            AssignContactCommand(
+                cipherID: cipherID,
+                contactID: ContactID(rawValue: UUID(
+                    uuidString: "A0000000-0000-0000-0000-000000000211"
+                )!)
+            ),
+            context: try Self.context(211)
+        )
+        let encoded = try await service.encode(
+            EncodeMessageCommand(plaintext: "one delivery", cipherID: cipherID),
+            context: try Self.context(212)
+        )
+        let command = PrepareMessageShareCommand(
+            runes: encoded.runes,
+            senderName: "Sender",
+            cipherID: cipherID,
+            shareHandle: try XCTUnwrap(encoded.shareHandle)
+        )
+        let first = try await service.prepareMessageShare(
+            command,
+            context: try Self.context(213)
+        )
+        XCTAssertTrue(first.requiresKeyDelivery)
+
+        do {
+            _ = try await service.prepareMessageShare(
+                command,
+                context: try Self.context(214)
+            )
+            XCTFail("A live first-delivery artifact must block a sibling")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeProductError,
+                .failure(RuneScribeFailureDTO(code: .invalidInput))
+            )
+        }
+        var activeArtifactCount = await harness.artifacts.count()
+        XCTAssertEqual(activeArtifactCount, 1)
+
+        await service.releaseShareArtifact(
+            id: first.id,
+            context: try Self.context(215)
+        )
+        let replacement = try await service.prepareMessageShare(
+            command,
+            context: try Self.context(216)
+        )
+        XCTAssertTrue(replacement.requiresKeyDelivery)
+        XCTAssertNotEqual(replacement.id, first.id)
+        activeArtifactCount = await harness.artifacts.count()
+        XCTAssertEqual(activeArtifactCount, 1)
+    }
+
     func testOperationAwareCreateAndEncodeCommitExactFactsAndDurableHandle() async throws {
         let harness = CoreProgressionHarness()
         let outbox = CoreIntegrationOutbox()
@@ -343,16 +457,20 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         XCTAssertEqual(artifactCount, 0)
 
         await harness.secure.failCipherLibraryWrite(afterSuccessfulWrites: 0)
-        let sibling = try await service.prepareMessageShare(
-            command,
-            context: try Self.context(55)
-        )
+        do {
+            _ = try await service.prepareMessageShare(
+                command,
+                context: try Self.context(55)
+            )
+            XCTFail("A delivery-eligible retained terminal must block a sibling key artifact")
+        } catch {
+            XCTAssertEqual(
+                error as? RuneScribeProductError,
+                .failure(RuneScribeFailureDTO(code: .invalidInput))
+            )
+        }
         artifactCount = await harness.artifacts.count()
-        XCTAssertEqual(artifactCount, 1)
-        await service.releaseShareArtifact(
-            id: sibling.id,
-            context: try Self.context(56)
-        )
+        XCTAssertEqual(artifactCount, 0)
 
         let recovered = try await service.prepareMessageShare(
             command,
@@ -487,6 +605,93 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         )
         let prepared = try XCTUnwrap(loadedPrepared)
         XCTAssertNil(prepared.terminalEvidence)
+    }
+
+    func testPendingTerminalCleanupFailureIsObservableAndRetried() async throws {
+        let harness = CoreProgressionHarness()
+        let outbox = CoreIntegrationOutbox()
+        let service = harness.service(outbox: outbox)
+        await service.startInboundProcessing()
+        let cipherID = try await Self.firstCipherID(from: service)
+        try await service.assignContact(
+            AssignContactCommand(
+                cipherID: cipherID,
+                contactID: ContactID(rawValue: UUID(
+                    uuidString: "A0000000-0000-0000-0000-000000000085"
+                )!)
+            ),
+            context: try Self.context(85)
+        )
+        let encoded = try await service.encode(
+            EncodeMessageCommand(
+                plaintext: "observable terminal retry",
+                cipherID: cipherID
+            ),
+            context: try Self.context(86)
+        )
+        let command = PrepareMessageShareCommand(
+            runes: encoded.runes,
+            senderName: "Sender",
+            cipherID: cipherID,
+            shareHandle: try XCTUnwrap(encoded.shareHandle)
+        )
+        let artifact = try await service.prepareMessageShare(
+            command,
+            context: try Self.context(87)
+        )
+        let evidence = try ShareArtifactCompletionEvidenceDTO(
+            artifactID: artifact.id,
+            report: SharePresentationReportDTO(
+                routeClass: .messages,
+                result: .sentConfirmed,
+                requiredAttachmentAccepted: true
+            ),
+            operationContext: try Self.context(88)
+        )
+
+        // The terminal intent and planned disposition commit first. Core then
+        // fails its transaction, and the best-effort physical-release journal
+        // update fails once. The retained result must also publish typed state.
+        await harness.secure.failCipherLibraryWrite(afterSuccessfulWrites: 0)
+        await harness.protected.failWrite(afterSuccessfulWrites: 2)
+        let retained = try await service.completeShareArtifact(
+            CompleteShareArtifactCommand(evidence: evidence),
+            context: try Self.context(89)
+        )
+        XCTAssertEqual(retained, .retainedForRetry)
+        var iterator = service.stateStream().makeAsyncIterator()
+        let failedValue = await iterator.next()
+        let failed = try XCTUnwrap(failedValue)
+        XCTAssertEqual(failed.lastFailure?.code, .shareUnavailable)
+
+        // A lifecycle retry that fails again must not discard its error or
+        // clear the typed failure while the exact terminal remains pending.
+        await harness.secure.failCipherLibraryWrite(afterSuccessfulWrites: 0)
+        await service.stopInboundProcessing()
+        var stoppedIterator = service.stateStream().makeAsyncIterator()
+        let stoppedValue = await stoppedIterator.next()
+        let stopped = try XCTUnwrap(stoppedValue)
+        XCTAssertEqual(stopped.lastFailure?.code, .shareUnavailable)
+
+        // The next activation retries the durable terminal before sharing is
+        // enabled. The one-shot failures have cleared, so the original terminal
+        // completes and only then may a replacement artifact be issued.
+        await service.startInboundProcessing()
+        let replacement = try await service.prepareMessageShare(
+            command,
+            context: try Self.context(90)
+        )
+        XCTAssertNotEqual(replacement.id, artifact.id)
+        let registry = ShareArtifactRegistry(runtimeIO: harness.runtimeIO)
+        let pendingIntents = try await registry.terminalIntents()
+        XCTAssertTrue(pendingIntents.isEmpty)
+        let facts = await outbox.facts()
+        XCTAssertEqual(facts.filter {
+            $0.eventType.rawValue == "runescribe.share.completed"
+        }.count, 1)
+        XCTAssertEqual(facts.filter {
+            $0.eventType.rawValue == "runescribe.cipher.first-delivery-completed"
+        }.count, 1)
     }
 
     func testRelaunchReplaysDurableTerminalAfterCoreCommitFailureExactlyOnce() async throws {
@@ -657,6 +862,10 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         let lowerArtifactID = try await service.prepareMessageShare(
             command,
             context: try Self.context(112)
+        )
+        await service.releaseShareArtifact(
+            id: lowerArtifactID.id,
+            context: try Self.context(112_500)
         )
         let higherArtifactID = try await service.prepareMessageShare(
             command,
@@ -1275,6 +1484,185 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             facts[2].payload.codexIDs,
             [CoreProgressionFactFactory.implicitNorseCodexID]
         )
+    }
+
+    func testThemedInboundCommitsSelectedEncounterFactsToExistingOutbox() async throws {
+        let harness = CoreProgressionHarness()
+        let outbox = CoreIntegrationOutbox()
+        let service = harness.service(outbox: outbox)
+        await service.startInboundProcessing()
+        let senderCipher = Cipher.generated(label: "Themed Sender")
+        let payload = MessageSharePayload(
+            senderName: "Themed Sender",
+            envelope: MessageEnvelope.wrap(
+                try MessageCryptor().seal("themed authenticated", with: senderCipher)
+            ),
+            embeddedCipher: CipherSharePayload(cipher: senderCipher)
+        )
+        let selection = try SharePresentationSelection(
+            codexID: CodexID(rawValue: "codex.moonleaf")!,
+            scriptID: ScriptID(rawValue: "script.moonleaf")!,
+            relicID: ArtifactID(rawValue: "relic.moonleaf.tablet")!,
+            sealID: ArtifactID(rawValue: "seal.moonleaf.firefly")!,
+            frameID: ArtifactID(rawValue: "frame.moonleaf.silvervine")!
+        )
+        let metadata = try SharePresentationMetadata(
+            selection: selection,
+            compatibility: .norseInteractiveFallback
+        )
+        let package = try RuneScribePackage.themed(
+            kind: .encryptedMessage,
+            payloadVersion: UInt16(MessageSharePayload.version),
+            corePayload: payload.encoded(),
+            presentation: SharePresentationSectionBundle(
+                metadata: metadata,
+                safePreviewData: nil,
+                signedProvenance: nil
+            )
+        ).encoded()
+
+        let result = try await service.importFile(
+            Self.inboundFile(package, id: 102_001),
+            context: try Self.context(102_001)
+        )
+
+        XCTAssertEqual(result.disposition, .receivedMessage)
+        let facts = await outbox.facts()
+        let presentationFacts = facts.filter {
+            [
+                "runescribe.message.imported",
+                "runescribe.message.decoded",
+                "runescribe.presentation.observed",
+            ].contains($0.eventType.rawValue)
+        }
+        XCTAssertEqual(presentationFacts.count, 3)
+        for fact in presentationFacts {
+            XCTAssertEqual(fact.payload.codexIDs, [selection.codexID])
+            XCTAssertEqual(fact.payload.artifactIDs, selection.artifactIDs)
+            XCTAssertEqual(fact.payload.provenanceStatus, .absent)
+        }
+        XCTAssertEqual(
+            Set(presentationFacts.compactMap(\.payload.packageToken)).count,
+            1
+        )
+        var stateIterator = service.stateStream().makeAsyncIterator()
+        let nextState = await stateIterator.next()
+        let state = try XCTUnwrap(nextState)
+        XCTAssertEqual(
+            state.messageState.pendingMessage?.presentation?.encounterRecordingStatus,
+            .recorded
+        )
+    }
+
+    func testThemedInboundKeepsPlaintextWhenEncounterRecordingIsUnavailable() async throws {
+        let harness = CoreProgressionHarness()
+        let outbox = CoreIntegrationOutbox(failsBackgroundContexts: true)
+        let service = harness.service(outbox: outbox)
+        await service.startInboundProcessing()
+        let senderCipher = Cipher.generated(label: "Unavailable Encounter Sender")
+        let payload = MessageSharePayload(
+            senderName: "Unavailable Encounter Sender",
+            envelope: MessageEnvelope.wrap(
+                try MessageCryptor().seal("still readable", with: senderCipher)
+            ),
+            embeddedCipher: CipherSharePayload(cipher: senderCipher)
+        )
+        let selection = try SharePresentationSelection(
+            codexID: CodexID(rawValue: "codex.sunspire")!,
+            scriptID: ScriptID(rawValue: "script.sunspire")!,
+            relicID: ArtifactID(rawValue: "relic.sunspire.tablet")!,
+            sealID: ArtifactID(rawValue: "seal.sunspire.flame")!
+        )
+        let metadata = try SharePresentationMetadata(
+            selection: selection,
+            compatibility: .norseInteractiveFallback
+        )
+        let package = try RuneScribePackage.themed(
+            kind: .encryptedMessage,
+            payloadVersion: UInt16(MessageSharePayload.version),
+            corePayload: payload.encoded(),
+            presentation: SharePresentationSectionBundle(
+                metadata: metadata,
+                safePreviewData: nil,
+                signedProvenance: nil
+            )
+        ).encoded()
+
+        let result = try await service.importFile(
+            Self.inboundFile(package, id: 102_010),
+            context: try Self.context(102_010)
+        )
+
+        XCTAssertEqual(result.disposition, .receivedMessage)
+        var stateIterator = service.stateStream().makeAsyncIterator()
+        let nextState = await stateIterator.next()
+        let state = try XCTUnwrap(nextState)
+        let message = try XCTUnwrap(state.messageState.pendingMessage)
+        XCTAssertEqual(message.plaintext, "still readable")
+        XCTAssertEqual(
+            message.presentation?.encounterRecordingStatus,
+            .unavailable
+        )
+        let facts = await outbox.facts()
+        XCTAssertEqual(facts.map(\.eventType.rawValue), ["runescribe.message.imported"])
+    }
+
+    func testThemedShareTerminalUsesSelectionFrozenInDurableJournal() async throws {
+        let harness = CoreProgressionHarness()
+        let outbox = CoreIntegrationOutbox()
+        let service = harness.service(outbox: outbox)
+        await service.startInboundProcessing()
+        let cipher = try await service.createCipher(
+            CreateCipherCommand(name: "Themed Outbound"),
+            context: try Self.context(102_100)
+        )
+        let encoded = try await service.encode(
+            EncodeMessageCommand(
+                plaintext: "frozen selection",
+                cipherID: cipher.id
+            ),
+            context: try Self.context(102_101)
+        )
+        let selection = try SharePresentationSelection(
+            codexID: CodexID(rawValue: "codex.sunspire")!,
+            scriptID: ScriptID(rawValue: "script.sunspire")!,
+            relicID: ArtifactID(rawValue: "relic.sunspire.tablet")!,
+            sealID: ArtifactID(rawValue: "seal.sunspire.flame")!
+        )
+        let metadata = try SharePresentationMetadata(
+            selection: selection,
+            compatibility: .norseInteractiveFallback
+        )
+        let artifact = try await service.prepareMessageShare(
+            PrepareMessageShareCommand(
+                runes: encoded.runes,
+                senderName: "Sender",
+                cipherID: cipher.id,
+                shareHandle: try XCTUnwrap(encoded.shareHandle),
+                presentation: OutboundSharePresentationDTO(metadata: metadata)
+            ),
+            context: try Self.context(102_102)
+        )
+        let completion = try ShareArtifactCompletionEvidenceDTO(
+            artifactID: artifact.id,
+            report: SharePresentationReportDTO(
+                routeClass: .shareSheet,
+                result: .completedBySystem
+            ),
+            operationContext: try Self.context(102_103)
+        )
+
+        _ = try await service.completeShareArtifact(
+            CompleteShareArtifactCommand(evidence: completion),
+            context: try Self.context(102_104)
+        )
+
+        let outboxFacts = await outbox.facts()
+        let share = try XCTUnwrap(outboxFacts.first {
+            $0.eventType.rawValue == "runescribe.share.completed"
+        })
+        XCTAssertEqual(share.payload.codexIDs, [selection.codexID])
+        XCTAssertEqual(share.payload.artifactIDs, selection.artifactIDs)
     }
 
     func testOptionalInboundTokenAndContextFailuresPreserveAuthenticatedUtility() async throws {

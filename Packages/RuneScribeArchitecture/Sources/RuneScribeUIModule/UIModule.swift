@@ -31,6 +31,9 @@ public enum RuneScribeUIModuleBootstrap {
             RuneScribeCapabilities.runtimeAvailabilityRead,
             RuneScribeCapabilities.runtimeSettingsRead,
             RuneScribeCapabilities.runtimeSettingsWrite,
+            RuneScribeCapabilities.cloudGameCenterStatusRead,
+            RuneScribeCapabilities.gameCenterOptIn,
+            RuneScribeCapabilities.cloudAccountRebind,
             RuneScribeCapabilities.progressionStateRead,
             RuneScribeCapabilities.progressionCommands,
             RuneScribeCapabilities.themeStateRead,
@@ -95,6 +98,7 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
         let progressionClient = try? await context.progressionClient()
         let themeCoordinatorClient = try await context.themeCoordinatorClient()
         let runtimeSettingsClient = try? await context.runtimeSettingsClient()
+        let cloudGameCenterStatusClient = try? await context.cloudGameCenterStatusClient()
         let unlockFeedbackClient = try? await context.unlockFeedbackClient()
         let rootPresentationClient = try await context.rootPresentationClient()
         let productMetadata = try await rootPresentationClient.productMetadata()
@@ -122,6 +126,7 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
             progressionClient: progressionClient,
             themeCoordinatorClient: themeCoordinatorClient,
             runtimeSettingsClient: runtimeSettingsClient,
+            cloudGameCenterStatusClient: cloudGameCenterStatusClient,
             unlockFeedbackClient: unlockFeedbackClient,
             inboundFileImportSession: inboundFileImportSession,
             resourcePresentation: resourcePresentation,

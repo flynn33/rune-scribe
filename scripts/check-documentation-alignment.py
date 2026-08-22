@@ -104,7 +104,11 @@ require(
     "CHANGELOG.md lacks the accepted corrected v3.1 package result",
 )
 require(PHASE_C_OUTCOME in changelog, "CHANGELOG.md lacks the merged Phase C result")
-require("Phase D is READY FOR AUTHORIZATION / NOT STARTED" in changelog, "CHANGELOG.md lacks the Phase D authorization boundary")
+require(
+    "Complete the source-controlled roadmap program" in changelog
+    and "strict no-ship boundary" in changelog,
+    "CHANGELOG.md lacks the roadmap-completion no-ship result",
+)
 
 readme = read("README.md")
 require(
@@ -122,17 +126,21 @@ require(
     "README lacks the accepted corrected v3.1 package result",
 )
 require("Phase C is PASS / MERGED TO MAIN" in readme, "README lacks current Phase C result")
-require("Phase D is READY FOR AUTHORIZATION / NOT STARTED" in readme, "README lacks the Phase D boundary")
+require(
+    "roadmap-completion program is source-complete" in readme
+    and "and not shipped" in readme,
+    "README lacks the roadmap-completion no-ship result",
+)
 require("## 🗺 Implementation roadmap" in readme, "README lacks the implementation roadmap")
 readme_roadmap = readme.split("## 🗺 Implementation roadmap", 1)[-1].split("## 🔐 Security & privacy", 1)[0]
 require(
-    f"remediation program for version {marketing} build {build}" in readme_roadmap,
+    f"version {marketing} build {build} roadmap-completion program" in readme_roadmap,
     "README roadmap version differs from the project version",
 )
 require(
-    "| P12 | Full Xcode, supported-environment parity, final audit, and handoff | Planned |"
+    "| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Complete; physical-device qualification owner-only |"
     in readme_roadmap,
-    "README P12 roadmap scope differs",
+    "README Wave 6 roadmap scope differs",
 )
 require(
     "| P12 | Full Xcode, parity, device" not in readme_roadmap,
@@ -146,7 +154,7 @@ require(
 )
 require(f"| **Version** | `{marketing}` |" in submission, "App Store packet version differs")
 require(f"| **Build** | `{build}` |" in submission, "App Store packet build differs")
-require(f"## What ships in {marketing}" in submission, "App Store packet summary differs")
+require("## What’s New (customer-facing)" in submission, "App Store packet summary differs")
 require(
     "Smoke-test Share deep link and intro cadence on device" not in submission,
     "App Store packet retains a device smoke-test completion item",
@@ -173,24 +181,62 @@ require(
     "PASS/FAIL, upload readiness, or pull-request readiness" in submission,
     "App Store packet lacks the non-gating upload and pull-request boundary",
 )
-for pull_request in (42, 43, 44, 45):
-    require(
-        f"[#{pull_request}](https://github.com/flynn33/rune-scribe/pull/{pull_request})"
-        in submission,
-        f"App Store packet lacks merged PR #{pull_request}",
-    )
-
+privacy = read("docs/PRIVACY.md")
+support = read("docs/SUPPORT.md")
+documentation_support_checklist = read(
+    "docs/verification/roadmap-completion/DocumentationSupportChecklist.md"
+)
+require(
+    f"Rune Scribe {marketing} (build {build})" in privacy,
+    "privacy policy application version differs",
+)
+require(
+    "private CloudKit database" in privacy
+    and "Game Center achievement reporting is also optional" in privacy
+    and "does not use advertising" in privacy
+    and "tracking" in privacy
+    and "analytics" in privacy,
+    "privacy policy lacks the optional-service and no-tracking boundary",
+)
+require(
+    f"version {marketing} (build {build})" in support,
+    "support guide application version differs",
+)
+require(
+    "owner test required; not shipped" in support
+    and "local Vault works without either Apple service" in support,
+    "support guide lacks the no-ship or local-first boundary",
+)
+require(
+    f"Rune Scribe {marketing} (build {build})" in documentation_support_checklist,
+    "documentation/support checklist application version differs",
+)
+require(
+    documentation_support_checklist.count("- [x]") >= 12
+    and "- [ ]" not in documentation_support_checklist,
+    "documentation/support checklist is incomplete",
+)
+require(
+    "**NOT SHIPPED — OWNER TEST REQUIRED**" in documentation_support_checklist
+    and "**Do not ship until the owner approves the test results.**"
+    in documentation_support_checklist,
+    "documentation/support checklist lacks the exact stop statements",
+)
 roadmap = read("docs/architecture/RoadmapAlignment.md")
 require(
     f"**Current application:** version {marketing} build {build}" in roadmap,
     "roadmap application version differs from the project version",
 )
 require("Phase C is PASS / MERGED TO MAIN" in roadmap, "roadmap lacks the merged Phase C result")
-require("Phase D is READY FOR AUTHORIZATION / NOT STARTED" in roadmap, "roadmap lacks the Phase D boundary")
+require(
+    "is source-complete for the authorized roadmap-completion" in roadmap
+    and "deliberately **not shipped**" in roadmap,
+    "roadmap lacks the source-complete no-ship result",
+)
 require("validated Elven Series recovery boundary" in roadmap, "roadmap lacks recovery result")
 require(RECOVERY_STATUS in roadmap, "roadmap lacks the closed recovery result")
 require(
-    f"{CORRECTED_V31_PACKAGE_STATUS} corrected v3.1 package" in roadmap,
+    f"corrected v3.1 package is {CORRECTED_V31_PACKAGE_STATUS}" in roadmap,
     "roadmap lacks the accepted corrected v3.1 package result",
 )
 require("Keep Elven Series Phase C blocked" not in roadmap, "roadmap retains superseded Phase C blocker")
@@ -250,16 +296,16 @@ require(
     "ADR-RS-005 retains a hardware acceptance requirement",
 )
 require(
-    "**Status:** Accepted interim; owner-operated hardware observation optional" in invitation_presentation,
-    "ADR-RS-012 status is not owner-optional",
+    "**Status:** Accepted; typed file Artifact with QR and link fallbacks" in invitation_presentation,
+    "ADR-RS-012 status differs from the completed transport decision",
 )
 require(
     "Blocked on physical-device spike" not in invitation_presentation,
     "ADR-RS-012 retains a hardware blocker",
 )
 require(
-    "Accepted interim; owner-operated hardware observation optional" in decision_index,
-    "decision index retains the superseded ADR-RS-012 status",
+    "Accepted; typed file Artifact with QR and link fallbacks" in decision_index,
+    "decision index differs from the completed ADR-RS-012 status",
 )
 
 migration_decisions = read("docs/architecture/MigrationDecisions.md")
@@ -474,6 +520,8 @@ for relative, content in (
 
 link_pages = (
     "README.md",
+    "docs/PRIVACY.md",
+    "docs/SUPPORT.md",
     "docs/APP_STORE_SUBMISSION.md",
     "docs/architecture/RoadmapAlignment.md",
     "docs/architecture/ForsettiCompliance.md",
@@ -695,7 +743,10 @@ named_package_patterns = [
     re.compile("".join(("gpt", r"[- _]?", r"\d")), re.IGNORECASE),
 ]
 
-tracked = git("ls-files", "-z").split("\0")
+tracked = sorted(set(
+    git("ls-files", "-z").split("\0")
+    + git("ls-files", "--others", "--exclude-standard", "-z").split("\0")
+))
 text_suffixes = {".md", ".json", ".swift", ".sh", ".py", ".rb", ".yml", ".yaml", ".plist", ".pbxproj"}
 for relative in filter(None, tracked):
     path = ROOT / relative
@@ -725,4 +776,8 @@ if ERRORS:
         print(f"FAIL {error}")
     sys.exit(1)
 
-print(f"Documentation alignment passed: version {marketing} build {build}, recovery closed, nine findings pass, Phase C merged to main; Phase D ready for authorization and not started.")
+print(
+    f"Documentation alignment passed: version {marketing} build {build}, "
+    "recovery closed, Phase C history retained, roadmap source-complete, "
+    "owner test required, not shipped."
+)
