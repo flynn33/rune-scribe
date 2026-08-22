@@ -35,6 +35,7 @@ struct ContentView: View {
     // MARK: - Environment
 
     @EnvironmentObject private var session: RuneScribeUISession
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     // MARK: - Types
 
@@ -505,37 +506,46 @@ struct ContentView: View {
     }
 
     private var artifactSelectionBar: some View {
-        HStack(spacing: 10) {
+        let usesExpandedLayout = dynamicTypeSize.isAccessibilitySize
+        let menuLayout = usesExpandedLayout
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(spacing: 10))
+
+        return HStack(alignment: .top, spacing: 10) {
             Image(systemName: "photo.artframe")
                 .font(.system(size: 12))
                 .foregroundColor(.runeBlue)
                 .accessibilityHidden(true)
+                .padding(.top, usesExpandedLayout ? 4 : 10)
 
-            artifactMenu(
-                title: "Relic",
-                selectedID: session.selectedThemeRelicID,
-                items: session.themeRelicItems,
-                kind: .relic
-            )
+            menuLayout {
+                artifactMenu(
+                    title: "Relic",
+                    selectedID: session.selectedThemeRelicID,
+                    items: session.themeRelicItems,
+                    kind: .relic
+                )
 
-            Divider().frame(height: 22)
+                Divider().frame(height: usesExpandedLayout ? nil : 22)
 
-            artifactMenu(
-                title: "Seal",
-                selectedID: session.selectedThemeSealID,
-                items: session.themeSealItems,
-                kind: .seal
-            )
+                artifactMenu(
+                    title: "Seal",
+                    selectedID: session.selectedThemeSealID,
+                    items: session.themeSealItems,
+                    kind: .seal
+                )
 
-            Divider().frame(height: 22)
+                Divider().frame(height: usesExpandedLayout ? nil : 22)
 
-            artifactMenu(
-                title: "Frame",
-                selectedID: session.selectedThemeFrameID,
-                items: session.themeFrameItems,
-                kind: .frame,
-                allowsNone: true
-            )
+                artifactMenu(
+                    title: "Frame",
+                    selectedID: session.selectedThemeFrameID,
+                    items: session.themeFrameItems,
+                    kind: .frame,
+                    allowsNone: true
+                )
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 12)
         .frame(minHeight: 44)
@@ -583,6 +593,7 @@ struct ContentView: View {
                 Text(title.uppercased())
                     .font(.caption2.weight(.semibold))
                     .foregroundColor(.runeSilver)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(
                     items.first(where: { $0.id == selectedID })?.name
                         ?? (allowsNone ? "None" : "Unavailable")

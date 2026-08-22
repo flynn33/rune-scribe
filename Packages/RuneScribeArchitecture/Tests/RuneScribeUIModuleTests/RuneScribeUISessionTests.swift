@@ -1121,6 +1121,22 @@ final class RuneScribeUISessionTests: XCTestCase {
             activeCipherBar.contains(".contentShape(Rectangle())\n            .fixedSize()")
         )
 
+        let artifactSelectionBar = try sourceSection(
+            contentSource,
+            from: "    private var artifactSelectionBar:",
+            to: "    // MARK: - Compose Recipient"
+        )
+        XCTAssertTrue(contentSource.contains("@Environment(\\.dynamicTypeSize)"))
+        XCTAssertTrue(artifactSelectionBar.contains("dynamicTypeSize.isAccessibilitySize"))
+        XCTAssertTrue(artifactSelectionBar.contains("AnyLayout(VStackLayout"))
+        XCTAssertTrue(artifactSelectionBar.contains("AnyLayout(HStackLayout"))
+        XCTAssertGreaterThanOrEqual(
+            artifactSelectionBar.components(
+                separatedBy: ".fixedSize(horizontal: false, vertical: true)"
+            ).count - 1,
+            2
+        )
+
         let cipherSource = try viewSource("CipherLibraryView.swift")
         let creationActions = try sourceSection(
             cipherSource,
