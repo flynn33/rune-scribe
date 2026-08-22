@@ -98,6 +98,7 @@ PERMISSIONS
 MAC
 • App Sandbox + Hardened Runtime.
 • Automatic import of cipher files from Messages is not claimed on Mac; use Import, open file, or paste runescribe:// link (see docs/platform-notes.md).
+• First-delivery message keys require explicit confirmation before persistence or Reply on both platforms; wire sender labels never create or rebind Contacts.
 
 NO DEMO ACCOUNT REQUIRED — local encryption, sharing, Journey, appearance, and Vault
 features work without iCloud or Game Center. Live service checks require the review

@@ -77,6 +77,7 @@ struct PendingMessageViewState: Identifiable, Equatable, Sendable {
     let senderName: String
     let cipherID: UUID
     let cipherName: String
+    let senderIdentityStatus: ReceivedSenderIdentityStatusDTO
     let presentation: ReceivedSharePresentation?
     let safePreviewData: Data?
 
@@ -86,6 +87,7 @@ struct PendingMessageViewState: Identifiable, Equatable, Sendable {
         senderName = message.senderName
         cipherID = message.cipherID.rawValue
         cipherName = message.cipherName
+        senderIdentityStatus = message.senderIdentityStatus
         presentation = message.presentation
         safePreviewData = message.safePreviewData
     }
@@ -99,6 +101,7 @@ struct PendingMessageViewState: Identifiable, Equatable, Sendable {
         senderName = message.senderName
         cipherID = message.cipherID.rawValue
         cipherName = message.cipherName
+        senderIdentityStatus = message.senderIdentityStatus
         presentation = message.presentation.map {
             ReceivedPresentationAvailabilityBinding.resolve(
                 $0,

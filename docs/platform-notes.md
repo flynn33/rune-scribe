@@ -6,7 +6,8 @@ operating systems expose different intake paths.
 ## Cipher Import on macOS
 
 Automatic cipher import from Messages is not supported on Mac. A `.runescribe`
-cipher file received in Messages does not silently add itself to the cipher library.
+cipher file received in Messages does not silently add itself to the cipher library;
+every new cipher requires confirmation before persistence.
 
 On macOS, import a cipher by one of these supported paths:
 
@@ -21,10 +22,11 @@ bounded resources, and matching hashes before their Core payload is admitted.
 
 ## iOS Intake
 
-iOS supports the one-tap Messages attachment flow for `.runescribe` files. When a
-first message includes an embedded cipher key, opening the attachment can import the
-key, decrypt the message, and file the cipher under the sender. Later themed messages
-remain typed attachments but do not resend that key.
+iOS supports opening a Messages attachment directly in Rune Scribe. When a first
+message includes an embedded key, the app may show a decrypted preview but labels the
+sender claim as unverified and keeps the key transient. The recipient must confirm the
+cipher before it is saved or used for Reply. Later themed messages do not resend the
+key; they use the confirmed local cipher identity rather than trusting the wire label.
 
 ## Themed presentation fallback
 

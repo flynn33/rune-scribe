@@ -2,6 +2,13 @@ import Foundation
 
 enum ContactBookValidationError: Error, Equatable, Sendable {
     case unsupportedVersion(Int)
+    case tooManyContacts
+    case tooManyPhoneNumbers
+    case tooManyEmailAddresses
+    case displayNameTooLong
+    case phoneNumberTooLong
+    case emailAddressTooLong
+    case appleContactIDTooLong
 }
 
 /// Version 1 is the shipping encrypted-contact JSON schema. Its field names and
@@ -9,6 +16,9 @@ enum ContactBookValidationError: Error, Equatable, Sendable {
 /// `contacts.enc` files.
 struct ContactBook: Codable, Equatable, Sendable {
     static let currentVersion = 1
+    /// Keeps decoded collection growth bounded independently of the encrypted
+    /// file and plaintext byte ceilings enforced by the repository.
+    static let maximumContactCount = 4_096
     static let empty = ContactBook(contacts: [])
 
     var version: Int
@@ -30,7 +40,33 @@ struct ContactBook: Codable, Equatable, Sendable {
         guard version == Self.currentVersion else {
             throw ContactBookValidationError.unsupportedVersion(version)
         }
-        contacts = try container.decode([Contact].self, forKey: .contacts)
+        var encodedContacts = try container.nestedUnkeyedContainer(
+            forKey: .contacts
+        )
+        if let count = encodedContacts.count, count > Self.maximumContactCount {
+            throw ContactBookValidationError.tooManyContacts
+        }
+
+        var decodedContacts: [Contact] = []
+        decodedContacts.reserveCapacity(
+            min(encodedContacts.count ?? 0, Self.maximumContactCount)
+        )
+        while !encodedContacts.isAtEnd {
+            guard decodedContacts.count < Self.maximumContactCount else {
+                throw ContactBookValidationError.tooManyContacts
+            }
+            decodedContacts.append(try encodedContacts.decode(Contact.self))
+        }
+        contacts = decodedContacts
+    }
+
+    func validatePersistenceBounds() throws {
+        guard contacts.count <= Self.maximumContactCount else {
+            throw ContactBookValidationError.tooManyContacts
+        }
+        for contact in contacts {
+            try contact.validatePersistenceBounds()
+        }
     }
 }
 

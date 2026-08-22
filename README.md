@@ -159,9 +159,10 @@ Themed presentation is resolved against the installed provider's artifact and re
 inventory before rendering. Unknown selections or resource metadata/digest drift use
 the Base Norse fallback without changing admission or decryption of a valid Core payload.
 
-> **macOS note.** Automatic cipher import from Messages is not supported on Mac.
-> On macOS, import a received cipher manually from **Cipher Library → Import**, by
-> opening the `.runescribe` file, or by pasting a `runescribe://` import link.
+> **Import note.** Cipher material is never saved merely because a message opens.
+> A first-delivery attachment presents the normal cipher confirmation sheet on both
+> platforms. On macOS, use **Cipher Library → Import**, open the `.runescribe` file,
+> or paste a `runescribe://` import link.
 
 > **Guard the cipher.** A shared QR image or `.runescribe` file carries the actual
 > **256-bit key** — anyone who has it can read your runes, so hand it over privately
@@ -205,27 +206,29 @@ sequenceDiagram
     App1-->>Msg: Runes + themed .runescribe file (envelope + first-delivery key) + app link
     Alice->>Bob: iMessage
     Bob->>App2: Open the .runescribe file
-    App2-->>App2: Import key · open envelope · file under “Alice”
+    App2-->>Bob: Preview message · confirm first-delivery cipher
+    App2-->>App2: Save the reviewed cipher
     App2-->>Bob: “Meet at dawn”  → Reply
 ```
 
-**Recipient with the app** opens the `.runescribe` attachment: Rune Scribe imports the
-embedded key (if present), opens the envelope by trying its ciphers (the AEAD tag picks
-exactly one), shows the decrypted message in a sheet, and **auto-files the cipher under
-a contact** named after the sender — then offers **Reply**. **Recipient without the
+**Recipient with the app** opens the `.runescribe` attachment. Rune Scribe can preview
+the plaintext with an embedded first-delivery key, but labels the claimed sender as
+unverified and keeps the key transient. The recipient must review and confirm the
+cipher before it is saved or **Reply** becomes available. A later message authenticates
+with that locally stored cipher and displays the local cipher name; its mutable wire
+sender label cannot create a contact or rebind a relationship. **Recipient without the
 app** taps the plain "get the app" link to the Rune Scribe page. Rotating a key is
-manual: make a new cipher for that contact, and its next message re-embeds the new key,
-which the other side auto-imports.
+manual: make a new cipher for that contact, and its next message re-embeds the new key
+for explicit confirmation.
 
-Automatic cipher import from Messages is an iOS flow. macOS users can still exchange
-the same `.runescribe` cipher files, but must import them manually before using the
-new key. See [Platform notes](docs/platform-notes.md) for the supported import paths.
+Both platforms use the same confirmation boundary. See [Platform notes](docs/platform-notes.md)
+for the supported intake paths.
 
 > The wire formats are pinned by tests: `CipherSharePayloadTests` and
 > `MessageSharePayloadTests` (encode, decode, round-trip, embedded-key,
 > version/checksum rejection), `FileRouterTests` (typed-container magic and legacy
 > version-byte classification), and `MessageServiceTests` / `MessageCoordinatorTests`
-> (try-all decryption + contact auto-association).
+> (bounded try-all decryption + explicit first-delivery confirmation).
 
 ---
 

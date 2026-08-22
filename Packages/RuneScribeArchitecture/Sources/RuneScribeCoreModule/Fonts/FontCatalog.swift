@@ -36,6 +36,8 @@ struct FontCatalogRegistrationReport: Equatable, Sendable {
 /// bundle, protected-file, and CoreText implementation details.
 actor FontCatalog: CoreFontIntegrating {
     static let bundledDisplayName = "Noto Sans Runic"
+    private static let maximumStoredFontByteCount =
+        RuneScribePackageResource.maximumDataLength
 
     private let runtimeIO: RuntimeIOClient
 
@@ -113,7 +115,10 @@ actor FontCatalog: CoreFontIntegrating {
         let path = try Self.importedPath(for: reference)
         let stored: Data?
         do {
-            stored = try await runtimeIO.readProtectedFile(path)
+            stored = try await runtimeIO.readProtectedFile(
+                path,
+                maximumByteCount: Self.maximumStoredFontByteCount
+            )
         } catch {
             throw FontCatalogError.protectedStorageUnavailable
         }
@@ -146,7 +151,10 @@ actor FontCatalog: CoreFontIntegrating {
         let path = try Self.importedPath(for: reference)
         let previous: Data?
         do {
-            previous = try await runtimeIO.readProtectedFile(path)
+            previous = try await runtimeIO.readProtectedFile(
+                path,
+                maximumByteCount: Self.maximumStoredFontByteCount
+            )
         } catch {
             throw FontCatalogError.protectedStorageUnavailable
         }
@@ -161,7 +169,10 @@ actor FontCatalog: CoreFontIntegrating {
                 // the intended content-addressed bytes were committed.
                 let authoritative: Data?
                 do {
-                    authoritative = try await runtimeIO.readProtectedFile(path)
+                    authoritative = try await runtimeIO.readProtectedFile(
+                        path,
+                        maximumByteCount: Self.maximumStoredFontByteCount
+                    )
                 } catch {
                     throw FontCatalogError.protectedStorageUnavailable
                 }
@@ -289,7 +300,10 @@ actor FontCatalog: CoreFontIntegrating {
     private func registerStoredFont(at path: ProtectedPath) async throws {
         let bytes: Data
         do {
-            guard let stored = try await runtimeIO.readProtectedFile(path) else {
+            guard let stored = try await runtimeIO.readProtectedFile(
+                path,
+                maximumByteCount: Self.maximumStoredFontByteCount
+            ) else {
                 throw FontCatalogError.corruptedStoredFont
             }
             bytes = stored
@@ -330,7 +344,10 @@ actor FontCatalog: CoreFontIntegrating {
         } catch {
             let authoritative: Data?
             do {
-                authoritative = try await runtimeIO.readProtectedFile(path)
+                authoritative = try await runtimeIO.readProtectedFile(
+                    path,
+                    maximumByteCount: Self.maximumStoredFontByteCount
+                )
             } catch {
                 throw FontCatalogError.rollbackFailed
             }

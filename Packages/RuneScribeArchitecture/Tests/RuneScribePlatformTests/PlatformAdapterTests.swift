@@ -95,11 +95,17 @@ final class PlatformAdapterTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: root) }
         let store = AppleProtectedFileStore(applicationSupportDirectory: root)
 
-        let missingContacts = try await store.read(relativePath: .contacts)
+        let missingContacts = try await store.read(
+            relativePath: .contacts,
+            maximumByteCount: 1_024
+        )
         XCTAssertNil(missingContacts)
         let contacts = Data([0x43, 0x54])
         try await store.write(contacts, relativePath: .contacts)
-        let persistedContacts = try await store.read(relativePath: .contacts)
+        let persistedContacts = try await store.read(
+            relativePath: .contacts,
+            maximumByteCount: 1_024
+        )
         XCTAssertEqual(persistedContacts, contacts)
         XCTAssertEqual(
             try Data(contentsOf: root.appendingPathComponent("RuneScribContacts/contacts.enc")),
@@ -122,9 +128,52 @@ final class PlatformAdapterTests: XCTestCase {
         XCTAssertTrue(fontsDirectoryExists)
         try await store.remove(relativePath: firstFont)
         let firstFontExists = try await store.exists(relativePath: firstFont)
-        let removedFont = try await store.read(relativePath: firstFont)
+        let removedFont = try await store.read(
+            relativePath: firstFont,
+            maximumByteCount: 1_024
+        )
         XCTAssertFalse(firstFontExists)
         XCTAssertNil(removedFont)
+    }
+
+    func testProtectedFileStoreEnforcesConsumerMaximumBeforeReturningData() async throws {
+        let root = temporaryDirectory(named: "ProtectedFileMaximum")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let store = AppleProtectedFileStore(applicationSupportDirectory: root)
+        let bytes = Data(repeating: 0xA5, count: 4_097)
+        try await store.write(bytes, relativePath: .contacts)
+
+        do {
+            _ = try await store.read(
+                relativePath: .contacts,
+                maximumByteCount: 4_096
+            )
+            XCTFail("Expected an oversized protected file to be rejected")
+        } catch {
+            XCTAssertEqual(
+                error as? ProtectedFileStoreReadError,
+                .contentTooLarge
+            )
+        }
+
+        let exact = try await store.read(
+            relativePath: .contacts,
+            maximumByteCount: bytes.count
+        )
+        XCTAssertEqual(exact, bytes)
+
+        do {
+            _ = try await store.read(
+                relativePath: .contacts,
+                maximumByteCount: 0
+            )
+            XCTFail("Expected a nonpositive maximum to be rejected")
+        } catch {
+            XCTAssertEqual(
+                error as? ProtectedFileStoreReadError,
+                .invalidMaximumByteCount
+            )
+        }
     }
 
     func testProtectedFileStoreRejectsSymlinkedDirectoryForEveryOperation() async throws {
@@ -152,7 +201,10 @@ final class PlatformAdapterTests: XCTestCase {
 
         let store = AppleProtectedFileStore(applicationSupportDirectory: root)
         await assertAsyncThrows {
-            try await store.read(relativePath: .contacts)
+            try await store.read(
+                relativePath: .contacts,
+                maximumByteCount: 1_024
+            )
         }
         XCTAssertEqual(try Data(contentsOf: outsideFile), outsideData)
         try FileManager.default.removeItem(at: outsideFile)
@@ -213,7 +265,10 @@ final class PlatformAdapterTests: XCTestCase {
 
         let linkedPath = try ProtectedPath.fontsDirectory.appending("linked.ttf")
         await assertAsyncThrows {
-            try await store.read(relativePath: linkedPath)
+            try await store.read(
+                relativePath: linkedPath,
+                maximumByteCount: 1_024
+            )
         }
         await assertAsyncThrows {
             try await store.remove(relativePath: linkedPath)

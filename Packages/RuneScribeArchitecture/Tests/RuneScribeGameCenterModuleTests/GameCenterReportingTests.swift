@@ -159,6 +159,95 @@ func outboxCoalescesMonotonicallyAndHandlesRetryDenialAndDuplicateCallbacks() th
 }
 
 @Test
+func duplicateCandidatesPreserveDeferredLifecycleAndBackoff() throws {
+    let id = achievement("achievement.courier-1")
+    let candidate60 = try report(id: id, percentage: 60, revision: 4)
+    let lowerRevision = try report(id: id, percentage: 60, revision: 3)
+    let candidate80 = try report(id: id, percentage: 80, revision: 8)
+
+    let deferred = try GameCenterReportOutbox()
+        .enqueue(candidate60)
+        .markInFlight([id])
+        .recordFailure(
+            achievementID: id,
+            category: .serviceUnavailable,
+            now: date(100)
+        )
+    #expect(deferred.pendingEntries.single?.state == .deferred)
+    #expect(deferred.pendingEntries.single?.failedAttemptCount == 1)
+    #expect(deferred.pendingEntries.single?.deferralReason == .scheduledRetry)
+    #expect(deferred.pendingEntries.single?.nextEligibleAttemptAt == date(110))
+
+    #expect(try deferred.enqueue(candidate60) == deferred)
+    #expect(try deferred.enqueue(lowerRevision) == deferred)
+
+    let upgraded = try deferred.enqueue(candidate80)
+    #expect(upgraded.pendingEntries.single?.candidate == candidate80)
+    #expect(upgraded.pendingEntries.single?.state == .deferred)
+    #expect(upgraded.pendingEntries.single?.failedAttemptCount == 1)
+    #expect(upgraded.pendingEntries.single?.deferralReason == .scheduledRetry)
+    #expect(upgraded.pendingEntries.single?.nextEligibleAttemptAt == date(110))
+    #expect(try upgraded.nextBatch(connection: .connected, now: date(109)).isEmpty)
+    #expect(try upgraded.nextBatch(connection: .connected, now: date(110)) == [candidate80])
+}
+
+@Test
+func higherCandidateDuringInFlightPreservesCallbackAndStagesSuccessor() throws {
+    let id = achievement("achievement.courier-1")
+    let candidate60 = try report(id: id, percentage: 60, revision: 4)
+    let candidate80 = try report(id: id, percentage: 80, revision: 8)
+
+    let upgradedInFlight = try GameCenterReportOutbox()
+        .enqueue(candidate60)
+        .markInFlight([id])
+        .enqueue(candidate80)
+    #expect(upgradedInFlight.pendingEntries.single?.candidate == candidate80)
+    #expect(upgradedInFlight.pendingEntries.single?.state == .inFlight)
+
+    let successor = try upgradedInFlight.recordSuccess(
+        achievementID: id,
+        reportedPercentage: 60
+    )
+    #expect(successor.acknowledgements.single?.percentage == 60)
+    #expect(successor.pendingEntries.single?.candidate == candidate80)
+    #expect(successor.pendingEntries.single?.state == .pending)
+
+    let completed = try successor
+        .markInFlight([id])
+        .recordSuccess(achievementID: id, reportedPercentage: 80)
+    #expect(completed.acknowledgements.single?.percentage == 80)
+    #expect(completed.pendingEntries.isEmpty)
+}
+
+@Test
+func interruptedReportRecoveryPreservesCandidateAttemptHistoryAndAcknowledgement() throws {
+    let id = achievement("achievement.courier-1")
+    let candidate60 = try report(id: id, percentage: 60, revision: 4)
+    let acknowledgement = try GameCenterAcknowledgement(
+        achievementID: id,
+        percentage: 40
+    )
+    let interrupted = try GameCenterReportOutbox(
+        acknowledgements: [acknowledgement],
+        pendingEntries: [
+            GameCenterOutboxEntry(
+                candidate: candidate60,
+                state: .inFlight,
+                failedAttemptCount: 3
+            ),
+        ]
+    )
+
+    let recovered = try interrupted.recoverInterruptedReports()
+
+    #expect(recovered.acknowledgements == [acknowledgement])
+    #expect(recovered.pendingEntries.single?.candidate == candidate60)
+    #expect(recovered.pendingEntries.single?.state == .pending)
+    #expect(recovered.pendingEntries.single?.failedAttemptCount == 3)
+    #expect(try recovered.nextBatch(connection: .connected, now: date(100)) == [candidate60])
+}
+
+@Test
 func accountChangeDropsOnlyRemoteAcknowledgementsAndRequeuesLocalTruth() throws {
     let id = achievement("achievement.first-inscription")
     let completed = try report(id: id, percentage: 100, revision: 9, completedAt: date(50))

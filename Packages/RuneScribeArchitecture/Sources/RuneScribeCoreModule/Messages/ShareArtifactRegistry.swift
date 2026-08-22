@@ -807,7 +807,8 @@ actor ShareArtifactRegistry {
         let loaded: CoreShareArtifactJournal
         do {
             guard let encrypted = try await runtimeIO.readProtectedFile(
-                Self.terminalJournalPath
+                Self.terminalJournalPath,
+                maximumByteCount: Self.maximumTerminalJournalByteCount
             ) else {
                 loaded = try CoreShareArtifactJournal()
                 terminalJournal = loaded
@@ -855,7 +856,8 @@ actor ShareArtifactRegistry {
                 try await runtimeIO.removeProtectedFile(Self.terminalJournalPath)
             } catch {
                 if (try? await runtimeIO.readProtectedFile(
-                    Self.terminalJournalPath
+                    Self.terminalJournalPath,
+                    maximumByteCount: Self.maximumTerminalJournalByteCount
                 )) != nil {
                     throw ShareArtifactRegistryError.storageUnavailable
                 }
@@ -889,7 +891,8 @@ actor ShareArtifactRegistry {
             )
         } catch {
             guard let stored = try? await runtimeIO.readProtectedFile(
-                Self.terminalJournalPath
+                Self.terminalJournalPath,
+                maximumByteCount: Self.maximumTerminalJournalByteCount
             ), let decoded = try? Self.decryptTerminalJournal(
                       stored,
                       using: key

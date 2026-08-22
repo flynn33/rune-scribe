@@ -38,6 +38,9 @@ actor AppLockService {
 
     private static let iterations = 120_000
     private static let failureThreshold = 5
+    // The cooldown schedule reaches its maximum tier at nine attempts. Legacy
+    // releases persisted larger counters, which load at this saturated tier.
+    private static let maximumFailedAttempts = 9
     private static let saltByteCount = 16
 
     private let runtimeIO: RuntimeIOClient
@@ -106,14 +109,14 @@ actor AppLockService {
 
     func changePIN(current: PINInput, replacement: PINInput) async throws {
         try await loadIfNeeded()
-        let matches = try await verify(current)
+        let matches = try await verifyUsingThrottle(current, clearFailuresOnSuccess: false)
         guard matches else { throw AppLockServiceError.incorrectPIN }
         try await setPIN(replacement)
     }
 
     func disablePIN(current: PINInput) async throws {
         try await loadIfNeeded()
-        let matches = try await verify(current)
+        let matches = try await verifyUsingThrottle(current, clearFailuresOnSuccess: false)
         guard matches else { throw AppLockServiceError.incorrectPIN }
         // Clear durable throttle state before removing the PIN. If either
         // operation fails, a reconstructing service still sees a PIN and fails
@@ -152,11 +155,12 @@ actor AppLockService {
         return .incorrect
     }
 
-    /// Side-effect-free management verification used before change/disable UI
-    /// advances. It neither unlocks nor changes the persisted throttle.
+    /// Management verification shares the durable unlock throttle but never
+    /// unlocks the app. A successful probe clears prior failures so a valid PIN
+    /// is not penalized by earlier mistakes.
     func verifyForManagement(_ input: PINInput) async throws -> Bool {
         try await loadIfNeeded()
-        return try await verify(input)
+        return try await verifyUsingThrottle(input, clearFailuresOnSuccess: true)
     }
 
     func lockIfEnabled() async throws {
@@ -184,7 +188,17 @@ actor AppLockService {
                 ), Self.isValid(decoded) else {
                     throw AppLockServiceError.secureStorageUnavailable
                 }
-                throttle = decoded
+                // Earlier releases persisted an unbounded positive attempt
+                // count. Normalize that valid legacy state to the maximum
+                // cooldown tier so upgrades remain unlockable and subsequent
+                // failures cannot overflow.
+                throttle = ThrottleState(
+                    failedAttempts: min(
+                        decoded.failedAttempts,
+                        Self.maximumFailedAttempts
+                    ),
+                    lastFailure: decoded.lastFailure
+                )
             } else {
                 throttle = ThrottleState()
             }
@@ -223,8 +237,28 @@ actor AppLockService {
         }
     }
 
+    private func verifyUsingThrottle(
+        _ input: PINInput,
+        clearFailuresOnSuccess: Bool
+    ) async throws -> Bool {
+        guard try await lockoutRetryAfter() == nil else { return false }
+
+        if try await verify(input) {
+            if clearFailuresOnSuccess, throttle.failedAttempts > 0 {
+                try await clearThrottle()
+            }
+            return true
+        }
+
+        try await registerFailure()
+        return false
+    }
+
     private func registerFailure() async throws {
-        throttle.failedAttempts += 1
+        let increment = throttle.failedAttempts.addingReportingOverflow(1)
+        throttle.failedAttempts = increment.overflow
+            ? Self.maximumFailedAttempts
+            : min(increment.partialValue, Self.maximumFailedAttempts)
         throttle.lastFailure = try await runtimeIO.now()
         do {
             try await runtimeIO.setSecureValue(

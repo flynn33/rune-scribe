@@ -639,7 +639,7 @@ func semanticCatalogMismatchesAndUncorroboratedReportsAreQuarantined() throws {
 }
 
 @Test
-func incrementableLogicalClocksRejectMaximumValue() throws {
+func incrementableLogicalClocksRejectMaximumValueAndUnboundedRemoteAdvance() throws {
     #expect(throws: CloudProgressionSchemaError.invalidLogicalClock) {
         _ = try CloudProgressionReplica(
             catalogVersion: 1,
@@ -662,14 +662,12 @@ func incrementableLogicalClocksRejectMaximumValue() throws {
             updatedAt: date(100)
         )
     }
-
-
     let unadvanceableRemote = try CloudProgressionReplica(
         catalogVersion: 1,
-        logicalClock: UInt64.max - 1,
+        logicalClock: UInt64.max - 2,
         selectedCodex: CloudCodexSelection(
             codexID: codex("codex.norse"),
-            logicalTimestamp: UInt64.max - 1,
+            logicalTimestamp: UInt64.max - 2,
             writerDeviceID: opaque("a"),
             updatedAt: date(100)
         )
@@ -682,6 +680,87 @@ func incrementableLogicalClocksRejectMaximumValue() throws {
     )
     #expect(outcome.status == .remoteQuarantinedLocalPreserved)
     #expect(outcome.replica.selectedCodex == nil)
+}
+
+@Test
+func boundedRemoteLogicalClockCanBeSupersededByTheNextLocalSelection() throws {
+    let localClock: UInt64 = 40
+    let remoteClock = localClock
+        + CloudProgressionReplica.maximumRemoteLogicalClockAdvance
+    let local = try CloudProgressionReplica(
+        catalogVersion: 1,
+        logicalClock: localClock,
+        selectedCodex: CloudCodexSelection(
+            codexID: codex("codex.norse"),
+            logicalTimestamp: localClock,
+            writerDeviceID: opaque("a"),
+            updatedAt: date(100)
+        )
+    )
+    let remote = try CloudProgressionReplica(
+        catalogVersion: 1,
+        logicalClock: remoteClock,
+        selectedCodex: CloudCodexSelection(
+            codexID: codex("codex.moonleaf"),
+            logicalTimestamp: remoteClock,
+            writerDeviceID: opaque("b"),
+            updatedAt: date(101)
+        )
+    )
+
+    let merged = try CloudProgressionMergeEngine.mergeValidated(
+        local: local,
+        remote: remote,
+        context: mergeContext()
+    )
+    #expect(merged.selectedCodex?.codexID == codex("codex.moonleaf"))
+
+    let localOverrideClock = remoteClock + 1
+    let localOverride = try CloudProgressionReplica(
+        catalogVersion: 1,
+        logicalClock: localOverrideClock,
+        selectedCodex: CloudCodexSelection(
+            codexID: codex("codex.norse"),
+            logicalTimestamp: localOverrideClock,
+            writerDeviceID: opaque("a"),
+            updatedAt: date(102)
+        )
+    )
+    let superseded = try CloudProgressionMergeEngine.mergeValidated(
+        local: merged,
+        remote: localOverride,
+        context: mergeContext()
+    )
+    #expect(superseded.selectedCodex?.codexID == codex("codex.norse"))
+    #expect(superseded.selectedCodex?.logicalTimestamp == localOverrideClock)
+}
+
+@Test
+func remoteLogicalClockBeyondBoundedAdvanceIsQuarantined() throws {
+    let localClock: UInt64 = 40
+    let rejectedClock = localClock
+        + CloudProgressionReplica.maximumRemoteLogicalClockAdvance
+        + 1
+    let local = try CloudProgressionReplica(catalogVersion: 1, logicalClock: localClock)
+    let remote = try CloudProgressionReplica(
+        catalogVersion: 1,
+        logicalClock: rejectedClock,
+        selectedTitle: CloudTitleSelection(
+            titleID: nil,
+            logicalTimestamp: rejectedClock,
+            writerDeviceID: opaque("b"),
+            updatedAt: date(101)
+        )
+    )
+
+    let outcome = try CloudProgressionMergeEngine.merge(
+        local: local,
+        remoteData: CloudProgressionCodec.encode(remote),
+        context: mergeContext()
+    )
+    #expect(outcome.status == .remoteQuarantinedLocalPreserved)
+    #expect(outcome.replica.logicalClock == localClock)
+    #expect(outcome.replica.selectedTitle == nil)
 }
 
 private func replica(

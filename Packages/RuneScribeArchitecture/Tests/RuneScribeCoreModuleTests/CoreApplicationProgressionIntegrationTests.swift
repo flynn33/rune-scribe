@@ -1449,7 +1449,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         )
     }
 
-    func testAuthenticatedEmbeddedCipherCommitsCanonicalFactsAtomically() async throws {
+    func testEmbeddedCipherRequiresConfirmationBeforeCanonicalImportFact() async throws {
         let harness = CoreProgressionHarness()
         let outbox = CoreIntegrationOutbox()
         let service = harness.service(outbox: outbox)
@@ -1468,6 +1468,28 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         )
 
         XCTAssertEqual(result.disposition, .receivedMessage)
+        let pending = try XCTUnwrap(result.pendingImport)
+        let preconfirmation = try await CipherRepository(
+            runtimeIO: harness.runtimeIO
+        ).snapshot()
+        XCTAssertFalse(
+            preconfirmation.ciphers.contains { $0.publicID == senderCipher.publicID }
+        )
+        let initialFacts = await outbox.facts()
+        XCTAssertEqual(initialFacts.map(\.eventType.rawValue), [
+            "runescribe.message.imported",
+            "runescribe.message.decoded",
+            "runescribe.presentation.observed",
+        ])
+
+        _ = try await service.confirmImport(
+            ConfirmImportCommand(
+                importID: pending.id,
+                name: "Reviewed Sender"
+            ),
+            context: try Self.context(102_100)
+        )
+
         let library = try await CipherRepository(runtimeIO: harness.runtimeIO).snapshot()
         XCTAssertTrue(library.ciphers.contains { $0.publicID == senderCipher.publicID })
         let facts = await outbox.facts()
@@ -1682,10 +1704,11 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             context: try Self.context(105)
         )
         XCTAssertEqual(tokenResult.disposition, .receivedMessage)
+        XCTAssertNotNil(tokenResult.pendingImport)
         let tokenLibrary = try await CipherRepository(
             runtimeIO: tokenHarness.runtimeIO
         ).snapshot()
-        XCTAssertTrue(tokenLibrary.ciphers.contains {
+        XCTAssertFalse(tokenLibrary.ciphers.contains {
             $0.publicID == tokenCipher.publicID
         })
         let tokenFacts = await tokenOutbox.facts()
@@ -1706,10 +1729,11 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             context: try Self.context(106)
         )
         XCTAssertEqual(contextResult.disposition, .receivedMessage)
+        XCTAssertNotNil(contextResult.pendingImport)
         let contextLibrary = try await CipherRepository(
             runtimeIO: contextHarness.runtimeIO
         ).snapshot()
-        XCTAssertTrue(contextLibrary.ciphers.contains {
+        XCTAssertFalse(contextLibrary.ciphers.contains {
             $0.publicID == contextCipher.publicID
         })
         let contextFacts = await contextOutbox.facts()
@@ -1763,6 +1787,14 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             context: try Self.context(50_003)
         )
         XCTAssertEqual(received.disposition, .receivedMessage)
+        let senderImportID = try XCTUnwrap(received.pendingImport?.id)
+        _ = try await service.confirmImport(
+            ConfirmImportCommand(
+                importID: senderImportID,
+                name: "Sparse Sender"
+            ),
+            context: try Self.context(50_003_001)
+        )
         let importedContacts = try await service.importContacts(
             ImportContactsCommand(contacts: [SystemContactDTO(
                 systemIdentifier: "seed-capacity-contact",
@@ -1908,26 +1940,6 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         )
         XCTAssertEqual(completion, .retainedForRetry)
 
-        // Use a fresh repository instance only after the service has finished
-        // its terminal mutation, mirroring a later inbound operation without
-        // letting two cached repositories race writes in the fixture.
-        let importedContact = CoreIntegrationContact(value: 60_000)
-        let importedCipher = Cipher.generated(label: "Relationship Sparse Sender")
-        let authenticated = try await Self.directMessageImport(
-            harness: harness,
-            outbox: unavailableOutbox,
-            contact: importedContact,
-            cipher: importedCipher
-        )
-        let importedStoredCipher = try XCTUnwrap(authenticated.library.ciphers.first {
-            $0.publicID == importedCipher.publicID
-        })
-        XCTAssertNotNil(importedStoredCipher.contactID)
-        let importedContactDidCommit = await importedContact.didCommit()
-        let importedContactDidComplete = await importedContact.didComplete()
-        XCTAssertTrue(importedContactDidCommit)
-        XCTAssertTrue(importedContactDidComplete)
-
         let repository = CipherRepository(runtimeIO: harness.runtimeIO)
         let beforeLibrary = try await repository.snapshot()
         let bound = try XCTUnwrap(beforeLibrary.ciphers.first {
@@ -1940,9 +1952,6 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             beforeLedger.relationships.count,
             CoreProgressionLedger.maximumRelationshipCount
         )
-        XCTAssertFalse(beforeLedger.cipherSeeds.contains {
-            $0.cipherID == importedStoredCipher.id
-        })
         let sparseRelationship = try await repository.relationshipProgressionEvidence(
             cipherID: cipherID.rawValue,
             contactID: newContactID.rawValue
@@ -1976,9 +1985,6 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
                 by: { $0 }
             ).mapValues(\.count),
             [
-                "runescribe.message.decoded": 1,
-                "runescribe.presentation.observed": 1,
-                "runescribe.cipher.imported": 1,
                 "runescribe.message.encoded": 1,
                 "runescribe.share.completed": 1,
             ]
@@ -2141,6 +2147,14 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         )
 
         XCTAssertEqual(result.disposition, .receivedMessage)
+        let confirmation = try XCTUnwrap(result.pendingImport)
+        _ = try await service.confirmImport(
+            ConfirmImportCommand(
+                importID: confirmation.id,
+                name: "Confirmed Capacity Sender"
+            ),
+            context: try Self.context(32_001)
+        )
         let library = try await CipherRepository(runtimeIO: harness.runtimeIO)
             .snapshot()
         XCTAssertTrue(library.ciphers.contains {
@@ -2148,7 +2162,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         })
         let ledger = try await CipherRepository(runtimeIO: harness.runtimeIO)
             .progressionEvidenceSnapshot()
-        XCTAssertEqual(ledger.pendingBatches.count, 1_026)
+        XCTAssertEqual(ledger.pendingBatches.count, 1_027)
         let retainedIDs = Set(retained.map(\.identity))
         XCTAssertTrue(retainedIDs.isSubset(
             of: Set(ledger.pendingBatches.map(\.identity))
@@ -2188,7 +2202,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         XCTAssertTrue(drained.acknowledgedBatches.isEmpty)
     }
 
-    func testAuthenticatedImportFailureBeforeAtomicWriteRetainsAdmissionOnly() async throws {
+    func testConfirmedImportFailureRetainsDecodedMessageWithoutPersistingCipher() async throws {
         let harness = CoreProgressionHarness()
         let outbox = CoreIntegrationOutbox(failsSubmissions: true)
         let service = harness.service(outbox: outbox)
@@ -2200,14 +2214,21 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             cipher: senderCipher,
             embedsCipher: true
         )
-        await harness.secure.failCipherLibraryWrite(afterSuccessfulWrites: 1)
-
+        let result = try await service.importFile(
+            Self.inboundFile(data, id: 107),
+            context: try Self.context(107)
+        )
+        let confirmation = try XCTUnwrap(result.pendingImport)
+        await harness.secure.failCipherLibraryWrite(afterSuccessfulWrites: 0)
         do {
-            _ = try await service.importFile(
-                Self.inboundFile(data, id: 107),
-                context: try Self.context(107)
+            _ = try await service.confirmImport(
+                ConfirmImportCommand(
+                    importID: confirmation.id,
+                    name: "Before Confirm"
+                ),
+                context: try Self.context(107_001)
             )
-            XCTFail("The uncommitted atomic write must report failure")
+            XCTFail("The failed confirmation write must report failure")
         } catch {}
 
         let repository = CipherRepository(runtimeIO: harness.runtimeIO)
@@ -2217,11 +2238,15 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         XCTAssertEqual(
             ledger.pendingBatches.flatMap(\.batch.facts)
                 .map(\.fact.eventType.rawValue),
-            ["runescribe.message.imported"]
+            [
+                "runescribe.message.imported",
+                "runescribe.message.decoded",
+                "runescribe.presentation.observed",
+            ]
         )
     }
 
-    func testAuthenticatedImportAfterWriteErrorUsesReadbackWithDecodedEvidence() async throws {
+    func testConfirmedImportAfterWriteErrorUsesReadbackWithImportEvidence() async throws {
         let harness = CoreProgressionHarness()
         let outbox = CoreIntegrationOutbox(failsSubmissions: true)
         let service = harness.service(outbox: outbox)
@@ -2233,120 +2258,79 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             cipher: senderCipher,
             embedsCipher: true
         )
-        await harness.secure.failCipherLibraryWrite(
-            afterSuccessfulWrites: 1,
-            afterCommit: true
-        )
-
         let result = try await service.importFile(
             Self.inboundFile(data, id: 108),
             context: try Self.context(108)
         )
 
         XCTAssertEqual(result.disposition, .receivedMessage)
+        let confirmation = try XCTUnwrap(result.pendingImport)
+        await harness.secure.failCipherLibraryWrite(
+            afterSuccessfulWrites: 0,
+            afterCommit: true
+        )
+        _ = try await service.confirmImport(
+            ConfirmImportCommand(
+                importID: confirmation.id,
+                name: "After Confirm"
+            ),
+            context: try Self.context(108_001)
+        )
         let repository = CipherRepository(runtimeIO: harness.runtimeIO)
         let library = try await repository.snapshot()
         XCTAssertTrue(library.ciphers.contains { $0.publicID == senderCipher.publicID })
         let ledger = try await repository.progressionEvidenceSnapshot()
         XCTAssertEqual(
-            ledger.pendingBatches.flatMap(\.batch.facts)
-                .map(\.fact.eventType.rawValue),
+            Dictionary(
+                grouping: ledger.pendingBatches.flatMap(\.batch.facts)
+                    .map(\.fact.eventType.rawValue),
+                by: { $0 }
+            ).mapValues(\.count),
             [
-                "runescribe.message.imported",
-                "runescribe.message.decoded",
-                "runescribe.presentation.observed",
-                "runescribe.cipher.imported",
+                "runescribe.message.imported": 1,
+                "runescribe.message.decoded": 1,
+                "runescribe.presentation.observed": 1,
+                "runescribe.cipher.imported": 1,
             ]
         )
     }
 
-    func testContactAndCipherCommitFaultsCannotPublishFalseRelationshipFacts() async throws {
-        let contactFailureHarness = CoreProgressionHarness()
-        let contactFailureOutbox = CoreIntegrationOutbox()
-        let contactFailureService = contactFailureHarness.service(
-            outbox: contactFailureOutbox
+    func testUnconfirmedEmbeddedCipherCannotInvokeContactOrPersistRelationship() async throws {
+        let harness = CoreProgressionHarness()
+        let outbox = CoreIntegrationOutbox()
+        let service = harness.service(outbox: outbox)
+        await service.startInboundProcessing()
+        let contact = CoreIntegrationContact(failsCommit: true, value: 1)
+        let cipher = Cipher.generated(label: "Unverified Claim")
+
+        let mutation = try await Self.directMessageImport(
+            harness: harness,
+            outbox: outbox,
+            contact: contact,
+            cipher: cipher
         )
-        await contactFailureService.startInboundProcessing()
-        let contactFailure = CoreIntegrationContact(failsCommit: true, value: 1)
-        let contactFailureCipher = Cipher.generated(label: "Contact Failure")
-        do {
-            _ = try await Self.directMessageImport(
-                harness: contactFailureHarness,
-                outbox: contactFailureOutbox,
-                contact: contactFailure,
-                cipher: contactFailureCipher
-            )
-            XCTFail("Contact commit failure must stop the Core commit")
-        } catch {}
-        let contactFailureLedger = try await CipherRepository(
-            runtimeIO: contactFailureHarness.runtimeIO
+
+        XCTAssertNotNil(mutation.pendingEmbeddedCipher)
+        XCTAssertEqual(
+            mutation.message.senderIdentityStatus,
+            .awaitingCipherConfirmation
+        )
+        XCTAssertFalse(mutation.library.ciphers.contains {
+            $0.publicID == cipher.publicID
+        })
+        let didCommit = await contact.didCommit()
+        let didComplete = await contact.didComplete()
+        XCTAssertFalse(didCommit)
+        XCTAssertFalse(didComplete)
+        let ledger = try await CipherRepository(
+            runtimeIO: harness.runtimeIO
         ).progressionEvidenceSnapshot()
-        XCTAssertTrue(contactFailureLedger.relationships.isEmpty)
-        XCTAssertTrue(contactFailureLedger.pendingBatches.isEmpty)
-        let contactFailureFacts = await contactFailureOutbox.facts()
-        XCTAssertTrue(contactFailureFacts.isEmpty)
-
-        let beforeHarness = CoreProgressionHarness()
-        let beforeOutbox = CoreIntegrationOutbox()
-        let beforeService = beforeHarness.service(outbox: beforeOutbox)
-        await beforeService.startInboundProcessing()
-        let beforeContact = CoreIntegrationContact(value: 2)
-        let beforeCipher = Cipher.generated(label: "Cipher Before Failure")
-        await beforeHarness.secure.failCipherLibraryWrite(afterSuccessfulWrites: 0)
-        do {
-            _ = try await Self.directMessageImport(
-                harness: beforeHarness,
-                outbox: beforeOutbox,
-                contact: beforeContact,
-                cipher: beforeCipher
-            )
-            XCTFail("A failed precommit cipher write must report failure")
-        } catch {}
-        let beforeLedger = try await CipherRepository(runtimeIO: beforeHarness.runtimeIO)
-            .progressionEvidenceSnapshot()
-        XCTAssertTrue(beforeLedger.relationships.isEmpty)
-        XCTAssertTrue(beforeLedger.pendingBatches.isEmpty)
-        let beforeFacts = await beforeOutbox.facts()
-        let beforeDidCommit = await beforeContact.didCommit()
-        let beforeDidComplete = await beforeContact.didComplete()
-        XCTAssertTrue(beforeFacts.isEmpty)
-        XCTAssertTrue(beforeDidCommit)
-        XCTAssertFalse(beforeDidComplete)
-
-        let afterHarness = CoreProgressionHarness()
-        let afterOutbox = CoreIntegrationOutbox()
-        let afterService = afterHarness.service(outbox: afterOutbox)
-        await afterService.startInboundProcessing()
-        let afterContact = CoreIntegrationContact(value: 3)
-        let afterCipher = Cipher.generated(label: "Cipher After Failure")
-        await afterHarness.secure.failCipherLibraryWrite(
-            afterSuccessfulWrites: 0,
-            afterCommit: true
-        )
-        _ = try await Self.directMessageImport(
-            harness: afterHarness,
-            outbox: afterOutbox,
-            contact: afterContact,
-            cipher: afterCipher
-        )
-        let afterLedger = try await CipherRepository(runtimeIO: afterHarness.runtimeIO)
-            .progressionEvidenceSnapshot()
-        XCTAssertEqual(afterLedger.relationships.count, 1)
-        XCTAssertTrue(afterLedger.relationships[0].hasAuthenticatedInbound)
-        XCTAssertFalse(afterLedger.relationships[0].bidirectionalEventCommitted)
-        let afterDidCommit = await afterContact.didCommit()
-        let afterDidComplete = await afterContact.didComplete()
-        XCTAssertTrue(afterDidCommit)
-        XCTAssertTrue(afterDidComplete)
-        let afterFacts = await afterOutbox.facts()
-        XCTAssertEqual(afterFacts.map(\.eventType.rawValue), [
+        XCTAssertTrue(ledger.relationships.isEmpty)
+        let facts = await outbox.facts()
+        XCTAssertEqual(facts.map(\.eventType.rawValue), [
             "runescribe.message.decoded",
             "runescribe.presentation.observed",
-            "runescribe.cipher.imported",
         ])
-        XCTAssertFalse(afterFacts.contains {
-            $0.eventType.rawValue == "runescribe.exchange.bidirectional-established"
-        })
     }
 
     func testRelaunchedReadmissionKeepsSemanticTokensAndDoesNotReimportCipher() async throws {
@@ -2361,17 +2345,26 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         )
         let first = harness.service(outbox: outbox)
         await first.startInboundProcessing()
-        _ = try await first.importFile(
+        let firstResult = try await first.importFile(
             Self.inboundFile(data, id: 103),
             context: try Self.context(103)
+        )
+        let confirmation = try XCTUnwrap(firstResult.pendingImport)
+        _ = try await first.confirmImport(
+            ConfirmImportCommand(
+                importID: confirmation.id,
+                name: "Confirmed Replay Sender"
+            ),
+            context: try Self.context(103_001)
         )
 
         let relaunched = harness.service(outbox: outbox)
         await relaunched.startInboundProcessing()
-        _ = try await relaunched.importFile(
+        let replayResult = try await relaunched.importFile(
             Self.inboundFile(data, id: 104),
             context: try Self.context(104)
         )
+        XCTAssertNil(replayResult.pendingImport)
 
         let facts = await outbox.facts()
         let imported = facts.filter {
@@ -2696,8 +2689,11 @@ private final class CoreProgressionHarness: @unchecked Sendable {
             deleteSecureValue: { service, account in
                 await secure.delete(service: service, account: account)
             },
-            readProtectedFile: { path in
-                await protected.read(path)
+            readProtectedFile: { path, maximumByteCount in
+                try await protected.read(
+                    path,
+                    maximumByteCount: maximumByteCount
+                )
             },
             writeProtectedFile: { data, path in
                 try await protected.write(data, path: path)
@@ -2755,7 +2751,16 @@ private actor CoreIntegrationProtectedStore {
     private var writesBeforeFailure: Int?
     private var failWriteAfterCommit = false
 
-    func read(_ path: ProtectedPath) -> Data? { values[path] }
+    func read(
+        _ path: ProtectedPath,
+        maximumByteCount: Int
+    ) throws -> Data? {
+        guard let data = values[path] else { return nil }
+        guard data.count <= maximumByteCount else {
+            throw ProtectedFileStoreReadError.contentTooLarge
+        }
+        return data
+    }
 
     func write(_ data: Data, path: ProtectedPath) throws {
         if let remaining = writesBeforeFailure {

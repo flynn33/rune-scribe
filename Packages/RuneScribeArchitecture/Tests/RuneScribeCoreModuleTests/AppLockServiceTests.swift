@@ -109,6 +109,102 @@ final class AppLockServiceTests: XCTestCase {
         XCTAssertNil(state.retryAfter)
     }
 
+    func testManagementAttemptsShareUnlockThrottleAndSuccessfulProbeResetsFailures() async throws {
+        let now = Date(timeIntervalSinceReferenceDate: 800_000_000)
+        let store = RecordingSecureValueStore(values: [
+            Self.pinAddress: Self.legacyPINRecord,
+        ])
+        let clock = MutableClock(now)
+        let service = AppLockService(
+            secureValueStore: store,
+            clock: clock,
+            entropy: FixedPINEntropy(bytes: Data(0...15))
+        )
+        _ = try await service.state()
+
+        let firstManagementAttempt = try await service.verifyForManagement(PINInput("0000"))
+        XCTAssertFalse(firstManagementAttempt)
+        do {
+            try await service.changePIN(
+                current: PINInput("0000"),
+                replacement: PINInput("5678")
+            )
+            XCTFail("An incorrect current PIN must fail")
+        } catch {
+            XCTAssertEqual(error as? AppLockServiceError, .incorrectPIN)
+        }
+        do {
+            try await service.disablePIN(current: PINInput("0000"))
+            XCTFail("An incorrect current PIN must fail")
+        } catch {
+            XCTAssertEqual(error as? AppLockServiceError, .incorrectPIN)
+        }
+        let fourthAttempt = try await service.unlock(PINInput("0000"))
+        XCTAssertEqual(fourthAttempt, .incorrect)
+        let fifthAttempt = try await service.verifyForManagement(PINInput("0000"))
+        XCTAssertFalse(fifthAttempt)
+
+        let retryAfter = now.addingTimeInterval(15)
+        let lockedUnlock = try await service.unlock(PINInput("1234"))
+        XCTAssertEqual(
+            lockedUnlock,
+            .lockedOut(retryAfter: retryAfter)
+        )
+        let lockedManagement = try await service.verifyForManagement(PINInput("1234"))
+        XCTAssertFalse(lockedManagement)
+
+        let persistedValue = await store.value(at: Self.throttleAddress)
+        let persisted = try XCTUnwrap(persistedValue)
+        let lockedThrottle = try JSONDecoder().decode(FrozenThrottleState.self, from: persisted)
+        XCTAssertEqual(lockedThrottle.failedAttempts, 5)
+        XCTAssertEqual(lockedThrottle.lastFailure, now)
+
+        clock.advance(by: 15)
+        let successfulManagement = try await service.verifyForManagement(PINInput("1234"))
+        XCTAssertTrue(successfulManagement)
+        let clearedThrottle = await store.value(at: Self.throttleAddress)
+        XCTAssertNil(clearedThrottle)
+        let state = try await service.state()
+        XCTAssertTrue(state.isLocked)
+        XCTAssertNil(state.retryAfter)
+    }
+
+    func testSuccessfulChangeAndDisableResetPriorManagementFailures() async throws {
+        let now = Date(timeIntervalSinceReferenceDate: 800_000_000)
+        let seededThrottle = Data(
+            #"{"failedAttempts":4,"lastFailure":800000000}"#.utf8
+        )
+        let store = RecordingSecureValueStore(values: [
+            Self.pinAddress: Self.legacyPINRecord,
+            Self.throttleAddress: seededThrottle,
+        ])
+        let service = AppLockService(
+            secureValueStore: store,
+            clock: MutableClock(now),
+            entropy: FixedPINEntropy(bytes: Data(0...15))
+        )
+
+        try await service.changePIN(
+            current: PINInput("1234"),
+            replacement: PINInput("5678")
+        )
+        let changeClearedThrottle = await store.value(at: Self.throttleAddress)
+        XCTAssertNil(changeClearedThrottle)
+
+        let failedManagement = try await service.verifyForManagement(PINInput("0000"))
+        XCTAssertFalse(failedManagement)
+        let failedValue = await store.value(at: Self.throttleAddress)
+        let failed = try XCTUnwrap(failedValue)
+        let failedThrottle = try JSONDecoder().decode(FrozenThrottleState.self, from: failed)
+        XCTAssertEqual(failedThrottle.failedAttempts, 1)
+
+        try await service.disablePIN(current: PINInput("5678"))
+        let disableClearedThrottle = await store.value(at: Self.throttleAddress)
+        let deletedPIN = await store.value(at: Self.pinAddress)
+        XCTAssertNil(disableClearedThrottle)
+        XCTAssertNil(deletedPIN)
+    }
+
     func testSetChangeDisableUseStableAccountsAndRecordSchema() async throws {
         let salt = Data(0...15)
         let store = RecordingSecureValueStore()
@@ -401,6 +497,95 @@ final class AppLockServiceTests: XCTestCase {
                 [.read(Self.pinAddress), .read(Self.throttleAddress)]
             )
         }
+    }
+
+    func testLegacyOverPolicyAndIntMaximumThrottleRecordsNormalizeAndRemainUnlockable() async throws {
+        let legacyRecords = [
+            Data(#"{"failedAttempts":10,"lastFailure":800000000}"#.utf8),
+            Data(#"{"failedAttempts":\#(Int.max),"lastFailure":800000000}"#.utf8),
+        ]
+
+        for legacyRecord in legacyRecords {
+            let store = RecordingSecureValueStore(values: [
+                Self.pinAddress: Self.legacyPINRecord,
+                Self.throttleAddress: legacyRecord,
+            ])
+            let clock = MutableClock(
+                Date(timeIntervalSinceReferenceDate: 800_000_000)
+            )
+            let service = AppLockService(
+                secureValueStore: store,
+                clock: clock,
+                entropy: FixedPINEntropy(bytes: Data(0...15))
+            )
+
+            let locked = try await service.state()
+            XCTAssertTrue(locked.isLocked)
+            XCTAssertEqual(
+                locked.retryAfter,
+                Date(timeIntervalSinceReferenceDate: 800_000_300)
+            )
+            let retainedRecord = await store.value(at: Self.throttleAddress)
+            XCTAssertEqual(retainedRecord, legacyRecord)
+
+            clock.advance(by: 300)
+            let result = try await service.unlock(PINInput("1234"))
+            XCTAssertEqual(result, .unlocked)
+            let clearedRecord = await store.value(at: Self.throttleAddress)
+            XCTAssertNil(clearedRecord)
+        }
+    }
+
+    func testFailureCountTransitionsToMaximumBoundary() async throws {
+        let now = Date(timeIntervalSinceReferenceDate: 800_000_000)
+        let store = RecordingSecureValueStore(values: [
+            Self.pinAddress: Self.legacyPINRecord,
+            Self.throttleAddress: Data(
+                #"{"failedAttempts":8,"lastFailure":799999879}"#.utf8
+            ),
+        ])
+        let service = AppLockService(
+            secureValueStore: store,
+            clock: MutableClock(now),
+            entropy: FixedPINEntropy(bytes: Data(0...15))
+        )
+
+        let result = try await service.unlock(PINInput("0000"))
+        XCTAssertEqual(result, .lockedOut(retryAfter: now.addingTimeInterval(300)))
+
+        let persistedValue = await store.value(at: Self.throttleAddress)
+        let persisted = try XCTUnwrap(persistedValue)
+        let throttle = try JSONDecoder().decode(FrozenThrottleState.self, from: persisted)
+        XCTAssertEqual(throttle.failedAttempts, 9)
+        XCTAssertEqual(throttle.lastFailure, now)
+    }
+
+    func testMaximumFailureCountSaturatesAndRefreshesSharedManagementCooldown() async throws {
+        let now = Date(timeIntervalSinceReferenceDate: 800_000_000)
+        let store = RecordingSecureValueStore(values: [
+            Self.pinAddress: Self.legacyPINRecord,
+            Self.throttleAddress: Data(
+                #"{"failedAttempts":9,"lastFailure":799999699}"#.utf8
+            ),
+        ])
+        let service = AppLockService(
+            secureValueStore: store,
+            clock: MutableClock(now),
+            entropy: FixedPINEntropy(bytes: Data(0...15))
+        )
+
+        let managementResult = try await service.verifyForManagement(PINInput("0000"))
+        XCTAssertFalse(managementResult)
+
+        let persistedValue = await store.value(at: Self.throttleAddress)
+        let persisted = try XCTUnwrap(persistedValue)
+        let throttle = try JSONDecoder().decode(FrozenThrottleState.self, from: persisted)
+        XCTAssertEqual(throttle.failedAttempts, 9)
+        XCTAssertEqual(throttle.lastFailure, now)
+
+        let state = try await service.state()
+        XCTAssertTrue(state.isLocked)
+        XCTAssertEqual(state.retryAfter, now.addingTimeInterval(300))
     }
 }
 

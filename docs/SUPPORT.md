@@ -9,6 +9,9 @@
   from Files/Finder or use Rune Scribe's Import action.
 - On iOS, a Messages attachment can open directly in Rune Scribe. macOS does not claim
   automatic Messages import; use the file, Import, or a `runescribe://` link.
+- A first-delivery message can show a decrypted preview, but its embedded cipher and
+  claimed sender remain unverified until you confirm the cipher. Rune Scribe does not
+  create or rebind a contact from the sender label in the attachment.
 - A valid encrypted message remains readable with the Base Norse appearance when the
   sender's Codex is locked, unavailable, incompatible, corrupt, or not installed.
 - Requested themed presentation is used only after the installed provider confirms the

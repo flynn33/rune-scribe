@@ -14,6 +14,66 @@ import XCTest
 
 @MainActor
 final class RuneScribeUISessionTests: XCTestCase {
+    func testRootPendingPresentationPrioritizesImportConfirmation() {
+        XCTAssertEqual(
+            RootPendingPresentationPolicy.selection(
+                showSplash: false,
+                isLocked: false,
+                hasPendingImport: true,
+                hasPendingMessage: true
+            ),
+            .importConfirmation
+        )
+        XCTAssertEqual(
+            RootPendingPresentationPolicy.selection(
+                showSplash: false,
+                isLocked: false,
+                hasPendingImport: true,
+                hasPendingMessage: false
+            ),
+            .importConfirmation
+        )
+    }
+
+    func testRootPendingPresentationExposesMessageAfterConfirmationResolves() {
+        XCTAssertEqual(
+            RootPendingPresentationPolicy.selection(
+                showSplash: false,
+                isLocked: false,
+                hasPendingImport: false,
+                hasPendingMessage: true
+            ),
+            .receivedMessage
+        )
+        XCTAssertNil(
+            RootPendingPresentationPolicy.selection(
+                showSplash: false,
+                isLocked: false,
+                hasPendingImport: false,
+                hasPendingMessage: false
+            )
+        )
+    }
+
+    func testRootPendingPresentationIsSuppressedBySplashOrLock() {
+        XCTAssertNil(
+            RootPendingPresentationPolicy.selection(
+                showSplash: true,
+                isLocked: false,
+                hasPendingImport: true,
+                hasPendingMessage: true
+            )
+        )
+        XCTAssertNil(
+            RootPendingPresentationPolicy.selection(
+                showSplash: false,
+                isLocked: true,
+                hasPendingImport: true,
+                hasPendingMessage: true
+            )
+        )
+    }
+
     func testRootImportFailureAlertDoesNotReplaceRetryableConfirmation() {
         XCTAssertFalse(
             RootImportFailurePresentation.shouldShowAlert(

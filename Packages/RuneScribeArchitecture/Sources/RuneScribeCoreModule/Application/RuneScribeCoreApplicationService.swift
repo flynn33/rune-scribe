@@ -80,6 +80,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
     private var messageState = MessageStateDTO(phase: .idle)
     private var lockState = ApplicationLockStateDTO(isPINSet: false, isLocked: false)
     private var pendingImports: [ImportID: PendingCipherImport] = [:]
+    private var messageConfirmationImportIDs: [ImportID: MessageID] = [:]
     private var activeImportID: ImportID?
     private var activeImportDedupeKeys: Set<Data> = []
     private var activeImportDedupeKeyOrder: [Data] = []
@@ -1634,6 +1635,11 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                 )
             }
             await refreshFontSummaries(for: mutation.library)
+            let summary = Self.summary(for: mutation.value, in: mutation.library)
+            try confirmPendingMessageCipher(
+                importID: command.importID,
+                summary: summary
+            )
             removePendingImport(pending)
             confirmingImportIDs.remove(command.importID)
             committingImportIDs.remove(command.importID)
@@ -1641,7 +1647,6 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             importState = ImportStateDTO(phase: .completed)
             await adoptMutation(mutation.library)
             if retainedFacts { _ = await progression.drain() }
-            let summary = Self.summary(for: mutation.value, in: mutation.library)
             releaseUseCasePermit()
             await drainInboundQueueIfPossible()
             return summary
@@ -1680,6 +1685,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
         // suspension and immediately frees the presentation rail.
         guard !committingImportIDs.contains(id) else { return }
         importCancellationGenerations[id, default: 0] &+= 1
+        messageConfirmationImportIDs.removeValue(forKey: id)
         removePendingImport(pending)
         if !confirmingImportIDs.contains(id) {
             importCancellationGenerations.removeValue(forKey: id)
@@ -1694,6 +1700,26 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
     public func dismissReceivedMessage(id: MessageID) async {
         let capturedAt = await snapshotTimestamp()
         guard messageState.pendingMessage?.id == id else { return }
+
+        let confirmationIDs = messageConfirmationImportIDs.compactMap {
+            $0.value == id ? $0.key : nil
+        }
+        var cancelledConfirmation = false
+        for importID in confirmationIDs {
+            messageConfirmationImportIDs.removeValue(forKey: importID)
+            guard let pending = pendingImports[importID],
+                  !committingImportIDs.contains(importID)
+            else { continue }
+            importCancellationGenerations[importID, default: 0] &+= 1
+            removePendingImport(pending)
+            if !confirmingImportIDs.contains(importID) {
+                importCancellationGenerations.removeValue(forKey: importID)
+            }
+            cancelledConfirmation = true
+        }
+        if cancelledConfirmation {
+            importState = ImportStateDTO(phase: .idle)
+        }
         if let key = messageDedupeKeys.removeValue(forKey: id) {
             forgetHandledDedupeKey(key)
         }
@@ -2547,16 +2573,32 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                     lastKnownContactBook = contactBook
                 }
                 await refreshFontSummaries(for: resultingLibrary)
+                var pendingCipherImport: PendingCipherImport?
+                if let embeddedCipher = mutation.pendingEmbeddedCipher {
+                    pendingCipherImport = ImportUseCase.pending(
+                        payload: embeddedCipher,
+                        fontBytes: fontBytes,
+                        id: ImportID(rawValue: try await runtimeIO.nextUUID()),
+                        source: source,
+                        dedupeKey: Self.digest(try embeddedCipher.encoded())
+                    )
+                }
                 rememberHandledDedupeKey(dedupeKey)
                 messageDedupeKeys[mutation.message.id] = dedupeKey
                 messageState = MessageStateDTO(
                     phase: .received,
                     pendingMessage: mutation.message
                 )
-                importState = ImportStateDTO(phase: .completed)
+                if let pending = pendingCipherImport {
+                    messageConfirmationImportIDs[pending.id] = mutation.message.id
+                    stagePendingImport(pending)
+                } else {
+                    importState = ImportStateDTO(phase: .completed)
+                }
                 await adoptMutation(resultingLibrary)
                 return ImportResultDTO(
                     disposition: .receivedMessage,
+                    pendingImport: pendingCipherImport?.summary,
                     receivedMessageID: mutation.message.id
                 )
             } catch {
@@ -2575,6 +2617,15 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
 
     private func setPendingImport(_ pending: PendingCipherImport) async {
         let capturedAt = await snapshotTimestamp()
+        stagePendingImport(pending)
+        revision &+= 1
+        broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
+    }
+
+    /// Stages every part of the confirmation rail before a snapshot can expose
+    /// the associated received message. Callers that need an immediate update
+    /// use `setPendingImport`; message ingestion publishes both states together.
+    private func stagePendingImport(_ pending: PendingCipherImport) {
         pendingImports[pending.id] = pending
         activeImportID = pending.id
         importCancellationGenerations[pending.id] = 0
@@ -2584,8 +2635,31 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             phase: .awaitingConfirmation,
             pending: pending.summary
         )
-        revision &+= 1
-        broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
+    }
+
+    private func confirmPendingMessageCipher(
+        importID: ImportID,
+        summary: CipherSummary
+    ) throws {
+        guard let messageID = messageConfirmationImportIDs.removeValue(
+            forKey: importID
+        ), let message = messageState.pendingMessage,
+              message.id == messageID
+        else { return }
+        let confirmed = try ReceivedMessageDTO(
+            id: message.id,
+            plaintext: message.plaintext,
+            senderName: summary.name,
+            cipherID: summary.id,
+            cipherName: summary.name,
+            senderIdentityStatus: .confirmedCipher,
+            presentation: message.presentation,
+            safePreviewData: message.safePreviewData
+        )
+        messageState = MessageStateDTO(
+            phase: .received,
+            pendingMessage: confirmed
+        )
     }
 
     private func removePendingImport(_ pending: PendingCipherImport) {
@@ -3305,8 +3379,15 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                 return RuneScribeFailureDTO(code: .internalFailure)
             }
         }
-        if error is MessageError {
-            return RuneScribeFailureDTO(code: .noMatchingCipher)
+        if let messageError = error as? MessageError {
+            switch messageError {
+            case .inputTooLarge,
+                 .tooManyCandidateCiphers,
+                 .decodeWorkLimitExceeded:
+                return RuneScribeFailureDTO(code: .invalidInput)
+            case .noMatchingCipher:
+                return RuneScribeFailureDTO(code: .noMatchingCipher)
+            }
         }
         if let lockError = error as? AppLockServiceError {
             switch lockError {

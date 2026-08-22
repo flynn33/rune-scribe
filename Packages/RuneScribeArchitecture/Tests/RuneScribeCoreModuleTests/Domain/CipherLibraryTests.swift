@@ -39,6 +39,21 @@ final class CipherLibraryTests: XCTestCase {
         XCTAssertEqual(restored.activeCipher?.id, b.id)
     }
 
+    func testStoredShapeRejectsCipherCountBeyondDecodeCapacity() {
+        let cipher = Cipher.generated(label: "Capacity")
+        let library = CipherLibrary(
+            ciphers: Array(
+                repeating: cipher,
+                count: CipherLibrary.maximumCipherCount + 1
+            ),
+            activeID: cipher.id
+        )
+
+        XCTAssertThrowsError(try library.validateStoredShape()) { error in
+            XCTAssertEqual(error as? CipherLibraryValidationError, .tooManyCiphers)
+        }
+    }
+
     func testActiveCipherFallsBackToFirst() {
         let a = Cipher.generated(label: "A")
         let b = Cipher.generated(label: "B")

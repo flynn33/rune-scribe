@@ -423,7 +423,10 @@ private extension FontCatalog {
         self.init(
             runtimeIO: RuntimeIOClient(
                 readProtectedFile: {
-                    try await protectedFileStore.read(relativePath: $0)
+                    try await protectedFileStore.read(
+                        relativePath: $0,
+                        maximumByteCount: $1
+                    )
                 },
                 writeProtectedFile: {
                     try await protectedFileStore.write($0, relativePath: $1)
@@ -477,8 +480,15 @@ private actor FontFileStore: ProtectedFileStore {
         self.files = files
     }
 
-    func read(relativePath: ProtectedPath) async throws -> Data? {
-        files[relativePath]
+    func read(
+        relativePath: ProtectedPath,
+        maximumByteCount: Int
+    ) async throws -> Data? {
+        guard let data = files[relativePath] else { return nil }
+        guard data.count <= maximumByteCount else {
+            throw ProtectedFileStoreReadError.contentTooLarge
+        }
+        return data
     }
 
     func write(_ data: Data, relativePath: ProtectedPath) async throws {

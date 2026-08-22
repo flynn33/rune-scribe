@@ -568,6 +568,12 @@ actor RuntimeCloudGameCenterCoordinator {
         runtimeIsActive = false
         cloudAccountOperationEpoch &+= 1
         gameCenterOperationEpoch &+= 1
+        do {
+            durable.gameCenterOutbox = try durable.gameCenterOutbox
+                .recoverInterruptedReports()
+        } catch {
+            persistenceIsDurable = false
+        }
         scheduledTask?.cancel()
         scheduledTask = nil
         settingsObservationTask?.cancel()
@@ -1021,11 +1027,16 @@ actor RuntimeCloudGameCenterCoordinator {
             workWasRequested = true
             return
         }
+        let workGeneration = runtimeGeneration
         workIsInFlight = true
         scheduledTask = nil
         await processCloudIfPossible()
+        guard runtimeIsActive, runtimeGeneration == workGeneration else { return }
         await processGameCenterIfPossible()
-        if !(await persistDurableStateIfPossible()) {
+        guard runtimeIsActive, runtimeGeneration == workGeneration else { return }
+        let persisted = await persistDurableStateIfPossible()
+        guard runtimeIsActive, runtimeGeneration == workGeneration else { return }
+        if !persisted {
             cloudPhase = .persistenceDegraded
             if durable.gameCenterOptedIn,
                !durable.gameCenterOutbox.pendingEntries.isEmpty
@@ -2086,12 +2097,17 @@ actor RuntimeCloudGameCenterCoordinator {
             decoder.dateDecodingStrategy = .millisecondsSince1970
             let persisted = try decoder.decode(DurableState.self, from: record.payload)
                 .validated()
+            let recoveredInterruptedReports = persisted.gameCenterOutbox.pendingEntries
+                .contains { $0.state == .inFlight }
             durable = try mergeRecoveredDurableState(persisted, overlay: overlay)
             durableLoadState = .loaded
             persistenceIsDurable = true
             persistenceAvailabilityProbeAt = nil
             pendingGameCenterOptInPreference = nil
             lastObservedProgressionRevision = nil
+            if recoveredInterruptedReports {
+                return await persistDurableStateIfPossible()
+            }
             return true
         } catch {
             do {
@@ -2168,6 +2184,7 @@ actor RuntimeCloudGameCenterCoordinator {
             result.gameCenterCloudReportMetadata ?? [],
             overlay.gameCenterCloudReportMetadata ?? []
         )
+        result.gameCenterOutbox = try result.gameCenterOutbox.recoverInterruptedReports()
         return try result.validated()
     }
 

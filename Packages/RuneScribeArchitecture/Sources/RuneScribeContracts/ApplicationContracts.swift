@@ -258,12 +258,26 @@ public enum MessagePhaseDTO: String, Codable, Hashable, Sendable {
     case failed
 }
 
+/// Describes what the application can establish about an inbound sender label.
+/// A message can authenticate against a locally stored cipher without claiming
+/// that an unauthenticated wire label identifies a person.
+public enum ReceivedSenderIdentityStatusDTO: String, Codable, Hashable, Sendable {
+    /// The envelope authenticated with a cipher that was already stored locally.
+    case trustedLocalCipher
+    /// A first-delivery cipher was supplied by the same message and still needs
+    /// explicit user confirmation before it can be saved or used for a reply.
+    case awaitingCipherConfirmation
+    /// The user explicitly reviewed and saved the first-delivery cipher.
+    case confirmedCipher
+}
+
 public struct ReceivedMessageDTO: Equatable, Sendable {
     public let id: MessageID
     public let plaintext: String
     public let senderName: String
     public let cipherID: CipherID
     public let cipherName: String
+    public let senderIdentityStatus: ReceivedSenderIdentityStatusDTO
     public let presentation: ReceivedSharePresentation?
     public let safePreviewData: Data?
 
@@ -272,13 +286,15 @@ public struct ReceivedMessageDTO: Equatable, Sendable {
         plaintext: String,
         senderName: String,
         cipherID: CipherID,
-        cipherName: String
+        cipherName: String,
+        senderIdentityStatus: ReceivedSenderIdentityStatusDTO = .trustedLocalCipher
     ) {
         self.id = id
         self.plaintext = plaintext
         self.senderName = senderName
         self.cipherID = cipherID
         self.cipherName = cipherName
+        self.senderIdentityStatus = senderIdentityStatus
         presentation = nil
         safePreviewData = nil
     }
@@ -289,6 +305,7 @@ public struct ReceivedMessageDTO: Equatable, Sendable {
         senderName: String,
         cipherID: CipherID,
         cipherName: String,
+        senderIdentityStatus: ReceivedSenderIdentityStatusDTO = .trustedLocalCipher,
         presentation: ReceivedSharePresentation?,
         safePreviewData: Data?
     ) throws {
@@ -303,6 +320,7 @@ public struct ReceivedMessageDTO: Equatable, Sendable {
         self.senderName = senderName
         self.cipherID = cipherID
         self.cipherName = cipherName
+        self.senderIdentityStatus = senderIdentityStatus
         self.presentation = presentation
         self.safePreviewData = safePreviewData
     }

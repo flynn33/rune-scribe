@@ -12,7 +12,13 @@ private typealias GameCenterAuthenticationViewController = UIViewController
 #endif
 
 public actor AppleGameCenterReportingAdapter: GameCenterReporting {
-    public init() {}
+    private let authenticationSingleFlight: GameCenterAuthenticationSingleFlight
+
+    public init() {
+        authenticationSingleFlight = GameCenterAuthenticationSingleFlight {
+            try await AppleGameCenterAuthenticationAttempt().run()
+        }
+    }
 
     public func authenticationState() async -> GameCenterAuthenticationStateDTO {
         GKLocalPlayer.local.isAuthenticated ? .authenticated : .notAuthenticated
@@ -31,7 +37,7 @@ public actor AppleGameCenterReportingAdapter: GameCenterReporting {
 
     public func requestAuthentication() async throws -> GameCenterAuthenticationStateDTO {
         if GKLocalPlayer.local.isAuthenticated { return .authenticated }
-        return try await AppleGameCenterAuthenticationAttempt().run()
+        return try await authenticationSingleFlight.run()
     }
 
     public func report(_ achievements: [GameCenterAchievementReportDTO]) async throws {
@@ -49,6 +55,53 @@ public actor AppleGameCenterReportingAdapter: GameCenterReporting {
             try await GKAchievement.report(reports)
         } catch {
             throw mapGameCenterError(error)
+        }
+    }
+}
+
+actor GameCenterAuthenticationSingleFlight {
+    typealias Operation = @Sendable () async throws -> GameCenterAuthenticationStateDTO
+
+    private struct ActiveOperation {
+        let id: UUID
+        let task: Task<GameCenterAuthenticationStateDTO, Error>
+    }
+
+    private let operation: Operation
+    private var activeOperation: ActiveOperation?
+    private var activeRequestCount = 0
+
+    init(operation: @escaping Operation) {
+        self.operation = operation
+    }
+
+    func run() async throws -> GameCenterAuthenticationStateDTO {
+        let active: ActiveOperation
+        if let activeOperation {
+            active = activeOperation
+        } else {
+            let operation = self.operation
+            let created = ActiveOperation(
+                id: UUID(),
+                task: Task { try await operation() }
+            )
+            activeOperation = created
+            active = created
+        }
+
+        activeRequestCount += 1
+        defer { finishRequest(for: active.id) }
+        return try await active.task.value
+    }
+
+    func currentRequestCount() -> Int {
+        activeRequestCount
+    }
+
+    private func finishRequest(for operationID: UUID) {
+        activeRequestCount -= 1
+        if activeOperation?.id == operationID {
+            activeOperation = nil
         }
     }
 }

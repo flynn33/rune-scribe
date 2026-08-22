@@ -209,7 +209,7 @@ public enum CloudProgressionMergeEngine {
         guard remote.catalogVersion == local.catalogVersion else {
             throw CloudProgressionSchemaError.invalidCatalogVersion
         }
-        try validateRemoteLogicalClockHeadroom(remote)
+        try validateRemoteLogicalClockHeadroom(remote, relativeTo: local)
         try validateRemoteTimestamps(remote, noLaterThan: context.now)
         try validateRemoteCatalogMembership(remote, context: context)
 
@@ -484,19 +484,31 @@ public enum CloudProgressionMergeEngine {
     }
 
     private static func validateRemoteLogicalClockHeadroom(
-        _ replica: CloudProgressionReplica
+        _ remote: CloudProgressionReplica,
+        relativeTo local: CloudProgressionReplica
     ) throws {
-        // A peer value at max - 1 is schema-valid but cannot be superseded by
-        // the next local Lamport write. Treat it as an invalid remote record
-        // before adoption so a single malformed peer cannot pin selections.
-        guard replica.logicalClock < UInt64.max - 1,
-              replica.selectedCodex.map({
-                  $0.logicalTimestamp < UInt64.max - 1
-              }) ?? true,
-              replica.selectedTitle.map({
-                  $0.logicalTimestamp < UInt64.max - 1
-              }) ?? true
-        else { throw CloudProgressionSchemaError.invalidLogicalClock }
+        let maximumAdvance = CloudProgressionReplica.maximumRemoteLogicalClockAdvance
+        let absoluteCeiling = UInt64.max - maximumAdvance
+        let localHighWatermark = max(
+            local.logicalClock,
+            max(
+                local.selectedCodex?.logicalTimestamp ?? 0,
+                local.selectedTitle?.logicalTimestamp ?? 0
+            )
+        )
+        guard localHighWatermark <= absoluteCeiling else {
+            throw CloudProgressionSchemaError.invalidLogicalClock
+        }
+        let relativeCeiling = localHighWatermark + maximumAdvance
+        let acceptedCeiling = min(relativeCeiling, absoluteCeiling)
+        let remoteClocks = [
+            remote.logicalClock,
+            remote.selectedCodex?.logicalTimestamp,
+            remote.selectedTitle?.logicalTimestamp,
+        ].compactMap { $0 }
+        guard remoteClocks.allSatisfy({ $0 <= acceptedCeiling }) else {
+            throw CloudProgressionSchemaError.invalidLogicalClock
+        }
     }
 
     private static func validateRemoteCatalogMembership(

@@ -353,6 +353,10 @@ public struct CloudQuarantineDiagnostic: Codable, Equatable, Hashable, Sendable 
 
 public struct CloudProgressionReplica: Codable, Equatable, Sendable {
     public static let currentSchemaVersion: UInt16 = 1
+    /// Maximum logical-clock distance accepted from a peer in one merge.
+    /// This permits more than one million offline mutations while reserving
+    /// deterministic headroom for subsequent local Lamport writes.
+    public static let maximumRemoteLogicalClockAdvance: UInt64 = 1_048_576
     public static let maximumRecordsPerCollection = 512
     public static let maximumDistinctStatisticTokenRecords = 4_096
     public static let maximumTotalRecords = 8_192

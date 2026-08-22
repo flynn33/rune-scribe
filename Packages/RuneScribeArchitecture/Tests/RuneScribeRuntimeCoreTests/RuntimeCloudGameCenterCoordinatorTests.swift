@@ -156,6 +156,107 @@ final class RuntimeCloudGameCenterCoordinatorTests: XCTestCase {
         XCTAssertEqual(reportedBatches.count, 1)
     }
 
+    func testInterruptedGameCenterReportRecoversNewestCandidateAfterRelaunch() async throws {
+        let store = InMemoryModuleStateStore(now: { testDate })
+        let uuidSequence = TestUUIDSequence()
+        let interruptedGameCenter = GameCenterCoordinatorProbe()
+        await interruptedGameCenter.suspendReport()
+        let first = try await CoordinatorFixture(
+            store: store,
+            gameCenter: interruptedGameCenter,
+            uuidSequence: uuidSequence
+        )
+        let candidate60 = try makeCandidate(percentage: 60, revision: 13)
+        let candidate80 = try makeCandidate(percentage: 80, revision: 14)
+        try await first.coordinator.submitGameCenterCandidates([candidate60])
+        try await first.coordinator.submit(.optIn)
+
+        let pendingWork = Task {
+            await first.coordinator.runPendingWork()
+        }
+        let reportStarted = await waitForCoordinatorCondition {
+            await interruptedGameCenter.reportAttemptCount() == 1
+        }
+        XCTAssertTrue(reportStarted)
+
+        try await first.coordinator.submitGameCenterCandidates([candidate80])
+        var status = try await first.coordinator.statusSnapshot()
+        XCTAssertEqual(status.gameCenter.pendingReportCount, 1)
+
+        await first.coordinator.deactivateRuntime()
+        await first.platformGateway.deactivateRuntime()
+        await first.stateGateway.deactivateRuntime()
+        await interruptedGameCenter.resumeReport()
+        await pendingWork.value
+
+        let freshGameCenter = GameCenterCoordinatorProbe()
+        let relaunched = try await CoordinatorFixture(
+            store: store,
+            gameCenter: freshGameCenter,
+            uuidSequence: uuidSequence
+        )
+        status = try await relaunched.coordinator.statusSnapshot()
+        XCTAssertTrue(status.gameCenter.isOptedIn)
+        XCTAssertEqual(status.gameCenter.reportStatus, .pending)
+        XCTAssertEqual(status.gameCenter.pendingReportCount, 1)
+
+        await relaunched.coordinator.runPendingWork()
+        status = try await relaunched.coordinator.statusSnapshot()
+        var reportedBatches = await freshGameCenter.reportedBatches()
+        XCTAssertEqual(reportedBatches.count, 1)
+        XCTAssertEqual(reportedBatches.single?.single?.percentage, 80)
+        XCTAssertEqual(status.gameCenter.reportStatus, .mirrored)
+        XCTAssertEqual(status.gameCenter.pendingReportCount, 0)
+
+        try await relaunched.coordinator.submitGameCenterCandidates([candidate60])
+        await relaunched.coordinator.runPendingWork()
+        reportedBatches = await freshGameCenter.reportedBatches()
+        XCTAssertEqual(reportedBatches.count, 1)
+    }
+
+    func testInterruptedGameCenterReportRecoversAcrossSameCoordinatorReactivation() async throws {
+        let gameCenter = GameCenterCoordinatorProbe()
+        await gameCenter.suspendReport()
+        let fixture = try await CoordinatorFixture(gameCenter: gameCenter)
+        let candidate60 = try makeCandidate(percentage: 60, revision: 15)
+        let candidate80 = try makeCandidate(percentage: 80, revision: 16)
+        try await fixture.coordinator.submitGameCenterCandidates([candidate60])
+        try await fixture.coordinator.submit(.optIn)
+
+        let interruptedWork = Task {
+            await fixture.coordinator.runPendingWork()
+        }
+        let reportStarted = await waitForCoordinatorCondition {
+            await gameCenter.reportAttemptCount() == 1
+        }
+        XCTAssertTrue(reportStarted)
+        try await fixture.coordinator.submitGameCenterCandidates([candidate80])
+
+        await fixture.coordinator.deactivateRuntime()
+        await fixture.coordinator.activateRuntime()
+        var status = try await fixture.coordinator.statusSnapshot()
+        XCTAssertEqual(status.gameCenter.reportStatus, .pending)
+        XCTAssertEqual(status.gameCenter.pendingReportCount, 1)
+
+        await gameCenter.resumeReport()
+        await interruptedWork.value
+        status = try await fixture.coordinator.statusSnapshot()
+        XCTAssertEqual(status.gameCenter.reportStatus, .pending)
+        XCTAssertEqual(status.gameCenter.pendingReportCount, 1)
+
+        await fixture.coordinator.runPendingWork()
+        status = try await fixture.coordinator.statusSnapshot()
+        var reportedBatches = await gameCenter.reportedBatches()
+        XCTAssertEqual(reportedBatches.map { $0.single?.percentage }, [60, 80])
+        XCTAssertEqual(status.gameCenter.reportStatus, .mirrored)
+        XCTAssertEqual(status.gameCenter.pendingReportCount, 0)
+
+        try await fixture.coordinator.submitGameCenterCandidates([candidate60])
+        await fixture.coordinator.runPendingWork()
+        reportedBatches = await gameCenter.reportedBatches()
+        XCTAssertEqual(reportedBatches.count, 2)
+    }
+
     func testFailedRestoredGameCenterAuthenticationDoesNotPromptAgainOnWake() async throws {
         let store = InMemoryModuleStateStore(now: { testDate })
         let uuidSequence = TestUUIDSequence()
@@ -668,6 +769,55 @@ final class RuntimeCloudGameCenterCoordinatorTests: XCTestCase {
         let saved = try XCTUnwrap(savedPayload)
         let replacement = try CloudProgressionCodec.decode(saved)
         XCTAssertEqual(replacement.catalogVersion, 1)
+        XCTAssertEqual(replacement.quarantineDiagnostics.count, 1)
+    }
+
+    func testNearMaximumRemoteSelectionClockIsQuarantinedBeforeRuntimeAdoption() async throws {
+        let localCodex = CodexID(rawValue: "codex.norse")!
+        let remoteCodex = CodexID(rawValue: "codex.moonleaf")!
+        let local = try CloudProgressionReplica(
+            catalogVersion: 1,
+            logicalClock: 24,
+            selectedCodex: CloudCodexSelection(
+                codexID: localCodex,
+                logicalTimestamp: 24,
+                writerDeviceID: CloudOpaqueIdentifier(
+                    rawValue: String(repeating: "a", count: 64)
+                )!,
+                updatedAt: testDate.addingTimeInterval(-2)
+            )
+        )
+        let remote = try CloudProgressionReplica(
+            catalogVersion: 1,
+            logicalClock: UInt64.max - 2,
+            selectedCodex: CloudCodexSelection(
+                codexID: remoteCodex,
+                logicalTimestamp: UInt64.max - 2,
+                writerDeviceID: CloudOpaqueIdentifier(
+                    rawValue: String(repeating: "b", count: 64)
+                )!,
+                updatedAt: testDate.addingTimeInterval(-1)
+            )
+        )
+        let cloud = try CloudCoordinatorProbe(
+            remotePayload: CloudProgressionCodec.encode(remote)
+        )
+        let fixture = try await CoordinatorFixture(cloud: cloud)
+        try await fixture.coordinator.submitCloudProjection(
+            projectionAllowingMoonleaf(localRevision: 24, replica: local)
+        )
+        await fixture.coordinator.runPendingWork()
+
+        let status = try await fixture.coordinator.statusSnapshot()
+        XCTAssertEqual(status.cloudSync.phase, .quarantinedRemote)
+        XCTAssertEqual(status.cloudSync.quarantineCount, 1)
+        let pendingDelivery = await fixture.coordinator.pendingCloudMergeDelivery()
+        XCTAssertNil(pendingDelivery)
+        let savedPayload = await cloud.savedPayloads().last
+        let saved = try XCTUnwrap(savedPayload)
+        let replacement = try CloudProgressionCodec.decode(saved)
+        XCTAssertEqual(replacement.selectedCodex?.codexID, localCodex)
+        XCTAssertEqual(replacement.selectedCodex?.logicalTimestamp, 24)
         XCTAssertEqual(replacement.quarantineDiagnostics.count, 1)
     }
 
@@ -1360,6 +1510,8 @@ private actor GameCenterCoordinatorProbe: GameCenterReporting {
     private var accountScopeCharacter: Character = "a"
     private var authenticationRequestShouldWait = false
     private var authenticationRequestContinuation: CheckedContinuation<Void, Never>?
+    private var reportShouldWait = false
+    private var reportContinuation: CheckedContinuation<Void, Never>?
 
     func authenticationState() async -> GameCenterAuthenticationStateDTO {
         authentication
@@ -1386,6 +1538,11 @@ private actor GameCenterCoordinatorProbe: GameCenterReporting {
 
     func report(_ achievements: [GameCenterAchievementReportDTO]) async throws {
         reportAttempts += 1
+        if reportShouldWait {
+            await withCheckedContinuation { continuation in
+                reportContinuation = continuation
+            }
+        }
         if !reportErrors.isEmpty { throw reportErrors.removeFirst() }
         reports.append(achievements)
     }
@@ -1410,6 +1567,15 @@ private actor GameCenterCoordinatorProbe: GameCenterReporting {
     }
     func setReportErrors(_ errors: [GameCenterReportingTransportError]) {
         reportErrors = errors
+    }
+    func suspendReport() {
+        reportShouldWait = true
+    }
+    func resumeReport() {
+        reportShouldWait = false
+        let continuation = reportContinuation
+        reportContinuation = nil
+        continuation?.resume()
     }
     func setAccountScope(character: Character) { accountScopeCharacter = character }
 }

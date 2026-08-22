@@ -39,6 +39,25 @@ enum RootRevealSafetyPolicy {
     }
 }
 
+enum RootPendingPresentation: Equatable {
+    case importConfirmation
+    case receivedMessage
+}
+
+enum RootPendingPresentationPolicy {
+    static func selection(
+        showSplash: Bool,
+        isLocked: Bool,
+        hasPendingImport: Bool,
+        hasPendingMessage: Bool
+    ) -> RootPendingPresentation? {
+        guard !showSplash, !isLocked else { return nil }
+        if hasPendingImport { return .importConfirmation }
+        if hasPendingMessage { return .receivedMessage }
+        return nil
+    }
+}
+
 /// Hosts the main interface and overlays the lock screen whenever the app is
 /// locked. The Core lifecycle path re-locks on background, while this view plays
 /// the launch splash on a cold start when the 30-day intro schedule allows.
@@ -66,6 +85,15 @@ struct RootView: View {
             hasSecurityOrFailurePresentation: session.importErrorMessage != nil
                 || session.messageErrorMessage != nil
                 || session.lastError != nil
+        )
+    }
+
+    private var pendingPresentation: RootPendingPresentation? {
+        RootPendingPresentationPolicy.selection(
+            showSplash: showSplash,
+            isLocked: session.isLocked,
+            hasPendingImport: session.pendingImport != nil,
+            hasPendingMessage: session.pendingMessage != nil
         )
     }
 
@@ -104,7 +132,11 @@ struct RootView: View {
             session.setRevealBlocker(.rootPresentation, active: isBlocked)
         }
         .sheet(item: Binding(
-            get: { (showSplash || session.isLocked) ? nil : session.pendingImport },
+            get: {
+                pendingPresentation == .importConfirmation
+                    ? session.pendingImport
+                    : nil
+            },
             set: {
                 if $0 == nil && !session.isLocked && !showSplash {
                     cancelPendingImport()
@@ -124,7 +156,11 @@ struct RootView: View {
             }
         }
         .sheet(item: Binding(
-            get: { (showSplash || session.isLocked) ? nil : session.pendingMessage },
+            get: {
+                pendingPresentation == .receivedMessage
+                    ? session.pendingMessage
+                    : nil
+            },
             set: {
                 if $0 == nil && !session.isLocked && !showSplash {
                     dismissPendingMessage()

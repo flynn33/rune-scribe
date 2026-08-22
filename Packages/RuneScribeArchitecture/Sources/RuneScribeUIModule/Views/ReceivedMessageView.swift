@@ -3,8 +3,8 @@
 import SwiftUI
 
 /// One-tap view of a decrypted inbound message arriving over the wire (deep link,
-/// Universal Link, or clipboard). Shows who sent it and the plaintext, and lets the
-/// user jump straight to composing a reply with the same cipher.
+/// Universal Link, or clipboard). It distinguishes a locally known cipher from
+/// an unverified first-delivery label before offering a reply.
 ///
 /// Presentation-agnostic: it dismisses itself and reports a reply request via
 /// `onReply`, so it can be hosted app-wide (RootView) without coupling to a
@@ -26,11 +26,28 @@ struct ReceivedMessageView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
-                    RuneEyebrow(title: "From", systemImage: "person.crop.circle.fill")
+                    RuneEyebrow(
+                        title: identityTitle,
+                        systemImage: identitySystemImage
+                    )
                     Text(pending.senderName)
                         .font(.system(size: 15, weight: .semibold, design: .monospaced))
                         .foregroundColor(.runeTextPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
+
+                    if pending.senderIdentityStatus == .awaitingCipherConfirmation {
+                        RunePanel(
+                            title: "Confirmation Required",
+                            systemImage: "exclamationmark.shield.fill"
+                        ) {
+                            Text(
+                                "This sender label and cipher arrived together. "
+                                    + "Confirm the cipher before trusting the label or replying."
+                            )
+                            .font(.system(size: 12, design: .monospaced))
+                            .foregroundColor(.runeTextPrimary)
+                        }
+                    }
 
                     RunePanel(title: "Decoded Message", systemImage: "envelope.open.fill") {
                         Text(pending.plaintext)
@@ -58,7 +75,7 @@ struct ReceivedMessageView: View {
                         }
                     }
 
-                    Text("Decoded with the “\(pending.cipherName)” cipher.")
+                    Text(cipherSummary)
                         .font(.system(size: 11, design: .monospaced))
                         .foregroundColor(.runeSilver.opacity(0.8))
                 }
@@ -76,14 +93,50 @@ struct ReceivedMessageView: View {
                     onReply?(pending)
                     dismiss()
                 } label: {
-                    Label("Reply", systemImage: "arrowshape.turn.up.left.fill").frame(maxWidth: .infinity)
+                    Label(replyTitle, systemImage: "arrowshape.turn.up.left.fill")
+                        .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(RuneScribButtonStyle())
+                .disabled(pending.senderIdentityStatus == .awaitingCipherConfirmation)
             }
             .padding(RuneMetrics.pad)
         }
         .runeSheetFrame()
         .background(Color.runeNavy)
         .preferredColorScheme(.dark)
+    }
+
+    private var identityTitle: String {
+        switch pending.senderIdentityStatus {
+        case .trustedLocalCipher:
+            "Locally Stored Cipher"
+        case .awaitingCipherConfirmation:
+            "Claimed Sender — Unverified"
+        case .confirmedCipher:
+            "Confirmed Cipher"
+        }
+    }
+
+    private var identitySystemImage: String {
+        pending.senderIdentityStatus == .awaitingCipherConfirmation
+            ? "exclamationmark.shield.fill"
+            : "checkmark.shield.fill"
+    }
+
+    private var cipherSummary: String {
+        switch pending.senderIdentityStatus {
+        case .trustedLocalCipher:
+            "Authenticated with the locally stored “\(pending.cipherName)” cipher."
+        case .awaitingCipherConfirmation:
+            "Decoded for preview with an unconfirmed embedded cipher."
+        case .confirmedCipher:
+            "Decoded with the user-confirmed “\(pending.cipherName)” cipher."
+        }
+    }
+
+    private var replyTitle: String {
+        pending.senderIdentityStatus == .awaitingCipherConfirmation
+            ? "Confirm Cipher to Reply"
+            : "Reply"
     }
 }

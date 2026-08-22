@@ -187,16 +187,17 @@ public struct GameCenterReportOutbox: Codable, Equatable, Sendable {
             $0.candidate.achievementID == candidate.achievementID
         }) {
             let existing = entries[index]
-            let winner: GameCenterReportCandidate
-            if candidate.percentage > existing.candidate.percentage
+            guard candidate.percentage > existing.candidate.percentage
                 || (candidate.percentage == existing.candidate.percentage
                     && candidate.localRevision > existing.candidate.localRevision)
-            {
-                winner = candidate
-            } else {
-                winner = existing.candidate
-            }
-            entries[index] = try GameCenterOutboxEntry(candidate: winner)
+            else { return self }
+            entries[index] = try GameCenterOutboxEntry(
+                candidate: candidate,
+                state: existing.state,
+                failedAttemptCount: existing.failedAttemptCount,
+                deferralReason: existing.deferralReason,
+                nextEligibleAttemptAt: existing.nextEligibleAttemptAt
+            )
         } else {
             entries.append(try GameCenterOutboxEntry(candidate: candidate))
         }
@@ -225,6 +226,19 @@ public struct GameCenterReportOutbox: Codable, Equatable, Sendable {
             }
             .prefix(maximumCount)
             .map(\.candidate)
+    }
+
+    /// Restores reports whose process-local callback owner was lost. Recovery does
+    /// not consume another attempt because no report failure was observed.
+    public func recoverInterruptedReports() throws -> Self {
+        let entries = try pendingEntries.map { entry in
+            guard entry.state == .inFlight else { return entry }
+            return try GameCenterOutboxEntry(
+                candidate: entry.candidate,
+                failedAttemptCount: entry.failedAttemptCount
+            )
+        }
+        return try Self(acknowledgements: acknowledgements, pendingEntries: entries)
     }
 
     public func markInFlight(_ achievementIDs: Set<AchievementID>) throws -> Self {

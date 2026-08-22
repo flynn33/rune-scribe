@@ -40,8 +40,18 @@ public actor InMemoryProtectedFileStore: ProtectedFileStore {
         self.files = files
     }
 
-    public func read(relativePath: ProtectedPath) async throws -> Data? {
-        files[relativePath]
+    public func read(
+        relativePath: ProtectedPath,
+        maximumByteCount: Int
+    ) async throws -> Data? {
+        guard maximumByteCount > 0 else {
+            throw ProtectedFileStoreReadError.invalidMaximumByteCount
+        }
+        guard let data = files[relativePath] else { return nil }
+        guard data.count <= maximumByteCount else {
+            throw ProtectedFileStoreReadError.contentTooLarge
+        }
+        return data
     }
 
     public func write(_ data: Data, relativePath: ProtectedPath) async throws {

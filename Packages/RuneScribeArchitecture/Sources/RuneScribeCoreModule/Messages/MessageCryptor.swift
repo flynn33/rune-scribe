@@ -15,6 +15,10 @@ enum MessageCryptorError: Error, LocalizedError, Equatable, Sendable {
 /// Stateless authenticated encryption over a `Cipher`'s symmetric key (AES-GCM).
 /// A wrong key or any tampering makes `open` throw — it never returns bogus plaintext.
 struct MessageCryptor: Sendable {
+    /// AES-GCM combined representation: 12-byte nonce and 16-byte tag, even
+    /// when the authenticated plaintext is empty.
+    static let minimumCombinedByteCount = 28
+
     /// Returns `AES.GCM.SealedBox.combined` (12-byte nonce ‖ ciphertext ‖ 16-byte tag).
     func seal(_ plaintext: String, with cipher: Cipher) throws -> Data {
         let box = try AES.GCM.seal(Data(plaintext.utf8), using: cipher.symmetricKey)
