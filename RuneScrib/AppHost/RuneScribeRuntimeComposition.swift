@@ -44,7 +44,8 @@ import RuneScribeUIRuntime
         bundle: Bundle = .main,
         injectedCoreFactory: AnyModuleFactory? = nil,
         moduleStateStore: (any ModuleStateStore)? = try? AppleSQLiteModuleStateStore(),
-        inboundFiles: any InboundFileReader = AppleInboundFileReader()
+        inboundFiles: any InboundFileReader = AppleInboundFileReader(),
+        cloudSync: (any CloudSyncTransport)? = nil
     ) {
         let shareArtifacts = AppleShareArtifactStore()
         let systemClipboard = SystemClipboardService()
@@ -61,7 +62,7 @@ import RuneScribeUIRuntime
         resources = BundleApplicationResourceLocator(bundle: bundle, moduleBundles: moduleBundles)
         fonts = CoreTextFontRegistrar()
         contacts = SystemContactAccessService()
-        cloudSync = AppleCloudKitProgressionTransport()
+        self.cloudSync = cloudSync ?? AppleCloudKitProgressionTransport()
         gameCenterReporting = AppleGameCenterReportingAdapter()
         clipboardRead = systemClipboard
         clipboardWrite = systemClipboard

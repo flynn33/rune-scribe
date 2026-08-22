@@ -294,7 +294,8 @@ final class AppHostRoutingTests: XCTestCase {
                 bundle: .main,
                 injectedCoreFactory: coreFactory,
                 moduleStateStore: moduleStateStore,
-                inboundFiles: inboundFiles
+                inboundFiles: inboundFiles,
+                cloudSync: NoAccountCloudSyncTransport()
             ),
             inboundInputService: inboundInputService
         )

@@ -11,16 +11,21 @@ public actor AppleCloudKitProgressionTransport: CloudSyncTransport {
     private static let recordName = "private-progression-v1"
     private static let payloadField = "payload"
 
-    private let container: CKContainer
-    private let database: CKDatabase
+    private let injectedContainer: CKContainer?
+    private var resolvedContainer: CKContainer?
+    private var resolvedDatabase: CKDatabase?
 
-    public init(container: CKContainer = CKContainer(identifier: containerIdentifier)) {
-        self.container = container
-        database = container.privateCloudDatabase
+    public init() {
+        injectedContainer = nil
+    }
+
+    public init(container: CKContainer) {
+        injectedContainer = container
     }
 
     public func accountState() async throws -> CloudAccountStateDTO {
         do {
+            let (container, _) = resolveConnection()
             let status = try await container.accountStatus()
             switch status {
             case .available:
@@ -59,6 +64,7 @@ public actor AppleCloudKitProgressionTransport: CloudSyncTransport {
 
     public func fetchPrivateProgression() async throws -> CloudSyncFetchResultDTO {
         do {
+            let (_, database) = resolveConnection()
             let record = try await database.record(
                 for: CKRecord.ID(recordName: Self.recordName)
             )
@@ -114,6 +120,7 @@ public actor AppleCloudKitProgressionTransport: CloudSyncTransport {
     public func savePrivateProgression(
         _ request: CloudSyncSaveRequestDTO
     ) async throws -> CloudSyncSaveResultDTO {
+        let (_, database) = resolveConnection()
         let recordID = CKRecord.ID(recordName: Self.recordName)
         let record: CKRecord
         do {
@@ -186,6 +193,18 @@ public actor AppleCloudKitProgressionTransport: CloudSyncTransport {
     ) throws {
         guard fileExists(fileURL.path) else { return }
         try remove(fileURL)
+    }
+
+    private func resolveConnection() -> (CKContainer, CKDatabase) {
+        if let resolvedContainer, let resolvedDatabase {
+            return (resolvedContainer, resolvedDatabase)
+        }
+        let container = injectedContainer
+            ?? CKContainer(identifier: Self.containerIdentifier)
+        let database = container.privateCloudDatabase
+        resolvedContainer = container
+        resolvedDatabase = database
+        return (container, database)
     }
 
     static func payloadValidationFailure(

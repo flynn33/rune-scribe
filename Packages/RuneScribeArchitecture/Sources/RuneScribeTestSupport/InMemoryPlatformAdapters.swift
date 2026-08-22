@@ -340,3 +340,21 @@ public struct FixedUUIDProvider: UUIDProviding {
         uuid
     }
 }
+
+public actor NoAccountCloudSyncTransport: CloudSyncTransport {
+    public init() {}
+
+    public func accountState() async throws -> CloudAccountStateDTO {
+        try CloudAccountStateDTO(state: .noAccount, accountScopeDigest: nil)
+    }
+
+    public func fetchPrivateProgression() async throws -> CloudSyncFetchResultDTO {
+        try CloudSyncFetchResultDTO(payload: nil, changeTag: nil)
+    }
+
+    public func savePrivateProgression(
+        _ request: CloudSyncSaveRequestDTO
+    ) async throws -> CloudSyncSaveResultDTO {
+        throw CloudSyncTransportError.accountUnavailable
+    }
+}

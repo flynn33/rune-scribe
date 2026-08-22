@@ -6,6 +6,10 @@ import RuneScribeContracts
 import XCTest
 
 final class AppleCloudKitProgressionTransportTests: XCTestCase {
+    func testDefaultConstructionDoesNotResolveCloudKitContainer() {
+        _ = AppleCloudKitProgressionTransport()
+    }
+
     func testAssetPolicyRejectsMissingMalformedAndOversizeInputsBeforeAllocation() {
         let maximum = CloudSyncFetchResultDTO.maximumPayloadByteCount
 
