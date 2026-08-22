@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "generatedAtUTC": "2026-08-21T14:30:00Z",
+  "packageVersion": "3.1.0",
+  "canonicalSourceRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0",
+  "intendedPackageRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1",
+  "cleanPackageRoot": "/tmp/elven-phase-c-external-compare.oPWlyg/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1",
+  "intendedArchive": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1.zip",
+  "cleanArchive": "/tmp/elven-phase-c-external-compare.oPWlyg/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1.zip",
+  "intendedTargetWasAbsent": true,
+  "cleanTargetWasEmpty": true,
+  "distinctTargets": true,
+  "rootComparison": {
+    "status": "PASS",
+    "fileCount": 488,
+    "byteTotal": 30388586,
+    "intendedTreeSHA256": "01415e0a5a43305c3989ac020adb2558045a16b05fdb888f17b2c07a08bf2b1e",
+    "cleanTreeSHA256": "01415e0a5a43305c3989ac020adb2558045a16b05fdb888f17b2c07a08bf2b1e",
+    "differences": []
+  },
+  "archiveComparison": {
+    "status": "PASS",
+    "byteLength": 25869236,
+    "intendedSHA256": "858290e05e8024b991ce736e1abbb9bded920420662407caaf8a0a03b4f9073e",
+    "cleanSHA256": "858290e05e8024b991ce736e1abbb9bded920420662407caaf8a0a03b4f9073e",
+    "memberCount": 488,
+    "deterministicMemberOrder": true,
+    "differences": []
+  },
+  "archiveToRootComparisons": [
+    {
+      "archive": "intended",
+      "root": "intended",
+      "status": "PASS",
+      "fileCount": 488,
+      "differences": []
+    },
+    {
+      "archive": "clean",
+      "root": "clean",
+      "status": "PASS",
+      "fileCount": 488,
+      "differences": []
+    }
+  ],
+  "commands": [
+    "python3 scripts/build-elven-production-assets.py --recreate-from-original --original /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0 --target /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1 --package-version 3.1.0 --generated-at 2026-08-21T14:30:00Z --font-registration-evidence /tmp/elven-phase-c-final.4egj9k/font-registration.json --deterministic-regeneration-evidence /tmp/elven-phase-c-current-prelim.i3hsVN/deterministic-regeneration.json",
+    "python3 scripts/build-elven-production-assets.py --recreate-from-original --original /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0 --target /tmp/elven-phase-c-external-compare.oPWlyg/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1 --package-version 3.1.0 --generated-at 2026-08-21T14:30:00Z --font-registration-evidence /tmp/elven-phase-c-final.4egj9k/font-registration.json --deterministic-regeneration-evidence /tmp/elven-phase-c-current-prelim.i3hsVN/deterministic-regeneration.json",
+    "python3 scripts/create-deterministic-package-archive.py --package-root /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1 --output /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1.zip --generated-at 2026-08-21T14:30:00Z",
+    "python3 scripts/create-deterministic-package-archive.py --package-root /tmp/elven-phase-c-external-compare.oPWlyg/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1 --output /tmp/elven-phase-c-external-compare.oPWlyg/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1.zip --generated-at 2026-08-21T14:30:00Z",
+    "python3 scripts/inventory-elven-package.py --root intended=/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1 --root clean=/tmp/elven-phase-c-external-compare.oPWlyg/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1 --archive intendedZip=/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1.zip --archive cleanZip=/tmp/elven-phase-c-external-compare.oPWlyg/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1.zip --require-deterministic-archive --expect-identical intended=clean --expect-identical-archive intendedZip=cleanZip --expect-archive-matches-root intendedZip=intended --expect-archive-matches-root cleanZip=clean --generated-at-utc 2026-08-21T14:30:00Z --output /tmp/elven-phase-c-external-inventory.json"
+  ],
+  "errors": []
+}

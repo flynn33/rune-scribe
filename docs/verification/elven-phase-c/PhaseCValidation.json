@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "1.0",
+  "validator": "elven-phase-c-package",
+  "packageRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1",
+  "repositoryRoot": "/Users/jimdaley/GitHub/Rune-Scribe-Elven-Phase-C",
+  "packageVersion": "3.1.0",
+  "requestedScopes": [
+    "aggregate"
+  ],
+  "effectiveScopes": [
+    "output-matrix",
+    "relics",
+    "seals",
+    "fonts",
+    "share-accessibility-fallbacks",
+    "provenance-recipes",
+    "budgets-integrity",
+    "publication"
+  ],
+  "status": "PASS",
+  "scopes": [
+    {
+      "scope": "output-matrix",
+      "status": "PASS",
+      "issueCount": 0,
+      "issueCodes": [],
+      "evidence": [
+        "Observed 56 logical resources and 184 explicit outputs"
+      ]
+    },
+    {
+      "scope": "relics",
+      "status": "PASS",
+      "issueCount": 0,
+      "issueCodes": [],
+      "evidence": [
+        "Observed 12 Relic descriptors and 48 Relic outputs"
+      ]
+    },
+    {
+      "scope": "seals",
+      "status": "PASS",
+      "issueCount": 0,
+      "issueCodes": [],
+      "evidence": [
+        "Observed 24 Seal descriptors and 72 Seal outputs"
+      ]
+    },
+    {
+      "scope": "fonts",
+      "status": "PASS",
+      "issueCount": 0,
+      "issueCodes": [],
+      "evidence": [
+        "Observed 4 Script/font resources and 4 evidence records"
+      ]
+    },
+    {
+      "scope": "share-accessibility-fallbacks",
+      "status": "PASS",
+      "issueCount": 0,
+      "issueCodes": [],
+      "evidence": [
+        "Observed fallback and accessibility declarations on 184 outputs"
+      ]
+    },
+    {
+      "scope": "provenance-recipes",
+      "status": "PASS",
+      "issueCount": 0,
+      "issueCodes": [],
+      "evidence": [
+        "Observed 198 provenance records, 184 output links, and 9 recipes"
+      ]
+    },
+    {
+      "scope": "budgets-integrity",
+      "status": "PASS",
+      "issueCount": 0,
+      "issueCodes": [],
+      "evidence": [
+        "Observed 184 shipping files and 487 package-manifest entries"
+      ]
+    },
+    {
+      "scope": "publication",
+      "status": "PASS",
+      "issueCount": 0,
+      "issueCodes": [],
+      "evidence": [
+        "Scanned 488 package files and 6 repository publication files"
+      ]
+    }
+  ],
+  "issues": [],
+  "summary": {
+    "status": "PASS",
+    "scopeCount": 8,
+    "passedScopeCount": 8,
+    "failedScopes": [],
+    "issueCount": 0,
+    "issueCodes": [],
+    "logicalResourceCount": 56,
+    "shippingOutputCount": 184,
+    "provenanceRecordCount": 198
+  },
+  "aggregate": {
+    "status": "PASS",
+    "requiredScopeCount": 8,
+    "passedScopeCount": 8
+  }
+}

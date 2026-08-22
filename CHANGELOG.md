@@ -12,9 +12,10 @@ release work and reviewed against the project version before merge. The format f
   while keeping production Elven series providers out of the shipping app.
 - Align the Core, Progression, and UI module descriptors, manifests, and pinned
   resource hashes with version 1.0.38 build 38.
-- Rebuild and validate the corrected Elven Series v3 production package: all nine
-  recovery findings pass simultaneously, Phase C is unblocked and in progress, and
-  production Elven providers remain outside the shipping app until later phases.
+- Complete and validate the corrected Elven Series v3.1 production package with 56
+  logical resources, 184 shipping outputs, complete provenance, and deterministic
+  regeneration. All nine recovery findings continue to pass simultaneously; Phase D
+  has not started, and production Elven providers remain outside the shipping app.
 
 ## [1.0.37] - 2026-08-14
 

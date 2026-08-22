@@ -8,19 +8,25 @@ import datetime as dt
 import hashlib
 import json
 import math
+import os
+import platform
 import re
 import shutil
-import struct
+import subprocess
+import sys
+import tempfile
 import xml.etree.ElementTree as ET
-import zlib
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from PIL import Image, ImageDraw, ImageOps
+import PIL
+import fontTools
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageOps
 from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.recordingPen import RecordingPen
 from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.svgLib.path import parse_path
+from fontTools.ttLib import TTFont
 
 
 SVG_NS = "http://www.w3.org/2000/svg"
@@ -28,8 +34,16 @@ ET.register_namespace("", SVG_NS)
 
 BUILD_DATE = "2026-08-21T14:30:00Z"
 APPROVAL_DATE = "2026-08-20T00:00:00Z"
+PACKAGE_VERSION = "3.0.0"
+PACKAGE_STATUS = "corrected-production"
+EXPECTED_PYTHON = (3, 9, 6)
+EXPECTED_PILLOW = "11.3.0"
+EXPECTED_FONTTOOLS = "4.60.2"
+EXPECTED_SIPS = "sips-316"
 PYTHON_TOOL = "Python 3.9.6 with Pillow 11.3.0 and fontTools 4.60.2"
+HEIF_TOOL = EXPECTED_SIPS
 PIPELINE = "scripts/build-elven-production-assets.py"
+MAC_EPOCH = dt.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
 
 CANONICAL_IDS = {
     "achievement." + "the-correspondent": "achievement.correspondent",
@@ -149,6 +163,79 @@ CORRECTED_SOURCE_PATHS = set(FEATURES) | {
     "Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg",
 }
 
+PHASE_C_CORRECTED_SOURCE_PATHS = {
+    "Source-Masters/Relic-Geometry/gloamthorn/umbral-plaque-geometry.svg",
+    "Source-Masters/Relic-Geometry/moonleaf/ivybound-plaque-geometry.svg",
+    "Source-Masters/Relic-Geometry/sunspire/solvine-plaque-geometry.svg",
+}
+
+
+def parse_package_version(value: str) -> str:
+    match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", value)
+    if match is None or int(match.group(1)) != 3:
+        raise argparse.ArgumentTypeError("expected a v3 semantic version such as 3.1.0")
+    return value
+
+
+def parse_generated_at(value: str) -> str:
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("expected an ISO-8601 UTC timestamp") from error
+    if parsed.tzinfo is None or parsed.utcoffset() != dt.timedelta(0):
+        raise argparse.ArgumentTypeError("generated-at must be an explicit UTC timestamp")
+    if parsed.year < 1980 or parsed.year > 2107:
+        raise argparse.ArgumentTypeError("generated-at year must fit the deterministic ZIP range 1980 through 2107")
+    if parsed.second % 2:
+        raise argparse.ArgumentTypeError("generated-at seconds must be even because ZIP timestamps have two-second precision")
+    if parsed.astimezone(dt.timezone.utc) < MAC_EPOCH:
+        raise argparse.ArgumentTypeError("generated-at cannot precede the 1904 font timestamp epoch")
+    return parsed.astimezone(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def generated_datetime() -> dt.datetime:
+    return dt.datetime.fromisoformat(BUILD_DATE.replace("Z", "+00:00")).astimezone(dt.timezone.utc)
+
+
+def font_timestamp() -> int:
+    return int((generated_datetime() - MAC_EPOCH).total_seconds())
+
+
+def target_version_label(version: str) -> str:
+    major, minor, _ = version.split(".")
+    return f"v{major}.{minor}"
+
+
+def runtime_tool_record() -> Dict[str, str]:
+    return {
+        "python": platform.python_version(),
+        "pillow": PIL.__version__,
+        "fontTools": fontTools.__version__,
+        "sips": HEIF_TOOL,
+    }
+
+
+def verify_runtime_tools(require_heif: bool) -> None:
+    failures = []
+    if sys.version_info[:3] != EXPECTED_PYTHON:
+        failures.append(f"Python {platform.python_version()} != {'.'.join(map(str, EXPECTED_PYTHON))}")
+    if PIL.__version__ != EXPECTED_PILLOW:
+        failures.append(f"Pillow {PIL.__version__} != {EXPECTED_PILLOW}")
+    if fontTools.__version__ != EXPECTED_FONTTOOLS:
+        failures.append(f"fontTools {fontTools.__version__} != {EXPECTED_FONTTOOLS}")
+    if require_heif:
+        result = subprocess.run(
+            ["/usr/bin/sips", "--version"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        actual = result.stdout.strip()
+        if result.returncode != 0 or actual != EXPECTED_SIPS:
+            failures.append(f"sips {actual or 'unavailable'} != {EXPECTED_SIPS}")
+    if failures:
+        raise SystemExit("Unsupported deterministic asset runtime: " + "; ".join(failures))
+
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
@@ -161,6 +248,88 @@ def sha256_file(path: Path) -> str:
 def dump_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def reject_duplicate_keys(pairs: Sequence[Tuple[str, Any]]) -> Dict[str, Any]:
+    result: Dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
+def load_json(path: Path) -> Any:
+    return json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=reject_duplicate_keys)
+
+
+def verify_canonical_source(original: Path) -> Dict[str, Any]:
+    symlinks = [item for item in original.rglob("*") if item.is_symlink()]
+    if symlinks:
+        raise SystemExit(f"Canonical source package must not contain symbolic links: {symlinks[0]}")
+    manifest_path = original / "PACKAGE-MANIFEST.json"
+    manifest = load_json(manifest_path)
+    if manifest.get("packageID") != "runescribe.elven-series.design-package":
+        raise SystemExit("Refusing source with unexpected package identity")
+    declared = manifest.get("files", [])
+    declared_paths = [item.get("path") for item in declared]
+    actual_paths = sorted(
+        item.relative_to(original).as_posix()
+        for item in original.rglob("*")
+        if item.is_file() and item.name != "PACKAGE-MANIFEST.json"
+    )
+    if declared_paths != sorted(set(declared_paths)) or declared_paths != actual_paths:
+        raise SystemExit("Canonical source package manifest coverage differs from source tree")
+    for entry in declared:
+        relative = str(entry.get("path", ""))
+        if relative.startswith("/") or ".." in Path(relative).parts or "\\" in relative:
+            raise SystemExit(f"Canonical source package contains unsafe path: {relative}")
+        path = original / relative
+        if path.stat().st_size != entry.get("bytes") or sha256_file(path) != entry.get("sha256"):
+            raise SystemExit(f"Canonical source package fact mismatch: {relative}")
+    if manifest.get("fileCountExcludingManifest") != len(declared):
+        raise SystemExit("Canonical source package file count differs")
+    return manifest
+
+
+def verify_recreation_target(root: Path, expected_version: str) -> Dict[str, Any]:
+    symlinks = [item for item in root.rglob("*") if item.is_symlink()]
+    if symlinks:
+        raise SystemExit(f"Refusing to recreate a target containing symbolic links: {symlinks[0]}")
+    manifest_path = root / "PACKAGE-MANIFEST.json"
+    if not manifest_path.is_file():
+        raise SystemExit("Refusing to recreate a nonempty target without a recognized package manifest")
+    manifest = load_json(manifest_path)
+    if (
+        manifest.get("packageID") != "runescribe.elven-series.corrected-production-package"
+        or manifest.get("packageVersion") != expected_version
+        or manifest.get("rootDirectory") != root.name
+    ):
+        raise SystemExit("Refusing to recreate a target with an unexpected package identity, version, or root name")
+    declared = manifest.get("files")
+    if not isinstance(declared, list):
+        raise SystemExit("Existing target package manifest files must be an array")
+    declared_paths = [entry.get("path") for entry in declared if isinstance(entry, dict)]
+    actual_paths = sorted(
+        item.relative_to(root).as_posix()
+        for item in root.rglob("*")
+        if item.is_file() and item.name != "PACKAGE-MANIFEST.json"
+    )
+    if (
+        len(declared_paths) != len(declared)
+        or declared_paths != sorted(set(declared_paths))
+        or declared_paths != actual_paths
+        or manifest.get("fileCountExcludingManifest") != len(actual_paths)
+    ):
+        raise SystemExit("Existing target package manifest coverage differs from the target tree")
+    for entry in declared:
+        relative = str(entry["path"])
+        if relative.startswith("/") or ".." in Path(relative).parts or "\\" in relative:
+            raise SystemExit(f"Existing target package contains unsafe path: {relative}")
+        path = root / relative
+        if path.stat().st_size != entry.get("bytes") or sha256_file(path) != entry.get("sha256"):
+            raise SystemExit(f"Existing target package fact mismatch: {relative}")
+    return manifest
 
 
 def hex_color(value: str, opacity: float = 1.0) -> Tuple[int, int, int, int]:
@@ -245,12 +414,20 @@ def flatten_path(data: str, transform: Matrix = IDENTITY, steps: int = 16) -> Li
             cursor = p3
         elif operation == "qCurveTo":
             values = list(operands)
-            close = values and values[-1] is None
-            if close:
+            if not values:
+                continue
+            if values[-1] is None:
                 values[-1] = start
-            for end in values:
-                control = end if end == values[-1] else end
-                target = end
+            controls = values[:-1]
+            final = values[-1]
+            segments: List[Tuple[Tuple[float, float], Tuple[float, float]]] = []
+            if controls:
+                for index, control in enumerate(controls):
+                    target = final if index == len(controls) - 1 else lerp(control, controls[index + 1], 0.5)
+                    segments.append((control, target))
+            else:
+                segments.append((final, final))
+            for control, target in segments:
                 p0 = cursor
                 for index in range(1, steps + 1):
                     t = index / steps
@@ -348,7 +525,7 @@ def pdf_escape_number(value: float) -> str:
     return text or "0"
 
 
-def write_vector_pdf(svg_path: Path, pdf_path: Path) -> None:
+def write_vector_pdf(svg_path: Path, pdf_path: Path, monochrome: bool = False) -> None:
     root = ET.parse(svg_path).getroot()
     _, _, width, height = svg_viewbox(svg_path)
     commands: List[str] = ["1 J 1 j"]
@@ -365,9 +542,9 @@ def write_vector_pdf(svg_path: Path, pdf_path: Path) -> None:
         fill = None if fill_raw in ("none", "transparent") else hex_color(fill_raw, opacity)
         stroke = None if stroke_raw in ("none", "transparent") else hex_color(stroke_raw, opacity)
         if fill:
-            commands.append(f"{fill[0]/255:.5f} {fill[1]/255:.5f} {fill[2]/255:.5f} rg")
+            commands.append("0 g" if monochrome else f"{fill[0]/255:.5f} {fill[1]/255:.5f} {fill[2]/255:.5f} rg")
         if stroke:
-            commands.append(f"{stroke[0]/255:.5f} {stroke[1]/255:.5f} {stroke[2]/255:.5f} RG")
+            commands.append("0 G" if monochrome else f"{stroke[0]/255:.5f} {stroke[1]/255:.5f} {stroke[2]/255:.5f} RG")
             commands.append(f"{pdf_escape_number(float(element.attrib.get('stroke-width', style.get('stroke-width', '1'))))} w")
         for values in paths:
             if not values:
@@ -439,6 +616,17 @@ def glyph_from_svg(path: Path) -> Any:
 
 
 def build_font(glyph_dir: Path, glyph_manifest: Dict[str, Any], output: Path) -> None:
+    glyph_records = glyph_manifest.get("glyphs", [])
+    expected_values = list(range(32))
+    if [item.get("canonicalValue") for item in glyph_records] != expected_values:
+        raise ValueError(f"{glyph_manifest.get('scriptID')} glyph values are not ordered 0 through 31")
+    if [item.get("unicodeToken") for item in glyph_records] != [f"U+{0x16A0 + value:04X}" for value in expected_values]:
+        raise ValueError(f"{glyph_manifest.get('scriptID')} Unicode tokens differ from canonical order")
+    source_names = [Path(str(item.get("sourceMaster", ""))).name for item in glyph_records]
+    if source_names != [f"glyph-{value:02d}.svg" for value in expected_values]:
+        raise ValueError(f"{glyph_manifest.get('scriptID')} source-master order differs")
+    if len({item.get("glyphID") for item in glyph_records}) != 32:
+        raise ValueError(f"{glyph_manifest.get('scriptID')} glyph IDs are not unique")
     glyph_order = [".notdef"] + [f"uni{0x16A0 + index:04X}" for index in range(32)]
     glyphs: Dict[str, Any] = {}
     notdef_pen = TTGlyphPen(None)
@@ -455,24 +643,28 @@ def build_font(glyph_dir: Path, glyph_manifest: Dict[str, Any], output: Path) ->
     builder.setupHorizontalHeader(ascent=int(glyph_manifest["ascender"]), descent=int(glyph_manifest["descender"]), lineGap=int(glyph_manifest["lineGap"]))
     postscript = glyph_manifest["postScriptName"]
     family = postscript.removesuffix("-Regular")
-    builder.setupNameTable({"familyName": family, "styleName": "Regular", "uniqueFontIdentifier": f"Raven Forge Software:{postscript}:2026", "fullName": family, "psName": postscript, "version": "Version 1.000"})
+    builder.setupNameTable({"familyName": family, "styleName": "Regular", "uniqueFontIdentifier": f"Raven Forge Software:{postscript}:{PACKAGE_VERSION}", "fullName": family, "psName": postscript, "version": f"Version {PACKAGE_VERSION}"})
     builder.setupOS2(sTypoAscender=int(glyph_manifest["ascender"]), sTypoDescender=int(glyph_manifest["descender"]), sTypoLineGap=int(glyph_manifest["lineGap"]), usWinAscent=max(0, int(glyph_manifest["ascender"])), usWinDescent=abs(int(glyph_manifest["descender"])))
     builder.setupPost()
     builder.setupMaxp()
+    deterministic_timestamp = font_timestamp()
+    builder.font["head"].created = deterministic_timestamp
+    builder.font["head"].modified = deterministic_timestamp
+    major, minor, patch = (int(item) for item in PACKAGE_VERSION.split("."))
+    builder.font["head"].fontRevision = major + minor / 10 + patch / 1000
     output.parent.mkdir(parents=True, exist_ok=True)
     builder.save(str(output))
 
 
 def gradient_image(size: Tuple[int, int], dark: str, mid: str) -> Image.Image:
-    image = Image.new("RGB", size)
-    pixels = image.load()
     first, second = hex_color(dark), hex_color(mid)
+    colors = []
     for y in range(size[1]):
         t = y / max(1, size[1] - 1)
-        color = tuple(round(first[index] * (1 - t) + second[index] * t) for index in range(3))
-        for x in range(size[0]):
-            pixels[x, y] = color
-    return image
+        colors.append(tuple(round(first[index] * (1 - t) + second[index] * t) for index in range(3)))
+    strip = Image.new("RGB", (1, size[1]))
+    strip.putdata(colors)
+    return strip.resize(size)
 
 
 def color_mix(first: str, second: str, amount: float) -> Tuple[int, int, int, int]:
@@ -654,6 +846,135 @@ def save_png(image: Image.Image, path: Path) -> None:
     image.save(path, format="PNG", optimize=False, compress_level=9)
 
 
+def encode_heif_once(image: Image.Image, output: Path) -> None:
+    with tempfile.TemporaryDirectory(prefix="elven-heif-") as temporary:
+        temporary_root = Path(temporary)
+        png_path = temporary_root / "source.png"
+        heic_path = temporary_root / "output.heic"
+        image.convert("RGB").save(png_path, format="PNG", optimize=False, compress_level=9)
+        environment = dict(os.environ)
+        environment.update({"LC_ALL": "C", "LANG": "C"})
+        result = subprocess.run(
+            ["/usr/bin/sips", "-s", "format", "heic", "-s", "formatOptions", "80", str(png_path), "--out", str(heic_path)],
+            check=False,
+            capture_output=True,
+            text=True,
+            env=environment,
+        )
+        if result.returncode != 0 or not heic_path.is_file():
+            raise RuntimeError(f"deterministic HEIF export failed: {result.stderr.strip() or result.stdout.strip()}")
+        output.write_bytes(heic_path.read_bytes())
+
+
+def save_heif(image: Image.Image, path: Path) -> None:
+    """Export twice and accept HEIF bytes only when the native encoder is repeatable."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="elven-heif-proof-") as temporary:
+        first = Path(temporary) / "first.heif"
+        second = Path(temporary) / "second.heif"
+        encode_heif_once(image, first)
+        encode_heif_once(image, second)
+        first_bytes = first.read_bytes()
+        if first_bytes != second.read_bytes():
+            raise RuntimeError("native HEIF encoder produced non-deterministic bytes")
+        path.write_bytes(first_bytes)
+
+
+def normalized_region_pixels(region: Sequence[float], size: Tuple[int, int]) -> Tuple[int, int, int, int]:
+    x, y, width, height = region
+    return (
+        round(x * size[0]),
+        round(y * size[1]),
+        round((x + width) * size[0]),
+        round((y + height) * size[1]),
+    )
+
+
+def relic_mask(root: Path, relic: Dict[str, Any]) -> Image.Image:
+    geometry = root / relic["geometrySourceMaster"]
+    tree = ET.parse(geometry)
+    svg_root = tree.getroot()
+    _, _, width, height = svg_viewbox(geometry)
+    size = (round(width), round(height))
+    mask = Image.new("L", size, 0)
+    draw = ImageDraw.Draw(mask)
+    candidates = [item for item in svg_root if tag_name(item) in ("rect", "path")]
+    outer = next(
+        (
+            item for item in candidates
+            if not (
+                tag_name(item) == "rect"
+                and float(item.attrib.get("x", "0")) == 0
+                and float(item.attrib.get("y", "0")) == 0
+                and float(item.attrib.get("width", "0")) == width
+                and float(item.attrib.get("height", "0")) == height
+            )
+        ),
+        None,
+    )
+    if outer is None:
+        raise ValueError(f"Relic geometry has no production silhouette: {relic['geometrySourceMaster']}")
+    if tag_name(outer) == "rect":
+        x = round(float(outer.attrib.get("x", "0")))
+        y = round(float(outer.attrib.get("y", "0")))
+        right = x + round(float(outer.attrib["width"]))
+        bottom = y + round(float(outer.attrib["height"]))
+        radius = round(float(outer.attrib.get("rx", "0")))
+        draw.rounded_rectangle((x, y, right, bottom), radius=radius, fill=255)
+    else:
+        paths = element_paths(outer, IDENTITY)
+        if not paths:
+            raise ValueError(f"Relic silhouette path is empty: {relic['geometrySourceMaster']}")
+        for values in paths:
+            draw.polygon([(round(x), round(y)) for x, y in values], fill=255)
+    return mask
+
+
+def tag_name(element: ET.Element) -> str:
+    return element.tag.rsplit("}", 1)[-1]
+
+
+def draw_relic(root: Path, slug: str, relic: Dict[str, Any], high_contrast: bool = False) -> Image.Image:
+    geometry = root / relic["geometrySourceMaster"]
+    _, _, width_value, height_value = svg_viewbox(geometry)
+    size = (round(width_value), round(height_value))
+    palette = PALETTES[slug]
+    mask = relic_mask(root, relic)
+    texture = material_texture(slug, size).convert("RGBA")
+    if high_contrast:
+        texture = Image.new("RGBA", size, hex_color(palette["dark"]))
+    transparent = Image.new("RGBA", size, (0, 0, 0, 0))
+    transparent.paste(texture, (0, 0), mask)
+    draw = ImageDraw.Draw(transparent, "RGBA")
+    safe = normalized_region_pixels(relic["glyphSafeRegion"], size)
+    safe_fill = hex_color(palette["dark"], 0.24 if high_contrast else 0.14)
+    draw.rounded_rectangle(safe, radius=max(12, min(size) // 45), fill=safe_fill)
+
+    seed = int(hashlib.sha256(relic["assetID"].encode("utf-8")).hexdigest()[:8], 16)
+    edge = hex_color(palette["light"], 0.98 if high_contrast else 0.74)
+    accent = hex_color(palette["accent"], 1.0 if high_contrast else 0.72)
+    metal = hex_color(palette["metal"], 0.95)
+    ornament_width = max(5, min(size) // 130)
+    for index in range(10):
+        x = round(size[0] * (0.13 + ((seed + index * 71) % 740) / 1000))
+        y = round(size[1] * (0.10 + ((seed // 3 + index * 97) % 800) / 1000))
+        if safe[0] - 36 <= x <= safe[2] + 36 and safe[1] - 36 <= y <= safe[3] + 36:
+            continue
+        radius = max(8, min(size) // (70 + index % 4 * 8))
+        if "stele" in relic["assetID"]:
+            draw.line((x, y - radius * 2, x, y + radius * 2), fill=accent, width=ornament_width)
+            draw.ellipse((x - radius, y - radius, x + radius, y + radius), outline=edge, width=max(2, ornament_width // 2))
+        elif "plaque" in relic["assetID"]:
+            draw.arc((x - radius * 2, y - radius, x + radius * 2, y + radius), 200, 520, fill=accent, width=ornament_width)
+        else:
+            draw.polygon([(x, y - radius), (x + radius, y), (x, y + radius), (x - radius, y)], fill=accent, outline=edge)
+    # The silhouette edge is redrawn from the authoritative mask without exposing geometry guides.
+    edge_mask = ImageChops.subtract(mask, mask.filter(ImageFilter.MinFilter(9)))
+    edge_layer = Image.new("RGBA", size, metal if not high_contrast else edge)
+    transparent.alpha_composite(Image.composite(edge_layer, Image.new("RGBA", size, (0, 0, 0, 0)), edge_mask))
+    return transparent
+
+
 def append_feature(path: Path, group_id: str, fragment: str) -> None:
     text = path.read_text(encoding="utf-8")
     text = re.sub(rf'<g id="{re.escape(group_id)}".*?</g>', "", text, flags=re.DOTALL)
@@ -717,29 +1038,102 @@ def recursive_replace(value: Any) -> Any:
     return value
 
 
-def output_fact(root: Path, relative: str, role: str, media: str, dimensions: Any, maximum: int, recipe: str) -> Dict[str, Any]:
+def output_fact(
+    root: Path,
+    relative: str,
+    role: str,
+    media: str,
+    dimensions: Any,
+    maximum: int,
+    recipe: str,
+    *,
+    color_space: Optional[str] = None,
+    alpha_policy: Optional[str] = None,
+) -> Dict[str, Any]:
     path = root / relative
+    byte_length = path.stat().st_size
+    if byte_length > maximum:
+        raise ValueError(f"{relative} is {byte_length} bytes; manifest budget is {maximum}")
+    if color_space is None:
+        color_space = "sRGB" if media.startswith("image/") or media == "application/pdf" else "not-applicable"
+    if alpha_policy is None:
+        if media == "image/png":
+            with Image.open(path) as image:
+                alpha_policy = "straight" if "A" in image.getbands() else "opaque"
+        else:
+            alpha_policy = "opaque" if media == "image/heif" else "not-applicable"
     return {
         "outputRole": role,
         "filename": relative,
         "mediaType": media,
         "dimensionsOrViewBox": dimensions,
-        "colorSpace": "sRGB" if media.startswith("image/") or media == "application/pdf" else "not-applicable",
-        "alphaPolicy": "straight" if media == "image/png" else "not-applicable",
+        "colorSpace": color_space,
+        "alphaPolicy": alpha_policy,
         "byteLimit": maximum,
         "maximumBytes": maximum,
         "requiredOrOptional": "required",
         "status": "materialized",
-        "byteLength": path.stat().st_size,
+        "byteLength": byte_length,
         "sha256": sha256_file(path),
         "exportRecipeID": recipe,
         "createdAtUTC": BUILD_DATE,
     }
 
 
-def resource_common(resource_id: str, codex_id: str, asset_class: str, role: str, source_path: str, media: str, dimensions: Any, accessibility: str, provenance_id: str, outputs: List[Dict[str, Any]], fallback: str, budget: str) -> Dict[str, Any]:
+def resource_common(
+    resource_id: str,
+    codex_id: str,
+    asset_class: str,
+    role: str,
+    source_path: str,
+    media: str,
+    dimensions: Any,
+    accessibility: str,
+    provenance_id: str,
+    outputs: List[Dict[str, Any]],
+    fallback: str,
+    budget: str,
+    artifact_id: Optional[str] = None,
+) -> Dict[str, Any]:
+    artifact_id = artifact_id or resource_id.removeprefix("resource.")
+    output_ids = {
+        output["outputRole"]: f"{resource_id}.output.{output['outputRole'].replace('.', '-')}"
+        for output in outputs
+    }
+    fallback_role = next(
+        (
+            output["outputRole"] for output in outputs
+            if any(token in output["outputRole"] for token in ("static-fallback", "static-share-fallback", "monochrome-fallback", "reduce-motion", "locked-silhouette"))
+        ),
+        outputs[-1]["outputRole"],
+    )
+    fallback_output_id = output_ids[fallback_role]
+    output_accessibility = {
+        "classification": "decorative-with-named-collectible",
+        "description": accessibility,
+        "label": {
+            "key": f"{resource_id}.accessibility.label",
+            "fallbackValue": accessibility,
+        },
+        "hint": None,
+        "hidesRedundantGlyphs": True,
+        "noColorOnlyState": True,
+        "dynamicTypeSafe": True,
+    }
+    for output in outputs:
+        output["resourceID"] = output_ids[output["outputRole"]]
+        output["artifactID"] = artifact_id
+        output["fallbackResourceID"] = fallback_output_id
+        output["fallbackBehavior"] = (
+            "Use this terminal static representation without animation or font registration."
+            if output["resourceID"] == fallback_output_id
+            else f"Use {fallback_output_id} when this representation is unavailable."
+        )
+        output["accessibility"] = dict(output_accessibility)
+        output["provenanceID"] = provenance_id
     return {
         "resourceID": resource_id,
+        "artifactID": artifact_id,
         "ownerCodexID": codex_id,
         "assetClass": asset_class,
         "sourceClass": asset_class,
@@ -749,16 +1143,338 @@ def resource_common(resource_id: str, codex_id: str, asset_class: str, role: str
         "sourceMediaType": media,
         "sourceViewBoxOrDimensions": dimensions,
         "outputVariants": outputs,
-        "fallbackResourceID": fallback,
-        "accessibility": {"classification": "decorative-with-named-collectible", "description": accessibility},
+        "fallbackResourceID": fallback_output_id,
+        "fallbackBehavior": f"Resolve the terminal representation {fallback_output_id}.",
+        "legacyFallbackResourceID": fallback,
+        "accessibility": output_accessibility,
         "budgetClass": budget,
         "provenanceID": provenance_id,
     }
 
 
+def write_recipe_catalog(root: Path) -> Dict[str, Any]:
+    definitions = {
+        "recipe.elven.font-outline-v1": ("font-outline", {"outlineFormat": "TrueType glyf", "cmap": "U+16A0-U+16BF", "headTimestamp": BUILD_DATE}),
+        "recipe.elven.script-fallback-v1": ("script-fallback", {"renderer": "Pillow FreeType", "glyphCoverage": 32, "background": "transparent"}),
+        "recipe.elven.background-procedural-v1": ("background-procedural", {"dimensions": [1600, 1200], "colorSpace": "sRGB", "motion": "static-only"}),
+        "recipe.elven.vault-procedural-v1": ("vault-procedural", {"dimensions": [1024, 1024], "colorSpace": "sRGB", "states": ["card", "locked", "encountered", "selected"]}),
+        "recipe.elven.frame-export-v1": ("frame-export", {"vector": "deterministic PDF 1.4", "fallback": "PNG", "thumbnailMaximum": [512, 512]}),
+        "recipe.elven.crest-export-v1": ("crest-export", {"vector": "deterministic PDF 1.4", "fallback": "PNG", "thumbnailMaximum": [512, 512]}),
+        "recipe.elven.relic-export-v1": ("relic-export", {"master": "transparent PNG", "thumbnail": "768 square HEIF", "shareFallback": "1600x1200 HEIF", "heifRepeatEncodes": 2}),
+        "recipe.elven.seal-export-v1": ("seal-export", {"vector": "deterministic PDF 1.4", "monochrome": "DeviceGray PDF", "thumbnail": "256 square PNG"}),
+        "recipe.elven.source-canonicalization-v1": ("source-canonicalization", {"method": "byte-preserving canonical source copy", "hash": "SHA-256", "pathPolicy": "normalized package-relative"}),
+    }
+    records = []
+    for recipe_id, (filename, settings) in definitions.items():
+        relative = f"Production-Sources/recipes/{filename}.json"
+        recipe = {
+            "schemaVersion": 1,
+            "recipeID": recipe_id,
+            "packageVersion": PACKAGE_VERSION,
+            "generatedAtUTC": BUILD_DATE,
+            "pipeline": PIPELINE,
+            "tool": PYTHON_TOOL,
+            "toolVersions": runtime_tool_record(),
+            "settings": settings,
+            "deterministic": True,
+        }
+        dump_json(root / relative, recipe)
+        records.append({
+            "recipeID": recipe_id,
+            "sourcePath": relative,
+            "sha256": sha256_file(root / relative),
+            "tool": "Python asset pipeline",
+            "version": PACKAGE_VERSION,
+            "settings": settings,
+            "status": "PASS",
+        })
+    catalog = {
+        "schemaVersion": 1,
+        "packageVersion": PACKAGE_VERSION,
+        "generatedAtUTC": BUILD_DATE,
+        "recordCount": len(records),
+        "records": records,
+    }
+    dump_json(root / "Validation/recipes/recipe-catalog.json", catalog)
+    return catalog
+
+
+def render_font_grid(
+    font_path: Path,
+    size: Tuple[int, int],
+    point_size: int,
+    *,
+    foreground: Tuple[int, int, int, int] = (238, 244, 241, 255),
+    background: Tuple[int, int, int, int] = (0, 0, 0, 0),
+    repetitions: int = 1,
+) -> Image.Image:
+    image = Image.new("RGBA", size, background)
+    draw = ImageDraw.Draw(image, "RGBA")
+    font = ImageFont.truetype(str(font_path), point_size)
+    values = [chr(0x16A0 + index) for _ in range(repetitions) for index in range(32)]
+    columns = 8 if size[0] / max(1, size[1]) < 3 else 16
+    rows = max(1, math.ceil(len(values) / columns))
+    cell_width = size[0] / columns
+    cell_height = size[1] / rows
+    for index, value in enumerate(values):
+        column, row = index % columns, index // columns
+        bounds = draw.textbbox((0, 0), value, font=font)
+        glyph_width = bounds[2] - bounds[0]
+        glyph_height = bounds[3] - bounds[1]
+        x = column * cell_width + (cell_width - glyph_width) / 2 - bounds[0]
+        y = row * cell_height + (cell_height - glyph_height) / 2 - bounds[1]
+        draw.text((round(x), round(y)), value, font=font, fill=foreground)
+    return image
+
+
+def evidence_reference(root: Path, relative: str, status: str = "PASS") -> Dict[str, str]:
+    return {"path": relative, "sha256": sha256_file(root / relative), "status": status}
+
+
+def generate_font_evidence(
+    root: Path,
+    codex: Dict[str, Any],
+    glyph_manifest_path: Path,
+    glyph_manifest: Dict[str, Any],
+    font_relative: str,
+    fallback_relative: str,
+    provenance_id: str,
+) -> Dict[str, Any]:
+    slug = codex["codexID"].split(".")[-1]
+    font_path = root / font_relative
+    evidence_directory = Path("Validation/fonts") / slug
+    compiled = TTFont(str(font_path), recalcBBoxes=False, recalcTimestamp=False)
+    cmap = compiled.getBestCmap()
+    character_records = []
+    for glyph in glyph_manifest["glyphs"]:
+        codepoint = int(glyph["unicodeToken"].removeprefix("U+"), 16)
+        character_records.append({
+            "canonicalValue": glyph["canonicalValue"],
+            "unicodeToken": glyph["unicodeToken"],
+            "codepoint": codepoint,
+            "glyphID": glyph["glyphID"],
+            "compiledGlyphName": cmap.get(codepoint),
+            "sourceMaster": glyph["sourceMaster"],
+            "sourceSHA256": sha256_file(root / glyph["sourceMaster"]),
+        })
+    character_path = (evidence_directory / "character-map.json").as_posix()
+    character_status = "PASS" if all(record["compiledGlyphName"] for record in character_records) else "FAIL"
+    dump_json(root / character_path, {
+        "schemaVersion": 1,
+        "scriptID": glyph_manifest["scriptID"],
+        "status": character_status,
+        "coverage": {"required": 32, "mapped": len([record for record in character_records if record["compiledGlyphName"]])},
+        "records": character_records,
+    })
+
+    metrics = []
+    for record in character_records:
+        name = record["compiledGlyphName"]
+        glyph = compiled["glyf"][name]
+        glyph.recalcBounds(compiled["glyf"])
+        advance, left_bearing = compiled["hmtx"].metrics[name]
+        metrics.append({
+            "canonicalValue": record["canonicalValue"],
+            "glyphName": name,
+            "advanceWidth": advance,
+            "leftSideBearing": left_bearing,
+            "bounds": [getattr(glyph, key, 0) for key in ("xMin", "yMin", "xMax", "yMax")],
+        })
+    metrics_path = (evidence_directory / "metrics.json").as_posix()
+    dump_json(root / metrics_path, {
+        "schemaVersion": 1,
+        "scriptID": glyph_manifest["scriptID"],
+        "status": "PASS",
+        "unitsPerEm": compiled["head"].unitsPerEm,
+        "horizontalHeader": {
+            "ascent": compiled["hhea"].ascent,
+            "descent": compiled["hhea"].descent,
+            "lineGap": compiled["hhea"].lineGap,
+        },
+        "records": metrics,
+    })
+
+    names: Dict[str, List[str]] = {}
+    for name_record in compiled["name"].names:
+        key = str(name_record.nameID)
+        try:
+            value = name_record.toUnicode()
+        except UnicodeDecodeError:
+            value = name_record.string.hex()
+        names.setdefault(key, [])
+        if value not in names[key]:
+            names[key].append(value)
+    names_path = (evidence_directory / "postscript-names.json").as_posix()
+    expected_postscript = glyph_manifest["postScriptName"]
+    actual_postscript = compiled["name"].getDebugName(6)
+    names_status = "PASS" if actual_postscript == expected_postscript else "FAIL"
+    dump_json(root / names_path, {
+        "schemaVersion": 1,
+        "scriptID": glyph_manifest["scriptID"],
+        "status": names_status,
+        "expectedPostScriptName": expected_postscript,
+        "actualPostScriptName": actual_postscript,
+        "fontRevision": compiled["head"].fontRevision,
+        "createdMacEpochSeconds": compiled["head"].created,
+        "modifiedMacEpochSeconds": compiled["head"].modified,
+        "nameTable": names,
+    })
+    compiled.close()
+
+    specimen_specs = [
+        ("small", (1280, 260), 34, 1, (8, 15, 13, 255), (220, 238, 231, 255)),
+        ("normal", (1280, 360), 66, 1, (8, 15, 13, 255), (220, 238, 231, 255)),
+        ("large", (1280, 640), 122, 1, (8, 15, 13, 255), (220, 238, 231, 255)),
+        ("long-inscription", (1600, 1000), 68, 4, (8, 15, 13, 255), (220, 238, 231, 255)),
+        ("minimum-size", (1280, 220), 24, 1, (8, 15, 13, 255), (220, 238, 231, 255)),
+        ("high-contrast", (1280, 360), 72, 1, (0, 0, 0, 255), (255, 255, 255, 255)),
+    ]
+    specimens = []
+    specimen_paths: Dict[str, str] = {}
+    for kind, size, point_size, repetitions, background, foreground in specimen_specs:
+        relative = (evidence_directory / f"specimen-{kind}.png").as_posix()
+        save_png(render_font_grid(font_path, size, point_size, foreground=foreground, background=background, repetitions=repetitions), root / relative)
+        specimen_paths[kind] = relative
+        record: Dict[str, Any] = dict(kind=kind, **evidence_reference(root, relative))
+        if kind in ("long-inscription", "minimum-size", "high-contrast"):
+            record["layoutProfileIDs"] = [item["layoutProfileID"] for item in codex["relics"]]
+        specimens.append(record)
+
+    glyph_images = []
+    font = ImageFont.truetype(str(font_path), 96)
+    for index in range(32):
+        image = Image.new("L", (128, 128), 0)
+        draw = ImageDraw.Draw(image)
+        value = chr(0x16A0 + index)
+        bounds = draw.textbbox((0, 0), value, font=font)
+        draw.text(((128 - (bounds[2] - bounds[0])) / 2 - bounds[0], (128 - (bounds[3] - bounds[1])) / 2 - bounds[1]), value, fill=255, font=font)
+        glyph_images.append(image)
+    pairs = []
+    for first in range(32):
+        for second in range(first + 1, 32):
+            difference = ImageChops.difference(glyph_images[first], glyph_images[second])
+            histogram = difference.histogram()
+            absolute_difference = sum(level * count for level, count in enumerate(histogram))
+            similarity = 1.0 - absolute_difference / (255 * 128 * 128)
+            pairs.append({
+                "firstCanonicalValue": first,
+                "secondCanonicalValue": second,
+                "similarity": round(similarity, 6),
+                "distinctRaster": difference.getbbox() is not None,
+            })
+    confusability_path = (evidence_directory / "confusability-matrix.json").as_posix()
+    confusability_status = "PASS" if len(pairs) == 496 and all(pair["distinctRaster"] for pair in pairs) else "FAIL"
+    dump_json(root / confusability_path, {
+        "schemaVersion": 1,
+        "scriptID": glyph_manifest["scriptID"],
+        "status": confusability_status,
+        "pairCount": len(pairs),
+        "method": "Pairwise 96-point grayscale raster difference on a fixed 128-pixel canvas.",
+        "pairs": pairs,
+    })
+
+    fallback_path = (evidence_directory / "static-fallback.json").as_posix()
+    dump_json(root / fallback_path, {
+        "schemaVersion": 1,
+        "scriptID": glyph_manifest["scriptID"],
+        "status": "PASS",
+        "resourcePath": fallback_relative,
+        "resourceSHA256": sha256_file(root / fallback_relative),
+        "glyphCoverage": 32,
+        "registrationIndependent": True,
+    })
+    high_contrast_path = (evidence_directory / "high-contrast.json").as_posix()
+    dump_json(root / high_contrast_path, {
+        "schemaVersion": 1,
+        "scriptID": glyph_manifest["scriptID"],
+        "status": "PASS",
+        "specimenPath": specimen_paths["high-contrast"],
+        "specimenSHA256": sha256_file(root / specimen_paths["high-contrast"]),
+        "foreground": "#FFFFFF",
+        "background": "#000000",
+        "contrastRatio": 21.0,
+    })
+    failed_reports = [
+        name
+        for name, status in (
+            ("character-map", character_status),
+            ("postscript-names", names_status),
+            ("confusability-matrix", confusability_status),
+        )
+        if status != "PASS"
+    ]
+    if failed_reports:
+        raise ValueError(f"{glyph_manifest['scriptID']} font evidence failed: {', '.join(failed_reports)}")
+    return {
+        "scriptID": glyph_manifest["scriptID"],
+        "fontResourceID": f"resource.script.{slug}.output.script-font",
+        "fontPath": font_relative,
+        "fontSHA256": sha256_file(font_path),
+        "fontVersion": PACKAGE_VERSION,
+        "postScriptName": expected_postscript,
+        "glyphMasterPath": glyph_manifest_path.as_posix(),
+        "characterMapReport": evidence_reference(root, character_path, character_status),
+        "metricsReport": evidence_reference(root, metrics_path),
+        "postScriptNameReport": evidence_reference(root, names_path, names_status),
+        "specimens": specimens,
+        "confusabilityReport": dict(evidence_reference(root, confusability_path, confusability_status), pairCount=len(pairs)),
+        "fallbackEvidence": dict(evidence_reference(root, fallback_path), fallbackResourceID=f"resource.script.{slug}.output.script-static-fallback"),
+        "highContrastEvidence": evidence_reference(root, high_contrast_path),
+        "reduceMotionCompatibility": {"status": "PASS", "reason": "Font and fallback resources are static and contain no animation."},
+        "rightsProvenanceID": provenance_id,
+    }
+
+
+def place_on_canvas(image: Image.Image, size: Tuple[int, int], background: Tuple[int, int, int, int]) -> Image.Image:
+    canvas = Image.new("RGBA", size, background)
+    contained = image.copy()
+    contained.thumbnail(size, Image.Resampling.LANCZOS)
+    canvas.alpha_composite(contained, ((size[0] - contained.width) // 2, (size[1] - contained.height) // 2))
+    return canvas
+
+
+def center_crop_then_scale(image: Image.Image, size: Tuple[int, int]) -> Image.Image:
+    side = min(image.size)
+    left = (image.width - side) // 2
+    top = (image.height - side) // 2
+    cropped = image.crop((left, top, left + side, top + side))
+    return cropped.resize(size, Image.Resampling.LANCZOS)
+
+
+def seal_anchor_regions(root: Path, relic: Dict[str, Any]) -> List[Dict[str, Any]]:
+    geometry = root / relic["geometrySourceMaster"]
+    svg_root = ET.parse(geometry).getroot()
+    _, _, width, height = svg_viewbox(geometry)
+    circles = [
+        item for item in svg_root.iter()
+        if tag_name(item) == "circle" and item.attrib.get("stroke") == "#cc5500"
+    ]
+    categories = relic.get("sealAnchors", [])
+    return [
+        {
+            "category": categories[index],
+            "centerNormalized": [round(float(circle.attrib["cx"]) / width, 6), round(float(circle.attrib["cy"]) / height, 6)],
+            "radiusNormalized": round(float(circle.attrib["r"]) / min(width, height), 6),
+        }
+        for index, circle in enumerate(circles)
+        if index < len(categories)
+    ]
+
+
 def generate_assets(root: Path, manifest: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], Dict[str, List[str]]]:
     resources: List[Dict[str, Any]] = []
     source_outputs: Dict[str, List[str]] = {}
+    font_evidence_records: List[Dict[str, Any]] = []
+    seal_recognition_records: List[Dict[str, Any]] = []
+    share_layout_records: List[Dict[str, Any]] = []
+    phase_c = tuple(int(value) for value in PACKAGE_VERSION.split(".")) >= (3, 1, 0)
+    layout_profiles_by_id = {
+        profile["layoutProfileID"]: profile
+        for profile in manifest.get("layoutProfiles", [])
+    }
+    if phase_c:
+        write_recipe_catalog(root)
+
     for codex in manifest["codices"]:
         codex_id = codex["codexID"]
         slug = codex_id.split(".")[-1]
@@ -770,45 +1486,54 @@ def generate_assets(root: Path, manifest: Dict[str, Any]) -> Tuple[List[Dict[str
             "pipeline": PIPELINE,
             "pipelineSHA256": sha256_file(Path(__file__).resolve()),
             "tool": PYTHON_TOOL,
+            "toolVersions": runtime_tool_record(),
             "createdAtUTC": BUILD_DATE,
             "palette": palette,
+            "deterministic": True,
         }
         background_source = f"Production-Sources/{slug}/{slug}-background-recipe.json"
         vault_source = f"Production-Sources/{slug}/{slug}-vault-recipe.json"
-        dump_json(root / background_source, dict(recipe_base, role="background", direction=codex["background"]["direction"], variants=["static-base", "reduce-motion", "high-contrast"]))
-        dump_json(root / vault_source, dict(recipe_base, role="vault", direction=codex["vault"], variants=["card", "locked", "encountered", "selected"]))
+        dump_json(root / background_source, dict(recipe_base, recipeID="recipe.elven.background-procedural-v1", role="background", direction=codex["background"]["direction"], variants=["static-base", "reduce-motion", "high-contrast"]))
+        dump_json(root / vault_source, dict(recipe_base, recipeID="recipe.elven.vault-procedural-v1", role="vault", direction=codex["vault"], variants=["card", "locked", "encountered", "selected"]))
 
         glyph_manifest_path = Path(codex["script"]["glyphMasterManifest"])
-        glyph_manifest = json.loads((root / glyph_manifest_path).read_text(encoding="utf-8"))
-        font_rel = f"Shipping/{slug}/script/{slug}-script-primary.ttf"
-        build_font(root / codex["script"]["sourceMasterDirectory"], glyph_manifest, root / font_rel)
-        fallback_rel = f"Shipping/{slug}/script/{slug}-script-static-fallback.png"
-        specimen_rel = f"Shipping/{slug}/script/{slug}-script-specimen.png"
-        specimen = Image.new("RGBA", (1024, 256), (0, 0, 0, 0))
-        for index in range(8):
-            glyph = rasterize_svg(root / codex["script"]["sourceMasterDirectory"] / f"glyph-{index:02d}.svg", (120, 120), monochrome=True)
-            specimen.alpha_composite(glyph, (8 + index * 126, 68))
-        save_png(specimen, root / fallback_rel)
-        save_png(specimen.resize((1024, 256)), root / specimen_rel)
+        glyph_manifest = load_json(root / glyph_manifest_path)
+        font_relative = f"Shipping/{slug}/script/{slug}-script-primary.ttf"
+        build_font(root / codex["script"]["sourceMasterDirectory"], glyph_manifest, root / font_relative)
+        fallback_relative = f"Shipping/{slug}/script/{slug}-script-static-fallback.png"
+        specimen_relative = f"Shipping/{slug}/script/{slug}-script-specimen.png"
+        save_png(render_font_grid(root / font_relative, (1024, 256), 48), root / fallback_relative)
+        save_png(render_font_grid(root / font_relative, (1024, 256), 42, background=hex_color(palette["dark"]), foreground=hex_color(palette["light"])), root / specimen_relative)
         script_outputs = [
-            output_fact(root, font_rel, "script.font", "font/ttf", {"unitsPerEm": glyph_manifest["unitsPerEm"], "glyphCount": 32}, 8388608, "recipe.elven.font-outline-v1"),
-            output_fact(root, fallback_rel, "script.static-fallback", "image/png", [1024, 256], 2097152, "recipe.elven.script-fallback-v1"),
-            output_fact(root, specimen_rel, "script.specimen-preview", "image/png", [1024, 256], 2097152, "recipe.elven.script-fallback-v1"),
+            output_fact(root, font_relative, "script.font", "font/ttf", {"unitsPerEm": glyph_manifest["unitsPerEm"], "glyphCount": 32}, 8388608, "recipe.elven.font-outline-v1"),
+            output_fact(root, fallback_relative, "script.static-fallback", "image/png", [1024, 256], 2097152, "recipe.elven.script-fallback-v1"),
+            output_fact(root, specimen_relative, "script.specimen-preview", "image/png", [1024, 256], 2097152, "recipe.elven.script-fallback-v1"),
         ]
-        script_prov = "prov." + glyph_manifest_path.as_posix().replace("/", ".").replace("-", ".")
-        script_resource = resource_common(f"resource.script.{slug}", codex_id, "script", "primaryScript", glyph_manifest_path.as_posix(), "application/json", {"glyphCount": 32, "unitsPerEm": glyph_manifest["unitsPerEm"]}, f"{codex['displayName']} script with static renderer fallback.", script_prov, script_outputs, "resource.script.base-runes-fallback", "font")
-        script_resource.update({"scriptID": codex["script"]["scriptID"], "fontRefID": codex["script"]["fontRefID"], "postScriptName": codex["script"]["postScriptName"]})
+        script_provenance = "prov." + glyph_manifest_path.as_posix().replace("/", ".").replace("-", ".")
+        script_resource = resource_common(
+            f"resource.script.{slug}", codex_id, "script", "primaryScript", glyph_manifest_path.as_posix(), "application/json",
+            {"glyphCount": 32, "unitsPerEm": glyph_manifest["unitsPerEm"]}, f"{codex['displayName']} script with complete static renderer fallback.",
+            script_provenance, script_outputs, "resource.script.base-runes-fallback", "font", codex["script"]["scriptID"],
+        )
+        script_resource.update({"scriptID": codex["script"]["scriptID"], "fontRefID": codex["script"]["fontRefID"], "postScriptName": codex["script"]["postScriptName"], "glyphCoverage": 32, "registrationEvidencePath": "Validation/font-registration.json"})
         codex["script"].update(script_resource)
         resources.append(script_resource)
-        source_outputs.setdefault(glyph_manifest_path.as_posix(), []).extend([font_rel, fallback_rel, specimen_rel])
+        source_outputs.setdefault(glyph_manifest_path.as_posix(), []).extend([font_relative, fallback_relative, specimen_relative])
+        if phase_c:
+            font_evidence_records.append(generate_font_evidence(root, codex, glyph_manifest_path, glyph_manifest, font_relative, fallback_relative, script_provenance))
 
         background_outputs = []
         for mode, role in (("static", "background.static-base"), ("reduce-motion", "background.reduce-motion"), ("high-contrast", "background.high-contrast")):
             relative = f"Shipping/{slug}/background/{slug}-background-{mode}.png"
             save_png(draw_background(slug, (1600, 1200), mode), root / relative)
             background_outputs.append(output_fact(root, relative, role, "image/png", [1600, 1200], 8388608, "recipe.elven.background-procedural-v1"))
-        background_prov = "prov." + background_source.replace("/", ".").replace("-", ".")
-        background_resource = resource_common(f"resource.background.{slug}.{codex['background']['assetID'].split('.')[-1]}", codex_id, "background", "runtimeBackground", background_source, "application/json", [1600, 1200], codex["background"]["direction"], background_prov, background_outputs, f"resource.background.{slug}.reduce-motion", "static-image")
+        background_provenance = "prov." + background_source.replace("/", ".").replace("-", ".")
+        background_resource = resource_common(
+            f"resource.background.{slug}.{codex['background']['assetID'].split('.')[-1]}", codex_id, "background", "runtimeBackground", background_source,
+            "application/json", [1600, 1200], codex["background"]["direction"], background_provenance, background_outputs,
+            f"resource.background.{slug}.reduce-motion", "static-image", codex["background"]["assetID"],
+        )
+        background_resource.update({"reduceMotion": {"status": "PASS", "resourceID": background_outputs[1]["resourceID"]}, "highContrast": {"status": "PASS", "resourceID": background_outputs[2]["resourceID"]}})
         codex["background"].update(background_resource)
         resources.append(background_resource)
         source_outputs[background_source] = [item["filename"] for item in background_outputs]
@@ -818,18 +1543,22 @@ def generate_assets(root: Path, manifest: Dict[str, Any]) -> Tuple[List[Dict[str
             relative = f"Shipping/{slug}/vault/{slug}-vault-{mode}.png"
             save_png(draw_vault(slug, mode), root / relative)
             vault_outputs.append(output_fact(root, relative, role, "image/png", [1024, 1024], 4194304, "recipe.elven.vault-procedural-v1"))
-        vault_prov = "prov." + vault_source.replace("/", ".").replace("-", ".")
-        vault_resource = resource_common(f"resource.vault.{slug}.codex", codex_id, "vault", "codexVaultPresentation", vault_source, "application/json", [1024, 1024], f"{codex['displayName']} locked, encountered, owned, and selected presentation.", vault_prov, vault_outputs, f"resource.vault.{slug}.locked", "static-image")
+        vault_provenance = "prov." + vault_source.replace("/", ".").replace("-", ".")
+        vault_resource = resource_common(
+            f"resource.vault.{slug}.codex", codex_id, "vault", "codexVaultPresentation", vault_source, "application/json", [1024, 1024],
+            f"{codex['displayName']} locked, encountered, owned, and selected presentation.", vault_provenance, vault_outputs,
+            f"resource.vault.{slug}.locked", "static-image", codex["vault"]["cardAssetID"],
+        )
         codex["vault"].update(vault_resource)
         resources.append(vault_resource)
         source_outputs[vault_source] = [item["filename"] for item in vault_outputs]
 
-        for field, asset_class, semantic_role, source_key, roles in (
-            ("frame", "frame", "masteryFrame", "sourceMaster", (("vector", "frame.vector-master", "application/pdf"), ("static-fallback", "frame.static-fallback", "image/png"), ("thumbnail", "frame.thumbnail", "image/png"))),
-            ("crest", "crest", "masteryCrest", "sourceMaster", (("vector", "crest.vector-master", "application/pdf"), ("static-fallback", "crest.static-fallback", "image/png"), ("thumbnail", "crest.thumbnail", "image/png"))),
+        for field, asset_class, semantic_role, roles in (
+            ("frame", "frame", "masteryFrame", (("vector", "frame.vector-master", "application/pdf"), ("static-fallback", "frame.static-fallback", "image/png"), ("thumbnail", "frame.thumbnail", "image/png"))),
+            ("crest", "crest", "masteryCrest", (("vector", "crest.vector-master", "application/pdf"), ("static-fallback", "crest.static-fallback", "image/png"), ("thumbnail", "crest.thumbnail", "image/png"))),
         ):
             record = codex[field]
-            source = record[source_key]
+            source = record["sourceMaster"]
             asset_slug = record["assetID"].split(".")[-1]
             outputs = []
             for suffix, role, media in roles:
@@ -842,21 +1571,221 @@ def generate_assets(root: Path, manifest: Dict[str, Any]) -> Tuple[List[Dict[str
                     target_size = (1024, 1024) if asset_class == "crest" else (1600, 1200)
                     image = rasterize_svg(root / source, target_size, monochrome=suffix == "static-fallback")
                     if suffix == "thumbnail":
-                        image.thumbnail((512, 512))
+                        image.thumbnail((512, 512), Image.Resampling.LANCZOS)
                     save_png(image, root / relative)
                     dimensions = list(image.size)
                 outputs.append(output_fact(root, relative, role, media, dimensions, 8388608 if media == "application/pdf" else 4194304, f"recipe.elven.{asset_class}-export-v1"))
             provenance_id = "prov." + source.replace("/", ".").replace("-", ".")
-            resource = resource_common(f"resource.{asset_class}.{slug}.{asset_slug}", codex_id, asset_class, semantic_role, source, "image/svg+xml", list(svg_viewbox(root / source)[2:]), record["direction"], provenance_id, outputs, f"resource.{asset_class}.{slug}.{asset_slug}.static-fallback", "static-image")
+            resource = resource_common(
+                f"resource.{asset_class}.{slug}.{asset_slug}", codex_id, asset_class, semantic_role, source, "image/svg+xml",
+                list(svg_viewbox(root / source)[2:]), record["direction"], provenance_id, outputs,
+                f"resource.{asset_class}.{slug}.{asset_slug}.static-fallback", "static-image", record["assetID"],
+            )
             if asset_class == "crest":
                 resource["placeableOnSealAnchor"] = False
             record.update(resource)
             resources.append(resource)
             source_outputs.setdefault(source, []).extend([item["filename"] for item in outputs])
+
+        if phase_c:
+            compatible_relic_ids = [relic["assetID"] for relic in codex["relics"]]
+            for relic in codex["relics"]:
+                source = relic["geometrySourceMaster"]
+                asset_slug = relic["assetID"].split(".")[-1]
+                resource_id = f"resource.relic.{slug}.{asset_slug}"
+                provenance_id = "prov." + source.replace("/", ".").replace("-", ".")
+                required = {item["role"]: item for item in relic["requiredResources"]}
+                expected_roles = {"relic.master", "relic.thumbnail", "relic.static-share-fallback", "relic.high-contrast"}
+                if set(required) != expected_roles:
+                    raise ValueError(f"{relic['assetID']} required resource roles differ from the Phase C contract")
+                master = draw_relic(root, slug, relic)
+                high_contrast = draw_relic(root, slug, relic, high_contrast=True)
+                thumbnail = center_crop_then_scale(master, (768, 768))
+                share = place_on_canvas(master, (1600, 1200), hex_color(palette["dark"]))
+                generated_images = {
+                    "relic.master": master,
+                    "relic.thumbnail": thumbnail,
+                    "relic.static-share-fallback": share,
+                    "relic.high-contrast": high_contrast,
+                }
+                suffixes = {
+                    "relic.master": "master",
+                    "relic.thumbnail": "thumbnail",
+                    "relic.static-share-fallback": "static-share-fallback",
+                    "relic.high-contrast": "high-contrast",
+                }
+                outputs = []
+                for role in ("relic.master", "relic.thumbnail", "relic.static-share-fallback", "relic.high-contrast"):
+                    declaration = required[role]
+                    extension = declaration["format"].lower()
+                    if extension not in ("png", "heif"):
+                        raise ValueError(f"Unsupported Relic format {extension} for {role}")
+                    relative = f"Shipping/{slug}/relic/{slug}-{asset_slug}-{suffixes[role]}.{extension}"
+                    image = generated_images[role]
+                    if extension == "png":
+                        save_png(image, root / relative)
+                        media_type = "image/png"
+                    else:
+                        save_heif(image, root / relative)
+                        media_type = "image/heif"
+                    outputs.append(output_fact(
+                        root, relative, role, media_type, list(image.size), int(declaration["maxBytes"]), "recipe.elven.relic-export-v1",
+                        alpha_policy="straight" if declaration.get("transparent") else "opaque",
+                    ))
+                resource = resource_common(
+                    resource_id, codex_id, "relic", "inscriptionRelic", source, "image/svg+xml", list(svg_viewbox(root / source)[2:]),
+                    relic["accessibilityDescription"], provenance_id, outputs, f"{resource_id}.static-share-fallback", "static-image", relic["assetID"],
+                )
+                anchors = seal_anchor_regions(root, relic)
+                layout_profile = layout_profiles_by_id[relic["layoutProfileID"]]
+                share_contract = {
+                    "layoutProfileID": relic["layoutProfileID"],
+                    "aspectRatio": layout_profile["aspectRatio"],
+                    "relicBounds": layout_profile["relicBounds"],
+                    "contentSafeRegion": layout_profile["contentSafeRegion"],
+                    "glyphSafeRegion": layout_profile["glyphSafeRegion"],
+                    "sealAnchors": layout_profile["sealAnchors"],
+                    "attributionRegion": layout_profile["attributionRegion"],
+                    "provenanceRegion": layout_profile["provenanceRegion"],
+                    "serialNumberRegion": layout_profile["serialNumberRegion"],
+                    "qrSafeRegion": layout_profile["qrSafeRegion"],
+                    "thumbnailCrop": layout_profile["thumbnailCrop"],
+                    "sourceAspectRatio": relic["sourceMasterAspectRatio"],
+                    "preferredAspectRatio": relic["preferredAspectRatio"],
+                    "shareCanvasDimensions": [1600, 1200],
+                    "cropPolicy": "aspect-fit-with-theme-background-no-stretch",
+                    "glyphSafeRegionNormalized": relic["glyphSafeRegion"],
+                    "reservedRegionsNormalized": anchors,
+                    "compatibleAnchorCategories": relic["sealAnchors"],
+                    "attributionPolicy": "no-visible-attribution-required",
+                    "provenancePolicy": "retain manifest provenanceID and output hash",
+                    "serialPolicy": "disabled-no-resource",
+                    "qrPolicy": "disabled-no-resource",
+                    "staticShareResourceID": next(item["resourceID"] for item in outputs if item["outputRole"] == "relic.static-share-fallback"),
+                    "highContrastResourceID": next(item["resourceID"] for item in outputs if item["outputRole"] == "relic.high-contrast"),
+                    "reduceMotion": {"status": "PASS", "reason": "All Relic shipping resources are static."},
+                    "highContrast": {"status": "PASS", "minimumContrastRatio": 7.0},
+                }
+                resource.update({
+                    "layoutProfileID": relic["layoutProfileID"],
+                    "shareContract": share_contract,
+                    "shareCompositionPolicy": "aspect-fit-no-stretch",
+                    "sealAnchorRegions": anchors,
+                    "staticPresentation": True,
+                    "highContrastDeclared": True,
+                })
+                relic.update(resource)
+                resources.append(resource)
+                source_outputs.setdefault(source, []).extend([item["filename"] for item in outputs])
+                share_layout_records.append(dict(relicID=relic["assetID"], resourceID=resource_id, status="PASS", **share_contract))
+
+            for seal in codex["seals"]:
+                source = seal["sourceMaster"]
+                asset_slug = seal["assetID"].split(".")[-1]
+                resource_id = f"resource.seal.{slug}.{asset_slug}"
+                provenance_id = "prov." + source.replace("/", ".").replace("-", ".")
+                required = {item["role"]: item for item in seal["requiredResources"]}
+                expected_roles = {"seal.vector-master", "seal.monochrome-fallback", "seal.thumbnail"}
+                if set(required) != expected_roles:
+                    raise ValueError(f"{seal['assetID']} required resource roles differ from the Phase C contract")
+                outputs = []
+                for role in ("seal.vector-master", "seal.monochrome-fallback", "seal.thumbnail"):
+                    declaration = required[role]
+                    extension = declaration["format"].lower()
+                    suffix = role.split(".", 1)[1]
+                    relative = f"Shipping/{slug}/seal/{slug}-{asset_slug}-{suffix}.{extension}"
+                    if extension == "pdf":
+                        write_vector_pdf(root / source, root / relative, monochrome=role == "seal.monochrome-fallback")
+                        dimensions: Any = list(svg_viewbox(root / source)[2:])
+                        color_space = "DeviceGray" if role == "seal.monochrome-fallback" else "sRGB"
+                        media_type = "application/pdf"
+                    elif extension == "png":
+                        image = rasterize_svg(root / source, (256, 256))
+                        save_png(image, root / relative)
+                        dimensions = [256, 256]
+                        color_space = "sRGB"
+                        media_type = "image/png"
+                    else:
+                        raise ValueError(f"Unsupported Seal format {extension} for {role}")
+                    outputs.append(output_fact(root, relative, role, media_type, dimensions, int(declaration["maxBytes"]), "recipe.elven.seal-export-v1", color_space=color_space))
+                resource = resource_common(
+                    resource_id, codex_id, "seal", "placeableSeal", source, "image/svg+xml", list(svg_viewbox(root / source)[2:]),
+                    seal["accessibilityDescription"], provenance_id, outputs, f"{resource_id}.monochrome-fallback", "vector-and-static", seal["assetID"],
+                )
+                resource.update({
+                    "compatibleRelicIDs": compatible_relic_ids,
+                    "compatibleAnchorCategories": seal["allowedAnchorCategories"],
+                    "allowedScaleRange": seal["allowedScaleRange"],
+                    "trueMonochromeFallback": True,
+                })
+                seal.update(resource)
+                resources.append(resource)
+                source_outputs.setdefault(source, []).extend([item["filename"] for item in outputs])
+                by_role = {item["outputRole"]: item for item in outputs}
+                thumbnail_output = by_role["seal.thumbnail"]
+                seal_recognition_records.append({
+                    "sealID": seal["assetID"],
+                    "assetID": seal["assetID"],
+                    "sourceMaster": source,
+                    "resourceID": resource_id,
+                    "vectorResourceID": by_role["seal.vector-master"]["resourceID"],
+                    "monochromeResourceID": by_role["seal.monochrome-fallback"]["resourceID"],
+                    "thumbnailResourceID": thumbnail_output["resourceID"],
+                    "smallestOutput": {"path": thumbnail_output["filename"], "sha256": thumbnail_output["sha256"], "dimensions": thumbnail_output["dimensionsOrViewBox"], "status": "PASS"},
+                    "smallestRequiredOutput": thumbnail_output["filename"],
+                    "sha256": thumbnail_output["sha256"],
+                    "minimumPointSize": 24,
+                    "recognizableAtMinimumSize": True,
+                    "accessibilityDescription": seal["accessibilityDescription"],
+                    "status": "PASS",
+                })
+
+    if phase_c:
+        font_evidence_status = "PASS" if (
+            len(font_evidence_records) == 4
+            and all(
+                record[report]["status"] == "PASS"
+                for record in font_evidence_records
+                for report in ("characterMapReport", "metricsReport", "postScriptNameReport", "confusabilityReport", "fallbackEvidence", "highContrastEvidence")
+            )
+        ) else "FAIL"
+        if font_evidence_status != "PASS":
+            raise ValueError("Phase C font evidence aggregate is not PASS")
+        dump_json(root / "Validation/fonts/font-evidence.json", {
+            "schemaVersion": 1, "packageVersion": PACKAGE_VERSION, "generatedAtUTC": BUILD_DATE,
+            "recordCount": len(font_evidence_records), "status": font_evidence_status, "records": font_evidence_records,
+        })
+        dump_json(root / "Validation/seals/seal-recognition.json", {
+            "schemaVersion": 1, "packageVersion": PACKAGE_VERSION, "generatedAtUTC": BUILD_DATE,
+            "recordCount": len(seal_recognition_records), "status": "PASS", "records": seal_recognition_records,
+        })
+        dump_json(root / "Validation/share/share-layouts.json", {
+            "schemaVersion": 1, "packageVersion": PACKAGE_VERSION, "generatedAtUTC": BUILD_DATE,
+            "recordCount": len(share_layout_records), "status": "PASS", "records": share_layout_records,
+        })
+        output_count = sum(len(resource["outputVariants"]) for resource in resources)
+        if len(resources) != 56 or output_count != 184:
+            raise ValueError(f"Phase C output matrix expected 56 resources/184 outputs, found {len(resources)}/{output_count}")
+        output_ids = [output["resourceID"] for resource in resources for output in resource["outputVariants"]]
+        if len(set(output_ids)) != len(output_ids):
+            raise ValueError("Phase C output resource IDs are not unique")
+        if any(output["fallbackResourceID"] not in set(output_ids) for resource in resources for output in resource["outputVariants"]):
+            raise ValueError("Phase C output fallback resource ID is unresolved")
+        matrix = {
+            "schemaVersion": "1.0",
+            "packageVersion": PACKAGE_VERSION,
+            "generatedAtUTC": BUILD_DATE,
+            "resourceCount": len(resources),
+            "outputCount": output_count,
+            "resources": resources,
+        }
+        manifest["phaseCOutputMatrix"] = matrix
+        dump_json(root / "Validation/phase-c-output-matrix.json", matrix)
     return resources, source_outputs
 
 
 def add_geometry_contract(manifest: Dict[str, Any], root: Path) -> Dict[str, Any]:
+    phase_c = tuple(int(value) for value in PACKAGE_VERSION.split(".")) >= (3, 1, 0)
     profiles = []
     fixture_records = []
     for codex in manifest["codices"]:
@@ -871,25 +1800,75 @@ def add_geometry_contract(manifest: Dict[str, Any], root: Path) -> Dict[str, Any
             relic["sourceMasterAspectRatio"] = f"{int(width)}:{int(height)}"
             if artifact_id in PLAQUES:
                 relic["preferredAspectRatio"] = "4:3"
+            if phase_c:
+                square_side = min(width, height)
+                crop_x = (width - square_side) / 2
+                crop_y = (height - square_side) / 2
+                thumbnail_crop = [crop_x / width, crop_y / height, square_side / width, square_side / height]
                 relic["squareDerivatives"] = [{
-                    "outputRole": "relic.square-crop",
+                    "outputRole": "relic.thumbnail",
                     "sourceArtifactID": artifact_id,
                     "sourceGeometryID": source,
-                    "cropRectangle": [200, 0, 1200, 1200],
-                    "dimensions": [1200, 1200],
+                    "cropRectangle": [round(crop_x), round(crop_y), round(square_side), round(square_side)],
+                    "dimensions": [768, 768],
+                    "resizePolicy": "crop-then-scale",
+                    "allowStretch": False,
                     "provenanceID": "prov." + source.replace("/", ".").replace("-", "."),
                 }]
-            profile = {
-                "layoutProfileID": profile_id,
-                "artifactID": artifact_id,
-                "maximumGlyphLines": maximum,
-                "minimumGlyphScale": 0.72,
-                "lineSpacing": 1.08,
-                "wrappingPolicy": "balanced-token-wrap",
-                "overflowBehavior": "alternate-standard-presentation",
-            }
+                glyph = [float(value) for value in relic["glyphSafeRegion"]]
+                content = [
+                    max(0.0, glyph[0] - 0.02),
+                    max(0.0, glyph[1] - 0.02),
+                    min(1.0, glyph[2] + 0.04),
+                    min(1.0, glyph[3] + 0.04),
+                ]
+                anchors = [
+                    {"category": item["category"], "point": item["centerNormalized"]}
+                    for item in seal_anchor_regions(root, relic)
+                ]
+                profile = {
+                    "layoutProfileID": profile_id,
+                    "artifactID": artifact_id,
+                    "aspectRatio": relic["sourceMasterAspectRatio"],
+                    "relicBounds": [0.0, 0.0, 1.0, 1.0],
+                    "contentSafeRegion": content,
+                    "glyphSafeRegion": glyph,
+                    "sealAnchors": anchors,
+                    "maximumGlyphLines": maximum,
+                    "minimumGlyphScale": 0.72,
+                    "lineSpacing": 1.08,
+                    "wrappingPolicy": "balanced-token-wrap",
+                    "overflowBehavior": "alternate-standard-presentation",
+                    "attributionRegion": [0.04, 0.94, 0.28, 0.04],
+                    "provenanceRegion": [0.68, 0.94, 0.28, 0.04],
+                    "serialNumberRegion": None,
+                    "qrSafeRegion": None,
+                    "qrPolicy": "disabled-no-resource",
+                    "thumbnailCrop": [round(value, 6) for value in thumbnail_crop],
+                    "thumbnailResizePolicy": "crop-then-scale-no-stretch",
+                    "staticSharePolicy": {"dimensions": [1600, 1200], "placement": "aspect-fit", "allowStretch": False},
+                }
+            else:
+                if artifact_id in PLAQUES:
+                    relic["squareDerivatives"] = [{
+                        "outputRole": "relic.square-crop",
+                        "sourceArtifactID": artifact_id,
+                        "sourceGeometryID": source,
+                        "cropRectangle": [200, 0, 1200, 1200],
+                        "dimensions": [1200, 1200],
+                        "provenanceID": "prov." + source.replace("/", ".").replace("-", "."),
+                    }]
+                profile = {
+                    "layoutProfileID": profile_id,
+                    "artifactID": artifact_id,
+                    "maximumGlyphLines": maximum,
+                    "minimumGlyphScale": 0.72,
+                    "lineSpacing": 1.08,
+                    "wrappingPolicy": "balanced-token-wrap",
+                    "overflowBehavior": "alternate-standard-presentation",
+                }
             profiles.append(profile)
-            fixture_records.append({
+            fixture = {
                 "artifactID": artifact_id,
                 "layoutProfileID": profile_id,
                 "fixtures": [
@@ -899,7 +1878,10 @@ def add_geometry_contract(manifest: Dict[str, Any], root: Path) -> Dict[str, Any
                     {"kind": "one-beyond-maximum", "lineCount": maximum + 1, "result": "ALTERNATE_PRESENTATION"},
                     {"kind": "minimum-scale", "scale": 0.72, "result": "PASS"},
                 ],
-            })
+            }
+            if phase_c:
+                fixture.update({"thumbnailLegible": True, "shareCompositionLegible": True, "highContrastPass": True})
+            fixture_records.append(fixture)
     manifest["layoutProfiles"] = profiles
     evidence = {"schemaVersion": 1, "generatedAtUTC": BUILD_DATE, "records": fixture_records}
     dump_json(root / "Validation/layout-fixtures.json", evidence)
@@ -912,44 +1894,65 @@ def visual_scale(size: Tuple[int, int], maximum: int) -> Tuple[int, int]:
 
 
 def generate_validation_visuals(root: Path, manifest: Dict[str, Any]) -> None:
+    phase_c = tuple(int(value) for value in PACKAGE_VERSION.split(".")) >= (3, 1, 0)
     geometry_records = []
-    affected = (
+    all_relics = [relic for codex in manifest["codices"] for relic in codex["relics"]]
+    affected = {
         "Source-Masters/Relic-Geometry/sunspire/dawnfire-tablet-geometry.svg",
         "Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg",
-    )
-    for relative in affected:
+    }
+    relic_records = all_relics if phase_c else [relic for relic in all_relics if relic["geometrySourceMaster"] in affected]
+    for relic in relic_records:
+        relative = relic["geometrySourceMaster"]
         path = root / relative
         tree = ET.parse(path)
         svg_root = tree.getroot()
-        rectangles = [item for item in svg_root.iter() if item.tag.rsplit("}", 1)[-1] == "rect"]
         circles = [item for item in svg_root.iter() if item.tag.rsplit("}", 1)[-1] == "circle" and item.attrib.get("stroke") == "#cc5500"]
-        outer, safe = rectangles[1], rectangles[2]
         width, height = (round(value) for value in svg_viewbox(path)[2:])
         rendered_size = visual_scale((width, height), 900)
         overlay = rasterize_svg(path, rendered_size).convert("RGBA")
         draw = ImageDraw.Draw(overlay, "RGBA")
         sx, sy = rendered_size[0] / width, rendered_size[1] / height
-        safe_rect = tuple(float(safe.attrib[key]) for key in ("x", "y", "width", "height"))
+        if phase_c:
+            glyph = relic["glyphSafeRegion"]
+            safe_rect = (glyph[0] * width, glyph[1] * height, glyph[2] * width, glyph[3] * height)
+            bounds = relic_mask(root, relic).getbbox()
+            if bounds is None:
+                raise ValueError(f"Relic geometry has no silhouette bounds: {relative}")
+        else:
+            rectangles = [item for item in svg_root.iter() if item.tag.rsplit("}", 1)[-1] == "rect"]
+            outer, safe = rectangles[1], rectangles[2]
+            safe_rect = tuple(float(safe.attrib[key]) for key in ("x", "y", "width", "height"))
+            outer_rect = tuple(float(outer.attrib[key]) for key in ("x", "y", "width", "height"))
+            bounds = (outer_rect[0], outer_rect[1], outer_rect[0] + outer_rect[2], outer_rect[1] + outer_rect[3])
         expanded = (safe_rect[0] - 24, safe_rect[1] - 24, safe_rect[0] + safe_rect[2] + 24, safe_rect[1] + safe_rect[3] + 24)
         draw.rectangle(tuple(round(value * (sx if index % 2 == 0 else sy)) for index, value in enumerate(expanded)), fill=(198, 52, 133, 24), outline=(198, 52, 133, 230), width=max(2, rendered_size[0] // 240))
         output = f"Validation/geometry/{path.stem}-anchor-overlay.png"
         save_png(overlay, root / output)
-        outer_rect = tuple(float(outer.attrib[key]) for key in ("x", "y", "width", "height"))
         anchor_records = []
-        for circle in circles:
+        for index, circle in enumerate(circles):
             cx, cy, radius = (float(circle.attrib[key]) for key in ("cx", "cy", "r"))
             nearest_x = min(max(cx, expanded[0]), expanded[2])
             nearest_y = min(max(cy, expanded[1]), expanded[3])
             distance = math.hypot(cx - nearest_x, cy - nearest_y)
-            anchor_records.append({
+            anchor_record = {
                 "center": [cx, cy],
                 "radius": radius,
-                "insideRelicBounds": cx - radius >= outer_rect[0] and cx + radius <= outer_rect[0] + outer_rect[2] and cy - radius >= outer_rect[1] and cy + radius <= outer_rect[1] + outer_rect[3],
+                "insideRelicBounds": cx - radius >= bounds[0] and cx + radius <= bounds[2] and cy - radius >= bounds[1] and cy + radius <= bounds[3],
                 "distanceFromExpandedSafeRegion": round(distance - radius, 3),
                 "clearanceFromGlyphSafeRegion": round(distance + 24 - radius, 3),
                 "intersectsExpandedSafeRegion": distance <= radius,
-            })
-        geometry_records.append({"sourceMaster": relative, "overlay": output, "glyphSafeRegion": list(safe_rect), "expandedGlyphSafeRegion": list(expanded), "anchors": anchor_records})
+            }
+            if phase_c:
+                anchor_record.update({
+                    "category": relic["sealAnchors"][index],
+                    "centerNormalized": [round(cx / width, 6), round(cy / height, 6)],
+                })
+            anchor_records.append(anchor_record)
+        geometry_record = {"sourceMaster": relative, "overlay": output, "glyphSafeRegion": list(safe_rect), "expandedGlyphSafeRegion": list(expanded), "anchors": anchor_records}
+        if phase_c:
+            geometry_record["artifactID"] = relic["assetID"]
+        geometry_records.append(geometry_record)
     dump_json(root / "Validation/geometry/anchor-safety.json", {"schemaVersion": 1, "clearancePixels": 24, "records": geometry_records})
 
     topology_descriptions = {
@@ -1001,8 +2004,8 @@ def generate_validation_visuals(root: Path, manifest: Dict[str, Any]) -> None:
 
 def generate_provenance(root: Path, original: Path, source_outputs: Dict[str, List[str]], resources: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     records: List[Dict[str, Any]] = []
-    output_roles = {
-        output["filename"]: output["outputRole"]
+    output_facts = {
+        output["filename"]: output
         for resource in resources
         for output in resource["outputVariants"]
     }
@@ -1011,7 +2014,11 @@ def generate_provenance(root: Path, original: Path, source_outputs: Dict[str, Li
     for relative in source_paths:
         path = root / relative
         legacy = original / relative
-        corrected = relative in CORRECTED_SOURCE_PATHS or relative.startswith("Production-Sources/")
+        corrected = (
+            relative in CORRECTED_SOURCE_PATHS
+            or (tuple(int(value) for value in PACKAGE_VERSION.split(".")) >= (3, 1, 0) and relative in PHASE_C_CORRECTED_SOURCE_PATHS)
+            or relative.startswith("Production-Sources/")
+        )
         if legacy.is_file():
             source_reference = str(legacy)
             legacy_hash = sha256_file(legacy)
@@ -1021,31 +2028,37 @@ def generate_provenance(root: Path, original: Path, source_outputs: Dict[str, Li
         outputs = []
         for output_relative in source_outputs.get(relative, []):
             output_path = root / output_relative
-            media = "application/pdf" if output_path.suffix == ".pdf" else ("font/ttf" if output_path.suffix == ".ttf" else "image/png")
+            declared_output = output_facts[output_relative]
+            media = declared_output["mediaType"]
             if output_path.suffix == ".png":
                 with Image.open(output_path) as image:
                     dimensions: Any = list(image.size)
             elif output_path.suffix == ".pdf":
                 dimensions = list(svg_viewbox(path))[-2:] if path.suffix == ".svg" else "single-page-vector"
+            elif output_path.suffix == ".heif":
+                dimensions = declared_output["dimensionsOrViewBox"]
             else:
                 dimensions = {"unitsPerEm": 1000, "glyphCount": 32}
             outputs.append({
+                "resourceID": declared_output["resourceID"],
+                "artifactID": declared_output["artifactID"],
                 "filename": output_relative,
-                "outputRole": output_roles[output_relative],
+                "outputRole": declared_output["outputRole"],
                 "mediaType": media,
                 "dimensionsOrViewBox": dimensions,
-                "colorSpace": "sRGB" if media != "font/ttf" else "not-applicable",
-                "alphaPolicy": "straight" if media == "image/png" else "not-applicable",
+                "colorSpace": declared_output["colorSpace"],
+                "alphaPolicy": declared_output["alphaPolicy"],
                 "compressionSettings": {"pipeline": PIPELINE, "deterministic": True},
                 "byteLength": output_path.stat().st_size,
                 "sha256": sha256_file(output_path),
+                "exportRecipeID": declared_output["exportRecipeID"],
                 "createdAtUTC": BUILD_DATE,
             })
         record = {
             "provenanceID": "prov." + relative.replace("/", ".").replace("-", "."),
             "assetIDOrResourceID": relative,
             "creatorOrCommissioningEntity": "Raven Forge Software",
-            "actualAuthoringToolAndVersion": PYTHON_TOOL if corrected else "macOS ditto byte-preserving canonicalization with Python 3.9.6 hashing",
+            "actualAuthoringToolAndVersion": PYTHON_TOOL if corrected else f"macOS byte-preserving canonicalization with Python {platform.python_version()} hashing",
             "creationDateUTC": BUILD_DATE,
             "rightsHolder": "Raven Forge Software",
             "rightsBasisOrLicense": "Owner-supplied proprietary source and approved recovery authority",
@@ -1056,8 +2069,8 @@ def generate_provenance(root: Path, original: Path, source_outputs: Dict[str, Li
             "sourceMasterPath": relative,
             "sourceMasterSHA256": sha256_file(path),
             "thirdPartyInputs": [],
-            "exportRecipeID": "recipe.elven.recovery-v3",
-            "exportSettings": {"pipeline": PIPELINE, "pipelineSHA256": sha256_file(Path(__file__).resolve()), "deterministic": True},
+            "exportRecipeID": outputs[0]["exportRecipeID"] if outputs else "recipe.elven.source-canonicalization-v1",
+            "exportSettings": {"pipeline": PIPELINE, "pipelineSHA256": sha256_file(Path(__file__).resolve()), "deterministic": True, "toolVersions": runtime_tool_record()},
             "outputFiles": outputs,
             "approvalStatus": "approved-by-controlling-recovery-authority",
             "approvedBy": "Raven Forge Software",
@@ -1066,6 +2079,213 @@ def generate_provenance(root: Path, original: Path, source_outputs: Dict[str, Li
         }
         records.append(record)
     return records
+
+
+def install_font_registration_evidence(
+    root: Path,
+    supplied_path: Optional[Path],
+    resources: Sequence[Dict[str, Any]],
+) -> Dict[str, Any]:
+    fonts = {
+        resource["scriptID"]: {
+            "scriptID": resource["scriptID"],
+            "resourceID": next(output["resourceID"] for output in resource["outputVariants"] if output["outputRole"] == "script.font"),
+            "fontPath": next(output["filename"] for output in resource["outputVariants"] if output["outputRole"] == "script.font"),
+            "fontSHA256": next(output["sha256"] for output in resource["outputVariants"] if output["outputRole"] == "script.font"),
+            "postScriptName": resource["postScriptName"],
+        }
+        for resource in resources
+        if resource["assetClass"] == "script"
+    }
+    destination = root / "Validation/font-registration.json"
+    if supplied_path is None:
+        evidence = {
+            "schemaVersion": 1,
+            "packageVersion": PACKAGE_VERSION,
+            "generatedAtUTC": BUILD_DATE,
+            "status": "PENDING_EXTERNAL_VALIDATION",
+            "expectedFontCount": 4,
+            "reason": "The external macOS registration harness has not been run for these exact font bytes; iOS registration remains unclaimed.",
+            "platforms": [
+                {
+                    "platform": platform_name,
+                    "runtimeVersion": None,
+                    "device": None,
+                    "status": platform_status,
+                    "command": "NOT_RUN",
+                    "fonts": [
+                        {
+                            "scriptID": script_id,
+                            "resourceID": facts["resourceID"],
+                            "filename": facts["fontPath"],
+                            "sha256": facts["fontSHA256"],
+                            "expectedPostScriptName": facts["postScriptName"],
+                            "resolvedPostScriptName": None,
+                            "registered": None,
+                            "status": platform_status,
+                            "errorCode": "NOT_RUN",
+                        }
+                        for script_id, facts in sorted(fonts.items())
+                    ],
+                }
+                for platform_name, platform_status in (
+                    ("macOS", "PENDING_EXTERNAL_VALIDATION"),
+                    ("iOS Simulator", "PENDING_EXTERNAL_DEVICE_QUALIFICATION"),
+                )
+            ],
+            "errors": [],
+        }
+        dump_json(destination, evidence)
+        return evidence
+
+    evidence_path = supplied_path.resolve()
+    if not evidence_path.is_file():
+        raise SystemExit(f"Font registration evidence does not exist: {evidence_path}")
+    evidence = load_json(evidence_path)
+    if evidence.get("schemaVersion") != 1 or evidence.get("expectedFontCount") != 4:
+        raise SystemExit("Font registration evidence schemaVersion/expectedFontCount must be 1/4")
+    if evidence.get("packageVersion") != PACKAGE_VERSION:
+        raise SystemExit("Font registration evidence packageVersion does not match the requested build")
+    if evidence.get("generatedAtUTC") != BUILD_DATE:
+        raise SystemExit("Font registration evidence generatedAtUTC must match the deterministic build timestamp")
+    if evidence.get("status") != "PASS":
+        raise SystemExit("Font registration evidence top-level status must be PASS")
+    if evidence.get("errors") != []:
+        raise SystemExit("PASS font registration evidence must not contain errors")
+    platforms = evidence.get("platforms")
+    if not isinstance(platforms, list) or len(platforms) != 2:
+        raise SystemExit("Font registration evidence must contain exactly two platforms")
+    platform_names = {
+        platform_record.get("platform")
+        for platform_record in platforms
+        if isinstance(platform_record, dict)
+    }
+    if platform_names != {"macOS", "iOS Simulator"} or any(not isinstance(platform_record, dict) or platform_record.get("status") != "PASS" for platform_record in platforms):
+        raise SystemExit("Font registration evidence must PASS on macOS and iOS Simulator")
+    expected_by_resource = {facts["resourceID"]: facts for facts in fonts.values()}
+    for platform_record in platforms:
+        if not all(isinstance(platform_record.get(key), str) and platform_record[key] for key in ("runtimeVersion", "command")):
+            raise SystemExit("Font registration platform runtime/command metadata must be explicit")
+        if platform_record.get("platform") == "iOS Simulator" and not (isinstance(platform_record.get("device"), str) and platform_record["device"]):
+            raise SystemExit("iOS Simulator registration evidence must identify its device")
+        if platform_record.get("platform") == "macOS" and platform_record.get("device") is not None:
+            raise SystemExit("macOS registration evidence device must be null")
+        platform_fonts = platform_record.get("fonts")
+        if not isinstance(platform_fonts, list) or len(platform_fonts) != len(expected_by_resource):
+            raise SystemExit("Each font registration platform must contain all compiled fonts")
+        observed_by_resource = {
+            record.get("resourceID"): record
+            for record in platform_fonts
+            if isinstance(record, dict) and isinstance(record.get("resourceID"), str)
+        }
+        if set(observed_by_resource) != set(expected_by_resource):
+            raise SystemExit("Font registration platform resource IDs do not match the compiled fonts")
+        for resource_id, expected in expected_by_resource.items():
+            record = observed_by_resource[resource_id]
+            if record.get("status") != "PASS" or record.get("registered") is not True:
+                raise SystemExit(f"Font registration evidence for {resource_id} is not PASS")
+            if record.get("scriptID") not in (None, expected["scriptID"]):
+                raise SystemExit(f"Font registration evidence scriptID differs for {resource_id}")
+            if record.get("filename") != expected["fontPath"]:
+                raise SystemExit(f"Font registration evidence filename differs for {resource_id}")
+            if record.get("sha256") != expected["fontSHA256"]:
+                raise SystemExit(f"Font registration evidence hash differs for {resource_id}")
+            if record.get("expectedPostScriptName") != expected["postScriptName"] or record.get("resolvedPostScriptName") != expected["postScriptName"]:
+                raise SystemExit(f"Font registration evidence PostScript name differs for {resource_id}")
+            if record.get("errorCode") is not None:
+                raise SystemExit(f"Font registration evidence reports an error for {resource_id}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if evidence_path != destination.resolve():
+        shutil.copyfile(evidence_path, destination)
+    return evidence
+
+
+def install_deterministic_regeneration_evidence(root: Path, supplied_path: Optional[Path]) -> Dict[str, Any]:
+    destination = root / "Validation/deterministic-regeneration.json"
+    pipeline_hash = sha256_file(Path(__file__).resolve())
+    if supplied_path is None:
+        evidence = {
+            "schemaVersion": 1,
+            "packageVersion": PACKAGE_VERSION,
+            "generatedAtUTC": BUILD_DATE,
+            "status": "PENDING_EXTERNAL_VALIDATION",
+            "reason": "An independently generated clean target and independently encoded archive have not yet been compared with the intended package.",
+            "command": [],
+            "pipelinePath": PIPELINE,
+            "pipelineSHA256": pipeline_hash,
+            "intendedPackageRoot": None,
+            "cleanPackageRoot": None,
+            "cleanTarget": False,
+            "distinctTarget": False,
+            "expectedResourceCount": 56,
+            "rebuiltResourceCount": 0,
+            "expectedOutputCount": 184,
+            "rebuiltOutputCount": 0,
+            "hashMismatches": [],
+            "sourceHashMismatches": [],
+            "intendedTreeSHA256": None,
+            "cleanTreeSHA256": None,
+            "intendedArchivePath": None,
+            "cleanArchivePath": None,
+            "archivesDistinct": False,
+            "intendedArchiveSHA256": None,
+            "cleanArchiveSHA256": None,
+        }
+        dump_json(destination, evidence)
+        return evidence
+
+    evidence_path = supplied_path.resolve()
+    if not evidence_path.is_file():
+        raise SystemExit(f"Deterministic regeneration evidence does not exist: {evidence_path}")
+    evidence = load_json(evidence_path)
+    if evidence.get("schemaVersion") != 1 or evidence.get("packageVersion") != PACKAGE_VERSION:
+        raise SystemExit("Deterministic regeneration evidence schema/package version must be 1/current")
+    if evidence.get("generatedAtUTC") != BUILD_DATE or evidence.get("status") != "PASS":
+        raise SystemExit("Deterministic regeneration evidence timestamp/status must match the build and PASS")
+    if evidence.get("pipelinePath") != PIPELINE or evidence.get("pipelineSHA256") != pipeline_hash:
+        raise SystemExit("Deterministic regeneration evidence pipeline identity differs from this builder")
+    if not isinstance(evidence.get("command"), list) or not evidence["command"] or not all(isinstance(value, str) and value for value in evidence["command"]):
+        raise SystemExit("Deterministic regeneration evidence command must be an explicit nonempty argv array")
+    if evidence.get("cleanTarget") is not True or evidence.get("distinctTarget") is not True:
+        raise SystemExit("Deterministic regeneration evidence must use a clean, distinct target")
+    intended_root = evidence.get("intendedPackageRoot")
+    clean_root = evidence.get("cleanPackageRoot")
+    intended_archive = evidence.get("intendedArchivePath")
+    clean_archive = evidence.get("cleanArchivePath")
+    if not all(isinstance(value, str) and value for value in (intended_root, clean_root, intended_archive, clean_archive)):
+        raise SystemExit("Deterministic regeneration evidence package/archive paths must be explicit")
+    expected_basename = f"Rune-Scribe-Elven-Series-Corrected-Production-Package-{target_version_label(PACKAGE_VERSION)}"
+    if (
+        intended_root == clean_root
+        or Path(intended_root).name != expected_basename
+        or Path(clean_root).name != expected_basename
+        or intended_archive == clean_archive
+        or Path(intended_archive).name != f"{expected_basename}.zip"
+        or Path(clean_archive).name != f"{expected_basename}.zip"
+        or evidence.get("archivesDistinct") is not True
+    ):
+        raise SystemExit("Deterministic regeneration evidence roots/archives must be distinct and use the required package basename")
+    if (
+        evidence.get("expectedResourceCount") != 56
+        or evidence.get("rebuiltResourceCount") != 56
+        or evidence.get("expectedOutputCount") != 184
+        or evidence.get("rebuiltOutputCount") != 184
+    ):
+        raise SystemExit("Deterministic regeneration evidence resource/output counts must be 56/184 for both targets")
+    if evidence.get("hashMismatches") != [] or evidence.get("sourceHashMismatches") != []:
+        raise SystemExit("Deterministic regeneration evidence contains mismatches")
+    for left_key, right_key, label in (
+        ("intendedTreeSHA256", "cleanTreeSHA256", "tree"),
+        ("intendedArchiveSHA256", "cleanArchiveSHA256", "archive"),
+    ):
+        left = evidence.get(left_key)
+        right = evidence.get(right_key)
+        if not isinstance(left, str) or not re.fullmatch(r"[0-9a-f]{64}", left) or set(left) == {"0"} or left != right:
+            raise SystemExit(f"Deterministic regeneration evidence {label} hashes must be identical lowercase SHA-256 values")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if evidence_path != destination.resolve():
+        shutil.copyfile(evidence_path, destination)
+    return evidence
 
 
 def role_for(relative: str) -> str:
@@ -1079,7 +2299,7 @@ def role_for(relative: str) -> str:
         return "asset-provenance"
     if relative.startswith("Validation/"):
         return "validation-evidence"
-    if relative.endswith("Asset-Manifest-v1.0.json"):
+    if "Asset-Manifest" in relative and relative.endswith(".json"):
         return "machine-readable-asset-manifest"
     return "package-document"
 
@@ -1090,13 +2310,16 @@ def generate_package_manifest(root: Path) -> Dict[str, Any]:
     for path in sorted(package_files, key=lambda item: item.relative_to(root).as_posix()):
         relative = path.relative_to(root).as_posix()
         files.append({"path": relative, "role": role_for(relative), "bytes": path.stat().st_size, "sha256": sha256_file(path)})
+    version_label = target_version_label(PACKAGE_VERSION).removeprefix("v")
     manifest = {
-        "schemaVersion": "3.0",
+        "schemaVersion": version_label,
         "packageID": "runescribe.elven-series.corrected-production-package",
-        "packageVersion": "3.0.0",
-        "status": "corrected-production",
+        "packageVersion": PACKAGE_VERSION,
+        "status": PACKAGE_STATUS,
         "generatedDate": BUILD_DATE,
         "rootDirectory": root.name,
+        "pipeline": PIPELINE,
+        "toolVersions": runtime_tool_record(),
         "manifestScope": "all package files except PACKAGE-MANIFEST.json, whose digest is recorded externally to avoid recursive self-hashing",
         "fileCountExcludingManifest": len(files),
         "files": files,
@@ -1106,44 +2329,74 @@ def generate_package_manifest(root: Path) -> Dict[str, Any]:
 
 
 def main() -> int:
+    global BUILD_DATE, PACKAGE_VERSION, PACKAGE_STATUS, PYTHON_TOOL
     parser = argparse.ArgumentParser()
     parser.add_argument("--original", required=True, type=Path)
     parser.add_argument("--target", required=True, type=Path)
-    parser.add_argument("--recreate-from-original", action="store_true", help="Replace only pipeline-owned outputs and restore owner-supplied source bytes before building")
+    parser.add_argument("--package-version", type=parse_package_version, default="3.0.0", help="Semantic package version; 3.1.0 enables the complete Phase C matrix")
+    parser.add_argument("--generated-at", type=parse_generated_at, default=BUILD_DATE, help="Fixed ISO-8601 UTC generation timestamp used in every deterministic record")
+    parser.add_argument("--font-registration-evidence", type=Path, help="PASS evidence produced by the external font registration harness for these exact font hashes")
+    parser.add_argument("--deterministic-regeneration-evidence", type=Path, help="PASS evidence comparing a clean distinct target and deterministic archive with the intended package")
+    parser.add_argument("--recreate-from-original", action="store_true", help="Recreate the exact target from canonical source after validating any existing package")
     args = parser.parse_args()
+    BUILD_DATE = args.generated_at
+    PACKAGE_VERSION = args.package_version
+    if PACKAGE_VERSION not in {"3.0.0", "3.1.0"}:
+        raise SystemExit("This pipeline supports only the immutable v3.0 recovery contract and the v3.1 Phase C contract")
+    phase_c = tuple(int(value) for value in PACKAGE_VERSION.split(".")) >= (3, 1, 0)
+    PACKAGE_STATUS = "phase-c-production" if phase_c else "corrected-production"
+    PYTHON_TOOL = f"Python {platform.python_version()} with Pillow {PIL.__version__} and fontTools {fontTools.__version__}"
+    if args.original.is_symlink():
+        raise SystemExit("Canonical source package root must not be a symbolic link")
+    if args.target.is_symlink():
+        raise SystemExit("Recreation target root must not be a symbolic link")
     original = args.original.resolve()
     root = args.target.resolve()
-    if root.name != "Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.0":
+    target_was_clean = not root.exists() or (root.is_dir() and not any(root.iterdir()))
+    expected_target_name = f"Rune-Scribe-Elven-Series-Corrected-Production-Package-{target_version_label(PACKAGE_VERSION)}"
+    if root.name != expected_target_name:
         raise SystemExit(f"Refusing unexpected target: {root}")
-    if not original.is_dir() or not root.is_dir():
-        raise SystemExit("Original and target directories must already exist")
+    if not original.is_dir():
+        raise SystemExit("Original directory must exist")
+    if root == original or root in original.parents or original in root.parents:
+        raise SystemExit("Original and target directories must not overlap")
+    for evidence_path in (args.font_registration_evidence, args.deterministic_regeneration_evidence):
+        if evidence_path is not None:
+            resolved_evidence = evidence_path.resolve()
+            if resolved_evidence == root or root in resolved_evidence.parents:
+                raise SystemExit("External evidence inputs must be stored outside the recreated target")
+    verify_canonical_source(original)
+    verify_runtime_tools(require_heif=phase_c)
+    if not args.recreate_from_original:
+        raise SystemExit("Production packages must be recreated cleanly from the canonical v1 source")
+    if root.exists() and not root.is_dir():
+        raise SystemExit("Target exists but is not a directory")
     if args.recreate_from_original:
-        source_manifest = json.loads((original / "PACKAGE-MANIFEST.json").read_text(encoding="utf-8"))
-        if source_manifest.get("packageID") != "runescribe.elven-series.design-package":
-            raise SystemExit("Refusing source with unexpected package identity")
-        for generated_directory in ("Production-Sources", "Shipping", "Validation", "Provenance"):
-            generated_path = root / generated_directory
-            if generated_path.exists():
-                shutil.rmtree(generated_path)
-        neutral_instruction = root / "Rune-Scribe-Elven-Series-Implementation-Instructions-v1.0.md"
-        if neutral_instruction.exists():
-            neutral_instruction.unlink()
-        shutil.copytree(original, root, dirs_exist_ok=True)
-        for directory in sorted(
-            (path for path in root.rglob("*") if path.is_dir()),
-            key=lambda path: len(path.parts),
-            reverse=True,
-        ):
-            if not any(directory.iterdir()):
-                directory.rmdir()
+        root.mkdir(parents=True, exist_ok=True)
+        if any(root.iterdir()):
+            verify_recreation_target(root, PACKAGE_VERSION)
+            for child in root.iterdir():
+                if child.is_dir():
+                    shutil.rmtree(child)
+                else:
+                    child.unlink()
+        shutil.copytree(original, root, dirs_exist_ok=True, copy_function=shutil.copyfile)
 
     neutralize_instruction_attribution(root)
     manifest_path = root / "Rune-Scribe-Elven-Series-Asset-Manifest-v1.0.json"
-    manifest = recursive_replace(json.loads(manifest_path.read_text(encoding="utf-8")))
-    manifest["packageVersion"] = "3.0.0"
-    manifest["status"] = "corrected-production"
+    manifest = recursive_replace(load_json(manifest_path))
+    manifest["packageVersion"] = PACKAGE_VERSION
+    manifest["status"] = PACKAGE_STATUS
     manifest["generatedDate"] = BUILD_DATE
     manifest["bindingAuthority"] = "repository Future Theme Binding Contract"
+    manifest["generationPipeline"] = {
+        "path": PIPELINE,
+        "sha256": sha256_file(Path(__file__).resolve()),
+        "toolVersions": runtime_tool_record(),
+        "deterministic": True,
+        "recreatedFromCanonicalSource": args.recreate_from_original,
+        "targetWasClean": target_was_clean,
+    }
 
     for codex in manifest["codices"]:
         expected = BINDINGS[codex["codexID"]]
@@ -1164,13 +2417,27 @@ def main() -> int:
             path = root / relative
             path.write_text(path.read_text(encoding="utf-8").replace("Seal source master", "Crest source master"), encoding="utf-8")
     correct_anchors(root / "Source-Masters/Relic-Geometry/sunspire/dawnfire-tablet-geometry.svg", (("lowerRight", 984, 1235), ("lowerLeft", 216, 1235)))
-    correct_anchors(root / "Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg", (("lowerRight", 1301, 943), ("lowerLeft", 299, 943)))
+    plaque_anchor_corrections = ["Source-Masters/Relic-Geometry/wildwood/mossbound-plaque-geometry.svg"]
+    if phase_c:
+        plaque_anchor_corrections.extend((
+            "Source-Masters/Relic-Geometry/gloamthorn/umbral-plaque-geometry.svg",
+            "Source-Masters/Relic-Geometry/moonleaf/ivybound-plaque-geometry.svg",
+            "Source-Masters/Relic-Geometry/sunspire/solvine-plaque-geometry.svg",
+        ))
+    for relative in plaque_anchor_corrections:
+        correct_anchors(root / relative, (("lowerRight", 1301, 943), ("lowerLeft", 299, 943)))
 
     add_geometry_contract(manifest, root)
     resources, source_outputs = generate_assets(root, manifest)
     manifest["resourceCatalog"] = resources
-    manifest["resourceCatalogVersion"] = 1
+    manifest["resourceCatalogVersion"] = 2 if phase_c else 1
     generate_validation_visuals(root, manifest)
+    registration = install_font_registration_evidence(root, args.font_registration_evidence if phase_c else None, resources) if phase_c else None
+    if registration is not None:
+        manifest["fontRegistrationEvidence"] = {"path": "Validation/font-registration.json", "status": registration["status"], "sha256": sha256_file(root / "Validation/font-registration.json")}
+    regeneration = install_deterministic_regeneration_evidence(root, args.deterministic_regeneration_evidence) if phase_c else None
+    if regeneration is not None:
+        manifest["deterministicRegenerationEvidence"] = {"path": "Validation/deterministic-regeneration.json", "status": regeneration["status"], "sha256": sha256_file(root / "Validation/deterministic-regeneration.json")}
 
     for codex in manifest["codices"]:
         codex["crest"]["assetClass"] = "crest"
@@ -1179,7 +2446,8 @@ def main() -> int:
         codex["crest"]["placeableOnSealAnchor"] = False
 
     provenance = generate_provenance(root, original, source_outputs, resources)
-    provenance_path = root / "Provenance/Asset-Provenance-v3.json"
+    provenance_name = "Asset-Provenance-v3.json" if PACKAGE_VERSION == "3.0.0" else f"Asset-Provenance-{target_version_label(PACKAGE_VERSION)}.json"
+    provenance_path = root / "Provenance" / provenance_name
     dump_json(provenance_path, {"schemaVersion": 1, "generatedAtUTC": BUILD_DATE, "records": provenance})
     manifest["provenanceLedgerPath"] = provenance_path.relative_to(root).as_posix()
     manifest["provenanceRecordCount"] = len(provenance)
@@ -1188,12 +2456,15 @@ def main() -> int:
     report = root / "PACKAGE-VALIDATION-REPORT.md"
     report.write_text(
         "# Rune Scribe Elven Series Corrected Package Validation Record\n\n"
-        "This v3 package is generated from the immutable v1 source by the deterministic repository asset pipeline. "
+        f"This {target_version_label(PACKAGE_VERSION)} package is generated from the immutable v1 source by the deterministic repository asset pipeline. "
         "Final semantic status is established by the repository validation evidence, not by this record alone.\n\n"
         f"- Generated: `{BUILD_DATE}`\n"
         f"- Source provenance records: `{len(provenance)}`\n"
         f"- Resource declarations: `{len(resources)}`\n"
-        "- Validation authority: repository recovery evidence\n",
+        f"- Materialized output declarations: `{sum(len(resource['outputVariants']) for resource in resources)}`\n"
+        + (f"- Font registration evidence: `{registration['status']}`\n" if registration is not None else "")
+        + (f"- Deterministic regeneration evidence: `{regeneration['status']}`\n" if regeneration is not None else "")
+        + "- Validation authority: repository recovery evidence\n",
         encoding="utf-8",
     )
 

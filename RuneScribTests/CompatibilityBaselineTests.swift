@@ -34,10 +34,19 @@ final class CompatibilityBaselineTests: XCTestCase {
         "QrsGhSp1NJZMfMHUL9o2COYKCo/IFn7jqMuwqWa6MSHzEdKUtIH7Iow=="
 
     func testBundledFontMatchesFixedSHA256() throws {
+        XCTAssertNil(
+            Bundle.main.url(forResource: "NotoSansRunic-Regular", withExtension: "ttf"),
+            "The app root must not duplicate the Norse module font."
+        )
+        let moduleBundleURL = try XCTUnwrap(
+            Bundle.main.resourceURL?.appendingPathComponent(
+                "RuneScribeArchitecture_RuneScribeNorseThemeModule.bundle",
+                isDirectory: true
+            )
+        )
+        let moduleBundle = try XCTUnwrap(Bundle(url: moduleBundleURL))
         let fontURL = try XCTUnwrap(
-            Bundle(for: CompatibilityBaselineTests.self)
-                .url(forResource: "NotoSansRunic-Regular", withExtension: "ttf")
-                ?? Bundle.main.url(forResource: "NotoSansRunic-Regular", withExtension: "ttf")
+            moduleBundle.url(forResource: "NotoSansRunic-Regular", withExtension: "ttf")
         )
         let digest = Data(SHA256.hash(data: try Data(contentsOf: fontURL)))
 

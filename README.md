@@ -13,7 +13,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Version](https://img.shields.io/badge/version-1.0.38%20build%2038-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-814%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-826%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -322,13 +322,13 @@ local Progression Module, and the Phase A/B Theme scaffold: approved Achievement
 Codex gates, the Vault/Progress view, durable unlock reveals, privacy-safe
 existing-user migration, the runtime Theme coordinator, and the required Norse Base
 provider. Production Elven series providers, cloud synchronization, and Game Center
-remain disabled. All nine Elven Series recovery findings pass simultaneously, the
-corrected v3 production package is validated, and Phase C resource production has
-resumed. Phase C remains in progress; its remaining Relic derivatives, Seal exports,
-font evidence, and share-resource declarations must finish before Phase D provider
-targets begin. Later Theme and sharing work also remains gated by the local runtime,
-compatibility, and physical-device program; there is no external-framework
-prerequisite.
+remain disabled. All nine Elven Series recovery findings pass simultaneously. The
+corrected v3.1 production package contains 56 logical resources and 184 shipping
+outputs with complete provenance and deterministic-regeneration evidence.
+Phase C is complete and ready for Phase D. Phase D has not started, and no production
+Elven provider target has been added to the shipping app. Later Theme and sharing work also
+remains gated by the local runtime, compatibility, and physical-device program; there
+is no external-framework prerequisite.
 
 Current architecture and dependency authority lives in the
 [controlling Forsetti policy](docs/architecture/FORSETTI_CONTROLLING_POLICY.md),
@@ -394,7 +394,7 @@ Packages/RuneScribeArchitecture/
 │   ├── RuneScribeNorseThemeModule/ Required Norse Base provider and verified resources
 │   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        814 Swift package tests
+└── Tests/                        826 Swift package tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -450,8 +450,9 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package currently contains **814 package tests**, supplemented by
-repository architecture guards, hosted macOS/iOS tests, iPhone/iPad UI parity, and an
+The local Swift package currently contains **826 package tests** (737 XCTest cases and
+89 Swift Testing cases), supplemented by repository architecture guards, hosted
+macOS/iOS tests, iPhone/iPad UI parity, and an
 isolated macOS parity host. The package suite uses deterministic in-memory adapters and
 does not access the operator's login Keychain.
 
@@ -489,7 +490,8 @@ Detailed guides, architecture deep-dives, and diagrams live in the
 for the current implementation boundary and dependencies. Elven Series status is in
 the [resolution ledger](docs/verification/ElvenSeriesBlockingResolutionLedger.md),
 [recovery state](docs/verification/elven-recovery-v3/RecoveryState.json), and
-[current final audit](docs/verification/elven-recovery-v3/RecoveryFinalAudit.md).
+[recovery final audit](docs/verification/elven-recovery-v3/RecoveryFinalAudit.md), and
+[Phase C final audit](docs/verification/elven-phase-c/PhaseCFinalAudit.md).
 Run `scripts/check-documentation-alignment.py` to verify release versions, roadmap
 status, recovery authority, and publication policy together.
 

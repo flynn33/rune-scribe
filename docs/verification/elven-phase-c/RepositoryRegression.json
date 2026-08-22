@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "sourceCommit": "f5b74658bb6ec4d3ac251f532a4d92d389c2a2db",
+  "environment": {
+    "macOS": "26.6.1 (25G76)",
+    "xcode": "26.2 (17C52)",
+    "swiftPackageDestination": "arm64e-apple-macos14.0",
+    "iOSSimulatorRuntime": "26.2 (23C54)"
+  },
+  "gates": [
+    {
+      "name": "complete Swift package suite",
+      "command": "swift test --package-path Packages/RuneScribeArchitecture",
+      "status": "PASS",
+      "result": "737 XCTest cases plus 89 Swift Testing cases; 826 total; zero failures"
+    },
+    {
+      "name": "architecture guard",
+      "command": "scripts/check-architecture.sh",
+      "status": "PASS",
+      "result": "17 architecture ratchets passed"
+    },
+    {
+      "name": "roadmap alignment guard",
+      "command": "scripts/check-roadmap-alignment.sh",
+      "status": "PASS",
+      "result": "92 tasks and 12 decisions verified"
+    },
+    {
+      "name": "Theme contract tests",
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --filter ThemeContractTests",
+      "status": "PASS",
+      "result": "21 tests; zero failures"
+    },
+    {
+      "name": "runtime opaque-resource registry tests",
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --filter RuntimeOpaqueResourceRegistryTests",
+      "status": "PASS",
+      "result": "14 tests; zero failures"
+    },
+    {
+      "name": "Norse Base Theme Module tests",
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --filter NorseBaseThemeModuleTests",
+      "status": "PASS",
+      "result": "6 tests; zero failures"
+    },
+    {
+      "name": "Theme coordinator conformance tests",
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --filter ThemeCoordinatorConformanceTests",
+      "status": "PASS",
+      "result": "5 tests; zero failures"
+    },
+    {
+      "name": "semantic Theme presentation tests",
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --filter SemanticThemePresentationTests",
+      "status": "PASS",
+      "result": "11 tests; zero failures"
+    },
+    {
+      "name": "macOS Release build",
+      "command": "xcodebuild build -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Release -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-elven-phase-c-macos-release CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "status": "PASS",
+      "result": "Release app built and ad-hoc signed"
+    },
+    {
+      "name": "iOS Simulator Release build",
+      "command": "xcodebuild build -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -configuration Release -destination 'platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83' -derivedDataPath /tmp/runescribe-elven-phase-c-ios-release CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "status": "PASS",
+      "result": "iOS Simulator Release app built and ad-hoc signed"
+    },
+    {
+      "name": "shipping product inspection",
+      "command": "scripts/check-shipping-products.sh --macos-app /tmp/runescribe-elven-phase-c-macos-release/Build/Products/Release/RuneScrib.app --ios-app /tmp/runescribe-elven-phase-c-ios-release/Build/Products/Release-iphonesimulator/RuneScrib.app",
+      "status": "PASS",
+      "result": "74 checks; zero failures"
+    },
+    {
+      "name": "macOS hosted acceptance",
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-elven-phase-c-macos-hosted-acceptance -parallel-testing-enabled NO -only-testing:RuneScribTests/CompatibilityBaselineTests -only-testing:RuneScribTests/RuntimeCompositionTests -only-testing:RuneScribArchitectureTests/ArchitectureGuardrailTests CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "status": "PASS",
+      "result": "20 tests; zero failures",
+      "resultBundle": "/tmp/runescribe-elven-phase-c-macos-hosted-acceptance/Logs/Test/Test-RuneScrib-macOS-2026.08.21_18-16-01--0500.xcresult"
+    },
+    {
+      "name": "macOS parity",
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-elven-phase-c-macos-parity -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "status": "PASS",
+      "result": "3 tests; zero failures",
+      "resultBundle": "/tmp/runescribe-elven-phase-c-macos-parity/Logs/Test/Test-RuneScrib-macOS-Parity-2026.08.21_17-40-08--0500.xcresult"
+    },
+    {
+      "name": "iOS hosted acceptance",
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -configuration Debug -destination 'platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83' -derivedDataPath /tmp/runescribe-elven-phase-c-ios-hosted -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "status": "PASS",
+      "result": "20 tests on iPhone 17 Pro / iOS 26.2; zero failures",
+      "resultBundle": "/tmp/runescribe-elven-phase-c-ios-hosted/Logs/Test/Test-RuneScrib-iOS-2026.08.21_17-44-25--0500.xcresult"
+    },
+    {
+      "name": "iPhone parity",
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination 'platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83' -derivedDataPath /tmp/runescribe-elven-phase-c-iphone-parity -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "status": "PASS",
+      "result": "1 UI parity test on iPhone 17 Pro / iOS 26.2; zero failures",
+      "resultBundle": "/tmp/runescribe-elven-phase-c-iphone-parity/Logs/Test/Test-RuneScrib-iOS-Parity-2026.08.21_17-45-50--0500.xcresult"
+    },
+    {
+      "name": "iPad parity",
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination 'platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3' -derivedDataPath /tmp/runescribe-elven-phase-c-ipad-parity -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "status": "PASS",
+      "result": "1 UI parity test on iPad Pro 13-inch (M5) / iOS 26.2; zero failures",
+      "resultBundle": "/tmp/runescribe-elven-phase-c-ipad-parity/Logs/Test/Test-RuneScrib-iOS-Parity-2026.08.21_17-45-50--0500.xcresult"
+    }
+  ],
+  "reportOnlyObservation": {
+    "status": "NON_ACCEPTANCE_OBSERVATION",
+    "command": "xcodebuild clean test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-elven-phase-c-macos-hosted -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+    "passedBeforeObservation": 20,
+    "finding": "ComplianceGuardTests/testActivationCompletenessCallRemovalReportsOnlyFG006 expected a passing FG-006 baseline while the inherited report-only baseline remains violation.",
+    "disposition": "Not an acceptance gate and not remediated in this Phase C resource task."
+  },
+  "physicalDeviceStatus": "PENDING_PHYSICAL_DEVICE",
+  "physicalDevicePending": [
+    "FP-009 Contacts authorization and picker behavior on signed hardware",
+    "FP-015 cold and warm document ingress through Files, Messages, and AirDrop",
+    "FP-020 QR readability using a separate physical camera",
+    "FP-021 iOS camera permission, scan, cancel, denied, and fallback behavior",
+    "FP-022 Messages attachment delivery, cancellation, failure, and sent behavior",
+    "FP-023 real share destinations and AirDrop completion/cancellation behavior",
+    "FP-030 physical-device lock and background lifecycle with PIN enabled",
+    "Distribution identity, provisioning, signed archive installation, and release-device launch"
+  ],
+  "errors": []
+}
