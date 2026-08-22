@@ -1,0 +1,31 @@
+/tmp/runescribe-roadmap-macos-release.IzHhkv/DerivedData/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64]
+/tmp/runescribe-roadmap-macos-release.IzHhkv/DerivedData/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib (for architecture x86_64):	Mach-O 64-bit executable x86_64
+/tmp/runescribe-roadmap-macos-release.IzHhkv/DerivedData/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib (for architecture arm64):	Mach-O 64-bit executable arm64
+Architectures in the fat file: /tmp/runescribe-roadmap-macos-release.IzHhkv/DerivedData/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib are: x86_64 arm64
+/tmp/runescribe-roadmap-macos-release.IzHhkv/DerivedData/Build/Products/Release/RuneScrib.app: valid on disk
+/tmp/runescribe-roadmap-macos-release.IzHhkv/DerivedData/Build/Products/Release/RuneScrib.app: satisfies its Designated Requirement
+Executable=/private/tmp/runescribe-roadmap-macos-release.IzHhkv/DerivedData/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib
+Identifier=com.runescribe.app
+Format=app bundle with Mach-O universal (x86_64 arm64)
+CodeDirectory v=20500 size=60787 flags=0x10002(adhoc,runtime) hashes=1893+3 location=embedded
+VersionPlatform=1
+VersionMin=983040
+VersionSDK=1704448
+Hash type=sha256 size=32
+CandidateCDHash sha256=16bf3a5bd97ec304906d3c6626136dc41e5c9761
+CandidateCDHashFull sha256=16bf3a5bd97ec304906d3c6626136dc41e5c976165b064b90486c501eca9253d
+Hash choices=sha256
+CMSDigest=16bf3a5bd97ec304906d3c6626136dc41e5c976165b064b90486c501eca9253d
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=12238848
+Executable Segment flags=0x1
+Page size=16384
+CDHash=16bf3a5bd97ec304906d3c6626136dc41e5c9761
+Signature=adhoc
+Info.plist entries=28
+TeamIdentifier=not set
+Runtime Version=26.2.0
+Sealed Resources version=2 rules=13 files=323
+Internal requirements count=0 size=12
+106596	/tmp/runescribe-roadmap-macos-release.IzHhkv/DerivedData/Build/Products/Release/RuneScrib.app

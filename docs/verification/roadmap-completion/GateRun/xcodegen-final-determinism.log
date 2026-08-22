@@ -1,0 +1,9 @@
+source_revision=79b3b6974aa047554e1938f986792cfef30b65ff
+command_1=xcodegen generate
+command_1_exit=0
+command_2=xcodegen generate
+command_2_exit=0
+before_vs_pass1_diff_exit=0
+pass1_vs_pass2_diff_exit=0
+generated_project_git_diff_exit=0
+project_pbxproj_sha256=c85900e4e5cf88060f24ca8eb68e5458e70e744da1607898089397fc810f4de7

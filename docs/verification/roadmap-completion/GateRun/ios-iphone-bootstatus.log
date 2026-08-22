@@ -1,0 +1,6 @@
+Monitoring boot status for iPhone 17 Pro (1563B47A-700D-4AEF-A8D5-89780C581F83).
+[2026-08-22 21:38:44 +0000] Status=4, isTerminal=NO, Elapsed=00:08.
+	Waiting on System App
+
+[2026-08-22 21:38:46 +0000] Status=4294967295, isTerminal=YES, Elapsed=00:10.
+	Finished

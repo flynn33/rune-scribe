@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture --filter ShareArtifactRendererTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter ElvenShareArtifactRendererIntegrationTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter ThemeCoordinatorConformanceTests",
+    "xcodebuild test -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83'",
+    "xcodebuild test -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3'"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ShareArtifactRendererTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ElvenShareArtifactRendererIntegrationTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeCoordinatorModuleTests/ThemeCoordinatorConformanceTests.swift",
+    "RuneScribIOSUITests/RuneScribeParityUITests.swift",
+    "docs/platform-notes.md",
+    "docs/verification/roadmap-completion/GateRun/swift-ui-accessibility-layout-focused.log",
+    "docs/verification/roadmap-completion/GateRun/swift-ui-accessibility-layout-regression.log",
+    "docs/verification/roadmap-completion/GateRun/ios-iphone-parity-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ios-iphone-parity-b7c55ff-attachments/manifest.json",
+    "docs/verification/roadmap-completion/GateRun/ipad-parity-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ipad-parity-b7c55ff-attachments/manifest.json"
+  ],
+  "coveredStates": [
+    "VoiceOver labels and descriptions",
+    "Dynamic Type-safe surrounding UI",
+    "high contrast",
+    "monochrome and no color-only state",
+    "Reduce Motion",
+    "keyboard focus",
+    "pointer focus",
+    "static fallback",
+    "short, medium, long, paginated, and overflow inscriptions",
+    "no-sound alternative metadata"
+  ],
+  "supportedResult": "PASS - semantic and renderer tests pass, the compact artifact heading adapts at accessibility text sizes, and integrated iPhone/iPad Simulator accessibility audits each pass 1/1 with screenshots preserved.",
+  "physicalAssistiveTechnologyStatus": "OWNER TEST REQUIRED"
+}

@@ -1,0 +1,19 @@
+source_revision=b7c55ff40255f96a6c857b49a14962e9fcd79c37
+destination=platform=macOS,arch=arm64
+configuration=Debug
+parallel_testing=NO
+derived_data=/tmp/runescribe-roadmap-macos-hosted-b7c55ff.2gwQbB/DerivedData
+result_bundle=/tmp/runescribe-roadmap-macos-hosted-b7c55ff.2gwQbB/RuneScrib-macOS-Full-b7c55ff.xcresult
+command=xcodebuild -quiet test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath '/tmp/runescribe-roadmap-macos-hosted-b7c55ff.2gwQbB/DerivedData' -resultBundlePath '/tmp/runescribe-roadmap-macos-hosted-b7c55ff.2gwQbB/RuneScrib-macOS-Full-b7c55ff.xcresult' -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=
+qualification_status=supplemental_non_acceptance_attempt
+exit_code=143
+run_status=superseded_diagnostic_incomplete
+final_gate_claim=false
+termination_reason=first_interpreted_compliance_scan_exceeded_12_minutes_at_100_percent_cpu
+first_compliance_test=ComplianceGuardTests/testActivationCompletenessCallRemovalReportsOnlyFG006
+first_scanner_invocation_completed=false
+observed_first_scanner_elapsed=12m40s
+partial_result_bundle=/tmp/runescribe-roadmap-macos-hosted-b7c55ff.2gwQbB/RuneScrib-macOS-Full-b7c55ff.xcresult
+partial_standard_output=docs/verification/roadmap-completion/GateRun/macos-hosted-full-b7c55ff-partial-standard-output.log
+scanner_sample=docs/verification/roadmap-completion/GateRun/macos-hosted-full-b7c55ff-swift-scanner.sample.txt
+head_at_termination=b7c55ff40255f96a6c857b49a14962e9fcd79c37

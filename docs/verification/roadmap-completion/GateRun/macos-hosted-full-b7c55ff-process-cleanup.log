@@ -1,0 +1,4 @@
+terminated_processes=9660,9667,10188,10845,10881
+exact_pid_check:
+  PID  PPID STAT ELAPSED  %CPU COMMAND
+relevant_global_process_check:

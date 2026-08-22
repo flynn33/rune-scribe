@@ -1,0 +1,11 @@
+Writing result bundle at path:
+	/tmp/runescribe-roadmap-macos-hosted-final.EFnFF3/RuneScrib-macOS-Hosted-Entitled.xcresult
+
+note: Using codesigning identity override: -
+/Users/jimdaley/GitHub/Rune-Scribe-Roadmap-Completion/RuneScrib.xcodeproj: error: "RuneScrib-macOS" requires a provisioning profile. Enable development signing and select a provisioning profile in the Signing & Capabilities editor. (in target 'RuneScrib-macOS' from project 'RuneScrib')
+note: Disabling hardened runtime with ad-hoc codesigning. (in target 'RuneScrib-macOS' from project 'RuneScrib')
+Testing failed:
+	"RuneScrib-macOS" requires a provisioning profile. Enable development signing and select a provisioning profile in the Signing & Capabilities editor.
+	Testing cancelled because the build failed.
+
+** TEST FAILED **

@@ -1,0 +1,18 @@
+Writing result bundle at path:
+	/tmp/runescribe-roadmap-macos-parity-b7c55ff.ean6CW/RuneScrib-macOS-Parity-b7c55ff.xcresult
+
+note: Using codesigning identity override: -
+warning: 'RuneScribeProgressionSyncDomain' is missing a dependency on 'RuneScribeContracts' because dependency scan of Swift module 'RuneScribeProgressionSyncDomain' discovered a dependency on 'RuneScribeContracts'
+warning: 'RuneScribeGameCenterModule' is missing a dependency on 'RuneScribeContracts' because dependency scan of Swift module 'RuneScribeGameCenterModule' discovered a dependency on 'RuneScribeContracts'
+warning: 'RuneScribeUIPresentationContracts' is missing a dependency on 'RuneScribeContracts' because dependency scan of Swift module 'RuneScribeUIPresentationContracts' discovered a dependency on 'RuneScribeContracts'
+warning: 'RuneScribeCloudSyncModule' is missing a dependency on 'RuneScribeProgressionSyncDomain' because dependency scan of Swift module 'RuneScribeCloudSyncModule' discovered a dependency on 'RuneScribeProgressionSyncDomain'
+warning: 'RuneScribeCloudSyncModule' is missing a dependency on 'RuneScribeContracts' because dependency scan of Swift module 'RuneScribeCloudSyncModule' discovered a dependency on 'RuneScribeContracts'
+warning: 'RuneScribeRuntimeCore' is missing a dependency on 'RuneScribeUIPresentationContracts' because dependency scan of Swift module 'RuneScribeRuntimeCore' discovered a dependency on 'RuneScribeUIPresentationContracts'
+warning: 'RuneScribeRuntimeCore' is missing a dependency on 'RuneScribeCloudSyncModule' because dependency scan of Swift module 'RuneScribeRuntimeCore' discovered a dependency on 'RuneScribeCloudSyncModule'
+warning: 'RuneScribeRuntimeCore' is missing a dependency on 'RuneScribeGameCenterModule' because dependency scan of Swift module 'RuneScribeRuntimeCore' discovered a dependency on 'RuneScribeGameCenterModule'
+warning: 'RuneScribeRuntimeCore' is missing a dependency on 'RuneScribeProgressionSyncDomain' because dependency scan of Swift module 'RuneScribeRuntimeCore' discovered a dependency on 'RuneScribeProgressionSyncDomain'
+warning: 'RuneScribeRuntimeCore' is missing a dependency on 'RuneScribeContracts' because dependency scan of Swift module 'RuneScribeRuntimeCore' discovered a dependency on 'RuneScribeContracts'
+2026-08-22 17:19:36.619 xcodebuild[6842:3274279] [MT] IDETestOperationsObserverDebug: 4.169 elapsed -- Testing started completed.
+2026-08-22 17:19:36.619 xcodebuild[6842:3274279] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-08-22 17:19:36.619 xcodebuild[6842:3274279] [MT] IDETestOperationsObserverDebug: 4.169 sec, +4.169 sec -- end
+Testing started

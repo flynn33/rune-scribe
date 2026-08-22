@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture --filter AllElvenProviderIntegrationTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter MoonleafThemeProviderTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter SunspireThemeProviderTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter WildwoodThemeProviderTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter GloamthornThemeProviderTests",
+    "python3 scripts/check-roadmap-completion.py"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/AllElvenProviderIntegrationTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeMoonleafModuleTests/MoonleafThemeProviderTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeSunspireModuleTests/SunspireThemeProviderTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeWildwoodModuleTests/WildwoodThemeProviderTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeGloamthornModuleTests/GloamthornThemeProviderTests.swift",
+    "Packages/RuneScribeArchitecture/Package.swift"
+  ],
+  "providers": [
+    {
+      "codexID": "codex.moonleaf",
+      "product": "RuneScribeThemeMoonleafModule",
+      "outputCount": 46,
+      "bytes": 678743,
+      "state": "optional"
+    },
+    {
+      "codexID": "codex.sunspire",
+      "product": "RuneScribeThemeSunspireModule",
+      "outputCount": 46,
+      "bytes": 666458,
+      "state": "optional"
+    },
+    {
+      "codexID": "codex.wildwood",
+      "product": "RuneScribeThemeWildwoodModule",
+      "outputCount": 46,
+      "bytes": 697897,
+      "state": "optional"
+    },
+    {
+      "codexID": "codex.gloamthorn",
+      "product": "RuneScribeThemeGloamthornModule",
+      "outputCount": 46,
+      "bytes": 609418,
+      "state": "optional"
+    }
+  ],
+  "aggregate": {
+    "outputCount": 184,
+    "bytes": 2652516
+  },
+  "isolation": "Each provider depends only on contracts and runtime core, publishes through runtime context, and fails independently to Norse fallback."
+}

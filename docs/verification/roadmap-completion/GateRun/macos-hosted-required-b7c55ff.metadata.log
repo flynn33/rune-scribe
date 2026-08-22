@@ -1,0 +1,18 @@
+source_revision=b7c55ff40255f96a6c857b49a14962e9fcd79c37
+destination=platform=macOS,arch=arm64
+configuration=Debug
+parallel_testing=NO
+scope=CompatibilityBaselineTests,RuntimeCompositionTests,ArchitectureGuardrailTests
+derived_data=/tmp/runescribe-roadmap-macos-hosted-required-b7c55ff.HHMdeQ/DerivedData
+result_bundle=/tmp/runescribe-roadmap-macos-hosted-required-b7c55ff.HHMdeQ/RuneScrib-macOS-RequiredHosted-b7c55ff.xcresult
+command=xcodebuild -quiet test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath '/tmp/runescribe-roadmap-macos-hosted-required-b7c55ff.HHMdeQ/DerivedData' -resultBundlePath '/tmp/runescribe-roadmap-macos-hosted-required-b7c55ff.HHMdeQ/RuneScrib-macOS-RequiredHosted-b7c55ff.xcresult' -disableAutomaticPackageResolution -parallel-testing-enabled NO -only-testing:RuneScribTests/CompatibilityBaselineTests -only-testing:RuneScribTests/RuntimeCompositionTests -only-testing:RuneScribArchitectureTests/ArchitectureGuardrailTests CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=
+qualification_status=final
+exit_code=0
+head_after=b7c55ff40255f96a6c857b49a14962e9fcd79c37
+summary_extract_exit=0
+tests_extract_exit=0
+passedTests=20
+failedTests=0
+skippedTests=0
+expectedFailures=0
+totalTestCount=20

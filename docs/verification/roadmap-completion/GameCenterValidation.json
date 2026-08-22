@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture --filter GameCenterCatalogTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter GameCenterReportingTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter RuntimeCloudGameCenterCoordinatorTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter GameCenterAuthenticationSingleFlightTests"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeGameCenterModuleTests/GameCenterCatalogTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeGameCenterModuleTests/GameCenterReportingTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribePlatformTests/GameCenterAuthenticationSingleFlightTests.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeGameCenterModule/Resources/GameCenter-Achievement-Catalog-v1.0.json"
+  ],
+  "optional": true,
+  "achievementCount": 15,
+  "pointTotal": 220,
+  "leaderboardsEnabled": false,
+  "authority": "Local Progression grants first and remains the only ownership authority. Game Center can neither grant nor revoke content.",
+  "coverage": [
+    "mapping",
+    "monotonic percentage",
+    "opt-in and opt-out",
+    "prior completion",
+    "offline and denial",
+    "retry and backoff",
+    "duplicate callback",
+    "account change",
+    "interrupted outbox recovery",
+    "single-flight authentication"
+  ],
+  "liveSandboxStatus": "OWNER TEST REQUIRED"
+}

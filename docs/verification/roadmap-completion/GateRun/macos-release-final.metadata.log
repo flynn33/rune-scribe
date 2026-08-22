@@ -1,0 +1,8 @@
+source_revision=79b3b6974aa047554e1938f986792cfef30b65ff
+destination=platform=macOS,arch=arm64
+derived_data=/tmp/runescribe-roadmap-macos-release-final.v8nqJT/DerivedData
+result_bundle=/tmp/runescribe-roadmap-macos-release-final.v8nqJT/RuneScrib-macOS-Release.xcresult
+command=xcodebuild -quiet build -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Release -destination platform=macOS,arch=arm64 -derivedDataPath /tmp/runescribe-roadmap-macos-release-final.v8nqJT/DerivedData -resultBundlePath /tmp/runescribe-roadmap-macos-release-final.v8nqJT/RuneScrib-macOS-Release.xcresult -disableAutomaticPackageResolution CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=
+exit_code=0
+app_path=/tmp/runescribe-roadmap-macos-release-final.v8nqJT/DerivedData/Build/Products/Release/RuneScrib.app
+inspection_exit=0

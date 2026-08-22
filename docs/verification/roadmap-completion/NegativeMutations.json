@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "python3 scripts/test-elven-phase-c-validator.py",
+    "scripts/test-shipping-products.sh",
+    "python3 scripts/check-roadmap-completion.py",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter RuneScribePackageTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter ProgressionCatalogMutationTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter AllElvenProviderIntegrationTests"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "scripts/test-elven-phase-c-validator.py",
+    "scripts/test-shipping-products.sh",
+    "scripts/check-roadmap-completion.py",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/RuneScribePackageTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeProgressionModuleTests/ProgressionCatalogMutationTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/AllElvenProviderIntegrationTests.swift",
+    "RuneScribArchitectureTests/ArchitectureGuardrailTests.swift"
+  ],
+  "mutationResults": [
+    {
+      "mutation": "prohibited external dependency or module coupling",
+      "result": "REJECTED"
+    },
+    {
+      "mutation": "provider manifest or output hash drift",
+      "result": "REJECTED"
+    },
+    {
+      "mutation": "provider failure leakage into Core, UI, Norse, or sibling provider",
+      "result": "REJECTED"
+    },
+    {
+      "mutation": "oversize, overlapping, noncanonical, checksum-invalid, or unknown-required package",
+      "result": "REJECTED"
+    },
+    {
+      "mutation": "cloud record containing prohibited secret or identity field",
+      "result": "REJECTED"
+    },
+    {
+      "mutation": "shipping target linked to test support or undeclared product",
+      "result": "REJECTED"
+    },
+    {
+      "mutation": "prohibited authorship or tool-credit marker",
+      "result": "REJECTED"
+    }
+  ],
+  "deterministicSeedStrategy": "Checked-in malformed corpus and deterministic mutation loops in RuneScribePackageTests and catalog mutation suites."
+}

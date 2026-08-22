@@ -1,0 +1,613 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture --filter DestinationCompatibilityMatrixTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter WireCompatibilityTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter ReceivedPresentationAvailabilityBindingTests",
+    "xcodebuild test -scheme RuneScrib-macOS-Parity -destination 'platform=macOS'",
+    "xcodebuild test -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83'",
+    "xcodebuild test -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3'"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ReceivedPresentationAvailabilityBindingTests.swift",
+    "RuneScribMacParityTests/RuneScribeMacParityTests.swift",
+    "RuneScribIOSUITests/RuneScribeParityUITests.swift",
+    "docs/verification/roadmap-completion/GateRun/macos-hosted-required-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/macos-parity-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ios-iphone-hosted-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ios-iphone-parity-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ipad-parity-b7c55ff-summary.json"
+  ],
+  "frozenFixtureCount": 16,
+  "platformFixtureRowCount": 48,
+  "presentationFallbackRowCount": 9,
+  "rowCount": 57,
+  "rows": [
+    {
+      "fixture": "legacy-cipher-v3",
+      "expectedClassifier": "legacyCipherV3",
+      "expectedDecoderOrFallback": "CipherSharePayload v3 legacy decoder",
+      "expectedUserState": "Cipher invitation is readable and importable; re-encoding preserves the frozen bytes.",
+      "priorReaderOutcome": "legacyCipher",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "legacy-cipher-v3",
+      "expectedClassifier": "legacyCipherV3",
+      "expectedDecoderOrFallback": "CipherSharePayload v3 legacy decoder",
+      "expectedUserState": "Cipher invitation is readable and importable; re-encoding preserves the frozen bytes.",
+      "priorReaderOutcome": "legacyCipher",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "legacy-cipher-v3",
+      "expectedClassifier": "legacyCipherV3",
+      "expectedDecoderOrFallback": "CipherSharePayload v3 legacy decoder",
+      "expectedUserState": "Cipher invitation is readable and importable; re-encoding preserves the frozen bytes.",
+      "priorReaderOutcome": "legacyCipher",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "legacy-message-v1",
+      "expectedClassifier": "legacyMessageV1",
+      "expectedDecoderOrFallback": "MessageSharePayload v1 legacy decoder",
+      "expectedUserState": "Encrypted message enters the established decrypt flow without presentation metadata.",
+      "priorReaderOutcome": "legacyMessage",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "legacy-message-v1",
+      "expectedClassifier": "legacyMessageV1",
+      "expectedDecoderOrFallback": "MessageSharePayload v1 legacy decoder",
+      "expectedUserState": "Encrypted message enters the established decrypt flow without presentation metadata.",
+      "priorReaderOutcome": "legacyMessage",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "legacy-message-v1",
+      "expectedClassifier": "legacyMessageV1",
+      "expectedDecoderOrFallback": "MessageSharePayload v1 legacy decoder",
+      "expectedUserState": "Encrypted message enters the established decrypt flow without presentation metadata.",
+      "priorReaderOutcome": "legacyMessage",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-cipher-v1",
+      "expectedClassifier": "typedCipherContainerV1",
+      "expectedDecoderOrFallback": "RuneScribePackage plus CipherSharePayload decoder",
+      "expectedUserState": "Cipher invitation is readable and importable.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-cipher-v1",
+      "expectedClassifier": "typedCipherContainerV1",
+      "expectedDecoderOrFallback": "RuneScribePackage plus CipherSharePayload decoder",
+      "expectedUserState": "Cipher invitation is readable and importable.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-cipher-v1",
+      "expectedClassifier": "typedCipherContainerV1",
+      "expectedDecoderOrFallback": "RuneScribePackage plus CipherSharePayload decoder",
+      "expectedUserState": "Cipher invitation is readable and importable.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-message-v1",
+      "expectedClassifier": "typedMessageContainerV1",
+      "expectedDecoderOrFallback": "RuneScribePackage plus MessageSharePayload decoder",
+      "expectedUserState": "Encrypted message is readable after authenticated decryption.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-message-v1",
+      "expectedClassifier": "typedMessageContainerV1",
+      "expectedDecoderOrFallback": "RuneScribePackage plus MessageSharePayload decoder",
+      "expectedUserState": "Encrypted message is readable after authenticated decryption.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-message-v1",
+      "expectedClassifier": "typedMessageContainerV1",
+      "expectedDecoderOrFallback": "RuneScribePackage plus MessageSharePayload decoder",
+      "expectedUserState": "Encrypted message is readable after authenticated decryption.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-cipher-themed-v1",
+      "expectedClassifier": "typedThemedCipherV1",
+      "expectedDecoderOrFallback": "RuneScribePackage presentation decoder with requested Theme when eligible and Norse fallback otherwise",
+      "expectedUserState": "Cipher remains importable; presentation never changes key identity.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-cipher-themed-v1",
+      "expectedClassifier": "typedThemedCipherV1",
+      "expectedDecoderOrFallback": "RuneScribePackage presentation decoder with requested Theme when eligible and Norse fallback otherwise",
+      "expectedUserState": "Cipher remains importable; presentation never changes key identity.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-cipher-themed-v1",
+      "expectedClassifier": "typedThemedCipherV1",
+      "expectedDecoderOrFallback": "RuneScribePackage presentation decoder with requested Theme when eligible and Norse fallback otherwise",
+      "expectedUserState": "Cipher remains importable; presentation never changes key identity.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-message-themed-v1",
+      "expectedClassifier": "typedThemedMessageV1",
+      "expectedDecoderOrFallback": "RuneScribePackage presentation decoder with requested Theme when eligible and Norse fallback otherwise",
+      "expectedUserState": "Message remains readable and safe preview status is preserved.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-message-themed-v1",
+      "expectedClassifier": "typedThemedMessageV1",
+      "expectedDecoderOrFallback": "RuneScribePackage presentation decoder with requested Theme when eligible and Norse fallback otherwise",
+      "expectedUserState": "Message remains readable and safe preview status is preserved.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "container-message-themed-v1",
+      "expectedClassifier": "typedThemedMessageV1",
+      "expectedDecoderOrFallback": "RuneScribePackage presentation decoder with requested Theme when eligible and Norse fallback otherwise",
+      "expectedUserState": "Message remains readable and safe preview status is preserved.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "known-payload-unavailable-presentation",
+      "expectedClassifier": "typedThemedMessageV1",
+      "expectedDecoderOrFallback": "Decode the known payload and use Norse interactive fallback",
+      "expectedUserState": "Message is readable; unavailable presentation is explained and no ownership is inferred.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "known-payload-unavailable-presentation",
+      "expectedClassifier": "typedThemedMessageV1",
+      "expectedDecoderOrFallback": "Decode the known payload and use Norse interactive fallback",
+      "expectedUserState": "Message is readable; unavailable presentation is explained and no ownership is inferred.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "known-payload-unavailable-presentation",
+      "expectedClassifier": "typedThemedMessageV1",
+      "expectedDecoderOrFallback": "Decode the known payload and use Norse interactive fallback",
+      "expectedUserState": "Message is readable; unavailable presentation is explained and no ownership is inferred.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unknown-optional-section",
+      "expectedClassifier": "typedCipherContainerV1WithUnknownOptional",
+      "expectedDecoderOrFallback": "Ignore the bounded unknown optional section and decode the known core payload",
+      "expectedUserState": "Cipher remains importable with no mutation from the ignored optional section.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unknown-optional-section",
+      "expectedClassifier": "typedCipherContainerV1WithUnknownOptional",
+      "expectedDecoderOrFallback": "Ignore the bounded unknown optional section and decode the known core payload",
+      "expectedUserState": "Cipher remains importable with no mutation from the ignored optional section.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unknown-optional-section",
+      "expectedClassifier": "typedCipherContainerV1WithUnknownOptional",
+      "expectedDecoderOrFallback": "Ignore the bounded unknown optional section and decode the known core payload",
+      "expectedUserState": "Cipher remains importable with no mutation from the ignored optional section.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-available",
+      "expectedClassifier": "typedCipherWithLegacyFont",
+      "expectedDecoderOrFallback": "Validate resource table hash and return the matching imported font",
+      "expectedUserState": "Cipher and compatible imported Script are available without changing key or mapping.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-available",
+      "expectedClassifier": "typedCipherWithLegacyFont",
+      "expectedDecoderOrFallback": "Validate resource table hash and return the matching imported font",
+      "expectedUserState": "Cipher and compatible imported Script are available without changing key or mapping.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-available",
+      "expectedClassifier": "typedCipherWithLegacyFont",
+      "expectedDecoderOrFallback": "Validate resource table hash and return the matching imported font",
+      "expectedUserState": "Cipher and compatible imported Script are available without changing key or mapping.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-missing",
+      "expectedClassifier": "typedCipherWithMissingRequiredLegacyFont",
+      "expectedDecoderOrFallback": "Fail closed as malformed container before import",
+      "expectedUserState": "A safe error is shown; no cipher, font, or contact state is mutated.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-missing",
+      "expectedClassifier": "typedCipherWithMissingRequiredLegacyFont",
+      "expectedDecoderOrFallback": "Fail closed as malformed container before import",
+      "expectedUserState": "A safe error is shown; no cipher, font, or contact state is mutated.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-missing",
+      "expectedClassifier": "typedCipherWithMissingRequiredLegacyFont",
+      "expectedDecoderOrFallback": "Fail closed as malformed container before import",
+      "expectedUserState": "A safe error is shown; no cipher, font, or contact state is mutated.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-mismatch",
+      "expectedClassifier": "typedCipherWithMismatchedLegacyFont",
+      "expectedDecoderOrFallback": "Fail closed on resource identity or hash mismatch before import",
+      "expectedUserState": "A safe error is shown; no unverified font bytes are registered.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-mismatch",
+      "expectedClassifier": "typedCipherWithMismatchedLegacyFont",
+      "expectedDecoderOrFallback": "Fail closed on resource identity or hash mismatch before import",
+      "expectedUserState": "A safe error is shown; no unverified font bytes are registered.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-mismatch",
+      "expectedClassifier": "typedCipherWithMismatchedLegacyFont",
+      "expectedDecoderOrFallback": "Fail closed on resource identity or hash mismatch before import",
+      "expectedUserState": "A safe error is shown; no unverified font bytes are registered.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-incompatible",
+      "expectedClassifier": "typedCipherWithUnregisterableLegacyFont",
+      "expectedDecoderOrFallback": "Decode authenticated bytes, then use runtime-owned font compatibility fallback",
+      "expectedUserState": "Cipher stays readable through fallback while mapping and key material remain unchanged.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-incompatible",
+      "expectedClassifier": "typedCipherWithUnregisterableLegacyFont",
+      "expectedDecoderOrFallback": "Decode authenticated bytes, then use runtime-owned font compatibility fallback",
+      "expectedUserState": "Cipher stays readable through fallback while mapping and key material remain unchanged.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "imported-font-incompatible",
+      "expectedClassifier": "typedCipherWithUnregisterableLegacyFont",
+      "expectedDecoderOrFallback": "Decode authenticated bytes, then use runtime-owned font compatibility fallback",
+      "expectedUserState": "Cipher stays readable through fallback while mapping and key material remain unchanged.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "newer-container",
+      "expectedClassifier": "newerContainerVersion",
+      "expectedDecoderOrFallback": "Reject with unsupportedContainerVersion and present update-required state",
+      "expectedUserState": "No import mutation occurs; user receives an update-required outcome.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "newer-container",
+      "expectedClassifier": "newerContainerVersion",
+      "expectedDecoderOrFallback": "Reject with unsupportedContainerVersion and present update-required state",
+      "expectedUserState": "No import mutation occurs; user receives an update-required outcome.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "newer-container",
+      "expectedClassifier": "newerContainerVersion",
+      "expectedDecoderOrFallback": "Reject with unsupportedContainerVersion and present update-required state",
+      "expectedUserState": "No import mutation occurs; user receives an update-required outcome.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "newer-payload",
+      "expectedClassifier": "newerPayloadVersion",
+      "expectedDecoderOrFallback": "Reject with unsupportedPayloadVersion and present update-required state",
+      "expectedUserState": "No import mutation occurs; user receives an update-required outcome.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "newer-payload",
+      "expectedClassifier": "newerPayloadVersion",
+      "expectedDecoderOrFallback": "Reject with unsupportedPayloadVersion and present update-required state",
+      "expectedUserState": "No import mutation occurs; user receives an update-required outcome.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "newer-payload",
+      "expectedClassifier": "newerPayloadVersion",
+      "expectedDecoderOrFallback": "Reject with unsupportedPayloadVersion and present update-required state",
+      "expectedUserState": "No import mutation occurs; user receives an update-required outcome.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unknown-required",
+      "expectedClassifier": "unknownRequiredSection",
+      "expectedDecoderOrFallback": "Reject with unknownRequiredSection and present update-required state",
+      "expectedUserState": "No unknown required content is exposed or persisted.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unknown-required",
+      "expectedClassifier": "unknownRequiredSection",
+      "expectedDecoderOrFallback": "Reject with unknownRequiredSection and present update-required state",
+      "expectedUserState": "No unknown required content is exposed or persisted.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unknown-required",
+      "expectedClassifier": "unknownRequiredSection",
+      "expectedDecoderOrFallback": "Reject with unknownRequiredSection and present update-required state",
+      "expectedUserState": "No unknown required content is exposed or persisted.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "newer-required-section",
+      "expectedClassifier": "newerRequiredSectionVersion",
+      "expectedDecoderOrFallback": "Reject with unsupportedRequiredSectionVersion and present update-required state",
+      "expectedUserState": "No unsupported required section is exposed or persisted.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "newer-required-section",
+      "expectedClassifier": "newerRequiredSectionVersion",
+      "expectedDecoderOrFallback": "Reject with unsupportedRequiredSectionVersion and present update-required state",
+      "expectedUserState": "No unsupported required section is exposed or persisted.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "newer-required-section",
+      "expectedClassifier": "newerRequiredSectionVersion",
+      "expectedDecoderOrFallback": "Reject with unsupportedRequiredSectionVersion and present update-required state",
+      "expectedUserState": "No unsupported required section is exposed or persisted.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "DestinationCompatibilityMatrixTests.testExecutableOldNewAndUpdateRequiredMatrixAcrossDestinations",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unknown-presentation",
+      "expectedClassifier": "validThemedMessageWithUnknownPresentation",
+      "expectedDecoderOrFallback": "Decode the known payload, preserve valid sender-rendered safe preview, and use Norse for interactive reading",
+      "expectedUserState": "Message is readable; presentation is labeled unknown; Encounter is not ownership.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "ReceivedPresentationAvailabilityBindingTests.testLiveProviderStatesResolveRequestedCodexOrNorseFallback",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unknown-presentation",
+      "expectedClassifier": "validThemedMessageWithUnknownPresentation",
+      "expectedDecoderOrFallback": "Decode the known payload, preserve valid sender-rendered safe preview, and use Norse for interactive reading",
+      "expectedUserState": "Message is readable; presentation is labeled unknown; Encounter is not ownership.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "ReceivedPresentationAvailabilityBindingTests.testLiveProviderStatesResolveRequestedCodexOrNorseFallback",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unknown-presentation",
+      "expectedClassifier": "validThemedMessageWithUnknownPresentation",
+      "expectedDecoderOrFallback": "Decode the known payload, preserve valid sender-rendered safe preview, and use Norse for interactive reading",
+      "expectedUserState": "Message is readable; presentation is labeled unknown; Encounter is not ownership.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "ReceivedPresentationAvailabilityBindingTests.testLiveProviderStatesResolveRequestedCodexOrNorseFallback",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "locked-presentation",
+      "expectedClassifier": "validThemedMessageWithLockedPresentation",
+      "expectedDecoderOrFallback": "Decode the known payload, preserve valid sender-rendered safe preview, and use Norse for interactive reading",
+      "expectedUserState": "Message is readable; presentation is labeled locked; Encounter is not ownership.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "ReceivedPresentationAvailabilityBindingTests.testLiveProviderStatesResolveRequestedCodexOrNorseFallback",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "locked-presentation",
+      "expectedClassifier": "validThemedMessageWithLockedPresentation",
+      "expectedDecoderOrFallback": "Decode the known payload, preserve valid sender-rendered safe preview, and use Norse for interactive reading",
+      "expectedUserState": "Message is readable; presentation is labeled locked; Encounter is not ownership.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "ReceivedPresentationAvailabilityBindingTests.testLiveProviderStatesResolveRequestedCodexOrNorseFallback",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "locked-presentation",
+      "expectedClassifier": "validThemedMessageWithLockedPresentation",
+      "expectedDecoderOrFallback": "Decode the known payload, preserve valid sender-rendered safe preview, and use Norse for interactive reading",
+      "expectedUserState": "Message is readable; presentation is labeled locked; Encounter is not ownership.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "ReceivedPresentationAvailabilityBindingTests.testLiveProviderStatesResolveRequestedCodexOrNorseFallback",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unavailable-presentation",
+      "expectedClassifier": "validThemedMessageWithUnavailablePresentation",
+      "expectedDecoderOrFallback": "Decode the known payload, preserve valid sender-rendered safe preview, and use Norse for interactive reading",
+      "expectedUserState": "Message is readable; presentation is labeled unavailable; Encounter is not ownership.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "ReceivedPresentationAvailabilityBindingTests.testLiveProviderStatesResolveRequestedCodexOrNorseFallback",
+      "platform": "macOS",
+      "platformResult": "PASS - shared domain fixture and macOS parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unavailable-presentation",
+      "expectedClassifier": "validThemedMessageWithUnavailablePresentation",
+      "expectedDecoderOrFallback": "Decode the known payload, preserve valid sender-rendered safe preview, and use Norse for interactive reading",
+      "expectedUserState": "Message is readable; presentation is labeled unavailable; Encounter is not ownership.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "ReceivedPresentationAvailabilityBindingTests.testLiveProviderStatesResolveRequestedCodexOrNorseFallback",
+      "platform": "iPhone Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPhone parity path passed at source revision b7c55ff"
+    },
+    {
+      "fixture": "unavailable-presentation",
+      "expectedClassifier": "validThemedMessageWithUnavailablePresentation",
+      "expectedDecoderOrFallback": "Decode the known payload, preserve valid sender-rendered safe preview, and use Norse for interactive reading",
+      "expectedUserState": "Message is readable; presentation is labeled unavailable; Encounter is not ownership.",
+      "priorReaderOutcome": "updateRequired",
+      "testReference": "ReceivedPresentationAvailabilityBindingTests.testLiveProviderStatesResolveRequestedCodexOrNorseFallback",
+      "platform": "iPad Simulator",
+      "platformResult": "PASS - shared domain fixture linked into the iOS product and iPad parity path passed at source revision b7c55ff"
+    }
+  ]
+}

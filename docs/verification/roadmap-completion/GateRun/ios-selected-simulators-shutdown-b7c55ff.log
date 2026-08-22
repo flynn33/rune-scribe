@@ -1,0 +1,4 @@
+command: xcrun simctl shutdown 1563B47A-700D-4AEF-A8D5-89780C581F83
+iphone_shutdown_exit_code: 0
+command: xcrun simctl shutdown 77D54A1F-0818-4761-B946-D7723490F6B3
+ipad_shutdown_exit_code: 0

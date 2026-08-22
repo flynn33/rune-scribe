@@ -1,7 +1,7 @@
 # Documentation and Support Completion Checklist
 
 **Application:** Rune Scribe 1.0.38 (build 38)
-**Program state:** Source completion in progress; owner test required; not shipped.
+**Program state:** Code and source complete for the supported host/Simulator scope; owner test required; not shipped.
 
 This checklist is the BAS-010 publication boundary. A checked item means the named
 source describes the same implementation and no-ship state; it does not mean a

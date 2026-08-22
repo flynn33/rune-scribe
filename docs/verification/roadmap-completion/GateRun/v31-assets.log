@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "scopeCount": 8,
+  "passedScopeCount": 8,
+  "failedScopes": [],
+  "issueCount": 0,
+  "issueCodes": [],
+  "logicalResourceCount": 56,
+  "shippingOutputCount": 184,
+  "provenanceRecordCount": 198
+}
+{
+  "status": "PASS",
+  "packageRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1",
+  "packageManifestSHA256": "d55f4b7c0f74eaf2b396ceb664f25ba086f50b7033052cd0f0a18d407c8a31da",
+  "physicalFileCount": 488,
+  "source": "directory"
+}

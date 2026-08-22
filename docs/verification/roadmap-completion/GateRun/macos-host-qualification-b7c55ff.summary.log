@@ -1,0 +1,70 @@
+source_revision=b7c55ff40255f96a6c857b49a14962e9fcd79c37
+acceptance_authority=Tier 5 focused macOS hosted composition/compatibility/architecture plus macOS parity
+destination=platform=macOS,arch=arm64
+
+xcodegen_command_1=xcodegen generate
+xcodegen_command_1_exit=0
+xcodegen_command_2=xcodegen generate
+xcodegen_command_2_exit=0
+xcodegen_before_vs_pass1_diff_exit=0
+xcodegen_pass1_vs_pass2_diff_exit=0
+xcodegen_generated_project_git_diff_exit=0
+xcodegen_project_pbxproj_sha256=c85900e4e5cf88060f24ca8eb68e5458e70e744da1607898089397fc810f4de7
+xcodegen_metadata=docs/verification/roadmap-completion/GateRun/xcodegen-b7c55ff-determinism.log
+
+release_command=xcodebuild -quiet build -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Release -destination 'platform=macOS,arch=arm64' -derivedDataPath '/tmp/runescribe-roadmap-macos-release-b7c55ff.voMV9k/DerivedData' -resultBundlePath '/tmp/runescribe-roadmap-macos-release-b7c55ff.voMV9k/RuneScrib-macOS-Release-b7c55ff.xcresult' -disableAutomaticPackageResolution CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=
+release_exit=0
+release_derived_data=/tmp/runescribe-roadmap-macos-release-b7c55ff.voMV9k/DerivedData
+release_app=/tmp/runescribe-roadmap-macos-release-b7c55ff.voMV9k/DerivedData/Build/Products/Release/RuneScrib.app
+release_result=/tmp/runescribe-roadmap-macos-release-b7c55ff.voMV9k/RuneScrib-macOS-Release-b7c55ff.xcresult
+release_bundle_identifier=com.runescribe.app
+release_version=1.0.38
+release_build=38
+release_architectures=x86_64 arm64
+release_signature=adhoc,runtime
+release_team_identifier=not set
+release_codesign_verify_exit=0
+release_binary_sha256=3986f7b7053794c7bb1c0ae348ff21929f13c63017bf593195fe5748f8f3614d
+release_bundle_size_kib=106652
+release_metadata=docs/verification/roadmap-completion/GateRun/macos-release-b7c55ff.metadata.log
+release_inspection=docs/verification/roadmap-completion/GateRun/macos-release-b7c55ff-product-inspection.log
+
+hosted_command=xcodebuild -quiet test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath '/tmp/runescribe-roadmap-macos-hosted-required-b7c55ff.HHMdeQ/DerivedData' -resultBundlePath '/tmp/runescribe-roadmap-macos-hosted-required-b7c55ff.HHMdeQ/RuneScrib-macOS-RequiredHosted-b7c55ff.xcresult' -disableAutomaticPackageResolution -parallel-testing-enabled NO -only-testing:RuneScribTests/CompatibilityBaselineTests -only-testing:RuneScribTests/RuntimeCompositionTests -only-testing:RuneScribArchitectureTests/ArchitectureGuardrailTests CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=
+hosted_exit=0
+hosted_passed=20
+hosted_failed=0
+hosted_skipped=0
+hosted_total=20
+hosted_derived_data=/tmp/runescribe-roadmap-macos-hosted-required-b7c55ff.HHMdeQ/DerivedData
+hosted_result=/tmp/runescribe-roadmap-macos-hosted-required-b7c55ff.HHMdeQ/RuneScrib-macOS-RequiredHosted-b7c55ff.xcresult
+hosted_metadata=docs/verification/roadmap-completion/GateRun/macos-hosted-required-b7c55ff.metadata.log
+hosted_summary=docs/verification/roadmap-completion/GateRun/macos-hosted-required-b7c55ff-summary.json
+hosted_test_list=docs/verification/roadmap-completion/GateRun/macos-hosted-required-b7c55ff-test-list.log
+
+parity_command=xcodebuild -quiet test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath '/tmp/runescribe-roadmap-macos-parity-b7c55ff.ean6CW/DerivedData' -resultBundlePath '/tmp/runescribe-roadmap-macos-parity-b7c55ff.ean6CW/RuneScrib-macOS-Parity-b7c55ff.xcresult' -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=
+parity_exit=0
+parity_passed=4
+parity_failed=0
+parity_skipped=0
+parity_total=4
+parity_derived_data=/tmp/runescribe-roadmap-macos-parity-b7c55ff.ean6CW/DerivedData
+parity_result=/tmp/runescribe-roadmap-macos-parity-b7c55ff.ean6CW/RuneScrib-macOS-Parity-b7c55ff.xcresult
+parity_metadata=docs/verification/roadmap-completion/GateRun/macos-parity-b7c55ff.metadata.log
+parity_summary=docs/verification/roadmap-completion/GateRun/macos-parity-b7c55ff-summary.json
+parity_test_list=docs/verification/roadmap-completion/GateRun/macos-parity-b7c55ff-test-list.log
+
+supplemental_unfiltered_status=diagnostic incomplete; not an acceptance gate
+supplemental_unfiltered_exit=143
+supplemental_unfiltered_reason=first interpreted compliance scan did not complete after 12m40s at approximately 100 percent CPU
+supplemental_unfiltered_partial_result=/tmp/runescribe-roadmap-macos-hosted-b7c55ff.2gwQbB/RuneScrib-macOS-Full-b7c55ff.xcresult
+supplemental_unfiltered_metadata=docs/verification/roadmap-completion/GateRun/macos-hosted-full-b7c55ff.metadata.log
+supplemental_unfiltered_process_cleanup=docs/verification/roadmap-completion/GateRun/macos-hosted-full-b7c55ff-process-cleanup.log
+
+project_diff_exit=0
+tracked_diff_check_exit=0
+remaining_relevant_process_count=0
+final_check=docs/verification/roadmap-completion/GateRun/macos-host-qualification-b7c55ff-final-check.log
+process_clean_check=docs/verification/roadmap-completion/GateRun/macos-host-qualification-b7c55ff-process-clean.log
+environment=docs/verification/roadmap-completion/GateRun/macos-environment-b7c55ff.log
+archive_export_distribution_sign_notarize_ship=not performed
+source_edits_commits=none

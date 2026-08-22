@@ -1,0 +1,7 @@
+source_revision=79b3b6974aa047554e1938f986792cfef30b65ff
+destination=platform=macOS,arch=arm64
+derived_data=/tmp/runescribe-roadmap-macos-hosted-final.EFnFF3/DerivedData
+result_bundle=/tmp/runescribe-roadmap-macos-hosted-final.EFnFF3/RuneScrib-macOS-Hosted-Entitled.xcresult
+command=xcodebuild -quiet test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Debug -destination platform=macOS,arch=arm64 -derivedDataPath /tmp/runescribe-roadmap-macos-hosted-final.EFnFF3/DerivedData -resultBundlePath /tmp/runescribe-roadmap-macos-hosted-final.EFnFF3/RuneScrib-macOS-Hosted-Entitled.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO -only-testing:RuneScribTests/CompatibilityBaselineTests -only-testing:RuneScribTests/RuntimeCompositionTests -only-testing:RuneScribArchitectureTests/ArchitectureGuardrailTests CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=
+retry_reason=preserve project CloudKit entitlement required by eager AppleCloudKitProgressionTransport construction
+exit_code=65

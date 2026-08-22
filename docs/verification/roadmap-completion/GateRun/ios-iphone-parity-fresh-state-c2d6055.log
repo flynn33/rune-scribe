@@ -1,0 +1,4 @@
+command: xcrun simctl uninstall 1563B47A-700D-4AEF-A8D5-89780C581F83 com.runescribe.app
+uninstall_exit_code: 0
+command: xcrun simctl keychain 1563B47A-700D-4AEF-A8D5-89780C581F83 reset
+keychain_exit_code: 0

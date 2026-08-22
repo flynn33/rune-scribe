@@ -1,0 +1,12 @@
+Writing result bundle at path:
+	/tmp/runescribe-roadmap-macos-hosted-final.EFnFF3/RuneScrib-macOS-Hosted.xcresult
+
+2026-08-22 16:46:46.383 xcodebuild[27038:2967808] [MT] IDETestOperationsObserverDebug: 15.550 elapsed -- Testing started completed.
+2026-08-22 16:46:46.383 xcodebuild[27038:2967808] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-08-22 16:46:46.383 xcodebuild[27038:2967808] [MT] IDETestOperationsObserverDebug: 15.550 sec, +15.550 sec -- end
+Testing failed:
+	RuneScrib (31014) encountered an error (Early unexpected exit, operation never finished bootstrapping - no restart will be attempted. (Underlying Error: The test runner crashed before establishing connection: RuneScrib at <external symbol>))
+
+** TEST FAILED **
+
+Testing started

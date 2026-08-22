@@ -1,0 +1,16 @@
+source_revision=b7c55ff40255f96a6c857b49a14962e9fcd79c37
+project_diff_check:
+project_diff_exit=0
+tracked_diff_check:
+tracked_diff_check_exit=0
+release_app_exists=true
+release_result_exists=true
+focused_result_exists=true
+parity_result_exists=true
+/tmp/runescribe-roadmap-macos-release-b7c55ff.voMV9k/DerivedData/Build/Products/Release/RuneScrib.app: valid on disk
+/tmp/runescribe-roadmap-macos-release-b7c55ff.voMV9k/DerivedData/Build/Products/Release/RuneScrib.app: satisfies its Designated Requirement
+codesign_verify_exit=0
+focused_counts={"passedTests":20,"failedTests":0,"skippedTests":0,"totalTestCount":20}
+parity_counts={"passedTests":4,"failedTests":0,"skippedTests":0,"totalTestCount":4}
+relevant_process_check=docs/verification/roadmap-completion/GateRun/macos-host-qualification-b7c55ff-process-clean.log
+remaining_relevant_process_count=0

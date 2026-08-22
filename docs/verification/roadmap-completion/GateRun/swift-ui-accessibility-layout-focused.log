@@ -1,0 +1,312 @@
+[0/1] Planning build
+Building for debugging...
+[0/3] Write sources
+[1/3] Write swift-version--58304C5D6DBC2206.txt
+[3/5] Emitting module RuneScribeUIModule
+[4/5] Compiling RuneScribeUIModule ContentView.swift
+[5/6] Compiling RuneScribeUIModule RootView.swift
+[6/9] Emitting module RuneScribeArchitectureTests
+[7/10] Emitting module RuneScribeUIModuleTests
+[8/10] Compiling RuneScribeUIModuleTests RuneScribeUISessionTests.swift
+[8/10] Write Objects.LinkFileList
+[9/10] Linking RuneScribeArchitecturePackageTests
+Build complete! (4.70s)
+Test Suite 'Selected tests' started at 2026-08-22 17:16:25.566.
+Test Suite 'RuneScribeArchitecturePackageTests.xctest' started at 2026-08-22 17:16:25.566.
+Test Suite 'ElvenShareArtifactRendererIntegrationTests' started at 2026-08-22 17:16:25.566.
+Test Case '-[RuneScribeUIModuleTests.ElvenShareArtifactRendererIntegrationTests testEveryElvenProviderRendersExactBundleResourcesAcrossAccessibilityVariants]' started.
+Test Case '-[RuneScribeUIModuleTests.ElvenShareArtifactRendererIntegrationTests testEveryElvenProviderRendersExactBundleResourcesAcrossAccessibilityVariants]' passed (0.694 seconds).
+Test Case '-[RuneScribeUIModuleTests.ElvenShareArtifactRendererIntegrationTests testEveryElvenRelicAndSealProducesAnOwnedApprovedRenderPlan]' started.
+Test Case '-[RuneScribeUIModuleTests.ElvenShareArtifactRendererIntegrationTests testEveryElvenRelicAndSealProducesAnOwnedApprovedRenderPlan]' passed (0.004 seconds).
+Test Suite 'ElvenShareArtifactRendererIntegrationTests' passed at 2026-08-22 17:16:26.265.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.698 (0.699) seconds
+Test Suite 'MessageAttachmentPolicyTests' started at 2026-08-22 17:16:26.265.
+Test Case '-[RuneScribeUIModuleTests.MessageAttachmentPolicyTests testDecisionTruthTablePreservesRequiredAttachmentGate]' started.
+Test Case '-[RuneScribeUIModuleTests.MessageAttachmentPolicyTests testDecisionTruthTablePreservesRequiredAttachmentGate]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.MessageAttachmentPolicyTests testDeliveryIsConsumedOnlyAfterRequiredAttachmentAcceptance]' started.
+Test Case '-[RuneScribeUIModuleTests.MessageAttachmentPolicyTests testDeliveryIsConsumedOnlyAfterRequiredAttachmentAcceptance]' passed (0.000 seconds).
+Test Suite 'MessageAttachmentPolicyTests' passed at 2026-08-22 17:16:26.265.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'PINFormatTests' started at 2026-08-22 17:16:26.265.
+Test Case '-[RuneScribeUIModuleTests.PINFormatTests testAcceptsExactlyFourASCIIDigits]' started.
+Test Case '-[RuneScribeUIModuleTests.PINFormatTests testAcceptsExactlyFourASCIIDigits]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.PINFormatTests testPINFailuresUseClosedSafeMessages]' started.
+Test Case '-[RuneScribeUIModuleTests.PINFormatTests testPINFailuresUseClosedSafeMessages]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.PINFormatTests testPINViewsDoNotSurfaceRawLocalizedDescriptions]' started.
+Test Case '-[RuneScribeUIModuleTests.PINFormatTests testPINViewsDoNotSurfaceRawLocalizedDescriptions]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.PINFormatTests testRejectsInvalidPINShapes]' started.
+Test Case '-[RuneScribeUIModuleTests.PINFormatTests testRejectsInvalidPINShapes]' passed (0.000 seconds).
+Test Suite 'PINFormatTests' passed at 2026-08-22 17:16:26.266.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.001) seconds
+Test Suite 'ProgressionPresentationTests' started at 2026-08-22 17:16:26.266.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testArchiveUnknownIsGenericAndNeverNeedsOwnershipForItsLabel]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testArchiveUnknownIsGenericAndNeverNeedsOwnershipForItsLabel]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testCombinedRevealTextMotionSettingsAndVoiceOverAreDeterministic]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testCombinedRevealTextMotionSettingsAndVoiceOverAreDeterministic]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testDurablyPresentedHeadResumesStaticAndNeverAutomaticallyAcknowledges]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testDurablyPresentedHeadResumesStaticAndNeverAutomaticallyAcknowledges]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testEveryRequiredUnsafeSurfaceMapsToABlocker]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testEveryRequiredUnsafeSurfaceMapsToABlocker]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testFailedAcknowledgementRetainsStaticRevealAndFIFOAdvancesAfterSuccess]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testFailedAcknowledgementRetainsStaticRevealAndFIFOAdvancesAfterSuccess]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testFreshPlanFinishesAfterItsSequenceWhileStaticResumeWaitsForDismiss]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testFreshPlanFinishesAfterItsSequenceWhileStaticResumeWaitsForDismiss]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testHiddenAchievementPlaceholderLeaksNoSecretTextOrProgress]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testHiddenAchievementPlaceholderLeaksNoSecretTextOrProgress]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testInterruptedRevealResumesWithoutRepeatingFeedbackOrAnnouncement]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testInterruptedRevealResumesWithoutRepeatingFeedbackOrAnnouncement]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testJourneyLayoutAdaptsAndAchievementGroupsAreStable]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testJourneyLayoutAdaptsAndAchievementGroupsAreStable]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testOptionalProgressionUnavailableNeverActivatesReveal]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testOptionalProgressionUnavailableNeverActivatesReveal]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testPendingRevealCannotRunOneShotPresentationBeforeMarkSucceeds]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testPendingRevealCannotRunOneShotPresentationBeforeMarkSucceeds]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testRootSafePointIncludesImportDecodePendingAndWarningPhases]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testRootSafePointIncludesImportDecodePendingAndWarningPhases]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testVaultShowsOwnedOnlyAndDistinguishesProviderState]' started.
+Test Case '-[RuneScribeUIModuleTests.ProgressionPresentationTests testVaultShowsOwnedOnlyAndDistinguishesProviderState]' passed (0.000 seconds).
+Test Suite 'ProgressionPresentationTests' passed at 2026-08-22 17:16:26.268.
+	 Executed 13 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'ReceivedPresentationAvailabilityBindingTests' started at 2026-08-22 17:16:26.268.
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testAvailableProviderFallsBackForCrossCodexSelectionAndHashDrift]' started.
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testAvailableProviderFallsBackForCrossCodexSelectionAndHashDrift]' passed (0.003 seconds).
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testEncounterSummaryDistinguishesRecordedFromUnavailable]' started.
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testEncounterSummaryDistinguishesRecordedFromUnavailable]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testLiveProviderStatesResolveRequestedCodexOrNorseFallback]' started.
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testLiveProviderStatesResolveRequestedCodexOrNorseFallback]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testMissingSnapshotOrProviderResolvesUnknownWithoutLosingObservation]' started.
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testMissingSnapshotOrProviderResolvesUnknownWithoutLosingObservation]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testPendingMessageProductionBindingPreservesSafePreviewBytes]' started.
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testPendingMessageProductionBindingPreservesSafePreviewBytes]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testUnsupportedPresentationVersionRemainsIncompatibleWithAvailableProvider]' started.
+Test Case '-[RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests testUnsupportedPresentationVersionRemainsIncompatibleWithAvailableProvider]' passed (0.000 seconds).
+Test Suite 'ReceivedPresentationAvailabilityBindingTests' passed at 2026-08-22 17:16:26.272.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.004 (0.004) seconds
+Test Suite 'RootViewPresentationTests' started at 2026-08-22 17:16:26.272.
+Test Case '-[RuneScribeUIModuleTests.RootViewPresentationTests testStorePresentsExactlyOneContributionAndDismissesItsOwner]' started.
+Test Case '-[RuneScribeUIModuleTests.RootViewPresentationTests testStorePresentsExactlyOneContributionAndDismissesItsOwner]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RootViewPresentationTests testStoreRejectsASecondUIOwnerAndSupportsSafeRecovery]' started.
+Test Case '-[RuneScribeUIModuleTests.RootViewPresentationTests testStoreRejectsASecondUIOwnerAndSupportsSafeRecovery]' passed (0.000 seconds).
+Test Suite 'RootViewPresentationTests' passed at 2026-08-22 17:16:26.273.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'RuneScribeCommandCatalogTests' started at 2026-08-22 17:16:26.273.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeCommandCatalogTests testMacCommandSurfaceAndPrimaryShortcutRemainExact]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeCommandCatalogTests testMacCommandSurfaceAndPrimaryShortcutRemainExact]' passed (0.000 seconds).
+Test Suite 'RuneScribeCommandCatalogTests' passed at 2026-08-22 17:16:26.273.
+	 Executed 1 test, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'RuneScribeUISessionTests' started at 2026-08-22 17:16:26.273.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testAvailabilityProjectionAppliesRuntimeSnapshotsAndStopsObserving]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testAvailabilityProjectionAppliesRuntimeSnapshotsAndStopsObserving]' passed (0.008 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testCancelledMenuConsumerAllowsImmediateReplacementSubscription]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testCancelledMenuConsumerAllowsImmediateReplacementSubscription]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testCancelledMenuConsumerRejectsDeliveryAndPermitsFreshRuntimeClient]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testCancelledMenuConsumerRejectsDeliveryAndPermitsFreshRuntimeClient]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testCipherCardActionsAdaptBeforeTheActivationLabelCompresses]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testCipherCardActionsAdaptBeforeTheActivationLabelCompresses]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testClipboardCopyFailureIsSanitizedAndNotConfirmed]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testClipboardCopyFailureIsSanitizedAndNotConfirmed]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testClipboardCopyUsesRuntimeIOClient]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testClipboardCopyUsesRuntimeIOClient]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testCompactActionRowsAndPINFlowsRetainAdaptiveLayoutGuards]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testCompactActionRowsAndPINFlowsRetainAdaptiveLayoutGuards]' passed (0.004 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testContactImportFailureRemainsPresentedAndCanRetry]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testContactImportFailureRemainsPresentedAndCanRetry]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testContentViewLockCleanupClearsSensitiveStateAndReleasesArtifactOnce]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testContentViewLockCleanupClearsSensitiveStateAndReleasesArtifactOnce]' passed (0.013 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testContentViewRepreparesWithSameHandleAfterEveryTerminalLease]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testContentViewRepreparesWithSameHandleAfterEveryTerminalLease]' passed (0.006 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testImportConfirmationFailureRemainsPresentedAndCanRetry]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testImportConfirmationFailureRemainsPresentedAndCanRetry]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testMenuStreamAndReplyUseTypedConsumableRoutes]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testMenuStreamAndReplyUseTypedConsumableRoutes]' passed (0.007 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testMessageArtifactCompletionGateAdmitsOneCompletionUntilFinished]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testMessageArtifactCompletionGateAdmitsOneCompletionUntilFinished]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testModuleActivationToleratesMissingOptionalResourcesAndProgressionRails]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testModuleActivationToleratesMissingOptionalResourcesAndProgressionRails]' passed (0.140 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testMutationViewsDoNotDiscardThrowingSessionResults]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testMutationViewsDoNotDiscardThrowingSessionResults]' passed (0.003 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testPrepareCipherFileSharePreservesLegacyFallbackWithTypedStatus]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testPrepareCipherFileSharePreservesLegacyFallbackWithTypedStatus]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testPrepareMessageShareForwardsPerEncodeHandle]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testPrepareMessageShareForwardsPerEncodeHandle]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testPresentedFailurePublishesStableDiagnostic]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testPresentedFailurePublishesStableDiagnostic]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRepeatingSameMessageSnapshotKeepsOneIdenticalProjection]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRepeatingSameMessageSnapshotKeepsOneIdenticalProjection]' passed (0.004 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRepresentativeUserFacingViewsRenderForParityInspection]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRepresentativeUserFacingViewsRenderForParityInspection]' passed (0.642 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testResourceResolutionFailureMapsToResourceUnavailableFallback]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testResourceResolutionFailureMapsToResourceUnavailableFallback]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRootImportFailureAlertDoesNotReplaceRetryableConfirmation]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRootImportFailureAlertDoesNotReplaceRetryableConfirmation]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRootPendingPresentationExposesMessageAfterConfirmationResolves]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRootPendingPresentationExposesMessageAfterConfirmationResolves]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRootPendingPresentationIsSuppressedBySplashOrLock]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRootPendingPresentationIsSuppressedBySplashOrLock]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRootPendingPresentationPrioritizesImportConfirmation]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRootPendingPresentationPrioritizesImportConfirmation]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeApplicationClientFailsAfterCoreReplacementWithoutSessionCleanup]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeApplicationClientFailsAfterCoreReplacementWithoutSessionCleanup]' passed (0.002 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeApplicationClientMediatesCommandQueryStateAndLedger]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeApplicationClientMediatesCommandQueryStateAndLedger]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeApplicationClientPreservesBurstMenuCommandFIFO]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeApplicationClientPreservesBurstMenuCommandFIFO]' passed (0.002 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeMenuCommandRailInvalidatesStaleStreamAndReopensAfterRestart]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeMenuCommandRailInvalidatesStaleStreamAndReopensAfterRestart]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeMenuCommandRailPurgesUnreadBufferedValueAfterStop]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeMenuCommandRailPurgesUnreadBufferedValueAfterStop]' passed (0.004 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeMenuCommandRailRejectsCapacityPlusOneAndPreservesFIFO]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeMenuCommandRailRejectsCapacityPlusOneAndPreservesFIFO]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeStopDeniesNewClientCallsWhileAcceptedMenuDrainsToSubscriber]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testRuntimeStopDeniesNewClientCallsWhileAcceptedMenuDrainsToSubscriber]' passed (0.004 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testSharePresentationAdaptersDoNotDiscardPresentedFailures]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testSharePresentationAdaptersDoNotDiscardPresentedFailures]' passed (0.002 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testSharePresentationForwardsRuntimeEvidenceAndPresentedIsNonterminal]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testSharePresentationForwardsRuntimeEvidenceAndPresentedIsNonterminal]' passed (0.002 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testShareTransferSerializesPresentedAndRetriesOneShotTerminalJournalFault]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testShareTransferSerializesPresentedAndRetriesOneShotTerminalJournalFault]' passed (0.004 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testSnapshotAndPendingMessageProjectWithoutOwningDomainState]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testSnapshotAndPendingMessageProjectWithoutOwningDomainState]' passed (0.004 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testSnapshotWithoutPendingMessageClearsPresentation]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testSnapshotWithoutPendingMessageClearsPresentation]' passed (0.007 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testStopClearsPresentationStateAndIgnoresLateStreamValues]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testStopClearsPresentationStateAndIgnoresLateStreamValues]' passed (0.004 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testStopReleasesClientWithoutTakingOwnershipFromRuntimeShareProvider]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testStopReleasesClientWithoutTakingOwnershipFromRuntimeShareProvider]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testUserTriggeredMutationFailuresRemainVisibleAndSanitized]' started.
+Test Case '-[RuneScribeUIModuleTests.RuneScribeUISessionTests testUserTriggeredMutationFailuresRemainVisibleAndSanitized]' passed (0.001 seconds).
+Test Suite 'RuneScribeUISessionTests' passed at 2026-08-22 17:16:27.149.
+	 Executed 40 tests, with 0 failures (0 unexpected) in 0.874 (0.876) seconds
+Test Suite 'RuntimeApplicationResourcePresentationTests' started at 2026-08-22 17:16:27.149.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testCloseReleasesSplashLeaseWithoutReportingCompletion]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testCloseReleasesSplashLeaseWithoutReportingCompletion]' passed (0.004 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testDecodedThemeResourceCacheDeduplicatesEvictsAndReleases]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testDecodedThemeResourceCacheDeduplicatesEvictsAndReleases]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testDecodedThemeResourcePreflightEnforcesADRLimits]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testDecodedThemeResourcePreflightEnforcesADRLimits]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testDecodedThemeResourceReleaseWaitsForLastOwner]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testDecodedThemeResourceReleaseWaitsForLastOwner]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testDecodedVectorResourceIsRasterizedOnceAndReused]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testDecodedVectorResourceIsRasterizedOnceAndReused]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testInvalidMetalLibraryClosesLeaseAndDegradesToStaticState]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testInvalidMetalLibraryClosesLeaseAndDegradesToStaticState]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testMetalCancellationClosesLeaseAcquiredBeforeCancellation]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testMetalCancellationClosesLeaseAcquiredBeforeCancellation]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testMissingSplashSessionFinishesWithoutCreatingNativeState]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testMissingSplashSessionFinishesWithoutCreatingNativeState]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testSourceRevocationStopsSplashAndNotifiesOnce]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testSourceRevocationStopsSplashAndNotifiesOnce]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testSplashPresentationAcquiresLazilyAndFinishesExactlyOnce]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testSplashPresentationAcquiresLazilyAndFinishesExactlyOnce]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundInstallAndClearReplaceTheWholeConfiguration]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundInstallAndClearReplaceTheWholeConfiguration]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundInstallRejectsMetadataOnlyRaster]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundInstallRejectsMetadataOnlyRaster]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundInstallRetainsStaticVariantsWhenParametersFail]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundInstallRetainsStaticVariantsWhenParametersFail]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundParametersDecodeEveryBoundedRendererField]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundParametersDecodeEveryBoundedRendererField]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundParametersRejectNoncanonicalAndUnsafeValues]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundParametersRejectNoncanonicalAndUnsafeValues]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundRendererUniformLayoutMatchesMetalABI]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundRendererUniformLayoutMatchesMetalABI]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundSelectionUsesOneBoundedAccessibilityVariant]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests testThemeBackgroundSelectionUsesOneBoundedAccessibilityVariant]' passed (0.000 seconds).
+Test Suite 'RuntimeApplicationResourcePresentationTests' passed at 2026-08-22 17:16:27.160.
+	 Executed 17 tests, with 0 failures (0 unexpected) in 0.010 (0.011) seconds
+Test Suite 'RuntimeExternalServicesSettingsPresentationTests' started at 2026-08-22 17:16:27.160.
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testAccountChangeOffersRebindAndRetainsLastSuccessfulSync]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testAccountChangeOffersRebindAndRetainsLastSuccessfulSync]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testGameCenterAuthenticatingStateDisablesRepeatedAction]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testGameCenterAuthenticatingStateDisablesRepeatedAction]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testGameCenterAvailableStateOffersExplicitUserAction]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testGameCenterAvailableStateOffersExplicitUserAction]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testGameCenterConnectedStateOffersStopMirroringAction]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testGameCenterConnectedStateOffersStopMirroringAction]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testLocalOnlyCloudStatusExplainsAutomaticRecovery]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testLocalOnlyCloudStatusExplainsAutomaticRecovery]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testQueuedAndOfflineCloudStatusesDescribeDurableLocalQueue]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testQueuedAndOfflineCloudStatusesDescribeDurableLocalQueue]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testRetryExhaustedExplainsProbeAndPreservesScopeCopy]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testRetryExhaustedExplainsProbeAndPreservesScopeCopy]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testUnavailableSnapshotRetainsLocalFirstMessageWithoutOfferingAnAction]' started.
+Test Case '-[RuneScribeUIModuleTests.RuntimeExternalServicesSettingsPresentationTests testUnavailableSnapshotRetainsLocalFirstMessageWithoutOfferingAnAction]' passed (0.000 seconds).
+Test Suite 'RuntimeExternalServicesSettingsPresentationTests' passed at 2026-08-22 17:16:27.160.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.000 (0.001) seconds
+Test Suite 'SemanticThemePresentationTests' started at 2026-08-22 17:16:27.160.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testDecorativeHeadingCatalogInstallsAllApprovedSlotsAndFailsClosed]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testDecorativeHeadingCatalogInstallsAllApprovedSlotsAndFailsClosed]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testImportedCipherFontIsTheExplicitThemeScriptCompatibilityException]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testImportedCipherFontIsTheExplicitThemeScriptCompatibilityException]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testInterpreterUsesEffectiveDescriptorPaletteAndPrimaryScriptFont]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testInterpreterUsesEffectiveDescriptorPaletteAndPrimaryScriptFont]' passed (0.004 seconds).
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testNorseUnlockAnimationParametersDriveAllRevealTierDurations]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testNorseUnlockAnimationParametersDriveAllRevealTierDurations]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testPerCodexArtifactSelectionUsesTypedContractAndFailsClosed]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testPerCodexArtifactSelectionUsesTypedContractAndFailsClosed]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testResetRestoresBaseSemanticFallback]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testResetRestoresBaseSemanticFallback]' passed (0.004 seconds).
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testResourcePlanBindsFontBackgroundVariantsAndRendererParameters]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testResourcePlanBindsFontBackgroundVariantsAndRendererParameters]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testUIModuleSourcesContainNoHardCodedRunicLiterals]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testUIModuleSourcesContainNoHardCodedRunicLiterals]' passed (0.023 seconds).
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testVectorPresentationIsLimitedToSettledEncodedRunes]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testVectorPresentationIsLimitedToSettledEncodedRunes]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testVectorPresentationRendersARealProviderPDFGlyph]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testVectorPresentationRendersARealProviderPDFGlyph]' passed (0.014 seconds).
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testVectorRunPreservesMappingWhitespaceLineBreakAndUnmappedText]' started.
+Test Case '-[RuneScribeUIModuleTests.SemanticThemePresentationTests testVectorRunPreservesMappingWhitespaceLineBreakAndUnmappedText]' passed (0.000 seconds).
+Test Suite 'SemanticThemePresentationTests' passed at 2026-08-22 17:16:27.207.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.046 (0.047) seconds
+Test Suite 'ShareArtifactRendererTests' started at 2026-08-22 17:16:27.207.
+Test Case '-[RuneScribeUIModuleTests.ShareArtifactRendererTests testBuilderShowsLockedContentButCannotSelectIt]' started.
+Test Case '-[RuneScribeUIModuleTests.ShareArtifactRendererTests testBuilderShowsLockedContentButCannotSelectIt]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ShareArtifactRendererTests testReceivedSummaryExplainsFallbackProvenanceAndEncounter]' started.
+Test Case '-[RuneScribeUIModuleTests.ShareArtifactRendererTests testReceivedSummaryExplainsFallbackProvenanceAndEncounter]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ShareArtifactRendererTests testRenderPlanCoversShortMediumLongPaginatedAndOverflowInscriptions]' started.
+Test Case '-[RuneScribeUIModuleTests.ShareArtifactRendererTests testRenderPlanCoversShortMediumLongPaginatedAndOverflowInscriptions]' passed (0.001 seconds).
+Test Case '-[RuneScribeUIModuleTests.ShareArtifactRendererTests testRenderPlanIsDeterministicPaginatedAndUsesApprovedAnchor]' started.
+Test Case '-[RuneScribeUIModuleTests.ShareArtifactRendererTests testRenderPlanIsDeterministicPaginatedAndUsesApprovedAnchor]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.ShareArtifactRendererTests testStaticRendererProducesBoundedFourByThreePreview]' started.
+Test Case '-[RuneScribeUIModuleTests.ShareArtifactRendererTests testStaticRendererProducesBoundedFourByThreePreview]' passed (0.268 seconds).
+Test Suite 'ShareArtifactRendererTests' passed at 2026-08-22 17:16:27.477.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.270 (0.270) seconds
+Test Suite 'SharePresentationAdapterTests' started at 2026-08-22 17:16:27.477.
+Test Case '-[RuneScribeUIModuleTests.SharePresentationAdapterTests testMacSystemShareMatrixClassifiesOnlyAuthoritativeAirDrop]' started.
+Test Case '-[RuneScribeUIModuleTests.SharePresentationAdapterTests testMacSystemShareMatrixClassifiesOnlyAuthoritativeAirDrop]' passed (0.022 seconds).
+Test Case '-[RuneScribeUIModuleTests.SharePresentationAdapterTests testUtilityRouteMatrixNeverProducesEligibleCompletion]' started.
+Test Case '-[RuneScribeUIModuleTests.SharePresentationAdapterTests testUtilityRouteMatrixNeverProducesEligibleCompletion]' passed (0.000 seconds).
+Test Suite 'SharePresentationAdapterTests' passed at 2026-08-22 17:16:27.499.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.022 (0.022) seconds
+Test Suite 'SplashAssetScheduleTests' started at 2026-08-22 17:16:27.499.
+Test Case '-[RuneScribeUIModuleTests.SplashAssetScheduleTests testFutureLastShownDateFailsClosedUntilIntervalElapses]' started.
+Test Case '-[RuneScribeUIModuleTests.SplashAssetScheduleTests testFutureLastShownDateFailsClosedUntilIntervalElapses]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.SplashAssetScheduleTests testNeverPresentedSplashShowsOnlyWhenResourceExists]' started.
+Test Case '-[RuneScribeUIModuleTests.SplashAssetScheduleTests testNeverPresentedSplashShowsOnlyWhenResourceExists]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.SplashAssetScheduleTests testSplashDoesNotShowWithinThirtyDays]' started.
+Test Case '-[RuneScribeUIModuleTests.SplashAssetScheduleTests testSplashDoesNotShowWithinThirtyDays]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.SplashAssetScheduleTests testSplashShowsAtAndAfterThirtyDays]' started.
+Test Case '-[RuneScribeUIModuleTests.SplashAssetScheduleTests testSplashShowsAtAndAfterThirtyDays]' passed (0.000 seconds).
+Test Suite 'SplashAssetScheduleTests' passed at 2026-08-22 17:16:27.499.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.000 (0.000) seconds
+Test Suite 'UIModuleTests' started at 2026-08-22 17:16:27.499.
+Test Case '-[RuneScribeUIModuleTests.UIModuleTests testBundledManifestMatchesFactoryDescriptor]' started.
+Test Case '-[RuneScribeUIModuleTests.UIModuleTests testBundledManifestMatchesFactoryDescriptor]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.UIModuleTests testOpaqueSharePresentationResolvesOnlyWhileLeased]' started.
+Test Case '-[RuneScribeUIModuleTests.UIModuleTests testOpaqueSharePresentationResolvesOnlyWhileLeased]' passed (0.007 seconds).
+Test Case '-[RuneScribeUIModuleTests.UIModuleTests testQRCodeRoundTripsAcrossScaleCropNoiseAndContrastFixtures]' started.
+Test Case '-[RuneScribeUIModuleTests.UIModuleTests testQRCodeRoundTripsAcrossScaleCropNoiseAndContrastFixtures]' passed (0.037 seconds).
+Test Case '-[RuneScribeUIModuleTests.UIModuleTests testRootContributionSelectorRejectsZeroAndMultiple]' started.
+Test Case '-[RuneScribeUIModuleTests.UIModuleTests testRootContributionSelectorRejectsZeroAndMultiple]' passed (0.000 seconds).
+Test Case '-[RuneScribeUIModuleTests.UIModuleTests testZeroArgumentFactoryCreatesFreshModulesOnDemand]' started.
+Test Case '-[RuneScribeUIModuleTests.UIModuleTests testZeroArgumentFactoryCreatesFreshModulesOnDemand]' passed (0.000 seconds).
+Test Suite 'UIModuleTests' passed at 2026-08-22 17:16:27.544.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.044 (0.045) seconds
+Test Suite 'RuneScribeArchitecturePackageTests.xctest' passed at 2026-08-22 17:16:27.544.
+	 Executed 122 tests, with 0 failures (0 unexpected) in 1.973 (1.978) seconds
+Test Suite 'Selected tests' passed at 2026-08-22 17:16:27.544.
+	 Executed 122 tests, with 0 failures (0 unexpected) in 1.973 (1.978) seconds
+◇ Test run started.
+↳ Testing Library Version: 1501
+↳ Target Platform: arm64e-apple-macos14.0
+✔ Test run with 0 tests in 0 suites passed after 0.001 seconds.
