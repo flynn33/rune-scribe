@@ -1,0 +1,8 @@
+iPhone Release Simulator entitlements
+Executable=/private/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-iphone-release-c2d6055/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib
+warning: Specifying ':' in the path is deprecated and will not work in a future release
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict></dict></plist>
+iPad Release Simulator entitlements
+Executable=/private/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-ipad-release-c2d6055/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib
+warning: Specifying ':' in the path is deprecated and will not work in a future release
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict></dict></plist>

@@ -261,6 +261,7 @@ enum ProgressionExistingUserMigrationReducer {
                 statisticID: cipherStatisticID,
                 bucketID: nil,
                 canonicalToken: $0.cipherToken.rawValue,
+                firstObservedAt: completedAt,
                 firstAppliedRevision: revision
             )
         }

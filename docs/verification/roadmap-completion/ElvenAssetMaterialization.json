@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "python3 scripts/materialize_elven_resources.py --package-root /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1 --repo-root . --report docs/verification/roadmap-completion/ElvenAssetMaterialization.json",
+    "python3 scripts/validate-elven-production-package.py /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1",
+    "python3 scripts/check-roadmap-completion.py",
+    "shasum -a 256 Packages/RuneScribeArchitecture/Sources/RuneScribeTheme*Module/Resources/Production/Resource-Integrity-Manifest-v1.0.json"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "acceptedPackageVersion": "3.1",
+    "inputTreatment": "immutable",
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "docs/verification/roadmap-completion/GateRun/materialize-elven-resources.log",
+    "docs/verification/roadmap-completion/GateRun/elven-production-validation.json",
+    "docs/verification/roadmap-completion/GateRun/elven-production-validation.log",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeWildwoodModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeGloamthornModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json"
+  ],
+  "acceptedPackage": {
+    "packageManifestSHA256": "d55f4b7c0f74eaf2b396ceb664f25ba086f50b7033052cd0f0a18d407c8a31da",
+    "logicalResourceCount": 56,
+    "shippingOutputCount": 184,
+    "provenanceRecordCount": 198,
+    "physicalFileCount": 488
+  },
+  "providers": [
+    {
+      "codexID": "codex.moonleaf",
+      "target": "RuneScribeThemeMoonleafModule",
+      "outputCount": 46,
+      "bytes": 678743,
+      "integrityManifestSHA256": "e7222671993ad13ff4f3c72dd048f31f49295a1412e1f365d9fd904ef0b4c633"
+    },
+    {
+      "codexID": "codex.sunspire",
+      "target": "RuneScribeThemeSunspireModule",
+      "outputCount": 46,
+      "bytes": 666458,
+      "integrityManifestSHA256": "da391cc35e89ad0606099e50e98bb2e28591420f68ec745efc2878411e9b1edc"
+    },
+    {
+      "codexID": "codex.wildwood",
+      "target": "RuneScribeThemeWildwoodModule",
+      "outputCount": 46,
+      "bytes": 697897,
+      "integrityManifestSHA256": "f41665d69e3034bd8df8cf60954a5e7fa338a144384116fac2a4ca8b71b6c8f8"
+    },
+    {
+      "codexID": "codex.gloamthorn",
+      "target": "RuneScribeThemeGloamthornModule",
+      "outputCount": 46,
+      "bytes": 609418,
+      "integrityManifestSHA256": "1808d845cbcf30ae21ae87cd1ec8e3db549ab493a652de420de7d8868466c6d9"
+    }
+  ],
+  "aggregate": {
+    "outputCount": 184,
+    "bytes": 2652516,
+    "exactLengthAndSHA256Match": true
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "python3 scripts/check_no_ai_attribution.py --repo-root . --base-ref 131f101069d1a8053f72e60918092e81373e2687",
+    "git log --format='%H%x09%B' 131f101069d1a8053f72e60918092e81373e2687..HEAD",
+    "git diff --check"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    ".gitattributes",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/verification/roadmap-completion/DocumentationSupportChecklist.md"
+  ],
+  "scannedScope": [
+    "changed text files",
+    "file names",
+    "branch name",
+    "commit subjects and bodies",
+    "documentation and evidence"
+  ],
+  "prohibitedCreditViolations": 0,
+  "coauthorFooterViolations": 0,
+  "resultDetail": "No prohibited authorship, model, tool-credit, or automated-signature marker was found in the reviewed scope."
+}

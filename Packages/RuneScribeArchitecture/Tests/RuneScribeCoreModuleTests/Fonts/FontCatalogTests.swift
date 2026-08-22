@@ -109,6 +109,77 @@ final class FontCatalogTests: XCTestCase {
         XCTAssertEqual(path.rawValue, "RuneScribFonts/\(Self.hex(reference.sha256)).ttf")
     }
 
+    func testImportedFontPackageResolvesRegistersAndRendersThroughCompatibilityScript() async throws {
+        let bytes = Data("portable-imported-font-fixture".utf8)
+        let reference = FontRef(id: "legacy-e2e", version: 3, sha256: Self.digest(bytes))
+        let originalCipher = Cipher(
+            label: "Imported presentation",
+            origin: .generated,
+            publicID: Data(1...8),
+            keyMaterial: Data(repeating: 0x44, count: 32),
+            decorativeMapping: Array((0..<32).reversed()),
+            fontRef: reference
+        )
+        let resource = try RuneScribePackageResource(
+            kind: .legacyFont,
+            id: reference.id,
+            version: UInt32(reference.version),
+            mediaType: "font/otf",
+            data: bytes
+        )
+        let package = try RuneScribePackage(
+            kind: .cipherInvitation,
+            payloadVersion: UInt16(CipherSharePayload.version),
+            sections: [
+                RuneScribePackageSection(
+                    type: RuneScribePackageSectionType.corePayload.rawValue,
+                    required: true,
+                    data: try CipherSharePayload(cipher: originalCipher).encoded()
+                ),
+                RuneScribePackageSection(
+                    type: RuneScribePackageSectionType.resourceTable.rawValue,
+                    data: try RuneScribePackageResourceTable(resources: [resource]).encoded()
+                ),
+            ]
+        )
+
+        guard case .cipher(let routedPayload, let routedBytes) = try FileRouter.decode(
+            package.encoded()
+        ) else {
+            return XCTFail("Expected imported cipher route")
+        }
+        XCTAssertEqual(routedBytes, bytes)
+        XCTAssertEqual(routedPayload.fontRef, reference)
+
+        let files = FontFileStore()
+        let registrar = FontRegistrarFake(names: [bytes: "ImportedRunes-Regular"])
+        let catalog = FontCatalog(
+            protectedFileStore: files,
+            registrar: registrar,
+            resources: FontResourceLocatorFake()
+        )
+        try await catalog.ensureAvailable(reference: reference, suppliedBytes: routedBytes)
+        let resolvedName = try await catalog.resolve(reference)
+        let registeredName = await catalog.registeredPostScriptName(for: reference)
+        XCTAssertEqual(resolvedName, "ImportedRunes-Regular")
+        XCTAssertEqual(registeredName, "ImportedRunes-Regular")
+
+        let importedCipher = routedPayload.cipher(label: "Received")
+        let compatibilityScript = try ScriptDescriptor.legacyCompatibility(fontRef: reference)
+        let plaintext = Data("end-to-end".utf8)
+        let rendered = try RuneCodec().encode(
+            plaintext,
+            with: importedCipher,
+            script: compatibilityScript
+        )
+        XCTAssertEqual(
+            try RuneCodec().decode(rendered, with: importedCipher, script: compatibilityScript),
+            plaintext
+        )
+        XCTAssertEqual(compatibilityScript.renderingFont, reference)
+        XCTAssertEqual(importedCipher.symbolPermutation, originalCipher.symbolPermutation)
+    }
+
     func testHashMismatchDoesNotWriteOrRegister() async throws {
         let bytes = Data("untrusted-font".utf8)
         let reference = FontRef(
@@ -352,7 +423,10 @@ private extension FontCatalog {
         self.init(
             runtimeIO: RuntimeIOClient(
                 readProtectedFile: {
-                    try await protectedFileStore.read(relativePath: $0)
+                    try await protectedFileStore.read(
+                        relativePath: $0,
+                        maximumByteCount: $1
+                    )
                 },
                 writeProtectedFile: {
                     try await protectedFileStore.write($0, relativePath: $1)
@@ -406,8 +480,15 @@ private actor FontFileStore: ProtectedFileStore {
         self.files = files
     }
 
-    func read(relativePath: ProtectedPath) async throws -> Data? {
-        files[relativePath]
+    func read(
+        relativePath: ProtectedPath,
+        maximumByteCount: Int
+    ) async throws -> Data? {
+        guard let data = files[relativePath] else { return nil }
+        guard data.count <= maximumByteCount else {
+            throw ProtectedFileStoreReadError.contentTooLarge
+        }
+        return data
     }
 
     func write(_ data: Data, relativePath: ProtectedPath) async throws {

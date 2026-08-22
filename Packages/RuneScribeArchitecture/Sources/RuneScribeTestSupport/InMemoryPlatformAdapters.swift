@@ -40,8 +40,18 @@ public actor InMemoryProtectedFileStore: ProtectedFileStore {
         self.files = files
     }
 
-    public func read(relativePath: ProtectedPath) async throws -> Data? {
-        files[relativePath]
+    public func read(
+        relativePath: ProtectedPath,
+        maximumByteCount: Int
+    ) async throws -> Data? {
+        guard maximumByteCount > 0 else {
+            throw ProtectedFileStoreReadError.invalidMaximumByteCount
+        }
+        guard let data = files[relativePath] else { return nil }
+        guard data.count <= maximumByteCount else {
+            throw ProtectedFileStoreReadError.contentTooLarge
+        }
+        return data
     }
 
     public func write(_ data: Data, relativePath: ProtectedPath) async throws {
@@ -328,5 +338,23 @@ public struct FixedUUIDProvider: UUIDProviding {
 
     public func nextUUID() -> UUID {
         uuid
+    }
+}
+
+public actor NoAccountCloudSyncTransport: CloudSyncTransport {
+    public init() {}
+
+    public func accountState() async throws -> CloudAccountStateDTO {
+        try CloudAccountStateDTO(state: .noAccount, accountScopeDigest: nil)
+    }
+
+    public func fetchPrivateProgression() async throws -> CloudSyncFetchResultDTO {
+        try CloudSyncFetchResultDTO(payload: nil, changeTag: nil)
+    }
+
+    public func savePrivateProgression(
+        _ request: CloudSyncSaveRequestDTO
+    ) async throws -> CloudSyncSaveResultDTO {
+        throw CloudSyncTransportError.accountUnavailable
     }
 }

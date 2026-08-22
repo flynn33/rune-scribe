@@ -29,6 +29,8 @@ public enum RuneScribeServiceIDs {
         clock,
         uuid,
         moduleStateStore,
+        cloudSyncTransport,
+        gameCenterReporting,
     ]
 }
 
@@ -120,8 +122,20 @@ public struct ProtectedPath: RawRepresentable, Codable, Hashable, Sendable, Comp
     }
 }
 
+public enum ProtectedFileStoreReadError: Error, Equatable, Sendable {
+    case invalidMaximumByteCount
+    case contentTooLarge
+    case unsupportedFileType
+    case unavailable
+}
+
 public protocol ProtectedFileStore: Sendable {
-    func read(relativePath: ProtectedPath) async throws -> Data?
+    /// Reads no more than the caller's positive byte ceiling. Implementations
+    /// must reject oversized content before materializing the complete file.
+    func read(
+        relativePath: ProtectedPath,
+        maximumByteCount: Int
+    ) async throws -> Data?
     func write(_ data: Data, relativePath: ProtectedPath) async throws
     func remove(relativePath: ProtectedPath) async throws
     func exists(relativePath: ProtectedPath) async throws -> Bool

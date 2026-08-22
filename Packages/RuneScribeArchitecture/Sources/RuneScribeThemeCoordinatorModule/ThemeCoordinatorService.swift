@@ -29,6 +29,7 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         let isEmergencyPresentation: Bool
         let effectiveTheme: ThemeDescriptor
         let providers: [ThemeProviderSummaryDTO]
+        let presentationInventories: [SharePresentationProviderInventory]
     }
 
     private let contributionReader: RuntimeContributionReaderClient
@@ -148,13 +149,9 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         }) else {
             throw ThemeCoordinatorModuleError.codexNotSelectable(command.codexID)
         }
-        let text = RuntimeSettingText(rawValue: command.codexID.rawValue)!
-        _ = try await settings.set(
-            SetRuntimeSettingCommand(
-                settingID: RuneScribeRuntimeSettings.selectedCodex,
-                value: .text(text),
-                expectedRevision: settingsRecordRevision
-            )
+        _ = try await settings.setSelectedCodex(
+            command.codexID,
+            expectedRevision: settingsRecordRevision
         )
         try await reconcile()
         guard let updated = latestSnapshot else {
@@ -450,13 +447,17 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             )
         }.sorted { $0.codexID < $1.codexID }
         let effectiveTheme = records[selection.effectiveCodexID]!.descriptor
+        let presentationInventories = try records.values.map {
+            try SharePresentationProviderInventory(descriptor: $0.descriptor)
+        }.sorted { $0.codexID < $1.codexID }
         let content = SnapshotContent(
             preferredCodexID: preference.codexID,
             effectiveCodexID: selection.effectiveCodexID,
             fallbackReason: selection.reason,
             isEmergencyPresentation: isEmergencyPresentation,
             effectiveTheme: effectiveTheme,
-            providers: summaries
+            providers: summaries,
+            presentationInventories: presentationInventories
         )
         let reconciledDiagnostics = try ThemeCoordinatorDiagnosticsDTO(
             capturedAt: now(),
@@ -485,6 +486,7 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
                 fallbackReason: content.fallbackReason,
                 effectiveTheme: content.effectiveTheme,
                 providers: content.providers,
+                presentationInventories: content.presentationInventories,
                 isEmergencyPresentation: content.isEmergencyPresentation
             )
             latestContent = content
@@ -594,11 +596,11 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             return (nil, false)
         }
         guard case .text(let text) = value,
-              let codexID = CodexID(rawValue: text.rawValue)
+              let decoded = try? RuntimeSelectedCodexPreferenceCodec.decodeForRead(text)
         else {
             return (nil, true)
         }
-        return (codexID, false)
+        return (decoded.value.codexID, false)
     }
 
     private static func effectiveSelection(

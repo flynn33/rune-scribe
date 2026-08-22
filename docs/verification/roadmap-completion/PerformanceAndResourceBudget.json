@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture --filter RuneScribePackageTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter RuntimeOpaqueResourceRegistryTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter CoreApplicationProgressionIntegrationTests",
+    "python3 scripts/check-roadmap-completion.py",
+    "scripts/check-shipping-products.sh --macos-app /tmp/runescribe-roadmap-shipping-macos-b7c55ff-unsigned-entitlements/DerivedData/Build/Products/Release/RuneScrib.app --ios-app /tmp/runescribe-roadmap-shipping-ios-b7c55ff/DerivedData/Build/Products/Release-iphonesimulator/RuneScrib.app"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/RuneScribePackageTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeOpaqueResourceRegistryTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/CoreApplicationProgressionIntegrationTests.swift",
+    "scripts/check-roadmap-completion.py",
+    "scripts/check-shipping-products.sh",
+    "docs/verification/roadmap-completion/GateRun/shipping-products-final-b7c55ff.metadata.log",
+    "docs/verification/roadmap-completion/GateRun/shipping-products-final-b7c55ff.log"
+  ],
+  "budgets": {
+    "maximumPackageBytes": 16777216,
+    "maximumSections": 16,
+    "maximumCipherCount": 131072,
+    "messageCandidateWorkBytes": 134217728,
+    "contactPlaintextBytes": 4194304,
+    "contactCount": 4096,
+    "importedFontBytes": 8388608,
+    "associationJournalBytes": 4096,
+    "encryptedContactPayloadAndTagChecked": true,
+    "decodedResourceCacheBounded": true
+  },
+  "providerResources": {
+    "outputCount": 184,
+    "bytes": 2652516,
+    "exactHashValidation": true
+  },
+  "supportedEnvironmentResult": "Release resource, cache, allocation, and package guardrails pass in hosted and Simulator-supported validation.",
+  "physicalMemoryProfileStatus": "OWNER TEST REQUIRED"
+}

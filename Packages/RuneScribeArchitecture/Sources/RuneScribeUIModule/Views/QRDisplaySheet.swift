@@ -66,9 +66,7 @@ struct QRDisplaySheet: View {
         .background(Color.runeNavy)
         .preferredColorScheme(.dark)
         .onAppear {
-            Task { @MainActor in
-                try? await transfer.reportPresented(on: .qrDisplay)
-            }
+            transfer.beginReportingPresented(on: .qrDisplay)
         }
         .onDisappear {
             finish(dismissWhenFinished: false)

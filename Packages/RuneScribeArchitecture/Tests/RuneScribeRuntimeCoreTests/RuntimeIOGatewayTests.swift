@@ -10,6 +10,7 @@ final class RuntimeIOGatewayTests: XCTestCase {
         let secureData = Data("secure-result".utf8)
         let writtenSecureData = Data("secure-write".utf8)
         let protectedData = Data("protected-result".utf8)
+        let protectedMaximumByteCount = 4_096
         let writtenProtectedData = Data("protected-write".utf8)
         let protectedPath = ProtectedPath(rawValue: "Vault/item.enc")!
         let protectedDirectory = ProtectedPath(rawValue: "Vault")!
@@ -57,7 +58,10 @@ final class RuntimeIOGatewayTests: XCTestCase {
             service: "com.runescribe.test.secure-service",
             account: "delete-account"
         )
-        let loadedProtectedData = try await client.readProtectedFile(protectedPath)
+        let loadedProtectedData = try await client.readProtectedFile(
+            protectedPath,
+            maximumByteCount: protectedMaximumByteCount
+        )
         try await client.writeProtectedFile(
             writtenProtectedData,
             path: protectedPath
@@ -107,7 +111,15 @@ final class RuntimeIOGatewayTests: XCTestCase {
             ]
         )
         let protectedState = await protectedFiles.state()
-        XCTAssertEqual(protectedState.readRequests, [protectedPath])
+        XCTAssertEqual(
+            protectedState.readRequests,
+            [
+                ProtectedFileReadProbeRequest(
+                    path: protectedPath,
+                    maximumByteCount: protectedMaximumByteCount
+                ),
+            ]
+        )
         XCTAssertEqual(
             protectedState.writeRequests,
             [
@@ -200,7 +212,10 @@ final class RuntimeIOGatewayTests: XCTestCase {
             )
         }
         let missingCapabilityError = await runtimeError {
-            _ = try await missingProtectedCapabilityClient.readProtectedFile(.contacts)
+            _ = try await missingProtectedCapabilityClient.readProtectedFile(
+                .contacts,
+                maximumByteCount: 1_024
+            )
         }
         let wrongClockRoleError = await runtimeError {
             _ = try await wrongRoleClient.now()
@@ -262,7 +277,10 @@ final class RuntimeIOGatewayTests: XCTestCase {
             _ = try await client.secureValueData(service: "service", account: "account")
         }
         let protectedError = await runtimeError {
-            _ = try await client.readProtectedFile(.contacts)
+            _ = try await client.readProtectedFile(
+                .contacts,
+                maximumByteCount: 1_024
+            )
         }
         let clockError = await runtimeError {
             _ = try await client.now()
@@ -323,7 +341,10 @@ final class RuntimeIOGatewayTests: XCTestCase {
             try await client.secureValueData(service: "late", account: "secure")
         }
         let protectedOperation = Task {
-            try await client.readProtectedFile(.contacts)
+            try await client.readProtectedFile(
+                .contacts,
+                maximumByteCount: 1_024
+            )
         }
 
         await secureBarrier.waitUntilEntered()
@@ -346,7 +367,15 @@ final class RuntimeIOGatewayTests: XCTestCase {
             secureState.dataRequests,
             [SecureValueLookupProbeRequest(service: "late", account: "secure")]
         )
-        XCTAssertEqual(protectedState.readRequests, [.contacts])
+        XCTAssertEqual(
+            protectedState.readRequests,
+            [
+                ProtectedFileReadProbeRequest(
+                    path: .contacts,
+                    maximumByteCount: 1_024
+                ),
+            ]
+        )
     }
 
     func testRetainedClockAndUUIDClientIsStaleAfterSourceInvalidation() async throws {
@@ -3409,6 +3438,11 @@ private struct ProtectedFileWriteProbeRequest: Equatable, Sendable {
     let path: ProtectedPath
 }
 
+private struct ProtectedFileReadProbeRequest: Equatable, Sendable {
+    let path: ProtectedPath
+    let maximumByteCount: Int
+}
+
 private struct ProtectedFileContentsProbeRequest: Equatable, Sendable {
     let directory: ProtectedPath
     let fileExtension: String?
@@ -3423,7 +3457,7 @@ private struct ProtectedFileStoreProbeState: Equatable, Sendable {
         contentsRequests: []
     )
 
-    let readRequests: [ProtectedPath]
+    let readRequests: [ProtectedFileReadProbeRequest]
     let writeRequests: [ProtectedFileWriteProbeRequest]
     let removeRequests: [ProtectedPath]
     let existsRequests: [ProtectedPath]
@@ -3435,7 +3469,7 @@ private actor ProtectedFileStoreProbe: ProtectedFileStore {
     private let existsResult: Bool
     private let contentsResult: [ProtectedPath]
     private let readBarrier: RuntimeIOBarrier?
-    private var readRequests: [ProtectedPath] = []
+    private var readRequests: [ProtectedFileReadProbeRequest] = []
     private var writeRequests: [ProtectedFileWriteProbeRequest] = []
     private var removeRequests: [ProtectedPath] = []
     private var existsRequests: [ProtectedPath] = []
@@ -3453,10 +3487,22 @@ private actor ProtectedFileStoreProbe: ProtectedFileStore {
         self.readBarrier = readBarrier
     }
 
-    func read(relativePath: ProtectedPath) async throws -> Data? {
-        readRequests.append(relativePath)
+    func read(
+        relativePath: ProtectedPath,
+        maximumByteCount: Int
+    ) async throws -> Data? {
+        readRequests.append(
+            ProtectedFileReadProbeRequest(
+                path: relativePath,
+                maximumByteCount: maximumByteCount
+            )
+        )
         if let readBarrier {
             await readBarrier.enterAndWait()
+        }
+        guard let readResult else { return nil }
+        guard readResult.count <= maximumByteCount else {
+            throw ProtectedFileStoreReadError.contentTooLarge
         }
         return readResult
     }

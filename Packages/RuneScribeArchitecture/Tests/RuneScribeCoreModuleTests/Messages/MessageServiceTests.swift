@@ -30,6 +30,68 @@ final class MessageServiceTests: XCTestCase {
         let messy = "\n  \(runes)\n"   // as if pasted from a chat app
         XCTAssertEqual(try svc.read(messy, tryingCiphers: [c]).plaintext, "hi there")
     }
+
+    func testReadRejectsOversizedPasteBeforeCandidateWork() throws {
+        let oversized = String(
+            repeating: "x",
+            count: MessageService.maximumPastedRuneUTF8ByteCount + 1
+        )
+
+        XCTAssertThrowsError(try svc.read(oversized, tryingCiphers: [])) { error in
+            XCTAssertEqual(error as? MessageError, .inputTooLarge)
+            XCTAssertEqual(
+                (error as? LocalizedError)?.errorDescription,
+                "The pasted rune message is too large to decode."
+            )
+        }
+    }
+
+    func testReadRejectsExcessCandidateWorkForPastedText() throws {
+        let cipher = Cipher.generated(label: "candidate")
+        let candidates = Array(
+            repeating: cipher,
+            count: MessageService.maximumCandidateCipherCount + 1
+        )
+        let runes = try svc.compose("bounded", with: cipher)
+        XCTAssertThrowsError(try svc.read(runes, tryingCiphers: candidates)) { error in
+            XCTAssertEqual(error as? MessageError, .tooManyCandidateCiphers)
+            XCTAssertEqual(
+                (error as? LocalizedError)?.errorDescription,
+                "Too many ciphers are available to decode this message."
+            )
+        }
+    }
+
+    func testReadRejectsPastedCandidateByteWorkBeyondBudget() {
+        let cipher = Cipher.generated(label: "candidate")
+        let candidateCount = 1_024
+        let candidates = Array(repeating: cipher, count: candidateCount)
+        let oversizedWork = String(
+            repeating: "x",
+            count: MessageService.maximumDecodeWorkByteCount / candidateCount + 1
+        )
+
+        XCTAssertThrowsError(
+            try svc.read(oversizedWork, tryingCiphers: candidates)
+        ) { error in
+            XCTAssertEqual(error as? MessageError, .decodeWorkLimitExceeded)
+        }
+    }
+
+    func testCandidateCapacityFitsTheMinimumWorkBudgetExactly() {
+        let capacity = MessageService.maximumCandidateCipherCount
+        let minimumCharge = MessageService.minimumDecodeWorkByteCountPerCandidate
+
+        XCTAssertEqual(capacity, CipherLibrary.maximumCipherCount)
+        XCTAssertLessThanOrEqual(
+            capacity * minimumCharge,
+            MessageService.maximumDecodeWorkByteCount
+        )
+        XCTAssertGreaterThan(
+            (capacity + 1) * minimumCharge,
+            MessageService.maximumDecodeWorkByteCount
+        )
+    }
 }
 
 extension MessageServiceTests {
@@ -57,6 +119,30 @@ extension MessageServiceTests {
         }
     }
 
+    func testReadEnvelopeMapsInvalidFramingToNoMatch() {
+        let cipher = Cipher.generated(label: "candidate")
+        let invalid = Data([MessageEnvelope.version &+ 1, 0])
+
+        XCTAssertThrowsError(
+            try svc.read(envelope: invalid, tryingCiphers: [cipher])
+        ) { error in
+            XCTAssertEqual(error as? MessageError, .noMatchingCipher)
+        }
+    }
+
+    func testReadEnvelopeRejectsVersionOnlyFramingBeforeCandidateWork() {
+        let cipher = Cipher.generated(label: "candidate")
+
+        XCTAssertThrowsError(
+            try svc.read(
+                envelope: Data([MessageEnvelope.version]),
+                tryingCiphers: Array(repeating: cipher, count: 4_096)
+            )
+        ) { error in
+            XCTAssertEqual(error as? MessageError, .noMatchingCipher)
+        }
+    }
+
     func testReadEnvelopeRejectsTamperedBytesNoFalsePositive() throws {
         let a = Cipher.generated(label: "a")
         var env = try envelope("authentic", with: a)
@@ -64,6 +150,53 @@ extension MessageServiceTests {
         // GCM tag no longer verifies — the correct cipher must still refuse to open it.
         env[env.count - 1] ^= 0xFF
         XCTAssertThrowsError(try svc.read(envelope: env, tryingCiphers: [a])) { error in
+            XCTAssertEqual(error as? MessageError, .noMatchingCipher)
+        }
+    }
+
+    func testReadEnvelopeRejectsCandidateCountBeyondLibraryCapacity() throws {
+        let cipher = Cipher.generated(label: "candidate")
+        let candidates = Array(
+            repeating: cipher,
+            count: MessageService.maximumCandidateCipherCount + 1
+        )
+        let env = try envelope("bounded", with: cipher)
+
+        XCTAssertThrowsError(
+            try svc.read(envelope: env, tryingCiphers: candidates)
+        ) { error in
+            XCTAssertEqual(error as? MessageError, .tooManyCandidateCiphers)
+        }
+    }
+
+    func testReadEnvelopeRejectsCandidateByteWorkBeyondBudget() {
+        let cipher = Cipher.generated(label: "candidate")
+        var env = Data([MessageEnvelope.version])
+        env.append(Data(repeating: 0, count: Int(UInt16.max) - 1))
+        let candidateCount = MessageService.maximumDecodeWorkByteCount
+            / (env.count - 1) + 1
+        let candidates = Array(repeating: cipher, count: candidateCount)
+
+        XCTAssertThrowsError(
+            try svc.read(envelope: env, tryingCiphers: candidates)
+        ) { error in
+            XCTAssertEqual(error as? MessageError, .decodeWorkLimitExceeded)
+        }
+    }
+
+    func testReadEnvelopeRejectsMinimumSizedRandomSealedData() {
+        let cipher = Cipher.generated(label: "candidate")
+        var env = Data([MessageEnvelope.version])
+        env.append(
+            Data(
+                repeating: 0,
+                count: MessageCryptor.minimumCombinedByteCount
+            )
+        )
+
+        XCTAssertThrowsError(
+            try svc.read(envelope: env, tryingCiphers: [cipher])
+        ) { error in
             XCTAssertEqual(error as? MessageError, .noMatchingCipher)
         }
     }

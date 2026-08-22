@@ -72,7 +72,10 @@ final class KeychainMigrationTests: XCTestCase {
                 try await store.delete(service: $0, account: $1)
             },
             readProtectedFile: {
-                try await protectedFiles.read(relativePath: $0)
+                try await protectedFiles.read(
+                    relativePath: $0,
+                    maximumByteCount: $1
+                )
             },
             writeProtectedFile: {
                 try await protectedFiles.write($0, relativePath: $1)

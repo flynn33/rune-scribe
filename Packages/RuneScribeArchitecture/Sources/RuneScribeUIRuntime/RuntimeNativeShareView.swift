@@ -90,9 +90,7 @@ public struct RuneScribeFileShareLink: View {
     }
 
     private func reportPresented(on routeClass: ShareRouteClassDTO) {
-        Task { @MainActor in
-            try? await transfer.reportPresented(on: routeClass)
-        }
+        transfer.beginReportingPresented(on: routeClass)
     }
 
     private func finish(_ report: SharePresentationReportDTO) {
@@ -165,9 +163,7 @@ public struct RuneScribeTextShareLink: View {
     }
 
     private func reportPresented(on routeClass: ShareRouteClassDTO) {
-        Task { @MainActor in
-            try? await transfer.reportPresented(on: routeClass)
-        }
+        transfer.beginReportingPresented(on: routeClass)
     }
 
     private func finish(_ report: SharePresentationReportDTO) {
@@ -255,9 +251,7 @@ public struct RuneScribeCipherLinkShareLink<Label: View>: View {
     }
 
     private func reportPresented(on routeClass: ShareRouteClassDTO) {
-        Task { @MainActor in
-            try? await transfer.reportPresented(on: routeClass)
-        }
+        transfer.beginReportingPresented(on: routeClass)
     }
 
     private func finish(_ report: SharePresentationReportDTO) {

@@ -1,5 +1,6 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeGameCenterModule
 import RuneScribeUIPresentationContracts
 
 public enum RuntimeStatus: Equatable, Sendable {
@@ -17,19 +18,22 @@ public struct RuntimeSnapshot: Equatable, Sendable {
     public let activationOrder: [ModuleIdentifier]
     public let activeUIModuleID: ModuleIdentifier?
     public let entitlementSnapshot: ProgressionEntitlementSnapshotDTO
+    public let cloudGameCenterStatus: RuntimeCloudGameCenterStatusSnapshotDTO
 
     public init(
         status: RuntimeStatus,
         moduleStates: [ModuleIdentifier: ModuleLifecycleState],
         activationOrder: [ModuleIdentifier],
         activeUIModuleID: ModuleIdentifier?,
-        entitlementSnapshot: ProgressionEntitlementSnapshotDTO
+        entitlementSnapshot: ProgressionEntitlementSnapshotDTO,
+        cloudGameCenterStatus: RuntimeCloudGameCenterStatusSnapshotDTO
     ) {
         self.status = status
         self.moduleStates = moduleStates
         self.activationOrder = activationOrder
         self.activeUIModuleID = activeUIModuleID
         self.entitlementSnapshot = entitlementSnapshot
+        self.cloudGameCenterStatus = cloudGameCenterStatus
     }
 }
 
@@ -70,6 +74,8 @@ public actor RuneScribeRuntime {
     private nonisolated let hostIngress: RuntimeHostIngressRail
     private let startCoordinator: any RuntimeStartCoordinating
     private let platformBridge = RuntimePlatformBridge()
+    private let cloudGameCenterGateway: RuntimeCloudGameCenterGateway
+    private let cloudGameCenterCoordinator: RuntimeCloudGameCenterCoordinator
     private let runtimeIOGateway: RuntimeIOGateway
     private let moduleStateGateway: RuntimeModuleStateGateway
     private let settingsGateway: RuntimeSettingsGateway
@@ -111,6 +117,8 @@ public actor RuneScribeRuntime {
         self.policy = policy
         self.eligibility = eligibility
         self.environment = environment
+        let cloudGameCenterGateway = RuntimeCloudGameCenterGateway(environment: environment)
+        self.cloudGameCenterGateway = cloudGameCenterGateway
         let opaqueResourceRegistry = RuntimeOpaqueResourceRegistry()
         self.opaqueResourceRegistry = opaqueResourceRegistry
         unlockFeedbackGateway = RuntimeUnlockFeedbackGateway(
@@ -134,9 +142,16 @@ public actor RuneScribeRuntime {
         self.dispatcher = dispatcher
         let moduleStateGateway = RuntimeModuleStateGateway(policy: policy)
         self.moduleStateGateway = moduleStateGateway
-        settingsGateway = RuntimeSettingsGateway(
+        let settingsGateway = RuntimeSettingsGateway(
             state: moduleStateGateway,
             environment: environment
+        )
+        self.settingsGateway = settingsGateway
+        cloudGameCenterCoordinator = RuntimeCloudGameCenterCoordinator(
+            stateGateway: moduleStateGateway,
+            platformGateway: cloudGameCenterGateway,
+            environment: environment,
+            settingsGateway: settingsGateway
         )
         availabilityGateway = RuntimeAvailabilityGateway(environment: environment)
         progressionOutbox = RuntimeProgressionOutbox(
@@ -177,6 +192,8 @@ public actor RuneScribeRuntime {
         self.policy = policy
         self.eligibility = eligibility
         self.environment = environment
+        let cloudGameCenterGateway = RuntimeCloudGameCenterGateway(environment: environment)
+        self.cloudGameCenterGateway = cloudGameCenterGateway
         let opaqueResourceRegistry = RuntimeOpaqueResourceRegistry()
         self.opaqueResourceRegistry = opaqueResourceRegistry
         unlockFeedbackGateway = RuntimeUnlockFeedbackGateway(
@@ -200,9 +217,16 @@ public actor RuneScribeRuntime {
         self.dispatcher = dispatcher
         let moduleStateGateway = RuntimeModuleStateGateway(policy: policy)
         self.moduleStateGateway = moduleStateGateway
-        settingsGateway = RuntimeSettingsGateway(
+        let settingsGateway = RuntimeSettingsGateway(
             state: moduleStateGateway,
             environment: environment
+        )
+        self.settingsGateway = settingsGateway
+        cloudGameCenterCoordinator = RuntimeCloudGameCenterCoordinator(
+            stateGateway: moduleStateGateway,
+            platformGateway: cloudGameCenterGateway,
+            environment: environment,
+            settingsGateway: settingsGateway
         )
         availabilityGateway = RuntimeAvailabilityGateway(environment: environment)
         progressionOutbox = RuntimeProgressionOutbox(
@@ -415,6 +439,26 @@ public actor RuneScribeRuntime {
     public func installPlatformAdapter(_ value: any ClockProviding, for key: ServiceKey<any ClockProviding>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.clock); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
     public func installPlatformAdapter(_ value: any UUIDProviding, for key: ServiceKey<any UUIDProviding>) async throws { try authorizePlatformAdapterInstallation(key.identifier, expected: RuneScribeServiceIDs.uuid); try await platformBridge.register(value); await runtimeIOGateway.install(value) }
     public func installPlatformAdapter(
+        _ value: any CloudSyncTransport,
+        for key: ServiceKey<any CloudSyncTransport>
+    ) async throws {
+        try authorizePlatformAdapterInstallation(
+            key.identifier,
+            expected: RuneScribeServiceIDs.cloudSyncTransport
+        )
+        try await cloudGameCenterGateway.install(value)
+    }
+    public func installPlatformAdapter(
+        _ value: any GameCenterReporting,
+        for key: ServiceKey<any GameCenterReporting>
+    ) async throws {
+        try authorizePlatformAdapterInstallation(
+            key.identifier,
+            expected: RuneScribeServiceIDs.gameCenterReporting
+        )
+        try await cloudGameCenterGateway.install(value)
+    }
+    public func installPlatformAdapter(
         _ value: any UnlockFeedbackProviding,
         for key: ServiceKey<any UnlockFeedbackProviding>
     ) async throws {
@@ -444,6 +488,74 @@ public actor RuneScribeRuntime {
             throw RuneScribeRuntimeError.runtimeBusy
         }
         try await rootPresentationGateway.install(adapter, for: key)
+    }
+
+    @_spi(RuntimeOperationAuthority)
+    public func cloudSyncClient() async throws -> RuntimeCloudSyncClient {
+        guard status == .running else { throw RuneScribeRuntimeError.runtimeNotRunning }
+        return try await cloudGameCenterGateway.cloudClient()
+    }
+
+    @_spi(RuntimeOperationAuthority)
+    public func gameCenterClient() async throws -> RuntimeGameCenterClient {
+        guard status == .running else { throw RuneScribeRuntimeError.runtimeNotRunning }
+        return try await cloudGameCenterGateway.gameCenterClient()
+    }
+
+    @_spi(RuntimeOperationAuthority)
+    public func submitCloudProgressionProjection(
+        _ projection: RuntimeCloudProgressionProjection
+    ) async throws {
+        guard status == .running else { throw RuneScribeRuntimeError.runtimeNotRunning }
+        try await cloudGameCenterCoordinator.submitCloudProjection(projection)
+    }
+
+    @_spi(RuntimeOperationAuthority)
+    public func pendingCloudProgressionMerge()
+        async throws -> RuntimeCloudProgressionMergeDelivery?
+    {
+        guard status == .running else { throw RuneScribeRuntimeError.runtimeNotRunning }
+        return await cloudGameCenterCoordinator.pendingCloudMergeDelivery()
+    }
+
+    @_spi(RuntimeOperationAuthority)
+    public func acknowledgeCloudProgressionMerge(
+        deliveryID: UUID,
+        updatedProjection: RuntimeCloudProgressionProjection
+    ) async throws {
+        guard status == .running else { throw RuneScribeRuntimeError.runtimeNotRunning }
+        try await cloudGameCenterCoordinator.acknowledgeCloudMerge(
+            deliveryID: deliveryID,
+            updatedProjection: updatedProjection
+        )
+    }
+
+    @_spi(RuntimeOperationAuthority)
+    public func submitGameCenterCandidates(
+        _ candidates: [GameCenterReportCandidate]
+    ) async throws {
+        guard status == .running else { throw RuneScribeRuntimeError.runtimeNotRunning }
+        try await cloudGameCenterCoordinator.submitGameCenterCandidates(candidates)
+    }
+
+    @_spi(RuntimeOperationAuthority)
+    public func rebindCloudAccount() async throws {
+        guard status == .running else { throw RuneScribeRuntimeError.runtimeNotRunning }
+        try await cloudGameCenterCoordinator.rebindCloudAccount()
+    }
+
+    @_spi(RuntimeOperationAuthority)
+    public func wakeExternalServices(
+        _ reason: RuntimeExternalServiceWakeReason
+    ) async {
+        guard status == .running else { return }
+        await cloudGameCenterCoordinator.wake(reason)
+    }
+
+    @_spi(RuntimeOperationAuthority)
+    public func runExternalServiceMaintenance() async throws {
+        guard status == .running else { throw RuneScribeRuntimeError.runtimeNotRunning }
+        await cloudGameCenterCoordinator.runPendingWork()
     }
 
     @discardableResult
@@ -492,7 +604,9 @@ public actor RuneScribeRuntime {
             return
         }
         _ = await platformBridge.activateRuntime()
+        await cloudGameCenterGateway.activateRuntime()
         _ = await moduleStateGateway.activateRuntime()
+        await cloudGameCenterCoordinator.activateRuntime()
         await settingsGateway.activateRuntime()
         await availabilityGateway.activateRuntime(
             optionalModules: optionalAvailabilitySnapshots(),
@@ -592,6 +706,8 @@ public actor RuneScribeRuntime {
             hostIngress.suspend()
             await dispatcher.beginRuntimeStop()
             await runtimeIOGateway.deactivateRuntime()
+            await cloudGameCenterCoordinator.deactivateRuntime()
+            await cloudGameCenterGateway.deactivateRuntime()
             await progressionOutbox.deactivateRuntime()
             await existingUserMigrationHandoff.deactivateRuntime()
             await settingsGateway.deactivateRuntime()
@@ -622,6 +738,8 @@ public actor RuneScribeRuntime {
             hostIngress.suspend()
             await dispatcher.beginRuntimeStop()
             await runtimeIOGateway.deactivateRuntime()
+            await cloudGameCenterCoordinator.deactivateRuntime()
+            await cloudGameCenterGateway.deactivateRuntime()
             await progressionOutbox.deactivateRuntime()
             await existingUserMigrationHandoff.deactivateRuntime()
             await settingsGateway.deactivateRuntime()
@@ -652,6 +770,8 @@ public actor RuneScribeRuntime {
         hostIngress.suspend()
         await dispatcher.beginRuntimeStop()
         await runtimeIOGateway.deactivateRuntime()
+        await cloudGameCenterCoordinator.deactivateRuntime()
+        await cloudGameCenterGateway.deactivateRuntime()
         await progressionOutbox.deactivateRuntime()
         await existingUserMigrationHandoff.deactivateRuntime()
         await settingsGateway.deactivateRuntime()
@@ -669,13 +789,16 @@ public actor RuneScribeRuntime {
         resumeStopWaiters()
     }
 
-    public func snapshot() -> RuntimeSnapshot {
-        RuntimeSnapshot(
+    public func snapshot() async -> RuntimeSnapshot {
+        let cloudGameCenterStatus = await cloudGameCenterCoordinator
+            .statusSnapshotIncludingInactive()
+        return RuntimeSnapshot(
             status: status,
             moduleStates: moduleStates,
             activationOrder: activationOrder,
             activeUIModuleID: activeUIModuleID,
-            entitlementSnapshot: entitlementSnapshot
+            entitlementSnapshot: entitlementSnapshot,
+            cloudGameCenterStatus: cloudGameCenterStatus
         )
     }
 
@@ -1097,6 +1220,7 @@ public actor RuneScribeRuntime {
             unlockFeedbackGateway: unlockFeedbackGateway,
             progressionOutbox: progressionOutbox,
             existingUserMigrationHandoff: existingUserMigrationHandoff,
+            cloudGameCenterCoordinator: cloudGameCenterCoordinator,
             rootPresentationGateway: rootPresentationGateway,
             rootPresentationGeneration: await rootPresentationGateway.currentGeneration(),
             contributionRegistry: contributionRegistry,
@@ -1151,6 +1275,8 @@ public actor RuneScribeRuntime {
         hostIngress.suspend()
         await dispatcher.beginRuntimeStop()
         await runtimeIOGateway.deactivateRuntime()
+        await cloudGameCenterCoordinator.deactivateRuntime()
+        await cloudGameCenterGateway.deactivateRuntime()
         await progressionOutbox.deactivateRuntime()
         await existingUserMigrationHandoff.deactivateRuntime()
         await settingsGateway.deactivateRuntime()

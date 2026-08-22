@@ -1,0 +1,17 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "1563B47A-700D-4AEF-A8D5-89780C581F83",
+        "deviceName" : "iPhone 17 Pro",
+        "exportedFileName" : "C7F612E5-538C-4B67-9D97-0423F4705C9E.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "fresh-install-primary-flows_0_F453EF8F-EDF4-403A-A2BF-F52AA14299C8.png",
+        "timestamp" : 1787437518.134
+      }
+    ],
+    "testIdentifier" : "RuneScribeParityUITests/testFreshInstallExercisesPrimaryProductFlows()",
+    "testIdentifierURL" : "test://com.apple.xcode/RuneScrib/RuneScribIOSUITests/RuneScribeParityUITests/testFreshInstallExercisesPrimaryProductFlows"
+  }
+]

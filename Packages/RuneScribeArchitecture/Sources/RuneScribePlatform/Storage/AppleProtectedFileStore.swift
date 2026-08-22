@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 import RuneScribeContracts
 
@@ -22,10 +23,61 @@ public struct AppleProtectedFileStore: ProtectedFileStore, Sendable {
         ).resolvingSymlinksInPath().standardizedFileURL
     }
 
-    public func read(relativePath: ProtectedPath) async throws -> Data? {
+    public func read(
+        relativePath: ProtectedPath,
+        maximumByteCount: Int
+    ) async throws -> Data? {
+        guard maximumByteCount > 0 else {
+            throw ProtectedFileStoreReadError.invalidMaximumByteCount
+        }
         let url = try resolvedURL(for: relativePath)
-        guard FileManager.default.fileExists(atPath: url.path) else { return nil }
-        return try Data(contentsOf: url)
+        let descriptor = Darwin.open(
+            url.path,
+            O_RDONLY | O_NOFOLLOW | O_CLOEXEC
+        )
+        guard descriptor >= 0 else {
+            if errno == ENOENT { return nil }
+            if errno == ELOOP || errno == ENOTDIR {
+                throw AppleProtectedFileStoreError.symbolicLinkNotAllowed
+            }
+            throw ProtectedFileStoreReadError.unavailable
+        }
+        defer { Darwin.close(descriptor) }
+
+        var metadata = stat()
+        guard Darwin.fstat(descriptor, &metadata) == 0 else {
+            throw ProtectedFileStoreReadError.unavailable
+        }
+        guard metadata.st_mode & S_IFMT == S_IFREG else {
+            throw ProtectedFileStoreReadError.unsupportedFileType
+        }
+        guard metadata.st_size >= 0,
+              metadata.st_size <= off_t(maximumByteCount)
+        else {
+            throw ProtectedFileStoreReadError.contentTooLarge
+        }
+
+        var result = Data()
+        result.reserveCapacity(Int(metadata.st_size))
+        var buffer = [UInt8](repeating: 0, count: 64 * 1_024)
+        while true {
+            let remaining = maximumByteCount - result.count
+            let requested = remaining < buffer.count
+                ? remaining + 1
+                : buffer.count
+            let count = buffer.withUnsafeMutableBytes { bytes in
+                Darwin.read(descriptor, bytes.baseAddress, requested)
+            }
+            if count == 0 { return result }
+            if count < 0 {
+                if errno == EINTR { continue }
+                throw ProtectedFileStoreReadError.unavailable
+            }
+            result.append(contentsOf: buffer.prefix(count))
+            guard result.count <= maximumByteCount else {
+                throw ProtectedFileStoreReadError.contentTooLarge
+            }
+        }
     }
 
     public func write(_ data: Data, relativePath: ProtectedPath) async throws {

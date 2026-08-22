@@ -379,6 +379,7 @@ extension RuneScribeUISession {
     func startOptionalSettingsObservation(generation: UInt64) {
         guard let runtimeSettingsClientHandle else {
             settingsRailState = .unavailable
+            runtimePresentationSettingsReady = true
             return
         }
         settingsRailState = .loading
@@ -404,6 +405,7 @@ extension RuneScribeUISession {
                       observationGeneration == generation
                 else { return }
                 settingsRailState = .unavailable
+                runtimePresentationSettingsReady = true
             }
         }
     }
@@ -447,6 +449,48 @@ extension RuneScribeUISession {
             settingsRailState = .available
         } catch {
             unlockFeedbackPreferences = previous
+            settingsRailState = .degraded
+        }
+    }
+
+    func markContactsImportPrompted() async {
+        guard !contactsImportPrompted,
+              let runtimeSettingsClientHandle
+        else { return }
+        contactsImportPrompted = true
+        let expectedRevision = runtimeSettingsSnapshot?.settings.first {
+            $0.settingID == RuneScribeRuntimeSettings.contactsImportPrompted
+        }?.revision
+        do {
+            _ = try await runtimeSettingsClientHandle.setContactsImportPrompted(
+                true,
+                expectedRevision: expectedRevision
+            )
+            settingsRailState = .available
+        } catch {
+            contactsImportPrompted = false
+            settingsRailState = .degraded
+        }
+    }
+
+    func markSplashShown(at date: Date) async {
+        guard let runtimeSettingsClientHandle else {
+            settingsRailState = .unavailable
+            return
+        }
+        let previous = splashLastShownAt
+        splashLastShownAt = date
+        let expectedRevision = runtimeSettingsSnapshot?.settings.first {
+            $0.settingID == RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds
+        }?.revision
+        do {
+            _ = try await runtimeSettingsClientHandle.setSplashLastShown(
+                at: date,
+                expectedRevision: expectedRevision
+            )
+            settingsRailState = .available
+        } catch {
+            splashLastShownAt = previous
             settingsRailState = .degraded
         }
     }
@@ -548,6 +592,9 @@ extension RuneScribeUISession {
     private func adoptRuntimeSettingsSnapshot(_ snapshot: RuntimeSettingsSnapshotDTO) {
         runtimeSettingsSnapshot = snapshot
         unlockFeedbackPreferences = UnlockFeedbackPreferences(snapshot: snapshot)
+        contactsImportPrompted = snapshot.contactsImportPrompted
+        splashLastShownAt = snapshot.splashLastShownAt
+        runtimePresentationSettingsReady = true
         settingsRailState = .available
         reconcileThemeArtifactSelections()
     }

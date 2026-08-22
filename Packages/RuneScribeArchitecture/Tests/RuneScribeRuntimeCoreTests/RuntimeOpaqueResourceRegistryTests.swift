@@ -291,6 +291,46 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
         )
     }
 
+    func testHEIFValidationMatchesDeclaredPrimaryDimensionsAfterAuxiliaryImage() async throws {
+        let fixture = try await makeFixture()
+        let data = Self.heifContainer(dimensions: [(512, 512), (1_600, 1_200)])
+        let declaration = makeDeclaration(
+            id: "image.heif-primary",
+            role: "relic.static-share-fallback",
+            mediaType: .heif,
+            data: data,
+            pixelSize: .init(width: 1_600, height: 1_200)
+        )
+
+        try await fixture.provider.register(
+            .init(
+                namespace: "namespace.heif-primary",
+                declarations: [declaration],
+                payloads: [.init(resourceID: declaration.resourceID, data: data)]
+            )
+        )
+
+        let resolved = try await fixture.resolver.resolve(
+            .init(namespace: "namespace.heif-primary", resourceID: declaration.resourceID)
+        )
+        XCTAssertEqual(resolved.metadata.pixelSize, .init(width: 1_600, height: 1_200))
+
+        let mismatch = makeDeclaration(
+            id: "image.heif-mismatch",
+            role: "relic.static-share-fallback",
+            mediaType: .heif,
+            data: data,
+            pixelSize: .init(width: 1_024, height: 768)
+        )
+        await assertRegistration(
+            fixture.provider,
+            namespace: "namespace.heif-mismatch",
+            declaration: mismatch,
+            data: data,
+            equals: .pixelSizeMismatch(mismatch.resourceID)
+        )
+    }
+
     func testInvalidationRemovesOwnedResourcesAndRevokesProviderClient() async throws {
         let fixture = try await makeFixture()
         let data = Data("{}".utf8)
@@ -838,6 +878,31 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
         data.append(Data([0, 0, 0, 8]))
         data.append(Data(mediaBox.utf8))
         return data
+    }
+
+    private static func heifContainer(dimensions: [(Int, Int)]) -> Data {
+        var data = Data([0, 0, 0, 16])
+        data.append(Data("ftyp".utf8))
+        data.append(Data("heic".utf8))
+        data.append(Data([0, 0, 0, 0]))
+        for (width, height) in dimensions {
+            data.append(Data([0, 0, 0, 20]))
+            data.append(Data("ispe".utf8))
+            data.append(Data([0, 0, 0, 0]))
+            data.append(contentsOf: Self.bigEndianUInt32(width))
+            data.append(contentsOf: Self.bigEndianUInt32(height))
+        }
+        return data
+    }
+
+    private static func bigEndianUInt32(_ value: Int) -> [UInt8] {
+        let value = UInt32(value)
+        return [
+            UInt8((value >> 24) & 0xFF),
+            UInt8((value >> 16) & 0xFF),
+            UInt8((value >> 8) & 0xFF),
+            UInt8(value & 0xFF),
+        ]
     }
 
     private static let onePixelPNGBase64 =

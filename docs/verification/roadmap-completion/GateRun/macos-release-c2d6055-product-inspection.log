@@ -1,0 +1,49 @@
+app_path=/tmp/runescribe-roadmap-macos-release-c2d6055.Tht3jn/DerivedData/Build/Products/Release/RuneScrib.app
+app_exists=true
+result_bundle_exists=true
+bundle_identifier=com.runescribe.app
+short_version=1.0.38
+build_version=38
+architectures=x86_64 arm64
+binary_sha256=3e242ab5711486b5283720b46205aa91f98e679bd006604f26b12c8a331d4606
+bundle_size_kib=106600
+
+file:
+/tmp/runescribe-roadmap-macos-release-c2d6055.Tht3jn/DerivedData/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64]
+/tmp/runescribe-roadmap-macos-release-c2d6055.Tht3jn/DerivedData/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib (for architecture x86_64):	Mach-O 64-bit executable x86_64
+/tmp/runescribe-roadmap-macos-release-c2d6055.Tht3jn/DerivedData/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib (for architecture arm64):	Mach-O 64-bit executable arm64
+
+codesign_display:
+Executable=/private/tmp/runescribe-roadmap-macos-release-c2d6055.Tht3jn/DerivedData/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib
+Identifier=com.runescribe.app
+Format=app bundle with Mach-O universal (x86_64 arm64)
+CodeDirectory v=20500 size=60787 flags=0x10002(adhoc,runtime) hashes=1893+3 location=embedded
+VersionPlatform=1
+VersionMin=983040
+VersionSDK=1704448
+Hash type=sha256 size=32
+CandidateCDHash sha256=a0ed1939cdb3acfa0596ce6ee497103df5a09aab
+CandidateCDHashFull sha256=a0ed1939cdb3acfa0596ce6ee497103df5a09aab3766f6a5cb83ad1e20351ccb
+Hash choices=sha256
+CMSDigest=a0ed1939cdb3acfa0596ce6ee497103df5a09aab3766f6a5cb83ad1e20351ccb
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=12238848
+Executable Segment flags=0x1
+Page size=16384
+CDHash=a0ed1939cdb3acfa0596ce6ee497103df5a09aab
+Signature=adhoc
+Info.plist entries=28
+TeamIdentifier=not set
+Runtime Version=26.2.0
+Sealed Resources version=2 rules=13 files=323
+Internal requirements count=0 size=12
+
+codesign_entitlements:
+Executable=/private/tmp/runescribe-roadmap-macos-release-c2d6055.Tht3jn/DerivedData/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib
+warning: Specifying ':' in the path is deprecated and will not work in a future release
+
+codesign_verify:
+/tmp/runescribe-roadmap-macos-release-c2d6055.Tht3jn/DerivedData/Build/Products/Release/RuneScrib.app: valid on disk
+/tmp/runescribe-roadmap-macos-release-c2d6055.Tht3jn/DerivedData/Build/Products/Release/RuneScrib.app: satisfies its Designated Requirement
+codesign_verify_exit=0

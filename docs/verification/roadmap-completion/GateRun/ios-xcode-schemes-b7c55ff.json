@@ -1,0 +1,43 @@
+{
+  "project" : {
+    "configurations" : [
+      "Debug",
+      "Release"
+    ],
+    "name" : "RuneScrib",
+    "schemes" : [
+      "RuneScrib-iOS",
+      "RuneScrib-iOS-Parity",
+      "RuneScrib-macOS",
+      "RuneScrib-macOS-Parity",
+      "RuneScribeArchitectureTests",
+      "RuneScribeCloudSyncModule",
+      "RuneScribeContracts",
+      "RuneScribeCoreModule",
+      "RuneScribeGameCenterModule",
+      "RuneScribeNorseThemeModule",
+      "RuneScribePlatform",
+      "RuneScribeProgressionModule",
+      "RuneScribeRuntimeCore",
+      "RuneScribeTestSupport",
+      "RuneScribeThemeCoordinatorModule",
+      "RuneScribeThemeGloamthornModule",
+      "RuneScribeThemeMoonleafModule",
+      "RuneScribeThemeSunspireModule",
+      "RuneScribeThemeWildwoodModule",
+      "RuneScribeUIModule",
+      "RuneScribeUIPresentationContracts",
+      "RuneScribeUIRuntime"
+    ],
+    "targets" : [
+      "RuneScrib-macOS",
+      "RuneScrib-iOS",
+      "RuneScribTests",
+      "RuneScribIOSTests",
+      "RuneScribIOSUITests",
+      "RuneScribMacParityHost",
+      "RuneScribMacParityTests",
+      "RuneScribArchitectureTests"
+    ]
+  }
+}

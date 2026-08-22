@@ -1,0 +1,10 @@
+source_revision=b7c55ff40255f96a6c857b49a14962e9fcd79c37
+ProductName:		macOS
+ProductVersion:		26.6.1
+BuildVersion:		25G76
+arm64
+Xcode 26.2
+Build version 17C52
+Version: 2.46.0
+Apple Swift version 6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)
+Target: arm64-apple-macosx26.0

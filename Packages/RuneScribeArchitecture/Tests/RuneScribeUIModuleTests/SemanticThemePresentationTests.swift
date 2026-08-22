@@ -155,23 +155,26 @@ final class SemanticThemePresentationTests: XCTestCase {
         XCTAssertEqual(violatingFiles, [])
     }
 
-    func testPerCodexArtifactSelectionTextIsDeterministicAndFailClosed() {
-        XCTAssertEqual(
-            RuneScribeUISession.themeSelectionMap(
-                "codex.elven=relic.elven.one;codex.norse=relic.norse.raven-medallion"
-            ),
-            [
-                "codex.elven": "relic.elven.one",
-                "codex.norse": "relic.norse.raven-medallion",
-            ]
+    func testPerCodexArtifactSelectionUsesTypedContractAndFailsClosed() throws {
+        let legacy = try XCTUnwrap(RuntimeSettingText(
+            rawValue: "codex.elven=relic.elven.one;codex.norse=relic.norse.raven-medallion"
+        ))
+        let decoded = try RuntimeArtifactSelectionCodec.decodeForRead(
+            legacy,
+            expectedKind: .relic
         )
+        XCTAssertEqual(decoded.encoding, .legacyUnversioned)
         XCTAssertEqual(
-            RuneScribeUISession.themeSelectionMap(
-                "broken;=missing;codex.norse=first;codex.norse=second"
-            ),
-            ["codex.norse": "second"]
+            decoded.value[try XCTUnwrap(CodexID(rawValue: "codex.elven"))]?.rawValue,
+            "relic.elven.one"
         )
-        XCTAssertEqual(RuneScribeUISession.themeSelectionMap(nil), [:])
+        let broken = try XCTUnwrap(RuntimeSettingText(
+            rawValue: "codex.norse=relic.norse.first;codex.norse=relic.norse.second"
+        ))
+        XCTAssertThrowsError(try RuntimeArtifactSelectionCodec.decodeForRead(
+            broken,
+            expectedKind: .relic
+        ))
     }
 
     func testImportedCipherFontIsTheExplicitThemeScriptCompatibilityException() {
@@ -196,6 +199,21 @@ final class SemanticThemePresentationTests: XCTestCase {
         )
         XCTAssertTrue(
             ThemeScriptFontSelector.usesThemeVectors(cipherFontSource: .bundled)
+        )
+        XCTAssertEqual(
+            ThemeScriptFontSelector.postScriptName(
+                themePostScriptName: "SelectedTheme-Regular",
+                cipherFontName: "UnavailableImported-Regular",
+                cipherFontSource: .imported,
+                cipherFontIsRegistered: false
+            ),
+            "SelectedTheme-Regular"
+        )
+        XCTAssertTrue(
+            ThemeScriptFontSelector.usesThemeVectors(
+                cipherFontSource: .imported,
+                cipherFontIsRegistered: false
+            )
         )
     }
 

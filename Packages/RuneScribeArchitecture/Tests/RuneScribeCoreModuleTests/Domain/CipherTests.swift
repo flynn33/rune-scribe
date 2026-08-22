@@ -61,16 +61,16 @@ extension CipherTests {
 
 extension CipherTests {
     func testNewCipherIsNotDelivered() {
-        XCTAssertFalse(Cipher.generated(label: "x").delivered)
+        XCTAssertFalse(Cipher.generated(label: "x").hasCompletedKeyDelivery)
     }
 
-    func testDeliveredSurvivesCodableRoundTrip() throws {
+    func testExplicitKeyDeliveryCompletionSurvivesCodableRoundTrip() throws {
         var c = Cipher.generated(label: "Bob")
         c.setContactID(UUID())
-        c.delivered = true
+        c.completeKeyDelivery()
         let data = try JSONEncoder().encode(c)
         let back = try JSONDecoder().decode(Cipher.self, from: data)
-        XCTAssertTrue(back.delivered)
+        XCTAssertTrue(back.hasCompletedKeyDelivery)
         XCTAssertEqual(back.keyDeliveryState, .completed)
         XCTAssertEqual(c, back)
     }
@@ -82,7 +82,10 @@ extension CipherTests {
          "formatVersion":1,"publicID":"AAAAAAAAAAA=","keyMaterial":"\(Data(repeating:1,count:32).base64EncodedString())",
          "decorativeMapping":[\((0..<32).map(String.init).joined(separator: ","))]}
         """
-        XCTAssertFalse(try JSONDecoder().decode(Cipher.self, from: Data(json.utf8)).delivered)
+        XCTAssertFalse(
+            try JSONDecoder().decode(Cipher.self, from: Data(json.utf8))
+                .hasCompletedKeyDelivery
+        )
     }
 }
 
@@ -138,7 +141,7 @@ extension CipherTests {
         XCTAssertEqual(cipher.formatVersion, Cipher.currentVersion)
         XCTAssertEqual(cipher.compatibility.originalRecordVersion, 1)
         XCTAssertEqual(cipher.keyDeliveryState, .migratedUnverified)
-        XCTAssertTrue(cipher.delivered)
+        XCTAssertTrue(cipher.hasCompletedKeyDelivery)
         XCTAssertFalse(MessageSend.shouldIncludeKey(cipher))
     }
 
@@ -154,7 +157,7 @@ extension CipherTests {
 
         XCTAssertNil(cipher.contactID)
         XCTAssertEqual(cipher.keyDeliveryState, .notLinked)
-        XCTAssertFalse(cipher.delivered)
+        XCTAssertFalse(cipher.hasCompletedKeyDelivery)
         XCTAssertFalse(MessageSend.shouldIncludeKey(cipher))
     }
 

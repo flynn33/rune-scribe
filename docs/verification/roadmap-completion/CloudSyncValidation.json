@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture --filter CloudProgressionMergeTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter CloudSyncPolicyTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter ProgressionExternalSyncTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter RuntimeCloudGameCenterCoordinatorTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter AppleCloudKitProgressionTransportTests"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCloudSyncModuleTests/CloudProgressionMergeTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCloudSyncModuleTests/CloudSyncPolicyTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeProgressionModuleTests/ProgressionExternalSyncTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribePlatformTests/AppleCloudKitProgressionTransportTests.swift",
+    "Config/RuneScrib-iOS.entitlements"
+  ],
+  "containerIdentifier": "iCloud.com.runescribe.app",
+  "mode": "private, optional, local-first",
+  "deterministicCoverage": [
+    "offline divergent edits",
+    "duplicate completion",
+    "set union",
+    "earliest and latest dates",
+    "per-device counter shards",
+    "selected Codex logical timestamps",
+    "monotonic Game Center outbox",
+    "reset generation",
+    "corrupt remote quarantine",
+    "account change",
+    "partial failure and retry",
+    "secret-field rejection"
+  ],
+  "prohibitedFields": [
+    "plaintext",
+    "cipher keys",
+    "Keychain material",
+    "contact data",
+    "raw relationship identifiers",
+    "QR content",
+    "full messages",
+    "package bytes",
+    "private logs"
+  ],
+  "liveCloudKitStatus": "OWNER TEST REQUIRED"
+}

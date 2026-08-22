@@ -1,0 +1,99 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture",
+    "scripts/check-architecture.sh",
+    "scripts/check-roadmap-alignment.sh",
+    "python3 scripts/check-documentation-alignment.py",
+    "python3 scripts/check-roadmap-completion.py",
+    "xcodegen generate",
+    "xcodebuild build -scheme RuneScrib-macOS -configuration Release -destination 'platform=macOS,arch=arm64' ARCHS=arm64 ONLY_ACTIVE_ARCH=YES",
+    "xcodebuild test -scheme RuneScrib-macOS -destination 'platform=macOS,arch=arm64' -only-testing:RuneScribTests/CompatibilityBaselineTests -only-testing:RuneScribTests/RuntimeCompositionTests -only-testing:RuneScribArchitectureTests/ArchitectureGuardrailTests",
+    "xcodebuild test -scheme RuneScrib-macOS-Parity -destination 'platform=macOS,arch=arm64'",
+    "xcodebuild build -scheme RuneScrib-iOS -configuration Release -destination 'platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83'",
+    "xcodebuild build -scheme RuneScrib-iOS -configuration Release -destination 'platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3'",
+    "xcodebuild test -scheme RuneScrib-iOS -destination 'platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83'",
+    "xcodebuild test -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83'",
+    "xcodebuild test -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3'",
+    "codesign --force --sign - --options runtime --entitlements Config/RuneScrib-macOS.entitlements /tmp/runescribe-roadmap-shipping-macos-b7c55ff-unsigned-entitlements/DerivedData/Build/Products/Release/RuneScrib.app",
+    "scripts/check-shipping-products.sh --macos-app /tmp/runescribe-roadmap-shipping-macos-b7c55ff-unsigned-entitlements/DerivedData/Build/Products/Release/RuneScrib.app --ios-app /tmp/runescribe-roadmap-shipping-ios-b7c55ff/DerivedData/Build/Products/Release-iphonesimulator/RuneScrib.app"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "Packages/RuneScribeArchitecture/Package.swift",
+    "scripts/check-architecture.sh",
+    "scripts/check-roadmap-alignment.sh",
+    "scripts/check-documentation-alignment.py",
+    "scripts/check-roadmap-completion.py",
+    "scripts/check-shipping-products.sh",
+    "docs/verification/roadmap-completion/GateRun/package.log",
+    "docs/verification/roadmap-completion/GateRun/architecture.log",
+    "docs/verification/roadmap-completion/GateRun/roadmap.log",
+    "docs/verification/roadmap-completion/GateRun/xcodegen-b7c55ff-determinism.log",
+    "docs/verification/roadmap-completion/GateRun/macos-release-shipping-b7c55ff.log",
+    "docs/verification/roadmap-completion/GateRun/macos-release-shipping-resign-b7c55ff.log",
+    "docs/verification/roadmap-completion/GateRun/macos-host-qualification-b7c55ff.summary.log",
+    "docs/verification/roadmap-completion/GateRun/macos-hosted-required-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/macos-parity-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ios-iphone-release-shipping-b7c55ff.log",
+    "docs/verification/roadmap-completion/GateRun/ios-iphone-hosted-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ios-iphone-parity-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ios-iphone-parity-b7c55ff-attachments/manifest.json",
+    "docs/verification/roadmap-completion/GateRun/ipad-release-b7c55ff.log",
+    "docs/verification/roadmap-completion/GateRun/ipad-parity-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ipad-parity-b7c55ff-attachments/manifest.json",
+    "docs/verification/roadmap-completion/GateRun/shipping-products-final-b7c55ff.metadata.log",
+    "docs/verification/roadmap-completion/GateRun/shipping-products-final-b7c55ff.log"
+  ],
+  "supportedEnvironmentStatus": {
+    "swiftPackage": "PASS",
+    "architecture": "PASS",
+    "roadmap": "PASS",
+    "documentation": "PASS",
+    "generatedProjectDeterminism": "PASS",
+    "macOSHosted": "PASS - Release build, package-required hosted tests 20/20, and parity tests 4/4",
+    "iPhoneSimulator": "PASS - Release build, hosted tests 21/21, and parity/accessibility audit 1/1",
+    "iPadSimulator": "PASS - Release build and parity/accessibility audit 1/1",
+    "shippingProductInspection": "PASS - 101 checks, 0 failures"
+  },
+  "hostedQualification": {
+    "status": "PASS",
+    "reason": "The package-required focused macOS hosted suite passed 20/20 after the CloudKit construction fix, macOS parity passed 4/4, iPhone hosted tests passed 21/21, and both Simulator parity/accessibility audits passed 1/1. A stopped unfiltered inherited scanner attempt is preserved only as supplemental diagnostic evidence and is not a Tier 5 acceptance gate."
+  },
+  "generatedProjectSHA256": "c85900e4e5cf88060f24ca8eb68e5458e70e744da1607898089397fc810f4de7",
+  "testCountComparison": {
+    "method": "Source declaration count at baseline and final source revision, supplemented by the executed totals in the final test logs",
+    "baseline": {
+      "xctestMethods": 743,
+      "swiftTestingDeclarations": 89,
+      "testSourceFiles": 76
+    },
+    "finalSource": {
+      "xctestMethods": 893,
+      "swiftTestingDeclarations": 129,
+      "testSourceFiles": 97
+    },
+    "nonDecrease": true,
+    "note": "Declaration counts prove the source coverage floor did not decrease; executed totals remain governed by successful final test logs."
+  },
+  "unsupportedOrExternal": [
+    "Physical iPhone and iPad execution",
+    "Optional owner-selected Mac hardware observation",
+    "Live iCloud account and CloudKit container",
+    "Game Center sandbox and App Store Connect records",
+    "Distribution signing, archive, export, upload, notarization, review, and release"
+  ]
+}

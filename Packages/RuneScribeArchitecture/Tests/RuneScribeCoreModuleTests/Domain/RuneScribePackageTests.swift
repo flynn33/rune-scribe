@@ -503,6 +503,365 @@ final class RuneScribePackageTests: XCTestCase {
             XCTAssertEqual(error as? FileRouterError, .malformedContainer)
         }
     }
+
+    func testFrozenBoundsRejectBeforeVariablePayloadAllocation() throws {
+        var oversized = Data(
+            repeating: 0,
+            count: RuneScribePackage.maximumTotalLength + 1
+        )
+        oversized.replaceSubrange(0..<RuneScribePackage.magic.count, with: RuneScribePackage.magic)
+        var oversizedEvents: [RuneScribePackageDecodeAllocation] = []
+        XCTAssertThrowsError(try RuneScribePackage(
+            decoding: oversized,
+            allocationObserver: { oversizedEvents.append($0) }
+        )) { error in
+            XCTAssertEqual(error as? RuneScribePackageError, .packageTooLarge)
+        }
+        XCTAssertTrue(oversizedEvents.isEmpty)
+
+        let cipher = Cipher.generated(label: "Bounded")
+        let package = try RuneScribePackage(
+            kind: .cipherInvitation,
+            payloadVersion: UInt16(CipherSharePayload.version),
+            sections: [
+                RuneScribePackageSection(
+                    type: RuneScribePackageSectionType.corePayload.rawValue,
+                    required: true,
+                    data: try CipherSharePayload(cipher: cipher).encoded()
+                )
+            ]
+        )
+        var forgedSectionLength = try package.encoded()
+        forgedSectionLength.replaceUInt32(
+            at: RuneScribePackage.fixedHeaderLength + 12,
+            with: UInt32(RuneScribePackage.maximumTotalLength)
+        )
+        forgedSectionLength.refreshPackageChecksum()
+        var sectionEvents: [RuneScribePackageDecodeAllocation] = []
+        XCTAssertThrowsError(try RuneScribePackage(
+            decoding: forgedSectionLength,
+            allocationObserver: { sectionEvents.append($0) }
+        )) { error in
+            XCTAssertEqual(error as? RuneScribePackageError, .nonContiguousSections)
+        }
+        XCTAssertFalse(sectionEvents.contains { event in
+            if case .sectionPayload = event { return true }
+            return false
+        })
+
+        let resource = try RuneScribePackageResource(
+            kind: .legacyFont,
+            id: "legacy.font",
+            version: 1,
+            mediaType: "font/otf",
+            data: Data("font".utf8)
+        )
+        var forgedResourceLength = try RuneScribePackageResourceTable(
+            resources: [resource]
+        ).encoded()
+        forgedResourceLength.replaceUInt32(
+            at: 16,
+            with: UInt32(RuneScribePackageResource.maximumDataLength + 1)
+        )
+        var resourceEvents: [RuneScribePackageDecodeAllocation] = []
+        XCTAssertThrowsError(try RuneScribePackageResourceTable(
+            decoding: forgedResourceLength,
+            allocationObserver: { resourceEvents.append($0) }
+        )) { error in
+            XCTAssertEqual(error as? RuneScribePackageError, .invalidResourceTable)
+        }
+        XCTAssertFalse(resourceEvents.contains { event in
+            switch event {
+            case .resourceMetadata, .resourcePayload: true
+            default: false
+            }
+        })
+    }
+
+    func testLateInvalidDirectoryRecordsEmitNoAllocationEvents() throws {
+        let cipher = Cipher.generated(label: "Late directory")
+        let package = try RuneScribePackage(
+            kind: .cipherInvitation,
+            payloadVersion: UInt16(CipherSharePayload.version),
+            sections: [
+                RuneScribePackageSection(
+                    type: RuneScribePackageSectionType.corePayload.rawValue,
+                    required: true,
+                    data: try CipherSharePayload(cipher: cipher).encoded()
+                ),
+                RuneScribePackageSection(
+                    type: RuneScribePackageSectionType.safePreview.rawValue,
+                    data: Data(repeating: 0xA5, count: 65 * 1024)
+                ),
+            ]
+        )
+        let valid = try package.encoded()
+        let lateRecord = RuneScribePackage.fixedHeaderLength
+            + RuneScribePackage.directoryRecordLength
+
+        var invalidReserved = valid
+        invalidReserved.replaceUInt16(at: lateRecord + 6, with: 1)
+        invalidReserved.refreshPackageChecksum()
+        assertPackagePreflightRejects(invalidReserved, as: .invalidDirectory)
+
+        var nonCanonical = valid
+        nonCanonical.replaceUInt16(at: lateRecord, with: 0)
+        nonCanonical.refreshPackageChecksum()
+        assertPackagePreflightRejects(nonCanonical, as: .nonCanonicalSectionOrder)
+
+        var oversizedForMutatedType = valid
+        oversizedForMutatedType.replaceUInt16(
+            at: lateRecord,
+            with: RuneScribePackageSectionType.presentationMetadata.rawValue
+        )
+        oversizedForMutatedType.refreshPackageChecksum()
+        assertPackagePreflightRejects(
+            oversizedForMutatedType,
+            as: .sectionTooLarge(RuneScribePackageSectionType.presentationMetadata.rawValue)
+        )
+
+        var nonContiguous = valid
+        let originalOffset = nonContiguous.readUInt32(at: lateRecord + 8)
+        nonContiguous.replaceUInt32(at: lateRecord + 8, with: originalOffset + 1)
+        nonContiguous.refreshPackageChecksum()
+        assertPackagePreflightRejects(nonContiguous, as: .nonContiguousSections)
+    }
+
+    func testLateInvalidResourceRecordsEmitNoAllocationEvents() throws {
+        let first = try RuneScribePackageResource(
+            kind: .legacyFont,
+            id: "legacy.a",
+            version: 1,
+            mediaType: "font/otf",
+            data: Data("first-font".utf8)
+        )
+        let second = try RuneScribePackageResource(
+            kind: .legacyFont,
+            id: "legacy.b",
+            version: 1,
+            mediaType: "font/otf",
+            data: Data("second-font".utf8)
+        )
+        let valid = try RuneScribePackageResourceTable(resources: [first, second]).encoded()
+        let lateRecord = 4 + 48
+            + first.id.utf8.count
+            + first.mediaType.utf8.count
+            + first.data.count
+
+        var invalidFlags = valid
+        invalidFlags.replaceUInt16(at: lateRecord + 2, with: 1)
+        assertResourcePreflightRejects(invalidFlags, as: .invalidResourceTable)
+
+        var oversized = valid
+        oversized.replaceUInt32(
+            at: lateRecord + 12,
+            with: UInt32(RuneScribePackageResource.maximumDataLength + 1)
+        )
+        assertResourcePreflightRejects(oversized, as: .invalidResourceTable)
+
+        var duplicate = valid
+        let lateIDStart = lateRecord + 48
+        duplicate.replaceSubrange(
+            lateIDStart..<(lateIDStart + second.id.utf8.count),
+            with: first.id.utf8
+        )
+        assertResourcePreflightRejects(duplicate, as: .duplicateResource)
+
+        let cipher = Cipher.generated(label: "Nested late resource")
+        let container = try RuneScribePackage(
+            kind: .cipherInvitation,
+            payloadVersion: UInt16(CipherSharePayload.version),
+            sections: [
+                RuneScribePackageSection(
+                    type: RuneScribePackageSectionType.corePayload.rawValue,
+                    required: true,
+                    data: try CipherSharePayload(cipher: cipher).encoded()
+                ),
+                RuneScribePackageSection(
+                    type: RuneScribePackageSectionType.resourceTable.rawValue,
+                    data: valid
+                ),
+            ]
+        )
+        var malformedNested = try container.encoded()
+        let resourceDirectoryRecord = RuneScribePackage.fixedHeaderLength
+            + RuneScribePackage.directoryRecordLength
+        let resourceOffset = Int(malformedNested.readUInt32(at: resourceDirectoryRecord + 8))
+        malformedNested.replaceUInt16(at: resourceOffset + lateRecord + 2, with: 1)
+        malformedNested.refreshPackageChecksum()
+        assertPackagePreflightRejects(malformedNested, as: .invalidResourceTable)
+    }
+
+    func testLegacyFontMediaTypeAllowlistRejectsImageBeforeAllocation() throws {
+        XCTAssertThrowsError(
+            try RuneScribePackageResource(
+                kind: .legacyFont,
+                id: "legacy.image",
+                version: 1,
+                mediaType: "image/png",
+                data: Data("not-a-font".utf8)
+            )
+        ) { error in
+            XCTAssertEqual(error as? RuneScribePackageError, .invalidResourceMediaType)
+        }
+
+        let first = try RuneScribePackageResource(
+            kind: .legacyFont,
+            id: "legacy.a",
+            version: 1,
+            mediaType: "font/ttf",
+            data: Data("first-font".utf8)
+        )
+        let second = try RuneScribePackageResource(
+            kind: .legacyFont,
+            id: "legacy.b",
+            version: 1,
+            mediaType: "font/otf",
+            data: Data("second-font".utf8)
+        )
+        var masquerading = try RuneScribePackageResourceTable(
+            resources: [first, second]
+        ).encoded()
+        let lateRecord = 4 + 48
+            + first.id.utf8.count
+            + first.mediaType.utf8.count
+            + first.data.count
+        let mediaLengthOffset = lateRecord + 10
+        let mediaStart = lateRecord + 48 + second.id.utf8.count
+        masquerading.replaceSubrange(
+            mediaStart..<(mediaStart + second.mediaType.utf8.count),
+            with: "image/png".utf8
+        )
+        masquerading.replaceUInt16(
+            at: mediaLengthOffset,
+            with: UInt16("image/png".utf8.count)
+        )
+        assertResourcePreflightRejects(masquerading, as: .invalidResourceMediaType)
+    }
+
+    func testResourceTableRejectsIdentifierPathAndMediaTypeAbuse() throws {
+        let resource = try RuneScribePackageResource(
+            kind: .legacyFont,
+            id: "legacy.font",
+            version: 1,
+            mediaType: "font/otf",
+            data: Data("font".utf8)
+        )
+        let valid = try RuneScribePackageResourceTable(resources: [resource]).encoded()
+
+        var traversal = valid
+        traversal.replaceSubrange(52..<63, with: Data("../bad.font".utf8))
+        XCTAssertThrowsError(try RuneScribePackageResourceTable(decoding: traversal)) { error in
+            XCTAssertEqual(error as? RuneScribePackageError, .invalidResourceIdentifier)
+        }
+
+        var malformedMediaType = valid
+        malformedMediaType.replaceSubrange(63..<71, with: Data("font//tf".utf8))
+        XCTAssertThrowsError(
+            try RuneScribePackageResourceTable(decoding: malformedMediaType)
+        ) { error in
+            XCTAssertEqual(error as? RuneScribePackageError, .invalidResourceMediaType)
+        }
+
+        var zeroVersion = valid
+        zeroVersion.replaceUInt32(at: 8, with: 0)
+        XCTAssertThrowsError(try RuneScribePackageResourceTable(decoding: zeroVersion)) { error in
+            XCTAssertEqual(error as? RuneScribePackageError, .invalidResourceVersion)
+        }
+    }
+
+    func testDeterministicMalformedCorpusStaysBoundedAndFailsClosed() throws {
+        let cipher = Cipher.generated(label: "Mutation corpus")
+        let base = try RuneScribePackage(
+            kind: .cipherInvitation,
+            payloadVersion: UInt16(CipherSharePayload.version),
+            sections: [
+                RuneScribePackageSection(
+                    type: RuneScribePackageSectionType.corePayload.rawValue,
+                    required: true,
+                    data: try CipherSharePayload(cipher: cipher).encoded()
+                ),
+                RuneScribePackageSection(type: 0x7000, data: Data("optional".utf8)),
+            ]
+        ).encoded()
+
+        var generator = DeterministicMutationGenerator(state: 0x5253_4352_504B_4731)
+        var distinctErrors: Set<String> = []
+        for sample in 0..<512 {
+            var candidate = base
+            let mutationCount = 1 + Int(generator.next() % 4)
+            for _ in 0..<mutationCount {
+                let position = Int(generator.next() % UInt64(candidate.count))
+                let mask = UInt8(truncatingIfNeeded: generator.next()) | 1
+                candidate[position] ^= mask
+            }
+            if sample.isMultiple(of: 2), candidate.count >= RuneScribePackage.checksumLength {
+                candidate.refreshPackageChecksum()
+            }
+
+            var events: [RuneScribePackageDecodeAllocation] = []
+            do {
+                let decoded = try RuneScribePackage(
+                    decoding: candidate,
+                    allocationObserver: { events.append($0) }
+                )
+                XCTAssertLessThanOrEqual(try decoded.encoded().count, RuneScribePackage.maximumTotalLength)
+            } catch let error as RuneScribePackageError {
+                distinctErrors.insert(String(describing: error))
+            } catch {
+                XCTFail("Unexpected error type at deterministic sample \(sample): \(error)")
+            }
+
+            for event in events {
+                switch event {
+                case .sectionArrayCapacity(let count):
+                    XCTAssertLessThanOrEqual(count, RuneScribePackage.maximumSectionCount)
+                case .sectionPayload(let bytes):
+                    XCTAssertLessThanOrEqual(bytes, RuneScribePackage.maximumResourceTableLength)
+                case .resourceArrayCapacity(let count):
+                    XCTAssertLessThanOrEqual(count, RuneScribePackageResourceTable.maximumResourceCount)
+                case .resourceMetadata(let bytes):
+                    XCTAssertLessThanOrEqual(
+                        bytes,
+                        SHA256.Digest.byteCount
+                            + RuneScribePackageResource.maximumIdentifierUTF8Count
+                            + RuneScribePackageResource.maximumMediaTypeUTF8Count
+                    )
+                case .resourcePayload(let bytes):
+                    XCTAssertLessThanOrEqual(bytes, RuneScribePackageResource.maximumDataLength)
+                }
+            }
+        }
+        XCTAssertGreaterThanOrEqual(distinctErrors.count, 6)
+    }
+
+    private func assertPackagePreflightRejects(
+        _ data: Data,
+        as expected: RuneScribePackageError
+    ) {
+        var events: [RuneScribePackageDecodeAllocation] = []
+        XCTAssertThrowsError(try RuneScribePackage(
+            decoding: data,
+            allocationObserver: { events.append($0) }
+        )) { error in
+            XCTAssertEqual(error as? RuneScribePackageError, expected)
+        }
+        XCTAssertTrue(events.isEmpty)
+    }
+
+    private func assertResourcePreflightRejects(
+        _ data: Data,
+        as expected: RuneScribePackageError
+    ) {
+        var events: [RuneScribePackageDecodeAllocation] = []
+        XCTAssertThrowsError(try RuneScribePackageResourceTable(
+            decoding: data,
+            allocationObserver: { events.append($0) }
+        )) { error in
+            XCTAssertEqual(error as? RuneScribePackageError, expected)
+        }
+        XCTAssertTrue(events.isEmpty)
+    }
 }
 
 private extension Data {
@@ -520,5 +879,34 @@ private extension Data {
             checksumStart..<count,
             with: Data(SHA256.hash(data: prefix(checksumStart)))
         )
+    }
+
+    mutating func replaceUInt32(at offset: Int, with value: UInt32) {
+        replaceSubrange(offset..<(offset + 4), with: [
+            UInt8(truncatingIfNeeded: value >> 24),
+            UInt8(truncatingIfNeeded: value >> 16),
+            UInt8(truncatingIfNeeded: value >> 8),
+            UInt8(truncatingIfNeeded: value),
+        ])
+    }
+
+    mutating func replaceUInt16(at offset: Int, with value: UInt16) {
+        replaceSubrange(offset..<(offset + 2), with: [
+            UInt8(truncatingIfNeeded: value >> 8),
+            UInt8(truncatingIfNeeded: value),
+        ])
+    }
+}
+
+private struct DeterministicMutationGenerator {
+    private var state: UInt64
+
+    init(state: UInt64) {
+        self.state = state
+    }
+
+    mutating func next() -> UInt64 {
+        state = state &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
+        return state
     }
 }

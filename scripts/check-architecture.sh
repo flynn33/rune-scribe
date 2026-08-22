@@ -54,14 +54,21 @@ end
 MODULE_IMPORT_POLICY = {
   "RuneScribeContracts" => %w[Foundation],
   "RuneScribeUIPresentationContracts" => %w[Foundation SwiftUI RuneScribeContracts],
-  "RuneScribeRuntimeCore" => %w[Foundation RuneScribeContracts RuneScribeUIPresentationContracts],
+  "RuneScribeRuntimeCore" => %w[Foundation RuneScribeCloudSyncModule RuneScribeContracts RuneScribeGameCenterModule RuneScribeProgressionSyncDomain RuneScribeUIPresentationContracts],
   "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts AVFoundation AppKit Contacts ContactsUI CoreImage CoreTransferable LinkPresentation MessageUI Metal MetalKit Observation UIKit UniformTypeIdentifiers],
-  "RuneScribePlatform" => %w[Foundation Darwin CoreData CryptoKit RuneScribeContracts Security Contacts CoreText AudioToolbox AppKit UIKit],
-  "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto RuneScribeContracts RuneScribeRuntimeCore],
-  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine Accessibility RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
-  "RuneScribeProgressionModule" => %w[Foundation RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribePlatform" => %w[Foundation Darwin CoreData CryptoKit RuneScribeContracts Security Contacts CoreText AudioToolbox AppKit UIKit CloudKit GameKit],
+  "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto ImageIO RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine Accessibility CryptoKit ImageIO AppKit RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
+  "RuneScribeProgressionModule" => %w[Foundation RuneScribeContracts RuneScribeProgressionSyncDomain RuneScribeRuntimeCore],
   "RuneScribeThemeCoordinatorModule" => %w[Foundation RuneScribeContracts RuneScribeRuntimeCore],
   "RuneScribeNorseThemeModule" => %w[Foundation CryptoKit RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeThemeMoonleafModule" => %w[Foundation CryptoKit RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeThemeSunspireModule" => %w[Foundation CryptoKit RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeThemeWildwoodModule" => %w[Foundation CryptoKit RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeThemeGloamthornModule" => %w[Foundation CryptoKit RuneScribeContracts RuneScribeRuntimeCore],
+  "RuneScribeProgressionSyncDomain" => %w[Foundation CryptoKit RuneScribeContracts],
+  "RuneScribeCloudSyncModule" => %w[Foundation RuneScribeProgressionSyncDomain],
+  "RuneScribeGameCenterModule" => %w[Foundation CryptoKit RuneScribeContracts],
   "RuneScribeTestSupport" => %w[Foundation CryptoKit RuneScribeContracts],
 }.freeze
 
@@ -79,6 +86,18 @@ PROGRESSION_FORBIDDEN_REFERENCE_PATTERNS = [
   [/\bSecItem(?:CopyMatching|Add|Update|Delete)\b|\bkSec[A-Z][A-Za-z0-9_]*\b|\bKeychain[A-Za-z0-9_]*\b/, "Keychain facility"],
   [/\b(?:AVAudio[A-Za-z0-9_]*|AudioServices[A-Za-z0-9_]*|CHHaptic[A-Za-z0-9_]*|UIImpactFeedbackGenerator|UINotificationFeedbackGenerator|NSHapticFeedbackManager)\b/, "audio or haptic facility"],
 ].freeze
+
+FEATURE_PREFERENCES_FORBIDDEN_PRODUCTS = Set.new(%w[
+  RuneScribeCoreModule RuneScribeUIModule RuneScribeUIRuntime
+  RuneScribeProgressionModule RuneScribeThemeCoordinatorModule
+  RuneScribeNorseThemeModule RuneScribeThemeMoonleafModule
+  RuneScribeThemeSunspireModule RuneScribeThemeWildwoodModule
+  RuneScribeThemeGloamthornModule RuneScribeCloudSyncModule
+  RuneScribeGameCenterModule
+]).freeze
+
+FEATURE_PREFERENCES_PATTERN =
+  /\b(?:UserDefaults|CFPreferences)\b|@(?:AppStorage|SceneStorage)\b/
 
 DIRECT_PEER_IMPLEMENTATION_PATTERNS = {
   "RuneScribeCoreModule" => [
@@ -160,6 +179,15 @@ def progression_source_errors(path, text)
       next unless line.match?(pattern)
       findings << "#{path}:#{index + 1}: RuneScribeProgressionModule may not reference #{label}"
     end
+  end
+end
+
+def feature_preferences_source_errors(product, path, text)
+  return [] unless FEATURE_PREFERENCES_FORBIDDEN_PRODUCTS.include?(product)
+  code = without_comments_preserving_lines(text)
+  code.lines.each_with_index.each_with_object([]) do |(line, index), findings|
+    next unless line.match?(FEATURE_PREFERENCES_PATTERN)
+    findings << "#{path}:#{index + 1}: #{product} may not own preferences storage"
   end
 end
 
@@ -279,6 +307,7 @@ if fixture_root_value || fixture_product
     ) if allowed_imports
     fixture_errors.concat(module_boundary_source_errors(fixture_product, path, source)) if allowed_imports
     fixture_errors.concat(progression_source_errors(path, source)) if fixture_product == "RuneScribeProgressionModule"
+    fixture_errors.concat(feature_preferences_source_errors(fixture_product, path, source))
     fixture_errors.concat(theme_progression_coupling_errors(path, source)) if fixture_product.match?(/Theme/)
   end
   if fixture_errors.empty?
@@ -465,6 +494,19 @@ end
 architecture_package_products.concat(test_only_products)
 unless architecture_package_products.uniq == architecture_package_products
   errors << "architecture package product names must be unique"
+end
+internal_architecture_targets = ["RuneScribeProgressionSyncDomain"]
+architecture_package_targets = architecture_package_products.dup
+progression_target_index = architecture_package_targets.index(
+  "RuneScribeProgressionModule"
+)
+if progression_target_index
+  architecture_package_targets.insert(
+    progression_target_index + 1,
+    *internal_architecture_targets
+  )
+else
+  errors << "architecture package targets must include RuneScribeProgressionModule"
 end
 required_module_ids = ratchet.fetch("requiredModuleIDs", {})
 metrics_policy = ratchet.fetch("metrics", {})
@@ -689,37 +731,51 @@ if package_present
       end
 
       targets = Array(package["targets"]).to_h { |target| [target["name"], target] }
-      missing_targets = architecture_package_products - targets.keys
+      missing_targets = architecture_package_targets - targets.keys
       errors << "architecture package missing targets: #{missing_targets.join(', ')}" unless missing_targets.empty?
 
       allowed_dependencies = {
         "RuneScribeContracts" => [],
         "RuneScribeUIPresentationContracts" => ["RuneScribeContracts"],
-        "RuneScribeRuntimeCore" => ["RuneScribeContracts", "RuneScribeUIPresentationContracts"],
+        "RuneScribeRuntimeCore" => ["RuneScribeCloudSyncModule", "RuneScribeContracts", "RuneScribeGameCenterModule", "RuneScribeProgressionSyncDomain", "RuneScribeUIPresentationContracts"],
         "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-        "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeProgressionSyncDomain", "RuneScribeRuntimeCore"],
         "RuneScribeThemeCoordinatorModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
         "RuneScribeNorseThemeModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeThemeMoonleafModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeThemeSunspireModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeThemeWildwoodModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeThemeGloamthornModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeProgressionSyncDomain" => ["RuneScribeContracts"],
+        "RuneScribeCloudSyncModule" => ["RuneScribeProgressionSyncDomain"],
+        "RuneScribeGameCenterModule" => ["RuneScribeContracts"],
         "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
       required_dependencies = {
         "RuneScribeContracts" => [],
         "RuneScribeUIPresentationContracts" => ["RuneScribeContracts"],
-        "RuneScribeRuntimeCore" => ["RuneScribeContracts", "RuneScribeUIPresentationContracts"],
+        "RuneScribeRuntimeCore" => ["RuneScribeCloudSyncModule", "RuneScribeContracts", "RuneScribeGameCenterModule", "RuneScribeProgressionSyncDomain", "RuneScribeUIPresentationContracts"],
         "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
-        "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeProgressionSyncDomain", "RuneScribeRuntimeCore"],
         "RuneScribeThemeCoordinatorModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
         "RuneScribeNorseThemeModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeThemeMoonleafModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeThemeSunspireModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeThemeWildwoodModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeThemeGloamthornModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
+        "RuneScribeProgressionSyncDomain" => ["RuneScribeContracts"],
+        "RuneScribeCloudSyncModule" => ["RuneScribeProgressionSyncDomain"],
+        "RuneScribeGameCenterModule" => ["RuneScribeContracts"],
         "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
 
-      architecture_package_products.each do |target_name|
+      architecture_package_targets.each do |target_name|
         next unless targets[target_name]
         dependencies = Array(targets[target_name]["dependencies"]).map { |dependency| dependency_name(dependency) }.compact
         forbidden = dependencies - allowed_dependencies.fetch(target_name)
@@ -735,7 +791,9 @@ if package_present
       expected_test_support_consumers = %w[
         RuneScribeArchitectureTests RuneScribePlatformTests
         RuneScribeProgressionModuleTests RuneScribeRuntimeCoreTests
-        RuneScribeThemeCoordinatorModuleTests RuneScribeUIModuleTests
+        RuneScribeThemeCoordinatorModuleTests RuneScribeThemeGloamthornModuleTests
+        RuneScribeThemeMoonleafModuleTests RuneScribeThemeSunspireModuleTests
+        RuneScribeThemeWildwoodModuleTests RuneScribeUIModuleTests
       ].sort
       unless test_support_consumers == expected_test_support_consumers
         errors << "package RuneScribeTestSupport consumers differ: #{test_support_consumers.join(', ')}"
@@ -785,6 +843,7 @@ MODULE_IMPORT_POLICY.each do |product, allowed_imports|
     )
     errors.concat(module_boundary_source_errors(product, relative_path, source))
     errors.concat(progression_source_errors(relative_path, source)) if product == "RuneScribeProgressionModule"
+    errors.concat(feature_preferences_source_errors(product, relative_path, source))
   end
 end
 
@@ -958,6 +1017,9 @@ host_files.each do |path|
       Foundation SwiftUI AppKit UIKit RuneScribeContracts RuneScribeRuntimeCore
       RuneScribePlatform RuneScribeCoreModule RuneScribeProgressionModule
       RuneScribeNorseThemeModule RuneScribeThemeCoordinatorModule
+      RuneScribeThemeMoonleafModule RuneScribeThemeSunspireModule
+      RuneScribeThemeWildwoodModule RuneScribeThemeGloamthornModule
+      RuneScribeCloudSyncModule RuneScribeGameCenterModule
       RuneScribeUIModule RuneScribeUIRuntime
     ]
     errors << "#{relative(path, root)}:#{line}: host may not import #{imported}" unless allowed.include?(imported)

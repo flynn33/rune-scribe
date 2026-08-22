@@ -1,0 +1,105 @@
+PASS: macOS main executable is present
+PASS: iOS main executable is present
+PASS: products have Release bundle shape (no test-only debug dylib)
+PASS: built Info.plists preserve identifiers, URL/UTI registration, privacy strings, versions, and platform settings
+PASS: macOS executable architecture set matches its Release destination
+PASS: macOS executable LC_BUILD_VERSION matches its declared platform
+PASS: iOS executable architecture set matches its Release destination
+PASS: iOS executable LC_BUILD_VERSION matches its declared platform
+PASS: macOS code signature and nested seals verify
+INFO: macOS product uses an ad hoc local signature; distribution identity is not assessed.
+PASS: iOS code signature and nested seals verify
+INFO: iOS product uses an ad hoc local signature; distribution identity is not assessed.
+PASS: macOS hardened runtime is present in the signed product
+PASS: macOS entitlements decode from every executable architecture
+PASS: iOS simulated entitlements decode from every executable architecture
+PASS: every architecture preserves sandbox, Contacts, file access, Keychain, iCloud, and Game Center entitlements without extras
+PASS: macOS compiled asset catalog is present
+PASS: macOS app icon is present and valid
+PASS: macOS app root does not duplicate the Norse module font
+PASS: macOS splash video is present and valid
+PASS: macOS Metal shader library is present and valid
+PASS: iOS compiled asset catalog is present
+PASS: iOS app icon is present and valid
+PASS: iOS app root does not duplicate the Norse module font
+PASS: iOS splash video is present and valid
+PASS: iOS Metal shader library is present and valid
+PASS: macOS product contains exactly one Core module resource bundle
+PASS: macOS product contains exactly one Progression module resource bundle
+PASS: macOS product contains exactly one Theme Coordinator module resource bundle
+PASS: macOS product contains exactly one Norse Theme module resource bundle
+PASS: macOS product contains exactly one UI module resource bundle
+PASS: iOS product contains exactly one Core module resource bundle
+PASS: iOS product contains exactly one Progression module resource bundle
+PASS: iOS product contains exactly one Theme Coordinator module resource bundle
+PASS: iOS product contains exactly one Norse Theme module resource bundle
+PASS: iOS product contains exactly one UI module resource bundle
+PASS: macOS Core module manifest resource is present
+PASS: macOS Progression module manifest resource is present
+PASS: macOS Theme Coordinator module manifest resource is present
+PASS: macOS Norse Theme module manifest resource is present
+PASS: macOS UI module manifest resource is present
+PASS: iOS Core module manifest resource is present
+PASS: iOS Progression module manifest resource is present
+PASS: iOS Theme Coordinator module manifest resource is present
+PASS: iOS Norse Theme module manifest resource is present
+PASS: iOS UI module manifest resource is present
+PASS: Progression bundles preserve the exact six-file byte, SHA-256, and cross-platform resource contract
+PASS: Theme bundles preserve exact inventories, byte counts, SHA-256 values, source exclusion, and cross-platform parity
+PASS: both products preserve the exact canonical SwiftPM resource-bundle census
+PASS: both products contain exactly four canonical Elven providers and all 184 accepted v3.1 outputs
+PASS: Elven provider resources preserve exact hashes, sizes, budgets, declarations, and cross-platform parity
+PASS: Game Center and Platform resource bundles preserve exact hashes, inventories, and cross-platform parity
+PASS: shipping products exclude misplaced Theme resources, placeholders, Source-Masters, debug/test catalogs, and prohibited attribution
+PASS: embedded module manifests preserve identity, policy, version, and cross-platform parity
+PASS: macOS Mach-O dependency tables are readable for every bundled executable
+PASS: macOS bundled Mach-O files link only canonical platform system libraries
+PASS: macOS product links the runtime-owned CloudKit adapter framework
+PASS: macOS product links the runtime-owned GameKit adapter framework
+PASS: macOS product contains only its expected main Mach-O executable
+PASS: macOS product has no Forsetti binary or dynamic linkage
+PASS: macOS product has no statically linked Forsetti symbols
+PASS: macOS executable links RuneScribeContracts
+PASS: macOS executable links RuneScribeRuntimeCore
+PASS: macOS executable links RuneScribeUIRuntime
+PASS: macOS executable links RuneScribePlatform
+PASS: macOS executable links RuneScribeCoreModule
+PASS: macOS executable links RuneScribeProgressionModule
+PASS: macOS executable links RuneScribeThemeCoordinatorModule
+PASS: macOS executable links RuneScribeNorseThemeModule
+PASS: macOS executable links RuneScribeThemeMoonleafModule
+PASS: macOS executable links RuneScribeThemeSunspireModule
+PASS: macOS executable links RuneScribeThemeWildwoodModule
+PASS: macOS executable links RuneScribeThemeGloamthornModule
+PASS: macOS executable links RuneScribeCloudSyncModule
+PASS: macOS executable links RuneScribeGameCenterModule
+PASS: macOS executable links RuneScribeUIModule
+PASS: macOS executable excludes RuneScribeTestSupport
+PASS: iOS Mach-O dependency tables are readable for every bundled executable
+PASS: iOS bundled Mach-O files link only canonical platform system libraries
+PASS: iOS product links the runtime-owned CloudKit adapter framework
+PASS: iOS product links the runtime-owned GameKit adapter framework
+PASS: iOS product contains only its expected main Mach-O executable
+PASS: iOS product has no Forsetti binary or dynamic linkage
+PASS: iOS product has no statically linked Forsetti symbols
+PASS: iOS executable links RuneScribeContracts
+PASS: iOS executable links RuneScribeRuntimeCore
+PASS: iOS executable links RuneScribeUIRuntime
+PASS: iOS executable links RuneScribePlatform
+PASS: iOS executable links RuneScribeCoreModule
+PASS: iOS executable links RuneScribeProgressionModule
+PASS: iOS executable links RuneScribeThemeCoordinatorModule
+PASS: iOS executable links RuneScribeNorseThemeModule
+PASS: iOS executable links RuneScribeThemeMoonleafModule
+PASS: iOS executable links RuneScribeThemeSunspireModule
+PASS: iOS executable links RuneScribeThemeWildwoodModule
+PASS: iOS executable links RuneScribeThemeGloamthornModule
+PASS: iOS executable links RuneScribeCloudSyncModule
+PASS: iOS executable links RuneScribeGameCenterModule
+PASS: iOS executable links RuneScribeUIModule
+PASS: iOS executable excludes RuneScribeTestSupport
+PASS: dependency-graph sources are present
+PASS: Swift package manifest resolves for dependency-graph inspection
+PASS: source entitlements, project.yml, structural app targets, and Package.swift preserve the exact shipping graph
+Shipping-product inspection: 101 checks, 0 failures.
+T-028 shipping-product/configuration inspection passed.

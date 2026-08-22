@@ -1,0 +1,13 @@
+b7c55ff40255f96a6c857b49a14962e9fcd79c37
+iphone_app_exists_exit_code: 0
+104M	/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-iphone-release-b7c55ff/Build/Products/Release-iphonesimulator/RuneScrib.app
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-iphone-release-b7c55ff/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64]
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-iphone-release-b7c55ff/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib (for architecture x86_64):	Mach-O 64-bit executable x86_64
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-iphone-release-b7c55ff/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib (for architecture arm64):	Mach-O 64-bit executable arm64
+aeddb92059d976c8a82cc77e46c279056619da22da123e9d2b5b3887841c9227  /tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-iphone-release-b7c55ff/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib
+ipad_app_exists_exit_code: 0
+104M	/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-ipad-release-b7c55ff/Build/Products/Release-iphonesimulator/RuneScrib.app
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-ipad-release-b7c55ff/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64]
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-ipad-release-b7c55ff/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib (for architecture x86_64):	Mach-O 64-bit executable x86_64
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-ipad-release-b7c55ff/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib (for architecture arm64):	Mach-O 64-bit executable arm64
+8fb3d1f65ca4b1619c8a6e48c36e1d99307d88722030a03b36b653a0d92940ba  /tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-ipad-release-b7c55ff/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib

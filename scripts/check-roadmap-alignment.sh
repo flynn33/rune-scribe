@@ -54,7 +54,10 @@ EXPECTED_GROUPS = {
   "PKG" => ["1B", 6],
   "THM" => ["2", 12],
   "PRO" => ["3", 16],
-  "SHR" => ["4", 17]
+  "SHR" => ["4", 17],
+  "CLD" => ["5A", 11],
+  "GC" => ["5B", 10],
+  "REL" => ["6", 11]
 }.freeze
 EXPECTED_DOCUMENTS = {
   "systemSpec" => {
@@ -352,13 +355,7 @@ def validate(document, root)
     identifier = format("ADR-RS-%03d", index + 1)
     errors << "#{basename} must have the expected decision heading" unless text.lines.first.to_s.include?(identifier)
     status_line = text.lines.find { |line| line.match?(/\*\*Status:\*\*/i) }
-    expected_status = if index.zero?
-                        /Superseded/i
-                      elsif index < 10 || index == 11
-                        /Accepted/i
-                      else
-                        /Blocked/i
-                      end
+    expected_status = index.zero? ? /Superseded/i : /Accepted/i
     errors << "#{basename} must retain its recorded decision status" unless status_line&.match?(expected_status)
   end
 
@@ -436,3 +433,5 @@ warn "Roadmap alignment guard failed:"
 errors.uniq.each { |error| warn "- #{error}" }
 exit 1
 RUBY
+
+python3 "$repository_root/scripts/check-roadmap-completion.py"

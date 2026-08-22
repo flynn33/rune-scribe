@@ -5,11 +5,17 @@ import RuneScribeRuntimeCore
 enum ThemeArtifactSelectionKind: Sendable {
     case relic
     case seal
+    case frame
 
     var settingID: RuntimeSettingID {
+        contractKind.settingID
+    }
+
+    var contractKind: RuntimeArtifactSelectionKind {
         switch self {
-        case .relic: RuneScribeRuntimeSettings.selectedRelicByCodex
-        case .seal: RuneScribeRuntimeSettings.selectedSealByCodex
+        case .relic: .relic
+        case .seal: .seal
+        case .frame: .frame
         }
     }
 }
@@ -58,8 +64,33 @@ extension RuneScribeUISession {
         }
     }
 
+    var themeFrameItems: [ThemeArtifactPickerItem] {
+        guard let theme = themeSnapshot?.effectiveTheme else { return [] }
+        let owned = ownedThemeArtifactIDs
+        return theme.codex.frames.compactMap { frame in
+            guard frame.metadata.availability != .reservedInactive,
+                  frame.allowsStaticShare
+            else { return nil }
+            return ThemeArtifactPickerItem(
+                id: frame.metadata.id,
+                name: frame.metadata.displayName.fallbackValue,
+                description: frame.metadata.description.fallbackValue,
+                rarity: frame.metadata.rarity,
+                isOwned: frame.metadata.availability == .included
+                    || owned.contains(frame.metadata.id),
+                isSelectable: frame.metadata.availability == .included
+                    || owned.contains(frame.metadata.id),
+                isSelected: frame.metadata.id == selectedThemeFrameID
+            )
+        }
+    }
+
     func selectThemeArtifact(_ artifactID: ArtifactID, kind: ThemeArtifactSelectionKind) async {
-        let items = kind == .relic ? themeRelicItems : themeSealItems
+        let items: [ThemeArtifactPickerItem] = switch kind {
+        case .relic: themeRelicItems
+        case .seal: themeSealItems
+        case .frame: themeFrameItems
+        }
         guard items.contains(where: { $0.id == artifactID && $0.isSelectable }),
               let codexID = themeSnapshot?.effectiveCodexID,
               let runtimeSettingsClientHandle
@@ -68,29 +99,24 @@ extension RuneScribeUISession {
             return
         }
         let settingID = kind.settingID
-        var selections = Self.themeSelectionMap(
-            runtimeSettingsSnapshot?[settingID]?.textValue?.rawValue
-        )
-        selections[codexID.rawValue] = artifactID.rawValue
-        let encoded = selections.keys.sorted().map { key in
-            "\(key)=\(selections[key]!)"
-        }.joined(separator: ";")
-        guard let text = RuntimeSettingText(rawValue: encoded) else {
+        let current = runtimeSettingsSnapshot?.artifactSelections(for: kind.contractKind)
+            ?? RuneScribeRuntimeSettings.defaultArtifactSelections(for: kind.contractKind)
+        guard let selections = try? current.setting(artifactID, for: codexID) else {
             themeSelectionError = "That appearance could not be saved."
             return
         }
         let existingRevision = runtimeSettingsSnapshot?.settings.first(where: {
             $0.settingID == settingID
         })?.revision
-        if kind == .relic { selectedThemeRelicID = artifactID }
-        else { selectedThemeSealID = artifactID }
+        switch kind {
+        case .relic: selectedThemeRelicID = artifactID
+        case .seal: selectedThemeSealID = artifactID
+        case .frame: selectedThemeFrameID = artifactID
+        }
         do {
-            _ = try await runtimeSettingsClientHandle.set(
-                SetRuntimeSettingCommand(
-                    settingID: settingID,
-                    value: .text(text),
-                    expectedRevision: existingRevision
-                )
+            _ = try await runtimeSettingsClientHandle.setArtifactSelections(
+                selections,
+                expectedRevision: existingRevision
             )
             themeSelectionError = nil
         } catch {
@@ -99,7 +125,38 @@ extension RuneScribeUISession {
         }
     }
 
-    private var ownedThemeArtifactIDs: Set<ArtifactID> {
+    func clearThemeFrame() async {
+        guard let codexID = themeSnapshot?.effectiveCodexID,
+              let runtimeSettingsClientHandle
+        else {
+            themeSelectionError = "That appearance is not available."
+            return
+        }
+        let current = runtimeSettingsSnapshot?.artifactSelections(for: .frame)
+            ?? RuneScribeRuntimeSettings.defaultArtifactSelections(for: .frame)
+        guard let frameNone = ArtifactID(rawValue: "frame.none"),
+              let selections = try? current.setting(frameNone, for: codexID)
+        else {
+            themeSelectionError = "That appearance could not be saved."
+            return
+        }
+        let existingRevision = runtimeSettingsSnapshot?.settings.first(where: {
+            $0.settingID == RuneScribeRuntimeSettings.selectedFrameByCodex
+        })?.revision
+        selectedThemeFrameID = nil
+        do {
+            _ = try await runtimeSettingsClientHandle.setArtifactSelections(
+                selections,
+                expectedRevision: existingRevision
+            )
+            themeSelectionError = nil
+        } catch {
+            reconcileThemeArtifactSelections()
+            themeSelectionError = "That appearance could not be saved."
+        }
+    }
+
+    var ownedThemeArtifactIDs: Set<ArtifactID> {
         Set((progressionSnapshot?.ownership ?? []).compactMap { item in
             guard item.state == .owned, case .artifact(let id) = item.reference else { return nil }
             return id

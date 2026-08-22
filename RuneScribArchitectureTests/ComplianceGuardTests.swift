@@ -5186,15 +5186,37 @@ final class ComplianceGuardTests: XCTestCase {
         process.executableURL = URL(fileURLWithPath: "/bin/bash")
         process.arguments = arguments
         process.currentDirectoryURL = repository
-        let standardOutput = Pipe()
-        let standardError = Pipe()
+        let standardOutputURL = workspace.appendingPathComponent("stdout.log")
+        let standardErrorURL = workspace.appendingPathComponent("stderr.log")
+        _ = FileManager.default.createFile(
+            atPath: standardOutputURL.path,
+            contents: nil
+        )
+        _ = FileManager.default.createFile(
+            atPath: standardErrorURL.path,
+            contents: nil
+        )
+        let standardOutput = try FileHandle(forWritingTo: standardOutputURL)
+        let standardError = try FileHandle(forWritingTo: standardErrorURL)
+        defer {
+            try? standardOutput.close()
+            try? standardError.close()
+        }
         process.standardOutput = standardOutput
         process.standardError = standardError
         try process.run()
         process.waitUntilExit()
+        try standardOutput.close()
+        try standardError.close()
 
-        let outputText = String(decoding: standardOutput.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
-        let errorText = String(decoding: standardError.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+        let outputText = String(
+            decoding: try Data(contentsOf: standardOutputURL),
+            as: UTF8.self
+        )
+        let errorText = String(
+            decoding: try Data(contentsOf: standardErrorURL),
+            as: UTF8.self
+        )
         let jsonURL = output.appendingPathComponent("forsetti-compliance-report.json")
         let markdownURL = output.appendingPathComponent("forsetti-compliance-report.md")
         guard FileManager.default.fileExists(atPath: jsonURL.path),

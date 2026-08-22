@@ -270,14 +270,23 @@ final class ArchitectureGuardrailTests: XCTestCase {
         process.currentDirectoryURL = repository
         process.environment = ProcessInfo.processInfo.environment.merging(environment) { _, new in new }
 
-        let output = Pipe()
+        let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "RuneScribeArchitectureGuardTests-\(UUID().uuidString).log"
+        )
+        _ = FileManager.default.createFile(atPath: outputURL.path, contents: nil)
+        let output = try FileHandle(forWritingTo: outputURL)
+        defer {
+            try? output.close()
+            try? FileManager.default.removeItem(at: outputURL)
+        }
         process.standardOutput = output
         process.standardError = output
 
         try process.run()
         process.waitUntilExit()
+        try output.close()
 
-        let data = output.fileHandleForReading.readDataToEndOfFile()
+        let data = try Data(contentsOf: outputURL)
         return Invocation(
             status: process.terminationStatus,
             message: String(decoding: data, as: UTF8.self)

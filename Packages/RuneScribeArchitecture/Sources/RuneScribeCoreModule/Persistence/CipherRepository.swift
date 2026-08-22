@@ -526,7 +526,7 @@ actor CipherRepository {
 
     /// Idempotently records successful first-delivery handoff without changing
     /// the key, contact association, active selection, or any other cipher.
-    func markDelivered(cipherID: UUID) async throws -> CipherRepositoryMutation<Bool> {
+    func completeKeyDelivery(cipherID: UUID) async throws -> CipherRepositoryMutation<Bool> {
         await acquireMutationPermit()
         defer { releaseMutationPermit() }
 
@@ -534,10 +534,10 @@ actor CipherRepository {
         guard let cipher = current.ciphers.first(where: { $0.id == cipherID }) else {
             return CipherRepositoryMutation(value: false, library: current)
         }
-        guard !cipher.delivered else {
+        guard !cipher.hasCompletedKeyDelivery else {
             return CipherRepositoryMutation(value: true, library: current)
         }
-        var candidate = current.markingDelivered(cipherID: cipherID)
+        var candidate = current.completingKeyDelivery(cipherID: cipherID)
         if current.version == CipherLibrary.currentVersion,
            let contactID = cipher.contactID {
             var ledger = try Self.progressionLedger(in: current)
@@ -1111,16 +1111,12 @@ actor CipherRepository {
         )
     }
 
-    /// Commits every durable consequence of an authenticated incoming message
-    /// in one encrypted-library write: an optional embedded cipher, its final
-    /// contact binding, relationship aggregate state, and the complete decoded
-    /// event batch. A failed secure write leaves the candidate transient so
-    /// authenticated plaintext remains usable without claiming a durable fact.
+    /// Commits relationship activity and decoded facts only for a cipher that
+    /// was already stored locally. First-delivery ciphers use the separate,
+    /// user-confirmed import rail and cannot enter through this method.
     func commitAuthenticatedMessageImport(
         candidate preparedCipher: Cipher,
-        persistCandidate: Bool,
         contactID: UUID?,
-        cipherProgressionSeed: Data?,
         relationshipProgressionSeed: Data?,
         activity: CoreProgressionRelationshipActivity,
         pendingBatches: [CorePendingProgressionBatch]
@@ -1130,9 +1126,7 @@ actor CipherRepository {
 
         return try await commitAuthenticatedMessageImportWithPermit(
             candidate: preparedCipher,
-            persistCandidate: persistCandidate,
             contactID: contactID,
-            cipherProgressionSeed: cipherProgressionSeed,
             relationshipProgressionSeed: relationshipProgressionSeed,
             activity: activity,
             pendingBatches: pendingBatches,
@@ -1145,7 +1139,6 @@ actor CipherRepository {
     /// is added; the complete authenticated fact group remains atomic.
     func commitAuthenticatedMessageImportWithoutProgressionEvidence(
         candidate preparedCipher: Cipher,
-        persistCandidate: Bool,
         contactID: UUID?,
         activity: CoreProgressionRelationshipActivity,
         pendingBatches: [CorePendingProgressionBatch]
@@ -1155,9 +1148,7 @@ actor CipherRepository {
 
         return try await commitAuthenticatedMessageImportWithPermit(
             candidate: preparedCipher,
-            persistCandidate: persistCandidate,
             contactID: contactID,
-            cipherProgressionSeed: nil,
             relationshipProgressionSeed: nil,
             activity: activity,
             pendingBatches: pendingBatches,
@@ -1167,9 +1158,7 @@ actor CipherRepository {
 
     private func commitAuthenticatedMessageImportWithPermit(
         candidate preparedCipher: Cipher,
-        persistCandidate: Bool,
         contactID: UUID?,
-        cipherProgressionSeed: Data?,
         relationshipProgressionSeed: Data?,
         activity: CoreProgressionRelationshipActivity,
         pendingBatches: [CorePendingProgressionBatch],
@@ -1179,35 +1168,10 @@ actor CipherRepository {
             let current = try await snapshot()
             var candidate = current
             var ledger = try Self.progressionLedger(in: current)
-            let cipherIndex: Int
-            let persistedNewCipher: Bool
-
-            if let existingIndex = current.ciphers.firstIndex(where: {
+            guard let cipherIndex = current.ciphers.firstIndex(where: {
                 $0.publicID == preparedCipher.publicID
-            }) {
-                cipherIndex = existingIndex
-                persistedNewCipher = false
-            } else {
-                guard persistCandidate else {
-                    throw CoreProgressionEvidenceError.invalidCipherSeed
-                }
-                candidate = current.addingWithoutActivating(preparedCipher)
-                guard let addedIndex = candidate.ciphers.firstIndex(where: {
-                    $0.id == preparedCipher.id
-                }) else {
-                    throw CoreProgressionEvidenceError.operationCollision
-                }
-                cipherIndex = addedIndex
-                persistedNewCipher = true
-                if retainsNewProgressionEvidence {
-                    guard let cipherProgressionSeed else {
-                        throw CoreProgressionEvidenceError.invalidCipherSeed
-                    }
-                    try ledger.addCipherSeed(
-                        cipherID: preparedCipher.id,
-                        seed: cipherProgressionSeed
-                    )
-                }
+            }) else {
+                throw CoreProgressionEvidenceError.invalidCipherSeed
             }
 
             let committedCipherID = candidate.ciphers[cipherIndex].id
@@ -1275,9 +1239,7 @@ actor CipherRepository {
                 }
             }
             let committedCipher = candidate.ciphers[cipherIndex]
-            return persistedNewCipher
-                ? .persisted(cipher: committedCipher, library: candidate)
-                : .existing(cipher: committedCipher, library: candidate)
+            return .existing(cipher: committedCipher, library: candidate)
         } catch let error as CipherRepositoryError {
             return .transient(cipher: preparedCipher, failure: error)
         } catch {

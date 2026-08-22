@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "git diff --check",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter AppLockServiceTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter MessageServiceTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter RuntimeCloudGameCenterCoordinatorTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter P4BApplicationServiceTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter AppleCloudKitProgressionTransportTests"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "docs/verification/roadmap-completion/GateRun/instruction-package-validation.log",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/AppLockServiceTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageServiceTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribePlatformTests/AppleCloudKitProgressionTransportTests.swift",
+    "docs/verification/roadmap-completion/SecurityPrivacyReview.md",
+    "docs/verification/roadmap-completion/GateRun/macos-hosted-required-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/macos-parity-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ios-iphone-parity-b7c55ff-summary.json",
+    "docs/verification/roadmap-completion/GateRun/ipad-parity-b7c55ff-summary.json"
+  ],
+  "openBlockingCount": 0,
+  "pendingQualification": "No blocking defect remains in the supported host/Simulator scope. Physical hardware, live accounts, provisioning, distribution, and store operations remain owner-required.",
+  "defects": [
+    {
+      "id": "INPUT-001",
+      "status": "CLASSIFIED_EXTERNAL",
+      "rootCause": "The immutable instruction bundle manifest omits 193 extra files; none of its 46 declared files is missing.",
+      "disposition": "Preserved the original bundle, recorded the validator failure, and independently validated the accepted v3.1 asset package.",
+      "regressionEvidence": "docs/verification/roadmap-completion/GateRun/instruction-package-validation.log"
+    },
+    {
+      "id": "SEC-001",
+      "status": "CLOSED",
+      "rootCause": "A first-delivery embedded cipher could make an unconfirmed sender label appear locally trusted.",
+      "fix": "Treat embedded identity as transient until explicit confirmation; established delivery uses local identity and does not rebind contacts.",
+      "regressionEvidence": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/P4BApplicationServiceTests.swift"
+    },
+    {
+      "id": "SEC-002",
+      "status": "CLOSED",
+      "rootCause": "Message candidate evaluation and persisted cipher inventory did not share one enforceable capacity/work boundary.",
+      "fix": "Added bounded cipher decoding, a 131072-cipher capacity, a 128 MiB candidate work budget, and one-time envelope unwrapping.",
+      "regressionEvidence": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Messages/MessageServiceTests.swift"
+    },
+    {
+      "id": "SEC-003",
+      "status": "CLOSED",
+      "rootCause": "App Lock management throttling was not durable across management operations and an extreme persisted counter could overflow.",
+      "fix": "Unified durable throttling, bounded failed attempts, rejected invalid persisted counts, and used checked saturation.",
+      "regressionEvidence": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/AppLockServiceTests.swift"
+    },
+    {
+      "id": "SEC-004",
+      "status": "CLOSED",
+      "rootCause": "Interrupted Game Center reports could remain stranded in an in-flight state across reload or reactivation.",
+      "fix": "Recover interrupted reports to pending while preserving attempts and backoff, including same-process reactivation.",
+      "regressionEvidence": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift"
+    },
+    {
+      "id": "SEC-005",
+      "status": "CLOSED",
+      "rootCause": "Remote logical timestamps could advance local state without a bounded relative horizon.",
+      "fix": "Added a 1048576-step remote advance bound relative to the trusted high-water mark with overflow headroom.",
+      "regressionEvidence": "Packages/RuneScribeArchitecture/Tests/RuneScribeCloudSyncModuleTests/CloudProgressionMergeTests.swift"
+    },
+    {
+      "id": "SEC-006",
+      "status": "CLOSED",
+      "rootCause": "Protected files, contact payloads, association journals, and imported fonts needed consistent preallocation bounds.",
+      "fix": "Added bounded streaming reads, growth sentinels, collection/string limits, and format-specific byte caps.",
+      "regressionEvidence": "Packages/RuneScribeArchitecture/Tests/RuneScribePlatformTests/PlatformAdapterTests.swift"
+    },
+    {
+      "id": "UI-001",
+      "status": "CLOSED",
+      "rootCause": "Concurrent pending message and cipher-confirmation state could transiently choose the wrong sheet.",
+      "fix": "Stage both states before publishing a snapshot and prioritize confirmation import presentation.",
+      "regressionEvidence": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RootViewPresentationTests.swift"
+    },
+    {
+      "id": "HOST-001",
+      "status": "CLOSED",
+      "rootCause": "Eager CKContainer resolution during default runtime composition caused entitlement-free hosted tests to terminate with Signal 5 before deterministic adapters could take control.",
+      "fix": "Defer CKContainer resolution until the first live CloudKit operation and inject deterministic no-account fixtures into hosted composition paths.",
+      "fixedInRevision": "008ed4a47f955b9f68819f7270545601d04d0f47",
+      "regressionEvidence": "Packages/RuneScribeArchitecture/Tests/RuneScribePlatformTests/AppleCloudKitProgressionTransportTests.swift"
+    },
+    {
+      "id": "HOST-002",
+      "status": "CLOSED",
+      "rootCause": "The hosted guard runner waited for a child process to exit before draining its output pipes, so verbose output could fill the pipe buffer and deadlock the test.",
+      "fix": "Capture each guard invocation in bounded temporary files and read the completed output after process termination.",
+      "fixedInRevision": "40b3f80fcf1eb85b3788ada7f16fd2a331555a16",
+      "regressionEvidence": "docs/verification/roadmap-completion/GateRun/macos-hosted-required-b7c55ff-summary.json"
+    },
+    {
+      "id": "UI-002",
+      "status": "CLOSED",
+      "rootCause": "The compact iPhone artifact heading kept the FRAME label in a horizontal row at accessibility text sizes, allowing the audit to identify potential clipping.",
+      "fix": "Use a compact horizontal layout at standard text sizes and stack the heading vertically at accessibility Dynamic Type sizes.",
+      "fixedInRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+      "regressionEvidence": "docs/verification/roadmap-completion/GateRun/ios-iphone-parity-b7c55ff-summary.json"
+    }
+  ]
+}

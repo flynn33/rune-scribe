@@ -35,6 +35,7 @@ struct ContentView: View {
     // MARK: - Environment
 
     @EnvironmentObject private var session: RuneScribeUISession
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     // MARK: - Types
 
@@ -505,27 +506,46 @@ struct ContentView: View {
     }
 
     private var artifactSelectionBar: some View {
-        HStack(spacing: 10) {
+        let usesExpandedLayout = dynamicTypeSize.isAccessibilitySize
+        let menuLayout = usesExpandedLayout
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(spacing: 10))
+
+        return HStack(alignment: .top, spacing: 10) {
             Image(systemName: "photo.artframe")
                 .font(.system(size: 12))
                 .foregroundColor(.runeBlue)
                 .accessibilityHidden(true)
+                .padding(.top, usesExpandedLayout ? 4 : 10)
 
-            artifactMenu(
-                title: "Relic",
-                selectedID: session.selectedThemeRelicID,
-                items: session.themeRelicItems,
-                kind: .relic
-            )
+            menuLayout {
+                artifactMenu(
+                    title: "Relic",
+                    selectedID: session.selectedThemeRelicID,
+                    items: session.themeRelicItems,
+                    kind: .relic
+                )
 
-            Divider().frame(height: 22)
+                Divider().frame(height: usesExpandedLayout ? nil : 22)
 
-            artifactMenu(
-                title: "Seal",
-                selectedID: session.selectedThemeSealID,
-                items: session.themeSealItems,
-                kind: .seal
-            )
+                artifactMenu(
+                    title: "Seal",
+                    selectedID: session.selectedThemeSealID,
+                    items: session.themeSealItems,
+                    kind: .seal
+                )
+
+                Divider().frame(height: usesExpandedLayout ? nil : 22)
+
+                artifactMenu(
+                    title: "Frame",
+                    selectedID: session.selectedThemeFrameID,
+                    items: session.themeFrameItems,
+                    kind: .frame,
+                    allowsNone: true
+                )
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 12)
         .frame(minHeight: 44)
@@ -543,9 +563,18 @@ struct ContentView: View {
         title: String,
         selectedID: ArtifactID?,
         items: [ThemeArtifactPickerItem],
-        kind: ThemeArtifactSelectionKind
+        kind: ThemeArtifactSelectionKind,
+        allowsNone: Bool = false
     ) -> some View {
         Menu {
+            if allowsNone {
+                Button {
+                    Task { await session.clearThemeFrame() }
+                } label: {
+                    Label("None", systemImage: selectedID == nil ? "checkmark" : "circle")
+                }
+                if !items.isEmpty { Divider() }
+            }
             ForEach(items) { item in
                 Button {
                     Task { await session.selectThemeArtifact(item.id, kind: kind) }
@@ -564,7 +593,11 @@ struct ContentView: View {
                 Text(title.uppercased())
                     .font(.caption2.weight(.semibold))
                     .foregroundColor(.runeSilver)
-                Text(items.first(where: { $0.id == selectedID })?.name ?? "Unavailable")
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(
+                    items.first(where: { $0.id == selectedID })?.name
+                        ?? (allowsNone ? "None" : "Unavailable")
+                )
                     .font(.caption.weight(.semibold))
                     .foregroundColor(.runeTextPrimary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -573,9 +606,12 @@ struct ContentView: View {
             .contentShape(Rectangle())
         }
         .menuIndicator(.visible)
-        .disabled(items.allSatisfy { !$0.isSelectable })
+        .disabled(!allowsNone && items.allSatisfy { !$0.isSelectable })
         .accessibilityLabel("Selected \(title)")
-        .accessibilityValue(items.first(where: { $0.id == selectedID })?.name ?? "Unavailable")
+        .accessibilityValue(
+            items.first(where: { $0.id == selectedID })?.name
+                ?? (allowsNone ? "None" : "Unavailable")
+        )
     }
 
     // MARK: - Compose Recipient

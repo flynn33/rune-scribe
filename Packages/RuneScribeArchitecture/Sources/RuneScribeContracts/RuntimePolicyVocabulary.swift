@@ -94,6 +94,15 @@ public enum RuneScribeCapabilities {
     public static let themeSelection: CapabilityIdentifier = "theme.selection"
     public static let themeResourceRead: CapabilityIdentifier = "theme.resources.read"
     public static let themeDiagnostics: CapabilityIdentifier = "theme.diagnostics"
+    public static let cloudSync: CapabilityIdentifier = "runtime.cloud-sync"
+    public static let gameCenterReporting: CapabilityIdentifier =
+        "runtime.game-center.reporting"
+    public static let cloudGameCenterStatusRead: CapabilityIdentifier =
+        "runtime.cloud-game-center.status.read"
+    public static let gameCenterOptIn: CapabilityIdentifier =
+        "runtime.game-center.opt-in"
+    public static let cloudAccountRebind: CapabilityIdentifier =
+        "runtime.cloud-sync.account-rebind"
 
     public static let all: Set<CapabilityIdentifier> = [
         publishService,
@@ -139,6 +148,11 @@ public enum RuneScribeCapabilities {
         themeSelection,
         themeResourceRead,
         themeDiagnostics,
+        cloudSync,
+        gameCenterReporting,
+        cloudGameCenterStatusRead,
+        gameCenterOptIn,
+        cloudAccountRebind,
     ]
 }
 

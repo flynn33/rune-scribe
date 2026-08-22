@@ -13,7 +13,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Version](https://img.shields.io/badge/version-1.0.38%20build%2038-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-826%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-981%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -36,9 +36,10 @@ A product of **Raven Forge Software**.
   fresh cipher, so every conversation has its own key.
 - **💬 Send over iMessage & Share** — encode a message and send it straight through
   **iMessage** (iOS) or the **system Share sheet** (both platforms). The runes ride
-  in the bubble; on the **first** message to a contact a `.runescribe` file carries the
-  sealed message and the cipher key, so the recipient reads it with one tap and never
-  sees a key-exchange step. Every later message is runes only — they already hold the key.
+  in the bubble; a themed `.runescribe` file carries the sealed message and bounded
+  appearance metadata. On the **first** eligible message to a contact it also carries
+  the cipher key. Later themed messages keep the file and never resend the key; Copy
+  Runes remains the compact compatibility action.
 - **🤝 Share a cipher, two ways** — hand someone a cipher by **Share** / **QR** (an offline
   `runescribe://import` deep link the recipient taps to open the app and import) or as a
   portable **`.runescribe` decoder file** from Export. Both carry the same validated key;
@@ -53,11 +54,16 @@ A product of **Raven Forge Software**.
 - **🎨 Crafted interface** — a Metal-rendered Norse background, a bundled
   **Noto Sans Runic** font so every rune renders sharply, and one cohesive design
   system across both platforms. Appearance is now driven by the runtime Theme
-  coordinator and the required Norse Base provider; production Elven series
-  providers are not shipped.
+  coordinator, the required Norse Base provider, and optional Moonleaf, Sunspire,
+  Wildwood, and Gloamthorn production providers with runtime-owned unlock selection.
 - **🏆 Local Journey** — optional Achievements, Codex gates, and the Vault/Progress
   view stay on-device. Unlock reveals are queued accessibly, and encode/decode
   still work if Progression is unavailable.
+- **☁️ Optional progression services** — private iCloud mirroring is local-first and
+  carries progression records only. Game Center is an optional trophy-case mirror;
+  it never grants or revokes Rune Scribe ownership, and decline/offline states leave
+  the local app fully usable. Saved opt-in permits one bounded authentication attempt
+  on a later launch, while failed reports remain in the durable outbox.
 - **🎬 Cold-launch intro** — a short, skippable Raven Forge splash video plays on
   first open and at most once every **30 days** thereafter (tap anywhere or **Skip**),
   bypassed automatically if the video asset isn't bundled.
@@ -137,20 +143,26 @@ Rune Scribe gives two ways to hand one to a friend, both funnelling through the
   a **QR code**. The recipient taps the link (or scans the QR with Camera / the in-app
   scanner) and Rune Scribe opens with a **one-tap import**. Nothing leaves your devices:
   no server, no Universal Link.
-- **Decoder file.** A portable `.runescribe` package (the same 129-byte record plus
-  optional **font bytes**) from **Cipher Library → Export** (or the file exporter).
-  Import from **Cipher Library → Import**, or open the file with Rune Scribe. Use this
-  when you need the font bytes to travel with the key; message attachments still use
-  `.runescribe` files for first-message key delivery.
+- **Decoder file.** A portable typed `.runescribe` package from **Cipher Library →
+  Export** (or the file exporter). It contains the validated invitation plus optional
+  legacy font bytes and bounded themed presentation. Import from **Cipher Library →
+  Import**, or open the file with Rune Scribe. Exact legacy decoder files remain
+  readable.
 
-Every channel — Share link, QR, file, or a pasted `runescribe://` link — is validated on arrival:
-the record must be the right version and length, a true 0–31 permutation, and pass its
-checksum, or the import is rejected with a friendly message. The in-app **QR scanner is
-iOS-only**; on macOS you import via the file or a pasted link.
+Every channel — Share link, QR, file, or a pasted `runescribe://` link — is validated on
+arrival. Legacy records must retain their exact version, length, true 0–31 permutation,
+and checksum. Typed packages additionally enforce canonical sections, byte/count/image
+bounds, hashes, and required versions before allocation or rendering. The in-app **QR
+scanner is iOS-only**; on macOS you import via the file or a pasted link.
 
-> **macOS note.** Automatic cipher import from Messages is not supported on Mac.
-> On macOS, import a received cipher manually from **Cipher Library → Import**, by
-> opening the `.runescribe` file, or by pasting a `runescribe://` import link.
+Themed presentation is resolved against the installed provider's artifact and resource
+inventory before rendering. Unknown selections or resource metadata/digest drift use
+the Base Norse fallback without changing admission or decryption of a valid Core payload.
+
+> **Import note.** Cipher material is never saved merely because a message opens.
+> A first-delivery attachment presents the normal cipher confirmation sheet on both
+> platforms. On macOS, use **Cipher Library → Import**, open the `.runescribe` file,
+> or paste a `runescribe://` import link.
 
 > **Guard the cipher.** A shared QR image or `.runescribe` file carries the actual
 > **256-bit key** — anyone who has it can read your runes, so hand it over privately
@@ -166,17 +178,18 @@ what goes out is:
 
 1. **The runes, as plain text** — what a human sees in the bubble. Meaningless without
    the key, so they leak nothing.
-2. **A `.runescribe` file attachment** carrying the **sealed envelope** and the
-   sender's display name — and, on this first message (when the cipher is linked to the
-   contact and hasn't been delivered yet), the **cipher key** itself, so the recipient
-   decodes instantly. The compose screen says which: **“Key included”** vs **“Uses your
-   shared key.”**
+2. **A themed `.runescribe` file attachment** carrying the **sealed envelope**, sender
+   display name, chosen Codex/Relic/Seal/Frame IDs, bounded static preview, and
+   provenance state — and, on this first message (when the cipher is linked to the
+   contact and hasn't been delivered yet), the **cipher key** itself. The compose screen
+   says which: **“Key included”** vs **“Uses your shared key.”**
 3. **A plain “get the app” link** to the Rune Scribe page, for a recipient who doesn't
    have the app yet.
 
-Every **later** message to that contact is **runes only** — no file, no key, no link.
-The recipient already holds the cipher and reads the runes directly. No Universal
-Links, no server.
+Every **later themed** message keeps the `.runescribe` attachment but carries **no
+key** and no product link. The recipient already holds the cipher. **Copy Runes** is
+the deliberate runes-only compatibility action. No Universal Links or Rune Scribe
+message server is involved.
 
 ```mermaid
 sequenceDiagram
@@ -190,38 +203,41 @@ sequenceDiagram
     Alice->>App1: Type “Meet at dawn”, press Rune Scribe
     App1-->>Alice: Runes  ᛗᛖᛖᛏ ᚨᛏ ᛞᚨᚹᚾ  ·  “Key included”
     Alice->>App1: Send via iMessage / Share
-    App1-->>Msg: Runes (bubble) + .runescribe file (envelope + key) + get-the-app link
+    App1-->>Msg: Runes + themed .runescribe file (envelope + first-delivery key) + app link
     Alice->>Bob: iMessage
     Bob->>App2: Open the .runescribe file
-    App2-->>App2: Import key · open envelope · file under “Alice”
+    App2-->>Bob: Preview message · confirm first-delivery cipher
+    App2-->>App2: Save the reviewed cipher
     App2-->>Bob: “Meet at dawn”  → Reply
 ```
 
-**Recipient with the app** opens the `.runescribe` attachment: Rune Scribe imports the
-embedded key (if present), opens the envelope by trying its ciphers (the AEAD tag picks
-exactly one), shows the decrypted message in a sheet, and **auto-files the cipher under
-a contact** named after the sender — then offers **Reply**. **Recipient without the
+**Recipient with the app** opens the `.runescribe` attachment. Rune Scribe can preview
+the plaintext with an embedded first-delivery key, but labels the claimed sender as
+unverified and keeps the key transient. The recipient must review and confirm the
+cipher before it is saved or **Reply** becomes available. A later message authenticates
+with that locally stored cipher and displays the local cipher name; its mutable wire
+sender label cannot create a contact or rebind a relationship. **Recipient without the
 app** taps the plain "get the app" link to the Rune Scribe page. Rotating a key is
-manual: make a new cipher for that contact, and its next message re-embeds the new key,
-which the other side auto-imports.
+manual: make a new cipher for that contact, and its next message re-embeds the new key
+for explicit confirmation.
 
-Automatic cipher import from Messages is an iOS flow. macOS users can still exchange
-the same `.runescribe` cipher files, but must import them manually before using the
-new key. See [Platform notes](docs/platform-notes.md) for the supported import paths.
+Both platforms use the same confirmation boundary. See [Platform notes](docs/platform-notes.md)
+for the supported intake paths.
 
 > The wire formats are pinned by tests: `CipherSharePayloadTests` and
 > `MessageSharePayloadTests` (encode, decode, round-trip, embedded-key,
-> version/checksum rejection), `FileRouterTests` (cipher-vs-message classification by
-> the leading version byte), and `MessageServiceTests` / `MessageCoordinatorTests`
-> (try-all decryption + contact auto-association).
+> version/checksum rejection), `FileRouterTests` (typed-container magic and legacy
+> version-byte classification), and `MessageServiceTests` / `MessageCoordinatorTests`
+> (bounded try-all decryption + explicit first-delivery confirmation).
 
 ---
 
 ## 🏛 Architecture
 
 Rune Scribe is a SwiftUI + Metal application split across compile-time package
-boundaries. All cryptography and storage happen on-device; the current shipping app
-makes **no network calls**.
+boundaries. Cryptography, keys, messages, contacts, and the authoritative local Vault
+remain on-device. Optional private CloudKit and Game Center traffic is isolated behind
+runtime-owned adapters and never carries message or key material.
 
 ```mermaid
 flowchart TD
@@ -232,6 +248,9 @@ flowchart TD
     Runtime --> Progression[RuneScribeProgressionModule<br/>optional local journey · records · grants]
     Runtime --> ThemeCoordinator[RuneScribeThemeCoordinatorModule<br/>selection · availability · fallback]
     Runtime --> NorseTheme[RuneScribeNorseThemeModule<br/>required Base provider]
+    Runtime --> ElvenThemes[Four Elven Theme providers<br/>optional · data only]
+    Runtime --> CloudPolicy[RuneScribeCloudSyncModule<br/>schema · merge · retry policy]
+    Runtime --> GCPolicy[RuneScribeGameCenterModule<br/>catalog · mapping · outbox]
     UI --> UIRuntime[RuneScribeUIRuntime<br/>native system presentation]
     Runtime --> Presentation[RuneScribeUIPresentationContracts<br/>typed root-presentation port]
     UI -. root contribution .-> Presentation
@@ -241,6 +260,9 @@ flowchart TD
     Progression -. neutral protocols and DTOs .-> Contracts
     ThemeCoordinator -. neutral protocols and DTOs .-> Contracts
     NorseTheme -. neutral protocols and DTOs .-> Contracts
+    ElvenThemes -. neutral protocols and DTOs .-> Contracts
+    CloudPolicy -. neutral protocols and DTOs .-> Contracts
+    GCPolicy -. neutral protocols and DTOs .-> Contracts
     Platform -. neutral protocols and DTOs .-> Contracts
     TestSupport[RuneScribeTestSupport<br/>test-only in-memory adapters] -. tests only .-> Contracts
 ```
@@ -251,20 +273,16 @@ target makes `RuneScribeRuntimeCore` the continuing app-owned control plane: eve
 cross-module call remains runtime-mediated, and the runtime owns operational I/O,
 persistent Settings, lifecycle, resources, and system-presentation sessions.
 `RuneScribeUIRuntime` contains the narrow Apple presentation bridges, while the UI
-module retains product views and normalized state only. Runtime modules do not import
-one another, and test support is excluded from shipping products.
+module retains product views and normalized state only. Policy and provider modules do
+not communicate directly; runtime-mediated contracts are the only cross-boundary rail.
+Test support is excluded from shipping products.
 
-The current applications link nine shipping package products: Contracts, Runtime
-Core, UI Runtime, Platform, Core Module, Progression Module, Theme Coordinator, Norse
-Base Theme, and the sole UI Module. Optional Progression failure falls back without
-blocking cipher workflows, and the Norse Base provider remains required. No production
-Elven provider target is linked into either application.
-
-The current source is being remediated to that target. Existing provider-object,
-platform-I/O, Settings, and lifecycle deviations are tracked explicitly and are not
-treated as compliant merely because the compile-time package graph is modular. An
-external Forsetti package, binary, source copy, fetch, or local checkout is permanently
-prohibited.
+The source-complete applications link Contracts, Runtime Core, UI Runtime, Platform,
+Core, Progression, Theme Coordinator, Norse Base, four Elven providers, Cloud policy,
+Game Center policy, and the sole UI Module. Norse remains the required fallback;
+optional provider, Progression, cloud, and Game Center failures cannot block cipher
+workflows. An external Forsetti package, binary, source copy, fetch, or local checkout
+is permanently prohibited.
 
 See [Module Graph](docs/architecture/ModuleGraph.md),
 [Contracts and Capabilities](docs/architecture/ContractsAndCapabilities.md), and
@@ -277,68 +295,34 @@ the current boundary and dependency rules.
 
 ## 🗺 Implementation roadmap
 
-The remediation program for version 1.0.38 build 38 is intentionally incremental:
-every phase must preserve the shipping cipher workflows while tightening one
-architectural boundary. The current repository status is:
+The authorized version 1.0.38 build 38 roadmap-completion program is source-complete
+and not shipped:
 
-| Phase | Scope | Status |
-| --- | --- | --- |
-| P00 | Worktree protection, evidence capture, and clean final baseline | Complete (controls remain continuous) |
-| P01 | Controlling policy, supersession rules, and report-only compliance guard | Complete |
-| P02 | Per-call runtime command, query, state, and ingress spine | Complete |
-| P03 | UI and host migration to runtime clients | Complete |
-| P04 | Runtime-owned I/O and system-presentation gateways | Active |
-| P05 | Runtime settings, metadata, and opaque operational handles | Planned |
-| P06 | Uniform module contracts, policy classes, and generated catalog | Planned |
-| P07 | State, contribution, resource, and diagnostics registries | Planned |
-| P08 | Live-gate reconciliation and optional-failure isolation | Planned |
-| P09 | Theme-module readiness scaffold and sole-UI rendering | Complete |
-| P10 | Typed durable event and coordination rail | Planned |
-| P11 | Permanent compliance guards, negative mutations, and CI | Planned |
-| P12 | Full Xcode, supported-environment parity, final audit, and handoff | Planned |
+| Wave | Scope | Source status |
+|---|---|---|
+| 0A–1B | Baseline, app-owned runtime, domain compatibility, typed package | Complete |
+| 2 | Semantic Theme system and required Norse Base | Complete |
+| 3 | Local Progression, Vault, grants, migration, recovery | Complete |
+| 4 | Themed Artifact sharing, receiving, Encounters, provenance | Complete |
+| 5A | Local-first private iCloud progression synchronization | Complete; live account/provisioning owner-only |
+| 5B | Optional Game Center catalog, mapping, outbox, status | Complete; records/sandbox login owner-only |
+| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Complete; physical-device qualification owner-only |
+| 7 | Limited/singular collectible program | Deferred separate program |
 
-P04 has landed the runtime I/O gateway, normalized inbound-file delivery, opaque
-resource and share leases, the metatype-only module factory, and typed root
-presentation. Its remaining phase closure work is tracked by the report-only FG-007
-finding. FG-016 remains open across the later resource, theme, and permanent-guard
-phases; neither finding is treated as a pass simply because the package and focused
-tests build successfully.
+The four production providers use the accepted corrected Elven v3.1 corpus: 56 logical
+resources, 184 shipping outputs, complete provenance, and deterministic regeneration.
+All nine Elven Series recovery findings pass simultaneously. Recovery is PASS / CLOSED,
+the corrected v3.1 package is ACCEPTED, and Phase C is PASS / MERGED TO MAIN via PR #45 at
+`e9e0e0c8814aaa107d7480e070f14a6fe9b09975`. Phase D provider targets, live entitlement
+binding, themed transport, Cloud/Game Center policy, and Wave 6 source hardening are
+implemented after that baseline without rewriting it.
 
-Hardware-only observations are owner-operated optional validation outside these phase
-statuses. They do not affect acceptance, completion, blocker status, residual work,
-PASS/FAIL, or pull-request readiness.
-
-### Product roadmap
-
-The locked roadmap evolves Rune Scribe in deliberately separated stages:
-
-1. Preserve current behavior and compatibility fixtures.
-2. Complete the app-owned Forsetti control plane and retain exactly one UI Module.
-3. Separate cipher material from Script presentation and add a typed `.runescribe`
-   container while keeping legacy readers.
-4. Prove one semantic UI scaffold with the Base Codex and two placeholder providers.
-5. Add deterministic local progression, Vault, Archive, achievements, and unlocks.
-6. Add themed Quick Share, Share Builder, and Encounter handling.
-7. Add private iCloud progression sync and optional Game Center reporting.
-8. Replace placeholders with reviewed production themes.
-
-The repository now includes the behavior-preserving modular foundation, the optional
-local Progression Module, and the Phase A/B Theme scaffold: approved Achievements,
-Codex gates, the Vault/Progress view, durable unlock reveals, privacy-safe
-existing-user migration, the runtime Theme coordinator, and the required Norse Base
-provider. Production Elven series providers, cloud synchronization, and Game Center
-remain disabled. Recovery is PASS / CLOSED.
-All nine Elven Series recovery findings pass simultaneously. The corrected v3.1
-package is ACCEPTED and contains 56 logical resources and 184 shipping
-outputs with complete provenance and deterministic-regeneration evidence.
-Phase C is PASS / MERGED TO MAIN via PR #45 at merge commit
-`e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
-Phase D is READY FOR AUTHORIZATION / NOT STARTED, and no production Elven provider
-target has been added to the shipping app.
-Later Theme and sharing implementation remains gated by the local runtime and
-compatibility program; there is no external-framework prerequisite. Hardware-only
-release observations are owner-operated outside Agent Coding scope and do not gate
-agent completion, PASS/FAIL, or pull-request readiness.
+The machine-readable [roadmap ledger](docs/verification/roadmap-alignment.json) covers
+124 tasks. `BAS-006`, `SHR-001`, and `SHR-015` are the only owner-optional rows;
+`BAS-005` is not applicable because no approved scrubbed real-user fixture was
+supplied. External-device, live-service, signing, archive/export, notarization, upload,
+rollout, and shipment work is recorded in the
+[no-ship owner handoff](docs/verification/roadmap-completion/OwnerTestAndNoShipHandoff.md).
 
 Current architecture and dependency authority lives in the
 [controlling Forsetti policy](docs/architecture/FORSETTI_CONTROLLING_POLICY.md),
@@ -347,8 +331,8 @@ Current architecture and dependency authority lives in the
 [architecture decisions](docs/architecture/decisions/README.md). The hash-locked
 [Codex System Specification](docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md)
 and [implementation roadmap](docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md)
-remain authoritative only for nonconflicting product requirements, compatibility
-anchors, and sequencing evidence; their external-framework direction is superseded.
+remain authority for nonconflicting product requirements, compatibility anchors, and
+historical sequencing; their former external-framework direction is superseded.
 
 ---
 
@@ -358,19 +342,25 @@ anchors, and sequencing evidence; their external-framework direction is supersed
   (CryptoKit) under a per-cipher 256-bit key. A fresh random nonce is used per
   message, and the GCM tag authenticates both key and contents — a wrong key or any
   tampering makes decryption **fail**, never silently mis-decode.
-- **On-device only.** Encrypting, decrypting, and key storage all happen locally.
-  Rune Scribe has no servers, no accounts, and makes no network calls.
+- **Local security authority.** Encrypting, decrypting, key storage, contacts, full
+  messages, package bytes, and unlock grants remain local. Rune Scribe has no message
+  server or proprietary account. Optional private CloudKit sync carries only bounded
+  progression facts, and optional Game Center receives monotonic trophy progress.
 - **Keys at rest.** Each cipher's key lives inside the cipher library, which is
   itself **AES-256-GCM encrypted** with a symmetric key held in the **Keychain**
   (`WhenUnlockedThisDeviceOnly`, no iCloud sync). Contacts are encrypted with the
   same key and written to an on-disk file (with complete file protection on iOS).
 - **Local sharing surfaces.** Sending a cipher or message hands a link, QR, or file
-  to the OS share sheet — the app still makes no network calls. Inbound links and
+  to the OS share sheet; Rune Scribe does not operate a message relay. Inbound links and
   scanned QR codes are validated entirely on-device (correct version, length,
   permutation, checksum) and a cipher never imports without your **one-tap
   confirmation** — and your PIN first, if App Lock is on. iOS QR scanning uses the
   camera only to read the code; frames are processed on-device and never saved or
   sent.
+- **Cloud field allowlist.** Private sync rejects plaintext, cipher/key material,
+  messages, package bytes, contact identity, raw relationship identifiers, QR content,
+  and private logs. Invalid remote records are quarantined without deleting valid
+  local Progression. Cloud and Game Center can never grant or revoke ownership.
 - **The PIN is never stored.** Only a random 16-byte salt and a
   **PBKDF2-HMAC-SHA256** derivation (120,000 iterations) are kept in the Keychain,
   compared in constant time. A persistent, escalating lockout (15s → 30s → 60s →
@@ -381,6 +371,10 @@ anchors, and sequencing evidence; their external-framework direction is supersed
   It is *not* a vetted secure messenger — there's no forward secrecy, no server-side
   verification, and no protection once a key is shared. A cipher — `.runescribe` file,
   QR image, or link — **is** the key; guard it accordingly and don't post it publicly.
+
+See the source-controlled [Privacy Policy](docs/PRIVACY.md) and
+[Support guide](docs/SUPPORT.md) for the optional Apple-service fields, user controls,
+fallback behavior, and current compatibility boundary.
 
 ---
 
@@ -402,9 +396,12 @@ Packages/RuneScribeArchitecture/
 │   ├── RuneScribeProgressionModule/ Local achievements, grants, migration and recovery
 │   ├── RuneScribeThemeCoordinatorModule/ Runtime Theme selection, fallback and diagnostics
 │   ├── RuneScribeNorseThemeModule/ Required Norse Base provider and verified resources
+│   ├── RuneScribeTheme*Module/    Four optional production Elven providers
+│   ├── RuneScribeCloudSyncModule/ Private progression schema and merge policy
+│   ├── RuneScribeGameCenterModule/ Frozen catalog, mapping and outbox policy
 │   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        826 Swift package tests
+└── Tests/                        981 Swift package tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -451,8 +448,9 @@ automated checks do not require a login-Keychain password.
 
 Both targets register the **`runescribe://`** URL scheme and a single exported
 **`com.runescribe.runescribe`** document type — the `.runescribe` cipher/message file,
-disambiguated by its leading version byte — and declare Contacts and (iOS) camera usage
-strings. Sharing is fully offline: there are no associated domains or Universal Links.
+disambiguated by typed-container magic or its legacy leading version byte — and declare
+Contacts and (iOS) camera usage strings. Sharing is fully offline: there are no
+associated domains or Universal Links.
 Those Info.plist keys and entitlements — and the bundled splash video — are configured
 in `project.yml` and `Config/`, the source of truth.
 
@@ -460,8 +458,8 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package currently contains **826 package tests** (737 XCTest cases and
-89 Swift Testing cases), supplemented by repository architecture guards, hosted
+The local Swift package currently contains **981 package tests** (857 XCTest cases and
+124 Swift Testing cases), supplemented by repository architecture guards, hosted
 macOS/iOS tests, iPhone/iPad UI parity, and an
 isolated macOS parity host. The package suite uses deterministic in-memory adapters and
 does not access the operator's login Keychain.

@@ -5,6 +5,7 @@ import Foundation
 enum CipherLibraryValidationError: Error, Equatable, Sendable {
     case unsupportedVersion(Int)
     case invalidVersionShape
+    case tooManyCiphers
     case duplicateCipher
     case invalidActiveCipher
     case progressionEvidenceRequired
@@ -19,6 +20,11 @@ struct CipherLibrary: Codable, Equatable, Sendable {
     /// Schema version, so the stored format can evolve safely.
     static let legacyVersion = 1
     static let currentVersion = 2
+    /// The identifier-free legacy message format requires a bounded try-all
+    /// decode. Keep storage and both decode paths on the same finite contract.
+    /// This includes the established 65,539-cipher sparse-progression case plus
+    /// bounded headroom without admitting a library that no message can decode.
+    static let maximumCipherCount = 65_568
 
     var version: Int
 
@@ -80,7 +86,21 @@ struct CipherLibrary: Codable, Equatable, Sendable {
             throw CipherLibraryValidationError.invalidVersionShape
         }
         version = decodedVersion
-        ciphers = try container.decode([Cipher].self, forKey: .ciphers)
+        var encodedCiphers = try container.nestedUnkeyedContainer(forKey: .ciphers)
+        if let count = encodedCiphers.count, count > Self.maximumCipherCount {
+            throw CipherLibraryValidationError.tooManyCiphers
+        }
+        var decodedCiphers: [Cipher] = []
+        decodedCiphers.reserveCapacity(
+            min(encodedCiphers.count ?? 0, Self.maximumCipherCount)
+        )
+        while !encodedCiphers.isAtEnd {
+            guard decodedCiphers.count < Self.maximumCipherCount else {
+                throw CipherLibraryValidationError.tooManyCiphers
+            }
+            decodedCiphers.append(try encodedCiphers.decode(Cipher.self))
+        }
+        ciphers = decodedCiphers
         activeID = try container.decodeIfPresent(UUID.self, forKey: .activeID)
         progressionLedger = try container.decodeIfPresent(
             CoreProgressionLedger.self,
@@ -169,6 +189,9 @@ struct CipherLibrary: Codable, Equatable, Sendable {
     }
 
     func validateStoredShape() throws {
+        guard ciphers.count <= Self.maximumCipherCount else {
+            throw CipherLibraryValidationError.tooManyCiphers
+        }
         guard Set(ciphers.map(\.id)).count == ciphers.count else {
             throw CipherLibraryValidationError.duplicateCipher
         }
@@ -272,8 +295,8 @@ extension CipherLibrary {
         return copy
     }
 
-    /// Marks the cipher with `cipherID` as delivered (no-op if not found). Touches nothing else.
-    func markingDelivered(cipherID: UUID) -> CipherLibrary {
+    /// Completes key delivery for `cipherID` (no-op if not found). Touches nothing else.
+    func completingKeyDelivery(cipherID: UUID) -> CipherLibrary {
         var copy = self
         if let i = copy.ciphers.firstIndex(where: { $0.id == cipherID }) {
             copy.ciphers[i].completeKeyDelivery()

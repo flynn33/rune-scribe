@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture --filter ProgressionApprovedCatalogRuleTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter FutureThemeLinkageIntegrationTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter RuntimeThemeFoundationIntegrationTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter ProgressionPresentationTests"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeProgressionModuleTests/ProgressionApprovedCatalogRuleTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeArchitectureTests/FutureThemeLinkageIntegrationTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeThemeFoundationIntegrationTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ProgressionPresentationTests.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json"
+  ],
+  "bindings": [
+    {
+      "codexID": "codex.moonleaf",
+      "entitlementID": "unlock.codex.moonleaf",
+      "gateRuleID": "rule.codex.moonleaf.known-in-five-circles"
+    },
+    {
+      "codexID": "codex.sunspire",
+      "entitlementID": "unlock.codex.sunspire",
+      "gateRuleID": "rule.codex.sunspire.reciprocal-light"
+    },
+    {
+      "codexID": "codex.wildwood",
+      "entitlementID": "unlock.codex.wildwood",
+      "gateRuleID": "rule.codex.wildwood.roots-of-memory"
+    },
+    {
+      "codexID": "codex.gloamthorn",
+      "entitlementID": "unlock.codex.gloamthorn",
+      "gateRuleID": "rule.codex.gloamthorn.beyond-the-gloam"
+    }
+  ],
+  "authority": "Progression owns evaluation, durable grants, replay, and entitlement projection; providers contain no progression import or unlock evaluation.",
+  "reconciliation": "Entitlement changes activate eligible installed providers without restart; corruption, revocation, or unavailability changes selection and fallback without deleting ownership history."
+}

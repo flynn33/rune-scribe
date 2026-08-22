@@ -1,0 +1,17 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "77D54A1F-0818-4761-B946-D7723490F6B3",
+        "deviceName" : "iPad Pro 13-inch (M5)",
+        "exportedFileName" : "B9DF311D-BA44-41F7-BFA3-0C87B6E5C4E6.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "fresh-install-primary-flows_0_A6BAEBE5-8009-4E0C-A665-70EFC447A743.png",
+        "timestamp" : 1787436768.559
+      }
+    ],
+    "testIdentifier" : "RuneScribeParityUITests/testFreshInstallExercisesPrimaryProductFlows()",
+    "testIdentifierURL" : "test://com.apple.xcode/RuneScrib/RuneScribIOSUITests/RuneScribeParityUITests/testFreshInstallExercisesPrimaryProductFlows"
+  }
+]

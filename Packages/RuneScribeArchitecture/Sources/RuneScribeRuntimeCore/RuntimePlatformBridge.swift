@@ -8,7 +8,7 @@ private struct SecureValueHandlers: Sendable {
 }
 
 private struct ProtectedFileHandlers: Sendable {
-    let read: @Sendable (ProtectedPath) async throws -> Data?
+    let read: @Sendable (ProtectedPath, Int) async throws -> Data?
     let write: @Sendable (Data, ProtectedPath) async throws -> Void
     let remove: @Sendable (ProtectedPath) async throws -> Void
     let exists: @Sendable (ProtectedPath) async throws -> Bool
@@ -114,7 +114,12 @@ actor RuntimePlatformBridge {
     func register(_ value: any ProtectedFileStore) throws {
         guard protectedFile == nil else { throw RuneScribeRuntimeError.duplicateService(RuneScribeServiceIDs.protectedFileStore) }
         protectedFile = ProtectedFileHandlers(
-            read: { try await value.read(relativePath: $0) },
+            read: {
+                try await value.read(
+                    relativePath: $0,
+                    maximumByteCount: $1
+                )
+            },
             write: { try await value.write($0, relativePath: $1) },
             remove: { try await value.remove(relativePath: $0) },
             exists: { try await value.exists(relativePath: $0) },
@@ -227,7 +232,7 @@ actor RuntimePlatformBridge {
         try validate(generation, serviceID: RuneScribeServiceIDs.secureValueStore)
     }
 
-    func protectedRead(_ path: ProtectedPath, generation: UInt64) async throws -> Data? { try validate(generation, serviceID: RuneScribeServiceIDs.protectedFileStore); guard let h = protectedFile?.read else { throw RuneScribeRuntimeError.serviceUnavailable(RuneScribeServiceIDs.protectedFileStore) }; let r = try await h(path); try validate(generation, serviceID: RuneScribeServiceIDs.protectedFileStore); return r }
+    func protectedRead(_ path: ProtectedPath, maximumByteCount: Int, generation: UInt64) async throws -> Data? { try validate(generation, serviceID: RuneScribeServiceIDs.protectedFileStore); guard let h = protectedFile?.read else { throw RuneScribeRuntimeError.serviceUnavailable(RuneScribeServiceIDs.protectedFileStore) }; let r = try await h(path, maximumByteCount); try validate(generation, serviceID: RuneScribeServiceIDs.protectedFileStore); return r }
     func protectedWrite(_ data: Data, _ path: ProtectedPath, generation: UInt64) async throws { try validate(generation, serviceID: RuneScribeServiceIDs.protectedFileStore); guard let h = protectedFile?.write else { throw RuneScribeRuntimeError.serviceUnavailable(RuneScribeServiceIDs.protectedFileStore) }; try await h(data, path); try validate(generation, serviceID: RuneScribeServiceIDs.protectedFileStore) }
     func protectedRemove(_ path: ProtectedPath, generation: UInt64) async throws { try validate(generation, serviceID: RuneScribeServiceIDs.protectedFileStore); guard let h = protectedFile?.remove else { throw RuneScribeRuntimeError.serviceUnavailable(RuneScribeServiceIDs.protectedFileStore) }; try await h(path); try validate(generation, serviceID: RuneScribeServiceIDs.protectedFileStore) }
     func protectedExists(_ path: ProtectedPath, generation: UInt64) async throws -> Bool { try validate(generation, serviceID: RuneScribeServiceIDs.protectedFileStore); guard let h = protectedFile?.exists else { throw RuneScribeRuntimeError.serviceUnavailable(RuneScribeServiceIDs.protectedFileStore) }; let r = try await h(path); try validate(generation, serviceID: RuneScribeServiceIDs.protectedFileStore); return r }

@@ -1,0 +1,7 @@
+Writing result bundle at path:
+	/tmp/runescribe-roadmap-macos-hosted-required-b7c55ff.HHMdeQ/RuneScrib-macOS-RequiredHosted-b7c55ff.xcresult
+
+2026-08-22 17:22:51.351 xcodebuild[11188:3305985] [MT] IDETestOperationsObserverDebug: 13.359 elapsed -- Testing started completed.
+2026-08-22 17:22:51.351 xcodebuild[11188:3305985] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-08-22 17:22:51.351 xcodebuild[11188:3305985] [MT] IDETestOperationsObserverDebug: 13.359 sec, +13.359 sec -- end
+Testing started

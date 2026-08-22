@@ -151,16 +151,22 @@ enum ThemeScriptFontSelector {
     static func postScriptName(
         themePostScriptName: String,
         cipherFontName: String?,
-        cipherFontSource: FontSourceDTO?
+        cipherFontSource: FontSourceDTO?,
+        cipherFontIsRegistered: Bool = true
     ) -> String {
-        if cipherFontSource == .imported, let cipherFontName {
+        if cipherFontSource == .imported,
+           cipherFontIsRegistered,
+           let cipherFontName {
             return cipherFontName
         }
         return themePostScriptName
     }
 
-    static func usesThemeVectors(cipherFontSource: FontSourceDTO?) -> Bool {
-        cipherFontSource != .imported
+    static func usesThemeVectors(
+        cipherFontSource: FontSourceDTO?,
+        cipherFontIsRegistered: Bool = true
+    ) -> Bool {
+        cipherFontSource != .imported || !cipherFontIsRegistered
     }
 }
 

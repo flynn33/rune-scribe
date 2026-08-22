@@ -69,6 +69,122 @@ extension RuneScribeCoreApplicationService {
 }
 
 final class P4BApplicationServiceTests: XCTestCase {
+    func testPresentationCommandsWriteVNextFilesAndNilPreservesLegacyRails() async throws {
+        let secure = P4BSecureStore()
+        let artifacts = P4BShareStore()
+        let service = RuneScribeCoreApplicationService(
+            secureValueStore: secure,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
+            clock: P4BClock(),
+            uuid: P4BUUIDs()
+        )
+        await service.startInboundProcessing()
+        let cipher = try await service.createCipher(CreateCipherCommand(name: "Phase F"))
+        let selection = try SharePresentationSelection(
+            codexID: CodexID(rawValue: "codex.moonleaf")!,
+            scriptID: ScriptID(rawValue: "script.moonleaf")!,
+            relicID: ArtifactID(rawValue: "relic.moonleaf.tablet")!,
+            sealID: ArtifactID(rawValue: "seal.moonleaf.firefly")!
+        )
+        let previewData = try XCTUnwrap(Data(base64Encoded:
+            "iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAABKADAAQAAAABAAAAAwAAAABUhAAoAAAAFklEQVQIHWM09k37z4AEmJDYYCaGAABbcAHrQYPA8AAAAABJRU5ErkJggg=="
+        ))
+        let previewDigest = ThemeSHA256Digest(rawValue: SHA256.hash(
+            data: previewData
+        ).map { String(format: "%02x", $0) }.joined())!
+        let metadata = try SharePresentationMetadata(
+            selection: selection,
+            safePreview: ShareSafePreviewMetadata(
+                mediaType: .png,
+                byteLength: UInt32(previewData.count),
+                pixelSize: ThemePixelSize(width: 4, height: 3),
+                sha256: previewDigest
+            ),
+            compatibility: SharePresentationCompatibilityFlags.safePreviewPresent
+                .union(.norseInteractiveFallback)
+        )
+        let presentation = try OutboundSharePresentationDTO(
+            metadata: metadata,
+            safePreviewData: previewData
+        )
+
+        let encoded = try await service.encode(
+            EncodeMessageCommand(plaintext: "vNext", cipherID: cipher.id)
+        )
+        let themedMessage = try await service.prepareMessageShare(
+            PrepareMessageShareCommand(
+                runes: encoded.runes,
+                senderName: "Sender",
+                cipherID: cipher.id,
+                presentation: presentation
+            )
+        )
+        XCTAssertEqual(themedMessage.reference, .file(themedMessage.id))
+        XCTAssertFalse(themedMessage.requiresKeyDelivery)
+        let storedThemedMessage = await artifacts.createdData(id: themedMessage.id)
+        let messageData = try XCTUnwrap(storedThemedMessage)
+        let messagePackage = try RuneScribePackage(decoding: messageData)
+        XCTAssertEqual(messagePackage.kind, .encryptedMessage)
+        XCTAssertEqual(messagePackage.sharePresentation().metadata?.selection, selection)
+        XCTAssertNil(
+            try MessageSharePayload(decoding: messagePackage.corePayload).embeddedCipher
+        )
+
+        let inboundURL = try temporaryFile(containing: messageData)
+        defer { try? FileManager.default.removeItem(at: inboundURL) }
+        let received = try await service.importFile(inboundFile(inboundURL))
+        XCTAssertEqual(received.disposition, .receivedMessage)
+        let receivedSnapshot = try await currentSnapshot(from: service)
+        let receivedMessage = try XCTUnwrap(
+            receivedSnapshot.messageState.pendingMessage
+        )
+        XCTAssertEqual(receivedMessage.presentation?.requestedSelection, selection)
+        XCTAssertEqual(
+            receivedMessage.presentation?.effectiveCodexID,
+            RuneScribeCodexIDs.norse
+        )
+        XCTAssertEqual(
+            receivedMessage.presentation?.renderMode,
+            .norseInteractiveFallback
+        )
+        XCTAssertEqual(receivedMessage.safePreviewData, previewData)
+
+        let legacyMessage = try await service.prepareMessageShare(
+            PrepareMessageShareCommand(
+                runes: encoded.runes,
+                senderName: "Sender",
+                cipherID: cipher.id
+            )
+        )
+        XCTAssertEqual(legacyMessage.reference, .opaque(legacyMessage.id))
+        let storedLegacyMessage = await artifacts.createdData(id: legacyMessage.id)
+        XCTAssertNil(storedLegacyMessage)
+
+        let themedCipher = try await service.prepareCipherShare(
+            PrepareCipherShareCommand(
+                cipherID: cipher.id,
+                representation: .file,
+                presentation: presentation
+            )
+        )
+        let storedThemedCipher = await artifacts.createdData(id: themedCipher.id)
+        let cipherData = try XCTUnwrap(storedThemedCipher)
+        let cipherPackage = try RuneScribePackage(decoding: cipherData)
+        XCTAssertEqual(cipherPackage.kind, .cipherInvitation)
+        XCTAssertEqual(cipherPackage.sharePresentation().metadata?.selection, selection)
+
+        let legacyCipher = try await service.prepareCipherShare(
+            PrepareCipherShareCommand(
+                cipherID: cipher.id,
+                representation: .file
+            )
+        )
+        let storedLegacyCipher = await artifacts.createdData(id: legacyCipher.id)
+        let legacyCipherData = try XCTUnwrap(storedLegacyCipher)
+        XCTAssertFalse(RuneScribePackage.hasMagic(legacyCipherData))
+        XCTAssertEqual(legacyCipherData.first, UInt8(RuneScribeWireFormat.cipherVersion))
+    }
+
     func testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup() async throws {
         let secure = P4BSecureStore()
         let artifacts = P4BShareStore()
@@ -1184,7 +1300,7 @@ final class P4BApplicationServiceTests: XCTestCase {
             version: 1,
             sha256: importedFontDigest
         )
-        let frozenCipher = Cipher(
+        var frozenCipher = Cipher(
             id: cipherID,
             label: "Legacy Cipher",
             origin: .generated,
@@ -1193,9 +1309,9 @@ final class P4BApplicationServiceTests: XCTestCase {
             keyMaterial: frozenCipherKey,
             decorativeMapping: Array((0..<32).reversed()),
             fontRef: .bundled,
-            contactID: contactID,
-            delivered: true
+            contactID: contactID
         )
+        frozenCipher.completeKeyDelivery()
         let importedFontCipher = Cipher(
             id: importedFontCipherID,
             label: "Imported Font Cipher",
@@ -1324,10 +1440,19 @@ final class P4BApplicationServiceTests: XCTestCase {
             snapshot.lockState.retryAfter,
             Date(timeIntervalSince1970: 1_750_000_014)
         )
-        let correctPINMatches = try await service.verifyPIN(PINInput("1234"))
-        let incorrectPINMatches = try await service.verifyPIN(PINInput("0000"))
-        XCTAssertTrue(correctPINMatches)
-        XCTAssertFalse(incorrectPINMatches)
+        let correctPINMatchesDuringCooldown = try await service.verifyPIN(
+            PINInput("1234")
+        )
+        let incorrectPINMatchesDuringCooldown = try await service.verifyPIN(
+            PINInput("0000")
+        )
+        XCTAssertFalse(correctPINMatchesDuringCooldown)
+        XCTAssertFalse(incorrectPINMatchesDuringCooldown)
+        let stillThrottled = try await currentSnapshot(from: service)
+        XCTAssertEqual(
+            stillThrottled.lockState.retryAfter,
+            Date(timeIntervalSince1970: 1_750_000_014)
+        )
         XCTAssertEqual(
             defaults.object(forKey: "rf.splash.lastShownAt") as? Date,
             lastSplashDate
@@ -1518,7 +1643,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         )
     }
 
-    func testInboundMessageEmbeddedAndStoredCipherPathsPreserveAssociationAndDedupe() async throws {
+    func testInboundMessageRequiresCipherConfirmationAndIgnoresWireSenderForStoredCipher() async throws {
         let secure = P4BSecureStore()
         let protected = P4BProtectedStore()
         let service = fullService(secure: secure, protected: protected)
@@ -1538,6 +1663,7 @@ final class P4BApplicationServiceTests: XCTestCase {
 
         let embeddedResult = try await service.importFile(inboundFile(embeddedURL))
         XCTAssertEqual(embeddedResult.disposition, .receivedMessage)
+        let confirmation = try XCTUnwrap(embeddedResult.pendingImport)
         let duplicate = try await service.importFile(inboundFile(embeddedURL))
         XCTAssertEqual(duplicate.disposition, .duplicate)
 
@@ -1546,26 +1672,47 @@ final class P4BApplicationServiceTests: XCTestCase {
             embeddedSnapshot.messageState.pendingMessage?.plaintext,
             "embedded hello"
         )
-        let senderContact = try XCTUnwrap(
-            embeddedSnapshot.contactLibrary.contacts.first {
-                $0.displayName == "Sender Person"
+        XCTAssertEqual(
+            embeddedSnapshot.messageState.pendingMessage?.senderIdentityStatus,
+            .awaitingCipherConfirmation
+        )
+        XCTAssertEqual(embeddedSnapshot.messageState.pendingMessage?.senderName, "Sender Person")
+        XCTAssertTrue(embeddedSnapshot.contactLibrary.contacts.isEmpty)
+        XCTAssertFalse(
+            embeddedSnapshot.cipherLibrary.ciphers.contains {
+                $0.publicIdentifier == senderCipher.shortPublicID
             }
         )
-        XCTAssertEqual(senderContact.linkedCipherCount, 1)
-        let importedCipher = try XCTUnwrap(
-            embeddedSnapshot.cipherLibrary.ciphers.first {
-                $0.assignedContactID == senderContact.id
-            }
+
+        let importedCipher = try await service.confirmImport(
+            ConfirmImportCommand(
+                importID: confirmation.id,
+                name: "Reviewed Sender Cipher"
+            )
         )
-        XCTAssertEqual(embeddedSnapshot.cipherLibrary.activeCipherID, initialActiveID)
+        let confirmedSnapshot = try await currentSnapshot(from: service)
+        XCTAssertEqual(
+            confirmedSnapshot.messageState.pendingMessage?.senderIdentityStatus,
+            .confirmedCipher
+        )
+        XCTAssertEqual(
+            confirmedSnapshot.messageState.pendingMessage?.senderName,
+            "Reviewed Sender Cipher"
+        )
+        XCTAssertEqual(
+            confirmedSnapshot.messageState.pendingMessage?.cipherID,
+            importedCipher.id
+        )
+        XCTAssertTrue(confirmedSnapshot.contactLibrary.contacts.isEmpty)
+        XCTAssertEqual(confirmedSnapshot.cipherLibrary.activeCipherID, importedCipher.id)
         XCTAssertNotEqual(importedCipher.id, initialActiveID)
-        let cipherCount = embeddedSnapshot.cipherLibrary.ciphers.count
-        let firstMessageID = try XCTUnwrap(embeddedSnapshot.messageState.pendingMessage?.id)
+        let cipherCount = confirmedSnapshot.cipherLibrary.ciphers.count
+        let firstMessageID = try XCTUnwrap(confirmedSnapshot.messageState.pendingMessage?.id)
         await service.dismissReceivedMessage(id: firstMessageID)
 
         let storedBytes = try messageFileData(
             plaintext: "stored hello",
-            senderName: "Sender Person",
+            senderName: "Spoofed Wire Sender",
             cipher: senderCipher,
             embedsCipher: false
         )
@@ -1575,20 +1722,132 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(storedResult.disposition, .receivedMessage)
         let storedSnapshot = try await currentSnapshot(from: service)
         XCTAssertEqual(storedSnapshot.messageState.pendingMessage?.plaintext, "stored hello")
-        XCTAssertEqual(storedSnapshot.contactLibrary.contacts.count, 1)
+        XCTAssertEqual(
+            storedSnapshot.messageState.pendingMessage?.senderIdentityStatus,
+            .trustedLocalCipher
+        )
+        XCTAssertEqual(
+            storedSnapshot.messageState.pendingMessage?.senderName,
+            "Reviewed Sender Cipher"
+        )
+        XCTAssertTrue(storedSnapshot.contactLibrary.contacts.isEmpty)
         XCTAssertEqual(storedSnapshot.cipherLibrary.ciphers.count, cipherCount)
-        XCTAssertEqual(storedSnapshot.cipherLibrary.activeCipherID, initialActiveID)
+        XCTAssertEqual(storedSnapshot.cipherLibrary.activeCipherID, importedCipher.id)
         let storedMessageID = try XCTUnwrap(storedSnapshot.messageState.pendingMessage?.id)
         await service.dismissReceivedMessage(id: storedMessageID)
 
-        // Dismissal forgets pending-only content dedupe, while embedded public-ID
-        // ingestion still reuses the persisted cipher and exact-name contact.
+        // Dismissal forgets pending-only content dedupe, while the embedded
+        // public ID reuses the explicitly confirmed local cipher.
         let resent = try await service.importFile(inboundFile(embeddedURL))
         XCTAssertEqual(resent.disposition, .receivedMessage)
+        XCTAssertNil(resent.pendingImport)
         let resentSnapshot = try await currentSnapshot(from: service)
         XCTAssertEqual(resentSnapshot.cipherLibrary.ciphers.count, cipherCount)
-        XCTAssertEqual(resentSnapshot.contactLibrary.contacts.count, 1)
-        XCTAssertEqual(resentSnapshot.cipherLibrary.activeCipherID, initialActiveID)
+        XCTAssertTrue(resentSnapshot.contactLibrary.contacts.isEmpty)
+        XCTAssertEqual(
+            resentSnapshot.messageState.pendingMessage?.senderName,
+            "Reviewed Sender Cipher"
+        )
+        XCTAssertEqual(resentSnapshot.cipherLibrary.activeCipherID, importedCipher.id)
+    }
+
+    func testCancellingFirstDeliveryCipherConfirmationRetainsDecryptedMessage() async throws {
+        let service = fullService(
+            secure: P4BSecureStore(),
+            protected: P4BProtectedStore()
+        )
+        await service.startInboundProcessing()
+        let senderCipher = Cipher.generated(label: "Unconfirmed Sender")
+        let bytes = try messageFileData(
+            plaintext: "read after cancellation",
+            senderName: "Unverified Sender",
+            cipher: senderCipher,
+            embedsCipher: true
+        )
+        let url = try temporaryFile(containing: bytes)
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let result = try await service.importFile(inboundFile(url))
+        let confirmation = try XCTUnwrap(result.pendingImport)
+        let awaiting = try await currentSnapshot(from: service)
+        let message = try XCTUnwrap(awaiting.messageState.pendingMessage)
+        XCTAssertEqual(awaiting.importState.pending?.id, confirmation.id)
+        XCTAssertEqual(message.plaintext, "read after cancellation")
+        XCTAssertEqual(message.senderIdentityStatus, .awaitingCipherConfirmation)
+
+        await service.cancelImport(id: confirmation.id)
+
+        let cancelled = try await currentSnapshot(from: service)
+        XCTAssertEqual(cancelled.importState.phase, .idle)
+        XCTAssertNil(cancelled.importState.pending)
+        XCTAssertEqual(cancelled.messageState.phase, .received)
+        XCTAssertEqual(cancelled.messageState.pendingMessage?.id, message.id)
+        XCTAssertEqual(
+            cancelled.messageState.pendingMessage?.plaintext,
+            "read after cancellation"
+        )
+        XCTAssertEqual(
+            cancelled.messageState.pendingMessage?.senderIdentityStatus,
+            .awaitingCipherConfirmation
+        )
+        XCTAssertTrue(cancelled.contactLibrary.contacts.isEmpty)
+        XCTAssertFalse(
+            cancelled.cipherLibrary.ciphers.contains {
+                $0.publicIdentifier == senderCipher.shortPublicID
+            }
+        )
+
+        await service.dismissReceivedMessage(id: message.id)
+        let dismissed = try await currentSnapshot(from: service)
+        XCTAssertNil(dismissed.importState.pending)
+        XCTAssertNil(dismissed.messageState.pendingMessage)
+        XCTAssertEqual(dismissed.messageState.phase, .idle)
+    }
+
+    func testFirstDeliveryStateStreamNeverPublishesMessageBeforeMatchingConfirmation() async throws {
+        let service = fullService(
+            secure: P4BSecureStore(),
+            protected: P4BProtectedStore()
+        )
+        await service.startInboundProcessing()
+        let senderCipher = Cipher.generated(label: "Stream Sender")
+        let bytes = try messageFileData(
+            plaintext: "coherent stream state",
+            senderName: "Stream Sender",
+            cipher: senderCipher,
+            embedsCipher: true
+        )
+        let url = try temporaryFile(containing: bytes)
+        defer { try? FileManager.default.removeItem(at: url) }
+        let input = inboundFile(url)
+        var iterator = service.stateStream().makeAsyncIterator()
+        let initialValue = await iterator.next()
+        let initial = try XCTUnwrap(initialValue)
+        XCTAssertFalse(initial.cipherLibrary.isLoading)
+
+        let ingestion = Task { try await service.importFile(input) }
+        var observed: [RuneScribeApplicationSnapshot] = []
+        while let snapshot = await iterator.next() {
+            observed.append(snapshot)
+            if snapshot.messageState.pendingMessage?.senderIdentityStatus
+                == .awaitingCipherConfirmation {
+                break
+            }
+        }
+        let result = try await ingestion.value
+        let confirmation = try XCTUnwrap(result.pendingImport)
+        let messageID = try XCTUnwrap(result.receivedMessageID)
+        let awaitingSnapshots = observed.filter {
+            $0.messageState.pendingMessage?.senderIdentityStatus
+                == .awaitingCipherConfirmation
+        }
+
+        XCTAssertFalse(awaitingSnapshots.isEmpty)
+        for snapshot in awaitingSnapshots {
+            XCTAssertEqual(snapshot.messageState.pendingMessage?.id, messageID)
+            XCTAssertEqual(snapshot.importState.phase, .awaitingConfirmation)
+            XCTAssertEqual(snapshot.importState.pending?.id, confirmation.id)
+        }
     }
 
     func testInboundMessageFailuresAreSafeAndDoNotBlockRetry() async throws {
@@ -1720,143 +1979,182 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(failed.importState.lastFailure?.code, .unsupportedFormat)
     }
 
-    func testMessageContactCommitFailureRepairsBeforeRetry() async throws {
+    func testStoredCipherSpoofedSenderDoesNotCreateContactOrWriteContactStore() async throws {
         let secure = P4BSecureStore()
         let protected = P4BProtectedStore()
         let service = fullService(secure: secure, protected: protected)
         await service.startInboundProcessing()
-        let cipher = Cipher.generated(label: "Contact Failure")
-        let contactAID = try await establishMessageAssociation(
+        let cipher = Cipher.generated(label: "Established Sender")
+        let association = try await establishMessageAssociation(
             service: service,
             cipher: cipher,
-            contactName: "Contact A"
+            contactName: "Trusted Contact"
         )
+        let writesBefore = await protected.writePaths()
+        await protected.failNextContactWrites()
         let bytes = try messageFileData(
-            plaintext: "repair then retry",
-            senderName: "Contact B",
+            plaintext: "spoofed sender",
+            senderName: "Attacker Chosen Contact",
             cipher: cipher,
             embedsCipher: false
         )
         let url = try temporaryFile(containing: bytes)
         defer { try? FileManager.default.removeItem(at: url) }
-        await protected.failNextContactWrites()
 
-        do {
-            _ = try await service.importFile(inboundFile(url))
-            XCTFail("A failed durable contact association must fail intake")
-        } catch {}
-        let failed = try await currentSnapshot(from: service)
-        XCTAssertEqual(failed.messageState.phase, .failed)
-        XCTAssertNil(failed.messageState.pendingMessage)
-        XCTAssertNil(failed.contactLibrary.contacts.first { $0.displayName == "Contact B" })
+        let result = try await service.importFile(inboundFile(url))
+        XCTAssertEqual(result.disposition, .receivedMessage)
+        let snapshot = try await currentSnapshot(from: service)
+        XCTAssertEqual(snapshot.messageState.pendingMessage?.plaintext, "spoofed sender")
         XCTAssertEqual(
-            failed.contactLibrary.contacts.first { $0.id == contactAID }?.linkedCipherCount,
+            snapshot.messageState.pendingMessage?.senderIdentityStatus,
+            .trustedLocalCipher
+        )
+        XCTAssertEqual(
+            snapshot.messageState.pendingMessage?.senderName,
+            association.cipher.name
+        )
+        XCTAssertNil(
+            snapshot.contactLibrary.contacts.first {
+                $0.displayName == "Attacker Chosen Contact"
+            }
+        )
+        XCTAssertEqual(
+            snapshot.contactLibrary.contacts.first {
+                $0.id == association.contact.id
+            }?.linkedCipherCount,
             1
         )
         XCTAssertEqual(
-            failed.cipherLibrary.ciphers.first { $0.assignedContactID == contactAID }?
-                .assignedContactID,
-            contactAID
+            snapshot.cipherLibrary.ciphers.first {
+                $0.id == association.cipher.id
+            }?.assignedContactID,
+            association.contact.id
         )
-
-        let retried = try await service.importFile(inboundFile(url))
-        XCTAssertEqual(retried.disposition, .receivedMessage)
-        let recovered = try await currentSnapshot(from: service)
-        let contact = try XCTUnwrap(
-            recovered.contactLibrary.contacts.first { $0.displayName == "Contact B" }
-        )
-        XCTAssertEqual(contact.linkedCipherCount, 1)
+        let writesAfter = await protected.writePaths()
+        XCTAssertEqual(writesAfter, writesBefore)
     }
 
-    func testCancelledMessageContactCommitRepairsWithoutCreatingContact() async throws {
+    func testStoredCipherWireLabelMatchingExistingContactDoesNotRebind() async throws {
         let secure = P4BSecureStore()
         let protected = P4BProtectedStore()
         let service = fullService(secure: secure, protected: protected)
         await service.startInboundProcessing()
-        let cipher = Cipher.generated(label: "Cancelled Contact")
-        let contactAID = try await establishMessageAssociation(
+        let cipher = Cipher.generated(label: "Established Collision Sender")
+        let association = try await establishMessageAssociation(
             service: service,
             cipher: cipher,
-            contactName: "Cancellation A"
+            contactName: "Original Contact"
         )
+        let decoy = try await service.createContact(
+            CreateContactCommand(displayName: "Matching Wire Label")
+        )
+        let writesBefore = await protected.writePaths()
         let url = try temporaryFile(
             containing: messageFileData(
-                plaintext: "cancel association",
-                senderName: "Cancellation B",
+                plaintext: "do not rebind",
+                senderName: "Matching Wire Label",
                 cipher: cipher,
                 embedsCipher: false
             )
         )
         defer { try? FileManager.default.removeItem(at: url) }
-        await protected.pauseNextContactWrite()
 
-        let input = inboundFile(url)
-        let operation = Task { try await service.importFile(input) }
-        await protected.waitUntilContactWritePaused()
-        operation.cancel()
-        await protected.resumeContactWrite()
-        do {
-            _ = try await operation.value
-            XCTFail("Cancellation before the contact commit must fail intake")
-        } catch {}
-
+        let result = try await service.importFile(inboundFile(url))
+        XCTAssertEqual(result.disposition, .receivedMessage)
         let snapshot = try await currentSnapshot(from: service)
-        XCTAssertEqual(snapshot.messageState.phase, .failed)
-        XCTAssertNil(
-            snapshot.contactLibrary.contacts.first { $0.displayName == "Cancellation B" }
+        XCTAssertEqual(
+            snapshot.messageState.pendingMessage?.senderName,
+            association.cipher.name
         )
         XCTAssertEqual(
-            snapshot.contactLibrary.contacts.first { $0.id == contactAID }?.linkedCipherCount,
+            snapshot.contactLibrary.contacts.first {
+                $0.id == association.contact.id
+            }?.linkedCipherCount,
             1
         )
+        XCTAssertEqual(
+            snapshot.contactLibrary.contacts.first { $0.id == decoy.id }?
+                .linkedCipherCount,
+            0
+        )
+        XCTAssertEqual(
+            snapshot.cipherLibrary.ciphers.first {
+                $0.id == association.cipher.id
+            }?.assignedContactID,
+            association.contact.id
+        )
+        let writesAfter = await protected.writePaths()
+        XCTAssertEqual(writesAfter, writesBefore)
     }
 
-    func testMessageAssociationRepairsOnReconstructionWithoutRetryingImport() async throws {
+    func testSpoofedStoredCipherMessageLeavesNoContactRepairAcrossReconstruction() async throws {
         let secure = P4BSecureStore()
         let protected = P4BProtectedStore()
         let firstService = fullService(secure: secure, protected: protected)
         await firstService.startInboundProcessing()
-        let cipher = Cipher.generated(label: "Reconstruct Contact")
-        let contactAID = try await establishMessageAssociation(
+        let cipher = Cipher.generated(label: "Established Reconstruction Sender")
+        let association = try await establishMessageAssociation(
             service: firstService,
             cipher: cipher,
-            contactName: "Reconstruction A"
+            contactName: "Durable Contact"
         )
+        let writesBefore = await protected.writePaths()
         let url = try temporaryFile(
             containing: messageFileData(
-                plaintext: "reconstruct",
-                senderName: "Reconstruction B",
+                plaintext: "spoof before reconstruction",
+                senderName: "Spoofed Reconstruction Contact",
                 cipher: cipher,
                 embedsCipher: false
             )
         )
         defer { try? FileManager.default.removeItem(at: url) }
-        await protected.failNextContactWrites {
-            await secure.failNextCipherLibraryWrites(1)
-        }
 
-        do {
-            _ = try await firstService.importFile(inboundFile(url))
-            XCTFail("Both the association commit and immediate repair are injected failures")
-        } catch {}
+        let result = try await firstService.importFile(inboundFile(url))
+        XCTAssertEqual(result.disposition, .receivedMessage)
+        let received = try await currentSnapshot(from: firstService)
+        XCTAssertEqual(
+            received.messageState.pendingMessage?.senderName,
+            association.cipher.name
+        )
+        let writesAfterImport = await protected.writePaths()
+        XCTAssertEqual(writesAfterImport, writesBefore)
+        let messageID = try XCTUnwrap(received.messageState.pendingMessage?.id)
+        await firstService.dismissReceivedMessage(id: messageID)
+
+        let associationIntentPath = try XCTUnwrap(
+            ProtectedPath(
+                rawValue: "RuneScribContacts/message-contact-association.enc"
+            )
+        )
+        let persistedBeforeReconstruction = await protected.storedValues()
+        XCTAssertNil(persistedBeforeReconstruction[associationIntentPath])
 
         let reconstructed = fullService(secure: secure, protected: protected)
         await reconstructed.startInboundProcessing()
         let snapshot = try await currentSnapshot(from: reconstructed)
         XCTAssertFalse(snapshot.cipherLibrary.isLoading)
         XCTAssertNil(
-            snapshot.contactLibrary.contacts.first { $0.displayName == "Reconstruction B" }
+            snapshot.contactLibrary.contacts.first {
+                $0.displayName == "Spoofed Reconstruction Contact"
+            }
         )
         XCTAssertEqual(
-            snapshot.contactLibrary.contacts.first { $0.id == contactAID }?.linkedCipherCount,
+            snapshot.contactLibrary.contacts.first {
+                $0.id == association.contact.id
+            }?.linkedCipherCount,
             1
         )
         XCTAssertEqual(
-            snapshot.cipherLibrary.ciphers.first { $0.assignedContactID == contactAID }?
-                .assignedContactID,
-            contactAID
+            snapshot.cipherLibrary.ciphers.first {
+                $0.id == association.cipher.id
+            }?.assignedContactID,
+            association.contact.id
         )
         XCTAssertNil(snapshot.messageState.pendingMessage)
+        let writesAfterReconstruction = await protected.writePaths()
+        XCTAssertEqual(writesAfterReconstruction, writesBefore)
+        let persistedAfterReconstruction = await protected.storedValues()
+        XCTAssertNil(persistedAfterReconstruction[associationIntentPath])
     }
 
     func testTransientMessageCipherDecryptsWithoutCreatingContact() async throws {
@@ -1903,7 +2201,8 @@ final class P4BApplicationServiceTests: XCTestCase {
             )
         )
         defer { try? FileManager.default.removeItem(at: messageURL) }
-        _ = try await service.importFile(inboundFile(messageURL))
+        let messageResult = try await service.importFile(inboundFile(messageURL))
+        let messageConfirmation = try XCTUnwrap(messageResult.pendingImport)
         let pendingMessageSnapshot = try await currentSnapshot(from: service)
         let messageID = try XCTUnwrap(
             pendingMessageSnapshot.messageState.pendingMessage?.id
@@ -1915,9 +2214,13 @@ final class P4BApplicationServiceTests: XCTestCase {
         _ = try await service.receive(.lifecycle(inboundLifecycle(.didBecomeActive)))
         let stillMessage = try await currentSnapshot(from: service)
         XCTAssertNotNil(stillMessage.messageState.pendingMessage)
-        XCTAssertNil(stillMessage.importState.pending)
+        XCTAssertEqual(stillMessage.importState.pending?.id, messageConfirmation.id)
+        XCTAssertEqual(stillMessage.importState.pending?.source, .file)
 
         await service.dismissReceivedMessage(id: messageID)
+        let dismissedMessage = try await currentSnapshot(from: service)
+        XCTAssertNil(dismissedMessage.messageState.pendingMessage)
+        XCTAssertNil(dismissedMessage.importState.pending)
         _ = try await service.receive(.lifecycle(inboundLifecycle(.didBecomeActive)))
         let importedClipboard = try await currentSnapshot(from: service)
         XCTAssertEqual(importedClipboard.importState.pending?.suggestedName, "Clipboard")
@@ -2186,7 +2489,10 @@ final class P4BApplicationServiceTests: XCTestCase {
                     try await secure.delete(service: $0, account: $1)
                 },
                 readProtectedFile: {
-                    try await protected.read(relativePath: $0)
+                    try await protected.read(
+                        relativePath: $0,
+                        maximumByteCount: $1
+                    )
                 },
                 writeProtectedFile: {
                     try await protected.write($0, relativePath: $1)
@@ -2395,7 +2701,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         service: RuneScribeCoreApplicationService,
         cipher: Cipher,
         contactName: String
-    ) async throws -> ContactID {
+    ) async throws -> (contact: ContactSummary, cipher: CipherSummary) {
         let url = try temporaryFile(
             containing: messageFileData(
                 plaintext: "establish association",
@@ -2405,14 +2711,37 @@ final class P4BApplicationServiceTests: XCTestCase {
             )
         )
         defer { try? FileManager.default.removeItem(at: url) }
-        _ = try await service.importFile(inboundFile(url))
-        let snapshot = try await currentSnapshot(from: service)
-        let contact = try XCTUnwrap(
-            snapshot.contactLibrary.contacts.first { $0.displayName == contactName }
+        let result = try await service.importFile(inboundFile(url))
+        XCTAssertEqual(result.disposition, .receivedMessage)
+        let pendingImport = try XCTUnwrap(result.pendingImport)
+        let importedCipher = try await service.confirmImport(
+            ConfirmImportCommand(
+                importID: pendingImport.id,
+                name: "Trusted \(contactName) Cipher"
+            )
         )
+        let createdContact = try await service.createContact(
+            CreateContactCommand(displayName: contactName)
+        )
+        try await service.assignContact(
+            AssignContactCommand(
+                cipherID: importedCipher.id,
+                contactID: createdContact.id
+            )
+        )
+        let snapshot = try await currentSnapshot(from: service)
+        XCTAssertEqual(snapshot.cipherLibrary.activeCipherID, importedCipher.id)
+        let contact = try XCTUnwrap(
+            snapshot.contactLibrary.contacts.first { $0.id == createdContact.id }
+        )
+        let storedCipher = try XCTUnwrap(
+            snapshot.cipherLibrary.ciphers.first { $0.id == importedCipher.id }
+        )
+        XCTAssertEqual(contact.linkedCipherCount, 1)
+        XCTAssertEqual(storedCipher.assignedContactID, contact.id)
         let messageID = try XCTUnwrap(snapshot.messageState.pendingMessage?.id)
         await service.dismissReceivedMessage(id: messageID)
-        return contact.id
+        return (contact: contact, cipher: storedCipher)
     }
 
     private func temporaryFile(containing data: Data) throws -> URL {
@@ -2615,11 +2944,6 @@ private actor P4BProtectedStore: ProtectedFileStore {
     private var writes: [ProtectedPath] = []
     private var removals: [ProtectedPath] = []
     private var contactWriteFailuresRemaining = 0
-    private var contactFailureAction: (@Sendable () async -> Void)?
-    private var pauseNextContactSet = false
-    private var contactSetIsPaused = false
-    private var contactPauseWaiters: [CheckedContinuation<Void, Never>] = []
-    private var contactResumeContinuation: CheckedContinuation<Void, Never>?
 
     func seed(_ data: Data, at path: ProtectedPath) {
         values[path] = data
@@ -2637,49 +2961,25 @@ private actor P4BProtectedStore: ProtectedFileStore {
         removals
     }
 
-    func failNextContactWrites(
-        _ count: Int = 1,
-        then action: (@Sendable () async -> Void)? = nil
-    ) {
+    func failNextContactWrites(_ count: Int = 1) {
         contactWriteFailuresRemaining = count
-        contactFailureAction = action
     }
 
-    func pauseNextContactWrite() {
-        pauseNextContactSet = true
-        contactSetIsPaused = false
-    }
-
-    func waitUntilContactWritePaused() async {
-        if contactSetIsPaused { return }
-        await withCheckedContinuation { contactPauseWaiters.append($0) }
-    }
-
-    func resumeContactWrite() {
-        contactResumeContinuation?.resume()
-        contactResumeContinuation = nil
-    }
-
-    func read(relativePath: ProtectedPath) async throws -> Data? {
-        values[relativePath]
+    func read(
+        relativePath: ProtectedPath,
+        maximumByteCount: Int
+    ) async throws -> Data? {
+        guard let data = values[relativePath] else { return nil }
+        guard data.count <= maximumByteCount else {
+            throw ProtectedFileStoreReadError.contentTooLarge
+        }
+        return data
     }
 
     func write(_ data: Data, relativePath: ProtectedPath) async throws {
         if relativePath == .contacts {
-            if pauseNextContactSet {
-                pauseNextContactSet = false
-                contactSetIsPaused = true
-                let waiters = contactPauseWaiters
-                contactPauseWaiters.removeAll()
-                for waiter in waiters { waiter.resume() }
-                await withCheckedContinuation { contactResumeContinuation = $0 }
-                try Task.checkCancellation()
-            }
             if contactWriteFailuresRemaining > 0 {
                 contactWriteFailuresRemaining -= 1
-                let action = contactFailureAction
-                contactFailureAction = nil
-                await action?()
                 throw P4BInjectedFailure()
             }
         }

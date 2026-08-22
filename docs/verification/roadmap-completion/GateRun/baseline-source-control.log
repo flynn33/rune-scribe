@@ -1,0 +1,52 @@
+qualification_worktree=/Users/jimdaley/GitHub/Rune-Scribe-Roadmap-Completion
+qualification_branch=feature/roadmap-completion-post-phase-c
+qualification_head=b7c55ff40255f96a6c857b49a14962e9fcd79c37
+required_baseline=131f101069d1a8053f72e60918092e81373e2687
+merge_base=131f101069d1a8053f72e60918092e81373e2687
+baseline_is_ancestor=0
+original_worktree=/Users/jimdaley/GitHub/Rune-Scribe
+original_head=af60a3c62d4b7828f3ab944504e06036ece4129e
+original_branch=runtime-owned-io-presentation
+original_status_begin
+ M docs/verification/elven-remediation/ElvenSupplementalAudit.json
+ M docs/verification/elven-remediation/source-discovery/source-discovery.json
+ M docs/verification/elven-remediation/source-discovery/source-discovery.md
+?? docs/verification/elven-remediation/DEV-ELVEN-008-009-remediation-audit.json
+?? docs/verification/elven-remediation/DEV-ELVEN-009-outputfact-repair.json
+?? docs/verification/elven-remediation/DEV-ELVEN-audit-before.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-RunFinal.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-current.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-run.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-test.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-test2.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-test3.json
+?? docs/verification/elven-remediation/ElvenSupplementalAudit-test4.json
+?? docs/verification/elven-remediation/source-discovery.json
+?? docs/verification/elven-remediation/source-discovery.md
+original_status_end
+worktrees_begin
+worktree /Users/jimdaley/GitHub/Rune-Scribe
+HEAD af60a3c62d4b7828f3ab944504e06036ece4129e
+branch refs/heads/runtime-owned-io-presentation
+
+worktree /Users/jimdaley/GitHub/Rune-Scribe-Elven-Phase-C
+HEAD ee47191d131dfe3b6b3e446bc4bd88e07bc9960f
+branch refs/heads/feature/elven-phase-c-production
+
+worktree /Users/jimdaley/GitHub/Rune-Scribe-Elven-Recovery-v3
+HEAD 393f07ccd5d2100e4b4887f1f670846a5b0af5df
+branch refs/heads/elven-recovery-v3
+
+worktree /Users/jimdaley/GitHub/Rune-Scribe-Norse-Theme-v1
+HEAD 065fb64c86f8806649c9e89809aba038ecbc7c9c
+branch refs/heads/feature/norse-theme-module
+
+worktree /Users/jimdaley/GitHub/Rune-Scribe-Phase-C-Merged-Boundary
+HEAD 48d4d2c0e93aa0ece631fe0d29bcb9315a95e0d1
+branch refs/heads/phase-c-merged-boundary
+
+worktree /Users/jimdaley/GitHub/Rune-Scribe-Roadmap-Completion
+HEAD b7c55ff40255f96a6c857b49a14962e9fcd79c37
+branch refs/heads/feature/roadmap-completion-post-phase-c
+
+worktrees_end

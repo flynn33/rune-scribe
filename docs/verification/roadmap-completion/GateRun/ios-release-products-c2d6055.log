@@ -1,0 +1,11 @@
+c2d6055bf9392661efcc765096e6e0156f792ea7
+iphone_app_exists_exit_code: 0
+104M	/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-iphone-release-c2d6055/Build/Products/Release-iphonesimulator/RuneScrib.app
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-iphone-release-c2d6055/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64]
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-iphone-release-c2d6055/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib (for architecture x86_64):	Mach-O 64-bit executable x86_64
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-iphone-release-c2d6055/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib (for architecture arm64):	Mach-O 64-bit executable arm64
+ipad_app_exists_exit_code: 0
+104M	/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-ipad-release-c2d6055/Build/Products/Release-iphonesimulator/RuneScrib.app
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-ipad-release-c2d6055/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64]
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-ipad-release-c2d6055/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib (for architecture x86_64):	Mach-O 64-bit executable x86_64
+/tmp/runescribe-roadmap-ios-qualification.fDPELS/DerivedData-ipad-release-c2d6055/Build/Products/Release-iphonesimulator/RuneScrib.app/RuneScrib (for architecture arm64):	Mach-O 64-bit executable arm64

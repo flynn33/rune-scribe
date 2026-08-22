@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "catalogID": "com.runescribe.gamecenter.achievements",
+  "catalogVersion": 1,
+  "status": "frozen-source-controlled",
+  "pointTotal": 220,
+  "leaderboardsEnabled": false,
+  "platformStrategy": "shared-catalog-game-center-group-if-separate-app-records",
+  "achievements": [
+    {
+      "achievementID": "achievement.first-inscription",
+      "gameCenterIdentifier": "com.runescribe.achievement.first-inscription",
+      "points": 5,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 1,
+      "localizationKeyPrefix": "gamecenter.achievement.first-inscription",
+      "artReference": "progression-catalog://fallback-system-image/pencil.and.scribble",
+      "localizations": [
+        {"locale": "en", "title": "First Inscription", "description": "Complete your first unique inscription."}
+      ]
+    },
+    {
+      "achievementID": "achievement.first-dispatch",
+      "gameCenterIdentifier": "com.runescribe.achievement.first-dispatch",
+      "points": 5,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 1,
+      "localizationKeyPrefix": "gamecenter.achievement.first-dispatch",
+      "artReference": "progression-catalog://fallback-system-image/paperplane",
+      "localizations": [
+        {"locale": "en", "title": "First Dispatch", "description": "Complete your first eligible cipher share."}
+      ]
+    },
+    {
+      "achievementID": "achievement.echo-returns",
+      "gameCenterIdentifier": "com.runescribe.achievement.echo-returns",
+      "points": 10,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 1,
+      "localizationKeyPrefix": "gamecenter.achievement.echo-returns",
+      "artReference": "progression-catalog://fallback-system-image/wave.3.right.circle",
+      "localizations": [
+        {"locale": "en", "title": "An Echo Returns", "description": "Successfully decode your first incoming Rune Scribe message."}
+      ]
+    },
+    {
+      "achievementID": "achievement.correspondent",
+      "gameCenterIdentifier": "com.runescribe.achievement.correspondent",
+      "points": 10,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 1,
+      "localizationKeyPrefix": "gamecenter.achievement.correspondent",
+      "artReference": "progression-catalog://fallback-system-image/arrow.left.arrow.right",
+      "localizations": [
+        {"locale": "en", "title": "The Correspondent", "description": "Establish your first bidirectional cipher relationship."}
+      ]
+    },
+    {
+      "achievementID": "achievement.courier-1",
+      "gameCenterIdentifier": "com.runescribe.achievement.courier-1",
+      "points": 10,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 5,
+      "localizationKeyPrefix": "gamecenter.achievement.courier-1",
+      "artReference": "progression-catalog://fallback-system-image/paperplane.circle",
+      "localizations": [
+        {"locale": "en", "title": "Courier I", "description": "Complete five eligible unique shares."}
+      ]
+    },
+    {
+      "achievementID": "achievement.courier-2",
+      "gameCenterIdentifier": "com.runescribe.achievement.courier-2",
+      "points": 20,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 25,
+      "localizationKeyPrefix": "gamecenter.achievement.courier-2",
+      "artReference": "progression-catalog://fallback-system-image/paperplane.circle.fill",
+      "localizations": [
+        {"locale": "en", "title": "Courier II", "description": "Complete twenty-five eligible unique shares."}
+      ]
+    },
+    {
+      "achievementID": "achievement.five-circles",
+      "gameCenterIdentifier": "com.runescribe.achievement.five-circles",
+      "points": 25,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 5,
+      "localizationKeyPrefix": "gamecenter.achievement.five-circles",
+      "artReference": "progression-catalog://fallback-system-image/circle.hexagongrid",
+      "localizations": [
+        {"locale": "en", "title": "Known in Five Circles", "description": "Complete first delivery to five distinct locally linked cipher relationships."}
+      ]
+    },
+    {
+      "achievementID": "achievement.archivist-1",
+      "gameCenterIdentifier": "com.runescribe.achievement.archivist-1",
+      "points": 10,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 5,
+      "localizationKeyPrefix": "gamecenter.achievement.archivist-1",
+      "artReference": "progression-catalog://fallback-system-image/books.vertical",
+      "localizations": [
+        {"locale": "en", "title": "Archivist I", "description": "Create or import five ciphers."}
+      ]
+    },
+    {
+      "achievementID": "achievement.archivist-2",
+      "gameCenterIdentifier": "com.runescribe.achievement.archivist-2",
+      "points": 25,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 20,
+      "localizationKeyPrefix": "gamecenter.achievement.archivist-2",
+      "artReference": "progression-catalog://fallback-system-image/books.vertical.fill",
+      "localizations": [
+        {"locale": "en", "title": "Archivist II", "description": "Create or import twenty ciphers."}
+      ]
+    },
+    {
+      "achievementID": "achievement.relic-bearer",
+      "gameCenterIdentifier": "com.runescribe.achievement.relic-bearer",
+      "points": 10,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 3,
+      "localizationKeyPrefix": "gamecenter.achievement.relic-bearer",
+      "artReference": "progression-catalog://fallback-system-image/shield.lefthalf.filled",
+      "localizations": [
+        {"locale": "en", "title": "Relic Bearer", "description": "Use three distinct owned Relics in eligible shares."}
+      ]
+    },
+    {
+      "achievementID": "achievement.seal-keeper",
+      "gameCenterIdentifier": "com.runescribe.achievement.seal-keeper",
+      "points": 10,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 5,
+      "localizationKeyPrefix": "gamecenter.achievement.seal-keeper",
+      "artReference": "progression-catalog://fallback-system-image/seal",
+      "localizations": [
+        {"locale": "en", "title": "Seal Keeper", "description": "Use five distinct owned Seals in eligible shares."}
+      ]
+    },
+    {
+      "achievementID": "achievement.many-worlds",
+      "gameCenterIdentifier": "com.runescribe.achievement.many-worlds",
+      "points": 20,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 2,
+      "localizationKeyPrefix": "gamecenter.achievement.many-worlds",
+      "artReference": "progression-catalog://fallback-system-image/globe.americas",
+      "localizations": [
+        {"locale": "en", "title": "Many Worlds", "description": "Complete eligible shares using two distinct Codices."}
+      ]
+    },
+    {
+      "achievementID": "achievement.explorer",
+      "gameCenterIdentifier": "com.runescribe.achievement.explorer",
+      "points": 10,
+      "hidden": true,
+      "repeatable": false,
+      "progressTarget": 1,
+      "localizationKeyPrefix": "gamecenter.achievement.explorer",
+      "artReference": "progression-catalog://fallback-system-image/sparkle.magnifyingglass",
+      "localizations": [
+        {"locale": "en", "title": "Explorer", "description": "Encounter a valid Codex you do not yet own."}
+      ]
+    },
+    {
+      "achievementID": "achievement.collector",
+      "gameCenterIdentifier": "com.runescribe.achievement.collector",
+      "points": 20,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 20,
+      "localizationKeyPrefix": "gamecenter.achievement.collector",
+      "artReference": "progression-catalog://fallback-system-image/square.grid.3x3.fill",
+      "localizations": [
+        {"locale": "en", "title": "Collector", "description": "Own twenty distinct Artifacts."}
+      ]
+    },
+    {
+      "achievementID": "achievement.master-scribe",
+      "gameCenterIdentifier": "com.runescribe.achievement.master-scribe",
+      "points": 30,
+      "hidden": false,
+      "repeatable": false,
+      "progressTarget": 10,
+      "localizationKeyPrefix": "gamecenter.achievement.master-scribe",
+      "artReference": "progression-catalog://fallback-system-image/crown",
+      "localizations": [
+        {"locale": "en", "title": "Master Scribe", "description": "Complete ten evergreen Rune Scribe Achievements."}
+      ]
+    }
+  ]
+}

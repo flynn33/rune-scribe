@@ -1,0 +1,760 @@
+{
+  "schemaVersion": 1,
+  "harness": "elven-phase-c-validator-negative-mutations",
+  "packageRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1",
+  "repositoryRoot": "/Users/jimdaley/GitHub/Rune-Scribe-Roadmap-Completion",
+  "status": "PASS",
+  "baseline": {
+    "exitCode": 0,
+    "status": "PASS",
+    "issueCodes": []
+  },
+  "inputFingerprintBefore": "954bb6afc140c723caebe5c9e5e5fb1038c0cb1a44cb6f1a8b57dd13c04ec819",
+  "inputFingerprintAfter": "954bb6afc140c723caebe5c9e5e5fb1038c0cb1a44cb6f1a8b57dd13c04ec819",
+  "inputUnchanged": true,
+  "selectedMutationCount": 53,
+  "passedMutationCount": 53,
+  "failedMutationCount": 0,
+  "mutations": [
+    {
+      "mutation": "relic-missing",
+      "scope": "relics",
+      "expectedAnyCode": [
+        "PHC-REL-002",
+        "PHC-REL-005"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-REL-002",
+        "PHC-REL-003",
+        "PHC-REL-005"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "relic-role-missing",
+      "scope": "relics",
+      "expectedAnyCode": [
+        "PHC-REL-007"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-REL-003",
+        "PHC-REL-007"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "relic-geometry",
+      "scope": "relics",
+      "expectedAnyCode": [
+        "PHC-REL-014"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-REL-014"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "relic-protected-region",
+      "scope": "relics",
+      "expectedAnyCode": [
+        "PHC-REL-033"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-REL-033"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "relic-crop-stretch",
+      "scope": "relics",
+      "expectedAnyCode": [
+        "PHC-REL-029"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-REL-029"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "relic-layout-missing",
+      "scope": "relics",
+      "expectedAnyCode": [
+        "PHC-REL-019"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-REL-019"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "relic-anchor-unsafe",
+      "scope": "relics",
+      "expectedAnyCode": [
+        "PHC-REL-025"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-REL-025"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "seal-missing",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-002",
+        "PHC-SEA-005"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-002",
+        "PHC-SEA-003",
+        "PHC-SEA-005"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "seal-fallback-missing",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-007"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-003",
+        "PHC-SEA-007"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "seal-role-undeclared",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-007"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-007"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "crest-anchor-enabled",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-036",
+        "PHC-SEA-037"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-036",
+        "PHC-SEA-037"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "seal-hash",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-040"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-040"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "svg-script",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-016"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-016"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "svg-external-reference",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-018"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-018"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "svg-duplicate-id",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-019"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-019"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "svg-no-topology",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-020"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-020"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "seal-not-monochrome",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-025"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-025",
+        "PHC-SEA-040"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "seal-recognition-missing",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-004",
+        "PHC-SEA-032"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-004",
+        "PHC-SEA-032"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "seal-anchor-mismatch",
+      "scope": "seals",
+      "expectedAnyCode": [
+        "PHC-SEA-029"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SEA-029"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "font-glyph-missing",
+      "scope": "fonts",
+      "expectedAnyCode": [
+        "PHC-FNT-006",
+        "PHC-FNT-007"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-FNT-006",
+        "PHC-FNT-007",
+        "PHC-FNT-008",
+        "PHC-FNT-009"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "font-cmap-alias",
+      "scope": "fonts",
+      "expectedAnyCode": [
+        "PHC-FNT-033"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-FNT-033"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "font-postscript-name",
+      "scope": "fonts",
+      "expectedAnyCode": [
+        "PHC-FNT-035"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-FNT-031",
+        "PHC-FNT-035"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "font-fallback-missing",
+      "scope": "fonts",
+      "expectedAnyCode": [
+        "PHC-FNT-014"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-FNT-014"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "font-registration-invalid",
+      "scope": "fonts",
+      "expectedAnyCode": [
+        "PHC-FNT-050"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-FNT-050"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "font-specimen-missing",
+      "scope": "fonts",
+      "expectedAnyCode": [
+        "PHC-FNT-027"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-FNT-027"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "font-outline-duplicate",
+      "scope": "fonts",
+      "expectedAnyCode": [
+        "PHC-FNT-042"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-FNT-042"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "font-metrics",
+      "scope": "fonts",
+      "expectedAnyCode": [
+        "PHC-FNT-039"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-FNT-039"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "font-table",
+      "scope": "fonts",
+      "expectedAnyCode": [
+        "PHC-FNT-044"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-FNT-044"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "font-fallback-evidence",
+      "scope": "fonts",
+      "expectedAnyCode": [
+        "PHC-FNT-024"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-FNT-024"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "share-role-missing",
+      "scope": "share-accessibility-fallbacks",
+      "expectedAnyCode": [
+        "PHC-SHR-008"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SHR-008",
+        "PHC-SHR-010",
+        "PHC-SHR-012",
+        "PHC-SHR-029"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "accessibility-color-only",
+      "scope": "share-accessibility-fallbacks",
+      "expectedAnyCode": [
+        "PHC-SHR-006"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SHR-006"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "fallback-unresolved",
+      "scope": "share-accessibility-fallbacks",
+      "expectedAnyCode": [
+        "PHC-SHR-012"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SHR-012"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "fallback-cycle",
+      "scope": "share-accessibility-fallbacks",
+      "expectedAnyCode": [
+        "PHC-SHR-015"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SHR-015"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "share-reserved-missing",
+      "scope": "share-accessibility-fallbacks",
+      "expectedAnyCode": [
+        "PHC-SHR-022"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SHR-022",
+        "PHC-SHR-025"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "motion-role-invented",
+      "scope": "share-accessibility-fallbacks",
+      "expectedAnyCode": [
+        "PHC-SHR-009"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-SHR-008",
+        "PHC-SHR-009"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "provenance-output-missing",
+      "scope": "provenance-recipes",
+      "expectedAnyCode": [
+        "PHC-PRO-016"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-PRO-016"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "provenance-field-missing",
+      "scope": "provenance-recipes",
+      "expectedAnyCode": [
+        "PHC-PRO-006"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-PRO-006",
+        "PHC-PRO-007"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "recipe-missing",
+      "scope": "provenance-recipes",
+      "expectedAnyCode": [
+        "PHC-REC-004"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-REC-004"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "recipe-nondeterministic",
+      "scope": "provenance-recipes",
+      "expectedAnyCode": [
+        "PHC-REC-007"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-PRO-010",
+        "PHC-REC-006",
+        "PHC-REC-007"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "regeneration-failed",
+      "scope": "provenance-recipes",
+      "expectedAnyCode": [
+        "PHC-DET-003"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-DET-003"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "resource-budget",
+      "scope": "budgets-integrity",
+      "expectedAnyCode": [
+        "PHC-BUD-003"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-BUD-003",
+        "PHC-INT-020",
+        "PHC-ZIP-008"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "catalog-budget",
+      "scope": "budgets-integrity",
+      "expectedAnyCode": [
+        "PHC-BUD-005"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-BUD-003",
+        "PHC-BUD-005",
+        "PHC-INT-003",
+        "PHC-INT-004",
+        "PHC-INT-020",
+        "PHC-ZIP-008"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "output-hash",
+      "scope": "budgets-integrity",
+      "expectedAnyCode": [
+        "PHC-INT-004"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-INT-004",
+        "PHC-INT-020",
+        "PHC-ZIP-008"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "output-length",
+      "scope": "budgets-integrity",
+      "expectedAnyCode": [
+        "PHC-INT-003"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-INT-003",
+        "PHC-INT-020",
+        "PHC-ZIP-008"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "output-file-missing",
+      "scope": "budgets-integrity",
+      "expectedAnyCode": [
+        "PHC-INT-002"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-INT-001",
+        "PHC-INT-002",
+        "PHC-INT-015",
+        "PHC-INT-019",
+        "PHC-ZIP-007"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "package-manifest-coverage",
+      "scope": "budgets-integrity",
+      "expectedAnyCode": [
+        "PHC-INT-015"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-INT-015",
+        "PHC-ZIP-008"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "path-traversal",
+      "scope": "output-matrix",
+      "expectedAnyCode": [
+        "PHC-PATH-001"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-MATRIX-006",
+        "PHC-PATH-001"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "json-duplicate-key",
+      "scope": "budgets-integrity",
+      "expectedAnyCode": [
+        "PHC-JSON-002"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-BUD-001",
+        "PHC-INT-001",
+        "PHC-INT-017",
+        "PHC-INT-020",
+        "PHC-JSON-002",
+        "PHC-ZIP-008"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "json-corrupt",
+      "scope": "budgets-integrity",
+      "expectedAnyCode": [
+        "PHC-JSON-001"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-INT-020",
+        "PHC-JSON-001",
+        "PHC-ZIP-008"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "symlink",
+      "scope": "budgets-integrity",
+      "expectedAnyCode": [
+        "PHC-PATH-002"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-PATH-002"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "archive-corrupt",
+      "scope": "budgets-integrity",
+      "expectedAnyCode": [
+        "PHC-ZIP-002",
+        "PHC-ZIP-009"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-ZIP-009"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "publication-attribution",
+      "scope": "publication",
+      "expectedAnyCode": [
+        "PHC-PUB-002"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-PUB-002"
+      ],
+      "status": "PASS"
+    },
+    {
+      "mutation": "shipping-format",
+      "scope": "publication",
+      "expectedAnyCode": [
+        "PHC-PUB-005"
+      ],
+      "validatorExitCode": 1,
+      "validatorStatus": "FAIL",
+      "observedCodes": [
+        "PHC-PUB-005"
+      ],
+      "status": "PASS"
+    }
+  ]
+}

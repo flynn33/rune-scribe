@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture --filter DestinationCompatibilityMatrixTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter RuneScribePackageTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter FontCatalogTests",
+    "scripts/check-architecture.sh",
+    "scripts/check-roadmap-alignment.sh",
+    "python3 scripts/check-documentation-alignment.py"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/RuneScribePackageTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Fonts/FontCatalogTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/CipherPersistenceApplicationTests.swift",
+    "docs/verification/roadmap-completion/DocumentationSupportChecklist.md",
+    "scripts/check-architecture.sh"
+  ],
+  "completedControls": [
+    "BAS-008",
+    "BAS-010",
+    "MOD-001",
+    "MOD-002",
+    "MOD-003",
+    "MOD-004",
+    "MOD-005",
+    "DOM-005",
+    "DOM-006",
+    "DOM-007",
+    "PKG-003",
+    "PKG-005"
+  ],
+  "compatibilityBoundary": "Legacy cipher v3 and message v1 remain readable; typed vNext input and update-required outcomes are executable.",
+  "packageBoundary": {
+    "maximumPackageBytes": 16777216,
+    "maximumSections": 16,
+    "allocationPolicy": "Declared bounds, directory arithmetic, section layout, resource metadata, and media allowlists validate before variable payload allocation."
+  }
+}

@@ -1,0 +1,28 @@
+Test Suite 'All tests' started at 2026-08-22 17:21:44.166.
+Test Suite 'RuneScribArchitectureTests.xctest' started at 2026-08-22 17:21:44.166.
+Test Suite 'ArchitectureGuardrailTests' started at 2026-08-22 17:21:44.166.
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testApprovedModuleStateReferencesAndAttributedImportsRemainAllowed]' started.
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testApprovedModuleStateReferencesAndAttributedImportsRemainAllowed]' passed (1.198 seconds).
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testCoreAndUICannotImportProgressionImplementation]' started.
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testCoreAndUICannotImportProgressionImplementation]' passed (0.266 seconds).
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testDirectPeerServiceHandlesAreBlocking]' started.
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testDirectPeerServiceHandlesAreBlocking]' passed (0.400 seconds).
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testDuplicateProgressionStableIDMutationIsBlocking]' started.
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testDuplicateProgressionStableIDMutationIsBlocking]' passed (0.134 seconds).
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testFreeFormProgressionEnvelopeCreationIsBlockingOutsideRuntime]' started.
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testFreeFormProgressionEnvelopeCreationIsBlockingOutsideRuntime]' passed (0.399 seconds).
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testProgressionBoundaryNegativeMutationsAreBlocking]' started.
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testProgressionBoundaryNegativeMutationsAreBlocking]' passed (2.672 seconds).
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testRepositoryArchitectureGuardrails]' started.
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testRepositoryArchitectureGuardrails]' passed (3.740 seconds).
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testThemeProgressionCouplingNegativeMutationsAreBlocking]' started.
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testThemeProgressionCouplingNegativeMutationsAreBlocking]' passed (0.675 seconds).
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testUIOwnedProgressionTruthMutationIsBlocking]' started.
+Test Case '-[RuneScribArchitectureTests.ArchitectureGuardrailTests testUIOwnedProgressionTruthMutationIsBlocking]' passed (0.473 seconds).
+Test Suite 'ArchitectureGuardrailTests' passed at 2026-08-22 17:21:54.125.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 9.957 (9.959) seconds
+Test Suite 'ComplianceGuardTests' started at 2026-08-22 17:21:54.125.
+Test Case '-[RuneScribArchitectureTests.ComplianceGuardTests testActivationCompletenessCallRemovalReportsOnlyFG006]' started.
+
+
+*** If you believe this error represents a bug, please attach the result bundle at /tmp/runescribe-roadmap-macos-hosted-b7c55ff.2gwQbB/RuneScrib-macOS-Full-b7c55ff.xcresult

@@ -1,0 +1,4 @@
+command: xcrun simctl uninstall 77D54A1F-0818-4761-B946-D7723490F6B3 com.runescribe.app
+uninstall_exit_code: 0
+command: xcrun simctl keychain 77D54A1F-0818-4761-B946-D7723490F6B3 reset
+keychain_exit_code: 0

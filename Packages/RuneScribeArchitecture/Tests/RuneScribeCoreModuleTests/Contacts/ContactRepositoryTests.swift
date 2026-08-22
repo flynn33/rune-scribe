@@ -90,6 +90,148 @@ final class ContactRepositoryTests: XCTestCase {
         XCTAssertEqual(readLocations, [Self.symmetricKeyLocation])
     }
 
+    func testOversizedEncryptedContactBookIsRejectedBeforeKeyAccess() async throws {
+        let oversized = Data(
+            repeating: 0xA5,
+            count: EncryptedContactRepository.maximumContactBookEncryptedByteCount + 1
+        )
+        let secureStore = ContactSecureStore()
+        let fileStore = ContactFileStore(files: [.contacts: oversized])
+        let repository = EncryptedContactRepository(
+            secureValueStore: secureStore,
+            protectedFileStore: fileStore
+        )
+
+        await XCTAssertThrowsErrorAsync(try await repository.snapshot()) { error in
+            XCTAssertEqual(error as? ContactRepositoryError, .corruptedStore)
+        }
+
+        let requestedMaximums = await fileStore.readMaximumByteCounts()
+        let keyReads = await secureStore.readLocations()
+        XCTAssertEqual(
+            requestedMaximums,
+            [EncryptedContactRepository.maximumContactBookEncryptedByteCount]
+        )
+        XCTAssertEqual(keyReads, [])
+    }
+
+    func testContactBookDecodeRejectsTooManyContacts() throws {
+        let contact = Contact(
+            id: UUID(),
+            displayName: "Bounded",
+            source: .manual,
+            createdAt: Date(timeIntervalSinceReferenceDate: 0)
+        )
+        let encoded = try JSONEncoder().encode(
+            ContactBook(
+                contacts: Array(
+                    repeating: contact,
+                    count: ContactBook.maximumContactCount + 1
+                )
+            )
+        )
+
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(ContactBook.self, from: encoded)
+        ) { error in
+            XCTAssertEqual(
+                error as? ContactBookValidationError,
+                .tooManyContacts
+            )
+        }
+    }
+
+    func testContactDecodeRejectsOversizedCollectionsAndStrings() throws {
+        let base = Contact(
+            id: UUID(),
+            displayName: "Bounded",
+            source: .imported,
+            createdAt: Date(timeIntervalSinceReferenceDate: 0)
+        )
+
+        try assertContactDecodeRejects(
+            Contact(
+                id: base.id,
+                displayName: String(
+                    repeating: "a",
+                    count: Contact.maximumDisplayNameUTF8Count + 1
+                ),
+                source: base.source,
+                createdAt: base.createdAt
+            ),
+            with: .displayNameTooLong
+        )
+        try assertContactDecodeRejects(
+            Contact(
+                id: base.id,
+                displayName: base.displayName,
+                phones: Array(
+                    repeating: "1",
+                    count: Contact.maximumPhoneCount + 1
+                ),
+                source: base.source,
+                createdAt: base.createdAt
+            ),
+            with: .tooManyPhoneNumbers
+        )
+        try assertContactDecodeRejects(
+            Contact(
+                id: base.id,
+                displayName: base.displayName,
+                phones: [
+                    String(
+                        repeating: "1",
+                        count: Contact.maximumPhoneUTF8Count + 1
+                    ),
+                ],
+                source: base.source,
+                createdAt: base.createdAt
+            ),
+            with: .phoneNumberTooLong
+        )
+        try assertContactDecodeRejects(
+            Contact(
+                id: base.id,
+                displayName: base.displayName,
+                emails: Array(
+                    repeating: "a@example.invalid",
+                    count: Contact.maximumEmailCount + 1
+                ),
+                source: base.source,
+                createdAt: base.createdAt
+            ),
+            with: .tooManyEmailAddresses
+        )
+        try assertContactDecodeRejects(
+            Contact(
+                id: base.id,
+                displayName: base.displayName,
+                emails: [
+                    String(
+                        repeating: "a",
+                        count: Contact.maximumEmailUTF8Count + 1
+                    ),
+                ],
+                source: base.source,
+                createdAt: base.createdAt
+            ),
+            with: .emailAddressTooLong
+        )
+        try assertContactDecodeRejects(
+            Contact(
+                id: base.id,
+                displayName: base.displayName,
+                appleContactID: String(
+                    repeating: "a",
+                    count: Contact.maximumAppleContactIDUTF8Count + 1
+                ),
+                source: base.source,
+                createdAt: base.createdAt
+            ),
+            with: .appleContactIDTooLong
+        )
+    }
+
     func testMissingFileIsEmptyWithoutReadingOrCreatingAKey() async throws {
         let secureStore = ContactSecureStore()
         let fileStore = ContactFileStore()
@@ -326,6 +468,27 @@ final class ContactRepositoryTests: XCTestCase {
         service: RuneScribeKeychain.service,
         account: RuneScribeKeychain.symmetricKeyAccount
     )
+
+    private func assertContactDecodeRejects(
+        _ contact: Contact,
+        with expectedError: ContactBookValidationError,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) throws {
+        let encoded = try JSONEncoder().encode(contact)
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(Contact.self, from: encoded),
+            file: file,
+            line: line
+        ) { error in
+            XCTAssertEqual(
+                error as? ContactBookValidationError,
+                expectedError,
+                file: file,
+                line: line
+            )
+        }
+    }
 }
 
 final class ContactManagerCoreTests: XCTestCase {
@@ -623,7 +786,10 @@ private extension EncryptedContactRepository {
                     try await secureValueStore.delete(service: $0, account: $1)
                 },
                 readProtectedFile: {
-                    try await protectedFileStore.read(relativePath: $0)
+                    try await protectedFileStore.read(
+                        relativePath: $0,
+                        maximumByteCount: $1
+                    )
                 },
                 writeProtectedFile: {
                     try await protectedFileStore.write($0, relativePath: $1)
@@ -726,6 +892,7 @@ private actor ContactSecureStore: SecureValueStore {
 private actor ContactFileStore: ProtectedFileStore {
     private var files: [ProtectedPath: Data]
     private var reads: [ProtectedPath] = []
+    private var requestedReadMaximums: [Int] = []
     private var writes: [ProtectedPath] = []
     private var failWrites = false
     private var commitThenFail = false
@@ -735,9 +902,17 @@ private actor ContactFileStore: ProtectedFileStore {
         self.files = files
     }
 
-    func read(relativePath: ProtectedPath) async throws -> Data? {
+    func read(
+        relativePath: ProtectedPath,
+        maximumByteCount: Int
+    ) async throws -> Data? {
         reads.append(relativePath)
-        return files[relativePath]
+        requestedReadMaximums.append(maximumByteCount)
+        guard let data = files[relativePath] else { return nil }
+        guard data.count <= maximumByteCount else {
+            throw ProtectedFileStoreReadError.contentTooLarge
+        }
+        return data
     }
 
     func write(_ data: Data, relativePath: ProtectedPath) async throws {
@@ -773,6 +948,7 @@ private actor ContactFileStore: ProtectedFileStore {
     func setRemoveThenFail(_ value: Bool) { removeThenFail = value }
     func data(at path: ProtectedPath) -> Data? { files[path] }
     func readPaths() -> [ProtectedPath] { reads }
+    func readMaximumByteCounts() -> [Int] { requestedReadMaximums }
     func writePaths() -> [ProtectedPath] { writes }
 }
 

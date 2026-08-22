@@ -774,7 +774,8 @@ enum ProgressionCatalogUpgradeCoordinator {
             lhs.statisticID == rhs.statisticID &&
             lhs.bucketID == rhs.bucketID &&
             lhs.tokenDigest == rhs.tokenDigest &&
-            lhs.canonicalToken == rhs.canonicalToken
+            lhs.canonicalToken == rhs.canonicalToken &&
+            lhs.externalOpaqueTokenDigest == rhs.externalOpaqueTokenDigest
     }
 
     private static func sameEncounter(_ lhs: EncounterRecord, _ rhs: EncounterRecord) -> Bool {

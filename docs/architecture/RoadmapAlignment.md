@@ -16,8 +16,8 @@ respectively
 `1c6e3cf79e6cd60d105c848a5fab65418daac799ae94db0d0c61504fc2c5679a`.
 
 The exhaustive machine-readable status is
-[`roadmap-alignment.json`](../verification/roadmap-alignment.json). It records all 92
-requested BAS, FOR, MOD, DOM, PKG, THM, PRO, and SHR work packages with status,
+[`roadmap-alignment.json`](../verification/roadmap-alignment.json). It records all 124
+requested BAS, FOR, MOD, DOM, PKG, THM, PRO, SHR, CLD, GC, and REL work packages with status,
 dependencies, repository evidence, and notes. This page explains the dependency gates
 and the implementation boundary in plain language.
 
@@ -28,138 +28,157 @@ effective only where they do not conflict with that authority.
 
 ## Current result
 
-The repository now has a coherent, compatibility-preserving foundation for the first
-Codex domain and a complete local Progression implementation:
+Version 1.0.38 build 38 is source-complete for the authorized roadmap-completion
+program. It is deliberately **not shipped**. The repository now contains:
 
-- a versioned Cipher Record migration that preserves keys and converts the mapping into
-  an explicit symbol permutation;
-- a validated 32-symbol Script descriptor and Base Rune Script with exact current
-  output;
-- an explicit key-delivery state that does not turn legacy `delivered` into progression
-  proof;
-- stable neutral Codex, package, operation, relationship, entitlement, and event
-  vocabulary;
-- the frozen bounded typed `.runescribe` parser/builder and magic-first file routing;
-- permanent legacy cipher v3 and message v1 intake, with current sharing still emitting
-  legacy formats only; and
-- an optional runtime-mediated Progression Module with strict approved catalogs,
-  privacy-safe durable event handoff, atomic rules and grants, versioned existing-user
-  migration, quarantine/recovery, live entitlement projection, snapshot-only UI, and an
-  accessible durable reveal queue;
-- a versioned semantic Theme contract, generic owned contribution and opaque-resource
-  registries, a runtime-owned Theme Coordinator, semantic common UI presentation, and
-  a required Norse Base provider with exact Base Script and font compatibility; and
-- a validated Elven Series recovery boundary that is PASS / CLOSED, with all nine
-  findings passing together and an ACCEPTED corrected v3.1 package containing 56
-  logical resources and 184 shipping outputs. Phase C is PASS / MERGED TO MAIN via
-  PR #45 at merge commit
-  `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
-  Phase D is READY FOR AUTHORIZATION / NOT STARTED, and production Elven providers
-  remain outside the shipping application; and
-- one superseded and eleven current architecture decisions with explicit dispositions,
-  plus this auditable roadmap ledger.
+- complete app-owned runtime mediation, bounded contracts, capability policy, thin
+  hosts, serialized ingress, runtime Settings, and permanent dependency guards;
+- exact legacy Cipher and Message readers plus a fail-before-allocation typed-container
+  parser and complete old/new destination matrix;
+- the required Norse provider and four optional production Elven providers—Moonleaf,
+  Sunspire, Wildwood, and Gloamthorn—built from the accepted v3.1 corpus with 56 logical
+  resources and 184 unique shipping outputs;
+- runtime-bound Progression ownership and live provider activation without any
+  provider-side rule evaluation;
+- a data-driven Artifact renderer, persisted Codex/Relic/Seal/Frame defaults, themed
+  vNext cipher/message files, legacy link and QR compatibility, fail-soft receiving,
+  Encounter recording, and provenance state;
+- local-first private progression synchronization with deterministic merge, offline and
+  account-change policy, corruption quarantine, runtime-owned CloudKit I/O, and no
+  secret-bearing cloud fields; and
+- optional Game Center mapping/report policy with a frozen 15-achievement, 220-point
+  catalog, monotonic outbox, runtime-owned GameKit I/O, and no local grant authority.
 
-That slice is intentionally usable without external services, a physical device,
-Contacts permission, login Keychain access, App Store Connect, iCloud, or Game Center.
-It does not declare an unused framework dependency and does not claim that optional
-production Theme series, cloud synchronization, or final public-sharing work is
-complete.
+The validated Elven Series recovery boundary remains intact: Recovery is PASS / CLOSED,
+the corrected v3.1 package is ACCEPTED, and Phase C is PASS / MERGED TO MAIN via PR #45 at
+`e9e0e0c8814aaa107d7480e070f14a6fe9b09975`. This completion branch begins at the
+post-Phase-C main revision `131f101069d1a8053f72e60918092e81373e2687`; it does not
+rewrite that history.
 
-## App-owned Forsetti remediation gate
+Automated and supported-host evidence can establish code completion and owner-test
+readiness. It cannot establish physical-device behavior, live iCloud/Game Center
+provisioning, App Store Connect configuration, distribution signing, archive/export,
+notarization, upload, rollout, or shipment. Those actions remain explicitly outside
+this program.
 
-Wave 0B is local architecture work. The app-owned runtime must provide generalized
-entitlement requirements, live reconciliation, keyed contribution registration, opaque
-resource resolution, capability-scoped command/query/state ports, lifecycle and
-generation enforcement, optional failure isolation, tests, and permanent guards.
+## App-owned Forsetti completion gate
 
-`RuneScribeRuntimeCore` is the continuing control plane. External Forsetti packages,
-binaries, source copies, submodules, fetch scripts, and developer-machine checkout paths
-are permanently prohibited. Theme and Progression work cannot pass their gates until
-the applicable local runtime capabilities and negative enforcement are green.
+`RuneScribeRuntimeCore` is the permanent control plane. It owns lifecycle, capability
+checks, cross-module calls, operational I/O, persistent Settings, state orchestration,
+Theme selection, platform presentation sessions, CloudKit calls, and GameKit calls.
+The UI owns views and submits typed intent. Core owns cryptographic and message-domain
+authority. Theme, Progression, Cloud, and Game Center policy products do not call one
+another or own platform side effects.
+
+External Forsetti packages, binaries, source copies, submodules, fetch scripts, and
+machine-local checkout paths remain prohibited. The executable architecture guard
+checks the shipping dependency graph, import boundaries, host composition, provider
+manifests, resource ownership, and negative mutations.
 
 ## Dependency order
 
 ```mermaid
 flowchart LR
-    BAS["Wave 0A<br/>baseline and decisions"] --> FOR["Wave 0B<br/>app-owned runtime remediation"]
-    BAS --> DOM["Wave 1B<br/>Cipher, Script, package"]
-    FOR --> MOD["Wave 1A<br/>standard module integration"]
-    MOD --> DOM
-    DOM --> THM["Wave 2<br/>semantic theme scaffold"]
-    FOR --> THM
-    THM --> PRO["Wave 3<br/>local progression"]
-    FOR --> PRO
+    BAS["Wave 0A<br/>baseline and decisions"] --> MOD["Wave 1A<br/>runtime and modules"]
+    MOD --> DOM["Wave 1B<br/>Cipher, Script, package"]
+    DOM --> THM["Wave 2<br/>Theme system"]
+    THM --> PRO["Wave 3<br/>Progression"]
     DOM --> SHR["Wave 4<br/>Artifacts and sharing"]
     THM --> SHR
     PRO --> SHR
+    PRO --> CLD["Wave 5A<br/>private cloud sync"]
+    CLD --> GC["Wave 5B<br/>optional Game Center"]
+    SHR --> REL["Wave 6<br/>hardening and handoff"]
+    CLD --> REL
+    GC --> REL
 ```
 
-The graph is an Agent Coding gate, not just a preferred order. Theme Modules cannot be
-finalized against missing runtime contribution/resource APIs. Progression cannot
-activate earned providers without live eligibility reconciliation. Themed sharing cannot promise
-portable presentation until the Theme scaffold, package validation, progression event
-contract, and supported-environment validations pass. Hardware-only observations are
-owner-operated outside this graph.
+The graph remains executable: a downstream status is satisfied only when its source,
+tests, guard evidence, and non-optional dependencies are present. Owner-only hardware
+observations supplement the record but never silently become Agent Coding gates.
 
 ## Work-package status
 
-| Group | Current ledger | Dependency and evidence |
+| Group | Current ledger | Completion evidence |
 |---|---|---|
-| BAS-001…010 | 6 satisfied, 2 partial, 1 owner-optional, 1 not-applicable | P8 baseline/build/fixture evidence remains; ADRs and repository policy exist. The old/new destination matrix and documentation checklist remain partial; owner-operated parity observation is optional and non-gating. |
-| FOR-001…011 | 11 superseded | The former external-release work packages are retained as historical identifiers; local runtime remediation is governed by the controlling policy and remediation phases. |
-| MOD-001…013 | 8 satisfied, 4 transitional, 1 partial | Historical Core/UI separation, adapters, ingress, lock gating, architecture tests, and hosted tests exist. Runtime mediation, manifests, and bootstrap remain incomplete under the controlling policy. |
-| DOM-001…007 | 4 satisfied, 3 partial | Cipher/Script migration and an explicit delivery-state foundation exist. End-to-end legacy-font proof, selected-Codex/per-share presentation stores, and removal of the writable `delivered` compatibility rail remain. |
-| PKG-001…006 | 4 satisfied, 2 partial | The typed container, legacy readers, policy, and magic-first router exist. Complete fail-before-allocation proof, randomized malformed-input coverage, and allocation instrumentation remain in PKG-003/005. |
-| THM-001…012 | 12 satisfied | Versioned contracts, generic owned registries, the Coordinator, semantic UI, required Norse Base, two deliberately different synthetic providers, runtime selection/fallback, debug diagnostics, and the shared conformance suite are implemented. Optional production Theme series remain separate work. |
-| PRO-001…016 | 16 satisfied | The optional module, runtime-owned store and handoff, opaque-token lifecycle, exact catalog/rules, atomic records and grants, scalable migration, entitlement projection, snapshot-only views, durable feedback queue, quarantine, and guarded recovery are implemented. Owner-operated feedback and accessibility observations are optional outside Agent Coding scope. |
-| SHR-001…017 | 7 not-started, 6 partial, 2 decision-frozen, 2 owner-optional | Current legacy share, QR, MessageUI, and completion foundations remain. Themed source and contract work depends on PKG, THM, and PRO gates; owner-operated destination observations are optional and non-gating. |
+| BAS-001…010 | 8 satisfied, 1 owner-optional, 1 not-applicable | Exact baseline, decisions, build/fixture evidence, destination matrix, and aligned publication sources are recorded. |
+| FOR-001…011 | 11 superseded | Former external-framework tasks remain historical identifiers; the permanent app-owned policy controls. |
+| MOD-001…013 | 13 satisfied | Runtime mediation, manifests where appropriate, standard ports, adapters, ingress, hosted tests, and guards are complete. |
+| DOM-001…007 | 7 satisfied | Cipher/Script migration, imported-font rendering, separate presentation state, and explicit terminal key delivery are tested. |
+| PKG-001…006 | 6 satisfied | Legacy readers, typed container, bounded allocation ordering, malformed corpus, resources, and magic-first routing pass. |
+| THM-001…012 | 12 satisfied | Contracts, registries, Coordinator, semantic UI, Norse Base, provider conformance, selection, fallback, and diagnostics pass. |
+| PRO-001…016 | 16 satisfied | Durable facts, exact catalogs/rules, grants, migration, live entitlement projection, UI, quarantine, and recovery pass. |
+| SHR-001…017 | 15 satisfied, 2 owner-optional | Artifact rendering, builder/defaults, themed transport, terminal events, intake fallback, Encounters, provenance, QR/static fallback, and compatibility pass. |
+| CLD-001…011 | 11 satisfied | Schema, entitlements, runtime/platform boundary, merge, queue/status, account change, quarantine, reset omission, and multi-device simulations pass. |
+| GC-001…010 | 10 satisfied | Frozen catalog/strategy, capabilities, optional opt-in, mapping, outbox, prior completion, status, and deterministic adapter tests pass. |
+| REL-001…011 | 11 satisfied | Exact providers/assets, conformance, budgets, accessibility, security/privacy, documentation, placeholder guards, and no-ship handoff are recorded. |
 
-The per-task records in the JSON ledger are normative for status automation. A group
-summary never upgrades a child task or removes its explicit `dependsOn` edges.
-Hardware-only rows in that broader product ledger are owner-operated observations
-outside Agent Coding scope. They do not block agent-task completion, determine an
-agent PASS/FAIL result, create residual agent work, or gate pull-request readiness.
+The machine-readable JSON ledger is normative. `BAS-006`, `SHR-001`, and `SHR-015`
+are the only owner-optional tasks. `BAS-005` remains not applicable because no approved
+scrubbed real-user corpus was supplied. Physical-device rows in Wave 6 and live-service
+configuration are owner pre-ship requirements, not source-code incompleteness.
 
 ## Frozen compatibility and safety decisions
 
 ### Typed container
 
-[`ADR-RS-004`](decisions/ADR-RS-004-typed-runescribe-container.md) freezes an 8-byte
-`RSCRPKG\n` magic, 32-byte big-endian fixed header, independent payload kind/version,
-16-byte directory records, canonical unique contiguous sections, and full 32-byte
-SHA-256 trailer. The package is bounded to 16 MiB and 16 sections, with independent
-limits for Core, presentation, preview, resources, and provenance. Unknown optional
-sections are retained/skipped; unknown required sections are rejected. Missing magic
-falls back to the legacy byte classifier.
+[`ADR-RS-004`](decisions/ADR-RS-004-typed-runescribe-container.md) freezes the 8-byte
+`RSCRPKG\n` magic, 32-byte big-endian header, independent payload kind/version,
+canonical unique contiguous sections, and SHA-256 trailer. Total, section, resource,
+preview, image, and provenance bounds are allocation-ordered and mutation-tested.
+Unknown optional sections are skipped; unknown required sections and unsupported
+required versions return an update-required outcome.
 
 ### Outbound compatibility
 
-[`ADR-RS-005`](decisions/ADR-RS-005-forward-compatibility.md) keeps production outbound
-sharing legacy-only until product review approves a measured transition. The vNext
-parser and builder do not authorize emitting vNext content, and metadata is never
-appended to legacy trailing font bytes.
+[`ADR-RS-005`](decisions/ADR-RS-005-forward-compatibility.md) authorizes bounded vNext
+files as the normal themed path. New builds retain exact legacy readers. Compact link
+and QR invitations remain legacy-compatible. Omitting presentation on a prepare command
+selects the deliberate legacy writer, which is the source-controlled rollback switch.
+Optional presentation corruption never changes Core payload admission or decryption.
+For an installed requested provider, receive-time compatibility resolves Script, Relic,
+Seal, Frame, and resource identity against the coordinator's bounded inventory before
+rendering. Unknown selections are incompatible; role, media type, length, dimensions,
+or digest drift is corrupt. Both states retain the valid Core payload and select Norse.
 
 ### Share completion
 
 [`ADR-RS-006`](decisions/ADR-RS-006-share-route-completion.md) makes presentation
-nonterminal and distinguishes cancellation, public-system completion, confirmed sent,
-failure, and unavailable completion. A tap, export, copy, or opened sheet is not
-delivery or progression proof. First delivery advances only after an eligible terminal
-result and required attachment acceptance.
+nonterminal. Delivery and Progression facts require eligible terminal evidence and
+required-attachment acceptance. Cancellation, failure, sheet presentation, copy, tap,
+or export alone grants nothing. Runtime operation identity and the durable Core journal
+make replay idempotent.
 
-## Next executable gates
+### Local-first services
 
-1. Finish PKG-003/005 fail-before-allocation proof, randomized malformed-input tests,
-   and bounded-allocation instrumentation without changing legacy outbound behavior.
-2. Finish DOM-005/006/007 compatibility rendering, presentation-state ownership, and
-   atomic delivery-state migration while keeping legacy decode behavior.
-3. Complete BAS-008's old/new compatibility and update-required test matrix.
-4. Preserve the completed Elven Series Phase C evidence and its validated v3.1
-   production package. Phase C is PASS / MERGED TO MAIN via PR #45 at merge commit
-   `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`.
-   Phase D is READY FOR AUTHORIZATION / NOT STARTED and remains a separately
-   authorized provider-target gate.
-Owner-operated hardware-only observations remain outside these executable Agent Coding
-gates. Supported simulators, hosted tests, deterministic test doubles, platform builds,
-static inspection, architecture guards, negative mutations, and reproducible artifact
-validation provide the applicable unattended evidence.
+[`ADR-RS-008`](decisions/ADR-RS-008-progression-persistence.md) keeps local Progression
+authoritative and constrains private-cloud records and deterministic merge.
+[`ADR-RS-011`](decisions/ADR-RS-011-game-center-records.md) freezes the optional Game
+Center catalog and grouping strategy while leaving App Store Connect configuration to
+the owner. Persisted Game Center opt-in authorizes one restored authentication attempt
+per activation, including a single later application-active retry only when cold-launch
+presentation was unavailable. Cancellation, denial, connectivity wakes, and concurrent
+explicit opt-in cannot create an authentication loop. Neither service may grant or
+revoke local ownership.
+
+## Completion and owner-test boundary
+
+Repository completion requires the full Swift package, architecture and roadmap guards,
+documentation guard, Xcode project regeneration, macOS Release, iPhone and iPad
+Simulator Release/parity tests, shipping-product inspection, exact asset validation,
+negative mutations, and attribution audit. Results live under
+[`docs/verification/roadmap-completion`](../verification/roadmap-completion/).
+
+After those gates are green, the correct state is:
+
+- **CODE COMPLETE**
+- **AUTOMATED TESTS PASS**
+- **SUPPORTED HOST/SIMULATOR TESTS PASS**
+- **OWNER TEST REQUIRED**
+- **NOT SHIPPED**
+
+The owner checklist covers physical Messages/share-sheet destinations, camera QR,
+Contacts, accessibility services, device performance/memory, iCloud container/account,
+Game Center records and sandbox login, signing, archive/export, notarization, App Store
+metadata entry, TestFlight/App Store upload, and rollout approval. None of those actions
+is performed by this branch.

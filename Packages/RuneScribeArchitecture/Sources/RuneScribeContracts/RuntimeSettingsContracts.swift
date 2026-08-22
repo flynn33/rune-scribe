@@ -4,6 +4,7 @@ public enum RuntimeSettingsContractError: Error, Equatable, Sendable {
     case tooManySettings(maximum: Int)
     case duplicateSettingID
     case invalidCapturedAt
+    case invalidSplashLastShownAt
 }
 
 public enum RuntimeSettingValue: Codable, Equatable, Sendable {
@@ -20,10 +21,15 @@ public enum RuntimeSettingValue: Codable, Equatable, Sendable {
         guard case .text(let value) = self else { return nil }
         return value
     }
+
+    public var integerValue: Int64? {
+        guard case .integer(let value) = self else { return nil }
+        return value
+    }
 }
 
 public struct RuntimeSettingText: RawRepresentable, Codable, Equatable, Hashable, Sendable {
-    public static let maximumUTF8Count = 256
+    public static let maximumUTF8Count = 2_048
 
     public let rawValue: String
 
@@ -159,6 +165,45 @@ public enum RuneScribeRuntimeSettings {
     public static let selectedSealByCodex = RuntimeSettingID(
         rawValue: "setting.appearance.selected-seal-by-codex"
     )!
+    public static let selectedFrameByCodex = RuntimeSettingID(
+        rawValue: "setting.appearance.selected-frame-by-codex"
+    )!
+    public static let contactsImportPrompted = RuntimeSettingID(
+        rawValue: "setting.presentation.contacts-import-prompted"
+    )!
+    public static let splashLastShownEpochMilliseconds = RuntimeSettingID(
+        rawValue: "setting.presentation.splash-last-shown-epoch-milliseconds"
+    )!
+
+    public static func defaultArtifactSelections(
+        for kind: RuntimeArtifactSelectionKind
+    ) -> RuntimeCodexArtifactSelectionMap {
+        let artifactID: ArtifactID = switch kind {
+        case .relic: ArtifactID(rawValue: "relic.norse.runestone.weathered")!
+        case .seal: ArtifactID(rawValue: "seal.norse.knotwork")!
+        case .frame: ArtifactID(rawValue: "frame.none")!
+        }
+        let selection = try! RuntimeCodexArtifactSelection(
+            codexID: RuneScribeCodexIDs.norse,
+            artifactID: artifactID,
+            kind: kind
+        )
+        return try! RuntimeCodexArtifactSelectionMap(kind: kind, selections: [selection])
+    }
+
+    public static func defaultArtifactSelectionValue(
+        for kind: RuntimeArtifactSelectionKind
+    ) -> RuntimeSettingValue {
+        .text(try! RuntimeArtifactSelectionCodec.encode(defaultArtifactSelections(for: kind)))
+    }
+
+    public static let defaultSelectedCodexPreference = try! RuntimeSelectedCodexPreference(
+        codexID: RuneScribeCodexIDs.norse
+    )
+
+    public static let defaultSelectedCodexValue = RuntimeSettingValue.text(
+        try! RuntimeSelectedCodexPreferenceCodec.encode(defaultSelectedCodexPreference)
+    )
 
     public static let descriptors: [RuntimeSettingDescriptor] = [
         RuntimeSettingDescriptor(
@@ -175,23 +220,78 @@ public enum RuneScribeRuntimeSettings {
         ),
         RuntimeSettingDescriptor(
             settingID: selectedCodex,
-            defaultValue: .text(
-                RuntimeSettingText(rawValue: RuneScribeCodexIDs.norse.rawValue)!
-            )
+            defaultValue: defaultSelectedCodexValue
         ),
         RuntimeSettingDescriptor(
             settingID: selectedRelicByCodex,
-            defaultValue: .text(
-                RuntimeSettingText(
-                    rawValue: "codex.norse=relic.norse.runestone.weathered"
-                )!
-            )
+            defaultValue: defaultArtifactSelectionValue(for: .relic)
         ),
         RuntimeSettingDescriptor(
             settingID: selectedSealByCodex,
-            defaultValue: .text(
-                RuntimeSettingText(rawValue: "codex.norse=seal.norse.knotwork")!
-            )
+            defaultValue: defaultArtifactSelectionValue(for: .seal)
+        ),
+        RuntimeSettingDescriptor(
+            settingID: selectedFrameByCodex,
+            defaultValue: defaultArtifactSelectionValue(for: .frame)
+        ),
+        RuntimeSettingDescriptor(
+            settingID: contactsImportPrompted,
+            defaultValue: .boolean(false)
+        ),
+        RuntimeSettingDescriptor(
+            settingID: splashLastShownEpochMilliseconds,
+            defaultValue: .integer(0)
         ),
     ]
+}
+
+public extension RuntimeSettingsSnapshotDTO {
+    var selectedCodexID: CodexID {
+        guard let text = self[RuneScribeRuntimeSettings.selectedCodex]?.textValue,
+              let decoded = try? RuntimeSelectedCodexPreferenceCodec.decodeForRead(text)
+        else { return RuneScribeRuntimeSettings.defaultSelectedCodexPreference.codexID }
+        return decoded.value.codexID
+    }
+
+    var contactsImportPrompted: Bool {
+        self[RuneScribeRuntimeSettings.contactsImportPrompted]?.booleanValue ?? false
+    }
+
+    var splashLastShownAt: Date? {
+        guard case .integer(let milliseconds)? =
+            self[RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds],
+            milliseconds > 0
+        else { return nil }
+        let seconds = Double(milliseconds) / 1_000
+        guard seconds.isFinite else { return nil }
+        return Date(timeIntervalSince1970: seconds)
+    }
+
+    func artifactSelections(
+        for kind: RuntimeArtifactSelectionKind
+    ) -> RuntimeCodexArtifactSelectionMap {
+        guard let text = self[kind.settingID]?.textValue,
+              let decoded = try? RuntimeArtifactSelectionCodec.decodeForRead(
+                  text,
+                  expectedKind: kind
+              )
+        else {
+            return RuneScribeRuntimeSettings.defaultArtifactSelections(for: kind)
+        }
+        return decoded.value
+    }
+}
+
+public enum RuntimePresentationSettingCodec {
+    public static func splashLastShownValue(at date: Date) throws -> RuntimeSettingValue {
+        let milliseconds = date.timeIntervalSince1970 * 1_000
+        guard milliseconds.isFinite,
+              milliseconds > 0,
+              milliseconds <= Double(Int64.max),
+              milliseconds.rounded() >= Double(Int64.min)
+        else {
+            throw RuntimeSettingsContractError.invalidSplashLastShownAt
+        }
+        return .integer(Int64(milliseconds.rounded()))
+    }
 }

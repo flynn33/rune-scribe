@@ -1,11 +1,15 @@
 import Foundation
 import RuneScribeContracts
 import RuneScribeCoreModule
+import RuneScribeThemeGloamthornModule
+import RuneScribeThemeMoonleafModule
 import RuneScribeNorseThemeModule
 import RuneScribePlatform
 import RuneScribeProgressionModule
-import RuneScribeRuntimeCore
+@_spi(RuntimeOperationAuthority) import RuneScribeRuntimeCore
+import RuneScribeThemeSunspireModule
 import RuneScribeThemeCoordinatorModule
+import RuneScribeThemeWildwoodModule
 import RuneScribeUIModule
 import RuneScribeUIRuntime
 @MainActor final class RuneScribeRuntimeComposition {
@@ -18,6 +22,8 @@ import RuneScribeUIRuntime
     private let resources: any ApplicationResourceLocator
     private let fonts: any SystemFontRegistrar
     private let contacts: any ContactAccessService
+    private let cloudSync: any CloudSyncTransport
+    private let gameCenterReporting: any GameCenterReporting
     private let clipboardRead: any ClipboardReading
     private let clipboardWrite: any ClipboardWriting
     private let clock: any ClockProviding
@@ -38,7 +44,8 @@ import RuneScribeUIRuntime
         bundle: Bundle = .main,
         injectedCoreFactory: AnyModuleFactory? = nil,
         moduleStateStore: (any ModuleStateStore)? = try? AppleSQLiteModuleStateStore(),
-        inboundFiles: any InboundFileReader = AppleInboundFileReader()
+        inboundFiles: any InboundFileReader = AppleInboundFileReader(),
+        cloudSync: (any CloudSyncTransport)? = nil
     ) {
         let shareArtifacts = AppleShareArtifactStore()
         let systemClipboard = SystemClipboardService()
@@ -48,9 +55,15 @@ import RuneScribeUIRuntime
         self.shareArtifacts = shareArtifacts
         let moduleBundles = RuneScribeProgressionModuleBootstrap.ownerScopedResourceBundles
             .merging(RuneScribeNorseThemeModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
+            .merging(RuneScribeThemeMoonleafModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
+            .merging(RuneScribeThemeSunspireModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
+            .merging(RuneScribeThemeWildwoodModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
+            .merging(RuneScribeThemeGloamthornModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
         resources = BundleApplicationResourceLocator(bundle: bundle, moduleBundles: moduleBundles)
         fonts = CoreTextFontRegistrar()
         contacts = SystemContactAccessService()
+        self.cloudSync = cloudSync ?? AppleCloudKitProgressionTransport()
+        gameCenterReporting = AppleGameCenterReportingAdapter()
         clipboardRead = systemClipboard
         clipboardWrite = systemClipboard
         clock = SystemClock()
@@ -143,7 +156,11 @@ import RuneScribeUIRuntime
     }
     @discardableResult
     func receive(lifecycle event: ApplicationLifecycleInputDTO) -> InboundInputDispositionDTO {
-        runtime.submit(.lifecycle(event))
+        let disposition = runtime.submit(.lifecycle(event))
+        if event == .didBecomeActive || event == .willEnterForeground {
+            Task { await runtime.wakeExternalServices(.applicationBecameActive) }
+        }
+        return disposition
     }
     @discardableResult
     func receive(menu command: ApplicationMenuCommandDTO) -> InboundInputDispositionDTO {
@@ -154,6 +171,10 @@ import RuneScribeUIRuntime
         if let moduleStateStore { try await runtime.installPlatformAdapter(moduleStateStore, for: RuneScribeServiceKeys.moduleStateStore) }
         try await runtime.register(manifest: RuneScribeCoreModuleBootstrap.manifest(), factory: coreFactory)
         try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeMoonleafModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeSunspireModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeWildwoodModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeGloamthornModuleBootstrap.register(with: runtime)
         try await RuneScribeThemeCoordinatorModuleBootstrap.register(with: runtime)
         try await RuneScribeProgressionModuleBootstrap.register(with: runtime)
         try await runtime.register(manifest: RuneScribeUIModuleBootstrap.manifest(), factory: RuneScribeUIModuleBootstrap.factory())
@@ -168,6 +189,14 @@ import RuneScribeUIRuntime
         try await runtime.installPlatformAdapter(shareArtifacts, for: RuneScribeServiceKeys.sharePresentation)
         try await runtime.installPlatformAdapter(fonts, for: RuneScribeServiceKeys.systemFontRegistrar)
         try await runtime.installPlatformAdapter(contacts, for: RuneScribeServiceKeys.contactAccess)
+        try await runtime.installPlatformAdapter(
+            cloudSync,
+            for: RuneScribeServiceKeys.cloudSyncTransport
+        )
+        try await runtime.installPlatformAdapter(
+            gameCenterReporting,
+            for: RuneScribeServiceKeys.gameCenterReporting
+        )
         try await runtime.installPlatformAdapter(clipboardRead, for: RuneScribeServiceKeys.clipboardRead)
         try await runtime.installPlatformAdapter(clipboardWrite, for: RuneScribeServiceKeys.clipboardWrite)
         try await runtime.installPlatformAdapter(clock, for: RuneScribeServiceKeys.clock)

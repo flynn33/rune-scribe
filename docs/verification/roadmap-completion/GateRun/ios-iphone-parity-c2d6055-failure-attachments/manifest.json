@@ -1,0 +1,34 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "1563B47A-700D-4AEF-A8D5-89780C581F83",
+        "deviceName" : "iPhone 17 Pro",
+        "exportedFileName" : "1B1091C8-8823-4B3B-BD68-04758DAD5395.txt",
+        "isAssociatedWithFailure" : true,
+        "suggestedHumanReadableName" : "Complete Issue Description.txt"
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "1563B47A-700D-4AEF-A8D5-89780C581F83",
+        "deviceName" : "iPhone 17 Pro",
+        "exportedFileName" : "2043451E-5BE6-48DC-AA1F-10712C2CC557.png",
+        "isAssociatedWithFailure" : true,
+        "suggestedHumanReadableName" : "App Screenshot_0_49231CC4-A2AE-4454-99EF-BFCC889157F8.png",
+        "timestamp" : 1787436628.067
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "1563B47A-700D-4AEF-A8D5-89780C581F83",
+        "deviceName" : "iPhone 17 Pro",
+        "exportedFileName" : "61A478C5-6D53-4793-B1D2-87B0E73448E6.png",
+        "isAssociatedWithFailure" : true,
+        "suggestedHumanReadableName" : "Element Screenshot_1_2C1B2151-05FD-48F8-95A9-0D2BAFC3EE22.png",
+        "timestamp" : 1787436628.067
+      }
+    ],
+    "testIdentifier" : "RuneScribeParityUITests/testFreshInstallExercisesPrimaryProductFlows()",
+    "testIdentifierURL" : "test://com.apple.xcode/RuneScrib/RuneScribIOSUITests/RuneScribeParityUITests/testFreshInstallExercisesPrimaryProductFlows"
+  }
+]

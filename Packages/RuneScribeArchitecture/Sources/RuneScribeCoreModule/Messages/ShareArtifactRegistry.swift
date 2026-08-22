@@ -16,6 +16,7 @@ struct CoreShareArtifact: Sendable {
     let hasStoredLink: Bool
     let messageCipherID: UUID?
     let encodedMessageHandle: EncodedMessageHandle?
+    let presentationSelection: SharePresentationSelection?
     let persistsMetadata: Bool
 }
 
@@ -27,6 +28,7 @@ struct CoreDurableShareArtifactRecord: Codable, Equatable, Sendable {
     let requiresKeyDelivery: Bool
     let messageCipherID: UUID?
     let encodedMessageHandle: EncodedMessageHandle?
+    let presentationSelection: SharePresentationSelection?
     var terminalEvidence: ShareArtifactCompletionEvidenceDTO?
     var plannedDisposition: ShareArtifactCompletionResultDTO?
     var completionDisposition: ShareArtifactCompletionResultDTO?
@@ -48,6 +50,7 @@ struct CoreDurableShareArtifactRecord: Codable, Equatable, Sendable {
         requiresKeyDelivery = artifact.dto.requiresKeyDelivery
         messageCipherID = artifact.messageCipherID
         encodedMessageHandle = artifact.encodedMessageHandle
+        presentationSelection = artifact.presentationSelection
         terminalEvidence = nil
         plannedDisposition = nil
         completionDisposition = nil
@@ -156,7 +159,8 @@ private struct CoreShareArtifactJournal: Codable, Equatable, Sendable {
                   existing.hasStoredLink == expected.hasStoredLink,
                   existing.requiresKeyDelivery == expected.requiresKeyDelivery,
                   existing.messageCipherID == expected.messageCipherID,
-                  existing.encodedMessageHandle == expected.encodedMessageHandle
+                  existing.encodedMessageHandle == expected.encodedMessageHandle,
+                  existing.presentationSelection == expected.presentationSelection
             else {
                 throw ShareArtifactRegistryError.terminalEvidenceCollision
             }
@@ -380,6 +384,7 @@ actor ShareArtifactRegistry {
         requiresKeyDelivery: Bool,
         messageCipherID: UUID?,
         encodedMessageHandle: EncodedMessageHandle? = nil,
+        presentationSelection: SharePresentationSelection? = nil,
         persistsMetadata: Bool = true
     ) async throws -> ShareArtifactDTO {
         do {
@@ -408,6 +413,7 @@ actor ShareArtifactRegistry {
             hasStoredLink: false,
             messageCipherID: messageCipherID,
             encodedMessageHandle: encodedMessageHandle,
+            presentationSelection: presentationSelection,
             persistsMetadata: persistsMetadata
         )
         artifacts[id] = artifact
@@ -427,6 +433,7 @@ actor ShareArtifactRegistry {
         url: URL,
         id: ShareArtifactID,
         displayName: String,
+        presentationSelection: SharePresentationSelection? = nil,
         persistsMetadata: Bool = true
     ) async throws -> ShareArtifactDTO {
         do {
@@ -449,6 +456,7 @@ actor ShareArtifactRegistry {
             hasStoredLink: true,
             messageCipherID: nil,
             encodedMessageHandle: nil,
+            presentationSelection: presentationSelection,
             persistsMetadata: persistsMetadata
         )
         artifacts[id] = artifact
@@ -468,6 +476,7 @@ actor ShareArtifactRegistry {
         id: ShareArtifactID,
         cipherID: UUID,
         encodedMessageHandle: EncodedMessageHandle? = nil,
+        presentationSelection: SharePresentationSelection? = nil,
         persistsMetadata: Bool = true
     ) async throws -> ShareArtifactDTO {
         let dto = ShareArtifactDTO(
@@ -485,6 +494,7 @@ actor ShareArtifactRegistry {
             hasStoredLink: false,
             messageCipherID: cipherID,
             encodedMessageHandle: encodedMessageHandle,
+            presentationSelection: presentationSelection,
             persistsMetadata: persistsMetadata
         )
         if persistsMetadata {
@@ -524,6 +534,37 @@ actor ShareArtifactRegistry {
         try await loadTerminalJournal().records.contains {
             $0.encodedMessageHandle == encodedMessageHandle
                 && $0.completionDisposition == nil
+        }
+    }
+
+    /// Prevents two addressable copies of the same first-delivery key material.
+    /// A physically released cancellation may be replaced, while a delivery-
+    /// eligible terminal or a Runtime-retained terminal remains authoritative.
+    func hasOutstandingKeyDeliveryArtifact(
+        cipherID: UUID,
+        runtimeOutstandingArtifactIDs: Set<ShareArtifactID>? = nil,
+        inspectsDurableJournal: Bool = true
+    ) async throws -> Bool {
+        if artifacts.values.contains(where: { artifact in
+            artifact.dto.requiresKeyDelivery
+                && artifact.messageCipherID == cipherID
+        }) {
+            return true
+        }
+        guard inspectsDurableJournal else { return false }
+
+        return try await loadTerminalJournal().records.contains { record in
+            guard record.requiresKeyDelivery,
+                  record.messageCipherID == cipherID,
+                  record.completionDisposition == nil
+            else { return false }
+            if !record.physicalArtifactReleased { return true }
+            if runtimeOutstandingArtifactIDs?.contains(record.artifactID) == true {
+                return true
+            }
+            return record.terminalEvidence?.report.isEligibleTerminal(
+                requiresKeyDelivery: true
+            ) == true
         }
     }
 
@@ -766,7 +807,8 @@ actor ShareArtifactRegistry {
         let loaded: CoreShareArtifactJournal
         do {
             guard let encrypted = try await runtimeIO.readProtectedFile(
-                Self.terminalJournalPath
+                Self.terminalJournalPath,
+                maximumByteCount: Self.maximumTerminalJournalByteCount
             ) else {
                 loaded = try CoreShareArtifactJournal()
                 terminalJournal = loaded
@@ -814,7 +856,8 @@ actor ShareArtifactRegistry {
                 try await runtimeIO.removeProtectedFile(Self.terminalJournalPath)
             } catch {
                 if (try? await runtimeIO.readProtectedFile(
-                    Self.terminalJournalPath
+                    Self.terminalJournalPath,
+                    maximumByteCount: Self.maximumTerminalJournalByteCount
                 )) != nil {
                     throw ShareArtifactRegistryError.storageUnavailable
                 }
@@ -848,7 +891,8 @@ actor ShareArtifactRegistry {
             )
         } catch {
             guard let stored = try? await runtimeIO.readProtectedFile(
-                Self.terminalJournalPath
+                Self.terminalJournalPath,
+                maximumByteCount: Self.maximumTerminalJournalByteCount
             ), let decoded = try? Self.decryptTerminalJournal(
                       stored,
                       using: key

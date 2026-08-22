@@ -1,0 +1,29 @@
+PASS: synthetic shipping-product baseline
+PASS: missing-provider -> macOS moonleaf provider bundle is not exactly once at its canonical direct path
+PASS: misplaced-provider -> macOS moonleaf provider bundle is not exactly once at its canonical direct path
+PASS: extra-bundle -> macOS product resource bundle census differs
+PASS: misplaced-theme-resource -> macOS Theme resource appears outside its canonical module bundle
+PASS: wrong-theme-hash -> macOS moonleaf output bytes or SHA-256 differ
+PASS: provider-optional-criticality -> macOS moonleaf optional provider contract differs
+PASS: provider-manifest-identity -> macOS moonleaf integrity-manifest identity differs
+PASS: duplicate-provider-resource-id -> macOS moonleaf output resource IDs are duplicated
+PASS: theme-module-budget -> macOS moonleaf resource bundle exceeds the 64 MiB budget
+PASS: norse-required-base -> macOS Norse Theme criticality differs
+PASS: placeholder-content -> macOS product contains placeholder content
+PASS: debug-catalog -> macOS product contains a debug or support-only catalog
+PASS: source-master -> macOS product contains a prohibited source master
+PASS: prohibited-attribution -> macOS product contains prohibited attribution bytes
+PASS: static-forbidden-linkage -> macOS product contains prohibited statically linked Forsetti symbols
+PASS: test-support-linkage -> macOS executable unexpectedly links RuneScribeTestSupport
+PASS: missing-gamekit-linkage -> macOS product has no dynamic linkage evidence for runtime-owned GameKit adapters
+PASS: missing-cloudkit-linkage -> macOS product has no dynamic linkage evidence for runtime-owned CloudKit adapters
+PASS: wrong-build-platform -> macOS executable LC_BUILD_VERSION does not match its declared platform
+PASS: entitlement-team-prefix -> macOS arm64 ubiquity key-value store prefix differs from the signing team
+PASS: missing-game-center-catalog -> macOS Game Center resource bytes or SHA-256 differ
+PASS: wrong-platform-audio -> macOS Platform resource bytes or SHA-256 differ
+PASS: changed-built-version -> built marketing version differs from frozen 1.0.38
+PASS: platform-source-exclusion -> Package.swift Platform resource processing or source exclusion differs
+PASS: frozen-source-version -> project.yml version/build differ from frozen 1.0.38 (38)
+PASS: source-entitlement-decision -> macOS source entitlement dictionary differs
+PASS: external-package-dependency -> Package.swift gained an external dependency
+Shipping-product negative mutations: 27 promised rejections exercised.

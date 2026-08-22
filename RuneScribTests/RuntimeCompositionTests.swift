@@ -397,7 +397,10 @@ final class RuntimeCompositionTests: XCTestCase {
                 try await secureValues.delete(service: $0, account: $1)
             },
             readProtectedFile: {
-                try await protectedFiles.read(relativePath: $0)
+                try await protectedFiles.read(
+                    relativePath: $0,
+                    maximumByteCount: $1
+                )
             },
             writeProtectedFile: {
                 try await protectedFiles.write($0, relativePath: $1)
@@ -446,7 +449,8 @@ final class RuntimeCompositionTests: XCTestCase {
                 bundle: .main,
                 injectedCoreFactory: coreFactory,
                 moduleStateStore: moduleStateStore,
-                inboundFiles: inboundFiles
+                inboundFiles: inboundFiles,
+                cloudSync: NoAccountCloudSyncTransport()
             ),
             inboundInputService: inboundInputService
         )

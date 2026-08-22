@@ -1,7 +1,9 @@
+import CoreGraphics
+import CoreImage
 import RuneScribeContracts
 @_spi(RuntimeTesting) import RuneScribeRuntimeCore
 @testable import RuneScribeUIModule
-import RuneScribeUIRuntime
+@testable import RuneScribeUIRuntime
 import SwiftUI
 import XCTest
 
@@ -123,6 +125,100 @@ final class UIModuleTests: XCTestCase {
         XCTAssertFalse(transfer.isAvailable)
         XCTAssertNil(transfer.qrCodeImage())
         await runtime.stop()
+    }
+
+    func testQRCodeRoundTripsAcrossScaleCropNoiseAndContrastFixtures() throws {
+        let payload = "runescribe://import?v=3&p="
+            + "dGVzdC1jaXBoZXItcGF5bG9hZC13aXRoLWJvdW5kZWQtbm9pc2U"
+        let detector = try XCTUnwrap(CIDetector(
+            ofType: CIDetectorTypeQRCode,
+            context: CIContext(options: [.useSoftwareRenderer: true]),
+            options: [CIDetectorAccuracy: CIDetectorAccuracyHigh]
+        ))
+
+        for scale: CGFloat in [4, 8, 12] {
+            let image = try XCTUnwrap(RuntimeQRCodeRenderer.image(
+                message: payload,
+                scale: scale
+            ))
+            XCTAssertEqual(decodedMessage(in: image, detector: detector), payload)
+        }
+
+        let source = try XCTUnwrap(RuntimeQRCodeRenderer.image(
+            message: payload,
+            scale: 12
+        ))
+        let crop = CGRect(
+            x: 2,
+            y: 2,
+            width: source.width - 4,
+            height: source.height - 4
+        )
+        let cropped = try XCTUnwrap(source.cropping(to: crop))
+        XCTAssertEqual(decodedMessage(in: cropped, detector: detector), payload)
+
+        for noisePointCount in [8, 32] {
+            let noisy = try deterministicNoise(
+                on: source,
+                pointCount: noisePointCount
+            )
+            XCTAssertEqual(decodedMessage(in: noisy, detector: detector), payload)
+        }
+
+        let highContrast = CIImage(cgImage: source).applyingFilter(
+            "CIColorControls",
+            parameters: [
+                kCIInputContrastKey: 2.0,
+                kCIInputSaturationKey: 0.0,
+            ]
+        )
+        let highContrastImage = try XCTUnwrap(
+            CIContext(options: [.useSoftwareRenderer: true]).createCGImage(
+                highContrast,
+                from: highContrast.extent
+            )
+        )
+        XCTAssertEqual(decodedMessage(in: highContrastImage, detector: detector), payload)
+    }
+
+    private func decodedMessage(in image: CGImage, detector: CIDetector) -> String? {
+        detector.features(in: CIImage(cgImage: image))
+            .compactMap { ($0 as? CIQRCodeFeature)?.messageString }
+            .first
+    }
+
+    private func deterministicNoise(
+        on image: CGImage,
+        pointCount: Int
+    ) throws -> CGImage {
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let context = try XCTUnwrap(CGContext(
+            data: nil,
+            width: image.width,
+            height: image.height,
+            bitsPerComponent: 8,
+            bytesPerRow: image.width * 4,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ))
+        context.interpolationQuality = .none
+        context.draw(
+            image,
+            in: CGRect(x: 0, y: 0, width: image.width, height: image.height)
+        )
+        var state: UInt64 = 0x5255_4E45_5343_5249
+        for index in 0 ..< pointCount {
+            state = state &* 6_364_136_223_846_793_005 &+ 1
+            let x = Int(state % UInt64(image.width))
+            state = state &* 6_364_136_223_846_793_005 &+ 1
+            let y = Int(state % UInt64(image.height))
+            context.setFillColor(CGColor(
+                gray: index.isMultiple(of: 2) ? 0 : 1,
+                alpha: 1
+            ))
+            context.fill(CGRect(x: x, y: y, width: 1, height: 1))
+        }
+        return try XCTUnwrap(context.makeImage())
     }
 }
 

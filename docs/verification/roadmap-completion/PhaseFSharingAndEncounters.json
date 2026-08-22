@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture --filter SharePresentationSectionTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter ShareArtifactRendererTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter ElvenShareArtifactRendererIntegrationTests",
+    "swift test --package-path Packages/RuneScribeArchitecture --filter CoreApplicationProgressionIntegrationTests"
+  ],
+  "environment": {
+    "host": "macOS arm64",
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3",
+    "supportedDestinations": [
+      "macOS hosted tests",
+      "iPhone 17 Pro Simulator, iOS 26.2",
+      "iPad Pro 13-inch (M5) Simulator, iOS 26.2"
+    ],
+    "externalBoundary": "Physical hardware, live service accounts, provisioning, distribution, and store operations are owner-only."
+  },
+  "sourceRevision": "b7c55ff40255f96a6c857b49a14962e9fcd79c37",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/SharePresentationSectionTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ShareArtifactRendererTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ElvenShareArtifactRendererIntegrationTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/CoreApplicationProgressionIntegrationTests.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift"
+  ],
+  "completedControls": [
+    "SHR-002",
+    "SHR-003",
+    "SHR-004",
+    "SHR-005",
+    "SHR-006",
+    "SHR-007",
+    "SHR-008",
+    "SHR-009",
+    "SHR-010",
+    "SHR-011",
+    "SHR-012",
+    "SHR-013",
+    "SHR-014",
+    "SHR-016",
+    "SHR-017"
+  ],
+  "renderer": "One UI-owned, data-driven renderer covers short, medium, long, paginated, overflow, 4:3 fallback, Vault thumbnail, high-contrast, reduced-motion, and monochrome states.",
+  "delivery": "Only eligible terminal outcomes after attachment acceptance emit deduplicated progression facts. First delivery can carry the key; established delivery does not.",
+  "receive": "Valid payloads remain readable through Norse when presentation is unknown, locked, unavailable, incompatible, corrupt, or absent. Encounters do not grant ownership.",
+  "ownerOnly": [
+    "Physical QR camera behavior",
+    "Live Messages delivery",
+    "Third-party share extension behavior"
+  ]
+}

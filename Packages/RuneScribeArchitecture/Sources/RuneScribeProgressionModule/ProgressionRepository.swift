@@ -1004,6 +1004,8 @@ struct ProgressionRepository: Sendable {
         } else if let receipt = additions.commandReceipt {
             let isRevealPresentationCommand = receipt.operationIdentifier ==
                 "progression.reveal.mark-presented"
+            let isExternalMergeCommand = receipt.operationIdentifier ==
+                "progression.external-merge.apply"
             let revealPresentationMutationIsValid = if isRevealPresentationCommand {
                 projection.records == before.projection.records &&
                     additions.pendingRevealUpserts.count <= 1 &&
@@ -1025,8 +1027,11 @@ struct ProgressionRepository: Sendable {
                     before.projection.metadata.appliedEventDigest,
                   projection.metadata.processedEventCount ==
                     before.projection.metadata.processedEventCount,
+                  !nextDistinctTokenCount.overflow,
                   projection.metadata.distinctTokenCount ==
-                    before.projection.metadata.distinctTokenCount,
+                    (isExternalMergeCommand
+                        ? nextDistinctTokenCount.partialValue
+                        : before.projection.metadata.distinctTokenCount),
                   !nextCommandReceiptCount.overflow,
                   projection.metadata.commandReceiptCount ==
                     nextCommandReceiptCount.partialValue,
@@ -1038,12 +1043,22 @@ struct ProgressionRepository: Sendable {
                   receipt.resultRevision == projection.metadata.revision,
                   additions.appliedEventOrder == nil,
                   additions.semanticRecord == nil,
-                  additions.distinctTokenUpserts.isEmpty,
+                  additions.distinctTokenUpserts.isEmpty || isExternalMergeCommand,
                   additions.processedEvent == nil,
                   (additions.acknowledgedRevealUpsert == nil) ==
                     additions.queuedRevealDeletes.isEmpty,
                   revealPresentationMutationIsValid
             else { throw ProgressionDomainError.invalidRecord("command-commit") }
+            if isExternalMergeCommand {
+                guard additions.distinctTokenUpserts.allSatisfy({ token in
+                    token.sourceExternalMergeTransactionID == transactionID &&
+                        token.firstAppliedRevision == projection.metadata.revision
+                }) else {
+                    throw ProgressionDomainError.invalidRecord(
+                        "external-merge-distinct-provenance"
+                    )
+                }
+            }
         } else {
             throw ProgressionDomainError.invalidRecord("commit-authority")
         }
@@ -2852,6 +2867,72 @@ struct ProgressionRepository: Sendable {
         return record
     }
 
+    func distinctTokens(
+        generation: String,
+        maximumRevision: UInt64
+    ) async throws -> [DistinctTokenRecord] {
+        let collection = ProgressionRepositoryIDs.distinctCollection
+        let prefix = "distinct.\(generation)."
+        var cursor: ModuleStateScanCursor?
+        var values: [DistinctTokenRecord] = []
+        repeat {
+            let page = try await client.scan(try ModuleStateScanRequest(
+                collectionID: collection,
+                limit: ModuleStateScanRequest.maximumLimit,
+                cursor: cursor
+            ))
+            for physical in page.records
+                where physical.key.recordID.rawValue.hasPrefix(prefix)
+            {
+                let record: DistinctTokenRecord = try await decodeDirectRecord(
+                    physical,
+                    category: .distinctToken,
+                    invalidLabel: "distinct-token-corrupt"
+                ) {
+                    guard physical.schemaVersion == Self.namespaceSchemaVersion else {
+                        throw ProgressionDomainError.unsupportedRecordSchema(
+                            UInt16(clamping: physical.schemaVersion)
+                        )
+                    }
+                    let decoded = try ProgressionDeterminism.decoder().decode(
+                        DistinctTokenRecord.self,
+                        from: physical.payload
+                    )
+                    try decoded.validate()
+                    guard decoded.generation == generation,
+                          decoded.firstAppliedRevision <= maximumRevision,
+                          ProgressionRepositoryIDs.distinctTokenRecordID(decoded) ==
+                            physical.key.recordID
+                    else {
+                        throw ProgressionDomainError.invalidRecord(
+                            "distinct-token-reference"
+                        )
+                    }
+                    return decoded
+                }
+                if let transactionID = record.sourceExternalMergeTransactionID {
+                    guard let receipt = try await commandReceipt(
+                        transactionID: transactionID,
+                        generation: generation
+                    ), receipt.resultRevision == record.firstAppliedRevision,
+                       record.firstObservedAt.map({ $0 <= receipt.completedAt }) == true
+                    else {
+                        throw ProgressionDomainError.invalidRecord(
+                            "distinct-token-external-provenance"
+                        )
+                    }
+                }
+                values.append(record)
+            }
+            try validateCursor(page.nextCursor, prior: cursor, collection: collection)
+            cursor = page.nextCursor
+        } while cursor != nil
+        guard Set(values.map(distinctIdentity)).count == values.count else {
+            throw ProgressionDomainError.invalidRecord("distinct-token-count")
+        }
+        return values.sorted { distinctIdentity($0) < distinctIdentity($1) }
+    }
+
     func appliedEventOrderPage(
         generation: String,
         cursor: ModuleStateScanCursor?
@@ -3502,6 +3583,43 @@ struct ProgressionRepository: Sendable {
               receipt.operationIdentifier == metadata.operationIdentifier.rawValue,
               receipt.commandDigest == commandDigest
         else { throw ProgressionDomainError.transactionIdentityCollision }
+        return receipt
+    }
+
+    private func commandReceipt(
+        transactionID: UUID,
+        generation: String
+    ) async throws -> ProgressionCommandReceiptRecord? {
+        guard let physical = try await client.fetch(
+            collectionID: ProgressionRepositoryIDs.commandCollection(generation),
+            recordID: ProgressionRepositoryIDs.commandRecordID(transactionID)
+        ) else { return nil }
+        let receipt: ProgressionCommandReceiptRecord = try await decodeDirectRecord(
+            physical,
+            category: .metadata,
+            invalidLabel: "command-receipt-corrupt"
+        ) {
+            guard physical.schemaVersion == Self.namespaceSchemaVersion else {
+                throw ProgressionDomainError.unsupportedRecordSchema(
+                    UInt16(clamping: physical.schemaVersion)
+                )
+            }
+            let receipt = try ProgressionDeterminism.decoder().decode(
+                ProgressionCommandReceiptRecord.self,
+                from: physical.payload
+            )
+            try receipt.validate()
+            let storedTransactionID = ProgressionDeterminism.transactionUUID(
+                "runtime-operation|\(receipt.operationIdentifier)|\(receipt.operationID)"
+            )
+            guard storedTransactionID == transactionID else {
+                throw ProgressionDomainError.invalidRecord("command-receipt-identity")
+            }
+            return receipt
+        }
+        guard receipt.operationIdentifier == "progression.external-merge.apply" else {
+            throw ProgressionDomainError.invalidRecord("external-merge-receipt")
+        }
         return receipt
     }
 
@@ -4628,10 +4746,7 @@ struct ProgressionRepository: Sendable {
                     try record.validate()
                     let replacement = DistinctTokenRecord(
                         generation: replacementGeneration,
-                        statisticID: record.statisticID,
-                        bucketID: record.bucketID,
-                        canonicalToken: record.canonicalToken,
-                        firstAppliedRevision: record.firstAppliedRevision
+                        copying: record
                     )
                     guard record.generation == generation,
                           ProgressionRepositoryIDs.distinctTokenRecordID(record) ==
@@ -5442,7 +5557,9 @@ struct ProgressionRepository: Sendable {
                        appliedRevision <= (projection.metadata.lastAppliedRevision ?? 0),
                        appliedRevision != projection.metadata.lastAppliedRevision ||
                         order.cumulativeDigest == projection.metadata.appliedEventDigest,
-                       processed.envelope.occurredAt == record.completedAt,
+                       (record.sourceExternalMergeTransactionID == nil
+                        ? processed.envelope.occurredAt == record.completedAt
+                        : record.completedAt <= processed.envelope.occurredAt),
                        case .accepted = ProgressionEventValidator.validate(
                         processed.envelope,
                         bundle: bundle
@@ -5453,11 +5570,14 @@ struct ProgressionRepository: Sendable {
                             label: "achievement-completion-provenance"
                         )
                     }
-                } else {
+                } else if let migrationTransactionID =
+                    record.sourceExistingUserMigrationTransactionID
+                {
                     guard let migration = existingUserMigration,
-                          record.sourceExistingUserMigrationTransactionID ==
-                            migration.transactionID,
-                          record.completedAt == migration.completedAt,
+                          migrationTransactionID == migration.transactionID,
+                          (record.sourceExternalMergeTransactionID == nil
+                            ? record.completedAt == migration.completedAt
+                            : record.completedAt <= migration.completedAt),
                           (record.achievementID.rawValue == "achievement.archivist-1" ||
                             record.achievementID.rawValue == "achievement.archivist-2")
                     else {
@@ -5466,33 +5586,73 @@ struct ProgressionRepository: Sendable {
                             label: "achievement-migration-provenance"
                         )
                     }
+                } else if record.sourceExternalMergeTransactionID == nil {
+                    throw ProgressionProjectionIntegrityIssue(
+                        categories: [.achievementCompletion],
+                        label: "achievement-completion-provenance"
+                    )
+                }
+                if let externalTransactionID = record.sourceExternalMergeTransactionID {
+                    guard let receipt = try await commandReceipt(
+                        transactionID: externalTransactionID,
+                        generation: generation
+                    ), receipt.resultRevision <= projection.metadata.revision,
+                       record.completedAt <= receipt.completedAt
+                    else {
+                        throw ProgressionProjectionIntegrityIssue(
+                            categories: [.achievementCompletion],
+                            label: "achievement-external-merge-provenance"
+                        )
+                    }
                 }
             case let .milestoneCompletion(record):
                 milestoneCompletions[record.ruleID] = record
-                guard let processed = try await processedEvent(
-                    record.sourceEventID,
-                    generation: generation
-                ), processed.outcome == .applied,
-                   let appliedRevision = processed.appliedRevision,
-                   let order = try await appliedEventOrderRecord(
-                    appliedRevision,
-                    generation: generation
-                   ), order.eventID == processed.eventID,
-                   order.envelope == processed.envelope,
-                   order.envelopeDigest == processed.envelopeDigest,
-                   appliedRevision <= (projection.metadata.lastAppliedRevision ?? 0),
-                   appliedRevision != projection.metadata.lastAppliedRevision ||
-                    order.cumulativeDigest == projection.metadata.appliedEventDigest,
-                   processed.envelope.occurredAt == record.completedAt,
-                   case .accepted = ProgressionEventValidator.validate(
-                    processed.envelope,
-                    bundle: bundle
-                   )
-                else {
+                if let sourceEventID = record.sourceEventID {
+                    guard let processed = try await processedEvent(
+                        sourceEventID,
+                        generation: generation
+                    ), processed.outcome == .applied,
+                       let appliedRevision = processed.appliedRevision,
+                       let order = try await appliedEventOrderRecord(
+                        appliedRevision,
+                        generation: generation
+                       ), order.eventID == processed.eventID,
+                       order.envelope == processed.envelope,
+                       order.envelopeDigest == processed.envelopeDigest,
+                       appliedRevision <= (projection.metadata.lastAppliedRevision ?? 0),
+                       appliedRevision != projection.metadata.lastAppliedRevision ||
+                        order.cumulativeDigest == projection.metadata.appliedEventDigest,
+                       (record.sourceExternalMergeTransactionID == nil
+                        ? processed.envelope.occurredAt == record.completedAt
+                        : record.completedAt <= processed.envelope.occurredAt),
+                       case .accepted = ProgressionEventValidator.validate(
+                        processed.envelope,
+                        bundle: bundle
+                       )
+                    else {
+                        throw ProgressionProjectionIntegrityIssue(
+                            categories: [.milestoneCompletion],
+                            label: "milestone-completion-provenance"
+                        )
+                    }
+                } else if record.sourceExternalMergeTransactionID == nil {
                     throw ProgressionProjectionIntegrityIssue(
                         categories: [.milestoneCompletion],
                         label: "milestone-completion-provenance"
                     )
+                }
+                if let externalTransactionID = record.sourceExternalMergeTransactionID {
+                    guard let receipt = try await commandReceipt(
+                        transactionID: externalTransactionID,
+                        generation: generation
+                    ), receipt.resultRevision <= projection.metadata.revision,
+                       record.completedAt <= receipt.completedAt
+                    else {
+                        throw ProgressionProjectionIntegrityIssue(
+                            categories: [.milestoneCompletion],
+                            label: "milestone-external-merge-provenance"
+                        )
+                    }
                 }
             default:
                 continue
@@ -5517,18 +5677,36 @@ struct ProgressionRepository: Sendable {
                     expectedTransactionID = GrantTransactionID(
                         rawValue: "transaction.\(sourceEventID.rawValue.uuidString.lowercased())"
                     )!
+                    guard let processed = try await processedEvent(
+                        sourceEventID,
+                        generation: generation
+                    ), processed.outcome == .applied
+                    else {
+                        throw ProgressionProjectionIntegrityIssue(
+                            categories: [.grant, .achievementCompletion],
+                            label: "achievement-grant-event-provenance"
+                        )
+                    }
+                    expectedGrantedAt = processed.envelope.occurredAt
                 } else if let migration = existingUserMigration,
                           completion.sourceExistingUserMigrationTransactionID ==
                             migration.transactionID
                 {
                     expectedTransactionID = migration.grantTransactionID
+                    expectedGrantedAt = migration.completedAt
+                } else if let externalTransactionID =
+                    completion.sourceExternalMergeTransactionID
+                {
+                    expectedTransactionID = externalMergeGrantTransactionID(
+                        externalTransactionID
+                    )
+                    expectedGrantedAt = completion.completedAt
                 } else {
                     throw ProgressionProjectionIntegrityIssue(
                         categories: [.grant, .achievementCompletion, .catalogMigration],
                         label: "achievement-grant-migration-provenance"
                     )
                 }
-                expectedGrantedAt = completion.completedAt
             case let .milestone(ruleID):
                 guard let completion = milestoneCompletions[ruleID] else {
                     throw ProgressionProjectionIntegrityIssue(
@@ -5536,10 +5714,34 @@ struct ProgressionRepository: Sendable {
                         label: "milestone-grant-provenance"
                     )
                 }
-                expectedTransactionID = GrantTransactionID(
-                    rawValue: "transaction.\(completion.sourceEventID.rawValue.uuidString.lowercased())"
-                )!
-                expectedGrantedAt = completion.completedAt
+                if let sourceEventID = completion.sourceEventID {
+                    expectedTransactionID = GrantTransactionID(
+                        rawValue: "transaction.\(sourceEventID.rawValue.uuidString.lowercased())"
+                    )!
+                    guard let processed = try await processedEvent(
+                        sourceEventID,
+                        generation: generation
+                    ), processed.outcome == .applied
+                    else {
+                        throw ProgressionProjectionIntegrityIssue(
+                            categories: [.grant, .milestoneCompletion],
+                            label: "milestone-grant-event-provenance"
+                        )
+                    }
+                    expectedGrantedAt = processed.envelope.occurredAt
+                } else if let externalTransactionID =
+                    completion.sourceExternalMergeTransactionID
+                {
+                    expectedTransactionID = externalMergeGrantTransactionID(
+                        externalTransactionID
+                    )
+                    expectedGrantedAt = completion.completedAt
+                } else {
+                    throw ProgressionProjectionIntegrityIssue(
+                        categories: [.grant, .milestoneCompletion],
+                        label: "milestone-grant-provenance"
+                    )
+                }
             }
             guard record.transactionID == expectedTransactionID,
                   record.grantedAt == expectedGrantedAt
@@ -6274,7 +6476,12 @@ struct ProgressionRepository: Sendable {
                     "milestone-completion|\(ruleID.rawValue)"
                   ]
             else { throw ProgressionDomainError.invalidRecord("queued-reveal-rule") }
-            sourceEventIDs.insert(completion.sourceEventID)
+            guard let sourceEventID = completion.sourceEventID else {
+                throw ProgressionDomainError.invalidRecord(
+                    "queued-reveal-rule-provenance"
+                )
+            }
+            sourceEventIDs.insert(sourceEventID)
         }
 
         let grants = validationRecords.values.compactMap { logical -> GrantRecord? in
@@ -6469,7 +6676,7 @@ struct ProgressionRepository: Sendable {
                   case let .ownership(ownership)? = validationRecords[
                     "ownership|\(grant.contentID.rawValue)"
                   ],
-                  ownership.grantedAt == createdAt,
+                  ownership.grantedAt.map({ $0 <= createdAt }) == true,
                   ownership.sourceGrantKeys.contains(
                     ProgressionLogicalRecord.grant(grant).identity
                   )

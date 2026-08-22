@@ -80,6 +80,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
     private var messageState = MessageStateDTO(phase: .idle)
     private var lockState = ApplicationLockStateDTO(isPINSet: false, isLocked: false)
     private var pendingImports: [ImportID: PendingCipherImport] = [:]
+    private var messageConfirmationImportIDs: [ImportID: MessageID] = [:]
     private var activeImportID: ImportID?
     private var activeImportDedupeKeys: Set<Data> = []
     private var activeImportDedupeKeyOrder: [Data] = []
@@ -851,8 +852,30 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             let artifact: ShareArtifactDTO
             switch command.representation {
             case .file:
-                let fontBytes = try await fontIntegration?.data(for: cipher.fontRef) ?? Data()
-                let bytes = try payload.encodedFile(fontBytes: fontBytes)
+                let bytes: Data
+                if let presentation = command.presentation {
+                    let fontBytes: Data? = if cipher.fontRef == .bundled {
+                        nil
+                    } else {
+                        try await fontIntegration?.data(for: cipher.fontRef)
+                    }
+                    bytes = try RuneScribePackage.themed(
+                        kind: .cipherInvitation,
+                        payloadVersion: UInt16(CipherSharePayload.version),
+                        corePayload: payload.encoded(),
+                        presentation: SharePresentationSectionBundle(
+                            metadata: presentation.metadata,
+                            safePreviewData: presentation.safePreviewData,
+                            signedProvenance: presentation.signedProvenance
+                        ),
+                        legacyFontReference: cipher.fontRef,
+                        legacyFontData: fontBytes
+                    ).encoded()
+                } else {
+                    let fontBytes = try await fontIntegration?.data(for: cipher.fontRef)
+                        ?? Data()
+                    bytes = try payload.encodedFile(fontBytes: fontBytes)
+                }
                 artifact = try await artifactRegistry.createFile(
                     data: bytes,
                     id: artifactID,
@@ -862,6 +885,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                     fileExtension: RuneScribeWireFormat.fileExtension,
                     requiresKeyDelivery: true,
                     messageCipherID: nil,
+                    presentationSelection: command.presentation?.metadata.selection,
                     persistsMetadata: persistsMetadata
                 )
             case .link, .qrCode:
@@ -870,6 +894,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                     url: url,
                     id: artifactID,
                     displayName: command.displayName ?? cipher.label,
+                    presentationSelection: command.presentation?.metadata.selection,
                     persistsMetadata: persistsMetadata
                 )
             }
@@ -934,6 +959,26 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             }
 
             let includeKey = MessageSend.shouldIncludeKey(cipher)
+            if includeKey {
+                let runtimeOutstandingArtifactIDs: Set<ShareArtifactID>?
+                if let progressionOutboxClient {
+                    runtimeOutstandingArtifactIDs = try await progressionOutboxClient
+                        .outstandingShareCompletionArtifactIDs()
+                } else {
+                    runtimeOutstandingArtifactIDs = nil
+                }
+                let hasOutstandingKeyDeliveryArtifact = try await artifactRegistry
+                    .hasOutstandingKeyDeliveryArtifact(
+                        cipherID: cipher.id,
+                    runtimeOutstandingArtifactIDs: runtimeOutstandingArtifactIDs,
+                    inspectsDurableJournal: persistsMetadata
+                )
+                guard !hasOutstandingKeyDeliveryArtifact else {
+                    throw RuneScribeProductError.failure(
+                        RuneScribeFailureDTO(code: .invalidInput)
+                    )
+                }
+            }
             // Always validate that the runes belong to the requested cipher;
             // the sender label remains the explicit user-selected share value.
             let payload = try MessageSend.payload(
@@ -944,7 +989,38 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             )
             let artifactID = ShareArtifactID(rawValue: try await runtimeIO.nextUUID())
             let artifact: ShareArtifactDTO
-            if includeKey {
+            if let presentation = command.presentation {
+                let fontBytes: Data? = if includeKey && cipher.fontRef != .bundled {
+                    try await fontIntegration?.data(for: cipher.fontRef)
+                } else {
+                    nil
+                }
+                let bytes = try RuneScribePackage.themed(
+                    kind: .encryptedMessage,
+                    payloadVersion: UInt16(MessageSharePayload.version),
+                    corePayload: payload.encoded(),
+                    presentation: SharePresentationSectionBundle(
+                        metadata: presentation.metadata,
+                        safePreviewData: presentation.safePreviewData,
+                        signedProvenance: presentation.signedProvenance
+                    ),
+                    legacyFontReference: includeKey ? cipher.fontRef : nil,
+                    legacyFontData: fontBytes
+                ).encoded()
+                artifact = try await artifactRegistry.createFile(
+                    data: bytes,
+                    id: artifactID,
+                    filename: MessageSend.filename,
+                    displayName: "Rune Scribe Message",
+                    contentType: RuneScribeWireFormat.contentType,
+                    fileExtension: RuneScribeWireFormat.fileExtension,
+                    requiresKeyDelivery: includeKey,
+                    messageCipherID: cipher.id,
+                    encodedMessageHandle: retainedShareHandle,
+                    presentationSelection: presentation.metadata.selection,
+                    persistsMetadata: persistsMetadata
+                )
+            } else if includeKey {
                 let fontBytes: Data?
                 if cipher.fontRef == .bundled {
                     fontBytes = nil
@@ -999,7 +1075,9 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
         context _: RuntimePersistableOperationContext
     ) async throws -> ShareArtifactCompletionResultDTO {
         guard let evidence = command.evidence else {
-            return try await completeLegacyShareArtifact(command)
+            throw await record(RuneScribeProductError.failure(
+                RuneScribeFailureDTO(code: .invalidInput)
+            ))
         }
         return try await completeShareArtifact(evidence: evidence)
     }
@@ -1023,7 +1101,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                    outcome: command.outcome,
                    requiresKeyDelivery: artifact.dto.requiresKeyDelivery
                ) {
-                let mutation = try await repository.markDelivered(cipherID: cipherID)
+                let mutation = try await repository.completeKeyDelivery(cipherID: cipherID)
                 guard mutation.value else {
                     throw RuneScribeProductError.failure(
                         RuneScribeFailureDTO(code: .itemNotFound)
@@ -1188,8 +1266,12 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                let share = try CoreProgressionFactFactory.shareCompleted(
                    report: evidence.report,
                    messageToken: encodedRecord.messageToken,
-                   codexIDs: encodedRecord.codexIDs,
-                   artifactIDs: encodedRecord.artifactIDs,
+                   codexIDs: durable.presentationSelection.map {
+                       [$0.codexID]
+                   } ?? encodedRecord.codexIDs,
+                   artifactIDs: durable.presentationSelection.map {
+                       $0.artifactIDs
+                   } ?? encodedRecord.artifactIDs,
                    keyIncluded: durable.requiresKeyDelivery,
                    relationshipToken: relationshipToken,
                    linkedRelationship: linkedRelationship
@@ -1278,12 +1360,18 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             return plannedDisposition
         } catch {
             if pendingShareTerminalEvidence[evidence.artifactID] != nil {
-                if let intent = try? await artifactRegistry.terminalIntent(
-                    artifactID: evidence.artifactID
-                ) {
-                    try? await artifactRegistry.releaseTerminalArtifact(intent)
-                }
                 shareCleanupNeedsRetry = true
+                do {
+                    if let intent = try await artifactRegistry.terminalIntent(
+                        artifactID: evidence.artifactID
+                    ) {
+                        try await artifactRegistry.releaseTerminalArtifact(intent)
+                    }
+                } catch {
+                    _ = await record(error)
+                    return .retainedForRetry
+                }
+                _ = await record(error)
                 return .retainedForRetry
             }
             throw await record(error)
@@ -1317,7 +1405,18 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                 < $1.artifactID.rawValue.uuidString
         }
         for evidence in retained {
-            _ = try? await completeShareArtifact(evidence: evidence)
+            do {
+                let result = try await completeShareArtifact(evidence: evidence)
+                if result == .retainedForRetry {
+                    shareCleanupNeedsRetry = true
+                    if lastFailure?.code != .shareUnavailable {
+                        _ = await record(ShareArtifactRegistryError.storageUnavailable)
+                    }
+                }
+            } catch {
+                shareCleanupNeedsRetry = true
+                _ = await record(error)
+            }
         }
     }
 
@@ -1536,6 +1635,11 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                 )
             }
             await refreshFontSummaries(for: mutation.library)
+            let summary = Self.summary(for: mutation.value, in: mutation.library)
+            try confirmPendingMessageCipher(
+                importID: command.importID,
+                summary: summary
+            )
             removePendingImport(pending)
             confirmingImportIDs.remove(command.importID)
             committingImportIDs.remove(command.importID)
@@ -1543,7 +1647,6 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             importState = ImportStateDTO(phase: .completed)
             await adoptMutation(mutation.library)
             if retainedFacts { _ = await progression.drain() }
-            let summary = Self.summary(for: mutation.value, in: mutation.library)
             releaseUseCasePermit()
             await drainInboundQueueIfPossible()
             return summary
@@ -1582,6 +1685,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
         // suspension and immediately frees the presentation rail.
         guard !committingImportIDs.contains(id) else { return }
         importCancellationGenerations[id, default: 0] &+= 1
+        messageConfirmationImportIDs.removeValue(forKey: id)
         removePendingImport(pending)
         if !confirmingImportIDs.contains(id) {
             importCancellationGenerations.removeValue(forKey: id)
@@ -1596,6 +1700,26 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
     public func dismissReceivedMessage(id: MessageID) async {
         let capturedAt = await snapshotTimestamp()
         guard messageState.pendingMessage?.id == id else { return }
+
+        let confirmationIDs = messageConfirmationImportIDs.compactMap {
+            $0.value == id ? $0.key : nil
+        }
+        var cancelledConfirmation = false
+        for importID in confirmationIDs {
+            messageConfirmationImportIDs.removeValue(forKey: importID)
+            guard let pending = pendingImports[importID],
+                  !committingImportIDs.contains(importID)
+            else { continue }
+            importCancellationGenerations[importID, default: 0] &+= 1
+            removePendingImport(pending)
+            if !confirmingImportIDs.contains(importID) {
+                importCancellationGenerations.removeValue(forKey: importID)
+            }
+            cancelledConfirmation = true
+        }
+        if cancelledConfirmation {
+            importState = ImportStateDTO(phase: .idle)
+        }
         if let key = messageDedupeKeys.removeValue(forKey: id) {
             forgetHandledDedupeKey(key)
         }
@@ -1790,6 +1914,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             let capturedAt = await snapshotTimestamp()
             shareCleanupNeedsRetry = !pendingShareTerminalEvidence.isEmpty
             if wasRetryingCleanup,
+               pendingShareTerminalEvidence.isEmpty,
                lastFailure?.code == .shareUnavailable {
                 lastFailure = nil
                 revision &+= 1
@@ -2343,8 +2468,12 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             return ImportResultDTO(disposition: .duplicate)
         }
 
-        switch try FileRouter.decode(data) {
-        case .cipher(let payload, let fontBytes):
+        let routed = try FileRouter.decode(data)
+        switch routed {
+        case .cipher, .themedCipher:
+            guard let (payload, fontBytes, _) = routed.cipherComponents else {
+                throw FileRouterError.malformedContainer
+            }
             let pending = ImportUseCase.pending(
                 payload: payload,
                 fontBytes: fontBytes,
@@ -2358,7 +2487,10 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                 pendingImport: pending.summary
             )
 
-        case .message(let payload, let fontBytes):
+        case .message, .themedMessage:
+            guard let (payload, fontBytes, presentation) = routed.messageComponents else {
+                throw FileRouterError.malformedContainer
+            }
             let progressionReady = await progressionEvidenceIsReady(
                 for: progressionContext
             )
@@ -2369,10 +2501,16 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                     let packageToken = try await progression.packageToken(
                         for: data
                     )
+                    let projection = SharePresentationProgressionProjection.inbound(
+                        presentation
+                    )
                     let fact = try CoreProgressionFactFactory.messageImported(
                         packageToken: packageToken,
                         routeClass: progressionRoute,
-                        embeddedCipher: payload.embeddedCipher != nil
+                        embeddedCipher: payload.embeddedCipher != nil,
+                        codexIDs: projection.codexIDs,
+                        artifactIDs: projection.artifactIDs,
+                        provenanceStatus: projection.provenanceStatus
                     )
                     let batches = try progressionBatches(
                         context: progressionContext,
@@ -2426,7 +2564,8 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                         : nil,
                     progressionRoute: progressionRoute,
                     embeddedCipherProgressionSeed: embeddedCipherSeed,
-                    relationshipProgressionSeed: relationshipSeed
+                    relationshipProgressionSeed: relationshipSeed,
+                    presentation: presentation
                 )
                 let resultingLibrary = mutation.library
                 if let contactManager,
@@ -2434,16 +2573,32 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                     lastKnownContactBook = contactBook
                 }
                 await refreshFontSummaries(for: resultingLibrary)
+                var pendingCipherImport: PendingCipherImport?
+                if let embeddedCipher = mutation.pendingEmbeddedCipher {
+                    pendingCipherImport = ImportUseCase.pending(
+                        payload: embeddedCipher,
+                        fontBytes: fontBytes,
+                        id: ImportID(rawValue: try await runtimeIO.nextUUID()),
+                        source: source,
+                        dedupeKey: Self.digest(try embeddedCipher.encoded())
+                    )
+                }
                 rememberHandledDedupeKey(dedupeKey)
                 messageDedupeKeys[mutation.message.id] = dedupeKey
                 messageState = MessageStateDTO(
                     phase: .received,
                     pendingMessage: mutation.message
                 )
-                importState = ImportStateDTO(phase: .completed)
+                if let pending = pendingCipherImport {
+                    messageConfirmationImportIDs[pending.id] = mutation.message.id
+                    stagePendingImport(pending)
+                } else {
+                    importState = ImportStateDTO(phase: .completed)
+                }
                 await adoptMutation(resultingLibrary)
                 return ImportResultDTO(
                     disposition: .receivedMessage,
+                    pendingImport: pendingCipherImport?.summary,
                     receivedMessageID: mutation.message.id
                 )
             } catch {
@@ -2462,6 +2617,15 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
 
     private func setPendingImport(_ pending: PendingCipherImport) async {
         let capturedAt = await snapshotTimestamp()
+        stagePendingImport(pending)
+        revision &+= 1
+        broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
+    }
+
+    /// Stages every part of the confirmation rail before a snapshot can expose
+    /// the associated received message. Callers that need an immediate update
+    /// use `setPendingImport`; message ingestion publishes both states together.
+    private func stagePendingImport(_ pending: PendingCipherImport) {
         pendingImports[pending.id] = pending
         activeImportID = pending.id
         importCancellationGenerations[pending.id] = 0
@@ -2471,8 +2635,31 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             phase: .awaitingConfirmation,
             pending: pending.summary
         )
-        revision &+= 1
-        broadcast(makeSnapshot(isLoading: false, capturedAt: capturedAt))
+    }
+
+    private func confirmPendingMessageCipher(
+        importID: ImportID,
+        summary: CipherSummary
+    ) throws {
+        guard let messageID = messageConfirmationImportIDs.removeValue(
+            forKey: importID
+        ), let message = messageState.pendingMessage,
+              message.id == messageID
+        else { return }
+        let confirmed = try ReceivedMessageDTO(
+            id: message.id,
+            plaintext: message.plaintext,
+            senderName: summary.name,
+            cipherID: summary.id,
+            cipherName: summary.name,
+            senderIdentityStatus: .confirmedCipher,
+            presentation: message.presentation,
+            safePreviewData: message.safePreviewData
+        )
+        messageState = MessageStateDTO(
+            phase: .received,
+            pendingMessage: confirmed
+        )
     }
 
     private func removePendingImport(_ pending: PendingCipherImport) {
@@ -3095,7 +3282,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             createdAt: cipher.createdAt,
             isActive: cipher.id == activeID,
             assignedContactID: cipher.contactID.map(ContactID.init(rawValue:)),
-            hasBeenDelivered: cipher.delivered,
+            hasBeenDelivered: cipher.hasCompletedKeyDelivery,
             publicIdentifier: cipher.shortPublicID,
             fontID: FontID(rawValue: cipher.fontRef.id)
         )
@@ -3192,8 +3379,15 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                 return RuneScribeFailureDTO(code: .internalFailure)
             }
         }
-        if error is MessageError {
-            return RuneScribeFailureDTO(code: .noMatchingCipher)
+        if let messageError = error as? MessageError {
+            switch messageError {
+            case .inputTooLarge,
+                 .tooManyCandidateCiphers,
+                 .decodeWorkLimitExceeded:
+                return RuneScribeFailureDTO(code: .invalidInput)
+            case .noMatchingCipher:
+                return RuneScribeFailureDTO(code: .noMatchingCipher)
+            }
         }
         if let lockError = error as? AppLockServiceError {
             switch lockError {

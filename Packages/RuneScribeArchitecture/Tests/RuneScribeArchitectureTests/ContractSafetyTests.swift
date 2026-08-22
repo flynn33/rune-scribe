@@ -23,7 +23,9 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertEqual(RuneScribeServiceIDs.clock.rawValue, "ClockService")
         XCTAssertEqual(RuneScribeServiceIDs.uuid.rawValue, "UUIDService")
         XCTAssertEqual(RuneScribeServiceIDs.moduleStateStore.rawValue, "ModuleStateStore")
-        XCTAssertEqual(RuneScribeServiceIDs.all.count, 13)
+        XCTAssertEqual(RuneScribeServiceIDs.cloudSyncTransport.rawValue, "CloudSyncTransport")
+        XCTAssertEqual(RuneScribeServiceIDs.gameCenterReporting.rawValue, "GameCenterReporting")
+        XCTAssertEqual(RuneScribeServiceIDs.all.count, 15)
         XCTAssertEqual(
             RuneScribeServiceKeys.secureValueStore.identifier,
             RuneScribeServiceIDs.secureValueStore
@@ -69,6 +71,14 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertEqual(
             RuneScribeServiceKeys.moduleStateStore.identifier,
             RuneScribeServiceIDs.moduleStateStore
+        )
+        XCTAssertEqual(
+            RuneScribeServiceKeys.cloudSyncTransport.identifier,
+            RuneScribeServiceIDs.cloudSyncTransport
+        )
+        XCTAssertEqual(
+            RuneScribeServiceKeys.gameCenterReporting.identifier,
+            RuneScribeServiceIDs.gameCenterReporting
         )
 
         XCTAssertEqual(RuneScribeKeychain.service, "com.runescribe.keystore")
@@ -338,6 +348,17 @@ final class ContractSafetyTests: XCTestCase {
         XCTAssertThrowsError(
             try JSONDecoder().decode(CodexID.self, from: Data("\"Codex.Base\"".utf8))
         )
+    }
+
+    func testThemeProvenanceIdentifierPreservesAcceptedCaseSensitiveIdentity() throws {
+        let rawValue = "prov.Source.Masters.Crests.moonleaf.moonbloom.svg"
+        let identifier = try XCTUnwrap(ThemeProvenanceID(rawValue: rawValue))
+
+        XCTAssertEqual(identifier.rawValue, rawValue)
+        try assertCodableRoundTrip(identifier)
+        XCTAssertNil(ThemeProvenanceID(rawValue: "prov/Source/Masters"))
+        XCTAssertNil(ThemeProvenanceID(rawValue: "prov..Source"))
+        XCTAssertNil(ThemeProvenanceID(rawValue: String(repeating: "a", count: 161)))
     }
 
     func testRoadmapEventAndCorrelationIdentifiersAreUUIDBackedAndCodable() throws {

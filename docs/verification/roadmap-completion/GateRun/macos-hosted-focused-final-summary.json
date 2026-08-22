@@ -1,0 +1,48 @@
+{
+  "devicesAndConfigurations" : [
+    {
+      "device" : {
+        "architecture" : "arm64",
+        "deviceId" : "00006040-0016283C11F8801C",
+        "deviceName" : "My Mac",
+        "modelName" : "MacBook Pro",
+        "osBuildNumber" : "25G76",
+        "osVersion" : "26.6.1",
+        "platform" : "macOS"
+      },
+      "expectedFailures" : 0,
+      "failedTests" : 1,
+      "passedTests" : 9,
+      "skippedTests" : 0,
+      "testPlanConfiguration" : {
+        "configurationId" : "1",
+        "configurationName" : "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription" : "RuneScrib-macOS · Built with macOS 26.6.1",
+  "expectedFailures" : 0,
+  "failedTests" : 1,
+  "finishTime" : 1787435206.386,
+  "passedTests" : 9,
+  "result" : "Failed",
+  "skippedTests" : 0,
+  "startTime" : 1787435172.07,
+  "statistics" : [
+
+  ],
+  "testFailures" : [
+    {
+      "failureText" : "Early unexpected exit, operation never finished bootstrapping - no restart will be attempted. (Underlying Error: The test runner crashed before establishing connection: RuneScrib at <external symbol>)",
+      "targetName" : "RuneScribTests",
+      "testIdentifier" : 1,
+      "testIdentifierString" : "RuneScrib (31014) encountered an error",
+      "testName" : "RuneScrib (31014) encountered an error"
+    }
+  ],
+  "title" : "Test - RuneScrib-macOS",
+  "topInsights" : [
+
+  ],
+  "totalTestCount" : 10
+}

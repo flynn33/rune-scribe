@@ -70,6 +70,16 @@ enum RuneScribePackageResourceKind: UInt16, Codable, Equatable, Sendable {
     case legacyFont = 1
 }
 
+/// Decoder-owned variable-size allocation accounting. The input buffer remains
+/// caller-owned; events are emitted only after structural limits and bounds pass.
+enum RuneScribePackageDecodeAllocation: Equatable, Sendable {
+    case sectionArrayCapacity(Int)
+    case sectionPayload(Int)
+    case resourceArrayCapacity(Int)
+    case resourceMetadata(Int)
+    case resourcePayload(Int)
+}
+
 struct RuneScribePackageResource: Equatable, Sendable {
     static let maximumIdentifierUTF8Count = 128
     static let maximumMediaTypeUTF8Count = 127
@@ -117,7 +127,7 @@ struct RuneScribePackageResource: Equatable, Sendable {
             throw RuneScribePackageError.invalidResourceIdentifier
         }
         guard version > 0 else { throw RuneScribePackageError.invalidResourceVersion }
-        guard Self.hasValidMediaType(mediaType) else {
+        guard Self.hasAllowedMediaType(mediaType, for: kind) else {
             throw RuneScribePackageError.invalidResourceMediaType
         }
         guard !data.isEmpty, data.count <= Self.maximumDataLength else {
@@ -141,7 +151,12 @@ struct RuneScribePackageResource: Equatable, Sendable {
     }
 
     private static func hasValidIdentifier(_ value: String) -> Bool {
-        let bytes = Array(value.utf8)
+        hasValidIdentifierBytes(value.utf8)
+    }
+
+    fileprivate static func hasValidIdentifierBytes<Bytes>(
+        _ bytes: Bytes
+    ) -> Bool where Bytes: BidirectionalCollection, Bytes.Element == UInt8 {
         guard !bytes.isEmpty,
               bytes.count <= maximumIdentifierUTF8Count,
               bytes.first.map(isLowercaseLetterOrNumber) == true,
@@ -162,8 +177,14 @@ struct RuneScribePackageResource: Equatable, Sendable {
         return true
     }
 
-    private static func hasValidMediaType(_ value: String) -> Bool {
-        let bytes = Array(value.utf8)
+    fileprivate static func hasAllowedMediaType(_ value: String, for kind: UInt16) -> Bool {
+        hasAllowedMediaTypeBytes(value.utf8, for: kind)
+    }
+
+    fileprivate static func hasAllowedMediaTypeBytes<Bytes>(
+        _ bytes: Bytes,
+        for kind: UInt16
+    ) -> Bool where Bytes: BidirectionalCollection, Bytes.Element == UInt8 {
         guard !bytes.isEmpty,
               bytes.count <= maximumMediaTypeUTF8Count,
               bytes.filter({ $0 == 0x2F }).count == 1,
@@ -172,12 +193,21 @@ struct RuneScribePackageResource: Equatable, Sendable {
         else {
             return false
         }
-        return bytes.allSatisfy {
+        guard bytes.allSatisfy({
             isLowercaseLetterOrNumber($0)
                 || $0 == 0x2F
                 || $0 == 0x2B
                 || $0 == 0x2D
                 || $0 == 0x2E
+        }) else {
+            return false
+        }
+        switch RuneScribePackageResourceKind(rawValue: kind) {
+        case .legacyFont:
+            return bytes.elementsEqual("font/otf".utf8)
+                || bytes.elementsEqual("font/ttf".utf8)
+        case nil:
+            return false
         }
     }
 
@@ -194,6 +224,17 @@ struct RuneScribePackageResourceTable: Equatable, Sendable {
     static let maximumAggregateDataLength = 12 * 1024 * 1024
     private static let fixedHeaderLength = 4
     private static let entryHeaderLength = 48
+
+    private struct RecordLayout {
+        let kind: UInt16
+        let version: UInt32
+        let hashRange: Range<Int>
+        let idRange: Range<Int>
+        let mediaTypeRange: Range<Int>
+        let contentRange: Range<Int>
+
+        var endOffset: Int { contentRange.upperBound }
+    }
 
     let resources: [RuneScribePackageResource]
 
@@ -239,75 +280,185 @@ struct RuneScribePackageResourceTable: Equatable, Sendable {
     }
 
     init(decoding data: Data) throws {
-        guard data.count >= Self.fixedHeaderLength,
-              data.count <= RuneScribePackage.maximumResourceTableLength
-        else {
-            throw RuneScribePackageError.invalidResourceTable
-        }
-        let count = Int(data.uint16(at: 0))
-        guard count <= Self.maximumResourceCount else {
-            throw RuneScribePackageError.tooManyResources
-        }
-        guard data.uint16(at: 2) == 0 else {
-            throw RuneScribePackageError.invalidResourceTable
-        }
+        try self.init(decoding: data, allocationObserver: nil)
+    }
 
-        var cursor = Self.fixedHeaderLength
+    init(
+        decoding data: Data,
+        allocationObserver: ((RuneScribePackageDecodeAllocation) -> Void)?
+    ) throws {
+        let range = data.startIndex..<data.endIndex
+        try Self.preflight(decoding: data, in: range)
+
+        let count = Int(data.uint16(at: range.lowerBound))
+        var cursor = range.lowerBound + Self.fixedHeaderLength
         var decoded: [RuneScribePackageResource] = []
+        allocationObserver?(.resourceArrayCapacity(count))
         decoded.reserveCapacity(count)
         for _ in 0..<count {
-            guard cursor <= data.count - Self.entryHeaderLength else {
-                throw RuneScribePackageError.invalidResourceTable
-            }
-            let kind = data.uint16(at: cursor)
-            let flags = data.uint16(at: cursor + 2)
-            let version = data.uint32(at: cursor + 4)
-            let idLength = Int(data.uint16(at: cursor + 8))
-            let mediaTypeLength = Int(data.uint16(at: cursor + 10))
-            let contentLength = Int(data.uint32(at: cursor + 12))
-            let hash = data.subdata(in: (cursor + 16)..<(cursor + 48))
-            cursor += Self.entryHeaderLength
-
-            guard flags == 0,
-                  idLength > 0,
-                  idLength <= RuneScribePackageResource.maximumIdentifierUTF8Count,
-                  mediaTypeLength > 0,
-                  mediaTypeLength <= RuneScribePackageResource.maximumMediaTypeUTF8Count,
-                  contentLength > 0,
-                  contentLength <= RuneScribePackageResource.maximumDataLength
-            else {
-                throw RuneScribePackageError.invalidResourceTable
-            }
-            let variableLength = idLength + mediaTypeLength + contentLength
-            guard cursor <= data.count,
-                  variableLength <= data.count - cursor
-            else {
-                throw RuneScribePackageError.invalidResourceTable
-            }
-            let idData = data.subdata(in: cursor..<(cursor + idLength))
-            cursor += idLength
-            let mediaTypeData = data.subdata(in: cursor..<(cursor + mediaTypeLength))
-            cursor += mediaTypeLength
-            let content = data.subdata(in: cursor..<(cursor + contentLength))
-            cursor += contentLength
+            let record = try Self.recordLayout(
+                in: data,
+                at: cursor,
+                upperBound: range.upperBound
+            )
+            allocationObserver?(.resourceMetadata(
+                SHA256.Digest.byteCount
+                    + record.idRange.count
+                    + record.mediaTypeRange.count
+            ))
+            let hash = data.subdata(in: record.hashRange)
+            let idData = data.subdata(in: record.idRange)
+            let mediaTypeData = data.subdata(in: record.mediaTypeRange)
+            allocationObserver?(.resourcePayload(record.contentRange.count))
+            let content = data.subdata(in: record.contentRange)
             guard let id = String(data: idData, encoding: .utf8),
                   let mediaType = String(data: mediaTypeData, encoding: .ascii)
             else {
                 throw RuneScribePackageError.invalidResourceTable
             }
             decoded.append(try RuneScribePackageResource(
-                kind: kind,
+                kind: record.kind,
                 id: id,
-                version: version,
+                version: record.version,
                 mediaType: mediaType,
                 data: content,
                 sha256: hash
             ))
-        }
-        guard cursor == data.count else {
-            throw RuneScribePackageError.invalidResourceTable
+            cursor = record.endOffset
         }
         try self.init(resources: decoded)
+    }
+
+    /// Validates every record against the original input buffer before the decoder
+    /// reserves output capacity, copies metadata, or copies resource payload bytes.
+    fileprivate static func preflight(
+        decoding data: Data,
+        in range: Range<Int>
+    ) throws {
+        guard range.lowerBound >= data.startIndex,
+              range.upperBound <= data.endIndex,
+              range.count >= Self.fixedHeaderLength,
+              range.count <= RuneScribePackage.maximumResourceTableLength
+        else {
+            throw RuneScribePackageError.invalidResourceTable
+        }
+        let count = Int(data.uint16(at: range.lowerBound))
+        guard count <= Self.maximumResourceCount else {
+            throw RuneScribePackageError.tooManyResources
+        }
+        guard data.uint16(at: range.lowerBound + 2) == 0 else {
+            throw RuneScribePackageError.invalidResourceTable
+        }
+
+        let firstRecordOffset = range.lowerBound + Self.fixedHeaderLength
+        var cursor = firstRecordOffset
+        var aggregateContentLength = 0
+        for index in 0..<count {
+            let record = try Self.recordLayout(
+                in: data,
+                at: cursor,
+                upperBound: range.upperBound
+            )
+            try Self.validateRecord(record, in: data)
+            guard record.contentRange.count
+                    <= Self.maximumAggregateDataLength - aggregateContentLength
+            else {
+                throw RuneScribePackageError.resourceTooLarge
+            }
+            aggregateContentLength += record.contentRange.count
+
+            var priorCursor = firstRecordOffset
+            for _ in 0..<index {
+                let prior = try Self.recordLayout(
+                    in: data,
+                    at: priorCursor,
+                    upperBound: range.upperBound
+                )
+                if prior.kind == record.kind,
+                   prior.version == record.version,
+                   data[prior.idRange].elementsEqual(data[record.idRange]) {
+                    throw RuneScribePackageError.duplicateResource
+                }
+                priorCursor = prior.endOffset
+            }
+            cursor = record.endOffset
+        }
+        guard cursor == range.upperBound else {
+            throw RuneScribePackageError.invalidResourceTable
+        }
+    }
+
+    private static func recordLayout(
+        in data: Data,
+        at cursor: Int,
+        upperBound: Int
+    ) throws -> RecordLayout {
+        guard cursor <= upperBound,
+              Self.entryHeaderLength <= upperBound - cursor
+        else {
+            throw RuneScribePackageError.invalidResourceTable
+        }
+        let kind = data.uint16(at: cursor)
+        let flags = data.uint16(at: cursor + 2)
+        let version = data.uint32(at: cursor + 4)
+        let idLength = Int(data.uint16(at: cursor + 8))
+        let mediaTypeLength = Int(data.uint16(at: cursor + 10))
+        let contentLength = Int(data.uint32(at: cursor + 12))
+        guard flags == 0,
+              idLength > 0,
+              idLength <= RuneScribePackageResource.maximumIdentifierUTF8Count,
+              mediaTypeLength > 0,
+              mediaTypeLength <= RuneScribePackageResource.maximumMediaTypeUTF8Count,
+              contentLength > 0,
+              contentLength <= RuneScribePackageResource.maximumDataLength
+        else {
+            throw RuneScribePackageError.invalidResourceTable
+        }
+
+        let hashRange = (cursor + 16)..<(cursor + Self.entryHeaderLength)
+        let idStart = cursor + Self.entryHeaderLength
+        guard idLength <= upperBound - idStart else {
+            throw RuneScribePackageError.invalidResourceTable
+        }
+        let idRange = idStart..<(idStart + idLength)
+        guard mediaTypeLength <= upperBound - idRange.upperBound else {
+            throw RuneScribePackageError.invalidResourceTable
+        }
+        let mediaTypeRange = idRange.upperBound..<(idRange.upperBound + mediaTypeLength)
+        guard contentLength <= upperBound - mediaTypeRange.upperBound else {
+            throw RuneScribePackageError.invalidResourceTable
+        }
+        let contentRange = mediaTypeRange.upperBound..<(mediaTypeRange.upperBound + contentLength)
+        return RecordLayout(
+            kind: kind,
+            version: version,
+            hashRange: hashRange,
+            idRange: idRange,
+            mediaTypeRange: mediaTypeRange,
+            contentRange: contentRange
+        )
+    }
+
+    private static func validateRecord(_ record: RecordLayout, in data: Data) throws {
+        guard RuneScribePackageResourceKind(rawValue: record.kind) != nil else {
+            throw RuneScribePackageError.invalidResourceKind
+        }
+        guard record.version > 0 else {
+            throw RuneScribePackageError.invalidResourceVersion
+        }
+        guard RuneScribePackageResource.hasValidIdentifierBytes(data[record.idRange]) else {
+            throw RuneScribePackageError.invalidResourceIdentifier
+        }
+        guard RuneScribePackageResource.hasAllowedMediaTypeBytes(
+            data[record.mediaTypeRange],
+            for: record.kind
+        ) else {
+            throw RuneScribePackageError.invalidResourceMediaType
+        }
+        let digest = SHA256.hash(data: data[record.contentRange])
+        guard data[record.hashRange].elementsEqual(digest) else {
+            throw RuneScribePackageError.resourceHashMismatch
+        }
     }
 }
 
@@ -370,6 +521,12 @@ struct RuneScribePackage: Equatable, Sendable {
         else {
             throw RuneScribePackageError.missingLegacyFontResource
         }
+        guard RuneScribePackageResource.hasAllowedMediaType(
+            resource.mediaType,
+            for: resource.kind
+        ) else {
+            throw RuneScribePackageError.invalidResourceMediaType
+        }
         guard resource.sha256 == reference.sha256 else {
             throw RuneScribePackageError.legacyFontResourceReferenceMismatch
         }
@@ -423,6 +580,13 @@ struct RuneScribePackage: Equatable, Sendable {
     }
 
     init(decoding data: Data) throws {
+        try self.init(decoding: data, allocationObserver: nil)
+    }
+
+    init(
+        decoding data: Data,
+        allocationObserver: ((RuneScribePackageDecodeAllocation) -> Void)?
+    ) throws {
         if data.count < Self.magic.count {
             if Self.magic.starts(with: data) {
                 throw RuneScribePackageError.truncatedMagic
@@ -478,10 +642,29 @@ struct RuneScribePackage: Equatable, Sendable {
             throw RuneScribePackageError.unsupportedPayloadKind(rawKind)
         }
 
-        var decodedSections: [RuneScribePackageSection] = []
-        decodedSections.reserveCapacity(sectionCount)
+        switch kind {
+        case .cipherInvitation:
+            guard payloadVersion == UInt16(CipherSharePayload.version) else {
+                throw RuneScribePackageError.unsupportedPayloadVersion(
+                    kind: kind.rawValue,
+                    version: payloadVersion
+                )
+            }
+        case .encryptedMessage:
+            guard payloadVersion == UInt16(MessageSharePayload.version) else {
+                throw RuneScribePackageError.unsupportedPayloadVersion(
+                    kind: kind.rawValue,
+                    version: payloadVersion
+                )
+            }
+        }
+
+        // Pass one validates the complete directory before reserving the output
+        // array or copying any section. A malformed late record therefore cannot
+        // cause an earlier valid payload to be allocated first.
         var expectedOffset = headerLength
         var priorType: UInt16?
+        var coreCount = 0
         for index in 0..<sectionCount {
             let base = Self.fixedHeaderLength + index * Self.directoryRecordLength
             let type = data.uint16(at: base)
@@ -523,22 +706,63 @@ struct RuneScribePackage: Equatable, Sendable {
                 throw RuneScribePackageError.unknownRequiredSection(type)
             }
             let end = offset + length
-            decodedSections.append(RuneScribePackageSection(
-                type: type,
-                version: sectionVersion,
-                required: required,
-                data: data.subdata(in: offset..<end)
-            ))
+            if type == RuneScribePackageSectionType.corePayload.rawValue {
+                coreCount += 1
+                guard required, sectionVersion == 1, length > 0 else {
+                    throw RuneScribePackageError.invalidCorePayload
+                }
+            }
             priorType = type
             expectedOffset = end
         }
         guard expectedOffset == checksumStart else {
             throw RuneScribePackageError.nonContiguousSections
         }
+        guard coreCount == 1 else {
+            throw RuneScribePackageError.missingCorePayload
+        }
+
+        // Pass two preflights nested resource records directly in the caller's
+        // buffer. Invalid resource metadata is rejected before any section copy.
+        for index in 0..<sectionCount {
+            let base = Self.fixedHeaderLength + index * Self.directoryRecordLength
+            let type = data.uint16(at: base)
+            let sectionVersion = data.uint16(at: base + 2)
+            guard type == RuneScribePackageSectionType.resourceTable.rawValue,
+                  sectionVersion == RuneScribePackageResourceTable.version
+            else { continue }
+            let offset = Int(data.uint32(at: base + 8))
+            let length = Int(data.uint32(at: base + 12))
+            try RuneScribePackageResourceTable.preflight(
+                decoding: data,
+                in: offset..<(offset + length)
+            )
+        }
+
+        var decodedSections: [RuneScribePackageSection] = []
+        allocationObserver?(.sectionArrayCapacity(sectionCount))
+        decodedSections.reserveCapacity(sectionCount)
+        for index in 0..<sectionCount {
+            let base = Self.fixedHeaderLength + index * Self.directoryRecordLength
+            let type = data.uint16(at: base)
+            let sectionVersion = data.uint16(at: base + 2)
+            let sectionFlags = data.uint16(at: base + 4)
+            let offset = Int(data.uint32(at: base + 8))
+            let length = Int(data.uint32(at: base + 12))
+            let end = offset + length
+            allocationObserver?(.sectionPayload(length))
+            decodedSections.append(RuneScribePackageSection(
+                type: type,
+                version: sectionVersion,
+                required: sectionFlags & RuneScribePackageSection.requiredFlag != 0,
+                data: data.subdata(in: offset..<end)
+            ))
+        }
         try Self.validateSemanticShape(
             kind: kind,
             payloadVersion: payloadVersion,
-            sections: decodedSections
+            sections: decodedSections,
+            allocationObserver: allocationObserver
         )
         self.kind = kind
         self.payloadVersion = payloadVersion
@@ -556,7 +780,8 @@ struct RuneScribePackage: Equatable, Sendable {
     private static func validateSemanticShape(
         kind: RuneScribePackageKind,
         payloadVersion: UInt16,
-        sections: [RuneScribePackageSection]
+        sections: [RuneScribePackageSection],
+        allocationObserver: ((RuneScribePackageDecodeAllocation) -> Void)? = nil
     ) throws {
         guard sections.count <= maximumSectionCount else {
             throw RuneScribePackageError.tooManySections
@@ -586,7 +811,10 @@ struct RuneScribePackage: Equatable, Sendable {
                     )
                 }
                 if knownType == .resourceTable, section.version == 1 {
-                    _ = try RuneScribePackageResourceTable(decoding: section.data)
+                    _ = try RuneScribePackageResourceTable(
+                        decoding: section.data,
+                        allocationObserver: allocationObserver
+                    )
                 }
             } else if section.required {
                 throw RuneScribePackageError.unknownRequiredSection(section.type)

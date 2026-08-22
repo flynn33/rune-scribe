@@ -1,5 +1,6 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeRuntimeCore
 
 enum ProgressionEventValidationResult: Sendable {
     case accepted(ProgressionValidatedEvent)
@@ -305,7 +306,8 @@ private struct ProgressionMutableReductionState {
     mutating func addLifetimeDistinct(
         statisticID: StatisticID,
         bucketID: CodexID?,
-        canonicalToken: String
+        canonicalToken: String,
+        firstObservedAt: Date
     ) throws -> Bool {
         let nextRevision = projection.metadata.revision.addingReportingOverflow(1)
         guard !nextRevision.overflow else {
@@ -316,6 +318,7 @@ private struct ProgressionMutableReductionState {
             statisticID: statisticID,
             bucketID: bucketID,
             canonicalToken: canonicalToken,
+            firstObservedAt: firstObservedAt,
             firstAppliedRevision: nextRevision.partialValue
         )
         try token.validate()
@@ -325,6 +328,45 @@ private struct ProgressionMutableReductionState {
                 throw ProgressionDomainError.recordIdentityCollision(identity)
             }
             return false
+        }
+        lifetimeTokens[identity] = token
+        newLifetimeTokenIDs.insert(identity)
+        try incrementCounter(statisticID: statisticID, bucketID: bucketID)
+        return true
+    }
+
+    mutating func addExternalLifetimeDistinct(
+        statisticID: StatisticID,
+        bucketID: CodexID?,
+        opaqueTokenDigest: String,
+        firstObservedAt: Date,
+        transactionID: UUID,
+        firstAppliedRevision: UInt64
+    ) throws -> Bool {
+        let opaqueIdentity =
+            "\(statisticID.rawValue)|\(bucketID?.rawValue ?? "")|\(opaqueTokenDigest)"
+        if let existing = lifetimeTokens.values.first(where: {
+            "\($0.statisticID.rawValue)|\($0.bucketID?.rawValue ?? "")|\($0.cloudOpaqueTokenDigest)"
+                == opaqueIdentity
+        }) {
+            guard existing.statisticID == statisticID, existing.bucketID == bucketID else {
+                throw ProgressionDomainError.recordIdentityCollision(opaqueIdentity)
+            }
+            return false
+        }
+        let token = DistinctTokenRecord(
+            generation: projection.metadata.activeGeneration,
+            statisticID: statisticID,
+            bucketID: bucketID,
+            externalOpaqueTokenDigest: opaqueTokenDigest,
+            firstObservedAt: firstObservedAt,
+            sourceExternalMergeTransactionID: transactionID,
+            firstAppliedRevision: firstAppliedRevision
+        )
+        try token.validate()
+        let identity = lifetimeTokenIdentity(token)
+        guard lifetimeTokens[identity] == nil else {
+            throw ProgressionDomainError.recordIdentityCollision(identity)
         }
         lifetimeTokens[identity] = token
         newLifetimeTokenIDs.insert(identity)
@@ -492,6 +534,7 @@ enum ProgressionReducer {
                         statisticID: statisticID,
                         bucketID: bucketID,
                         canonicalToken: value,
+                        firstObservedAt: event.envelope.occurredAt,
                         firstAppliedRevision: nextRevision.partialValue
                     )
                     try candidate.validate()
@@ -660,6 +703,360 @@ enum ProgressionReducer {
         )
     }
 
+    /// Imports monotonic facts, then evaluates the local source-controlled
+    /// catalog to decide completions and grants. Remote grant/ownership arrays
+    /// are corroborating output only and never create a local grant directly.
+    static func applyExternalMerge(
+        _ external: RuntimeProgressionExternalProjection,
+        to source: ProgressionProjection,
+        transactionID: UUID,
+        appliedAt: Date,
+        existingDistinctTokens: [DistinctTokenRecord],
+        bundle: ValidatedProgressionCatalogBundle
+    ) throws -> (
+        projection: ProgressionProjection,
+        newDistinctTokens: [DistinctTokenRecord]
+    ) {
+        guard external.catalogVersion == bundle.catalog.catalogVersion.rawValue else {
+            throw ProgressionDomainError.invalidRecord("external-merge-catalog-version")
+        }
+        let (firstAppliedRevision, revisionOverflow) = source.metadata.revision
+            .addingReportingOverflow(1)
+        guard !revisionOverflow else {
+            throw ProgressionDomainError.invalidRecord("revision-overflow")
+        }
+        var tokenState = try ProgressionMutableReductionState(
+            projection: source,
+            lifetimeTokens: existingDistinctTokens,
+            queueTail: nil
+        )
+        for fact in external.distinctTokens.sorted(by: {
+            ($0.statisticID.rawValue, $0.codexID?.rawValue ?? "", $0.opaqueTokenDigest)
+                < ($1.statisticID.rawValue, $1.codexID?.rawValue ?? "", $1.opaqueTokenDigest)
+        }) {
+            guard let definition = bundle.catalog.statistic(id: fact.statisticID),
+                  definition.storage != .derived,
+                  isLifetimeDimension(definition.dimension),
+                  (definition.bucket == nil) == (fact.codexID == nil),
+                  fact.firstObservedAt <= appliedAt
+            else { continue }
+            _ = try tokenState.addExternalLifetimeDistinct(
+                statisticID: fact.statisticID,
+                bucketID: fact.codexID,
+                opaqueTokenDigest: fact.opaqueTokenDigest,
+                firstObservedAt: fact.firstObservedAt,
+                transactionID: transactionID,
+                firstAppliedRevision: firstAppliedRevision
+            )
+        }
+        let newDistinctTokens = tokenState.newDistinctTokens()
+        var projection = tokenState.projection
+        let generation = projection.metadata.activeGeneration
+
+        for fact in external.counters {
+            guard let definition = bundle.catalog.statistic(id: fact.statisticID),
+                  definition.storage != .derived,
+                  !isLifetimeDimension(definition.dimension),
+                  (definition.bucket == nil) == (fact.codexID == nil)
+            else { continue }
+            let identity = counterIdentity(fact.statisticID, fact.codexID)
+            let localValue: UInt64
+            if case let .statisticCounter(record)? = projection.records[identity] {
+                localValue = record.value
+            } else {
+                localValue = 0
+            }
+            guard fact.value > localValue else { continue }
+            try projection.upsert(.statisticCounter(StatisticCounterRecord(
+                generation: generation,
+                statisticID: fact.statisticID,
+                bucketID: fact.codexID,
+                value: fact.value
+            )))
+        }
+
+        for fact in external.encounters {
+            guard let codexContentID = ProgressionContentID(rawValue: fact.codexID.rawValue),
+                  bundle.catalog.content(id: codexContentID)?.kind == .codex,
+                  fact.encounterCount > 0,
+                  fact.firstEncounteredAt <= fact.lastEncounteredAt,
+                  fact.artifactIDs.allSatisfy({ artifactID in
+                      guard let contentID = ProgressionContentID(rawValue: artifactID.rawValue)
+                      else { return false }
+                      return bundle.catalog.content(id: contentID)?.countsAsArtifact == true
+                  })
+            else { continue }
+            let identity = "encounter|\(fact.codexID.rawValue)"
+            if case let .encounter(existing)? = projection.records[identity] {
+                var observations = Dictionary(
+                    uniqueKeysWithValues: existing.artifactObservations.map {
+                        ($0.artifactID, $0)
+                    }
+                )
+                for artifactID in fact.artifactIDs where observations[artifactID] == nil {
+                    observations[artifactID] = EncounterRecord.ArtifactObservation(
+                        artifactID: artifactID,
+                        firstEncounteredAt: fact.firstEncounteredAt,
+                        lastEncounteredAt: fact.lastEncounteredAt,
+                        encounterCount: 1,
+                        provenanceStatus: .unverified
+                    )
+                }
+                try projection.upsert(.encounter(EncounterRecord(
+                    generation: generation,
+                    codexID: fact.codexID,
+                    artifactObservations: Array(observations.values),
+                    firstEncounteredAt: min(
+                        existing.firstEncounteredAt,
+                        fact.firstEncounteredAt
+                    ),
+                    lastEncounteredAt: max(
+                        existing.lastEncounteredAt,
+                        fact.lastEncounteredAt
+                    ),
+                    encounterCount: max(existing.encounterCount, fact.encounterCount),
+                    provenanceStatus: mergeProvenance(
+                        existing.provenanceStatus,
+                        .unverified
+                    )
+                )))
+            } else {
+                try projection.upsert(.encounter(EncounterRecord(
+                    generation: generation,
+                    codexID: fact.codexID,
+                    artifactIDs: fact.artifactIDs,
+                    firstEncounteredAt: fact.firstEncounteredAt,
+                    lastEncounteredAt: fact.lastEncounteredAt,
+                    encounterCount: fact.encounterCount,
+                    provenanceStatus: .unverified
+                )))
+            }
+        }
+
+        let remoteCompletions: [(AchievementID, Date)] = external.achievements
+            .compactMap { fact in
+                guard let completedAt = fact.completedAt,
+                      let definition = bundle.catalog.achievement(id: fact.achievementID),
+                      fact.target == UInt64(definition.progress.target),
+                      fact.current == fact.target,
+                      completedAt <= appliedAt
+                else { return nil }
+                return (fact.achievementID, completedAt)
+            }
+        let remoteCompletionByID = Dictionary(
+            uniqueKeysWithValues: remoteCompletions
+        )
+        let remoteMilestones: [(RuleID, Date)] = external.milestones.compactMap { fact in
+                guard fact.completedAt <= appliedAt else { return nil }
+                return bundle.catalog.milestone(id: fact.ruleID).map { _ in
+                    (fact.ruleID, fact.completedAt)
+                }
+            }
+        let remoteMilestoneByID = Dictionary(
+            uniqueKeysWithValues: remoteMilestones
+        )
+        try reconcileExistingCompletionDates(
+            achievementDates: remoteCompletionByID,
+            milestoneDates: remoteMilestoneByID,
+            transactionID: transactionID,
+            projection: &projection
+        )
+        var grants = ProgressionGrantAccumulator()
+        let grantTransactionID = externalMergeGrantTransactionID(transactionID)
+        let maximumPasses = bundle.catalog.achievements.count
+            + bundle.catalog.milestones.count + 1
+        for _ in 0 ..< maximumPasses {
+            try recomputeDerivedStatistics(bundle: bundle, projection: &projection)
+            let facts = ProgressionRuleFacts(projection: projection)
+            var changed = false
+            for achievement in bundle.catalog.achievements.sorted(by: {
+                $0.achievementID < $1.achievementID
+            }) where !completedAchievements(in: projection).contains(
+                achievement.achievementID
+            ) {
+                guard ProgressionRuleEvaluator.evaluate(
+                    achievement.rule,
+                    facts: facts
+                ).isSatisfied else { continue }
+                let completedAt = remoteCompletionByID[achievement.achievementID] ?? appliedAt
+                try projection.upsert(.achievementCompletion(
+                    AchievementCompletionRecord(
+                        generation: generation,
+                        achievementID: achievement.achievementID,
+                        completedAt: min(completedAt, appliedAt),
+                        sourceExternalMergeTransactionID: transactionID
+                    )
+                ))
+                try applyGrantGroup(
+                    achievement.rewardGrantGroupID,
+                    source: .achievement(achievement.achievementID),
+                    transactionID: grantTransactionID,
+                    grantedAt: min(completedAt, appliedAt),
+                    revealEligible: false,
+                    bundle: bundle,
+                    projection: &projection,
+                    accumulator: &grants
+                )
+                changed = true
+            }
+
+            try recomputeDerivedStatistics(bundle: bundle, projection: &projection)
+            let milestoneFacts = ProgressionRuleFacts(projection: projection)
+            for milestone in bundle.catalog.milestones.sorted(by: {
+                $0.ruleID < $1.ruleID
+            }) where !completedMilestones(in: projection).contains(milestone.ruleID) {
+                guard ProgressionRuleEvaluator.evaluate(
+                    milestone.rule,
+                    facts: milestoneFacts
+                ).isSatisfied else { continue }
+                let completedAt = remoteMilestoneByID[milestone.ruleID] ?? appliedAt
+                try projection.upsert(.milestoneCompletion(MilestoneCompletionRecord(
+                    generation: generation,
+                    ruleID: milestone.ruleID,
+                    completedAt: min(completedAt, appliedAt),
+                    sourceExternalMergeTransactionID: transactionID
+                )))
+                try applyGrantGroup(
+                    milestone.grantGroupID,
+                    source: .milestone(milestone.ruleID),
+                    transactionID: grantTransactionID,
+                    grantedAt: min(completedAt, appliedAt),
+                    revealEligible: false,
+                    bundle: bundle,
+                    projection: &projection,
+                    accumulator: &grants
+                )
+                changed = true
+            }
+            if !changed { break }
+        }
+
+        var mutable = try ProgressionMutableReductionState(
+            projection: projection,
+            lifetimeTokens: existingDistinctTokens + newDistinctTokens,
+            queueTail: nil
+        )
+        try updateAchievementProgress(state: &mutable, bundle: bundle)
+        projection = mutable.projection
+
+        if let selectedTitleUpdatedAt = external.selectedTitleUpdatedAt {
+            if let selectedTitleID = external.selectedTitleID {
+                guard external.titleIDs.contains(selectedTitleID),
+                      let contentID = ProgressionContentID(
+                          rawValue: selectedTitleID.rawValue
+                      ),
+                      bundle.catalog.content(id: contentID)?.kind == .title,
+                      projection.records["ownership|\(contentID.rawValue)"] != nil
+                else { return (projection, newDistinctTokens) }
+            }
+            try projection.upsert(.titleSelection(TitleSelectionRecord(
+                generation: generation,
+                selectedTitleID: external.selectedTitleID,
+                selectedAt: selectedTitleUpdatedAt
+            )))
+        }
+        return (projection, newDistinctTokens)
+    }
+
+    private static func reconcileExistingCompletionDates(
+        achievementDates: [AchievementID: Date],
+        milestoneDates: [RuleID: Date],
+        transactionID: UUID,
+        projection: inout ProgressionProjection
+    ) throws {
+        let generation = projection.metadata.activeGeneration
+        for (achievementID, remoteDate) in achievementDates {
+            let identity = "achievement-completion|\(achievementID.rawValue)"
+            guard case let .achievementCompletion(existing)? = projection.records[identity],
+                  remoteDate < existing.completedAt
+            else { continue }
+            try projection.upsert(.achievementCompletion(AchievementCompletionRecord(
+                generation: generation,
+                preservingProvenance: existing,
+                completedAt: remoteDate,
+                sourceExternalMergeTransactionID: transactionID
+            )))
+            try reconcileGrantDates(
+                source: .achievement(achievementID),
+                grantedAt: remoteDate,
+                transactionID: transactionID,
+                replaceGrantProvenance: existing.sourceEventID == nil &&
+                    existing.sourceExistingUserMigrationTransactionID == nil,
+                projection: &projection
+            )
+        }
+        for (ruleID, remoteDate) in milestoneDates {
+            let identity = "milestone-completion|\(ruleID.rawValue)"
+            guard case let .milestoneCompletion(existing)? = projection.records[identity],
+                  remoteDate < existing.completedAt
+            else { continue }
+            try projection.upsert(.milestoneCompletion(MilestoneCompletionRecord(
+                generation: generation,
+                preservingProvenance: existing,
+                completedAt: remoteDate,
+                sourceExternalMergeTransactionID: transactionID
+            )))
+            try reconcileGrantDates(
+                source: .milestone(ruleID),
+                grantedAt: remoteDate,
+                transactionID: transactionID,
+                replaceGrantProvenance: existing.sourceEventID == nil,
+                projection: &projection
+            )
+        }
+    }
+
+    private static func reconcileGrantDates(
+        source: ProgressionGrantSource,
+        grantedAt: Date,
+        transactionID: UUID,
+        replaceGrantProvenance: Bool,
+        projection: inout ProgressionProjection
+    ) throws {
+        let generation = projection.metadata.activeGeneration
+        var affectedContentIDs: Set<ProgressionContentID> = []
+        for logical in projection.logicalRecords() {
+            guard case let .grant(existing) = logical,
+                  existing.source == source,
+                  existing.grantedAt.map({ grantedAt < $0 }) ?? true
+            else { continue }
+            if replaceGrantProvenance {
+                try projection.upsert(.grant(GrantRecord(
+                    generation: generation,
+                    grantGroupID: existing.grantGroupID,
+                    contentID: existing.contentID,
+                    source: existing.source,
+                    transactionID: externalMergeGrantTransactionID(transactionID),
+                    grantedAt: grantedAt
+                )))
+            }
+            affectedContentIDs.insert(existing.contentID)
+        }
+        for contentID in affectedContentIDs {
+            let ownershipID = "ownership|\(contentID.rawValue)"
+            if case let .ownership(existing)? = projection.records[ownershipID],
+               existing.grantedAt.map({ grantedAt < $0 }) ?? true
+            {
+                try projection.upsert(.ownership(OwnershipRecord(
+                    generation: generation,
+                    copying: existing,
+                    grantedAt: grantedAt
+                )))
+            }
+            if let unlockID = UnlockID(rawValue: contentID.rawValue),
+               case let .entitlement(existing)? = projection.records[
+                   "entitlement|\(unlockID.rawValue)"
+               ], existing.grantedAt.map({ grantedAt < $0 }) ?? true
+            {
+                try projection.upsert(.entitlement(ProgressionEntitlementRecord(
+                    generation: generation,
+                    copying: existing,
+                    grantedAt: grantedAt
+                )))
+            }
+        }
+    }
+
     private static func apply(
         _ event: ProgressionValidatedEvent,
         state: inout ProgressionMutableReductionState,
@@ -777,7 +1174,8 @@ enum ProgressionReducer {
                         _ = try state.addLifetimeDistinct(
                             statisticID: statisticID,
                             bucketID: nil,
-                            canonicalToken: value
+                            canonicalToken: value,
+                            firstObservedAt: event.envelope.occurredAt
                         )
                     } else {
                         guard let contentID = ProgressionContentID(rawValue: value),
@@ -805,7 +1203,8 @@ enum ProgressionReducer {
                             _ = try state.addLifetimeDistinct(
                                 statisticID: statisticID,
                                 bucketID: bucketID,
-                                canonicalToken: value
+                                canonicalToken: value,
+                                firstObservedAt: event.envelope.occurredAt
                             )
                         } else {
                             guard let contentID = ProgressionContentID(rawValue: value),
@@ -1417,7 +1816,8 @@ private func sameLifetimeToken(_ lhs: DistinctTokenRecord, _ rhs: DistinctTokenR
         lhs.statisticID == rhs.statisticID &&
         lhs.bucketID == rhs.bucketID &&
         lhs.tokenDigest == rhs.tokenDigest &&
-        lhs.canonicalToken == rhs.canonicalToken
+        lhs.canonicalToken == rhs.canonicalToken &&
+        lhs.externalOpaqueTokenDigest == rhs.externalOpaqueTokenDigest
 }
 
 private func counterIdentity(_ statisticID: StatisticID, _ bucketID: CodexID?) -> String {

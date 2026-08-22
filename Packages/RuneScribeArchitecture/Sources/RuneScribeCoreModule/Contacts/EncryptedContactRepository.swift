@@ -17,6 +17,13 @@ enum ContactRepositoryError: Error, Equatable, Sendable {
 /// deliberately never creates the shared symmetric key: cipher initialization
 /// is the single authority that creates and persists that key.
 actor EncryptedContactRepository {
+    static let maximumContactBookPlaintextByteCount = 4 * 1_024 * 1_024
+    static let maximumContactBookEncryptedByteCount =
+        maximumContactBookPlaintextByteCount + 28
+    static let maximumAssociationIntentPlaintextByteCount = 4 * 1_024
+    static let maximumAssociationIntentEncryptedByteCount =
+        maximumAssociationIntentPlaintextByteCount + 28
+
     private struct LoadedState: Sendable {
         let book: ContactBook
         let keyData: Data?
@@ -65,7 +72,12 @@ actor EncryptedContactRepository {
         let path = try Self.messageAssociationIntentPath()
         let encrypted: Data?
         do {
-            encrypted = try await runtimeIO.readProtectedFile(path)
+            encrypted = try await runtimeIO.readProtectedFile(
+                path,
+                maximumByteCount: Self.maximumAssociationIntentEncryptedByteCount
+            )
+        } catch ProtectedFileStoreReadError.contentTooLarge {
+            throw ContactRepositoryError.corruptedStore
         } catch {
             throw ContactRepositoryError.protectedStorageUnavailable
         }
@@ -75,6 +87,9 @@ actor EncryptedContactRepository {
         do {
             let box = try AES.GCM.SealedBox(combined: encrypted)
             let plaintext = try AES.GCM.open(box, using: key)
+            guard plaintext.count <= Self.maximumAssociationIntentPlaintextByteCount else {
+                throw ContactRepositoryError.corruptedStore
+            }
             let intent = try JSONDecoder().decode(
                 MessageContactAssociationIntent.self,
                 from: plaintext
@@ -100,8 +115,14 @@ actor EncryptedContactRepository {
         let encrypted: Data
         do {
             let plaintext = try JSONEncoder().encode(intent)
+            guard plaintext.count <= Self.maximumAssociationIntentPlaintextByteCount else {
+                throw ContactRepositoryError.encryptionFailed
+            }
             let box = try AES.GCM.seal(plaintext, using: key)
             guard let combined = box.combined else {
+                throw ContactRepositoryError.encryptionFailed
+            }
+            guard combined.count <= Self.maximumAssociationIntentEncryptedByteCount else {
                 throw ContactRepositoryError.encryptionFailed
             }
             encrypted = combined
@@ -202,7 +223,12 @@ actor EncryptedContactRepository {
     private static func loadState(runtimeIO: RuntimeIOClient) async throws -> LoadedState {
         let encrypted: Data?
         do {
-            encrypted = try await runtimeIO.readProtectedFile(.contacts)
+            encrypted = try await runtimeIO.readProtectedFile(
+                .contacts,
+                maximumByteCount: Self.maximumContactBookEncryptedByteCount
+            )
+        } catch ProtectedFileStoreReadError.contentTooLarge {
+            throw ContactRepositoryError.corruptedStore
         } catch {
             throw ContactRepositoryError.protectedStorageUnavailable
         }
@@ -247,10 +273,18 @@ actor EncryptedContactRepository {
 
     private static func encrypt(_ book: ContactBook, using key: SymmetricKey) throws -> Data {
         do {
+            try book.validatePersistenceBounds()
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .deferredToDate
-            let sealed = try AES.GCM.seal(try encoder.encode(book), using: key)
+            let plaintext = try encoder.encode(book)
+            guard plaintext.count <= Self.maximumContactBookPlaintextByteCount else {
+                throw ContactRepositoryError.encryptionFailed
+            }
+            let sealed = try AES.GCM.seal(plaintext, using: key)
             guard let combined = sealed.combined else {
+                throw ContactRepositoryError.encryptionFailed
+            }
+            guard combined.count <= Self.maximumContactBookEncryptedByteCount else {
                 throw ContactRepositoryError.encryptionFailed
             }
             return combined
@@ -263,8 +297,14 @@ actor EncryptedContactRepository {
 
     private static func decrypt(_ encrypted: Data, using key: SymmetricKey) throws -> ContactBook {
         do {
+            guard encrypted.count <= Self.maximumContactBookEncryptedByteCount else {
+                throw ContactRepositoryError.corruptedStore
+            }
             let sealed = try AES.GCM.SealedBox(combined: encrypted)
             let plaintext = try AES.GCM.open(sealed, using: key)
+            guard plaintext.count <= Self.maximumContactBookPlaintextByteCount else {
+                throw ContactRepositoryError.corruptedStore
+            }
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .deferredToDate
             return try decoder.decode(ContactBook.self, from: plaintext)
@@ -272,6 +312,14 @@ actor EncryptedContactRepository {
             switch error {
             case .unsupportedVersion(let version):
                 throw ContactRepositoryError.unsupportedStoreVersion(version)
+            case .tooManyContacts,
+                 .tooManyPhoneNumbers,
+                 .tooManyEmailAddresses,
+                 .displayNameTooLong,
+                 .phoneNumberTooLong,
+                 .emailAddressTooLong,
+                 .appleContactIDTooLong:
+                throw ContactRepositoryError.corruptedStore
             }
         } catch {
             throw ContactRepositoryError.corruptedStore

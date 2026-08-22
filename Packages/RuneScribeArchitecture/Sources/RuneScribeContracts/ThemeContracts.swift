@@ -26,8 +26,63 @@ public typealias ThemeFontReferenceID =
 public typealias ThemeLayoutPresetID = RoadmapStringIdentifier<ThemeLayoutPresetIdentifierDomain>
 public typealias ThemeBackgroundID = RoadmapStringIdentifier<ThemeBackgroundIdentifierDomain>
 public typealias ThemeVaultID = RoadmapStringIdentifier<ThemeVaultIdentifierDomain>
-public typealias ThemeProvenanceID = RoadmapStringIdentifier<ThemeProvenanceIdentifierDomain>
 public typealias ThemeLocalizationKey = RoadmapStringIdentifier<ThemeLocalizationKeyDomain>
+
+/// A bounded, case-preserving provenance identifier. Accepted production provenance
+/// records use path-derived, case-sensitive segments, so this identifier deliberately
+/// has a narrower purpose than the lower-case roadmap identifier vocabulary.
+public struct ThemeProvenanceID: RawRepresentable, Codable, Hashable, Sendable,
+    Comparable, CustomStringConvertible
+{
+    public static let maximumUTF8Count = 160
+
+    public let rawValue: String
+
+    public init?(rawValue: String) {
+        let bytes = Array(rawValue.utf8)
+        guard !bytes.isEmpty, bytes.count <= Self.maximumUTF8Count else { return nil }
+
+        var previousWasSeparator = false
+        for (index, byte) in bytes.enumerated() {
+            let isASCIIAlphaNumeric = (0x30 ... 0x39).contains(byte)
+                || (0x41 ... 0x5A).contains(byte)
+                || (0x61 ... 0x7A).contains(byte)
+            let isSeparator = byte == 0x2D || byte == 0x2E
+            guard isASCIIAlphaNumeric || isSeparator else { return nil }
+            if isSeparator {
+                guard index > 0, index < bytes.count - 1, !previousWasSeparator else {
+                    return nil
+                }
+            }
+            previousWasSeparator = isSeparator
+        }
+        self.rawValue = rawValue
+    }
+
+    public init(from decoder: Decoder) throws {
+        let value = try decoder.singleValueContainer().decode(String.self)
+        guard let identifier = Self(rawValue: value) else {
+            throw DecodingError.dataCorrupted(
+                .init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Invalid Theme provenance identifier."
+                )
+            )
+        }
+        self = identifier
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
+    }
+
+    public static func < (lhs: Self, rhs: Self) -> Bool {
+        lhs.rawValue < rhs.rawValue
+    }
+
+    public var description: String { rawValue }
+}
 
 public enum ThemeDescriptorValidationError: Error, Equatable, Sendable {
     case unsupportedSchemaVersion

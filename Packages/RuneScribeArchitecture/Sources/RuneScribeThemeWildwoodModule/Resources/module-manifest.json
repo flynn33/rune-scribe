@@ -1,0 +1,335 @@
+{
+  "schemaVersion": "1.0",
+  "policyProfile": "forsetti-pattern-b-standalone",
+  "runtimeVersion": "1.0.0",
+  "moduleID": "com.runescribe.module.theme.wildwood",
+  "displayName": "Rune Scribe Wildwood Codex Theme",
+  "moduleVersion": "1.0.0",
+  "moduleType": "service",
+  "criticality": "optional",
+  "supportedPlatforms": [
+    "iOS",
+    "macOS"
+  ],
+  "minimumOS": {
+    "iOS": "17.0",
+    "macOS": "15.0"
+  },
+  "capabilitiesRequested": [
+    "resources.read",
+    "runtime.contributions.publish",
+    "runtime.resources.opaque.publish"
+  ],
+  "entryPoint": "RuneScribeThemeWildwoodModule",
+  "runtimeRequirements": {
+    "requiredServices": [
+      "ApplicationResourceLocator"
+    ],
+    "requiredResources": [
+      {
+        "name": "module-manifest",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "Resource-Integrity-Manifest-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-background-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-background-reduce-motion",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-background-static",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-heartwood-crown-static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-heartwood-crown-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-heartwood-crown-vector",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-living-root-static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-living-root-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-living-root-vector",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-elderbark-stele-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-elderbark-stele-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-elderbark-stele-static-share-fallback",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-elderbark-stele-thumbnail",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-mossbound-plaque-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-mossbound-plaque-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-mossbound-plaque-static-share-fallback",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-mossbound-plaque-thumbnail",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-rootsong-tablet-high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-rootsong-tablet-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-rootsong-tablet-static-share-fallback",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-rootsong-tablet-thumbnail",
+        "fileExtension": "heif",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-script-primary",
+        "fileExtension": "ttf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-script-specimen",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-script-static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-acorn-knot-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-acorn-knot-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-acorn-knot-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-echo-seed-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-echo-seed-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-echo-seed-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-fern-spiral-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-fern-spiral-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-fern-spiral-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-lantern-moth-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-lantern-moth-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-lantern-moth-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-rooted-tree-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-rooted-tree-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-rooted-tree-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-wild-fox-monochrome-fallback",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-wild-fox-thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-wild-fox-vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-vault-card",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-vault-encountered",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-vault-locked",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      },
+      {
+        "name": "wildwood-vault-selected",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.wildwood"
+      }
+    ],
+    "requiredModuleRoles": [
+
+    ]
+  },
+  "defaultRole": "runescribe.theme.wildwood",
+  "policyClass": "policy.theme-provider",
+  "consumedEndpoints": [
+
+  ],
+  "publishedEndpoints": [
+
+  ],
+  "entitlementRequirement": {
+    "kind": "earned",
+    "identifier": "unlock.codex.wildwood"
+  },
+  "diagnosticsVisibleInProduction": false
+}

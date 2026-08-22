@@ -62,7 +62,7 @@ struct CipherLibraryView: View {
     @State private var showReassignConfirm = false
 
     // One-time contacts import prompt (first time the library opens)
-    @AppStorage("rf.contacts.importPrompted") private var contactsPrompted = false
+    @State private var didEvaluateContactsPrompt = false
     @State private var showContactsPrompt = false
     @State private var showContactsManager = false
 
@@ -214,10 +214,10 @@ struct CipherLibraryView: View {
         }
         // One-time prompt offering contacts import the first time the library opens.
         .onAppear {
-            if !contactsPrompted {
-                contactsPrompted = true
-                showContactsPrompt = true
-            }
+            evaluateContactsPromptIfReady()
+        }
+        .onChange(of: session.runtimePresentationSettingsReady) { _, _ in
+            evaluateContactsPromptIfReady()
         }
         .confirmationDialog("Organize ciphers by contact?", isPresented: $showContactsPrompt, titleVisibility: .visible) {
             Button("Import from Contacts") { showContactsManager = true }
@@ -233,6 +233,16 @@ struct CipherLibraryView: View {
             await prepareLinkArtifacts()
         }
         .onDisappear { releaseLinkArtifacts() }
+    }
+
+    private func evaluateContactsPromptIfReady() {
+        guard session.runtimePresentationSettingsReady,
+              !didEvaluateContactsPrompt
+        else { return }
+        didEvaluateContactsPrompt = true
+        guard !session.contactsImportPrompted else { return }
+        showContactsPrompt = true
+        Task { await session.markContactsImportPrompted() }
     }
 
     // MARK: - Actions Bar

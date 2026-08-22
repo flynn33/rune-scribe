@@ -380,7 +380,8 @@ public struct RuntimeIOClient: Sendable {
         String
     ) async throws -> Void
     private let readProtectedFileOperation: @Sendable (
-        ProtectedPath
+        ProtectedPath,
+        Int
     ) async throws -> Data?
     private let writeProtectedFileOperation: @Sendable (
         Data,
@@ -486,7 +487,11 @@ public struct RuntimeIOClient: Sendable {
             )
         }
         readProtectedFileOperation = {
-            try await gateway.readProtectedFile($0, lease: lease)
+            try await gateway.readProtectedFile(
+                $0,
+                maximumByteCount: $1,
+                lease: lease
+            )
         }
         writeProtectedFileOperation = {
             try await gateway.writeProtectedFile($0, path: $1, lease: lease)
@@ -628,8 +633,9 @@ public struct RuntimeIOClient: Sendable {
             )
         },
         readProtectedFile: @escaping @Sendable (
-            ProtectedPath
-        ) async throws -> Data? = { _ in
+            ProtectedPath,
+            Int
+        ) async throws -> Data? = { _, _ in
             throw RuneScribeRuntimeError.serviceUnavailable(
                 RuneScribeServiceIDs.protectedFileStore
             )
@@ -868,8 +874,11 @@ public struct RuntimeIOClient: Sendable {
         try await deleteSecureValueOperation(service, account)
     }
 
-    public func readProtectedFile(_ path: ProtectedPath) async throws -> Data? {
-        try await readProtectedFileOperation(path)
+    public func readProtectedFile(
+        _ path: ProtectedPath,
+        maximumByteCount: Int
+    ) async throws -> Data? {
+        try await readProtectedFileOperation(path, maximumByteCount)
     }
 
     public func writeProtectedFile(
@@ -1051,7 +1060,7 @@ actor RuntimeIOGateway {
     }
 
     private struct ProtectedFileHandlers: Sendable {
-        let read: @Sendable (ProtectedPath) async throws -> Data?
+        let read: @Sendable (ProtectedPath, Int) async throws -> Data?
         let write: @Sendable (Data, ProtectedPath) async throws -> Void
         let remove: @Sendable (ProtectedPath) async throws -> Void
         let exists: @Sendable (ProtectedPath) async throws -> Bool
@@ -1159,7 +1168,12 @@ actor RuntimeIOGateway {
 
     func install(_ provider: any ProtectedFileStore) {
         protectedFiles = ProtectedFileHandlers(
-            read: { try await provider.read(relativePath: $0) },
+            read: {
+                try await provider.read(
+                    relativePath: $0,
+                    maximumByteCount: $1
+                )
+            },
             write: { try await provider.write($0, relativePath: $1) },
             remove: { try await provider.remove(relativePath: $0) },
             exists: { try await provider.exists(relativePath: $0) },
@@ -1361,13 +1375,14 @@ actor RuntimeIOGateway {
 
     func readProtectedFile(
         _ path: ProtectedPath,
+        maximumByteCount: Int,
         lease: RuntimeIOLease
     ) async throws -> Data? {
         let handler = try authorizedProtectedFileHandlers(lease: lease).read
         return try await invoke(
             lease: lease,
             serviceID: RuneScribeServiceIDs.protectedFileStore,
-            operation: { try await handler(path) }
+            operation: { try await handler(path, maximumByteCount) }
         )
     }
 

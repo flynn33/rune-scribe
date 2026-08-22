@@ -1,0 +1,16 @@
+source_revision=b7c55ff40255f96a6c857b49a14962e9fcd79c37
+macos_destination=platform=macOS,arch=arm64
+macos_build_command=xcodebuild -quiet build -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Release -destination 'platform=macOS,arch=arm64' -derivedDataPath '/tmp/runescribe-roadmap-shipping-macos-b7c55ff-unsigned-entitlements/DerivedData' -resultBundlePath '/tmp/runescribe-roadmap-shipping-macos-b7c55ff-unsigned-entitlements/RuneScrib-macOS-Release-b7c55ff.xcresult' -disableAutomaticPackageResolution ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=
+macos_build_exit=0
+macos_review_sign_command=codesign --force --sign - --options runtime --entitlements Config/RuneScrib-macOS.entitlements '/tmp/runescribe-roadmap-shipping-macos-b7c55ff-unsigned-entitlements/DerivedData/Build/Products/Release/RuneScrib.app'
+macos_review_sign_exit=0
+macos_review_signature=local ad hoc with hardened runtime and checked-in entitlements
+ios_destination=platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83
+ios_build_command=xcodebuild -quiet build -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -configuration Release -destination 'platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83' -derivedDataPath '/tmp/runescribe-roadmap-shipping-ios-b7c55ff/DerivedData' -resultBundlePath '/tmp/runescribe-roadmap-shipping-ios-b7c55ff/RuneScrib-iOS-Release-b7c55ff.xcresult' -disableAutomaticPackageResolution ARCHS=arm64 ONLY_ACTIVE_ARCH=YES
+ios_build_exit=0
+shipping_check_command=scripts/check-shipping-products.sh --macos-app '/tmp/runescribe-roadmap-shipping-macos-b7c55ff-unsigned-entitlements/DerivedData/Build/Products/Release/RuneScrib.app' --ios-app '/tmp/runescribe-roadmap-shipping-ios-b7c55ff/DerivedData/Build/Products/Release-iphonesimulator/RuneScrib.app'
+shipping_check_exit=0
+shipping_check_result=101 checks, 0 failures
+provisioning_updates=not performed
+distribution_signing=not performed
+archive_export_notarize_upload_release=not performed

@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "scopeCount": 8,
+  "passedScopeCount": 8,
+  "failedScopes": [],
+  "issueCount": 0,
+  "issueCodes": [],
+  "logicalResourceCount": 56,
+  "shippingOutputCount": 184,
+  "provenanceRecordCount": 198
+}
+{
+  "status": "PASS",
+  "packageRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1",
+  "packageManifestSHA256": "d55f4b7c0f74eaf2b396ceb664f25ba086f50b7033052cd0f0a18d407c8a31da",
+  "physicalFileCount": 488,
+  "source": "directory"
+}
+{
+  "schemaVersion": "1.0",
+  "status": "PASS",
+  "packageRoot": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Corrected-Production-Package-v3.1",
+  "targets": {
+    "moonleaf": {
+      "target": "RuneScribeThemeMoonleafModule",
+      "copiedOutputCount": 46,
+      "copiedBytes": 678743,
+      "integrityManifest": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json"
+    },
+    "sunspire": {
+      "target": "RuneScribeThemeSunspireModule",
+      "copiedOutputCount": 46,
+      "copiedBytes": 666458,
+      "integrityManifest": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json"
+    },
+    "wildwood": {
+      "target": "RuneScribeThemeWildwoodModule",
+      "copiedOutputCount": 46,
+      "copiedBytes": 697897,
+      "integrityManifest": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeWildwoodModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json"
+    },
+    "gloamthorn": {
+      "target": "RuneScribeThemeGloamthornModule",
+      "copiedOutputCount": 46,
+      "copiedBytes": 609418,
+      "integrityManifest": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeGloamthornModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json"
+    }
+  },
+  "errors": []
+}

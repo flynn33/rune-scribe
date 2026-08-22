@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "scopeCount": 8,
+  "passedScopeCount": 8,
+  "failedScopes": [],
+  "issueCount": 0,
+  "issueCodes": [],
+  "logicalResourceCount": 56,
+  "shippingOutputCount": 184,
+  "provenanceRecordCount": 198
+}

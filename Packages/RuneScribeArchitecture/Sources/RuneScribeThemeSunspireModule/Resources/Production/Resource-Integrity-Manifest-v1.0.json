@@ -1,0 +1,330 @@
+{
+  "schemaVersion": "1.0",
+  "codexID": "codex.sunspire",
+  "moduleID": "com.runescribe.module.theme.sunspire",
+  "acceptedPackageVersion": "3.1.0",
+  "files": [
+    {
+      "path": "Production/background/sunspire-background-high-contrast.png",
+      "bytes": 14878,
+      "sha256": "007ce2728036bde7a8d23ed5608c9e95cb347c3b2f5ee983eb2bfc4f2f0d95c4",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-high-contrast",
+      "role": "background.high-contrast"
+    },
+    {
+      "path": "Production/background/sunspire-background-reduce-motion.png",
+      "bytes": 16917,
+      "sha256": "cc6ae9acd5a4f8677c6131f27cb7fb72267c161649d3c8a23011bd9a7b27d07a",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-reduce-motion",
+      "role": "background.reduce-motion"
+    },
+    {
+      "path": "Production/background/sunspire-background-static.png",
+      "bytes": 17307,
+      "sha256": "a53245f8cf3c7a07afb3495bc2ee2adf2f62e9de0b838d154375f820df0d6833",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-static-base",
+      "role": "background.static-base"
+    },
+    {
+      "path": "Production/crest/sunspire-first-light-static-fallback.png",
+      "bytes": 13644,
+      "sha256": "65d67ec928b617d9835a2e1ef68e04bd5f2bc9b4065041d9ab99827cb605111d",
+      "resourceID": "resource.crest.sunspire.first-light.output.crest-static-fallback",
+      "role": "crest.static-fallback"
+    },
+    {
+      "path": "Production/crest/sunspire-first-light-thumbnail.png",
+      "bytes": 52561,
+      "sha256": "3ad40287cc4dd370fdcbaedbb713f95ca97938edd8cc20b2fe9d8df8d894618e",
+      "resourceID": "resource.crest.sunspire.first-light.output.crest-thumbnail",
+      "role": "crest.thumbnail"
+    },
+    {
+      "path": "Production/crest/sunspire-first-light-vector.pdf",
+      "bytes": 4932,
+      "sha256": "828a00733938d87859636681234499872e8f9c119ce39aa88def6fa2807e78bb",
+      "resourceID": "resource.crest.sunspire.first-light.output.crest-vector-master",
+      "role": "crest.vector-master"
+    },
+    {
+      "path": "Production/frame/sunspire-laurel-of-dawn-static-fallback.png",
+      "bytes": 13802,
+      "sha256": "b62b480e0a70b7104213366b701b6af65e82618e759a5bec322af7eb722a8b70",
+      "resourceID": "resource.frame.sunspire.laurel-of-dawn.output.frame-static-fallback",
+      "role": "frame.static-fallback"
+    },
+    {
+      "path": "Production/frame/sunspire-laurel-of-dawn-thumbnail.png",
+      "bytes": 21479,
+      "sha256": "c0ff9a66c29d01d92a3cfa3fcba8ecfdb9c9e26bfe2083aa767d5dfe772b6cfd",
+      "resourceID": "resource.frame.sunspire.laurel-of-dawn.output.frame-thumbnail",
+      "role": "frame.thumbnail"
+    },
+    {
+      "path": "Production/frame/sunspire-laurel-of-dawn-vector.pdf",
+      "bytes": 15870,
+      "sha256": "656ccf129f331672876123ffaa330c916f50d5829a40649be178f992f6fdaf03",
+      "resourceID": "resource.frame.sunspire.laurel-of-dawn.output.frame-vector-master",
+      "role": "frame.vector-master"
+    },
+    {
+      "path": "Production/relic/sunspire-auric-stele-high-contrast.png",
+      "bytes": 11811,
+      "sha256": "530b5dcda06e6ac9e644d41219dc04569916a08e2f25886e5e723f3dbe679514",
+      "resourceID": "resource.relic.sunspire.auric-stele.output.relic-high-contrast",
+      "role": "relic.high-contrast"
+    },
+    {
+      "path": "Production/relic/sunspire-auric-stele-master.png",
+      "bytes": 15585,
+      "sha256": "cdd4117f9ca77b716c1eb0a61a0673c78097fb0c46b973f7d7868e89a0123a6f",
+      "resourceID": "resource.relic.sunspire.auric-stele.output.relic-master",
+      "role": "relic.master"
+    },
+    {
+      "path": "Production/relic/sunspire-auric-stele-static-share-fallback.heif",
+      "bytes": 10158,
+      "sha256": "a2e4343e12fb0da7f68891c588d2261ea778ab07cb09be8893a0a2daad44d76c",
+      "resourceID": "resource.relic.sunspire.auric-stele.output.relic-static-share-fallback",
+      "role": "relic.static-share-fallback"
+    },
+    {
+      "path": "Production/relic/sunspire-auric-stele-thumbnail.heif",
+      "bytes": 8557,
+      "sha256": "87ef57634e448730a14f0c46d9c9262357c476bc15f0ca77c703dbca037cc751",
+      "resourceID": "resource.relic.sunspire.auric-stele.output.relic-thumbnail",
+      "role": "relic.thumbnail"
+    },
+    {
+      "path": "Production/relic/sunspire-dawnfire-tablet-high-contrast.png",
+      "bytes": 11155,
+      "sha256": "dca89a9ff479e3b9db01d9740090318ff7fe7d51fec66bf657fc27972a10e944",
+      "resourceID": "resource.relic.sunspire.dawnfire-tablet.output.relic-high-contrast",
+      "role": "relic.high-contrast"
+    },
+    {
+      "path": "Production/relic/sunspire-dawnfire-tablet-master.png",
+      "bytes": 17941,
+      "sha256": "700d02edcc7e0d190f82275968c4ab83a7991d807b594881dd04513c59ef4573",
+      "resourceID": "resource.relic.sunspire.dawnfire-tablet.output.relic-master",
+      "role": "relic.master"
+    },
+    {
+      "path": "Production/relic/sunspire-dawnfire-tablet-static-share-fallback.heif",
+      "bytes": 12388,
+      "sha256": "3d55513cede7edc3f41d2a3523379d5584e45eba23d7988a8e9f3cf117f4e47f",
+      "resourceID": "resource.relic.sunspire.dawnfire-tablet.output.relic-static-share-fallback",
+      "role": "relic.static-share-fallback"
+    },
+    {
+      "path": "Production/relic/sunspire-dawnfire-tablet-thumbnail.heif",
+      "bytes": 9049,
+      "sha256": "37ff07e8a2658fe10c91ff7186f52ec969b82368be8b659b845d2e8133d61839",
+      "resourceID": "resource.relic.sunspire.dawnfire-tablet.output.relic-thumbnail",
+      "role": "relic.thumbnail"
+    },
+    {
+      "path": "Production/relic/sunspire-solvine-plaque-high-contrast.png",
+      "bytes": 12040,
+      "sha256": "30cc72aacac5510e7bd34c19099f14a63db6d71dbd5f0bc4638c1a0cba5f2237",
+      "resourceID": "resource.relic.sunspire.solvine-plaque.output.relic-high-contrast",
+      "role": "relic.high-contrast"
+    },
+    {
+      "path": "Production/relic/sunspire-solvine-plaque-master.png",
+      "bytes": 18176,
+      "sha256": "62e468e957cd76439700e7c3a301469f8edeb3c432fada531bb5d9fa13e2f79d",
+      "resourceID": "resource.relic.sunspire.solvine-plaque.output.relic-master",
+      "role": "relic.master"
+    },
+    {
+      "path": "Production/relic/sunspire-solvine-plaque-static-share-fallback.heif",
+      "bytes": 15793,
+      "sha256": "9092487a2eeddec2ac9d9cc886af09c36cf535ee7034c171f5daaf3c2fa7d171",
+      "resourceID": "resource.relic.sunspire.solvine-plaque.output.relic-static-share-fallback",
+      "role": "relic.static-share-fallback"
+    },
+    {
+      "path": "Production/relic/sunspire-solvine-plaque-thumbnail.heif",
+      "bytes": 10669,
+      "sha256": "ae668a737dca2c07283b609573ea824513a05c1f9c6c2e9c4c6463661639d2cf",
+      "resourceID": "resource.relic.sunspire.solvine-plaque.output.relic-thumbnail",
+      "role": "relic.thumbnail"
+    },
+    {
+      "path": "Production/script/sunspire-script-primary.ttf",
+      "bytes": 96648,
+      "sha256": "af4394a11b37bbd0a7cfa276e727a26a505a2712a6a54847488a38f2f4ca79ab",
+      "resourceID": "resource.script.sunspire.output.script-font",
+      "role": "script.font"
+    },
+    {
+      "path": "Production/script/sunspire-script-specimen.png",
+      "bytes": 24785,
+      "sha256": "8020e5f687a55af6bcea5db224ba2e2782c95dc3c91d45574458c0c1a3961dd4",
+      "resourceID": "resource.script.sunspire.output.script-specimen-preview",
+      "role": "script.specimen-preview"
+    },
+    {
+      "path": "Production/script/sunspire-script-static-fallback.png",
+      "bytes": 20386,
+      "sha256": "e8337ea0ddc8c421a6a01cf4b06275e674051adfdd682788288f47f4762cdf7e",
+      "resourceID": "resource.script.sunspire.output.script-static-fallback",
+      "role": "script.static-fallback"
+    },
+    {
+      "path": "Production/seal/sunspire-dawnflower-monochrome-fallback.pdf",
+      "bytes": 7305,
+      "sha256": "0d10a0d4aabead159b03f898882129ad205005b6378bc4072ef88d262f5df927",
+      "resourceID": "resource.seal.sunspire.dawnflower.output.seal-monochrome-fallback",
+      "role": "seal.monochrome-fallback"
+    },
+    {
+      "path": "Production/seal/sunspire-dawnflower-thumbnail.png",
+      "bytes": 2741,
+      "sha256": "2e92a2d1ae15b7373cc488a14068f5fd4783738eda45a726973436e1fededb59",
+      "resourceID": "resource.seal.sunspire.dawnflower.output.seal-thumbnail",
+      "role": "seal.thumbnail"
+    },
+    {
+      "path": "Production/seal/sunspire-dawnflower-vector-master.pdf",
+      "bytes": 7535,
+      "sha256": "d23a638f0109e909e51e2ac15450b03b7c64ffa1e033dd99382dee3f26932ab1",
+      "resourceID": "resource.seal.sunspire.dawnflower.output.seal-vector-master",
+      "role": "seal.vector-master"
+    },
+    {
+      "path": "Production/seal/sunspire-echo-ember-monochrome-fallback.pdf",
+      "bytes": 5860,
+      "sha256": "53d38096f911ceb5b2315c8c7356d58213a3bbf235ccc2ed462625ee3651363c",
+      "resourceID": "resource.seal.sunspire.echo-ember.output.seal-monochrome-fallback",
+      "role": "seal.monochrome-fallback"
+    },
+    {
+      "path": "Production/seal/sunspire-echo-ember-thumbnail.png",
+      "bytes": 3895,
+      "sha256": "e616bc60dd6455c479150677ca2ae3a82619a6f2f89af9e992198921cac6e3e4",
+      "resourceID": "resource.seal.sunspire.echo-ember.output.seal-thumbnail",
+      "role": "seal.thumbnail"
+    },
+    {
+      "path": "Production/seal/sunspire-echo-ember-vector-master.pdf",
+      "bytes": 5998,
+      "sha256": "08df4ce70b0db83a7bbfce91dc31af206967a6e8d530aa36f869992bcbe077c5",
+      "resourceID": "resource.seal.sunspire.echo-ember.output.seal-vector-master",
+      "role": "seal.vector-master"
+    },
+    {
+      "path": "Production/seal/sunspire-golden-lark-monochrome-fallback.pdf",
+      "bytes": 6558,
+      "sha256": "a2ceca638629edc8b3dc66a209e48c81805f62ac90112a7da7c2b033b5912b8b",
+      "resourceID": "resource.seal.sunspire.golden-lark.output.seal-monochrome-fallback",
+      "role": "seal.monochrome-fallback"
+    },
+    {
+      "path": "Production/seal/sunspire-golden-lark-thumbnail.png",
+      "bytes": 3063,
+      "sha256": "4d8d56307b745fabf4deff3fc125d654bd43cce0845114b7084f7391f17af87e",
+      "resourceID": "resource.seal.sunspire.golden-lark.output.seal-thumbnail",
+      "role": "seal.thumbnail"
+    },
+    {
+      "path": "Production/seal/sunspire-golden-lark-vector-master.pdf",
+      "bytes": 6765,
+      "sha256": "d2626f3d78f6ba4bac30c18d8786f018c2b61d8e12f16b208ee2ec9617bcd86d",
+      "resourceID": "resource.seal.sunspire.golden-lark.output.seal-vector-master",
+      "role": "seal.vector-master"
+    },
+    {
+      "path": "Production/seal/sunspire-radiant-spire-monochrome-fallback.pdf",
+      "bytes": 2470,
+      "sha256": "04552e8cf04d1f327c7271f99afffe6ba682b829b133ef5862f66245b747b672",
+      "resourceID": "resource.seal.sunspire.radiant-spire.output.seal-monochrome-fallback",
+      "role": "seal.monochrome-fallback"
+    },
+    {
+      "path": "Production/seal/sunspire-radiant-spire-thumbnail.png",
+      "bytes": 2832,
+      "sha256": "a8f22d8069f7f33e71ae0e0a009791f46d02a5abc8723a373a38f0533fd58944",
+      "resourceID": "resource.seal.sunspire.radiant-spire.output.seal-thumbnail",
+      "role": "seal.thumbnail"
+    },
+    {
+      "path": "Production/seal/sunspire-radiant-spire-vector-master.pdf",
+      "bytes": 2654,
+      "sha256": "3b5d9acd94acaa0ed9505a576285bdafde2128499362a72d987a70f29eb34d42",
+      "resourceID": "resource.seal.sunspire.radiant-spire.output.seal-vector-master",
+      "role": "seal.vector-master"
+    },
+    {
+      "path": "Production/seal/sunspire-sunleaf-crest-monochrome-fallback.pdf",
+      "bytes": 8531,
+      "sha256": "6ac37f57e720cf1cfe10c8d4e9bebde9c8da877e8f6242efed7477e3cc518185",
+      "resourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-monochrome-fallback",
+      "role": "seal.monochrome-fallback"
+    },
+    {
+      "path": "Production/seal/sunspire-sunleaf-crest-thumbnail.png",
+      "bytes": 3289,
+      "sha256": "1964ff66b717ddb83ccd38a2a7b632059e831d3f7ee49fa594ebde010cc3bd51",
+      "resourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-thumbnail",
+      "role": "seal.thumbnail"
+    },
+    {
+      "path": "Production/seal/sunspire-sunleaf-crest-vector-master.pdf",
+      "bytes": 8968,
+      "sha256": "994a9466b01ae555e3ad7d53a1244de3aa02c74b0316b08cf82428633782d86d",
+      "resourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-vector-master",
+      "role": "seal.vector-master"
+    },
+    {
+      "path": "Production/seal/sunspire-sunwheel-monochrome-fallback.pdf",
+      "bytes": 9482,
+      "sha256": "dfbb9e6a5b8844a4488e32f399bc4e23e11947724abfd9a5298554861d5edbf8",
+      "resourceID": "resource.seal.sunspire.sunwheel.output.seal-monochrome-fallback",
+      "role": "seal.monochrome-fallback"
+    },
+    {
+      "path": "Production/seal/sunspire-sunwheel-thumbnail.png",
+      "bytes": 3772,
+      "sha256": "b312b0f4552042b0b7c08a9f52eeac393d48c4f7af585243c41a5f42eb7da6b2",
+      "resourceID": "resource.seal.sunspire.sunwheel.output.seal-thumbnail",
+      "role": "seal.thumbnail"
+    },
+    {
+      "path": "Production/seal/sunspire-sunwheel-vector-master.pdf",
+      "bytes": 9942,
+      "sha256": "2047ac32e8e22c4b68faa5f07fb4eb6524056fa2bac7be21a32074c1e6d814a3",
+      "resourceID": "resource.seal.sunspire.sunwheel.output.seal-vector-master",
+      "role": "seal.vector-master"
+    },
+    {
+      "path": "Production/vault/sunspire-vault-card.png",
+      "bytes": 25044,
+      "sha256": "cf69cf2ee9bf8dc1ad8623d14cc7e813757a3b95cc3db4e8b4439d27299557ea",
+      "resourceID": "resource.vault.sunspire.codex.output.vault-card",
+      "role": "vault.card"
+    },
+    {
+      "path": "Production/vault/sunspire-vault-encountered.png",
+      "bytes": 22764,
+      "sha256": "ce00d62d5e861a313bae15c70158f6a4164946d03167544651b8280183c58196",
+      "resourceID": "resource.vault.sunspire.codex.output.vault-encountered",
+      "role": "vault.encountered"
+    },
+    {
+      "path": "Production/vault/sunspire-vault-locked.png",
+      "bytes": 21734,
+      "sha256": "5530458342ee5e21b04d80a0a052b982b95bbca03db40a7e3234fad637005a92",
+      "resourceID": "resource.vault.sunspire.codex.output.vault-locked-silhouette",
+      "role": "vault.locked-silhouette"
+    },
+    {
+      "path": "Production/vault/sunspire-vault-selected.png",
+      "bytes": 28725,
+      "sha256": "8998efd0edf8196f5a38900c2985c0d81cf496ca2ad22d3ea2a5fda6bd46a56a",
+      "resourceID": "resource.vault.sunspire.codex.output.vault-selected",
+      "role": "vault.selected"
+    }
+  ]
+}

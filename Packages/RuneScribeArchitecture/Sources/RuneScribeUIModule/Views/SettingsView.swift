@@ -27,6 +27,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
                     appearancePanel
                     progressAndFeedbackPanel
+                    cloudAndGameCenterPanel
                     appLockPanel
                     contactsPanel
                     aboutPanel
@@ -239,6 +240,92 @@ struct SettingsView: View {
         }
         .toggleStyle(.switch)
         .accessibilityHint("Does not hide unlock text")
+    }
+
+    // MARK: - Cloud and Game Center
+
+    private var cloudAndGameCenterPanel: some View {
+        let presentation = RuntimeExternalServicesSettingsPresentation(
+            snapshot: session.cloudGameCenterStatus
+        )
+        return RunePanel(
+            title: "Cloud & Game Center",
+            systemImage: "icloud",
+            accent: .runeBlue
+        ) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Cloud sync and Game Center are optional. Rune Scribe keeps local progression usable when either service is unavailable.")
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                infoRow("iCloud", presentation.cloudStatus)
+                Text(presentation.cloudDetail)
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                infoRow(
+                    "Last successful sync",
+                    presentation.cloudLastSuccessfulSyncAt?.formatted(
+                        date: .abbreviated,
+                        time: .shortened
+                    ) ?? "Not yet"
+                )
+                Text(presentation.cloudDataScopeDetail)
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let cloudActionTitle = presentation.cloudActionTitle,
+                   presentation.cloudAction == .rebindAccount
+                {
+                    Button {
+                        Task { await session.rebindCloudAccount() }
+                    } label: {
+                        Label(cloudActionTitle, systemImage: "arrow.triangle.2.circlepath.icloud")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(RuneSecondaryButtonStyle())
+                    .accessibilityHint(
+                        "Keeps local progress and resumes sync with the current iCloud account"
+                    )
+                }
+
+                Divider().overlay(Color.runeSilver.opacity(0.25))
+
+                infoRow("Game Center", presentation.gameCenterStatus)
+                Text(presentation.gameCenterDetail)
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let actionTitle = presentation.gameCenterActionTitle,
+                   let action = presentation.gameCenterAction
+                {
+                    Button {
+                        Task { await session.submitGameCenterParticipation(action) }
+                    } label: {
+                        Label(actionTitle, systemImage: "trophy.fill")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(RuneSecondaryButtonStyle())
+                    .disabled(!presentation.gameCenterActionIsEnabled)
+                    .accessibilityHint(
+                        action == .optIn
+                            ? "Opens Apple Game Center authentication only after you choose this action"
+                            : "Stops Rune Scribe mirroring without signing out of Game Center"
+                    )
+                }
+
+                if let error = session.cloudGameCenterError {
+                    Label(error, systemImage: "exclamationmark.triangle")
+                        .font(.footnote)
+                        .foregroundColor(.runeWarning)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
     }
 
     // MARK: - App Lock

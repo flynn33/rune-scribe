@@ -69,20 +69,11 @@ struct Cipher: Codable, Equatable, Identifiable, Sendable {
 
     let compatibility: CipherCompatibilityRecord
 
-    /// Source-compatible aliases for the legacy domain vocabulary. New code uses
-    /// `symbolPermutation`, `keyDeliveryState`, and the explicit transition methods.
+    /// Read-only compatibility projections. State changes use the explicit key-delivery
+    /// transitions below; the legacy writable `delivered` rail is decode-only.
     var decorativeMapping: [Int] { symbolPermutation }
     var fontRef: FontRef { compatibility.legacyFontRef ?? .bundled }
-    var delivered: Bool {
-        get { keyDeliveryState.preservesLegacyDeliveryContinuity }
-        set {
-            guard contactID != nil else {
-                keyDeliveryState = .notLinked
-                return
-            }
-            keyDeliveryState = newValue ? .completed : .pending
-        }
-    }
+    var hasCompletedKeyDelivery: Bool { keyDeliveryState.preservesLegacyDeliveryContinuity }
 
     var symmetricKey: SymmetricKey { SymmetricKey(data: keyMaterial) }
 
@@ -100,8 +91,7 @@ struct Cipher: Codable, Equatable, Identifiable, Sendable {
         keyMaterial: Data,
         decorativeMapping: [Int],
         fontRef: FontRef = .bundled,
-        contactID: UUID? = nil,
-        delivered: Bool = false
+        contactID: UUID? = nil
     ) {
         self.id = id
         self.label = label
@@ -112,11 +102,7 @@ struct Cipher: Codable, Equatable, Identifiable, Sendable {
         self.keyMaterial = keyMaterial
         self.symbolPermutation = decorativeMapping
         self.contactID = contactID
-        if contactID == nil {
-            self.keyDeliveryState = .notLinked
-        } else {
-            self.keyDeliveryState = delivered ? .completed : .pending
-        }
+        self.keyDeliveryState = contactID == nil ? .notLinked : .pending
         self.compatibility = CipherCompatibilityRecord(
             originalRecordVersion: formatVersion,
             legacyFontRef: fontRef == .bundled ? nil : fontRef
