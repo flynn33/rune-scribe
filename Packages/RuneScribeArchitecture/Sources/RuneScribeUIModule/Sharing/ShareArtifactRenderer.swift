@@ -1,8 +1,7 @@
 import CryptoKit
-import CoreGraphics
 import Foundation
-import ImageIO
 import RuneScribeContracts
+import RuneScribeUIRuntime
 import SwiftUI
 
 #if os(macOS)
@@ -562,13 +561,22 @@ struct ShareArtifactStaticOutput: Equatable, Sendable {
 
 @MainActor
 enum ShareArtifactStaticRenderer {
+    private struct ValidatedThemeImage {
+        let reference: RuntimeThemeImageReference
+        let image: Image
+    }
+
     static func render(
         plan: ShareArtifactRenderPlan,
-        resourceData: [ThemeResourceID: Data]
+        resourceData: [ThemeResourceID: Data],
+        imageReferences: [ThemeResourceID: RuntimeThemeImageReference],
+        contentRevision: UInt64
     ) throws -> ShareArtifactStaticOutput {
         let renderedImages = try validateResources(
             plan: plan,
-            resourceData: resourceData
+            resourceData: resourceData,
+            imageReferences: imageReferences,
+            contentRevision: contentRevision
         )
         var pageData: [Data] = []
         pageData.reserveCapacity(plan.pages.count)
@@ -578,11 +586,7 @@ enum ShareArtifactStaticRenderer {
                 page: page,
                 context: .staticShare,
                 image: { resourceID in
-                    Image(
-                        decorative: renderedImages[resourceID]!,
-                        scale: 1,
-                        orientation: .up
-                    )
+                    renderedImages[resourceID]?.image ?? Image(systemName: "photo")
                 }
             )
             .environment(\.locale, Locale(identifier: plan.request.localeIdentifier))
@@ -593,9 +597,18 @@ enum ShareArtifactStaticRenderer {
             )
             renderer.scale = CGFloat(plan.request.scale)
             renderer.isOpaque = true
+            #if os(macOS)
             guard let cgImage = renderer.cgImage,
-                  let png = pngData(from: cgImage)
+                  let png = NSBitmapImageRep(cgImage: cgImage).representation(
+                    using: .png,
+                    properties: [:]
+                  )
             else { throw ShareArtifactRenderError.renderingFailed }
+            #elseif os(iOS)
+            guard let png = renderer.uiImage?.pngData() else {
+                throw ShareArtifactRenderError.renderingFailed
+            }
+            #endif
             guard png.count <= Int(ShareSafePreviewMetadata.maximumByteLength) else {
                 throw ShareArtifactRenderError.outputTooLarge
             }
@@ -628,8 +641,10 @@ enum ShareArtifactStaticRenderer {
 
     private static func validateResources(
         plan: ShareArtifactRenderPlan,
-        resourceData: [ThemeResourceID: Data]
-    ) throws -> [ThemeResourceID: CGImage] {
+        resourceData: [ThemeResourceID: Data],
+        imageReferences: [ThemeResourceID: RuntimeThemeImageReference],
+        contentRevision: UInt64
+    ) throws -> [ThemeResourceID: ValidatedThemeImage] {
         let expected = Dictionary(uniqueKeysWithValues: plan.resourceMetadata.map {
             ($0.resourceID, $0)
         })
@@ -643,27 +658,46 @@ enum ShareArtifactStaticRenderer {
             throw ShareArtifactRenderError.renderingFailed
         }
         let renderedResourceIDSet = Set(renderedResourceIDs)
-        var renderedImages: [ThemeResourceID: CGImage] = [:]
+        var renderedImages: [ThemeResourceID: ValidatedThemeImage] = [:]
         for (resourceID, metadata) in expected {
-            guard let data = resourceData[resourceID] else {
-                throw ShareArtifactRenderError.missingResource(resourceID)
-            }
-            let digest = SHA256.hash(data: data).map {
-                String(format: "%02x", $0)
-            }.joined()
-            guard UInt64(data.count) == metadata.byteLength,
-                  digest == metadata.sha256.rawValue
-            else { throw ShareArtifactRenderError.invalidResource(resourceID) }
             switch metadata.mediaType {
             case .png, .heif, .pdf:
-                guard let image = decodedImage(data, metadata: metadata) else {
+                guard let image = imageReferences[resourceID] else {
+                    throw ShareArtifactRenderError.missingResource(resourceID)
+                }
+                guard image.codexID == plan.request.selection.codexID,
+                      image.resourceID == metadata.resourceID,
+                      image.role == metadata.role,
+                      image.mediaType == metadata.mediaType,
+                      image.integrity.byteLength == metadata.byteLength,
+                      image.integrity.pixelSize == metadata.pixelSize,
+                      image.integrity.sha256 == metadata.sha256
+                else {
                     throw ShareArtifactRenderError.invalidResource(resourceID)
                 }
+                guard image.contentRevision == contentRevision else {
+                    throw ShareArtifactRenderError.unavailableSelection
+                }
+                guard let renderedImage = image.image else {
+                    throw ShareArtifactRenderError.renderingFailed
+                }
                 if renderedResourceIDSet.contains(resourceID) {
-                    renderedImages[resourceID] = image
+                    renderedImages[resourceID] = ValidatedThemeImage(
+                        reference: image,
+                        image: renderedImage
+                    )
                 }
             case .ttf, .otf:
-                guard !data.isEmpty else {
+                guard let data = resourceData[resourceID] else {
+                    throw ShareArtifactRenderError.missingResource(resourceID)
+                }
+                let digest = SHA256.hash(data: data).map {
+                    String(format: "%02x", $0)
+                }.joined()
+                guard !data.isEmpty,
+                      UInt64(data.count) == metadata.byteLength,
+                      digest == metadata.sha256.rawValue
+                else {
                     throw ShareArtifactRenderError.invalidResource(resourceID)
                 }
             case .json, .mp4, .quickTime, .m4a, .caf, .wav:
@@ -675,86 +709,6 @@ enum ShareArtifactStaticRenderer {
         }
         return renderedImages
     }
-
-    private static func decodedImage(
-        _ data: Data,
-        metadata: SharePresentationResourceMetadata
-    ) -> CGImage? {
-        switch metadata.mediaType {
-        case .png, .heif:
-            guard let pixelSize = metadata.pixelSize,
-                  let source = CGImageSourceCreateWithData(data as CFData, nil),
-                  CGImageSourceGetCount(source) == 1,
-                  let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil)
-                    as? [CFString: Any],
-                  let width = (properties[kCGImagePropertyPixelWidth] as? NSNumber)?.intValue,
-                  let height = (properties[kCGImagePropertyPixelHeight] as? NSNumber)?.intValue,
-                  width == Int(pixelSize.width),
-                  height == Int(pixelSize.height),
-                  let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
-                  image.width == width,
-                  image.height == height,
-                  (1 ... 8).contains(image.bitsPerComponent)
-            else { return nil }
-            return image
-        case .pdf:
-            return decodedPDFImage(data)
-        case .ttf, .otf, .json, .mp4, .quickTime, .m4a, .caf, .wav:
-            return nil
-        }
-    }
-
-    private static func decodedPDFImage(_ data: Data) -> CGImage? {
-        guard let provider = CGDataProvider(data: data as CFData),
-              let document = CGPDFDocument(provider),
-              document.numberOfPages == 1,
-              let page = document.page(at: 1)
-        else { return nil }
-        let bounds = page.getBoxRect(.mediaBox).standardized
-        let normalizedRotation = (Int(page.rotationAngle) % 360 + 360) % 360
-        let swapsDimensions = normalizedRotation == 90 || normalizedRotation == 270
-        let widthValue = swapsDimensions ? bounds.height : bounds.width
-        let heightValue = swapsDimensions ? bounds.width : bounds.height
-        guard widthValue.isFinite,
-              heightValue.isFinite,
-              widthValue > 0,
-              heightValue > 0,
-              widthValue <= 4_096,
-              heightValue <= 4_096
-        else { return nil }
-        let width = Int(ceil(widthValue))
-        let height = Int(ceil(heightValue))
-        guard let context = CGContext(
-            data: nil,
-            width: width,
-            height: height,
-            bitsPerComponent: 8,
-            bytesPerRow: width * 4,
-            space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-        ) else { return nil }
-        let drawingBounds = CGRect(x: 0, y: 0, width: width, height: height)
-        context.clear(drawingBounds)
-        context.concatenate(
-            page.getDrawingTransform(
-                .mediaBox,
-                rect: drawingBounds,
-                rotate: 0,
-                preserveAspectRatio: true
-            )
-        )
-        context.drawPDFPage(page)
-        return context.makeImage()
-    }
-
-    private static func pngData(from image: CGImage) -> Data? {
-        #if os(macOS)
-        NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:])
-        #elseif os(iOS)
-        UIImage(cgImage: image).pngData()
-        #endif
-    }
-
 }
 
 enum ThemeArtifactCanvasContext: Equatable, Sendable {

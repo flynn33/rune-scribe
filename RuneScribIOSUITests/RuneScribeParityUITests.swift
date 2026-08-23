@@ -86,8 +86,8 @@ final class RuneScribeParityUITests: XCTestCase {
                 },
                 app.debugDescription
             )
-            try auditAccessibility(in: app)
         }
+        try auditAccessibility(in: app)
         if !isPad {
             keepScreenshot(app, named: "iphone-artifact-picker-norse")
         }

@@ -393,6 +393,36 @@ final class RuntimeApplicationResourcePresentationTests: XCTestCase {
         XCTAssertEqual(cache.totalDecodedByteCount, 24)
     }
 
+    func testThemeImageReferenceSupportsPDFShareInventory() throws {
+        let data = try makeThemeVectorPDF(width: 2, height: 3)
+        let fixture = try makeThemeImageContractFixture(
+            role: ThemeResourceRoles.sealVectorMaster,
+            mediaType: .pdf,
+            pixelSize: nil,
+            data: data
+        )
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: nil
+        )
+        let reference = try presentation.makeThemeImageReference(
+            resolvedResource: fixture.resolved,
+            expectedInventory: SharePresentationProviderResourceInventory(
+                reference: fixture.reference
+            ),
+            expectedCodexID: fixture.codexID,
+            contentRevision: 17
+        )
+
+        XCTAssertEqual(reference.resourceID, fixture.reference.id)
+        XCTAssertEqual(reference.mediaType, .pdf)
+        XCTAssertEqual(reference.kind, .vectorPDF)
+        XCTAssertEqual(reference.pixelWidth, 2)
+        XCTAssertEqual(reference.pixelHeight, 3)
+        XCTAssertEqual(reference.contentRevision, 17)
+        XCTAssertNotNil(reference.image)
+    }
+
     func testThemeImageReferenceValidatesIdentityAndSupportsInventory() throws {
         let fixture = try makeThemeImageContractFixture()
         let cache = RuntimeThemeDecodedResourceCache()

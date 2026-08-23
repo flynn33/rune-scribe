@@ -111,6 +111,71 @@ final class ArchitectureGuardrailTests: XCTestCase {
         }
     }
 
+    func testUIProviderResourceDecoderMutationsAreBlocking() throws {
+        let mutations: [(source: String, expected: String)] = [
+            ("let source = CGImageSourceCreateWithData(bytes, nil)\n", "ImageIO image-source decoder"),
+            ("let document = CGPDFDocument(provider)\n", "Core Graphics PDF decoder"),
+            ("let provider = CGDataProvider(data: bytes)\n", "Core Graphics encoded-data provider"),
+            ("let image = NSImage(data: bytes)\n", "platform image-data decoder"),
+            ("let image = UIImage(data: bytes)\n", "platform image-data decoder"),
+            ("let bitmap = NSBitmapImageRep(data: bytes)\n", "platform image-data decoder"),
+            (
+                "let image = CGImage(pngDataProviderSource: provider)\n",
+                "CGImage encoded-provider decoder"
+            ),
+        ]
+
+        for mutation in mutations {
+            let invocation = try invokeFixture(
+                product: "RuneScribeUIModule",
+                source: mutation.source
+            )
+            XCTAssertNotEqual(invocation.status, 0, mutation.source)
+            XCTAssertTrue(
+                invocation.message.contains("UI-RUNTIME-IMAGE-DECODE")
+                    && invocation.message.contains(mutation.expected),
+                "\(mutation.source)\n\(invocation.message)"
+            )
+        }
+    }
+
+    func testUIStaticRendererOutputEncodingRemainsAllowed() throws {
+        let invocation = try invokeFixture(
+            product: "RuneScribeUIModule",
+            source: """
+            let image = renderer.cgImage
+            let png = NSBitmapImageRep(cgImage: image).representation(
+                using: .png,
+                properties: [:]
+            )
+            """
+        )
+        XCTAssertEqual(invocation.status, 0, invocation.message)
+    }
+
+    func testReceivedSafePreviewExceptionIsExactAndCannotHideProviderDecoding() throws {
+        let approved = try invokeFixture(
+            product: "RuneScribeUIModule",
+            source: """
+            guard let image = NSImage(data: safePreviewData) else { return nil }
+            guard let image = UIImage(data: safePreviewData) else { return nil }
+            """,
+            treatAsSafePreviewSource: true
+        )
+        XCTAssertEqual(approved.status, 0, approved.message)
+
+        let rejected = try invokeFixture(
+            product: "RuneScribeUIModule",
+            source: """
+            guard let image = NSImage(data: safePreviewData) else { return nil }
+            let providerImage = NSImage(data: providerResourceData)
+            """,
+            treatAsSafePreviewSource: true
+        )
+        XCTAssertNotEqual(rejected.status, 0, rejected.message)
+        XCTAssertTrue(rejected.message.contains("UI-RUNTIME-IMAGE-DECODE"), rejected.message)
+    }
+
     func testDuplicateProgressionStableIDMutationIsBlocking() throws {
         let fixtureRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent("RuneScribeArchitectureCatalogFixture-\(UUID().uuidString)")
@@ -239,7 +304,11 @@ final class ArchitectureGuardrailTests: XCTestCase {
         }
     }
 
-    private func invokeFixture(product: String, source: String) throws -> Invocation {
+    private func invokeFixture(
+        product: String,
+        source: String,
+        treatAsSafePreviewSource: Bool = false
+    ) throws -> Invocation {
         let fixtureRoot = FileManager.default.temporaryDirectory
             .appendingPathComponent("RuneScribeArchitectureFixture-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: fixtureRoot) }
@@ -247,16 +316,21 @@ final class ArchitectureGuardrailTests: XCTestCase {
             at: fixtureRoot,
             withIntermediateDirectories: true
         )
+        let fixtureSource = fixtureRoot.appendingPathComponent("Fixture.swift")
         try source.write(
-            to: fixtureRoot.appendingPathComponent("Fixture.swift"),
+            to: fixtureSource,
             atomically: true,
             encoding: .utf8
         )
 
-        return try invokeGuard(environment: [
+        var environment = [
             "RUNESCRIBE_ARCHITECTURE_MODULE_FIXTURE_ROOT": fixtureRoot.path,
             "RUNESCRIBE_ARCHITECTURE_MODULE_FIXTURE_PRODUCT": product,
-        ])
+        ]
+        if treatAsSafePreviewSource {
+            environment["RUNESCRIBE_ARCHITECTURE_UI_SAFE_PREVIEW_SOURCE"] = fixtureSource.path
+        }
+        return try invokeGuard(environment: environment)
     }
 
     private func invokeGuard(environment: [String: String] = [:]) throws -> Invocation {

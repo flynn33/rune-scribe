@@ -6,6 +6,7 @@ import RuneScribeThemeGloamthornModule
 import RuneScribeThemeMoonleafModule
 import RuneScribeThemeSunspireModule
 import RuneScribeThemeWildwoodModule
+import RuneScribeUIRuntime
 @testable import RuneScribeUIModule
 import XCTest
 
@@ -287,9 +288,17 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
                     provider: provider,
                     entriesByID: entriesByID
                 )
+                let contentRevision: UInt64 = 1
+                let imageReferences = try makeRuntimeImageReferences(
+                    plan: plan,
+                    resourceData: resourceData,
+                    contentRevision: contentRevision
+                )
                 let output = try ShareArtifactStaticRenderer.render(
                     plan: plan,
-                    resourceData: resourceData
+                    resourceData: resourceData,
+                    imageReferences: imageReferences,
+                    contentRevision: contentRevision
                 )
                 let png = try XCTUnwrap(output.pagePNGData.only)
                 let metadata = output.safePreviewMetadata
@@ -420,6 +429,48 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
             return descriptor.codex.background.reduceMotionResourceID
         }
         return descriptor.codex.background.staticBaseResourceID
+    }
+
+    private func makeRuntimeImageReferences(
+        plan: ShareArtifactRenderPlan,
+        resourceData: [ThemeResourceID: Data],
+        contentRevision: UInt64
+    ) throws -> [ThemeResourceID: RuntimeThemeImageReference] {
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: nil
+        )
+        return try Dictionary(uniqueKeysWithValues: plan.resourceMetadata.compactMap {
+            metadata in
+            guard metadata.mediaType == .png
+                    || metadata.mediaType == .heif
+                    || metadata.mediaType == .pdf
+            else { return nil }
+            let data = try XCTUnwrap(resourceData[metadata.resourceID])
+            let integrity = try ThemeResourceIntegrity(
+                sha256: metadata.sha256,
+                byteLength: metadata.byteLength,
+                pixelSize: metadata.pixelSize
+            )
+            let resolved = try ResolvedThemeResourceDTO(
+                codexID: plan.request.selection.codexID,
+                resourceID: metadata.resourceID,
+                role: metadata.role,
+                mediaType: metadata.mediaType,
+                integrity: integrity,
+                verifiedSHA256: metadata.sha256,
+                data: data
+            )
+            let reference = try presentation.makeThemeImageReference(
+                resolvedResource: resolved,
+                expectedInventory: SharePresentationProviderResourceInventory(
+                    metadata: metadata
+                ),
+                expectedCodexID: plan.request.selection.codexID,
+                contentRevision: contentRevision
+            )
+            return (metadata.resourceID, reference)
+        })
     }
 
     private func assertApprovedBounds(

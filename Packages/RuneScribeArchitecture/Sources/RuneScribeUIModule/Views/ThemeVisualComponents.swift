@@ -276,16 +276,16 @@ struct ThemeArtifactTile<Artwork: View>: View {
             Text(item.name)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Color.runeTextPrimary)
-                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
             Text(item.description)
                 .font(.caption)
                 .foregroundStyle(Color.runeSilver)
-                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
             if let provenance = item.provenance {
                 Text("Source: \(provenance)")
                     .font(.caption2)
                     .foregroundStyle(Color.runeSilver)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             HStack {
                 Text(item.kind.rawValue)
