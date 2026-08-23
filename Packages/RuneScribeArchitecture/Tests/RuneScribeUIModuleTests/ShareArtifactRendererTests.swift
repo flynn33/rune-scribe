@@ -84,6 +84,21 @@ final class ShareArtifactRendererTests: XCTestCase {
             first.pages.map(\.inscription).joined().replacingOccurrences(of: "\n", with: ""),
             request.inscription
         )
+
+        let interactive = try ThemeArtifactCompositionPolicy.interactivePlan(
+            selection: selection,
+            inscription: request.inscription,
+            descriptor: descriptor,
+            colorMode: request.colorMode,
+            reduceMotion: request.reduceMotion,
+            accessibilityLabel: request.accessibilityLabel,
+            preferredSealAnchor: .lowerRight
+        )
+        XCTAssertEqual(first.composition, interactive)
+        XCTAssertEqual(
+            interactive.sealResourceID,
+            includedSeal.monochromeFallbackResourceID
+        )
     }
 
     func testRenderPlanCoversShortMediumLongPaginatedAndOverflowInscriptions() throws {
@@ -169,6 +184,119 @@ final class ShareArtifactRendererTests: XCTestCase {
             accessibilityLabel: "An invalid encoded inscription."
         )) { error in
             XCTAssertEqual(error as? ShareArtifactRenderError, .invalidRequest)
+        }
+    }
+
+    func testRegisteredExternalFontOverrideIsSharedAndNotDeclaredAsThemeFontData() throws {
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        let selection = try ShareBuilderPolicy.selection(
+            descriptor: descriptor,
+            codexOwned: true,
+            providerAvailable: true,
+            ownedArtifactIDs: [],
+            relicID: nil,
+            sealID: nil,
+            frameID: nil
+        )
+        let override = try XCTUnwrap(
+            ThemeFontPostScriptName(rawValue: "ImportedRunic-Regular")
+        )
+        let request = try ShareArtifactRenderRequest(
+            selection: selection,
+            inscription: "ABCD",
+            operationID: RuntimeOperationID(rawValue: "operation.imported-font"),
+            capturedAt: Date(timeIntervalSince1970: 1_800_000_103),
+            accessibilityLabel: "An imported-font artifact preview.",
+            fontPostScriptNameOverride: override
+        )
+
+        let staticPlan = try ShareArtifactRenderPolicy.plan(
+            request: request,
+            descriptor: descriptor
+        )
+        let interactivePlan = try ThemeArtifactCompositionPolicy.interactivePlan(
+            selection: selection,
+            inscription: request.inscription,
+            descriptor: descriptor,
+            colorMode: request.colorMode,
+            reduceMotion: request.reduceMotion,
+            accessibilityLabel: request.accessibilityLabel,
+            fontPostScriptNameOverride: override
+        )
+
+        XCTAssertEqual(staticPlan.composition, interactivePlan)
+        XCTAssertEqual(staticPlan.fontPostScriptName, override.rawValue)
+        XCTAssertTrue(staticPlan.composition.usesExternalFontOverride)
+        let themeFontID = try XCTUnwrap(descriptor.codex.scripts.first(where: {
+            $0.id == selection.scriptID
+        })?.fontResourceID)
+        XCTAssertFalse(staticPlan.resourceMetadata.contains(where: {
+            $0.resourceID == themeFontID
+        }))
+    }
+
+    func testSharedPolicyUsesOptionalFrameCompatibilityReduceMotionAndMonochrome() throws {
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        let frame = try XCTUnwrap(descriptor.codex.frames.first)
+        let seal = try XCTUnwrap(descriptor.codex.seals.first(where: {
+            $0.metadata.availability == .included
+        }))
+        let selection = try ShareBuilderPolicy.selection(
+            descriptor: descriptor,
+            codexOwned: true,
+            providerAvailable: true,
+            ownedArtifactIDs: [frame.metadata.id],
+            relicID: descriptor.codex.defaultRelicID,
+            sealID: seal.metadata.id,
+            frameID: frame.metadata.id
+        )
+        let reduceMotionRequest = try ShareArtifactRenderRequest(
+            selection: selection,
+            inscription: "ABCD",
+            operationID: RuntimeOperationID(rawValue: "operation.frame.reduce-motion"),
+            capturedAt: Date(timeIntervalSince1970: 1_800_000_104),
+            reduceMotion: true,
+            accessibilityLabel: "An encoded artifact with an optional frame."
+        )
+        let reduceMotionPlan = try ShareArtifactRenderPolicy.plan(
+            request: reduceMotionRequest,
+            descriptor: descriptor
+        )
+        XCTAssertEqual(reduceMotionPlan.frameResourceID, frame.staticFallbackResourceID)
+        XCTAssertEqual(
+            reduceMotionPlan.backgroundResourceID,
+            descriptor.codex.background.reduceMotionResourceID
+        )
+
+        let monochromeRequest = try ShareArtifactRenderRequest(
+            selection: selection,
+            inscription: reduceMotionRequest.inscription,
+            operationID: RuntimeOperationID(rawValue: "operation.frame.monochrome"),
+            capturedAt: reduceMotionRequest.capturedAt,
+            colorMode: .monochrome,
+            accessibilityLabel: reduceMotionRequest.accessibilityLabel
+        )
+        let monochromePlan = try ShareArtifactRenderPolicy.plan(
+            request: monochromeRequest,
+            descriptor: descriptor
+        )
+        XCTAssertEqual(monochromePlan.sealResourceID, seal.monochromeFallbackResourceID)
+        XCTAssertEqual(monochromePlan.frameResourceID, frame.staticFallbackResourceID)
+
+        let incompatible = try descriptorByRestrictingFirstFrame(
+            descriptor,
+            to: descriptor.codex.relics[1].metadata.id
+        )
+        XCTAssertThrowsError(try ShareBuilderPolicy.selection(
+            descriptor: incompatible,
+            codexOwned: true,
+            providerAvailable: true,
+            ownedArtifactIDs: [frame.metadata.id],
+            relicID: incompatible.codex.defaultRelicID,
+            sealID: nil,
+            frameID: frame.metadata.id
+        )) { error in
+            XCTAssertEqual(error as? ShareArtifactRenderError, .incompatibleFrame)
         }
     }
 
@@ -370,6 +498,27 @@ final class ShareArtifactRendererTests: XCTestCase {
         CGImageDestinationAddImage(destination, image, nil)
         XCTAssertTrue(CGImageDestinationFinalize(destination))
         return output as Data
+    }
+
+    private func descriptorByRestrictingFirstFrame(
+        _ descriptor: ThemeDescriptor,
+        to relicID: ArtifactID
+    ) throws -> ThemeDescriptor {
+        let encoded = try JSONEncoder().encode(descriptor)
+        var root = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        )
+        var codex = try XCTUnwrap(root["codex"] as? [String: Any])
+        var frames = try XCTUnwrap(codex["frames"] as? [[String: Any]])
+        var frame = try XCTUnwrap(frames.first)
+        frame["compatibleRelicIDs"] = [relicID.rawValue]
+        frames[0] = frame
+        codex["frames"] = frames
+        root["codex"] = codex
+        return try JSONDecoder().decode(
+            ThemeDescriptor.self,
+            from: JSONSerialization.data(withJSONObject: root, options: [.sortedKeys])
+        )
     }
 
 }

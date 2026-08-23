@@ -9,6 +9,137 @@ final class RuneScribeParityUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    func testNorseVisualPresentationAndScreenshots() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        let skipIntro = app.buttons["Skip intro"]
+        if skipIntro.waitForExistence(timeout: 12) {
+            skipIntro.tap()
+        }
+
+        XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 15), app.debugDescription)
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.staticTexts["SETTINGS"].waitForExistence(timeout: 5))
+        let codexCard = app.descendants(matching: .any)[
+            "theme.codex-card.codex.norse"
+        ].firstMatch
+        XCTAssertTrue(codexCard.waitForExistence(timeout: 8), app.debugDescription)
+        let expectedTheme = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        XCTAssertEqual(expectedTheme.id.rawValue, "theme.norse.base")
+        XCTAssertEqual(expectedTheme.codex.id.rawValue, "codex.norse")
+        XCTAssertEqual(
+            codexCard.identifier,
+            "theme.codex-card.\(expectedTheme.codex.id.rawValue)"
+        )
+        XCTAssertTrue(codexCard.label.localizedCaseInsensitiveContains("Norse"))
+        XCTAssertEqual(codexCard.value as? String, "Selected")
+        let activePresentation = app.descendants(matching: .any)[
+            "theme.presentation.theme.norse.base.standard"
+        ].firstMatch
+        XCTAssertTrue(activePresentation.waitForExistence(timeout: 8), app.debugDescription)
+        XCTAssertEqual(activePresentation.value as? String, "Standard")
+        XCTAssertFalse(
+            app.staticTexts[
+                "Your preferred Codex is unavailable. The Base appearance is active."
+            ].exists
+        )
+        XCTAssertFalse(app.staticTexts["Codex appearances are temporarily unavailable."].exists)
+        let isPad = app.windows.firstMatch.frame.width >= 700
+        if !isPad {
+            keepScreenshot(app, named: "iphone-settings-norse")
+        }
+        tapCloseControl(in: app)
+
+        let relicThumbnail = app.descendants(matching: .any)[
+            "theme.artifact-thumbnail.relic.norse.runestone.weathered"
+        ].firstMatch
+        let sealThumbnail = app.descendants(matching: .any)[
+            "theme.artifact-thumbnail.seal.norse.knotwork"
+        ].firstMatch
+        XCTAssertTrue(relicThumbnail.waitForExistence(timeout: 8), app.debugDescription)
+        XCTAssertTrue(sealThumbnail.waitForExistence(timeout: 8), app.debugDescription)
+
+        relicThumbnail.tap()
+        let artifactPicker = app.descendants(matching: .any)[
+            "theme.artifact-picker"
+        ].firstMatch
+        XCTAssertTrue(artifactPicker.waitForExistence(timeout: 8), app.debugDescription)
+        XCTAssertTrue(
+            app.descendants(matching: .any)[
+                "theme.artifact-picker.relic.norse.runestone.weathered"
+            ].firstMatch.waitForExistence(timeout: 8),
+            app.debugDescription
+        )
+        if isPad {
+            let pickerFrame = artifactPicker.frame
+            let windowFrame = app.windows.firstMatch.frame
+            XCTAssertGreaterThanOrEqual(pickerFrame.width, 500)
+            XCTAssertGreaterThanOrEqual(pickerFrame.height, 500)
+            XCTAssertGreaterThanOrEqual(pickerFrame.minX, windowFrame.minX - 1)
+            XCTAssertGreaterThanOrEqual(pickerFrame.minY, windowFrame.minY - 1)
+            XCTAssertLessThanOrEqual(pickerFrame.maxX, windowFrame.maxX + 1)
+            XCTAssertLessThanOrEqual(pickerFrame.maxY, windowFrame.maxY + 1)
+            XCTAssertTrue(
+                app.buttons.matching(identifier: "Close").allElementsBoundByIndex.contains {
+                    $0.isHittable
+                },
+                app.debugDescription
+            )
+            try auditAccessibility(in: app)
+        }
+        if !isPad {
+            keepScreenshot(app, named: "iphone-artifact-picker-norse")
+        }
+        tapCloseControl(in: app)
+
+        let editor = app.textViews.matching(
+            NSPredicate(format: "label == %@", "Message to encode")
+        ).firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5), app.debugDescription)
+        editor.tap()
+        editor.typeText("Norse")
+        let encodeButton = app.buttons["RUNE SCRIBE"]
+        XCTAssertTrue(encodeButton.waitForExistence(timeout: 5), app.debugDescription)
+        encodeButton.tap()
+
+        let preview = app.descendants(matching: .any)["theme.artifact-preview"].firstMatch
+        let relicPreview = app.descendants(matching: .any)[
+            "theme.artifact-preview.relic.norse.runestone.weathered"
+        ].firstMatch
+        XCTAssertTrue(preview.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertTrue(relicPreview.waitForExistence(timeout: 10), app.debugDescription)
+        XCTAssertFalse(
+            app.alerts["Standard Share Appearance Used"].exists,
+            app.debugDescription
+        )
+        try auditAccessibility(in: app)
+        keepScreenshot(
+            app,
+            named: isPad ? "ipad-workspace-norse" : "iphone-workspace-norse"
+        )
+
+        app.buttons["Vault and Progress"].tap()
+        XCTAssertTrue(app.staticTexts["VAULT & PROGRESS"].waitForExistence(timeout: 5))
+        let vaultSection = app.buttons["Vault"]
+        app.scrollViews.firstMatch.swipeLeft()
+        XCTAssertTrue(vaultSection.waitForExistence(timeout: 5), app.debugDescription)
+        vaultSection.tap()
+        XCTAssertTrue(app.staticTexts["Active Codex Collection"].waitForExistence(timeout: 8))
+        let vaultCodex = app.descendants(matching: .any)[
+            "theme.vault.codex.norse"
+        ].firstMatch
+        XCTAssertTrue(vaultCodex.waitForExistence(timeout: 8), app.debugDescription)
+        XCTAssertTrue(app.staticTexts["Provider available"].exists)
+        let vaultRelic = app.descendants(matching: .any)[
+            "theme.vault-artifact.relic.norse.runestone.weathered"
+        ].firstMatch
+        scrollVaultUntilVisible(vaultRelic, in: app)
+        XCTAssertTrue(vaultRelic.waitForExistence(timeout: 8), app.debugDescription)
+        try auditAccessibility(in: app)
+        keepScreenshot(app, named: isPad ? "ipad-vault-norse" : "iphone-vault-norse")
+    }
+
     func testFreshInstallExercisesPrimaryProductFlows() throws {
         let app = XCUIApplication()
         app.open(Self.customImportURL)
@@ -290,6 +421,13 @@ final class RuneScribeParityUITests: XCTestCase {
         }
     }
 
+    private func keepScreenshot(_ app: XCUIApplication, named name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
     private func tapCloseControl(
         in app: XCUIApplication,
         file: StaticString = #filePath,
@@ -309,6 +447,16 @@ final class RuneScribeParityUITests: XCTestCase {
         }
 
         XCTFail("No hittable Close control", file: file, line: line)
+    }
+
+    private func scrollVaultUntilVisible(_ element: XCUIElement, in app: XCUIApplication) {
+        guard let vaultScrollView = app.scrollViews.allElementsBoundByIndex.max(by: {
+            $0.frame.height < $1.frame.height
+        }) else { return }
+
+        for _ in 0..<12 where !element.exists || !element.isHittable {
+            vaultScrollView.swipeUp()
+        }
     }
 
     private func auditAccessibility(in app: XCUIApplication) throws {

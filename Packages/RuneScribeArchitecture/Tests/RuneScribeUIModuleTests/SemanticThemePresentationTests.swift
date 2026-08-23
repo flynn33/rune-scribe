@@ -70,6 +70,204 @@ final class SemanticThemePresentationTests: XCTestCase {
         XCTAssertEqual(plan.unlockAnimationResourceIDByTier.count, 4)
     }
 
+    func testActiveVisualPlanBindsCodexArtifactsAndDescriptorAccessibility() throws {
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        XCTAssertEqual(descriptor.id.rawValue, "theme.norse.base")
+        XCTAssertEqual(descriptor.codex.id.rawValue, "codex.norse")
+        let includedSeal = try XCTUnwrap(descriptor.codex.seals.first(where: {
+            $0.metadata.availability == .included
+        }))
+        let selection = try ShareBuilderPolicy.selection(
+            descriptor: descriptor,
+            codexOwned: true,
+            providerAvailable: true,
+            ownedArtifactIDs: [],
+            relicID: nil,
+            sealID: includedSeal.metadata.id,
+            frameID: nil
+        )
+
+        let plan = try ActiveThemeVisualResourcePlan(
+            descriptor: descriptor,
+            revision: 41,
+            selection: selection
+        )
+
+        XCTAssertEqual(plan.revision, 41)
+        XCTAssertEqual(plan.themeID.rawValue, "theme.norse.base")
+        XCTAssertEqual(plan.codexID.rawValue, "codex.norse")
+        XCTAssertEqual(plan.codex.codexID, descriptor.codex.id)
+        XCTAssertEqual(plan.codex.card.id, descriptor.codex.vault.cardResourceID)
+        XCTAssertEqual(plan.codex.selected.id, descriptor.codex.vault.selectedResourceID)
+        XCTAssertEqual(plan.selectedRelicID, descriptor.codex.defaultRelicID)
+        XCTAssertEqual(
+            plan.selectedRelic?.primary.id,
+            descriptor.codex.relics.first(where: { $0.metadata.id == plan.selectedRelicID })?
+                .primaryResourceID
+        )
+        XCTAssertEqual(
+            plan.selectedRelic?.defaultLayoutID,
+            descriptor.codex.relics.first(where: { $0.metadata.id == plan.selectedRelicID })?
+                .defaultLayoutID
+        )
+        XCTAssertEqual(plan.selectedSeal?.thumbnail.id, includedSeal.thumbnailResourceID)
+        XCTAssertEqual(plan.selectedSeal?.sealAllowedAnchors, includedSeal.allowedAnchors)
+        XCTAssertEqual(
+            plan.selectedSeal?.accessibilityLabel,
+            includedSeal.metadata.accessibility.label.fallbackValue
+        )
+        XCTAssertFalse(plan.catalog.contains(where: {
+            $0.availability == .reservedInactive
+        }))
+        XCTAssertTrue(plan.catalog.allSatisfy { $0.codexID == descriptor.codex.id })
+    }
+
+    func testNorseActiveVisualPlanDeclaresExactCatalogFallbacksAndOptionalFrame() throws {
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        let seal = try XCTUnwrap(descriptor.codex.seals.first(where: {
+            $0.metadata.id.rawValue == "seal.norse.knotwork"
+        }))
+        let frame = try XCTUnwrap(descriptor.codex.frames.first(where: {
+            $0.metadata.id.rawValue == "frame.norse.carved-knotwork"
+        }))
+        let selection = try ShareBuilderPolicy.selection(
+            descriptor: descriptor,
+            codexOwned: true,
+            providerAvailable: true,
+            ownedArtifactIDs: [frame.metadata.id],
+            relicID: descriptor.codex.defaultRelicID,
+            sealID: seal.metadata.id,
+            frameID: frame.metadata.id
+        )
+        let plan = try ActiveThemeVisualResourcePlan(
+            descriptor: descriptor,
+            revision: 42,
+            selection: selection
+        )
+
+        XCTAssertEqual(plan.codex.card.id, descriptor.codex.vault.cardResourceID)
+        XCTAssertEqual(plan.codex.locked.id, descriptor.codex.vault.lockedSilhouetteResourceID)
+        XCTAssertEqual(plan.codex.encountered.id, descriptor.codex.vault.encounteredResourceID)
+        XCTAssertEqual(plan.codex.selected.id, descriptor.codex.vault.selectedResourceID)
+        XCTAssertEqual(Set(plan.relics.map(\.id.rawValue)), [
+            "relic.norse.runestone.weathered",
+            "relic.norse.raven-medallion",
+            "relic.norse.ironbound-shield",
+            "relic.norse.sealed-parchment",
+            "relic.norse.runestone.blackstone",
+        ])
+        XCTAssertEqual(Set(plan.seals.map(\.id.rawValue)), [
+            "seal.norse.knotwork",
+            "seal.norse.forge-flame",
+            "seal.norse.raven",
+            "seal.norse.longship",
+            "seal.norse.forge-hammer",
+            "seal.norse.echo-rune",
+        ])
+        XCTAssertEqual(plan.frames.map(\.id.rawValue), ["frame.norse.carved-knotwork"])
+        XCTAssertEqual(plan.crests.map(\.id.rawValue), ["crest.norse.forge-master"])
+        XCTAssertEqual(plan.selectedFrame?.id, frame.metadata.id)
+        XCTAssertEqual(plan.selectedFrame?.primary.id, frame.vectorResourceID)
+        XCTAssertEqual(plan.selectedFrame?.standard.id, frame.staticFallbackResourceID)
+        XCTAssertEqual(plan.selectedSeal?.highContrast.id, seal.monochromeFallbackResourceID)
+
+        let references = Dictionary(uniqueKeysWithValues: descriptor.resources.map {
+            ($0.id, $0)
+        })
+        let imagePlans = [
+            plan.codex.card,
+            plan.codex.locked,
+            plan.codex.encountered,
+            plan.codex.selected,
+            plan.backgroundStatic,
+            plan.backgroundReduceMotion,
+            plan.backgroundHighContrast,
+        ] + plan.catalog.flatMap {
+            [$0.primary, $0.thumbnail, $0.standard, $0.highContrast]
+        }
+        for imagePlan in imagePlans {
+            let reference = try XCTUnwrap(references[imagePlan.id])
+            XCTAssertEqual(imagePlan.role, reference.role)
+            XCTAssertEqual(imagePlan.mediaType, reference.mediaType)
+            XCTAssertEqual(imagePlan.byteLength, reference.integrity.byteLength)
+            XCTAssertEqual(imagePlan.pixelSize, reference.integrity.pixelSize)
+            XCTAssertEqual(imagePlan.sha256, reference.integrity.sha256)
+        }
+    }
+
+    func testThemeVisualComponentsExposeStableAccessibilityAndAutomationHooks() throws {
+        var repositoryRoot = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 { repositoryRoot.deleteLastPathComponent() }
+        let views = repositoryRoot.appendingPathComponent(
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views"
+        )
+        let componentSource = try String(
+            contentsOf: views.appendingPathComponent("ThemeVisualComponents.swift"),
+            encoding: .utf8
+        )
+        let contentSource = try String(
+            contentsOf: views.appendingPathComponent("ContentView.swift"),
+            encoding: .utf8
+        )
+        let settingsSource = try String(
+            contentsOf: views.appendingPathComponent("SettingsView.swift"),
+            encoding: .utf8
+        )
+        let vaultSource = try String(
+            contentsOf: views.appendingPathComponent("VaultProgressView.swift"),
+            encoding: .utf8
+        )
+
+        for identifier in [
+            "theme.codex-card",
+            "theme.artifact-thumbnail",
+            "theme.artifact-picker",
+            "theme.artifact-none.frame",
+            "theme.artifact-preview",
+        ] {
+            XCTAssertTrue(componentSource.contains(identifier), identifier)
+        }
+        XCTAssertTrue(contentSource.contains("ThemeArtifactPreview("))
+        XCTAssertTrue(settingsSource.contains("ThemeCodexCardView("))
+        XCTAssertTrue(vaultSource.contains("identifierPrefix: \"theme.vault\""))
+        XCTAssertTrue(vaultSource.contains("identifierPrefix: \"theme.vault-artifact\""))
+        XCTAssertTrue(vaultSource.contains("GridItem(.adaptive"))
+    }
+
+    func testVaultCatalogUsesDescriptorVisualsWithoutInventingEncounterState() throws {
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        let catalog = VaultProgressPresentation.themeCatalog(
+            descriptor: descriptor,
+            ownership: [],
+            selectedArtifactIDs: [descriptor.codex.defaultRelicID]
+        )
+
+        XCTAssertEqual(
+            catalog.first(where: { $0.artifactID == descriptor.codex.defaultRelicID })?.state,
+            .selected
+        )
+        XCTAssertFalse(catalog.contains(where: { item in
+            let metadata = descriptor.codex.relics.map(\.metadata)
+                + descriptor.codex.seals.map(\.metadata)
+                + descriptor.codex.frames.map(\.metadata)
+                + descriptor.codex.crests.map(\.metadata)
+            return metadata.first(where: { $0.id == item.artifactID })?.availability
+                == .reservedInactive
+        }))
+        if let encounteredSeal = descriptor.codex.seals.first(where: {
+            $0.metadata.availability == .encountered
+        }) {
+            XCTAssertEqual(
+                catalog.first(where: { $0.artifactID == encounteredSeal.metadata.id })?.state,
+                .locked
+            )
+            XCTAssertEqual(
+                catalog.first(where: { $0.artifactID == encounteredSeal.metadata.id })?.resourceID,
+                encounteredSeal.thumbnailResourceID
+            )
+        }
+    }
+
     func testNorseUnlockAnimationParametersDriveAllRevealTierDurations() throws {
         let plan = try ThemePresentationResourcePlan(
             descriptor: RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor

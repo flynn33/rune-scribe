@@ -44,11 +44,18 @@ struct AchievementCardPresentation: Equatable, Sendable {
 
 struct ThemeCatalogCardPresentation: Identifiable, Equatable, Sendable {
     let id: String
+    let artifactID: ArtifactID
     let name: String
     let description: String
-    let kind: String
+    let kind: ThemeVisualArtifactKind
     let rarity: ThemeRarityToken
-    let isOwned: Bool
+    let resourceID: ThemeResourceID
+    let state: ThemeVisualContentState
+    let accessibilityLabel: String
+    let accessibilityHint: String?
+    let provenance: String?
+
+    var isOwned: Bool { state == .owned || state == .selected }
 }
 
 enum VaultProgressPresentation {
@@ -131,44 +138,106 @@ enum VaultProgressPresentation {
 
     static func themeCatalog(
         descriptor: ThemeDescriptor,
-        ownership: [ProgressionOwnershipDTO]
+        ownership: [ProgressionOwnershipDTO],
+        providerAvailable: Bool = true,
+        selectedArtifactIDs: Set<ArtifactID> = []
     ) -> [ThemeCatalogCardPresentation] {
-        let ownedIDs = Set(ownership.compactMap { item -> String? in
-            guard item.state == .owned else { return nil }
+        let ownershipByID = Dictionary(uniqueKeysWithValues: ownership.compactMap {
+            item -> (String, ProgressionContentOwnershipState)? in
             switch item.reference {
-            case .artifact(let id): return id.rawValue
-            case .crest(let id): return id.rawValue
+            case .artifact(let id): return (id.rawValue, item.state)
+            case .crest(let id): return (id.rawValue, item.state)
             default: return nil
             }
         })
+        let rightsByID = Dictionary(uniqueKeysWithValues: descriptor.rights.map {
+            ($0.id, $0.sourceReference)
+        })
         let relics = descriptor.codex.relics.compactMap { relic -> ThemeCatalogCardPresentation? in
             guard relic.metadata.availability != .reservedInactive else { return nil }
-            return catalogItem(relic.metadata, kind: "Relic", ownedIDs: ownedIDs)
+            return catalogItem(
+                relic.metadata,
+                kind: .relic,
+                resourceID: relic.thumbnailResourceID,
+                ownershipByID: ownershipByID,
+                rightsByID: rightsByID,
+                providerAvailable: providerAvailable,
+                selectedArtifactIDs: selectedArtifactIDs
+            )
         }
-        let seals = descriptor.codex.seals.map {
-            catalogItem($0.metadata, kind: "Seal", ownedIDs: ownedIDs)
+        let seals = descriptor.codex.seals.compactMap { seal -> ThemeCatalogCardPresentation? in
+            guard seal.metadata.availability != .reservedInactive else { return nil }
+            return catalogItem(
+                seal.metadata,
+                kind: .seal,
+                resourceID: seal.thumbnailResourceID,
+                ownershipByID: ownershipByID,
+                rightsByID: rightsByID,
+                providerAvailable: providerAvailable,
+                selectedArtifactIDs: selectedArtifactIDs
+            )
         }
-        let frames = descriptor.codex.frames.map {
-            catalogItem($0.metadata, kind: "Frame", ownedIDs: ownedIDs)
+        let frames = descriptor.codex.frames.compactMap { frame -> ThemeCatalogCardPresentation? in
+            guard frame.metadata.availability != .reservedInactive else { return nil }
+            return catalogItem(
+                frame.metadata,
+                kind: .frame,
+                resourceID: frame.staticFallbackResourceID,
+                ownershipByID: ownershipByID,
+                rightsByID: rightsByID,
+                providerAvailable: providerAvailable,
+                selectedArtifactIDs: selectedArtifactIDs
+            )
         }
-        let crests = descriptor.codex.crests.map {
-            catalogItem($0.metadata, kind: "Crest", ownedIDs: ownedIDs)
+        let crests = descriptor.codex.crests.compactMap { crest -> ThemeCatalogCardPresentation? in
+            guard crest.metadata.availability != .reservedInactive else { return nil }
+            return catalogItem(
+                crest.metadata,
+                kind: .crest,
+                resourceID: crest.staticFallbackResourceID,
+                ownershipByID: ownershipByID,
+                rightsByID: rightsByID,
+                providerAvailable: providerAvailable,
+                selectedArtifactIDs: selectedArtifactIDs
+            )
         }
         return relics + seals + frames + crests
     }
 
     private static func catalogItem(
         _ metadata: ThemeArtifactMetadata,
-        kind: String,
-        ownedIDs: Set<String>
+        kind: ThemeVisualArtifactKind,
+        resourceID: ThemeResourceID,
+        ownershipByID: [String: ProgressionContentOwnershipState],
+        rightsByID: [ThemeProvenanceID: String],
+        providerAvailable: Bool,
+        selectedArtifactIDs: Set<ArtifactID>
     ) -> ThemeCatalogCardPresentation {
-        ThemeCatalogCardPresentation(
+        let ownership = ownershipByID[metadata.id.rawValue]
+        let state: ThemeVisualContentState = if !providerAvailable {
+            .unavailable
+        } else if selectedArtifactIDs.contains(metadata.id)
+                    && (metadata.availability == .included || ownership == .owned) {
+            .selected
+        } else if metadata.availability == .included || ownership == .owned {
+            .owned
+        } else if ownership == .encountered {
+            .encountered
+        } else {
+            .locked
+        }
+        return ThemeCatalogCardPresentation(
             id: metadata.id.rawValue,
+            artifactID: metadata.id,
             name: metadata.displayName.fallbackValue,
             description: metadata.description.fallbackValue,
             kind: kind,
             rarity: metadata.rarity,
-            isOwned: metadata.availability == .included || ownedIDs.contains(metadata.id.rawValue)
+            resourceID: resourceID,
+            state: state,
+            accessibilityLabel: metadata.accessibility.label.fallbackValue,
+            accessibilityHint: metadata.accessibility.hint?.fallbackValue,
+            provenance: rightsByID[metadata.rightsID]
         )
     }
 
@@ -234,6 +303,7 @@ enum VaultProgressPresentation {
 struct VaultProgressView: View {
     @EnvironmentObject private var session: RuneScribeUISession
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @State private var section: VaultProgressSection = .journey
 
@@ -268,6 +338,7 @@ struct VaultProgressView: View {
         .background(Color.runeNavy)
         .preferredColorScheme(.dark)
         .modifier(VaultProgressFrameModifier())
+        .task { await session.loadActiveThemeCatalogVisuals() }
         .alert("Progress Unavailable", isPresented: Binding(
             get: { session.progressionCommandError != nil },
             set: { if !$0 { session.dismissProgressionCommandError() } }
@@ -622,10 +693,17 @@ struct VaultProgressView: View {
                 .foregroundColor(.runeSilver)
 
             if let descriptor = session.themeSnapshot?.effectiveTheme {
+                activeCodexCard(descriptor)
                 themeCollection(
                     VaultProgressPresentation.themeCatalog(
                         descriptor: descriptor,
-                        ownership: snapshot.ownership
+                        ownership: snapshot.ownership,
+                        providerAvailable: session.themeSnapshot?.isEmergencyPresentation == false,
+                        selectedArtifactIDs: Set([
+                            session.selectedThemeRelicID,
+                            session.selectedThemeSealID,
+                            session.selectedThemeFrameID,
+                        ].compactMap { $0 })
                     )
                 )
             }
@@ -667,29 +745,108 @@ struct VaultProgressView: View {
             Text("Active Codex Collection")
                 .font(.headline)
                 .foregroundColor(.runeGoldBright)
-            ForEach(items) { item in
-                RunePanel(
-                    title: item.name,
-                    systemImage: item.isOwned ? "checkmark.seal.fill" : "lock.fill",
-                    accent: item.isOwned ? .runeRarity(item.rarity) : .runeLocked
-                ) {
-                    VStack(alignment: .leading, spacing: 7) {
-                        Text(item.description)
-                            .font(.body)
-                            .foregroundColor(.runeSilver)
-                        HStack {
-                            Text(item.kind)
-                            Spacer()
-                            Text(item.isOwned ? "Owned" : "Locked")
-                        }
-                        .font(.footnote.weight(.semibold))
-                        .foregroundColor(item.isOwned ? .runeGoldBright : .runeLocked)
+            LazyVGrid(columns: themeCatalogColumns, alignment: .leading, spacing: 12) {
+                ForEach(items) { item in
+                    ThemeArtifactTile(
+                        item: ThemeArtifactBrowserItem(
+                            id: item.artifactID,
+                            resourceID: item.resourceID,
+                            name: item.name,
+                            description: item.description,
+                            kind: item.kind,
+                            rarity: item.rarity,
+                            state: item.state,
+                            accessibilityLabel: item.accessibilityLabel,
+                            accessibilityHint: item.accessibilityHint,
+                            provenance: item.provenance,
+                            isSelectable: false
+                        ),
+                        identifierPrefix: "theme.vault-artifact",
+                        isInteractive: false,
+                        action: {}
+                    ) {
+                        vaultArtifactArtwork(item)
                     }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityValue(item.isOwned ? "Owned" : "Locked")
                 }
             }
         }
+    }
+
+    private func activeCodexCard(_ descriptor: ThemeDescriptor) -> some View {
+        let isAvailable = session.themeSnapshot?.isEmergencyPresentation == false
+        let provider = session.themeSnapshot?.providers.first(where: {
+            $0.codexID == descriptor.codex.id
+        })
+        let selectedArtifacts = [
+            session.activeThemeVisualPresentation?.plan.selectedRelic?.displayName,
+            session.activeThemeVisualPresentation?.plan.selectedSeal?.displayName,
+            session.activeThemeVisualPresentation?.plan.selectedFrame?.displayName,
+        ].compactMap { $0 }.joined(separator: ", ")
+        return RunePanel(title: "Active Codex", systemImage: "books.vertical", accent: .runeGold) {
+            VStack(alignment: .leading, spacing: 10) {
+                ThemeCodexCardView(
+                    codexID: descriptor.codex.id,
+                    displayName: descriptor.codex.displayName.fallbackValue,
+                    summary: descriptor.codex.shortDescription.fallbackValue,
+                    state: isAvailable ? .selected : .unavailable,
+                    accessibilityLabel: descriptor.codex.accessibility.label.fallbackValue,
+                    accessibilityHint: descriptor.codex.accessibility.hint?.fallbackValue ?? "",
+                    isEnabled: false,
+                    identifierPrefix: "theme.vault",
+                    action: {}
+                ) {
+                    vaultCodexArtwork(descriptor)
+                }
+                Label(
+                    isAvailable ? "Provider available" : "Provider unavailable; safe presentation in use",
+                    systemImage: isAvailable ? "checkmark.circle" : "exclamationmark.circle"
+                )
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(isAvailable ? Color.runeGoldBright : Color.runeWarning)
+                Label(
+                    provider?.isOwned == true ? "Owned and selected" : "Ownership unavailable",
+                    systemImage: provider?.isOwned == true ? "checkmark.seal" : "lock.fill"
+                )
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(provider?.isOwned == true ? Color.runeGoldBright : Color.runeLocked)
+                Text("Script: \(descriptor.codex.primaryScriptID.rawValue)")
+                    .font(.footnote)
+                    .foregroundStyle(Color.runeSilver)
+                if !selectedArtifacts.isEmpty {
+                    Text("Selected artifacts: \(selectedArtifacts)")
+                        .font(.footnote)
+                        .foregroundStyle(Color.runeSilver)
+                }
+            }
+        }
+    }
+
+    private var themeCatalogColumns: [GridItem] {
+        if dynamicTypeSize.isAccessibilitySize {
+            return [GridItem(.flexible(), spacing: 12, alignment: .top)]
+        }
+        return [GridItem(.adaptive(minimum: 190, maximum: 280), spacing: 12, alignment: .top)]
+    }
+
+    private func vaultCodexArtwork(_ descriptor: ThemeDescriptor) -> AnyView {
+        if let presentation = session.activeThemeVisualPresentation,
+           let image = presentation.imageReference(for: presentation.plan.codex.selected)?.image {
+            return AnyView(image.resizable().scaledToFill())
+        }
+        return AnyView(ThemeVisualPlaceholder(
+            systemImage: "books.vertical",
+            label: "\(descriptor.codex.displayName.fallbackValue) artwork unavailable"
+        ))
+    }
+
+    private func vaultArtifactArtwork(_ item: ThemeCatalogCardPresentation) -> AnyView {
+        if let image = session.activeThemeVisualPresentation?.image(for: item.resourceID) {
+            return AnyView(image.resizable().scaledToFill())
+        }
+        return AnyView(ThemeVisualPlaceholder(
+            systemImage: item.kind.systemImage,
+            label: "\(item.name) artwork unavailable"
+        ))
     }
 
     private func ownedContentCard(_ item: ProgressionOwnershipDTO) -> some View {

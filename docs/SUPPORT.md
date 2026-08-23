@@ -1,7 +1,9 @@
 # Rune Scribe Support
 
 **Current product source:** version 1.0.38 (build 38)
-**Publication boundary:** owner test required; not shipped
+**Publication boundary:** owner validation is discretionary before distribution; not shipped
+
+Optional owner validation does not gate remediation PASS or pull-request readiness.
 
 ## Import and sharing
 

@@ -1,4 +1,5 @@
 import CryptoKit
+import CoreGraphics
 import Foundation
 import ImageIO
 import RuneScribeContracts
@@ -91,7 +92,7 @@ enum ShareBuilderPolicy {
         sealID: ArtifactID?,
         frameID: ArtifactID?
     ) throws -> SharePresentationSelection {
-        guard codexOwned || descriptor.codex.id == RuneScribeCodexIDs.norse,
+        guard codexOwned || descriptor.criticality == .requiredBase,
               providerAvailable
         else { throw ShareArtifactRenderError.unavailableSelection }
 
@@ -176,6 +177,7 @@ struct ShareArtifactRenderRequest: Equatable, Sendable {
     let reduceMotion: Bool
     let accessibilityLabel: String
     let provenanceLabel: String?
+    let fontPostScriptNameOverride: ThemeFontPostScriptName?
 
     init(
         selection: SharePresentationSelection,
@@ -187,7 +189,8 @@ struct ShareArtifactRenderRequest: Equatable, Sendable {
         colorMode: ShareArtifactColorMode = .standard,
         reduceMotion: Bool = false,
         accessibilityLabel: String,
-        provenanceLabel: String? = nil
+        provenanceLabel: String? = nil,
+        fontPostScriptNameOverride: ThemeFontPostScriptName? = nil
     ) throws {
         guard !inscription.isEmpty,
               inscription.count <= Self.maximumInscriptionCharacters,
@@ -211,6 +214,7 @@ struct ShareArtifactRenderRequest: Equatable, Sendable {
         self.reduceMotion = reduceMotion
         self.accessibilityLabel = accessibilityLabel
         self.provenanceLabel = provenanceLabel
+        self.fontPostScriptNameOverride = fontPostScriptNameOverride
     }
 }
 
@@ -218,6 +222,28 @@ struct ShareArtifactRenderPage: Equatable, Hashable, Sendable {
     let index: Int
     let count: Int
     let inscription: String
+}
+
+/// Provider-neutral composition shared by the interactive workspace preview
+/// and deterministic static sharing. It is deliberately pure: image bytes and
+/// platform image objects remain in their respective runtime/rendering rails.
+struct ThemeArtifactCompositionPlan: Equatable, Sendable {
+    let selection: SharePresentationSelection
+    let inscription: String
+    let palette: ThemeSemanticPalette
+    let layout: ThemeShareLayoutPreset
+    let pages: [ShareArtifactRenderPage]
+    let relicResourceID: ThemeResourceID
+    let sealResourceID: ThemeResourceID?
+    let frameResourceID: ThemeResourceID?
+    let backgroundResourceID: ThemeResourceID
+    let sealAnchor: ThemeNormalizedPoint?
+    let sealScale: Double
+    let fontPostScriptName: String
+    let usesExternalFontOverride: Bool
+    let colorMode: ShareArtifactColorMode
+    let accessibilityLabel: String
+    let provenanceLabel: String?
 }
 
 struct ShareArtifactRenderPlan: Equatable, Sendable {
@@ -236,9 +262,30 @@ struct ShareArtifactRenderPlan: Equatable, Sendable {
     let sealScale: Double
     let fontPostScriptName: String
     let resourceMetadata: [SharePresentationResourceMetadata]
+
+    var composition: ThemeArtifactCompositionPlan {
+        ThemeArtifactCompositionPlan(
+            selection: request.selection,
+            inscription: request.inscription,
+            palette: palette,
+            layout: layout,
+            pages: pages,
+            relicResourceID: relicResourceID,
+            sealResourceID: sealResourceID,
+            frameResourceID: frameResourceID,
+            backgroundResourceID: backgroundResourceID,
+            sealAnchor: sealAnchor,
+            sealScale: sealScale,
+            fontPostScriptName: fontPostScriptName,
+            usesExternalFontOverride: request.fontPostScriptNameOverride != nil,
+            colorMode: request.colorMode,
+            accessibilityLabel: request.accessibilityLabel,
+            provenanceLabel: request.provenanceLabel
+        )
+    }
 }
 
-enum ShareArtifactRenderPolicy {
+enum ThemeArtifactCompositionPolicy {
     static let maximumPageCount = 16
     private static let glyphsPerLine = 24
 
@@ -246,29 +293,85 @@ enum ShareArtifactRenderPolicy {
         request: ShareArtifactRenderRequest,
         descriptor: ThemeDescriptor,
         preferredSealAnchor: ThemeSealAnchorCategory? = nil
-    ) throws -> ShareArtifactRenderPlan {
-        guard descriptor.codex.id == request.selection.codexID,
+    ) throws -> ThemeArtifactCompositionPlan {
+        try compose(
+            selection: request.selection,
+            inscription: request.inscription,
+            descriptor: descriptor,
+            colorMode: request.colorMode,
+            reduceMotion: request.reduceMotion,
+            accessibilityLabel: request.accessibilityLabel,
+            provenanceLabel: request.provenanceLabel,
+            fontPostScriptNameOverride: request.fontPostScriptNameOverride,
+            preferredSealAnchor: preferredSealAnchor
+        )
+    }
+
+    static func interactivePlan(
+        selection: SharePresentationSelection,
+        inscription: String,
+        descriptor: ThemeDescriptor,
+        colorMode: ShareArtifactColorMode,
+        reduceMotion: Bool,
+        accessibilityLabel: String,
+        provenanceLabel: String? = nil,
+        fontPostScriptNameOverride: ThemeFontPostScriptName? = nil,
+        preferredSealAnchor: ThemeSealAnchorCategory? = nil
+    ) throws -> ThemeArtifactCompositionPlan {
+        guard !inscription.isEmpty,
+              inscription.count <= ShareArtifactRenderRequest.maximumInscriptionCharacters,
+              !accessibilityLabel.isEmpty,
+              accessibilityLabel.utf8.count
+                <= ShareArtifactRenderRequest.maximumAccessibilityUTF8Count,
+              (provenanceLabel?.utf8.count ?? 0)
+                <= ShareArtifactRenderRequest.maximumAccessibilityUTF8Count
+        else { throw ShareArtifactRenderError.invalidRequest }
+        return try compose(
+            selection: selection,
+            inscription: inscription,
+            descriptor: descriptor,
+            colorMode: colorMode,
+            reduceMotion: reduceMotion,
+            accessibilityLabel: accessibilityLabel,
+            provenanceLabel: provenanceLabel,
+            fontPostScriptNameOverride: fontPostScriptNameOverride,
+            preferredSealAnchor: preferredSealAnchor
+        )
+    }
+
+    private static func compose(
+        selection: SharePresentationSelection,
+        inscription: String,
+        descriptor: ThemeDescriptor,
+        colorMode: ShareArtifactColorMode,
+        reduceMotion: Bool,
+        accessibilityLabel: String,
+        provenanceLabel: String?,
+        fontPostScriptNameOverride: ThemeFontPostScriptName?,
+        preferredSealAnchor: ThemeSealAnchorCategory?
+    ) throws -> ThemeArtifactCompositionPlan {
+        guard descriptor.codex.id == selection.codexID,
               let script = descriptor.codex.scripts.first(where: {
-                  $0.id == request.selection.scriptID
+                  $0.id == selection.scriptID
               }),
               let relic = descriptor.codex.relics.first(where: {
-                  $0.metadata.id == request.selection.relicID
+                  $0.metadata.id == selection.relicID
               }),
               let layout = relic.layouts.first(where: {
                   $0.id == relic.defaultLayoutID
               })
         else { throw ShareArtifactRenderError.unknownSelection }
 
-        let seal = request.selection.sealID.flatMap { id in
+        let seal = selection.sealID.flatMap { id in
             descriptor.codex.seals.first(where: { $0.metadata.id == id })
         }
-        if request.selection.sealID != nil, seal == nil {
+        if selection.sealID != nil, seal == nil {
             throw ShareArtifactRenderError.unknownSelection
         }
-        let frame = request.selection.frameID.flatMap { id in
+        let frame = selection.frameID.flatMap { id in
             descriptor.codex.frames.first(where: { $0.metadata.id == id })
         }
-        if request.selection.frameID != nil, frame == nil {
+        if selection.frameID != nil, frame == nil {
             throw ShareArtifactRenderError.unknownSelection
         }
         if let frame,
@@ -297,58 +400,29 @@ enum ShareArtifactRenderPolicy {
         }
 
         let pages = try paginate(
-            request.inscription,
+            inscription,
             maximumLines: Int(layout.maximumGlyphLines)
         )
-        let relicResourceID: ThemeResourceID = switch request.colorMode {
+        let relicResourceID: ThemeResourceID = switch colorMode {
         case .highContrast: relic.highContrastResourceID
         case .standard, .monochrome: relic.staticFallbackResourceID
         }
         let sealResourceID: ThemeResourceID? = seal.map {
-            request.colorMode == .standard
+            colorMode == .standard
                 ? $0.vectorResourceID
                 : $0.monochromeFallbackResourceID
         }
         let frameResourceID = frame?.staticFallbackResourceID
-        let backgroundResourceID: ThemeResourceID = if request.colorMode == .highContrast {
+        let backgroundResourceID: ThemeResourceID = if colorMode == .highContrast {
             descriptor.codex.background.highContrastResourceID
-        } else if request.reduceMotion {
+        } else if reduceMotion {
             descriptor.codex.background.reduceMotionResourceID
         } else {
             descriptor.codex.background.staticBaseResourceID
         }
-        var seenResourceIDs = Set<ThemeResourceID>()
-        let resourceIDs = [
-            relicResourceID,
-            sealResourceID,
-            frameResourceID,
-            backgroundResourceID,
-            script.fontResourceID,
-        ].compactMap { $0 }.filter { seenResourceIDs.insert($0).inserted }
-        let references = Dictionary(uniqueKeysWithValues: descriptor.resources.map {
-            ($0.id, $0)
-        })
-        let metadata = try resourceIDs.map { resourceID -> SharePresentationResourceMetadata in
-            guard let reference = references[resourceID] else {
-                throw ShareArtifactRenderError.missingResource(resourceID)
-            }
-            let sharePixelSize: ThemePixelSize? = switch reference.mediaType {
-            case .png, .heif:
-                reference.integrity.pixelSize
-            case .pdf, .ttf, .otf, .json, .mp4, .quickTime, .m4a, .caf, .wav:
-                nil
-            }
-            return try SharePresentationResourceMetadata(
-                resourceID: reference.id,
-                role: reference.role,
-                mediaType: reference.mediaType,
-                byteLength: reference.integrity.byteLength,
-                pixelSize: sharePixelSize,
-                sha256: reference.integrity.sha256
-            )
-        }
-        return ShareArtifactRenderPlan(
-            request: request,
+        return ThemeArtifactCompositionPlan(
+            selection: selection,
+            inscription: inscription,
             palette: descriptor.codex.palette,
             layout: layout,
             pages: pages,
@@ -360,9 +434,13 @@ enum ShareArtifactRenderPolicy {
             sealScale: seal.map {
                 min($0.allowedScale.maximum, max($0.allowedScale.minimum, 0.18))
             } ?? 0,
-            fontPostScriptName: script.fontPostScriptName?.rawValue
+            fontPostScriptName: fontPostScriptNameOverride?.rawValue
+                ?? script.fontPostScriptName?.rawValue
                 ?? "NotoSansRunic-Regular",
-            resourceMetadata: metadata
+            usesExternalFontOverride: fontPostScriptNameOverride != nil,
+            colorMode: colorMode,
+            accessibilityLabel: accessibilityLabel,
+            provenanceLabel: provenanceLabel
         )
     }
 
@@ -390,6 +468,69 @@ enum ShareArtifactRenderPolicy {
                 inscription: lines.joined(separator: "\n")
             )
         }
+    }
+}
+
+enum ShareArtifactRenderPolicy {
+    static let maximumPageCount = ThemeArtifactCompositionPolicy.maximumPageCount
+
+    static func plan(
+        request: ShareArtifactRenderRequest,
+        descriptor: ThemeDescriptor,
+        preferredSealAnchor: ThemeSealAnchorCategory? = nil
+    ) throws -> ShareArtifactRenderPlan {
+        let composition = try ThemeArtifactCompositionPolicy.plan(
+            request: request,
+            descriptor: descriptor,
+            preferredSealAnchor: preferredSealAnchor
+        )
+        let script = descriptor.codex.scripts.first(where: {
+            $0.id == composition.selection.scriptID
+        })
+        var seenResourceIDs = Set<ThemeResourceID>()
+        let resourceIDs = [
+            composition.relicResourceID,
+            composition.sealResourceID,
+            composition.frameResourceID,
+            composition.backgroundResourceID,
+            composition.usesExternalFontOverride ? nil : script?.fontResourceID,
+        ].compactMap { $0 }.filter { seenResourceIDs.insert($0).inserted }
+        let references = Dictionary(uniqueKeysWithValues: descriptor.resources.map {
+            ($0.id, $0)
+        })
+        let metadata = try resourceIDs.map { resourceID -> SharePresentationResourceMetadata in
+            guard let reference = references[resourceID] else {
+                throw ShareArtifactRenderError.missingResource(resourceID)
+            }
+            let sharePixelSize: ThemePixelSize? = switch reference.mediaType {
+            case .png, .heif:
+                reference.integrity.pixelSize
+            case .pdf, .ttf, .otf, .json, .mp4, .quickTime, .m4a, .caf, .wav:
+                nil
+            }
+            return try SharePresentationResourceMetadata(
+                resourceID: reference.id,
+                role: reference.role,
+                mediaType: reference.mediaType,
+                byteLength: reference.integrity.byteLength,
+                pixelSize: sharePixelSize,
+                sha256: reference.integrity.sha256
+            )
+        }
+        return ShareArtifactRenderPlan(
+            request: request,
+            palette: composition.palette,
+            layout: composition.layout,
+            pages: composition.pages,
+            relicResourceID: composition.relicResourceID,
+            sealResourceID: composition.sealResourceID,
+            frameResourceID: composition.frameResourceID,
+            backgroundResourceID: composition.backgroundResourceID,
+            sealAnchor: composition.sealAnchor,
+            sealScale: composition.sealScale,
+            fontPostScriptName: composition.fontPostScriptName,
+            resourceMetadata: metadata
+        )
     }
 }
 
@@ -425,14 +566,24 @@ enum ShareArtifactStaticRenderer {
         plan: ShareArtifactRenderPlan,
         resourceData: [ThemeResourceID: Data]
     ) throws -> ShareArtifactStaticOutput {
-        try validateResources(plan: plan, resourceData: resourceData)
+        let renderedImages = try validateResources(
+            plan: plan,
+            resourceData: resourceData
+        )
         var pageData: [Data] = []
         pageData.reserveCapacity(plan.pages.count)
         for page in plan.pages {
-            let content = ShareArtifactCanvas(
-                plan: plan,
+            let content = ThemeArtifactCanvas(
+                plan: plan.composition,
                 page: page,
-                resourceData: resourceData
+                context: .staticShare,
+                image: { resourceID in
+                    Image(
+                        decorative: renderedImages[resourceID]!,
+                        scale: 1,
+                        orientation: .up
+                    )
+                }
             )
             .environment(\.locale, Locale(identifier: plan.request.localeIdentifier))
             let renderer = ImageRenderer(content: content)
@@ -478,7 +629,7 @@ enum ShareArtifactStaticRenderer {
     private static func validateResources(
         plan: ShareArtifactRenderPlan,
         resourceData: [ThemeResourceID: Data]
-    ) throws {
+    ) throws -> [ThemeResourceID: CGImage] {
         let expected = Dictionary(uniqueKeysWithValues: plan.resourceMetadata.map {
             ($0.resourceID, $0)
         })
@@ -491,6 +642,8 @@ enum ShareArtifactStaticRenderer {
         guard renderedResourceIDs.allSatisfy({ expected[$0] != nil }) else {
             throw ShareArtifactRenderError.renderingFailed
         }
+        let renderedResourceIDSet = Set(renderedResourceIDs)
+        var renderedImages: [ThemeResourceID: CGImage] = [:]
         for (resourceID, metadata) in expected {
             guard let data = resourceData[resourceID] else {
                 throw ShareArtifactRenderError.missingResource(resourceID)
@@ -499,16 +652,34 @@ enum ShareArtifactStaticRenderer {
                 String(format: "%02x", $0)
             }.joined()
             guard UInt64(data.count) == metadata.byteLength,
-                  digest == metadata.sha256.rawValue,
-                  validateResource(data, metadata: metadata)
+                  digest == metadata.sha256.rawValue
             else { throw ShareArtifactRenderError.invalidResource(resourceID) }
+            switch metadata.mediaType {
+            case .png, .heif, .pdf:
+                guard let image = decodedImage(data, metadata: metadata) else {
+                    throw ShareArtifactRenderError.invalidResource(resourceID)
+                }
+                if renderedResourceIDSet.contains(resourceID) {
+                    renderedImages[resourceID] = image
+                }
+            case .ttf, .otf:
+                guard !data.isEmpty else {
+                    throw ShareArtifactRenderError.invalidResource(resourceID)
+                }
+            case .json, .mp4, .quickTime, .m4a, .caf, .wav:
+                throw ShareArtifactRenderError.invalidResource(resourceID)
+            }
         }
+        guard renderedImages.count == renderedResourceIDSet.count else {
+            throw ShareArtifactRenderError.renderingFailed
+        }
+        return renderedImages
     }
 
-    private static func validateResource(
+    private static func decodedImage(
         _ data: Data,
         metadata: SharePresentationResourceMetadata
-    ) -> Bool {
+    ) -> CGImage? {
         switch metadata.mediaType {
         case .png, .heif:
             guard let pixelSize = metadata.pixelSize,
@@ -519,26 +690,61 @@ enum ShareArtifactStaticRenderer {
                   let width = (properties[kCGImagePropertyPixelWidth] as? NSNumber)?.intValue,
                   let height = (properties[kCGImagePropertyPixelHeight] as? NSNumber)?.intValue,
                   width == Int(pixelSize.width),
-                  height == Int(pixelSize.height)
-            else { return false }
-            #if os(macOS)
-            return NSImage(data: data) != nil
-            #elseif os(iOS)
-            return UIImage(data: data) != nil
-            #endif
+                  height == Int(pixelSize.height),
+                  let image = CGImageSourceCreateImageAtIndex(source, 0, nil),
+                  image.width == width,
+                  image.height == height,
+                  (1 ... 8).contains(image.bitsPerComponent)
+            else { return nil }
+            return image
         case .pdf:
-            #if os(macOS)
-            return NSImage(data: data) != nil
-            #elseif os(iOS)
-            return UIImage(data: data) != nil
-            #endif
-        case .ttf, .otf:
-            // Theme activation owns font parsing and registration. The renderer
-            // binds the already-admitted bytes to their declared length/hash.
-            return !data.isEmpty
-        case .json, .mp4, .quickTime, .m4a, .caf, .wav:
-            return false
+            return decodedPDFImage(data)
+        case .ttf, .otf, .json, .mp4, .quickTime, .m4a, .caf, .wav:
+            return nil
         }
+    }
+
+    private static func decodedPDFImage(_ data: Data) -> CGImage? {
+        guard let provider = CGDataProvider(data: data as CFData),
+              let document = CGPDFDocument(provider),
+              document.numberOfPages == 1,
+              let page = document.page(at: 1)
+        else { return nil }
+        let bounds = page.getBoxRect(.mediaBox).standardized
+        let normalizedRotation = (Int(page.rotationAngle) % 360 + 360) % 360
+        let swapsDimensions = normalizedRotation == 90 || normalizedRotation == 270
+        let widthValue = swapsDimensions ? bounds.height : bounds.width
+        let heightValue = swapsDimensions ? bounds.width : bounds.height
+        guard widthValue.isFinite,
+              heightValue.isFinite,
+              widthValue > 0,
+              heightValue > 0,
+              widthValue <= 4_096,
+              heightValue <= 4_096
+        else { return nil }
+        let width = Int(ceil(widthValue))
+        let height = Int(ceil(heightValue))
+        guard let context = CGContext(
+            data: nil,
+            width: width,
+            height: height,
+            bitsPerComponent: 8,
+            bytesPerRow: width * 4,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { return nil }
+        let drawingBounds = CGRect(x: 0, y: 0, width: width, height: height)
+        context.clear(drawingBounds)
+        context.concatenate(
+            page.getDrawingTransform(
+                .mediaBox,
+                rect: drawingBounds,
+                rotate: 0,
+                preserveAspectRatio: true
+            )
+        )
+        context.drawPDFPage(page)
+        return context.makeImage()
     }
 
     private static func pngData(from image: CGImage) -> Data? {
@@ -548,13 +754,23 @@ enum ShareArtifactStaticRenderer {
         UIImage(cgImage: image).pngData()
         #endif
     }
+
 }
 
+enum ThemeArtifactCanvasContext: Equatable, Sendable {
+    case interactivePreview
+    case staticShare
+}
+
+/// One composition implementation for both interactive and static output.
+/// The caller supplies only already-admitted images; all geometry, layering,
+/// page text, frame placement, and seal anchoring live here.
 @MainActor
-private struct ShareArtifactCanvas: View {
-    let plan: ShareArtifactRenderPlan
+struct ThemeArtifactCanvas: View {
+    let plan: ThemeArtifactCompositionPlan
     let page: ShareArtifactRenderPage
-    let resourceData: [ThemeResourceID: Data]
+    let context: ThemeArtifactCanvasContext
+    let image: (ThemeResourceID) -> Image
 
     var body: some View {
         GeometryReader { geometry in
@@ -580,9 +796,13 @@ private struct ShareArtifactCanvas: View {
                 }
 
                 Text(page.inscription)
-                    .font(.custom(plan.fontPostScriptName, size: 54))
+                    .font(
+                        .custom(
+                            plan.fontPostScriptName,
+                            size: 54 * typographyScale(in: geometry.size)
+                        )
+                    )
                     .minimumScaleFactor(CGFloat(plan.layout.minimumGlyphScale))
-                    .lineLimit(Int(plan.layout.maximumGlyphLines))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(color(plan.palette.textPrimary))
                     .frame(
@@ -590,6 +810,7 @@ private struct ShareArtifactCanvas: View {
                         height: geometry.size.height * CGFloat(plan.layout.glyphSafeRegion.height)
                     )
                     .position(point(for: plan.layout.glyphSafeRegion, in: geometry.size))
+                    .accessibilityHidden(true)
 
                 if let sealResourceID = plan.sealResourceID,
                    let anchor = plan.sealAnchor {
@@ -607,7 +828,13 @@ private struct ShareArtifactCanvas: View {
                 }
 
                 Text(page.count == 1 ? "Rune Scribe" : "Rune Scribe · \(page.index + 1)/\(page.count)")
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .font(
+                        .system(
+                            size: 18 * typographyScale(in: geometry.size),
+                            weight: .semibold,
+                            design: .rounded
+                        )
+                    )
                     .foregroundStyle(color(plan.palette.textSecondary))
                     .frame(
                         width: geometry.size.width
@@ -616,11 +843,18 @@ private struct ShareArtifactCanvas: View {
                             * CGFloat(plan.layout.attributionRegion.height)
                     )
                     .position(point(for: plan.layout.attributionRegion, in: geometry.size))
+                    .accessibilityHidden(true)
 
-                if let provenanceLabel = plan.request.provenanceLabel,
+                if let provenanceLabel = plan.provenanceLabel,
                    let region = plan.layout.provenanceRegion {
                     Text(provenanceLabel)
-                        .font(.system(size: 13, weight: .medium, design: .rounded))
+                        .font(
+                            .system(
+                                size: 13 * typographyScale(in: geometry.size),
+                                weight: .medium,
+                                design: .rounded
+                            )
+                        )
                         .foregroundStyle(color(plan.palette.textSecondary))
                         .lineLimit(1)
                         .frame(
@@ -628,16 +862,18 @@ private struct ShareArtifactCanvas: View {
                             height: geometry.size.height * CGFloat(region.height)
                         )
                         .position(point(for: region, in: geometry.size))
+                        .accessibilityHidden(true)
                 }
             }
-            .grayscale(plan.request.colorMode == .monochrome ? 1 : 0)
+            // The canvas is a deterministic visual artifact, not flowing UI text.
+            // Its accessible label/value below remain available at every user size.
+            .dynamicTypeSize(.medium)
+            .grayscale(plan.colorMode == .monochrome ? 1 : 0)
         }
-        .frame(
-            width: CGFloat(ShareArtifactRenderPlan.outputWidth),
-            height: CGFloat(ShareArtifactRenderPlan.outputHeight)
-        )
+        .modifier(ThemeArtifactCanvasSizing(context: context))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(plan.request.accessibilityLabel))
+        .accessibilityLabel(Text(plan.accessibilityLabel))
+        .accessibilityValue(Text(page.inscription))
         .accessibilityHint(Text("The sender-rendered inscription remains available when its Codex is not."))
     }
 
@@ -663,13 +899,11 @@ private struct ShareArtifactCanvas: View {
         )
     }
 
-    private func image(_ resourceID: ThemeResourceID) -> Image {
-        let data = resourceData[resourceID]!
-        #if os(macOS)
-        return Image(nsImage: NSImage(data: data)!)
-        #elseif os(iOS)
-        return Image(uiImage: UIImage(data: data)!)
-        #endif
+    private func typographyScale(in size: CGSize) -> CGFloat {
+        min(
+            size.width / CGFloat(ShareArtifactRenderPlan.outputWidth),
+            size.height / CGFloat(ShareArtifactRenderPlan.outputHeight)
+        )
     }
 
     private func color(_ semantic: ThemeSemanticColor) -> Color {
@@ -697,5 +931,26 @@ private struct ShareArtifactCanvas: View {
             blue: Double(blue) / 255,
             opacity: Double(alpha) / 255
         )
+    }
+}
+
+private struct ThemeArtifactCanvasSizing: ViewModifier {
+    let context: ThemeArtifactCanvasContext
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        switch context {
+        case .interactivePreview:
+            content.aspectRatio(
+                CGFloat(ShareArtifactRenderPlan.outputWidth)
+                    / CGFloat(ShareArtifactRenderPlan.outputHeight),
+                contentMode: .fit
+            )
+        case .staticShare:
+            content.frame(
+                width: CGFloat(ShareArtifactRenderPlan.outputWidth),
+                height: CGFloat(ShareArtifactRenderPlan.outputHeight)
+            )
+        }
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 import RuneScribeContracts
-import RuneScribeNorseThemeModule
+@testable import RuneScribeNorseThemeModule
 @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
 @testable import RuneScribeThemeCoordinatorModule
@@ -110,6 +110,32 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
         XCTAssertFalse(
             try XCTUnwrap(provider(in: initial, codexID: vectorTheme.codexID)).isSelectable
         )
+        let lockedRuntimeSnapshot = await harness.runtime.snapshot()
+        XCTAssertEqual(
+            lockedRuntimeSnapshot.moduleStates[fontTheme.moduleID],
+            .active
+        )
+        XCTAssertEqual(
+            lockedRuntimeSnapshot.moduleStates[vectorTheme.moduleID],
+            .active
+        )
+        for descriptor in [
+            ProviderRegistration(definition: fontTheme, mode: .normal).descriptor,
+            ProviderRegistration(definition: vectorTheme, mode: .normal).descriptor,
+        ] {
+            XCTAssertFalse(
+                descriptor.requestedCapabilities.contains(
+                    RuneScribeCapabilities.themeSelection
+                )
+            )
+            XCTAssertEqual(
+                descriptor.requestedCapabilities,
+                [
+                    RuneScribeCapabilities.contributionPublish,
+                    RuneScribeCapabilities.opaqueResourcePublish,
+                ]
+            )
+        }
         XCTAssertEqual(
             fontTheme.descriptor.codex.scripts.first?.portability,
             .fontDependent
@@ -126,6 +152,72 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
             fontTheme.descriptor.codex.palette,
             RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor.codex.palette
         )
+
+        let lockedCardResourceID = fontTheme.descriptor.codex.vault
+            .lockedSilhouetteResourceID
+        let lockedCard = try await harness.probe.resolveCatalogPreview(
+            codexID: fontTheme.codexID,
+            resourceID: lockedCardResourceID
+        )
+        XCTAssertEqual(lockedCard.resourceID, lockedCardResourceID)
+        XCTAssertTrue([
+            ThemeResourceRoles.vaultCard,
+            ThemeResourceRoles.vaultLockedSilhouette,
+        ].contains(lockedCard.role))
+
+        do {
+            _ = try await harness.probe.resolve(
+                ResolveThemeResourceRequestDTO(
+                    codexID: fontTheme.codexID,
+                    resourceID: lockedCardResourceID
+                )
+            )
+            XCTFail("Locked providers must not resolve active presentation resources")
+        } catch {
+            XCTAssertEqual(
+                error as? ThemeCoordinatorModuleError,
+                .resourceUnavailable(
+                    ResolveThemeResourceRequestDTO(
+                        codexID: fontTheme.codexID,
+                        resourceID: lockedCardResourceID
+                    )
+                )
+            )
+        }
+
+        let lockedFontResourceID = try XCTUnwrap(
+            fontTheme.descriptor.codex.scripts.first?.fontResourceID
+        )
+        do {
+            _ = try await harness.probe.resolve(
+                ResolveThemeResourceRequestDTO(
+                    codexID: fontTheme.codexID,
+                    resourceID: lockedFontResourceID,
+                    purpose: .catalogPreview
+                )
+            )
+            XCTFail("Catalog preview must not expose non-preview script resources")
+        } catch {
+            XCTAssertNotNil(error as? ThemeCoordinatorModuleError)
+        }
+
+        let reservedRelic = try XCTUnwrap(
+            fontTheme.descriptor.codex.relics.first(where: {
+                $0.metadata.availability == .reservedInactive
+            })
+        )
+        do {
+            _ = try await harness.probe.resolve(
+                ResolveThemeResourceRequestDTO(
+                    codexID: fontTheme.codexID,
+                    resourceID: reservedRelic.thumbnailResourceID,
+                    purpose: .catalogPreview
+                )
+            )
+            XCTFail("Reserved-inactive artifacts must not expose catalog previews")
+        } catch {
+            XCTAssertNotNil(error as? ThemeCoordinatorModuleError)
+        }
 
         do {
             _ = try await harness.probe.select(
@@ -260,6 +352,18 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
                 )
             )
             XCTFail("Resources from a revoked provider must be unavailable")
+        } catch {
+            XCTAssertNotNil(error as? ThemeCoordinatorModuleError)
+        }
+        do {
+            _ = try await harness.probe.resolve(
+                ResolveThemeResourceRequestDTO(
+                    codexID: vectorTheme.codexID,
+                    resourceID: vectorTheme.descriptor.codex.vault.cardResourceID,
+                    purpose: .catalogPreview
+                )
+            )
+            XCTFail("Revoked providers must not expose catalog previews")
         } catch {
             XCTAssertNotNil(error as? ThemeCoordinatorModuleError)
         }
@@ -506,6 +610,11 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
             for: RuneScribeServiceKeys.moduleStateStore
         )
         try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        if !providers.isEmpty {
+            await syntheticPayloadSource.install(
+                try syntheticBaseThemeFixture()
+            )
+        }
 
         for provider in providers {
             try await runtime.register(
@@ -609,6 +718,33 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
             runtime: runtime,
             probe: probe,
             diagnostics: diagnosticsProbe
+        )
+    }
+
+    private func syntheticBaseThemeFixture() throws -> ValidatedNorseBaseTheme {
+        let bundle = RuneScribeNorseThemeModuleBootstrap.resourceBundle
+        let payloads = try Dictionary(
+            uniqueKeysWithValues: NorseBaseThemeResourceCatalog.definitions.map {
+                definition in
+                guard let url = bundle.url(
+                    forResource: definition.resource.name,
+                    withExtension: definition.resource.fileExtension,
+                    subdirectory: definition.resource.subdirectory
+                )
+                else {
+                    throw CoordinatorTestError.applicationResourceUnavailable(
+                        definition.resource
+                    )
+                }
+                return (definition.id, try Data(contentsOf: url))
+            }
+        )
+        guard NorseBaseThemeResourceCatalog.validates(payloads) else {
+            throw CoordinatorTestError.basePayloadUnavailable
+        }
+        return ValidatedNorseBaseTheme(
+            descriptor: RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor,
+            resourcePayloads: payloads
         )
     }
 
@@ -1186,6 +1322,17 @@ private actor ThemeCoordinatorClientProbe {
     ) async throws -> ResolvedThemeResourceDTO {
         guard let client else { throw CoordinatorTestError.clientUnavailable }
         return try await client.resolveResource(request)
+    }
+
+    func resolveCatalogPreview(
+        codexID: CodexID,
+        resourceID: ThemeResourceID
+    ) async throws -> ResolvedThemeResourceDTO {
+        guard let client else { throw CoordinatorTestError.clientUnavailable }
+        return try await client.resolveCatalogPreviewResource(
+            codexID: codexID,
+            resourceID: resourceID
+        )
     }
 
     func waitForSnapshot(

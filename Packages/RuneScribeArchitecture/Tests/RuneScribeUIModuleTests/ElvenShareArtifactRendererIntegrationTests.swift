@@ -130,6 +130,72 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
         XCTAssertEqual(planCount, 72)
     }
 
+    func testEveryElvenProviderBuildsTheCompleteGenericActiveVisualPath() throws {
+        var validatedProviderCount = 0
+
+        for (index, provider) in providers.enumerated() {
+            let descriptor = provider.descriptor
+            let includedSeal = try XCTUnwrap(descriptor.codex.seals.first(where: {
+                $0.metadata.availability == .included
+            }))
+            let selection = try ShareBuilderPolicy.selection(
+                descriptor: descriptor,
+                codexOwned: true,
+                providerAvailable: true,
+                ownedArtifactIDs: [],
+                relicID: descriptor.codex.defaultRelicID,
+                sealID: includedSeal.metadata.id,
+                frameID: nil
+            )
+            let plan = try ActiveThemeVisualResourcePlan(
+                descriptor: descriptor,
+                revision: UInt64(index + 1),
+                selection: selection
+            )
+            let scriptPlan = try ThemePresentationResourcePlan(descriptor: descriptor)
+            let references = Dictionary(uniqueKeysWithValues: descriptor.resources.map {
+                ($0.id, $0)
+            })
+
+            XCTAssertEqual(plan.themeID, descriptor.id, provider.name)
+            XCTAssertEqual(plan.codexID, descriptor.codex.id, provider.name)
+            XCTAssertEqual(plan.codex.card.id, descriptor.codex.vault.cardResourceID, provider.name)
+            XCTAssertEqual(plan.selectedRelicID, descriptor.codex.defaultRelicID, provider.name)
+            XCTAssertEqual(
+                plan.selectedRelic?.primary.id,
+                descriptor.codex.relics.first(where: {
+                    $0.metadata.id == descriptor.codex.defaultRelicID
+                })?.primaryResourceID,
+                provider.name
+            )
+            XCTAssertEqual(plan.selectedSeal?.id, includedSeal.metadata.id, provider.name)
+            XCTAssertEqual(plan.selectedSeal?.thumbnail.id, includedSeal.thumbnailResourceID, provider.name)
+            XCTAssertEqual(
+                plan.backgroundStatic.id,
+                descriptor.codex.background.staticBaseResourceID,
+                provider.name
+            )
+            XCTAssertEqual(scriptPlan.scriptID, descriptor.codex.primaryScriptID, provider.name)
+            XCTAssertNotNil(scriptPlan.fontResourceID, provider.name)
+
+            for imagePlan in [
+                plan.codex.card,
+                try XCTUnwrap(plan.selectedRelic).primary,
+                try XCTUnwrap(plan.selectedSeal).thumbnail,
+                plan.backgroundStatic,
+            ] {
+                let reference = try XCTUnwrap(references[imagePlan.id])
+                XCTAssertEqual(imagePlan.role, reference.role, provider.name)
+                XCTAssertEqual(imagePlan.mediaType, reference.mediaType, provider.name)
+                XCTAssertEqual(imagePlan.byteLength, reference.integrity.byteLength, provider.name)
+                XCTAssertEqual(imagePlan.sha256, reference.integrity.sha256, provider.name)
+            }
+            validatedProviderCount += 1
+        }
+
+        XCTAssertEqual(validatedProviderCount, 4)
+    }
+
     func testEveryElvenProviderRendersExactBundleResourcesAcrossAccessibilityVariants()
         throws
     {

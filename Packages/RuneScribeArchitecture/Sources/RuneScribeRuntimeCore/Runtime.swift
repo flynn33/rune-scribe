@@ -932,9 +932,20 @@ public actor RuneScribeRuntime {
             return true
         case .earned:
             return entitlementSnapshot.earnedUnlockIDs.contains(requirement.identifier)
+                || Self.isThemePreviewPublisher(registration)
         case .purchase, .composite:
             return false
         }
+    }
+
+    private static func isThemePreviewPublisher(
+        _ registration: Registration
+    ) -> Bool {
+        registration.themeDiscovery != nil
+            && registration.factory.descriptor.policyClass
+                == RuneScribePolicyClasses.themeProvider
+            && registration.manifest.effectivePolicyClass
+                == RuneScribePolicyClasses.themeProvider
     }
 
     private func reconcileEligibleOptionalModules() async {

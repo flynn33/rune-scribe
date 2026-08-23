@@ -4,6 +4,7 @@ import AppKit
 import Foundation
 @_spi(RuntimeOperationAuthority) import RuneScribeContracts
 import RuneScribeNorseThemeModule
+import RuneScribeThemeGloamthornModule
 @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
 import RuneScribeThemeCoordinatorModule
@@ -893,6 +894,233 @@ final class RuneScribeUISessionTests: XCTestCase {
 
         await runtime.stop()
         XCTAssertEqual(rootStore.state, .booting)
+    }
+
+    func testThemeVisualAdoptionIsAtomicAcrossArtifactAndProviderChanges() async throws {
+        let capture = ThemeVisualSessionClientCapture()
+        let applicationService = ControllableApplicationService()
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 38),
+            platform: .macOS
+        )
+        let norseFontURL = try XCTUnwrap(
+            RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
+                forResource: "NotoSansRunic-Regular",
+                withExtension: "ttf"
+            )
+        )
+        let gloamthornFontURL = try XCTUnwrap(
+            RuneScribeThemeGloamthornModuleBootstrap.resourceBundle.url(
+                forResource: "gloamthorn-script-primary",
+                withExtension: "ttf"
+            )
+        )
+
+        try await runtime.installPlatformAdapter(
+            ThemeVisualApplicationResources(),
+            for: RuneScribeServiceKeys.applicationResourceLocator
+        )
+        try await runtime.installPlatformAdapter(
+            InMemoryFontRegistrar(namesByData: [
+                try Data(contentsOf: norseFontURL): "NotoSansRunic-Regular",
+                try Data(contentsOf: gloamthornFontURL):
+                    "RavenForgeGloamthornScript-Regular",
+            ]),
+            for: RuneScribeServiceKeys.systemFontRegistrar
+        )
+        try await runtime.installPlatformAdapter(
+            InMemoryModuleStateStore(),
+            for: RuneScribeServiceKeys.moduleStateStore
+        )
+        try await runtime.installPlatformAdapter(
+            LifetimeClipboard(),
+            for: RuneScribeServiceKeys.clipboardWrite
+        )
+        try await runtime.installPlatformAdapter(
+            UnavailableInboundFileReader(),
+            for: RuneScribeServiceKeys.inboundFileReader
+        )
+        try await runtime.installPlatformAdapter(
+            SharePresentationProbe(),
+            for: RuneScribeServiceKeys.sharePresentation
+        )
+        try await runtime.register(
+            manifest: TestCoreModule.manifest,
+            factory: TestCoreModule.factory(applicationService: applicationService)
+        )
+        try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeGloamthornModuleBootstrap.register(with: runtime)
+        try await runtime.register(
+            manifest: RuneScribeThemeCoordinatorModuleBootstrap.manifest(),
+            factory: RuneScribeThemeCoordinatorModuleBootstrap.factory()
+        )
+        try await runtime.register(
+            manifest: RuneScribeUIModuleBootstrap.manifest(),
+            factory: ThemeVisualSessionClientModule.factory(capture: capture)
+        )
+        try await runtime.start()
+
+        let session = RuneScribeUISession(
+            applicationClient: try await capture.requireApplicationClient(),
+            runtimeIO: try await capture.requireRuntimeIOClient(),
+            availabilityClient: try await capture.requireAvailabilityClient(),
+            themeCoordinatorClient: try await capture.requireThemeCoordinatorClient(),
+            runtimeSettingsClient: try await capture.requireRuntimeSettingsClient(),
+            resourcePresentation: RuntimeApplicationResourcePresentation(
+                splashVideo: nil,
+                metalLibrary: nil
+            ),
+            productMetadata: RuneScribeUIProductMetadata(
+                version: "1.0.38",
+                buildNumber: "38"
+            )
+        )
+        try await session.prepareInitialTheme()
+
+        XCTAssertEqual(session.themeSnapshot?.effectiveTheme.id.rawValue, "theme.norse.base")
+        XCTAssertEqual(session.themeSnapshot?.effectiveCodexID, RuneScribeCodexIDs.norse)
+        XCTAssertEqual(session.themeSnapshot?.isEmergencyPresentation, false)
+        XCTAssertEqual(
+            session.selectedThemeRelicID?.rawValue,
+            "relic.norse.runestone.weathered"
+        )
+        XCTAssertEqual(session.selectedThemeSealID?.rawValue, "seal.norse.knotwork")
+        XCTAssertNil(session.selectedThemeFrameID)
+
+        let initial = try XCTUnwrap(session.activeThemeVisualPresentation)
+        XCTAssertEqual(initial.revision, initial.plan.revision)
+        XCTAssertEqual(initial.plan.relics.count, 5)
+        XCTAssertEqual(initial.plan.seals.count, 6)
+        XCTAssertEqual(initial.plan.frames.count, 1)
+        XCTAssertEqual(initial.plan.crests.count, 1)
+        XCTAssertTrue(initial.imageReferences.values.allSatisfy {
+            $0.codexID == RuneScribeCodexIDs.norse
+                && $0.contentRevision == initial.revision
+        })
+        for imagePlan in [
+            initial.plan.codex.selected,
+            initial.plan.backgroundStatic,
+            initial.plan.backgroundReduceMotion,
+            initial.plan.backgroundHighContrast,
+            try XCTUnwrap(initial.plan.selectedRelic).thumbnail,
+            try XCTUnwrap(initial.plan.selectedRelic).standard,
+            try XCTUnwrap(initial.plan.selectedRelic).highContrast,
+            try XCTUnwrap(initial.plan.selectedSeal).thumbnail,
+            try XCTUnwrap(initial.plan.selectedSeal).standard,
+            try XCTUnwrap(initial.plan.selectedSeal).highContrast,
+        ] {
+            XCTAssertNotNil(initial.imageReference(for: imagePlan), imagePlan.id.rawValue)
+        }
+
+        _ = try await session.makeOutboundSharePresentation(
+            inscription: "ᚱᚢᚾᛖ",
+            accessibilityLabel: "Norse visual adoption proof",
+            operationID: RuntimeOperationID(rawValue: "share.render.norse-proof.pre-catalog"),
+            capturedAt: Date(timeIntervalSince1970: 1_700_000_000)
+        )
+
+        await session.loadActiveThemeCatalogVisuals()
+        let catalogLoaded = try XCTUnwrap(session.activeThemeVisualPresentation)
+        XCTAssertTrue(catalogLoaded.plan.catalog.allSatisfy {
+            catalogLoaded.imageReference(for: $0.thumbnail) != nil
+        })
+        await session.loadThemeCodexCardPreviews()
+        XCTAssertEqual(
+            session.themeCodexCardImageReferences[RuneScribeCodexIDs.norse]?.role,
+            initial.plan.codex.selected.role
+        )
+        XCTAssertEqual(
+            session.themeCodexCardImageReferences[
+                RuneScribeThemeGloamthornModuleBootstrap.codexID
+            ]?.role,
+            ThemeResourceRoles.vaultLockedSilhouette
+        )
+        let outboundPresentation = try await session.makeOutboundSharePresentation(
+            inscription: "ᚱᚢᚾᛖ",
+            accessibilityLabel: "Norse visual adoption proof",
+            operationID: RuntimeOperationID(rawValue: "share.render.norse-proof"),
+            capturedAt: Date(timeIntervalSince1970: 1_700_000_000)
+        )
+        XCTAssertEqual(
+            outboundPresentation.metadata.selection.codexID,
+            RuneScribeCodexIDs.norse
+        )
+        XCTAssertFalse(outboundPresentation.safePreviewData?.isEmpty ?? true)
+
+        try session.start()
+        let settingsReady = await eventually {
+            session.runtimePresentationSettingsReady
+                && session.runtimeSettingsSnapshot != nil
+        }
+        XCTAssertTrue(settingsReady)
+        let preArtifactRevision = catalogLoaded.revision
+        let coordinatorRevision = session.themeSnapshot?.revision
+        let forgeFlame = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.forge-flame"))
+        await session.selectThemeArtifact(forgeFlame, kind: .seal)
+        let artifactAdopted = await eventually {
+            guard session.selectedThemeSealID == forgeFlame,
+                  let presentation = session.activeThemeVisualPresentation
+            else { return false }
+            return presentation.revision > preArtifactRevision
+                && presentation.plan.selectedSealID == forgeFlame
+                && presentation.imageReferences.values.allSatisfy {
+                    $0.contentRevision == presentation.revision
+                        && $0.codexID == presentation.plan.codex.codexID
+                }
+        }
+        XCTAssertTrue(artifactAdopted)
+        XCTAssertEqual(session.themeSnapshot?.revision, coordinatorRevision)
+
+        try await runtime.reconcileEntitlements(
+            ProgressionEntitlementSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 10_000),
+                includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                earnedUnlockIDs: [RuneScribeThemeGloamthornModuleBootstrap.unlockID]
+            )
+        )
+        let providerAvailable = await eventually(attempts: 2_000) {
+            session.themeSnapshot?.providers.contains(where: {
+                $0.codexID == RuneScribeThemeGloamthornModuleBootstrap.codexID
+                    && $0.state == .available
+                    && $0.isOwned
+                    && $0.isSelectable
+            }) == true
+        }
+        XCTAssertTrue(providerAvailable)
+
+        await session.selectCodex(RuneScribeThemeGloamthornModuleBootstrap.codexID)
+        await session.selectCodex(RuneScribeCodexIDs.norse)
+        let staleSwitchSettled = await eventually(attempts: 2_000) {
+            guard session.themeSnapshot?.effectiveCodexID == RuneScribeCodexIDs.norse,
+                  let presentation = session.activeThemeVisualPresentation
+            else { return false }
+            return presentation.plan.codex.codexID == RuneScribeCodexIDs.norse
+                && presentation.revision == presentation.plan.revision
+                && presentation.imageReferences.values.allSatisfy {
+                    $0.codexID == RuneScribeCodexIDs.norse
+                        && $0.contentRevision == presentation.revision
+                }
+        }
+        XCTAssertTrue(staleSwitchSettled)
+
+        await session.selectCodex(RuneScribeThemeGloamthornModuleBootstrap.codexID)
+        let alternateProviderAdopted = await eventually(attempts: 2_000) {
+            guard session.themeSnapshot?.effectiveCodexID
+                    == RuneScribeThemeGloamthornModuleBootstrap.codexID,
+                  let presentation = session.activeThemeVisualPresentation
+            else { return false }
+            return presentation.plan.codex.codexID
+                    == RuneScribeThemeGloamthornModuleBootstrap.codexID
+                && presentation.imageReferences.values.allSatisfy {
+                    $0.codexID == RuneScribeThemeGloamthornModuleBootstrap.codexID
+                        && $0.contentRevision == presentation.revision
+                }
+        }
+        XCTAssertTrue(alternateProviderAdopted)
+
+        await session.stop()
+        await runtime.stop()
     }
 
     func testUserTriggeredMutationFailuresRemainVisibleAndSanitized() async throws {
@@ -1929,9 +2157,10 @@ final class RuneScribeUISessionTests: XCTestCase {
     }
 
     private func eventually(
+        attempts: Int = 500,
         _ predicate: @escaping @MainActor () -> Bool
     ) async -> Bool {
-        for _ in 0..<500 {
+        for _ in 0..<attempts {
             if predicate() {
                 return true
             }
@@ -2449,6 +2678,36 @@ private struct NorseOnlyApplicationResources: ApplicationResourceLocator {
     }
 }
 
+private struct ThemeVisualApplicationResources: ApplicationResourceLocator {
+    func data(for resource: ApplicationResource) async throws -> Data {
+        try Data(contentsOf: location(for: resource))
+    }
+
+    func url(for resource: ApplicationResource) async throws -> URL {
+        try location(for: resource)
+    }
+
+    private func location(for resource: ApplicationResource) throws -> URL {
+        let bundle: Bundle
+        switch resource.ownerModuleID {
+        case RuneScribeModuleIDs.norseTheme:
+            bundle = RuneScribeNorseThemeModuleBootstrap.resourceBundle
+        case RuneScribeThemeGloamthornModuleBootstrap.moduleID:
+            bundle = RuneScribeThemeGloamthornModuleBootstrap.resourceBundle
+        default:
+            throw MissingResourceError.unavailable
+        }
+        guard let url = bundle.url(
+            forResource: resource.name,
+            withExtension: resource.fileExtension,
+            subdirectory: resource.subdirectory
+        ) else {
+            throw MissingResourceError.unavailable
+        }
+        return url
+    }
+}
+
 private struct ThemeFontRegistrarProbeState: Sendable {
     let postScriptNameRequests: [Data]
     let registrationRequests: [Data]
@@ -2545,6 +2804,78 @@ private enum TestCoreModule {
         AnyModuleFactory(descriptor: descriptor) {
             ApplicationPublishingModule(applicationService: applicationService)
         }
+    }
+}
+
+private enum ThemeVisualSessionClientModule {
+    static func factory(capture: ThemeVisualSessionClientCapture) -> AnyModuleFactory {
+        AnyModuleFactory(descriptor: RuneScribeUIModuleBootstrap.descriptor) {
+            ThemeVisualSessionClientCapturingModule(capture: capture)
+        }
+    }
+}
+
+private struct ThemeVisualSessionClientCapturingModule: RuneScribeModule {
+    let descriptor = RuneScribeUIModuleBootstrap.descriptor
+    let capture: ThemeVisualSessionClientCapture
+
+    func start(context: ModuleContext) async throws {
+        try await capture.store(
+            applicationClient: context.applicationClient(),
+            runtimeIOClient: context.runtimeIOClient(),
+            availabilityClient: context.runtimeAvailabilityClient(),
+            themeCoordinatorClient: context.themeCoordinatorClient(),
+            runtimeSettingsClient: context.runtimeSettingsClient()
+        )
+    }
+
+    func stop() async {}
+}
+
+private actor ThemeVisualSessionClientCapture {
+    private var applicationClient: RuntimeApplicationClient?
+    private var runtimeIOClient: RuntimeIOClient?
+    private var availabilityClient: RuntimeAvailabilityClient?
+    private var themeCoordinatorClient: RuntimeThemeCoordinatorClient?
+    private var runtimeSettingsClient: RuntimeSettingsClient?
+
+    func store(
+        applicationClient: RuntimeApplicationClient,
+        runtimeIOClient: RuntimeIOClient,
+        availabilityClient: RuntimeAvailabilityClient,
+        themeCoordinatorClient: RuntimeThemeCoordinatorClient,
+        runtimeSettingsClient: RuntimeSettingsClient
+    ) {
+        self.applicationClient = applicationClient
+        self.runtimeIOClient = runtimeIOClient
+        self.availabilityClient = availabilityClient
+        self.themeCoordinatorClient = themeCoordinatorClient
+        self.runtimeSettingsClient = runtimeSettingsClient
+    }
+
+    func requireApplicationClient() throws -> RuntimeApplicationClient {
+        guard let applicationClient else { throw StubError.unexpectedCommand }
+        return applicationClient
+    }
+
+    func requireRuntimeIOClient() throws -> RuntimeIOClient {
+        guard let runtimeIOClient else { throw StubError.unexpectedCommand }
+        return runtimeIOClient
+    }
+
+    func requireAvailabilityClient() throws -> RuntimeAvailabilityClient {
+        guard let availabilityClient else { throw StubError.unexpectedCommand }
+        return availabilityClient
+    }
+
+    func requireThemeCoordinatorClient() throws -> RuntimeThemeCoordinatorClient {
+        guard let themeCoordinatorClient else { throw StubError.unexpectedCommand }
+        return themeCoordinatorClient
+    }
+
+    func requireRuntimeSettingsClient() throws -> RuntimeSettingsClient {
+        guard let runtimeSettingsClient else { throw StubError.unexpectedCommand }
+        return runtimeSettingsClient
     }
 }
 

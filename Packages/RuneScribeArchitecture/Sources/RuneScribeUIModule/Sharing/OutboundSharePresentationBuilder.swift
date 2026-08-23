@@ -6,12 +6,21 @@ import RuneScribeContracts
 extension RuneScribeUISession {
     func makeOutboundSharePresentationWithLegacyFallback(
         inscription: String,
-        accessibilityLabel: String
+        accessibilityLabel: String,
+        operationID: RuntimeOperationID
     ) async -> OutboundSharePresentationPreparation {
+        guard let capturedAt = snapshot?.capturedAt else {
+            return OutboundSharePresentationPreparation(
+                presentation: nil,
+                status: .legacyFallback(.themeUnavailable)
+            )
+        }
         do {
             let presentation = try await makeOutboundSharePresentation(
                 inscription: inscription,
-                accessibilityLabel: accessibilityLabel
+                accessibilityLabel: accessibilityLabel,
+                operationID: operationID,
+                capturedAt: capturedAt
             )
             return OutboundSharePresentationPreparation(
                 presentation: presentation,
@@ -29,11 +38,12 @@ extension RuneScribeUISession {
 
     func makeOutboundSharePresentation(
         inscription: String,
-        accessibilityLabel: String
+        accessibilityLabel: String,
+        operationID: RuntimeOperationID,
+        capturedAt: Date
     ) async throws -> OutboundSharePresentationDTO {
         guard let snapshot = themeSnapshot,
               !snapshot.isEmergencyPresentation,
-              let runtimeIOHandle,
               let themeCoordinatorClientHandle,
               let provider = snapshot.providers.first(where: {
                   $0.codexID == snapshot.effectiveCodexID
@@ -50,19 +60,19 @@ extension RuneScribeUISession {
             sealID: selectedThemeSealID,
             frameID: selectedThemeFrameID
         )
-        let operationUUID = try await runtimeIOHandle.nextUUID()
-        let capturedAt = try await runtimeIOHandle.now()
         let request = try ShareArtifactRenderRequest(
             selection: selection,
             inscription: inscription,
-            operationID: RuntimeOperationID(
-                rawValue: "share.render.\(operationUUID.uuidString.lowercased())"
-            ),
+            operationID: operationID,
             capturedAt: capturedAt,
             localeIdentifier: descriptor.defaultLocaleIdentifier,
             scale: 1,
             accessibilityLabel: accessibilityLabel,
-            provenanceLabel: "Source details included"
+            provenanceLabel: "Source details included",
+            fontPostScriptNameOverride: activeCipher?.fontSource == .imported
+                && activeCipher?.fontIsRegistered == true
+                ? ThemeFontPostScriptName(rawValue: inscriptionFontPostScriptName)
+                : nil
         )
         let plan = try ShareArtifactRenderPolicy.plan(
             request: request,

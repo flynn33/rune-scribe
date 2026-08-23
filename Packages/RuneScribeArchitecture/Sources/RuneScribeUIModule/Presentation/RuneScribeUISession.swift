@@ -16,6 +16,9 @@ final class RuneScribeUISession: ObservableObject {
     @Published var progressionRailState: OptionalProgressionRailState = .unavailable
     @Published private(set) var themeSnapshot: ThemeCoordinatorSnapshotDTO?
     @Published private(set) var themeScriptPresentation = ThemeScriptPresentation.baseFallback
+    @Published private(set) var activeThemeVisualPresentation: ActiveThemeVisualPresentation?
+    @Published private(set) var themeCodexCardImageReferences:
+        [CodexID: RuntimeThemeImageReference] = [:]
     var themeUnlockAnimationDataByTier: [String: Data] = [:]
     @Published var themeSelectionError: String?
     @Published var runtimeSettingsSnapshot: RuntimeSettingsSnapshotDTO?
@@ -28,9 +31,9 @@ final class RuneScribeUISession: ObservableObject {
     @Published var unlockFeedbackPreferences = UnlockFeedbackPreferences.defaults
     @Published var activeReveal: ProgressionRevealSummaryDTO?
     @Published var progressionCommandError: String?
-    @Published var selectedThemeRelicID: ArtifactID?
-    @Published var selectedThemeSealID: ArtifactID?
-    @Published var selectedThemeFrameID: ArtifactID?
+    @Published private(set) var selectedThemeRelicID: ArtifactID?
+    @Published private(set) var selectedThemeSealID: ArtifactID?
+    @Published private(set) var selectedThemeFrameID: ArtifactID?
     @Published private(set) var outboundSharePresentationStatus: OutboundSharePresentationStatus = .idle
 
     let resourcePresentation: RuntimeApplicationResourcePresentation
@@ -54,6 +57,8 @@ final class RuneScribeUISession: ObservableObject {
     var progressionTask: Task<Void, Never>?
     private var themeTask: Task<Void, Never>?
     private var themeResourceTask: Task<Void, Never>?
+    private var themeCatalogResourceTask: Task<Void, Never>?
+    private var themeCodexPreviewTask: Task<Void, Never>?
     private var themeAdoptionGeneration: UInt64 = 0
     private var latestThemeCoordinatorRevision: UInt64?
     var settingsTask: Task<Void, Never>?
@@ -95,6 +100,8 @@ final class RuneScribeUISession: ObservableObject {
         progressionTask?.cancel()
         themeTask?.cancel()
         themeResourceTask?.cancel()
+        themeCatalogResourceTask?.cancel()
+        themeCodexPreviewTask?.cancel()
         settingsTask?.cancel()
         cloudGameCenterStatusTask?.cancel()
     }
@@ -190,6 +197,8 @@ final class RuneScribeUISession: ObservableObject {
         let progressionTask = self.progressionTask
         let themeTask = self.themeTask
         let themeResourceTask = self.themeResourceTask
+        let themeCatalogResourceTask = self.themeCatalogResourceTask
+        let themeCodexPreviewTask = self.themeCodexPreviewTask
         let settingsTask = self.settingsTask
         let cloudGameCenterStatusTask = self.cloudGameCenterStatusTask
         stateTask?.cancel()
@@ -198,6 +207,8 @@ final class RuneScribeUISession: ObservableObject {
         progressionTask?.cancel()
         themeTask?.cancel()
         themeResourceTask?.cancel()
+        themeCatalogResourceTask?.cancel()
+        themeCodexPreviewTask?.cancel()
         settingsTask?.cancel()
         cloudGameCenterStatusTask?.cancel()
         self.stateTask = nil
@@ -206,6 +217,8 @@ final class RuneScribeUISession: ObservableObject {
         self.progressionTask = nil
         self.themeTask = nil
         self.themeResourceTask = nil
+        self.themeCatalogResourceTask = nil
+        self.themeCodexPreviewTask = nil
         themeAdoptionGeneration &+= 1
         latestThemeCoordinatorRevision = nil
         self.settingsTask = nil
@@ -216,6 +229,8 @@ final class RuneScribeUISession: ObservableObject {
         progressionRailState = .unavailable
         themeSnapshot = nil
         themeScriptPresentation = .baseFallback
+        activeThemeVisualPresentation = nil
+        themeCodexCardImageReferences = [:]
         themeUnlockAnimationDataByTier = [:]
         themeSelectionError = nil
         RuneThemePaletteInterpreter.reset()
@@ -254,6 +269,8 @@ final class RuneScribeUISession: ObservableObject {
         await progressionTask?.value
         await themeTask?.value
         await themeResourceTask?.value
+        await themeCatalogResourceTask?.value
+        await themeCodexPreviewTask?.value
         await settingsTask?.value
         await cloudGameCenterStatusTask?.value
     }
@@ -559,10 +576,12 @@ final class RuneScribeUISession: ObservableObject {
         scheduleThemeResourceAdoption(nextSnapshot)
     }
 
-    private func scheduleThemeResourceAdoption(
+    func scheduleThemeResourceAdoption(
         _ snapshot: ThemeCoordinatorSnapshotDTO
     ) {
         themeResourceTask?.cancel()
+        themeCatalogResourceTask?.cancel()
+        themeCodexPreviewTask?.cancel()
         themeAdoptionGeneration &+= 1
         let adoptionGeneration = themeAdoptionGeneration
         themeResourceTask = Task { @MainActor [weak self] in
@@ -597,7 +616,11 @@ final class RuneScribeUISession: ObservableObject {
             themeScriptPresentation = .baseFallback
             themeUnlockAnimationDataByTier = [:]
             themeSnapshot = snapshot
-            reconcileThemeArtifactSelections()
+            activeThemeVisualPresentation = nil
+            themeCodexCardImageReferences = [:]
+            selectedThemeRelicID = nil
+            selectedThemeSealID = nil
+            selectedThemeFrameID = nil
             themeSelectionError =
                 "Norse appearance resources are unavailable. Rune Scribe is using its emergency system presentation; message data and decode remain available."
             return
@@ -607,11 +630,26 @@ final class RuneScribeUISession: ObservableObject {
         else {
             throw ThemePresentationResourceError.stateUnavailable
         }
-        let plan = try ThemePresentationResourcePlan(
-            descriptor: snapshot.effectiveTheme
+        let descriptor = snapshot.effectiveTheme
+        let plan = try ThemePresentationResourcePlan(descriptor: descriptor)
+        let selection = try resolvedThemeArtifactSelection(for: snapshot)
+        let visualPlan = try ActiveThemeVisualResourcePlan(
+            descriptor: descriptor,
+            revision: adoptionGeneration,
+            selection: selection
         )
+        let references = Dictionary(
+            uniqueKeysWithValues: descriptor.resources.map { ($0.id, $0) }
+        )
+        let eagerImagePlans = try Self.eagerThemeVisualImagePlans(
+            visualPlan
+        )
+        var resourceIDs = Self.semanticThemeResourceIDs(plan)
+        resourceIDs.formUnion(eagerImagePlans.keys)
         let resolved = try await Self.resolveThemeResources(
-            plan: plan,
+            codexID: plan.codexID,
+            resourceIDs: resourceIDs,
+            expectedReferences: references,
             client: themeCoordinatorClientHandle
         )
         try Task.checkCancellation()
@@ -643,9 +681,9 @@ final class RuneScribeUISession: ObservableObject {
                 return (token, resource.data)
             }
         )
-        guard let staticBase = resolved[plan.backgroundStaticResourceID],
-              let reduceMotion = resolved[plan.backgroundReduceMotionResourceID],
-              let highContrast = resolved[plan.backgroundHighContrastResourceID]
+        guard resolved[plan.backgroundStaticResourceID] != nil,
+              resolved[plan.backgroundReduceMotionResourceID] != nil,
+              resolved[plan.backgroundHighContrastResourceID] != nil
         else {
             throw ThemePresentationResourceError.missing(
                 plan.backgroundStaticResourceID
@@ -655,22 +693,57 @@ final class RuneScribeUISession: ObservableObject {
             resolved[$0]?.data
         }
 
+        var imageReferences: [ThemeResourceID: RuntimeThemeImageReference] = [:]
+        var imageResourceIDs = Set(eagerImagePlans.keys)
+        imageResourceIDs.formUnion([
+            plan.backgroundStaticResourceID,
+            plan.backgroundReduceMotionResourceID,
+            plan.backgroundHighContrastResourceID,
+        ])
+        for resourceID in imageResourceIDs.sorted() {
+            guard let resource = resolved[resourceID],
+                  let expected = references[resourceID]
+            else { throw ThemePresentationResourceError.missing(resourceID) }
+            imageReferences[resourceID] = try resourcePresentation
+                .makeThemeImageReference(
+                    resolvedResource: resource,
+                    expectedReference: expected,
+                    expectedCodexID: plan.codexID,
+                    contentRevision: adoptionGeneration
+                )
+        }
+        guard let staticBackgroundReference = imageReferences[
+                  plan.backgroundStaticResourceID
+              ],
+              let reduceMotionBackgroundReference = imageReferences[
+                  plan.backgroundReduceMotionResourceID
+              ],
+              let highContrastBackgroundReference = imageReferences[
+                  plan.backgroundHighContrastResourceID
+              ]
+        else {
+            throw ThemePresentationResourceError.missing(
+                plan.backgroundStaticResourceID
+            )
+        }
+        let preparedBackground = try resourcePresentation.prepareThemeBackground(
+            staticBase: staticBackgroundReference,
+            reduceMotion: reduceMotionBackgroundReference,
+            highContrast: highContrastBackgroundReference,
+            rendererParametersData: parameters
+        )
+        let visualPresentation = ActiveThemeVisualPresentation(
+            revision: adoptionGeneration,
+            plan: visualPlan,
+            imageReferences: imageReferences
+        )
+
         try Task.checkCancellation()
         guard themeAdoptionGeneration == adoptionGeneration else {
             throw CancellationError()
         }
-        do {
-            try resourcePresentation.installThemeBackground(
-                staticBaseData: staticBase.data,
-                reduceMotionData: reduceMotion.data,
-                highContrastData: highContrast.data,
-                rendererParametersData: parameters
-            )
-        } catch is RuntimeThemeBackgroundParameterError {
-            // Optional animation parameters may fail closed while the three
-            // validated static variants remain usable.
-        }
-        RuneThemePaletteInterpreter.install(snapshot.effectiveTheme)
+        try resourcePresentation.commitThemeBackground(preparedBackground)
+        RuneThemePaletteInterpreter.install(descriptor)
         RuneThemeHeadingInterpreter.install(
             plan.decorativeHeadingResourceID.flatMap { resolved[$0]?.data }
         )
@@ -686,54 +759,95 @@ final class RuneScribeUISession: ObservableObject {
             }
         )
         themeSnapshot = snapshot
-        reconcileThemeArtifactSelections()
+        selectedThemeRelicID = visualPlan.selectedRelicID
+        selectedThemeSealID = visualPlan.selectedSealID
+        selectedThemeFrameID = visualPlan.selectedFrameID
+        themeCodexCardImageReferences = visualPresentation
+            .imageReference(for: visualPlan.codex.selected)
+            .map { [visualPlan.codex.codexID: $0] } ?? [:]
+        activeThemeVisualPresentation = visualPresentation
         themeSelectionError = nil
     }
 
     func reconcileThemeArtifactSelections() {
-        guard let theme = themeSnapshot?.effectiveTheme else {
+        guard let themeSnapshot else {
             selectedThemeRelicID = nil
             selectedThemeSealID = nil
             selectedThemeFrameID = nil
+            activeThemeVisualPresentation = nil
             return
         }
-        let codexID = theme.codex.id
-        let owned = Set((progressionSnapshot?.ownership ?? []).compactMap { item -> ArtifactID? in
-            guard item.state == .owned, case .artifact(let id) = item.reference else { return nil }
-            return id
-        })
+        scheduleThemeResourceAdoption(themeSnapshot)
+    }
+
+    private func resolvedThemeArtifactSelection(
+        for snapshot: ThemeCoordinatorSnapshotDTO
+    ) throws -> SharePresentationSelection {
+        guard !snapshot.isEmergencyPresentation,
+              let provider = snapshot.providers.first(where: {
+                  $0.codexID == snapshot.effectiveCodexID
+              })
+        else { throw ShareArtifactRenderError.unavailableSelection }
+
+        let descriptor = snapshot.effectiveTheme
+        let owned = ownedThemeArtifactIDs
+        let providerAvailable = provider.state == .available
+        func selectable(_ metadata: ThemeArtifactMetadata) -> Bool {
+            metadata.availability != .reservedInactive
+                && (metadata.availability == .included || owned.contains(metadata.id))
+        }
+
+        let codexID = descriptor.codex.id
         let relicPreference = runtimeSettingsSnapshot?
             .artifactSelections(for: .relic)[codexID]
         let sealPreference = runtimeSettingsSnapshot?
             .artifactSelections(for: .seal)[codexID]
         let framePreference = runtimeSettingsSnapshot?
             .artifactSelections(for: .frame)[codexID]
-        let selectableRelics = theme.codex.relics.filter {
-            $0.metadata.availability == .included || owned.contains($0.metadata.id)
+
+        let relicID = relicPreference.flatMap { preferred in
+            descriptor.codex.relics.first(where: {
+                $0.metadata.id == preferred && selectable($0.metadata)
+            })?.metadata.id
+        } ?? descriptor.codex.relics.first(where: {
+            $0.metadata.id == descriptor.codex.defaultRelicID
+                && selectable($0.metadata)
+        })?.metadata.id
+        guard let relicID else { throw ShareArtifactRenderError.unavailableSelection }
+
+        let sealID = sealPreference.flatMap { preferred in
+            descriptor.codex.seals.first(where: {
+                $0.metadata.id == preferred && selectable($0.metadata)
+            })?.metadata.id
+        } ?? descriptor.codex.seals.first(where: {
+            selectable($0.metadata)
+        })?.metadata.id
+
+        let noneFrameID = ArtifactID(rawValue: "frame.none")
+        let frameID = framePreference.flatMap { preferred -> ArtifactID? in
+            guard preferred != noneFrameID else { return nil }
+            return descriptor.codex.frames.first(where: {
+                $0.metadata.id == preferred
+                    && selectable($0.metadata)
+                    && $0.allowsStaticShare
+                    && $0.compatibleRelicIDs.contains(relicID)
+            })?.metadata.id
         }
-        let selectableSeals = theme.codex.seals.filter {
-            $0.metadata.availability == .included || owned.contains($0.metadata.id)
-        }
-        let selectableFrames = theme.codex.frames.filter {
-            ($0.metadata.availability == .included || owned.contains($0.metadata.id))
-                && $0.allowsStaticShare
-        }
-        selectedThemeRelicID = relicPreference.flatMap { preferred in
-            selectableRelics.contains(where: { $0.metadata.id == preferred }) ? preferred : nil
-        } ?? theme.codex.defaultRelicID
-        selectedThemeSealID = sealPreference.flatMap { preferred in
-            selectableSeals.contains(where: { $0.metadata.id == preferred }) ? preferred : nil
-        } ?? selectableSeals.first?.metadata.id
-        selectedThemeFrameID = framePreference.flatMap {
-            preferred in
-            selectableFrames.contains(where: { $0.metadata.id == preferred }) ? preferred : nil
-        }
+
+        return try ShareBuilderPolicy.selection(
+            descriptor: descriptor,
+            codexOwned: provider.isOwned,
+            providerAvailable: providerAvailable,
+            ownedArtifactIDs: owned,
+            relicID: relicID,
+            sealID: sealID,
+            frameID: frameID
+        )
     }
 
-    private static func resolveThemeResources(
-        plan: ThemePresentationResourcePlan,
-        client: RuntimeThemeCoordinatorClient
-    ) async throws -> [ThemeResourceID: ResolvedThemeResourceDTO] {
+    private static func semanticThemeResourceIDs(
+        _ plan: ThemePresentationResourcePlan
+    ) -> Set<ThemeResourceID> {
         var resourceIDs = Set([
             plan.backgroundStaticResourceID,
             plan.backgroundReduceMotionResourceID,
@@ -750,21 +864,68 @@ final class RuneScribeUISession: ObservableObject {
             resourceIDs.insert(headings)
         }
         resourceIDs.formUnion(plan.vectorResourceIDByToken.values)
+        return resourceIDs
+    }
 
+    private static func eagerThemeVisualImagePlans(
+        _ plan: ActiveThemeVisualResourcePlan
+    ) throws -> [ThemeResourceID: ThemeVisualImagePlan] {
+        var result: [ThemeResourceID: ThemeVisualImagePlan] = [:]
+        func insert(_ imagePlan: ThemeVisualImagePlan?) throws {
+            guard let imagePlan else { return }
+            if let existing = result[imagePlan.id], existing != imagePlan {
+                throw ThemePresentationResourceError.identityMismatch
+            }
+            result[imagePlan.id] = imagePlan
+        }
+
+        try insert(plan.codex.selected)
+        if let relic = plan.selectedRelic {
+            try insert(relic.thumbnail)
+            try insert(relic.standard)
+            try insert(relic.highContrast)
+        }
+        if let seal = plan.selectedSeal {
+            try insert(seal.thumbnail)
+            try insert(seal.standard)
+            try insert(seal.highContrast)
+        }
+        if let frame = plan.selectedFrame {
+            try insert(frame.thumbnail)
+            try insert(frame.standard)
+            try insert(frame.highContrast)
+        }
+        return result
+    }
+
+    private static func resolveThemeResources(
+        codexID: CodexID,
+        resourceIDs: Set<ThemeResourceID>,
+        expectedReferences: [ThemeResourceID: ThemeResourceReference],
+        purpose: ThemeResourceResolutionPurpose = .activePresentation,
+        client: RuntimeThemeCoordinatorClient
+    ) async throws -> [ThemeResourceID: ResolvedThemeResourceDTO] {
         return try await withThrowingTaskGroup(
             of: (ThemeResourceID, ResolvedThemeResourceDTO).self,
             returning: [ThemeResourceID: ResolvedThemeResourceDTO].self
         ) { group in
             for resourceID in resourceIDs {
+                guard let expected = expectedReferences[resourceID] else {
+                    throw ThemePresentationResourceError.missing(resourceID)
+                }
                 group.addTask {
                     let resource = try await client.resolveResource(
                         ResolveThemeResourceRequestDTO(
-                            codexID: plan.codexID,
-                            resourceID: resourceID
+                            codexID: codexID,
+                            resourceID: resourceID,
+                            purpose: purpose
                         )
                     )
-                    guard resource.codexID == plan.codexID,
-                          resource.resourceID == resourceID
+                    guard resource.codexID == codexID,
+                          resource.resourceID == resourceID,
+                          resource.role == expected.role,
+                          resource.mediaType == expected.mediaType,
+                          resource.integrity == expected.integrity
                     else {
                         throw ThemePresentationResourceError.identityMismatch
                     }
@@ -777,6 +938,147 @@ final class RuneScribeUISession: ObservableObject {
             }
             return result
         }
+    }
+
+    func loadActiveThemeCatalogVisuals() async {
+        guard let snapshot = themeSnapshot,
+              let current = activeThemeVisualPresentation,
+              snapshot.effectiveCodexID == current.plan.codex.codexID,
+              let client = themeCoordinatorClientHandle
+        else { return }
+
+        let generation = themeAdoptionGeneration
+        let requestedPlans = current.plan.catalog.map(\.thumbnail)
+        let missingPlans = requestedPlans.filter {
+            current.imageReference(for: $0) == nil
+        }
+        guard !missingPlans.isEmpty else { return }
+        let references = Dictionary(
+            uniqueKeysWithValues: snapshot.effectiveTheme.resources.map {
+                ($0.id, $0)
+            }
+        )
+
+        do {
+            let resourceIDs = Set(missingPlans.map(\.id))
+            let resolved = try await Self.resolveThemeResources(
+                codexID: snapshot.effectiveCodexID,
+                resourceIDs: resourceIDs,
+                expectedReferences: references,
+                client: client
+            )
+            try Task.checkCancellation()
+
+            var additions: [ThemeResourceID: RuntimeThemeImageReference] = [:]
+            for resourceID in resourceIDs.sorted() {
+                guard let resource = resolved[resourceID],
+                      let expected = references[resourceID]
+                else { throw ThemePresentationResourceError.missing(resourceID) }
+                additions[resourceID] = try resourcePresentation
+                    .makeThemeImageReference(
+                        resolvedResource: resource,
+                        expectedReference: expected,
+                        expectedCodexID: snapshot.effectiveCodexID,
+                        contentRevision: current.revision
+                    )
+            }
+            guard themeAdoptionGeneration == generation,
+                  themeSnapshot?.revision == snapshot.revision,
+                  let latest = activeThemeVisualPresentation,
+                  latest.revision == current.revision,
+                  latest.plan == current.plan
+            else { return }
+            activeThemeVisualPresentation = ActiveThemeVisualPresentation(
+                revision: latest.revision,
+                plan: latest.plan,
+                imageReferences: latest.imageReferences.merging(
+                    additions,
+                    uniquingKeysWith: { _, new in new }
+                )
+            )
+        } catch is CancellationError {
+            return
+        } catch {
+            // Catalog images are optional presentation. Keep the complete
+            // active selection and expose semantic placeholders for any tile
+            // that could not be resolved within runtime bounds.
+            return
+        }
+    }
+
+    func loadThemeCodexCardPreviews() async {
+        guard let snapshot = themeSnapshot,
+              let active = activeThemeVisualPresentation,
+              let client = themeCoordinatorClientHandle
+        else { return }
+
+        let generation = themeAdoptionGeneration
+        let inventories = Dictionary(
+            uniqueKeysWithValues: snapshot.presentationInventories.map {
+                ($0.codexID, $0)
+            }
+        )
+        var loaded = themeCodexCardImageReferences.filter {
+            $0.value.contentRevision == active.revision
+        }
+
+        for provider in snapshot.providers where loaded[provider.codexID] == nil {
+            if Task.isCancelled { return }
+            guard themeAdoptionGeneration == generation else { return }
+            let expectedRole: ThemeResourceRoleID
+            switch provider.state {
+            case .available:
+                expectedRole = provider.isSelected
+                    ? ThemeResourceRoles.vaultSelected
+                    : ThemeResourceRoles.vaultCard
+            case .locked:
+                expectedRole = ThemeResourceRoles.vaultLockedSilhouette
+            case .unavailable, .incompatible, .invalidResources:
+                continue
+            }
+            guard let inventory = inventories[provider.codexID],
+                  let expected = inventory.resources.first(where: {
+                      $0.role == expectedRole
+                  }) ?? (provider.isSelected
+                      ? inventory.resources.first(where: {
+                          $0.role == ThemeResourceRoles.vaultCard
+                      })
+                      : nil)
+            else { continue }
+
+            do {
+                let resolved = try await client.resolveResource(
+                    ResolveThemeResourceRequestDTO(
+                        codexID: provider.codexID,
+                        resourceID: expected.resourceID,
+                        purpose: .catalogPreview
+                    )
+                )
+                guard resolved.codexID == provider.codexID,
+                      resolved.resourceID == expected.resourceID,
+                      resolved.role == expected.role,
+                      resolved.mediaType == expected.mediaType,
+                      resolved.integrity.byteLength == expected.byteLength,
+                      resolved.integrity.pixelSize == expected.pixelSize,
+                      resolved.integrity.sha256 == expected.sha256
+                else { continue }
+                loaded[provider.codexID] = try resourcePresentation
+                    .makeThemeImageReference(
+                        resolvedResource: resolved,
+                        expectedInventory: expected,
+                        expectedCodexID: provider.codexID,
+                        contentRevision: active.revision
+                    )
+            } catch {
+                continue
+            }
+        }
+
+        guard themeAdoptionGeneration == generation,
+              themeSnapshot?.revision == snapshot.revision,
+              activeThemeVisualPresentation?.revision == active.revision
+        else { return }
+        themeCodexCardImageReferences = loaded
     }
 
     private func adoptImportPresentation(_ state: ImportStateDTO) {

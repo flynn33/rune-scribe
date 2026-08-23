@@ -27,6 +27,7 @@
 		38049FACD09DEBB67B1C6DAF /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		3828C5D79EBACBAE2932DCA1 /* ComplianceGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8794218367CD5682362E58C /* ComplianceGuardTests.swift */; };
 		40A0F491D108F48D91D1E3A6 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = D531AAF50C10D2A6FABCD7ED /* RuneScribeThemeSunspireModule */; };
+		453F9C67E7131C528E6E781E /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = 7E0CAEB200DFACF10D6F3618 /* RuneScribeThemeCoordinatorModule */; };
 		469C9325BA26BDA76E53BD44 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 52B302D4A6F1BF026533FEFF /* RuneScribeUIModule */; };
 		49A2F2518A57128E5F05A105 /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 9C0E34DE3867BB9FDF5211F1 /* RuneScribeUIRuntime */; };
 		49B202E878AE83C746A4B887 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = A8A04E62141809DD6DDA8F52 /* RuneScribeThemeSunspireModule */; };
@@ -205,6 +206,7 @@
 				C8CC6BD65F9BF9B0600C8F63 /* RuneScribeThemeWildwoodModule in Frameworks */,
 				B82FD0E550E20EA8EEA02D7F /* RuneScribeThemeGloamthornModule in Frameworks */,
 				BE33ADBB23CDC9ABFF5B2E0F /* RuneScribeTestSupport in Frameworks */,
+				453F9C67E7131C528E6E781E /* RuneScribeThemeCoordinatorModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -557,6 +559,7 @@
 				63C37183F979025E712FE1EA /* RuneScribeThemeWildwoodModule */,
 				07D4F90FAF61D13576919B92 /* RuneScribeThemeGloamthornModule */,
 				415BD6C69E96BAF82603E6EB /* RuneScribeTestSupport */,
+				7E0CAEB200DFACF10D6F3618 /* RuneScribeThemeCoordinatorModule */,
 			);
 			productName = RuneScribMacParityTests;
 			productReference = 4B31D2BF5EC1E6D84B23D71C /* RuneScribMacParityTests.xctest */;
@@ -1510,6 +1513,10 @@
 		7AF155E409B644C03E87BD2E /* RuneScribeThemeGloamthornModule */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeThemeGloamthornModule;
+		};
+		7E0CAEB200DFACF10D6F3618 /* RuneScribeThemeCoordinatorModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeThemeCoordinatorModule;
 		};
 		7E882999675FF418B476A8C0 /* RuneScribeThemeMoonleafModule */ = {
 			isa = XCSwiftPackageProductDependency;

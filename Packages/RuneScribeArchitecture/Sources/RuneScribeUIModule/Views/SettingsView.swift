@@ -65,59 +65,43 @@ struct SettingsView: View {
                     .fixedSize(horizontal: false, vertical: true)
 
                 if let snapshot = session.themeSnapshot {
-                    ForEach(snapshot.providers, id: \.codexID) { provider in
-                        Button {
-                            Task { await session.selectCodex(provider.codexID) }
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: providerIcon(provider))
-                                    .frame(width: 20)
-                                    .foregroundColor(
-                                        provider.isSelected ? .runeSelected : .runeSilver
-                                    )
-                                    .accessibilityHidden(true)
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(provider.displayName)
-                                        .font(.body.weight(.semibold))
-                                        .foregroundColor(.runeTextPrimary)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                    Text(providerStatus(provider))
-                                        .font(.caption)
-                                        .foregroundColor(.runeSilver)
-                                        .fixedSize(horizontal: false, vertical: true)
+                    VStack(alignment: .leading, spacing: 12) {
+                        ForEach(snapshot.providers, id: \.codexID) { provider in
+                            ThemeCodexCardView(
+                                codexID: provider.codexID,
+                                displayName: provider.displayName,
+                                summary: providerStatus(provider),
+                                state: providerVisualState(provider),
+                                accessibilityLabel: provider.displayName,
+                                accessibilityHint: provider.isSelectable && !provider.isSelected
+                                    ? "Selects this Codex appearance"
+                                    : "",
+                                isEnabled: provider.isSelectable && !provider.isSelected,
+                                action: {
+                                    Task { await session.selectCodex(provider.codexID) }
                                 }
-                                .layoutPriority(1)
-                                Spacer(minLength: 8)
-                                if provider.isSelected {
-                                    Text("Selected")
-                                        .font(.caption.weight(.semibold))
-                                        .foregroundColor(.runeSelected)
-                                        .fixedSize(horizontal: true, vertical: false)
-                                }
+                            ) {
+                                providerArtwork(provider)
                             }
-                            .padding(.vertical, 6)
-                            .contentShape(Rectangle())
                         }
-                        .buttonStyle(.plain)
-                        .disabled(!provider.isSelectable || provider.isSelected)
-                        .accessibilityLabel(provider.displayName)
-                        .accessibilityValue(providerAccessibilityStatus(provider))
-                        .accessibilityHint(
-                            provider.isSelectable && !provider.isSelected
-                                ? "Selects this Codex appearance"
-                                : ""
-                        )
-                    }
 
-                    if snapshot.fallbackReason != .none {
-                        Label(
-                            "Your preferred Codex is unavailable. The Base appearance is active.",
-                            systemImage: "arrow.uturn.backward.circle"
-                        )
-                        .font(.footnote)
-                        .foregroundColor(.runeWarning)
-                        .fixedSize(horizontal: false, vertical: true)
+                        if snapshot.fallbackReason != .none {
+                            Label(
+                                "Your preferred Codex is unavailable. The Base appearance is active.",
+                                systemImage: "arrow.uturn.backward.circle"
+                            )
+                            .font(.footnote)
+                            .foregroundColor(.runeWarning)
+                            .fixedSize(horizontal: false, vertical: true)
+                        }
                     }
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("Active theme presentation")
+                    .accessibilityValue(snapshot.isEmergencyPresentation ? "Emergency" : "Standard")
+                    .accessibilityIdentifier(
+                        "theme.presentation.\(snapshot.effectiveTheme.id.rawValue)."
+                            + (snapshot.isEmergencyPresentation ? "emergency" : "standard")
+                    )
                 } else {
                     Label(
                         "Codex appearances are temporarily unavailable.",
@@ -134,6 +118,7 @@ struct SettingsView: View {
                 }
             }
         }
+        .task { await session.loadThemeCodexCardPreviews() }
     }
 
     private func providerStatus(_ provider: ThemeProviderSummaryDTO) -> String {
@@ -152,8 +137,25 @@ struct SettingsView: View {
         }
     }
 
-    private func providerAccessibilityStatus(_ provider: ThemeProviderSummaryDTO) -> String {
-        provider.isSelected ? "Available and selected" : providerStatus(provider)
+    private func providerVisualState(
+        _ provider: ThemeProviderSummaryDTO
+    ) -> ThemeVisualContentState {
+        if provider.isSelected { return .selected }
+        switch provider.state {
+        case .available: return provider.isOwned ? .owned : .locked
+        case .locked: return .locked
+        case .unavailable, .incompatible, .invalidResources: return .unavailable
+        }
+    }
+
+    private func providerArtwork(_ provider: ThemeProviderSummaryDTO) -> AnyView {
+        if let image = session.themeCodexCardImageReferences[provider.codexID]?.image {
+            return AnyView(image.resizable().scaledToFill())
+        }
+        return AnyView(ThemeVisualPlaceholder(
+            systemImage: providerIcon(provider),
+            label: "\(provider.displayName) artwork unavailable"
+        ))
     }
 
     private func providerIcon(_ provider: ThemeProviderSummaryDTO) -> String {
