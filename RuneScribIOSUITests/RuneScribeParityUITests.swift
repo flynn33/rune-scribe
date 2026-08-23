@@ -134,7 +134,7 @@ final class RuneScribeParityUITests: XCTestCase {
         let vaultRelic = app.descendants(matching: .any)[
             "theme.vault-artifact.relic.norse.runestone.weathered"
         ].firstMatch
-        scrollVaultUntilVisible(vaultRelic, in: app)
+        scrollUntilVisible(vaultRelic, in: app)
         XCTAssertTrue(vaultRelic.waitForExistence(timeout: 8), app.debugDescription)
         try auditAccessibility(in: app)
         keepScreenshot(app, named: isPad ? "ipad-vault-norse" : "iphone-vault-norse")
@@ -170,12 +170,19 @@ final class RuneScribeParityUITests: XCTestCase {
 
         app.buttons["Settings"].tap()
         XCTAssertTrue(app.staticTexts["SETTINGS"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["Set a PIN…"].exists)
-        XCTAssertTrue(app.buttons["Manage Contacts"].exists)
-        XCTAssertTrue(app.buttons["View License"].exists)
+        let setPIN = app.buttons["Set a PIN…"]
+        scrollUntilVisible(setPIN, in: app)
+        XCTAssertTrue(setPIN.exists, app.debugDescription)
+        let manageContacts = app.buttons["Manage Contacts"]
+        scrollUntilVisible(manageContacts, in: app)
+        XCTAssertTrue(manageContacts.exists, app.debugDescription)
+        let viewLicense = app.buttons["View License"]
+        scrollUntilVisible(viewLicense, in: app)
+        XCTAssertTrue(viewLicense.exists, app.debugDescription)
         try auditAccessibility(in: app)
 
-        app.buttons["View License"].tap()
+        XCTAssertTrue(viewLicense.isHittable, app.debugDescription)
+        viewLicense.tap()
         let licenseAgreement = app.staticTexts.matching(
             NSPredicate(
                 format: "label BEGINSWITH %@",
@@ -185,7 +192,9 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(licenseAgreement.waitForExistence(timeout: 5))
         tapCloseControl(in: app)
 
-        app.buttons["Manage Contacts"].tap()
+        scrollUntilVisible(manageContacts, in: app, direction: .towardTop)
+        XCTAssertTrue(manageContacts.isHittable, app.debugDescription)
+        manageContacts.tap()
         XCTAssertTrue(app.staticTexts["CONTACTS"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["No contacts yet"].exists)
         try auditAccessibility(in: app)
@@ -209,7 +218,9 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Parity Contact Edited"].waitForExistence(timeout: 5))
         tapCloseControl(in: app)
 
-        app.buttons["Set a PIN…"].tap()
+        scrollUntilVisible(setPIN, in: app, direction: .towardTop)
+        XCTAssertTrue(setPIN.isHittable, app.debugDescription)
+        setPIN.tap()
         XCTAssertTrue(app.staticTexts["SET PIN"].waitForExistence(timeout: 5))
         enterPIN("1234", in: app)
         XCTAssertTrue(app.staticTexts["Confirm PIN"].waitForExistence(timeout: 5))
@@ -231,8 +242,12 @@ final class RuneScribeParityUITests: XCTestCase {
         enterPIN("1234", in: app)
         XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 8))
         app.buttons["Settings"].tap()
-        XCTAssertTrue(app.buttons["Change PIN"].waitForExistence(timeout: 5))
-        app.buttons["Change PIN"].tap()
+        XCTAssertTrue(app.staticTexts["SETTINGS"].waitForExistence(timeout: 5))
+        let changePIN = app.buttons["Change PIN"]
+        scrollUntilVisible(changePIN, in: app)
+        XCTAssertTrue(changePIN.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(changePIN.isHittable, app.debugDescription)
+        changePIN.tap()
         enterPIN("1234", in: app)
         XCTAssertTrue(app.staticTexts["Enter New PIN"].waitForExistence(timeout: 5))
         enterPIN("5678", in: app)
@@ -240,7 +255,10 @@ final class RuneScribeParityUITests: XCTestCase {
         enterPIN("5678", in: app)
         XCTAssertTrue(app.staticTexts["PIN set"].waitForExistence(timeout: 8))
 
-        app.buttons["Disable"].tap()
+        let disablePIN = app.buttons["Disable"]
+        scrollUntilVisible(disablePIN, in: app)
+        XCTAssertTrue(disablePIN.isHittable, app.debugDescription)
+        disablePIN.tap()
         XCTAssertTrue(app.staticTexts["Enter Current PIN"].waitForExistence(timeout: 5))
         enterPIN("5678", in: app)
         XCTAssertTrue(app.staticTexts["No PIN"].waitForExistence(timeout: 8))
@@ -321,7 +339,11 @@ final class RuneScribeParityUITests: XCTestCase {
 
         tapCloseControl(in: app)
         app.buttons["Settings"].tap()
-        app.buttons["Manage Contacts"].tap()
+        XCTAssertTrue(app.staticTexts["SETTINGS"].waitForExistence(timeout: 5))
+        let reopenedManageContacts = app.buttons["Manage Contacts"]
+        scrollUntilVisible(reopenedManageContacts, in: app)
+        XCTAssertTrue(reopenedManageContacts.isHittable, app.debugDescription)
+        reopenedManageContacts.tap()
         XCTAssertTrue(app.staticTexts["Parity Contact Edited"].waitForExistence(timeout: 5))
         app.buttons["Delete Parity Contact Edited"].tap()
         let deleteContact = app.alerts["Delete “Parity Contact Edited”?"]
@@ -449,13 +471,28 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTFail("No hittable Close control", file: file, line: line)
     }
 
-    private func scrollVaultUntilVisible(_ element: XCUIElement, in app: XCUIApplication) {
-        guard let vaultScrollView = app.scrollViews.allElementsBoundByIndex.max(by: {
-            $0.frame.height < $1.frame.height
-        }) else { return }
+    private enum ScrollDirection {
+        case towardTop
+        case towardBottom
+    }
+
+    private func scrollUntilVisible(
+        _ element: XCUIElement,
+        in app: XCUIApplication,
+        direction: ScrollDirection = .towardBottom
+    ) {
+        guard let scrollView = app.scrollViews.allElementsBoundByIndex
+            .filter({ $0.isHittable })
+            .max(by: { $0.frame.height < $1.frame.height })
+        else { return }
 
         for _ in 0..<12 where !element.exists || !element.isHittable {
-            vaultScrollView.swipeUp()
+            switch direction {
+            case .towardTop:
+                scrollView.swipeDown()
+            case .towardBottom:
+                scrollView.swipeUp()
+            }
         }
     }
 
