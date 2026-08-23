@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "1.0",
+  "sourceSHA": "74f57f4a11af9df349111ae2416d5c54699ae116",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture",
+    "./scripts/check-architecture.sh",
+    "./scripts/check-roadmap-alignment.sh",
+    "python3 scripts/check-roadmap-completion.py",
+    "python3 scripts/check-documentation-alignment.py",
+    "./scripts/check-forsetti-compliance.sh --output /tmp/runescribe-nrv-final3.2ce0nv/verification/forsetti",
+    "python3 scripts/validate-elven-recovery-state.py docs/verification/elven-recovery-v3/RecoveryState.json",
+    "python3 scripts/check-norse-visual-remediation.py --profile implementation",
+    "python3 scripts/test-norse-visual-remediation.py --output /tmp/runescribe-nrv-final3.2ce0nv/verification/NegativeMutations.json",
+    "./scripts/test-shipping-products.sh",
+    "./scripts/check-shipping-products.sh --macos-app /tmp/runescribe-nrv-final3.2ce0nv/mac/release-arm64-only-derived/Build/Products/Release/RuneScrib.app --ios-app /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/release-iphone/Build/Products/Release-iphonesimulator/RuneScrib.app",
+    "xcodebuild build -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Release -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/mac/release-arm64-only-derived -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/mac/release-arm64-only.xcresult -disableAutomaticPackageResolution clean build CODE_SIGNING_ALLOWED=NO ARCHS=arm64 ONLY_ACTIVE_ARCH=YES",
+    "xcodebuild build -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -configuration Release -destination 'platform=iOS Simulator,id=42CE8A98-5D00-4718-935F-94A651647D15' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/release-iphone -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/release-iphone.xcresult",
+    "xcodebuild build -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -configuration Release -destination 'platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/release-ipad -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/release-ipad.xcresult",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/mac/hosted-supported-derived -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/mac/hosted-supported.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO -only-testing:RuneScribTests/CompatibilityBaselineTests -only-testing:RuneScribTests/RuntimeCompositionTests -only-testing:RuneScribArchitectureTests/ArchitectureGuardrailTests CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS= COMPILER_INDEX_STORE_ENABLE=NO",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -destination 'platform=iOS Simulator,id=42CE8A98-5D00-4718-935F-94A651647D15' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/full-ios -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/full-ios.xcresult -parallel-testing-enabled NO",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=42CE8A98-5D00-4718-935F-94A651647D15' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/full-ios-parity -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/full-ios-parity.xcresult -parallel-testing-enabled NO",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/mac/parity-supported-derived -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/mac/parity-supported.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS= COMPILER_INDEX_STORE_ENABLE=NO"
+  ],
+  "destination": {
+    "macOS": "My Mac / arm64 / macOS 26.6.2",
+    "iPhone": "iPhone 17 Pro / iOS Simulator 26.2 / 42CE8A98-5D00-4718-935F-94A651647D15",
+    "iPad": "iPad Pro 13-inch (M5) / iOS Simulator 26.2 / 77D54A1F-0818-4761-B946-D7723490F6B3",
+    "repository": "/Users/jimdaley/GitHub/Rune-Scribe-Norse-Visual-Remediation"
+  },
+  "startTimestamp": "2026-08-23T03:00:54Z",
+  "endTimestamp": "2026-08-23T03:42:30Z",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/FinalNonUIQualificationSummary.json",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/01-swift-test.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/02-check-architecture.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/03-check-roadmap-alignment.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/04-check-roadmap-completion.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/05-check-documentation-alignment.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/06-check-forsetti-compliance.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/07b-validate-elven-recovery-state-corrected.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/08-nrv-implementation-checker.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/09-nrv-negative-mutations.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/10-test-shipping-products.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/13-check-shipping-products-arm64.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/11b-xcodegen-determinism-isolated-copy.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/14-xcodebuild-list-json.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/15-final-static-version-resource-checks.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/mac/release-arm64-only.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/mac/hosted-supported.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/mac/parity-supported.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/ios/results/release-iphone.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/ios/results/release-ipad.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/ios/results/full-ios.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/ios/results/full-ios-parity.xcresult"
+  ],
+  "toolchainVersions": {
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "host": "macOS 26.6.2 (25G83)",
+    "python": "3.9.6",
+    "ruby": "2.6.10p210",
+    "xcodegen": "2.46.0",
+    "xcresulttool": "24514 schema 0.1.0"
+  },
+  "acceptedResults": {
+    "swiftPackage": {
+      "xctest": 907,
+      "swiftTesting": 129,
+      "total": 1036,
+      "failures": 0
+    },
+    "architecture": "PASS",
+    "roadmapAlignment": {
+      "tasks": 124,
+      "decisions": 12,
+      "result": "PASS"
+    },
+    "roadmapCompletion": {
+      "providers": 4,
+      "exactOutputs": 184,
+      "result": "PASS"
+    },
+    "documentation": "PASS at version 1.0.38 build 38",
+    "recovery": "PASS with committed RecoveryState.json",
+    "nrvSemanticRules": "47 of 47 PASS",
+    "nrvNegativeMutations": "20 of 20 rejected and restored",
+    "shippingNegativeMutations": "baseline plus 27 of 27 promised rejections PASS",
+    "realProductShipping": "101 of 101 PASS",
+    "xcodegen": "same-layout isolated regeneration byte-identical",
+    "projectInventory": "8 targets, 2 configurations, 22 schemes",
+    "macOSRelease": "PASS; thin arm64; ad hoc hardened-runtime signature verified",
+    "macOSHosted": "23 of 23 supported acceptance tests PASS",
+    "macOSParity": "6 of 6 PASS",
+    "macOSFocusedVisual": "1 of 1 PASS",
+    "iPhoneRelease": "PASS",
+    "iPadRelease": "PASS",
+    "RuneScrib-iOS": "21 of 21 PASS",
+    "RuneScrib-iOS-Parity": "2 of 2 PASS",
+    "iPhoneFocusedVisual": "1 of 1 PASS",
+    "iPadFocusedVisual": "1 of 1 standard plus 1 of 1 accessibility PASS"
+  },
+  "reportOnlyInspection": {
+    "command": "./scripts/check-forsetti-compliance.sh --output /tmp/runescribe-nrv-final3.2ce0nv/verification/forsetti",
+    "semantics": "REPORT ONLY - NOT A COMPLIANCE PASS",
+    "completion": "PASS",
+    "counts": {
+      "rules": 20,
+      "pass": 5,
+      "violation": 12,
+      "pendingEnforcement": 1,
+      "notEvaluated": 2
+    },
+    "matchesInheritedRepositoryBaseline": true
+  },
+  "nonAcceptanceObservation": {
+    "classification": "documented inherited report-only fixture contradiction",
+    "command": "unfiltered RuneScrib-macOS scheme diagnostic",
+    "passedBeforeObservation": 24,
+    "test": "ComplianceGuardTests.testActivationCompletenessCallRemovalReportsOnlyFG006",
+    "detail": "The fixture expects an FG-006 pass while the inherited report-only baseline is violation.",
+    "acceptedHostedBoundary": "CompatibilityBaselineTests, RuntimeCompositionTests, and ArchitectureGuardrailTests; 23 of 23 PASS"
+  },
+  "diagnosticCorrections": [
+    {
+      "diagnostic": "recovery validator invoked without its required state path",
+      "resolution": "correct command performed the first validation and passed"
+    },
+    {
+      "diagnostic": "xcodegen output compared from an external relative path layout",
+      "resolution": "same-layout isolated repository regeneration was byte-identical"
+    },
+    {
+      "diagnostic": "universal fallback macOS product selected for an arm64 declaration check",
+      "resolution": "declared arm64 Release product passed 101 of 101 shipping checks"
+    }
+  ],
+  "compatibility": {
+    "version": "1.0.38",
+    "build": "38",
+    "cipherIdentity": "unchanged",
+    "payloadAndKeyBehavior": "unchanged",
+    "testTargetsRemoved": 0,
+    "schemesRemoved": 0
+  },
+  "distributionOperations": [],
+  "openFindings": []
+}

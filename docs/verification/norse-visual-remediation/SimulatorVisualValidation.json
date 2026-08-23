@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "1.0",
+  "sourceSHA": "74f57f4a11af9df349111ae2416d5c54699ae116",
+  "command": [
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=42CE8A98-5D00-4718-935F-94A651647D15' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/focused-iphone-standard -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/focused-iphone-standard.xcresult -only-testing:RuneScribIOSUITests/RuneScribeParityUITests/testNorseVisualPresentationAndScreenshots -parallel-testing-enabled NO",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/focused-ipad-standard -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/focused-ipad-standard.xcresult -only-testing:RuneScribIOSUITests/RuneScribeParityUITests/testNorseVisualPresentationAndScreenshots -parallel-testing-enabled NO",
+    "xcrun xcresulttool export attachments --path /tmp/runescribe-nrv-final3.2ce0nv/ios/results/focused-iphone-standard.xcresult --output-path /tmp/runescribe-nrv-final3.2ce0nv/ios/attachments/focused-iphone-standard",
+    "xcrun xcresulttool export attachments --path /tmp/runescribe-nrv-final3.2ce0nv/ios/results/focused-ipad-standard.xcresult --output-path /tmp/runescribe-nrv-final3.2ce0nv/ios/attachments/focused-ipad-standard"
+  ],
+  "destination": {
+    "iPhone": {
+      "name": "RuneScribe Norse Visual Phone",
+      "model": "iPhone 17 Pro",
+      "deviceID": "42CE8A98-5D00-4718-935F-94A651647D15",
+      "runtime": "iOS 26.2 (23C54)"
+    },
+    "iPad": {
+      "name": "RuneScribe Norse Visual iPad",
+      "model": "iPad Pro 13-inch (M5)",
+      "deviceID": "77D54A1F-0818-4761-B946-D7723490F6B3",
+      "runtime": "iOS 26.2 (23C54)"
+    },
+    "macOS": {
+      "name": "My Mac",
+      "architecture": "arm64"
+    }
+  },
+  "startTimestamp": "2026-08-23T03:01:05Z",
+  "endTimestamp": "2026-08-23T03:37:25Z",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "docs/verification/norse-visual-remediation/screenshots/iphone-workspace-norse.png",
+    "docs/verification/norse-visual-remediation/screenshots/iphone-artifact-picker-norse.png",
+    "docs/verification/norse-visual-remediation/screenshots/iphone-settings-norse.png",
+    "docs/verification/norse-visual-remediation/screenshots/iphone-vault-norse.png",
+    "docs/verification/norse-visual-remediation/screenshots/ipad-workspace-norse.png",
+    "docs/verification/norse-visual-remediation/screenshots/ipad-vault-norse.png",
+    "docs/verification/norse-visual-remediation/screenshots/macos-workspace-norse.png",
+    "docs/verification/norse-visual-remediation/screenshots/macos-settings-norse.png",
+    "docs/verification/norse-visual-remediation/screenshots/macos-vault-norse.png",
+    "/tmp/runescribe-nrv-final3.2ce0nv/ios/attachments/focused-iphone-standard/manifest.json",
+    "/tmp/runescribe-nrv-final3.2ce0nv/ios/attachments/focused-ipad-standard/manifest.json",
+    "/tmp/runescribe-nrv-final3.2ce0nv/mac/attachments-supported/manifest.json"
+  ],
+  "toolchainVersions": {
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "host": "macOS 26.6.2 (25G83)",
+    "xcresulttool": "24514 schema 0.1.0"
+  },
+  "provenance": {
+    "capture": "XCTAttachment from automated visual tests",
+    "extraction": "xcresulttool attachment export",
+    "failureAssociatedAttachments": 0,
+    "visualInspection": "PASS"
+  },
+  "executions": {
+    "iPhoneRelease": {
+      "command": "xcodebuild build -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -configuration Release -destination 'platform=iOS Simulator,id=42CE8A98-5D00-4718-935F-94A651647D15' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/release-iphone -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/release-iphone.xcresult",
+      "startTimestamp": "2026-08-23T03:01:05Z",
+      "endTimestamp": "2026-08-23T03:02:31Z",
+      "result": "PASS"
+    },
+    "iPadRelease": {
+      "command": "xcodebuild build -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -configuration Release -destination 'platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/release-ipad -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/release-ipad.xcresult",
+      "startTimestamp": "2026-08-23T03:02:48Z",
+      "endTimestamp": "2026-08-23T03:04:21Z",
+      "result": "PASS"
+    },
+    "iPhoneFocusedVisual": {
+      "tests": 1,
+      "startTimestamp": "2026-08-23T03:05:15Z",
+      "endTimestamp": "2026-08-23T03:06:34Z",
+      "result": "PASS"
+    },
+    "iPadFocusedVisual": {
+      "tests": 1,
+      "startTimestamp": "2026-08-23T03:08:42Z",
+      "endTimestamp": "2026-08-23T03:09:51Z",
+      "result": "PASS"
+    },
+    "iPadFocusedAccessibility": {
+      "tests": 1,
+      "executions": 1,
+      "startTimestamp": "2026-08-23T03:11:05Z",
+      "endTimestamp": "2026-08-23T03:12:21Z",
+      "result": "PASS"
+    },
+    "RuneScrib-iOS": {
+      "tests": 21,
+      "startTimestamp": "2026-08-23T03:13:14Z",
+      "endTimestamp": "2026-08-23T03:13:41Z",
+      "result": "PASS"
+    },
+    "RuneScrib-iOS-Parity": {
+      "tests": 2,
+      "startTimestamp": "2026-08-23T03:14:30Z",
+      "endTimestamp": "2026-08-23T03:19:34Z",
+      "result": "PASS"
+    },
+    "macOS": {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/mac/visual-supported-derived -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/mac/visual-supported.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO -only-testing:RuneScribMacParityTests/RuneScribeMacParityTests/testNorseVisualPresentationRendersRuntimeBackedMacSurfacesAndRetainsStateAcrossResize CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS= COMPILER_INDEX_STORE_ENABLE=NO",
+      "hostedTests": 23,
+      "parityTests": 6,
+      "focusedVisualTests": 1,
+      "focusedStartTimestamp": "2026-08-23T03:35:58Z",
+      "focusedEndTimestamp": "2026-08-23T03:36:22Z",
+      "result": "PASS"
+    }
+  },
+  "screenshots": [
+    {
+      "name": "iphone-workspace-norse.png",
+      "dimensions": "1206x2622",
+      "sha256": "fae582a80e62460a316ad4f69563d908921f9b9c2dee5661e253d97b952cbfbf"
+    },
+    {
+      "name": "iphone-artifact-picker-norse.png",
+      "dimensions": "1206x2622",
+      "sha256": "ac7af19b71a6519ab1f73de7d899da81694c665978a8a1f0577914541f5ae67f"
+    },
+    {
+      "name": "iphone-settings-norse.png",
+      "dimensions": "1206x2622",
+      "sha256": "a35810780f27875771408c138db431990bcd93d295e240dd1cb964e23c027b00"
+    },
+    {
+      "name": "iphone-vault-norse.png",
+      "dimensions": "1206x2622",
+      "sha256": "016bc5aedb1c5c0a373e79a5e57451b514fbc1b11089666a2424d478d565ad0c"
+    },
+    {
+      "name": "ipad-workspace-norse.png",
+      "dimensions": "2064x2752",
+      "sha256": "10af631b38c49991d61da2b0d954fa90dcab7c94717874174a161ff3c739763b"
+    },
+    {
+      "name": "ipad-vault-norse.png",
+      "dimensions": "2064x2752",
+      "sha256": "cfc3a9f665b88283389133a7bbe9b48915f243bfdba5d23b24e0967a550da98b"
+    },
+    {
+      "name": "macos-workspace-norse.png",
+      "dimensions": "720x780",
+      "sha256": "23c3ec1fd872bc4ac308a4d8fe36e6c97c3e347f27b47c375c445ef134ef82a3"
+    },
+    {
+      "name": "macos-settings-norse.png",
+      "dimensions": "760x900",
+      "sha256": "4a06126e1b1cade4b5e9ce857c9765f46cccc4c8fc5c3a51235322a74671f22f"
+    },
+    {
+      "name": "macos-vault-norse.png",
+      "dimensions": "840x940",
+      "sha256": "60970ce62f73031629c80759b08c8342d4bdca6117c76ed9449006d9f4ccd669"
+    }
+  ]
+}

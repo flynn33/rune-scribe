@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0",
+  "sourceSHA": "74f57f4a11af9df349111ae2416d5c54699ae116",
+  "command": "swift test --package-path Packages/RuneScribeArchitecture",
+  "destination": {
+    "platform": "macOS",
+    "suite": "RuneScribeArchitecture package"
+  },
+  "startTimestamp": "2026-08-23T03:01:23Z",
+  "endTimestamp": "2026-08-23T03:03:20Z",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/01-swift-test.log",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ElvenShareArtifactRendererIntegrationTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeMoonleafModuleTests/MoonleafThemeProviderTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeSunspireModuleTests/SunspireThemeProviderTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeWildwoodModuleTests/WildwoodThemeProviderTests.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeGloamthornModuleTests/GloamthornThemeProviderTests.swift"
+  ],
+  "toolchainVersions": {
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "host": "macOS 26.6.2 (25G83)"
+  },
+  "productionPath": "ActiveThemeVisualResourcePlan and ThemeArtifactCompositionPolicy",
+  "providers": [
+    {
+      "codexID": "codex.moonleaf",
+      "manifestEntries": 46,
+      "genericVisualPath": "PASS"
+    },
+    {
+      "codexID": "codex.sunspire",
+      "manifestEntries": 46,
+      "genericVisualPath": "PASS"
+    },
+    {
+      "codexID": "codex.wildwood",
+      "manifestEntries": 46,
+      "genericVisualPath": "PASS"
+    },
+    {
+      "codexID": "codex.gloamthorn",
+      "manifestEntries": 46,
+      "genericVisualPath": "PASS"
+    }
+  ],
+  "requiredFallback": "codex.norse",
+  "verifiedPerProvider": [
+    "Codex card",
+    "default Relic",
+    "included Seal",
+    "background",
+    "Script",
+    "injected failure fallback to codex.norse"
+  ],
+  "staticRenderMatrix": {
+    "providers": 4,
+    "variantsPerProvider": 4,
+    "renders": 16,
+    "result": "PASS"
+  },
+  "providerSpecificProductionBranches": 0
+}
