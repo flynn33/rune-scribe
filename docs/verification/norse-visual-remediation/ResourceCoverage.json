@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "sourceSHA": "74f57f4a11af9df349111ae2416d5c54699ae116",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture",
+    "python3 scripts/check-norse-visual-remediation.py --profile implementation"
+  ],
+  "destination": {
+    "platform": "macOS",
+    "swiftTarget": "arm64-apple-macosx26.0",
+    "repository": "/Users/jimdaley/GitHub/Rune-Scribe-Norse-Visual-Remediation"
+  },
+  "startTimestamp": "2026-08-23T03:01:23Z",
+  "endTimestamp": "2026-08-23T03:34:15Z",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/01-swift-test.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/08-nrv-implementation-checker.log",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+  ],
+  "toolchainVersions": {
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "host": "macOS 26.6.2 (25G83)",
+    "python": "3.9.6"
+  },
+  "provider": "theme.norse.base",
+  "codex": "codex.norse",
+  "acceptedManifest": {
+    "sha256": "8bfb935ca4d3b82bdee00ce0f21756811e0d34460c9002dfed4c56ce13f1eb0a",
+    "entryCount": 47,
+    "verifiedEntries": 47,
+    "byteLengthAndSHA256Checks": "PASS"
+  },
+  "descriptorResourceCount": 55,
+  "moduleManifestSHA256": "cd7d1d28ef3efff04daf2f6ad9103dc83d174e00470592a9d918d187ac8cb804",
+  "font": {
+    "resourceID": "resource.font.norse.noto-sans-runic",
+    "sha256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b",
+    "descriptorAndCopiedBytesMatch": true
+  },
+  "scriptID": "script.base-runes",
+  "physicalResources": {
+    "uniqueBytes": 31879723,
+    "staticBytes": 30455573,
+    "animationBytes": 3277,
+    "soundBytes": 1334576,
+    "largestResourceBytes": 2568492
+  },
+  "acceptedProductionResourceDiff": "clean",
+  "resourceBudgets": "within declared limits"
+}

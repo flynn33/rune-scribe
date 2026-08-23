@@ -1,5 +1,6 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeUIRuntime
 import SwiftUI
 
 struct ThemePresentationResourcePlan: Equatable, Sendable {
@@ -44,6 +45,312 @@ struct ThemePresentationResourcePlan: Equatable, Sendable {
             role: "unlock-animation-cue",
             descriptor: descriptor
         )
+    }
+}
+
+/// A presentation-only description of an image admitted by the Theme runtime.
+///
+/// The plan intentionally contains identity and integrity metadata rather than
+/// bytes or a platform image. `RuneScribeUIRuntime` is responsible for matching
+/// a resolved resource against this plan before it publishes an opaque image
+/// reference to the UI.
+struct ThemeVisualImagePlan: Identifiable, Equatable, Hashable, Sendable {
+    let id: ThemeResourceID
+    let codexID: CodexID
+    let role: ThemeResourceRoleID
+    let mediaType: ThemeResourceMediaType
+    let byteLength: UInt64
+    let pixelSize: ThemePixelSize?
+    let sha256: ThemeSHA256Digest
+
+    init(codexID: CodexID, reference: ThemeResourceReference) {
+        id = reference.id
+        self.codexID = codexID
+        role = reference.role
+        mediaType = reference.mediaType
+        byteLength = reference.integrity.byteLength
+        pixelSize = reference.integrity.pixelSize
+        sha256 = reference.integrity.sha256
+    }
+}
+
+enum ThemeVisualArtifactKind: String, CaseIterable, Equatable, Hashable, Sendable {
+    case relic = "Relic"
+    case seal = "Seal"
+    case frame = "Frame"
+    case crest = "Crest"
+
+    var systemImage: String {
+        switch self {
+        case .relic: "rectangle.portrait"
+        case .seal: "seal"
+        case .frame: "photo.artframe"
+        case .crest: "shield"
+        }
+    }
+}
+
+struct ThemeCodexVisualPlan: Equatable, Sendable {
+    let codexID: CodexID
+    let displayName: String
+    let description: String
+    let accessibilityLabel: String
+    let accessibilityHint: String?
+    let card: ThemeVisualImagePlan
+    let locked: ThemeVisualImagePlan
+    let encountered: ThemeVisualImagePlan
+    let selected: ThemeVisualImagePlan
+}
+
+struct ThemeArtifactVisualPlan: Identifiable, Equatable, Sendable {
+    let id: ArtifactID
+    let codexID: CodexID
+    let kind: ThemeVisualArtifactKind
+    let displayName: String
+    let description: String
+    let rarity: ThemeRarityToken
+    let availability: ThemeArtifactAvailability
+    let accessibilityLabel: String
+    let accessibilityHint: String?
+    let rightsID: ThemeProvenanceID
+    let primary: ThemeVisualImagePlan
+    let thumbnail: ThemeVisualImagePlan
+    let standard: ThemeVisualImagePlan
+    let highContrast: ThemeVisualImagePlan
+    let defaultLayoutID: ThemeLayoutPresetID?
+    let layouts: [ThemeShareLayoutPreset]
+    let sealAllowedScale: ThemeScalarRange?
+    let sealScaleReference: ThemeSealScaleReference?
+    let sealAllowedAnchors: [ThemeSealAnchorCategory]
+    let compatibleRelicIDs: Set<ArtifactID>
+    let allowsStaticShare: Bool
+}
+
+/// The complete descriptor-derived image inventory needed by the active UI.
+/// Selection and revision are part of the plan so a view never combines image
+/// references from one Theme revision with selection metadata from another.
+struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
+    let revision: UInt64
+    let themeID: ThemeID
+    let codexID: CodexID
+    let codex: ThemeCodexVisualPlan
+    let scriptID: ScriptID
+    let backgroundStatic: ThemeVisualImagePlan
+    let backgroundReduceMotion: ThemeVisualImagePlan
+    let backgroundHighContrast: ThemeVisualImagePlan
+    let relics: [ThemeArtifactVisualPlan]
+    let seals: [ThemeArtifactVisualPlan]
+    let frames: [ThemeArtifactVisualPlan]
+    let crests: [ThemeArtifactVisualPlan]
+    let selectedRelicID: ArtifactID
+    let selectedSealID: ArtifactID?
+    let selectedFrameID: ArtifactID?
+
+    var catalog: [ThemeArtifactVisualPlan] {
+        relics + seals + frames + crests
+    }
+
+    var selectedRelic: ThemeArtifactVisualPlan? {
+        relics.first(where: { $0.id == selectedRelicID })
+    }
+
+    var selectedSeal: ThemeArtifactVisualPlan? {
+        selectedSealID.flatMap { selectedID in
+            seals.first(where: { $0.id == selectedID })
+        }
+    }
+
+    var selectedFrame: ThemeArtifactVisualPlan? {
+        selectedFrameID.flatMap { selectedID in
+            frames.first(where: { $0.id == selectedID })
+        }
+    }
+
+    init(
+        descriptor: ThemeDescriptor,
+        revision: UInt64,
+        selection: SharePresentationSelection
+    ) throws {
+        guard selection.codexID == descriptor.codex.id,
+              selection.scriptID == descriptor.codex.primaryScriptID
+        else { throw ThemePresentationResourceError.identityMismatch }
+
+        self.revision = revision
+        themeID = descriptor.id
+        codexID = descriptor.codex.id
+
+        let references = Dictionary(uniqueKeysWithValues: descriptor.resources.map {
+            ($0.id, $0)
+        })
+        func image(_ id: ThemeResourceID) throws -> ThemeVisualImagePlan {
+            guard let reference = references[id] else {
+                throw ThemePresentationResourceError.missing(id)
+            }
+            return ThemeVisualImagePlan(codexID: descriptor.codex.id, reference: reference)
+        }
+        func artifact(
+            _ metadata: ThemeArtifactMetadata,
+            kind: ThemeVisualArtifactKind,
+            primaryID: ThemeResourceID,
+            thumbnailID: ThemeResourceID,
+            standardID: ThemeResourceID,
+            highContrastID: ThemeResourceID,
+            defaultLayoutID: ThemeLayoutPresetID? = nil,
+            layouts: [ThemeShareLayoutPreset] = [],
+            sealAllowedScale: ThemeScalarRange? = nil,
+            sealScaleReference: ThemeSealScaleReference? = nil,
+            sealAllowedAnchors: [ThemeSealAnchorCategory] = [],
+            compatibleRelicIDs: Set<ArtifactID> = [],
+            allowsStaticShare: Bool = true
+        ) throws -> ThemeArtifactVisualPlan {
+            ThemeArtifactVisualPlan(
+                id: metadata.id,
+                codexID: metadata.codexID,
+                kind: kind,
+                displayName: metadata.displayName.fallbackValue,
+                description: metadata.description.fallbackValue,
+                rarity: metadata.rarity,
+                availability: metadata.availability,
+                accessibilityLabel: metadata.accessibility.label.fallbackValue,
+                accessibilityHint: metadata.accessibility.hint?.fallbackValue,
+                rightsID: metadata.rightsID,
+                primary: try image(primaryID),
+                thumbnail: try image(thumbnailID),
+                standard: try image(standardID),
+                highContrast: try image(highContrastID),
+                defaultLayoutID: defaultLayoutID,
+                layouts: layouts,
+                sealAllowedScale: sealAllowedScale,
+                sealScaleReference: sealScaleReference,
+                sealAllowedAnchors: sealAllowedAnchors,
+                compatibleRelicIDs: compatibleRelicIDs,
+                allowsStaticShare: allowsStaticShare
+            )
+        }
+
+        let vault = descriptor.codex.vault
+        codex = ThemeCodexVisualPlan(
+            codexID: descriptor.codex.id,
+            displayName: descriptor.codex.displayName.fallbackValue,
+            description: descriptor.codex.shortDescription.fallbackValue,
+            accessibilityLabel: vault.accessibility.label.fallbackValue,
+            accessibilityHint: vault.accessibility.hint?.fallbackValue,
+            card: try image(vault.cardResourceID),
+            locked: try image(vault.lockedSilhouetteResourceID),
+            encountered: try image(vault.encounteredResourceID),
+            selected: try image(vault.selectedResourceID)
+        )
+        scriptID = descriptor.codex.primaryScriptID
+        backgroundStatic = try image(descriptor.codex.background.staticBaseResourceID)
+        backgroundReduceMotion = try image(descriptor.codex.background.reduceMotionResourceID)
+        backgroundHighContrast = try image(descriptor.codex.background.highContrastResourceID)
+        relics = try descriptor.codex.relics.compactMap { relic in
+            guard relic.metadata.availability != .reservedInactive else { return nil }
+            return try artifact(
+                relic.metadata,
+                kind: .relic,
+                primaryID: relic.primaryResourceID,
+                thumbnailID: relic.thumbnailResourceID,
+                standardID: relic.staticFallbackResourceID,
+                highContrastID: relic.highContrastResourceID,
+                defaultLayoutID: relic.defaultLayoutID,
+                layouts: relic.layouts
+            )
+        }
+        seals = try descriptor.codex.seals.compactMap { seal in
+            guard seal.metadata.availability != .reservedInactive else { return nil }
+            return try artifact(
+                seal.metadata,
+                kind: .seal,
+                primaryID: seal.vectorResourceID,
+                thumbnailID: seal.thumbnailResourceID,
+                standardID: seal.vectorResourceID,
+                highContrastID: seal.monochromeFallbackResourceID,
+                sealAllowedScale: seal.allowedScale,
+                sealScaleReference: seal.scaleReference,
+                sealAllowedAnchors: seal.allowedAnchors
+            )
+        }
+        frames = try descriptor.codex.frames.compactMap { frame in
+            guard frame.metadata.availability != .reservedInactive else { return nil }
+            return try artifact(
+                frame.metadata,
+                kind: .frame,
+                primaryID: frame.vectorResourceID,
+                thumbnailID: frame.staticFallbackResourceID,
+                standardID: frame.staticFallbackResourceID,
+                highContrastID: frame.staticFallbackResourceID,
+                compatibleRelicIDs: Set(frame.compatibleRelicIDs),
+                allowsStaticShare: frame.allowsStaticShare
+            )
+        }
+        crests = try descriptor.codex.crests.compactMap { crest in
+            guard crest.metadata.availability != .reservedInactive else { return nil }
+            return try artifact(
+                crest.metadata,
+                kind: .crest,
+                primaryID: crest.vectorResourceID,
+                thumbnailID: crest.staticFallbackResourceID,
+                standardID: crest.staticFallbackResourceID,
+                highContrastID: crest.staticFallbackResourceID
+            )
+        }
+        selectedRelicID = selection.relicID
+        selectedSealID = selection.sealID
+        selectedFrameID = selection.frameID
+
+        guard relics.contains(where: { $0.id == selectedRelicID }),
+              selectedSealID.map({ id in seals.contains(where: { $0.id == id }) }) ?? true,
+              selectedFrameID.map({ id in
+                  frames.contains(where: {
+                      $0.id == id
+                          && $0.allowsStaticShare
+                          && $0.compatibleRelicIDs.contains(selectedRelicID)
+                  })
+              }) ?? true
+        else { throw ThemePresentationResourceError.identityMismatch }
+    }
+}
+
+/// Atomically published UI state. Every reference is revision-bound and was
+/// admitted by the runtime against the corresponding pure image plan.
+@MainActor
+struct ActiveThemeVisualPresentation {
+    let revision: UInt64
+    let plan: ActiveThemeVisualResourcePlan
+    let imageReferences: [ThemeResourceID: RuntimeThemeImageReference]
+
+    init(
+        revision: UInt64,
+        plan: ActiveThemeVisualResourcePlan,
+        imageReferences: [ThemeResourceID: RuntimeThemeImageReference]
+    ) {
+        precondition(revision == plan.revision)
+        self.revision = revision
+        self.plan = plan
+        self.imageReferences = imageReferences.filter { resourceID, reference in
+            resourceID == reference.resourceID
+                && reference.codexID == plan.codex.codexID
+                && reference.contentRevision == revision
+        }
+    }
+
+    func imageReference(for imagePlan: ThemeVisualImagePlan) -> RuntimeThemeImageReference? {
+        guard imagePlan.codexID == plan.codex.codexID,
+              let reference = imageReferences[imagePlan.id],
+              reference.codexID == imagePlan.codexID,
+              reference.role == imagePlan.role,
+              reference.mediaType == imagePlan.mediaType,
+              reference.integrity.byteLength == imagePlan.byteLength,
+              reference.integrity.pixelSize == imagePlan.pixelSize,
+              reference.integrity.sha256 == imagePlan.sha256,
+              reference.contentRevision == revision
+        else { return nil }
+        return reference
+    }
+
+    func image(for resourceID: ThemeResourceID) -> Image? {
+        imageReferences[resourceID]?.image
     }
 }
 

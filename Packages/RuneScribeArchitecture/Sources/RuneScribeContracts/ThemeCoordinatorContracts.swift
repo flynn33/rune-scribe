@@ -235,13 +235,39 @@ public struct SelectThemeCodexCommand: Codable, Equatable, Sendable {
     }
 }
 
+public enum ThemeResourceResolutionPurpose: String, Codable, Hashable, Sendable {
+    case activePresentation = "active-presentation"
+    case catalogPreview = "catalog-preview"
+}
+
 public struct ResolveThemeResourceRequestDTO: Codable, Equatable, Hashable, Sendable {
     public let codexID: CodexID
     public let resourceID: ThemeResourceID
+    public let purpose: ThemeResourceResolutionPurpose
 
-    public init(codexID: CodexID, resourceID: ThemeResourceID) {
+    public init(
+        codexID: CodexID,
+        resourceID: ThemeResourceID,
+        purpose: ThemeResourceResolutionPurpose = .activePresentation
+    ) {
         self.codexID = codexID
         self.resourceID = resourceID
+        self.purpose = purpose
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            codexID: try container.decode(CodexID.self, forKey: .codexID),
+            resourceID: try container.decode(
+                ThemeResourceID.self,
+                forKey: .resourceID
+            ),
+            purpose: try container.decodeIfPresent(
+                ThemeResourceResolutionPurpose.self,
+                forKey: .purpose
+            ) ?? .activePresentation
+        )
     }
 }
 

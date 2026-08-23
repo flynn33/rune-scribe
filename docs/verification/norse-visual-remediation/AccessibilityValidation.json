@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "1.0",
+  "sourceSHA": "74f57f4a11af9df349111ae2416d5c54699ae116",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=42CE8A98-5D00-4718-935F-94A651647D15' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/focused-iphone-standard -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/focused-iphone-standard.xcresult -only-testing:RuneScribIOSUITests/RuneScribeParityUITests/testNorseVisualPresentationAndScreenshots -parallel-testing-enabled NO",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/focused-ipad-standard -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/focused-ipad-standard.xcresult -only-testing:RuneScribIOSUITests/RuneScribeParityUITests/testNorseVisualPresentationAndScreenshots -parallel-testing-enabled NO",
+    "xcrun simctl ui 77D54A1F-0818-4761-B946-D7723490F6B3 content_size accessibility-extra-extra-extra-large",
+    "xcrun simctl ui 77D54A1F-0818-4761-B946-D7723490F6B3 increase_contrast enabled",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/focused-ipad-ax -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/focused-ipad-ax.xcresult -only-testing:RuneScribIOSUITests/RuneScribeParityUITests/testNorseVisualPresentationAndScreenshots -parallel-testing-enabled NO",
+    "xcrun simctl ui 77D54A1F-0818-4761-B946-D7723490F6B3 content_size large",
+    "xcrun simctl ui 77D54A1F-0818-4761-B946-D7723490F6B3 increase_contrast disabled",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=42CE8A98-5D00-4718-935F-94A651647D15' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/ios/derived/full-ios-parity -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/ios/results/full-ios-parity.xcresult -parallel-testing-enabled NO",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/mac/visual-supported-derived -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/mac/visual-supported.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO -only-testing:RuneScribMacParityTests/RuneScribeMacParityTests/testNorseVisualPresentationRendersRuntimeBackedMacSurfacesAndRetainsStateAcrossResize CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS= COMPILER_INDEX_STORE_ENABLE=NO"
+  ],
+  "destination": {
+    "iPhone": "iPhone 17 Pro / iOS 26.2 / 42CE8A98-5D00-4718-935F-94A651647D15",
+    "iPad": "iPad Pro 13-inch (M5) / iOS 26.2 / 77D54A1F-0818-4761-B946-D7723490F6B3",
+    "macOS": "My Mac / arm64"
+  },
+  "startTimestamp": "2026-08-23T03:01:23Z",
+  "endTimestamp": "2026-08-23T03:36:22Z",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/01-swift-test.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/ios/results/focused-iphone-standard.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/ios/results/focused-ipad-standard.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/ios/results/focused-ipad-ax.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/ios/results/full-ios-parity.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/mac/visual-supported.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/mac/attachments-supported/manifest.json"
+  ],
+  "toolchainVersions": {
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "host": "macOS 26.6.2 (25G83)",
+    "xcresulttool": "24514 schema 0.1.0"
+  },
+  "accessibility": {
+    "VoiceOver": "descriptor-backed labels, values, ownership, selection, and traits verified",
+    "colorOnlyState": false,
+    "High Contrast": "distinct descriptor-declared background and Relic paths verified",
+    "Reduce Motion": "distinct descriptor-declared static background path verified",
+    "Dynamic Type": "standard and accessibility-extra-extra-extra-large verified"
+  },
+  "automatedAudits": {
+    "iPhone": [
+      "sufficientElementDescription",
+      "hitRegion",
+      "trait",
+      "textClipped"
+    ],
+    "iPadStandard": [
+      "picker at least 500 by 500",
+      "picker inside window",
+      "Close control hittable",
+      "textClipped"
+    ],
+    "iPadAccessibility": [
+      "exactly one execution",
+      "picker bounds",
+      "description",
+      "hitRegion",
+      "trait",
+      "textClipped"
+    ],
+    "macOS": [
+      "at least three key views",
+      "focusable view present",
+      "accepted first responder",
+      "560x640 resize",
+      "980x720 resize",
+      "720x780 resize"
+    ]
+  },
+  "stateRestoration": {
+    "iPhoneContentSize": "large",
+    "iPadContentSize": "large",
+    "iPadIncreaseContrast": "disabled"
+  }
+}

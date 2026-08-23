@@ -1,0 +1,579 @@
+{
+  "artifactPaths": [
+    "docs/verification/norse-visual-remediation/NegativeMutations.json",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/09-nrv-negative-mutations.log"
+  ],
+  "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 scripts/test-norse-visual-remediation.py --output /tmp/runescribe-nrv-final3.2ce0nv/verification/NegativeMutations.json",
+  "destination": {
+    "kind": "isolated-temporary-copy",
+    "originalRepository": "/Users/jimdaley/GitHub/Rune-Scribe-Norse-Visual-Remediation",
+    "validatorProfile": "implementation"
+  },
+  "endTimestamp": "2026-08-23T03:35:25Z",
+  "executedMutationCount": 20,
+  "expectedMutationCount": 20,
+  "failures": [],
+  "mutations": [
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-004/active-relic-plan"
+      ],
+      "endTimestamp": "2026-08-23T03:34:45Z",
+      "expectedGate": "NRV-004",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "remove-active-relic-from-plan",
+      "instruction": "Remove the active Relic resource from the visual plan.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:34:43Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SemanticThemePresentation.swift": {
+          "before": "7e4e6b5208a825e4613d2f4a16e5d5d4c1437e7e923b57bbdb7e290ae34c08bc",
+          "mutated": "b00f2d50e1a546fbf0d12a8b716b694233ce9403710dacf2e1d1db4406b9ce1f",
+          "restored": "7e4e6b5208a825e4613d2f4a16e5d5d4c1437e7e923b57bbdb7e290ae34c08bc"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SemanticThemePresentation.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-008/interactive-artifact-preview"
+      ],
+      "endTimestamp": "2026-08-23T03:34:47Z",
+      "expectedGate": "NRV-008",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "replace-interactive-artifact-preview-with-color",
+      "instruction": "Replace the interactive Artifact preview with a plain Color.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:34:45Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift": {
+          "before": "47ed055197ced36f87b5601e32cda289181cff163a7c1d34b1484dacfd271210",
+          "mutated": "6549b496bd7a7becbc67db01943959af6cdd6d6de16231a2d78d14144d2d6e31",
+          "restored": "47ed055197ced36f87b5601e32cda289181cff163a7c1d34b1484dacfd271210"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-004/codex-card-plan"
+      ],
+      "endTimestamp": "2026-08-23T03:34:48Z",
+      "expectedGate": "NRV-004",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "stop-resolving-norse-codex-card",
+      "instruction": "Stop resolving the Norse Codex card.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:34:47Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SemanticThemePresentation.swift": {
+          "before": "7e4e6b5208a825e4613d2f4a16e5d5d4c1437e7e923b57bbdb7e290ae34c08bc",
+          "mutated": "ffd8d54e873a0cd436ffe4eb77771d55f60c4e8e25123f2086bf71aa3cc81e0e",
+          "restored": "7e4e6b5208a825e4613d2f4a16e5d5d4c1437e7e923b57bbdb7e290ae34c08bc"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SemanticThemePresentation.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-004/active-relic-plan",
+        "NRV-004/active-visual-plan",
+        "NRV-004/codex-card-plan",
+        "NRV-007/selected-seal-thumbnail"
+      ],
+      "endTimestamp": "2026-08-23T03:34:50Z",
+      "expectedGate": "NRV-007",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "remove-selected-seal-thumbnail",
+      "instruction": "Remove the selected Seal thumbnail from the picker.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:34:48Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SemanticThemePresentation.swift": {
+          "before": "7e4e6b5208a825e4613d2f4a16e5d5d4c1437e7e923b57bbdb7e290ae34c08bc",
+          "mutated": "a92986b4e5650084c7b04fc7d598f061a235200574e027a7648fb7b3f265d2c6",
+          "restored": "7e4e6b5208a825e4613d2f4a16e5d5d4c1437e7e923b57bbdb7e290ae34c08bc"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SemanticThemePresentation.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-010/vault-visual-surface"
+      ],
+      "endTimestamp": "2026-08-23T03:34:52Z",
+      "expectedGate": "NRV-010",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "remove-vault-image-rendering",
+      "instruction": "Remove Vault image rendering while retaining text.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:34:50Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VaultProgressView.swift": {
+          "before": "11591a17d602ed58012edd2ccf53b5a780abc0531ad73b76c42b3792c4acc6d2",
+          "mutated": "a12fde160b516f2b5b4faca1430cc726ed9de2ab5f1d694ca321187d0675b17b",
+          "restored": "11591a17d602ed58012edd2ccf53b5a780abc0531ad73b76c42b3792c4acc6d2"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VaultProgressView.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-015/stable-accessibility-identifiers",
+        "NRV-017/provider-neutral-visual-path"
+      ],
+      "endTimestamp": "2026-08-23T03:34:54Z",
+      "expectedGate": "NRV-017",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "hardcode-norse-in-generic-view",
+      "instruction": "Hard-code codex.norse in the generic production visual view.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:34:52Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift": {
+          "before": "47ed055197ced36f87b5601e32cda289181cff163a7c1d34b1484dacfd271210",
+          "mutated": "a9ec6e5903ea86439ced85387b24ef256b1fe8bfa2cb9a37313967836915331f",
+          "restored": "47ed055197ced36f87b5601e32cda289181cff163a7c1d34b1484dacfd271210"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-017/provider-import"
+      ],
+      "endTimestamp": "2026-08-23T03:34:56Z",
+      "expectedGate": "NRV-017",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "import-norse-provider-from-ui",
+      "instruction": "Import RuneScribeNorseThemeModule from the production UI target.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:34:54Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift": {
+          "before": "47ed055197ced36f87b5601e32cda289181cff163a7c1d34b1484dacfd271210",
+          "mutated": "700cee36556517052fbac5b3a572f850526d4aa48371c5116b3fb3aad276f467",
+          "restored": "47ed055197ced36f87b5601e32cda289181cff163a7c1d34b1484dacfd271210"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-005/runtime-resource-boundary"
+      ],
+      "endTimestamp": "2026-08-23T03:34:57Z",
+      "expectedGate": "NRV-005",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "bypass-runtime-resolution-with-bundle-module",
+      "instruction": "Bypass runtime resource resolution with Bundle.module.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:34:56Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift": {
+          "before": "47ed055197ced36f87b5601e32cda289181cff163a7c1d34b1484dacfd271210",
+          "mutated": "1d8b3218aeb203fce0909398a836af13fb77b48fec9efe580ad716ccb8cbc7a3",
+          "restored": "47ed055197ced36f87b5601e32cda289181cff163a7c1d34b1484dacfd271210"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-002/resource-hash-fixture"
+      ],
+      "endTimestamp": "2026-08-23T03:34:59Z",
+      "expectedGate": "NRV-002",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "corrupt-resource-hash-fixture",
+      "instruction": "Corrupt a resource hash in a test fixture.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:34:57Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeNorseThemeModuleTests/NorseBaseThemeModuleTests.swift": {
+          "before": "4a3cbff860d1a00ac1abad06708cae9f7f7dd0a56cca11234076a48f5686ead9",
+          "mutated": "130aeadc10d81a768f1fe733c927c3af2accd6708652e5f95cbc2f38fb39b7fe",
+          "restored": "4a3cbff860d1a00ac1abad06708cae9f7f7dd0a56cca11234076a48f5686ead9"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeNorseThemeModuleTests/NorseBaseThemeModuleTests.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-006/atomic-visual-state"
+      ],
+      "endTimestamp": "2026-08-23T03:35:01Z",
+      "expectedGate": "NRV-006",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "publish-partial-visual-state",
+      "instruction": "Publish a partial visual state before all required resources resolve.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:34:59Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift": {
+          "before": "0fd3acfd314694abd0bdf4e0b5082401f6ad31b80f2bc36690e8d420505dc6ca",
+          "mutated": "59671b5ebe729af883390d97a97cf0b7b80703438d92f3379c56df3dd275a7ec",
+          "restored": "0fd3acfd314694abd0bdf4e0b5082401f6ad31b80f2bc36690e8d420505dc6ca"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-006/stale-adoption"
+      ],
+      "endTimestamp": "2026-08-23T03:35:03Z",
+      "expectedGate": "NRV-006",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "allow-stale-selection-adoption",
+      "instruction": "Allow a stale selection task to overwrite a newer selection.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:35:01Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift": {
+          "before": "0fd3acfd314694abd0bdf4e0b5082401f6ad31b80f2bc36690e8d420505dc6ca",
+          "mutated": "aa3196bf017bc7b26bf0943a5cc20e19270a3ab57f34828de92aaf0a18382919",
+          "restored": "0fd3acfd314694abd0bdf4e0b5082401f6ad31b80f2bc36690e8d420505dc6ca"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-013/locked-selection"
+      ],
+      "endTimestamp": "2026-08-23T03:35:05Z",
+      "expectedGate": "NRV-013",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "allow-locked-artifact-selection",
+      "instruction": "Allow locked Artifact selection.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:35:03Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift": {
+          "before": "600f5a64459ff8c9f423a5e86b6c33a70c9d4e934e9a487ee024ce6ececafb17",
+          "mutated": "da74b9228c2110e6da43eb284d0a36a721950ebf7cf9ccf5ff452c06d72e18a8",
+          "restored": "600f5a64459ff8c9f423a5e86b6c33a70c9d4e934e9a487ee024ce6ececafb17"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-015/high-contrast-fallback"
+      ],
+      "endTimestamp": "2026-08-23T03:35:07Z",
+      "expectedGate": "NRV-015",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "remove-high-contrast-fallback",
+      "instruction": "Remove High Contrast fallback.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:35:05Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift": {
+          "before": "9cb2986dcb46cfb59faf634937201c271a9712848ff7c0e7bc36925d39cd0896",
+          "mutated": "5558872d9cdc9911e6296049456321943c5d1bfec9184dc96adb998b10e9d043",
+          "restored": "9cb2986dcb46cfb59faf634937201c271a9712848ff7c0e7bc36925d39cd0896"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-015/reduce-motion-fallback"
+      ],
+      "endTimestamp": "2026-08-23T03:35:09Z",
+      "expectedGate": "NRV-015",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "remove-reduce-motion-fallback",
+      "instruction": "Remove Reduce Motion fallback.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:35:07Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift": {
+          "before": "9cb2986dcb46cfb59faf634937201c271a9712848ff7c0e7bc36925d39cd0896",
+          "mutated": "f96cef0e5cd7e1a39134f7239804bbbf9f35fdd02fd8f9fbf4b9767891830ad7",
+          "restored": "9cb2986dcb46cfb59faf634937201c271a9712848ff7c0e7bc36925d39cd0896"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-015/artifact-accessibility-label"
+      ],
+      "endTimestamp": "2026-08-23T03:35:13Z",
+      "expectedGate": "NRV-015",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "remove-accessibility-label",
+      "instruction": "Remove an accessibility label.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:35:09Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift": {
+          "before": "9cb2986dcb46cfb59faf634937201c271a9712848ff7c0e7bc36925d39cd0896",
+          "mutated": "e3a9854ea81b3b56f88b4c76fe9aeb17a1782d12eb6b2e11627da1e2ca1940f3",
+          "restored": "9cb2986dcb46cfb59faf634937201c271a9712848ff7c0e7bc36925d39cd0896"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-005/cache-budget"
+      ],
+      "endTimestamp": "2026-08-23T03:35:16Z",
+      "expectedGate": "NRV-005",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "exceed-decoded-resource-cache-budget",
+      "instruction": "Exceed decoded-resource cache budget.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:35:13Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift": {
+          "before": "d9351495b4a5c656454f6b9ba0ac8ac5e19224f8306ca5def257593b9d3a1566",
+          "mutated": "54a6f53947978bf3ae00115765a40a70655e2912603045737f500111f681c30b",
+          "restored": "d9351495b4a5c656454f6b9ba0ac8ac5e19224f8306ca5def257593b9d3a1566"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-014/optional-provider-fallback"
+      ],
+      "endTimestamp": "2026-08-23T03:35:18Z",
+      "expectedGate": "NRV-014",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "blank-ui-on-optional-provider-failure",
+      "instruction": "Make optional provider failure blank the UI instead of falling back.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:35:16Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationAvailabilityBinding.swift": {
+          "before": "8da51a84f38c9fe3c0c28485cce9d28c91d588c392bdc57d0922ebe3df10c9ed",
+          "mutated": "6b2928615a0a13db1ca86017af204fe275f319a2a8a0696feebd3c3cdca4ed3c",
+          "restored": "8da51a84f38c9fe3c0c28485cce9d28c91d588c392bdc57d0922ebe3df10c9ed"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationAvailabilityBinding.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-004/norse-script-identity"
+      ],
+      "endTimestamp": "2026-08-23T03:35:19Z",
+      "expectedGate": "NRV-004",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "change-script-base-runes",
+      "instruction": "Change script.base-runes.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:35:18Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeDescriptor.swift": {
+          "before": "beb6bdbcd00fba5a1474bbbd22671a9d9867c05eaba18af1a83d468901dd65ca",
+          "mutated": "43c51eb945368500727d39334e5de4a761bc7e8eeaa3d534e4368c7ac98c99c9",
+          "restored": "beb6bdbcd00fba5a1474bbbd22671a9d9867c05eaba18af1a83d468901dd65ca"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeDescriptor.swift"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-002/norse-resource-integrity"
+      ],
+      "endTimestamp": "2026-08-23T03:35:21Z",
+      "expectedGate": "NRV-002",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "alter-norse-production-asset-byte",
+      "instruction": "Change a Norse production asset byte.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:35:19Z",
+      "targetSHA256": {
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.runestone.weathered.png": {
+          "before": "9c235fd40b841e16d35be138cf1f46a5061dd8eee79208e8982208b46d647da9",
+          "mutated": "d261a4f68f68a7b2790903b5c559104bd9cddd58e08e277c85288e54bb273b8a",
+          "restored": "9c235fd40b841e16d35be138cf1f46a5061dd8eee79208e8982208b46d647da9"
+        }
+      },
+      "targets": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.runestone.weathered.png"
+      ]
+    },
+    {
+      "actualOutcome": "REJECTED",
+      "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3 /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository/scripts/check-norse-visual-remediation.py --repo-root /var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/runescribe-nrv-mutations-i1vnju_r/repository --profile implementation --format json",
+      "detectedRules": [
+        "NRV-024/version-build"
+      ],
+      "endTimestamp": "2026-08-23T03:35:23Z",
+      "expectedGate": "NRV-024",
+      "expectedOutcome": "REJECTED",
+      "failure": null,
+      "id": "change-version-build",
+      "instruction": "Change version/build.",
+      "restoredValidatorResult": "PASS",
+      "result": "PASS",
+      "sourceRestored": true,
+      "startTimestamp": "2026-08-23T03:35:21Z",
+      "targetSHA256": {
+        "project.yml": {
+          "before": "fcde23cacd0742758ebbd149ab84cb7be7ee61c4394630d774b38c3e4583fb88",
+          "mutated": "a4698a8db2c0b49bd2441d2ac5d30f8e313b161f4a3c60ffc692224eb34ef1fc",
+          "restored": "fcde23cacd0742758ebbd149ab84cb7be7ee61c4394630d774b38c3e4583fb88"
+        }
+      },
+      "targets": [
+        "project.yml"
+      ]
+    }
+  ],
+  "result": "PASS",
+  "schemaVersion": "1.0",
+  "sourceRestoration": {
+    "afterFingerprint": "6c20811ceef62f64cefb343d5d4fa7fca4304637ef97cba6c57ab94c0c675e7b",
+    "beforeFingerprint": "6c20811ceef62f64cefb343d5d4fa7fca4304637ef97cba6c57ab94c0c675e7b",
+    "originalWorktreeUntouched": true,
+    "strategy": "temporary repository copy; exact target bytes restored after each mutation"
+  },
+  "sourceSHA": "74f57f4a11af9df349111ae2416d5c54699ae116",
+  "startTimestamp": "2026-08-23T03:34:41Z",
+  "toolchainVersions": {
+    "host": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.9.6",
+    "swift": "Apple Swift version 6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2); Target: arm64-apple-macosx26.0",
+    "validator": "scripts/check-norse-visual-remediation.py",
+    "xcode": "Xcode 26.2; Build version 17C52"
+  }
+}

@@ -249,7 +249,7 @@ PASS/FAIL, upload readiness, or pull-request readiness.
 
 ## Source-complete 1.0.38 candidate
 
-Internal summary for owner testing; this is **not a shipment claim**:
+Internal source-complete summary; this is **not a shipment claim**:
 
 1. Optional on-device Progression with approved achievements, milestones, durable records, and privacy-safe existing-user migration
 2. Vault/Progress, Collection, Archive, and accessible queued unlock reveals
@@ -257,7 +257,7 @@ Internal summary for owner testing; this is **not a shipment claim**:
 4. Themed typed-package sharing/receiving, static preview, Encounter and provenance state
 5. Local-first private progression synchronization and optional Game Center policy
 6. Core, runtime, providers, Progression, Cloud, Game Center, and UI boundaries guarded
-7. Marketing version **1.0.38**, build **38**, with owner test required and no upload performed
+7. Marketing version **1.0.38**, build **38**, with discretionary owner validation before distribution and no upload performed
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)
 

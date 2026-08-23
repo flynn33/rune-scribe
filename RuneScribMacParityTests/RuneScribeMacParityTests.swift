@@ -7,6 +7,7 @@ import RuneScribeNorseThemeModule
 import RuneScribePlatform
 @_spi(RuntimeFileImportHost) @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
+import RuneScribeThemeCoordinatorModule
 import RuneScribeThemeMoonleafModule
 @testable import RuneScribeUIModule
 import RuneScribeUIRuntime
@@ -15,6 +16,549 @@ import XCTest
 
 @MainActor
 final class RuneScribeMacParityTests: XCTestCase {
+    func testNorseVisualPresentationRendersRuntimeBackedMacSurfacesAndRetainsStateAcrossResize()
+        async throws
+    {
+        var normalEvidenceDigests = Set<String>()
+        try await withHarness { harness in
+            let snapshot = try XCTUnwrap(harness.session.themeSnapshot)
+            XCTAssertEqual(snapshot.effectiveTheme.id.rawValue, "theme.norse.base")
+            XCTAssertEqual(snapshot.effectiveCodexID.rawValue, "codex.norse")
+            XCTAssertFalse(snapshot.isEmergencyPresentation)
+            XCTAssertEqual(
+                harness.session.selectedThemeRelicID?.rawValue,
+                "relic.norse.runestone.weathered"
+            )
+            XCTAssertEqual(
+                harness.session.selectedThemeSealID?.rawValue,
+                "seal.norse.knotwork"
+            )
+            XCTAssertNil(harness.session.selectedThemeFrameID)
+
+            let settingsAdoptionFinished = await eventually {
+                harness.session.runtimePresentationSettingsReady
+                    && harness.session.runtimeSettingsSnapshot != nil
+                    && (harness.session.activeThemeVisualPresentation?.revision ?? 0) > 1
+            }
+            XCTAssertTrue(settingsAdoptionFinished)
+            await harness.session.loadActiveThemeCatalogVisuals()
+            await harness.session.loadThemeCodexCardPreviews()
+
+            let presentation = try XCTUnwrap(
+                harness.session.activeThemeVisualPresentation
+            )
+            XCTAssertEqual(presentation.revision, presentation.plan.revision)
+            XCTAssertEqual(presentation.plan.themeID.rawValue, "theme.norse.base")
+            XCTAssertEqual(presentation.plan.codexID.rawValue, "codex.norse")
+            XCTAssertEqual(presentation.plan.relics.count, 5)
+            XCTAssertEqual(presentation.plan.seals.count, 6)
+            XCTAssertEqual(presentation.plan.frames.count, 1)
+            XCTAssertEqual(presentation.plan.crests.count, 1)
+
+            let requiredVisuals = [
+                presentation.plan.codex.selected,
+                presentation.plan.backgroundStatic,
+                presentation.plan.backgroundReduceMotion,
+                presentation.plan.backgroundHighContrast,
+                try XCTUnwrap(presentation.plan.selectedRelic).thumbnail,
+                try XCTUnwrap(presentation.plan.selectedRelic).standard,
+                try XCTUnwrap(presentation.plan.selectedRelic).highContrast,
+                try XCTUnwrap(presentation.plan.selectedSeal).thumbnail,
+                try XCTUnwrap(presentation.plan.selectedSeal).standard,
+                try XCTUnwrap(presentation.plan.selectedSeal).highContrast,
+            ]
+            for visual in requiredVisuals {
+                let reference = try XCTUnwrap(
+                    presentation.imageReference(for: visual),
+                    visual.id.rawValue
+                )
+                XCTAssertEqual(reference.codexID, visual.codexID)
+                XCTAssertEqual(reference.resourceID, visual.id)
+                XCTAssertEqual(reference.role, visual.role)
+                XCTAssertEqual(reference.mediaType, visual.mediaType)
+                XCTAssertEqual(reference.integrity.byteLength, visual.byteLength)
+                XCTAssertEqual(reference.integrity.pixelSize, visual.pixelSize)
+                XCTAssertEqual(reference.integrity.sha256, visual.sha256)
+                XCTAssertEqual(reference.contentRevision, presentation.revision)
+                XCTAssertGreaterThan(reference.pixelWidth, 0)
+                XCTAssertGreaterThan(reference.pixelHeight, 0)
+                XCTAssertNotNil(reference.image)
+            }
+            for visual in presentation.plan.catalog {
+                XCTAssertNotNil(
+                    presentation.imageReference(for: visual.thumbnail),
+                    visual.thumbnail.id.rawValue
+                )
+            }
+            let settingsCodexReference = try XCTUnwrap(
+                harness.session.themeCodexCardImageReferences[snapshot.effectiveCodexID]
+            )
+            XCTAssertEqual(
+                settingsCodexReference.resourceID,
+                presentation.plan.codex.selected.id
+            )
+            XCTAssertNotNil(settingsCodexReference.image)
+
+            let selectedState = MacSelectedThemeState(session: harness.session)
+            let workspace = AnyView(RootView(session: harness.session))
+            let workspacePNG = try renderPNG(
+                workspace,
+                size: CGSize(width: 720, height: 780)
+            )
+            try assertDetailedPNG(workspacePNG, minimumUniqueSampleColors: 48)
+            attachPNG(workspacePNG, name: "macos-workspace-pre-encode-norse")
+
+            let focus = inspectKeyboardFocus(
+                workspace,
+                size: CGSize(width: 720, height: 780)
+            )
+            XCTAssertGreaterThanOrEqual(focus.keyViewCount, 3)
+            XCTAssertGreaterThan(focus.focusableViewCount, 0)
+            XCTAssertTrue(focus.acceptedFirstResponder)
+
+            let resizeReport = try inspectWindowResize(
+                workspace,
+                sizes: [
+                    CGSize(width: 560, height: 640),
+                    CGSize(width: 980, height: 720),
+                    CGSize(width: 720, height: 780),
+                ]
+            )
+            XCTAssertEqual(resizeReport.renderedSizes.count, 3)
+            XCTAssertTrue(resizeReport.renderedSizes.allSatisfy {
+                $0.width > 0 && $0.height > 0
+            })
+            XCTAssertEqual(
+                MacSelectedThemeState(session: harness.session),
+                selectedState,
+                "Window resizing must not reset the selected visual state."
+            )
+
+            let settingsPNG = try renderPNG(
+                AnyView(
+                    SettingsView()
+                        .environmentObject(harness.session)
+                ),
+                size: CGSize(width: 760, height: 900)
+            )
+            try assertDetailedPNG(settingsPNG, minimumUniqueSampleColors: 48)
+            attachPNG(settingsPNG, name: "macos-settings-norse")
+
+            let pickerItems = presentation.plan.catalog.map { visual in
+                ThemeArtifactBrowserItem(
+                    id: visual.id,
+                    resourceID: visual.thumbnail.id,
+                    name: visual.displayName,
+                    description: visual.description,
+                    kind: visual.kind,
+                    rarity: visual.rarity,
+                    state: visual.id == presentation.plan.selectedRelicID
+                        || visual.id == presentation.plan.selectedSealID
+                        || visual.id == presentation.plan.selectedFrameID
+                        ? .selected
+                        : visual.availability == .included ? .owned : .locked,
+                    accessibilityLabel: visual.accessibilityLabel,
+                    accessibilityHint: visual.accessibilityHint,
+                    provenance: snapshot.effectiveTheme.rights.first(where: {
+                        $0.id == visual.rightsID
+                    })?.sourceReference,
+                    isSelectable: visual.availability == .included
+                )
+            }
+            let knotworkID = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.knotwork"))
+            let forgeFlameID = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.forge-flame"))
+            let knotwork = try XCTUnwrap(pickerItems.first(where: { $0.id == knotworkID }))
+            let forgeFlame = try XCTUnwrap(pickerItems.first(where: { $0.id == forgeFlameID }))
+            XCTAssertEqual(knotwork.name, "Knotwork Mark")
+            XCTAssertEqual(knotwork.state, .selected)
+            XCTAssertEqual(forgeFlame.name, "Forge Flame")
+            XCTAssertEqual(forgeFlame.state, .owned)
+            for item in [knotwork, forgeFlame] {
+                let visual = try XCTUnwrap(
+                    presentation.plan.catalog.first(where: { $0.id == item.id })
+                )
+                XCTAssertEqual(item.resourceID, visual.thumbnail.id)
+                XCTAssertNotNil(presentation.imageReference(for: visual.thumbnail)?.image)
+            }
+            let pickerPNG = try renderPNG(
+                AnyView(
+                    ThemeArtifactBrowserView(
+                        title: "Choose Artifact",
+                        items: pickerItems,
+                        includesNone: false,
+                        canSelectNone: false,
+                        selectNone: {},
+                        select: { _ in }
+                    ) { item in
+                        if let visual = presentation.plan.catalog.first(where: {
+                            $0.id == item.id
+                        }),
+                        let image = presentation.imageReference(
+                            for: visual.thumbnail
+                        )?.image {
+                            AnyView(image.resizable().scaledToFill())
+                        } else {
+                            AnyView(
+                                ThemeVisualPlaceholder(
+                                    systemImage: item.kind.systemImage,
+                                    label: "\(item.name) artwork unavailable"
+                                )
+                            )
+                        }
+                    }
+                    .background(Color.runeNavy)
+                ),
+                size: CGSize(width: 820, height: 760)
+            )
+            try assertDetailedPNG(pickerPNG, minimumUniqueSampleColors: 64)
+            attachPNG(pickerPNG, name: "macos-artifact-picker-norse")
+
+            let lockedItem = try XCTUnwrap(
+                pickerItems.first(where: { $0.state == .locked })
+            )
+            let lockedVisual = try XCTUnwrap(
+                presentation.plan.catalog.first(where: { $0.id == lockedItem.id })
+            )
+            let lockedReference = try XCTUnwrap(
+                presentation.imageReference(for: lockedVisual.thumbnail)
+            )
+            let lockedImage = try XCTUnwrap(lockedReference.image)
+            XCTAssertEqual(lockedItem.resourceID, lockedVisual.thumbnail.id)
+            XCTAssertEqual(lockedReference.resourceID, lockedItem.resourceID)
+            XCTAssertFalse(lockedItem.isSelectable)
+            XCTAssertNotEqual(lockedVisual.availability, .included)
+            let lockedTilePNG = try renderPNG(
+                AnyView(
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("LOCKED ARTIFACT")
+                            .font(.caption.bold().monospaced())
+                            .foregroundStyle(Color.runeGoldBright)
+                        Text(lockedItem.resourceID.rawValue)
+                            .font(.caption2.monospaced())
+                            .foregroundStyle(Color.runeSilver)
+                        ThemeArtifactTile(item: lockedItem, action: {}) {
+                            lockedImage.resizable().scaledToFill()
+                        }
+                    }
+                    .padding(24)
+                    .background(Color.runeNavy)
+                ),
+                size: CGSize(width: 360, height: 540)
+            )
+            try assertDetailedPNG(lockedTilePNG, minimumUniqueSampleColors: 48)
+            attachPNG(lockedTilePNG, name: "macos-locked-artifact-norse")
+
+            let activeCipher = try XCTUnwrap(harness.session.activeCipher)
+            let encoded = try await harness.session.encode(
+                "Norse hosted visual parity",
+                cipherID: activeCipher.id
+            )
+            let selection = try SharePresentationSelection(
+                codexID: presentation.plan.codexID,
+                scriptID: presentation.plan.scriptID,
+                relicID: presentation.plan.selectedRelicID,
+                sealID: presentation.plan.selectedSealID,
+                frameID: presentation.plan.selectedFrameID,
+                presentationVersion:
+                    SharePresentationSelection.supportedPresentationVersion
+            )
+            let composition = try ThemeArtifactCompositionPolicy.interactivePlan(
+                selection: selection,
+                inscription: encoded.runes,
+                descriptor: snapshot.effectiveTheme,
+                colorMode: .standard,
+                reduceMotion: false,
+                accessibilityLabel:
+                    "Settled Norse artifact using Weathered Rune Stone and Knotwork Seal",
+                provenanceLabel: "Runtime-admitted Norse resources"
+            )
+            XCTAssertEqual(composition.selection, selection)
+            XCTAssertEqual(
+                composition.relicResourceID,
+                try XCTUnwrap(presentation.plan.selectedRelic).standard.id
+            )
+            XCTAssertEqual(
+                composition.sealResourceID,
+                try XCTUnwrap(presentation.plan.selectedSeal).standard.id
+            )
+            XCTAssertEqual(
+                composition.backgroundResourceID,
+                presentation.plan.backgroundStatic.id
+            )
+            for resourceID in [
+                composition.relicResourceID,
+                composition.sealResourceID,
+                composition.frameResourceID,
+                Optional(composition.backgroundResourceID),
+            ].compactMap({ $0 }) {
+                XCTAssertNotNil(
+                    presentation.image(for: resourceID),
+                    resourceID.rawValue
+                )
+            }
+
+            let previewPNG = try renderPNG(
+                artifactEvidencePreview(
+                    title: "Settled encoded preview",
+                    plan: composition,
+                    presentation: presentation
+                ),
+                size: CGSize(width: 760, height: 590)
+            )
+            try assertDetailedPNG(previewPNG, minimumUniqueSampleColors: 96)
+            let fallbackPreviewPNG = try renderPNG(
+                AnyView(
+                    ThemeVisualPlaceholder(
+                        systemImage: "photo.artframe",
+                        label: "Artifact preview unavailable"
+                    )
+                ),
+                size: CGSize(width: 760, height: 590)
+            )
+            XCTAssertNotEqual(
+                Self.digestHex(previewPNG),
+                Self.digestHex(fallbackPreviewPNG),
+                "The settled preview must not collapse to the semantic placeholder."
+            )
+            attachPNG(previewPNG, name: "macos-settled-preview-norse")
+
+            let settledWorkspacePNG = try renderPNG(
+                AnyView(
+                    ContentView(
+                        initialSettledArtifact: ContentViewSettledArtifactSeed(
+                            composition: composition,
+                            presentation: presentation
+                        )
+                    )
+                    .environmentObject(harness.session)
+                    .environment(
+                        \.runtimeApplicationResourcePresentation,
+                        harness.session.resourcePresentation
+                    )
+                ),
+                size: CGSize(width: 720, height: 780)
+            )
+            try assertDetailedPNG(
+                settledWorkspacePNG,
+                minimumUniqueSampleColors: 96
+            )
+            XCTAssertNotEqual(
+                Self.digestHex(settledWorkspacePNG),
+                Self.digestHex(workspacePNG),
+                "The required workspace evidence must show the settled encoded canvas."
+            )
+            attachPNG(settledWorkspacePNG, name: "macos-workspace-norse")
+
+            let highContrastComposition = try ThemeArtifactCompositionPolicy
+                .interactivePlan(
+                    selection: selection,
+                    inscription: encoded.runes,
+                    descriptor: snapshot.effectiveTheme,
+                    colorMode: .highContrast,
+                    reduceMotion: false,
+                    accessibilityLabel: "High Contrast Norse artifact preview",
+                    provenanceLabel: "Runtime-admitted Norse resources"
+                )
+            XCTAssertEqual(
+                highContrastComposition.relicResourceID,
+                try XCTUnwrap(presentation.plan.selectedRelic).highContrast.id
+            )
+            XCTAssertEqual(
+                highContrastComposition.sealResourceID,
+                try XCTUnwrap(presentation.plan.selectedSeal).highContrast.id
+            )
+            XCTAssertEqual(
+                highContrastComposition.backgroundResourceID,
+                presentation.plan.backgroundHighContrast.id
+            )
+            for resourceID in [
+                highContrastComposition.relicResourceID,
+                highContrastComposition.sealResourceID,
+                Optional(highContrastComposition.backgroundResourceID),
+            ].compactMap({ $0 }) {
+                XCTAssertNotNil(presentation.image(for: resourceID), resourceID.rawValue)
+            }
+            let highContrastPNG = try renderPNG(
+                artifactEvidencePreview(
+                    title: "High Contrast preview",
+                    plan: highContrastComposition,
+                    presentation: presentation
+                ),
+                size: CGSize(width: 760, height: 590)
+            )
+            try assertDetailedPNG(highContrastPNG, minimumUniqueSampleColors: 96)
+            XCTAssertNotEqual(
+                Self.digestHex(highContrastPNG),
+                Self.digestHex(previewPNG)
+            )
+            attachPNG(highContrastPNG, name: "macos-high-contrast-preview-norse")
+
+            let reduceMotionComposition = try ThemeArtifactCompositionPolicy
+                .interactivePlan(
+                    selection: selection,
+                    inscription: encoded.runes,
+                    descriptor: snapshot.effectiveTheme,
+                    colorMode: .standard,
+                    reduceMotion: true,
+                    accessibilityLabel: "Reduce Motion Norse artifact preview",
+                    provenanceLabel: "Runtime-admitted Norse resources"
+                )
+            XCTAssertEqual(
+                reduceMotionComposition.relicResourceID,
+                try XCTUnwrap(presentation.plan.selectedRelic).standard.id
+            )
+            XCTAssertEqual(
+                reduceMotionComposition.sealResourceID,
+                try XCTUnwrap(presentation.plan.selectedSeal).standard.id
+            )
+            XCTAssertEqual(
+                reduceMotionComposition.backgroundResourceID,
+                presentation.plan.backgroundReduceMotion.id
+            )
+            XCTAssertEqual(
+                reduceMotionComposition.backgroundResourceID,
+                composition.backgroundResourceID
+            )
+            for resourceID in [
+                reduceMotionComposition.relicResourceID,
+                reduceMotionComposition.sealResourceID,
+                Optional(reduceMotionComposition.backgroundResourceID),
+            ].compactMap({ $0 }) {
+                XCTAssertNotNil(presentation.image(for: resourceID), resourceID.rawValue)
+            }
+            let reduceMotionPNG = try renderPNG(
+                artifactEvidencePreview(
+                    title: "Reduce Motion preview",
+                    plan: reduceMotionComposition,
+                    presentation: presentation
+                ),
+                size: CGSize(width: 760, height: 590)
+            )
+            try assertDetailedPNG(reduceMotionPNG, minimumUniqueSampleColors: 96)
+            let reduceMotionDigest = Self.digestHex(reduceMotionPNG)
+            XCTAssertNotEqual(reduceMotionDigest, Self.digestHex(previewPNG))
+            XCTAssertNotEqual(reduceMotionDigest, Self.digestHex(highContrastPNG))
+            attachPNG(reduceMotionPNG, name: "macos-reduce-motion-preview-norse")
+
+            harness.session.progressionSnapshot = try ProgressionSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 1_700_000_000),
+                availability: .available,
+                storeHealth: .loaded,
+                catalogID: nil,
+                catalogVersion: nil
+            )
+            harness.session.progressionRailState = .available
+            let initialVaultPNG = try renderPNG(
+                AnyView(
+                    VaultProgressView()
+                        .environmentObject(harness.session)
+                ),
+                size: CGSize(width: 840, height: 940)
+            )
+            let vaultPNG = try renderPNG(
+                AnyView(
+                    VaultProgressView()
+                        .environmentObject(harness.session)
+                ),
+                size: CGSize(width: 840, height: 940),
+                afterClicking: CGPoint(x: 400, y: 140)
+            )
+            XCTAssertNotEqual(
+                Self.digestHex(vaultPNG),
+                Self.digestHex(initialVaultPNG),
+                "The hosted Vault control must switch from Journey to Vault."
+            )
+            try assertMaterialPNGChange(
+                from: initialVaultPNG,
+                to: vaultPNG,
+                minimumChangedSampleRatio: 0.15
+            )
+            try assertDetailedPNG(vaultPNG, minimumUniqueSampleColors: 64)
+            attachPNG(vaultPNG, name: "macos-vault-norse")
+
+            let screenshotDigests = Set([
+                settledWorkspacePNG,
+                settingsPNG,
+                pickerPNG,
+                previewPNG,
+                lockedTilePNG,
+                highContrastPNG,
+                reduceMotionPNG,
+                vaultPNG,
+            ].map(Self.digestHex))
+            XCTAssertEqual(
+                screenshotDigests.count,
+                8,
+                "Every macOS evidence surface must be a distinct rendered image."
+            )
+            normalEvidenceDigests = screenshotDigests
+            XCTAssertEqual(
+                MacSelectedThemeState(session: harness.session),
+                selectedState,
+                "Rendering Settings, picker, preview, and Vault must retain selection."
+            )
+        }
+
+        let unavailableFont = NorseBaseBundledResourceCatalog.notoSansRunic
+        try await withHarness(unavailableThemeResource: unavailableFont) { harness in
+            let emergencyReady = await eventually {
+                harness.session.themeSnapshot?.isEmergencyPresentation == true
+                    && harness.session.runtimePresentationSettingsReady
+            }
+            XCTAssertTrue(emergencyReady)
+            let snapshot = try XCTUnwrap(harness.session.themeSnapshot)
+            XCTAssertTrue(snapshot.isEmergencyPresentation)
+            XCTAssertEqual(snapshot.effectiveCodexID.rawValue, "codex.norse")
+            XCTAssertEqual(snapshot.fallbackReason, .invalidResources)
+            let script = try XCTUnwrap(
+                snapshot.effectiveTheme.codex.scripts.first(where: {
+                    $0.id == snapshot.effectiveTheme.codex.primaryScriptID
+                })
+            )
+            XCTAssertEqual(
+                script.fontResourceID?.rawValue,
+                "resource.font.norse.noto-sans-runic"
+            )
+            XCTAssertEqual(unavailableFont.name, "NotoSansRunic-Regular")
+            XCTAssertNil(harness.session.activeThemeVisualPresentation)
+            XCTAssertTrue(harness.session.themeCodexCardImageReferences.isEmpty)
+            XCTAssertNil(harness.session.selectedThemeRelicID)
+            XCTAssertNil(harness.session.selectedThemeSealID)
+            XCTAssertNil(harness.session.selectedThemeFrameID)
+
+            let emergencyPNG = try renderPNG(
+                AnyView(RootView(session: harness.session)),
+                size: CGSize(width: 720, height: 780)
+            )
+            try assertDetailedPNG(emergencyPNG, minimumUniqueSampleColors: 24)
+            let emergencyDigest = Self.digestHex(emergencyPNG)
+            XCTAssertFalse(
+                normalEvidenceDigests.contains(emergencyDigest),
+                "Emergency presentation evidence must differ from every runtime-backed surface."
+            )
+            attachPNG(emergencyPNG, name: "macos-emergency-fallback-norse")
+        }
+    }
+
+    func testDefaultContentViewStartsWithAnEmptyEditableWorkspace() async throws {
+        try await withHarness { harness in
+            let state = inspectContentEditingState(
+                AnyView(
+                    ContentView()
+                        .environmentObject(harness.session)
+                        .environment(
+                            \.runtimeApplicationResourcePresentation,
+                            harness.session.resourcePresentation
+                        )
+                ),
+                size: CGSize(width: 720, height: 780)
+            )
+            XCTAssertTrue(state.hasEditableTextView)
+            XCTAssertEqual(state.text, "")
+        }
+    }
+
     func testRealViewsRenderWithFocusableWorkspaceAndExactCommandCatalog() async throws {
         try await withHarness { harness in
             let workspace = AnyView(RootView(session: harness.session))
@@ -432,6 +976,7 @@ final class RuneScribeMacParityTests: XCTestCase {
     }
 
     private func withHarness(
+        unavailableThemeResource: ApplicationResource? = nil,
         _ operation: (MacParityHarness) async throws -> Void
     ) async throws {
         let fontURL = try XCTUnwrap(
@@ -441,7 +986,8 @@ final class RuneScribeMacParityTests: XCTestCase {
             )
         )
         let harness = try await MacParityHarness(
-            bundledFontURL: fontURL
+            bundledFontURL: fontURL,
+            unavailableThemeResource: unavailableThemeResource
         )
         do {
             try await harness.start()
@@ -494,6 +1040,66 @@ final class RuneScribeMacParityTests: XCTestCase {
         return data
     }
 
+    private func artifactEvidencePreview(
+        title: String,
+        plan: ThemeArtifactCompositionPlan,
+        presentation: ActiveThemeVisualPresentation
+    ) -> AnyView {
+        AnyView(
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title.uppercased())
+                    .font(.caption.bold().monospaced())
+                    .foregroundStyle(Color.runeGoldBright)
+                Text([
+                    plan.relicResourceID.rawValue,
+                    plan.sealResourceID?.rawValue,
+                    plan.frameResourceID?.rawValue,
+                    plan.backgroundResourceID.rawValue,
+                ].compactMap { $0 }.joined(separator: " • "))
+                    .font(.caption2.monospaced())
+                    .foregroundStyle(Color.runeSilver)
+                    .lineLimit(2)
+                ThemeArtifactPreview(
+                    plan: plan,
+                    image: { presentation.image(for: $0) }
+                )
+            }
+            .padding(16)
+            .background(Color.runeNavy)
+        )
+    }
+
+    private func inspectContentEditingState(
+        _ view: AnyView,
+        size: CGSize
+    ) -> ContentEditingState {
+        _ = NSApplication.shared
+        let hostingView = NSHostingView(
+            rootView: view.frame(width: size.width, height: size.height)
+        )
+        let window = makeInteractiveOffscreenWindow(size: size)
+        window.contentView = hostingView
+        window.makeKeyAndOrderFront(nil)
+        defer { window.orderOut(nil) }
+
+        hostingView.layoutSubtreeIfNeeded()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.08))
+        hostingView.layoutSubtreeIfNeeded()
+        let textView = viewDescendants(of: hostingView)
+            .compactMap { $0 as? NSTextView }
+            .first(where: { $0.isEditable })
+        return ContentEditingState(
+            hasEditableTextView: textView != nil,
+            text: textView?.string
+        )
+    }
+
+    private func viewDescendants(of root: NSView) -> [NSView] {
+        root.subviews.reduce(into: [root]) { result, child in
+            result.append(contentsOf: viewDescendants(of: child))
+        }
+    }
+
     private func renderPNG(_ view: AnyView, size: CGSize) throws -> Data {
         let hostingView = NSHostingView(
             rootView: view.frame(width: size.width, height: size.height)
@@ -501,6 +1107,55 @@ final class RuneScribeMacParityTests: XCTestCase {
         hostingView.frame = NSRect(origin: .zero, size: size)
         hostingView.layoutSubtreeIfNeeded()
         RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.03))
+        hostingView.layoutSubtreeIfNeeded()
+        hostingView.displayIfNeeded()
+
+        let bitmap = try XCTUnwrap(
+            hostingView.bitmapImageRepForCachingDisplay(in: hostingView.bounds)
+        )
+        hostingView.cacheDisplay(in: hostingView.bounds, to: bitmap)
+        return try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
+    }
+
+    private func renderPNG(
+        _ view: AnyView,
+        size: CGSize,
+        afterClicking point: CGPoint
+    ) throws -> Data {
+        _ = NSApplication.shared
+        let hostingView = NSHostingView(
+            rootView: view.frame(width: size.width, height: size.height)
+        )
+        let window = makeInteractiveOffscreenWindow(size: size)
+        window.contentView = hostingView
+        window.makeKeyAndOrderFront(nil)
+        defer { window.orderOut(nil) }
+
+        hostingView.layoutSubtreeIfNeeded()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.08))
+        hostingView.layoutSubtreeIfNeeded()
+        _ = try XCTUnwrap(
+            hostingView.hitTest(point),
+            "The deterministic hosted click did not hit the Vault section control."
+        )
+        let eventLocation = hostingView.convert(point, to: nil)
+        let mouseDown = try hostedMouseEvent(
+            type: .leftMouseDown,
+            location: eventLocation,
+            window: window,
+            eventNumber: 1,
+            pressure: 1
+        )
+        let mouseUp = try hostedMouseEvent(
+            type: .leftMouseUp,
+            location: eventLocation,
+            window: window,
+            eventNumber: 2,
+            pressure: 0
+        )
+        window.sendEvent(mouseDown)
+        window.sendEvent(mouseUp)
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.08))
         hostingView.layoutSubtreeIfNeeded()
         hostingView.displayIfNeeded()
 
@@ -519,6 +1174,104 @@ final class RuneScribeMacParityTests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+
+    private func assertDetailedPNG(
+        _ data: Data,
+        minimumUniqueSampleColors: Int,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) throws {
+        let bitmap = try XCTUnwrap(
+            NSBitmapImageRep(data: data),
+            "The rendered evidence is not a decodable PNG.",
+            file: file,
+            line: line
+        )
+        XCTAssertGreaterThan(bitmap.pixelsWide, 0, file: file, line: line)
+        XCTAssertGreaterThan(bitmap.pixelsHigh, 0, file: file, line: line)
+
+        let stepX = max(1, bitmap.pixelsWide / 64)
+        let stepY = max(1, bitmap.pixelsHigh / 64)
+        var sampledColors = Set<UInt32>()
+        var opaqueSampleCount = 0
+        var totalSampleCount = 0
+        for y in stride(from: 0, to: bitmap.pixelsHigh, by: stepY) {
+            for x in stride(from: 0, to: bitmap.pixelsWide, by: stepX) {
+                guard let source = bitmap.colorAt(x: x, y: y),
+                      let color = source.usingColorSpace(.deviceRGB)
+                else { continue }
+                let red = UInt32((color.redComponent * 255).rounded())
+                let green = UInt32((color.greenComponent * 255).rounded())
+                let blue = UInt32((color.blueComponent * 255).rounded())
+                let alpha = UInt32((color.alphaComponent * 255).rounded())
+                sampledColors.insert(
+                    (red << 24) | (green << 16) | (blue << 8) | alpha
+                )
+                opaqueSampleCount += alpha >= 250 ? 1 : 0
+                totalSampleCount += 1
+            }
+        }
+        XCTAssertGreaterThanOrEqual(
+            sampledColors.count,
+            minimumUniqueSampleColors,
+            "The evidence image lacks the expected visual detail.",
+            file: file,
+            line: line
+        )
+        XCTAssertGreaterThan(
+            opaqueSampleCount,
+            totalSampleCount / 2,
+            "Most of the evidence image must contain visible pixels.",
+            file: file,
+            line: line
+        )
+    }
+
+    private func assertMaterialPNGChange(
+        from baselineData: Data,
+        to changedData: Data,
+        minimumChangedSampleRatio: Double,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) throws {
+        let baseline = try XCTUnwrap(
+            NSBitmapImageRep(data: baselineData),
+            file: file,
+            line: line
+        )
+        let changed = try XCTUnwrap(
+            NSBitmapImageRep(data: changedData),
+            file: file,
+            line: line
+        )
+        XCTAssertEqual(baseline.pixelsWide, changed.pixelsWide, file: file, line: line)
+        XCTAssertEqual(baseline.pixelsHigh, changed.pixelsHigh, file: file, line: line)
+
+        let stepX = max(1, baseline.pixelsWide / 80)
+        let stepY = max(1, baseline.pixelsHigh / 80)
+        var sampleCount = 0
+        var changedSampleCount = 0
+        for y in stride(from: 0, to: baseline.pixelsHigh, by: stepY) {
+            for x in stride(from: 0, to: baseline.pixelsWide, by: stepX) {
+                guard let before = baseline.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB),
+                      let after = changed.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB)
+                else { continue }
+                let componentDelta = abs(before.redComponent - after.redComponent)
+                    + abs(before.greenComponent - after.greenComponent)
+                    + abs(before.blueComponent - after.blueComponent)
+                    + abs(before.alphaComponent - after.alphaComponent)
+                changedSampleCount += componentDelta > 0.04 ? 1 : 0
+                sampleCount += 1
+            }
+        }
+        XCTAssertGreaterThan(
+            Double(changedSampleCount) / Double(max(1, sampleCount)),
+            minimumChangedSampleRatio,
+            "The hosted interaction did not materially change the rendered surface.",
+            file: file,
+            line: line
+        )
     }
 
     private func inspectKeyboardFocus(
@@ -577,6 +1330,83 @@ final class RuneScribeMacParityTests: XCTestCase {
         return window
     }
 
+    private func makeInteractiveOffscreenWindow(size: CGSize) -> NSWindow {
+        let minimumX = NSScreen.screens.map(\.frame.minX).min() ?? 0
+        let minimumY = NSScreen.screens.map(\.frame.minY).min() ?? 0
+        let window = NSWindow(
+            contentRect: NSRect(
+                x: minimumX - 10_000,
+                y: minimumY - 10_000,
+                width: size.width,
+                height: size.height
+            ),
+            styleMask: [.titled, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+        window.alphaValue = 0.01
+        window.hasShadow = false
+        return window
+    }
+
+    private func hostedMouseEvent(
+        type: NSEvent.EventType,
+        location: CGPoint,
+        window: NSWindow,
+        eventNumber: Int,
+        pressure: Float
+    ) throws -> NSEvent {
+        try XCTUnwrap(
+            NSEvent.mouseEvent(
+                with: type,
+                location: location,
+                modifierFlags: [],
+                timestamp: ProcessInfo.processInfo.systemUptime,
+                windowNumber: window.windowNumber,
+                context: nil,
+                eventNumber: eventNumber,
+                clickCount: 1,
+                pressure: pressure
+            )
+        )
+    }
+
+    private func inspectWindowResize(
+        _ view: AnyView,
+        sizes: [CGSize]
+    ) throws -> WindowResizeReport {
+        _ = NSApplication.shared
+        let initialSize = try XCTUnwrap(sizes.first)
+        let hostingView = NSHostingView(rootView: view)
+        let window = NSWindow(
+            contentRect: NSRect(origin: .zero, size: initialSize),
+            styleMask: [.titled, .resizable],
+            backing: .buffered,
+            defer: false
+        )
+        window.contentView = hostingView
+        window.orderBack(nil)
+        defer { window.orderOut(nil) }
+
+        var renderedSizes: [CGSize] = []
+        for size in sizes {
+            window.setContentSize(size)
+            hostingView.frame = NSRect(origin: .zero, size: size)
+            hostingView.layoutSubtreeIfNeeded()
+            RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.03))
+            hostingView.layoutSubtreeIfNeeded()
+            hostingView.displayIfNeeded()
+            let bitmap = try XCTUnwrap(
+                hostingView.bitmapImageRepForCachingDisplay(in: hostingView.bounds)
+            )
+            hostingView.cacheDisplay(in: hostingView.bounds, to: bitmap)
+            XCTAssertGreaterThan(bitmap.pixelsWide, 0)
+            XCTAssertGreaterThan(bitmap.pixelsHigh, 0)
+            renderedSizes.append(hostingView.bounds.size)
+        }
+        return WindowResizeReport(renderedSizes: renderedSizes)
+    }
+
     private func eventually(
         _ predicate: @escaping @MainActor () -> Bool
     ) async -> Bool {
@@ -602,6 +1432,38 @@ private struct MacParityPersistentState: Sendable {
     let protectedFiles = InMemoryProtectedFileStore()
 }
 
+private struct MacParityThemeResourceLocator: ApplicationResourceLocator, Sendable {
+    let bundled: BundleApplicationResourceLocator
+    let unavailableResource: ApplicationResource?
+
+    func data(for resource: ApplicationResource) async throws -> Data {
+        try requireAvailable(resource)
+        return try await bundled.data(for: resource)
+    }
+
+    func data(
+        for resource: ApplicationResource,
+        maximumByteCount: Int
+    ) async throws -> Data {
+        try requireAvailable(resource)
+        return try await bundled.data(
+            for: resource,
+            maximumByteCount: maximumByteCount
+        )
+    }
+
+    func url(for resource: ApplicationResource) async throws -> URL {
+        try requireAvailable(resource)
+        return try await bundled.url(for: resource)
+    }
+
+    private func requireAvailable(_ resource: ApplicationResource) throws {
+        guard resource != unavailableResource else {
+            throw ApplicationResourceLocatorError.resourceNotFound(resource)
+        }
+    }
+}
+
 @MainActor
 private final class MacParityHarness {
     let session: RuneScribeUISession
@@ -618,6 +1480,7 @@ private final class MacParityHarness {
 
     init(
         bundledFontURL: URL,
+        unavailableThemeResource: ApplicationResource? = nil,
         persistentState: MacParityPersistentState = MacParityPersistentState()
     ) async throws {
         self.bundledFontURL = bundledFontURL
@@ -643,6 +1506,14 @@ private final class MacParityHarness {
         )
         let resources = MappedApplicationResourceLocator(
             locations: [.bundledRuneFont: bundledFontURL]
+        )
+        let themeResources = MacParityThemeResourceLocator(
+            bundled: BundleApplicationResourceLocator(
+                bundle: .main,
+                moduleBundles:
+                    RuneScribeNorseThemeModuleBootstrap.ownerScopedResourceBundles
+            ),
+            unavailableResource: unavailableThemeResource
         )
         let fontRegistrar = CoreTextFontRegistrar()
         let contacts = InMemoryContactAccessService(authorizationStatus: .denied)
@@ -748,6 +1619,18 @@ private final class MacParityHarness {
             platform: .macOS
         )
         let clientCapture = MacParityApplicationClientCapture()
+        try await runtime.installPlatformAdapter(
+            themeResources,
+            for: RuneScribeServiceKeys.applicationResourceLocator
+        )
+        try await runtime.installPlatformAdapter(
+            fontRegistrar,
+            for: RuneScribeServiceKeys.systemFontRegistrar
+        )
+        try await runtime.installPlatformAdapter(
+            clipboard,
+            for: RuneScribeServiceKeys.clipboardWrite
+        )
         try await runtime.register(
             manifest: MacParityRuntimeModules.coreManifest,
             factory: AnyModuleFactory(
@@ -756,10 +1639,12 @@ private final class MacParityHarness {
                 MacParityApplicationPublishingModule(service: service)
             }
         )
+        try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeCoordinatorModuleBootstrap.register(with: runtime)
         try await runtime.register(
-            manifest: MacParityRuntimeModules.clientManifest,
+            manifest: RuneScribeUIModuleBootstrap.manifest(),
             factory: AnyModuleFactory(
-                descriptor: MacParityRuntimeModules.clientDescriptor
+                descriptor: RuneScribeUIModuleBootstrap.descriptor
             ) {
                 MacParityApplicationClientModule(capture: clientCapture)
             }
@@ -793,6 +1678,9 @@ private final class MacParityHarness {
         session = RuneScribeUISession(
             applicationClient: applicationClient,
             runtimeIO: uiRuntimeIO,
+            availabilityClient: try await clientCapture.requireAvailabilityClient(),
+            themeCoordinatorClient: try await clientCapture.requireThemeCoordinatorClient(),
+            runtimeSettingsClient: try await clientCapture.requireRuntimeSettingsClient(),
             inboundFileImportSession: inboundFileImportSession,
             resourcePresentation: RuntimeApplicationResourcePresentation(
                 splashVideo: nil,
@@ -803,6 +1691,7 @@ private final class MacParityHarness {
                 buildNumber: "1"
             )
         )
+        try await session.prepareInitialTheme()
     }
 
     func start() async throws {
@@ -928,10 +1817,22 @@ private struct MacParityApplicationPublishingModule: RuneScribeModule {
 private actor MacParityApplicationClientCapture {
     private var client: RuntimeApplicationClient?
     private var runtimeIO: RuntimeIOClient?
+    private var availabilityClient: RuntimeAvailabilityClient?
+    private var themeCoordinatorClient: RuntimeThemeCoordinatorClient?
+    private var runtimeSettingsClient: RuntimeSettingsClient?
 
-    func store(_ client: RuntimeApplicationClient, runtimeIO: RuntimeIOClient) {
+    func store(
+        _ client: RuntimeApplicationClient,
+        runtimeIO: RuntimeIOClient,
+        availabilityClient: RuntimeAvailabilityClient,
+        themeCoordinatorClient: RuntimeThemeCoordinatorClient,
+        runtimeSettingsClient: RuntimeSettingsClient
+    ) {
         self.client = client
         self.runtimeIO = runtimeIO
+        self.availabilityClient = availabilityClient
+        self.themeCoordinatorClient = themeCoordinatorClient
+        self.runtimeSettingsClient = runtimeSettingsClient
     }
 
     func requireClient() throws -> RuntimeApplicationClient {
@@ -947,16 +1848,46 @@ private actor MacParityApplicationClientCapture {
         }
         return runtimeIO
     }
+
+    func requireAvailabilityClient() throws -> RuntimeAvailabilityClient {
+        guard let availabilityClient else {
+            throw MacParityHarnessError.applicationClientUnavailable
+        }
+        return availabilityClient
+    }
+
+    func requireThemeCoordinatorClient() throws -> RuntimeThemeCoordinatorClient {
+        guard let themeCoordinatorClient else {
+            throw MacParityHarnessError.applicationClientUnavailable
+        }
+        return themeCoordinatorClient
+    }
+
+    func requireRuntimeSettingsClient() throws -> RuntimeSettingsClient {
+        guard let runtimeSettingsClient else {
+            throw MacParityHarnessError.applicationClientUnavailable
+        }
+        return runtimeSettingsClient
+    }
 }
 
 private struct MacParityApplicationClientModule: RuneScribeModule {
-    let descriptor = MacParityRuntimeModules.clientDescriptor
+    let descriptor = RuneScribeUIModuleBootstrap.descriptor
     let capture: MacParityApplicationClientCapture
 
     func start(context: ModuleContext) async throws {
         let client = try await context.applicationClient()
         let runtimeIO = try await context.runtimeIOClient()
-        await capture.store(client, runtimeIO: runtimeIO)
+        let availabilityClient = try await context.runtimeAvailabilityClient()
+        let themeCoordinatorClient = try await context.themeCoordinatorClient()
+        let runtimeSettingsClient = try await context.runtimeSettingsClient()
+        await capture.store(
+            client,
+            runtimeIO: runtimeIO,
+            availabilityClient: availabilityClient,
+            themeCoordinatorClient: themeCoordinatorClient,
+            runtimeSettingsClient: runtimeSettingsClient
+        )
     }
 
     func stop() async {}
@@ -970,4 +1901,28 @@ private struct KeyboardFocusReport {
     let keyViewCount: Int
     let focusableViewCount: Int
     let acceptedFirstResponder: Bool
+}
+
+private struct ContentEditingState {
+    let hasEditableTextView: Bool
+    let text: String?
+}
+
+private struct WindowResizeReport {
+    let renderedSizes: [CGSize]
+}
+
+@MainActor
+private struct MacSelectedThemeState: Equatable {
+    let revision: UInt64?
+    let relicID: ArtifactID?
+    let sealID: ArtifactID?
+    let frameID: ArtifactID?
+
+    init(session: RuneScribeUISession) {
+        revision = session.activeThemeVisualPresentation?.revision
+        relicID = session.selectedThemeRelicID
+        sealID = session.selectedThemeSealID
+        frameID = session.selectedThemeFrameID
+    }
 }

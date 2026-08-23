@@ -268,7 +268,7 @@ final class GloamthornThemeProviderTests: XCTestCase {
         XCTAssertEqual(shippingBytes, 609418)
     }
 
-    func testLockedDiscoveryPublishesAtomicallyAfterLiveEntitlementAndRestartsSafely() async throws {
+    func testLockedDiscoveryPublishesPreviewResourcesAndRestartsSafely() async throws {
         let probe = GloamthornThemeReaderProbe()
         let runtime = try await makeRuntime(locator: GloamthornThemeBundleLocator())
         try await RuneScribeThemeGloamthornModuleBootstrap.register(with: runtime)
@@ -277,9 +277,18 @@ final class GloamthornThemeProviderTests: XCTestCase {
         try await runtime.start()
         var runtimeSnapshot = await runtime.snapshot()
         XCTAssertEqual(runtimeSnapshot.status, .running)
-        XCTAssertEqual(runtimeSnapshot.moduleStates[RuneScribeThemeGloamthornModuleBootstrap.moduleID], .validated)
+        XCTAssertEqual(runtimeSnapshot.moduleStates[RuneScribeThemeGloamthornModuleBootstrap.moduleID], .active)
         var contributionSnapshot = try await probe.contributionSnapshot()
-        XCTAssertTrue(contributionSnapshot.entries.isEmpty)
+        let previewContribution = try XCTUnwrap(contributionSnapshot.entries.only)
+        XCTAssertEqual(
+            previewContribution.value,
+            RuneScribeThemeGloamthornModuleBootstrap.discoveryDescriptor
+        )
+        let previewResources = try await probe.resourceSnapshot()
+        XCTAssertEqual(
+            previewResources.resources.count,
+            previewContribution.value.resources.count
+        )
 
         try await runtime.reconcileEntitlements(try entitlementSnapshot())
         runtimeSnapshot = await runtime.snapshot()

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "sourceSHA": "74f57f4a11af9df349111ae2416d5c54699ae116",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /tmp/runescribe-nrv-final3.2ce0nv/mac/parity-supported-derived -resultBundlePath /tmp/runescribe-nrv-final3.2ce0nv/mac/parity-supported.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS= COMPILER_INDEX_STORE_ENABLE=NO",
+    "scripts/check-macos-native-share.sh /tmp/runescribe-nrv-final3.2ce0nv/mac/parity-supported-derived/Build/Products/Debug/RuneScribMacParityHost.app /tmp/runescribe-nrv-final3.2ce0nv/mac/native-share-supported-report.json"
+  ],
+  "destination": {
+    "platform": "macOS arm64",
+    "scheme": "RuneScrib-macOS-Parity"
+  },
+  "startTimestamp": "2026-08-23T03:01:23Z",
+  "endTimestamp": "2026-08-23T03:35:41Z",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/01-swift-test.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/mac/parity-supported.xcresult",
+    "/tmp/runescribe-nrv-final3.2ce0nv/mac/native-share-supported-report.json",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift"
+  ],
+  "toolchainVersions": {
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "host": "macOS 26.6.2 (25G83)"
+  },
+  "sharedPolicy": "ThemeArtifactCompositionPolicy",
+  "sharedCanvas": "ThemeArtifactCanvas",
+  "contexts": [
+    "interactive",
+    "static"
+  ],
+  "sharedSemantics": [
+    "relic",
+    "seal",
+    "frame",
+    "selection",
+    "layout",
+    "anchor",
+    "frame compatibility",
+    "Script",
+    "normalized inscription"
+  ],
+  "staticRendererInput": "validated runtime image references only",
+  "regression": {
+    "swiftPackageTests": "PASS within 1036 total",
+    "macOSParity": "6 of 6 PASS",
+    "nativeShare": "file and link picker presentation plus deterministic dismissal PASS"
+  },
+  "passingTests": [
+    "ShareArtifactRendererTests.testRenderPlanIsDeterministicPaginatedAndUsesApprovedAnchor",
+    "ShareArtifactRendererTests.testSharedPolicyUsesOptionalFrameCompatibilityReduceMotionAndMonochrome",
+    "ShareArtifactRendererTests.testStaticRendererProducesBoundedFourByThreePreview",
+    "ShareArtifactRendererTests.testBuilderShowsLockedContentButCannotSelectIt"
+  ]
+}

@@ -206,6 +206,19 @@ public struct RuntimeThemeCoordinatorClient: Sendable {
         )
     }
 
+    public func resolveCatalogPreviewResource(
+        codexID: CodexID,
+        resourceID: ThemeResourceID
+    ) async throws -> ResolvedThemeResourceDTO {
+        try await resolveResource(
+            ResolveThemeResourceRequestDTO(
+                codexID: codexID,
+                resourceID: resourceID,
+                purpose: .catalogPreview
+            )
+        )
+    }
+
     public func diagnostics() async throws -> ThemeCoordinatorDiagnosticsDTO {
         try await query.fetch(
             RuntimeEmptyPayload(),

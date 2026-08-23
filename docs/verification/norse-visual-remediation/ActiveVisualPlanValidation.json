@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "sourceSHA": "74f57f4a11af9df349111ae2416d5c54699ae116",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture",
+    "python3 scripts/check-norse-visual-remediation.py --profile implementation"
+  ],
+  "destination": {
+    "platform": "macOS",
+    "suite": "RuneScribeArchitecture package and NRV semantic validator"
+  },
+  "startTimestamp": "2026-08-23T03:01:23Z",
+  "endTimestamp": "2026-08-23T03:34:15Z",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/01-swift-test.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/08-nrv-implementation-checker.log",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SemanticThemePresentation.swift"
+  ],
+  "toolchainVersions": {
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "host": "macOS 26.6.2 (25G83)",
+    "python": "3.9.6"
+  },
+  "planType": "ActiveThemeVisualResourcePlan",
+  "derivation": "provider-neutral ThemeDescriptor resources and Codex metadata",
+  "revisioned": true,
+  "effectiveProvider": {
+    "themeID": "theme.norse.base",
+    "codexID": "codex.norse",
+    "scriptID": "script.base-runes",
+    "isEmergencyPresentation": false
+  },
+  "selectedResources": {
+    "relic": "relic.norse.runestone.weathered",
+    "seal": "seal.norse.knotwork",
+    "frame": null,
+    "crest": "descriptor-declared optional catalog visuals"
+  },
+  "coveredClasses": [
+    "codex card states",
+    "relic",
+    "seal",
+    "frame",
+    "crest"
+  ],
+  "validatedMetadata": [
+    "role",
+    "mediaType",
+    "sha256",
+    "byteLength",
+    "pixelSize",
+    "ownershipContext",
+    "layoutReference"
+  ],
+  "passingTests": [
+    "SemanticThemePresentationTests.testActiveVisualPlanBindsCodexArtifactsAndDescriptorAccessibility",
+    "SemanticThemePresentationTests.testNorseActiveVisualPlanDeclaresExactCatalogFallbacksAndOptionalFrame",
+    "RuneScribeUISessionTests.testThemeVisualAdoptionIsAtomicAcrossArtifactAndProviderChanges"
+  ]
+}

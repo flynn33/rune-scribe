@@ -398,6 +398,8 @@ targets:
         product: RuneScribeThemeGloamthornModule
       - package: RuneScribeArchitecture
         product: RuneScribeTestSupport
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeCoordinatorModule
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.macos-parity-tests

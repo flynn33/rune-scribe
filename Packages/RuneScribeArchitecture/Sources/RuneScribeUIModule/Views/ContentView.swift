@@ -30,12 +30,20 @@ private struct MessageSharePreparation: Equatable, Sendable {
     let shareHandle: EncodedMessageHandle
 }
 
+struct ContentViewSettledArtifactSeed {
+    let composition: ThemeArtifactCompositionPlan
+    let presentation: ActiveThemeVisualPresentation
+}
+
 struct ContentView: View {
 
     // MARK: - Environment
 
     @EnvironmentObject private var session: RuneScribeUISession
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
     // MARK: - Types
 
@@ -49,6 +57,32 @@ struct ContentView: View {
     /// inscription animation, then rests on the result — all in the same frame,
     /// which never changes size.
     private enum BoxPhase { case editing, transforming, result }
+
+    private enum ArtifactBrowser: String, Identifiable {
+        case relic
+        case seal
+        case frame
+
+        var id: String { rawValue }
+
+        var title: String { rawValue.capitalized }
+
+        var selectionKind: ThemeArtifactSelectionKind {
+            switch self {
+            case .relic: .relic
+            case .seal: .seal
+            case .frame: .frame
+            }
+        }
+
+        var visualKind: ThemeVisualArtifactKind {
+            switch self {
+            case .relic: .relic
+            case .seal: .seal
+            case .frame: .frame
+            }
+        }
+    }
 
     // MARK: - State
 
@@ -66,6 +100,9 @@ struct ContentView: View {
     @State private var showLibrary: Bool = false
     @State private var showSettings: Bool = false
     @State private var showVaultProgress: Bool = false
+    @State private var artifactBrowser: ArtifactBrowser?
+    @State private var resultArtifactComposition: ThemeArtifactCompositionPlan?
+    @State private var resultThemeVisualPresentation: ActiveThemeVisualPresentation?
     @State private var decodeError: String?
     @State private var showMessageCompose = false
     /// Scoped Core artifact for a first-delivery attachment. UI receives only the
@@ -86,6 +123,21 @@ struct ContentView: View {
     /// changes size when it transforms — only the glyphs change.
     private let glyphSize: CGFloat = 20
 
+    init(initialSettledArtifact: ContentViewSettledArtifactSeed? = nil) {
+        guard let initialSettledArtifact else { return }
+        _boxPhase = State(initialValue: .result)
+        _targetSnapshot = State(
+            initialValue: initialSettledArtifact.composition.inscription
+        )
+        _transformDirection = State(initialValue: .encode)
+        _resultArtifactComposition = State(
+            initialValue: initialSettledArtifact.composition
+        )
+        _resultThemeVisualPresentation = State(
+            initialValue: initialSettledArtifact.presentation
+        )
+    }
+
     private var isEditing: Bool { boxPhase == .editing }
 
     private var actionDisabled: Bool {
@@ -97,6 +149,7 @@ struct ContentView: View {
         showLibrary
             || showSettings
             || showVaultProgress
+            || artifactBrowser != nil
             || showMessageCompose
             || showNewContact
             || decodeError != nil
@@ -186,6 +239,9 @@ struct ContentView: View {
         .sheet(isPresented: $showVaultProgress) {
             VaultProgressView()
         }
+        .sheet(item: $artifactBrowser) { browser in
+            artifactBrowserSheet(browser)
+        }
         #if os(iOS)
         .sheet(isPresented: $showMessageCompose) {
             MessageComposeView(messageText: outgoingMessageText(
@@ -230,6 +286,37 @@ struct ContentView: View {
 
     // MARK: - Text Frame (fixed size; only the inner content changes)
 
+    private func artifactBrowserSheet(_ browser: ArtifactBrowser) -> AnyView {
+        AnyView(NavigationStack {
+            ThemeArtifactBrowserView(
+                title: "Choose \(browser.title)",
+                items: artifactBrowserItems(browser),
+                includesNone: browser == .frame,
+                canSelectNone: session.activeThemeProviderIsAvailable,
+                selectNone: {
+                    artifactBrowser = nil
+                    Task { await session.clearThemeFrame() }
+                },
+                select: { item in
+                    artifactBrowser = nil
+                    Task {
+                        await session.selectThemeArtifact(
+                            item.id,
+                            kind: browser.selectionKind
+                        )
+                    }
+                },
+                artwork: { item in artifactArtwork(for: item.id, kind: item.kind) }
+            )
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { artifactBrowser = nil }
+                }
+            }
+        }
+        .task { await session.loadActiveThemeCatalogVisuals() })
+    }
+
     private var textFrame: some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
@@ -257,7 +344,7 @@ struct ContentView: View {
                         .allowsHitTesting(false)
                 }
 
-            case .transforming, .result:
+            case .transforming:
                 ScrollView {
                     RuneInscriptionText(source: sourceSnapshot,
                                         target: targetSnapshot,
@@ -270,6 +357,32 @@ struct ContentView: View {
                         .padding(.horizontal, 15)
                         .padding(.vertical, 15)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            case .result:
+                if transformDirection == .encode,
+                   let resultArtifactComposition,
+                   let presentation = resultThemeVisualPresentation,
+                   presentation.revision == presentation.plan.revision {
+                    ThemeArtifactPreview(
+                        plan: resultArtifactComposition,
+                        image: { presentation.image(for: $0) }
+                    )
+                    .padding(10)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ScrollView {
+                        RuneInscriptionText(source: sourceSnapshot,
+                                            target: targetSnapshot,
+                                            start: transformStart,
+                                            direction: transformDirection,
+                                            fontSize: glyphSize,
+                                            fontName: session.inscriptionFontPostScriptName,
+                                            vectorDataByToken: session.inscriptionVectorDataByToken,
+                                            settled: true)
+                            .padding(.horizontal, 15)
+                            .padding(.vertical, 15)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
                 }
             }
         }
@@ -507,7 +620,8 @@ struct ContentView: View {
 
     private var artifactSelectionBar: some View {
         let usesExpandedLayout = dynamicTypeSize.isAccessibilitySize
-        let menuLayout = usesExpandedLayout
+            || horizontalSizeClass == .compact
+        let controlLayout = usesExpandedLayout
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
             : AnyLayout(HStackLayout(spacing: 10))
 
@@ -518,32 +632,31 @@ struct ContentView: View {
                 .accessibilityHidden(true)
                 .padding(.top, usesExpandedLayout ? 4 : 10)
 
-            menuLayout {
-                artifactMenu(
+            controlLayout {
+                artifactSelectionControl(
                     title: "Relic",
-                    selectedID: session.selectedThemeRelicID,
                     items: session.themeRelicItems,
-                    kind: .relic
+                    browser: .relic
                 )
+                .fixedSize(horizontal: false, vertical: true)
 
                 Divider().frame(height: usesExpandedLayout ? nil : 22)
 
-                artifactMenu(
+                artifactSelectionControl(
                     title: "Seal",
-                    selectedID: session.selectedThemeSealID,
                     items: session.themeSealItems,
-                    kind: .seal
+                    browser: .seal
                 )
+                .fixedSize(horizontal: false, vertical: true)
 
                 Divider().frame(height: usesExpandedLayout ? nil : 22)
 
-                artifactMenu(
+                artifactSelectionControl(
                     title: "Frame",
-                    selectedID: session.selectedThemeFrameID,
                     items: session.themeFrameItems,
-                    kind: .frame,
-                    allowsNone: true
+                    browser: .frame
                 )
+                .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -557,60 +670,127 @@ struct ContentView: View {
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
                 .strokeBorder(Color.runeBlue.opacity(0.22), lineWidth: 1)
         )
+        .disabled(actionTask != nil || boxPhase != .editing)
     }
 
-    private func artifactMenu(
+    private func artifactSelectionControl(
         title: String,
-        selectedID: ArtifactID?,
         items: [ThemeArtifactPickerItem],
-        kind: ThemeArtifactSelectionKind,
-        allowsNone: Bool = false
+        browser: ArtifactBrowser
     ) -> some View {
-        Menu {
-            if allowsNone {
-                Button {
-                    Task { await session.clearThemeFrame() }
-                } label: {
-                    Label("None", systemImage: selectedID == nil ? "checkmark" : "circle")
-                }
-                if !items.isEmpty { Divider() }
+        let selectedItem = items.first(where: \.isSelected)
+        return ThemeArtifactSelectionControl(
+            title: title,
+            item: selectedItem,
+            kind: browser.visualKind,
+            state: artifactSelectionState(selectedItem, browser: browser),
+            allowsNone: browser == .frame,
+            action: { artifactBrowser = browser }
+        ) {
+            if let selectedItem {
+                artifactArtwork(for: selectedItem.id, kind: browser.visualKind)
+            } else {
+                AnyView(ThemeVisualPlaceholder(
+                    systemImage: browser.visualKind.systemImage,
+                    label: "No \(title.lowercased()) selected"
+                ))
             }
-            ForEach(items) { item in
-                Button {
-                    Task { await session.selectThemeArtifact(item.id, kind: kind) }
-                } label: {
-                    Label(
-                        item.name,
-                        systemImage: item.isSelected
-                            ? "checkmark"
-                            : (item.isOwned ? "circle" : "lock.fill")
-                    )
-                }
-                .disabled(!item.isSelectable)
-            }
-        } label: {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title.uppercased())
-                    .font(.caption2.weight(.semibold))
-                    .foregroundColor(.runeSilver)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(
-                    items.first(where: { $0.id == selectedID })?.name
-                        ?? (allowsNone ? "None" : "Unavailable")
-                )
-                    .font(.caption.weight(.semibold))
-                    .foregroundColor(.runeTextPrimary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
         }
-        .menuIndicator(.visible)
-        .disabled(!allowsNone && items.allSatisfy { !$0.isSelectable })
-        .accessibilityLabel("Selected \(title)")
-        .accessibilityValue(
-            items.first(where: { $0.id == selectedID })?.name
-                ?? (allowsNone ? "None" : "Unavailable")
+    }
+
+    private func artifactSelectionState(
+        _ item: ThemeArtifactPickerItem?,
+        browser: ArtifactBrowser
+    ) -> ThemeVisualContentState {
+        guard session.activeThemeProviderIsAvailable else { return .unavailable }
+        guard let item else { return browser == .frame ? .selected : .unavailable }
+        guard item.isOwned else { return .locked }
+        return item.isSelected ? .selected : .owned
+    }
+
+    private func artifactBrowserItems(_ browser: ArtifactBrowser) -> [ThemeArtifactBrowserItem] {
+        let items: [ThemeArtifactPickerItem] = switch browser {
+        case .relic: session.themeRelicItems
+        case .seal: session.themeSealItems
+        case .frame: session.themeFrameItems
+        }
+        return items.compactMap { item in
+            guard let visual = session.activeThemeVisualPresentation?.plan.catalog.first(where: {
+                $0.id == item.id && $0.kind == browser.visualKind
+            }) else { return nil }
+            let state: ThemeVisualContentState = if !session.activeThemeProviderIsAvailable {
+                .unavailable
+            } else if item.isSelected {
+                .selected
+            } else if item.isOwned {
+                .owned
+            } else {
+                .locked
+            }
+            return ThemeArtifactBrowserItem(
+                id: item.id,
+                resourceID: visual.thumbnail.id,
+                name: item.name,
+                description: item.description,
+                kind: browser.visualKind,
+                rarity: item.rarity,
+                state: state,
+                accessibilityLabel: visual.accessibilityLabel,
+                accessibilityHint: visual.accessibilityHint,
+                provenance: nil,
+                isSelectable: item.isSelectable
+            )
+        }
+    }
+
+    private func artifactArtwork(
+        for artifactID: ArtifactID,
+        kind: ThemeVisualArtifactKind
+    ) -> AnyView {
+        guard let presentation = session.activeThemeVisualPresentation,
+              let visual = presentation.plan.catalog.first(where: {
+                  $0.id == artifactID && $0.kind == kind
+              }),
+              let image = presentation.imageReference(for: visual.thumbnail)?.image
+        else {
+            return AnyView(ThemeVisualPlaceholder(
+                systemImage: kind.systemImage,
+                label: "\(kind.rawValue) artwork unavailable"
+            ))
+        }
+        return AnyView(image.resizable().scaledToFill())
+    }
+
+    private func interactiveComposition(
+        inscription: String,
+        presentation: ActiveThemeVisualPresentation,
+        descriptor: ThemeDescriptor,
+        fontPostScriptNameOverride: ThemeFontPostScriptName?
+    ) -> ThemeArtifactCompositionPlan? {
+        guard descriptor.codex.id == presentation.plan.codex.codexID,
+              let selection = try? SharePresentationSelection(
+                  codexID: presentation.plan.codex.codexID,
+                  scriptID: presentation.plan.scriptID,
+                  relicID: presentation.plan.selectedRelicID,
+                  sealID: presentation.plan.selectedSealID,
+                  frameID: presentation.plan.selectedFrameID,
+                  presentationVersion: SharePresentationSelection.supportedPresentationVersion
+              )
+        else { return nil }
+        let artifactNames = [
+            presentation.plan.selectedRelic?.displayName,
+            presentation.plan.selectedSeal?.displayName,
+            presentation.plan.selectedFrame?.displayName,
+        ].compactMap { $0 }.joined(separator: ", ")
+        return try? ThemeArtifactCompositionPolicy.interactivePlan(
+            selection: selection,
+            inscription: inscription,
+            descriptor: descriptor,
+            colorMode: colorSchemeContrast == .increased ? .highContrast : .standard,
+            reduceMotion: accessibilityReduceMotion,
+            accessibilityLabel: "Encoded rune artifact using \(artifactNames)",
+            provenanceLabel: "Source details included",
+            fontPostScriptNameOverride: fontPostScriptNameOverride
         )
     }
 
@@ -679,6 +859,12 @@ struct ContentView: View {
 
     private func performAction(generation: UInt64) async {
         guard boxPhase == .editing, let activeCipher = session.activeCipher else { return }
+        let visualPresentationSnapshot = session.activeThemeVisualPresentation
+        let themeDescriptorSnapshot = session.themeSnapshot?.effectiveTheme
+        let fontPostScriptNameOverrideSnapshot: ThemeFontPostScriptName? =
+            activeCipher.fontSource == .imported && activeCipher.fontIsRegistered
+                ? ThemeFontPostScriptName(rawValue: session.inscriptionFontPostScriptName)
+                : nil
         let source = inputText
         let target: String
         let direction: RuneInscriptionText.Direction
@@ -759,6 +945,20 @@ struct ContentView: View {
         } else {
             releaseMessageArtifact()
         }
+        if direction == .encode,
+           let visualPresentationSnapshot,
+           let themeDescriptorSnapshot {
+            resultThemeVisualPresentation = visualPresentationSnapshot
+            resultArtifactComposition = interactiveComposition(
+                inscription: target,
+                presentation: visualPresentationSnapshot,
+                descriptor: themeDescriptorSnapshot,
+                fontPostScriptNameOverride: fontPostScriptNameOverrideSnapshot
+            )
+        } else {
+            resultThemeVisualPresentation = nil
+            resultArtifactComposition = nil
+        }
         sourceSnapshot = source
         targetSnapshot = target
         transformDirection = direction
@@ -778,6 +978,8 @@ struct ContentView: View {
     private func returnToEditing() {
         settleTask?.cancel()
         releaseMessageArtifact()
+        resultArtifactComposition = nil
+        resultThemeVisualPresentation = nil
         copyConfirmed = false
         boxPhase = .editing
     }
@@ -797,6 +999,8 @@ struct ContentView: View {
         inputText = ""
         sourceSnapshot = ""
         targetSnapshot = ""
+        resultArtifactComposition = nil
+        resultThemeVisualPresentation = nil
         releaseMessageArtifact()
         copyConfirmed = false
         decodeError = nil
@@ -898,12 +1102,15 @@ struct ContentView: View {
         inputText = ""
         sourceSnapshot = ""
         targetSnapshot = ""
+        resultArtifactComposition = nil
+        resultThemeVisualPresentation = nil
         decodeError = nil
         copyConfirmed = false
         boxPhase = .editing
         showLibrary = false
         showSettings = false
         showVaultProgress = false
+        artifactBrowser = nil
         showMessageCompose = false
         showNewContact = false
         resetNewContact()

@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "1.0",
+  "sourceSHA": "dde22989d2c5180485c6737670afb6c3f5556eb0",
+  "branch": "fix/norse-visual-presentation",
+  "command": [
+    "git fetch origin --prune",
+    "git worktree add /Users/jimdaley/GitHub/Rune-Scribe-Norse-Visual-Remediation -b fix/norse-visual-presentation origin/main",
+    "xcodebuild test -quiet -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -destination 'platform=iOS Simulator,id=42CE8A98-5D00-4718-935F-94A651647D15' -only-testing:RuneScribIOSUITests/RuneScribeParityUITests/testCaptureNorseVisualPresentationBaseline -resultBundlePath /tmp/runescribe-nrv-baseline.YbOxXb/Baseline3.xcresult -derivedDataPath /tmp/runescribe-nrv-baseline.YbOxXb/DerivedData COMPILER_INDEX_STORE_ENABLE=NO",
+    "scripts/check-architecture.sh",
+    "scripts/check-roadmap-alignment.sh",
+    "python3 scripts/check-documentation-alignment.py",
+    "python3 manifest entry verification against Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+  ],
+  "destination": {
+    "platform": "iOS Simulator",
+    "deviceName": "RuneScribe Norse Visual Phone",
+    "model": "iPhone 17 Pro",
+    "deviceID": "42CE8A98-5D00-4718-935F-94A651647D15",
+    "osVersion": "26.2",
+    "osBuild": "23C54"
+  },
+  "startTimestamp": "2026-08-23T00:13:21Z",
+  "endTimestamp": "2026-08-23T00:13:44Z",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "docs/verification/norse-visual-remediation/Baseline.json",
+    "docs/verification/norse-visual-remediation/Diagnosis.md",
+    "docs/verification/norse-visual-remediation/baseline-screenshots/iphone-workspace-before.png",
+    "docs/verification/norse-visual-remediation/baseline-screenshots/iphone-settings-before.png",
+    "docs/verification/norse-visual-remediation/baseline-screenshots/iphone-vault-before.png"
+  ],
+  "toolchainVersions": {
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "host": "macOS 26.6.2 (25G83)",
+    "xcodegen": "2.46.0"
+  },
+  "supportedSimulatorRuntimes": [
+    "iOS 18.6 (22G86)",
+    "iOS 26.0.1 (23A8464)",
+    "iOS 26.2 (23C54)"
+  ],
+  "versionBuild": {
+    "version": "1.0.38",
+    "build": "38"
+  },
+  "testInventory": {
+    "swiftPMXCTestMethods": 893,
+    "swiftTestingDeclarations": 129,
+    "swiftPMTestFiles": 97,
+    "xcodeHostedAndUITestMethods": 120,
+    "baselineFocusedUI": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "resourceIntegrity": {
+    "manifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json",
+    "manifestSHA256": "8bfb935ca4d3b82bdee00ce0f21756811e0d34460c9002dfed4c56ce13f1eb0a",
+    "manifestEntries": 47,
+    "verifiedEntries": 47,
+    "failures": [],
+    "descriptorResourceCount": 55,
+    "moduleManifestSHA256": "cd7d1d28ef3efff04daf2f6ad9103dc83d174e00470592a9d918d187ac8cb804",
+    "fontSHA256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
+  },
+  "guardResults": {
+    "architecture": "PASS: 17 ratchets",
+    "roadmapAlignment": "PASS: 124 tasks and 12 decisions",
+    "roadmapCompletion": "PASS",
+    "documentationAlignment": "PASS under the pre-remediation historical owner-test policy; NRV-023 supersession is documented in Diagnosis.md"
+  },
+  "effectiveThemeSnapshot": {
+    "effectiveThemeID": "theme.norse.base",
+    "effectiveCodexID": "codex.norse",
+    "isEmergencyPresentation": false,
+    "selectedRelicID": "relic.norse.runestone.weathered",
+    "selectedRelicName": "Weathered Rune Stone",
+    "selectedSealID": "seal.norse.knotwork",
+    "selectedSealName": "Knotwork Mark",
+    "selectedFrameID": null,
+    "resourceValidation": "PASS"
+  },
+  "observedDefect": {
+    "workspaceArtifactArt": "ABSENT",
+    "settingsCodexCard": "ABSENT",
+    "vaultArtifactArt": "ABSENT",
+    "reproduction": "The fresh-install UI test passed only while all three required visual identifiers were absent. The captured workspace displays textual Relic, Seal, and Frame values; Settings displays icon-and-text Codex rows; Vault displays text-only catalog cards."
+  },
+  "baselineScreenshotSHA256": {
+    "iphone-workspace-before.png": "3892840216c08eedec050589af5c4824b33527c64acde087652a9bd40e40ff09",
+    "iphone-settings-before.png": "2362628f1b12f5307610a3282d198655a4e8f118b1938a3b4b032d241475645e",
+    "iphone-vault-before.png": "e21031c8cf917c2e5630937235f792775d12b2c3a14a25a18c95b3a12792af41"
+  },
+  "originalWorktreePreservation": {
+    "path": "/Users/jimdaley/GitHub/Rune-Scribe",
+    "headSHA": "af60a3c62d4b7828f3ab944504e06036ece4129e",
+    "branch": "runtime-owned-io-presentation",
+    "state": "DIRTY BEFORE REMEDIATION; ISOLATED AND UNTOUCHED",
+    "modifiedTrackedPaths": 3,
+    "untrackedPaths": 13
+  },
+  "historicalOwnerTestPolicy": {
+    "status": "NONCONTROLLING FOR THIS REMEDIATION",
+    "statement": "Earlier roadmap-completion handoff material remains historical release guidance. Physical hardware and operator input are not required for NRV implementation, verification, PR readiness, or PASS. Any later owner validation is discretionary before distribution."
+  }
+}

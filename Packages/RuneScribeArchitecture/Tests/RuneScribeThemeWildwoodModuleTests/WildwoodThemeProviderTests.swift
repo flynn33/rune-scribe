@@ -268,7 +268,7 @@ final class WildwoodThemeProviderTests: XCTestCase {
         XCTAssertEqual(shippingBytes, 697897)
     }
 
-    func testLockedDiscoveryPublishesAtomicallyAfterLiveEntitlementAndRestartsSafely() async throws {
+    func testLockedDiscoveryPublishesPreviewResourcesAndRestartsSafely() async throws {
         let probe = WildwoodThemeReaderProbe()
         let runtime = try await makeRuntime(locator: WildwoodThemeBundleLocator())
         try await RuneScribeThemeWildwoodModuleBootstrap.register(with: runtime)
@@ -277,9 +277,18 @@ final class WildwoodThemeProviderTests: XCTestCase {
         try await runtime.start()
         var runtimeSnapshot = await runtime.snapshot()
         XCTAssertEqual(runtimeSnapshot.status, .running)
-        XCTAssertEqual(runtimeSnapshot.moduleStates[RuneScribeThemeWildwoodModuleBootstrap.moduleID], .validated)
+        XCTAssertEqual(runtimeSnapshot.moduleStates[RuneScribeThemeWildwoodModuleBootstrap.moduleID], .active)
         var contributionSnapshot = try await probe.contributionSnapshot()
-        XCTAssertTrue(contributionSnapshot.entries.isEmpty)
+        let previewContribution = try XCTUnwrap(contributionSnapshot.entries.only)
+        XCTAssertEqual(
+            previewContribution.value,
+            RuneScribeThemeWildwoodModuleBootstrap.discoveryDescriptor
+        )
+        let previewResources = try await probe.resourceSnapshot()
+        XCTAssertEqual(
+            previewResources.resources.count,
+            previewContribution.value.resources.count
+        )
 
         try await runtime.reconcileEntitlements(try entitlementSnapshot())
         runtimeSnapshot = await runtime.snapshot()

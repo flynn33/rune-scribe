@@ -404,6 +404,28 @@ final class ThemeContractTests: XCTestCase {
         }
     }
 
+    func testThemeResourceResolutionPurposeDefaultsActiveForLegacyPayloads() throws {
+        let legacy = Data(
+            #"{"codexID":"codex.test","resourceID":"resource.test.resolved"}"#.utf8
+        )
+        let decoded = try JSONDecoder().decode(
+            ResolveThemeResourceRequestDTO.self,
+            from: legacy
+        )
+        XCTAssertEqual(decoded.purpose, .activePresentation)
+
+        let catalog = ResolveThemeResourceRequestDTO(
+            codexID: identifier(CodexID.self, "codex.test"),
+            resourceID: resourceID("resolved"),
+            purpose: .catalogPreview
+        )
+        let roundTrip = try JSONDecoder().decode(
+            ResolveThemeResourceRequestDTO.self,
+            from: JSONEncoder().encode(catalog)
+        )
+        XCTAssertEqual(roundTrip, catalog)
+    }
+
     func testGeometryRejectsOutOfBoundsOrDegenerateValues() {
         XCTAssertThrowsError(
             try ThemeNormalizedRegion(x: 0.8, y: 0, width: 0.3, height: 1)

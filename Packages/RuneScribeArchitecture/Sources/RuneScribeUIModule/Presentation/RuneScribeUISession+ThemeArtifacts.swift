@@ -34,15 +34,18 @@ extension RuneScribeUISession {
     var themeRelicItems: [ThemeArtifactPickerItem] {
         guard let theme = themeSnapshot?.effectiveTheme else { return [] }
         let owned = ownedThemeArtifactIDs
+        let providerAvailable = activeThemeProviderIsAvailable
         return theme.codex.relics.compactMap { relic in
             guard relic.metadata.availability != .reservedInactive else { return nil }
+            let isOwned = relic.metadata.availability == .included
+                || owned.contains(relic.metadata.id)
             return ThemeArtifactPickerItem(
                 id: relic.metadata.id,
                 name: relic.metadata.displayName.fallbackValue,
                 description: relic.metadata.description.fallbackValue,
                 rarity: relic.metadata.rarity,
-                isOwned: relic.metadata.availability == .included || owned.contains(relic.metadata.id),
-                isSelectable: relic.metadata.availability == .included || owned.contains(relic.metadata.id),
+                isOwned: isOwned,
+                isSelectable: providerAvailable && isOwned,
                 isSelected: relic.metadata.id == selectedThemeRelicID
             )
         }
@@ -51,14 +54,18 @@ extension RuneScribeUISession {
     var themeSealItems: [ThemeArtifactPickerItem] {
         guard let theme = themeSnapshot?.effectiveTheme else { return [] }
         let owned = ownedThemeArtifactIDs
-        return theme.codex.seals.map { seal in
-            ThemeArtifactPickerItem(
+        let providerAvailable = activeThemeProviderIsAvailable
+        return theme.codex.seals.compactMap { seal in
+            guard seal.metadata.availability != .reservedInactive else { return nil }
+            let isOwned = seal.metadata.availability == .included
+                || owned.contains(seal.metadata.id)
+            return ThemeArtifactPickerItem(
                 id: seal.metadata.id,
                 name: seal.metadata.displayName.fallbackValue,
                 description: seal.metadata.description.fallbackValue,
                 rarity: seal.metadata.rarity,
-                isOwned: seal.metadata.availability == .included || owned.contains(seal.metadata.id),
-                isSelectable: seal.metadata.availability == .included || owned.contains(seal.metadata.id),
+                isOwned: isOwned,
+                isSelectable: providerAvailable && isOwned,
                 isSelected: seal.metadata.id == selectedThemeSealID
             )
         }
@@ -67,19 +74,23 @@ extension RuneScribeUISession {
     var themeFrameItems: [ThemeArtifactPickerItem] {
         guard let theme = themeSnapshot?.effectiveTheme else { return [] }
         let owned = ownedThemeArtifactIDs
+        let providerAvailable = activeThemeProviderIsAvailable
         return theme.codex.frames.compactMap { frame in
             guard frame.metadata.availability != .reservedInactive,
-                  frame.allowsStaticShare
+                  frame.allowsStaticShare,
+                  frame.compatibleRelicIDs.contains(
+                      selectedThemeRelicID ?? theme.codex.defaultRelicID
+                  )
             else { return nil }
+            let isOwned = frame.metadata.availability == .included
+                || owned.contains(frame.metadata.id)
             return ThemeArtifactPickerItem(
                 id: frame.metadata.id,
                 name: frame.metadata.displayName.fallbackValue,
                 description: frame.metadata.description.fallbackValue,
                 rarity: frame.metadata.rarity,
-                isOwned: frame.metadata.availability == .included
-                    || owned.contains(frame.metadata.id),
-                isSelectable: frame.metadata.availability == .included
-                    || owned.contains(frame.metadata.id),
+                isOwned: isOwned,
+                isSelectable: providerAvailable && isOwned,
                 isSelected: frame.metadata.id == selectedThemeFrameID
             )
         }
@@ -108,11 +119,6 @@ extension RuneScribeUISession {
         let existingRevision = runtimeSettingsSnapshot?.settings.first(where: {
             $0.settingID == settingID
         })?.revision
-        switch kind {
-        case .relic: selectedThemeRelicID = artifactID
-        case .seal: selectedThemeSealID = artifactID
-        case .frame: selectedThemeFrameID = artifactID
-        }
         do {
             _ = try await runtimeSettingsClientHandle.setArtifactSelections(
                 selections,
@@ -120,7 +126,6 @@ extension RuneScribeUISession {
             )
             themeSelectionError = nil
         } catch {
-            reconcileThemeArtifactSelections()
             themeSelectionError = "That appearance could not be saved."
         }
     }
@@ -143,7 +148,6 @@ extension RuneScribeUISession {
         let existingRevision = runtimeSettingsSnapshot?.settings.first(where: {
             $0.settingID == RuneScribeRuntimeSettings.selectedFrameByCodex
         })?.revision
-        selectedThemeFrameID = nil
         do {
             _ = try await runtimeSettingsClientHandle.setArtifactSelections(
                 selections,
@@ -151,7 +155,6 @@ extension RuneScribeUISession {
             )
             themeSelectionError = nil
         } catch {
-            reconcileThemeArtifactSelections()
             themeSelectionError = "That appearance could not be saved."
         }
     }
@@ -161,5 +164,15 @@ extension RuneScribeUISession {
             guard item.state == .owned, case .artifact(let id) = item.reference else { return nil }
             return id
         })
+    }
+
+    var activeThemeProviderIsAvailable: Bool {
+        guard let snapshot = themeSnapshot,
+              !snapshot.isEmergencyPresentation,
+              let provider = snapshot.providers.first(where: {
+                  $0.codexID == snapshot.effectiveCodexID
+              })
+        else { return false }
+        return provider.state == .available && provider.isOwned
     }
 }

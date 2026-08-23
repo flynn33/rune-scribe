@@ -6,6 +6,7 @@ import RuneScribeThemeGloamthornModule
 import RuneScribeThemeMoonleafModule
 import RuneScribeThemeSunspireModule
 import RuneScribeThemeWildwoodModule
+import RuneScribeUIRuntime
 @testable import RuneScribeUIModule
 import XCTest
 
@@ -130,6 +131,72 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
         XCTAssertEqual(planCount, 72)
     }
 
+    func testEveryElvenProviderBuildsTheCompleteGenericActiveVisualPath() throws {
+        var validatedProviderCount = 0
+
+        for (index, provider) in providers.enumerated() {
+            let descriptor = provider.descriptor
+            let includedSeal = try XCTUnwrap(descriptor.codex.seals.first(where: {
+                $0.metadata.availability == .included
+            }))
+            let selection = try ShareBuilderPolicy.selection(
+                descriptor: descriptor,
+                codexOwned: true,
+                providerAvailable: true,
+                ownedArtifactIDs: [],
+                relicID: descriptor.codex.defaultRelicID,
+                sealID: includedSeal.metadata.id,
+                frameID: nil
+            )
+            let plan = try ActiveThemeVisualResourcePlan(
+                descriptor: descriptor,
+                revision: UInt64(index + 1),
+                selection: selection
+            )
+            let scriptPlan = try ThemePresentationResourcePlan(descriptor: descriptor)
+            let references = Dictionary(uniqueKeysWithValues: descriptor.resources.map {
+                ($0.id, $0)
+            })
+
+            XCTAssertEqual(plan.themeID, descriptor.id, provider.name)
+            XCTAssertEqual(plan.codexID, descriptor.codex.id, provider.name)
+            XCTAssertEqual(plan.codex.card.id, descriptor.codex.vault.cardResourceID, provider.name)
+            XCTAssertEqual(plan.selectedRelicID, descriptor.codex.defaultRelicID, provider.name)
+            XCTAssertEqual(
+                plan.selectedRelic?.primary.id,
+                descriptor.codex.relics.first(where: {
+                    $0.metadata.id == descriptor.codex.defaultRelicID
+                })?.primaryResourceID,
+                provider.name
+            )
+            XCTAssertEqual(plan.selectedSeal?.id, includedSeal.metadata.id, provider.name)
+            XCTAssertEqual(plan.selectedSeal?.thumbnail.id, includedSeal.thumbnailResourceID, provider.name)
+            XCTAssertEqual(
+                plan.backgroundStatic.id,
+                descriptor.codex.background.staticBaseResourceID,
+                provider.name
+            )
+            XCTAssertEqual(scriptPlan.scriptID, descriptor.codex.primaryScriptID, provider.name)
+            XCTAssertNotNil(scriptPlan.fontResourceID, provider.name)
+
+            for imagePlan in [
+                plan.codex.card,
+                try XCTUnwrap(plan.selectedRelic).primary,
+                try XCTUnwrap(plan.selectedSeal).thumbnail,
+                plan.backgroundStatic,
+            ] {
+                let reference = try XCTUnwrap(references[imagePlan.id])
+                XCTAssertEqual(imagePlan.role, reference.role, provider.name)
+                XCTAssertEqual(imagePlan.mediaType, reference.mediaType, provider.name)
+                XCTAssertEqual(imagePlan.byteLength, reference.integrity.byteLength, provider.name)
+                XCTAssertEqual(imagePlan.sha256, reference.integrity.sha256, provider.name)
+            }
+            validatedProviderCount += 1
+        }
+
+        XCTAssertEqual(validatedProviderCount, 4)
+    }
+
     func testEveryElvenProviderRendersExactBundleResourcesAcrossAccessibilityVariants()
         throws
     {
@@ -221,9 +288,17 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
                     provider: provider,
                     entriesByID: entriesByID
                 )
+                let contentRevision: UInt64 = 1
+                let imageReferences = try makeRuntimeImageReferences(
+                    plan: plan,
+                    resourceData: resourceData,
+                    contentRevision: contentRevision
+                )
                 let output = try ShareArtifactStaticRenderer.render(
                     plan: plan,
-                    resourceData: resourceData
+                    resourceData: resourceData,
+                    imageReferences: imageReferences,
+                    contentRevision: contentRevision
                 )
                 let png = try XCTUnwrap(output.pagePNGData.only)
                 let metadata = output.safePreviewMetadata
@@ -354,6 +429,48 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
             return descriptor.codex.background.reduceMotionResourceID
         }
         return descriptor.codex.background.staticBaseResourceID
+    }
+
+    private func makeRuntimeImageReferences(
+        plan: ShareArtifactRenderPlan,
+        resourceData: [ThemeResourceID: Data],
+        contentRevision: UInt64
+    ) throws -> [ThemeResourceID: RuntimeThemeImageReference] {
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: nil
+        )
+        return try Dictionary(uniqueKeysWithValues: plan.resourceMetadata.compactMap {
+            metadata in
+            guard metadata.mediaType == .png
+                    || metadata.mediaType == .heif
+                    || metadata.mediaType == .pdf
+            else { return nil }
+            let data = try XCTUnwrap(resourceData[metadata.resourceID])
+            let integrity = try ThemeResourceIntegrity(
+                sha256: metadata.sha256,
+                byteLength: metadata.byteLength,
+                pixelSize: metadata.pixelSize
+            )
+            let resolved = try ResolvedThemeResourceDTO(
+                codexID: plan.request.selection.codexID,
+                resourceID: metadata.resourceID,
+                role: metadata.role,
+                mediaType: metadata.mediaType,
+                integrity: integrity,
+                verifiedSHA256: metadata.sha256,
+                data: data
+            )
+            let reference = try presentation.makeThemeImageReference(
+                resolvedResource: resolved,
+                expectedInventory: SharePresentationProviderResourceInventory(
+                    metadata: metadata
+                ),
+                expectedCodexID: plan.request.selection.codexID,
+                contentRevision: contentRevision
+            )
+            return (metadata.resourceID, reference)
+        })
     }
 
     private func assertApprovedBounds(

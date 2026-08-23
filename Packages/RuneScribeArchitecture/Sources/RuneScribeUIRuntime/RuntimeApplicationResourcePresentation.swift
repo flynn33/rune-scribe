@@ -3,6 +3,7 @@ import Foundation
 import ImageIO
 import Metal
 import MetalKit
+import RuneScribeContracts
 @_spi(RuntimeResourceHost) import RuneScribeRuntimeCore
 import SwiftUI
 
@@ -25,69 +26,118 @@ public enum RuntimeThemeBackgroundInstallationError: Error, Equatable, Sendable 
     case invalidStaticBaseData
     case invalidReduceMotionData
     case invalidHighContrastData
+    case invalidBackgroundReference
+    case preparedBackgroundOwnerMismatch
+    case preparedBackgroundAlreadyCommitted
 }
 
 enum RuntimeThemeDecodedResourceError: Error, Equatable, Sendable {
     case emptyData
     case encodedDataTooLarge
+    case encodedCacheCapacityExceeded
     case unsupportedImage
     case invalidPixelDimensions
     case unsupportedPixelDepth
     case decodedResourceTooLarge
 }
 
+public enum RuntimeThemeImageReferenceError: Error, Equatable, Sendable {
+    case presentationClosed
+    case codexIdentityMismatch
+    case resourceIdentityMismatch
+    case roleMismatch
+    case mediaTypeMismatch
+    case integrityMismatch
+    case encodedContentMismatch
+    case pixelDimensionsMismatch
+    case unsupportedImage
+    case cacheCapacityExceeded
+}
+
+public enum RuntimeThemeImageKind: String, Equatable, Hashable, Sendable {
+    case raster
+    case vectorPDF = "vector-pdf"
+}
+
+private struct RuntimeThemeDecodedResourceKey: Hashable, Sendable {
+    let codexID: CodexID?
+    let resourceID: ThemeResourceID?
+    let contentRevision: UInt64?
+    let sha256: ThemeSHA256Digest
+}
+
 struct RuntimeThemeDecodedImageHandle: Sendable {
-    fileprivate enum Kind: Sendable {
+    fileprivate enum Kind: Equatable, Sendable {
         case raster
         case pdf
     }
 
-    fileprivate let encodedData: Data
+    fileprivate let key: RuntimeThemeDecodedResourceKey
     fileprivate let kind: Kind
     let encodedByteCount: Int
     let pixelWidth: Int
     let pixelHeight: Int
     let decodedByteCount: Int
-
-    fileprivate var key: Data { encodedData }
 }
 
 @MainActor
 final class RuntimeThemeDecodedResourceCache: ObservableObject {
     static let maximumEncodedImageByteCount = 8 * 1_024 * 1_024
+    static let maximumTotalEncodedImageByteCount = 64 * 1_024 * 1_024
     static let maximumPixelDimension = 4_096
     static let maximumDecodedByteCount = 64 * 1_024 * 1_024
     static let maximumEntryCount = 512
-    private struct Entry {
+
+    private struct EncodedEntry {
+        let data: Data
+        let kind: RuntimeThemeDecodedImageHandle.Kind
+        let pixelWidth: Int
+        let pixelHeight: Int
+        let decodedByteCount: Int
+        var accessOrder: UInt64
+    }
+
+    private struct DecodedEntry {
         let image: CGImage?
         let decodedByteCount: Int
         var accessOrder: UInt64
     }
 
+    private let encodedByteLimit: Int
     private let decodedByteLimit: Int
     private let entryLimit: Int
-    private var entries: [Data: Entry] = [:]
-    private var retainedKeyCounts: [Data: Int] = [:]
+    private var encodedEntries: [RuntimeThemeDecodedResourceKey: EncodedEntry] = [:]
+    private var decodedEntries: [RuntimeThemeDecodedResourceKey: DecodedEntry] = [:]
+    private var retainedKeyCounts: [RuntimeThemeDecodedResourceKey: Int] = [:]
     private var accessOrder: UInt64 = 0
     private var memoryPressureSource: (any DispatchSourceMemoryPressure)?
 
+    private(set) var totalEncodedByteCount = 0
     private(set) var totalDecodedByteCount = 0
     private(set) var decodedImageCreationCount = 0
     private(set) var decodedImageValidationCount = 0
 
-    var entryCount: Int { entries.count }
+    var entryCount: Int { decodedEntries.count }
+
+    var encodedEntryCount: Int { encodedEntries.count }
+
+    var retainedEntryCount: Int { retainedKeyCounts.count }
 
     var decodedImageCount: Int {
-        entries.values.lazy.filter { $0.image != nil }.count
+        decodedEntries.values.lazy.filter { $0.image != nil }.count
     }
 
     init(
+        maximumTotalEncodedImageByteCount: Int = RuntimeThemeDecodedResourceCache
+            .maximumTotalEncodedImageByteCount,
         maximumDecodedByteCount: Int = RuntimeThemeDecodedResourceCache
             .maximumDecodedByteCount,
         maximumEntryCount: Int = RuntimeThemeDecodedResourceCache.maximumEntryCount
     ) {
+        precondition(maximumTotalEncodedImageByteCount > 0)
         precondition(maximumDecodedByteCount > 0)
         precondition(maximumEntryCount > 0)
+        encodedByteLimit = maximumTotalEncodedImageByteCount
         decodedByteLimit = maximumDecodedByteCount
         entryLimit = maximumEntryCount
 
@@ -111,6 +161,46 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
     func prepareImage(
         data: Data
     ) throws -> RuntimeThemeDecodedImageHandle {
+        let sha256 = ThemeSHA256Digest(
+            rawValue: RuntimeIntegrityDigest.sha256Hex(data)
+        )!
+        return try prepareImage(
+            data: data,
+            key: RuntimeThemeDecodedResourceKey(
+                codexID: nil,
+                resourceID: nil,
+                contentRevision: nil,
+                sha256: sha256
+            ),
+            expectedMediaType: nil
+        )
+    }
+
+    fileprivate func prepareImage(
+        data: Data,
+        codexID: CodexID,
+        resourceID: ThemeResourceID,
+        contentRevision: UInt64,
+        sha256: ThemeSHA256Digest,
+        expectedMediaType: ThemeResourceMediaType
+    ) throws -> RuntimeThemeDecodedImageHandle {
+        try prepareImage(
+            data: data,
+            key: RuntimeThemeDecodedResourceKey(
+                codexID: codexID,
+                resourceID: resourceID,
+                contentRevision: contentRevision,
+                sha256: sha256
+            ),
+            expectedMediaType: expectedMediaType
+        )
+    }
+
+    private func prepareImage(
+        data: Data,
+        key: RuntimeThemeDecodedResourceKey,
+        expectedMediaType: ThemeResourceMediaType?
+    ) throws -> RuntimeThemeDecodedImageHandle {
         guard !data.isEmpty else {
             throw RuntimeThemeDecodedResourceError.emptyData
         }
@@ -131,10 +221,15 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         let kind: RuntimeThemeDecodedImageHandle.Kind
         let dimensions: (width: Int, height: Int)
         if type == "com.adobe.pdf" {
+            guard expectedMediaType == nil || expectedMediaType == .pdf else {
+                throw RuntimeThemeDecodedResourceError.unsupportedImage
+            }
             kind = .pdf
             dimensions = try Self.pdfPixelDimensions(data: data)
         } else {
-            guard Self.supportedRasterTypes.contains(type) else {
+            guard Self.supportedRasterTypes.contains(type),
+                  Self.matchesRasterMediaType(type, expected: expectedMediaType)
+            else {
                 throw RuntimeThemeDecodedResourceError.unsupportedImage
             }
             kind = .raster
@@ -144,14 +239,42 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
             width: dimensions.width,
             height: dimensions.height
         )
-        return RuntimeThemeDecodedImageHandle(
-            encodedData: data,
+        let handle = RuntimeThemeDecodedImageHandle(
+            key: key,
             kind: kind,
             encodedByteCount: data.count,
             pixelWidth: dimensions.width,
             pixelHeight: dimensions.height,
             decodedByteCount: decodedByteCount
         )
+        if var existing = encodedEntries[key] {
+            guard existing.data == data,
+                  existing.kind == kind,
+                  existing.pixelWidth == dimensions.width,
+                  existing.pixelHeight == dimensions.height,
+                  existing.decodedByteCount == decodedByteCount
+            else {
+                throw RuntimeThemeDecodedResourceError.unsupportedImage
+            }
+            existing.accessOrder = nextAccessOrder()
+            encodedEntries[key] = existing
+            return handle
+        }
+
+        try evictEncodedToFit(
+            encodedByteCount: data.count,
+            addingEntry: true
+        )
+        encodedEntries[key] = EncodedEntry(
+            data: data,
+            kind: kind,
+            pixelWidth: dimensions.width,
+            pixelHeight: dimensions.height,
+            decodedByteCount: decodedByteCount,
+            accessOrder: nextAccessOrder()
+        )
+        totalEncodedByteCount += data.count
+        return handle
     }
 
     func image(for data: Data) -> Image? {
@@ -160,19 +283,20 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
     }
 
     func image(for handle: RuntimeThemeDecodedImageHandle) -> Image? {
-        if var entry = entries[handle.key] {
+        guard var encodedEntry = encodedEntries[handle.key] else { return nil }
+        encodedEntry.accessOrder = nextAccessOrder()
+        encodedEntries[handle.key] = encodedEntry
+        if var entry = decodedEntries[handle.key] {
             entry.accessOrder = nextAccessOrder()
-            entries[handle.key] = entry
+            decodedEntries[handle.key] = entry
             return entry.image.map(Self.swiftUIImage)
         }
         guard handle.decodedByteCount <= decodedByteLimit else {
-            insertFailure(for: handle.key)
             return nil
         }
 
-        evictToFit(decodedByteCount: handle.decodedByteCount)
+        evictDecodedToFit(decodedByteCount: handle.decodedByteCount)
         guard let decodedImage = decode(handle) else {
-            insertFailure(for: handle.key)
             return nil
         }
         let actualByteCount = max(
@@ -180,11 +304,10 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
             Self.byteCount(of: decodedImage) ?? Int.max
         )
         guard actualByteCount <= decodedByteLimit else {
-            insertFailure(for: handle.key)
             return nil
         }
-        evictToFit(decodedByteCount: actualByteCount)
-        entries[handle.key] = Entry(
+        evictDecodedToFit(decodedByteCount: actualByteCount)
+        decodedEntries[handle.key] = DecodedEntry(
             image: decodedImage,
             decodedByteCount: actualByteCount,
             accessOrder: nextAccessOrder()
@@ -195,7 +318,9 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
     }
 
     func validateImage(_ handle: RuntimeThemeDecodedImageHandle) -> Bool {
-        guard handle.decodedByteCount <= decodedByteLimit else { return false }
+        guard encodedEntries[handle.key] != nil,
+              handle.decodedByteCount <= decodedByteLimit
+        else { return false }
         return autoreleasepool {
             guard let decodedImage = decode(handle),
                   let byteCount = Self.byteCount(of: decodedImage),
@@ -208,6 +333,7 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
 
     func retain(_ handles: [RuntimeThemeDecodedImageHandle]) {
         for key in Set(handles.map(\.key)) {
+            guard encodedEntries[key] != nil else { continue }
             retainedKeyCounts[key, default: 0] += 1
         }
     }
@@ -219,14 +345,25 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
                 retainedKeyCounts[key] = count - 1
             } else {
                 retainedKeyCounts.removeValue(forKey: key)
-                removeEntry(for: key)
+                removeEncodedEntry(for: key)
             }
         }
     }
 
     func purge() {
-        entries.removeAll(keepingCapacity: false)
+        decodedEntries.removeAll(keepingCapacity: false)
         totalDecodedByteCount = 0
+        for key in Array(encodedEntries.keys) where retainedKeyCounts[key] == nil {
+            removeEncodedEntry(for: key)
+        }
+    }
+
+    fileprivate func discardIfUnretained(
+        _ handles: [RuntimeThemeDecodedImageHandle]
+    ) {
+        for key in Set(handles.map(\.key)) where retainedKeyCounts[key] == nil {
+            removeEncodedEntry(for: key)
+        }
     }
 
     static func validatedDecodedByteCount(
@@ -261,6 +398,28 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         "public.heif",
         "public.heics",
     ]
+
+    private static let supportedHEIFTypes: Set<String> = [
+        "public.heic",
+        "public.heif",
+        "public.heics",
+    ]
+
+    private static func matchesRasterMediaType(
+        _ type: String,
+        expected: ThemeResourceMediaType?
+    ) -> Bool {
+        switch expected {
+        case nil:
+            return true
+        case .png:
+            return type == "public.png"
+        case .heif:
+            return supportedHEIFTypes.contains(type)
+        default:
+            return false
+        }
+    }
 
     private static func rasterPixelDimensions(
         source: CGImageSource
@@ -324,6 +483,9 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
     private func decode(
         _ handle: RuntimeThemeDecodedImageHandle
     ) -> CGImage? {
+        guard let encodedData = encodedEntries[handle.key]?.data else {
+            return nil
+        }
         switch handle.kind {
         case .raster:
             let options = [
@@ -331,7 +493,7 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
                 kCGImageSourceShouldCacheImmediately: true,
             ] as CFDictionary
             guard let source = CGImageSourceCreateWithData(
-                handle.encodedData as CFData,
+                encodedData as CFData,
                 options
             ),
             let image = CGImageSourceCreateImageAtIndex(source, 0, options),
@@ -344,15 +506,16 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
             else { return nil }
             return image
         case .pdf:
-            return Self.decodePDF(handle)
+            return Self.decodePDF(handle, encodedData: encodedData)
         }
     }
 
     private static func decodePDF(
-        _ handle: RuntimeThemeDecodedImageHandle
+        _ handle: RuntimeThemeDecodedImageHandle,
+        encodedData: Data
     ) -> CGImage? {
         guard let provider = CGDataProvider(
-            data: handle.encodedData as CFData
+            data: encodedData as CFData
         ),
         let document = CGPDFDocument(provider),
         let page = document.page(at: 1),
@@ -397,28 +560,46 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         Image(decorative: image, scale: 1, orientation: .up)
     }
 
-    private func insertFailure(for key: Data) {
-        evictToFit(decodedByteCount: 0)
-        entries[key] = Entry(
-            image: nil,
-            decodedByteCount: 0,
-            accessOrder: nextAccessOrder()
-        )
-    }
-
-    private func evictToFit(decodedByteCount: Int) {
-        while entries.count >= entryLimit
+    private func evictDecodedToFit(decodedByteCount: Int) {
+        while decodedEntries.count >= entryLimit
             || totalDecodedByteCount > decodedByteLimit - decodedByteCount {
-            guard let leastRecentlyUsed = entries.min(
+            guard let leastRecentlyUsed = decodedEntries.min(
                 by: { $0.value.accessOrder < $1.value.accessOrder }
             )?.key else { break }
-            removeEntry(for: leastRecentlyUsed)
+            removeDecodedEntry(for: leastRecentlyUsed)
         }
     }
 
-    private func removeEntry(for key: Data) {
-        guard let removed = entries.removeValue(forKey: key) else { return }
+    private func evictEncodedToFit(
+        encodedByteCount: Int,
+        addingEntry: Bool
+    ) throws {
+        guard encodedByteCount <= encodedByteLimit else {
+            throw RuntimeThemeDecodedResourceError.encodedCacheCapacityExceeded
+        }
+        while (addingEntry && encodedEntries.count >= entryLimit)
+            || totalEncodedByteCount > encodedByteLimit - encodedByteCount {
+            guard let leastRecentlyUsed = encodedEntries
+                .filter({ retainedKeyCounts[$0.key] == nil })
+                .min(by: { $0.value.accessOrder < $1.value.accessOrder })?.key
+            else {
+                throw RuntimeThemeDecodedResourceError.encodedCacheCapacityExceeded
+            }
+            removeEncodedEntry(for: leastRecentlyUsed)
+        }
+    }
+
+    private func removeDecodedEntry(for key: RuntimeThemeDecodedResourceKey) {
+        guard let removed = decodedEntries.removeValue(forKey: key) else { return }
         totalDecodedByteCount -= removed.decodedByteCount
+    }
+
+    private func removeEncodedEntry(for key: RuntimeThemeDecodedResourceKey) {
+        guard retainedKeyCounts[key] == nil,
+              let removed = encodedEntries.removeValue(forKey: key)
+        else { return }
+        totalEncodedByteCount -= removed.data.count
+        removeDecodedEntry(for: key)
     }
 
     private func nextAccessOrder() -> UInt64 {
@@ -450,6 +631,62 @@ final class RuntimeThemeDecodedResourceReference: ObservableObject {
     deinit {
         guard let handle else { return }
         let cache = cache
+        Task { @MainActor in
+            cache.release([handle])
+        }
+    }
+}
+
+@MainActor
+public final class RuntimeThemeImageReference: ObservableObject {
+    public let codexID: CodexID
+    public let resourceID: ThemeResourceID
+    public let role: ThemeResourceRoleID
+    public let mediaType: ThemeResourceMediaType
+    public let integrity: ThemeResourceIntegrity
+    public let contentRevision: UInt64
+    public let pixelWidth: Int
+    public let pixelHeight: Int
+    public let kind: RuntimeThemeImageKind
+
+    fileprivate let cache: RuntimeThemeDecodedResourceCache
+    fileprivate let handle: RuntimeThemeDecodedImageHandle
+
+    fileprivate init(
+        codexID: CodexID,
+        resourceID: ThemeResourceID,
+        role: ThemeResourceRoleID,
+        mediaType: ThemeResourceMediaType,
+        integrity: ThemeResourceIntegrity,
+        contentRevision: UInt64,
+        handle: RuntimeThemeDecodedImageHandle,
+        cache: RuntimeThemeDecodedResourceCache
+    ) {
+        self.codexID = codexID
+        self.resourceID = resourceID
+        self.role = role
+        self.mediaType = mediaType
+        self.integrity = integrity
+        self.contentRevision = contentRevision
+        pixelWidth = handle.pixelWidth
+        pixelHeight = handle.pixelHeight
+        kind = handle.kind == .pdf ? .vectorPDF : .raster
+        self.cache = cache
+        self.handle = handle
+        cache.retain([handle])
+    }
+
+    public var pixelSize: ThemePixelSize? {
+        integrity.pixelSize
+    }
+
+    public var image: Image? {
+        cache.image(for: handle)
+    }
+
+    deinit {
+        let cache = cache
+        let handle = handle
         Task { @MainActor in
             cache.release([handle])
         }
@@ -660,16 +897,22 @@ public struct RuntimeThemeBackgroundParameters: Equatable, Sendable {
 }
 
 @MainActor
-private struct RuntimeThemeBackgroundImage {
+fileprivate struct RuntimeThemeBackgroundImage {
     let handle: RuntimeThemeDecodedImageHandle
+
+    init(handle: RuntimeThemeDecodedImageHandle) {
+        self.handle = handle
+    }
 
     init?(
         data: Data,
         cache: RuntimeThemeDecodedResourceCache
     ) {
-        guard let handle = try? cache.prepareImage(data: data),
-              cache.validateImage(handle)
-        else { return nil }
+        guard let handle = try? cache.prepareImage(data: data) else { return nil }
+        guard cache.validateImage(handle) else {
+            cache.discardIfUnretained([handle])
+            return nil
+        }
         self.handle = handle
     }
 
@@ -678,7 +921,7 @@ private struct RuntimeThemeBackgroundImage {
     }
 }
 
-private struct RuntimeThemeBackgroundConfiguration {
+fileprivate struct RuntimeThemeBackgroundConfiguration {
     let staticBase: RuntimeThemeBackgroundImage
     let reduceMotion: RuntimeThemeBackgroundImage
     let highContrast: RuntimeThemeBackgroundImage
@@ -686,6 +929,52 @@ private struct RuntimeThemeBackgroundConfiguration {
 
     var imageHandles: [RuntimeThemeDecodedImageHandle] {
         [staticBase.handle, reduceMotion.handle, highContrast.handle]
+    }
+}
+
+@MainActor
+public final class RuntimePreparedThemeBackground {
+    public let usesRendererParameters: Bool
+
+    fileprivate let ownerID: ObjectIdentifier
+    fileprivate let configuration: RuntimeThemeBackgroundConfiguration
+    fileprivate let cache: RuntimeThemeDecodedResourceCache
+    fileprivate var isCommitted = false
+
+    fileprivate init(
+        ownerID: ObjectIdentifier,
+        configuration: RuntimeThemeBackgroundConfiguration,
+        cache: RuntimeThemeDecodedResourceCache
+    ) {
+        self.ownerID = ownerID
+        self.configuration = configuration
+        self.cache = cache
+        usesRendererParameters = configuration.parameters != nil
+        cache.retain(configuration.imageHandles)
+    }
+
+    fileprivate func take(
+        for ownerID: ObjectIdentifier
+    ) throws -> RuntimeThemeBackgroundConfiguration {
+        guard self.ownerID == ownerID else {
+            throw RuntimeThemeBackgroundInstallationError
+                .preparedBackgroundOwnerMismatch
+        }
+        guard !isCommitted else {
+            throw RuntimeThemeBackgroundInstallationError
+                .preparedBackgroundAlreadyCommitted
+        }
+        isCommitted = true
+        return configuration
+    }
+
+    deinit {
+        guard !isCommitted else { return }
+        let cache = cache
+        let handles = configuration.imageHandles
+        Task { @MainActor in
+            cache.release(handles)
+        }
     }
 }
 
@@ -702,6 +991,31 @@ private final class RuntimeNotificationObserver: @unchecked Sendable {
 
     deinit {
         cancel()
+    }
+}
+
+private struct RuntimeThemeExpectedImageIdentity {
+    let resourceID: ThemeResourceID
+    let role: ThemeResourceRoleID
+    let mediaType: ThemeResourceMediaType
+    let integrity: ThemeResourceIntegrity
+
+    init(reference: ThemeResourceReference) {
+        resourceID = reference.id
+        role = reference.role
+        mediaType = reference.mediaType
+        integrity = reference.integrity
+    }
+
+    init(inventory: SharePresentationProviderResourceInventory) throws {
+        resourceID = inventory.resourceID
+        role = inventory.role
+        mediaType = inventory.mediaType
+        integrity = try ThemeResourceIntegrity(
+            sha256: inventory.sha256,
+            byteLength: inventory.byteLength,
+            pixelSize: inventory.pixelSize
+        )
     }
 }
 
@@ -776,12 +1090,137 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         AnyView(RuntimeMetalPresentationView(presentation: self))
     }
 
+    public func makeThemeImageReference(
+        resolvedResource: ResolvedThemeResourceDTO,
+        expectedReference: ThemeResourceReference,
+        expectedCodexID: CodexID,
+        contentRevision: UInt64
+    ) throws -> RuntimeThemeImageReference {
+        try makeThemeImageReference(
+            resolvedResource: resolvedResource,
+            expected: RuntimeThemeExpectedImageIdentity(
+                reference: expectedReference
+            ),
+            expectedCodexID: expectedCodexID,
+            contentRevision: contentRevision
+        )
+    }
+
+    public func makeThemeImageReference(
+        resolvedResource: ResolvedThemeResourceDTO,
+        expectedInventory: SharePresentationProviderResourceInventory,
+        expectedCodexID: CodexID,
+        contentRevision: UInt64
+    ) throws -> RuntimeThemeImageReference {
+        let expected: RuntimeThemeExpectedImageIdentity
+        do {
+            expected = try RuntimeThemeExpectedImageIdentity(
+                inventory: expectedInventory
+            )
+        } catch {
+            throw RuntimeThemeImageReferenceError.integrityMismatch
+        }
+        return try makeThemeImageReference(
+            resolvedResource: resolvedResource,
+            expected: expected,
+            expectedCodexID: expectedCodexID,
+            contentRevision: contentRevision
+        )
+    }
+
+    private func makeThemeImageReference(
+        resolvedResource: ResolvedThemeResourceDTO,
+        expected: RuntimeThemeExpectedImageIdentity,
+        expectedCodexID: CodexID,
+        contentRevision: UInt64
+    ) throws -> RuntimeThemeImageReference {
+        guard !isClosed else {
+            throw RuntimeThemeImageReferenceError.presentationClosed
+        }
+        guard resolvedResource.codexID == expectedCodexID else {
+            throw RuntimeThemeImageReferenceError.codexIdentityMismatch
+        }
+        guard resolvedResource.resourceID == expected.resourceID else {
+            throw RuntimeThemeImageReferenceError.resourceIdentityMismatch
+        }
+        guard resolvedResource.role == expected.role else {
+            throw RuntimeThemeImageReferenceError.roleMismatch
+        }
+        guard resolvedResource.mediaType == expected.mediaType else {
+            throw RuntimeThemeImageReferenceError.mediaTypeMismatch
+        }
+        guard resolvedResource.integrity == expected.integrity else {
+            throw RuntimeThemeImageReferenceError.integrityMismatch
+        }
+        guard UInt64(resolvedResource.data.count) == expected.integrity.byteLength,
+              RuntimeIntegrityDigest.sha256Hex(resolvedResource.data)
+                == expected.integrity.sha256.rawValue
+        else {
+            throw RuntimeThemeImageReferenceError.encodedContentMismatch
+        }
+
+        let handle: RuntimeThemeDecodedImageHandle
+        do {
+            handle = try decodedResourceCache.prepareImage(
+                data: resolvedResource.data,
+                codexID: expectedCodexID,
+                resourceID: expected.resourceID,
+                contentRevision: contentRevision,
+                sha256: expected.integrity.sha256,
+                expectedMediaType: expected.mediaType
+            )
+        } catch RuntimeThemeDecodedResourceError.encodedCacheCapacityExceeded {
+            throw RuntimeThemeImageReferenceError.cacheCapacityExceeded
+        } catch RuntimeThemeDecodedResourceError.encodedDataTooLarge {
+            throw RuntimeThemeImageReferenceError.cacheCapacityExceeded
+        } catch {
+            throw RuntimeThemeImageReferenceError.unsupportedImage
+        }
+
+        if let expectedPixelSize = expected.integrity.pixelSize,
+           (handle.pixelWidth != Int(expectedPixelSize.width)
+               || handle.pixelHeight != Int(expectedPixelSize.height))
+        {
+            decodedResourceCache.discardIfUnretained([handle])
+            throw RuntimeThemeImageReferenceError.pixelDimensionsMismatch
+        }
+        guard decodedResourceCache.image(for: handle) != nil else {
+            decodedResourceCache.discardIfUnretained([handle])
+            throw RuntimeThemeImageReferenceError.cacheCapacityExceeded
+        }
+        return RuntimeThemeImageReference(
+            codexID: expectedCodexID,
+            resourceID: expected.resourceID,
+            role: expected.role,
+            mediaType: expected.mediaType,
+            integrity: expected.integrity,
+            contentRevision: contentRevision,
+            handle: handle,
+            cache: decodedResourceCache
+        )
+    }
+
     public func installThemeBackground(
         staticBaseData: Data,
         reduceMotionData: Data,
         highContrastData: Data,
         rendererParametersData: Data?
     ) throws {
+        let prepared = try prepareThemeBackground(
+            staticBaseData: staticBaseData,
+            reduceMotionData: reduceMotionData,
+            highContrastData: highContrastData,
+            rendererParametersData: rendererParametersData
+        )
+        try commitThemeBackground(prepared)
+    }
+
+    public func prepareThemeBackground(
+        staticBaseData: Data,
+        reduceMotionData: Data,
+        highContrastData: Data,
+        rendererParametersData: Data?
+    ) throws -> RuntimePreparedThemeBackground {
         guard !isClosed else {
             throw RuntimeThemeBackgroundInstallationError.presentationClosed
         }
@@ -789,51 +1228,93 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
             data: staticBaseData,
             cache: decodedResourceCache
         ) else {
-            clearThemeBackground()
             throw RuntimeThemeBackgroundInstallationError.invalidStaticBaseData
         }
         guard let reduceMotion = RuntimeThemeBackgroundImage(
             data: reduceMotionData,
             cache: decodedResourceCache
         ) else {
-            clearThemeBackground()
+            decodedResourceCache.discardIfUnretained([staticBase.handle])
             throw RuntimeThemeBackgroundInstallationError.invalidReduceMotionData
         }
         guard let highContrast = RuntimeThemeBackgroundImage(
             data: highContrastData,
             cache: decodedResourceCache
         ) else {
-            clearThemeBackground()
+            decodedResourceCache.discardIfUnretained([
+                staticBase.handle,
+                reduceMotion.handle,
+            ])
             throw RuntimeThemeBackgroundInstallationError.invalidHighContrastData
         }
 
-        let staticConfiguration = RuntimeThemeBackgroundConfiguration(
-            staticBase: staticBase,
-            reduceMotion: reduceMotion,
-            highContrast: highContrast,
-            parameters: nil
-        )
-        let parameters: RuntimeThemeBackgroundParameters?
-        if let rendererParametersData {
-            do {
-                parameters = try RuntimeThemeBackgroundParameters.decode(
-                    from: rendererParametersData
-                )
-            } catch {
-                installThemeBackgroundConfiguration(staticConfiguration)
-                throw error
-            }
-        } else {
-            parameters = nil
+        let parameters = rendererParametersData.flatMap {
+            try? RuntimeThemeBackgroundParameters.decode(from: $0)
         }
-
-        installThemeBackgroundConfiguration(
-            RuntimeThemeBackgroundConfiguration(
+        return RuntimePreparedThemeBackground(
+            ownerID: ObjectIdentifier(self),
+            configuration: RuntimeThemeBackgroundConfiguration(
                 staticBase: staticBase,
                 reduceMotion: reduceMotion,
                 highContrast: highContrast,
                 parameters: parameters
-            )
+            ),
+            cache: decodedResourceCache
+        )
+    }
+
+    public func prepareThemeBackground(
+        staticBase: RuntimeThemeImageReference,
+        reduceMotion: RuntimeThemeImageReference,
+        highContrast: RuntimeThemeImageReference,
+        rendererParametersData: Data?
+    ) throws -> RuntimePreparedThemeBackground {
+        guard !isClosed else {
+            throw RuntimeThemeBackgroundInstallationError.presentationClosed
+        }
+        let references = [staticBase, reduceMotion, highContrast]
+        guard references.allSatisfy({ $0.cache === decodedResourceCache }),
+              Set(references.map(\.codexID)).count == 1,
+              Set(references.map(\.contentRevision)).count == 1,
+              staticBase.role == ThemeResourceRoles.backgroundStaticBase,
+              (reduceMotion.role == ThemeResourceRoles.backgroundReduceMotion
+                  || reduceMotion.role == ThemeResourceRoles.backgroundStaticBase),
+              highContrast.role == ThemeResourceRoles.backgroundHighContrast
+        else {
+            throw RuntimeThemeBackgroundInstallationError
+                .invalidBackgroundReference
+        }
+        let parameters = rendererParametersData.flatMap {
+            try? RuntimeThemeBackgroundParameters.decode(from: $0)
+        }
+        return RuntimePreparedThemeBackground(
+            ownerID: ObjectIdentifier(self),
+            configuration: RuntimeThemeBackgroundConfiguration(
+                staticBase: RuntimeThemeBackgroundImage(
+                    handle: staticBase.handle
+                ),
+                reduceMotion: RuntimeThemeBackgroundImage(
+                    handle: reduceMotion.handle
+                ),
+                highContrast: RuntimeThemeBackgroundImage(
+                    handle: highContrast.handle
+                ),
+                parameters: parameters
+            ),
+            cache: decodedResourceCache
+        )
+    }
+
+    public func commitThemeBackground(
+        _ prepared: RuntimePreparedThemeBackground
+    ) throws {
+        guard !isClosed else {
+            throw RuntimeThemeBackgroundInstallationError.presentationClosed
+        }
+        let configuration = try prepared.take(for: ObjectIdentifier(self))
+        installThemeBackgroundConfiguration(
+            configuration,
+            alreadyRetained: true
         )
     }
 
@@ -1052,10 +1533,13 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
     }
 
     private func installThemeBackgroundConfiguration(
-        _ configuration: RuntimeThemeBackgroundConfiguration
+        _ configuration: RuntimeThemeBackgroundConfiguration,
+        alreadyRetained: Bool = false
     ) {
         let replacedHandles = themeBackgroundConfiguration?.imageHandles ?? []
-        decodedResourceCache.retain(configuration.imageHandles)
+        if !alreadyRetained {
+            decodedResourceCache.retain(configuration.imageHandles)
+        }
         themeBackgroundConfiguration = configuration
         themeBackgroundRevision &+= 1
         decodedResourceCache.release(replacedHandles)

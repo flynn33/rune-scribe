@@ -203,9 +203,17 @@ require(
     "support guide application version differs",
 )
 require(
-    "owner test required; not shipped" in support
-    and "local Vault works without either Apple service" in support,
-    "support guide lacks the no-ship or local-first boundary",
+    "local Vault works without either Apple service" in support,
+    "support guide lacks the local-first boundary",
+)
+require(
+    "owner test required" not in support.lower(),
+    "support guide makes owner testing a publication-readiness gate",
+)
+require(
+    "discretionary before distribution" in support.lower()
+    and "pull-request readiness" in support.lower(),
+    "support guide lacks the discretionary, non-gating owner-test boundary",
 )
 require(
     f"Rune Scribe {marketing} (build {build})" in documentation_support_checklist,
@@ -220,7 +228,7 @@ require(
     "**NOT SHIPPED — OWNER TEST REQUIRED**" in documentation_support_checklist
     and "**Do not ship until the owner approves the test results.**"
     in documentation_support_checklist,
-    "documentation/support checklist lacks the exact stop statements",
+    "historical roadmap-completion checklist no longer preserves its exact stop statements",
 )
 roadmap = read("docs/architecture/RoadmapAlignment.md")
 require(
@@ -723,6 +731,47 @@ current_status_docs = {
     "docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md": invitation_presentation,
     "docs/verification/ElvenSeriesBlockingResolutionLedger.md": ledger,
 }
+
+# Roadmap-completion evidence is an immutable historical record of the policy
+# that controlled that earlier handoff.  It must retain its original owner-test
+# language above, but the active application and NRV status surfaces must not
+# reuse that historical release gate.  A later owner review may be performed at
+# the owner's discretion before distribution; it never blocks implementation,
+# automated acceptance, PASS, or pull-request readiness.
+active_owner_boundary_docs = {
+    "README.md": readme,
+    "CHANGELOG.md": changelog,
+    "docs/SUPPORT.md": support,
+    "docs/APP_STORE_SUBMISSION.md": submission,
+    "docs/architecture/RoadmapAlignment.md": roadmap,
+    "docs/architecture/ForsettiSupersessionIndex.md": supersession_index,
+}
+nrv_evidence_root = ROOT / "docs/verification/norse-visual-remediation"
+if nrv_evidence_root.is_dir():
+    for pattern in ("*.md", "*.json"):
+        for path in sorted(nrv_evidence_root.glob(pattern)):
+            active_owner_boundary_docs[path.relative_to(ROOT).as_posix()] = path.read_text(
+                encoding="utf-8"
+            )
+
+owner_gate_patterns = (
+    re.compile(r"\bowner[- ]test\s+required\b", re.IGNORECASE),
+    re.compile(r"\bowner(?:/operator|\s+or\s+operator)?\s+input\s+required\b", re.IGNORECASE),
+    re.compile(r"\bdo\s+not\s+(?:ship|merge|publish).{0,100}\bowner\s+approv", re.IGNORECASE),
+    re.compile(
+        r"\b(?:physical[- ]device|physical\s+hardware)"
+        r"(?![^.\n]{0,80}\bnot\s+required\b)[^.\n]{0,80}"
+        r"\b(?:required|pending|block(?:ed|er)?|gate)\b",
+        re.IGNORECASE,
+    ),
+)
+for relative, content in active_owner_boundary_docs.items():
+    for pattern in owner_gate_patterns:
+        require(
+            pattern.search(content) is None,
+            f"{relative} retains an active hardware or owner/operator gate",
+        )
+
 stale_status = re.compile(
     r"DEV-ELVEN-003\s+through\s+DEV-ELVEN-009.{0,100}(?:remain|still).{0,30}(?:blocked|block)",
     re.IGNORECASE | re.DOTALL,
@@ -779,5 +828,5 @@ if ERRORS:
 print(
     f"Documentation alignment passed: version {marketing} build {build}, "
     "recovery closed, Phase C history retained, roadmap source-complete, "
-    "owner test required, not shipped."
+    "owner testing discretionary before distribution, not shipped."
 )

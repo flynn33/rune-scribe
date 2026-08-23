@@ -268,7 +268,7 @@ final class SunspireThemeProviderTests: XCTestCase {
         XCTAssertEqual(shippingBytes, 666458)
     }
 
-    func testLockedDiscoveryPublishesAtomicallyAfterLiveEntitlementAndRestartsSafely() async throws {
+    func testLockedDiscoveryPublishesPreviewResourcesAndRestartsSafely() async throws {
         let probe = SunspireThemeReaderProbe()
         let runtime = try await makeRuntime(locator: SunspireThemeBundleLocator())
         try await RuneScribeThemeSunspireModuleBootstrap.register(with: runtime)
@@ -277,9 +277,18 @@ final class SunspireThemeProviderTests: XCTestCase {
         try await runtime.start()
         var runtimeSnapshot = await runtime.snapshot()
         XCTAssertEqual(runtimeSnapshot.status, .running)
-        XCTAssertEqual(runtimeSnapshot.moduleStates[RuneScribeThemeSunspireModuleBootstrap.moduleID], .validated)
+        XCTAssertEqual(runtimeSnapshot.moduleStates[RuneScribeThemeSunspireModuleBootstrap.moduleID], .active)
         var contributionSnapshot = try await probe.contributionSnapshot()
-        XCTAssertTrue(contributionSnapshot.entries.isEmpty)
+        let previewContribution = try XCTUnwrap(contributionSnapshot.entries.only)
+        XCTAssertEqual(
+            previewContribution.value,
+            RuneScribeThemeSunspireModuleBootstrap.discoveryDescriptor
+        )
+        let previewResources = try await probe.resourceSnapshot()
+        XCTAssertEqual(
+            previewResources.resources.count,
+            previewContribution.value.resources.count
+        )
 
         try await runtime.reconcileEntitlements(try entitlementSnapshot())
         runtimeSnapshot = await runtime.snapshot()

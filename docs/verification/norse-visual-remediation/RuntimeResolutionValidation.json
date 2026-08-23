@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0",
+  "sourceSHA": "74f57f4a11af9df349111ae2416d5c54699ae116",
+  "command": [
+    "swift test --package-path Packages/RuneScribeArchitecture",
+    "./scripts/check-architecture.sh",
+    "python3 scripts/check-norse-visual-remediation.py --profile implementation"
+  ],
+  "destination": {
+    "platform": "macOS",
+    "boundary": "Theme Coordinator and runtime resource clients"
+  },
+  "startTimestamp": "2026-08-23T03:01:23Z",
+  "endTimestamp": "2026-08-23T03:34:15Z",
+  "result": "PASS",
+  "failures": [],
+  "artifactPaths": [
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/01-swift-test.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/02-check-architecture.log",
+    "/tmp/runescribe-nrv-final3.2ce0nv/verification/08-nrv-implementation-checker.log",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift"
+  ],
+  "toolchainVersions": {
+    "xcode": "26.2 (17C52)",
+    "swift": "6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "host": "macOS 26.6.2 (25G83)",
+    "python": "3.9.6"
+  },
+  "referenceType": "RuntimeThemeImageReference",
+  "resolutionPath": [
+    "ThemeDescriptor",
+    "Theme Coordinator authorization",
+    "runtime opaque-resource client",
+    "validated RuntimeThemeImageReference",
+    "provider-neutral UI"
+  ],
+  "resolutionPurposes": [
+    "activePresentation",
+    "catalogPreview"
+  ],
+  "cacheBounds": {
+    "maximumEncodedImageByteCount": 8388608,
+    "maximumTotalEncodedImageByteCount": 67108864,
+    "maximumDecodedByteCount": 67108864,
+    "maximumPixelDimension": 4096,
+    "maximumEntryCount": 512
+  },
+  "lifecycle": {
+    "leases": "retain and release verified",
+    "eviction": "least-recently-used unleased entries",
+    "memoryPressure": "purge and deterministic rehydration verified",
+    "vectorSupport": "bounded PDF rasterization verified"
+  },
+  "adoption": {
+    "publication": "atomic",
+    "failedReplacement": "previous valid state retained",
+    "staleWork": "generation checked and rejected"
+  },
+  "passingTests": [
+    "RuntimeApplicationResourcePresentationTests.testThemeImageReferenceRejectsForgedContentMediaAndDimensions",
+    "RuntimeApplicationResourcePresentationTests.testEncodedBudgetHonorsLeasesAndMemoryPressureRehydrates",
+    "RuntimeApplicationResourcePresentationTests.testPreparedBackgroundDoesNotPublishUntilCommitted",
+    "ThemeCoordinatorConformanceTests.testSuspendedOlderReconcileCannotReplaceNewerProviderState"
+  ]
+}

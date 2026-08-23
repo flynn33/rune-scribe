@@ -166,10 +166,14 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
     ) async throws -> ResolvedThemeResourceDTO {
         try await reconcile()
         guard let provider = providersByCodexID[request.codexID],
-              provider.state == .available,
               let reference = provider.descriptor.resources.first(where: {
                   $0.id == request.resourceID
-              })
+              }),
+              Self.canResolve(
+                  reference,
+                  from: provider,
+                  purpose: request.purpose
+              )
         else {
             throw ThemeCoordinatorModuleError.resourceUnavailable(request)
         }
@@ -719,6 +723,89 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             }
         }
         return .accepted
+    }
+
+    private static func canResolve(
+        _ reference: ThemeResourceReference,
+        from provider: ProviderRecord,
+        purpose: ThemeResourceResolutionPurpose
+    ) -> Bool {
+        switch purpose {
+        case .activePresentation:
+            return provider.state == .available
+        case .catalogPreview:
+            return (provider.state == .available || provider.state == .locked)
+                && isCatalogPreviewResource(
+                    reference,
+                    descriptor: provider.descriptor
+                )
+        }
+    }
+
+    private static func isCatalogPreviewResource(
+        _ reference: ThemeResourceReference,
+        descriptor: ThemeDescriptor
+    ) -> Bool {
+        let codex = descriptor.codex
+        var declaredPreviewResourceIDs: Set<ThemeResourceID> = [
+            codex.vault.cardResourceID,
+            codex.vault.lockedSilhouetteResourceID,
+            codex.vault.encounteredResourceID,
+            codex.vault.selectedResourceID,
+        ]
+        for relic in codex.relics
+            where relic.metadata.availability != .reservedInactive
+        {
+            declaredPreviewResourceIDs.formUnion([
+                relic.thumbnailResourceID,
+                relic.staticFallbackResourceID,
+                relic.highContrastResourceID,
+            ])
+        }
+        for seal in codex.seals
+            where seal.metadata.availability != .reservedInactive
+        {
+            declaredPreviewResourceIDs.formUnion([
+                seal.vectorResourceID,
+                seal.monochromeFallbackResourceID,
+                seal.thumbnailResourceID,
+            ])
+        }
+        for frame in codex.frames
+            where frame.metadata.availability != .reservedInactive
+        {
+            declaredPreviewResourceIDs.formUnion([
+                frame.vectorResourceID,
+                frame.staticFallbackResourceID,
+            ])
+        }
+        for crest in codex.crests
+            where crest.metadata.availability != .reservedInactive
+        {
+            declaredPreviewResourceIDs.formUnion([
+                crest.vectorResourceID,
+                crest.staticFallbackResourceID,
+            ])
+        }
+
+        let previewRoles: Set<ThemeResourceRoleID> = [
+            ThemeResourceRoles.vaultCard,
+            ThemeResourceRoles.vaultLockedSilhouette,
+            ThemeResourceRoles.vaultEncountered,
+            ThemeResourceRoles.vaultSelected,
+            ThemeResourceRoles.relicThumbnail,
+            ThemeResourceRoles.relicStaticShareFallback,
+            ThemeResourceRoles.relicHighContrast,
+            ThemeResourceRoles.sealVectorMaster,
+            ThemeResourceRoles.sealMonochromeFallback,
+            ThemeResourceRoles.sealThumbnail,
+            ThemeResourceRoles.frameVectorMaster,
+            ThemeResourceRoles.frameStaticFallback,
+            ThemeResourceRoles.crestVectorMaster,
+            ThemeResourceRoles.crestStaticFallback,
+        ]
+        return declaredPreviewResourceIDs.contains(reference.id)
+            && previewRoles.contains(reference.role)
     }
 
     private static func matches(

@@ -174,11 +174,12 @@ After those gates are green, the correct state is:
 - **CODE COMPLETE**
 - **AUTOMATED TESTS PASS**
 - **SUPPORTED HOST/SIMULATOR TESTS PASS**
-- **OWNER TEST REQUIRED**
+- **OWNER VALIDATION DISCRETIONARY BEFORE DISTRIBUTION**
 - **NOT SHIPPED**
 
-The owner checklist covers physical Messages/share-sheet destinations, camera QR,
+The optional owner checklist covers physical Messages/share-sheet destinations, camera QR,
 Contacts, accessibility services, device performance/memory, iCloud container/account,
 Game Center records and sandbox login, signing, archive/export, notarization, App Store
 metadata entry, TestFlight/App Store upload, and rollout approval. None of those actions
-is performed by this branch.
+is performed by this branch. The checklist does not gate source completion, remediation
+PASS, or PR readiness; distribution remains owner-controlled.

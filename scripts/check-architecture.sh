@@ -58,7 +58,7 @@ MODULE_IMPORT_POLICY = {
   "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts AVFoundation AppKit Contacts ContactsUI CoreImage CoreTransferable LinkPresentation MessageUI Metal MetalKit Observation UIKit UniformTypeIdentifiers],
   "RuneScribePlatform" => %w[Foundation Darwin CoreData CryptoKit RuneScribeContracts Security Contacts CoreText AudioToolbox AppKit UIKit CloudKit GameKit],
   "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto ImageIO RuneScribeContracts RuneScribeRuntimeCore],
-  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine Accessibility CryptoKit ImageIO AppKit RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
+  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine Accessibility CryptoKit AppKit RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
   "RuneScribeProgressionModule" => %w[Foundation RuneScribeContracts RuneScribeProgressionSyncDomain RuneScribeRuntimeCore],
   "RuneScribeThemeCoordinatorModule" => %w[Foundation RuneScribeContracts RuneScribeRuntimeCore],
   "RuneScribeNorseThemeModule" => %w[Foundation CryptoKit RuneScribeContracts RuneScribeRuntimeCore],
@@ -124,6 +124,30 @@ UI_PROGRESSION_TRUTH_PATTERNS = [
   [/\b(?:distinctCountAtLeast|bucketCountAtLeast|allListedContentUsed|completedAchievementCountAtLeast)\b/, "Progression rule calculation"],
   [/\bProgressionEventFact\s*\(/, "Progression event creation"],
 ].freeze
+
+UI_RESOURCE_DECODE_PATTERNS = [
+  [/\bCGImageSource[A-Za-z0-9_]*\b/, "ImageIO image-source decoder"],
+  [/\bCGDataProvider[A-Za-z0-9_]*\b/, "Core Graphics encoded-data provider"],
+  [
+    /\bCGPDF(?:Document|Page)[A-Za-z0-9_]*\b|\bdrawPDFPage\s*\(/,
+    "Core Graphics PDF decoder",
+  ],
+  [
+    /\b(?:NSImage|UIImage|NSBitmapImageRep|CIImage)(?:\.init)?\s*\(\s*(?:data|contentsOf[A-Za-z]*|byReferencing|coder)\s*:/m,
+    "platform image-data decoder",
+  ],
+  [
+    /\bCGImage(?:\.init)?\s*\(\s*(?:jpeg|png)DataProviderSource\s*:/m,
+    "CGImage encoded-provider decoder",
+  ],
+  [/\bNSBitmapImageRep\.(?:imageRep|imageReps)\s*\(/, "AppKit image-representation decoder"],
+  [/\bPDFDocument(?:\.init)?\s*\(\s*(?:data|url)\s*:/m, "PDFKit document decoder"],
+].freeze
+
+UI_SAFE_PREVIEW_DECODER_LINES = Set.new([
+  "guard let image = NSImage(data: safePreviewData) else { return nil }",
+  "guard let image = UIImage(data: safePreviewData) else { return nil }",
+]).freeze
 
 THEME_RULE_CATALOG_PATTERNS = [
   [/\bachievement\.[a-z0-9-]+\b/, "Achievement stable ID"],
@@ -209,6 +233,21 @@ def module_boundary_source_errors(product, path, text)
   end
 end
 
+def ui_resource_decode_errors(path, text, safe_preview_decode_source: nil)
+  code = without_comments_preserving_lines(text)
+  UI_RESOURCE_DECODE_PATTERNS.each_with_object([]) do |(pattern, label), findings|
+    code.to_enum(:scan, pattern).each do
+      match = Regexp.last_match
+      line = code.byteslice(0, match.begin(0)).count("\n") + 1
+      safe_preview_call = label == "platform image-data decoder" &&
+        path == safe_preview_decode_source &&
+        UI_SAFE_PREVIEW_DECODER_LINES.include?(code.lines.fetch(line - 1).strip)
+      next if safe_preview_call
+      findings << "#{path}:#{line}: UI-RUNTIME-IMAGE-DECODE RuneScribeUIModule may not decode provider resources with #{label}"
+    end
+  end
+end
+
 def theme_progression_coupling_errors(path, text)
   code = without_comments_preserving_lines(text)
   findings = swift_imports(code).each_with_object([]) do |(imported, line), imports|
@@ -284,6 +323,7 @@ end
 
 fixture_root_value = ENV["RUNESCRIBE_ARCHITECTURE_MODULE_FIXTURE_ROOT"]
 fixture_product = ENV["RUNESCRIBE_ARCHITECTURE_MODULE_FIXTURE_PRODUCT"]
+fixture_safe_preview_value = ENV["RUNESCRIBE_ARCHITECTURE_UI_SAFE_PREVIEW_SOURCE"]
 if fixture_root_value || fixture_product
   unless fixture_root_value && fixture_product
     warn "architecture fixture mode requires both fixture root and product"
@@ -299,6 +339,9 @@ if fixture_root_value || fixture_product
     warn "architecture fixture root is not a directory: #{fixture_root}"
     exit 64
   end
+  fixture_safe_preview_source = fixture_safe_preview_value && Pathname(
+    fixture_safe_preview_value
+  ).to_s
   fixture_errors = []
   Dir.glob(fixture_root.join("**/*.swift").to_s).sort.each do |path|
     source = File.read(path)
@@ -306,6 +349,13 @@ if fixture_root_value || fixture_product
       module_source_errors(fixture_product, path, source, allowed_imports)
     ) if allowed_imports
     fixture_errors.concat(module_boundary_source_errors(fixture_product, path, source)) if allowed_imports
+    fixture_errors.concat(
+      ui_resource_decode_errors(
+        path,
+        source,
+        safe_preview_decode_source: fixture_safe_preview_source
+      )
+    ) if fixture_product == "RuneScribeUIModule"
     fixture_errors.concat(progression_source_errors(path, source)) if fixture_product == "RuneScribeProgressionModule"
     fixture_errors.concat(feature_preferences_source_errors(fixture_product, path, source))
     fixture_errors.concat(theme_progression_coupling_errors(path, source)) if fixture_product.match?(/Theme/)
@@ -823,6 +873,9 @@ ui_image_decode_source = architecture_package.join(
 runtime_pdf_validation_source = architecture_package.join(
   "Sources/RuneScribeRuntimeCore/RuntimePDFResourceValidation.swift"
 ).to_s
+ui_safe_preview_decode_source = architecture_package.join(
+  "Sources/RuneScribeUIModule/Sharing/ReceivedPresentationSummary.swift"
+).to_s
 MODULE_IMPORT_POLICY.each do |product, allowed_imports|
   source_root = architecture_package.join("Sources/#{product}")
   next unless source_root.directory?
@@ -842,6 +895,13 @@ MODULE_IMPORT_POLICY.each do |product, allowed_imports|
       )
     )
     errors.concat(module_boundary_source_errors(product, relative_path, source))
+    errors.concat(
+      ui_resource_decode_errors(
+        relative_path,
+        source,
+        safe_preview_decode_source: relative(ui_safe_preview_decode_source, root)
+      )
+    ) if product == "RuneScribeUIModule"
     errors.concat(progression_source_errors(relative_path, source)) if product == "RuneScribeProgressionModule"
     errors.concat(feature_preferences_source_errors(product, relative_path, source))
   end

@@ -72,7 +72,10 @@ extension RuneScribeUISession {
         if representation == .file {
             presentationPreparation = await makeOutboundSharePresentationWithLegacyFallback(
                 inscription: displayName ?? "Rune Scribe cipher invitation",
-                accessibilityLabel: "Rune Scribe themed cipher invitation"
+                accessibilityLabel: "Rune Scribe themed cipher invitation",
+                operationID: RuntimeOperationID(
+                    rawValue: "share.render.cipher.\(cipherID.uuidString.lowercased())"
+                )
             )
         } else {
             presentationPreparation = OutboundSharePresentationPreparation(
@@ -102,7 +105,10 @@ extension RuneScribeUISession {
     ) async throws -> ShareArtifactDTO {
         let presentationPreparation = await makeOutboundSharePresentationWithLegacyFallback(
             inscription: runes,
-            accessibilityLabel: "Rune Scribe themed encrypted message"
+            accessibilityLabel: "Rune Scribe themed encrypted message",
+            operationID: RuntimeOperationID(
+                rawValue: "share.render.message.\(shareHandle.rawValue.uuidString.lowercased())"
+            )
         )
         let artifact = try await perform {
             try await requireApplicationClient().prepareMessageShare(

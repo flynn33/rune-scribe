@@ -268,7 +268,7 @@ final class MoonleafThemeProviderTests: XCTestCase {
         XCTAssertEqual(shippingBytes, 678743)
     }
 
-    func testLockedDiscoveryPublishesAtomicallyAfterLiveEntitlementAndRestartsSafely() async throws {
+    func testLockedDiscoveryPublishesPreviewResourcesAndRestartsSafely() async throws {
         let probe = MoonleafThemeReaderProbe()
         let runtime = try await makeRuntime(locator: MoonleafThemeBundleLocator())
         try await RuneScribeThemeMoonleafModuleBootstrap.register(with: runtime)
@@ -277,9 +277,18 @@ final class MoonleafThemeProviderTests: XCTestCase {
         try await runtime.start()
         var runtimeSnapshot = await runtime.snapshot()
         XCTAssertEqual(runtimeSnapshot.status, .running)
-        XCTAssertEqual(runtimeSnapshot.moduleStates[RuneScribeThemeMoonleafModuleBootstrap.moduleID], .validated)
+        XCTAssertEqual(runtimeSnapshot.moduleStates[RuneScribeThemeMoonleafModuleBootstrap.moduleID], .active)
         var contributionSnapshot = try await probe.contributionSnapshot()
-        XCTAssertTrue(contributionSnapshot.entries.isEmpty)
+        let previewContribution = try XCTUnwrap(contributionSnapshot.entries.only)
+        XCTAssertEqual(
+            previewContribution.value,
+            RuneScribeThemeMoonleafModuleBootstrap.discoveryDescriptor
+        )
+        let previewResources = try await probe.resourceSnapshot()
+        XCTAssertEqual(
+            previewResources.resources.count,
+            previewContribution.value.resources.count
+        )
 
         try await runtime.reconcileEntitlements(try entitlementSnapshot())
         runtimeSnapshot = await runtime.snapshot()
