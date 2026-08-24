@@ -545,6 +545,9 @@ extension RuneScribeUISession {
                 try? await unlockFeedbackClientHandle.perform(request)
             }
         }
+        let effectiveEffects = effectiveEffectsPreference(
+            systemReduceMotion: reduceMotion
+        )
         return UnlockRevealPresentationPlan(
             revealID: revealID,
             sequenceDurationSeconds: ThemeUnlockCueSelector.animationDuration(
@@ -552,14 +555,14 @@ extension RuneScribeUISession {
             ) ?? ProgressionRevealPresentationPolicy.sequenceDurationSeconds(
                 for: reveal.tier
             ),
-            visualMode: disposition.isStatic
+            visualMode: disposition.isStatic || effectiveEffects == .off
                 ? .none
                 : ProgressionRevealPresentationPolicy.visualMode(
                     animationEnabled: unlockFeedbackPreferences.animationEnabled,
-                    reduceMotion: reduceMotion
+                    reduceMotion: effectiveEffects != .full
                 ),
             announcement: announcement,
-            isStatic: disposition.isStatic
+            isStatic: disposition.isStatic || effectiveEffects == .off
         )
     }
 
@@ -591,6 +594,7 @@ extension RuneScribeUISession {
 
     private func adoptRuntimeSettingsSnapshot(_ snapshot: RuntimeSettingsSnapshotDTO) {
         runtimeSettingsSnapshot = snapshot
+        resourcePresentation.setThemeEffectsPreference(snapshot.effectsPreference)
         unlockFeedbackPreferences = UnlockFeedbackPreferences(snapshot: snapshot)
         contactsImportPrompted = snapshot.contactsImportPrompted
         splashLastShownAt = snapshot.splashLastShownAt

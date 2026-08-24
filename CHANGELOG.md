@@ -6,6 +6,21 @@ release work and reviewed against the project version before merge. The format f
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [1.0.39] - 2026-08-23
+
+- Complete the authorized source remediation while preserving the repository's strict
+  no-ship boundary.
+- Add a complete Share Builder flow with themed static previews, optional frozen
+  geometry, explicit first-delivery key handling, and cancellable runtime resource reads.
+- Correct Cipher Library sharing, unsupported-theme fallback, share lifecycle handling,
+  minimum control hit regions, and deterministic 4:3 Appearance defaults previews.
+- Replace Norse placeholder generation with provenance-locked production resources and
+  byte-count, digest, availability, accessibility, and visual-integrity qualification.
+- Expand the Swift package regression to 1,088 tests: 959 XCTest cases and 129 Swift
+  Testing cases, plus hosted macOS/iOS and iPhone/iPad parity coverage.
+- Add fail-closed release-product inspection, mutation-tested evidence generation,
+  source-manifest verification, and deterministic owner-test candidate packaging.
+
 ## [1.0.38] - 2026-08-22
 
 - Complete the source-controlled roadmap program while retaining version 1.0.38 build

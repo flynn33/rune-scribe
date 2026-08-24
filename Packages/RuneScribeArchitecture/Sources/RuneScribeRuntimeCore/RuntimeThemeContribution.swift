@@ -5,6 +5,14 @@ public enum RuntimeThemeContributionCatalog {
     public static let descriptor = RuntimeContributionType<ThemeDescriptor>(
         id: RuntimeContributionCatalog.themeDescriptorTypeID
     )
+    public static let requiredBaseResourceFailure =
+        RuntimeContributionType<RequiredThemeResourceFailureDTO>(
+            id: RuntimeContributionCatalog.requiredBaseResourceFailureTypeID
+        )
+
+    public static let requiredBaseResourceFailureKey = RuntimeContributionKey(
+        rawValue: "theme.required-base-resource-failure"
+    )!
 
     public static func key(for codexID: CodexID) -> RuntimeContributionKey {
         RuntimeContributionKey(rawValue: codexID.rawValue)!
@@ -21,6 +29,9 @@ enum RuntimeContributionCatalog {
     static let themeDescriptorTypeID = RuntimeContributionTypeID(
         rawValue: "theme.descriptor"
     )!
+    static let requiredBaseResourceFailureTypeID = RuntimeContributionTypeID(
+        rawValue: "theme.required-base-resource-failure"
+    )!
 
     static let canonicalRules: [
         RuntimeContributionTypeID: RuntimeContributionCanonicalRule
@@ -29,7 +40,28 @@ enum RuntimeContributionCatalog {
             valueType: ThemeDescriptor.self,
             validate: validateThemeDescriptor
         ),
+        requiredBaseResourceFailureTypeID: RuntimeContributionCanonicalRule(
+            valueType: RequiredThemeResourceFailureDTO.self,
+            validate: validateRequiredBaseResourceFailure
+        ),
     ]
+
+    static func validateRequiredBaseResourceFailure(
+        _ failure: RequiredThemeResourceFailureDTO,
+        _ key: RuntimeContributionKey,
+        _ module: ModuleDescriptor
+    ) throws {
+        guard module.moduleID == RuneScribeModuleIDs.norseTheme,
+              module.criticality == .required,
+              failure.moduleID == module.moduleID,
+              failure.codexID == RuneScribeCodexIDs.norse
+        else {
+            throw RuntimeContributionRegistryError.canonicalIdentityMismatch(key)
+        }
+        guard key == RuntimeThemeContributionCatalog.requiredBaseResourceFailureKey else {
+            throw RuntimeContributionRegistryError.canonicalKeyMismatch(key)
+        }
+    }
 
     static func validateThemeDescriptor(
         _ descriptor: ThemeDescriptor,
@@ -78,6 +110,23 @@ enum RuntimeContributionCatalog {
 }
 
 public extension ModuleContext {
+    @discardableResult
+    func publishRequiredBaseResourceFailure(
+        _ failure: RequiredThemeResourceFailureDTO
+    ) async throws -> RuntimeContributionSnapshotEntry<RequiredThemeResourceFailureDTO> {
+        guard failure.moduleID == moduleID,
+              failure.codexID == RuneScribeCodexIDs.norse
+        else {
+            throw RuntimeThemeContributionError.identityMismatch
+        }
+        let publisher = try await contributionPublisherClient()
+        return try await publisher.publish(
+            failure,
+            type: RuntimeThemeContributionCatalog.requiredBaseResourceFailure,
+            key: RuntimeThemeContributionCatalog.requiredBaseResourceFailureKey
+        )
+    }
+
     func publishTheme(
         descriptor: ThemeDescriptor,
         resourcePayloads: [ThemeResourceID: Data]

@@ -1,0 +1,1 @@
+PASS: 42 required gates validate against one source tree (Git revision and source manifest)

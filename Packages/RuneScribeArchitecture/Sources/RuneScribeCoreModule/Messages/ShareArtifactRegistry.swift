@@ -760,13 +760,14 @@ actor ShareArtifactRegistry {
         let hasStoredLink = artifact?.hasStoredLink
             ?? record?.hasStoredLink
             ?? false
-        if hasStoredFile {
+        let physicalArtifactReleased = record?.physicalArtifactReleased == true
+        if hasStoredFile && !physicalArtifactReleased {
             do {
                 try await runtimeIO.removeShareArtifact(artifactID: id)
             } catch {
                 throw ShareArtifactRegistryError.storageUnavailable
             }
-        } else if hasStoredLink {
+        } else if hasStoredLink && !physicalArtifactReleased {
             do {
                 try await runtimeIO.removeShareArtifactLink(artifactID: id)
             } catch {

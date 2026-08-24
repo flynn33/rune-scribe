@@ -4,7 +4,7 @@
 
 ## Authority and scope
 
-**Current application:** version 1.0.38 build 38
+**Current application:** version 1.0.39 build 39
 
 The hash-locked [Codex System Specification](../product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md)
 and [Current-App Delta and Implementation Roadmap](../product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md)
@@ -13,13 +13,22 @@ and sequencing evidence. They do not control framework ownership, runtime mediat
 operational I/O, Settings, or dependency direction. Their repository SHA-256 values are
 respectively
 `7c4c460815064fca87a6769766fb875f267eb692795bbab2635eec5d55d8f88d` and
-`1c6e3cf79e6cd60d105c848a5fab65418daac799ae94db0d0c61504fc2c5679a`.
+`884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4`.
+The separate [Roadmap Remediation Amendment v1.1](../product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md),
+SHA-256 `2b6ce54c50538419d324692ebfeec1bb29de46add9f354368d39169d6f74ed40`,
+records the controlling remediation variances without changing either locked v1.0 file.
 
 The exhaustive machine-readable status is
 [`roadmap-alignment.json`](../verification/roadmap-alignment.json). It records all 124
 requested BAS, FOR, MOD, DOM, PKG, THM, PRO, SHR, CLD, GC, and REL work packages with status,
 dependencies, repository evidence, and notes. This page explains the dependency gates
 and the implementation boundary in plain language.
+
+The ledger classifies FOR-001 through FOR-011 as
+`variance-accepted-app-owned-equivalent`, not complete as written. BAS-006, SHR-001,
+and SHR-015 use `simulator-replacement-complete` for the supported automated
+qualification boundary. `non-gating-external` is reserved for live-account or public
+distribution actions outside source remediation; it never denotes shipment.
 
 Historical P8 verification remains valid evidence for the app state it measured; it is
 not the final Codex architecture. The controlling policy and current ledger govern
@@ -28,7 +37,7 @@ effective only where they do not conflict with that authority.
 
 ## Current result
 
-Version 1.0.38 build 38 is source-complete for the authorized roadmap-completion
+Version 1.0.39 build 39 is source-complete for the authorized roadmap-completion
 program. It is deliberately **not shipped**. The repository now contains:
 
 - complete app-owned runtime mediation, bounded contracts, capability policy, thin
@@ -93,30 +102,31 @@ flowchart LR
     GC --> REL
 ```
 
-The graph remains executable: a downstream status is satisfied only when its source,
-tests, guard evidence, and non-optional dependencies are present. Owner-only hardware
-observations supplement the record but never silently become Agent Coding gates.
+The graph remains executable: a downstream requirement is satisfied only when its
+source, tests, guard evidence, and gating dependencies are present. Hardware wording is
+qualified through the amendment's hosted, Simulator, deterministic-adapter, and
+release-product replacement boundary.
 
 ## Work-package status
 
 | Group | Current ledger | Completion evidence |
 |---|---|---|
-| BAS-001…010 | 8 satisfied, 1 owner-optional, 1 not-applicable | Exact baseline, decisions, build/fixture evidence, destination matrix, and aligned publication sources are recorded. |
-| FOR-001…011 | 11 superseded | Former external-framework tasks remain historical identifiers; the permanent app-owned policy controls. |
+| BAS-001…010 | 8 satisfied, 1 simulator-replacement-complete, 1 not-applicable | Exact baseline, decisions, build/fixture evidence, destination matrix, and aligned publication sources are recorded. |
+| FOR-001…011 | 11 variance-accepted-app-owned-equivalent | Former external-framework wording is not complete as written; the amended permanent app-owned equivalent controls. |
 | MOD-001…013 | 13 satisfied | Runtime mediation, manifests where appropriate, standard ports, adapters, ingress, hosted tests, and guards are complete. |
 | DOM-001…007 | 7 satisfied | Cipher/Script migration, imported-font rendering, separate presentation state, and explicit terminal key delivery are tested. |
 | PKG-001…006 | 6 satisfied | Legacy readers, typed container, bounded allocation ordering, malformed corpus, resources, and magic-first routing pass. |
 | THM-001…012 | 12 satisfied | Contracts, registries, Coordinator, semantic UI, Norse Base, provider conformance, selection, fallback, and diagnostics pass. |
 | PRO-001…016 | 16 satisfied | Durable facts, exact catalogs/rules, grants, migration, live entitlement projection, UI, quarantine, and recovery pass. |
-| SHR-001…017 | 15 satisfied, 2 owner-optional | Artifact rendering, builder/defaults, themed transport, terminal events, intake fallback, Encounters, provenance, QR/static fallback, and compatibility pass. |
+| SHR-001…017 | 15 satisfied, 2 simulator-replacement-complete | Artifact rendering, builder/defaults, themed transport, terminal events, intake fallback, Encounters, provenance, QR/static fallback, and compatibility pass. |
 | CLD-001…011 | 11 satisfied | Schema, entitlements, runtime/platform boundary, merge, queue/status, account change, quarantine, reset omission, and multi-device simulations pass. |
 | GC-001…010 | 10 satisfied | Frozen catalog/strategy, capabilities, optional opt-in, mapping, outbox, prior completion, status, and deterministic adapter tests pass. |
-| REL-001…011 | 11 satisfied | Exact providers/assets, conformance, budgets, accessibility, security/privacy, documentation, placeholder guards, and no-ship handoff are recorded. |
+| REL-001…011 | 10 satisfied, 1 non-gating-external | Exact providers/assets, conformance, budgets, accessibility, security/privacy, documentation, placeholder guards, and no-ship handoff are recorded; staged rollout is not performed. |
 
 The machine-readable JSON ledger is normative. `BAS-006`, `SHR-001`, and `SHR-015`
-are the only owner-optional tasks. `BAS-005` remains not applicable because no approved
-scrubbed real-user corpus was supplied. Physical-device rows in Wave 6 and live-service
-configuration are owner pre-ship requirements, not source-code incompleteness.
+are the only `simulator-replacement-complete` tasks. `REL-011` is the only
+`non-gating-external` task and may not be called complete or shipped. `BAS-005` remains
+not applicable because no approved scrubbed real-user corpus was supplied.
 
 ## Frozen compatibility and safety decisions
 

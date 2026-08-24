@@ -1,0 +1,18 @@
+head=5642f169a72eccd8615e284816db63a75a0a18c1
+tree=c56eaa91d5ed78c7ba01129f21d974698a9aab8a
+sourceAggregate=47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d
+trackedTree=UNCHANGED
+shippingProductHashes=UNCHANGED
+shippingProductTree=HASH_IDENTICAL
+4ec8b4589e65bac5b2a94acf77f37480fc8cdcee922b2ca4c442d357a373baf4  /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-macos-release/Build/Products/Release/RuneScrib.app/Contents/MacOS/RuneScrib
+b83703fd09ebc4d000f424c1db6660a64157cbbd313440a9233a067314bdd19b  /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-macos-release/Build/Products/Release/RuneScrib.app/Contents/_CodeSignature/CodeResources
+shippingProduct=/tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-macos-release/Build/Products/Release/RuneScrib.app
+shippingEntitlements=FULL
+developerID=NOT_CLAIMED
+notarization=NOT_CLAIMED
+hostedTests=23 passed, 0 failed, 0 skipped
+parityTests=9 passed, 0 failed, 0 skipped
+parityPNGAttachments=26
+moonleafShareBuilderAttachment=PRESENT
+RuneScribProcess=NOT_RUNNING
+simulatorUse=NONE

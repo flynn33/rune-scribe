@@ -69,7 +69,7 @@ extension RuneScribeCoreApplicationService {
 }
 
 final class P4BApplicationServiceTests: XCTestCase {
-    func testPresentationCommandsWriteVNextFilesAndNilPreservesLegacyRails() async throws {
+    func testPresentationCommandsWriteVNextFilesAndNilPreservesCorePayload() async throws {
         let secure = P4BSecureStore()
         let artifacts = P4BShareStore()
         let service = RuneScribeCoreApplicationService(
@@ -149,16 +149,22 @@ final class P4BApplicationServiceTests: XCTestCase {
         )
         XCTAssertEqual(receivedMessage.safePreviewData, previewData)
 
-        let legacyMessage = try await service.prepareMessageShare(
+        let fallbackMessage = try await service.prepareMessageShare(
             PrepareMessageShareCommand(
                 runes: encoded.runes,
                 senderName: "Sender",
                 cipherID: cipher.id
             )
         )
-        XCTAssertEqual(legacyMessage.reference, .opaque(legacyMessage.id))
-        let storedLegacyMessage = await artifacts.createdData(id: legacyMessage.id)
-        XCTAssertNil(storedLegacyMessage)
+        XCTAssertEqual(fallbackMessage.reference, .file(fallbackMessage.id))
+        XCTAssertEqual(fallbackMessage.contentType, RuneScribeWireFormat.contentType)
+        XCTAssertEqual(fallbackMessage.fileExtension, RuneScribeWireFormat.fileExtension)
+        XCTAssertFalse(fallbackMessage.requiresKeyDelivery)
+        let fallbackMessageData = await artifacts.createdData(id: fallbackMessage.id)
+        let storedFallbackMessage = try XCTUnwrap(fallbackMessageData)
+        let decodedFallback = try MessageSharePayload.decodeFile(storedFallbackMessage)
+        XCTAssertNil(decodedFallback.0.embeddedCipher)
+        XCTAssertNil(decodedFallback.fontBytes)
 
         let themedCipher = try await service.prepareCipherShare(
             PrepareCipherShareCommand(
@@ -205,21 +211,29 @@ final class P4BApplicationServiceTests: XCTestCase {
         let encoded = try await service.encode(
             EncodeMessageCommand(plaintext: "rendezvous", cipherID: cipher.id)
         )
+        let presentationFixture = try messagePresentationFixture()
 
         let cancelled = try await service.prepareMessageShare(
             PrepareMessageShareCommand(
                 runes: encoded.runes,
                 senderName: "Untrusted Caller Name",
-                cipherID: cipher.id
+                cipherID: cipher.id,
+                presentation: presentationFixture.presentation
             )
         )
         XCTAssertEqual(cancelled.reference, .file(cancelled.id))
+        XCTAssertEqual(cancelled.contentType, RuneScribeWireFormat.contentType)
+        XCTAssertEqual(cancelled.fileExtension, RuneScribeWireFormat.fileExtension)
         XCTAssertTrue(cancelled.requiresKeyDelivery)
         let firstData = await artifacts.createdData(id: cancelled.id)
         let firstBytes = try XCTUnwrap(firstData)
-        let decodedFile = try MessageSharePayload.decodeFile(firstBytes)
-        let decodedFirst = decodedFile.0
-        XCTAssertNil(decodedFile.fontBytes)
+        let firstPackage = try RuneScribePackage(decoding: firstBytes)
+        XCTAssertEqual(firstPackage.kind, .encryptedMessage)
+        XCTAssertEqual(
+            firstPackage.sharePresentation().metadata?.selection,
+            presentationFixture.selection
+        )
+        let decodedFirst = try MessageSharePayload(decoding: firstPackage.corePayload)
         XCTAssertEqual(decodedFirst.senderName, "Untrusted Caller Name")
         let embedded = try XCTUnwrap(decodedFirst.embeddedCipher)
         let dtoBytes = try JSONEncoder().encode(cancelled)
@@ -245,9 +259,12 @@ final class P4BApplicationServiceTests: XCTestCase {
             PrepareMessageShareCommand(
                 runes: encoded.runes,
                 senderName: "Ignored",
-                cipherID: cipher.id
+                cipherID: cipher.id,
+                presentation: presentationFixture.presentation
             )
         )
+        XCTAssertEqual(delivered.reference, .file(delivered.id))
+        XCTAssertTrue(delivered.requiresKeyDelivery)
         let deliveredCompletion = try await service.completeShareArtifact(
             CompleteShareArtifactCommand(
                 artifactID: delivered.id,
@@ -262,11 +279,25 @@ final class P4BApplicationServiceTests: XCTestCase {
             PrepareMessageShareCommand(
                 runes: encoded.runes,
                 senderName: "Ignored",
-                cipherID: cipher.id
+                cipherID: cipher.id,
+                presentation: presentationFixture.presentation
             )
         )
-        XCTAssertEqual(followup.reference, .opaque(followup.id))
+        XCTAssertEqual(followup.reference, .file(followup.id))
+        XCTAssertEqual(followup.contentType, RuneScribeWireFormat.contentType)
+        XCTAssertEqual(followup.fileExtension, RuneScribeWireFormat.fileExtension)
         XCTAssertFalse(followup.requiresKeyDelivery)
+        let storedFollowupData = await artifacts.createdData(id: followup.id)
+        let followupBytes = try XCTUnwrap(storedFollowupData)
+        let followupPackage = try RuneScribePackage(decoding: followupBytes)
+        XCTAssertEqual(followupPackage.kind, .encryptedMessage)
+        XCTAssertEqual(
+            followupPackage.sharePresentation().metadata?.selection,
+            presentationFixture.selection
+        )
+        XCTAssertNil(
+            try MessageSharePayload(decoding: followupPackage.corePayload).embeddedCipher
+        )
         let followupCompletion = try await service.completeShareArtifact(
             CompleteShareArtifactCommand(
                 artifactID: followup.id,
@@ -299,10 +330,15 @@ final class P4BApplicationServiceTests: XCTestCase {
             )
         )
 
-        XCTAssertEqual(artifact.reference, .opaque(artifact.id))
+        XCTAssertEqual(artifact.reference, .file(artifact.id))
+        XCTAssertEqual(artifact.contentType, RuneScribeWireFormat.contentType)
+        XCTAssertEqual(artifact.fileExtension, RuneScribeWireFormat.fileExtension)
         XCTAssertFalse(artifact.requiresKeyDelivery)
-        let storedBytes = await artifacts.createdData(id: artifact.id)
-        XCTAssertNil(storedBytes)
+        let storedArtifactData = await artifacts.createdData(id: artifact.id)
+        let storedBytes = try XCTUnwrap(storedArtifactData)
+        let decoded = try MessageSharePayload.decodeFile(storedBytes)
+        XCTAssertNil(decoded.0.embeddedCipher)
+        XCTAssertNil(decoded.fontBytes)
         let completion = try await service.completeShareArtifact(
             CompleteShareArtifactCommand(
                 artifactID: artifact.id,
@@ -384,10 +420,15 @@ final class P4BApplicationServiceTests: XCTestCase {
                 cipherID: cipher.id
             )
         )
-        XCTAssertEqual(followup.reference, .opaque(followup.id))
+        XCTAssertEqual(followup.reference, .file(followup.id))
+        XCTAssertEqual(followup.contentType, RuneScribeWireFormat.contentType)
+        XCTAssertEqual(followup.fileExtension, RuneScribeWireFormat.fileExtension)
         XCTAssertFalse(followup.requiresKeyDelivery)
-        let storedFollowup = await artifacts.createdData(id: followup.id)
-        XCTAssertNil(storedFollowup)
+        let followupData = await artifacts.createdData(id: followup.id)
+        let storedFollowup = try XCTUnwrap(followupData)
+        let decodedFollowup = try MessageSharePayload.decodeFile(storedFollowup)
+        XCTAssertNil(decodedFollowup.0.embeddedCipher)
+        XCTAssertNil(decodedFollowup.fontBytes)
     }
 
     func testRejectedRequiredAttachmentNeverRecordsDelivery() async throws {
@@ -2695,6 +2736,42 @@ final class P4BApplicationServiceTests: XCTestCase {
             envelope: MessageEnvelope.wrap(sealed),
             embeddedCipher: embedsCipher ? CipherSharePayload(cipher: cipher) : nil
         ).encodedFile(fontBytes: nil)
+    }
+
+    private func messagePresentationFixture() throws -> (
+        presentation: OutboundSharePresentationDTO,
+        selection: SharePresentationSelection
+    ) {
+        let selection = try SharePresentationSelection(
+            codexID: CodexID(rawValue: "codex.moonleaf")!,
+            scriptID: ScriptID(rawValue: "script.moonleaf")!,
+            relicID: ArtifactID(rawValue: "relic.moonleaf.tablet")!,
+            sealID: ArtifactID(rawValue: "seal.moonleaf.firefly")!
+        )
+        let previewData = try XCTUnwrap(Data(base64Encoded:
+            "iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAABKADAAQAAAABAAAAAwAAAABUhAAoAAAAFklEQVQIHWM09k37z4AEmJDYYCaGAABbcAHrQYPA8AAAAABJRU5ErkJggg=="
+        ))
+        let digest = ThemeSHA256Digest(rawValue: SHA256.hash(
+            data: previewData
+        ).map { String(format: "%02x", $0) }.joined())!
+        let metadata = try SharePresentationMetadata(
+            selection: selection,
+            safePreview: ShareSafePreviewMetadata(
+                mediaType: .png,
+                byteLength: UInt32(previewData.count),
+                pixelSize: ThemePixelSize(width: 4, height: 3),
+                sha256: digest
+            ),
+            compatibility: SharePresentationCompatibilityFlags.safePreviewPresent
+                .union(.norseInteractiveFallback)
+        )
+        return (
+            try OutboundSharePresentationDTO(
+                metadata: metadata,
+                safePreviewData: previewData
+            ),
+            selection
+        )
     }
 
     private func establishMessageAssociation(

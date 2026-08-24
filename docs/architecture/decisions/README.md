@@ -4,6 +4,9 @@
 
 These records implement the decision freeze required by Wave 0A of the locked
 [Codex implementation roadmap](../../product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md).
+The separate [Roadmap Remediation Amendment v1.1](../../product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md)
+records the accepted app-owned, Simulator, and external-account variances without
+rewriting that roadmap.
 They supplement the completed compatibility-migration decisions in
 [`MigrationDecisions.md`](../MigrationDecisions.md). If the two sets conflict, these
 roadmap-specific records control Codex work.

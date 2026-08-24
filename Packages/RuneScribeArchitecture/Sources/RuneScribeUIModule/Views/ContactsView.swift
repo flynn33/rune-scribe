@@ -104,7 +104,7 @@ struct ContactsView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .runeSheetFrame()
-        .background(Color.runeNavy)
+        .runeSemanticPresentationSurface()
         .preferredColorScheme(.dark)
         #if os(iOS)
         .sheet(isPresented: $showPicker) {

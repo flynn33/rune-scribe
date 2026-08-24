@@ -1,0 +1,101 @@
+{
+  "platform": "iPhone",
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "suites": [
+    {
+      "name": "hosted",
+      "summary": {
+        "devicesAndConfigurations": [
+          {
+            "device": {
+              "architecture": "arm64",
+              "deviceId": "1563B47A-700D-4AEF-A8D5-89780C581F83",
+              "deviceName": "iPhone 17 Pro",
+              "modelName": "iPhone 17 Pro",
+              "osBuildNumber": "23C54",
+              "osVersion": "26.2",
+              "platform": "iOS Simulator"
+            },
+            "expectedFailures": 0,
+            "failedTests": 0,
+            "passedTests": 21,
+            "skippedTests": 0,
+            "testPlanConfiguration": {
+              "configurationId": "1",
+              "configurationName": "Test Scheme Action"
+            }
+          }
+        ],
+        "environmentDescription": "RuneScrib-iOS \u00b7 Built with macOS 26.6.2",
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "finishTime": 1787556962.085,
+        "passedTests": 21,
+        "result": "Passed",
+        "skippedTests": 0,
+        "startTime": 1787556925.548,
+        "statistics": [],
+        "testFailures": [],
+        "title": "Test - RuneScrib-iOS",
+        "topInsights": [
+          {
+            "category": "Longest Test Runs",
+            "impact": "36% of duration",
+            "text": "1 longest test run with outlier durations exceeding 0.94s (three standard deviations)"
+          }
+        ],
+        "totalTestCount": 21
+      },
+      "xcresult": "/tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-hosted.xcresult"
+    },
+    {
+      "name": "parity and accessibility UI",
+      "summary": {
+        "devicesAndConfigurations": [
+          {
+            "device": {
+              "architecture": "arm64",
+              "deviceId": "1563B47A-700D-4AEF-A8D5-89780C581F83",
+              "deviceName": "iPhone 17 Pro",
+              "modelName": "iPhone 17 Pro",
+              "osBuildNumber": "23C54",
+              "osVersion": "26.2",
+              "platform": "iOS Simulator"
+            },
+            "expectedFailures": 0,
+            "failedTests": 0,
+            "passedTests": 7,
+            "skippedTests": 0,
+            "testPlanConfiguration": {
+              "configurationId": "1",
+              "configurationName": "Test Scheme Action"
+            }
+          }
+        ],
+        "environmentDescription": "RuneScrib-iOS-Parity \u00b7 Built with macOS 26.6.2",
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "finishTime": 1787557789.176,
+        "passedTests": 7,
+        "result": "Passed",
+        "skippedTests": 0,
+        "startTime": 1787556990.108,
+        "statistics": [],
+        "testFailures": [],
+        "title": "Test - RuneScrib-iOS-Parity",
+        "topInsights": [],
+        "totalTestCount": 7
+      },
+      "xcresult": "/tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult"
+    }
+  ],
+  "totals": {
+    "executed": 28,
+    "failed": 0,
+    "passed": 28,
+    "skipped": 0
+  }
+}

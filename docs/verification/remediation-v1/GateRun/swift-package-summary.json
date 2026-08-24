@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "result": "passed",
+  "canonicalLog": "swift-package.log",
+  "boundary": {
+    "head": "5642f169a72eccd8615e284816db63a75a0a18c1",
+    "tree": "c56eaa91d5ed78c7ba01129f21d974698a9aab8a",
+    "sourceManifestAggregateSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+    "sourceManifestFileCount": 1017,
+    "cleanBefore": true,
+    "cleanAfter": true
+  },
+  "packageInspection": {
+    "dumpPackageExitCode": 0,
+    "packageManifestSHA256": "1fd864e9e9633a4abdf541b5ac44fd2cd72d2e2c07683547c0b5d713b418fd06",
+    "dumpPackageSHA256": "ea0b47e66b6c8abd35c41aba3630791831d4470800fb5cb2a6f9a1cbb236792d",
+    "libraryProducts": 17,
+    "regularTargets": 18,
+    "testTargets": 14,
+    "externalDependencies": 0,
+    "swiftLanguageMode": 6
+  },
+  "attempts": [
+    {
+      "id": "full-attempt-1",
+      "exitCode": 0,
+      "scratchPath": "/tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh",
+      "buildDurationSeconds": 26.40,
+      "wallDurationSeconds": 190,
+      "xctest": {
+        "executed": 960,
+        "passed": 960,
+        "failed": 0,
+        "skipped": 0,
+        "unexpected": 0,
+        "durationSeconds": 84.902
+      },
+      "swiftTesting": {
+        "executed": 129,
+        "passed": 129,
+        "failed": 0,
+        "skipped": 0,
+        "durationSeconds": 77.271
+      },
+      "combined": {
+        "executed": 1089,
+        "passed": 1089,
+        "failed": 0,
+        "skipped": 0
+      },
+      "knownTimingCase": {
+        "test": "RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests.testMetalCancellationClosesLeaseAcquiredBeforeCancellation",
+        "result": "passed",
+        "durationSeconds": 0.000
+      }
+    }
+  ],
+  "retryRequired": false,
+  "simulatorInvokedByQualification": false,
+  "trackedFilesEdited": false,
+  "published": false
+}

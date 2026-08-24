@@ -10,10 +10,10 @@ as a string of Unicode runes. Send a friend your cipher — by QR, iMessage, lin
 or file — and they can read it; without it, the runes are just runes.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.0.38%20build%2038-3A7FD5?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.39%20build%2039-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-981%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-1088%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -40,10 +40,11 @@ A product of **Raven Forge Software**.
   appearance metadata. On the **first** eligible message to a contact it also carries
   the cipher key. Later themed messages keep the file and never resend the key; Copy
   Runes remains the compact compatibility action.
-- **🤝 Share a cipher, two ways** — hand someone a cipher by **Share** / **QR** (an offline
-  `runescribe://import` deep link the recipient taps to open the app and import) or as a
-  portable **`.runescribe` decoder file** from Export. Both carry the same validated key;
-  the file also carries font bytes. No server, no Universal Link.
+- **🤝 Share a cipher safely** — the primary **Share** action sends a validated themed
+  **`.runescribe` Artifact**; **Customize Share** chooses its Codex appearance. Explicit
+  Export, offline `runescribe://import` link, and QR actions remain available as
+  fallbacks. Each invitation carries the same validated key. No server or Universal Link
+  is involved.
 - **🔒 App lock** — an optional **4-digit PIN** gates the app on launch and when it
   returns from the background. The PIN is never stored: a salted
   **PBKDF2-HMAC-SHA256** hash lives in the Keychain, and repeated wrong guesses
@@ -132,24 +133,29 @@ simply tries each cipher it holds until exactly one succeeds.
 ## 🤝 Sharing a cipher
 
 A cipher is the shared secret: whoever holds it can read — and write — your runes.
-Rune Scribe gives two ways to hand one to a friend, both funnelling through the
-**same validated import path**, and both fully offline.
+Rune Scribe provides one primary typed-Artifact path plus explicit compatibility
+fallbacks. Every path funnels through the **same validated import rail** and works
+without a Rune Scribe server.
 
-- **Share link / QR code.** A cipher is packed into a compact **129-byte record**
+- **Primary Share / Customize Share.** **Cipher Library → Share** prepares a themed,
+  typed `.runescribe` Artifact and opens the system share sheet. **Customize Share**
+  opens the provider-neutral Share Builder first, with a fixed warning that the
+  invitation contains the shared cipher. The Artifact carries validated presentation,
+  safe-preview, provenance, and optional legacy-font sections without exposing key bytes
+  to UI state.
+- **Link / QR fallbacks.** A cipher is packed into a compact **129-byte record**
   (version, an 8-byte public ID, the 32-byte key, the 32-glyph permutation, the font
   reference, and a SHA-256 checksum) carried as base64url inside an offline
-  `runescribe://import` deep link. **Cipher Library → Share** sends that link through
-  the system share sheet (Messages, Mail, Notes, …); the same link is also rendered as
-  a **QR code**. The recipient taps the link (or scans the QR with Camera / the in-app
-  scanner) and Rune Scribe opens with a **one-tap import**. Nothing leaves your devices:
-  no server, no Universal Link.
-- **Decoder file.** A portable typed `.runescribe` package from **Cipher Library →
-  Export** (or the file exporter). It contains the validated invitation plus optional
-  legacy font bytes and bounded themed presentation. Import from **Cipher Library →
+  `runescribe://import` deep link. **More → Share Link** sends that link, while **More →
+  Show QR** renders it as a QR code. The recipient taps or scans it to open Rune Scribe's
+  confirmation flow.
+- **Explicit Export.** **More → Export File** saves a portable typed `.runescribe`
+  invitation through the platform file exporter. Import from **Cipher Library →
   Import**, or open the file with Rune Scribe. Exact legacy decoder files remain
   readable.
 
-Every channel — Share link, QR, file, or a pasted `runescribe://` link — is validated on
+Every channel — primary Artifact, Share Builder Artifact, exported file, link, QR, or a
+pasted `runescribe://` link — is validated on
 arrival. Legacy records must retain their exact version, length, true 0–31 permutation,
 and checksum. Typed packages additionally enforce canonical sections, byte/count/image
 bounds, hashes, and required versions before allocation or rendering. The in-app **QR
@@ -295,7 +301,7 @@ the current boundary and dependency rules.
 
 ## 🗺 Implementation roadmap
 
-The authorized version 1.0.38 build 38 roadmap-completion program is source-complete
+The authorized version 1.0.39 build 39 roadmap-completion program is source-complete
 and not shipped:
 
 | Wave | Scope | Source status |
@@ -318,10 +324,11 @@ binding, themed transport, Cloud/Game Center policy, and Wave 6 source hardening
 implemented after that baseline without rewriting it.
 
 The machine-readable [roadmap ledger](docs/verification/roadmap-alignment.json) covers
-124 tasks. `BAS-006`, `SHR-001`, and `SHR-015` are the only owner-optional rows;
-`BAS-005` is not applicable because no approved scrubbed real-user fixture was
-supplied. External-device, live-service, signing, archive/export, notarization, upload,
-rollout, and shipment work is recorded in the
+124 tasks. `BAS-006`, `SHR-001`, and `SHR-015` are the only
+`simulator-replacement-complete` rows; `REL-011` is `non-gating-external` and cannot
+denote rollout or shipment. `BAS-005` is not applicable because no approved scrubbed
+real-user fixture was supplied. External-device, live-service, signing, archive/export,
+notarization, upload, rollout, and shipment work is recorded in the
 [no-ship owner handoff](docs/verification/roadmap-completion/OwnerTestAndNoShipHandoff.md).
 
 Current architecture and dependency authority lives in the
@@ -332,7 +339,10 @@ Current architecture and dependency authority lives in the
 [Codex System Specification](docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md)
 and [implementation roadmap](docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md)
 remain authority for nonconflicting product requirements, compatibility anchors, and
-historical sequencing; their former external-framework direction is superseded.
+historical sequencing. The separate
+[Roadmap Remediation Amendment v1.1](docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md)
+records the controlling app-owned, Simulator, external-account, release-candidate, and
+nonshipment variances; the former external-framework direction is superseded.
 
 ---
 
@@ -401,7 +411,7 @@ Packages/RuneScribeArchitecture/
 │   ├── RuneScribeGameCenterModule/ Frozen catalog, mapping and outbox policy
 │   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        981 Swift package tests
+└── Tests/                        1088 Swift package tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -458,8 +468,8 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package currently contains **981 package tests** (857 XCTest cases and
-124 Swift Testing cases), supplemented by repository architecture guards, hosted
+The local Swift package currently contains **1088 package tests** (959 XCTest cases and
+129 Swift Testing cases), supplemented by repository architecture guards, hosted
 macOS/iOS tests, iPhone/iPad UI parity, and an
 isolated macOS parity host. The package suite uses deterministic in-memory adapters and
 does not access the operator's login Keychain.

@@ -146,8 +146,8 @@ write_built_info_plists() {
   plutil -replace CFBundleExecutable -string RuneScrib "$macos_info"
   plutil -replace CFBundleIdentifier -string com.runescribe.app "$macos_info"
   plutil -replace CFBundleName -string RuneScrib "$macos_info"
-  plutil -replace CFBundleShortVersionString -string 1.0.38 "$macos_info"
-  plutil -replace CFBundleVersion -string 38 "$macos_info"
+  plutil -replace CFBundleShortVersionString -string 1.0.39 "$macos_info"
+  plutil -replace CFBundleVersion -string 39 "$macos_info"
   plutil -insert CFBundleSupportedPlatforms -json '["MacOSX"]' "$macos_info"
   plutil -insert LSMinimumSystemVersion -string 15.0 "$macos_info"
 
@@ -155,8 +155,8 @@ write_built_info_plists() {
   plutil -replace CFBundleExecutable -string RuneScrib "$ios_info"
   plutil -replace CFBundleIdentifier -string com.runescribe.app "$ios_info"
   plutil -replace CFBundleName -string RuneScrib "$ios_info"
-  plutil -replace CFBundleShortVersionString -string 1.0.38 "$ios_info"
-  plutil -replace CFBundleVersion -string 38 "$ios_info"
+  plutil -replace CFBundleShortVersionString -string 1.0.39 "$ios_info"
+  plutil -replace CFBundleVersion -string 39 "$ios_info"
   plutil -insert CFBundleSupportedPlatforms -json '["iPhoneOS"]' "$ios_info"
   plutil -insert MinimumOSVersion -string 17.0 "$ios_info"
   plutil -insert UIDeviceFamily -json '[1,2]' "$ios_info"
@@ -472,7 +472,7 @@ assert_rejected missing-game-center-catalog \
 assert_rejected wrong-platform-audio \
   "macOS Platform resource bytes or SHA-256 differ" mutate_platform_audio
 assert_rejected changed-built-version \
-  "built marketing version differs from frozen 1.0.38" mutate_built_version
+  "built marketing version differs from frozen 1.0.39" mutate_built_version
 
 mutate_platform_graph() {
   ruby - "$graph_repository/Packages/RuneScribeArchitecture/Package.swift" <<'RUBY'
@@ -488,7 +488,7 @@ mutate_source_version() {
   ruby - "$graph_repository/project.yml" <<'RUBY'
 path = ARGV.fetch(0)
 source = File.read(path)
-anchor = "    MARKETING_VERSION: \"1.0.38\"\n"
+anchor = "    MARKETING_VERSION: \"1.0.39\"\n"
 abort "version anchor missing" unless source.scan(anchor).length == 1
 File.write(path, source.sub(anchor, "    MARKETING_VERSION: \"9.9.9\"\n"))
 RUBY
@@ -517,7 +517,7 @@ assert_rejected platform-source-exclusion \
 rsync -a --delete --exclude '.git/' --exclude '.build/' "$repository_root/" "$graph_repository/"
 (CDPATH= cd -- "$graph_repository" && xcodegen generate >/dev/null)
 assert_rejected frozen-source-version \
-  "project.yml version/build differ from frozen 1.0.38 (38)" \
+  "project.yml version/build differ from frozen 1.0.39 (39)" \
   mutate_source_version "$graph_checker"
 
 rsync -a --delete --exclude '.git/' --exclude '.build/' "$repository_root/" "$graph_repository/"

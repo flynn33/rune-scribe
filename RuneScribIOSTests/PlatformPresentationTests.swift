@@ -126,13 +126,13 @@ final class PlatformPresentationTests: XCTestCase {
         )
     }
 
-    func testMessageComposeAttachmentSetupAllowsComposerWithoutRequiredAttachment() {
+    func testMessageComposeAttachmentSetupRejectsMissingCanonicalPackage() {
         XCTAssertEqual(
             MessageComposeAttachmentSetupPolicy.decide(
                 requiredAttachmentWasPresent: false,
                 requiredAttachmentAccepted: false
             ),
-            .presentComposer(requiredAttachmentAccepted: false)
+            .fail
         )
     }
 

@@ -13,6 +13,8 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
         let unavailableFont = NorseBaseBundledResourceCatalog.notoSansRunic
         let harness = try await makeHarness(
             providers: [],
+            permitsDiagnostics: true,
+            includeDiagnosticsClient: true,
             unavailableBaseResource: unavailableFont
         )
         defer { Task { await harness.runtime.stop() } }
@@ -33,6 +35,18 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
         let fontID = try XCTUnwrap(
             snapshot.effectiveTheme.codex.scripts.first?.fontResourceID
         )
+        let failure = try XCTUnwrap(snapshot.requiredBaseResourceFailures.first)
+        XCTAssertEqual(snapshot.requiredBaseResourceFailures.count, 1)
+        XCTAssertEqual(failure.moduleID, RuneScribeModuleIDs.norseTheme)
+        XCTAssertEqual(failure.codexID, RuneScribeCodexIDs.norse)
+        XCTAssertEqual(failure.resourceID, fontID)
+        XCTAssertEqual(failure.stage, .resourceRead)
+        XCTAssertEqual(failure.errorCode, .resourceUnavailable)
+
+        let diagnostics = try await harness.diagnostics.query()
+        XCTAssertEqual(diagnostics.fallbackReason, .invalidResources)
+        XCTAssertEqual(diagnostics.requiredBaseResourceFailures, [failure])
+
         do {
             _ = try await harness.probe.resolve(
                 ResolveThemeResourceRequestDTO(

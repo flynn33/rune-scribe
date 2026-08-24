@@ -16,6 +16,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_ROOT = ROOT / "Packages/RuneScribeArchitecture"
+SOURCE_MANIFEST = ROOT / "docs/verification/remediation-v1/SOURCE-MANIFEST.json"
 ERRORS: list[str] = []
 
 PROVIDERS = {
@@ -106,6 +107,49 @@ def load_json(path: Path) -> dict[str, Any]:
         error(f"{path.relative_to(ROOT)}: JSON root must be an object")
         return {}
     return value
+
+
+def git_available() -> bool:
+    if not (ROOT / ".git").exists():
+        return False
+    result = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return False
+    try:
+        return Path(result.stdout.strip()).resolve() == ROOT.resolve()
+    except OSError:
+        return False
+
+
+def validate_source_manifest() -> None:
+    if not SOURCE_MANIFEST.is_file():
+        if not git_available():
+            error(
+                "Git metadata is absent and the final deterministic source manifest is missing"
+            )
+        return
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/generate-source-manifest.py"),
+            str(ROOT),
+            str(SOURCE_MANIFEST),
+            "--verify",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip()
+        error(f"final deterministic source manifest does not match this tree: {detail}")
 
 
 def validate_integrity_manifest(
@@ -470,9 +514,9 @@ def validate_sharing_boundary() -> None:
 
 def validate_version() -> None:
     project = (ROOT / "project.yml").read_text(encoding="utf-8")
-    if 'MARKETING_VERSION: "1.0.38"' not in project:
+    if 'MARKETING_VERSION: "1.0.39"' not in project:
         error("marketing version changed")
-    if 'CURRENT_PROJECT_VERSION: "38"' not in project:
+    if 'CURRENT_PROJECT_VERSION: "39"' not in project:
         error("build number changed")
 
 
@@ -494,6 +538,7 @@ def validate_negative_controls() -> None:
 
 
 def validate_evidence() -> None:
+    has_git = git_available()
     for filename in REQUIRED_MARKDOWN_EVIDENCE:
         path = EVIDENCE_ROOT / filename
         if not path.is_file() or not path.read_text(encoding="utf-8").strip():
@@ -517,7 +562,7 @@ def validate_evidence() -> None:
         revision = document.get("sourceRevision")
         if not isinstance(revision, str) or re.fullmatch(r"[0-9a-f]{40}", revision) is None:
             error(f"{relative}: sourceRevision must be a lowercase 40-character Git SHA")
-        else:
+        elif has_git:
             exists = subprocess.run(
                 ["git", "cat-file", "-e", f"{revision}^{{commit}}"],
                 cwd=ROOT,
@@ -553,6 +598,7 @@ def validate_evidence() -> None:
 
 
 def main() -> int:
+    validate_source_manifest()
     validate_package_graph()
     all_resource_ids: set[str] = set()
     for key, record in PROVIDERS.items():

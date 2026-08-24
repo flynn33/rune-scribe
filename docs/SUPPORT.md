@@ -1,6 +1,6 @@
 # Rune Scribe Support
 
-**Current product source:** version 1.0.38 (build 38)
+**Current product source:** version 1.0.39 (build 39)
 **Publication boundary:** owner validation is discretionary before distribution; not shipped
 
 Optional owner validation does not gate remediation PASS or pull-request readiness.
@@ -9,6 +9,12 @@ Optional owner validation does not gate remediation PASS or pull-request readine
 
 - A `.runescribe` file may contain a cipher invitation or an encrypted message. Open it
   from Files/Finder or use Rune Scribe's Import action.
+- Cipher Library's primary **Share** action sends a typed themed `.runescribe` Artifact.
+  **Customize Share** opens the Share Builder; Export File, Share Link, and Show QR remain
+  explicit fallback actions.
+- After encoding, **Quick Share** uses the current validated per-Codex defaults. Use
+  **Customize Share** to choose a Codex, Relic, optional Seal/Frame, and effects policy
+  for that operation without changing the cipher or re-encrypting the message.
 - On iOS, a Messages attachment can open directly in Rune Scribe. macOS does not claim
   automatic Messages import; use the file, Import, or a `runescribe://` link.
 - A first-delivery message can show a decrypted preview, but its embedded cipher and
@@ -19,6 +25,9 @@ Optional owner validation does not gate remediation PASS or pull-request readine
 - Requested themed presentation is used only after the installed provider confirms the
   selected artifacts and each referenced resource's type, dimensions, length, and
   digest. A mismatch falls back to Base Norse without rejecting the valid message.
+- If required Base appearance resources fail validation, an accessible nonmodal warning
+  explains the standard emergency appearance. Encode, decode, import, and message access
+  remain available; the affected build is not considered release-qualified.
 - A cipher invitation carries key material. Treat a cipher file, QR image, or invitation
   link as sensitive and do not post it publicly.
 

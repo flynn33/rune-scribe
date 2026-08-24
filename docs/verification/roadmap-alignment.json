@@ -1,9 +1,9 @@
 {
-  "schemaVersion": "1.1",
-  "asOfDate": "2026-08-22",
+  "schemaVersion": "1.2",
+  "asOfDate": "2026-08-23",
   "applicationVersion": {
-    "marketing": "1.0.38",
-    "build": "38"
+    "marketing": "1.0.39",
+    "build": "39"
   },
   "authority": {
     "systemSpec": {
@@ -12,7 +12,11 @@
     },
     "implementationRoadmap": {
       "path": "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md",
-      "sha256": "1c6e3cf79e6cd60d105c848a5fab65418daac799ae94db0d0c61504fc2c5679a"
+      "sha256": "884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4"
+    },
+    "remediationAmendment": {
+      "path": "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md",
+      "sha256": "2b6ce54c50538419d324692ebfeec1bb29de46add9f354368d39169d6f74ed40"
     },
     "repositoryAuditBaseline": "b7e3da24a6e0a78fe1866c7b8f2bafb8140ea14e"
   },
@@ -46,7 +50,13 @@
     "superseded": "The historical work package is retained for traceability but no longer directs implementation.",
     "owner-optional": "Owner-operated hardware-only observation outside Agent Coding scope with no completion, blocking, residual-work, PASS/FAIL, or pull-request-readiness effect.",
     "not-started": "No qualifying production implementation exists.",
-    "not-applicable": "The conditional task has no approved input to include."
+    "not-applicable": "The conditional task has no approved input to include.",
+    "complete": "The remediation requirement is implemented and has current final-source evidence.",
+    "open": "Required remediation behavior or evidence remains incomplete.",
+    "variance-accepted-app-owned-equivalent": "The external-framework wording is not complete as written; the controlling app-owned equivalent and dependency prohibition satisfy the amended requirement.",
+    "simulator-replacement-complete": "The hardware wording is replaced by completed hosted, Simulator, deterministic-adapter, and release-product qualification under the amendment.",
+    "non-gating-external": "A live-account or public-distribution action is outside autonomous source remediation and cannot block source completion or denote shipment.",
+    "deferred": "The item is intentionally outside this remediation and has no current completion claim."
   },
   "taskCount": 124,
   "taskGroups": [
@@ -56,11 +66,11 @@
       "dependsOn": [],
       "items": [
         {"id":"BAS-001","status":"satisfied","dependsOn":[],"evidence":["docs/verification/ForsettiMigrationBaseline.md"],"notes":"The byte-exact source baseline and reconciliation revision are recorded."},
-        {"id":"BAS-002","status":"satisfied","dependsOn":["BAS-001"],"evidence":["docs/verification/BuildAndTestReport.md","docs/verification/elven-recovery-v3/PhaseABRegression.json","docs/verification/p7-test-matrix.json","docs/verification/elven-phase-c/RepositoryRegression.json"],"notes":"Recorded macOS and iOS build/test rails exist; the current Swift package regression passed 981 tests (857 XCTest cases and 124 Swift Testing cases) without interactive credentials."},
-        {"id":"BAS-003","status":"satisfied","dependsOn":["BAS-001"],"evidence":["README.md","docs/verification/BuildAndTestReport.md","docs/verification/elven-recovery-v3/PhaseABRegression.json","docs/verification/elven-phase-c/RepositoryRegression.json"],"notes":"README reports the current 981-package-test and 17-architecture-ratchet suites while the historical build report retains its snapshot counts."},
+        {"id":"BAS-002","status":"satisfied","dependsOn":["BAS-001"],"evidence":["docs/verification/BuildAndTestReport.md","docs/verification/elven-recovery-v3/PhaseABRegression.json","docs/verification/p7-test-matrix.json","docs/verification/elven-phase-c/RepositoryRegression.json"],"notes":"Recorded macOS and iOS build/test rails exist; the current Swift package regression passed 1088 tests (959 XCTest cases and 129 Swift Testing cases) without interactive credentials."},
+        {"id":"BAS-003","status":"satisfied","dependsOn":["BAS-001"],"evidence":["README.md","docs/verification/BuildAndTestReport.md","docs/verification/elven-recovery-v3/PhaseABRegression.json","docs/verification/p7-test-matrix.json","docs/verification/elven-phase-c/RepositoryRegression.json"],"notes":"README reports the current 1088-package-test and 17-architecture-ratchet suites while the historical build report retains its snapshot counts."},
         {"id":"BAS-004","status":"satisfied","dependsOn":["BAS-003"],"evidence":["Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/WireCompatibilityTests.swift","docs/verification/feature-parity-matrix.json"],"notes":"Current cipher, message, link, QR, encrypted-library, contact, and font compatibility fixtures are covered by repository tests and parity evidence."},
         {"id":"BAS-005","status":"not-applicable","dependsOn":["BAS-004"],"evidence":["docs/architecture/RoadmapAlignment.md"],"notes":"No separately approved scrubbed real user sample was supplied; synthetic golden fixtures remain authoritative."},
-        {"id":"BAS-006","status":"owner-optional","dependsOn":[],"evidence":["docs/verification/feature-parity-matrix.json","docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Owner-operated hardware-only parity observation is optional, outside Agent Coding scope, and has no gating effect."},
+        {"id":"BAS-006","status":"simulator-replacement-complete","dependsOn":[],"evidence":["docs/verification/feature-parity-matrix.json","docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"The amendment replaces the hardware-only parity observation with supported hosted, Simulator, deterministic-adapter, and release-product qualification."},
         {"id":"BAS-007","status":"satisfied","dependsOn":["BAS-001"],"evidence":["docs/architecture/decisions/README.md"],"notes":"ADR-RS-001 through ADR-RS-012 have explicit statuses and decisions."},
         {"id":"BAS-008","status":"satisfied","dependsOn":["BAS-004","BAS-007"],"evidence":["Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift","docs/verification/roadmap-completion/CompatibilityMatrix.json"],"notes":"The machine-readable destination matrix covers legacy and vNext readers, future required and optional sections, presentation fallback, and explicit update-required outcomes."},
         {"id":"BAS-009","status":"satisfied","dependsOn":["BAS-001"],"evidence":["scripts/check-architecture.sh","scripts/architecture-ratchet.json"],"notes":"The consumer-repository architecture policy and executable guard exist."},
@@ -72,17 +82,17 @@
       "wave": "0B",
       "dependsOn": ["BAS-007"],
       "items": [
-        {"id":"FOR-001","status":"superseded","dependsOn":["BAS-007"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md","docs/architecture/decisions/ADR-RS-001-module-packaging-and-target-graph.md"],"notes":"The former external-version integration task is superseded by the permanent app-owned policy."},
-        {"id":"FOR-002","status":"superseded","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"The former external bootstrap task is superseded; bootstrap validation belongs to the app-owned runtime."},
-        {"id":"FOR-003","status":"superseded","dependsOn":["FOR-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift","docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Generalized requirements remain product needs but are implemented in the app-owned runtime."},
-        {"id":"FOR-004","status":"superseded","dependsOn":["FOR-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift","docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Composite sources remain product needs but are implemented in the app-owned runtime."},
-        {"id":"FOR-005","status":"superseded","dependsOn":["FOR-003","FOR-004"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Live eligibility reconciliation remains required local runtime work."},
-        {"id":"FOR-006","status":"superseded","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Keyed contribution registration remains required local runtime work."},
-        {"id":"FOR-007","status":"superseded","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Opaque resource resolution remains required local runtime work."},
-        {"id":"FOR-008","status":"superseded","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Capability-scoped runtime ports remain required local work."},
-        {"id":"FOR-009","status":"superseded","dependsOn":["FOR-006","FOR-007","FOR-008"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Identity, lifecycle, duplicate-ID, and capability enforcement remain required local work."},
-        {"id":"FOR-010","status":"superseded","dependsOn":["FOR-005","FOR-009"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"The provider sample remains a local runtime conformance requirement."},
-        {"id":"FOR-011","status":"superseded","dependsOn":["FOR-010"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md","docs/architecture/ForsettiSupersessionIndex.md"],"notes":"Tests, documentation, migration notes, and guards remain local repository deliverables."}
+        {"id":"FOR-001","status":"variance-accepted-app-owned-equivalent","dependsOn":["BAS-007"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md","docs/architecture/decisions/ADR-RS-001-module-packaging-and-target-graph.md"],"notes":"The former external-version integration wording is not complete as written; the amendment accepts the permanent app-owned equivalent and dependency prohibition."},
+        {"id":"FOR-002","status":"variance-accepted-app-owned-equivalent","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"The former external bootstrap wording is not complete as written; bootstrap validation belongs to the app-owned runtime."},
+        {"id":"FOR-003","status":"variance-accepted-app-owned-equivalent","dependsOn":["FOR-001"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift","docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"The product requirement is implemented through the accepted app-owned runtime equivalent."},
+        {"id":"FOR-004","status":"variance-accepted-app-owned-equivalent","dependsOn":["FOR-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RoadmapContracts.swift","docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"The product requirement is implemented through the accepted app-owned runtime equivalent."},
+        {"id":"FOR-005","status":"variance-accepted-app-owned-equivalent","dependsOn":["FOR-003","FOR-004"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Live eligibility reconciliation remains required in the accepted app-owned runtime equivalent."},
+        {"id":"FOR-006","status":"variance-accepted-app-owned-equivalent","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Keyed contribution registration remains required in the accepted app-owned runtime equivalent."},
+        {"id":"FOR-007","status":"variance-accepted-app-owned-equivalent","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Opaque resource resolution remains required in the accepted app-owned runtime equivalent."},
+        {"id":"FOR-008","status":"variance-accepted-app-owned-equivalent","dependsOn":["FOR-001"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Capability-scoped runtime ports remain required in the accepted app-owned runtime equivalent."},
+        {"id":"FOR-009","status":"variance-accepted-app-owned-equivalent","dependsOn":["FOR-006","FOR-007","FOR-008"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Identity, lifecycle, duplicate-ID, and capability enforcement remain required in the accepted app-owned runtime equivalent."},
+        {"id":"FOR-010","status":"variance-accepted-app-owned-equivalent","dependsOn":["FOR-005","FOR-009"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md"],"notes":"Provider conformance remains a requirement of the accepted app-owned runtime equivalent."},
+        {"id":"FOR-011","status":"variance-accepted-app-owned-equivalent","dependsOn":["FOR-010"],"evidence":["docs/architecture/FORSETTI_CONTROLLING_POLICY.md","docs/architecture/ForsettiSupersessionIndex.md"],"notes":"Tests, documentation, migration notes, and guards remain deliverables for the accepted app-owned runtime equivalent."}
       ]
     },
     {
@@ -179,7 +189,7 @@
       "wave": "4",
       "dependsOn": ["PKG-001","THM-012","PRO-009"],
       "items": [
-        {"id":"SHR-001","status":"owner-optional","dependsOn":[],"evidence":["docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Owner-operated public-destination observation is optional, outside Agent Coding scope, and has no gating effect."},
+        {"id":"SHR-001","status":"simulator-replacement-complete","dependsOn":[],"evidence":["docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"The amendment replaces the public-destination hardware observation with supported presentation-session, Simulator, and deterministic-adapter qualification."},
         {"id":"SHR-002","status":"satisfied","dependsOn":["THM-004","THM-005"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ShareArtifactRendererTests.swift"],"notes":"One data-driven UI renderer produces bounded deterministic 4:3 artifacts and paginated inscriptions from runtime-validated semantic Theme inputs."},
         {"id":"SHR-003","status":"satisfied","dependsOn":["THM-012","SHR-002"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift","docs/verification/roadmap-completion/PerformanceAndResourceBudget.json","docs/verification/roadmap-completion/AccessibilityValidation.json"],"notes":"Renderer policy enforces exact safe regions, Seal anchors, frame compatibility, contrast, monochrome, Reduce Motion, resource hashes, dimensions, and byte budgets."},
         {"id":"SHR-004","status":"satisfied","dependsOn":["PKG-001","THM-009","SHR-002","SHR-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareArtifactRenderer.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift"],"notes":"The common selection policy exposes owned, locked, and unavailable Relic, Seal, and Frame choices and rejects unowned or incompatible output."},
@@ -193,7 +203,7 @@
         {"id":"SHR-012","status":"satisfied","dependsOn":["THM-009","PKG-003"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/SharePresentationLifecycle.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationSummary.swift"],"notes":"Locked, unknown, unavailable, incompatible, corrupt, and uninstalled requested presentation falls back to Norse interaction while retaining a valid sender preview."},
         {"id":"SHR-013","status":"satisfied","dependsOn":["PRO-007","SHR-009","SHR-012"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/SharePresentationLifecycle.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/SharePresentationSectionTests.swift"],"notes":"Authenticated intake records one privacy-safe package-token Encounter with requested Codex, Artifact, and provenance facts and deduplicates replay."},
         {"id":"SHR-014","status":"satisfied","dependsOn":["SHR-010","SHR-013"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationSummary.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ReceivedMessageView.swift"],"notes":"Received presentation surfaces expose verified, unverified, unavailable, or invalid provenance and safe-preview/fallback state without blocking decryption."},
-        {"id":"SHR-015","status":"owner-optional","dependsOn":[],"evidence":["docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Owner-operated Quick Look scope observation is optional, outside Agent Coding scope, and has no gating effect."},
+        {"id":"SHR-015","status":"simulator-replacement-complete","dependsOn":[],"evidence":["docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md"],"notes":"Quick Look remains explicitly nonrequired; the amendment replaces device-only visual qualification with supported Simulator screenshots and accessibility checks."},
         {"id":"SHR-016","status":"satisfied","dependsOn":["SHR-004"],"evidence":["Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRDisplaySheet.swift","Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/QRScannerView.swift","Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ShareArtifactRendererTests.swift"],"notes":"Deterministic 4:3 static rendering and existing QR fallback are covered at supported scales, contrast states, crops, and fixture-based round trips."},
         {"id":"SHR-017","status":"satisfied","dependsOn":["BAS-008","PKG-002","PKG-004","SHR-006","SHR-007","SHR-012"],"evidence":["Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift","docs/verification/roadmap-completion/CompatibilityMatrix.json"],"notes":"The complete old/new destination matrix preserves legacy reads, accepts supported vNext, falls back safely for presentation, and returns update-required for unsupported required content."}
       ]
@@ -248,7 +258,7 @@
         {"id":"REL-008","status":"satisfied","dependsOn":["SHR-017","CLD-011","GC-010"],"evidence":["docs/verification/roadmap-completion/SecurityPrivacyReview.md","docs/verification/roadmap-completion/NegativeMutations.json"],"notes":"Package metadata, cloud records, Game Center metadata, logs, diagnostics, share artifacts and provenance are reviewed with negative secret-leakage mutations."},
         {"id":"REL-009","status":"satisfied","dependsOn":["REL-006","REL-007","REL-008"],"evidence":["README.md","CHANGELOG.md","docs/PRIVACY.md","docs/SUPPORT.md","docs/APP_STORE_SUBMISSION.md","docs/platform-notes.md","docs/verification/roadmap-completion/OwnerTestAndNoShipHandoff.md"],"notes":"Source-controlled product, support, privacy, submission, review and owner-test text is aligned without creating or uploading a demonstration recording."},
         {"id":"REL-010","status":"satisfied","dependsOn":["GC-001","REL-003"],"evidence":["scripts/check-roadmap-completion.py","docs/verification/roadmap-completion/NegativeMutations.json"],"notes":"Production catalogs contain no beta or placeholder identifiers, and executable guards reject placeholder leakage and hash drift."},
-        {"id":"REL-011","status":"satisfied","dependsOn":["REL-006","REL-007","REL-008","REL-009","REL-010"],"evidence":["docs/verification/roadmap-completion/OwnerTestAndNoShipHandoff.md","docs/verification/roadmap-completion/FinalSelfAudit.md"],"notes":"Rollback, monitoring and owner-test plans are recorded; no rollout, archive, export, notarization, upload, tag, release or merge is executed."}
+        {"id":"REL-011","status":"non-gating-external","dependsOn":["REL-006","REL-007","REL-008","REL-009","REL-010"],"evidence":["docs/verification/roadmap-completion/OwnerTestAndNoShipHandoff.md","docs/verification/roadmap-completion/FinalSelfAudit.md"],"notes":"Staged rollout and public distribution are outside autonomous source remediation. Rollback, monitoring, and owner-test plans are recorded without performing rollout, archive, export, notarization, upload, tag, release, or merge."}
       ]
     }
   ]

@@ -102,7 +102,7 @@ struct ReceivedMessageView: View {
             .padding(RuneMetrics.pad)
         }
         .runeSheetFrame()
-        .background(Color.runeNavy)
+        .runeSemanticPresentationSurface()
         .preferredColorScheme(.dark)
     }
 

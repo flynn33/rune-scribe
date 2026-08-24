@@ -1,0 +1,72 @@
+{
+  "artifactSHA256": {
+    "docs/verification/remediation-v1/GateRun/attribution.json": "e5723d578c43ec597b046fd300815b01952a04586e6119fe3733b7c628d501c5",
+    "docs/verification/remediation-v1/GateRun/final-qualification-results.json": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+    "docs/verification/remediation-v1/GateRun/forsetti.log": "a102958e736565be065d26413d1e4706e22e8ce9f52d977a82e34ae41d91ca1a",
+    "docs/verification/remediation-v1/GateRun/ipad-ui.log": "ad0806ccdc1bb8ec64972b56183129c2715854945815ef8526c1ebd640086df8",
+    "docs/verification/remediation-v1/GateRun/iphone-ui.log": "9fd543c7041ec8647dea4d2525d4ee89bda3e8aa538ff03c04504603940bcdf7",
+    "docs/verification/remediation-v1/GateRun/macos-parity.log": "614aea1ddb16aea1a3d0ace11c414220159596b54a0eeeb20038a435bcfa4f20",
+    "docs/verification/remediation-v1/GateRun/static-qualification.log": "1c57cd86c6a93ac0bd7b5355aa03f09ef1ec25b13a98e0af1bc6084156803680",
+    "docs/verification/remediation-v1/GateRun/swift-package.log": "cdbceb34bc98065d8d9c4e3e75ebc960a953ebee4ae4fab5e4ce39f3223a5be3",
+    "docs/verification/remediation-v1/GateRun/xcodegen-determinism.log": "ce12f1b9c07fac374c5a7aa44c12ed8f4ab69322d4d3ab31fa27c239eb94fc11"
+  },
+  "artifacts": [
+    "docs/verification/remediation-v1/GateRun/attribution.json"
+  ],
+  "build": "39",
+  "commands": [
+    "python3 scripts/scan-attribution.py . --patterns /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Codex-Remediation-Package-v1.0/controls/PROHIBITED-ATTRIBUTION-PATTERNS-v1.0.json"
+  ],
+  "endedAt": "2026-08-24T08:15:05Z",
+  "environment": {
+    "architecture": "arm64",
+    "operatingSystem": "macOS 26.6.2 (25G83)",
+    "swift": "Swift 6.2.3",
+    "xcode": "Xcode 26.2 (17C52)"
+  },
+  "evidenceBindings": {
+    "AttributionAudit.json": [
+      "docs/verification/remediation-v1/AttributionAudit.json"
+    ]
+  },
+  "evidenceClaims": [
+    "AttributionAudit.json"
+  ],
+  "failures": [],
+  "gateIDs": [
+    "RC-030"
+  ],
+  "logs": [
+    "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+    "docs/verification/remediation-v1/GateRun/forsetti.log",
+    "docs/verification/remediation-v1/GateRun/ipad-ui.log",
+    "docs/verification/remediation-v1/GateRun/iphone-ui.log",
+    "docs/verification/remediation-v1/GateRun/macos-parity.log",
+    "docs/verification/remediation-v1/GateRun/static-qualification.log",
+    "docs/verification/remediation-v1/GateRun/swift-package.log",
+    "docs/verification/remediation-v1/GateRun/xcodegen-determinism.log"
+  ],
+  "nonGatingExternal": [
+    "App Store Connect records",
+    "live CloudKit account/container",
+    "live Game Center sandbox",
+    "distribution signing and public upload"
+  ],
+  "notes": [
+    "Exact locked test executions: docs/verification/remediation-v1/Attachments/AttributionAudit-Test-Matrix.md",
+    "Qualified against the committed source revision with fresh build and test outputs."
+  ],
+  "recordID": "remediation-v1-attributionaudit",
+  "result": "PASS",
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "startedAt": "2026-08-24T05:13:00Z",
+  "testSummary": {
+    "executed": 87,
+    "failed": 0,
+    "passed": 87,
+    "skipped": 0
+  },
+  "version": "1.0.39"
+}

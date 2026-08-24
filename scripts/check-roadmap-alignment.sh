@@ -24,7 +24,7 @@ EXPECTED_TOP_LEVEL_KEYS = %w[
 ].freeze
 EXPECTED_APPLICATION_VERSION_KEYS = %w[marketing build].freeze
 EXPECTED_AUTHORITY_KEYS = %w[
-  systemSpec implementationRoadmap repositoryAuditBaseline
+  systemSpec implementationRoadmap remediationAmendment repositoryAuditBaseline
 ].freeze
 EXPECTED_FORSETTI_POLICY_KEYS = %w[
   status implementationOwnership externalDependencyAllowed perCallRuntimeMediationRequired
@@ -34,9 +34,11 @@ EXPECTED_GROUP_KEYS = %w[prefix wave dependsOn items].freeze
 EXPECTED_ITEM_KEYS = %w[id status dependsOn evidence notes].freeze
 EXPECTED_STATUSES = %w[
   satisfied transitional partial decision-frozen superseded owner-optional
-  not-started not-applicable
+  not-started not-applicable complete open variance-accepted-app-owned-equivalent
+  simulator-replacement-complete non-gating-external deferred
 ].freeze
-OWNER_OPTIONAL_TASKS = %w[BAS-006 SHR-001 SHR-015].freeze
+SIMULATOR_REPLACEMENT_TASKS = %w[BAS-006 SHR-001 SHR-015].freeze
+NON_GATING_EXTERNAL_TASKS = %w[REL-011].freeze
 EXPECTED_SOURCE_PRIORITY = [
   "active operator instructions",
   "active implementation package and machine-readable controls",
@@ -66,7 +68,11 @@ EXPECTED_DOCUMENTS = {
   },
   "implementationRoadmap" => {
     "path" => "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md",
-    "sha256" => "1c6e3cf79e6cd60d105c848a5fab65418daac799ae94db0d0c61504fc2c5679a"
+    "sha256" => "884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4"
+  },
+  "remediationAmendment" => {
+    "path" => "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md",
+    "sha256" => "2b6ce54c50538419d324692ebfeec1bb29de46add9f354368d39169d6f74ed40"
   }
 }.freeze
 EXPECTED_FORSETTI_POLICY = {
@@ -167,7 +173,7 @@ def validate(document, root)
   return ["roadmap alignment root must be an object"] unless document.is_a?(Hash)
 
   exact_keys(document, EXPECTED_TOP_LEVEL_KEYS, "roadmap alignment", errors)
-  errors << "schemaVersion must be 1.1" unless document["schemaVersion"] == "1.1"
+  errors << "schemaVersion must be 1.2" unless document["schemaVersion"] == "1.2"
   begin
     Date.iso8601(document["asOfDate"])
   rescue ArgumentError, TypeError
@@ -176,8 +182,8 @@ def validate(document, root)
 
   application_version = document["applicationVersion"]
   if exact_keys(application_version, EXPECTED_APPLICATION_VERSION_KEYS, "applicationVersion", errors)
-    errors << "applicationVersion.marketing must be 1.0.38" unless application_version["marketing"] == "1.0.38"
-    errors << "applicationVersion.build must be 38" unless application_version["build"] == "38"
+    errors << "applicationVersion.marketing must be 1.0.39" unless application_version["marketing"] == "1.0.39"
+    errors << "applicationVersion.build must be 39" unless application_version["build"] == "39"
   end
 
   authority = document["authority"]
@@ -277,8 +283,8 @@ def validate(document, root)
       errors << "#{item_label}.dependsOn must contain unique strings" unless optional_unique_strings(item["dependsOn"])
       errors << "#{item_label}.evidence must contain non-empty unique strings" unless nonempty_unique_strings(item["evidence"])
       errors << "#{item_label}.notes must be non-empty" unless item["notes"].is_a?(String) && !item["notes"].strip.empty?
-      if prefix == "FOR" && item["status"] != "superseded"
-        errors << "#{item_label} must remain superseded"
+      if prefix == "FOR" && item["status"] != "variance-accepted-app-owned-equivalent"
+        errors << "#{item_label} must remain variance-accepted-app-owned-equivalent and may not be complete as written"
       end
     end
   end
@@ -287,20 +293,30 @@ def validate(document, root)
   errors << "task IDs must be unique" unless ids.uniq == ids
   errors << "task IDs must match the exact roadmap universe" unless ids == expected_ids
 
-  owner_optional_ids = all_items
-    .select { |item| item["status"] == "owner-optional" }
+  simulator_replacement_ids = all_items
+    .select { |item| item["status"] == "simulator-replacement-complete" }
     .map { |item| item["id"] }
-  unless owner_optional_ids == OWNER_OPTIONAL_TASKS
-    errors << "owner-optional tasks must be exactly #{OWNER_OPTIONAL_TASKS.join(', ')}"
+  unless simulator_replacement_ids == SIMULATOR_REPLACEMENT_TASKS
+    errors << "simulator-replacement-complete tasks must be exactly #{SIMULATOR_REPLACEMENT_TASKS.join(', ')}"
   end
   all_items.each do |item|
-    if item["status"] == "owner-optional" && !Array(item["dependsOn"]).empty?
-      errors << "owner-optional task #{item['id']} may not retain dependencies"
+    if item["status"] == "owner-optional"
+      errors << "owner-optional status is superseded by the remediation amendment"
     end
-    blocked_optional = Array(item["dependsOn"]) & OWNER_OPTIONAL_TASKS
-    unless blocked_optional.empty?
-      errors << "task #{item['id']} may not depend on owner-optional #{blocked_optional.join(', ')}"
+    if item["status"] == "simulator-replacement-complete" && !Array(item["dependsOn"]).empty?
+      errors << "simulator-replacement-complete task #{item['id']} may not retain dependencies"
     end
+    blocked_replacement = Array(item["dependsOn"]) & SIMULATOR_REPLACEMENT_TASKS
+    unless blocked_replacement.empty?
+      errors << "task #{item['id']} may not depend on simulator replacement #{blocked_replacement.join(', ')}"
+    end
+  end
+
+  non_gating_external_ids = all_items
+    .select { |item| item["status"] == "non-gating-external" }
+    .map { |item| item["id"] }
+  unless non_gating_external_ids == NON_GATING_EXTERNAL_TASKS
+    errors << "non-gating-external tasks must be exactly #{NON_GATING_EXTERNAL_TASKS.join(', ')}"
   end
 
   permitted_dependencies = (expected_ids + (1..12).map { |number| format("ADR-RS-%03d", number) }).to_set
@@ -309,7 +325,7 @@ def validate(document, root)
     Array(group["dependsOn"]).each do |dependency|
       errors << "taskGroups[#{group_index}] has unknown dependency #{dependency}" unless permitted_dependencies.include?(dependency)
       if group["prefix"] != "FOR" && dependency.to_s.start_with?("FOR-")
-        errors << "taskGroups[#{group_index}] active group may not depend on superseded #{dependency}"
+        errors << "taskGroups[#{group_index}] active group may not depend on variance-classified #{dependency}"
       end
     end
     Array(group["items"]).each do |item|
@@ -317,7 +333,7 @@ def validate(document, root)
       Array(item["dependsOn"]).each do |dependency|
         errors << "task #{item['id']} has unknown dependency #{dependency}" unless permitted_dependencies.include?(dependency)
         if group["prefix"] != "FOR" && dependency.to_s.start_with?("FOR-")
-          errors << "task #{item['id']} may not depend on superseded #{dependency}"
+          errors << "task #{item['id']} may not depend on variance-classified #{dependency}"
         end
       end
       Array(item["evidence"]).each do |evidence|
@@ -398,6 +414,24 @@ negative_cases = {
       copy["authority"]["systemSpec"]["sha256"] = "0" * 64
     end
   },
+  "amendment hash drift" => {
+    "expected" => "authority.remediationAmendment must retain the locked path and SHA-256",
+    "mutation" => lambda do |copy|
+      copy["authority"]["remediationAmendment"]["sha256"] = "0" * 64
+    end
+  },
+  "external framework task called complete" => {
+    "expected" => "taskGroups[1].items[0] must remain variance-accepted-app-owned-equivalent and may not be complete as written",
+    "mutation" => lambda do |copy|
+      copy["taskGroups"][1]["items"][0]["status"] = "complete"
+    end
+  },
+  "public rollout called complete" => {
+    "expected" => "non-gating-external tasks must be exactly REL-011",
+    "mutation" => lambda do |copy|
+      copy["taskGroups"].last["items"].last["status"] = "complete"
+    end
+  },
   "controlling policy hash drift" => {
     "expected" => "FG-020: forsettiPolicy.controllingPolicy must retain the canonical path and SHA-256",
     "mutation" => lambda do |copy|
@@ -425,7 +459,7 @@ negative_cases.each do |name, test_case|
 end
 
 if errors.empty?
-  puts "Roadmap alignment guard passed: #{expected_task_ids.length} tasks, 12 decisions, controlling policy and locked authorities verified."
+  puts "Roadmap alignment guard passed: #{expected_task_ids.length} tasks, 12 decisions, immutable v1.0 authorities, remediation amendment, and variance semantics verified."
   exit 0
 end
 

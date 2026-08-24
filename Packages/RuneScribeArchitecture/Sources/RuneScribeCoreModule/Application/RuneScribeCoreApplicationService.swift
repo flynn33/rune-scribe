@@ -1041,9 +1041,19 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                     persistsMetadata: persistsMetadata
                 )
             } else {
-                artifact = try await artifactRegistry.createOpaqueMessage(
+                // Presentation failure must not demote an established delivery to
+                // runes-only text. The canonical typed package still carries the
+                // encrypted envelope; only the first delivery embeds the cipher.
+                let bytes = try payload.encodedFile(fontBytes: nil)
+                artifact = try await artifactRegistry.createFile(
+                    data: bytes,
                     id: artifactID,
-                    cipherID: cipher.id,
+                    filename: MessageSend.filename,
+                    displayName: "Rune Scribe Message",
+                    contentType: RuneScribeWireFormat.contentType,
+                    fileExtension: RuneScribeWireFormat.fileExtension,
+                    requiresKeyDelivery: false,
+                    messageCipherID: cipher.id,
                     encodedMessageHandle: retainedShareHandle,
                     persistsMetadata: persistsMetadata
                 )
@@ -1241,9 +1251,16 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                 relationshipToken = nil
             }
 
+            // A Messages completion is eligible for a message Artifact only when
+            // the system composer accepted the canonical package. This applies to
+            // established messages too: `requiresKeyDelivery` controls key inclusion,
+            // not whether the `.runescribe` transport may be omitted.
+            let messageTransportConfirmed = durable.messageCipherID == nil
+                || evidence.report.routeClass != .messages
+                || evidence.report.requiredAttachmentAccepted == true
             let eligible = evidence.report.isEligibleTerminal(
                 requiresKeyDelivery: durable.requiresKeyDelivery
-            )
+            ) && messageTransportConfirmed
             let domainLinked = cipher != nil && contactID != nil
             let linkedRelationship = relationship != nil
             let completesKeyDelivery = eligible
@@ -1262,7 +1279,8 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                 && relationship?.bidirectionalEventCommitted == false
 
             var facts: [ProgressionEventFact] = []
-            if let encodedRecord,
+            if eligible,
+               let encodedRecord,
                let share = try CoreProgressionFactFactory.shareCompleted(
                    report: evidence.report,
                    messageToken: encodedRecord.messageToken,

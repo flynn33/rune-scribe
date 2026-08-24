@@ -6,6 +6,41 @@ enum RuneScribeShare {
     static let fileExtension = RuneScribeWireFormat.fileExtension
 }
 
+enum CanonicalMessageArtifactPolicy {
+    static func accepts(_ artifact: ShareArtifactDTO) -> Bool {
+        guard case .file(let referenceID) = artifact.reference else { return false }
+        return referenceID == artifact.id
+            && artifact.contentType == RuneScribeWireFormat.contentType
+            && artifact.fileExtension == RuneScribeWireFormat.fileExtension
+    }
+}
+
+enum MessageResultActionPolicy {
+    static func allowsPlainCopy(
+        artifactPreparationInFlight: Bool,
+        hasPendingArtifact: Bool
+    ) -> Bool {
+        !artifactPreparationInFlight && !hasPendingArtifact
+    }
+}
+
+enum ShareBuilderTerminalDisposition: Equatable, Sendable {
+    case completed
+    case cancelled
+    case failed
+
+    init(routeResult: ShareRouteResultDTO) {
+        self = switch routeResult {
+        case .completedBySystem, .sentConfirmed:
+            .completed
+        case .cancelled:
+            .cancelled
+        case .presented, .failed, .completionUnavailable:
+            .failed
+        }
+    }
+}
+
 enum AttachmentRequirementDecision: Equatable, Sendable {
     case allowed
     case blockedNeedsAttachment
@@ -16,11 +51,9 @@ enum MessageAttachmentPolicy {
     static func decide(
         canSendText: Bool,
         canSendAttachments: Bool,
-        utiSupported: Bool,
-        requiredAttachment: Bool
+        utiSupported: Bool
     ) -> AttachmentRequirementDecision {
         guard canSendText else { return .blockedCannotSendText }
-        guard requiredAttachment else { return .allowed }
         guard canSendAttachments, utiSupported else { return .blockedNeedsAttachment }
         return .allowed
     }
@@ -30,8 +63,6 @@ enum MessageAttachmentPolicy {
         requiredAttachmentWasPresent: Bool,
         requiredAttachmentAccepted: Bool
     ) -> Bool {
-        guard sent else { return false }
-        guard requiredAttachmentWasPresent else { return true }
-        return requiredAttachmentAccepted
+        sent && requiredAttachmentWasPresent && requiredAttachmentAccepted
     }
 }

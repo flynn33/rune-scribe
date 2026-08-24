@@ -52,6 +52,63 @@ extension View {
     }
 }
 
+// MARK: - Presentation Surfaces
+
+/// Controls how strongly a provider-neutral presentation surface obscures the
+/// application content beneath it. Privacy-sensitive overlays use a stronger
+/// material and tint while preserving the active Theme's semantic palette.
+enum RuneSemanticPresentationSurfaceRole {
+    case standard
+    case privacy
+}
+
+private struct RuneSemanticPresentationSurfaceModifier: ViewModifier {
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    @Environment(\.runtimeAccessibilityPreferences) private var accessibilityPreferences
+
+    let role: RuneSemanticPresentationSurfaceRole
+
+    private var material: Material {
+        role == .privacy ? .thickMaterial : .thinMaterial
+    }
+
+    private var tintOpacity: Double {
+        let increasedContrast = colorSchemeContrast == .increased
+            || accessibilityPreferences.forcesIncreasedContrast
+        return switch (role, increasedContrast) {
+        case (.standard, false): 0.58
+        case (.standard, true): 0.78
+        case (.privacy, false): 0.88
+        case (.privacy, true): 0.96
+        }
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .background {
+                ZStack {
+                    Rectangle().fill(material)
+                    Color.runeBackgroundSecondary.opacity(tintOpacity)
+                }
+                .ignoresSafeArea()
+            }
+            // A sheet's system container must not replace the semantic surface
+            // with an unrelated opaque platform background.
+            .presentationBackground(.clear)
+    }
+}
+
+extension View {
+    /// Applies the shared semantic surface used above the single root Theme
+    /// background renderer. The default remains translucent so provider
+    /// presentation continuity survives sheets without mounting a renderer.
+    func runeSemanticPresentationSurface(
+        _ role: RuneSemanticPresentationSurfaceRole = .standard
+    ) -> some View {
+        modifier(RuneSemanticPresentationSurfaceModifier(role: role))
+    }
+}
+
 // MARK: - Runic Font
 
 extension Font {
@@ -96,15 +153,42 @@ struct RuneEyebrow: View {
 /// Placed at the header's top-right on every platform — clear of the macOS window
 /// controls (which sit top-left).
 struct RuneHeaderButton: Identifiable {
-    let id = UUID()
     let systemImage: String
     let help: String
-    let action: () -> Void
+    let action: @MainActor () -> Void
+
+    var id: String { "\(systemImage).\(help)" }
 }
 
-/// The animated Metal header shared by every view: a centered runic wordmark over
-/// a legibility scrim, an optional top-right action, and a hairline gold rule along
-/// the bottom. Fixed height keeps all views vertically aligned.
+private struct RuneHeaderActionView: View {
+    let button: RuneHeaderButton
+
+    var body: some View {
+        Button(action: button.action) {
+            Image(systemName: button.systemImage)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.runeSilver)
+                .frame(width: 28, height: 28)
+                .background(Circle().fill(Color.runeNavy.opacity(0.55)))
+                .overlay(
+                    Circle().strokeBorder(
+                        Color.runeSilver.opacity(0.30),
+                        lineWidth: 1
+                    )
+                )
+                .frame(width: 44, height: 44)
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(button.help)
+        .help(button.help)
+    }
+}
+
+/// The application header shared by every view: a centered runic wordmark over
+/// a provider-neutral legibility scrim, an optional top-right action, and a
+/// hairline semantic-accent rule along the bottom. The application shell owns
+/// the runtime Theme background; the header never mounts a second renderer.
 struct RuneHeader: View {
     let slot: ThemeHeadingSlot
     let subtitle: String
@@ -117,9 +201,9 @@ struct RuneHeader: View {
 
     var body: some View {
         ZStack {
-            RuntimeMetalBackground()
+            Color.runeNavy.opacity(0.24)
 
-            // Scrim: darkens the animated background so the wordmark stays legible.
+            // Scrim: preserves wordmark legibility over the root Theme background.
             LinearGradient(
                 colors: [Color.runeNavy.opacity(0.10), Color.runeNavy.opacity(0.62)],
                 startPoint: .top,
@@ -220,26 +304,7 @@ struct RuneHeader: View {
 
     private var actionRow: some View {
         HStack(spacing: 10) {
-            ForEach(trailingButtons) { button in
-                Button(action: button.action) {
-                    Image(systemName: button.systemImage)
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(.runeSilver)
-                        .frame(width: 28, height: 28)
-                        .background(Circle().fill(Color.runeNavy.opacity(0.55)))
-                        .overlay(
-                            Circle().strokeBorder(
-                                Color.runeSilver.opacity(0.30),
-                                lineWidth: 1
-                            )
-                        )
-                        .frame(width: 44, height: 44)
-                        .contentShape(Circle())
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(button.help)
-                .help(button.help)
-            }
+            ForEach(trailingButtons, content: RuneHeaderActionView.init)
         }
         .frame(height: max(44, height - 28), alignment: .top)
     }

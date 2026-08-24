@@ -1,0 +1,39 @@
+{
+  "artifacts": [
+    {
+      "kind": "structured-suite-result",
+      "path": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "sha256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3"
+    },
+    {
+      "kind": "raw-test-log",
+      "path": "docs/verification/remediation-v1/GateRun/final-qualification.log",
+      "sha256": "b8a6a895be57e082c3964031da81e379830760b5869b4912a92e6b58e2b19126"
+    }
+  ],
+  "build": "39",
+  "claim": "xcodegen log",
+  "executions": [
+    {
+      "command": "git archive --format=tar HEAD | tar -xf - -C /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2; xcodegen generate --spec /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/project.yml --project /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --project-root /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --cache-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass1.cache; python3 /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/fingerprint_project.py /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/RuneScrib.xcodeproj /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/static-xcodegen-pass1-manifest.json; xcodegen generate --spec /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/project.yml --project /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --project-root /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --cache-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass2.cache; python3 /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/fingerprint_project.py /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/RuneScrib.xcodeproj /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/static-xcodegen-pass2-manifest.json; diff -ru /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass1-project /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass2-project",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "xcodegen log",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-110"
+    }
+  ],
+  "gateIDs": [
+    "RC-031"
+  ],
+  "schemaVersion": "1.0",
+  "semanticMarkers": [],
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "testIDs": [
+    "T-110"
+  ],
+  "version": "1.0.39"
+}

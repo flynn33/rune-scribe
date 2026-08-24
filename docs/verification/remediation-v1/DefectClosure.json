@@ -1,0 +1,1189 @@
+{
+  "build": "39",
+  "findings": [
+    {
+      "changedFiles": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SettingsView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VaultProgressView.swift"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/FullRegression.json",
+        "docs/verification/remediation-v1/NorseProductionProvenanceValidation.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-005",
+        "RC-006",
+        "RC-007",
+        "RC-033",
+        "RC-034",
+        "RC-035"
+      ],
+      "id": "RSA-001",
+      "implementationBindings": {
+        "Prove visual resources in workspace, settled result, Settings, Vault, browsers and Share Builder": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SettingsView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VaultProgressView.swift"
+        ],
+        "Retain/merge current provider-neutral image integration": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift"
+        ],
+        "Supersede old b7c55ff evidence": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift"
+        ]
+      },
+      "originalStatus": "remediation-present-in-attached-snapshot; merge lineage unverified",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift"
+        ],
+        "RuneScribeUIModule/Views/ContentView.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift"
+        ],
+        "RuneScribeUIModule/Views/SettingsView.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SettingsView.swift"
+        ],
+        "RuneScribeUIModule/Views/ThemeVisualComponents.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ThemeVisualComponents.swift"
+        ],
+        "RuneScribeUIModule/Views/VaultProgressView.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VaultProgressView.swift"
+        ]
+      },
+      "testBindings": {
+        "Missing-image normal-path mutation": [
+          "T-015"
+        ],
+        "Provider-neutral visual integration": [
+          "T-005",
+          "T-006",
+          "T-010",
+          "T-011",
+          "T-012",
+          "T-013",
+          "T-014",
+          "T-112",
+          "T-113",
+          "T-114"
+        ],
+        "Simulator screenshot tests": [
+          "T-010",
+          "T-011",
+          "T-012",
+          "T-013",
+          "T-014",
+          "T-023",
+          "T-112",
+          "T-113",
+          "T-114"
+        ]
+      },
+      "tests": [
+        "T-005: Wrong source manifest in evidence",
+        "T-006: No-Git verification",
+        "T-010: Norse workspace visual integration",
+        "T-011: Norse settled Artifact",
+        "T-012: Settings Codex cards",
+        "T-013: Vault Codices and Artifacts",
+        "T-014: Optional provider parity",
+        "T-015: Provider-specific UI fork detection",
+        "T-023: Adaptive builder layout",
+        "T-112: Release product and hosted tests",
+        "T-113: Release product and full Simulator suite",
+        "T-114: Adaptive Release qualification"
+      ]
+    },
+    {
+      "changedFiles": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/ShareArtifactRegistry.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Policy.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeIOGateway.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Progression.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ShareBuilder.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/OutboundSharePresentationBuilder.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationSummary.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderModel.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/SharePolicy.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeNativeShareView.swift"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/AccessibilityValidation.json",
+        "docs/verification/remediation-v1/CipherInvitationValidation.json",
+        "docs/verification/remediation-v1/ShareBuilderValidation.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-008",
+        "RC-009",
+        "RC-010",
+        "RC-011",
+        "RC-012",
+        "RC-013",
+        "RC-036",
+        "RC-037"
+      ],
+      "id": "RSA-002",
+      "implementationBindings": {
+        "Add live preview, fixed security summary, save/reset defaults and runtime Share launch": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/ShareArtifactRegistry.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Policy.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeIOGateway.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Progression.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ShareBuilder.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/OutboundSharePresentationBuilder.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationSummary.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderModel.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/SharePolicy.swift"
+        ],
+        "Add one provider-neutral Share Builder for message and cipher invitation purposes": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/ShareArtifactRegistry.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Policy.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeIOGateway.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Progression.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ShareBuilder.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/OutboundSharePresentationBuilder.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationSummary.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderModel.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/SharePolicy.swift"
+        ],
+        "Preserve Quick Share": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Progression.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ShareBuilder.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeNativeShareView.swift"
+        ]
+      },
+      "originalStatus": "open",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "CipherLibraryView.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift"
+        ],
+        "ContentView.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeNativeShareView.swift"
+        ],
+        "RuneScribeContracts/ShareBuilderContracts.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/ShareArtifactRegistry.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderModel.swift"
+        ],
+        "RuneScribeRuntimeCore runtime share gateway": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Policy.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeIOGateway.swift"
+        ],
+        "RuneScribeUIModule/Presentation/RuneScribeUISession+ShareBuilder.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Progression.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ShareBuilder.swift"
+        ],
+        "RuneScribeUIModule/Sharing": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/OutboundSharePresentationBuilder.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationSummary.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderModel.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/SharePolicy.swift"
+        ]
+      },
+      "testBindings": {
+        "Accessibility and adaptive layouts": [
+          "T-022",
+          "T-023",
+          "T-065",
+          "T-115",
+          "T-116"
+        ],
+        "Cancel/idempotency": [
+          "T-035",
+          "T-036",
+          "T-037"
+        ],
+        "Cipher invitation builder": [
+          "T-042"
+        ],
+        "Locked/unavailable selections": [
+          "T-025",
+          "T-026",
+          "T-027",
+          "T-028",
+          "T-029",
+          "T-030",
+          "T-031"
+        ],
+        "Message first/established builder": [
+          "T-020",
+          "T-021",
+          "T-024",
+          "T-032",
+          "T-033",
+          "T-038"
+        ]
+      },
+      "tests": [
+        "T-020: First-delivery message builder",
+        "T-021: Established message builder",
+        "T-022: Message builder keyboard flow",
+        "T-023: Adaptive builder layout",
+        "T-024: Codex change default resolution",
+        "T-025: Seal None",
+        "T-026: Frame None",
+        "T-027: Incompatible frame removal",
+        "T-028: Locked item cannot apply",
+        "T-029: Encountered item not owned",
+        "T-030: Unavailable provider rejected",
+        "T-031: Preview rendering failure",
+        "T-032: Reset defaults",
+        "T-033: Save defaults",
+        "T-035: Share completed once",
+        "T-036: Share cancelled",
+        "T-037: Presentation not completion",
+        "T-038: One-action defaults path",
+        "T-042: Customize cipher invitation",
+        "T-065: Reduce Motion cap",
+        "T-115: Accessibility matrix",
+        "T-116: Preview/cache/resource bounds"
+      ]
+    },
+    {
+      "changedFiles": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/CipherInvitationValidation.json",
+        "docs/verification/remediation-v1/CompatibilityValidation.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-009",
+        "RC-014",
+        "RC-015",
+        "RC-025"
+      ],
+      "id": "RSA-003",
+      "implementationBindings": {
+        "Avoid eager link preparation where not needed": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift"
+        ],
+        "Change primary Share to typed file Artifact": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift"
+        ],
+        "Keep link and QR as explicit fallbacks": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift"
+        ]
+      },
+      "originalStatus": "open",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "Core prepare cipher share path": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift"
+        ],
+        "RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift"
+        ],
+        "RuneScribeUIModule/Views/CipherLibraryView.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift"
+        ]
+      },
+      "testBindings": {
+        "Link/QR fallback compatibility": [
+          "T-044",
+          "T-045",
+          "T-046",
+          "T-054",
+          "T-090",
+          "T-091",
+          "T-093"
+        ],
+        "Primary representation file assertion": [
+          "T-040",
+          "T-041",
+          "T-042"
+        ],
+        "Source mutation back to link fails": [
+          "T-047"
+        ],
+        "Typed package/preview validation": [
+          "T-043",
+          "T-092"
+        ]
+      },
+      "tests": [
+        "T-040: Primary Library Share",
+        "T-041: Primary representation contract",
+        "T-042: Customize cipher invitation",
+        "T-043: Typed invitation metadata",
+        "T-044: Link fallback",
+        "T-045: QR fallback",
+        "T-046: Export distinct from Share",
+        "T-047: Primary reverted to link",
+        "T-054: Decode survives emergency presentation",
+        "T-090: Legacy cipher v3",
+        "T-091: Legacy message v1",
+        "T-092: Current typed package",
+        "T-093: Corrupt presentation valid core"
+      ]
+    },
+    {
+      "changedFiles": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ThemeCoordinatorContracts.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeResources.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeModule.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeQualification.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeContribution.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeEndpoints.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/Resources/module-manifest.json",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/ThemeCoordinatorService.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift",
+        "scripts/check-shipping-products.sh"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/BaseThemeFailureValidation.json",
+        "docs/verification/remediation-v1/SecurityPrivacyValidation.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-016",
+        "RC-017",
+        "RC-018",
+        "RC-026"
+      ],
+      "id": "RSA-004",
+      "implementationBindings": {
+        "Add structured required-theme resource failure DTO": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ThemeCoordinatorContracts.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeResources.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeQualification.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeContribution.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeEndpoints.swift"
+        ],
+        "Propagate through runtime diagnostics": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ThemeCoordinatorContracts.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeContribution.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeEndpoints.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/ThemeCoordinatorService.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift"
+        ],
+        "Reject invalid Base resources in Release qualification while preserving emergency decode": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ThemeCoordinatorContracts.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeResources.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeQualification.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeContribution.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeEndpoints.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/ThemeCoordinatorService.swift",
+          "scripts/check-shipping-products.sh"
+        ],
+        "Show root warning": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift"
+        ]
+      },
+      "originalStatus": "open",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "NorseBaseThemeResources.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeResources.swift"
+        ],
+        "RootView.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift"
+        ],
+        "RuneScribeNorseThemeModule/NorseThemeModule.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeQualification.swift"
+        ],
+        "RuneScribeRuntimeCore diagnostics": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ThemeCoordinatorContracts.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeContribution.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeEndpoints.swift"
+        ],
+        "RuneScribeUISession.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift"
+        ],
+        "ThemeCoordinatorService.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/ThemeCoordinatorService.swift"
+        ],
+        "check-shipping-products.sh": [
+          "scripts/check-shipping-products.sh"
+        ]
+      },
+      "testBindings": {
+        "Emergency decode": [
+          "T-054",
+          "T-093"
+        ],
+        "Missing/digest/dimension mutations": [
+          "T-050",
+          "T-051",
+          "T-052",
+          "T-055"
+        ],
+        "Optional provider isolation": [
+          "T-031",
+          "T-056",
+          "T-094",
+          "T-095"
+        ],
+        "Root banner": [
+          "T-053"
+        ]
+      },
+      "tests": [
+        "T-031: Preview rendering failure",
+        "T-050: Missing required resource",
+        "T-051: Hash mismatch",
+        "T-052: Dimension mismatch",
+        "T-053: Root warning",
+        "T-054: Decode survives emergency presentation",
+        "T-055: Release product missing Norse resource",
+        "T-056: Optional provider isolation",
+        "T-093: Corrupt presentation valid core",
+        "T-094: Progression/cloud privacy",
+        "T-095: First delivery only once"
+      ]
+    },
+    {
+      "changedFiles": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeArtifactSelectionContracts.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeSettingsContracts.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeSettingsGateway.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+AppearanceDefaults.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SettingsView.swift"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/AccessibilityValidation.json",
+        "docs/verification/remediation-v1/AppearanceDefaultsValidation.json",
+        "docs/verification/remediation-v1/ShareBuilderValidation.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-012",
+        "RC-019",
+        "RC-020",
+        "RC-036"
+      ],
+      "id": "RSA-005",
+      "implementationBindings": {
+        "Add Full/Reduced/Off effects preference": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeArtifactSelectionContracts.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeSettingsContracts.swift"
+        ],
+        "Add per-Codex Relic, Seal/None and Frame/None defaults": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeArtifactSelectionContracts.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeSettingsContracts.swift"
+        ],
+        "Use one runtime-owned defaults rail for Settings, workspace, Quick Share and builder": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeSettingsContracts.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeSettingsGateway.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+AppearanceDefaults.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SettingsView.swift"
+        ]
+      },
+      "originalStatus": "open",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "RuneScribeUISession+ThemeArtifacts.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+AppearanceDefaults.swift"
+        ],
+        "RuntimeArtifactSelectionContracts.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeArtifactSelectionContracts.swift"
+        ],
+        "RuntimeSettingsContracts.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeSettingsContracts.swift"
+        ],
+        "RuntimeSettingsGateway.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeSettingsGateway.swift"
+        ],
+        "SettingsView.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SettingsView.swift"
+        ]
+      },
+      "testBindings": {
+        "Default consistency": [
+          "T-022",
+          "T-024",
+          "T-032",
+          "T-060"
+        ],
+        "Explicit None": [
+          "T-062",
+          "T-063"
+        ],
+        "Persistence/migration": [
+          "T-033",
+          "T-034",
+          "T-060",
+          "T-061",
+          "T-066",
+          "T-067"
+        ],
+        "Reduce Motion override": [
+          "T-064",
+          "T-065",
+          "T-115"
+        ]
+      },
+      "tests": [
+        "T-022: Message builder keyboard flow",
+        "T-024: Codex change default resolution",
+        "T-032: Reset defaults",
+        "T-033: Save defaults",
+        "T-034: Save defaults failure",
+        "T-060: Per-Codex defaults controls",
+        "T-061: Relic default persistence",
+        "T-062: Explicit Seal None",
+        "T-063: Explicit Frame None",
+        "T-064: Effects Full/Reduced/Off",
+        "T-065: Reduce Motion cap",
+        "T-066: Stale default fallback",
+        "T-067: No direct UI persistence",
+        "T-115: Accessibility matrix"
+      ]
+    },
+    {
+      "changedFiles": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Production-Asset-Provenance-v1.0.json",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Source/Norse-Production-Provenance-Tooling.md",
+        "scripts/check-norse-production-provenance.py",
+        "scripts/generate-norse-production-provenance.py"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/BaseThemeFailureValidation.json",
+        "docs/verification/remediation-v1/FullRegression.json",
+        "docs/verification/remediation-v1/NorseProductionProvenanceValidation.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-022",
+        "RC-018",
+        "RC-039"
+      ],
+      "id": "RSA-006",
+      "implementationBindings": {
+        "Generate exact provenance/integrity records": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Production-Asset-Provenance-v1.0.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Source/Norse-Production-Provenance-Tooling.md",
+          "scripts/check-norse-production-provenance.py",
+          "scripts/generate-norse-production-provenance.py"
+        ],
+        "Remove active placeholder/candidate ambiguity": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+        ],
+        "Use current Production bytes as release-candidate baseline": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+        ]
+      },
+      "originalStatus": "open",
+      "removalBindings": {
+        "Remove active placeholder/candidate ambiguity": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Source/make_norse_base_placeholders.swift"
+        ]
+      },
+      "removedFiles": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Source/make_norse_base_placeholders.swift"
+      ],
+      "sourceAreaBindings": {
+        "Norse integrity manifests": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Production-Asset-Provenance-v1.0.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+        ],
+        "Norse resource scripts": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Source/Norse-Production-Provenance-Tooling.md",
+          "scripts/check-norse-production-provenance.py",
+          "scripts/generate-norse-production-provenance.py"
+        ],
+        "RuneScribeNorseThemeModule/Resources/Production": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+        ]
+      },
+      "testBindings": {
+        "Built-product match": [
+          "T-055",
+          "T-056",
+          "T-118"
+        ],
+        "Deterministic regeneration": [
+          "T-082"
+        ],
+        "Exact paths/hashes/dimensions/rights/accessibility": [
+          "T-080",
+          "T-081"
+        ]
+      },
+      "tests": [
+        "T-055: Release product missing Norse resource",
+        "T-056: Optional provider isolation",
+        "T-080: Production paths and hashes",
+        "T-081: No active placeholder/candidate labels",
+        "T-082: Generated resource reproducibility",
+        "T-118: Final bundle inspection"
+      ]
+    },
+    {
+      "changedFiles": [
+        "docs/architecture/RoadmapAlignment.md",
+        "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md",
+        "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md",
+        "docs/verification/roadmap-alignment.json",
+        "scripts/check-roadmap-alignment.sh"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/FullRegression.json",
+        "docs/verification/remediation-v1/SourceManifestValidation.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-002",
+        "RC-041"
+      ],
+      "id": "RSA-007",
+      "implementationBindings": {
+        "Add v1.1 amendment": [
+          "docs/architecture/RoadmapAlignment.md",
+          "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md",
+          "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md",
+          "docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md"
+        ],
+        "Preserve v1.0 bytes": [
+          "docs/architecture/RoadmapAlignment.md",
+          "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md",
+          "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md",
+          "docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md"
+        ],
+        "Teach alignment tooling accepted variance statuses": [
+          "docs/verification/roadmap-alignment.json",
+          "scripts/check-roadmap-alignment.sh"
+        ]
+      },
+      "originalStatus": "requires formal amendment",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "check-roadmap-alignment.sh": [
+          "scripts/check-roadmap-alignment.sh"
+        ],
+        "docs/architecture/RoadmapAlignment.md": [
+          "docs/architecture/RoadmapAlignment.md"
+        ],
+        "docs/product-roadmap": [
+          "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md",
+          "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md",
+          "docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md"
+        ],
+        "roadmap-alignment.json": [
+          "docs/verification/roadmap-alignment.json"
+        ]
+      },
+      "testBindings": {
+        "Amendment indexed": [
+          "T-002"
+        ],
+        "No complete-as-written mislabel": [
+          "T-120"
+        ],
+        "Original hash unchanged": [
+          "T-002"
+        ]
+      },
+      "tests": [
+        "T-002: Original roadmap immutability",
+        "T-120: Final self-audit"
+      ]
+    },
+    {
+      "changedFiles": [
+        "scripts/capture-remediation-domain-results.py",
+        "scripts/check-documentation-alignment.py",
+        "scripts/check-remediation-completion.py",
+        "scripts/check-roadmap-completion.py",
+        "scripts/generate-remediation-evidence.py",
+        "scripts/generate-source-manifest.py"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/FullRegression.json",
+        "docs/verification/remediation-v1/NegativeMutations.json",
+        "docs/verification/remediation-v1/SourceManifestValidation.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-004",
+        "RC-005",
+        "RC-029",
+        "RC-041"
+      ],
+      "id": "RSA-008",
+      "implementationBindings": {
+        "Add no-Git verification path": [
+          "scripts/check-roadmap-completion.py",
+          "scripts/generate-source-manifest.py"
+        ],
+        "Bind all evidence": [
+          "scripts/capture-remediation-domain-results.py",
+          "scripts/check-documentation-alignment.py",
+          "scripts/check-remediation-completion.py",
+          "scripts/check-roadmap-completion.py",
+          "scripts/generate-remediation-evidence.py",
+          "scripts/generate-source-manifest.py"
+        ],
+        "Generate deterministic source manifest": [
+          "scripts/generate-source-manifest.py"
+        ],
+        "Refresh alignment ledger": [
+          "scripts/capture-remediation-domain-results.py",
+          "scripts/check-documentation-alignment.py",
+          "scripts/check-remediation-completion.py",
+          "scripts/check-roadmap-completion.py",
+          "scripts/generate-remediation-evidence.py"
+        ]
+      },
+      "originalStatus": "open for distributable audit snapshots",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "check-documentation-alignment.py": [
+          "scripts/check-documentation-alignment.py"
+        ],
+        "check-roadmap-completion.py": [
+          "scripts/check-roadmap-completion.py"
+        ],
+        "docs/verification/remediation-v1": [
+          "scripts/capture-remediation-domain-results.py",
+          "scripts/check-remediation-completion.py",
+          "scripts/generate-remediation-evidence.py"
+        ],
+        "scripts/generate-source-manifest.py": [
+          "scripts/generate-source-manifest.py"
+        ]
+      },
+      "testBindings": {
+        "Copied no-Git tree passes valid verification": [
+          "T-006",
+          "T-120"
+        ],
+        "Tamper detection": [
+          "T-004",
+          "T-015",
+          "T-047",
+          "T-072",
+          "T-101"
+        ],
+        "Wrong evidence hash": [
+          "T-005"
+        ]
+      },
+      "tests": [
+        "T-004: Shipping file tamper",
+        "T-005: Wrong source manifest in evidence",
+        "T-006: No-Git verification",
+        "T-015: Provider-specific UI fork detection",
+        "T-047: Primary reverted to link",
+        "T-072: Root background removed",
+        "T-101: Required mutation suite",
+        "T-120: Final self-audit"
+      ]
+    },
+    {
+      "changedFiles": [
+        "CHANGELOG.md",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionCatalogResources.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionModule.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/module-manifest.json",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift",
+        "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift",
+        "RuneScrib.xcodeproj/project.pbxproj",
+        "docs/APP_STORE_SUBMISSION.md",
+        "project.yml",
+        "scripts/capture-remediation-domain-results.py",
+        "scripts/check-remediation-completion.py",
+        "scripts/generate-remediation-evidence.py"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/FullRegression.json",
+        "docs/verification/remediation-v1/SecurityPrivacyValidation.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-027",
+        "RC-033",
+        "RC-034",
+        "RC-035",
+        "RC-040",
+        "RC-041",
+        "RC-042"
+      ],
+      "id": "RSA-009",
+      "implementationBindings": {
+        "Complete source/simulator qualification": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionCatalogResources.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift",
+          "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift",
+          "RuneScrib.xcodeproj/project.pbxproj",
+          "project.yml",
+          "scripts/capture-remediation-domain-results.py",
+          "scripts/check-remediation-completion.py",
+          "scripts/generate-remediation-evidence.py"
+        ],
+        "Define release-candidate boundary": [
+          "CHANGELOG.md",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionCatalogResources.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift",
+          "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift",
+          "RuneScrib.xcodeproj/project.pbxproj",
+          "docs/APP_STORE_SUBMISSION.md",
+          "project.yml",
+          "scripts/check-remediation-completion.py",
+          "scripts/generate-remediation-evidence.py"
+        ],
+        "Produce owner-test artifacts": [
+          "scripts/generate-remediation-evidence.py"
+        ],
+        "Remove public shipment overclaim": [
+          "CHANGELOG.md",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionCatalogResources.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift",
+          "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift",
+          "RuneScrib.xcodeproj/project.pbxproj",
+          "docs/APP_STORE_SUBMISSION.md",
+          "project.yml",
+          "scripts/check-remediation-completion.py",
+          "scripts/generate-remediation-evidence.py"
+        ]
+      },
+      "originalStatus": "expected owner/distribution work remains",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "APP_STORE_SUBMISSION.md": [
+          "docs/APP_STORE_SUBMISSION.md"
+        ],
+        "CHANGELOG.md": [
+          "CHANGELOG.md"
+        ],
+        "Completion docs": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionCatalogResources.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionModule.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift",
+          "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift",
+          "RuneScrib.xcodeproj/project.pbxproj",
+          "project.yml",
+          "scripts/check-remediation-completion.py",
+          "scripts/generate-remediation-evidence.py"
+        ],
+        "OwnerTestCandidateHandoff": [
+          "scripts/capture-remediation-domain-results.py",
+          "scripts/generate-remediation-evidence.py"
+        ]
+      },
+      "testBindings": {
+        "No distribution action evidence": [
+          "T-119",
+          "T-121"
+        ],
+        "No external account/hardware gate": [
+          "T-096",
+          "T-097",
+          "T-112",
+          "T-113",
+          "T-114"
+        ],
+        "Report schema/status": [
+          "T-120"
+        ]
+      },
+      "tests": [
+        "T-096: Offline and merge adapters",
+        "T-097: Optional reporting adapters",
+        "T-112: Release product and hosted tests",
+        "T-113: Release product and full Simulator suite",
+        "T-114: Adaptive Release qualification",
+        "T-119: Owner-test ZIP",
+        "T-120: Final self-audit",
+        "T-121: No public shipment"
+      ]
+    },
+    {
+      "changedFiles": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContactsView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ImportConfirmView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/LockView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ReceivedMessageView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneTheme.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SimulatorAccessibilityQualification.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/UnlockRevealView.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeAccessibilityPreferences.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeSimulatorQualification.swift",
+        "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/FullRegression.json",
+        "docs/verification/remediation-v1/ThemeRootBackgroundValidation.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-021",
+        "RC-033",
+        "RC-034",
+        "RC-035"
+      ],
+      "id": "RSA-010",
+      "implementationBindings": {
+        "Define safe area/clipping and fallback": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContactsView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ImportConfirmView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/LockView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ReceivedMessageView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneTheme.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SemanticThemePresentation.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SimulatorAccessibilityQualification.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/UnlockRevealView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeAccessibilityPreferences.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeSimulatorQualification.swift",
+          "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"
+        ],
+        "Mount runtime Theme background in root ZStack": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContactsView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ImportConfirmView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/LockView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ReceivedMessageView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SimulatorAccessibilityQualification.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/UnlockRevealView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeAccessibilityPreferences.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeSimulatorQualification.swift",
+          "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"
+        ],
+        "Use header scrim/decoration": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContactsView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ImportConfirmView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/LockView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ReceivedMessageView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneTheme.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SemanticThemePresentation.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SimulatorAccessibilityQualification.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/UnlockRevealView.swift"
+        ]
+      },
+      "originalStatus": "open",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "RootView.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContactsView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ImportConfirmView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/LockView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ReceivedMessageView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SimulatorAccessibilityQualification.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/UnlockRevealView.swift"
+        ],
+        "RuneTheme.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RuneTheme.swift"
+        ],
+        "RuntimeApplicationResourcePresentation.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeAccessibilityPreferences.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeApplicationResourcePresentation.swift",
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeSimulatorQualification.swift",
+          "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"
+        ],
+        "SemanticThemePresentation.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SemanticThemePresentation.swift"
+        ]
+      },
+      "testBindings": {
+        "Emergency/Reduce Motion states": [
+          "T-073"
+        ],
+        "Norse/optional screenshots": [
+          "T-023",
+          "T-070",
+          "T-071",
+          "T-112",
+          "T-113",
+          "T-114"
+        ],
+        "Root background source guard": [
+          "T-070",
+          "T-071",
+          "T-072"
+        ]
+      },
+      "tests": [
+        "T-023: Adaptive builder layout",
+        "T-070: Workspace background",
+        "T-071: Settings/Vault background continuity",
+        "T-072: Root background removed",
+        "T-073: Emergency static background",
+        "T-112: Release product and hosted tests",
+        "T-113: Release product and full Simulator suite",
+        "T-114: Adaptive Release qualification"
+      ]
+    },
+    {
+      "changedFiles": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift",
+        "README.md",
+        "docs/superpowers/plans/2026-06-26-phase4-messages.md",
+        "docs/superpowers/plans/2026-06-27-phase4-file-based-sharing.md"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/FullRegression.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-023"
+      ],
+      "id": "RSA-011",
+      "implementationBindings": {
+        "Correct source comments and related docs to canonical package policy": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift",
+          "README.md",
+          "docs/superpowers/plans/2026-06-26-phase4-messages.md",
+          "docs/superpowers/plans/2026-06-27-phase4-file-based-sharing.md"
+        ]
+      },
+      "originalStatus": "open",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "ContentView.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift"
+        ],
+        "README/Wiki": [
+          "README.md"
+        ],
+        "sharing docs": [
+          "docs/superpowers/plans/2026-06-26-phase4-messages.md",
+          "docs/superpowers/plans/2026-06-27-phase4-file-based-sharing.md"
+        ]
+      },
+      "testBindings": {
+        "Documentation alignment/source phrase guard": [
+          "T-083"
+        ]
+      },
+      "tests": [
+        "T-083: Canonical follow-up transport wording"
+      ]
+    },
+    {
+      "changedFiles": [
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeArtifactSelectionContracts.swift"
+      ],
+      "evidence": [
+        "docs/verification/remediation-v1/CompatibilityValidation.json",
+        "docs/verification/remediation-v1/FullRegression.json"
+      ],
+      "finalStatus": "CLOSED",
+      "gateIDs": [
+        "RC-024",
+        "RC-032"
+      ],
+      "id": "RSA-012",
+      "implementationBindings": {
+        "Add CoreFoundation import or portable strict numeric decoder": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeArtifactSelectionContracts.swift"
+        ],
+        "Preserve canonical/legacy validation": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeArtifactSelectionContracts.swift"
+        ]
+      },
+      "originalStatus": "open",
+      "removalBindings": {},
+      "removedFiles": [],
+      "sourceAreaBindings": {
+        "RuntimeArtifactSelectionContracts.swift": [
+          "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeArtifactSelectionContracts.swift"
+        ]
+      },
+      "testBindings": {
+        "Boolean/fractional rejection": [
+          "T-084"
+        ],
+        "Canonical write and legacy read": [
+          "T-111"
+        ],
+        "Portable compile": [
+          "T-085"
+        ]
+      },
+      "tests": [
+        "T-084: Strict schema numeric type",
+        "T-085: Neutral contract compile",
+        "T-111: Full Swift package suite"
+      ]
+    }
+  ],
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "version": "1.0.39"
+}

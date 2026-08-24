@@ -37,6 +37,7 @@
   "publishedEndpoints": [
     "theme.codex.select",
     "theme.diagnostics.summary",
+    "theme.provider.descriptor",
     "theme.resource.resolve",
     "theme.state",
     "theme.state.current"

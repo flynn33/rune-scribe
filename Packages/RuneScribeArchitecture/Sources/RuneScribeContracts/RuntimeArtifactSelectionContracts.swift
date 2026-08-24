@@ -16,6 +16,11 @@ public struct RuntimeSelectedCodexPreference: Equatable, Sendable {
 public enum RuntimeSelectedCodexPreferenceCodec {
     private static let rootKeys: Set<String> = ["schemaVersion", "codexID"]
 
+    private struct Document: Decodable {
+        let schemaVersion: Int
+        let codexID: String
+    }
+
     public static func encode(
         _ preference: RuntimeSelectedCodexPreference
     ) throws -> RuntimeSettingText {
@@ -70,18 +75,15 @@ public enum RuntimeSelectedCodexPreferenceCodec {
         guard Set(root.keys) == rootKeys else {
             throw RuntimeArtifactSelectionContractError.unexpectedFields
         }
-        guard let schemaNumber = root["schemaVersion"] as? NSNumber,
-              CFGetTypeID(schemaNumber) != CFBooleanGetTypeID(),
-              schemaNumber.doubleValue.rounded() == schemaNumber.doubleValue
+        guard let document = try? JSONDecoder().decode(Document.self, from: data)
         else {
             throw RuntimeArtifactSelectionContractError.malformed
         }
-        let version = schemaNumber.intValue
+        let version = document.schemaVersion
         guard version == RuntimeSelectedCodexPreference.currentSchemaVersion else {
             throw RuntimeArtifactSelectionContractError.unsupportedVersion(version)
         }
-        guard let rawCodexID = root["codexID"] as? String,
-              let codexID = CodexID(rawValue: rawCodexID)
+        guard let codexID = CodexID(rawValue: document.codexID)
         else {
             throw RuntimeArtifactSelectionContractError.invalidCodexID
         }
@@ -102,8 +104,18 @@ public enum RuntimeArtifactSelectionKind: String, Codable, CaseIterable, Sendabl
         }
     }
 
+    fileprivate var permitsExplicitNone: Bool {
+        self == .seal || self == .frame
+    }
+
     fileprivate func accepts(_ artifactID: ArtifactID) -> Bool {
         artifactID.rawValue.hasPrefix("\(rawValue).")
+            && artifactID.rawValue != "\(rawValue).none"
+    }
+
+    fileprivate func accepts(_ artifactID: ArtifactID?) -> Bool {
+        guard let artifactID else { return permitsExplicitNone }
+        return accepts(artifactID)
     }
 }
 
@@ -123,11 +135,11 @@ public enum RuntimeArtifactSelectionContractError: Error, Equatable, Sendable {
 
 public struct RuntimeCodexArtifactSelection: Equatable, Hashable, Sendable {
     public let codexID: CodexID
-    public let artifactID: ArtifactID
+    public let artifactID: ArtifactID?
 
     public init(
         codexID: CodexID,
-        artifactID: ArtifactID,
+        artifactID: ArtifactID?,
         kind: RuntimeArtifactSelectionKind
     ) throws {
         guard codexID.rawValue.hasPrefix("codex.") else {
@@ -141,8 +153,13 @@ public struct RuntimeCodexArtifactSelection: Equatable, Hashable, Sendable {
     }
 }
 
+public enum RuntimeArtifactSelectionPreference: Equatable, Hashable, Sendable {
+    case artifact(ArtifactID)
+    case none
+}
+
 public struct RuntimeCodexArtifactSelectionMap: Equatable, Sendable {
-    public static let currentSchemaVersion = 1
+    public static let currentSchemaVersion = 2
     public static let maximumSelectionCount = 16
     public static let maximumEncodedUTF8Count = 2_048
 
@@ -174,8 +191,21 @@ public struct RuntimeCodexArtifactSelectionMap: Equatable, Sendable {
         selections.first { $0.codexID == codexID }?.artifactID
     }
 
+    /// Distinguishes an explicit optional `None` from an absent preference.
+    public func storedPreference(
+        for codexID: CodexID
+    ) -> RuntimeArtifactSelectionPreference? {
+        guard let selection = selections.first(where: { $0.codexID == codexID }) else {
+            return nil
+        }
+        guard let artifactID = selection.artifactID else {
+            return RuntimeArtifactSelectionPreference.none
+        }
+        return .artifact(artifactID)
+    }
+
     public func setting(
-        _ artifactID: ArtifactID,
+        _ artifactID: ArtifactID?,
         for codexID: CodexID
     ) throws -> RuntimeCodexArtifactSelectionMap {
         let replacement = try RuntimeCodexArtifactSelection(
@@ -196,8 +226,15 @@ public struct RuntimeCodexArtifactSelectionMap: Equatable, Sendable {
         availableArtifactIDs: Set<ArtifactID>,
         fallbackArtifactID: ArtifactID? = nil
     ) -> ArtifactID? {
-        if let selected = self[codexID], availableArtifactIDs.contains(selected) {
-            return selected
+        if let preference = storedPreference(for: codexID) {
+            switch preference {
+            case .artifact(let selected) where availableArtifactIDs.contains(selected):
+                return selected
+            case .none:
+                return nil
+            case .artifact:
+                break
+            }
         }
         if let fallbackArtifactID, availableArtifactIDs.contains(fallbackArtifactID) {
             return fallbackArtifactID
@@ -208,6 +245,7 @@ public struct RuntimeCodexArtifactSelectionMap: Equatable, Sendable {
 
 public enum RuntimeArtifactSelectionEncoding: Equatable, Sendable {
     case current
+    case legacySchemaVersion(Int)
     case legacyUnversioned
 }
 
@@ -228,15 +266,29 @@ public enum RuntimeArtifactSelectionCodec {
     private static let rootKeys: Set<String> = ["schemaVersion", "kind", "selections"]
     private static let selectionKeys: Set<String> = ["codexID", "artifactID"]
 
+    private struct Document: Decodable {
+        let schemaVersion: Int
+        let kind: String
+        let selections: [SelectionDocument]
+    }
+
+    private struct SelectionDocument: Decodable {
+        let codexID: String
+        let artifactID: String?
+    }
+
     public static func encode(
         _ value: RuntimeCodexArtifactSelectionMap
     ) throws -> RuntimeSettingText {
+        let encodedSelections: [[String: Any]] = value.selections.map { selection in
+            var encoded: [String: Any] = ["codexID": selection.codexID.rawValue]
+            encoded["artifactID"] = selection.artifactID?.rawValue ?? NSNull()
+            return encoded
+        }
         let object: [String: Any] = [
             "schemaVersion": RuntimeCodexArtifactSelectionMap.currentSchemaVersion,
             "kind": value.kind.rawValue,
-            "selections": value.selections.map {
-                ["artifactID": $0.artifactID.rawValue, "codexID": $0.codexID.rawValue]
-            },
+            "selections": encodedSelections,
         ]
         let data = try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
         guard data.count <= RuntimeCodexArtifactSelectionMap.maximumEncodedUTF8Count,
@@ -250,7 +302,7 @@ public enum RuntimeArtifactSelectionCodec {
         return text
     }
 
-    /// Reads the current schema or the one supported unversioned migration form.
+    /// Reads schema v2 plus the supported v1 and unversioned migration forms.
     public static func decodeForRead(
         _ text: RuntimeSettingText,
         expectedKind: RuntimeArtifactSelectionKind
@@ -263,9 +315,13 @@ public enum RuntimeArtifactSelectionCodec {
             )
         }
         if text.rawValue.first == "{" {
+            let decoded = try decodeVersionedValue(text, expectedKind: expectedKind)
             return RuntimeArtifactSelectionDecodeResult(
-                value: try decodeCurrentValue(text, expectedKind: expectedKind),
-                encoding: .current
+                value: decoded.value,
+                encoding: decoded.schemaVersion
+                    == RuntimeCodexArtifactSelectionMap.currentSchemaVersion
+                    ? .current
+                    : .legacySchemaVersion(decoded.schemaVersion)
             )
         }
         return RuntimeArtifactSelectionDecodeResult(
@@ -279,17 +335,19 @@ public enum RuntimeArtifactSelectionCodec {
         _ text: RuntimeSettingText,
         expectedKind: RuntimeArtifactSelectionKind
     ) throws -> RuntimeCodexArtifactSelectionMap {
-        let value = try decodeCurrentValue(text, expectedKind: expectedKind)
-        guard try encode(value) == text else {
+        let decoded = try decodeVersionedValue(text, expectedKind: expectedKind)
+        guard decoded.schemaVersion == RuntimeCodexArtifactSelectionMap.currentSchemaVersion,
+              try encode(decoded.value) == text
+        else {
             throw RuntimeArtifactSelectionContractError.nonCanonical
         }
-        return value
+        return decoded.value
     }
 
-    private static func decodeCurrentValue(
+    private static func decodeVersionedValue(
         _ text: RuntimeSettingText,
         expectedKind: RuntimeArtifactSelectionKind
-    ) throws -> RuntimeCodexArtifactSelectionMap {
+    ) throws -> (value: RuntimeCodexArtifactSelectionMap, schemaVersion: Int) {
         guard let data = text.rawValue.data(using: .utf8),
               let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
         else {
@@ -298,41 +356,57 @@ public enum RuntimeArtifactSelectionCodec {
         guard Set(root.keys) == rootKeys else {
             throw RuntimeArtifactSelectionContractError.unexpectedFields
         }
-        guard let schemaNumber = root["schemaVersion"] as? NSNumber,
-              CFGetTypeID(schemaNumber) != CFBooleanGetTypeID(),
-              schemaNumber.doubleValue.rounded() == schemaNumber.doubleValue
-        else {
-            throw RuntimeArtifactSelectionContractError.malformed
-        }
-        let schemaVersion = schemaNumber.intValue
-        guard schemaVersion == RuntimeCodexArtifactSelectionMap.currentSchemaVersion else {
-            throw RuntimeArtifactSelectionContractError.unsupportedVersion(schemaVersion)
-        }
-        guard let kindRawValue = root["kind"] as? String,
-              let kind = RuntimeArtifactSelectionKind(rawValue: kindRawValue),
-              kind == expectedKind,
-              let rawSelections = root["selections"] as? [[String: Any]]
+        guard let rawSelections = root["selections"] as? [[String: Any]]
         else {
             throw RuntimeArtifactSelectionContractError.kindMismatch
         }
-        guard rawSelections.count <= RuntimeCodexArtifactSelectionMap.maximumSelectionCount else {
+        guard rawSelections.allSatisfy({ Set($0.keys) == selectionKeys }) else {
+            throw RuntimeArtifactSelectionContractError.unexpectedFields
+        }
+        guard let document = try? JSONDecoder().decode(Document.self, from: data) else {
+            throw RuntimeArtifactSelectionContractError.malformed
+        }
+        let schemaVersion = document.schemaVersion
+        guard schemaVersion == 1
+                || schemaVersion == RuntimeCodexArtifactSelectionMap.currentSchemaVersion
+        else {
+            throw RuntimeArtifactSelectionContractError.unsupportedVersion(schemaVersion)
+        }
+        guard let kind = RuntimeArtifactSelectionKind(rawValue: document.kind),
+              kind == expectedKind,
+              rawSelections.count == document.selections.count
+        else {
+            throw RuntimeArtifactSelectionContractError.kindMismatch
+        }
+        guard document.selections.count
+                <= RuntimeCodexArtifactSelectionMap.maximumSelectionCount
+        else {
             throw RuntimeArtifactSelectionContractError.tooManySelections(
                 maximum: RuntimeCodexArtifactSelectionMap.maximumSelectionCount
             )
         }
-        let selections = try rawSelections.map { raw -> RuntimeCodexArtifactSelection in
-            guard Set(raw.keys) == selectionKeys else {
-                throw RuntimeArtifactSelectionContractError.unexpectedFields
-            }
-            guard let codexRawValue = raw["codexID"] as? String,
-                  let codexID = CodexID(rawValue: codexRawValue)
+        let selections = try document.selections.map { raw -> RuntimeCodexArtifactSelection in
+            guard let codexID = CodexID(rawValue: raw.codexID)
             else {
                 throw RuntimeArtifactSelectionContractError.invalidCodexID
             }
-            guard let artifactRawValue = raw["artifactID"] as? String,
-                  let artifactID = ArtifactID(rawValue: artifactRawValue)
-            else {
-                throw RuntimeArtifactSelectionContractError.invalidArtifactID
+            let artifactID: ArtifactID?
+            if let artifactRawValue = raw.artifactID {
+                if schemaVersion == 1,
+                   expectedKind.permitsExplicitNone,
+                   artifactRawValue == "\(expectedKind.rawValue).none" {
+                    artifactID = nil
+                } else {
+                    guard let decodedArtifactID = ArtifactID(rawValue: artifactRawValue) else {
+                        throw RuntimeArtifactSelectionContractError.invalidArtifactID
+                    }
+                    artifactID = decodedArtifactID
+                }
+            } else {
+                guard schemaVersion == RuntimeCodexArtifactSelectionMap.currentSchemaVersion else {
+                    throw RuntimeArtifactSelectionContractError.invalidArtifactID
+                }
+                artifactID = nil
             }
             return try RuntimeCodexArtifactSelection(
                 codexID: codexID,
@@ -340,7 +414,10 @@ public enum RuntimeArtifactSelectionCodec {
                 kind: expectedKind
             )
         }
-        return try RuntimeCodexArtifactSelectionMap(kind: expectedKind, selections: selections)
+        return (
+            try RuntimeCodexArtifactSelectionMap(kind: expectedKind, selections: selections),
+            schemaVersion
+        )
     }
 
     private static func decodeLegacyValue(
@@ -357,10 +434,14 @@ public enum RuntimeArtifactSelectionCodec {
             let parts = rawEntry.split(separator: "=", omittingEmptySubsequences: false)
             guard parts.count == 2,
                   let codexID = CodexID(rawValue: String(parts[0])),
-                  let artifactID = ArtifactID(rawValue: String(parts[1]))
+                  let decodedArtifactID = ArtifactID(rawValue: String(parts[1]))
             else {
                 throw RuntimeArtifactSelectionContractError.malformed
             }
+            let artifactID: ArtifactID? = expectedKind.permitsExplicitNone
+                && decodedArtifactID.rawValue == "\(expectedKind.rawValue).none"
+                ? nil
+                : decodedArtifactID
             return try RuntimeCodexArtifactSelection(
                 codexID: codexID,
                 artifactID: artifactID,

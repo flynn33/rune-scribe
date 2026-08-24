@@ -350,6 +350,7 @@ public struct RuntimePolicy: Sendable {
                     RuneScribeRuntimeSettings.selectedRelicByCodex,
                     RuneScribeRuntimeSettings.selectedSealByCodex,
                     RuneScribeRuntimeSettings.selectedFrameByCodex,
+                    RuneScribeRuntimeSettings.effectsPreference,
                     RuneScribeRuntimeSettings.contactsImportPrompted,
                     RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds,
                 ],

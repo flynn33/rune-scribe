@@ -1,0 +1,383 @@
+{
+  "allFindingsMustClose": true,
+  "findings": [
+    {
+      "gates": [
+        "RC-005",
+        "RC-006",
+        "RC-007",
+        "RC-033",
+        "RC-034",
+        "RC-035"
+      ],
+      "id": "RSA-001",
+      "implementation": [
+        "Retain/merge current provider-neutral image integration",
+        "Prove visual resources in workspace, settled result, Settings, Vault, browsers and Share Builder",
+        "Supersede old b7c55ff evidence"
+      ],
+      "phases": [
+        "R1",
+        "R9"
+      ],
+      "primarySourceAreas": [
+        "RuneScribeUIModule/Views/ThemeVisualComponents.swift",
+        "RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift",
+        "RuneScribeUIModule/Views/ContentView.swift",
+        "RuneScribeUIModule/Views/SettingsView.swift",
+        "RuneScribeUIModule/Views/VaultProgressView.swift"
+      ],
+      "severity": "critical",
+      "tests": [
+        "Provider-neutral visual integration",
+        "Simulator screenshot tests",
+        "Missing-image normal-path mutation"
+      ],
+      "title": "Original Norse visual implementation was incomplete"
+    },
+    {
+      "gates": [
+        "RC-008",
+        "RC-009",
+        "RC-010",
+        "RC-011",
+        "RC-012",
+        "RC-013",
+        "RC-036",
+        "RC-037"
+      ],
+      "id": "RSA-002",
+      "implementation": [
+        "Add one provider-neutral Share Builder for message and cipher invitation purposes",
+        "Add live preview, fixed security summary, save/reset defaults and runtime Share launch",
+        "Preserve Quick Share"
+      ],
+      "phases": [
+        "R2",
+        "R9"
+      ],
+      "primarySourceAreas": [
+        "RuneScribeContracts/ShareBuilderContracts.swift",
+        "RuneScribeRuntimeCore runtime share gateway",
+        "RuneScribeUIModule/Sharing",
+        "RuneScribeUIModule/Presentation/RuneScribeUISession+ShareBuilder.swift",
+        "ContentView.swift",
+        "CipherLibraryView.swift"
+      ],
+      "severity": "high",
+      "tests": [
+        "Message first/established builder",
+        "Cipher invitation builder",
+        "Locked/unavailable selections",
+        "Cancel/idempotency",
+        "Accessibility and adaptive layouts"
+      ],
+      "title": "Share Builder missing"
+    },
+    {
+      "gates": [
+        "RC-009",
+        "RC-014",
+        "RC-015",
+        "RC-025"
+      ],
+      "id": "RSA-003",
+      "implementation": [
+        "Change primary Share to typed file Artifact",
+        "Keep link and QR as explicit fallbacks",
+        "Avoid eager link preparation where not needed"
+      ],
+      "phases": [
+        "R3",
+        "R9"
+      ],
+      "primarySourceAreas": [
+        "RuneScribeUIModule/Views/CipherLibraryView.swift",
+        "RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift",
+        "Core prepare cipher share path"
+      ],
+      "severity": "high",
+      "tests": [
+        "Primary representation file assertion",
+        "Typed package/preview validation",
+        "Link/QR fallback compatibility",
+        "Source mutation back to link fails"
+      ],
+      "title": "Cipher Library primary Share uses link"
+    },
+    {
+      "gates": [
+        "RC-016",
+        "RC-017",
+        "RC-018",
+        "RC-026"
+      ],
+      "id": "RSA-004",
+      "implementation": [
+        "Add structured required-theme resource failure DTO",
+        "Propagate through runtime diagnostics",
+        "Show root warning",
+        "Reject invalid Base resources in Release qualification while preserving emergency decode"
+      ],
+      "phases": [
+        "R4",
+        "R9"
+      ],
+      "primarySourceAreas": [
+        "RuneScribeNorseThemeModule/NorseThemeModule.swift",
+        "NorseBaseThemeResources.swift",
+        "RuneScribeRuntimeCore diagnostics",
+        "ThemeCoordinatorService.swift",
+        "RuneScribeUISession.swift",
+        "RootView.swift",
+        "check-shipping-products.sh"
+      ],
+      "severity": "high",
+      "tests": [
+        "Missing/digest/dimension mutations",
+        "Emergency decode",
+        "Root banner",
+        "Optional provider isolation"
+      ],
+      "title": "Required Norse resource failure swallowed"
+    },
+    {
+      "gates": [
+        "RC-012",
+        "RC-019",
+        "RC-020",
+        "RC-036"
+      ],
+      "id": "RSA-005",
+      "implementation": [
+        "Add per-Codex Relic, Seal/None and Frame/None defaults",
+        "Add Full/Reduced/Off effects preference",
+        "Use one runtime-owned defaults rail for Settings, workspace, Quick Share and builder"
+      ],
+      "phases": [
+        "R5",
+        "R2",
+        "R9"
+      ],
+      "primarySourceAreas": [
+        "RuntimeSettingsContracts.swift",
+        "RuntimeArtifactSelectionContracts.swift",
+        "RuntimeSettingsGateway.swift",
+        "RuneScribeUISession+ThemeArtifacts.swift",
+        "SettingsView.swift"
+      ],
+      "severity": "medium",
+      "tests": [
+        "Persistence/migration",
+        "Explicit None",
+        "Reduce Motion override",
+        "Default consistency"
+      ],
+      "title": "Appearance defaults incomplete"
+    },
+    {
+      "gates": [
+        "RC-022",
+        "RC-018",
+        "RC-039"
+      ],
+      "id": "RSA-006",
+      "implementation": [
+        "Use current Production bytes as release-candidate baseline",
+        "Remove active placeholder/candidate ambiguity",
+        "Generate exact provenance/integrity records"
+      ],
+      "phases": [
+        "R7",
+        "R9"
+      ],
+      "primarySourceAreas": [
+        "RuneScribeNorseThemeModule/Resources/Production",
+        "Norse resource scripts",
+        "Norse integrity manifests"
+      ],
+      "severity": "medium",
+      "tests": [
+        "Exact paths/hashes/dimensions/rights/accessibility",
+        "Deterministic regeneration",
+        "Built-product match"
+      ],
+      "title": "Norse assets lack unequivocal production sign-off"
+    },
+    {
+      "gates": [
+        "RC-002",
+        "RC-041"
+      ],
+      "id": "RSA-007",
+      "implementation": [
+        "Preserve v1.0 bytes",
+        "Add v1.1 amendment",
+        "Teach alignment tooling accepted variance statuses"
+      ],
+      "phases": [
+        "R0"
+      ],
+      "primarySourceAreas": [
+        "docs/product-roadmap",
+        "docs/architecture/RoadmapAlignment.md",
+        "roadmap-alignment.json",
+        "check-roadmap-alignment.sh"
+      ],
+      "severity": "medium",
+      "tests": [
+        "Original hash unchanged",
+        "Amendment indexed",
+        "No complete-as-written mislabel"
+      ],
+      "title": "Roadmap requirements reclassified without versioned amendment"
+    },
+    {
+      "gates": [
+        "RC-004",
+        "RC-005",
+        "RC-029",
+        "RC-041"
+      ],
+      "id": "RSA-008",
+      "implementation": [
+        "Generate deterministic source manifest",
+        "Bind all evidence",
+        "Add no-Git verification path",
+        "Refresh alignment ledger"
+      ],
+      "phases": [
+        "R0",
+        "R9"
+      ],
+      "primarySourceAreas": [
+        "scripts/generate-source-manifest.py",
+        "check-roadmap-completion.py",
+        "check-documentation-alignment.py",
+        "docs/verification/remediation-v1"
+      ],
+      "severity": "medium",
+      "tests": [
+        "Tamper detection",
+        "Wrong evidence hash",
+        "Copied no-Git tree passes valid verification"
+      ],
+      "title": "Evidence not self-verifying without Git"
+    },
+    {
+      "gates": [
+        "RC-027",
+        "RC-033",
+        "RC-034",
+        "RC-035",
+        "RC-040",
+        "RC-041",
+        "RC-042"
+      ],
+      "id": "RSA-009",
+      "implementation": [
+        "Define release-candidate boundary",
+        "Complete source/simulator qualification",
+        "Produce owner-test artifacts",
+        "Remove public shipment overclaim"
+      ],
+      "phases": [
+        "R0",
+        "R9"
+      ],
+      "primarySourceAreas": [
+        "Completion docs",
+        "CHANGELOG.md",
+        "APP_STORE_SUBMISSION.md",
+        "OwnerTestCandidateHandoff"
+      ],
+      "severity": "medium",
+      "tests": [
+        "Report schema/status",
+        "No external account/hardware gate",
+        "No distribution action evidence"
+      ],
+      "title": "Wave 6/public release overclaim"
+    },
+    {
+      "gates": [
+        "RC-021",
+        "RC-033",
+        "RC-034",
+        "RC-035"
+      ],
+      "id": "RSA-010",
+      "implementation": [
+        "Mount runtime Theme background in root ZStack",
+        "Use header scrim/decoration",
+        "Define safe area/clipping and fallback"
+      ],
+      "phases": [
+        "R6",
+        "R9"
+      ],
+      "primarySourceAreas": [
+        "RootView.swift",
+        "RuneTheme.swift",
+        "SemanticThemePresentation.swift",
+        "RuntimeApplicationResourcePresentation.swift"
+      ],
+      "severity": "medium",
+      "tests": [
+        "Root background source guard",
+        "Norse/optional screenshots",
+        "Emergency/Reduce Motion states"
+      ],
+      "title": "Theme background not mounted at root"
+    },
+    {
+      "gates": [
+        "RC-023"
+      ],
+      "id": "RSA-011",
+      "implementation": [
+        "Correct source comments and related docs to canonical package policy"
+      ],
+      "phases": [
+        "R8"
+      ],
+      "primarySourceAreas": [
+        "ContentView.swift",
+        "sharing docs",
+        "README/Wiki"
+      ],
+      "severity": "low",
+      "tests": [
+        "Documentation alignment/source phrase guard"
+      ],
+      "title": "Stale runes-only follow-up comment"
+    },
+    {
+      "gates": [
+        "RC-024",
+        "RC-032"
+      ],
+      "id": "RSA-012",
+      "implementation": [
+        "Add CoreFoundation import or portable strict numeric decoder",
+        "Preserve canonical/legacy validation"
+      ],
+      "phases": [
+        "R8",
+        "R9"
+      ],
+      "primarySourceAreas": [
+        "RuntimeArtifactSelectionContracts.swift"
+      ],
+      "severity": "low",
+      "tests": [
+        "Boolean/fractional rejection",
+        "Portable compile",
+        "Canonical write and legacy read"
+      ],
+      "title": "Neutral contracts CoreFoundation import/decoding defect"
+    }
+  ],
+  "schemaVersion": "1.0",
+  "sourceAudit": "Rune-Scribe-Roadmap-Audit-Findings-v1.0.json"
+}

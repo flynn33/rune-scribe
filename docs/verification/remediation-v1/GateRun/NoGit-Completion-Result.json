@@ -1,0 +1,12 @@
+{
+  "build": "39",
+  "command": "python3 scripts/check-remediation-completion.py --no-git-child --expected-source-hash 47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "expectedOutput": "PASS: 42 required gates validate against one source tree (copied tree without Git ancestry)\n",
+  "expectedOutputSHA256": "50c9a2da227d88d4c650237375c4ea68e7019ebcce2a128a718ec5463ace6428",
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "testID": "T-006",
+  "version": "1.0.39"
+}

@@ -11,13 +11,14 @@ The [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md) is the sole cu
 | `docs/architecture/decisions/ADR-RS-001-module-packaging-and-target-graph.md` | Superseded and replaced by the permanent app-owned dependency policy. |
 | `docs/verification/roadmap-alignment.json` | Current machine-readable roadmap; the former external-release gate is superseded. |
 | `docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md` | Hash-locked historical input (`7c4c460815064fca87a6769766fb875f267eb692795bbab2635eec5d55d8f88d`); authority is limited to nonconflicting product requirements and compatibility anchors. Every framework-ownership or dependency directive is superseded. |
-| `docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md` | Hash-locked historical input with a current publication-boundary banner (`1c6e3cf79e6cd60d105c848a5fab65418daac799ae94db0d0c61504fc2c5679a`); authority is limited to nonconflicting product sequencing and compatibility evidence. Every external-framework prerequisite, upstream work package, hardware gate, and dependency directive is superseded. |
+| `docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md` | Immutable hash-locked historical input (`884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4`); authority is limited to nonconflicting product sequencing and compatibility evidence. Every external-framework prerequisite, upstream work package, hardware gate, and dependency directive is superseded. |
+| `docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md` | Controlling remediation amendment (`2b6ce54c50538419d324692ebfeec1bb29de46add9f354368d39169d6f74ed40`); records the app-owned architecture, Simulator, external-account, release-candidate, and nonshipment variances without rewriting either v1.0 authority. |
 
-The historical planning bodies remain preserved. The current-app delta roadmap adds
-only its explicit publication-boundary banner; the recorded hashes pin both complete
-files. No statement inside either historical body constitutes current permission for an
-external dependency, hardware gate, or override of the controlling policy. Any further
-content change invalidates this exception and requires a fresh conflict audit.
+The historical planning bodies remain byte-preserved at their canonical hashes. Their
+current disposition is recorded only in the separate amendment and current indexes.
+No statement inside either historical body constitutes current permission for an
+external dependency, hardware gate, or override of the controlling policy. Any content
+change to a locked v1.0 file requires a fresh conflict audit.
 
 ## Historical architecture and compliance evidence
 

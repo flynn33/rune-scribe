@@ -11,10 +11,116 @@ import RuneScribeThemeGloamthornModule
 import RuneScribeThemeMoonleafModule
 import RuneScribeThemeSunspireModule
 import RuneScribeThemeWildwoodModule
-import RuneScribeUIModule
+@testable import RuneScribeUIModule
 import XCTest
 
 final class AllElvenProviderIntegrationTests: XCTestCase {
+    func testSelectedMoonleafCorruptionKeepsCoreUINorseUsableWithoutBaseWarning()
+        async throws
+    {
+        let stateStore = InMemoryModuleStateStore(
+            now: { Date(timeIntervalSince1970: 1_776_211_200) }
+        )
+        let providers = allElvenProviders()
+        let entitlements = try entitlementSnapshot(for: providers)
+
+        let healthyCapture = AllElvenUICapture()
+        let healthyRuntime = try await makeRuntime(
+            stateStore: stateStore,
+            capture: healthyCapture
+        )
+        do {
+            try await healthyRuntime.start()
+            let clients = try await healthyCapture.waitForClients()
+            try await healthyRuntime.reconcileEntitlements(entitlements)
+            _ = try await waitForSnapshot(from: clients.theme) { snapshot in
+                providerSummary(
+                    in: snapshot,
+                    codexID: RuneScribeThemeMoonleafModuleBootstrap.codexID
+                )?.isSelectable == true
+            }
+            let selected = try await clients.theme.selectCodex(
+                SelectThemeCodexCommand(
+                    codexID: RuneScribeThemeMoonleafModuleBootstrap.codexID
+                )
+            )
+            XCTAssertEqual(
+                selected.effectiveCodexID,
+                RuneScribeThemeMoonleafModuleBootstrap.codexID
+            )
+        } catch {
+            await healthyRuntime.stop()
+            throw error
+        }
+        await healthyRuntime.stop()
+
+        let corruptedResource = try XCTUnwrap(
+            MoonleafThemeBundledResourceCatalog.all.first { resource in
+                resource != MoonleafThemeBundledResourceCatalog.moduleManifest
+                    && resource != MoonleafThemeBundledResourceCatalog.integrityManifest
+            }
+        )
+        let isolatedCapture = AllElvenUICapture()
+        let isolatedRuntime = try await makeRuntime(
+            stateStore: stateStore,
+            capture: isolatedCapture,
+            corruptResource: corruptedResource
+        )
+        do {
+            try await isolatedRuntime.reconcileEntitlements(entitlements)
+            try await isolatedRuntime.start()
+            let clients = try await isolatedCapture.waitForClients()
+            let isolated = try await waitForSnapshot(from: clients.theme) { snapshot in
+                snapshot.preferredCodexID
+                    == RuneScribeThemeMoonleafModuleBootstrap.codexID
+                    && snapshot.effectiveCodexID == RuneScribeCodexIDs.norse
+                    && providerSummary(
+                        in: snapshot,
+                        codexID: RuneScribeThemeMoonleafModuleBootstrap.codexID
+                    )?.state == .unavailable
+            }
+
+            XCTAssertEqual(isolated.fallbackReason, .unavailable)
+            XCTAssertFalse(isolated.isEmergencyPresentation)
+            XCTAssertEqual(isolated.requiredBaseResourceFailures, [])
+            XCTAssertFalse(
+                RootEmergencyThemeWarningPolicy.shouldShow(
+                    isEmergencyPresentation: isolated.isEmergencyPresentation,
+                    isDismissed: false,
+                    showSplash: false,
+                    isLocked: false,
+                    hasPendingImport: false,
+                    hasPendingMessage: false,
+                    hasActiveReveal: false
+                ),
+                "Optional provider corruption must not show the required-Base warning."
+            )
+            XCTAssertEqual(
+                providerSummary(
+                    in: isolated,
+                    codexID: RuneScribeThemeMoonleafModuleBootstrap.codexID
+                )?.isSelectable,
+                false
+            )
+            try await assertCoreRoundTrip(
+                using: clients.application,
+                message: "Optional Moonleaf corruption remains isolated"
+            )
+
+            let running = await isolatedRuntime.snapshot()
+            XCTAssertEqual(running.status, .running)
+            assertRequiredModulesAreActive(running)
+            XCTAssertEqual(
+                running.moduleStates[RuneScribeThemeMoonleafModuleBootstrap.moduleID],
+                .failed
+            )
+        } catch {
+            await isolatedRuntime.stop()
+            throw error
+        }
+        await isolatedRuntime.stop()
+    }
+
     func testAllRealProvidersActivateResolveAndIsolateCorruptionAndCollision()
         async throws
     {

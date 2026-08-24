@@ -1,0 +1,74 @@
+{
+  "artifacts": [
+    {
+      "kind": "structured-suite-result",
+      "path": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "sha256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3"
+    },
+    {
+      "kind": "raw-test-log",
+      "path": "docs/verification/remediation-v1/GateRun/final-qualification.log",
+      "sha256": "b8a6a895be57e082c3964031da81e379830760b5869b4912a92e6b58e2b19126"
+    },
+    {
+      "kind": "test-evidence",
+      "path": "docs/verification/remediation-v1/Screenshots/iphone-cipher-share.png",
+      "sha256": "c6ef839401e2e4f35960001d7a50ab74a44edd379a2ee81243c00e7f0674e2f8"
+    }
+  ],
+  "build": "39",
+  "claim": "source mutation test",
+  "executions": [
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "iphone-cipher-share.png",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-040"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "CipherInvitationValidation.json",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-041"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "CipherInvitationValidation.json",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-043"
+    },
+    {
+      "command": "python3 scripts/test-remediation-mutations.py",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "NegativeMutations.json",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-047"
+    }
+  ],
+  "gateIDs": [
+    "RC-014"
+  ],
+  "schemaVersion": "1.0",
+  "semanticMarkers": [],
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "testIDs": [
+    "T-040",
+    "T-041",
+    "T-043",
+    "T-047"
+  ],
+  "version": "1.0.39"
+}

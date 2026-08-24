@@ -1,10 +1,12 @@
 import Accessibility
 import RuneScribeContracts
+import RuneScribeUIRuntime
 import SwiftUI
 
 struct UnlockRevealView: View {
     @EnvironmentObject private var session: RuneScribeUISession
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.runtimeAccessibilityPreferences) private var accessibilityPreferences
 
     let reveal: ProgressionRevealSummaryDTO
 
@@ -32,6 +34,7 @@ struct UnlockRevealView: View {
                 if let newPlan = await session.revealPresentationDidStart(
                     revealID: reveal.revealID,
                     reduceMotion: reduceMotion
+                        || accessibilityPreferences.forcesReduceMotion
                 ) {
                     plan = newPlan
                     present(using: newPlan)

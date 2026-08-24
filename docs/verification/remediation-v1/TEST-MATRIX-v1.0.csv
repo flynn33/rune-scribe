@@ -1,0 +1,88 @@
+testID,area,platform,kind,scenario,precondition,action,expectedResult,requiredEvidence,gateIDs
+T-001,Baseline,All,static,Clean or isolated remediation workspace,Repository available,Apply worktree protocol,Unrelated work is untouched and baseline recorded,Baseline.json,RC-001
+T-002,Governance,All,static,Original roadmap immutability,Original roadmap hash known,Run amendment/alignment check,Original hash unchanged; v1.1 separate and indexed,roadmap log,RC-002
+T-003,Forsetti,All,static,No external Forsetti dependency,Final source,Run architecture guard,No remote/path/binary/vendored Forsetti dependency,architecture log,RC-003
+T-004,Source manifest,All,mutation,Shipping file tamper,Valid final manifest,Modify one byte in isolated copy and verify,Manifest validation fails and identifies path,SourceManifestValidation.json,RC-004
+T-005,Evidence,All,mutation,Wrong source manifest in evidence,Valid evidence record,Replace hash in isolated copy,Completion validator fails,NegativeMutations.json,RC-005
+T-006,Evidence,All,static,No-Git verification,Copy final source without .git,Run completion checks,Checks pass using source manifest without claiming ancestry,SourceManifestValidation.json,RC-004;RC-005
+T-010,Theme visuals,iPhone Simulator,ui,Norse workspace visual integration,Seeded Norse selection,Launch workspace,Relic/Seal/Frame controls display runtime artwork and labels,iphone-norse-workspace.png,RC-006
+T-011,Theme visuals,iPhone Simulator,ui,Norse settled Artifact,Encode deterministic fixture,Complete encode animation,Settled result shows composed Relic/Seal/Frame and readable runes,iphone-norse-result.png,RC-006
+T-012,Theme visuals,iPhone Simulator,ui,Settings Codex cards,All providers registered,Open Settings,Valid providers display image-backed Codex cards with correct states,iphone-settings-codices.png,RC-006;RC-007
+T-013,Theme visuals,iPhone Simulator,ui,Vault Codices and Artifacts,Seed ownership/locked/encountered states,Open Vault,Cards use runtime artwork and state treatments,iphone-vault.png,RC-006;RC-007
+T-014,Theme visuals,macOS,ui,Optional provider parity,Select Moonleaf or another provider,Open workspace/settings/vault,Same scaffold renders visibly distinct provider resources,macos-optional-provider.png,RC-007
+T-015,Theme visuals,All,mutation,Provider-specific UI fork detection,Final source,Insert codex-specific branch in isolated copy,Architecture/remediation guard fails,NegativeMutations.json,RC-007;RC-029
+T-020,Share Builder,iPhone Simulator,ui,First-delivery message builder,Linked cipher not delivered; encoded result exists,Tap Customize Share,"Builder opens with Key included notice, defaults and live preview",iphone-share-builder-first.png,RC-008;RC-011
+T-021,Share Builder,iPhone Simulator,ui,Established message builder,Linked cipher delivered; encoded result exists,Tap Customize Share,Builder opens with Uses your shared key notice,iphone-share-builder-established.png,RC-008;RC-011
+T-022,Share Builder,macOS,ui,Message builder keyboard flow,Encoded result exists,Open builder and navigate by keyboard,"Focus order reaches Codex, Relic, Seal, Frame, effects, reset/save/share",macos-share-builder.png,RC-008;RC-036
+T-023,Share Builder,iPad Simulator,ui,Adaptive builder layout,Encoded result exists,Open builder in portrait and landscape,No clipping; live preview and security summary remain visible,ipad-share-builder.png,RC-008;RC-035
+T-024,Share Builder,All,unit,Codex change default resolution,Builder draft on Norse; optional provider available,Select other Codex,Valid per-Codex defaults resolve and stale selections are cleared,ShareBuilderValidation.json,RC-008;RC-012
+T-025,Share Builder,All,unit,Seal None,Builder open,Select None for Seal,Preview and package omit sealID; selection remains valid,ShareBuilderValidation.json,RC-008
+T-026,Share Builder,All,unit,Frame None,Builder open,Select None for Frame,Preview and package omit frameID; selection remains valid,ShareBuilderValidation.json,RC-008
+T-027,Share Builder,All,unit,Incompatible frame removal,Frame selected for Relic A,Select incompatible Relic B,Frame resets to None/default and UI explains effective choice,ShareBuilderValidation.json,RC-008
+T-028,Share Builder,All,unit,Locked item cannot apply,Locked item visible,Attempt selection,Draft unchanged; no ownership bypass,ShareBuilderValidation.json,RC-008
+T-029,Share Builder,All,unit,Encountered item not owned,Encountered item visible,Attempt selection,Draft unchanged; state remains Encountered,ShareBuilderValidation.json,RC-008
+T-030,Share Builder,All,unit,Unavailable provider rejected,Owned provider marked invalid/unavailable,Attempt selection,Current valid Codex remains; reason exposed,ShareBuilderValidation.json,RC-008
+T-031,Share Builder,All,unit,Preview rendering failure,Core payload valid; presentation renderer throws,Refresh preview,Fallback preview/status appears; Core share can still be prepared,ShareBuilderValidation.json,RC-008;RC-026
+T-032,Share Builder,All,unit,Reset defaults,Draft differs from defaults,Tap Reset to Defaults,Draft returns to validated defaults without persistence mutation,ShareBuilderValidation.json,RC-012
+T-033,Share Builder,All,unit,Save defaults,Valid draft differs from defaults,Tap Save as Defaults,Runtime Settings persist canonical maps and effects preference,ShareBuilderValidation.json,RC-012;RC-019
+T-034,Share Builder,All,unit,Save defaults failure,Runtime Settings adapter injects failure,Tap Save as Defaults,Prior defaults remain; draft retained; clear error shown,ShareBuilderValidation.json,RC-012
+T-035,Share lifecycle,All,unit,Share completed once,Prepared artifact and simulated completion,Deliver duplicate completion callbacks,Delivery/progression occur once; handles release,ShareBuilderValidation.json,RC-013
+T-036,Share lifecycle,All,unit,Share cancelled,Prepared artifact and simulated cancel,Finish session cancelled,No delivery/progression; handles release,ShareBuilderValidation.json,RC-013
+T-037,Share lifecycle,All,unit,Presentation not completion,Share sheet presented only,Do not send completion,No progression or first-delivery transition,ShareBuilderValidation.json,RC-013
+T-038,Quick Share,All,unit,One-action defaults path,Encoded result and valid defaults,Tap Share,Canonical typed package prepared with same selection policy; no builder required,ShareBuilderValidation.json,RC-010
+T-040,Cipher invitation,iPhone Simulator,ui,Primary Library Share,Cipher exists,Tap Share on cipher card,Runtime presents typed themed .runescribe Artifact,iphone-cipher-share.png,RC-014
+T-041,Cipher invitation,All,unit,Primary representation contract,Cipher card normal Share,Inspect command,"representation is file, not link",CipherInvitationValidation.json,RC-014
+T-042,Cipher invitation,iPhone Simulator,ui,Customize cipher invitation,Cipher exists,Tap Customize Share,Builder opens with Contains shared cipher notice and live preview,iphone-share-builder-cipher.png,RC-009;RC-011
+T-043,Cipher invitation,All,unit,Typed invitation metadata,Valid selection,Prepare primary share,"Package contains core invitation, selection and valid safe preview",CipherInvitationValidation.json,RC-014
+T-044,Cipher invitation,All,unit,Link fallback,Cipher supports link,Request Copy/Share Link,Compact link remains importable and explicitly secondary,CipherInvitationValidation.json,RC-015;RC-025
+T-045,Cipher invitation,All,unit,QR fallback,Cipher supports QR,Generate and import QR payload,QR remains importable through validated intake,CipherInvitationValidation.json,RC-015;RC-025
+T-046,Cipher invitation,macOS,integration,Export distinct from Share,Cipher exists,Export file then cancel/complete,Export semantics remain distinct and no false delivery progression,CipherInvitationValidation.json,RC-015
+T-047,Cipher invitation,All,mutation,Primary reverted to link,Final source copy,Change primary representation to link,Remediation checker fails,NegativeMutations.json,RC-014;RC-029
+T-050,Base Theme failure,All,unit,Missing required resource,Norse resource adapter injects missing file,Start provider,Structured failure records stage/resource; emergency descriptor published,BaseThemeFailureValidation.json,RC-016
+T-051,Base Theme failure,All,unit,Hash mismatch,Inject altered bytes,Start provider,Expected/actual digest captured and emergency fallback activates,BaseThemeFailureValidation.json,RC-016
+T-052,Base Theme failure,All,unit,Dimension mismatch,Inject wrong image metadata,Validate provider,Structured media/dimension failure produced,BaseThemeFailureValidation.json,RC-016
+T-053,Base Theme failure,iPhone Simulator,ui,Root warning,Launch emergency Base test configuration,Unlock app/open workspace,Nonblocking accessible warning appears after critical presentations,iphone-base-failure-banner.png,RC-017
+T-054,Base Theme failure,All,integration,Decode survives emergency presentation,Valid typed/legacy message and invalid Norse resources,Import/decode,Plaintext remains available through emergency UI,BaseThemeFailureValidation.json,RC-016;RC-017;RC-025
+T-055,Base Theme failure,All,mutation,Release product missing Norse resource,Copy built product and remove required file,Run shipping check,Shipping qualification fails,NegativeMutations.json,RC-018
+T-056,Base Theme failure,All,integration,Optional provider isolation,Corrupt Moonleaf resource only,Launch/select/fallback,Core/UI/Norse operate; Moonleaf unavailable; no Base-failure banner,BaseThemeFailureValidation.json,RC-018
+T-060,Appearance,iPhone Simulator,ui,Per-Codex defaults controls,Selected available Codex,Open Appearance,"Relic, Seal/None, Frame/None, effects and preview visible",iphone-appearance-defaults.png,RC-019;RC-020
+T-061,Appearance,All,unit,Relic default persistence,Valid owned relic,Set default and reload session,Same relic resolves for Codex,AppearanceDefaultsValidation.json,RC-019
+T-062,Appearance,All,unit,Explicit Seal None,Seal selected previously,Set None and reload,None remains explicit; stale selection not resurrected,AppearanceDefaultsValidation.json,RC-019
+T-063,Appearance,All,unit,Explicit Frame None,Frame selected previously,Set None and reload,None remains explicit,AppearanceDefaultsValidation.json,RC-019
+T-064,Appearance,All,unit,Effects Full/Reduced/Off,Runtime settings available,Set each value and reload,Persisted and effective values are correct,AppearanceDefaultsValidation.json,RC-020
+T-065,Appearance,All,unit,Reduce Motion cap,Preference Full; system Reduce Motion true,Resolve effective effects,Effective behavior is Reduced/static; stored preference remains Full,AccessibilityValidation.json,RC-020;RC-036
+T-066,Appearance,All,unit,Stale default fallback,Stored artifact removed/unavailable,Load settings,Deterministic owned compatible fallback used; ownership unchanged,AppearanceDefaultsValidation.json,RC-019
+T-067,Appearance,All,static,No direct UI persistence,Final source,Scan UI/modules,No new @AppStorage/UserDefaults for defaults/effects,architecture log,RC-003;RC-019
+T-070,Root background,iPhone Simulator,ui,Workspace background,Norse selected,Launch workspace,Runtime Theme background fills root safely,iphone-norse-workspace.png,RC-021
+T-071,Root background,iPhone Simulator,ui,Settings/Vault background continuity,Optional provider selected,Open Settings and Vault,Root background contract remains; sheets use semantic surfaces,screenshots,RC-021
+T-072,Root background,All,mutation,Root background removed,Final source copy,Remove root renderer,Architecture/remediation check fails,NegativeMutations.json,RC-021;RC-029
+T-073,Root background,All,unit,Emergency static background,Base invalid or effects Off,Resolve root background,Safe static emergency background used,ThemeRootBackgroundValidation.json,RC-021
+T-080,Norse provenance,All,static,Production paths and hashes,Final resource tree,Run provenance validator,All exact bytes/paths/dimensions/rights/accessibility match,NorseProductionProvenanceValidation.json,RC-022
+T-081,Norse provenance,All,static,No active placeholder/candidate labels,Final source,Scan active manifests/tooling,No active release-candidate production record uses obsolete labels/paths,NorseProductionProvenanceValidation.json,RC-022
+T-082,Norse provenance,All,determinism,Generated resource reproducibility,Generator-managed files exist,Run generator twice,Byte-identical outputs and hashes,NorseProductionProvenanceValidation.json,RC-022
+T-083,Documentation,All,static,Canonical follow-up transport wording,Final docs/source,Run documentation alignment,No current policy says established themed share is runes-only/no file,documentation log,RC-023
+T-084,Contracts,All,unit,Strict schema numeric type,Contract decoder,"Decode integer, Boolean, fractional and unknown-key fixtures",Only canonical integer accepted; legacy read preserved,contract tests,RC-024
+T-085,Contracts,Portable Swift,build,Neutral contract compile,Apple-independent target available,Compile/test neutral contract path,No missing CoreFoundation symbols,portable compile log,RC-024
+T-090,Compatibility,All,unit,Legacy cipher v3,Golden fixture,Decode/import,Success with unchanged identity and key behavior,CompatibilityValidation.json,RC-025
+T-091,Compatibility,All,unit,Legacy message v1,Golden fixtures with/without cipher/font,Decode/import,Success and first-delivery rules preserved,CompatibilityValidation.json,RC-025
+T-092,Compatibility,All,unit,Current typed package,Current message and invitation fixtures,Decode/import,Success with presentation metadata,CompatibilityValidation.json,RC-025
+T-093,Compatibility,All,unit,Corrupt presentation valid core,Valid encrypted payload; invalid theme metadata,Admit/decode,Core plaintext available using Base fallback; presentation marked corrupt,CompatibilityValidation.json,RC-025;RC-026
+T-094,Security,All,static,Progression/cloud privacy,Seed operations and inspect records,Run privacy validator,No plaintext/keys/raw contacts/package bytes,SecurityPrivacyValidation.json,RC-026
+T-095,Security,All,unit,First delivery only once,Linked relationship,Complete first and established shares,Key only first; established package still typed/themed,SecurityPrivacyValidation.json,RC-026
+T-096,Cloud,All,unit,Offline and merge adapters,Service unavailable/divergent records,Apply events/sync,Local progress continues; deterministic merge; corrupt remote quarantined,service tests,RC-027
+T-097,Game Center,All,unit,Optional reporting adapters,Auth decline/offline/duplicate callbacks,Report local completion,Local grant immediate; max progress queued; no ownership from Game Center,service tests,RC-027
+T-100,Architecture,All,static,Complete guards,Final source,Run architecture/Forsetti scripts and hosted tests,All pass,architecture logs,RC-028
+T-101,Mutations,All,mutation,Required mutation suite,Final source copy,Run all listed mutations,Every mutation fails expected gate and source restores,NegativeMutations.json,RC-029
+T-102,Attribution,All,static,Attribution clean,Final changed files and local commits,Run scanner,No prohibited authorship/tool credits,AttributionAudit.json,RC-030
+T-110,Project generation,All,determinism,XcodeGen twice,Final source,Generate twice and hash,Normalized project hashes equal,xcodegen log,RC-031
+T-111,Package,macOS host,test,Full Swift package suite,Final source,swift test,All tests pass; declarations do not decrease,swift-package.log,RC-032
+T-112,macOS,macOS,build/test,Release product and hosted tests,Final source,"Build Release, run hosted/parity/UI tests",All pass and app launches,macos logs,RC-033
+T-113,iPhone,iPhone Simulator,build/test,Release product and full Simulator suite,Selected available device,Build/install/launch/test,All pass without physical hardware,iphone logs,RC-034
+T-114,iPad,iPad Simulator,build/test,Adaptive Release qualification,Selected available device,Build/install/launch/test,All pass without physical hardware,ipad logs,RC-035
+T-115,Accessibility,All,ui/unit,Accessibility matrix,Seed required states,Run accessibility tests,"All required semantics, contrast, motion and input modes pass",AccessibilityValidation.json,RC-036
+T-116,Performance,All,unit/integration,Preview/cache/resource bounds,Large/repeated operations,Run performance/resource tests,No unbounded retention; all budgets pass,performance report,RC-037
+T-117,Versioning,All,static/build,Version/build consistency,All source gates pass,Increment once and rebuild,Project/products/docs/evidence match next values,CompletionReport.json,RC-038
+T-118,Shipping product,macOS+iOS Simulator,static,Final bundle inspection,Release apps built,Run shipping-product checker,Expected modules/resources/entitlements/version; no test/external Forsetti artifacts,shipping-products.log,RC-039
+T-119,Candidate package,All,artifact,Owner-test ZIP,All final gates pass,Build package and verify hashes,"Runnable products, instructions, evidence and screenshots included",candidate zip,RC-040
+T-120,Completion,All,static,Final self-audit,Final manifest and all evidence,Run remediation completion checker,All 42 gates pass; status RELEASE_CANDIDATE_READY,CompletionReport.json,RC-041
+T-121,Distribution boundary,All,static,No public shipment,Final workspace/remote state,Inspect tags/releases/uploads/actions,No merge/tag/release/upload/notarization/rollout performed,CompletionReport.json,RC-042

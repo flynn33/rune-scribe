@@ -1,0 +1,549 @@
+{
+  "build": "39",
+  "cases": [
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeUIModuleTests.ShareBuilderModelTests/testRapidPreviewGenerationsRejectEveryStaleCompletionAndInvalidation"
+      ],
+      "marker": "preview-churn-cancel",
+      "result": "PASS",
+      "testIDs": [
+        "T-116"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeUIModuleTests.ShareArtifactRendererTests/testRenderPlanCoversShortMediumLongPaginatedAndOverflowInscriptions"
+      ],
+      "marker": "large-inscriptions",
+      "result": "PASS",
+      "testIDs": [
+        "T-116"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests/testDecodedThemeResourceCacheDeduplicatesEvictsAndReleases",
+        "RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests/testThemeImageReferenceLeaseSurvivesPurgeAndReleasesOnDeinit"
+      ],
+      "marker": "cache-release",
+      "result": "PASS",
+      "testIDs": [
+        "T-116"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeNorseThemeModuleTests.NorseBaseThemeModuleTests/testMissingOrCorruptOptionalResourceIsOmittedWithoutBaseFailure",
+        "RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests/testLiveProviderStatesResolveRequestedCodexOrNorseFallback"
+      ],
+      "marker": "optional-provider-fallback",
+      "result": "PASS",
+      "testIDs": [
+        "T-116"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeCoreModuleTests.CoreApplicationProgressionIntegrationTests/testUnavailableOutboxRepeatedTerminalsKeepOnePhysicalArtifactBound",
+        "RuneScribeCoreModuleTests.CoreApplicationProgressionIntegrationTests/testReleasedPreparedMetadataWindowPlusOneCompactsByPersistedChronology",
+        "RuneScribeUIModuleTests.RuneScribeUISessionTests/testContentViewLockCleanupClearsSensitiveStateAndReleasesArtifactOnce",
+        "RuneScribeUIModuleTests.RuneScribeUISessionTests/testStopReleasesClientWithoutTakingOwnershipFromRuntimeShareProvider"
+      ],
+      "marker": "bounded-session-retention",
+      "result": "PASS",
+      "testIDs": [
+        "T-116"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeUIModuleTests.ShareArtifactRendererTests/testStaticRendererProducesBoundedFourByThreePreview"
+      ],
+      "marker": "preview-under-4-mib",
+      "result": "PASS",
+      "testIDs": [
+        "T-116"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeUIModuleTests.ShareArtifactRendererTests/testStaticRendererProducesBoundedFourByThreePreview"
+      ],
+      "marker": "preview-4:3",
+      "result": "PASS",
+      "testIDs": [
+        "T-116"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeNorseThemeModuleTests.NorseBaseThemeModuleTests/testProductionResourcesPassPhysicalBudgetsWithoutChargingLogicalReuseTwice",
+        "RuneScribeThemeGloamthornModuleTests.GloamthornThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact",
+        "RuneScribeThemeMoonleafModuleTests.MoonleafThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact",
+        "RuneScribeThemeSunspireModuleTests.SunspireThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact",
+        "RuneScribeThemeWildwoodModuleTests.WildwoodThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact"
+      ],
+      "marker": "theme-budgets",
+      "result": "PASS",
+      "testIDs": [
+        "T-116"
+      ]
+    }
+  ],
+  "executions": [
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeUIModuleTests\\.ShareBuilderModelTests/testRapidPreviewGenerationsRejectEveryStaleCompletionAndInvalidation$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeUIModuleTests.ShareBuilderModelTests/testRapidPreviewGenerationsRejectEveryStaleCompletionAndInvalidation",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ShareBuilderModelTests.swift",
+      "sourceSHA256": "c26b765e3a070000cd39343cfb2892e9a9ba7c57c9a8b1657b04485638ee08ec"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeUIModuleTests\\.ShareArtifactRendererTests/testRenderPlanCoversShortMediumLongPaginatedAndOverflowInscriptions$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeUIModuleTests.ShareArtifactRendererTests/testRenderPlanCoversShortMediumLongPaginatedAndOverflowInscriptions",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ShareArtifactRendererTests.swift",
+      "sourceSHA256": "d8a9cb192cf5d10876040a210a4c63b63affecfdf9c6a9e6a8d280aed03bd5af"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeUIModuleTests\\.ShareArtifactRendererTests/testStaticRendererProducesBoundedFourByThreePreview$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeUIModuleTests.ShareArtifactRendererTests/testStaticRendererProducesBoundedFourByThreePreview",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ShareArtifactRendererTests.swift",
+      "sourceSHA256": "d8a9cb192cf5d10876040a210a4c63b63affecfdf9c6a9e6a8d280aed03bd5af"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeUIModuleTests\\.RuntimeApplicationResourcePresentationTests/testDecodedThemeResourceCacheDeduplicatesEvictsAndReleases$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests/testDecodedThemeResourceCacheDeduplicatesEvictsAndReleases",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuntimeApplicationResourcePresentationTests.swift",
+      "sourceSHA256": "fbeff1bbc18ee740cdfb5bcd91414f99496aec1ef579a7a5be8653b7f0f4bbaf"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeUIModuleTests\\.RuntimeApplicationResourcePresentationTests/testThemeImageReferenceLeaseSurvivesPurgeAndReleasesOnDeinit$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeUIModuleTests.RuntimeApplicationResourcePresentationTests/testThemeImageReferenceLeaseSurvivesPurgeAndReleasesOnDeinit",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuntimeApplicationResourcePresentationTests.swift",
+      "sourceSHA256": "fbeff1bbc18ee740cdfb5bcd91414f99496aec1ef579a7a5be8653b7f0f4bbaf"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeNorseThemeModuleTests\\.NorseBaseThemeModuleTests/testMissingOrCorruptOptionalResourceIsOmittedWithoutBaseFailure$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeNorseThemeModuleTests.NorseBaseThemeModuleTests/testMissingOrCorruptOptionalResourceIsOmittedWithoutBaseFailure",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeNorseThemeModuleTests/NorseBaseThemeModuleTests.swift",
+      "sourceSHA256": "18eb7d16df615c6a8299fa1d87c6030e39c241ee143e5cfd96cd9fe972560dcc"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeUIModuleTests\\.ReceivedPresentationAvailabilityBindingTests/testLiveProviderStatesResolveRequestedCodexOrNorseFallback$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeUIModuleTests.ReceivedPresentationAvailabilityBindingTests/testLiveProviderStatesResolveRequestedCodexOrNorseFallback",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/ReceivedPresentationAvailabilityBindingTests.swift",
+      "sourceSHA256": "540887a57be99f76c01ac44d1592824dfb8811ca9c05bd158e9e6fd820bdf6d4"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeCoreModuleTests\\.CoreApplicationProgressionIntegrationTests/testUnavailableOutboxRepeatedTerminalsKeepOnePhysicalArtifactBound$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeCoreModuleTests.CoreApplicationProgressionIntegrationTests/testUnavailableOutboxRepeatedTerminalsKeepOnePhysicalArtifactBound",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/CoreApplicationProgressionIntegrationTests.swift",
+      "sourceSHA256": "176d4897a82370791fcf908c226518fd018eb2c93b057e2a143eb448dab30edd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeCoreModuleTests\\.CoreApplicationProgressionIntegrationTests/testReleasedPreparedMetadataWindowPlusOneCompactsByPersistedChronology$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeCoreModuleTests.CoreApplicationProgressionIntegrationTests/testReleasedPreparedMetadataWindowPlusOneCompactsByPersistedChronology",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/CoreApplicationProgressionIntegrationTests.swift",
+      "sourceSHA256": "176d4897a82370791fcf908c226518fd018eb2c93b057e2a143eb448dab30edd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeUIModuleTests\\.RuneScribeUISessionTests/testContentViewLockCleanupClearsSensitiveStateAndReleasesArtifactOnce$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeUIModuleTests.RuneScribeUISessionTests/testContentViewLockCleanupClearsSensitiveStateAndReleasesArtifactOnce",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift",
+      "sourceSHA256": "75da8a683c06a47a2d241dd67fc634a31adc2ba4c49dae82898237bde62dc6a4"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeUIModuleTests\\.RuneScribeUISessionTests/testStopReleasesClientWithoutTakingOwnershipFromRuntimeShareProvider$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeUIModuleTests.RuneScribeUISessionTests/testStopReleasesClientWithoutTakingOwnershipFromRuntimeShareProvider",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift",
+      "sourceSHA256": "75da8a683c06a47a2d241dd67fc634a31adc2ba4c49dae82898237bde62dc6a4"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeNorseThemeModuleTests\\.NorseBaseThemeModuleTests/testProductionResourcesPassPhysicalBudgetsWithoutChargingLogicalReuseTwice$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeNorseThemeModuleTests.NorseBaseThemeModuleTests/testProductionResourcesPassPhysicalBudgetsWithoutChargingLogicalReuseTwice",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeNorseThemeModuleTests/NorseBaseThemeModuleTests.swift",
+      "sourceSHA256": "18eb7d16df615c6a8299fa1d87c6030e39c241ee143e5cfd96cd9fe972560dcc"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeThemeGloamthornModuleTests\\.GloamthornThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeThemeGloamthornModuleTests.GloamthornThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeGloamthornModuleTests/GloamthornThemeProviderTests.swift",
+      "sourceSHA256": "8cf2323cefede602fabd5573b70bd0e276aafddb5eba6377c08215a7045fd12e"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeThemeMoonleafModuleTests\\.MoonleafThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeThemeMoonleafModuleTests.MoonleafThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeMoonleafModuleTests/MoonleafThemeProviderTests.swift",
+      "sourceSHA256": "ba78eeaaa7f001ea003b81381d5399e95146faef572cbd9f8711574d41189e2f"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeThemeSunspireModuleTests\\.SunspireThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeThemeSunspireModuleTests.SunspireThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeSunspireModuleTests/SunspireThemeProviderTests.swift",
+      "sourceSHA256": "7750610cdf1ab1d2291c4e6931b2a3b77ce094b6ec4960b03a0dbe45cfe78a8f"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeThemeWildwoodModuleTests\\.WildwoodThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeThemeWildwoodModuleTests.WildwoodThemeProviderTests/testModuleManifestAndImmutableResourcesRemainExact",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeThemeWildwoodModuleTests/WildwoodThemeProviderTests.swift",
+      "sourceSHA256": "101eb8236959e67f1a668a9aa47a8a5e1caf5392651e2ffeffba023c9ee289f9"
+    }
+  ],
+  "metrics": {
+    "preview": {
+      "previewBytes": 23412,
+      "previewHeightPixels": 900,
+      "previewWidthPixels": 1200,
+      "schemaVersion": "1.0",
+      "testIdentifier": "RuneScribeUIModuleTests.ShareArtifactRendererTests/testStaticRendererProducesBoundedFourByThreePreview"
+    },
+    "themeResourceBudgets": [
+      {
+        "limits": {
+          "animationBytes": 16777216,
+          "fontBytes": 16777216,
+          "largestResourceBytes": 8388608,
+          "soundBytes": 8388608,
+          "staticImageBytes": 33554432,
+          "uniquePhysicalBytes": 67108864
+        },
+        "manifestPath": "RuneScrib.app/Contents/Resources/RuneScribeArchitecture_RuneScribeNorseThemeModule.bundle/Contents/Resources/Norse-Resource-Integrity-Manifest-v1.0.json",
+        "manifestSHA256": "4c59d88099a7561d9983b148d5d4ab860c514d5b0645f03df1f5ac8cc9338a30",
+        "observed": {
+          "animationBytes": 3277,
+          "fontBytes": 55800,
+          "largestResourceBytes": 2568492,
+          "soundBytes": 1334576,
+          "staticImageBytes": 30455573,
+          "uniquePhysicalBytes": 31970233
+        },
+        "platform": "macOS",
+        "resourceCount": 58,
+        "result": "PASS",
+        "sourceManifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json",
+        "theme": "Norse"
+      },
+      {
+        "limits": {
+          "animationBytes": 16777216,
+          "fontBytes": 16777216,
+          "largestResourceBytes": 8388608,
+          "soundBytes": 8388608,
+          "staticImageBytes": 33554432,
+          "uniquePhysicalBytes": 67108864
+        },
+        "manifestPath": "RuneScrib.app/Contents/Resources/RuneScribeArchitecture_RuneScribeThemeGloamthornModule.bundle/Contents/Resources/Resource-Integrity-Manifest-v1.0.json",
+        "manifestSHA256": "1808d845cbcf30ae21ae87cd1ec8e3db549ab493a652de420de7d8868466c6d9",
+        "observed": {
+          "animationBytes": 0,
+          "fontBytes": 44108,
+          "largestResourceBytes": 51976,
+          "soundBytes": 0,
+          "staticImageBytes": 565310,
+          "uniquePhysicalBytes": 634837
+        },
+        "platform": "macOS",
+        "resourceCount": 48,
+        "result": "PASS",
+        "sourceManifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeGloamthornModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+        "theme": "Gloamthorn"
+      },
+      {
+        "limits": {
+          "animationBytes": 16777216,
+          "fontBytes": 16777216,
+          "largestResourceBytes": 8388608,
+          "soundBytes": 8388608,
+          "staticImageBytes": 33554432,
+          "uniquePhysicalBytes": 67108864
+        },
+        "manifestPath": "RuneScrib.app/Contents/Resources/RuneScribeArchitecture_RuneScribeThemeMoonleafModule.bundle/Contents/Resources/Resource-Integrity-Manifest-v1.0.json",
+        "manifestSHA256": "e7222671993ad13ff4f3c72dd048f31f49295a1412e1f365d9fd904ef0b4c633",
+        "observed": {
+          "animationBytes": 0,
+          "fontBytes": 111892,
+          "largestResourceBytes": 111892,
+          "soundBytes": 0,
+          "staticImageBytes": 566851,
+          "uniquePhysicalBytes": 703579
+        },
+        "platform": "macOS",
+        "resourceCount": 48,
+        "result": "PASS",
+        "sourceManifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+        "theme": "Moonleaf"
+      },
+      {
+        "limits": {
+          "animationBytes": 16777216,
+          "fontBytes": 16777216,
+          "largestResourceBytes": 8388608,
+          "soundBytes": 8388608,
+          "staticImageBytes": 33554432,
+          "uniquePhysicalBytes": 67108864
+        },
+        "manifestPath": "RuneScrib.app/Contents/Resources/RuneScribeArchitecture_RuneScribeThemeSunspireModule.bundle/Contents/Resources/Resource-Integrity-Manifest-v1.0.json",
+        "manifestSHA256": "da391cc35e89ad0606099e50e98bb2e28591420f68ec745efc2878411e9b1edc",
+        "observed": {
+          "animationBytes": 0,
+          "fontBytes": 96648,
+          "largestResourceBytes": 96648,
+          "soundBytes": 0,
+          "staticImageBytes": 569810,
+          "uniquePhysicalBytes": 691393
+        },
+        "platform": "macOS",
+        "resourceCount": 48,
+        "result": "PASS",
+        "sourceManifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+        "theme": "Sunspire"
+      },
+      {
+        "limits": {
+          "animationBytes": 16777216,
+          "fontBytes": 16777216,
+          "largestResourceBytes": 8388608,
+          "soundBytes": 8388608,
+          "staticImageBytes": 33554432,
+          "uniquePhysicalBytes": 67108864
+        },
+        "manifestPath": "RuneScrib.app/Contents/Resources/RuneScribeArchitecture_RuneScribeThemeWildwoodModule.bundle/Contents/Resources/Resource-Integrity-Manifest-v1.0.json",
+        "manifestSHA256": "f41665d69e3034bd8df8cf60954a5e7fa338a144384116fac2a4ca8b71b6c8f8",
+        "observed": {
+          "animationBytes": 0,
+          "fontBytes": 53648,
+          "largestResourceBytes": 53648,
+          "soundBytes": 0,
+          "staticImageBytes": 644249,
+          "uniquePhysicalBytes": 722871
+        },
+        "platform": "macOS",
+        "resourceCount": 48,
+        "result": "PASS",
+        "sourceManifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeWildwoodModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+        "theme": "Wildwood"
+      },
+      {
+        "limits": {
+          "animationBytes": 16777216,
+          "fontBytes": 16777216,
+          "largestResourceBytes": 8388608,
+          "soundBytes": 8388608,
+          "staticImageBytes": 33554432,
+          "uniquePhysicalBytes": 67108864
+        },
+        "manifestPath": "RuneScrib.app/RuneScribeArchitecture_RuneScribeNorseThemeModule.bundle/Norse-Resource-Integrity-Manifest-v1.0.json",
+        "manifestSHA256": "4c59d88099a7561d9983b148d5d4ab860c514d5b0645f03df1f5ac8cc9338a30",
+        "observed": {
+          "animationBytes": 3277,
+          "fontBytes": 55800,
+          "largestResourceBytes": 2568492,
+          "soundBytes": 1334576,
+          "staticImageBytes": 30455573,
+          "uniquePhysicalBytes": 31987418
+        },
+        "platform": "iOS",
+        "resourceCount": 63,
+        "result": "PASS",
+        "sourceManifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json",
+        "theme": "Norse"
+      },
+      {
+        "limits": {
+          "animationBytes": 16777216,
+          "fontBytes": 16777216,
+          "largestResourceBytes": 8388608,
+          "soundBytes": 8388608,
+          "staticImageBytes": 33554432,
+          "uniquePhysicalBytes": 67108864
+        },
+        "manifestPath": "RuneScrib.app/RuneScribeArchitecture_RuneScribeThemeGloamthornModule.bundle/Resource-Integrity-Manifest-v1.0.json",
+        "manifestSHA256": "1808d845cbcf30ae21ae87cd1ec8e3db549ab493a652de420de7d8868466c6d9",
+        "observed": {
+          "animationBytes": 0,
+          "fontBytes": 44108,
+          "largestResourceBytes": 51976,
+          "soundBytes": 0,
+          "staticImageBytes": 565310,
+          "uniquePhysicalBytes": 650239
+        },
+        "platform": "iOS",
+        "resourceCount": 53,
+        "result": "PASS",
+        "sourceManifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeGloamthornModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+        "theme": "Gloamthorn"
+      },
+      {
+        "limits": {
+          "animationBytes": 16777216,
+          "fontBytes": 16777216,
+          "largestResourceBytes": 8388608,
+          "soundBytes": 8388608,
+          "staticImageBytes": 33554432,
+          "uniquePhysicalBytes": 67108864
+        },
+        "manifestPath": "RuneScrib.app/RuneScribeArchitecture_RuneScribeThemeMoonleafModule.bundle/Resource-Integrity-Manifest-v1.0.json",
+        "manifestSHA256": "e7222671993ad13ff4f3c72dd048f31f49295a1412e1f365d9fd904ef0b4c633",
+        "observed": {
+          "animationBytes": 0,
+          "fontBytes": 111892,
+          "largestResourceBytes": 111892,
+          "soundBytes": 0,
+          "staticImageBytes": 566851,
+          "uniquePhysicalBytes": 718657
+        },
+        "platform": "iOS",
+        "resourceCount": 53,
+        "result": "PASS",
+        "sourceManifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+        "theme": "Moonleaf"
+      },
+      {
+        "limits": {
+          "animationBytes": 16777216,
+          "fontBytes": 16777216,
+          "largestResourceBytes": 8388608,
+          "soundBytes": 8388608,
+          "staticImageBytes": 33554432,
+          "uniquePhysicalBytes": 67108864
+        },
+        "manifestPath": "RuneScrib.app/RuneScribeArchitecture_RuneScribeThemeSunspireModule.bundle/Resource-Integrity-Manifest-v1.0.json",
+        "manifestSHA256": "da391cc35e89ad0606099e50e98bb2e28591420f68ec745efc2878411e9b1edc",
+        "observed": {
+          "animationBytes": 0,
+          "fontBytes": 96648,
+          "largestResourceBytes": 96648,
+          "soundBytes": 0,
+          "staticImageBytes": 569810,
+          "uniquePhysicalBytes": 706529
+        },
+        "platform": "iOS",
+        "resourceCount": 53,
+        "result": "PASS",
+        "sourceManifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+        "theme": "Sunspire"
+      },
+      {
+        "limits": {
+          "animationBytes": 16777216,
+          "fontBytes": 16777216,
+          "largestResourceBytes": 8388608,
+          "soundBytes": 8388608,
+          "staticImageBytes": 33554432,
+          "uniquePhysicalBytes": 67108864
+        },
+        "manifestPath": "RuneScrib.app/RuneScribeArchitecture_RuneScribeThemeWildwoodModule.bundle/Resource-Integrity-Manifest-v1.0.json",
+        "manifestSHA256": "f41665d69e3034bd8df8cf60954a5e7fa338a144384116fac2a4ca8b71b6c8f8",
+        "observed": {
+          "animationBytes": 0,
+          "fontBytes": 53648,
+          "largestResourceBytes": 53648,
+          "soundBytes": 0,
+          "staticImageBytes": 644249,
+          "uniquePhysicalBytes": 738037
+        },
+        "platform": "iOS",
+        "resourceCount": 53,
+        "result": "PASS",
+        "sourceManifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeWildwoodModule/Resources/Production/Resource-Integrity-Manifest-v1.0.json",
+        "theme": "Wildwood"
+      }
+    ]
+  },
+  "producer": {
+    "path": "scripts/capture-remediation-domain-results.py",
+    "sha256": "102c1d263d335bc6c4ad88f3025ca0e92e519321b9f5c077bcc7df366e675d1f"
+  },
+  "rawLog": "docs/verification/remediation-v1/GateRun/final-qualification.log",
+  "rawLogSHA256": "b8a6a895be57e082c3964031da81e379830760b5869b4912a92e6b58e2b19126",
+  "schemaVersion": "1.0",
+  "semanticMarkers": [
+    "preview-churn-cancel",
+    "large-inscriptions",
+    "cache-release",
+    "optional-provider-fallback",
+    "bounded-session-retention",
+    "preview-under-4-mib",
+    "preview-4:3",
+    "theme-budgets"
+  ],
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "testIDs": [
+    "T-116"
+  ],
+  "version": "1.0.39"
+}

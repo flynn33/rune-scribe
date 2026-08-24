@@ -11,7 +11,7 @@ public enum RuneScribeCoreModuleBootstrap {
 
     public static let descriptor = ModuleDescriptor(
         moduleID: "com.runescribe.module.core",
-        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(38)),
+        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(39)),
         kind: .service,
         entryPoint: "RuneScribeCoreModule",
         role: RuneScribeRoles.core,

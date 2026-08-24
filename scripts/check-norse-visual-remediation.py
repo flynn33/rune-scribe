@@ -14,10 +14,10 @@ from pathlib import Path
 from typing import Any, Optional, Sequence, Union
 
 
-EXPECTED_VERSION = "1.0.38"
-EXPECTED_BUILD = "38"
+EXPECTED_VERSION = "1.0.39"
+EXPECTED_BUILD = "39"
 EXPECTED_MANIFEST_SHA256 = (
-    "8bfb935ca4d3b82bdee00ce0f21756811e0d34460c9002dfed4c56ce13f1eb0a"
+    "4c59d88099a7561d9983b148d5d4ab860c514d5b0645f03df1f5ac8cc9338a30"
 )
 EXPECTED_FONT_SHA256 = (
     "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
@@ -86,7 +86,9 @@ EXPECTED_GUARD_SCRIPTS = {
     "check-roadmap-completion.py",
     "check-documentation-alignment.py",
     "check-forsetti-compliance.sh",
+    "check-norse-production-provenance.py",
     "check-shipping-products.sh",
+    "test-norse-production-provenance.py",
     "test-shipping-products.sh",
     "validate-elven-recovery-state.py",
 }
@@ -242,34 +244,44 @@ class Validator:
             "accepted manifest must contain exactly 47 resources",
             relative,
         )
-        resource_root = manifest_path.parents[3]
-        candidates: dict[str, list[Path]] = {}
-        for path in resource_root.rglob("*"):
-            if path.is_file() and path != manifest_path:
-                candidates.setdefault(path.name, []).append(path)
+        resource_root = manifest_path.parents[2]
         for entry in entries if isinstance(entries, list) else []:
             if not isinstance(entry, dict):
                 self.add("NRV-002", "norse-resource-integrity", "manifest resource is not an object", relative)
                 continue
-            basename = Path(str(entry.get("path", ""))).name
-            matches = candidates.get(basename, [])
-            if len(matches) != 1:
+            manifest_relative = str(entry.get("path", ""))
+            normalized = Path(manifest_relative)
+            if (
+                not manifest_relative
+                or normalized.is_absolute()
+                or ".." in normalized.parts
+                or normalized.as_posix() != manifest_relative
+            ):
                 self.add(
                     "NRV-002",
                     "norse-resource-integrity",
-                    f"resource {basename!r} does not resolve uniquely in the provider module",
+                    f"resource path is not normalized: {manifest_relative!r}",
                     relative,
                 )
                 continue
-            data = matches[0].read_bytes()
+            resource_path = resource_root / normalized
+            if not resource_path.is_file() or resource_path.is_symlink():
+                self.add(
+                    "NRV-002",
+                    "norse-resource-integrity",
+                    f"resource path does not resolve exactly: {manifest_relative!r}",
+                    relative,
+                )
+                continue
+            data = resource_path.read_bytes()
             expected_length = entry.get("byteLength")
             expected_hash = entry.get("sha256")
             if len(data) != expected_length or hashlib.sha256(data).hexdigest() != expected_hash:
                 self.add(
                     "NRV-002",
                     "norse-resource-integrity",
-                    f"resource bytes differ from accepted manifest: {basename}",
-                    matches[0],
+                    f"resource bytes differ from accepted manifest: {manifest_relative}",
+                    resource_path,
                 )
 
         test_relative = (

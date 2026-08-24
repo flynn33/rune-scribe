@@ -1,0 +1,34 @@
+git rev-parse HEAD
+git rev-parse HEAD^{tree}
+git status --porcelain=v1
+python3 scripts/generate-source-manifest.py . docs/verification/remediation-v1/SOURCE-MANIFEST.json --verify
+swift package --package-path Packages/RuneScribeArchitecture dump-package
+python3 scripts/check-remediation-source.py --root . --json
+scripts/check-architecture.sh
+scripts/check-roadmap-alignment.sh
+python3 scripts/check-roadmap-completion.py
+python3 scripts/check-documentation-alignment.py
+python3 scripts/check-norse-production-provenance.py --root .
+TMPDIR=/tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/tmp-provenance python3 scripts/test-norse-production-provenance.py
+python3 scripts/check-norse-visual-remediation.py --repo-root . --profile final --format json
+TMPDIR=/tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/tmp-evidence-hardening python3 scripts/tests/test_remediation_evidence_hardening.py
+python3 scripts/scan-attribution.py . --patterns /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Codex-Remediation-Package-v1.0/controls/PROHIBITED-ATTRIBUTION-PATTERNS-v1.0.json --output /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/static-attribution.json
+git archive --format=tar HEAD | tar -xf - -C /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2
+python3 /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/fingerprint_project.py /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/RuneScrib.xcodeproj /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/static-xcodegen-initial-manifest.json
+xcodegen generate --spec /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/project.yml --project /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --project-root /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --cache-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass1.cache
+python3 /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/fingerprint_project.py /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/RuneScrib.xcodeproj /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/static-xcodegen-pass1-manifest.json
+xcodegen generate --spec /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/project.yml --project /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --project-root /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --cache-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass2.cache
+python3 /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/fingerprint_project.py /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/RuneScrib.xcodeproj /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/static-xcodegen-pass2-manifest.json
+diff -ru /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass1-project /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass2-project
+git archive --format=tar HEAD | tar -xf - -C /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/visual-mutation-isolated.jii3fR/repository
+TMPDIR=/tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/tmp-visual-mutations python3 scripts/test-norse-visual-remediation.py --repo-root /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/visual-mutation-isolated.jii3fR/repository --output /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/static-norse-visual-mutations.json
+TMPDIR=/tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/tmp-remediation-mutations python3 scripts/test-remediation-mutations.py
+scripts/check-forsetti-compliance.sh --scan-root . --rules scripts/forsetti-compliance-rules.json --output /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/forsetti-report
+python3 scripts/generate-source-manifest.py . docs/verification/remediation-v1/SOURCE-MANIFEST.json --verify
+python3 scripts/check-remediation-source.py --root . --json
+git diff --check
+git diff --exit-code HEAD --
+git diff --cached --exit-code HEAD --
+git rev-parse HEAD
+git rev-parse HEAD^{tree}
+git status --porcelain=v1

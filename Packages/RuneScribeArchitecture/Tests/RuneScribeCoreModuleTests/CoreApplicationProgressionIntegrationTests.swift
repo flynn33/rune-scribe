@@ -120,6 +120,116 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         XCTAssertEqual(activeArtifactCount, 1)
     }
 
+    func testFirstDeliveryShareBuilderHandoffCancelsAndCompletesExactlyOnce() async throws {
+        let harness = CoreProgressionHarness()
+        let outbox = CoreIntegrationOutbox()
+        let service = harness.service(outbox: outbox)
+        await service.startInboundProcessing()
+        let cipher = try await service.createCipher(
+            CreateCipherCommand(name: "Builder Handoff"),
+            context: try Self.context(220)
+        )
+        try await service.assignContact(
+            AssignContactCommand(
+                cipherID: cipher.id,
+                contactID: ContactID(rawValue: UUID(
+                    uuidString: "A0000000-0000-0000-0000-000000000220"
+                )!)
+            ),
+            context: try Self.context(221)
+        )
+        let encoded = try await service.encode(
+            EncodeMessageCommand(plaintext: "builder handoff", cipherID: cipher.id),
+            context: try Self.context(222)
+        )
+        let handle = try XCTUnwrap(encoded.shareHandle)
+        let quickShareCommand = PrepareMessageShareCommand(
+            runes: encoded.runes,
+            senderName: "Sender",
+            cipherID: cipher.id,
+            shareHandle: handle
+        )
+        let quickShare = try await service.prepareMessageShare(
+            quickShareCommand,
+            context: try Self.context(223)
+        )
+        XCTAssertTrue(quickShare.requiresKeyDelivery)
+
+        await service.releaseShareArtifact(
+            id: quickShare.id,
+            context: try Self.context(224)
+        )
+        let selection = try SharePresentationSelection(
+            codexID: CodexID(rawValue: "codex.norse")!,
+            scriptID: ScriptID(rawValue: "script.base-runes")!,
+            relicID: ArtifactID(rawValue: "relic.norse.runestone.weathered")!,
+            sealID: ArtifactID(rawValue: "seal.norse.knotwork")!
+        )
+        let builderCommand = PrepareMessageShareCommand(
+            runes: encoded.runes,
+            senderName: "Sender",
+            cipherID: cipher.id,
+            shareHandle: handle,
+            presentation: try OutboundSharePresentationDTO(
+                metadata: try SharePresentationMetadata(
+                    selection: selection,
+                    compatibility: .norseInteractiveFallback
+                )
+            )
+        )
+        let cancelledBuilder = try await service.prepareMessageShare(
+            builderCommand,
+            context: try Self.context(225)
+        )
+        XCTAssertTrue(cancelledBuilder.requiresKeyDelivery)
+        await service.releaseShareArtifact(
+            id: cancelledBuilder.id,
+            context: try Self.context(226)
+        )
+        var facts = await outbox.facts()
+        XCTAssertTrue(facts.allSatisfy {
+            $0.eventType.rawValue != "runescribe.share.completed"
+                && $0.eventType.rawValue != "runescribe.cipher.first-delivery-completed"
+        })
+
+        let deliveredBuilder = try await service.prepareMessageShare(
+            builderCommand,
+            context: try Self.context(227)
+        )
+        XCTAssertTrue(deliveredBuilder.requiresKeyDelivery)
+        let completionEvidence = try ShareArtifactCompletionEvidenceDTO(
+            artifactID: deliveredBuilder.id,
+            report: SharePresentationReportDTO(
+                routeClass: .shareSheet,
+                result: .completedBySystem
+            ),
+            operationContext: try Self.context(228)
+        )
+        let firstCompletion = try await service.completeShareArtifact(
+            CompleteShareArtifactCommand(evidence: completionEvidence),
+            context: try Self.context(229)
+        )
+        let duplicateCompletion = try await service.completeShareArtifact(
+            CompleteShareArtifactCommand(evidence: completionEvidence),
+            context: try Self.context(230)
+        )
+        XCTAssertEqual(firstCompletion, .deliveryRecorded)
+        XCTAssertEqual(duplicateCompletion, .deliveryRecorded)
+
+        let established = try await service.prepareMessageShare(
+            quickShareCommand,
+            context: try Self.context(231)
+        )
+        XCTAssertFalse(established.requiresKeyDelivery)
+        facts = await outbox.facts()
+        XCTAssertEqual(facts.filter {
+            $0.eventType.rawValue == "runescribe.share.completed"
+        }.count, 1)
+        XCTAssertEqual(facts.filter {
+            $0.eventType.rawValue == "runescribe.cipher.first-delivery-completed"
+        }.count, 1)
+    }
+
     func testOperationAwareCreateAndEncodeCommitExactFactsAndDurableHandle() async throws {
         let harness = CoreProgressionHarness()
         let outbox = CoreIntegrationOutbox()
@@ -230,7 +340,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         )
         XCTAssertEqual(duplicateCompletion, .deliveryRecorded)
 
-        let second = try await service.prepareMessageShare(
+        let rejectedEstablished = try await service.prepareMessageShare(
             PrepareMessageShareCommand(
                 runes: encoded.runes,
                 senderName: "Sender",
@@ -239,17 +349,49 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             ),
             context: try Self.context(11)
         )
+        XCTAssertFalse(rejectedEstablished.requiresKeyDelivery)
+        let rejectedEstablishedEvidence = try ShareArtifactCompletionEvidenceDTO(
+            artifactID: rejectedEstablished.id,
+            report: SharePresentationReportDTO(
+                routeClass: .messages,
+                result: .sentConfirmed,
+                requiredAttachmentAccepted: false
+            ),
+            operationContext: try Self.context(12)
+        )
+        let rejectedEstablishedCompletion = try await service.completeShareArtifact(
+            CompleteShareArtifactCommand(evidence: rejectedEstablishedEvidence),
+            context: try Self.context(13)
+        )
+        XCTAssertEqual(rejectedEstablishedCompletion, .released)
+        let factsAfterRejectedEstablished = await outbox.facts()
+        XCTAssertEqual(
+            factsAfterRejectedEstablished.filter {
+                $0.eventType.rawValue == "runescribe.share.completed"
+            }.count,
+            1
+        )
+
+        let second = try await service.prepareMessageShare(
+            PrepareMessageShareCommand(
+                runes: encoded.runes,
+                senderName: "Sender",
+                cipherID: created.id,
+                shareHandle: handle
+            ),
+            context: try Self.context(14)
+        )
         let secondEvidence = try ShareArtifactCompletionEvidenceDTO(
             artifactID: second.id,
             report: SharePresentationReportDTO(
                 routeClass: .shareSheet,
                 result: .completedBySystem
             ),
-            operationContext: try Self.context(12)
+            operationContext: try Self.context(15)
         )
         _ = try await service.completeShareArtifact(
             CompleteShareArtifactCommand(evidence: secondEvidence),
-            context: try Self.context(13)
+            context: try Self.context(16)
         )
 
         let disposable = try await service.prepareMessageShare(
@@ -259,9 +401,9 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
                 cipherID: created.id,
                 shareHandle: handle
             ),
-            context: try Self.context(14)
+            context: try Self.context(17)
         )
-        await service.releaseShareArtifact(id: disposable.id, context: try Self.context(15))
+        await service.releaseShareArtifact(id: disposable.id, context: try Self.context(18))
         _ = try await service.prepareMessageShare(
             PrepareMessageShareCommand(
                 runes: encoded.runes,
@@ -269,7 +411,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
                 cipherID: created.id,
                 shareHandle: handle
             ),
-            context: try Self.context(16)
+            context: try Self.context(19)
         )
 
         let facts = await outbox.facts()
@@ -534,6 +676,55 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         let completed = try await CipherRepository(runtimeIO: harness.runtimeIO)
             .progressionEvidenceSnapshot()
         XCTAssertFalse(try XCTUnwrap(completed.shareTerminals.first).cleanupPending)
+    }
+
+    func testReleaseAfterSuccessfulTerminalCompletionIsIdempotent() async throws {
+        let harness = CoreProgressionHarness()
+        let service = harness.service(outbox: CoreIntegrationOutbox())
+        await service.startInboundProcessing()
+        let cipherID = try await Self.firstCipherID(from: service)
+        let encoded = try await service.encode(
+            EncodeMessageCommand(plaintext: "idempotent release", cipherID: cipherID),
+            context: try Self.context(65)
+        )
+        let artifact = try await service.prepareMessageShare(
+            PrepareMessageShareCommand(
+                runes: encoded.runes,
+                senderName: "Sender",
+                cipherID: cipherID,
+                shareHandle: try XCTUnwrap(encoded.shareHandle)
+            ),
+            context: try Self.context(66)
+        )
+        let evidence = try ShareArtifactCompletionEvidenceDTO(
+            artifactID: artifact.id,
+            report: SharePresentationReportDTO(
+                routeClass: .shareSheet,
+                result: .completedBySystem
+            ),
+            operationContext: try Self.context(67)
+        )
+
+        let result = try await service.completeShareArtifact(
+            CompleteShareArtifactCommand(evidence: evidence),
+            context: try Self.context(68)
+        )
+        XCTAssertEqual(result, .released)
+        let artifactCountAfterCompletion = await harness.artifacts.count()
+        XCTAssertEqual(artifactCountAfterCompletion, 0)
+
+        await service.releaseShareArtifact(id: artifact.id)
+
+        let artifactCountAfterRelease = await harness.artifacts.count()
+        XCTAssertEqual(artifactCountAfterRelease, 0)
+        var iterator = service.stateStream().makeAsyncIterator()
+        let snapshot = await iterator.next()
+        XCTAssertNil(snapshot?.lastFailure)
+        let registry = ShareArtifactRegistry(runtimeIO: harness.runtimeIO)
+        let durableRecord = try await registry.durableRecord(artifactID: artifact.id)
+        let record = try XCTUnwrap(durableRecord)
+        XCTAssertTrue(record.physicalArtifactReleased)
+        XCTAssertEqual(record.completionDisposition, .released)
     }
 
     func testTerminalCannotCleanupOrTransitionBeforeDurableIntent() async throws {

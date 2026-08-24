@@ -3,7 +3,7 @@
 Ready-to-paste material for App Store Connect (iOS App Store and Mac App Store).
 Keep this file in sync when shipping a new marketing version.
 
-**Last prepared for:** 1.0.38 (build 38) — 2026-08-22
+**Last prepared for:** 1.0.39 (build 39) — 2026-08-23
 
 > **No-ship boundary:** this repository update prepares source-controlled copy only.
 > It does not create or change App Store Connect records, archive/export either app,
@@ -15,8 +15,8 @@ Keep this file in sync when shipping a new marketing version.
 
 | Field | Value |
 |--------|--------|
-| **Version** | `1.0.38` |
-| **Build** | `38` |
+| **Version** | `1.0.39` |
+| **Build** | `39` |
 | **Bundle ID** | `com.runescribe.app` |
 | **Display name** | Rune Scribe |
 | **Category** | Lifestyle (`public.app-category.lifestyle`) |
@@ -36,21 +36,21 @@ Sources of truth in the repo:
 ### Short
 
 ```
-• Adds four unlockable Elven Codices and themed message Artifacts
-• Adds optional private Journey sync across your Apple devices
-• Adds optional Game Center achievement reporting
+• Adds Share Builder and one-action Quick Share appearance controls
+• Makes typed themed Artifacts the primary cipher-sharing format
+• Improves verified appearance fallback and accessibility
 ```
 
 ### Full
 
 ```
-This update completes Rune Scribe's Codex journey while preserving local encryption and offline use:
+This update completes the Codex remediation release candidate while preserving local encryption and offline use:
 
-• Unlock Moonleaf, Sunspire, Wildwood, and Gloamthorn Codices from the local Journey.
-• Choose owned Relics, Seals, and Frames for a static themed message preview.
+• Use Share Builder for messages and cipher invitations, or Quick Share with validated defaults.
+• Choose owned Relics, optional Seals and Frames, and Full, Reduced, or Off effects policy.
+• Share ciphers primarily as typed themed .runescribe Artifacts; link, QR, and Export remain explicit fallbacks.
 • Receive themed files safely even when their Codex is locked or unavailable.
-• Optionally mirror progression through your private iCloud database.
-• Optionally report the evergreen achievement catalog to Game Center.
+• Continue using encode, decode, import, and messages under a visible emergency Base appearance when required appearance resources fail.
 • Cipher keys, contacts, plaintext, and full messages stay out of iCloud and Game Center.
 ```
 
@@ -70,11 +70,14 @@ HOW TO DEMO
 1. Launch the app. You may see a short skippable intro (Skip or wait).
 2. Optional: Settings → set a 4-digit App Lock PIN, then background and return to verify lock.
 3. Cipher Library → New Cipher (or use the default).
-4. On the main screen, choose available Relic/Seal/Frame appearance defaults, type a
-   short message → Rune Scribe → Share or Send via iMessage (iOS).
-5. Cipher Library → Share on a cipher: system share sheet offers a runescribe://import link. Opening that link on a device with Rune Scribe installed presents Import Cipher.
-6. Cipher Library → Export produces a typed themed .runescribe file; Import… re-imports it.
-7. QR: show QR for a cipher; Scan QR Code (iOS) or Camera to import.
+4. On the main screen, set per-Codex appearance defaults, type a short message → Rune
+   Scribe → Quick Share, Customize Share, or Send via iMessage (iOS).
+5. In Customize Share, review the fixed security summary, choose available appearance
+   options, and Share the freshly prepared typed package.
+6. Cipher Library → Share sends a typed themed .runescribe invitation. Customize Share
+   opens the same builder for that invitation.
+7. Cipher Library → More retains Export File, Share Link, and Show QR as explicit
+   fallbacks; Import… re-imports supported current and legacy formats.
 8. Open Vault/Progress to review the local Journey, achievement progress, Encounters,
    and collected rewards. The app remains usable if Progression is unavailable.
 9. Optional: Settings shows private-sync and Game Center state. Decline or remain
@@ -224,7 +227,7 @@ roadmap-completion work.
 
 ### Before upload
 
-- [ ] Version and build match App Store Connect (`1.0.38` / `38` for this packet)
+- [ ] Version and build match App Store Connect (`1.0.39` / `39` for this packet)
 - [ ] Release notes pasted (What’s New)
 - [ ] Review notes pasted
 - [ ] Privacy answers set
@@ -247,7 +250,7 @@ PASS/FAIL, upload readiness, or pull-request readiness.
 
 ---
 
-## Source-complete 1.0.38 candidate
+## Source-complete 1.0.39 candidate
 
 Internal source-complete summary; this is **not a shipment claim**:
 
@@ -257,7 +260,7 @@ Internal source-complete summary; this is **not a shipment claim**:
 4. Themed typed-package sharing/receiving, static preview, Encounter and provenance state
 5. Local-first private progression synchronization and optional Game Center policy
 6. Core, runtime, providers, Progression, Cloud, Game Center, and UI boundaries guarded
-7. Marketing version **1.0.38**, build **38**, with discretionary owner validation before distribution and no upload performed
+7. Marketing version **1.0.39**, build **39**, with discretionary owner validation before distribution and no upload performed
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)
 

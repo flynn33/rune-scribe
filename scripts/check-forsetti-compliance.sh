@@ -75,7 +75,8 @@ end.freeze
 CONTROLLING_POLICY_SHA256 = "8392d9ad457ccb2afbf9e872d591ec887d383f4b8617236179d624d2f792fb53"
 HASH_LOCKED_PRODUCT_DOCUMENTS = {
   "docs/product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md" => "7c4c460815064fca87a6769766fb875f267eb692795bbab2635eec5d55d8f88d",
-  "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md" => "1c6e3cf79e6cd60d105c848a5fab65418daac799ae94db0d0c61504fc2c5679a"
+  "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md" => "884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4",
+  "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md" => "2b6ce54c50538419d324692ebfeec1bb29de46add9f354368d39169d6f74ed40"
 }.freeze
 
 def fail_with(code, message)

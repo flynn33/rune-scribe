@@ -2,11 +2,11 @@
   "schemaVersion": "1.0",
   "manifestID": "resource-integrity.norse.v1",
   "moduleID": "com.runescribe.module.theme.norse",
-  "generationScope": "Handoff recommended shipping candidates. Codex must regenerate against final live shipping resources after any approved conversion or optimization.",
+  "generationScope": "Exact release-candidate Production resources, regenerated from the checked-in paths and bytes. Public distribution is not authorized.",
   "resources": [
     {
       "resourceHandle": "resource.relic.norse.runestone.weathered.art",
-      "path": "Resources/Relics/ShippingCandidates/relic.norse.runestone.weathered.png",
+      "path": "Production/Relics/relic.norse.runestone.weathered.png",
       "semanticRole": "relic-art",
       "mediaType": "image/png",
       "byteLength": 2100882,
@@ -21,7 +21,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.runestone.weathered.geometry",
-      "path": "Resources/Relics/Geometry/relic.norse.runestone.weathered.geometry.json",
+      "path": "Production/Geometry/relic.norse.runestone.weathered.geometry.json",
       "semanticRole": "relic-geometry",
       "mediaType": "application/json",
       "byteLength": 714,
@@ -31,7 +31,7 @@
     },
     {
       "resourceHandle": "resource.share-fallback.norse.runestone.weathered",
-      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.runestone.weathered.png",
+      "path": "Production/ShareFallbacks/share-fallback.norse.runestone.weathered.png",
       "semanticRole": "static-share-fallback",
       "mediaType": "image/png",
       "byteLength": 2444821,
@@ -46,7 +46,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.raven-medallion.art",
-      "path": "Resources/Relics/ShippingCandidates/relic.norse.raven-medallion.png",
+      "path": "Production/Relics/relic.norse.raven-medallion.png",
       "semanticRole": "relic-art",
       "mediaType": "image/png",
       "byteLength": 1602486,
@@ -61,7 +61,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.raven-medallion.geometry",
-      "path": "Resources/Relics/Geometry/relic.norse.raven-medallion.geometry.json",
+      "path": "Production/Geometry/relic.norse.raven-medallion.geometry.json",
       "semanticRole": "relic-geometry",
       "mediaType": "application/json",
       "byteLength": 578,
@@ -71,7 +71,7 @@
     },
     {
       "resourceHandle": "resource.share-fallback.norse.raven-medallion",
-      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.raven-medallion.png",
+      "path": "Production/ShareFallbacks/share-fallback.norse.raven-medallion.png",
       "semanticRole": "static-share-fallback",
       "mediaType": "image/png",
       "byteLength": 2498330,
@@ -86,7 +86,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.ironbound-shield.art",
-      "path": "Resources/Relics/ShippingCandidates/relic.norse.ironbound-shield.png",
+      "path": "Production/Relics/relic.norse.ironbound-shield.png",
       "semanticRole": "relic-art",
       "mediaType": "image/png",
       "byteLength": 1664406,
@@ -101,7 +101,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.ironbound-shield.geometry",
-      "path": "Resources/Relics/Geometry/relic.norse.ironbound-shield.geometry.json",
+      "path": "Production/Geometry/relic.norse.ironbound-shield.geometry.json",
       "semanticRole": "relic-geometry",
       "mediaType": "application/json",
       "byteLength": 684,
@@ -111,7 +111,7 @@
     },
     {
       "resourceHandle": "resource.share-fallback.norse.ironbound-shield",
-      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.ironbound-shield.png",
+      "path": "Production/ShareFallbacks/share-fallback.norse.ironbound-shield.png",
       "semanticRole": "static-share-fallback",
       "mediaType": "image/png",
       "byteLength": 2557201,
@@ -126,7 +126,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.sealed-parchment.art",
-      "path": "Resources/Relics/ShippingCandidates/relic.norse.sealed-parchment.png",
+      "path": "Production/Relics/relic.norse.sealed-parchment.png",
       "semanticRole": "relic-art",
       "mediaType": "image/png",
       "byteLength": 1772507,
@@ -141,7 +141,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.sealed-parchment.geometry",
-      "path": "Resources/Relics/Geometry/relic.norse.sealed-parchment.geometry.json",
+      "path": "Production/Geometry/relic.norse.sealed-parchment.geometry.json",
       "semanticRole": "relic-geometry",
       "mediaType": "application/json",
       "byteLength": 697,
@@ -151,7 +151,7 @@
     },
     {
       "resourceHandle": "resource.share-fallback.norse.sealed-parchment",
-      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.sealed-parchment.png",
+      "path": "Production/ShareFallbacks/share-fallback.norse.sealed-parchment.png",
       "semanticRole": "static-share-fallback",
       "mediaType": "image/png",
       "byteLength": 2353385,
@@ -166,7 +166,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.runestone.blackstone.art",
-      "path": "Resources/Relics/ShippingCandidates/relic.norse.runestone.blackstone.png",
+      "path": "Production/Relics/relic.norse.runestone.blackstone.png",
       "semanticRole": "relic-art",
       "mediaType": "image/png",
       "byteLength": 2285375,
@@ -181,7 +181,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.runestone.blackstone.geometry",
-      "path": "Resources/Relics/Geometry/relic.norse.runestone.blackstone.geometry.json",
+      "path": "Production/Geometry/relic.norse.runestone.blackstone.geometry.json",
       "semanticRole": "relic-geometry",
       "mediaType": "application/json",
       "byteLength": 713,
@@ -191,7 +191,7 @@
     },
     {
       "resourceHandle": "resource.share-fallback.norse.runestone.blackstone",
-      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.runestone.blackstone.png",
+      "path": "Production/ShareFallbacks/share-fallback.norse.runestone.blackstone.png",
       "semanticRole": "static-share-fallback",
       "mediaType": "image/png",
       "byteLength": 2568492,
@@ -206,7 +206,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.runestone.frozen.art",
-      "path": "Resources/Relics/ShippingCandidates/relic.norse.runestone.frozen.png",
+      "path": "Production/Relics/relic.norse.runestone.frozen.png",
       "semanticRole": "relic-art",
       "mediaType": "image/png",
       "byteLength": 2249646,
@@ -221,7 +221,7 @@
     },
     {
       "resourceHandle": "resource.relic.norse.runestone.frozen.geometry",
-      "path": "Resources/Relics/Geometry/relic.norse.runestone.frozen.geometry.json",
+      "path": "Production/Geometry/relic.norse.runestone.frozen.geometry.json",
       "semanticRole": "relic-geometry",
       "mediaType": "application/json",
       "byteLength": 705,
@@ -231,7 +231,7 @@
     },
     {
       "resourceHandle": "resource.share-fallback.norse.runestone.frozen",
-      "path": "Resources/Relics/StaticShareFallbacks/share-fallback.norse.runestone.frozen.png",
+      "path": "Production/ShareFallbacks/share-fallback.norse.runestone.frozen.png",
       "semanticRole": "static-share-fallback",
       "mediaType": "image/png",
       "byteLength": 2503093,
@@ -246,7 +246,7 @@
     },
     {
       "resourceHandle": "resource.seal.norse.knotwork.vector",
-      "path": "Resources/Seals/ShippingCandidates/seal.norse.knotwork.pdf",
+      "path": "Production/Seals/seal.norse.knotwork.pdf",
       "semanticRole": "seal-vector",
       "mediaType": "application/pdf",
       "byteLength": 3057,
@@ -261,7 +261,7 @@
     },
     {
       "resourceHandle": "resource.seal.norse.forge-flame.vector",
-      "path": "Resources/Seals/ShippingCandidates/seal.norse.forge-flame.pdf",
+      "path": "Production/Seals/seal.norse.forge-flame.pdf",
       "semanticRole": "seal-vector",
       "mediaType": "application/pdf",
       "byteLength": 3017,
@@ -276,7 +276,7 @@
     },
     {
       "resourceHandle": "resource.seal.norse.raven.vector",
-      "path": "Resources/Seals/ShippingCandidates/seal.norse.raven.pdf",
+      "path": "Production/Seals/seal.norse.raven.pdf",
       "semanticRole": "seal-vector",
       "mediaType": "application/pdf",
       "byteLength": 3110,
@@ -291,7 +291,7 @@
     },
     {
       "resourceHandle": "resource.seal.norse.longship.vector",
-      "path": "Resources/Seals/ShippingCandidates/seal.norse.longship.pdf",
+      "path": "Production/Seals/seal.norse.longship.pdf",
       "semanticRole": "seal-vector",
       "mediaType": "application/pdf",
       "byteLength": 3145,
@@ -306,7 +306,7 @@
     },
     {
       "resourceHandle": "resource.seal.norse.forge-hammer.vector",
-      "path": "Resources/Seals/ShippingCandidates/seal.norse.forge-hammer.pdf",
+      "path": "Production/Seals/seal.norse.forge-hammer.pdf",
       "semanticRole": "seal-vector",
       "mediaType": "application/pdf",
       "byteLength": 3190,
@@ -321,7 +321,7 @@
     },
     {
       "resourceHandle": "resource.seal.norse.echo-rune.vector",
-      "path": "Resources/Seals/ShippingCandidates/seal.norse.echo-rune.pdf",
+      "path": "Production/Seals/seal.norse.echo-rune.pdf",
       "semanticRole": "seal-vector",
       "mediaType": "application/pdf",
       "byteLength": 3046,
@@ -336,7 +336,7 @@
     },
     {
       "resourceHandle": "resource.frame.norse.carved-knotwork.vector",
-      "path": "Resources/Frame/frame.norse.carved-knotwork.pdf",
+      "path": "Production/Frame/frame.norse.carved-knotwork.pdf",
       "semanticRole": "frame-vector",
       "mediaType": "application/pdf",
       "byteLength": 4385,
@@ -351,7 +351,7 @@
     },
     {
       "resourceHandle": "resource.crest.norse.forge-master.vector",
-      "path": "Resources/Crest/crest.norse.forge-master.pdf",
+      "path": "Production/Crest/crest.norse.forge-master.pdf",
       "semanticRole": "crest-vector",
       "mediaType": "application/pdf",
       "byteLength": 2963,
@@ -366,7 +366,7 @@
     },
     {
       "resourceHandle": "resource.codex-card.norse",
-      "path": "Resources/CodexCard/codex-card.norse.v1.png",
+      "path": "Production/CodexCard/codex-card.norse.v1.png",
       "semanticRole": "codex-card",
       "mediaType": "image/png",
       "byteLength": 998363,
@@ -381,7 +381,7 @@
     },
     {
       "resourceHandle": "resource.codex-silhouette.norse",
-      "path": "Resources/CodexCard/codex-silhouette.norse.v1.png",
+      "path": "Production/CodexCard/codex-silhouette.norse.v1.png",
       "semanticRole": "codex-silhouette",
       "mediaType": "image/png",
       "byteLength": 663322,
@@ -396,7 +396,7 @@
     },
     {
       "resourceHandle": "resource.background.norse.forge.static",
-      "path": "Resources/Background/background.norse.forge.static.png",
+      "path": "Production/Background/background.norse.forge.static.png",
       "semanticRole": "reduce-motion-background",
       "mediaType": "image/png",
       "byteLength": 480562,
@@ -411,7 +411,7 @@
     },
     {
       "resourceHandle": "resource.background.norse.high-contrast",
-      "path": "Resources/Background/background.norse.high-contrast.png",
+      "path": "Production/Background/background.norse.high-contrast.png",
       "semanticRole": "high-contrast-background",
       "mediaType": "image/png",
       "byteLength": 419519,
@@ -426,7 +426,7 @@
     },
     {
       "resourceHandle": "resource.background.norse.profile",
-      "path": "Machine-Readable/Norse-Background-Profile-v1.0.json",
+      "path": "Production/Metadata/Norse-Background-Profile-v1.0.json",
       "semanticRole": "background-parameter-record",
       "mediaType": "application/json",
       "byteLength": 1678,
@@ -436,7 +436,7 @@
     },
     {
       "resourceHandle": "resource.palette.norse.semantic",
-      "path": "Machine-Readable/Norse-Semantic-Palette-v1.0.json",
+      "path": "Production/Metadata/Norse-Semantic-Palette-v1.0.json",
       "semanticRole": "semantic-palette",
       "mediaType": "application/json",
       "byteLength": 2556,
@@ -446,7 +446,7 @@
     },
     {
       "resourceHandle": "resource.headings.norse",
-      "path": "Machine-Readable/Norse-Decorative-Heading-Slots-v1.0.json",
+      "path": "Production/Metadata/Norse-Decorative-Heading-Slots-v1.0.json",
       "semanticRole": "decorative-heading-catalog",
       "mediaType": "application/json",
       "byteLength": 779,
@@ -456,7 +456,7 @@
     },
     {
       "resourceHandle": "resource.script.norse.mapping",
-      "path": "Machine-Readable/Norse-Script-Mapping-v1.0.json",
+      "path": "Production/Metadata/Norse-Script-Mapping-v1.0.json",
       "semanticRole": "script-mapping",
       "mediaType": "application/json",
       "byteLength": 4552,
@@ -466,7 +466,7 @@
     },
     {
       "resourceHandle": "resource.script.norse.specimen",
-      "path": "Resources/Script/script.base-runes.specimen.png",
+      "path": "Production/Script/script.base-runes.specimen.png",
       "semanticRole": "script-specimen",
       "mediaType": "image/png",
       "byteLength": 91927,
@@ -481,7 +481,7 @@
     },
     {
       "resourceHandle": "resource.accessibility.norse.en",
-      "path": "Resources/Localization/norse-accessibility.en.json",
+      "path": "Production/Localization/norse-accessibility.en.json",
       "semanticRole": "accessibility-localization",
       "mediaType": "application/json",
       "byteLength": 2972,
@@ -491,7 +491,7 @@
     },
     {
       "resourceHandle": "resource.localization.norse.en",
-      "path": "Resources/Localization/norse-content.en.json",
+      "path": "Production/Localization/norse-content.en.json",
       "semanticRole": "content-localization",
       "mediaType": "application/json",
       "byteLength": 9043,
@@ -501,7 +501,7 @@
     },
     {
       "resourceHandle": "resource.progression-bindings.norse",
-      "path": "Machine-Readable/Norse-Progression-Bindings-v1.0.json",
+      "path": "Production/Metadata/Norse-Progression-Bindings-v1.0.json",
       "semanticRole": "progression-binding-catalog",
       "mediaType": "application/json",
       "byteLength": 4826,
@@ -511,8 +511,8 @@
     },
     {
       "resourceHandle": "resource.sound.norse.unlock-minor",
-      "path": "Resources/Audio/sound.norse.unlock-minor.wav",
-      "semanticRole": "unlock-sound-candidate",
+      "path": "Production/Audio/sound.norse.unlock-minor.wav",
+      "semanticRole": "unlock-sound",
       "mediaType": "audio/wav",
       "byteLength": 157484,
       "sha256": "86ff6f83532792c120885c4177fbf4577aea4d9c93ce1a00ae92ef675d663231",
@@ -528,7 +528,7 @@
     },
     {
       "resourceHandle": "resource.effect.norse.reveal-minor",
-      "path": "Resources/Animation/effect.norse.reveal-minor.json",
+      "path": "Production/Animation/effect.norse.reveal-minor.json",
       "semanticRole": "unlock-animation-cue",
       "mediaType": "application/json",
       "byteLength": 638,
@@ -538,8 +538,8 @@
     },
     {
       "resourceHandle": "resource.sound.norse.unlock-relic",
-      "path": "Resources/Audio/sound.norse.unlock-relic.wav",
-      "semanticRole": "unlock-sound-candidate",
+      "path": "Production/Audio/sound.norse.unlock-relic.wav",
+      "semanticRole": "unlock-sound",
       "mediaType": "audio/wav",
       "byteLength": 245804,
       "sha256": "fd03dc2727db17991724175ad4de0e8441ceb635157869147e3ec4c4246d17d0",
@@ -555,7 +555,7 @@
     },
     {
       "resourceHandle": "resource.effect.norse.reveal-relic",
-      "path": "Resources/Animation/effect.norse.reveal-relic.json",
+      "path": "Production/Animation/effect.norse.reveal-relic.json",
       "semanticRole": "unlock-animation-cue",
       "mediaType": "application/json",
       "byteLength": 797,
@@ -565,8 +565,8 @@
     },
     {
       "resourceHandle": "resource.sound.norse.unlock-codex",
-      "path": "Resources/Audio/sound.norse.unlock-codex.wav",
-      "semanticRole": "unlock-sound-candidate",
+      "path": "Production/Audio/sound.norse.unlock-codex.wav",
+      "semanticRole": "unlock-sound",
       "mediaType": "audio/wav",
       "byteLength": 422444,
       "sha256": "92002d43b73dfbb6240ab8c3166b5044f9ebec9dc919925934774875caaa92f8",
@@ -582,7 +582,7 @@
     },
     {
       "resourceHandle": "resource.effect.norse.reveal-codex",
-      "path": "Resources/Animation/effect.norse.reveal-codex.json",
+      "path": "Production/Animation/effect.norse.reveal-codex.json",
       "semanticRole": "unlock-animation-cue",
       "mediaType": "application/json",
       "byteLength": 960,
@@ -592,8 +592,8 @@
     },
     {
       "resourceHandle": "resource.sound.norse.unlock-mastery",
-      "path": "Resources/Audio/sound.norse.unlock-mastery.wav",
-      "semanticRole": "unlock-sound-candidate",
+      "path": "Production/Audio/sound.norse.unlock-mastery.wav",
+      "semanticRole": "unlock-sound",
       "mediaType": "audio/wav",
       "byteLength": 508844,
       "sha256": "a5e4be793829f6abc73727f6441894d79d0e93b548f754dc35005aac529f2682",
@@ -609,7 +609,7 @@
     },
     {
       "resourceHandle": "resource.effect.norse.reveal-mastery",
-      "path": "Resources/Animation/effect.norse.reveal-mastery.json",
+      "path": "Production/Animation/effect.norse.reveal-mastery.json",
       "semanticRole": "unlock-animation-cue",
       "mediaType": "application/json",
       "byteLength": 882,
@@ -619,7 +619,7 @@
     },
     {
       "resourceHandle": "resource.font.norse.noto-sans-runic",
-      "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+      "path": "NotoSansRunic-Regular.ttf",
       "semanticRole": "required-base-script-font",
       "mediaType": "font/ttf",
       "byteLength": 55800,

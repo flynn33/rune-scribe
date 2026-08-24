@@ -29,8 +29,8 @@ public enum NorseBaseBundledResourceCatalog {
     public static let integrityManifest = NorseApplicationResourceCatalog.integrityManifest
     public static let integrityManifestDescriptor = descriptor(
         integrityManifest,
-        24_610,
-        "8bfb935ca4d3b82bdee00ce0f21756811e0d34460c9002dfed4c56ce13f1eb0a",
+        24_187,
+        "4c59d88099a7561d9983b148d5d4ab860c514d5b0645f03df1f5ac8cc9338a30",
         32 * 1_024
     )
     public static let notoSansRunic = NorseApplicationResourceCatalog.notoSansRunic
@@ -83,10 +83,22 @@ public enum NorseBaseThemeResources {
     public static func loadValidated(using runtimeIO: RuntimeIOClient) async throws -> ValidatedNorseBaseTheme {
         let manifestData = try await read(
             NorseBaseBundledResourceCatalog.integrityManifestDescriptor,
+            resourceID: nil,
+            mediaType: .json,
+            readStage: .manifestRead,
+            digestStage: .manifestIntegrity,
             using: runtimeIO
         )
         guard NorseProductionManifest.validate(manifestData) else {
-            throw NorseBaseThemeResourceError.invalidIntegrityManifest
+            throw requiredFailure(
+                stage: .manifestIntegrity,
+                code: .invalidIntegrityManifest,
+                expectedByteCount: NorseBaseBundledResourceCatalog
+                    .integrityManifestDescriptor.expectedByteCount,
+                expectedSHA256Hex: NorseBaseBundledResourceCatalog
+                    .integrityManifestDescriptor.expectedSHA256Hex,
+                mediaType: .json
+            )
         }
 
         var payloads: [ThemeResourceID: Data] = [:]
@@ -96,20 +108,41 @@ public enum NorseBaseThemeResources {
             if let cached = physicalPayloads[definition.resource] {
                 data = cached
             } else {
-                data = try await read(definition.bundledDescriptor, using: runtimeIO)
+                do {
+                    data = try await read(
+                        definition.bundledDescriptor,
+                        resourceID: definition.id,
+                        mediaType: definition.mediaType,
+                        readStage: .resourceRead,
+                        digestStage: .digest,
+                        using: runtimeIO
+                    )
+                    try validateMediaMetadata(data, definition: definition)
+                } catch is CancellationError {
+                    throw CancellationError()
+                } catch where definition.requirement == .optional {
+                    continue
+                }
                 physicalPayloads[definition.resource] = data
             }
             payloads[definition.id] = data
         }
 
         try validateSemanticJSON(payloads)
-        _ = try budgetReport(physicalPayloads: physicalPayloads)
+        do {
+            _ = try budgetReport(physicalPayloads: physicalPayloads)
+        } catch NorseBaseThemeResourceError.resourceBudgetExceeded {
+            throw requiredFailure(stage: .budget, code: .resourceBudgetExceeded)
+        }
 
         let descriptor = NorseBaseThemeDescriptorFactory.discoveryDescriptor
-        guard Set(payloads.keys) == Set(descriptor.resources.map(\.id)),
+        guard Set(payloads.keys).isSubset(of: Set(descriptor.resources.map(\.id))),
               NorseBaseThemeResourceCatalog.validates(payloads)
         else {
-            throw NorseBaseThemeResourceError.resourcePayloadSetMismatch
+            throw requiredFailure(
+                stage: .contributionPublication,
+                code: .resourceSetMismatch
+            )
         }
         return ValidatedNorseBaseTheme(descriptor: descriptor, resourcePayloads: payloads)
     }
@@ -161,21 +194,136 @@ public enum NorseBaseThemeResources {
 
     private static func read(
         _ descriptor: NorseBaseBundledResourceDescriptor,
+        resourceID: ThemeResourceID?,
+        mediaType: ThemeResourceMediaType?,
+        readStage: RequiredThemeResourceFailureStage,
+        digestStage: RequiredThemeResourceFailureStage,
         using runtimeIO: RuntimeIOClient
     ) async throws -> Data {
-        let data = try await runtimeIO.readVerifiedApplicationResource(
-            descriptor.resource,
-            expectedSHA256: descriptor.expectedSHA256,
-            maximumByteCount: descriptor.maximumByteCount
-        )
+        let data: Data
+        do {
+            data = try await runtimeIO.readVerifiedApplicationResource(
+                descriptor.resource,
+                expectedSHA256: descriptor.expectedSHA256,
+                maximumByteCount: descriptor.maximumByteCount
+            )
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch let failure as RuntimeVerifiedApplicationResourceFailure {
+            switch failure {
+            case .resourceUnavailable:
+                throw requiredFailure(
+                    stage: readStage,
+                    resourceID: resourceID,
+                    code: .resourceUnavailable,
+                    expectedByteCount: descriptor.expectedByteCount,
+                    expectedSHA256Hex: descriptor.expectedSHA256Hex,
+                    mediaType: mediaType
+                )
+            case .contentTooLarge:
+                throw requiredFailure(
+                    stage: readStage,
+                    resourceID: resourceID,
+                    code: .contentTooLarge,
+                    expectedByteCount: descriptor.expectedByteCount,
+                    expectedSHA256Hex: descriptor.expectedSHA256Hex,
+                    mediaType: mediaType
+                )
+            case .integrityMismatch(let actualSHA256, let actualByteCount):
+                if actualByteCount != descriptor.expectedByteCount {
+                    throw requiredFailure(
+                        stage: .byteCount,
+                        resourceID: resourceID,
+                        code: .byteCountMismatch,
+                        expectedByteCount: descriptor.expectedByteCount,
+                        actualByteCount: actualByteCount,
+                        expectedSHA256Hex: descriptor.expectedSHA256Hex,
+                        actualSHA256Hex: hexadecimal(actualSHA256),
+                        mediaType: mediaType
+                    )
+                }
+                throw requiredFailure(
+                    stage: digestStage,
+                    resourceID: resourceID,
+                    code: .digestMismatch,
+                    expectedByteCount: descriptor.expectedByteCount,
+                    actualByteCount: actualByteCount,
+                    expectedSHA256Hex: descriptor.expectedSHA256Hex,
+                    actualSHA256Hex: hexadecimal(actualSHA256),
+                    mediaType: mediaType
+                )
+            case .invalidMaximumByteCount:
+                throw requiredFailure(
+                    stage: readStage,
+                    resourceID: resourceID,
+                    code: .unexpectedFailure,
+                    expectedByteCount: descriptor.expectedByteCount,
+                    expectedSHA256Hex: descriptor.expectedSHA256Hex,
+                    mediaType: mediaType
+                )
+            }
+        } catch {
+            throw requiredFailure(
+                stage: readStage,
+                resourceID: resourceID,
+                code: .resourceUnavailable,
+                expectedByteCount: descriptor.expectedByteCount,
+                expectedSHA256Hex: descriptor.expectedSHA256Hex,
+                mediaType: mediaType
+            )
+        }
         guard data.count == descriptor.expectedByteCount else {
-            throw NorseBaseThemeResourceError.resourceByteCountMismatch(
-                resource: "\(descriptor.resource.name).\(descriptor.resource.fileExtension)",
-                expected: descriptor.expectedByteCount,
-                actual: data.count
+            throw requiredFailure(
+                stage: .byteCount,
+                resourceID: resourceID,
+                code: .byteCountMismatch,
+                expectedByteCount: descriptor.expectedByteCount,
+                actualByteCount: data.count,
+                expectedSHA256Hex: descriptor.expectedSHA256Hex,
+                actualSHA256Hex: sha256Hex(data),
+                mediaType: mediaType
             )
         }
         return data
+    }
+
+    static func validateMediaMetadata(
+        _ data: Data,
+        definition: NorseBaseThemeResourceDefinition
+    ) throws {
+        guard let expectedWidth = definition.pixelWidth,
+              let expectedHeight = definition.pixelHeight
+        else { return }
+        guard definition.mediaType == .png,
+              let dimensions = pngDimensions(data),
+              dimensions.width == expectedWidth,
+              dimensions.height == expectedHeight
+        else {
+            throw requiredFailure(
+                stage: .mediaMetadata,
+                resourceID: definition.id,
+                code: .mediaMetadataMismatch,
+                expectedByteCount: definition.byteCount,
+                actualByteCount: data.count,
+                expectedSHA256Hex: definition.sha256Hex,
+                actualSHA256Hex: sha256Hex(data),
+                mediaType: definition.mediaType
+            )
+        }
+    }
+
+    private static func pngDimensions(_ data: Data) -> (width: Int, height: Int)? {
+        let signature: [UInt8] = [137, 80, 78, 71, 13, 10, 26, 10]
+        guard data.count >= 24,
+              Array(data.prefix(signature.count)) == signature,
+              String(decoding: data[12 ..< 16], as: UTF8.self) == "IHDR"
+        else { return nil }
+        func integer(at offset: Int) -> Int {
+            data[offset ..< offset + 4].reduce(0) { value, byte in
+                (value << 8) | Int(byte)
+            }
+        }
+        return (integer(at: 16), integer(at: 20))
     }
 
     private static func validateSemanticJSON(_ payloads: [ThemeResourceID: Data]) throws {
@@ -185,34 +333,83 @@ public enum NorseBaseThemeResources {
               mappingRoot["scriptID"] as? String == "script.base-runes",
               let symbols = mappingRoot["glyphs"] as? [[String: Any]],
               symbols.count == ThemeCanonicalSymbolSet.symbolCount
-        else { throw NorseBaseThemeResourceError.invalidScriptFallback }
+        else {
+            throw requiredFailure(
+                stage: .semanticJSON,
+                resourceID: NorseBaseThemeResourceIDs.scriptMapping,
+                code: .invalidSemanticJSON,
+                mediaType: .json
+            )
+        }
 
         guard let palette = payloads[NorseBaseThemeResourceIDs.palette],
               let paletteRoot = try? JSONSerialization.jsonObject(with: palette) as? [String: Any],
               paletteRoot["codexID"] as? String == "codex.norse",
               let tokens = paletteRoot["tokens"] as? [String: Any],
-              tokens.count >= 13,
-              let headings = payloads[NorseBaseThemeResourceIDs.headings],
+              tokens.count >= 13
+        else {
+            throw requiredFailure(
+                stage: .semanticJSON,
+                resourceID: NorseBaseThemeResourceIDs.palette,
+                code: .invalidSemanticJSON,
+                mediaType: .json
+            )
+        }
+
+        guard let headings = payloads[NorseBaseThemeResourceIDs.headings],
               let headingRoot = try? JSONSerialization.jsonObject(with: headings) as? [String: Any],
               let slots = headingRoot["decorativeHeadingSlots"] as? [String: Any],
               slots.count == 13
-        else { throw NorseBaseThemeResourceError.invalidVisualCatalog }
+        else {
+            throw requiredFailure(
+                stage: .semanticJSON,
+                resourceID: NorseBaseThemeResourceIDs.headings,
+                code: .invalidSemanticJSON,
+                mediaType: .json
+            )
+        }
 
         guard let localization = payloads[NorseBaseThemeResourceIDs.localization],
               let localizationRoot = try? JSONSerialization.jsonObject(with: localization) as? [String: Any],
               localizationRoot["locale"] as? String == "en"
-        else { throw NorseBaseThemeResourceError.invalidLocalizationCatalog }
+        else {
+            throw requiredFailure(
+                stage: .semanticJSON,
+                resourceID: NorseBaseThemeResourceIDs.localization,
+                code: .invalidSemanticJSON,
+                mediaType: .json
+            )
+        }
 
         guard let bindings = payloads[NorseBaseThemeResourceIDs.progressionBindings],
               let bindingRoot = try? JSONSerialization.jsonObject(with: bindings) as? [String: Any],
               let grants = bindingRoot["grants"] as? [[String: Any]],
               Set(grants.compactMap { $0["contentID"] as? String }).isSuperset(of: NorseProgressionBindingCatalog.contentIDs),
               grants.allSatisfy({ ($0["trigger"] as? String)?.isEmpty == false })
-        else { throw NorseBaseThemeResourceError.invalidProgressionBindings }
+        else {
+            throw requiredFailure(
+                stage: .semanticJSON,
+                resourceID: NorseBaseThemeResourceIDs.progressionBindings,
+                code: .invalidSemanticJSON,
+                mediaType: .json
+            )
+        }
 
         for (artifactID, geometryID) in NorseBaseThemeResourceIDs.geometryResourceIDs {
-            guard let geometry = payloads[geometryID],
-                  let root = try? JSONSerialization.jsonObject(with: geometry) as? [String: Any],
+            guard let geometry = payloads[geometryID] else {
+                if NorseBaseThemeResourceCatalog.definitions.first(where: {
+                    $0.id == geometryID
+                })?.requirement == .optional {
+                    continue
+                }
+                throw requiredFailure(
+                    stage: .geometry,
+                    resourceID: geometryID,
+                    code: .invalidGeometry,
+                    mediaType: .json
+                )
+            }
+            guard let root = try? JSONSerialization.jsonObject(with: geometry) as? [String: Any],
                   root["artifactID"] as? String == artifactID.rawValue,
                   let area = root["normalizedInscriptionSafeArea"] as? [String: Any],
                   let x = area["x"] as? Double,
@@ -221,8 +418,39 @@ public enum NorseBaseThemeResources {
                   let height = area["height"] as? Double,
                   x >= 0, y >= 0, width > 0, height > 0,
                   x + width <= 1, y + height <= 1
-            else { throw NorseBaseThemeResourceError.invalidGeometry(artifactID.rawValue) }
+            else {
+                throw requiredFailure(
+                    stage: .geometry,
+                    resourceID: geometryID,
+                    code: .invalidGeometry,
+                    mediaType: .json
+                )
+            }
         }
+    }
+
+    private static func requiredFailure(
+        stage: RequiredThemeResourceFailureStage,
+        resourceID: ThemeResourceID? = nil,
+        code: RequiredThemeResourceFailureCode,
+        expectedByteCount: Int? = nil,
+        actualByteCount: Int? = nil,
+        expectedSHA256Hex: String? = nil,
+        actualSHA256Hex: String? = nil,
+        mediaType: ThemeResourceMediaType? = nil
+    ) -> RequiredThemeResourceFailureDTO {
+        RequiredThemeResourceFailureDTO(
+            moduleID: RuneScribeModuleIDs.norseTheme,
+            codexID: RuneScribeCodexIDs.norse,
+            stage: stage,
+            resourceID: resourceID,
+            errorCode: code,
+            expectedByteCount: expectedByteCount.flatMap(UInt64.init(exactly:)),
+            actualByteCount: actualByteCount.flatMap(UInt64.init(exactly:)),
+            expectedSHA256: expectedSHA256Hex.flatMap(ThemeSHA256Digest.init(rawValue:)),
+            actualSHA256: actualSHA256Hex.flatMap(ThemeSHA256Digest.init(rawValue:)),
+            mediaType: mediaType
+        )
     }
 }
 
@@ -361,8 +589,12 @@ enum NorseBaseThemeResourceCatalog {
     }
 
     static func validates(_ payloads: [ThemeResourceID: Data]) -> Bool {
-        Set(payloads.keys) == Set(definitions.map(\.id)) && definitions.allSatisfy { definition in
-            guard let data = payloads[definition.id] else { return false }
+        let definedIDs = Set(definitions.map(\.id))
+        guard Set(payloads.keys).isSubset(of: definedIDs) else { return false }
+        return definitions.allSatisfy { definition in
+            guard let data = payloads[definition.id] else {
+                return definition.requirement == .optional
+            }
             return data.count == definition.byteCount && sha256Hex(data) == definition.sha256Hex
         }
     }
@@ -447,13 +679,13 @@ private enum NorseProductionManifest {
         seed("resource.accessibility.norse.en", "accessibility-localization", "application/json", 2_972, "376354f0c3fcf408b4bfdde894f1e38689ad83dd84d451d0202956af79d1c257", true),
         seed("resource.localization.norse.en", "content-localization", "application/json", 9_043, "58afc0693e8a35808c0776c6cd25069432cbd9b7227bd080ff0fa2bf4fe4a868", true),
         seed("resource.progression-bindings.norse", "progression-binding-catalog", "application/json", 4_826, "eeaaa67d71f3e8f3466fdd2a76b56f8ff673fa50325c7e17225223412f795bca", true),
-        seed("resource.sound.norse.unlock-minor", "unlock-sound-candidate", "audio/wav", 157_484, "86ff6f83532792c120885c4177fbf4577aea4d9c93ce1a00ae92ef675d663231", true),
+        seed("resource.sound.norse.unlock-minor", "unlock-sound", "audio/wav", 157_484, "86ff6f83532792c120885c4177fbf4577aea4d9c93ce1a00ae92ef675d663231", true),
         seed("resource.effect.norse.reveal-minor", "unlock-animation-cue", "application/json", 638, "7886f75c160e25dfca5afa836b5ba0a87bf0669eee7da7f40ab441c855f11eb5", true),
-        seed("resource.sound.norse.unlock-relic", "unlock-sound-candidate", "audio/wav", 245_804, "fd03dc2727db17991724175ad4de0e8441ceb635157869147e3ec4c4246d17d0", true),
+        seed("resource.sound.norse.unlock-relic", "unlock-sound", "audio/wav", 245_804, "fd03dc2727db17991724175ad4de0e8441ceb635157869147e3ec4c4246d17d0", true),
         seed("resource.effect.norse.reveal-relic", "unlock-animation-cue", "application/json", 797, "1f72a5bdd443ea8edb38604c90d7de8c5b6cefa18f486b7ddee918996a22cb0f", true),
-        seed("resource.sound.norse.unlock-codex", "unlock-sound-candidate", "audio/wav", 422_444, "92002d43b73dfbb6240ab8c3166b5044f9ebec9dc919925934774875caaa92f8", true),
+        seed("resource.sound.norse.unlock-codex", "unlock-sound", "audio/wav", 422_444, "92002d43b73dfbb6240ab8c3166b5044f9ebec9dc919925934774875caaa92f8", true),
         seed("resource.effect.norse.reveal-codex", "unlock-animation-cue", "application/json", 960, "7bb5b550ad37ea2cebf7619d78c165a62101b4e9a7b0d1dcee78801768161b4d", true),
-        seed("resource.sound.norse.unlock-mastery", "unlock-sound-candidate", "audio/wav", 508_844, "a5e4be793829f6abc73727f6441894d79d0e93b548f754dc35005aac529f2682", true),
+        seed("resource.sound.norse.unlock-mastery", "unlock-sound", "audio/wav", 508_844, "a5e4be793829f6abc73727f6441894d79d0e93b548f754dc35005aac529f2682", true),
         seed("resource.effect.norse.reveal-mastery", "unlock-animation-cue", "application/json", 882, "8abd4c76f20243d2da901a4a87ba5a691efadadc669a75da23b1e53f8f59364f", true),
         seed("resource.font.norse.noto-sans-runic", "required-base-script-font", "font/ttf", 55_800, "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b", true),
     ]
@@ -567,6 +799,10 @@ private enum NorseProductionManifest {
 
 private func sha256Hex(_ data: Data) -> String {
     SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+}
+
+private func hexadecimal(_ data: Data) -> String {
+    data.map { String(format: "%02x", $0) }.joined()
 }
 
 private extension Data {

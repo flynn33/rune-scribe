@@ -104,6 +104,204 @@ public struct RuneScribeFileShareLink: View {
     }
 }
 
+/// Launches one freshly prepared file share without requiring a second tap.
+/// The caller owns the preparation button and supplies a unique token only
+/// after the runtime artifact and its presentation lease are ready.
+public struct RuneScribePreparedFileShareLauncher: View {
+    @ObservedObject private var transfer: OpaqueShareTransfer
+    private let launchID: UUID
+    private let onPresented: @MainActor () -> Void
+    private let onFinish: @MainActor (SharePresentationCompletion) -> Void
+
+    public init(
+        transfer: OpaqueShareTransfer,
+        launchID: UUID,
+        onPresented: @escaping @MainActor () -> Void = {},
+        onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void
+    ) {
+        self.transfer = transfer
+        self.launchID = launchID
+        self.onPresented = onPresented
+        self.onFinish = onFinish
+    }
+
+    public var body: some View {
+        Group {
+            if let presentationURL = transfer.presentationURL {
+                #if os(iOS)
+                RuneScribeIOSAutomaticActivityLauncher(
+                    launchID: launchID,
+                    payload: .file(presentationURL),
+                    onPresented: reportPresented,
+                    onFinish: finish
+                )
+                #elseif os(macOS)
+                RuneScribeMacAutomaticShareControl(
+                    launchID: launchID,
+                    payload: .file(presentationURL),
+                    onPresented: reportPresented,
+                    onFinish: finish
+                )
+                #endif
+            }
+        }
+        .frame(width: 1, height: 1)
+        .opacity(0.001)
+        .accessibilityHidden(true)
+    }
+
+    private func reportPresented(on routeClass: ShareRouteClassDTO) {
+        transfer.beginReportingPresented(on: routeClass)
+        onPresented()
+    }
+
+    private func finish(_ report: SharePresentationReportDTO) {
+        Task { @MainActor in
+            do {
+                onFinish(.success(try await transfer.finish(report)))
+            } catch {
+                onFinish(.failure(error))
+            }
+        }
+    }
+}
+
+/// Launches one freshly prepared text share without requiring a second tap.
+/// This remains a compatibility rail; canonical themed message operations use
+/// the file launcher whenever Core supplies the typed package.
+public struct RuneScribePreparedTextShareLauncher: View {
+    @ObservedObject private var transfer: OpaqueShareTransfer
+    private let launchID: UUID
+    private let onPresented: @MainActor () -> Void
+    private let onFinish: @MainActor (SharePresentationCompletion) -> Void
+
+    public init(
+        transfer: OpaqueShareTransfer,
+        launchID: UUID,
+        onPresented: @escaping @MainActor () -> Void = {},
+        onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void
+    ) {
+        self.transfer = transfer
+        self.launchID = launchID
+        self.onPresented = onPresented
+        self.onFinish = onFinish
+    }
+
+    public var body: some View {
+        Group {
+            if let text = transfer.presentationText {
+                #if os(iOS)
+                RuneScribeIOSAutomaticActivityLauncher(
+                    launchID: launchID,
+                    payload: .text(text),
+                    onPresented: reportPresented,
+                    onFinish: finish
+                )
+                #elseif os(macOS)
+                RuneScribeMacAutomaticShareControl(
+                    launchID: launchID,
+                    payload: .text(text),
+                    onPresented: reportPresented,
+                    onFinish: finish
+                )
+                #endif
+            }
+        }
+        .frame(width: 1, height: 1)
+        .opacity(0.001)
+        .accessibilityHidden(true)
+    }
+
+    private func reportPresented(on routeClass: ShareRouteClassDTO) {
+        transfer.beginReportingPresented(on: routeClass)
+        onPresented()
+    }
+
+    private func finish(_ report: SharePresentationReportDTO) {
+        Task { @MainActor in
+            do {
+                onFinish(.success(try await transfer.finish(report)))
+            } catch {
+                onFinish(.failure(error))
+            }
+        }
+    }
+}
+
+/// Launches an explicitly requested compact cipher-link fallback. The primary
+/// Cipher Library path remains the typed file launcher above.
+public struct RuneScribePreparedCipherLinkLauncher: View {
+    @ObservedObject private var transfer: OpaqueShareTransfer
+    private let cipherLabel: String
+    private let launchID: UUID
+    private let onPresented: @MainActor () -> Void
+    private let onFinish: @MainActor (SharePresentationCompletion) -> Void
+
+    public init(
+        transfer: OpaqueShareTransfer,
+        cipherLabel: String,
+        launchID: UUID,
+        onPresented: @escaping @MainActor () -> Void = {},
+        onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void
+    ) {
+        self.transfer = transfer
+        self.cipherLabel = cipherLabel
+        self.launchID = launchID
+        self.onPresented = onPresented
+        self.onFinish = onFinish
+    }
+
+    public var body: some View {
+        Group {
+            if let presentationURL = transfer.presentationURL {
+                #if os(iOS)
+                RuneScribeIOSAutomaticActivityLauncher(
+                    launchID: launchID,
+                    payload: .link(
+                        presentationURL,
+                        previewTitle: "Rune Scribe cipher: \(cipherLabel)",
+                        previewSystemImage: "link",
+                        subject: "Rune Scribe cipher: \(cipherLabel)",
+                        message: "Tap to open in Rune Scribe and import this cipher so you can decode my messages."
+                    ),
+                    onPresented: reportPresented,
+                    onFinish: finish
+                )
+                #elseif os(macOS)
+                RuneScribeMacAutomaticShareControl(
+                    launchID: launchID,
+                    payload: .link(
+                        presentationURL,
+                        subject: "Rune Scribe cipher: \(cipherLabel)",
+                        message: "Tap to open in Rune Scribe and import this cipher so you can decode my messages."
+                    ),
+                    onPresented: reportPresented,
+                    onFinish: finish
+                )
+                #endif
+            }
+        }
+        .frame(width: 1, height: 1)
+        .opacity(0.001)
+        .accessibilityHidden(true)
+    }
+
+    private func reportPresented(on routeClass: ShareRouteClassDTO) {
+        transfer.beginReportingPresented(on: routeClass)
+        onPresented()
+    }
+
+    private func finish(_ report: SharePresentationReportDTO) {
+        Task { @MainActor in
+            do {
+                onFinish(.success(try await transfer.finish(report)))
+            } catch {
+                onFinish(.failure(error))
+            }
+        }
+    }
+}
+
 public struct RuneScribeTextShareLink: View {
     @ObservedObject private var transfer: OpaqueShareTransfer
     private let onShareTriggered: @MainActor () -> Void
@@ -337,6 +535,31 @@ private struct RuneScribeIOSActivityButton<Label: View>: View {
             RuneScribeIOSActivityPresenter(presentation: presentation)
                 .allowsHitTesting(false)
         }
+    }
+}
+
+@MainActor
+private struct RuneScribeIOSAutomaticActivityLauncher: View {
+    let launchID: UUID
+    let payload: RuneScribeIOSActivityPayload
+    let onPresented: @MainActor (ShareRouteClassDTO) -> Void
+    let onFinish: @MainActor (SharePresentationReportDTO) -> Void
+
+    @State private var presentation: RuneScribeIOSActivityPresentation?
+
+    var body: some View {
+        RuneScribeIOSActivityPresenter(presentation: presentation)
+            .task(id: launchID) {
+                guard presentation == nil else { return }
+                presentation = RuneScribeIOSActivityPresentation(
+                    payload: payload,
+                    onPresented: onPresented,
+                    onFinish: { report in
+                        onFinish(report)
+                        presentation = nil
+                    }
+                )
+            }
     }
 }
 
@@ -631,9 +854,8 @@ private final class RuneScribeIOSActivityPresenterController: UIViewController,
     }
 }
 
-@MainActor
 private final class RuneScribeIOSActivityItemSource: NSObject,
-    @preconcurrency UIActivityItemSource
+    UIActivityItemSource
 {
     private let url: URL
     private let previewTitle: String
@@ -772,6 +994,40 @@ private struct RuneScribeMacShareControl: NSViewRepresentable {
     }
 }
 
+private struct RuneScribeMacAutomaticShareControl: NSViewRepresentable {
+    let launchID: UUID
+    let payload: RuneScribeMacSharePayload
+    let onPresented: @MainActor (ShareRouteClassDTO) -> Void
+    let onFinish: @MainActor (SharePresentationReportDTO) -> Void
+
+    func makeNSView(context: Context) -> RuneScribeMacShareView {
+        let view = RuneScribeMacShareView()
+        configure(view)
+        return view
+    }
+
+    func updateNSView(_ view: RuneScribeMacShareView, context: Context) {
+        configure(view)
+    }
+
+    static func dismantleNSView(_ view: RuneScribeMacShareView, coordinator: ()) {
+        view.cancelPresentation()
+    }
+
+    private func configure(_ view: RuneScribeMacShareView) {
+        view.configure(
+            payload: payload,
+            accessibilityLabel: "Share",
+            help: "Share via Messages, Mail…",
+            onShareTriggered: {},
+            onPresented: onPresented,
+            onFinish: onFinish,
+            onPresentation: { _ in }
+        )
+        view.presentAutomatically(launchID: launchID)
+    }
+}
+
 @MainActor
 private final class RuneScribeMacShareView: NSView,
     @preconcurrency NSSharingServicePickerDelegate,
@@ -786,6 +1042,8 @@ private final class RuneScribeMacShareView: NSView,
     private var chosenService: NSSharingService?
     private var presentationHandle: RuneScribeSharePresentationHandle?
     private var didFinish = false
+    private var pendingAutomaticLaunchID: UUID?
+    private var lastAutomaticLaunchID: UUID?
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -800,6 +1058,11 @@ private final class RuneScribeMacShareView: NSView,
     }
 
     override var acceptsFirstResponder: Bool { true }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        presentPendingAutomaticLaunchIfPossible()
+    }
 
     override var focusRingMaskBounds: NSRect { bounds }
 
@@ -858,7 +1121,27 @@ private final class RuneScribeMacShareView: NSView,
         finish(result: .cancelled)
     }
 
-    private func presentPicker() {
+    func presentAutomatically(launchID: UUID) {
+        guard launchID != lastAutomaticLaunchID,
+              launchID != pendingAutomaticLaunchID
+        else { return }
+        pendingAutomaticLaunchID = launchID
+        presentPendingAutomaticLaunchIfPossible()
+    }
+
+    private func presentPendingAutomaticLaunchIfPossible() {
+        guard window != nil,
+              let launchID = pendingAutomaticLaunchID,
+              picker == nil
+        else { return }
+        pendingAutomaticLaunchID = nil
+        lastAutomaticLaunchID = launchID
+        DispatchQueue.main.async { [weak self] in
+            self?.presentPicker()
+        }
+    }
+
+    fileprivate func presentPicker() {
         guard picker == nil else { return }
         didFinish = false
         onShareTriggered()

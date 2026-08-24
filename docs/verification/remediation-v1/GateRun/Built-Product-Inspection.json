@@ -1,0 +1,150 @@
+{
+  "build": "39",
+  "producer": {
+    "path": "scripts/capture-remediation-domain-results.py",
+    "sha256": "102c1d263d335bc6c4ad88f3025ca0e92e519321b9f5c077bcc7df366e675d1f"
+  },
+  "products": [
+    {
+      "architectures": [
+        "arm64"
+      ],
+      "configuration": {
+        "CFBundleIdentifier": "com.runescribe.app",
+        "CFBundlePackageType": "APPL",
+        "CFBundleShortVersionString": "1.0.39",
+        "CFBundleSupportedPlatforms": [
+          "MacOSX"
+        ],
+        "CFBundleVersion": "39",
+        "GKGameCenter": null,
+        "NSUbiquitousContainers": null,
+        "cloudKitContainerIdentifiers": [
+          "iCloud.com.runescribe.app"
+        ],
+        "cloudKitServices": [
+          "CloudKit"
+        ],
+        "gameCenterEntitlement": true
+      },
+      "entitlementInspections": [
+        {
+          "architecture": "arm64",
+          "entitlements": {
+            "com.apple.developer.game-center": true,
+            "com.apple.developer.icloud-container-identifiers": [
+              "iCloud.com.runescribe.app"
+            ],
+            "com.apple.developer.icloud-services": [
+              "CloudKit"
+            ],
+            "com.apple.developer.ubiquity-kvstore-identifier": "$(TeamIdentifierPrefix)com.runescribe.app",
+            "com.apple.security.app-sandbox": true,
+            "com.apple.security.files.user-selected.read-write": true,
+            "com.apple.security.personal-information.addressbook": true
+          },
+          "method": "codesign",
+          "sha256": "b50e5a80401e936ac56665d86c5e2615a75dd5b1dca3899d4efe5ed445f88134"
+        }
+      ],
+      "executablePath": "RuneScrib.app/Contents/MacOS/RuneScrib",
+      "executableSHA256": "4ec8b4589e65bac5b2a94acf77f37480fc8cdcee922b2ca4c442d357a373baf4",
+      "infoPlistPath": "RuneScrib.app/Contents/Info.plist",
+      "infoPlistSHA256": "ff96d6e22fc6fcc667d8bd9a93c2995851a89ef94a350ad0799879a90b4c64d7",
+      "path": "artifacts/remediation-v1/RuneScrib-macOS-Release.app.zip",
+      "platform": "macOS",
+      "sha256": "e900bd81ac05c3d0b71e12eb8ceaa49ed5fd466e7c32ff51d1136817514327e8"
+    },
+    {
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "configuration": {
+        "CFBundleIdentifier": "com.runescribe.app",
+        "CFBundlePackageType": "APPL",
+        "CFBundleShortVersionString": "1.0.39",
+        "CFBundleSupportedPlatforms": [
+          "iPhoneSimulator"
+        ],
+        "CFBundleVersion": "39",
+        "GKGameCenter": null,
+        "NSUbiquitousContainers": null,
+        "cloudKitContainerIdentifiers": [
+          "iCloud.com.runescribe.app"
+        ],
+        "cloudKitServices": [
+          "CloudKit"
+        ],
+        "gameCenterEntitlement": true
+      },
+      "entitlementInspections": [
+        {
+          "architecture": "x86_64",
+          "entitlements": {
+            "application-identifier": "9AQ2C2838M.com.runescribe.app",
+            "com.apple.developer.game-center": true,
+            "com.apple.developer.icloud-container-identifiers": [
+              "iCloud.com.runescribe.app"
+            ],
+            "com.apple.developer.icloud-services": [
+              "CloudKit"
+            ],
+            "com.apple.developer.ubiquity-kvstore-identifier": "9AQ2C2838M.com.runescribe.app",
+            "keychain-access-groups": [
+              "9AQ2C2838M.com.runescribe.app"
+            ]
+          },
+          "method": "otool-__TEXT-__entitlements",
+          "sha256": "6c6f3a11943bec56f5341aca99369d048fea446b5bf48484679a02725004b6fc"
+        },
+        {
+          "architecture": "arm64",
+          "entitlements": {
+            "application-identifier": "9AQ2C2838M.com.runescribe.app",
+            "com.apple.developer.game-center": true,
+            "com.apple.developer.icloud-container-identifiers": [
+              "iCloud.com.runescribe.app"
+            ],
+            "com.apple.developer.icloud-services": [
+              "CloudKit"
+            ],
+            "com.apple.developer.ubiquity-kvstore-identifier": "9AQ2C2838M.com.runescribe.app",
+            "keychain-access-groups": [
+              "9AQ2C2838M.com.runescribe.app"
+            ]
+          },
+          "method": "otool-__TEXT-__entitlements",
+          "sha256": "6c6f3a11943bec56f5341aca99369d048fea446b5bf48484679a02725004b6fc"
+        }
+      ],
+      "executablePath": "RuneScrib.app/RuneScrib",
+      "executableSHA256": "83ee12b425707786d9430324d822e1add0312d871ce21c6d9af0d66a46e39485",
+      "infoPlistPath": "RuneScrib.app/Info.plist",
+      "infoPlistSHA256": "9766692f4891bf6a131abc9baa554d34d10491e677c9f5427c4b29ecfac43e92",
+      "path": "artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip",
+      "platform": "iOS",
+      "sha256": "3e505eafc011a395dbc4c5dfcec2a9cf4f712bc8c18a418b0613f3dd9782be2b"
+    }
+  ],
+  "rawLog": "docs/verification/remediation-v1/GateRun/final-qualification.log",
+  "rawLogSHA256": "b8a6a895be57e082c3964031da81e379830760b5869b4912a92e6b58e2b19126",
+  "schemaVersion": "1.0",
+  "shippingValidation": {
+    "checkCount": 101,
+    "checkerPath": "scripts/check-shipping-products.sh",
+    "checkerSHA256": "7a054350e086de7bc920cdd265b608c541200160704ae221bc32715d32aa1134",
+    "command": "/bin/bash scripts/check-shipping-products.sh --macos-app ${EXTRACTED_MACOS_APP} --ios-app ${EXTRACTED_IOS_APP}",
+    "log": "docs/verification/remediation-v1/GateRun/shipping-products.log",
+    "logSHA256": "be1495da18d8ee588b364c074a112a856800d33866530005a1d33fbe3715837a",
+    "result": "PASS",
+    "signatureKinds": {
+      "iOS": "ad-hoc",
+      "macOS": "ad-hoc"
+    }
+  },
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "version": "1.0.39"
+}

@@ -12,6 +12,10 @@ public protocol RuneScribeThemeCoordinatorService: Sendable {
         _ command: SelectThemeCodexCommand,
         metadata: RuntimeOperationMetadata
     ) async throws -> ThemeCoordinatorSnapshotDTO
+    func providerDescriptor(
+        _ request: ThemeProviderDescriptorRequestDTO,
+        metadata: RuntimeOperationMetadata
+    ) async throws -> ThemeDescriptor
     func resolveResource(
         _ request: ResolveThemeResourceRequestDTO,
         metadata: RuntimeOperationMetadata
@@ -94,6 +98,15 @@ public enum RuntimeThemeEndpointCatalog {
         maximumResponseBytes: resourceLimit
     )
 
+    public static let providerDescriptor: RuntimeEndpointKey<
+        ThemeProviderDescriptorRequestDTO,
+        ThemeDescriptor
+    > = endpoint(
+        "theme.provider.descriptor",
+        kind: .query,
+        capability: RuneScribeCapabilities.themeStateRead
+    )
+
     public static let diagnostics: RuntimeEndpointKey<
         RuntimeEmptyPayload,
         ThemeCoordinatorDiagnosticsDTO
@@ -107,6 +120,7 @@ public enum RuntimeThemeEndpointCatalog {
         state.endpointID,
         selectCodex.descriptor.endpointID,
         resolveResource.descriptor.endpointID,
+        providerDescriptor.descriptor.endpointID,
         diagnostics.descriptor.endpointID,
         snapshot.descriptor.endpointID,
     ]
@@ -115,6 +129,7 @@ public enum RuntimeThemeEndpointCatalog {
         state.endpointID,
         selectCodex.descriptor.endpointID,
         resolveResource.descriptor.endpointID,
+        providerDescriptor.descriptor.endpointID,
         snapshot.descriptor.endpointID,
     ]
 }
@@ -139,6 +154,10 @@ public extension ModuleContext {
         try await registerEndpoint(RuntimeThemeEndpointCatalog.resolveResource) {
             metadata, request in
             try await service.resolveResource(request, metadata: metadata)
+        }
+        try await registerEndpoint(RuntimeThemeEndpointCatalog.providerDescriptor) {
+            metadata, request in
+            try await service.providerDescriptor(request, metadata: metadata)
         }
         try await registerEndpoint(RuntimeThemeEndpointCatalog.diagnostics) {
             metadata, _ in
@@ -203,6 +222,15 @@ public struct RuntimeThemeCoordinatorClient: Sendable {
         try await query.fetch(
             request,
             from: RuntimeThemeEndpointCatalog.resolveResource
+        )
+    }
+
+    public func providerDescriptor(
+        for codexID: CodexID
+    ) async throws -> ThemeDescriptor {
+        try await query.fetch(
+            ThemeProviderDescriptorRequestDTO(codexID: codexID),
+            from: RuntimeThemeEndpointCatalog.providerDescriptor
         )
     }
 

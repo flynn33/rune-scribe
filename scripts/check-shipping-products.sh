@@ -276,8 +276,8 @@ errors << "platform marketing versions differ" unless marketing_versions.uniq.le
 errors << "platform build numbers differ" unless build_versions.uniq.length == 1
 errors << "marketing version is malformed" unless marketing_versions.first.to_s.match?(/\A\d+(?:\.\d+){1,2}\z/)
 errors << "build number is malformed" unless build_versions.first.to_s.match?(/\A\d+\z/)
-errors << "built marketing version differs from frozen 1.0.38" unless marketing_versions == ["1.0.38", "1.0.38"]
-errors << "built build number differs from frozen 38" unless build_versions == ["38", "38"]
+errors << "built marketing version differs from frozen 1.0.39" unless marketing_versions == ["1.0.39", "1.0.39"]
+errors << "built build number differs from frozen 39" unless build_versions == ["39", "39"]
 
 puts errors
 exit(errors.empty? ? 0 : 1)
@@ -870,7 +870,7 @@ expected = {
   ],
   "module-manifest.json" => [
     2494,
-    "b6a25bb50010cf68c68c94dd6331a8a30ff27fcdb90872c61e2b628e508f4ca7"
+    "b448bfdc77e990359df5b31bdce329d195f60a28c2f496faf6a86d26ba23197f"
   ]
 }
 
@@ -946,8 +946,8 @@ errors = []
 expected_by_module = {
   "Theme Coordinator" => {
     "module-manifest.json" => [
-      1215,
-      "aaa6a0e08f4b7ae9c1fa39a26990dbd7909824aaf6efae08492ab8f86f48507c"
+      1248,
+      "3081817bb182afe213e6b151fec9fd57795129da37a20448d7b0725cd361879c"
     ]
   },
   "Norse Theme" => {}
@@ -955,8 +955,8 @@ expected_by_module = {
 
 norse_integrity_name = "Norse-Resource-Integrity-Manifest-v1.0.json"
 norse_integrity_contract = [
-  24_610,
-  "8bfb935ca4d3b82bdee00ce0f21756811e0d34460c9002dfed4c56ce13f1eb0a"
+  24_187,
+  "4c59d88099a7561d9983b148d5d4ab860c514d5b0645f03df1f5ac8cc9338a30"
 ]
 norse_fixed_resources = {
   "module-manifest.json" => [
@@ -964,6 +964,10 @@ norse_fixed_resources = {
     "cd7d1d28ef3efff04daf2f6ad9103dc83d174e00470592a9d918d187ac8cb804"
   ],
   norse_integrity_name => norse_integrity_contract,
+  "Norse-Production-Asset-Provenance-v1.0.json" => [
+    54_597,
+    "105fb4f5f966e3071f1e75d2f2aa590279f30ed1368dfd613d7045575c6b9f8c"
+  ],
   "crest.norse.forge-master.png" => [123_379, "50a2620294a19c3fa6be7129e1d4973c90ee7abea3fe71ce5640f60ca4a6635f"],
   "frame.norse.carved-knotwork.png" => [120_537, "632dc82de68d83a8ecec315d7ca7bbda54bbf242b3d5afed3691af0af0d4d36a"],
   "seal.norse.echo-rune.png" => [159_691, "f98d9f2de501b78586363c3abe0b4949142bdd46523bc2e7c6a4e5d95da6aa36"],
@@ -1158,6 +1162,15 @@ non_theme_resource_contracts = {
       "unlock_micro.wav" => [
         24_300,
         "49c4cfb544be9dc7d42d31cc6f1da82fcc96e02fd78ee7ca60f165d1a0eaa8c5"
+      ]
+    }
+  },
+  "UI" => {
+    bundle: "RuneScribeArchitecture_RuneScribeUIModule.bundle",
+    files: {
+      "module-manifest.json" => [
+        3_084,
+        "0401ca85bd4edc005f80d6c4960be2cf47e2ae9b26c7943dc7387162ae857df8"
       ]
     }
   }
@@ -1483,6 +1496,9 @@ attribution_terms = [
 maximum_term_bytes = attribution_terms.map(&:bytesize).max
 placeholder_terms = [
   "placeholder",
+  "shipping " + "candidate",
+  "unlock-sound-" + "candidate",
+  "final conversion " + "still remains",
   "temporary provider",
   "example provider",
   "sample provider",
@@ -1541,7 +1557,7 @@ then
   pass_check "both products preserve the exact canonical SwiftPM resource-bundle census"
   pass_check "both products contain exactly four canonical Elven providers and all 184 accepted v3.1 outputs"
   pass_check "Elven provider resources preserve exact hashes, sizes, budgets, declarations, and cross-platform parity"
-  pass_check "Game Center and Platform resource bundles preserve exact hashes, inventories, and cross-platform parity"
+  pass_check "Game Center, Platform, and UI resource bundles preserve exact hashes, inventories, and cross-platform parity"
   pass_check "shipping products exclude misplaced Theme resources, placeholders, Source-Masters, debug/test catalogs, and prohibited attribution"
 else
   validation_detail=false
@@ -1555,7 +1571,7 @@ else
   fail_check "shipping products do not preserve the exact canonical SwiftPM resource-bundle census"
   fail_check "Elven providers or accepted v3.1 shipping resources differ"
   fail_check "Elven provider resource budgets, declarations, or cross-platform parity differ"
-  fail_check "Game Center or Platform resource hashes, inventories, or cross-platform parity differ"
+  fail_check "Game Center, Platform, or UI resource hashes, inventories, or cross-platform parity differ"
   fail_check "shipping products contain misplaced Theme resources or prohibited provider, source, catalog, or attribution content"
 fi
 
@@ -1668,6 +1684,7 @@ paths.each_with_index do |path, index|
     expected_endpoints = [
       "theme.codex.select",
       "theme.diagnostics.summary",
+      "theme.provider.descriptor",
       "theme.resource.resolve",
       "theme.state",
       "theme.state.current"
@@ -2029,9 +2046,9 @@ errors << "project.yml package declarations differ" unless project.fetch("packag
 
 base_settings = project.dig("settings", "base")
 unless base_settings.is_a?(Hash) &&
-    base_settings["MARKETING_VERSION"] == "1.0.38" &&
-    base_settings["CURRENT_PROJECT_VERSION"] == "38"
-  errors << "project.yml version/build differ from frozen 1.0.38 (38)"
+    base_settings["MARKETING_VERSION"] == "1.0.39" &&
+    base_settings["CURRENT_PROJECT_VERSION"] == "39"
+  errors << "project.yml version/build differ from frozen 1.0.39 (39)"
 end
 
 expected_macos_entitlements = {
@@ -2488,9 +2505,9 @@ end
 
 configurations_for(objects, project_object, "generated project", errors).each do |configuration|
   settings = configuration.fetch("buildSettings", {})
-  unless settings["MARKETING_VERSION"] == "1.0.38" &&
-      settings["CURRENT_PROJECT_VERSION"] == "38"
-    errors << "generated project #{configuration['name']} version/build differ from frozen 1.0.38 (38)"
+  unless settings["MARKETING_VERSION"] == "1.0.39" &&
+      settings["CURRENT_PROJECT_VERSION"] == "39"
+    errors << "generated project #{configuration['name']} version/build differ from frozen 1.0.39 (39)"
   end
   forbidden_build_settings.each do |setting|
     errors << "generated project #{configuration['name']} injects #{setting}" if settings.key?(setting)
