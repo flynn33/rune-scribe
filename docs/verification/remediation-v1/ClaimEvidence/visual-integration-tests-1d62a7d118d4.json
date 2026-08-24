@@ -1,0 +1,89 @@
+{
+  "artifacts": [
+    {
+      "kind": "structured-suite-result",
+      "path": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "sha256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3"
+    },
+    {
+      "kind": "raw-test-log",
+      "path": "docs/verification/remediation-v1/GateRun/final-qualification.log",
+      "sha256": "b8a6a895be57e082c3964031da81e379830760b5869b4912a92e6b58e2b19126"
+    },
+    {
+      "kind": "test-evidence",
+      "path": "docs/verification/remediation-v1/Screenshots/iphone-norse-result.png",
+      "sha256": "2a0287c6f6de2844f067c03ff20fdf4ac1caf836c158cef1ac39ef3c65d00bb0"
+    },
+    {
+      "kind": "test-evidence",
+      "path": "docs/verification/remediation-v1/Screenshots/iphone-norse-workspace.png",
+      "sha256": "2a0287c6f6de2844f067c03ff20fdf4ac1caf836c158cef1ac39ef3c65d00bb0"
+    },
+    {
+      "kind": "test-evidence",
+      "path": "docs/verification/remediation-v1/Screenshots/iphone-settings-codices.png",
+      "sha256": "932bcf86e45fe81353b4656614b7f1d250712bd05af22e49ee0be420caa9c490"
+    },
+    {
+      "kind": "test-evidence",
+      "path": "docs/verification/remediation-v1/Screenshots/iphone-vault.png",
+      "sha256": "54a8761f85e8c7a3571a9a0e306d2b9cf73dba79beaddc79a8f3e45b9f7db66e"
+    }
+  ],
+  "build": "39",
+  "claim": "visual integration tests",
+  "executions": [
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "iphone-norse-workspace.png",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-010"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "iphone-norse-result.png",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-011"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "iphone-settings-codices.png",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-012"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "iphone-vault.png",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-013"
+    }
+  ],
+  "gateIDs": [
+    "RC-006"
+  ],
+  "schemaVersion": "1.0",
+  "semanticMarkers": [],
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "testIDs": [
+    "T-010",
+    "T-011",
+    "T-012",
+    "T-013"
+  ],
+  "version": "1.0.39"
+}

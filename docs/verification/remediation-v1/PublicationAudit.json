@@ -1,0 +1,23 @@
+{
+  "appStorePerformed": false,
+  "branch": "fix/rune-scribe-remediation-v1",
+  "build": "39",
+  "checkedAt": "2026-08-24T08:15:05Z",
+  "command": "set -euo pipefail; revision=5642f169a72eccd8615e284816db63a75a0a18c1; branch=$(git branch --show-current); default_branch=main; git fetch --prune origin >/dev/null; test \"$branch\" = fix/rune-scribe-remediation-v1; test -z \"$(git tag --points-at \"$revision\")\"; if git merge-base --is-ancestor \"$revision\" \"origin/$default_branch\"; then exit 1; fi; releases=$(gh release list --repo flynn33/rune-scribe --limit 100 --json tagName,isDraft,isPrerelease,publishedAt); runs=$(gh run list --repo flynn33/rune-scribe --branch \"$branch\" --limit 20 --json databaseId,status,conclusion,event,workflowName,headSha); printf 'REMOTE_RELEASES=%s\\nREMOTE_BRANCH_RUNS=%s\\nDEFAULT_BRANCH=%s\\nBRANCH=%s\\nSOURCE_REVISION=%s\\nPUBLICATION_AUDIT_PASS\\nREMOTE_INSPECTION_PERFORMED=true\\nHEAD_TAGS=NONE\\nSOURCE_MERGED_TO_DEFAULT=false\\nRELEASE_PUBLISHED=false\\nUPLOAD_PERFORMED=false\\nNOTARIZATION_PERFORMED=false\\nTESTFLIGHT_PERFORMED=false\\nAPPSTORE_PERFORMED=false\\nROLLOUT_PERFORMED=false\\n' \"$releases\" \"$runs\" \"$default_branch\" \"$branch\" \"$revision\"",
+  "defaultBranch": "main",
+  "headTags": [],
+  "log": "docs/verification/remediation-v1/GateRun/publication-audit.log",
+  "logSHA256": "6a779c3be17b502672a40e189f6b7a50c866ee607b2db6248ae7c2396c997759",
+  "notarizationPerformed": false,
+  "releasePublished": false,
+  "remoteInspectionPerformed": true,
+  "rolloutPerformed": false,
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceMergedToDefault": false,
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "testFlightPerformed": false,
+  "uploadPerformed": false,
+  "version": "1.0.39"
+}

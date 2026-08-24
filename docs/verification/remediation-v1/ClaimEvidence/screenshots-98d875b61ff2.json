@@ -1,0 +1,54 @@
+{
+  "artifacts": [
+    {
+      "kind": "structured-suite-result",
+      "path": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "sha256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3"
+    },
+    {
+      "kind": "raw-test-log",
+      "path": "docs/verification/remediation-v1/GateRun/final-qualification.log",
+      "sha256": "b8a6a895be57e082c3964031da81e379830760b5869b4912a92e6b58e2b19126"
+    },
+    {
+      "kind": "test-evidence",
+      "path": "docs/verification/remediation-v1/Screenshots/iphone-settings-moonleaf.png",
+      "sha256": "a2f6a32d2e5150892e92700a823f8f5f7b0e797b43244c80f9bb4db72a8c5a7d"
+    },
+    {
+      "kind": "test-evidence",
+      "path": "docs/verification/remediation-v1/Screenshots/iphone-vault-moonleaf.png",
+      "sha256": "0f703fda32f3f651676eff63453eaf592e7440a9cb85e6d53819bd20e1d2c1bc"
+    },
+    {
+      "kind": "test-evidence",
+      "path": "docs/verification/remediation-v1/Screenshots/iphone-workspace-moonleaf.png",
+      "sha256": "44b655e965a3008b09f7f274b8c9108f087e0f031e2d2a439b38295e68122534"
+    }
+  ],
+  "build": "39",
+  "claim": "screenshots",
+  "executions": [
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "screenshots",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-071"
+    }
+  ],
+  "gateIDs": [
+    "RC-021"
+  ],
+  "schemaVersion": "1.0",
+  "semanticMarkers": [],
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "testIDs": [
+    "T-071"
+  ],
+  "version": "1.0.39"
+}

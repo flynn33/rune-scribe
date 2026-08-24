@@ -1,0 +1,141 @@
+{
+  "artifactSHA256": {
+    "docs/architecture/RoadmapAlignment.md": "e70db958b0e196dd11a39e917ad4bc461d932a8db7858b539176f59c4d86efb4",
+    "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md": "884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4",
+    "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md": "2b6ce54c50538419d324692ebfeec1bb29de46add9f354368d39169d6f74ed40",
+    "docs/verification/remediation-v1/Baseline.json": "2bcf4fa1fd88892c287ba56448991e347321dd4a7bedd40241a10c6ccee21615",
+    "docs/verification/remediation-v1/ClaimEvidence/architecture-logs-6e9697e6a6b8.json": "8182cfe29bc4202e81dd49ab62292c94a4eeaf29ccf1ff7d02336e10ae1667e3",
+    "docs/verification/remediation-v1/ClaimEvidence/roadmap-alignment-log-3a2a21f6475f.json": "06a0ef6c08c20e92d0766a90234c11c44ebb1c73fc96f5e2d326231dbb84fda9",
+    "docs/verification/remediation-v1/GateRun/NoGit-Completion-Result.json": "6a1f527c1b2f7cf63e920784d032ad7bca1e5524151a5c76d316983dfe523adf",
+    "docs/verification/remediation-v1/GateRun/final-qualification-results.json": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+    "docs/verification/remediation-v1/GateRun/forsetti.log": "a102958e736565be065d26413d1e4706e22e8ce9f52d977a82e34ae41d91ca1a",
+    "docs/verification/remediation-v1/GateRun/ipad-ui.log": "ad0806ccdc1bb8ec64972b56183129c2715854945815ef8526c1ebd640086df8",
+    "docs/verification/remediation-v1/GateRun/iphone-ui.log": "9fd543c7041ec8647dea4d2525d4ee89bda3e8aa538ff03c04504603940bcdf7",
+    "docs/verification/remediation-v1/GateRun/macos-parity.log": "614aea1ddb16aea1a3d0ace11c414220159596b54a0eeeb20038a435bcfa4f20",
+    "docs/verification/remediation-v1/GateRun/static-qualification.log": "1c57cd86c6a93ac0bd7b5355aa03f09ef1ec25b13a98e0af1bc6084156803680",
+    "docs/verification/remediation-v1/GateRun/swift-package.log": "cdbceb34bc98065d8d9c4e3e75ebc960a953ebee4ae4fab5e4ce39f3223a5be3",
+    "docs/verification/remediation-v1/GateRun/xcodegen-determinism.log": "ce12f1b9c07fac374c5a7aa44c12ed8f4ab69322d4d3ab31fa27c239eb94fc11",
+    "docs/verification/remediation-v1/NegativeMutations.json": "e431b5b69fb1d09c9a35b5cc3df1caec3fdcca5757de1b590b4ad32bd715af83",
+    "docs/verification/remediation-v1/SOURCE-MANIFEST.before.json": "700f33cdf7c95270294f93b1c9f34d04a6a3134e2785e2a4a12abb1a0efc9e37",
+    "docs/verification/remediation-v1/SOURCE-MANIFEST.json": "08acfc39638598c634441a26d59ee4e2aa9b33e145f9eb0eb042d194019f8e75",
+    "docs/verification/roadmap-alignment.json": "ff970d7d1de51c70f6bd2c0eb429997b9891c8f6c8d62d8fba5a4635be0dcf5d",
+    "scripts/capture-remediation-domain-results.py": "102c1d263d335bc6c4ad88f3025ca0e92e519321b9f5c077bcc7df366e675d1f",
+    "scripts/check-documentation-alignment.py": "8de34a8b5106dfaf6968ff5e45dcdc02db698748b802681319308537f27d0c5e",
+    "scripts/check-remediation-completion.py": "42a9307a8945af64b4b8b2c76ad47fdf218288b29ca6b7eea2cd93e7708579d6",
+    "scripts/check-roadmap-alignment.sh": "b5b66974e37a4e214588883d6301d19e6760fd28a14c70a73d09013cb5cf8217",
+    "scripts/check-roadmap-completion.py": "dab36c716da5b509ef19f896af88a14ac1ffa45e3e1130671817b7d0c7d6b0e5",
+    "scripts/generate-remediation-evidence.py": "4e83c26cf68bf357ac74d73602e5f77d7f406d2539117475fbd0b4283f82bb19",
+    "scripts/generate-source-manifest.py": "b5c385ae852e15a5f558098b94d47032f150cbec9e98b158094d9c5c8eab31e0"
+  },
+  "artifacts": [
+    "docs/architecture/RoadmapAlignment.md",
+    "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md",
+    "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md",
+    "docs/verification/remediation-v1/Baseline.json",
+    "docs/verification/remediation-v1/ClaimEvidence/architecture-logs-6e9697e6a6b8.json",
+    "docs/verification/remediation-v1/ClaimEvidence/roadmap-alignment-log-3a2a21f6475f.json",
+    "docs/verification/remediation-v1/GateRun/NoGit-Completion-Result.json",
+    "docs/verification/remediation-v1/NegativeMutations.json",
+    "docs/verification/remediation-v1/SOURCE-MANIFEST.before.json",
+    "docs/verification/remediation-v1/SOURCE-MANIFEST.json",
+    "docs/verification/roadmap-alignment.json",
+    "scripts/capture-remediation-domain-results.py",
+    "scripts/check-documentation-alignment.py",
+    "scripts/check-remediation-completion.py",
+    "scripts/check-roadmap-alignment.sh",
+    "scripts/check-roadmap-completion.py",
+    "scripts/generate-remediation-evidence.py",
+    "scripts/generate-source-manifest.py"
+  ],
+  "build": "39",
+  "commands": [
+    "python3 scripts/check-remediation-completion.py --no-git-child --expected-source-hash 47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+    "python3 scripts/check-remediation-source.py",
+    "python3 scripts/test-remediation-mutations.py",
+    "scripts/check-architecture.sh",
+    "scripts/check-roadmap-alignment.sh"
+  ],
+  "endedAt": "2026-08-24T08:15:05Z",
+  "environment": {
+    "architecture": "arm64",
+    "operatingSystem": "macOS 26.6.2 (25G83)",
+    "swift": "Swift 6.2.3",
+    "xcode": "Xcode 26.2 (17C52)"
+  },
+  "evidenceBindings": {
+    "SOURCE-MANIFEST.before.json": [
+      "docs/verification/remediation-v1/SOURCE-MANIFEST.before.json"
+    ],
+    "SourceManifestValidation.json": [
+      "docs/verification/remediation-v1/SourceManifestValidation.json"
+    ],
+    "architecture logs": [
+      "docs/verification/remediation-v1/ClaimEvidence/architecture-logs-6e9697e6a6b8.json"
+    ],
+    "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md": [
+      "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md"
+    ],
+    "docs/verification/remediation-v1/Baseline.json": [
+      "docs/verification/remediation-v1/Baseline.json"
+    ],
+    "docs/verification/remediation-v1/SOURCE-MANIFEST.json": [
+      "docs/verification/remediation-v1/SOURCE-MANIFEST.json"
+    ],
+    "negative mutation results": [
+      "docs/verification/remediation-v1/NegativeMutations.json"
+    ],
+    "roadmap alignment log": [
+      "docs/verification/remediation-v1/ClaimEvidence/roadmap-alignment-log-3a2a21f6475f.json"
+    ]
+  },
+  "evidenceClaims": [
+    "SOURCE-MANIFEST.before.json",
+    "SourceManifestValidation.json",
+    "architecture logs",
+    "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md",
+    "docs/verification/remediation-v1/Baseline.json",
+    "docs/verification/remediation-v1/SOURCE-MANIFEST.json",
+    "negative mutation results",
+    "roadmap alignment log"
+  ],
+  "failures": [],
+  "gateIDs": [
+    "RC-001",
+    "RC-002",
+    "RC-003",
+    "RC-004"
+  ],
+  "logs": [
+    "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+    "docs/verification/remediation-v1/GateRun/forsetti.log",
+    "docs/verification/remediation-v1/GateRun/ipad-ui.log",
+    "docs/verification/remediation-v1/GateRun/iphone-ui.log",
+    "docs/verification/remediation-v1/GateRun/macos-parity.log",
+    "docs/verification/remediation-v1/GateRun/static-qualification.log",
+    "docs/verification/remediation-v1/GateRun/swift-package.log",
+    "docs/verification/remediation-v1/GateRun/xcodegen-determinism.log"
+  ],
+  "nonGatingExternal": [
+    "App Store Connect records",
+    "live CloudKit account/container",
+    "live Game Center sandbox",
+    "distribution signing and public upload"
+  ],
+  "notes": [
+    "Exact locked test executions: docs/verification/remediation-v1/Attachments/SourceManifestValidation-Test-Matrix.md",
+    "Qualified against the committed source revision with fresh build and test outputs."
+  ],
+  "recordID": "remediation-v1-sourcemanifestvalidation",
+  "result": "PASS",
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "startedAt": "2026-08-24T05:13:00Z",
+  "testSummary": {
+    "executed": 87,
+    "failed": 0,
+    "passed": 87,
+    "skipped": 0
+  },
+  "version": "1.0.39"
+}

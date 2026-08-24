@@ -1,0 +1,95 @@
+{
+  "platform": "macOS",
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "suites": [
+    {
+      "name": "hosted",
+      "summary": {
+        "devicesAndConfigurations": [
+          {
+            "device": {
+              "architecture": "arm64",
+              "deviceId": "00006040-0016283C11F8801C",
+              "deviceName": "My Mac",
+              "modelName": "MacBook Pro",
+              "osBuildNumber": "25G83",
+              "osVersion": "26.6.2",
+              "platform": "macOS"
+            },
+            "expectedFailures": 0,
+            "failedTests": 0,
+            "passedTests": 23,
+            "skippedTests": 0,
+            "testPlanConfiguration": {
+              "configurationId": "1",
+              "configurationName": "Test Scheme Action"
+            }
+          }
+        ],
+        "environmentDescription": "RuneScrib-macOS \u00b7 Built with macOS 26.6.2",
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "finishTime": 1787558716.432,
+        "passedTests": 23,
+        "result": "Passed",
+        "skippedTests": 0,
+        "startTime": 1787558686.088,
+        "statistics": [],
+        "testFailures": [],
+        "title": "Test - RuneScrib-macOS",
+        "topInsights": [],
+        "totalTestCount": 23
+      },
+      "xcresult": "/tmp/runescribe-sourcebound-domain-terminal.C1mmD0/macos-hosted.xcresult"
+    },
+    {
+      "name": "parity",
+      "summary": {
+        "devicesAndConfigurations": [
+          {
+            "device": {
+              "architecture": "arm64",
+              "deviceId": "00006040-0016283C11F8801C",
+              "deviceName": "My Mac",
+              "modelName": "MacBook Pro",
+              "osBuildNumber": "25G83",
+              "osVersion": "26.6.2",
+              "platform": "macOS"
+            },
+            "expectedFailures": 0,
+            "failedTests": 0,
+            "passedTests": 9,
+            "skippedTests": 0,
+            "testPlanConfiguration": {
+              "configurationId": "1",
+              "configurationName": "Test Scheme Action"
+            }
+          }
+        ],
+        "environmentDescription": "RuneScrib-macOS-Parity \u00b7 Built with macOS 26.6.2",
+        "expectedFailures": 0,
+        "failedTests": 0,
+        "finishTime": 1787558755.828,
+        "passedTests": 9,
+        "result": "Passed",
+        "skippedTests": 0,
+        "startTime": 1787558717.164,
+        "statistics": [],
+        "testFailures": [],
+        "title": "Test - RuneScrib-macOS-Parity",
+        "topInsights": [],
+        "totalTestCount": 9
+      },
+      "xcresult": "/tmp/runescribe-sourcebound-domain-terminal.C1mmD0/macos-parity.xcresult"
+    }
+  ],
+  "totals": {
+    "executed": 32,
+    "failed": 0,
+    "passed": 32,
+    "skipped": 0
+  }
+}

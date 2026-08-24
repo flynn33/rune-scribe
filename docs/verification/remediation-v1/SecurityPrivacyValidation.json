@@ -1,0 +1,130 @@
+{
+  "artifactSHA256": {
+    "CHANGELOG.md": "d6824b6919ae3aef28a30fa119dc9456cdd2782733f5aebd3f13c0dbf6d4bc16",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ThemeCoordinatorContracts.swift": "68df77df436c5b116da8390641aedc1f273ed6ba3dc75542c182a1b889da17b7",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift": "49bebe0c5d27f99844c4c8353780432f0b8845b9f244be362079542e57636ca5",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json": "75db2f226eea5b1adc6be7ce08a2aec7d63a1f537ff4e18b1534df914bcf7fde",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeResources.swift": "c094550a7296f442a7b9d06ad3ddb4b3eb40785043c2e1a84ef604eb9f274b44",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeModule.swift": "b79b2cbb1098988a8ebe5029b9a736069b30c9c4811e82cf02be57d2bdf1c3e9",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeQualification.swift": "7e896b10170aa09ffac79302d820ef5758fe9ef918084c17b2228a2aa505509d",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionCatalogResources.swift": "2f9e49ca78982fdc0714f4e80a28324e997910367a99b334747aa1d906d35801",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionModule.swift": "c0fe32b178f1fd57d8b8b02ccedbd02f055b49ca4442bdd53c9a88492447fae3",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/module-manifest.json": "b448bfdc77e990359df5b31bdce329d195f60a28c2f496faf6a86d26ba23197f",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeContribution.swift": "140aeb267182bee61307a7fb3b6f77859d7bb2363f38da28d9d19def9ad22c92",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeEndpoints.swift": "c9e9669a2c71b818d9dbc39b98f1c1fa415a0bf80aab9deaeeb970308ee957f4",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/Resources/module-manifest.json": "3081817bb182afe213e6b151fec9fd57795129da37a20448d7b0725cd361879c",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/ThemeCoordinatorService.swift": "bd27f11458c739f45ae0a6205098448a65b9c6b689f05d6341ffed9a1244fe4b",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift": "316dd82e7f31f405acd7feabbc9d35d9a9dc0cfd856b03e9c38798cf1f5bbee0",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json": "0401ca85bd4edc005f80d6c4960be2cf47e2ae9b26c7943dc7387162ae857df8",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift": "c095a7f5ceb748248ca219405bf7faabc87f15d3c07b25f28c6462ae17d08e35",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift": "6423b5df6bbe8f8abb58f6ff5f1f722d6d309015f9a08bc9b6e159a9deeddfe7",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift": "75da8a683c06a47a2d241dd67fc634a31adc2ba4c49dae82898237bde62dc6a4",
+    "RuneScrib.xcodeproj/project.pbxproj": "980e5a3b52086106107c3dfe331c63b2e82363ccf832bc1044187a69cf960201",
+    "docs/APP_STORE_SUBMISSION.md": "6b4b41cdb00ef81f0ebecee3b4b249abfea630318392f9d0a1199698b9f1e04d",
+    "docs/verification/remediation-v1/ClaimEvidence/cloud-game-center-test-logs-ce8a92bff95d.json": "ea83cd3ae69c3947aa5f965eb1b9e094e6c50d2158dfa4d5f14bdcc41ff413fb",
+    "docs/verification/remediation-v1/GateRun/final-qualification-results.json": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+    "docs/verification/remediation-v1/GateRun/forsetti.log": "a102958e736565be065d26413d1e4706e22e8ce9f52d977a82e34ae41d91ca1a",
+    "docs/verification/remediation-v1/GateRun/ipad-ui.log": "ad0806ccdc1bb8ec64972b56183129c2715854945815ef8526c1ebd640086df8",
+    "docs/verification/remediation-v1/GateRun/iphone-ui.log": "9fd543c7041ec8647dea4d2525d4ee89bda3e8aa538ff03c04504603940bcdf7",
+    "docs/verification/remediation-v1/GateRun/macos-parity.log": "614aea1ddb16aea1a3d0ace11c414220159596b54a0eeeb20038a435bcfa4f20",
+    "docs/verification/remediation-v1/GateRun/static-qualification.log": "1c57cd86c6a93ac0bd7b5355aa03f09ef1ec25b13a98e0af1bc6084156803680",
+    "docs/verification/remediation-v1/GateRun/swift-package.log": "cdbceb34bc98065d8d9c4e3e75ebc960a953ebee4ae4fab5e4ce39f3223a5be3",
+    "docs/verification/remediation-v1/GateRun/xcodegen-determinism.log": "ce12f1b9c07fac374c5a7aa44c12ed8f4ab69322d4d3ab31fa27c239eb94fc11",
+    "project.yml": "a4698a8db2c0b49bd2441d2ac5d30f8e313b161f4a3c60ffc692224eb34ef1fc",
+    "scripts/capture-remediation-domain-results.py": "102c1d263d335bc6c4ad88f3025ca0e92e519321b9f5c077bcc7df366e675d1f",
+    "scripts/check-remediation-completion.py": "42a9307a8945af64b4b8b2c76ad47fdf218288b29ca6b7eea2cd93e7708579d6",
+    "scripts/check-shipping-products.sh": "7a054350e086de7bc920cdd265b608c541200160704ae221bc32715d32aa1134",
+    "scripts/generate-remediation-evidence.py": "4e83c26cf68bf357ac74d73602e5f77d7f406d2539117475fbd0b4283f82bb19"
+  },
+  "artifacts": [
+    "CHANGELOG.md",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ThemeCoordinatorContracts.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeResources.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeModule.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseThemeQualification.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionCatalogResources.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionModule.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/module-manifest.json",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeContribution.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeThemeEndpoints.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/Resources/module-manifest.json",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/ThemeCoordinatorService.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift",
+    "Packages/RuneScribeArchitecture/Tests/RuneScribeUIModuleTests/RuneScribeUISessionTests.swift",
+    "RuneScrib.xcodeproj/project.pbxproj",
+    "docs/APP_STORE_SUBMISSION.md",
+    "docs/verification/remediation-v1/ClaimEvidence/cloud-game-center-test-logs-ce8a92bff95d.json",
+    "project.yml",
+    "scripts/capture-remediation-domain-results.py",
+    "scripts/check-remediation-completion.py",
+    "scripts/check-shipping-products.sh",
+    "scripts/generate-remediation-evidence.py"
+  ],
+  "build": "39",
+  "commands": [
+    "python3 scripts/capture-remediation-domain-results.py --root . --source-manifest docs/verification/remediation-v1/SOURCE-MANIFEST.json --source-revision 5642f169a72eccd8615e284816db63a75a0a18c1 --suite-log-input /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/final-qualification-prefix.log --raw-output docs/verification/remediation-v1/GateRun/final-qualification.log --macos-app-zip artifacts/remediation-v1/RuneScrib-macOS-Release.app.zip --ios-app-zip artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip --cloud-output docs/verification/remediation-v1/GateRun/CloudGameCenter-Test-Results.json --performance-output docs/verification/remediation-v1/GateRun/Performance-Resource-Results.json --inspection-output docs/verification/remediation-v1/GateRun/Built-Product-Inspection.json --shipping-output docs/verification/remediation-v1/GateRun/shipping-products.log",
+    "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors"
+  ],
+  "endedAt": "2026-08-24T08:15:05Z",
+  "environment": {
+    "architecture": "arm64",
+    "operatingSystem": "macOS 26.6.2 (25G83)",
+    "swift": "Swift 6.2.3",
+    "xcode": "Xcode 26.2 (17C52)"
+  },
+  "evidenceBindings": {
+    "SecurityPrivacyValidation.json": [
+      "docs/verification/remediation-v1/SecurityPrivacyValidation.json"
+    ],
+    "cloud/game center test logs": [
+      "docs/verification/remediation-v1/ClaimEvidence/cloud-game-center-test-logs-ce8a92bff95d.json"
+    ]
+  },
+  "evidenceClaims": [
+    "SecurityPrivacyValidation.json",
+    "cloud/game center test logs"
+  ],
+  "failures": [],
+  "gateIDs": [
+    "RC-026",
+    "RC-027"
+  ],
+  "logs": [
+    "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+    "docs/verification/remediation-v1/GateRun/forsetti.log",
+    "docs/verification/remediation-v1/GateRun/ipad-ui.log",
+    "docs/verification/remediation-v1/GateRun/iphone-ui.log",
+    "docs/verification/remediation-v1/GateRun/macos-parity.log",
+    "docs/verification/remediation-v1/GateRun/static-qualification.log",
+    "docs/verification/remediation-v1/GateRun/swift-package.log",
+    "docs/verification/remediation-v1/GateRun/xcodegen-determinism.log"
+  ],
+  "nonGatingExternal": [
+    "App Store Connect records",
+    "live CloudKit account/container",
+    "live Game Center sandbox",
+    "distribution signing and public upload"
+  ],
+  "notes": [
+    "Exact locked test executions: docs/verification/remediation-v1/Attachments/SecurityPrivacyValidation-Test-Matrix.md",
+    "Qualified against the committed source revision with fresh build and test outputs."
+  ],
+  "recordID": "remediation-v1-securityprivacyvalidation",
+  "result": "PASS",
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "startedAt": "2026-08-24T05:13:00Z",
+  "testSummary": {
+    "executed": 87,
+    "failed": 0,
+    "passed": 87,
+    "skipped": 0
+  },
+  "version": "1.0.39"
+}

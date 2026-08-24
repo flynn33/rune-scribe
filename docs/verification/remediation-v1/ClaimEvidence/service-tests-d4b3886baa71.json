@@ -1,0 +1,64 @@
+{
+  "artifacts": [
+    {
+      "kind": "product-inspection",
+      "path": "docs/verification/remediation-v1/GateRun/Built-Product-Inspection.json",
+      "sha256": "c919f92411a6dbc805d1348cbee6ddab9f56361b73113824944ee429ab2aaab1"
+    },
+    {
+      "kind": "domain-result",
+      "path": "docs/verification/remediation-v1/GateRun/CloudGameCenter-Test-Results.json",
+      "sha256": "21c00a3b25a6dc762aac5630960ce16c67645edefb170c76114ef73bd7e045b0"
+    },
+    {
+      "kind": "structured-suite-result",
+      "path": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "sha256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3"
+    },
+    {
+      "kind": "raw-test-log",
+      "path": "docs/verification/remediation-v1/GateRun/final-qualification.log",
+      "sha256": "b8a6a895be57e082c3964031da81e379830760b5869b4912a92e6b58e2b19126"
+    },
+    {
+      "kind": "test-evidence",
+      "path": "docs/verification/remediation-v1/GateRun/shipping-products.log",
+      "sha256": "be1495da18d8ee588b364c074a112a856800d33866530005a1d33fbe3715837a"
+    }
+  ],
+  "build": "39",
+  "claim": "service tests",
+  "executions": [
+    {
+      "command": "python3 scripts/capture-remediation-domain-results.py --root . --source-manifest docs/verification/remediation-v1/SOURCE-MANIFEST.json --source-revision 5642f169a72eccd8615e284816db63a75a0a18c1 --suite-log-input /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/final-qualification-prefix.log --raw-output docs/verification/remediation-v1/GateRun/final-qualification.log --macos-app-zip artifacts/remediation-v1/RuneScrib-macOS-Release.app.zip --ios-app-zip artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip --cloud-output docs/verification/remediation-v1/GateRun/CloudGameCenter-Test-Results.json --performance-output docs/verification/remediation-v1/GateRun/Performance-Resource-Results.json --inspection-output docs/verification/remediation-v1/GateRun/Built-Product-Inspection.json --shipping-output docs/verification/remediation-v1/GateRun/shipping-products.log",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "service tests",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-096"
+    },
+    {
+      "command": "python3 scripts/capture-remediation-domain-results.py --root . --source-manifest docs/verification/remediation-v1/SOURCE-MANIFEST.json --source-revision 5642f169a72eccd8615e284816db63a75a0a18c1 --suite-log-input /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/final-qualification-prefix.log --raw-output docs/verification/remediation-v1/GateRun/final-qualification.log --macos-app-zip artifacts/remediation-v1/RuneScrib-macOS-Release.app.zip --ios-app-zip artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip --cloud-output docs/verification/remediation-v1/GateRun/CloudGameCenter-Test-Results.json --performance-output docs/verification/remediation-v1/GateRun/Performance-Resource-Results.json --inspection-output docs/verification/remediation-v1/GateRun/Built-Product-Inspection.json --shipping-output docs/verification/remediation-v1/GateRun/shipping-products.log",
+      "log": "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+      "logSHA256": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+      "requiredEvidence": "service tests",
+      "result": "PASS",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-097"
+    }
+  ],
+  "gateIDs": [
+    "RC-027"
+  ],
+  "schemaVersion": "1.0",
+  "semanticMarkers": [],
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "testIDs": [
+    "T-096",
+    "T-097"
+  ],
+  "version": "1.0.39"
+}

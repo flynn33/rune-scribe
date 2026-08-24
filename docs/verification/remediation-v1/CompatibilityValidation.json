@@ -1,0 +1,91 @@
+{
+  "artifactSHA256": {
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeArtifactSelectionContracts.swift": "7b742a460b860e58ffc83097b9e5de65755c4fe3905bb7409d57b257c1e5d766",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift": "50f023e3b793ad437fcbc5684308c8f55f2c19f1fec92fd594930dbf2dd1c6aa",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift": "e813505e6643d37432afee2f357b3a78bdf34ba82cd5f11de0e760fa9192db2a",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift": "0c388b8ba940f45144697f43c99bf749c74d2f31e60463897dd32090e0f69aff",
+    "docs/verification/remediation-v1/ClaimEvidence/contract-test-log-1da6a2b9b7c7.json": "5da81d3b8146257d6d002a460c6c1e9762164939910d14a354f1780f97e64da1",
+    "docs/verification/remediation-v1/ClaimEvidence/portable-compile-log-0235a4a1fcc4.json": "6c37b688fc33a7c240432461fa178f7c34bfd61b0f7117059076e916f1591434",
+    "docs/verification/remediation-v1/GateRun/final-qualification-results.json": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+    "docs/verification/remediation-v1/GateRun/forsetti.log": "a102958e736565be065d26413d1e4706e22e8ce9f52d977a82e34ae41d91ca1a",
+    "docs/verification/remediation-v1/GateRun/ipad-ui.log": "ad0806ccdc1bb8ec64972b56183129c2715854945815ef8526c1ebd640086df8",
+    "docs/verification/remediation-v1/GateRun/iphone-ui.log": "9fd543c7041ec8647dea4d2525d4ee89bda3e8aa538ff03c04504603940bcdf7",
+    "docs/verification/remediation-v1/GateRun/macos-parity.log": "614aea1ddb16aea1a3d0ace11c414220159596b54a0eeeb20038a435bcfa4f20",
+    "docs/verification/remediation-v1/GateRun/static-qualification.log": "1c57cd86c6a93ac0bd7b5355aa03f09ef1ec25b13a98e0af1bc6084156803680",
+    "docs/verification/remediation-v1/GateRun/swift-package.log": "cdbceb34bc98065d8d9c4e3e75ebc960a953ebee4ae4fab5e4ce39f3223a5be3",
+    "docs/verification/remediation-v1/GateRun/xcodegen-determinism.log": "ce12f1b9c07fac374c5a7aa44c12ed8f4ab69322d4d3ab31fa27c239eb94fc11"
+  },
+  "artifacts": [
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeArtifactSelectionContracts.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift",
+    "docs/verification/remediation-v1/ClaimEvidence/contract-test-log-1da6a2b9b7c7.json",
+    "docs/verification/remediation-v1/ClaimEvidence/portable-compile-log-0235a4a1fcc4.json"
+  ],
+  "build": "39",
+  "commands": [
+    "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors"
+  ],
+  "endedAt": "2026-08-24T08:15:05Z",
+  "environment": {
+    "architecture": "arm64",
+    "operatingSystem": "macOS 26.6.2 (25G83)",
+    "swift": "Swift 6.2.3",
+    "xcode": "Xcode 26.2 (17C52)"
+  },
+  "evidenceBindings": {
+    "CompatibilityValidation.json": [
+      "docs/verification/remediation-v1/CompatibilityValidation.json"
+    ],
+    "contract test log": [
+      "docs/verification/remediation-v1/ClaimEvidence/contract-test-log-1da6a2b9b7c7.json"
+    ],
+    "portable compile log": [
+      "docs/verification/remediation-v1/ClaimEvidence/portable-compile-log-0235a4a1fcc4.json"
+    ]
+  },
+  "evidenceClaims": [
+    "CompatibilityValidation.json",
+    "contract test log",
+    "portable compile log"
+  ],
+  "failures": [],
+  "gateIDs": [
+    "RC-024",
+    "RC-025"
+  ],
+  "logs": [
+    "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+    "docs/verification/remediation-v1/GateRun/forsetti.log",
+    "docs/verification/remediation-v1/GateRun/ipad-ui.log",
+    "docs/verification/remediation-v1/GateRun/iphone-ui.log",
+    "docs/verification/remediation-v1/GateRun/macos-parity.log",
+    "docs/verification/remediation-v1/GateRun/static-qualification.log",
+    "docs/verification/remediation-v1/GateRun/swift-package.log",
+    "docs/verification/remediation-v1/GateRun/xcodegen-determinism.log"
+  ],
+  "nonGatingExternal": [
+    "App Store Connect records",
+    "live CloudKit account/container",
+    "live Game Center sandbox",
+    "distribution signing and public upload"
+  ],
+  "notes": [
+    "Exact locked test executions: docs/verification/remediation-v1/Attachments/CompatibilityValidation-Test-Matrix.md",
+    "Qualified against the committed source revision with fresh build and test outputs."
+  ],
+  "recordID": "remediation-v1-compatibilityvalidation",
+  "result": "PASS",
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "startedAt": "2026-08-24T05:13:00Z",
+  "testSummary": {
+    "executed": 87,
+    "failed": 0,
+    "passed": 87,
+    "skipped": 0
+  },
+  "version": "1.0.39"
+}

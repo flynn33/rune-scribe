@@ -1,0 +1,192 @@
+{
+  "allTemporaryCopiesRestored": true,
+  "cases": [
+    {
+      "caseID": "M01",
+      "detector": "remediation-source-checker",
+      "durationSeconds": 0.543,
+      "expectedOutcome": "rejected by RMS-001",
+      "observedOutcome": "RMS-001",
+      "requirement": "Primary Cipher Library Share changed from file to link",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M02",
+      "detector": "remediation-source-checker",
+      "durationSeconds": 0.514,
+      "expectedOutcome": "rejected by RMS-002",
+      "observedOutcome": "RMS-002",
+      "requirement": "Share Builder entry point removed",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M03",
+      "detector": "remediation-source-checker",
+      "durationSeconds": 0.465,
+      "expectedOutcome": "rejected by RMS-003",
+      "observedOutcome": "RMS-003",
+      "requirement": "Key and security summary removed",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M04",
+      "detector": "source checker and focused progression test",
+      "durationSeconds": 36.796,
+      "expectedOutcome": "static rejection and focused test failure",
+      "observedOutcome": "focused-test-rejected-mutant",
+      "requirement": "Cancellation awards progression",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M05",
+      "detector": "built Release Norse product companion shipping checker",
+      "durationSeconds": 0.692,
+      "expectedOutcome": "rejected by RMS-005",
+      "observedOutcome": "RMS-005",
+      "requirement": "Required Norse shipping resource removed",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M06",
+      "detector": "built Release Norse product companion shipping checker",
+      "durationSeconds": 0.514,
+      "expectedOutcome": "rejected by RMS-006",
+      "observedOutcome": "RMS-006",
+      "requirement": "Required Norse shipping resource digest changed",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M07",
+      "detector": "four focused degraded-launch tests",
+      "durationSeconds": 33.851,
+      "expectedOutcome": "focused tests pass and expose no required-Base warning state",
+      "observedOutcome": "four-focused-degraded-launch-tests-passed-with-no-base-warning-state",
+      "requirement": "Optional provider corrupted while Core, UI, and Norse degrade safely",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "T-015",
+      "detector": "remediation-source-checker",
+      "durationSeconds": 0.557,
+      "expectedOutcome": "rejected by RMS-007",
+      "observedOutcome": "RMS-007",
+      "requirement": "Provider-specific UI branch inserted",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M08",
+      "detector": "remediation-source-checker",
+      "durationSeconds": 0.442,
+      "expectedOutcome": "rejected by RMS-008",
+      "observedOutcome": "RMS-008",
+      "requirement": "Root Theme background removed",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M09",
+      "detector": "remediation-source-checker",
+      "durationSeconds": 0.456,
+      "expectedOutcome": "rejected by RMS-009",
+      "observedOutcome": "RMS-009",
+      "requirement": "Settings write moved to local view storage",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M10",
+      "detector": "remediation-source-checker",
+      "durationSeconds": 0.432,
+      "expectedOutcome": "rejected by RMS-010",
+      "observedOutcome": "RMS-010",
+      "requirement": "External Forsetti dependency added",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "T-004",
+      "detector": "existing deterministic source-manifest verifier",
+      "durationSeconds": 1.054,
+      "expectedOutcome": "byte drift identifies its path and shipping excludes are rejected",
+      "observedOutcome": "source-manifest-rejected-byte-drift-and-shipping-exclude",
+      "requirement": "Shipping-source byte or locked exclude policy changed",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M11",
+      "detector": "existing remediation completion binder",
+      "durationSeconds": 0.252,
+      "expectedOutcome": "malformed schemas reject without a crash and evidence binding rejects",
+      "observedOutcome": "record-validator-rejected-malformed-inputs-and-source-hash",
+      "requirement": "Malformed evidence inputs or evidence source-manifest hash changed",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M12",
+      "detector": "existing remediation completion binder",
+      "durationSeconds": 0.2,
+      "expectedOutcome": "otherwise-terminal stale completion rejected",
+      "observedOutcome": "internal-and-top-level-completion-rejected-stale-source-hash",
+      "requirement": "Prior completion record substituted for final completion",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M13",
+      "detector": "remediation-source-checker",
+      "durationSeconds": 0.435,
+      "expectedOutcome": "rejected by RMS-013",
+      "observedOutcome": "RMS-013",
+      "requirement": "Core payload reader removed",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M14",
+      "detector": "remediation-source-checker",
+      "durationSeconds": 0.434,
+      "expectedOutcome": "rejected by RMS-014",
+      "observedOutcome": "RMS-014",
+      "requirement": "Presentation choice moved into Cipher key state",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M15",
+      "detector": "existing publication scanner",
+      "durationSeconds": 3.381,
+      "expectedOutcome": "each isolated publication surface is rejected",
+      "observedOutcome": "publication-scan-rejected-content-filename-and-branch",
+      "requirement": "Prohibited publication content, filename, or branch label inserted",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    },
+    {
+      "caseID": "M16",
+      "detector": "source checker and focused contract test",
+      "durationSeconds": 35.306,
+      "expectedOutcome": "static rejection and focused test failure",
+      "observedOutcome": "focused-test-rejected-mutant",
+      "requirement": "Boolean schema version accepted",
+      "restoredAutomatically": true,
+      "result": "PASS"
+    }
+  ],
+  "failedCaseCount": 0,
+  "passedCaseCount": 18,
+  "requiredCaseCount": 18,
+  "result": "PASS",
+  "runtimeSeconds": 236.332,
+  "schemaVersion": "1.0",
+  "sourceMutationsConfinedToTemporaryCopies": true
+}

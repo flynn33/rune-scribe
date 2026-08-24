@@ -1,0 +1,463 @@
+{
+  "build": "39",
+  "builtInspection": {
+    "products": [
+      {
+        "architectures": [
+          "arm64"
+        ],
+        "configuration": {
+          "CFBundleIdentifier": "com.runescribe.app",
+          "CFBundlePackageType": "APPL",
+          "CFBundleShortVersionString": "1.0.39",
+          "CFBundleSupportedPlatforms": [
+            "MacOSX"
+          ],
+          "CFBundleVersion": "39",
+          "GKGameCenter": null,
+          "NSUbiquitousContainers": null,
+          "cloudKitContainerIdentifiers": [
+            "iCloud.com.runescribe.app"
+          ],
+          "cloudKitServices": [
+            "CloudKit"
+          ],
+          "gameCenterEntitlement": true
+        },
+        "entitlementInspections": [
+          {
+            "architecture": "arm64",
+            "entitlements": {
+              "com.apple.developer.game-center": true,
+              "com.apple.developer.icloud-container-identifiers": [
+                "iCloud.com.runescribe.app"
+              ],
+              "com.apple.developer.icloud-services": [
+                "CloudKit"
+              ],
+              "com.apple.developer.ubiquity-kvstore-identifier": "$(TeamIdentifierPrefix)com.runescribe.app",
+              "com.apple.security.app-sandbox": true,
+              "com.apple.security.files.user-selected.read-write": true,
+              "com.apple.security.personal-information.addressbook": true
+            },
+            "method": "codesign",
+            "sha256": "b50e5a80401e936ac56665d86c5e2615a75dd5b1dca3899d4efe5ed445f88134"
+          }
+        ],
+        "executablePath": "RuneScrib.app/Contents/MacOS/RuneScrib",
+        "executableSHA256": "4ec8b4589e65bac5b2a94acf77f37480fc8cdcee922b2ca4c442d357a373baf4",
+        "infoPlistPath": "RuneScrib.app/Contents/Info.plist",
+        "infoPlistSHA256": "ff96d6e22fc6fcc667d8bd9a93c2995851a89ef94a350ad0799879a90b4c64d7",
+        "path": "artifacts/remediation-v1/RuneScrib-macOS-Release.app.zip",
+        "platform": "macOS",
+        "sha256": "e900bd81ac05c3d0b71e12eb8ceaa49ed5fd466e7c32ff51d1136817514327e8"
+      },
+      {
+        "architectures": [
+          "x86_64",
+          "arm64"
+        ],
+        "configuration": {
+          "CFBundleIdentifier": "com.runescribe.app",
+          "CFBundlePackageType": "APPL",
+          "CFBundleShortVersionString": "1.0.39",
+          "CFBundleSupportedPlatforms": [
+            "iPhoneSimulator"
+          ],
+          "CFBundleVersion": "39",
+          "GKGameCenter": null,
+          "NSUbiquitousContainers": null,
+          "cloudKitContainerIdentifiers": [
+            "iCloud.com.runescribe.app"
+          ],
+          "cloudKitServices": [
+            "CloudKit"
+          ],
+          "gameCenterEntitlement": true
+        },
+        "entitlementInspections": [
+          {
+            "architecture": "x86_64",
+            "entitlements": {
+              "application-identifier": "9AQ2C2838M.com.runescribe.app",
+              "com.apple.developer.game-center": true,
+              "com.apple.developer.icloud-container-identifiers": [
+                "iCloud.com.runescribe.app"
+              ],
+              "com.apple.developer.icloud-services": [
+                "CloudKit"
+              ],
+              "com.apple.developer.ubiquity-kvstore-identifier": "9AQ2C2838M.com.runescribe.app",
+              "keychain-access-groups": [
+                "9AQ2C2838M.com.runescribe.app"
+              ]
+            },
+            "method": "otool-__TEXT-__entitlements",
+            "sha256": "6c6f3a11943bec56f5341aca99369d048fea446b5bf48484679a02725004b6fc"
+          },
+          {
+            "architecture": "arm64",
+            "entitlements": {
+              "application-identifier": "9AQ2C2838M.com.runescribe.app",
+              "com.apple.developer.game-center": true,
+              "com.apple.developer.icloud-container-identifiers": [
+                "iCloud.com.runescribe.app"
+              ],
+              "com.apple.developer.icloud-services": [
+                "CloudKit"
+              ],
+              "com.apple.developer.ubiquity-kvstore-identifier": "9AQ2C2838M.com.runescribe.app",
+              "keychain-access-groups": [
+                "9AQ2C2838M.com.runescribe.app"
+              ]
+            },
+            "method": "otool-__TEXT-__entitlements",
+            "sha256": "6c6f3a11943bec56f5341aca99369d048fea446b5bf48484679a02725004b6fc"
+          }
+        ],
+        "executablePath": "RuneScrib.app/RuneScrib",
+        "executableSHA256": "83ee12b425707786d9430324d822e1add0312d871ce21c6d9af0d66a46e39485",
+        "infoPlistPath": "RuneScrib.app/Info.plist",
+        "infoPlistSHA256": "9766692f4891bf6a131abc9baa554d34d10491e677c9f5427c4b29ecfac43e92",
+        "path": "artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip",
+        "platform": "iOS",
+        "sha256": "3e505eafc011a395dbc4c5dfcec2a9cf4f712bc8c18a418b0613f3dd9782be2b"
+      }
+    ],
+    "record": "docs/verification/remediation-v1/GateRun/Built-Product-Inspection.json",
+    "recordSHA256": "c919f92411a6dbc805d1348cbee6ddab9f56361b73113824944ee429ab2aaab1",
+    "result": "PASS"
+  },
+  "cases": [
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeCloudSyncModuleTests.accountChangeAndOfflineModesPreserveLocalWithoutRemoteOverwrite()",
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testMissingServicesAndStorePreserveLocalFirstStatusAndQueuedTruth",
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testAutomaticGameCenterProbeRecoversOfflineReportWithoutNewInput"
+      ],
+      "marker": "deterministic-offline-unavailable",
+      "result": "PASS",
+      "testIDs": [
+        "T-096",
+        "T-097"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeCloudSyncModuleTests.offlineQueueCoalescesRevisionsAndAcknowledgesIdempotently()",
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testOfflineCloudFailureRemainsDurablyQueuedForRetry",
+        "RuneScribeGameCenterModuleTests.outboxCoalescesMonotonicallyAndHandlesRetryDenialAndDuplicateCallbacks()"
+      ],
+      "marker": "queue",
+      "result": "PASS",
+      "testIDs": [
+        "T-096",
+        "T-097"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeCloudSyncModuleTests.twoDeviceMergeIsCommutativeIdempotentAndPreservesDomainRules()",
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testSaveConflictRefetchesAndRetriesWithoutDroppingQueuedRevision",
+        "RuneScribeGameCenterModuleTests.outboxCoalescesMonotonicallyAndHandlesRetryDenialAndDuplicateCallbacks()"
+      ],
+      "marker": "retry-merge",
+      "result": "PASS",
+      "testIDs": [
+        "T-096",
+        "T-097"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeCloudSyncModuleTests.accountChangeAndOfflineModesPreserveLocalWithoutRemoteOverwrite()",
+        "RuneScribeGameCenterModuleTests.accountChangeDropsOnlyRemoteAcknowledgementsAndRequeuesLocalTruth()",
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testIdleAccountChangeRequiresExplicitRebindAndPreservesLocalProjection",
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testGameCenterAccountChangeRequeuesPriorLocalCompletionForNewScope"
+      ],
+      "marker": "account-change",
+      "result": "PASS",
+      "testIDs": [
+        "T-096",
+        "T-097"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeCloudSyncModuleTests.corruptOrSecretBearingRemoteIsQuarantinedWithoutChangingLocalTruth()",
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testCorruptRemoteIsQuarantinedAndReplacedWithValidatedLocalReplica"
+      ],
+      "marker": "corruption-quarantine",
+      "result": "PASS",
+      "testIDs": [
+        "T-096",
+        "T-097"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeGameCenterModuleTests.percentageMappingIsWholeNumberMonotonicAndOverflowSafe()",
+        "RuneScribeGameCenterModuleTests.outboxCoalescesMonotonicallyAndHandlesRetryDenialAndDuplicateCallbacks()",
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testPriorCompletionReportsOnceAndDuplicateSnapshotCallbackIsIdempotent"
+      ],
+      "marker": "monotonic-reporting",
+      "result": "PASS",
+      "testIDs": [
+        "T-096",
+        "T-097"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeGameCenterModuleTests.mappingUsesOnlyLocalProgressionAndLaterOptInIncludesPriorCompletion()",
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testGameCenterNeverAuthenticatesBeforeOptInAndPersistsAcknowledgement"
+      ],
+      "marker": "no-ownership-path",
+      "result": "PASS",
+      "testIDs": [
+        "T-096",
+        "T-097"
+      ]
+    },
+    {
+      "artifacts": [],
+      "executedTests": [
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testMissingServicesAndStorePreserveLocalFirstStatusAndQueuedTruth",
+        "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testGameCenterDenialPreservesQueueAndLaterExplicitOptInReplays"
+      ],
+      "marker": "privacy-offline-utility",
+      "result": "PASS",
+      "testIDs": [
+        "T-096",
+        "T-097"
+      ]
+    },
+    {
+      "artifacts": [
+        "docs/verification/remediation-v1/GateRun/Built-Product-Inspection.json"
+      ],
+      "executedTests": [],
+      "marker": "built-entitlement-configuration-inspection",
+      "result": "PASS",
+      "testIDs": [
+        "T-096",
+        "T-097"
+      ]
+    }
+  ],
+  "executions": [
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter 'RuneScribeCloudSyncModuleTests.offlineQueueCoalescesRevisionsAndAcknowledgesIdempotently()'",
+      "exitStatus": 0,
+      "framework": "Swift Testing",
+      "identifier": "RuneScribeCloudSyncModuleTests.offlineQueueCoalescesRevisionsAndAcknowledgesIdempotently()",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeCloudSyncModuleTests/CloudSyncPolicyTests.swift",
+      "sourceSHA256": "66f4b3f8dfa98f3858ce8b59099b414c83264c44c5205ac2e7ee7d699a7aa818"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter 'RuneScribeCloudSyncModuleTests.twoDeviceMergeIsCommutativeIdempotentAndPreservesDomainRules()'",
+      "exitStatus": 0,
+      "framework": "Swift Testing",
+      "identifier": "RuneScribeCloudSyncModuleTests.twoDeviceMergeIsCommutativeIdempotentAndPreservesDomainRules()",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeCloudSyncModuleTests/CloudProgressionMergeTests.swift",
+      "sourceSHA256": "0cdf711070ceeda4a7bca10a89a61234d89db41bb0f7d91a6e9d210145f9d5aa"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter 'RuneScribeCloudSyncModuleTests.corruptOrSecretBearingRemoteIsQuarantinedWithoutChangingLocalTruth()'",
+      "exitStatus": 0,
+      "framework": "Swift Testing",
+      "identifier": "RuneScribeCloudSyncModuleTests.corruptOrSecretBearingRemoteIsQuarantinedWithoutChangingLocalTruth()",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeCloudSyncModuleTests/CloudProgressionMergeTests.swift",
+      "sourceSHA256": "0cdf711070ceeda4a7bca10a89a61234d89db41bb0f7d91a6e9d210145f9d5aa"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter 'RuneScribeCloudSyncModuleTests.accountChangeAndOfflineModesPreserveLocalWithoutRemoteOverwrite()'",
+      "exitStatus": 0,
+      "framework": "Swift Testing",
+      "identifier": "RuneScribeCloudSyncModuleTests.accountChangeAndOfflineModesPreserveLocalWithoutRemoteOverwrite()",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeCloudSyncModuleTests/CloudProgressionMergeTests.swift",
+      "sourceSHA256": "0cdf711070ceeda4a7bca10a89a61234d89db41bb0f7d91a6e9d210145f9d5aa"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeRuntimeCoreTests\\.RuntimeCloudGameCenterCoordinatorTests/testOfflineCloudFailureRemainsDurablyQueuedForRetry$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testOfflineCloudFailureRemainsDurablyQueuedForRetry",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+      "sourceSHA256": "fc841554f8b9abb8c042f0c8844844b61926a79455148722804e6910a35743bd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeRuntimeCoreTests\\.RuntimeCloudGameCenterCoordinatorTests/testSaveConflictRefetchesAndRetriesWithoutDroppingQueuedRevision$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testSaveConflictRefetchesAndRetriesWithoutDroppingQueuedRevision",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+      "sourceSHA256": "fc841554f8b9abb8c042f0c8844844b61926a79455148722804e6910a35743bd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeRuntimeCoreTests\\.RuntimeCloudGameCenterCoordinatorTests/testCorruptRemoteIsQuarantinedAndReplacedWithValidatedLocalReplica$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testCorruptRemoteIsQuarantinedAndReplacedWithValidatedLocalReplica",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+      "sourceSHA256": "fc841554f8b9abb8c042f0c8844844b61926a79455148722804e6910a35743bd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeRuntimeCoreTests\\.RuntimeCloudGameCenterCoordinatorTests/testIdleAccountChangeRequiresExplicitRebindAndPreservesLocalProjection$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testIdleAccountChangeRequiresExplicitRebindAndPreservesLocalProjection",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+      "sourceSHA256": "fc841554f8b9abb8c042f0c8844844b61926a79455148722804e6910a35743bd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter 'RuneScribeGameCenterModuleTests.percentageMappingIsWholeNumberMonotonicAndOverflowSafe()'",
+      "exitStatus": 0,
+      "framework": "Swift Testing",
+      "identifier": "RuneScribeGameCenterModuleTests.percentageMappingIsWholeNumberMonotonicAndOverflowSafe()",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeGameCenterModuleTests/GameCenterReportingTests.swift",
+      "sourceSHA256": "f2d20d029e9c7ede772a6238c81a8f20c49b5976d65e9b07d02cceb3dbda9669"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter 'RuneScribeGameCenterModuleTests.mappingUsesOnlyLocalProgressionAndLaterOptInIncludesPriorCompletion()'",
+      "exitStatus": 0,
+      "framework": "Swift Testing",
+      "identifier": "RuneScribeGameCenterModuleTests.mappingUsesOnlyLocalProgressionAndLaterOptInIncludesPriorCompletion()",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeGameCenterModuleTests/GameCenterReportingTests.swift",
+      "sourceSHA256": "f2d20d029e9c7ede772a6238c81a8f20c49b5976d65e9b07d02cceb3dbda9669"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter 'RuneScribeGameCenterModuleTests.outboxCoalescesMonotonicallyAndHandlesRetryDenialAndDuplicateCallbacks()'",
+      "exitStatus": 0,
+      "framework": "Swift Testing",
+      "identifier": "RuneScribeGameCenterModuleTests.outboxCoalescesMonotonicallyAndHandlesRetryDenialAndDuplicateCallbacks()",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeGameCenterModuleTests/GameCenterReportingTests.swift",
+      "sourceSHA256": "f2d20d029e9c7ede772a6238c81a8f20c49b5976d65e9b07d02cceb3dbda9669"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter 'RuneScribeGameCenterModuleTests.accountChangeDropsOnlyRemoteAcknowledgementsAndRequeuesLocalTruth()'",
+      "exitStatus": 0,
+      "framework": "Swift Testing",
+      "identifier": "RuneScribeGameCenterModuleTests.accountChangeDropsOnlyRemoteAcknowledgementsAndRequeuesLocalTruth()",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeGameCenterModuleTests/GameCenterReportingTests.swift",
+      "sourceSHA256": "f2d20d029e9c7ede772a6238c81a8f20c49b5976d65e9b07d02cceb3dbda9669"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeRuntimeCoreTests\\.RuntimeCloudGameCenterCoordinatorTests/testGameCenterNeverAuthenticatesBeforeOptInAndPersistsAcknowledgement$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testGameCenterNeverAuthenticatesBeforeOptInAndPersistsAcknowledgement",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+      "sourceSHA256": "fc841554f8b9abb8c042f0c8844844b61926a79455148722804e6910a35743bd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeRuntimeCoreTests\\.RuntimeCloudGameCenterCoordinatorTests/testPriorCompletionReportsOnceAndDuplicateSnapshotCallbackIsIdempotent$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testPriorCompletionReportsOnceAndDuplicateSnapshotCallbackIsIdempotent",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+      "sourceSHA256": "fc841554f8b9abb8c042f0c8844844b61926a79455148722804e6910a35743bd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeRuntimeCoreTests\\.RuntimeCloudGameCenterCoordinatorTests/testGameCenterDenialPreservesQueueAndLaterExplicitOptInReplays$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testGameCenterDenialPreservesQueueAndLaterExplicitOptInReplays",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+      "sourceSHA256": "fc841554f8b9abb8c042f0c8844844b61926a79455148722804e6910a35743bd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeRuntimeCoreTests\\.RuntimeCloudGameCenterCoordinatorTests/testAutomaticGameCenterProbeRecoversOfflineReportWithoutNewInput$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testAutomaticGameCenterProbeRecoversOfflineReportWithoutNewInput",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+      "sourceSHA256": "fc841554f8b9abb8c042f0c8844844b61926a79455148722804e6910a35743bd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeRuntimeCoreTests\\.RuntimeCloudGameCenterCoordinatorTests/testGameCenterAccountChangeRequeuesPriorLocalCompletionForNewScope$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testGameCenterAccountChangeRequeuesPriorLocalCompletionForNewScope",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+      "sourceSHA256": "fc841554f8b9abb8c042f0c8844844b61926a79455148722804e6910a35743bd"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path '${DOMAIN_SCRATCH}' --skip-update --skip-build --filter '^RuneScribeRuntimeCoreTests\\.RuntimeCloudGameCenterCoordinatorTests/testMissingServicesAndStorePreserveLocalFirstStatusAndQueuedTruth$'",
+      "exitStatus": 0,
+      "framework": "XCTest",
+      "identifier": "RuneScribeRuntimeCoreTests.RuntimeCloudGameCenterCoordinatorTests/testMissingServicesAndStorePreserveLocalFirstStatusAndQueuedTruth",
+      "observedTestCount": 1,
+      "result": "PASS",
+      "sourcePath": "Packages/RuneScribeArchitecture/Tests/RuneScribeRuntimeCoreTests/RuntimeCloudGameCenterCoordinatorTests.swift",
+      "sourceSHA256": "fc841554f8b9abb8c042f0c8844844b61926a79455148722804e6910a35743bd"
+    }
+  ],
+  "producer": {
+    "path": "scripts/capture-remediation-domain-results.py",
+    "sha256": "102c1d263d335bc6c4ad88f3025ca0e92e519321b9f5c077bcc7df366e675d1f"
+  },
+  "rawLog": "docs/verification/remediation-v1/GateRun/final-qualification.log",
+  "rawLogSHA256": "b8a6a895be57e082c3964031da81e379830760b5869b4912a92e6b58e2b19126",
+  "schemaVersion": "1.0",
+  "semanticMarkers": [
+    "deterministic-offline-unavailable",
+    "queue",
+    "retry-merge",
+    "account-change",
+    "corruption-quarantine",
+    "monotonic-reporting",
+    "no-ownership-path",
+    "privacy-offline-utility",
+    "built-entitlement-configuration-inspection"
+  ],
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "testIDs": [
+    "T-096",
+    "T-097"
+  ],
+  "version": "1.0.39"
+}

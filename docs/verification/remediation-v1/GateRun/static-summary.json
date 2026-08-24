@@ -1,0 +1,154 @@
+{
+  "boundary": {
+    "head": "5642f169a72eccd8615e284816db63a75a0a18c1",
+    "indexDiffSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "manifestFileCount": 1017,
+    "manifestSHA256": "08acfc39638598c634441a26d59ee4e2aa9b33e145f9eb0eb042d194019f8e75",
+    "sourceAggregateSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+    "trackedTreeClean": true,
+    "tree": "c56eaa91d5ed78c7ba01129f21d974698a9aab8a",
+    "worktreeDiffSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "checks": {
+    "architecture": {
+      "result": "PASS"
+    },
+    "attribution": {
+      "branchScanned": true,
+      "findingCount": 0,
+      "pathLabels": 1021,
+      "publicationTexts": 0,
+      "result": "PASS",
+      "textFiles": 583
+    },
+    "diffCheck": {
+      "result": "PASS"
+    },
+    "documentationAlignment": {
+      "build": 39,
+      "result": "PASS",
+      "shipped": false,
+      "version": "1.0.39"
+    },
+    "evidenceHardening": {
+      "failures": 0,
+      "result": "PASS",
+      "tests": 27
+    },
+    "forsetti": {
+      "architecturalCompliancePass": false,
+      "banner": "REPORT ONLY \u2014 NOT A COMPLIANCE PASS",
+      "commandExit": 0,
+      "mode": "report-only",
+      "notEvaluated": 2,
+      "overallStatus": "report-only",
+      "pass": 5,
+      "pendingEnforcement": 1,
+      "total": 20,
+      "violation": 12
+    },
+    "norseProvenance": {
+      "negativeControls": "PASS",
+      "resourceCount": 55,
+      "result": "PASS"
+    },
+    "norseVisual": {
+      "checksPerformed": 57,
+      "findingCount": 0,
+      "profile": "final",
+      "result": "PASS"
+    },
+    "norseVisualMutations": {
+      "executed": 20,
+      "expected": 20,
+      "failed": 0,
+      "originalWorktreeUntouched": true,
+      "passed": 20,
+      "restored": true,
+      "result": "PASS"
+    },
+    "remediationMutations": {
+      "confined": true,
+      "failed": 0,
+      "passed": 18,
+      "required": 18,
+      "restored": true,
+      "result": "PASS"
+    },
+    "roadmapAlignment": {
+      "decisionCount": 12,
+      "result": "PASS",
+      "taskCount": 124
+    },
+    "roadmapCompletion": {
+      "exactOutputCount": 184,
+      "providerCount": 4,
+      "result": "PASS"
+    },
+    "source": {
+      "findingCount": 0,
+      "result": "PASS"
+    },
+    "sourceManifest": {
+      "aggregateSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+      "fileCount": 1017,
+      "result": "PASS"
+    },
+    "swiftPackageDump": {
+      "productCount": 17,
+      "result": "PASS",
+      "targetCount": 32
+    },
+    "xcodegenDeterminism": {
+      "pass1Exit": 0,
+      "pass2Exit": 0,
+      "pbxprojSHA256": "980e5a3b52086106107c3dfe331c63b2e82363ccf832bc1044187a69cf960201",
+      "projectFingerprint": "2012a2fb4cbb83904f0ff214d838e99b11d738ccc999194671cdf25515c76699",
+      "recursiveDiffBytes": 0,
+      "recursiveDiffExit": 0,
+      "result": "PASS"
+    }
+  },
+  "constraints": {
+    "externalSubscriptionReviewUsed": false,
+    "publicationActionsExecuted": false,
+    "simulatorCommandsExecuted": false,
+    "trackedFilesEdited": false
+  },
+  "executionResult": "PASS",
+  "finishedAt": "2026-08-24T08:00:59Z",
+  "schemaVersion": "1.0",
+  "startedAt": "2026-08-24T07:33:51Z",
+  "statusCodes": {
+    "static-architecture.status": 0,
+    "static-attribution.status": 0,
+    "static-diff-cached.status": 0,
+    "static-diff-check.status": 0,
+    "static-diff-head.status": 0,
+    "static-documentation-alignment.status": 0,
+    "static-evidence-hardening.status": 0,
+    "static-final-boundary.status": 0,
+    "static-final-diff-cached.status": 0,
+    "static-final-diff-check.status": 0,
+    "static-final-diff-head.status": 0,
+    "static-final-remediation-source.status": 0,
+    "static-final-source-manifest.status": 0,
+    "static-forsetti-validation.status": 0,
+    "static-forsetti.status": 0,
+    "static-norse-provenance-tests.status": 0,
+    "static-norse-provenance.status": 0,
+    "static-norse-visual-mutations.status": 0,
+    "static-norse-visual.status": 0,
+    "static-package-dump.status": 0,
+    "static-post-mutation-boundary.status": 0,
+    "static-post-mutation-remediation-source.status": 0,
+    "static-post-mutation-source-manifest.status": 0,
+    "static-preflight.status": 0,
+    "static-remediation-mutations.status": 0,
+    "static-remediation-source.status": 0,
+    "static-roadmap-alignment.status": 0,
+    "static-roadmap-completion.status": 0,
+    "static-source-manifest.status": 0,
+    "static-xcodegen-determinism.status": 0
+  }
+}

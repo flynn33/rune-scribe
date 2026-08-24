@@ -1,0 +1,159 @@
+{
+  "$id": "https://ravenforgesoftware.com/schemas/runescribe-ipad-qualification-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "build": {
+      "const": "39"
+    },
+    "iOSProduct": {
+      "additionalProperties": false,
+      "properties": {
+        "bundleIdentifier": {
+          "const": "com.runescribe.app"
+        },
+        "path": {
+          "const": "artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bundleIdentifier",
+        "path",
+        "sha256"
+      ],
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "screenshots": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "simulator": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "runtime": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "udid": {
+          "pattern": "^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "runtime",
+        "udid"
+      ],
+      "type": "object"
+    },
+    "sourceManifestSHA256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "sourceRevision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "const": "PASS"
+    },
+    "suites": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "executed": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "failed": {
+            "const": 0
+          },
+          "log": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "logSHA256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "passed": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "result": {
+            "const": "PASS"
+          },
+          "skipped": {
+            "const": 0
+          }
+        },
+        "required": [
+          "executed",
+          "failed",
+          "log",
+          "logSHA256",
+          "name",
+          "passed",
+          "result",
+          "skipped"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "version": {
+      "const": "1.0.39"
+    }
+  },
+  "required": [
+    "build",
+    "iOSProduct",
+    "schemaVersion",
+    "screenshots",
+    "simulator",
+    "sourceManifestSHA256",
+    "sourceRevision",
+    "status",
+    "suites",
+    "version"
+  ],
+  "title": "Rune Scribe iPad Simulator Qualification",
+  "type": "object"
+}

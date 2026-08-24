@@ -1,0 +1,86 @@
+[
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "77D54A1F-0818-4761-B946-D7723490F6B3",
+        "deviceName" : "iPad Pro 13-inch (M5)",
+        "exportedFileName" : "E3FC1F50-EA89-4F86-A019-11E8D0B9E6FB.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "fresh-install-primary-flows_0_382088DF-2396-4C79-8DDC-23C94B8F7729.png",
+        "timestamp" : 1787558372.17
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "77D54A1F-0818-4761-B946-D7723490F6B3",
+        "deviceName" : "iPad Pro 13-inch (M5)",
+        "exportedFileName" : "9793C155-4040-4D04-A1EF-732291332934.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "ipad-share-builder-first-delivery-landscape_0_DDAC93B5-C9F4-4E52-ADC0-FAAD7ADBCAF8.png",
+        "timestamp" : 1787558263.598
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "77D54A1F-0818-4761-B946-D7723490F6B3",
+        "deviceName" : "iPad Pro 13-inch (M5)",
+        "exportedFileName" : "D0C7E738-BB7F-4EFA-A4C1-EB4A2E2BD71B.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "ipad-share-builder-first-delivery_0_2128CA0D-CD3E-4CFE-A503-E90D4926A7BE.png",
+        "timestamp" : 1787558260.463
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "77D54A1F-0818-4761-B946-D7723490F6B3",
+        "deviceName" : "iPad Pro 13-inch (M5)",
+        "exportedFileName" : "E5CEB9A2-C799-471F-960B-B76611B6368D.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "ipad-share-builder-cipher_0_4548EEF3-A5CF-4FC8-BD93-4658487F3315.png",
+        "timestamp" : 1787558182.671
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "77D54A1F-0818-4761-B946-D7723490F6B3",
+        "deviceName" : "iPad Pro 13-inch (M5)",
+        "exportedFileName" : "5F9692B4-8FD7-44C8-AC2A-CF48BF519FE2.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "ipad-cipher-primary-share_0_48F996D2-258A-4711-82B6-580FA7F12457.png",
+        "timestamp" : 1787558131.324
+      }
+    ],
+    "testIdentifier" : "RuneScribeParityUITests/testFreshInstallExercisesPrimaryProductFlows()",
+    "testIdentifierURL" : "test://com.apple.xcode/RuneScrib/RuneScribIOSUITests/RuneScribeParityUITests/testFreshInstallExercisesPrimaryProductFlows"
+  },
+  {
+    "attachments" : [
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "77D54A1F-0818-4761-B946-D7723490F6B3",
+        "deviceName" : "iPad Pro 13-inch (M5)",
+        "exportedFileName" : "7F28D6DE-CFD7-48AF-A334-FF85EE374A16.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "ipad-vault-norse_0_472B18F0-F0EA-4651-B90A-DAE6DFB3473C.png",
+        "timestamp" : 1787558463.048
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "77D54A1F-0818-4761-B946-D7723490F6B3",
+        "deviceName" : "iPad Pro 13-inch (M5)",
+        "exportedFileName" : "191B7407-4260-4926-90FF-EB71BB4D98B2.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "ipad-workspace-norse_0_7D63D84D-0089-4F3B-AACF-E00198B51F36.png",
+        "timestamp" : 1787558452.214
+      },
+      {
+        "configurationName" : "Test Scheme Action",
+        "deviceId" : "77D54A1F-0818-4761-B946-D7723490F6B3",
+        "deviceName" : "iPad Pro 13-inch (M5)",
+        "exportedFileName" : "0EBB3E16-AE36-4B9D-88C5-AA31936A7C2B.png",
+        "isAssociatedWithFailure" : false,
+        "suggestedHumanReadableName" : "ipad-appearance-defaults_0_6F8C671E-A018-4863-AA4B-061D05379ACC.png",
+        "timestamp" : 1787558414.101
+      }
+    ],
+    "testIdentifier" : "RuneScribeParityUITests/testNorseVisualPresentationAndScreenshots()",
+    "testIdentifierURL" : "test://com.apple.xcode/RuneScrib/RuneScribIOSUITests/RuneScribeParityUITests/testNorseVisualPresentationAndScreenshots"
+  }
+]

@@ -1,0 +1,715 @@
+{
+  "build": "39",
+  "executions": [
+    {
+      "command": "python3 scripts/check-remediation-source.py",
+      "requiredEvidence": "Baseline.json",
+      "result": "PASS",
+      "scenario": "Clean or isolated remediation workspace",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-001"
+    },
+    {
+      "command": "scripts/check-roadmap-alignment.sh",
+      "requiredEvidence": "roadmap log",
+      "result": "PASS",
+      "scenario": "Original roadmap immutability",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-002"
+    },
+    {
+      "command": "scripts/check-architecture.sh",
+      "requiredEvidence": "architecture log",
+      "result": "PASS",
+      "scenario": "No external Forsetti dependency",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-003"
+    },
+    {
+      "command": "python3 scripts/test-remediation-mutations.py",
+      "requiredEvidence": "SourceManifestValidation.json",
+      "result": "PASS",
+      "scenario": "Shipping file tamper",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-004"
+    },
+    {
+      "command": "python3 scripts/tests/test_remediation_evidence_hardening.py",
+      "requiredEvidence": "NegativeMutations.json",
+      "result": "PASS",
+      "scenario": "Wrong source manifest in evidence",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-005"
+    },
+    {
+      "command": "python3 scripts/check-remediation-completion.py --no-git-child --expected-source-hash 47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+      "requiredEvidence": "SourceManifestValidation.json",
+      "result": "PASS",
+      "scenario": "No-Git verification",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-006"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-norse-workspace.png",
+      "result": "PASS",
+      "scenario": "Norse workspace visual integration",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-010"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-norse-result.png",
+      "result": "PASS",
+      "scenario": "Norse settled Artifact",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-011"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-settings-codices.png",
+      "result": "PASS",
+      "scenario": "Settings Codex cards",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-012"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-vault.png",
+      "result": "PASS",
+      "scenario": "Vault Codices and Artifacts",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-013"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination platform=macOS,arch=arm64 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-macos-parity -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/macos-parity.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=",
+      "requiredEvidence": "macos-optional-provider.png",
+      "result": "PASS",
+      "scenario": "Optional provider parity",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-014"
+    },
+    {
+      "command": "python3 scripts/test-remediation-mutations.py",
+      "requiredEvidence": "NegativeMutations.json",
+      "result": "PASS",
+      "scenario": "Provider-specific UI fork detection",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-015"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-share-builder-first.png",
+      "result": "PASS",
+      "scenario": "First-delivery message builder",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-020"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-share-builder-established.png",
+      "result": "PASS",
+      "scenario": "Established message builder",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-021"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination platform=macOS,arch=arm64 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-macos-parity -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/macos-parity.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=",
+      "requiredEvidence": "macos-share-builder.png",
+      "result": "PASS",
+      "scenario": "Message builder keyboard flow",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-022"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=77D54A1F-0818-4761-B946-D7723490F6B3\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-ipad-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/ipad-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO -only-testing:RuneScribIOSUITests/RuneScribeParityUITests/testNorseVisualPresentationAndScreenshots -only-testing:RuneScribIOSUITests/RuneScribeParityUITests/testShareBuilderControlsExposeStableAccessibilityState -only-testing:RuneScribIOSUITests/RuneScribeParityUITests/testCipherLibraryShareActionsExposeUsableHitRegions -only-testing:RuneScribIOSUITests/RuneScribeParityUITests/testFreshInstallExercisesPrimaryProductFlows CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "ipad-share-builder.png",
+      "result": "PASS",
+      "scenario": "Adaptive builder layout",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-023"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Codex change default resolution",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-024"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Seal None",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-025"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Frame None",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-026"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Incompatible frame removal",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-027"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Locked item cannot apply",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-028"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Encountered item not owned",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-029"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Unavailable provider rejected",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-030"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Preview rendering failure",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-031"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Reset defaults",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-032"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Save defaults",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-033"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Save defaults failure",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-034"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Share completed once",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-035"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Share cancelled",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-036"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "Presentation not completion",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-037"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ShareBuilderValidation.json",
+      "result": "PASS",
+      "scenario": "One-action defaults path",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-038"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-cipher-share.png",
+      "result": "PASS",
+      "scenario": "Primary Library Share",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-040"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "CipherInvitationValidation.json",
+      "result": "PASS",
+      "scenario": "Primary representation contract",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-041"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-share-builder-cipher.png",
+      "result": "PASS",
+      "scenario": "Customize cipher invitation",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-042"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "CipherInvitationValidation.json",
+      "result": "PASS",
+      "scenario": "Typed invitation metadata",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-043"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "CipherInvitationValidation.json",
+      "result": "PASS",
+      "scenario": "Link fallback",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-044"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "CipherInvitationValidation.json",
+      "result": "PASS",
+      "scenario": "QR fallback",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-045"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination platform=macOS,arch=arm64 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-macos-parity -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/macos-parity.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS=",
+      "requiredEvidence": "CipherInvitationValidation.json",
+      "result": "PASS",
+      "scenario": "Export distinct from Share",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-046"
+    },
+    {
+      "command": "python3 scripts/test-remediation-mutations.py",
+      "requiredEvidence": "NegativeMutations.json",
+      "result": "PASS",
+      "scenario": "Primary reverted to link",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-047"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "BaseThemeFailureValidation.json",
+      "result": "PASS",
+      "scenario": "Missing required resource",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-050"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "BaseThemeFailureValidation.json",
+      "result": "PASS",
+      "scenario": "Hash mismatch",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-051"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "BaseThemeFailureValidation.json",
+      "result": "PASS",
+      "scenario": "Dimension mismatch",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-052"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-base-failure-banner.png",
+      "result": "PASS",
+      "scenario": "Root warning",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-053"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "BaseThemeFailureValidation.json",
+      "result": "PASS",
+      "scenario": "Decode survives emergency presentation",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-054"
+    },
+    {
+      "command": "scripts/test-shipping-products.sh",
+      "requiredEvidence": "NegativeMutations.json",
+      "result": "PASS",
+      "scenario": "Release product missing Norse resource",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-055"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "BaseThemeFailureValidation.json",
+      "result": "PASS",
+      "scenario": "Optional provider isolation",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-056"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-appearance-defaults.png",
+      "result": "PASS",
+      "scenario": "Per-Codex defaults controls",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-060"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "AppearanceDefaultsValidation.json",
+      "result": "PASS",
+      "scenario": "Relic default persistence",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-061"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "AppearanceDefaultsValidation.json",
+      "result": "PASS",
+      "scenario": "Explicit Seal None",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-062"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "AppearanceDefaultsValidation.json",
+      "result": "PASS",
+      "scenario": "Explicit Frame None",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-063"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "AppearanceDefaultsValidation.json",
+      "result": "PASS",
+      "scenario": "Effects Full/Reduced/Off",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-064"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "AccessibilityValidation.json",
+      "result": "PASS",
+      "scenario": "Reduce Motion cap",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-065"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "AppearanceDefaultsValidation.json",
+      "result": "PASS",
+      "scenario": "Stale default fallback",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-066"
+    },
+    {
+      "command": "scripts/check-architecture.sh",
+      "requiredEvidence": "architecture log",
+      "result": "PASS",
+      "scenario": "No direct UI persistence",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-067"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "iphone-norse-workspace.png",
+      "result": "PASS",
+      "scenario": "Workspace background",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-070"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "screenshots",
+      "result": "PASS",
+      "scenario": "Settings/Vault background continuity",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-071"
+    },
+    {
+      "command": "python3 scripts/test-remediation-mutations.py",
+      "requiredEvidence": "NegativeMutations.json",
+      "result": "PASS",
+      "scenario": "Root background removed",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-072"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "ThemeRootBackgroundValidation.json",
+      "result": "PASS",
+      "scenario": "Emergency static background",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-073"
+    },
+    {
+      "command": "python3 scripts/check-norse-production-provenance.py",
+      "requiredEvidence": "NorseProductionProvenanceValidation.json",
+      "result": "PASS",
+      "scenario": "Production paths and hashes",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-080"
+    },
+    {
+      "command": "python3 scripts/check-norse-production-provenance.py",
+      "requiredEvidence": "NorseProductionProvenanceValidation.json",
+      "result": "PASS",
+      "scenario": "No active placeholder/candidate labels",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-081"
+    },
+    {
+      "command": "python3 scripts/check-norse-production-provenance.py",
+      "requiredEvidence": "NorseProductionProvenanceValidation.json",
+      "result": "PASS",
+      "scenario": "Generated resource reproducibility",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-082"
+    },
+    {
+      "command": "python3 scripts/check-documentation-alignment.py",
+      "requiredEvidence": "documentation log",
+      "result": "PASS",
+      "scenario": "Canonical follow-up transport wording",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-083"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "contract tests",
+      "result": "PASS",
+      "scenario": "Strict schema numeric type",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-084"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "portable compile log",
+      "result": "PASS",
+      "scenario": "Neutral contract compile",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-085"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "CompatibilityValidation.json",
+      "result": "PASS",
+      "scenario": "Legacy cipher v3",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-090"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "CompatibilityValidation.json",
+      "result": "PASS",
+      "scenario": "Legacy message v1",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-091"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "CompatibilityValidation.json",
+      "result": "PASS",
+      "scenario": "Current typed package",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-092"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "CompatibilityValidation.json",
+      "result": "PASS",
+      "scenario": "Corrupt presentation valid core",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-093"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "SecurityPrivacyValidation.json",
+      "result": "PASS",
+      "scenario": "Progression/cloud privacy",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-094"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "SecurityPrivacyValidation.json",
+      "result": "PASS",
+      "scenario": "First delivery only once",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-095"
+    },
+    {
+      "command": "python3 scripts/capture-remediation-domain-results.py --root . --source-manifest docs/verification/remediation-v1/SOURCE-MANIFEST.json --source-revision 5642f169a72eccd8615e284816db63a75a0a18c1 --suite-log-input /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/final-qualification-prefix.log --raw-output docs/verification/remediation-v1/GateRun/final-qualification.log --macos-app-zip artifacts/remediation-v1/RuneScrib-macOS-Release.app.zip --ios-app-zip artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip --cloud-output docs/verification/remediation-v1/GateRun/CloudGameCenter-Test-Results.json --performance-output docs/verification/remediation-v1/GateRun/Performance-Resource-Results.json --inspection-output docs/verification/remediation-v1/GateRun/Built-Product-Inspection.json --shipping-output docs/verification/remediation-v1/GateRun/shipping-products.log",
+      "requiredEvidence": "service tests",
+      "result": "PASS",
+      "scenario": "Offline and merge adapters",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-096"
+    },
+    {
+      "command": "python3 scripts/capture-remediation-domain-results.py --root . --source-manifest docs/verification/remediation-v1/SOURCE-MANIFEST.json --source-revision 5642f169a72eccd8615e284816db63a75a0a18c1 --suite-log-input /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/final-qualification-prefix.log --raw-output docs/verification/remediation-v1/GateRun/final-qualification.log --macos-app-zip artifacts/remediation-v1/RuneScrib-macOS-Release.app.zip --ios-app-zip artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip --cloud-output docs/verification/remediation-v1/GateRun/CloudGameCenter-Test-Results.json --performance-output docs/verification/remediation-v1/GateRun/Performance-Resource-Results.json --inspection-output docs/verification/remediation-v1/GateRun/Built-Product-Inspection.json --shipping-output docs/verification/remediation-v1/GateRun/shipping-products.log",
+      "requiredEvidence": "service tests",
+      "result": "PASS",
+      "scenario": "Optional reporting adapters",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-097"
+    },
+    {
+      "command": "scripts/check-architecture.sh; scripts/check-forsetti-compliance.sh --scan-root . --rules scripts/forsetti-compliance-rules.json --output /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/forsetti-report; printf '%s\\n' 'REPORT ONLY \u2014 NOT A COMPLIANCE PASS'; zsh docs/verification/remediation-v1/GateRun/run_complete_macos_qualification.zsh; RUNESCRIBE_RECORDED_SIMULATOR_UDID=1563B47A-700D-4AEF-A8D5-89780C581F83 zsh docs/verification/remediation-v1/GateRun/run_iphone_qualification.zsh; RUNESCRIBE_RECORDED_SIMULATOR_UDID=77D54A1F-0818-4761-B946-D7723490F6B3 zsh docs/verification/remediation-v1/GateRun/run_ipad_qualification.zsh",
+      "requiredEvidence": "architecture logs",
+      "result": "PASS",
+      "scenario": "Complete guards",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-100"
+    },
+    {
+      "command": "python3 scripts/test-remediation-mutations.py",
+      "requiredEvidence": "NegativeMutations.json",
+      "result": "PASS",
+      "scenario": "Required mutation suite",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-101"
+    },
+    {
+      "command": "python3 scripts/scan-attribution.py . --patterns /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Codex-Remediation-Package-v1.0/controls/PROHIBITED-ATTRIBUTION-PATTERNS-v1.0.json",
+      "requiredEvidence": "AttributionAudit.json",
+      "result": "PASS",
+      "scenario": "Attribution clean",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-102"
+    },
+    {
+      "command": "git archive --format=tar HEAD | tar -xf - -C /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2; xcodegen generate --spec /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/project.yml --project /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --project-root /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --cache-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass1.cache; python3 /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/fingerprint_project.py /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/RuneScrib.xcodeproj /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/static-xcodegen-pass1-manifest.json; xcodegen generate --spec /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/project.yml --project /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --project-root /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2 --cache-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass2.cache; python3 /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/fingerprint_project.py /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-isolated.wKwOU2/RuneScrib.xcodeproj /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/static-xcodegen-pass2-manifest.json; diff -ru /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass1-project /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/static-final/xcodegen-pass2-project",
+      "requiredEvidence": "xcodegen log",
+      "result": "PASS",
+      "scenario": "XcodeGen twice",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-110"
+    },
+    {
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+      "requiredEvidence": "swift-package.log",
+      "result": "PASS",
+      "scenario": "Full Swift package suite",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-111"
+    },
+    {
+      "command": "zsh docs/verification/remediation-v1/GateRun/run_complete_macos_qualification.zsh",
+      "requiredEvidence": "macos logs",
+      "result": "PASS",
+      "scenario": "Release product and hosted tests",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-112"
+    },
+    {
+      "command": "RUNESCRIBE_RECORDED_SIMULATOR_UDID=1563B47A-700D-4AEF-A8D5-89780C581F83 zsh docs/verification/remediation-v1/GateRun/run_iphone_qualification.zsh",
+      "requiredEvidence": "iphone logs",
+      "result": "PASS",
+      "scenario": "Release product and full Simulator suite",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-113"
+    },
+    {
+      "command": "RUNESCRIBE_RECORDED_SIMULATOR_UDID=77D54A1F-0818-4761-B946-D7723490F6B3 zsh docs/verification/remediation-v1/GateRun/run_ipad_qualification.zsh",
+      "requiredEvidence": "ipad logs",
+      "result": "PASS",
+      "scenario": "Adaptive Release qualification",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-114"
+    },
+    {
+      "command": "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+      "requiredEvidence": "AccessibilityValidation.json",
+      "result": "PASS",
+      "scenario": "Accessibility matrix",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-115"
+    },
+    {
+      "command": "python3 scripts/capture-remediation-domain-results.py --root . --source-manifest docs/verification/remediation-v1/SOURCE-MANIFEST.json --source-revision 5642f169a72eccd8615e284816db63a75a0a18c1 --suite-log-input /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/final-qualification-prefix.log --raw-output docs/verification/remediation-v1/GateRun/final-qualification.log --macos-app-zip artifacts/remediation-v1/RuneScrib-macOS-Release.app.zip --ios-app-zip artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip --cloud-output docs/verification/remediation-v1/GateRun/CloudGameCenter-Test-Results.json --performance-output docs/verification/remediation-v1/GateRun/Performance-Resource-Results.json --inspection-output docs/verification/remediation-v1/GateRun/Built-Product-Inspection.json --shipping-output docs/verification/remediation-v1/GateRun/shipping-products.log",
+      "requiredEvidence": "performance report",
+      "result": "PASS",
+      "scenario": "Preview/cache/resource bounds",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-116"
+    },
+    {
+      "command": "scripts/check-shipping-products.sh --macos-app /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-macos-release/Build/Products/Release/RuneScrib.app --ios-app /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-ios-release/Build/Products/Release-iphonesimulator/RuneScrib.app",
+      "requiredEvidence": "CompletionReport.json",
+      "result": "PASS",
+      "scenario": "Version/build consistency",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-117"
+    },
+    {
+      "command": "python3 scripts/capture-remediation-domain-results.py --root . --source-manifest docs/verification/remediation-v1/SOURCE-MANIFEST.json --source-revision 5642f169a72eccd8615e284816db63a75a0a18c1 --suite-log-input /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/final-qualification-prefix.log --raw-output docs/verification/remediation-v1/GateRun/final-qualification.log --macos-app-zip artifacts/remediation-v1/RuneScrib-macOS-Release.app.zip --ios-app-zip artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip --cloud-output docs/verification/remediation-v1/GateRun/CloudGameCenter-Test-Results.json --performance-output docs/verification/remediation-v1/GateRun/Performance-Resource-Results.json --inspection-output docs/verification/remediation-v1/GateRun/Built-Product-Inspection.json --shipping-output docs/verification/remediation-v1/GateRun/shipping-products.log",
+      "requiredEvidence": "shipping-products.log",
+      "result": "PASS",
+      "scenario": "Final bundle inspection",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-118"
+    },
+    {
+      "command": "python3 scripts/generate-remediation-evidence.py --package-root /Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Codex-Remediation-Package-v1.0 --input /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/qualification-input.json",
+      "requiredEvidence": "candidate zip",
+      "result": "PASS",
+      "scenario": "Owner-test ZIP",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-119"
+    },
+    {
+      "command": "python3 scripts/check-remediation-completion.py",
+      "requiredEvidence": "CompletionReport.json",
+      "result": "PASS",
+      "scenario": "Final self-audit",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-120"
+    },
+    {
+      "command": "set -euo pipefail; revision=5642f169a72eccd8615e284816db63a75a0a18c1; branch=$(git branch --show-current); default_branch=main; git fetch --prune origin >/dev/null; test \"$branch\" = fix/rune-scribe-remediation-v1; test -z \"$(git tag --points-at \"$revision\")\"; if git merge-base --is-ancestor \"$revision\" \"origin/$default_branch\"; then exit 1; fi; releases=$(gh release list --repo flynn33/rune-scribe --limit 100 --json tagName,isDraft,isPrerelease,publishedAt); runs=$(gh run list --repo flynn33/rune-scribe --branch \"$branch\" --limit 20 --json databaseId,status,conclusion,event,workflowName,headSha); printf 'REMOTE_RELEASES=%s\\nREMOTE_BRANCH_RUNS=%s\\nDEFAULT_BRANCH=%s\\nBRANCH=%s\\nSOURCE_REVISION=%s\\nPUBLICATION_AUDIT_PASS\\nREMOTE_INSPECTION_PERFORMED=true\\nHEAD_TAGS=NONE\\nSOURCE_MERGED_TO_DEFAULT=false\\nRELEASE_PUBLISHED=false\\nUPLOAD_PERFORMED=false\\nNOTARIZATION_PERFORMED=false\\nTESTFLIGHT_PERFORMED=false\\nAPPSTORE_PERFORMED=false\\nROLLOUT_PERFORMED=false\\n' \"$releases\" \"$runs\" \"$default_branch\" \"$branch\" \"$revision\"",
+      "requiredEvidence": "CompletionReport.json",
+      "result": "PASS",
+      "scenario": "No public shipment",
+      "suiteName": "Rune Scribe Remediation Final Qualification",
+      "testID": "T-121"
+    }
+  ],
+  "rawLog": "docs/verification/remediation-v1/GateRun/final-qualification.log",
+  "rawLogSHA256": "b8a6a895be57e082c3964031da81e379830760b5869b4912a92e6b58e2b19126",
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "status": "PASS",
+  "suiteName": "Rune Scribe Remediation Final Qualification",
+  "totals": {
+    "executed": 87,
+    "failed": 0,
+    "passed": 87,
+    "skipped": 0
+  },
+  "version": "1.0.39"
+}

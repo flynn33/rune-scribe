@@ -1,0 +1,165 @@
+{
+  "artifactSHA256": {
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift": "50f023e3b793ad437fcbc5684308c8f55f2c19f1fec92fd594930dbf2dd1c6aa",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift": "8fe51ed6e12bc682e71a7db31652e68f7682f76f2bc4c20e09bd57156cd7600e",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/ShareArtifactRegistry.swift": "befb7c9bf4594623cda8fc2d91701cea08ba98b94bbf3b91eb3421d0a9defebb",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Policy.swift": "872027fa7c9557a364de440c84fbca3fc7bbf31016a5c41c5089b2d8f47b3c8b",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeIOGateway.swift": "01356376537624ba1fd12eb6f2cf61e25c167754334f9d3993b2b8d902d9a170",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift": "e813505e6643d37432afee2f357b3a78bdf34ba82cd5f11de0e760fa9192db2a",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Progression.swift": "5f9aff525773556f7724487d4b6385e80ad196ba6c01b67484c7947bddeaebd7",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ShareBuilder.swift": "069a36fb95238f690c76eb21cce09946964229ad66e19e31da3b0cc7c4924127",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json": "0401ca85bd4edc005f80d6c4960be2cf47e2ae9b26c7943dc7387162ae857df8",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/OutboundSharePresentationBuilder.swift": "bc20acb2e7fae56579dae750f62b9b7e232a46a2bb20203182b4bbcdbfb93d4d",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationSummary.swift": "cd82812972b53039069f022388e47a18c303dbcd063df707b0a80ac4e67f64f6",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderModel.swift": "b10b6540ed5b3962ca73a8c28d5fe52630764cad3b9b07ea090ff0f9f5f341db",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderView.swift": "a6489c4901d8bf7341455940ace8d04ac90883dd6114865774ac37031a070ec1",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/SharePolicy.swift": "d5da8889398afd64047ca10a62bc8a2961ae0525408747c00814811d6ff5648d",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift": "0c388b8ba940f45144697f43c99bf749c74d2f31e60463897dd32090e0f69aff",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift": "2486b7b758351cf232a491eba403bcfbe24513dd7f8fee118fce8fd36d369158",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift": "34763f72ca545e0e1c5306dcd8a3584998e1d5a850533b991accea2ac676d537",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeNativeShareView.swift": "898a1f6e7cca3a83021be8b09acfee00873d258f2bd10c38054e431a63f8aee2",
+    "docs/verification/remediation-v1/ClaimEvidence/fallback-compatibility-tests-e336d08675ba.json": "1f17114fd26ae1502a1edbf5c85e9d2b1d9d706ef606c2f7c893a5c7dee7445c",
+    "docs/verification/remediation-v1/ClaimEvidence/source-mutation-test-403cb2d96801.json": "559da7dac3667837b57d25f8f3ad1f8f69fd2eb1036e7f2f6c983dbeae5bc716",
+    "docs/verification/remediation-v1/GateRun/final-qualification-results.json": "a711216ffddc8251e8cc6784a467b801f4a8b66d89053cbd5774e06bb495a6d3",
+    "docs/verification/remediation-v1/GateRun/forsetti.log": "a102958e736565be065d26413d1e4706e22e8ce9f52d977a82e34ae41d91ca1a",
+    "docs/verification/remediation-v1/GateRun/ipad-ui.log": "ad0806ccdc1bb8ec64972b56183129c2715854945815ef8526c1ebd640086df8",
+    "docs/verification/remediation-v1/GateRun/iphone-ui.log": "9fd543c7041ec8647dea4d2525d4ee89bda3e8aa538ff03c04504603940bcdf7",
+    "docs/verification/remediation-v1/GateRun/macos-parity.log": "614aea1ddb16aea1a3d0ace11c414220159596b54a0eeeb20038a435bcfa4f20",
+    "docs/verification/remediation-v1/GateRun/static-qualification.log": "1c57cd86c6a93ac0bd7b5355aa03f09ef1ec25b13a98e0af1bc6084156803680",
+    "docs/verification/remediation-v1/GateRun/swift-package.log": "cdbceb34bc98065d8d9c4e3e75ebc960a953ebee4ae4fab5e4ce39f3223a5be3",
+    "docs/verification/remediation-v1/GateRun/xcodegen-determinism.log": "ce12f1b9c07fac374c5a7aa44c12ed8f4ab69322d4d3ab31fa27c239eb94fc11",
+    "docs/verification/remediation-v1/Screenshots/ipad-share-builder.png": "15f5e64fa85f97734ef5cf4453f7af547ce20fe7b4ebaa72a76304ce7d9b6040",
+    "docs/verification/remediation-v1/Screenshots/iphone-appearance-defaults.png": "932bcf86e45fe81353b4656614b7f1d250712bd05af22e49ee0be420caa9c490",
+    "docs/verification/remediation-v1/Screenshots/iphone-base-failure-banner.png": "99b683743c59e8aea8375cb7eca5655a3a98158f3e4df431ad166b53d6e2bb98",
+    "docs/verification/remediation-v1/Screenshots/iphone-cipher-share.png": "c6ef839401e2e4f35960001d7a50ab74a44edd379a2ee81243c00e7f0674e2f8",
+    "docs/verification/remediation-v1/Screenshots/iphone-norse-result.png": "2a0287c6f6de2844f067c03ff20fdf4ac1caf836c158cef1ac39ef3c65d00bb0",
+    "docs/verification/remediation-v1/Screenshots/iphone-norse-workspace.png": "2a0287c6f6de2844f067c03ff20fdf4ac1caf836c158cef1ac39ef3c65d00bb0",
+    "docs/verification/remediation-v1/Screenshots/iphone-settings-codices.png": "932bcf86e45fe81353b4656614b7f1d250712bd05af22e49ee0be420caa9c490",
+    "docs/verification/remediation-v1/Screenshots/iphone-settings-moonleaf.png": "a2f6a32d2e5150892e92700a823f8f5f7b0e797b43244c80f9bb4db72a8c5a7d",
+    "docs/verification/remediation-v1/Screenshots/iphone-share-builder-cipher.png": "31b6ea17f118d74bb62c5fe1f1ab139ccd290b6cba11e03cd102c1e6dadf7189",
+    "docs/verification/remediation-v1/Screenshots/iphone-share-builder-established.png": "559ebb838954cb648e0791556beaba937415f48533bdaf4093cf346bfa5531f4",
+    "docs/verification/remediation-v1/Screenshots/iphone-share-builder-first.png": "5725455b78904f6e1a46ff9c3fd56e357402a2428a460c175ca92dc87db09ef0",
+    "docs/verification/remediation-v1/Screenshots/iphone-share-builder-message.png": "5725455b78904f6e1a46ff9c3fd56e357402a2428a460c175ca92dc87db09ef0",
+    "docs/verification/remediation-v1/Screenshots/iphone-vault-moonleaf.png": "0f703fda32f3f651676eff63453eaf592e7440a9cb85e6d53819bd20e1d2c1bc",
+    "docs/verification/remediation-v1/Screenshots/iphone-vault.png": "54a8761f85e8c7a3571a9a0e306d2b9cf73dba79beaddc79a8f3e45b9f7db66e",
+    "docs/verification/remediation-v1/Screenshots/iphone-workspace-moonleaf.png": "44b655e965a3008b09f7f274b8c9108f087e0f031e2d2a439b38295e68122534",
+    "docs/verification/remediation-v1/Screenshots/macos-optional-provider.png": "8a78caa4ba74cdf6e2c9d583fdb749f835ac48b545054cba51d370e73c733920",
+    "docs/verification/remediation-v1/Screenshots/macos-share-builder-moonleaf.png": "4ce50cf72cf96892f340398f837d6fb30ddfdab66a4b7ca4a98397fa20507d8b",
+    "docs/verification/remediation-v1/Screenshots/macos-share-builder.png": "41e509439af325fce4e8f113303f381f75a34cef2e9dc04d17cac2e734025e21",
+    "docs/verification/remediation-v1/Screenshots/optional-provider-workspace.png": "8a78caa4ba74cdf6e2c9d583fdb749f835ac48b545054cba51d370e73c733920"
+  },
+  "artifacts": [
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageSend.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/ShareArtifactRegistry.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Policy.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeIOGateway.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Progression.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ShareBuilder.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/OutboundSharePresentationBuilder.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationSummary.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderModel.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderView.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/SharePolicy.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeNativeShareView.swift",
+    "docs/verification/remediation-v1/ClaimEvidence/fallback-compatibility-tests-e336d08675ba.json",
+    "docs/verification/remediation-v1/ClaimEvidence/source-mutation-test-403cb2d96801.json",
+    "docs/verification/remediation-v1/Screenshots/ipad-share-builder.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-appearance-defaults.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-base-failure-banner.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-cipher-share.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-norse-result.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-norse-workspace.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-settings-codices.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-settings-moonleaf.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-share-builder-cipher.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-share-builder-established.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-share-builder-first.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-share-builder-message.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-vault-moonleaf.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-vault.png",
+    "docs/verification/remediation-v1/Screenshots/iphone-workspace-moonleaf.png",
+    "docs/verification/remediation-v1/Screenshots/macos-optional-provider.png",
+    "docs/verification/remediation-v1/Screenshots/macos-share-builder-moonleaf.png",
+    "docs/verification/remediation-v1/Screenshots/macos-share-builder.png",
+    "docs/verification/remediation-v1/Screenshots/optional-provider-workspace.png"
+  ],
+  "build": "39",
+  "commands": [
+    "python3 scripts/test-remediation-mutations.py",
+    "swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/swiftpm-scratch.G3g7Wh --no-parallel -Xswiftc -warnings-as-errors",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-iOS-Parity -configuration Debug -destination \"platform=iOS Simulator,id=1563B47A-700D-4AEF-A8D5-89780C581F83\" -destination-timeout 120 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-iphone-ui -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/iphone-ui.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=",
+    "xcodebuild test -project RuneScrib.xcodeproj -scheme RuneScrib-macOS-Parity -configuration Debug -destination platform=macOS,arch=arm64 -derivedDataPath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/DerivedData-macos-parity -resultBundlePath /tmp/runescribe-sourcebound-domain-terminal.C1mmD0/macos-parity.xcresult -disableAutomaticPackageResolution -parallel-testing-enabled NO CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= CODE_SIGN_ENTITLEMENTS="
+  ],
+  "endedAt": "2026-08-24T08:15:05Z",
+  "environment": {
+    "architecture": "arm64",
+    "operatingSystem": "macOS 26.6.2 (25G83)",
+    "swift": "Swift 6.2.3",
+    "xcode": "Xcode 26.2 (17C52)"
+  },
+  "evidenceBindings": {
+    "CipherInvitationValidation.json": [
+      "docs/verification/remediation-v1/CipherInvitationValidation.json"
+    ],
+    "Screenshots/iphone-share-builder-cipher.png": [
+      "docs/verification/remediation-v1/Screenshots/iphone-share-builder-cipher.png"
+    ],
+    "fallback compatibility tests": [
+      "docs/verification/remediation-v1/ClaimEvidence/fallback-compatibility-tests-e336d08675ba.json"
+    ],
+    "source mutation test": [
+      "docs/verification/remediation-v1/ClaimEvidence/source-mutation-test-403cb2d96801.json"
+    ]
+  },
+  "evidenceClaims": [
+    "CipherInvitationValidation.json",
+    "Screenshots/iphone-share-builder-cipher.png",
+    "fallback compatibility tests",
+    "source mutation test"
+  ],
+  "failures": [],
+  "gateIDs": [
+    "RC-009",
+    "RC-014",
+    "RC-015"
+  ],
+  "logs": [
+    "docs/verification/remediation-v1/GateRun/final-qualification-results.json",
+    "docs/verification/remediation-v1/GateRun/forsetti.log",
+    "docs/verification/remediation-v1/GateRun/ipad-ui.log",
+    "docs/verification/remediation-v1/GateRun/iphone-ui.log",
+    "docs/verification/remediation-v1/GateRun/macos-parity.log",
+    "docs/verification/remediation-v1/GateRun/static-qualification.log",
+    "docs/verification/remediation-v1/GateRun/swift-package.log",
+    "docs/verification/remediation-v1/GateRun/xcodegen-determinism.log"
+  ],
+  "nonGatingExternal": [
+    "App Store Connect records",
+    "live CloudKit account/container",
+    "live Game Center sandbox",
+    "distribution signing and public upload"
+  ],
+  "notes": [
+    "Exact locked test executions: docs/verification/remediation-v1/Attachments/CipherInvitationValidation-Test-Matrix.md",
+    "Qualified against the committed source revision with fresh build and test outputs."
+  ],
+  "recordID": "remediation-v1-cipherinvitationvalidation",
+  "result": "PASS",
+  "schemaVersion": "1.0",
+  "sourceManifestSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
+  "sourceRevision": "5642f169a72eccd8615e284816db63a75a0a18c1",
+  "startedAt": "2026-08-24T05:13:00Z",
+  "testSummary": {
+    "executed": 87,
+    "failed": 0,
+    "passed": 87,
+    "skipped": 0
+  },
+  "version": "1.0.39"
+}
