@@ -448,6 +448,20 @@ class EvidenceHardeningTests(unittest.TestCase):
     def test_generator_checker_exact_path_policies_match(self) -> None:
         self.assertEqual(generator.SOURCE_AREA_PATHS, checker.SOURCE_AREA_PATHS)
         self.assertEqual(generator.IMPLEMENTATION_PATHS, checker.IMPLEMENTATION_PATHS)
+        progression_catalog_path = (
+            "Packages/RuneScribeArchitecture/Sources/"
+            "RuneScribeProgressionModule/ProgressionCatalogResources.swift"
+        )
+        self.assertIn(
+            progression_catalog_path,
+            generator.SOURCE_AREA_PATHS["RSA-009"][0],
+        )
+        self.assertTrue(
+            any(
+                progression_catalog_path in expectation_paths
+                for expectation_paths in generator.IMPLEMENTATION_PATHS["RSA-009"]
+            )
+        )
         self.assertEqual(
             generator.REMOVED_IMPLEMENTATION_PATHS,
             checker.REMOVED_IMPLEMENTATION_PATHS,

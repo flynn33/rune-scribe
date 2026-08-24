@@ -1,6 +1,6 @@
 {
   "aggregateFormat": "UTF-8 records sorted by normalized path: path\\0kind\\0bytes\\0sha256\\0executable-as-0-or-1\\n",
-  "aggregateSHA256": "e7706b0551d5104dac5bd4fb1c52cebcc264a376aec2853d9a23ffb12f0a3e7a",
+  "aggregateSHA256": "882898594bc1f986cca551e6d6652ef36bf539fb7f4db1d1970a6d5f091783df",
   "excludes": [
     ".DS_Store",
     ".build",
@@ -6943,11 +6943,11 @@
       "sha256": "7ec14b3cdc47d8349cc9823feb6feb7e080ef14ed1e740f50180dcb929d3f0a5"
     },
     {
-      "bytes": 277935,
+      "bytes": 278052,
       "executable": true,
       "kind": "file",
       "path": "scripts/check-remediation-completion.py",
-      "sha256": "b8fc8ef330572ffa13ae0956aaa5ea465090fdc70d12ae4bc90edc4018e1aea0"
+      "sha256": "a8b558d2accb277306715cbb9583a58fe05724c9bb8b845c4cc3bea6a1b3e879"
     },
     {
       "bytes": 28227,
@@ -7020,11 +7020,11 @@
       "sha256": "5dc54bdb8e92091fe60d838d6bdb68edc0351d0c5059bf7728aa65eade5d806f"
     },
     {
-      "bytes": 205775,
+      "bytes": 205892,
       "executable": true,
       "kind": "file",
       "path": "scripts/generate-remediation-evidence.py",
-      "sha256": "f3fb02990caa772e23ea327dbec2fe16e16aa82df99f03cf51dba3794fd7c853"
+      "sha256": "4e83c26cf68bf357ac74d73602e5f77d7f406d2539117475fbd0b4283f82bb19"
     },
     {
       "bytes": 10954,
@@ -7097,11 +7097,11 @@
       "sha256": "aa7c857c35bdf6abc518f7b0d6ce0b3ffc4f3c7525880aefed556bae1fd868c5"
     },
     {
-      "bytes": 51053,
+      "bytes": 51568,
       "executable": false,
       "kind": "file",
       "path": "scripts/tests/test_remediation_evidence_hardening.py",
-      "sha256": "ab3035fc8aeaa9ef72ec121da6442b9f5edafdb500764ce333b8c0287375bdbe"
+      "sha256": "b6fb4bc83a9868bacbdf4c14472e33a5c944f351ce2e2c91982dc461ad7219d0"
     },
     {
       "bytes": 32740,

@@ -426,6 +426,7 @@ SOURCE_AREA_PATHS: dict[str, tuple[tuple[str, ...], ...]] = {
         (
             "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift",
             "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json",
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionCatalogResources.swift",
             "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionModule.swift",
             "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/module-manifest.json",
             "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json",
