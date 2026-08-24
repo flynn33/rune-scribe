@@ -2065,10 +2065,19 @@ def derive_domain_theme_budgets(
                     theme, bundle_name, source_relative, manifest_name,
                     entries_key, bytes_key,
                 ) in DOMAIN_THEME_SPECS:
+                    supported_manifest_suffixes = (
+                        f"/{bundle_name}/{manifest_name}",
+                        f"/{bundle_name}/Resources/{manifest_name}",
+                        f"/{bundle_name}/Contents/Resources/{manifest_name}",
+                    )
                     candidates = [
                         name for name in files
-                        if name.endswith(f"/{bundle_name}/{manifest_name}")
-                        or name == f"{bundle_name}/{manifest_name}"
+                        if name in {
+                            f"{bundle_name}/{manifest_name}",
+                            f"{bundle_name}/Resources/{manifest_name}",
+                            f"{bundle_name}/Contents/Resources/{manifest_name}",
+                        }
+                        or name.endswith(supported_manifest_suffixes)
                     ]
                     if len(candidates) != 1:
                         errors.append(
@@ -2134,7 +2143,11 @@ def derive_domain_theme_budgets(
                         and name[len(bundle_prefix):]
                     }
                     allowed_packaging_members = {
-                        "Info.plist", "_CodeSignature/CodeResources",
+                        "Info.plist",
+                        "_CodeSignature/CodeDirectory",
+                        "_CodeSignature/CodeRequirements",
+                        "_CodeSignature/CodeResources",
+                        "_CodeSignature/CodeSignature",
                     }
                     unexpected = (
                         set(actual_bundle_members)
@@ -2295,10 +2308,13 @@ def expected_domain_execution(
 ) -> tuple[list[str], dict[str, Any]]:
     if not repository_relative_file(source_relative, repository_root):
         return [f"domain execution source is missing: {source_relative}"], {}
+    test_filter = (
+        "^" + re.escape(identifier) + "$" if "/" in identifier else identifier
+    )
     command = shlex.join([
         "swift", "test", "--package-path", DOMAIN_PACKAGE_PATH,
         "--scratch-path", DOMAIN_SCRATCH_TOKEN, "--skip-update", "--skip-build",
-        "--filter", "^" + re.escape(identifier) + "$",
+        "--filter", test_filter,
     ])
     return [], {
         "identifier": identifier,

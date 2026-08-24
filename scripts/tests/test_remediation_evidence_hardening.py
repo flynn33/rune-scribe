@@ -572,6 +572,23 @@ class EvidenceHardeningTests(unittest.TestCase):
             capture.test_command(xctest, scratch)[-1],
             "^" + __import__("re").escape(xctest) + "$",
         )
+        for identifier, source_relative in (
+            (swift_testing, capture.CLOUD_TEST_SOURCES[swift_testing]),
+            (xctest, capture.PERFORMANCE_TEST_SOURCES[xctest]),
+        ):
+            errors, expected = checker.expected_domain_execution(
+                REPOSITORY_ROOT,
+                identifier,
+                source_relative,
+            )
+            self.assertEqual(errors, [])
+            self.assertEqual(
+                expected["command"],
+                capture.display_command(
+                    capture.test_command(identifier, scratch),
+                    scratch,
+                ),
+            )
 
     def test_swift_testing_zero_match_output_is_rejected(self) -> None:
         identifier = next(iter(capture.CLOUD_TEST_SOURCES))
@@ -1104,6 +1121,35 @@ class EvidenceHardeningTests(unittest.TestCase):
 
             self.assertEqual(product["platform"], "iOS")
             self.assertEqual(len(budgets), len(capture.THEME_SPECS))
+            self.assertTrue(all(item["result"] == "PASS" for item in budgets))
+
+    def test_checker_accepts_domain_producer_theme_bundle_layouts(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            for _theme, _bundle, source_relative, *_rest in capture.THEME_SPECS:
+                source_root = (
+                    REPOSITORY_ROOT
+                    / source_relative.split("/Resources/", 1)[0]
+                    / "Resources"
+                )
+                destination = (
+                    root
+                    / source_relative.split("/Resources/", 1)[0]
+                    / "Resources"
+                )
+                shutil.copytree(source_root, destination)
+            for platform, relative in checker.DOMAIN_APP_PRODUCTS:
+                target = root / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(mutation_harness.app_zip(platform))
+
+            errors, budgets = checker.derive_domain_theme_budgets(root)
+
+            self.assertEqual(errors, [])
+            self.assertEqual(
+                len(budgets),
+                len(checker.DOMAIN_APP_PRODUCTS) * len(capture.THEME_SPECS),
+            )
             self.assertTrue(all(item["result"] == "PASS" for item in budgets))
 
     def test_recursive_theme_inventory_rejects_nested_unlisted_payload(self) -> None:
