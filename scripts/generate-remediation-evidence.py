@@ -248,6 +248,7 @@ PLATFORM_SCREENSHOT_CLAIM_PATHS: dict[str, tuple[str, ...]] = {
         f"{EVIDENCE_PREFIX}/Screenshots/{name}" for name in (
             "macos-optional-provider.png",
             "macos-share-builder.png",
+            "macos-share-builder-moonleaf.png",
             "optional-provider-workspace.png",
         )
     ),
@@ -271,6 +272,18 @@ PLATFORM_SCREENSHOT_CLAIM_PATHS: dict[str, tuple[str, ...]] = {
     ),
     "iPad screenshots": (
         f"{EVIDENCE_PREFIX}/Screenshots/ipad-share-builder.png",
+    ),
+}
+PLATFORM_SCREENSHOT_CLAIM_PLATFORMS = {
+    "macOS screenshots": "macOS",
+    "iPhone screenshots": "iPhone Simulator",
+    "iPad screenshots": "iPad Simulator",
+}
+WRITTEN_SCREENSHOT_CONTRACTS: dict[str, tuple[str, str]] = {
+    f"{EVIDENCE_PREFIX}/Screenshots/macos-share-builder-moonleaf.png": (
+        "macOS",
+        "Moonleaf selected in the macOS Share Builder, demonstrating the "
+        "optional provider's themed builder surface.",
     ),
 }
 DOMAIN_RESULT_PRODUCER = "scripts/capture-remediation-domain-results.py"
@@ -2236,7 +2249,11 @@ def validate_input(
         f"{EVIDENCE_PREFIX}/Screenshots/{name}" for name in matrix_screenshots
     } | {
         f"{EVIDENCE_PREFIX}/{claim}" for claim in GATE_SCREENSHOT_CLAIMS
-    } | set(WORKSPACE_SCREENSHOT_CLAIM_PATHS)
+    } | set(WORKSPACE_SCREENSHOT_CLAIM_PATHS) | {
+        path
+        for paths in PLATFORM_SCREENSHOT_CLAIM_PATHS.values()
+        for path in paths
+    }
     missing_screenshots = sorted(expected_screenshot_paths - screenshot_paths)
     if missing_screenshots:
         raise EvidenceError(
@@ -2249,6 +2266,20 @@ def validate_input(
             raise EvidenceError(
                 f"{path} platform differs from the locked test matrix"
             )
+    for claim, paths in PLATFORM_SCREENSHOT_CLAIM_PATHS.items():
+        expected_platform = PLATFORM_SCREENSHOT_CLAIM_PLATFORMS[claim]
+        for path in paths:
+            if by_path[path]["platform"] != expected_platform:
+                raise EvidenceError(
+                    f"{path} platform differs from the platform screenshot contract"
+                )
+    for path, (expected_platform, expected_description) in (
+        WRITTEN_SCREENSHOT_CONTRACTS.items()
+    ):
+        if by_path[path]["platform"] != expected_platform:
+            raise EvidenceError(f"{path} platform differs from the written contract")
+        if by_path[path]["description"] != expected_description:
+            raise EvidenceError(f"{path} description differs from the written contract")
     required_platforms = {"macOS", "iPhone Simulator", "iPad Simulator"}
     if not required_platforms.issubset(screenshot_platforms):
         raise EvidenceError(
@@ -4539,6 +4570,11 @@ def generated_output_template(
         "iphone-settings-moonleaf.png": "iPhone Simulator",
         "iphone-vault-moonleaf.png": "iPhone Simulator",
     }
+    screenshot_platforms.update({
+        PurePosixPath(path).name: PLATFORM_SCREENSHOT_CLAIM_PLATFORMS[claim]
+        for claim, paths in PLATFORM_SCREENSHOT_CLAIM_PATHS.items()
+        for path in paths
+    })
     return {
         "schemaVersion": SCHEMA_VERSION,
         "sourceRevision": "replace-with-lowercase-40-character-source-commit",
@@ -4555,7 +4591,10 @@ def generated_output_template(
             {
                 "path": f"{EVIDENCE_PREFIX}/Screenshots/{name}",
                 "platform": platform,
-                "description": "replace with the exact captured state",
+                "description": WRITTEN_SCREENSHOT_CONTRACTS.get(
+                    f"{EVIDENCE_PREFIX}/Screenshots/{name}",
+                    (platform, "replace with the exact captured state"),
+                )[1],
             }
             for name, platform in sorted(screenshot_platforms.items())
         ],

@@ -121,6 +121,55 @@ class EvidenceHardeningTests(unittest.TestCase):
         self.assertNotEqual(generator.required_claim_paths(claim), (alias,))
         self.assertNotEqual(checker.required_claim_paths(claim), (alias,))
 
+    def test_moonleaf_share_builder_screenshot_is_a_written_contract(self) -> None:
+        path = (
+            "docs/verification/remediation-v1/Screenshots/"
+            "macos-share-builder-moonleaf.png"
+        )
+        description = (
+            "Moonleaf selected in the macOS Share Builder, demonstrating the "
+            "optional provider's themed builder surface."
+        )
+        self.assertIn(
+            path,
+            generator.required_claim_paths("macOS screenshots"),
+        )
+        self.assertIn(
+            path,
+            checker.required_claim_paths("macOS screenshots"),
+        )
+        self.assertEqual(
+            generator.WRITTEN_SCREENSHOT_CONTRACTS[path],
+            ("macOS", description),
+        )
+        self.assertEqual(
+            checker.WRITTEN_SCREENSHOT_CONTRACTS[path],
+            ("macOS", description),
+        )
+
+        (
+            _, finding_gates, finding_controls, _, test_rows, _, matrix_screenshots,
+        ) = generator.load_controls(PACKAGE_ROOT, REPOSITORY_ROOT)
+        template = generator.generated_output_template(
+            test_rows,
+            finding_gates,
+            finding_controls,
+            matrix_screenshots,
+            set(),
+        )
+        screenshots = {
+            item["path"]: item
+            for item in template["screenshots"]
+        }
+        self.assertEqual(
+            screenshots[path],
+            {
+                "path": path,
+                "platform": "macOS",
+                "description": description,
+            },
+        )
+
     def test_info_plist_only_app_zip_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             archive_path = Path(temporary) / "InfoOnly.app.zip"
@@ -411,6 +460,14 @@ class EvidenceHardeningTests(unittest.TestCase):
         self.assertEqual(
             generator.PLATFORM_SCREENSHOT_CLAIM_PATHS,
             checker.PLATFORM_SCREENSHOT_CLAIM_PATHS,
+        )
+        self.assertEqual(
+            generator.PLATFORM_SCREENSHOT_CLAIM_PLATFORMS,
+            checker.PLATFORM_SCREENSHOT_CLAIM_PLATFORMS,
+        )
+        self.assertEqual(
+            generator.WRITTEN_SCREENSHOT_CONTRACTS,
+            checker.WRITTEN_SCREENSHOT_CONTRACTS,
         )
         self.assertEqual(capture.CLOUD_TEST_SOURCES, checker.DOMAIN_CLOUD_TEST_SOURCES)
         self.assertEqual(

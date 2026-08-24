@@ -607,6 +607,27 @@ final class RuneScribeMacParityTests: XCTestCase {
                 size: CGSize(width: 840, height: 940),
                 afterClicking: CGPoint(x: 400, y: 140)
             )
+            let activeCipher = try XCTUnwrap(harness.session.activeCipher)
+            let shareSource = ShareBuilderSource.cipherInvitation(
+                cipherID: activeCipher.id,
+                displayName: activeCipher.label
+            )
+            let norseShareCatalog = try harness.session.makeShareBuilderCatalog()
+            XCTAssertEqual(
+                norseShareCatalog.draft.codexID,
+                RuneScribeCodexIDs.norse
+            )
+            let norseShareBuilderPNG = try renderPNG(
+                AnyView(
+                    ShareBuilderView(
+                        source: shareSource,
+                        initialCatalog: norseShareCatalog
+                    )
+                        .environmentObject(harness.session)
+                ),
+                size: CGSize(width: 720, height: 780),
+                warmup: 0.75
+            )
 
             try await harness.unlockMoonleaf()
             let moonleafAvailable = await eventually {
@@ -674,8 +695,33 @@ final class RuneScribeMacParityTests: XCTestCase {
                 size: CGSize(width: 840, height: 940),
                 afterClicking: CGPoint(x: 400, y: 140)
             )
+            let moonleafShareCatalog = try harness.session.makeShareBuilderCatalog()
+            XCTAssertEqual(
+                moonleafShareCatalog.draft.codexID,
+                RuneScribeThemeMoonleafModuleBootstrap.codexID
+            )
+            XCTAssertEqual(
+                moonleafShareCatalog.descriptor.id,
+                RuneScribeThemeMoonleafModuleBootstrap.discoveryDescriptor.id
+            )
+            let moonleafShareBuilderPNG = try renderPNG(
+                AnyView(
+                    ShareBuilderView(
+                        source: shareSource,
+                        initialCatalog: moonleafShareCatalog
+                    )
+                        .environmentObject(harness.session)
+                ),
+                size: CGSize(width: 720, height: 780),
+                warmup: 0.75
+            )
 
-            for png in [moonleafWorkspacePNG, moonleafSettingsPNG, moonleafVaultPNG] {
+            for png in [
+                moonleafWorkspacePNG,
+                moonleafSettingsPNG,
+                moonleafVaultPNG,
+                moonleafShareBuilderPNG,
+            ] {
                 try assertDetailedPNG(png, minimumUniqueSampleColors: 48)
             }
             try assertMaterialPNGChange(
@@ -693,6 +739,11 @@ final class RuneScribeMacParityTests: XCTestCase {
                 to: moonleafVaultPNG,
                 minimumChangedSampleRatio: 0.03
             )
+            try assertMaterialPNGChange(
+                from: norseShareBuilderPNG,
+                to: moonleafShareBuilderPNG,
+                minimumChangedSampleRatio: 0.03
+            )
             attachPNG(
                 moonleafWorkspacePNG,
                 name: "macos-optional-provider-workspace"
@@ -704,6 +755,10 @@ final class RuneScribeMacParityTests: XCTestCase {
             attachPNG(
                 moonleafVaultPNG,
                 name: "macos-optional-provider-vault"
+            )
+            attachPNG(
+                moonleafShareBuilderPNG,
+                name: "macos-share-builder-moonleaf"
             )
 
             XCTAssertEqual(

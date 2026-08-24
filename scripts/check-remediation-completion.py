@@ -399,6 +399,7 @@ PLATFORM_SCREENSHOT_CLAIM_PATHS: dict[str, tuple[str, ...]] = {
     "macOS screenshots": tuple(
         f"docs/verification/remediation-v1/Screenshots/{name}" for name in (
             "macos-optional-provider.png", "macos-share-builder.png",
+            "macos-share-builder-moonleaf.png",
             "optional-provider-workspace.png",
         )
     ),
@@ -415,6 +416,18 @@ PLATFORM_SCREENSHOT_CLAIM_PATHS: dict[str, tuple[str, ...]] = {
     ),
     "iPad screenshots": (
         "docs/verification/remediation-v1/Screenshots/ipad-share-builder.png",
+    ),
+}
+PLATFORM_SCREENSHOT_CLAIM_PLATFORMS = {
+    "macOS screenshots": "macOS",
+    "iPhone screenshots": "iPhone Simulator",
+    "iPad screenshots": "iPad Simulator",
+}
+WRITTEN_SCREENSHOT_CONTRACTS: dict[str, tuple[str, str]] = {
+    "docs/verification/remediation-v1/Screenshots/macos-share-builder-moonleaf.png": (
+        "macOS",
+        "Moonleaf selected in the macOS Share Builder, demonstrating the "
+        "optional provider's themed builder surface.",
     ),
 }
 IMPLEMENTATION_SOURCE_AREA_INDEXES: dict[str, tuple[tuple[int, ...], ...]] = {
@@ -1372,17 +1385,28 @@ def validate_test_execution_index(
     )
     if not screenshot_index:
         errors.append("artifacts/remediation-v1/Screenshot-Index.md is missing or unreadable")
-    for screenshot in sorted(exact_matrix_screenshots):
+    platform_screenshot_contracts = {
+        path: PLATFORM_SCREENSHOT_CLAIM_PLATFORMS[claim]
+        for claim, paths in PLATFORM_SCREENSHOT_CLAIM_PATHS.items()
+        for path in paths
+    }
+    indexed_screenshots = exact_matrix_screenshots | set(platform_screenshot_contracts)
+    for screenshot in sorted(indexed_screenshots):
         basename = Path(screenshot).name
         platforms = {
             row["platform"] for row in locked_rows.values()
             if row["requiredEvidence"] == basename
         }
+        if screenshot in platform_screenshot_contracts:
+            platforms.add(platform_screenshot_contracts[screenshot])
         digest = (
             sha256_file(repository_root / screenshot)
             if repository_relative_file(screenshot, repository_root) else ""
         )
-        for required in (f"Screenshots/{basename}", digest, *sorted(platforms)):
+        description = WRITTEN_SCREENSHOT_CONTRACTS.get(screenshot, ("", ""))[1]
+        for required in (
+            f"Screenshots/{basename}", digest, *sorted(platforms), description,
+        ):
             if required and required not in screenshot_index:
                 errors.append(
                     f"artifacts/remediation-v1/Screenshot-Index.md omits {required}"
@@ -3619,6 +3643,13 @@ def validate_owner_package(
                         f"Screenshots/{row['requiredEvidence']}"
                         for row in locked_rows.values()
                         if row["requiredEvidence"].endswith(".png")
+                    } | {
+                        "Screenshots/"
+                        + PurePosixPath(path).relative_to(
+                            "docs/verification/remediation-v1/Screenshots"
+                        ).as_posix()
+                        for paths in PLATFORM_SCREENSHOT_CLAIM_PATHS.values()
+                        for path in paths
                     }
                     missing_shots = sorted(exact_shots - set(payload_files))
                     if missing_shots:
