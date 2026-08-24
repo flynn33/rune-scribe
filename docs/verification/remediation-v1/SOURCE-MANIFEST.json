@@ -1,6 +1,6 @@
 {
   "aggregateFormat": "UTF-8 records sorted by normalized path: path\\0kind\\0bytes\\0sha256\\0executable-as-0-or-1\\n",
-  "aggregateSHA256": "bfcba97a1323be76a501ac19d861dab3109f74a9d24f2b87fa913d8888b4a815",
+  "aggregateSHA256": "47a1aa1c98ab120164223b53b4430a5dbd7d07f77a49fb57a25fa475a01a362d",
   "excludes": [
     ".DS_Store",
     ".build",
@@ -6943,11 +6943,11 @@
       "sha256": "7ec14b3cdc47d8349cc9823feb6feb7e080ef14ed1e740f50180dcb929d3f0a5"
     },
     {
-      "bytes": 278814,
+      "bytes": 279183,
       "executable": true,
       "kind": "file",
       "path": "scripts/check-remediation-completion.py",
-      "sha256": "de8c77aa8e7056c9471e6003cc1152e44dc2a3ea39d63b83a2c7c9de38306fb8"
+      "sha256": "42a9307a8945af64b4b8b2c76ad47fdf218288b29ca6b7eea2cd93e7708579d6"
     },
     {
       "bytes": 28227,
@@ -7097,11 +7097,11 @@
       "sha256": "aa7c857c35bdf6abc518f7b0d6ce0b3ffc4f3c7525880aefed556bae1fd868c5"
     },
     {
-      "bytes": 53469,
+      "bytes": 55956,
       "executable": false,
       "kind": "file",
       "path": "scripts/tests/test_remediation_evidence_hardening.py",
-      "sha256": "e4d10c08c4f4cf6f20b8914f60e19c11ec6abc15810ade630cfacfe3eb945354"
+      "sha256": "f018b7b42bc2475981ee522df5d26e5a272a400cfbe92836860385d92b31308f"
     },
     {
       "bytes": 32740,

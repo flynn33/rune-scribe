@@ -434,6 +434,59 @@ class EvidenceHardeningTests(unittest.TestCase):
                 errors,
             )
 
+        # The same record must remain valid after the terminal checker copies
+        # the repository without Git metadata.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            log = "docs/verification/remediation-v1/GateRun/publication.log"
+            log_path = root / log
+            log_path.parent.mkdir(parents=True, exist_ok=True)
+            branch = "fix/rune-scribe-remediation-v1"
+            revision = "b" * 40
+            markers = (
+                "PUBLICATION_AUDIT_PASS",
+                "REMOTE_INSPECTION_PERFORMED=true",
+                "HEAD_TAGS=NONE",
+                "SOURCE_MERGED_TO_DEFAULT=false",
+                "RELEASE_PUBLISHED=false",
+                "UPLOAD_PERFORMED=false",
+                "NOTARIZATION_PERFORMED=false",
+                "TESTFLIGHT_PERFORMED=false",
+                "APPSTORE_PERFORMED=false",
+                "ROLLOUT_PERFORMED=false",
+                branch,
+                "main",
+                revision,
+            )
+            log_path.write_text("\n".join(markers) + "\n", encoding="utf-8")
+            command = "inspect publication state"
+            record = {
+                "schemaVersion": "1.0", "status": "PASS",
+                "sourceManifestSHA256": "a" * 64,
+                "sourceRevision": revision,
+                "version": "1.0.39", "build": "39",
+                "command": command, "log": log,
+                "checkedAt": "2026-08-23T00:00:00Z", "branch": branch,
+                "defaultBranch": "main", "remoteInspectionPerformed": True,
+                "headTags": [], "sourceMergedToDefault": False,
+                "releasePublished": False, "uploadPerformed": False,
+                "notarizationPerformed": False, "testFlightPerformed": False,
+                "appStorePerformed": False, "rolloutPerformed": False,
+                "logSHA256": hashlib.sha256(log_path.read_bytes()).hexdigest(),
+            }
+            write_json(root / checker.EXPECTED_PUBLICATION_AUDIT, record)
+            executions = {"T-121": {
+                "command": command,
+                "evidence": [checker.EXPECTED_PUBLICATION_AUDIT, log],
+            }}
+            with mock.patch.object(checker, "NO_GIT_CHILD_MODE", True):
+                self.assertEqual(
+                    checker.validate_publication_audit_record(
+                        root, "a" * 64, revision, executions
+                    ),
+                    [],
+                )
+
     def test_flat_owner_archive_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

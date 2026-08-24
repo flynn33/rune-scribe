@@ -3153,8 +3153,18 @@ def validate_publication_audit_record(
         errors.append(f"{relative}: checkedAt must be timezone-aware ISO-8601")
     branch = document.get("branch")
     default_branch = document.get("defaultBranch")
-    if branch != current_git_branch(repository_root):
-        errors.append(f"{relative}: branch differs from the current Git branch")
+    if git_available(repository_root):
+        if branch != current_git_branch(repository_root):
+            errors.append(f"{relative}: branch differs from the current Git branch")
+    elif NO_GIT_CHILD_MODE:
+        if (
+            not isinstance(branch, str)
+            or not branch
+            or len(branch) > 200
+        ):
+            errors.append(f"{relative}: copied-tree branch is invalid")
+    elif branch is not None:
+        errors.append(f"{relative}: branch must be null without Git")
     if (
         not isinstance(default_branch, str) or not default_branch
         or branch == default_branch
