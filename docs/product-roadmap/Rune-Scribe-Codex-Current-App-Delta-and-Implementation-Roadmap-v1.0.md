@@ -1,15 +1,6 @@
 # Rune Scribe Codex System
 ## Current-App Delta Assessment and Implementation Roadmap
 
-> **Current publication boundary — August 22, 2026.** This document preserves the
-> August 7 planning snapshot and its audited Rune Scribe 1.0.33 build 33 source facts.
-> The current application is version 1.0.38 build 38. Physical-device procedures in
-> the snapshot are owner-operated optional observations outside Agent Coding scope;
-> they do not affect acceptance, completion, blocker status, residual work, PASS/FAIL,
-> or pull-request readiness. Current implementation status is recorded in
-> [`../architecture/RoadmapAlignment.md`](../architecture/RoadmapAlignment.md) and
-> [`../verification/roadmap-alignment.json`](../verification/roadmap-alignment.json).
-
 **Document version:** 1.0  
 **Decision status:** Implementation planning baseline  
 **Date:** August 7, 2026  

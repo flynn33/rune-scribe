@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "1.0",
+  "capturedAt": "2026-08-23T14:59:27Z",
+  "repository": {
+    "root": "/Users/jimdaley/GitHub/Rune-Scribe-Remediation-v1",
+    "originalWorktree": "/Users/jimdaley/GitHub/Rune-Scribe",
+    "originalBranch": "main",
+    "remediationBranch": "fix/rune-scribe-remediation-v1",
+    "head": "5e4e08ad17a54378ffed2b3a66691594961fe047",
+    "originMain": "5e4e08ad17a54378ffed2b3a66691594961fe047",
+    "sourceWasCleanBeforeEvidenceGeneration": true,
+    "originalWorkPreserved": true,
+    "preservedOriginalState": [
+      "existing stash entries were not changed",
+      "ignored .remediation-execution state was not changed",
+      "registered archived worktrees were not pruned or changed"
+    ]
+  },
+  "sourceBaseline": {
+    "packageArchive": "rune-scribe-main.zip",
+    "packageArchiveSHA256": "75df2709f203de247064204090f00c58806792e235e45e6f196650e79cf724dc",
+    "sourceManifestPath": "docs/verification/remediation-v1/SOURCE-MANIFEST.before.json",
+    "sourceManifestSHA256": "fe59cb5da32a0632b76a61c1071933a7f23b4ad1583bc4b902d6d391ee8e69b4",
+    "sourceManifestFileCount": 991,
+    "marketingVersion": "1.0.38",
+    "build": "38"
+  },
+  "environment": {
+    "xcode": "Xcode 26.2 (17C52)",
+    "swift": "Apple Swift 6.2.3 (swiftlang-6.2.3.3.21 clang-1700.6.3.2)",
+    "xcodegen": "2.46.0",
+    "python": "3.9.6",
+    "macOS": "26.6.2 (25G83)",
+    "architecture": "arm64"
+  },
+  "installedIOSSimulatorRuntimes": [
+    "iOS 18.6 (22G86)",
+    "iOS 26.0.1 (23A8464)",
+    "iOS 26.2 (23C54)"
+  ],
+  "selectedSimulators": {
+    "runtime": "iOS 26.2",
+    "iPhone": {
+      "name": "iPhone 17 Pro",
+      "udid": "1563B47A-700D-4AEF-A8D5-89780C581F83"
+    },
+    "iPad": {
+      "name": "iPad Pro 13-inch (M5)",
+      "udid": "77D54A1F-0818-4761-B946-D7723490F6B3"
+    }
+  },
+  "schemes": [
+    "RuneScrib-macOS",
+    "RuneScrib-macOS-Parity",
+    "RuneScrib-iOS",
+    "RuneScrib-iOS-Parity"
+  ],
+  "packageProducts": [
+    "RuneScribeCloudSyncModule",
+    "RuneScribeContracts",
+    "RuneScribeCoreModule",
+    "RuneScribeGameCenterModule",
+    "RuneScribeNorseThemeModule",
+    "RuneScribePlatform",
+    "RuneScribeProgressionModule",
+    "RuneScribeRuntimeCore",
+    "RuneScribeTestSupport",
+    "RuneScribeThemeCoordinatorModule",
+    "RuneScribeThemeGloamthornModule",
+    "RuneScribeThemeMoonleafModule",
+    "RuneScribeThemeSunspireModule",
+    "RuneScribeThemeWildwoodModule",
+    "RuneScribeUIModule",
+    "RuneScribeUIPresentationContracts",
+    "RuneScribeUIRuntime"
+  ],
+  "testDeclarationFloor": {
+    "xctestMethods": 913,
+    "swiftTestingDeclarations": 129,
+    "testFiles": 97,
+    "totalDeclarations": 1042
+  },
+  "baselineGuards": {
+    "architecture": "PASS",
+    "roadmapAlignment": "PASS",
+    "roadmapCompletion": "PASS",
+    "documentationAlignment": "PASS",
+    "norseVisualRemediation": "PASS (57 semantic rules, final profile)",
+    "forsettiCompliance": "NOT_COMPLETED (initial scan was interrupted after extended silence; full rerun required)"
+  },
+  "qualificationBoundary": {
+    "physicalHardwareRequired": false,
+    "liveAccountsRequired": false,
+    "publicDistributionAuthorized": false
+  }
+}

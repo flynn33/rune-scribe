@@ -898,9 +898,23 @@ final class RuneScribeUISessionTests: XCTestCase {
 
     func testThemeVisualAdoptionIsAtomicAcrossArtifactAndProviderChanges() async throws {
         let capture = ThemeVisualSessionClientCapture()
-        let applicationService = ControllableApplicationService()
+        let quickShareArtifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "85A00000-0000-0000-0000-000000000001")!
+        )
+        let quickShareArtifact = ShareArtifactDTO(
+            id: quickShareArtifactID,
+            reference: .file(quickShareArtifactID),
+            displayName: "Latest Defaults.runescribe",
+            contentType: RuneScribeWireFormat.contentType,
+            fileExtension: RuneScribeWireFormat.fileExtension,
+            lifetime: .singleUse,
+            requiresKeyDelivery: false
+        )
+        let applicationService = ControllableApplicationService(
+            preparedMessageArtifact: quickShareArtifact
+        )
         let runtime = RuneScribeRuntime(
-            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 38),
+            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 39),
             platform: .macOS
         )
         let norseFontURL = try XCTUnwrap(
@@ -971,8 +985,8 @@ final class RuneScribeUISessionTests: XCTestCase {
                 metalLibrary: nil
             ),
             productMetadata: RuneScribeUIProductMetadata(
-                version: "1.0.38",
-                buildNumber: "38"
+                version: "1.0.39",
+                buildNumber: "39"
             )
         )
         try await session.prepareInitialTheme()
@@ -1039,18 +1053,33 @@ final class RuneScribeUISessionTests: XCTestCase {
             inscription: "ᚱᚢᚾᛖ",
             accessibilityLabel: "Norse visual adoption proof",
             operationID: RuntimeOperationID(rawValue: "share.render.norse-proof"),
-            capturedAt: Date(timeIntervalSince1970: 1_700_000_000)
+            capturedAt: Date(timeIntervalSince1970: 1_700_000_000),
+            colorMode: .highContrast
         )
         XCTAssertEqual(
             outboundPresentation.metadata.selection.codexID,
             RuneScribeCodexIDs.norse
         )
         XCTAssertFalse(outboundPresentation.safePreviewData?.isEmpty ?? true)
+        XCTAssertTrue(
+            outboundPresentation.metadata.compatibility.contains(
+                .highContrastPreviewAvailable
+            )
+        )
+        XCTAssertTrue(outboundPresentation.metadata.resources.contains(where: {
+            $0.resourceID == initial.plan.backgroundHighContrast.id
+        }))
 
         try session.start()
+        applicationService.yieldState(Self.fixtureSnapshot(
+            revision: 38,
+            plaintext: nil,
+            includeFailures: false
+        ))
         let settingsReady = await eventually {
             session.runtimePresentationSettingsReady
                 && session.runtimeSettingsSnapshot != nil
+                && session.snapshot?.revision == 38
         }
         XCTAssertTrue(settingsReady)
         let preArtifactRevision = catalogLoaded.revision
@@ -1118,6 +1147,42 @@ final class RuneScribeUISessionTests: XCTestCase {
                 }
         }
         XCTAssertTrue(alternateProviderAdopted)
+
+        var latestDefaults = try session.makeShareBuilderCatalog()
+        try latestDefaults.selectSeal(nil)
+        try latestDefaults.selectFrame(nil)
+        latestDefaults.selectEffects(.off)
+        try await session.saveShareBuilderDefaults(latestDefaults)
+        let latestSettingsArrived = await eventually(attempts: 2_000) {
+            session.runtimeSettingsSnapshot?.effectsPreference == .off
+        }
+        XCTAssertTrue(latestSettingsArrived)
+
+        let quickShareHandle = EncodedMessageHandle(
+            rawValue: UUID(uuidString: "85A00000-0000-0000-0000-000000000002")!
+        )
+        let quickPrepared = try await session.prepareMessageShare(
+            runes: "ᚱᚢᚾᛖ",
+            senderName: "Freya",
+            cipherID: UUID(uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA")!,
+            shareHandle: quickShareHandle
+        )
+        XCTAssertEqual(quickPrepared, quickShareArtifact)
+        let quickCommands = await applicationService.recordedPrepareMessageShareCommands()
+        let quickCommand = try XCTUnwrap(quickCommands.last)
+        let quickPresentation = try XCTUnwrap(quickCommand.presentation)
+        XCTAssertEqual(
+            quickPresentation.metadata.selection.codexID,
+            latestDefaults.draft.codexID
+        )
+        XCTAssertEqual(
+            quickPresentation.metadata.selection.relicID,
+            latestDefaults.draft.relicID
+        )
+        XCTAssertNil(quickPresentation.metadata.selection.sealID)
+        XCTAssertNil(quickPresentation.metadata.selection.frameID)
+        XCTAssertEqual(session.appearanceEffectsPreference, .off)
+        XCTAssertEqual(session.outboundSharePresentationStatus, .themed)
 
         await session.stop()
         await runtime.stop()
@@ -1294,6 +1359,25 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
         XCTAssertTrue(
             activationButton.contains(".frame(minWidth: 44, minHeight: 44")
+        )
+
+        let utilityActions = try sourceSection(
+            source,
+            from: "    private func cipherUtilityActions(",
+            to: "    // MARK: - Small Components"
+        )
+        let plainButtonSegments = utilityActions.components(
+            separatedBy: ".buttonStyle(.plain)"
+        )
+        XCTAssertGreaterThanOrEqual(plainButtonSegments.count, 3)
+        XCTAssertTrue(plainButtonSegments[0].contains(".frame(minHeight: 44)"))
+        XCTAssertTrue(plainButtonSegments[1].contains(".frame(minHeight: 44)"))
+        XCTAssertFalse(utilityActions.contains(".accessibilityElement(children: .ignore)"))
+        XCTAssertEqual(
+            utilityActions.components(
+                separatedBy: ".frame(minWidth: 44, minHeight: 44)"
+            ).count - 1,
+            2
         )
     }
 
@@ -1614,16 +1698,357 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
     }
 
-    func testPrepareMessageShareForwardsPerEncodeHandle() async throws {
+    func testEstablishedBuilderPreconditionComesFromLinkedDeliveredSessionState() async throws {
+        let service = ControllableApplicationService()
+        let fixture = try await makeSession(applicationService: service)
+        try fixture.session.start()
+        service.yieldState(Self.fixtureSnapshot(
+            revision: 86,
+            plaintext: nil,
+            includeFailures: false
+        ))
+        let projected = await eventually {
+            fixture.session.snapshot?.revision == 86
+                && fixture.session.activeCipher?.delivered == true
+        }
+        XCTAssertTrue(projected)
+
+        let cipher = try XCTUnwrap(fixture.session.activeCipher)
+        XCTAssertNotNil(cipher.contactID)
+        XCTAssertTrue(cipher.delivered)
+        XCTAssertNotNil(fixture.session.contact(id: cipher.contactID))
+        let requiresKeyDelivery = cipher.contactID != nil && !cipher.delivered
+        let source = ShareBuilderSource.encryptedMessage(
+            runes: "ᚱᚢᚾᛖ",
+            senderName: cipher.label,
+            cipherID: cipher.id,
+            messageHandle: EncodedMessageHandle(
+                rawValue: UUID(uuidString: "86000000-0000-0000-0000-000000000001")!
+            ),
+            requiresKeyDelivery: requiresKeyDelivery
+        )
+
+        XCTAssertFalse(requiresKeyDelivery)
+        XCTAssertEqual(source.purpose, .encryptedMessage(requiresKeyDelivery: false))
+        XCTAssertEqual(
+            source.purpose.securityAccessibilityIdentifier,
+            "share-builder.security.established"
+        )
+        XCTAssertEqual(
+            source.purpose.securitySummary,
+            "Uses your shared key — this message does not resend the cipher."
+        )
+
+        await fixture.session.stop()
+        await fixture.runtime.stop()
+    }
+
+    func testShareBuilderShareActionWaitsForCanonicalSessionPreparationBeforeLaunch() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let sharingDirectory = packageRoot
+            .appendingPathComponent("Sources", isDirectory: true)
+            .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+            .appendingPathComponent("Sharing", isDirectory: true)
+        let presentationDirectory = packageRoot
+            .appendingPathComponent("Sources", isDirectory: true)
+            .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+            .appendingPathComponent("Presentation", isDirectory: true)
+        let viewSource = try String(
+            contentsOf: sharingDirectory.appendingPathComponent("ShareBuilderView.swift"),
+            encoding: .utf8
+        )
+        let sessionSource = try String(
+            contentsOf: presentationDirectory.appendingPathComponent(
+                "RuneScribeUISession+ShareBuilder.swift"
+            ),
+            encoding: .utf8
+        )
+        let runtimeSource = try String(
+            contentsOf: packageRoot
+                .appendingPathComponent("Sources", isDirectory: true)
+                .appendingPathComponent("RuneScribeUIRuntime", isDirectory: true)
+                .appendingPathComponent("RuntimeNativeShareView.swift"),
+            encoding: .utf8
+        )
+
+        let action = try sourceSection(
+            viewSource,
+            from: "    private var shareAction: some View {",
+            to: "    @ViewBuilder\n    private var automaticShareLauncher: some View {"
+        )
+        XCTAssertTrue(action.contains("beginSharePreparation()"))
+        XCTAssertFalse(action.contains("prepareMessageShare"))
+        XCTAssertFalse(action.contains("prepareCipherShare"))
+
+        let preparation = try sourceSection(
+            viewSource,
+            from: "    private func beginSharePreparation() {",
+            to: "    private func handleShareCompletion("
+        )
+        let preparesThroughSession = try XCTUnwrap(
+            preparation.range(of: "session.prepareShareBuilderArtifact(")
+        )
+        let storesPreparedArtifact = try XCTUnwrap(
+            preparation.range(of: "preparedShare = prepared")
+        )
+        let createsLaunchToken = try XCTUnwrap(
+            preparation.range(of: "shareLaunchID = UUID()")
+        )
+        XCTAssertLessThan(
+            preparation.distance(
+                from: preparation.startIndex,
+                to: preparesThroughSession.lowerBound
+            ),
+            preparation.distance(
+                from: preparation.startIndex,
+                to: storesPreparedArtifact.lowerBound
+            )
+        )
+        XCTAssertLessThan(
+            preparation.distance(
+                from: preparation.startIndex,
+                to: storesPreparedArtifact.lowerBound
+            ),
+            preparation.distance(
+                from: preparation.startIndex,
+                to: createsLaunchToken.lowerBound
+            )
+        )
+
+        let launcher = try sourceSection(
+            viewSource,
+            from: "    @ViewBuilder\n    private var automaticShareLauncher: some View {",
+            to: "    private func markSharePresented() {"
+        )
+        XCTAssertTrue(launcher.contains("case .file:"))
+        XCTAssertTrue(launcher.contains("RuneScribePreparedFileShareLauncher("))
+        XCTAssertTrue(launcher.contains("transfer: preparedShare.transfer"))
+
+        let canonicalPreparation = try sourceSection(
+            sessionSource,
+            from: "    func prepareShareBuilderArtifact(",
+            to: "    func finishShareBuilderArtifact("
+        )
+        XCTAssertTrue(canonicalPreparation.contains("artifact = try await prepareMessageShare("))
+        XCTAssertTrue(canonicalPreparation.contains("artifact = try await prepareCipherShare("))
+        XCTAssertTrue(canonicalPreparation.contains("transfer = try await shareTransfer("))
+
+        XCTAssertTrue(
+            runtimeSource.contains(
+                "private final class RuneScribeIOSActivityItemSource: NSObject,"
+            )
+        )
+        XCTAssertFalse(
+            runtimeSource.contains(
+                "@MainActor\nprivate final class RuneScribeIOSActivityItemSource"
+            )
+        )
+    }
+
+    func testHeaderActionsRetainExplicitMainActorIsolation() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let source = try String(
+            contentsOf: packageRoot
+                .appendingPathComponent("Sources", isDirectory: true)
+                .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+                .appendingPathComponent("Views", isDirectory: true)
+                .appendingPathComponent("RuneTheme.swift"),
+            encoding: .utf8
+        )
+
+        XCTAssertTrue(source.contains("let action: @MainActor () -> Void"))
+        XCTAssertTrue(
+            source.contains("ForEach(trailingButtons, content: RuneHeaderActionView.init)")
+        )
+        XCTAssertFalse(source.contains("ForEach(trailingButtons) { button in"))
+        XCTAssertFalse(source.contains("let action: () -> Void"))
+    }
+
+    func testRootBackgroundIdentifierDoesNotOverrideInteractiveDescendants() throws {
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let source = try String(
+            contentsOf: packageRoot
+                .appendingPathComponent("Sources", isDirectory: true)
+                .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+                .appendingPathComponent("Views", isDirectory: true)
+                .appendingPathComponent("RootView.swift"),
+            encoding: .utf8
+        )
+        let rootStack = try sourceSection(
+            source,
+            from: "        ZStack {",
+            to: "\n        .background {"
+        )
+        XCTAssertFalse(rootStack.contains("RuntimeMetalBackground()"))
+
+        let background = try sourceSection(
+            source,
+            from: "        .background {",
+            to: "\n        .animation(.easeInOut(duration: 0.25)"
+        )
+
+        XCTAssertTrue(background.contains("RuntimeMetalBackground()"))
+        XCTAssertTrue(
+            background.contains(
+                ".accessibilityIdentifier(rootBackgroundAccessibilityIdentifier)"
+            )
+        )
+        let rootModifiers = try sourceSection(
+            source,
+            from: "        .animation(.easeInOut(duration: 0.25)",
+            to: "        .onChange(of: session.runtimePresentationSettingsReady"
+        )
+        XCTAssertFalse(rootModifiers.contains(".accessibilityIdentifier("))
+    }
+
+    func testBuilderPreviewFailureStillPreparesCanonicalCorePackage() async throws {
+        let artifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "86050000-0000-0000-0000-000000000001")!
+        )
+        let expectedArtifact = ShareArtifactDTO(
+            id: artifactID,
+            reference: .file(artifactID),
+            displayName: "Rune Scribe Message",
+            contentType: RuneScribeWireFormat.contentType,
+            fileExtension: RuneScribeWireFormat.fileExtension,
+            lifetime: .singleUse,
+            requiresKeyDelivery: false
+        )
+        let service = ControllableApplicationService(
+            preparedMessageArtifact: expectedArtifact
+        )
+        let fixture = try await makeSession(applicationService: service)
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        let provider = ThemeProviderSummaryDTO(
+            codexID: descriptor.codex.id,
+            moduleID: RuneScribeModuleIDs.norseTheme,
+            displayName: descriptor.codex.displayName.fallbackValue,
+            state: .available,
+            isOwned: true,
+            isSelectable: true,
+            isSelected: true
+        )
+        let catalog = try ShareBuilderCatalog(
+            descriptor: descriptor,
+            provider: provider,
+            settings: nil,
+            ownedArtifactIDs: [],
+            encounteredArtifactIDs: []
+        )
+        let cipherID = UUID(uuidString: "86050000-0000-0000-0000-000000000002")!
+        let handle = EncodedMessageHandle(
+            rawValue: UUID(uuidString: "86050000-0000-0000-0000-000000000003")!
+        )
+        let source = ShareBuilderSource.encryptedMessage(
+            runes: "ᚱᚢᚾᛖ",
+            senderName: "Freya",
+            cipherID: cipherID,
+            messageHandle: handle,
+            requiresKeyDelivery: false
+        )
+
+        do {
+            _ = try await fixture.session.renderShareBuilderPreview(
+                source: source,
+                catalog: catalog
+            )
+            XCTFail("A session without a Theme Coordinator must use the fallback preview state")
+        } catch {
+            XCTAssertEqual(error as? ShareArtifactRenderError, .unavailableSelection)
+        }
+
+        let prepared = try await fixture.session.prepareShareBuilderArtifact(
+            source: source,
+            catalog: catalog
+        )
+        XCTAssertEqual(prepared.artifact, expectedArtifact)
+        let commands = await service.recordedPrepareMessageShareCommands()
+        let command = try XCTUnwrap(commands.first)
+        XCTAssertEqual(commands.count, 1)
+        XCTAssertEqual(command.cipherID, CipherID(rawValue: cipherID))
+        XCTAssertEqual(command.shareHandle, handle)
+        XCTAssertNil(command.presentation)
+        XCTAssertEqual(
+            fixture.session.outboundSharePresentationStatus,
+            .legacyFallback(.themeUnavailable)
+        )
+
+        await prepared.transfer.close()
+        await fixture.session.releaseShareArtifact(id: prepared.artifact.id)
+        await fixture.session.stop()
+        await fixture.runtime.stop()
+    }
+
+    func testShareBuilderTerminalResultsAreReturnedAndReleasedExactlyOnce() async throws {
+        let service = ControllableApplicationService(
+            shareCompletionResult: .released
+        )
+        let fixture = try await makeSession(applicationService: service)
+        let terminalResults: [ShareRouteResultDTO] = [
+            .completedBySystem,
+            .cancelled,
+            .failed,
+        ]
+        var artifactIDs: [ShareArtifactID] = []
+
+        for terminalResult in terminalResults {
+            let artifactID = ShareArtifactID(rawValue: UUID())
+            artifactIDs.append(artifactID)
+            let artifact = ShareArtifactDTO(
+                id: artifactID,
+                reference: .file(artifactID),
+                displayName: "Rune Scribe Share",
+                contentType: RuneScribeWireFormat.contentType,
+                fileExtension: RuneScribeWireFormat.fileExtension,
+                lifetime: .singleUse,
+                requiresKeyDelivery: false
+            )
+            let transfer = try await fixture.session.shareTransfer(for: artifactID)
+            let evidence = try await transfer.finish(
+                try SharePresentationReportDTO(
+                    routeClass: .shareSheet,
+                    result: terminalResult
+                )
+            )
+
+            let returnedResult = try await fixture.session.finishShareBuilderArtifact(
+                PreparedShareBuilderArtifact(
+                    artifact: artifact,
+                    transfer: transfer
+                ),
+                completion: .success(evidence)
+            )
+
+            XCTAssertEqual(returnedResult, terminalResult)
+        }
+
+        let releasedArtifactIDs = await service.recordedReleasedShareArtifactIDs()
+        XCTAssertEqual(releasedArtifactIDs.count, artifactIDs.count)
+        XCTAssertEqual(Set(releasedArtifactIDs), Set(artifactIDs))
+
+        await fixture.session.stop()
+        await fixture.runtime.stop()
+    }
+
+    func testPresentationFailureStillForwardsMessageAndReturnsCanonicalFile() async throws {
         let artifactID = ShareArtifactID(
             rawValue: UUID(uuidString: "86100000-0000-0000-0000-000000000001")!
         )
         let artifact = ShareArtifactDTO(
             id: artifactID,
-            reference: .opaque(artifactID),
+            reference: .file(artifactID),
             displayName: "Rune Scribe Message",
-            contentType: "text/plain",
-            fileExtension: nil,
+            contentType: RuneScribeWireFormat.contentType,
+            fileExtension: RuneScribeWireFormat.fileExtension,
             lifetime: .singleUse,
             requiresKeyDelivery: false
         )
@@ -1644,6 +2069,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
 
         XCTAssertEqual(prepared, artifact)
+        XCTAssertTrue(CanonicalMessageArtifactPolicy.accepts(prepared))
         let commands = await service.recordedPrepareMessageShareCommands()
         let command = try XCTUnwrap(commands.first)
         XCTAssertEqual(commands.count, 1)
@@ -1728,7 +2154,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         let lockCleanup = try sourceSection(
             source,
             from: "    private func dismissPresentedContentForLock() {",
-            to: "    /// The Share button."
+            to: "    /// Quick Share prepares the canonical package"
         )
         for requiredStatement in [
             "settleTask?.cancel()",
@@ -1760,7 +2186,7 @@ final class RuneScribeUISessionTests: XCTestCase {
             to: "    private func returnToEditing() {"
         )
         let finalCoreAwait = try XCTUnwrap(
-            action.range(of: "session.prepareMessageShare", options: .backwards)
+            action.range(of: "try await session.decode", options: .backwards)
         )
         let postAwaitLockGuard = try XCTUnwrap(
             action.range(of: "guard !session.isLocked else")
@@ -1781,18 +2207,9 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertTrue(action.contains("dismissPresentedContentForLock()"))
         XCTAssertTrue(action.contains("actionGeneration == generation"))
         XCTAssertTrue(action.contains("!Task.isCancelled"))
-        XCTAssertTrue(action.contains("await session.releaseShareArtifact(id: preparedArtifact.id)"))
-        XCTAssertLessThan(
-            action.distance(
-                from: action.startIndex,
-                to: try XCTUnwrap(action.range(of: "var preparedArtifact")).lowerBound
-            ),
-            action.distance(
-                from: action.startIndex,
-                to: try XCTUnwrap(action.range(of: "pendingMessageArtifact = preparedArtifact")).lowerBound
-            ),
-            "A prepared artifact must remain local until the action generation commits"
-        )
+        XCTAssertFalse(action.contains("session.prepareMessageShare"))
+        XCTAssertFalse(action.contains("pendingMessageArtifact ="))
+        XCTAssertTrue(action.contains("messageSharePreparation = preparedShare"))
 
         let beginAction = try sourceSection(
             source,
@@ -1825,7 +2242,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         let completion = try sourceSection(
             source,
             from: "    private func completePreparedArtifact(",
-            to: "    private func selectActiveCipher("
+            to: "    private func beginMessageArtifactPreparation("
         )
         let coreCompletion = try XCTUnwrap(
             completion.range(of: "try await session.completeShareArtifact")
@@ -1903,7 +2320,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         }
     }
 
-    func testContentViewRepreparesWithSameHandleAfterEveryTerminalLease() throws {
+    func testContentViewPreparesLatestDefaultsOnlyAtShareOperationTime() throws {
         let packageRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
@@ -1923,8 +2340,11 @@ final class RuneScribeUISessionTests: XCTestCase {
             to: "    private func returnToEditing() {"
         )
         XCTAssertTrue(action.contains("guard let shareHandle = result.shareHandle"))
-        XCTAssertTrue(action.contains("shareHandle: share.shareHandle"))
+        XCTAssertTrue(action.contains("shareHandle: shareHandle"))
         XCTAssertTrue(action.contains("messageSharePreparation = preparedShare"))
+        XCTAssertTrue(action.contains("requiresKeyDelivery: activeCipher.contactID != nil"))
+        XCTAssertFalse(action.contains("session.prepareMessageShare"))
+        XCTAssertFalse(action.contains("canonicalMessageTransfer"))
 
         let terminalFailure = try sourceSection(
             source,
@@ -1932,30 +2352,109 @@ final class RuneScribeUISessionTests: XCTestCase {
             to: "    private func beginMessageArtifactCompletion("
         )
         XCTAssertTrue(terminalFailure.contains("session.releaseShareArtifact(id: artifact.id)"))
-        XCTAssertTrue(
-            terminalFailure.contains("prepareReplacementMessageArtifact(using: preparation)")
-        )
+        XCTAssertFalse(terminalFailure.contains("prepareMessageArtifact"))
 
         let completion = try sourceSection(
             source,
             from: "    private func completePreparedArtifact(",
-            to: "    private func prepareReplacementMessageArtifact("
+            to: "    private func beginMessageArtifactPreparation("
         )
         XCTAssertTrue(completion.contains("session.completeShareArtifact(evidence: evidence)"))
         XCTAssertTrue(completion.contains("pendingMessageArtifact = nil"))
-        XCTAssertTrue(completion.contains("prepareReplacementMessageArtifact(using: preparation)"))
+        XCTAssertFalse(completion.contains("prepareMessageArtifact"))
         XCTAssertFalse(completion.contains("retainedForRetry"))
 
-        let replacement = try sourceSection(
+        let operationTimePreparation = try sourceSection(
             source,
-            from: "    private func prepareReplacementMessageArtifact(",
+            from: "    private func beginMessageArtifactPreparation(",
             to: "    private func selectActiveCipher("
         )
-        XCTAssertTrue(replacement.contains("shareHandle: preparation.shareHandle"))
-        XCTAssertTrue(replacement.contains("session.shareTransfer(for: preparedArtifact.id)"))
-        XCTAssertTrue(replacement.contains("artifactID: preparedArtifact.id"))
-        XCTAssertTrue(replacement.contains("pendingMessageArtifact = artifact"))
-        XCTAssertTrue(replacement.contains("pendingMessageTransfer = transfer"))
+        XCTAssertTrue(operationTimePreparation.contains("shareHandle: preparation.shareHandle"))
+        XCTAssertTrue(
+            operationTimePreparation.contains("canonicalMessageTransfer(for: preparedArtifact)")
+        )
+        XCTAssertTrue(operationTimePreparation.contains("pendingMessageArtifact = artifact"))
+        XCTAssertTrue(operationTimePreparation.contains("pendingMessageTransfer = transfer"))
+        XCTAssertTrue(operationTimePreparation.contains("messageShareLaunchID = UUID()"))
+        XCTAssertTrue(operationTimePreparation.contains("showMessageCompose = true"))
+        XCTAssertFalse(operationTimePreparation.contains("textShareTransfer"))
+
+        let messageSheet = try sourceSection(
+            source,
+            from: "        #if os(iOS)\n        .sheet(isPresented: $showMessageCompose)",
+            to: "        #endif"
+        )
+        XCTAssertTrue(messageSheet.contains("attachment: pendingMessageTransfer"))
+
+        let messageButton = try sourceSection(
+            source,
+            from: "    private func resultMessageButton(resistsCompression: Bool) -> some View {",
+            to: "    #endif"
+        )
+        XCTAssertTrue(messageButton.contains("canSend(requiredAttachment: true)"))
+        XCTAssertTrue(
+            messageButton.contains("beginMessageArtifactPreparation(destination: .messages)")
+        )
+
+        let shareButton = try sourceSection(
+            source,
+            from: "    private func shareButton() -> some View {",
+            to: "    /// A light line telling the sender"
+        )
+        XCTAssertTrue(
+            shareButton.contains("beginMessageArtifactPreparation(destination: .systemShare)")
+        )
+        XCTAssertTrue(shareButton.contains("RuneScribePreparedFileShareLauncher"))
+        XCTAssertFalse(shareButton.contains("RuneScribeFileShareLink"))
+        XCTAssertTrue(shareButton.contains("message.quick-share"))
+
+        let builderHandoff = try sourceSection(
+            source,
+            from: "    private func openMessageShareBuilder() {",
+            to: "    private func recoverMessageArtifactAfterTerminalFailure("
+        )
+        for requiredStatement in [
+            "pendingMessageArtifact == nil",
+            "messageArtifactPreparationTask == nil",
+            "session.ciphers.first(where:",
+            "$0.id == preparation.cipherID",
+            "$0.contactID != nil && !$0.delivered",
+            "?? preparation.requiresKeyDelivery",
+            "shareBuilderSource = source",
+            "handleMessageShareBuilderLifecycleEnded()",
+        ] {
+            XCTAssertTrue(
+                builderHandoff.contains(requiredStatement),
+                "Builder handoff must contain: \(requiredStatement)"
+            )
+        }
+        XCTAssertFalse(builderHandoff.contains("releaseShareArtifact"))
+        XCTAssertFalse(builderHandoff.contains("prepareMessageShare"))
+
+        let shareBuilderSource = try String(
+            contentsOf: packageRoot
+                .appendingPathComponent("Sources", isDirectory: true)
+                .appendingPathComponent("RuneScribeUIModule", isDirectory: true)
+                .appendingPathComponent("Sharing", isDirectory: true)
+                .appendingPathComponent("ShareBuilderView.swift"),
+            encoding: .utf8
+        )
+        let lifecycleEnd = try sourceSection(
+            shareBuilderSource,
+            from: "    private func endLifecycle() {",
+            to: "    private var previewImage: Image?"
+        )
+        let waitsForPreparation = try XCTUnwrap(
+            lifecycleEnd.range(of: "await inFlightPreparation?.value")
+        )
+        let reportsLifecycleEnd = try XCTUnwrap(
+            lifecycleEnd.range(of: "onLifecycleEnded()")
+        )
+        XCTAssertLessThan(
+            lifecycleEnd.distance(from: lifecycleEnd.startIndex, to: waitsForPreparation.lowerBound),
+            lifecycleEnd.distance(from: lifecycleEnd.startIndex, to: reportsLifecycleEnd.lowerBound),
+            "Builder lifecycle reporting must wait for its own in-flight preparation cleanup"
+        )
     }
 
     #if os(macOS)
@@ -2445,6 +2944,7 @@ private actor ControllableApplicationService:
     ] = [:]
     private var prepareCipherShareCommands: [PrepareCipherShareCommand] = []
     private var prepareMessageShareCommands: [PrepareMessageShareCommand] = []
+    private var releasedShareArtifactIDs: [ShareArtifactID] = []
     nonisolated let states: AsyncStream<RuneScribeApplicationSnapshot>
     nonisolated let stateContinuation: AsyncStream<RuneScribeApplicationSnapshot>.Continuation
 
@@ -2590,7 +3090,13 @@ private actor ControllableApplicationService:
         logicalShareCompletionEvidence.count
     }
 
-    func releaseShareArtifact(id: ShareArtifactID) async {}
+    func releaseShareArtifact(id: ShareArtifactID) async {
+        releasedShareArtifactIDs.append(id)
+    }
+
+    func recordedReleasedShareArtifactIDs() -> [ShareArtifactID] {
+        releasedShareArtifactIDs
+    }
 
     func importFile(_ input: InboundFileDTO) async throws -> ImportResultDTO {
         throw StubError.unexpectedCommand

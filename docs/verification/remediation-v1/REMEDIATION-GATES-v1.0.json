@@ -1,0 +1,603 @@
+{
+  "gates": [
+    {
+      "auditFindings": [
+        "RSA-008"
+      ],
+      "failCriteria": "Missing baseline, destructive Git operation, or unbound starting state.",
+      "id": "RC-001",
+      "passCriteria": "Baseline captures source, tools, schemes, version/build, test floor, and original work remains untouched.",
+      "required": true,
+      "requiredEvidence": [
+        "docs/verification/remediation-v1/Baseline.json",
+        "SOURCE-MANIFEST.before.json"
+      ],
+      "severity": "blocking",
+      "title": "Baseline and worktree safety"
+    },
+    {
+      "auditFindings": [
+        "RSA-007"
+      ],
+      "failCriteria": "Original roadmap edited in place or variance called complete as written.",
+      "id": "RC-002",
+      "passCriteria": "Original v1.0 roadmap bytes are unchanged; v1.1 amendment is separate, indexed, and machine-recognized.",
+      "required": true,
+      "requiredEvidence": [
+        "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md",
+        "roadmap alignment log"
+      ],
+      "severity": "blocking",
+      "title": "Roadmap amendment and immutable v1.0"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Any controlling Forsetti policy violation.",
+      "id": "RC-003",
+      "passCriteria": "Exactly one UI Module, runtime mediation, runtime-owned I/O/Settings, no external Forsetti dependency, no provider objects escape.",
+      "required": true,
+      "requiredEvidence": [
+        "architecture logs",
+        "negative mutation results"
+      ],
+      "severity": "blocking",
+      "title": "App-owned Forsetti architecture preserved"
+    },
+    {
+      "auditFindings": [
+        "RSA-008"
+      ],
+      "failCriteria": "Manifest incomplete, nondeterministic, or Git required for verification.",
+      "id": "RC-004",
+      "passCriteria": "All shipping-affecting files are hashed deterministically and aggregate digest verifies with and without Git.",
+      "required": true,
+      "requiredEvidence": [
+        "docs/verification/remediation-v1/SOURCE-MANIFEST.json",
+        "SourceManifestValidation.json"
+      ],
+      "severity": "blocking",
+      "title": "Deterministic source manifest"
+    },
+    {
+      "auditFindings": [
+        "RSA-001",
+        "RSA-008",
+        "RSA-009"
+      ],
+      "failCriteria": "Any required record targets another source or old completion evidence satisfies a final gate.",
+      "id": "RC-005",
+      "passCriteria": "Every evidence record has the final source-manifest hash; stale or mismatched evidence is rejected.",
+      "required": true,
+      "requiredEvidence": [
+        "all remediation JSON evidence",
+        "check-remediation-completion log"
+      ],
+      "severity": "blocking",
+      "title": "Evidence bound to exact source"
+    },
+    {
+      "auditFindings": [
+        "RSA-001"
+      ],
+      "failCriteria": "Text-only or generic-placeholder normal path remains.",
+      "id": "RC-006",
+      "passCriteria": "Norse artwork appears in workspace selectors, settled result, Settings, Vault, and browsers through runtime resources.",
+      "required": true,
+      "requiredEvidence": [
+        "Screenshots/iphone-norse-workspace.png",
+        "Screenshots/iphone-norse-result.png",
+        "visual integration tests"
+      ],
+      "severity": "blocking",
+      "title": "Norse visual remediation integrated"
+    },
+    {
+      "auditFindings": [
+        "RSA-001"
+      ],
+      "failCriteria": "Provider-specific UI branch or optional provider cannot render equivalent surfaces.",
+      "id": "RC-007",
+      "passCriteria": "All five providers use the same UI scaffold and resource rails without provider-specific view forks.",
+      "required": true,
+      "requiredEvidence": [
+        "provider-neutral visual tests",
+        "Screenshots/optional-provider-workspace.png"
+      ],
+      "severity": "blocking",
+      "title": "Provider-neutral visual scaffold"
+    },
+    {
+      "auditFindings": [
+        "RSA-002"
+      ],
+      "failCriteria": "No dedicated builder or builder does not launch canonical share.",
+      "id": "RC-008",
+      "passCriteria": "Post-encode Customize Share supports Codex, Relic, optional Seal/Frame, Extras, live preview, security summary, and Share.",
+      "required": true,
+      "requiredEvidence": [
+        "ShareBuilderValidation.json",
+        "Screenshots/iphone-share-builder-message.png"
+      ],
+      "severity": "blocking",
+      "title": "Message Share Builder"
+    },
+    {
+      "auditFindings": [
+        "RSA-002",
+        "RSA-003"
+      ],
+      "failCriteria": "Cipher invitation customization absent or exposes key data.",
+      "id": "RC-009",
+      "passCriteria": "Cipher invitations can open the same provider-neutral builder with contains-shared-cipher notice.",
+      "required": true,
+      "requiredEvidence": [
+        "CipherInvitationValidation.json",
+        "Screenshots/iphone-share-builder-cipher.png"
+      ],
+      "severity": "blocking",
+      "title": "Cipher invitation Share Builder"
+    },
+    {
+      "auditFindings": [
+        "RSA-002"
+      ],
+      "failCriteria": "Every share requires builder or Quick Share uses divergent policy.",
+      "id": "RC-010",
+      "passCriteria": "One-action Share uses validated defaults and the same render/package/completion rails without opening builder.",
+      "required": true,
+      "requiredEvidence": [
+        "quick-share tests"
+      ],
+      "severity": "blocking",
+      "title": "Quick Share preserved"
+    },
+    {
+      "auditFindings": [
+        "RSA-002"
+      ],
+      "failCriteria": "Notice missing, incorrect, obscured, or theme-controlled.",
+      "id": "RC-011",
+      "passCriteria": "First delivery, established delivery, and cipher invitation notices are correct, persistent, accessible, and not themeable.",
+      "required": true,
+      "requiredEvidence": [
+        "security summary tests",
+        "accessibility audit"
+      ],
+      "severity": "blocking",
+      "title": "Fixed non-themeable security summary"
+    },
+    {
+      "auditFindings": [
+        "RSA-002",
+        "RSA-005"
+      ],
+      "failCriteria": "UI persists directly, defaults drift, or failure corrupts prior values.",
+      "id": "RC-012",
+      "passCriteria": "Reset restores validated defaults; Save persists through runtime Settings; share works without save.",
+      "required": true,
+      "requiredEvidence": [
+        "ShareBuilderValidation.json",
+        "settings tests"
+      ],
+      "severity": "blocking",
+      "title": "Share Builder defaults save/reset"
+    },
+    {
+      "auditFindings": [
+        "RSA-002",
+        "RSA-003"
+      ],
+      "failCriteria": "Tap/presentation counts as completion, duplicate grant, or leaked handles.",
+      "id": "RC-013",
+      "passCriteria": "Presented/completed/cancelled/failed are distinct; cancel awards nothing; duplicate callbacks are idempotent; handles release.",
+      "required": true,
+      "requiredEvidence": [
+        "share completion tests",
+        "NegativeMutations.json"
+      ],
+      "severity": "blocking",
+      "title": "Share lifecycle and progression correctness"
+    },
+    {
+      "auditFindings": [
+        "RSA-003"
+      ],
+      "failCriteria": "Primary Share requests link or lacks preview metadata.",
+      "id": "RC-014",
+      "passCriteria": "Primary Library Share prepares `.file` typed themed invitation, not `.link`.",
+      "required": true,
+      "requiredEvidence": [
+        "CipherInvitationValidation.json",
+        "source mutation test"
+      ],
+      "severity": "blocking",
+      "title": "Cipher Library primary typed Artifact"
+    },
+    {
+      "auditFindings": [
+        "RSA-003"
+      ],
+      "failCriteria": "Fallback removed or link remains dominant normal Share.",
+      "id": "RC-015",
+      "passCriteria": "QR and compact link remain importable and clearly secondary; Export remains distinct.",
+      "required": true,
+      "requiredEvidence": [
+        "fallback compatibility tests"
+      ],
+      "severity": "blocking",
+      "title": "Link, QR, and Export remain explicit fallbacks"
+    },
+    {
+      "auditFindings": [
+        "RSA-004"
+      ],
+      "failCriteria": "Error swallowed or only unstructured string retained.",
+      "id": "RC-016",
+      "passCriteria": "Norse load failures retain bounded stage/resource/hash/metadata details through runtime diagnostics.",
+      "required": true,
+      "requiredEvidence": [
+        "BaseThemeFailureValidation.json",
+        "diagnostic contract tests"
+      ],
+      "severity": "blocking",
+      "title": "Structured required Base resource failure"
+    },
+    {
+      "auditFindings": [
+        "RSA-004"
+      ],
+      "failCriteria": "Failure visible only in Settings or modal blocks utility.",
+      "id": "RC-017",
+      "passCriteria": "Nonblocking accessible warning appears after lock/splash while decode remains available; details accessible.",
+      "required": true,
+      "requiredEvidence": [
+        "Screenshots/iphone-base-failure-banner.png",
+        "UI tests"
+      ],
+      "severity": "blocking",
+      "title": "Root/workspace emergency warning"
+    },
+    {
+      "auditFindings": [
+        "RSA-004"
+      ],
+      "failCriteria": "Descriptor-only Base fallback accepted as shipping pass.",
+      "id": "RC-018",
+      "passCriteria": "Missing/corrupt required Norse bytes fail Release product qualification; optional provider corruption remains isolated.",
+      "required": true,
+      "requiredEvidence": [
+        "shipping product log",
+        "negative resource mutations"
+      ],
+      "severity": "blocking",
+      "title": "Built-product Base resource qualification"
+    },
+    {
+      "auditFindings": [
+        "RSA-005"
+      ],
+      "failCriteria": "Only Codex cards exist or defaults are UI-local.",
+      "id": "RC-019",
+      "passCriteria": "Settings exposes default Relic, Seal/None, Frame/None and preview using runtime-owned canonical maps.",
+      "required": true,
+      "requiredEvidence": [
+        "AppearanceDefaultsValidation.json",
+        "Screenshots/iphone-appearance-defaults.png"
+      ],
+      "severity": "blocking",
+      "title": "Appearance per-Codex defaults"
+    },
+    {
+      "auditFindings": [
+        "RSA-005"
+      ],
+      "failCriteria": "Effects control absent or ignores system accessibility.",
+      "id": "RC-020",
+      "passCriteria": "Full/Reduced/Off persists; Reduce Motion caps effective behavior; no invented production effect assets required.",
+      "required": true,
+      "requiredEvidence": [
+        "effects tests",
+        "accessibility audit"
+      ],
+      "severity": "blocking",
+      "title": "Effects preference"
+    },
+    {
+      "auditFindings": [
+        "RSA-010"
+      ],
+      "failCriteria": "Background depends on header overdraw or hardcoded full-screen Norse color.",
+      "id": "RC-021",
+      "passCriteria": "Provider-neutral background is mounted at root with explicit safe-area/clipping; header is not sole application background owner.",
+      "required": true,
+      "requiredEvidence": [
+        "ThemeRootBackgroundValidation.json",
+        "workspace/settings/vault screenshots"
+      ],
+      "severity": "blocking",
+      "title": "Root Theme background composition"
+    },
+    {
+      "auditFindings": [
+        "RSA-006"
+      ],
+      "failCriteria": "Obsolete paths/names remain in active shipping records or hashes differ.",
+      "id": "RC-022",
+      "passCriteria": "Exact Production bytes have accurate paths, hashes, dimensions, rights/accessibility references, and release-candidate status; active placeholder/candidate ambiguity removed.",
+      "required": true,
+      "requiredEvidence": [
+        "NorseProductionProvenanceValidation.json",
+        "production manifest"
+      ],
+      "severity": "blocking",
+      "title": "Norse release-candidate provenance"
+    },
+    {
+      "auditFindings": [
+        "RSA-011"
+      ],
+      "failCriteria": "Runes-only/no-file follow-up policy remains documented as current.",
+      "id": "RC-023",
+      "passCriteria": "Comments/docs state canonical themed package for first and established messages; key only first.",
+      "required": true,
+      "requiredEvidence": [
+        "documentation alignment log"
+      ],
+      "severity": "blocking",
+      "title": "Transport documentation corrected"
+    },
+    {
+      "auditFindings": [
+        "RSA-012"
+      ],
+      "failCriteria": "CoreFoundation symbol failure or weakened decoding.",
+      "id": "RC-024",
+      "passCriteria": "Neutral contract compiles; integer schema accepted; Boolean/fractional/unknown/oversized/noncanonical writes rejected; legacy read preserved.",
+      "required": true,
+      "requiredEvidence": [
+        "contract test log",
+        "portable compile log"
+      ],
+      "severity": "blocking",
+      "title": "Portable strict selection decoder"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Any supported fixture becomes unreadable or mutates unexpectedly.",
+      "id": "RC-025",
+      "passCriteria": "All legacy cipher/message/link/font/library/contact fixtures and current typed packages pass; presentation failure never blocks valid Core payload.",
+      "required": true,
+      "requiredEvidence": [
+        "CompatibilityValidation.json"
+      ],
+      "severity": "blocking",
+      "title": "Legacy and current compatibility"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Sensitive data leakage, key resend, or theme changes cryptographic state.",
+      "id": "RC-026",
+      "passCriteria": "No plaintext/keys/raw contacts in progression/cloud/evidence; cipher/theme separation and first-delivery rules preserved.",
+      "required": true,
+      "requiredEvidence": [
+        "SecurityPrivacyValidation.json"
+      ],
+      "severity": "blocking",
+      "title": "Security and privacy invariants"
+    },
+    {
+      "auditFindings": [
+        "RSA-009"
+      ],
+      "failCriteria": "Live account required, local utility blocked, or Game Center grants ownership.",
+      "id": "RC-027",
+      "passCriteria": "Offline/unavailable/retry/merge/corruption/auth-decline tests pass with adapters; local ownership remains authoritative.",
+      "required": true,
+      "requiredEvidence": [
+        "cloud/game center test logs"
+      ],
+      "severity": "blocking",
+      "title": "Cloud/Game Center deterministic qualification"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Guard failure, disabled rule, or rule weakened to accept violation.",
+      "id": "RC-028",
+      "passCriteria": "All static and hosted architecture guards pass after changes.",
+      "required": true,
+      "requiredEvidence": [
+        "architecture logs",
+        "Forsetti compliance logs"
+      ],
+      "severity": "blocking",
+      "title": "Architecture and policy guards"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Any known defect mutation escapes detection.",
+      "id": "RC-029",
+      "passCriteria": "All required mutations fail the expected gate and source is restored automatically.",
+      "required": true,
+      "requiredEvidence": [
+        "NegativeMutations.json"
+      ],
+      "severity": "blocking",
+      "title": "Negative mutation suite"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Any prohibited attribution marker remains.",
+      "id": "RC-030",
+      "passCriteria": "No tool/model authorship credits or generated-by markers in changed source/docs/evidence/commits.",
+      "required": true,
+      "requiredEvidence": [
+        "AttributionAudit.json"
+      ],
+      "severity": "blocking",
+      "title": "Attribution scan clean"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Generated project drift or nondeterministic output.",
+      "id": "RC-031",
+      "passCriteria": "Two regenerations produce identical normalized project and match project.yml.",
+      "required": true,
+      "requiredEvidence": [
+        "GateRun/xcodegen-determinism.log"
+      ],
+      "severity": "blocking",
+      "title": "XcodeGen determinism"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Any package test failure or coverage removed without equivalent replacement.",
+      "id": "RC-032",
+      "passCriteria": "Complete package tests pass; test declaration floor does not decrease.",
+      "required": true,
+      "requiredEvidence": [
+        "GateRun/swift-package.log"
+      ],
+      "severity": "blocking",
+      "title": "Swift package regression"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Build/test/crash/product inspection failure.",
+      "id": "RC-033",
+      "passCriteria": "Release app builds, hosted/parity/UI tests pass, product inspection passes, app launches.",
+      "required": true,
+      "requiredEvidence": [
+        "GateRun/macos-release.log",
+        "GateRun/macos-tests.json",
+        "macOS screenshots"
+      ],
+      "severity": "blocking",
+      "title": "macOS Release and hosted qualification"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Any required simulator build/test/UI failure.",
+      "id": "RC-034",
+      "passCriteria": "Release app builds/installs/launches and hosted/parity/UI/accessibility tests pass on selected iPhone Simulator.",
+      "required": true,
+      "requiredEvidence": [
+        "GateRun/iphone-release.log",
+        "GateRun/iphone-tests.json",
+        "iPhone screenshots"
+      ],
+      "severity": "blocking",
+      "title": "iPhone Simulator qualification"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Required iPad layout/build/test failure.",
+      "id": "RC-035",
+      "passCriteria": "Adaptive Share Builder and primary flows pass on selected iPad Simulator.",
+      "required": true,
+      "requiredEvidence": [
+        "GateRun/ipad-release.log",
+        "GateRun/ipad-tests.json",
+        "iPad screenshots"
+      ],
+      "severity": "blocking",
+      "title": "iPad Simulator qualification"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Any blocking accessibility defect.",
+      "id": "RC-036",
+      "passCriteria": "Dynamic Type, VoiceOver semantics, contrast, Reduce Motion, effects Off, keyboard/pointer, warnings and security summaries pass.",
+      "required": true,
+      "requiredEvidence": [
+        "AccessibilityValidation.json"
+      ],
+      "severity": "blocking",
+      "title": "Accessibility qualification"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Unbounded retention, budget violation, or unsafe preview size.",
+      "id": "RC-037",
+      "passCriteria": "Preview churn, cache/session release, large inscriptions, package bounds, and Theme budgets pass.",
+      "required": true,
+      "requiredEvidence": [
+        "performance/resource report"
+      ],
+      "severity": "blocking",
+      "title": "Performance and resource bounds"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Mismatch, rollback, or repeated uncontrolled bump.",
+      "id": "RC-038",
+      "passCriteria": "Version/build increment once and match project, products, docs, and evidence.",
+      "required": true,
+      "requiredEvidence": [
+        "CompletionReport.json",
+        "built Info.plists"
+      ],
+      "severity": "blocking",
+      "title": "Version/build finalization"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Any product inspection failure.",
+      "id": "RC-039",
+      "passCriteria": "macOS and iOS Simulator Release bundles contain expected modules/resources/entitlements/version and no test-only or external Forsetti artifacts.",
+      "required": true,
+      "requiredEvidence": [
+        "GateRun/shipping-products.log"
+      ],
+      "severity": "blocking",
+      "title": "Final shipping-product inspection"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Package missing, hash invalid, or requires operator completion to qualify source.",
+      "id": "RC-040",
+      "passCriteria": "ZIP contains runnable macOS and iOS Simulator products, install commands, hashes, screenshots, reports, and no mandatory hardware task.",
+      "required": true,
+      "requiredEvidence": [
+        "Rune-Scribe-Owner-Test-Candidate-v1.0.zip",
+        "SHA256SUMS"
+      ],
+      "severity": "blocking",
+      "title": "Owner-test candidate package"
+    },
+    {
+      "auditFindings": [],
+      "failCriteria": "Partial/ambiguous status, open source defect, or unsupported overclaim.",
+      "id": "RC-041",
+      "passCriteria": "Every required gate is PASS against one final manifest and all findings are closed accurately.",
+      "required": true,
+      "requiredEvidence": [
+        "CompletionReport.md",
+        "CompletionReport.json",
+        "DefectClosure.json"
+      ],
+      "severity": "blocking",
+      "title": "Final self-audit and machine report"
+    },
+    {
+      "auditFindings": [
+        "RSA-009"
+      ],
+      "failCriteria": "Public distribution performed or claimed without authorization.",
+      "id": "RC-042",
+      "passCriteria": "No merge/tag/release/upload/notarization/TestFlight/App Store rollout performed; status is release candidate.",
+      "required": true,
+      "requiredEvidence": [
+        "CompletionReport.json"
+      ],
+      "severity": "blocking",
+      "title": "No public distribution action"
+    }
+  ],
+  "liveAccountsRequired": false,
+  "operatorParticipationRequired": false,
+  "physicalHardwareRequired": false,
+  "program": "Rune Scribe Codex Remediation v1.0",
+  "publicDistributionAuthorized": false,
+  "schemaVersion": "1.0",
+  "terminalStatus": "RELEASE_CANDIDATE_READY"
+}

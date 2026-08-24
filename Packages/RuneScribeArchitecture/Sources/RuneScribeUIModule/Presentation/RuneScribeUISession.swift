@@ -788,61 +788,10 @@ final class RuneScribeUISession: ObservableObject {
                   $0.codexID == snapshot.effectiveCodexID
               })
         else { throw ShareArtifactRenderError.unavailableSelection }
-
-        let descriptor = snapshot.effectiveTheme
-        let owned = ownedThemeArtifactIDs
-        let providerAvailable = provider.state == .available
-        func selectable(_ metadata: ThemeArtifactMetadata) -> Bool {
-            metadata.availability != .reservedInactive
-                && (metadata.availability == .included || owned.contains(metadata.id))
-        }
-
-        let codexID = descriptor.codex.id
-        let relicPreference = runtimeSettingsSnapshot?
-            .artifactSelections(for: .relic)[codexID]
-        let sealPreference = runtimeSettingsSnapshot?
-            .artifactSelections(for: .seal)[codexID]
-        let framePreference = runtimeSettingsSnapshot?
-            .artifactSelections(for: .frame)[codexID]
-
-        let relicID = relicPreference.flatMap { preferred in
-            descriptor.codex.relics.first(where: {
-                $0.metadata.id == preferred && selectable($0.metadata)
-            })?.metadata.id
-        } ?? descriptor.codex.relics.first(where: {
-            $0.metadata.id == descriptor.codex.defaultRelicID
-                && selectable($0.metadata)
-        })?.metadata.id
-        guard let relicID else { throw ShareArtifactRenderError.unavailableSelection }
-
-        let sealID = sealPreference.flatMap { preferred in
-            descriptor.codex.seals.first(where: {
-                $0.metadata.id == preferred && selectable($0.metadata)
-            })?.metadata.id
-        } ?? descriptor.codex.seals.first(where: {
-            selectable($0.metadata)
-        })?.metadata.id
-
-        let noneFrameID = ArtifactID(rawValue: "frame.none")
-        let frameID = framePreference.flatMap { preferred -> ArtifactID? in
-            guard preferred != noneFrameID else { return nil }
-            return descriptor.codex.frames.first(where: {
-                $0.metadata.id == preferred
-                    && selectable($0.metadata)
-                    && $0.allowsStaticShare
-                    && $0.compatibleRelicIDs.contains(relicID)
-            })?.metadata.id
-        }
-
-        return try ShareBuilderPolicy.selection(
-            descriptor: descriptor,
-            codexOwned: provider.isOwned,
-            providerAvailable: providerAvailable,
-            ownedArtifactIDs: owned,
-            relicID: relicID,
-            sealID: sealID,
-            frameID: frameID
-        )
+        return try makeShareBuilderCatalog(
+            descriptor: snapshot.effectiveTheme,
+            provider: provider
+        ).validatedSelection()
     }
 
     private static func semanticThemeResourceIDs(

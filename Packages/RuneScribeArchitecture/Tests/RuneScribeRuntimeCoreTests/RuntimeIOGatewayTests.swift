@@ -1541,7 +1541,13 @@ final class RuntimeIOGatewayTests: XCTestCase {
                 maximumByteCount: data.count
             )
         }
-        XCTAssertEqual(digestMismatch, .integrityMismatch)
+        XCTAssertEqual(
+            digestMismatch,
+            .integrityMismatch(
+                actualSHA256: Data(SHA256.hash(data: data)),
+                actualByteCount: data.count
+            )
+        )
         state = await resources.state()
         XCTAssertEqual(state.dataRequests, [resource, resource])
     }
@@ -1760,7 +1766,10 @@ final class RuntimeIOGatewayTests: XCTestCase {
                 XCTAssertEqual(criticality, .required)
                 XCTAssertEqual(
                     error as? RuntimeVerifiedApplicationResourceFailure,
-                    .integrityMismatch
+                    .integrityMismatch(
+                        actualSHA256: Data(SHA256.hash(data: manifestData)),
+                        actualByteCount: manifestData.count
+                    )
                 )
             }
 

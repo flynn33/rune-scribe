@@ -66,7 +66,12 @@ extension RuneScribeUISession {
     func prepareCipherShare(
         cipherID: UUID,
         displayName: String?,
-        representation: ShareRepresentationDTO
+        representation: ShareRepresentationDTO,
+        selection: SharePresentationSelection? = nil,
+        descriptor: ThemeDescriptor? = nil,
+        effects: RuntimeEffectsPreference? = nil,
+        colorMode: ShareArtifactColorMode = .standard,
+        systemReduceMotion: Bool = false
     ) async throws -> ShareArtifactDTO {
         let presentationPreparation: OutboundSharePresentationPreparation
         if representation == .file {
@@ -75,7 +80,13 @@ extension RuneScribeUISession {
                 accessibilityLabel: "Rune Scribe themed cipher invitation",
                 operationID: RuntimeOperationID(
                     rawValue: "share.render.cipher.\(cipherID.uuidString.lowercased())"
-                )
+                ),
+                cipherID: cipherID,
+                selection: selection,
+                descriptor: descriptor,
+                effects: effects,
+                colorMode: colorMode,
+                systemReduceMotion: systemReduceMotion
             )
         } else {
             presentationPreparation = OutboundSharePresentationPreparation(
@@ -101,14 +112,25 @@ extension RuneScribeUISession {
         runes: String,
         senderName: String,
         cipherID: UUID,
-        shareHandle: EncodedMessageHandle
+        shareHandle: EncodedMessageHandle,
+        selection: SharePresentationSelection? = nil,
+        descriptor: ThemeDescriptor? = nil,
+        effects: RuntimeEffectsPreference? = nil,
+        colorMode: ShareArtifactColorMode = .standard,
+        systemReduceMotion: Bool = false
     ) async throws -> ShareArtifactDTO {
         let presentationPreparation = await makeOutboundSharePresentationWithLegacyFallback(
             inscription: runes,
             accessibilityLabel: "Rune Scribe themed encrypted message",
             operationID: RuntimeOperationID(
                 rawValue: "share.render.message.\(shareHandle.rawValue.uuidString.lowercased())"
-            )
+            ),
+            cipherID: cipherID,
+            selection: selection,
+            descriptor: descriptor,
+            effects: effects,
+            colorMode: colorMode,
+            systemReduceMotion: systemReduceMotion
         )
         let artifact = try await perform {
             try await requireApplicationClient().prepareMessageShare(

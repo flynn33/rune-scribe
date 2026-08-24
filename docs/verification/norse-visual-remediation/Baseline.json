@@ -58,7 +58,7 @@
   },
   "resourceIntegrity": {
     "manifestPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json",
-    "manifestSHA256": "8bfb935ca4d3b82bdee00ce0f21756811e0d34460c9002dfed4c56ce13f1eb0a",
+    "manifestSHA256": "4c59d88099a7561d9983b148d5d4ab860c514d5b0645f03df1f5ac8cc9338a30",
     "manifestEntries": 47,
     "verifiedEntries": 47,
     "failures": [],

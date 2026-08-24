@@ -322,7 +322,7 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         XCTAssertEqual(cipher.contactID, contactID)
     }
 
-    func testSharedFailedInitializationCanRetryWithoutPoisoningNewLoad() async throws {
+    func testConcurrentFailedInitializationCanRetryWithoutPoisoningNewLoad() async throws {
         let generatedID = try XCTUnwrap(
             UUID(uuidString: "55555555-6666-7777-8888-999999999999")
         )
@@ -339,13 +339,22 @@ final class CipherPersistenceApplicationTests: XCTestCase {
 
         let first = Task { try await repository.snapshot() }
         let second = Task { try await repository.snapshot() }
+        var failures: [CipherRepositoryError] = []
+        var successes: [CipherLibrary] = []
         for task in [first, second] {
             do {
-                _ = try await task.value
-                XCTFail("Expected the shared initialization to fail")
+                successes.append(try await task.value)
             } catch let error as CipherRepositoryError {
-                XCTAssertEqual(error, .secureStorageUnavailable)
+                failures.append(error)
+            } catch {
+                XCTFail("Expected a typed repository failure, received \(error)")
             }
+        }
+        XCTAssertFalse(failures.isEmpty)
+        XCTAssertTrue(failures.allSatisfy { $0 == .secureStorageUnavailable })
+        for success in successes {
+            XCTAssertEqual(success.ciphers.map(\.id), [generatedID])
+            XCTAssertEqual(success.activeID, generatedID)
         }
 
         let recovered = try await repository.snapshot()

@@ -30,6 +30,7 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         let effectiveTheme: ThemeDescriptor
         let providers: [ThemeProviderSummaryDTO]
         let presentationInventories: [SharePresentationProviderInventory]
+        let requiredBaseResourceFailures: [RequiredThemeResourceFailureDTO]
     }
 
     private let contributionReader: RuntimeContributionReaderClient
@@ -158,6 +159,20 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             throw ThemeCoordinatorModuleError.baseProviderUnavailable
         }
         return updated
+    }
+
+    func providerDescriptor(
+        _ request: ThemeProviderDescriptorRequestDTO,
+        metadata _: RuntimeOperationMetadata
+    ) async throws -> ThemeDescriptor {
+        try await reconcile()
+        guard let provider = providersByCodexID[request.codexID],
+              provider.state == .available,
+              provider.isOwned || provider.descriptor.criticality == .requiredBase
+        else {
+            throw ThemeCoordinatorModuleError.codexNotSelectable(request.codexID)
+        }
+        return provider.descriptor
     }
 
     func resolveResource(
@@ -308,6 +323,9 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         let contributions = try await contributionReader.snapshot(
             for: RuntimeThemeContributionCatalog.descriptor
         )
+        let requiredBaseFailureContributions = try await contributionReader.snapshot(
+            for: RuntimeThemeContributionCatalog.requiredBaseResourceFailure
+        )
         let resources = try await resourceResolver.snapshot()
         let availabilitySnapshot = try? await availability.snapshot()
         let settingsSnapshot = try? await settings.snapshot()
@@ -430,6 +448,9 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             $0.settingID == RuneScribeRuntimeSettings.selectedCodex
         })?.revision ?? 0
         let isEmergencyPresentation = base.state == .invalidResources
+        let requiredBaseResourceFailures = Self.requiredBaseResourceFailures(
+            from: requiredBaseFailureContributions
+        )
         let selection: (
             effectiveCodexID: CodexID,
             reason: ThemeSelectionFallbackReason
@@ -461,7 +482,8 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             isEmergencyPresentation: isEmergencyPresentation,
             effectiveTheme: effectiveTheme,
             providers: summaries,
-            presentationInventories: presentationInventories
+            presentationInventories: presentationInventories,
+            requiredBaseResourceFailures: requiredBaseResourceFailures
         )
         let reconciledDiagnostics = try ThemeCoordinatorDiagnosticsDTO(
             capturedAt: now(),
@@ -470,7 +492,8 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             preferredCodexID: content.preferredCodexID,
             effectiveCodexID: content.effectiveCodexID,
             fallbackReason: content.fallbackReason,
-            providers: diagnostics
+            providers: diagnostics,
+            requiredBaseResourceFailures: content.requiredBaseResourceFailures
         )
 
         await reconcileWillCommit(generation)
@@ -491,7 +514,8 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
                 effectiveTheme: content.effectiveTheme,
                 providers: content.providers,
                 presentationInventories: content.presentationInventories,
-                isEmergencyPresentation: content.isEmergencyPresentation
+                isEmergencyPresentation: content.isEmergencyPresentation,
+                requiredBaseResourceFailures: content.requiredBaseResourceFailures
             )
             latestContent = content
             latestSnapshot = snapshot
@@ -655,6 +679,44 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             }
         }
         return result
+    }
+
+    private static func requiredBaseResourceFailures(
+        from snapshot: RuntimeContributionSnapshot<RequiredThemeResourceFailureDTO>
+    ) -> [RequiredThemeResourceFailureDTO] {
+        let values: [RequiredThemeResourceFailureDTO] = snapshot.entries.compactMap {
+            entry -> RequiredThemeResourceFailureDTO? in
+            guard entry.key == RuntimeThemeContributionCatalog
+                .requiredBaseResourceFailureKey,
+                  entry.owner.moduleID == RuneScribeModuleIDs.norseTheme,
+                  entry.value.moduleID == RuneScribeModuleIDs.norseTheme,
+                  entry.value.codexID == RuneScribeCodexIDs.norse
+            else { return nil }
+            return entry.value
+        }
+        return Array(Set(values)).sorted {
+            requiredBaseResourceFailureOrderingKey($0)
+                .lexicographicallyPrecedes(
+                    requiredBaseResourceFailureOrderingKey($1)
+                )
+        }
+    }
+
+    private static func requiredBaseResourceFailureOrderingKey(
+        _ failure: RequiredThemeResourceFailureDTO
+    ) -> [String] {
+        [
+            failure.moduleID.rawValue,
+            failure.codexID.rawValue,
+            failure.stage.rawValue,
+            failure.resourceID?.rawValue ?? "",
+            failure.errorCode.rawValue,
+            failure.expectedByteCount.map { String($0) } ?? "",
+            failure.actualByteCount.map { String($0) } ?? "",
+            failure.expectedSHA256?.rawValue ?? "",
+            failure.actualSHA256?.rawValue ?? "",
+            failure.mediaType?.rawValue ?? "",
+        ]
     }
 
     private func isCompatible(_ descriptor: ThemeDescriptor) -> Bool {

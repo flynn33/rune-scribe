@@ -2,8 +2,8 @@
 
 > **Historical decision record:** Migration facts and compatibility anchors remain evidence,
 > but conflicting architecture conclusions are superseded by the
-> [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md). The current application is
-> version 1.0.38 build 38. Hardware-only classifications in this historical record are
+> [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md). This historical snapshot
+> records version 1.0.38 build 38. Hardware-only classifications in this record are
 > owner-operated optional observations outside Agent Coding scope and have no acceptance,
 > completion, blocker, residual-work, PASS/FAIL, or pull-request-readiness effect. In
 > particular, provider-object retention, raw platform-adapter retention, lookup-time

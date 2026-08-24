@@ -94,6 +94,66 @@ public struct RuntimeSettingsClient: Sendable {
         )
     }
 
+    /// Persists one complete Appearance-default draft atomically. A failed
+    /// write cannot leave only part of the Relic, Seal, Frame, or effects
+    /// selection changed.
+    @discardableResult
+    public func setAppearanceDefaults(
+        relics: RuntimeCodexArtifactSelectionMap,
+        seals: RuntimeCodexArtifactSelectionMap,
+        frames: RuntimeCodexArtifactSelectionMap,
+        effects: RuntimeEffectsPreference,
+        expectedRevisions: [RuntimeSettingID: UInt64] = [:]
+    ) async throws -> RuntimeSettingsSnapshotDTO {
+        try await lease.requireActive()
+        let settingIDs: Set<RuntimeSettingID> = [
+            RuneScribeRuntimeSettings.selectedRelicByCodex,
+            RuneScribeRuntimeSettings.selectedSealByCodex,
+            RuneScribeRuntimeSettings.selectedFrameByCodex,
+            RuneScribeRuntimeSettings.effectsPreference,
+        ]
+        guard settingIDs.isSubset(of: writableSettingIDs) else {
+            let denied = settingIDs.subtracting(writableSettingIDs).sorted().first!
+            throw RuneScribeRuntimeError.settingWriteDenied(
+                moduleID: lease.moduleID,
+                settingID: denied
+            )
+        }
+        let commands = [
+            SetRuntimeSettingCommand(
+                settingID: RuneScribeRuntimeSettings.selectedRelicByCodex,
+                value: .text(try RuntimeArtifactSelectionCodec.encode(relics)),
+                expectedRevision: expectedRevisions[
+                    RuneScribeRuntimeSettings.selectedRelicByCodex
+                ]
+            ),
+            SetRuntimeSettingCommand(
+                settingID: RuneScribeRuntimeSettings.selectedSealByCodex,
+                value: .text(try RuntimeArtifactSelectionCodec.encode(seals)),
+                expectedRevision: expectedRevisions[
+                    RuneScribeRuntimeSettings.selectedSealByCodex
+                ]
+            ),
+            SetRuntimeSettingCommand(
+                settingID: RuneScribeRuntimeSettings.selectedFrameByCodex,
+                value: .text(try RuntimeArtifactSelectionCodec.encode(frames)),
+                expectedRevision: expectedRevisions[
+                    RuneScribeRuntimeSettings.selectedFrameByCodex
+                ]
+            ),
+            SetRuntimeSettingCommand(
+                settingID: RuneScribeRuntimeSettings.effectsPreference,
+                value: effects.settingValue,
+                expectedRevision: expectedRevisions[
+                    RuneScribeRuntimeSettings.effectsPreference
+                ]
+            ),
+        ]
+        let result = try await gateway.setAtomically(commands)
+        try await lease.requireActive()
+        return result
+    }
+
     @discardableResult
     public func setContactsImportPrompted(
         _ prompted: Bool,
@@ -124,6 +184,11 @@ public struct RuntimeSettingsClient: Sendable {
 }
 
 actor RuntimeSettingsGateway {
+    private struct PendingNormalization {
+        let value: RuntimeSettingValue
+        let expectedRevision: UInt64
+    }
+
     private static let namespace = ModuleStateNamespace(
         moduleID: "com.runescribe.runtime.settings"
     )
@@ -136,6 +201,7 @@ actor RuntimeSettingsGateway {
     private let environment: RuntimeEnvironment
     private let descriptors: [RuntimeSettingID: RuntimeSettingDescriptor]
     private var values: [RuntimeSettingID: RuntimeSettingDTO] = [:]
+    private var pendingNormalizations: [RuntimeSettingID: PendingNormalization] = [:]
     private var revision: UInt64 = 0
     private var loaded = false
     private var continuationSequence: UInt64 = 0
@@ -156,6 +222,7 @@ actor RuntimeSettingsGateway {
     func activateRuntime() async {
         loaded = false
         values.removeAll(keepingCapacity: true)
+        pendingNormalizations.removeAll(keepingCapacity: true)
         revision = 0
         try? await loadIfNeeded()
     }
@@ -163,6 +230,7 @@ actor RuntimeSettingsGateway {
     func deactivateRuntime() {
         loaded = false
         values.removeAll(keepingCapacity: true)
+        pendingNormalizations.removeAll(keepingCapacity: true)
         revision = 0
         let active = continuations.values
         continuations.removeAll()
@@ -222,7 +290,9 @@ actor RuntimeSettingsGateway {
                 updatedAt: environment.now()
             )
             values[command.settingID] = dto
+            pendingNormalizations.removeValue(forKey: command.settingID)
             revision = result.storeRevision
+            await persistPendingNormalizations(excluding: [command.settingID])
             yieldSnapshot()
             return dto
         } catch {
@@ -230,6 +300,81 @@ actor RuntimeSettingsGateway {
                 loaded = false
                 try? await loadIfNeeded()
             }
+            throw error
+        }
+    }
+
+    func setAtomically(
+        _ commands: [SetRuntimeSettingCommand]
+    ) async throws -> RuntimeSettingsSnapshotDTO {
+        try await loadIfNeeded()
+        guard !commands.isEmpty,
+              Set(commands.map(\.settingID)).count == commands.count
+        else { throw ModuleStateStoreError.invalidRequest }
+
+        let validated = try commands.map { command in
+            guard let descriptor = descriptors[command.settingID],
+                  sameValueKind(command.value, descriptor.defaultValue)
+            else { throw ModuleStateStoreError.invalidRequest }
+            return (
+                command,
+                try validatedWriteValue(command.value, settingID: command.settingID)
+            )
+        }
+        let mutations = try validated.map { command, value in
+            let expectation: ModuleStateRevisionExpectation
+            if let expected = command.expectedRevision {
+                expectation = expected == 0 ? .absent : .exact(expected)
+            } else {
+                expectation = .any
+            }
+            return ModuleStateMutation.upsert(
+                ModuleStateUpsert(
+                    key: recordKey(for: command.settingID),
+                    schemaVersion: Self.schemaVersion,
+                    payload: try JSONEncoder().encode(value),
+                    expectedRevision: expectation
+                )
+            )
+        }
+        let transaction = try ModuleStateTransaction(
+            transactionID: environment.nextUUID(),
+            mutations: mutations
+        )
+        do {
+            let result = try await state.runtimeTransact(
+                namespace: Self.namespace,
+                transaction: transaction
+            )
+            let valueBySettingID = Dictionary(uniqueKeysWithValues: validated.map {
+                ($0.0.settingID, $0.1)
+            })
+            let updatedAt = environment.now()
+            for mutation in result.mutations {
+                guard let settingID = RuntimeSettingID(
+                    rawValue: mutation.key.recordID.rawValue
+                ),
+                    let value = valueBySettingID[settingID],
+                    let storedRevision = mutation.revision
+                else { throw ModuleStateStoreError.corrupt }
+                values[settingID] = RuntimeSettingDTO(
+                    settingID: settingID,
+                    value: value,
+                    revision: storedRevision,
+                    updatedAt: updatedAt
+                )
+                pendingNormalizations.removeValue(forKey: settingID)
+            }
+            revision = result.storeRevision
+            await persistPendingNormalizations(
+                excluding: Set(validated.map { $0.0.settingID })
+            )
+            let snapshot = currentSnapshot()
+            yieldSnapshot()
+            return snapshot
+        } catch {
+            loaded = false
+            try? await loadIfNeeded()
             throw error
         }
     }
@@ -258,7 +403,7 @@ actor RuntimeSettingsGateway {
         )
         let page = try await state.runtimeScan(namespace: Self.namespace, request: request)
         var loadedValues: [RuntimeSettingID: RuntimeSettingDTO] = [:]
-        var normalizationMutations: [ModuleStateMutation] = []
+        pendingNormalizations.removeAll(keepingCapacity: true)
         for record in page.records {
             guard let settingID = RuntimeSettingID(rawValue: record.key.recordID.rawValue),
                   let descriptor = descriptors[settingID]
@@ -283,45 +428,13 @@ actor RuntimeSettingsGateway {
                 updatedAt: record.updatedAt
             )
             if normalization.shouldPersist {
-                normalizationMutations.append(
-                    .upsert(
-                        ModuleStateUpsert(
-                            key: record.key,
-                            schemaVersion: Self.schemaVersion,
-                            payload: try JSONEncoder().encode(value),
-                            expectedRevision: .exact(record.revision)
-                        )
-                    )
+                pendingNormalizations[settingID] = PendingNormalization(
+                    value: value,
+                    expectedRevision: record.revision
                 )
             }
         }
-        if !normalizationMutations.isEmpty {
-            let transaction = try ModuleStateTransaction(
-                transactionID: environment.nextUUID(),
-                mutations: normalizationMutations
-            )
-            let result = try await state.runtimeTransact(
-                namespace: Self.namespace,
-                transaction: transaction
-            )
-            for mutation in result.mutations {
-                guard let settingID = RuntimeSettingID(
-                    rawValue: mutation.key.recordID.rawValue
-                ),
-                    let storedRevision = mutation.revision,
-                    let existing = loadedValues[settingID]
-                else { continue }
-                loadedValues[settingID] = RuntimeSettingDTO(
-                    settingID: settingID,
-                    value: existing.value,
-                    revision: storedRevision,
-                    updatedAt: environment.now()
-                )
-            }
-            revision = result.storeRevision
-        } else {
-            revision = health.storeRevision
-        }
+        revision = health.storeRevision
         values = loadedValues
         loaded = true
         yieldSnapshot()
@@ -348,6 +461,57 @@ actor RuntimeSettingsGateway {
             collectionID: Self.collectionID,
             recordID: ModuleStateRecordID(rawValue: settingID.rawValue)!
         )
+    }
+
+    /// Legacy encodings remain read-only until a user mutation succeeds. The
+    /// explicit mutation is never failed or rolled back by best-effort
+    /// canonicalization of other readable records.
+    private func persistPendingNormalizations(
+        excluding excludedSettingIDs: Set<RuntimeSettingID>
+    ) async {
+        let pending = pendingNormalizations
+            .filter { !excludedSettingIDs.contains($0.key) }
+            .sorted { $0.key < $1.key }
+        guard !pending.isEmpty else { return }
+        do {
+            let transaction = try ModuleStateTransaction(
+                transactionID: environment.nextUUID(),
+                mutations: try pending.map { settingID, normalization in
+                    .upsert(
+                        ModuleStateUpsert(
+                            key: recordKey(for: settingID),
+                            schemaVersion: Self.schemaVersion,
+                            payload: try JSONEncoder().encode(normalization.value),
+                            expectedRevision: .exact(normalization.expectedRevision)
+                        )
+                    )
+                }
+            )
+            let result = try await state.runtimeTransact(
+                namespace: Self.namespace,
+                transaction: transaction
+            )
+            let normalizedAt = environment.now()
+            for mutation in result.mutations {
+                guard let settingID = RuntimeSettingID(
+                    rawValue: mutation.key.recordID.rawValue
+                ),
+                    let storedRevision = mutation.revision,
+                    let normalization = pendingNormalizations[settingID]
+                else { continue }
+                values[settingID] = RuntimeSettingDTO(
+                    settingID: settingID,
+                    value: normalization.value,
+                    revision: storedRevision,
+                    updatedAt: normalizedAt
+                )
+                pendingNormalizations.removeValue(forKey: settingID)
+            }
+            revision = result.storeRevision
+        } catch {
+            // The successful explicit setting mutation remains authoritative.
+            // A later successful mutation will retry any still-pending rewrite.
+        }
     }
 
     private func sameValueKind(
@@ -393,6 +557,11 @@ actor RuntimeSettingsGateway {
                 throw ModuleStateStoreError.invalidRequest
             }
         }
+        if settingID == RuneScribeRuntimeSettings.effectsPreference {
+            guard let rawValue = value.textValue?.rawValue,
+                  RuntimeEffectsPreference(rawValue: rawValue) != nil
+            else { throw ModuleStateStoreError.invalidRequest }
+        }
         if settingID == RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds {
             guard let milliseconds = value.integerValue, milliseconds >= 0 else {
                 throw ModuleStateStoreError.invalidRequest
@@ -414,6 +583,12 @@ actor RuntimeSettingsGateway {
                 return (fallback, false)
             }
             return (.text(canonical), canonical != text)
+        }
+        if settingID == RuneScribeRuntimeSettings.effectsPreference {
+            guard let rawValue = value.textValue?.rawValue,
+                  RuntimeEffectsPreference(rawValue: rawValue) != nil
+            else { return (fallback, false) }
+            return (value, false)
         }
         guard let kind = artifactKind(for: settingID) else {
             if settingID == RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds,

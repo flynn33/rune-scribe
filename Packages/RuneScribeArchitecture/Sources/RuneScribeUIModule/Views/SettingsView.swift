@@ -1,6 +1,7 @@
 // RuneScrib/Views/SettingsView.swift
 
 import RuneScribeContracts
+import RuneScribeUIRuntime
 import SwiftUI
 
 /// App settings: the 4-digit app-lock PIN, an About section attributing the app
@@ -9,11 +10,15 @@ struct SettingsView: View {
 
     @EnvironmentObject private var session: RuneScribeUISession
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    @Environment(\.runtimeAccessibilityPreferences) private var accessibilityPreferences
 
     @State private var pinFlow: PINFlowView.Mode?
     @State private var showLicense = false
     @State private var showContacts = false
     @State private var showVaultProgress = false
+    @State private var showThemeFailureDetails = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -38,7 +43,7 @@ struct SettingsView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .runeSheetFrame()
-        .background(Color.runeNavy)
+        .runeSemanticPresentationSurface()
         .preferredColorScheme(.dark)
         .sheet(item: $pinFlow) { mode in
             PINFlowView(mode: mode)
@@ -94,13 +99,54 @@ struct SettingsView: View {
                             .foregroundColor(.runeWarning)
                             .fixedSize(horizontal: false, vertical: true)
                         }
+
+                        if !snapshot.requiredBaseResourceFailures.isEmpty {
+                            DisclosureGroup(
+                                isExpanded: $showThemeFailureDetails,
+                                content: {
+                                    VStack(alignment: .leading, spacing: 10) {
+                                        ForEach(
+                                            Array(snapshot.requiredBaseResourceFailures.enumerated()),
+                                            id: \.offset
+                                        ) { _, failure in
+                                            themeFailureDetails(failure)
+                                        }
+                                    }
+                                    .padding(.top, 8)
+                                },
+                                label: {
+                                    Label(
+                                        "Required Base Resource Failure Details",
+                                        systemImage: "exclamationmark.triangle.fill"
+                                    )
+                                    .font(.footnote.weight(.semibold))
+                                    .foregroundColor(.runeWarning)
+                                }
+                            )
+                            .accessibilityIdentifier("theme.required-resource-failure-details")
+                        }
+
+                        if session.activeThemeProviderIsAvailable {
+                            Divider().overlay(Color.runeSilver.opacity(0.25))
+                            selectedCodexDefaults
+                        }
                     }
                     .accessibilityElement(children: .contain)
                     .accessibilityLabel("Active theme presentation")
-                    .accessibilityValue(snapshot.isEmergencyPresentation ? "Emergency" : "Standard")
+                    .accessibilityValue(
+                        snapshot.isEmergencyPresentation
+                            ? "Emergency"
+                            : usesIncreasedContrast
+                                ? "High Contrast"
+                                : "Standard"
+                    )
                     .accessibilityIdentifier(
                         "theme.presentation.\(snapshot.effectiveTheme.id.rawValue)."
-                            + (snapshot.isEmergencyPresentation ? "emergency" : "standard")
+                            + (snapshot.isEmergencyPresentation
+                                ? "emergency"
+                                : usesIncreasedContrast
+                                    ? "high-contrast"
+                                    : "standard")
                     )
                 } else {
                     Label(
@@ -118,7 +164,229 @@ struct SettingsView: View {
                 }
             }
         }
-        .task { await session.loadThemeCodexCardPreviews() }
+        .task {
+            await session.loadThemeCodexCardPreviews()
+            await session.loadActiveThemeCatalogVisuals()
+        }
+    }
+
+    private var selectedCodexDefaults: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("DEFAULTS FOR \(session.themeSnapshot?.effectiveTheme.codex.displayName.fallbackValue.uppercased() ?? "SELECTED CODEX")")
+                .font(.caption.weight(.bold))
+                .tracking(1)
+                .foregroundColor(.runeGold)
+
+            Text("Workspace choices, Quick Share, and Share Builder initialization use these same runtime-owned defaults.")
+                .font(.footnote)
+                .foregroundColor(.runeSilver)
+                .fixedSize(horizontal: false, vertical: true)
+
+            appearanceArtifactMenu(
+                title: "Relic",
+                items: session.themeRelicItems,
+                selectedID: session.selectedThemeRelicID,
+                includesNone: false,
+                kind: .relic
+            )
+            appearanceArtifactMenu(
+                title: "Seal",
+                items: session.themeSealItems,
+                selectedID: session.selectedThemeSealID,
+                includesNone: true,
+                kind: .seal
+            )
+            appearanceArtifactMenu(
+                title: "Frame",
+                items: session.themeFrameItems,
+                selectedID: session.selectedThemeFrameID,
+                includesNone: true,
+                kind: .frame
+            )
+
+            Picker("Effects", selection: Binding(
+                get: { session.appearanceEffectsPreference },
+                set: { preference in
+                    Task { await session.setEffectsPreference(preference) }
+                }
+            )) {
+                ForEach(RuntimeEffectsPreference.allCases, id: \.self) { preference in
+                    Text(preference.rawValue.capitalized).tag(preference)
+                }
+            }
+            .pickerStyle(.segmented)
+            .accessibilityHint("Controls optional decorative motion only")
+            .accessibilityIdentifier("appearance.effects")
+
+            Text(appearanceEffectsDetail)
+                .font(.footnote)
+                .foregroundColor(.runeSilver)
+
+            appearanceDefaultsPreview
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("appearance.selected-codex-defaults")
+    }
+
+    private func appearanceArtifactMenu(
+        title: String,
+        items: [ThemeArtifactPickerItem],
+        selectedID: ArtifactID?,
+        includesNone: Bool,
+        kind: ThemeArtifactSelectionKind
+    ) -> some View {
+        let selected = items.first(where: { $0.id == selectedID })
+        return Menu {
+            if includesNone {
+                Button {
+                    Task {
+                        switch kind {
+                        case .seal: await session.clearThemeSeal()
+                        case .frame: await session.clearThemeFrame()
+                        case .relic: break
+                        }
+                    }
+                } label: {
+                    if selectedID == nil {
+                        Label("None", systemImage: "checkmark")
+                    } else {
+                        Text("None")
+                    }
+                }
+            }
+            ForEach(items) { item in
+                Button {
+                    Task { await session.selectThemeArtifact(item.id, kind: kind) }
+                } label: {
+                    Label(
+                        item.name + (item.isOwned ? "" : " — locked"),
+                        systemImage: item.id == selectedID
+                            ? "checkmark"
+                            : item.isOwned ? "circle" : "lock"
+                    )
+                }
+                .disabled(!item.isSelectable)
+            }
+        } label: {
+            HStack(spacing: 12) {
+                appearanceArtwork(selectedID, kind: kind)
+                    .frame(width: 48, height: 48)
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title.uppercased())
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.runeSilver)
+                    Text(selected?.name ?? "None")
+                        .font(.body.weight(.semibold))
+                        .foregroundColor(.runeTextPrimary)
+                }
+                Spacer()
+                Image(systemName: "chevron.up.chevron.down")
+                    .foregroundColor(.runeSilver)
+            }
+            .frame(minHeight: 52)
+            .contentShape(Rectangle())
+        }
+        .menuIndicator(.hidden)
+        .accessibilityLabel("Default \(title): \(selected?.name ?? "None")")
+        .accessibilityIdentifier("appearance.default-\(title.lowercased())")
+    }
+
+    @ViewBuilder
+    private var appearanceDefaultsPreview: some View {
+        if let plan = appearancePreviewPlan,
+           let presentation = session.activeThemeVisualPresentation {
+            ZStack {
+                RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                    .fill(Color.runeParchment)
+                    .aspectRatio(4.0 / 3.0, contentMode: .fit)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Preview of the selected Codex defaults")
+                    .accessibilityValue(plan.accessibilityLabel)
+                    .accessibilityIdentifier("appearance.defaults-preview")
+
+                ThemeArtifactPreview(
+                    plan: plan,
+                    image: { presentation.image(for: $0) }
+                )
+                .aspectRatio(4.0 / 3.0, contentMode: .fit)
+                .accessibilityHidden(true)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous))
+        } else {
+            Color.clear
+            .aspectRatio(4.0 / 3.0, contentMode: .fit)
+            .overlay {
+                ThemeVisualPlaceholder(
+                    systemImage: "rectangle.inset.filled",
+                    label: "Appearance preview unavailable"
+                )
+            }
+        }
+    }
+
+    private var appearancePreviewPlan: ThemeArtifactCompositionPlan? {
+        guard session.activeThemeVisualPresentation != nil,
+              let descriptor = session.themeSnapshot?.effectiveTheme,
+              let relicID = session.selectedThemeRelicID,
+              let selection = try? SharePresentationSelection(
+                  codexID: descriptor.codex.id,
+                  scriptID: descriptor.codex.primaryScriptID,
+                  relicID: relicID,
+                  sealID: session.selectedThemeSealID,
+                  frameID: session.selectedThemeFrameID
+              )
+        else { return nil }
+        guard let primaryScript = descriptor.codex.scripts.first(where: {
+            $0.id == descriptor.codex.primaryScriptID
+        }) else { return nil }
+        let specimen = primaryScript.glyphs.prefix(12).map(\.textToken).joined()
+        guard !specimen.isEmpty else { return nil }
+        return try? ThemeArtifactCompositionPolicy.interactivePlan(
+            selection: selection,
+            inscription: specimen,
+            descriptor: descriptor,
+            colorMode: usesIncreasedContrast ? .highContrast : .standard,
+            reduceMotion: session.effectiveEffectsPreference(
+                systemReduceMotion: effectiveReduceMotion
+            ) != .full,
+            accessibilityLabel: "Rune Scribe appearance defaults preview"
+        )
+    }
+
+    private func appearanceArtwork(
+        _ artifactID: ArtifactID?,
+        kind: ThemeArtifactSelectionKind
+    ) -> AnyView {
+        guard let artifactID,
+              let presentation = session.activeThemeVisualPresentation,
+              let visual = presentation.plan.catalog.first(where: {
+                  $0.id == artifactID && $0.kind == kind.visualKind
+              }),
+              let image = presentation.imageReference(for: visual.thumbnail)?.image
+        else {
+            return AnyView(ThemeVisualPlaceholder(
+                systemImage: artifactID == nil ? "nosign" : "photo",
+                label: artifactID == nil ? "No artifact selected" : "Artwork unavailable"
+            ))
+        }
+        return AnyView(image.resizable().scaledToFill())
+    }
+
+    private var appearanceEffectsDetail: String {
+        if effectiveReduceMotion && session.appearanceEffectsPreference == .full {
+            return "Full is saved; Reduce Motion limits effective behavior to Reduced."
+        }
+        return "Effective behavior: \(session.effectiveEffectsPreference(systemReduceMotion: effectiveReduceMotion).rawValue.capitalized)."
+    }
+
+    private var effectiveReduceMotion: Bool {
+        accessibilityReduceMotion || accessibilityPreferences.forcesReduceMotion
+    }
+
+    private var usesIncreasedContrast: Bool {
+        colorSchemeContrast == .increased
+            || accessibilityPreferences.forcesIncreasedContrast
     }
 
     private func providerStatus(_ provider: ThemeProviderSummaryDTO) -> String {
@@ -135,6 +403,40 @@ struct SettingsView: View {
         case .invalidResources:
             return "Unavailable because required resources could not be verified"
         }
+    }
+
+    private func themeFailureDetails(
+        _ failure: RequiredThemeResourceFailureDTO
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("\(failure.stage.rawValue) · \(failure.errorCode.rawValue)")
+                .font(.caption.weight(.bold))
+                .foregroundColor(.runeTextPrimary)
+            Text("Codex: \(failure.codexID.rawValue)")
+            Text("Module: \(failure.moduleID.rawValue)")
+            if let resourceID = failure.resourceID {
+                Text("Resource: \(resourceID.rawValue)")
+            }
+            if let mediaType = failure.mediaType {
+                Text("Media type: \(mediaType.rawValue)")
+            }
+            if failure.expectedByteCount != nil || failure.actualByteCount != nil {
+                Text(
+                    "Bytes — expected: \(failure.expectedByteCount.map(String.init) ?? "n/a"), "
+                        + "actual: \(failure.actualByteCount.map(String.init) ?? "n/a")"
+                )
+            }
+            if failure.expectedSHA256 != nil || failure.actualSHA256 != nil {
+                Text(
+                    "SHA-256 — expected: \(failure.expectedSHA256?.rawValue ?? "n/a"), "
+                        + "actual: \(failure.actualSHA256?.rawValue ?? "n/a")"
+                )
+                    .textSelection(.enabled)
+            }
+        }
+        .font(.caption.monospaced())
+        .foregroundColor(.runeSilver)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private func providerVisualState(

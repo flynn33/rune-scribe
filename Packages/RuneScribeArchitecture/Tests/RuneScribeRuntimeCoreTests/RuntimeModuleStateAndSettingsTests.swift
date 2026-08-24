@@ -401,9 +401,12 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
             "seal.norse.knotwork"
         )
         XCTAssertEqual(
-            defaults.artifactSelections(for: .frame)[RuneScribeCodexIDs.norse]?.rawValue,
-            "frame.none"
+            defaults.artifactSelections(for: .frame).storedPreference(
+                for: RuneScribeCodexIDs.norse
+            ),
+            RuntimeArtifactSelectionPreference.none
         )
+        XCTAssertEqual(defaults.effectsPreference, .full)
         XCTAssertFalse(defaults.contactsImportPrompted)
         XCTAssertNil(defaults.splashLastShownAt)
         let stored = try await firstClient.set(
@@ -414,6 +417,14 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
             )
         )
         XCTAssertGreaterThan(stored.revision, 0)
+        let storedEffects = try await firstClient.set(
+            SetRuntimeSettingCommand(
+                settingID: RuneScribeRuntimeSettings.effectsPreference,
+                value: RuntimeEffectsPreference.reduced.settingValue,
+                expectedRevision: 0
+            )
+        )
+        XCTAssertEqual(storedEffects.value, RuntimeEffectsPreference.reduced.settingValue)
         await firstRuntime.stop()
 
         do {
@@ -431,7 +442,99 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
             relaunched[RuneScribeRuntimeSettings.unlockFeedbackSoundEnabled],
             .boolean(false)
         )
+        XCTAssertEqual(relaunched.effectsPreference, .reduced)
         await secondRuntime.stop()
+    }
+
+    func testAppearanceDefaultsCommitAtomicallyAndConflictPreservesPriorValues() async throws {
+        let store = InMemoryModuleStateStore(now: { Date(timeIntervalSince1970: 2_250) })
+        let capture = RuntimeRailClientCapture()
+        let runtime = try await makeRuntime(store: store, capture: capture)
+        try await runtime.start()
+        defer { Task { await runtime.stop() } }
+
+        let capturedClient = await capture.settingsClient()
+        let client = try XCTUnwrap(capturedClient)
+        let initial = try await client.snapshot()
+        let settingIDs: [RuntimeSettingID] = [
+            RuneScribeRuntimeSettings.selectedRelicByCodex,
+            RuneScribeRuntimeSettings.selectedSealByCodex,
+            RuneScribeRuntimeSettings.selectedFrameByCodex,
+            RuneScribeRuntimeSettings.effectsPreference,
+        ]
+        func revisions(
+            in snapshot: RuntimeSettingsSnapshotDTO
+        ) -> [RuntimeSettingID: UInt64] {
+            Dictionary(uniqueKeysWithValues: settingIDs.map { settingID in
+                (
+                    settingID,
+                    snapshot.settings.first(where: { $0.settingID == settingID })?.revision ?? 0
+                )
+            })
+        }
+
+        let relics = try initial.artifactSelections(for: .relic).setting(
+            XCTUnwrap(ArtifactID(rawValue: "relic.norse.raven-medallion")),
+            for: RuneScribeCodexIDs.norse
+        )
+        let seals = try initial.artifactSelections(for: .seal).setting(
+            nil,
+            for: RuneScribeCodexIDs.norse
+        )
+        let frames = try initial.artifactSelections(for: .frame).setting(
+            XCTUnwrap(ArtifactID(rawValue: "frame.norse.carved-knotwork")),
+            for: RuneScribeCodexIDs.norse
+        )
+        let committed = try await client.setAppearanceDefaults(
+            relics: relics,
+            seals: seals,
+            frames: frames,
+            effects: .reduced,
+            expectedRevisions: revisions(in: initial)
+        )
+        XCTAssertEqual(committed.artifactSelections(for: .relic), relics)
+        XCTAssertEqual(committed.artifactSelections(for: .seal), seals)
+        XCTAssertEqual(committed.artifactSelections(for: .frame), frames)
+        XCTAssertEqual(committed.effectsPreference, .reduced)
+        XCTAssertEqual(
+            committed.artifactSelections(for: .seal).storedPreference(
+                for: RuneScribeCodexIDs.norse
+            ),
+            RuntimeArtifactSelectionPreference.none
+        )
+
+        let replacementRelics = try relics.setting(
+            XCTUnwrap(ArtifactID(rawValue: "relic.norse.runestone.weathered")),
+            for: RuneScribeCodexIDs.norse
+        )
+        let replacementSeals = try seals.setting(
+            XCTUnwrap(ArtifactID(rawValue: "seal.norse.knotwork")),
+            for: RuneScribeCodexIDs.norse
+        )
+        let replacementFrames = try frames.setting(nil, for: RuneScribeCodexIDs.norse)
+        var conflictingRevisions = revisions(in: committed)
+        conflictingRevisions[RuneScribeRuntimeSettings.selectedSealByCodex] = 0
+        do {
+            _ = try await client.setAppearanceDefaults(
+                relics: replacementRelics,
+                seals: replacementSeals,
+                frames: replacementFrames,
+                effects: .off,
+                expectedRevisions: conflictingRevisions
+            )
+            XCTFail("Expected one stale revision to reject the complete Appearance write")
+        } catch let error as ModuleStateStoreError {
+            guard case .revisionConflict = error else {
+                return XCTFail("Unexpected error: \(error)")
+            }
+        }
+
+        let afterConflict = try await client.snapshot()
+        XCTAssertEqual(afterConflict.artifactSelections(for: .relic), relics)
+        XCTAssertEqual(afterConflict.artifactSelections(for: .seal), seals)
+        XCTAssertEqual(afterConflict.artifactSelections(for: .frame), frames)
+        XCTAssertEqual(afterConflict.effectsPreference, .reduced)
+        XCTAssertEqual(revisions(in: afterConflict), revisions(in: committed))
     }
 
     func testSettingsWriteScopeSeparatesPrimaryUIAndThemeCoordinator() async throws {
@@ -661,8 +764,14 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
             rawValue: "codex.norse=relic.norse.raven-medallion"
         ))
         let futureSeal = try XCTUnwrap(RuntimeSettingText(
-            rawValue: #"{"kind":"seal","schemaVersion":2,"selections":[]}"#
+            rawValue: #"{"kind":"seal","schemaVersion":3,"selections":[]}"#
         ))
+        let legacyCodexPayload = try JSONEncoder().encode(
+            RuntimeSettingValue.text(legacyCodex)
+        )
+        let legacyRelicPayload = try JSONEncoder().encode(
+            RuntimeSettingValue.text(legacyRelic)
+        )
         _ = try await store.transact(
             namespace: namespace,
             transaction: ModuleStateTransaction(
@@ -671,13 +780,13 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
                     .upsert(ModuleStateUpsert(
                         key: key(RuneScribeRuntimeSettings.selectedCodex),
                         schemaVersion: 1,
-                        payload: try JSONEncoder().encode(RuntimeSettingValue.text(legacyCodex)),
+                        payload: legacyCodexPayload,
                         expectedRevision: .absent
                     )),
                     .upsert(ModuleStateUpsert(
                         key: key(RuneScribeRuntimeSettings.selectedRelicByCodex),
                         schemaVersion: 1,
-                        payload: try JSONEncoder().encode(RuntimeSettingValue.text(legacyRelic)),
+                        payload: legacyRelicPayload,
                         expectedRevision: .absent
                     )),
                     .upsert(ModuleStateUpsert(
@@ -706,31 +815,16 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
             RuneScribeRuntimeSettings.defaultArtifactSelections(for: .seal)
         )
 
-        let fetchedCodexRecord = try await store.fetch(
+        let readOnlyCodexRecord = try await store.fetch(
             namespace: namespace,
             key: key(RuneScribeRuntimeSettings.selectedCodex)
         )
-        let normalizedCodexRecord = try XCTUnwrap(fetchedCodexRecord)
-        let normalizedCodexValue = try JSONDecoder().decode(
-            RuntimeSettingValue.self,
-            from: normalizedCodexRecord.payload
-        )
-        XCTAssertNoThrow(try RuntimeSelectedCodexPreferenceCodec.decodeCurrentWrite(
-            XCTUnwrap(normalizedCodexValue.textValue)
-        ))
-        let fetchedRelicRecord = try await store.fetch(
+        XCTAssertEqual(try XCTUnwrap(readOnlyCodexRecord).payload, legacyCodexPayload)
+        let readOnlyRelicRecord = try await store.fetch(
             namespace: namespace,
             key: key(RuneScribeRuntimeSettings.selectedRelicByCodex)
         )
-        let normalizedRelicRecord = try XCTUnwrap(fetchedRelicRecord)
-        let normalizedRelicValue = try JSONDecoder().decode(
-            RuntimeSettingValue.self,
-            from: normalizedRelicRecord.payload
-        )
-        XCTAssertNoThrow(try RuntimeArtifactSelectionCodec.decodeCurrentWrite(
-            XCTUnwrap(normalizedRelicValue.textValue),
-            expectedKind: .relic
-        ))
+        XCTAssertEqual(try XCTUnwrap(readOnlyRelicRecord).payload, legacyRelicPayload)
 
         for command in [
             SetRuntimeSettingCommand(
@@ -747,6 +841,45 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
                 XCTFail("Expected non-current setting write rejection")
             } catch ModuleStateStoreError.invalidRequest {}
         }
+        let codexAfterFailedMutation = try await store.fetch(
+            namespace: namespace,
+            key: key(RuneScribeRuntimeSettings.selectedCodex)
+        )
+        XCTAssertEqual(
+            try XCTUnwrap(codexAfterFailedMutation).payload,
+            legacyCodexPayload,
+            "A failed mutation must not rewrite readable legacy bytes"
+        )
+
+        _ = try await client.setArtifactSelections(
+            snapshot.artifactSelections(for: .relic)
+        )
+        let fetchedNormalizedCodexRecord = try await store.fetch(
+            namespace: namespace,
+            key: key(RuneScribeRuntimeSettings.selectedCodex)
+        )
+        let normalizedCodexRecord = try XCTUnwrap(fetchedNormalizedCodexRecord)
+        let normalizedCodexValue = try JSONDecoder().decode(
+            RuntimeSettingValue.self,
+            from: normalizedCodexRecord.payload
+        )
+        XCTAssertNoThrow(try RuntimeSelectedCodexPreferenceCodec.decodeCurrentWrite(
+            XCTUnwrap(normalizedCodexValue.textValue)
+        ))
+        let fetchedNormalizedRelicRecord = try await store.fetch(
+            namespace: namespace,
+            key: key(RuneScribeRuntimeSettings.selectedRelicByCodex)
+        )
+        let normalizedRelicRecord = try XCTUnwrap(fetchedNormalizedRelicRecord)
+        let normalizedRelicValue = try JSONDecoder().decode(
+            RuntimeSettingValue.self,
+            from: normalizedRelicRecord.payload
+        )
+        XCTAssertNoThrow(try RuntimeArtifactSelectionCodec.decodeCurrentWrite(
+            XCTUnwrap(normalizedRelicValue.textValue),
+            expectedKind: .relic
+        ))
+
         await runtime.stop()
     }
 

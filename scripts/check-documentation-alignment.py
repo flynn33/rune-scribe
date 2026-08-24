@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
 import subprocess
 import sys
@@ -12,6 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SOURCE_MANIFEST = ROOT / "docs/verification/remediation-v1/SOURCE-MANIFEST.json"
 ERRORS: list[str] = []
 RECOVERY_STATUS = "PASS / CLOSED"
 RECOVERY_ACCEPTANCE_OUTCOME = "PASS / UNBLOCKED FOR PHASE C"
@@ -23,6 +25,8 @@ PULL_REQUEST_NUMBER = 45
 AUDITED_SOURCE_COMMIT = "f5b74658bb6ec4d3ac251f532a4d92d389c2a2db"
 EVIDENCE_COMMIT = "ee47191d131dfe3b6b3e446bc4bd88e07bc9960f"
 MERGE_COMMIT = "e9e0e0c8814aaa107d7480e070f14a6fe9b09975"
+HISTORICAL_APPLICATION_VERSION = "1.0.38"
+HISTORICAL_APPLICATION_BUILD = "38"
 
 
 def read(relative: str) -> str:
@@ -60,6 +64,61 @@ def git(*arguments: str) -> str:
         text=True,
     )
     return result.stdout
+
+
+def git_available() -> bool:
+    if not (ROOT / ".git").exists():
+        return False
+    result = subprocess.run(
+        ["git", "rev-parse", "--show-toplevel"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return False
+    try:
+        return Path(result.stdout.strip()).resolve() == ROOT.resolve()
+    except OSError:
+        return False
+
+
+def validate_source_manifest(has_git: bool) -> dict[str, object]:
+    if not SOURCE_MANIFEST.is_file():
+        if not has_git:
+            ERRORS.append(
+                "Git metadata is absent and the final deterministic source manifest is missing"
+            )
+        return {}
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/generate-source-manifest.py"),
+            str(ROOT),
+            str(SOURCE_MANIFEST),
+            "--verify",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip()
+        ERRORS.append(
+            f"final deterministic source manifest does not match this tree: {detail}"
+        )
+    try:
+        document = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exception:
+        ERRORS.append(f"final deterministic source manifest is invalid: {exception}")
+        return {}
+    return document if isinstance(document, dict) else {}
+
+
+HAS_GIT = git_available()
+SOURCE_MANIFEST_DOCUMENT = validate_source_manifest(HAS_GIT)
 
 
 project = read("project.yml")
@@ -111,6 +170,12 @@ require(
 )
 
 readme = read("README.md")
+normalized_readme = re.sub(r"\s+", " ", readme)
+require(
+    "Every **later themed** message keeps the `.runescribe` attachment but carries **no "
+    "key**" in normalized_readme,
+    "README does not preserve the canonical established-message package and first-key boundary",
+)
 require(
     f"version-{marketing}%20build%20{build}" in readme,
     "README version badge differs from project version",
@@ -216,8 +281,9 @@ require(
     "support guide lacks the discretionary, non-gating owner-test boundary",
 )
 require(
-    f"Rune Scribe {marketing} (build {build})" in documentation_support_checklist,
-    "documentation/support checklist application version differs",
+    f"Rune Scribe {HISTORICAL_APPLICATION_VERSION} "
+    f"(build {HISTORICAL_APPLICATION_BUILD})" in documentation_support_checklist,
+    "historical documentation/support checklist application version differs",
 )
 require(
     documentation_support_checklist.count("- [x]") >= 12
@@ -249,44 +315,93 @@ require(
 )
 require("Keep Elven Series Phase C blocked" not in roadmap, "roadmap retains superseded Phase C blocker")
 
+content_view = read(
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift"
+)
+normalized_content_view = re.sub(r"\s+", " ", re.sub(r"\s*///\s*", " ", content_view))
+require(
+    "Every delivery also carries the canonical themed `.runescribe` package; only the "
+    "first includes key material." in normalized_content_view,
+    "ContentView commentary does not describe the canonical package on every delivery",
+)
+require(
+    "Established deliveries keep the envelope and presentation metadata but never resend "
+    "the key." in normalized_content_view,
+    "ContentView commentary does not preserve established-message presentation metadata",
+)
+
+stale_transport_policy = re.compile(
+    r"\b(?:follow[- ]up|later|established)\b[^.\n]{0,160}"
+    r"\b(?:runes alone|no file)\b",
+    re.IGNORECASE,
+)
+require(
+    stale_transport_policy.search("Established messages send runes alone with no file.")
+    is not None,
+    "internal transport-policy negative control is ineffective",
+)
+current_transport_sources = {
+    "README.md": readme,
+    "docs/SUPPORT.md": read("docs/SUPPORT.md"),
+    "docs/PRIVACY.md": read("docs/PRIVACY.md"),
+    "docs/APP_STORE_SUBMISSION.md": submission,
+    "docs/architecture/RoadmapAlignment.md": roadmap,
+    "docs/architecture/decisions/ADR-RS-005-forward-compatibility.md": read(
+        "docs/architecture/decisions/ADR-RS-005-forward-compatibility.md"
+    ),
+    "docs/architecture/decisions/ADR-RS-007-themed-follow-up-transport.md": read(
+        "docs/architecture/decisions/ADR-RS-007-themed-follow-up-transport.md"
+    ),
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift": content_view,
+}
+for relative, content in current_transport_sources.items():
+    require(
+        stale_transport_policy.search(content) is None,
+        f"{relative} retains a runes-only or no-file established-message policy",
+    )
+
 locked_roadmap = read(
     "docs/product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md"
 )
-locked_roadmap_marker = "> **Current publication boundary — August 22, 2026.**"
-locked_roadmap_end = "\n\n**Document version:**"
 require(
-    locked_roadmap.count(locked_roadmap_marker) == 1,
-    "locked roadmap must contain exactly one current publication-boundary marker",
+    hashlib.sha256(locked_roadmap.encode("utf-8")).hexdigest()
+    == "884ad563f7849ebda8326bc742493ce67fb89cfacc14b39e56c792c4f7c52db4",
+    "locked roadmap differs from the immutable v1.0 bytes",
+)
+amendment_relative = (
+    "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md"
+)
+amendment = read(amendment_relative)
+require(
+    hashlib.sha256(amendment.encode("utf-8")).hexdigest()
+    == "2b6ce54c50538419d324692ebfeec1bb29de46add9f354368d39169d6f74ed40",
+    "roadmap remediation amendment differs from its locked v1.1 bytes",
 )
 require(
-    locked_roadmap.count(locked_roadmap_end) == 1,
-    "locked roadmap must contain exactly one publication-boundary terminator",
-)
-locked_roadmap_banner = locked_roadmap.split(locked_roadmap_marker, 1)[-1].split(
-    locked_roadmap_end,
-    1,
-)[0]
-locked_roadmap_banner_text = "\n".join(
-    re.sub(r"^>\s?", "", line) for line in locked_roadmap_banner.splitlines()
+    "**Amends:** `Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md`"
+    in amendment,
+    "roadmap remediation amendment does not identify the immutable v1.0 roadmap",
 )
 require(
-    f"current application is version {marketing} build {build}" in locked_roadmap_banner_text,
-    "locked roadmap banner version differs from the project version",
-)
-require(
-    "owner-operated optional observations outside Agent Coding scope"
-    in locked_roadmap_banner_text,
-    "locked roadmap banner lacks the owner-operated scope boundary",
-)
-require(
-    "pull-request readiness" in locked_roadmap_banner_text,
-    "locked roadmap banner lacks the non-gating publication boundary",
+    "**Public shipment authorized:** No" in amendment
+    and "**Owner-testable release candidate authorized:** Yes" in amendment,
+    "roadmap remediation amendment has an invalid release boundary",
 )
 
 supersession_index = read("docs/architecture/ForsettiSupersessionIndex.md")
 decision_index = read("docs/architecture/decisions/README.md")
 forward_compatibility = read("docs/architecture/decisions/ADR-RS-005-forward-compatibility.md")
 invitation_presentation = read("docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md")
+for relative, content in (
+    ("README.md", readme),
+    ("docs/architecture/RoadmapAlignment.md", roadmap),
+    ("docs/architecture/ForsettiSupersessionIndex.md", supersession_index),
+    ("docs/architecture/decisions/README.md", decision_index),
+):
+    require(
+        "Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md" in content,
+        f"{relative} does not index the roadmap remediation amendment",
+    )
 require(
     re.search(
         r"Hardware-only observations\s+are owner-operated optional validation outside Agent Coding scope",
@@ -325,8 +440,9 @@ migration_banner_text = re.sub(
 )
 require("Historical decision record" in migration_banner_text, "migration decisions lack a historical marker")
 require(
-    f"version {marketing} build {build}" in migration_banner_text,
-    "migration decisions current application version differs",
+    f"version {HISTORICAL_APPLICATION_VERSION} build {HISTORICAL_APPLICATION_BUILD}"
+    in migration_banner_text,
+    "migration decisions historical application version differs",
 )
 require(
     "owner-operated optional observations outside Agent Coding scope" in migration_banner_text,
@@ -350,8 +466,9 @@ for relative in historical_phase4_plans:
     )
     require("Historical" in banner_text, f"{relative} lacks an immediate historical marker")
     require(
-        f"version {marketing} build {build}" in banner_text,
-        f"{relative} current application version differs",
+        f"version {HISTORICAL_APPLICATION_VERSION} build {HISTORICAL_APPLICATION_BUILD}"
+        in banner_text,
+        f"{relative} historical application version differs",
     )
     require(
         "owner-operated optional observations outside Agent Coding scope" in banner_text,
@@ -368,28 +485,65 @@ require(
     "roadmap ledger application version differs from the project version",
 )
 require("blocked-device" not in roadmap_state.get("statusVocabulary", {}), "roadmap retains a device-blocker status")
-owner_optional_tasks = [
+required_remediation_statuses = {
+    "complete",
+    "open",
+    "variance-accepted-app-owned-equivalent",
+    "simulator-replacement-complete",
+    "non-gating-external",
+    "deferred",
+}
+require(
+    required_remediation_statuses.issubset(roadmap_state.get("statusVocabulary", {})),
+    "roadmap ledger lacks required remediation status semantics",
+)
+simulator_replacement_tasks = [
     item
     for group in roadmap_state.get("taskGroups", [])
     for item in group.get("items", [])
-    if item.get("status") == "owner-optional"
+    if item.get("status") == "simulator-replacement-complete"
 ]
 require(
-    [item.get("id") for item in owner_optional_tasks] == ["BAS-006", "SHR-001", "SHR-015"],
-    "roadmap owner-optional task set differs",
+    [item.get("id") for item in simulator_replacement_tasks]
+    == ["BAS-006", "SHR-001", "SHR-015"],
+    "roadmap Simulator-replacement task set differs",
 )
 require(
-    all(item.get("dependsOn") == [] for item in owner_optional_tasks),
-    "roadmap owner-optional observations retain dependencies",
+    all(item.get("dependsOn") == [] for item in simulator_replacement_tasks),
+    "roadmap Simulator replacements retain dependencies",
 )
-owner_optional_ids = {item.get("id") for item in owner_optional_tasks}
+simulator_replacement_ids = {item.get("id") for item in simulator_replacement_tasks}
 require(
     all(
-        not owner_optional_ids.intersection(item.get("dependsOn", []))
+        not simulator_replacement_ids.intersection(item.get("dependsOn", []))
         for group in roadmap_state.get("taskGroups", [])
         for item in group.get("items", [])
     ),
-    "roadmap task depends on an owner-optional observation",
+    "roadmap task depends on a Simulator replacement",
+)
+for_tasks = [
+    item
+    for group in roadmap_state.get("taskGroups", [])
+    if group.get("prefix") == "FOR"
+    for item in group.get("items", [])
+]
+require(
+    len(for_tasks) == 11
+    and all(
+        item.get("status") == "variance-accepted-app-owned-equivalent"
+        for item in for_tasks
+    ),
+    "roadmap FOR tasks are not classified as accepted app-owned variances",
+)
+require(
+    [
+        item.get("id")
+        for group in roadmap_state.get("taskGroups", [])
+        for item in group.get("items", [])
+        if item.get("status") == "non-gating-external"
+    ]
+    == ["REL-011"],
+    "roadmap external rollout boundary differs",
 )
 try:
     require(
@@ -407,8 +561,9 @@ for relative in ("docs/architecture/ModuleGraph.md", "docs/architecture/Forsetti
 
 ledger = read("docs/verification/ElvenSeriesBlockingResolutionLedger.md")
 require(
-    f"**Application:** version {marketing} build {build}" in ledger,
-    "resolution ledger application version differs",
+    f"**Application:** version {HISTORICAL_APPLICATION_VERSION} "
+    f"build {HISTORICAL_APPLICATION_BUILD}" in ledger,
+    "historical resolution ledger application version differs",
 )
 require("stat.message.incoming-decoded.unique" in ledger, "resolution ledger lacks canonical decode statistic")
 passing_findings = re.findall(r"^\| DEV-ELVEN-\d{3} \| PASS \|", ledger, re.MULTILINE)
@@ -470,20 +625,22 @@ phase_c_final = read("docs/verification/elven-phase-c/PhaseCFinalAudit.md")
 recovery_final = read("docs/verification/elven-recovery-v3/RecoveryFinalAudit.md")
 remediation_readme = read("docs/verification/elven-remediation/README.md")
 require(
-    f"| Application version | `{marketing}` |" in phase_c_final,
-    "Phase C final audit application version differs",
+    f"| Application version | `{HISTORICAL_APPLICATION_VERSION}` |" in phase_c_final,
+    "historical Phase C final audit application version differs",
 )
 require(
-    f"| Application build | `{build}` |" in phase_c_final,
-    "Phase C final audit application build differs",
+    f"| Application build | `{HISTORICAL_APPLICATION_BUILD}` |" in phase_c_final,
+    "historical Phase C final audit application build differs",
 )
 require(
-    f"Application release: **version {marketing} build {build}**" in recovery_final,
-    "recovery final audit application version differs",
+    f"Application release: **version {HISTORICAL_APPLICATION_VERSION} "
+    f"build {HISTORICAL_APPLICATION_BUILD}**" in recovery_final,
+    "historical recovery final audit application version differs",
 )
 require(
-    f"current application is version {marketing} build {build}" in remediation_readme,
-    "remediation archive current application version differs",
+    f"current application is version {HISTORICAL_APPLICATION_VERSION} "
+    f"build {HISTORICAL_APPLICATION_BUILD}" in remediation_readme,
+    "historical remediation archive application version differs",
 )
 section_markers = (
     ("docs/verification/elven-phase-c/PhaseCFinalAudit.md", phase_c_final, "## Outcome", "## Source and package boundary"),
@@ -603,8 +760,14 @@ require(
 )
 
 recovery = json.loads(read("docs/verification/elven-recovery-v3/RecoveryState.json"))
-require(recovery.get("applicationVersion") == marketing, "recovery state application version differs")
-require(recovery.get("applicationBuild") == build, "recovery state application build differs")
+require(
+    recovery.get("applicationVersion") == HISTORICAL_APPLICATION_VERSION,
+    "historical recovery state application version differs",
+)
+require(
+    recovery.get("applicationBuild") == HISTORICAL_APPLICATION_BUILD,
+    "historical recovery state application build differs",
+)
 require(recovery.get("recoveryStatus") == RECOVERY_STATUS, "recovery state is not closed")
 require(recovery.get("recoveryAcceptanceOutcome") == RECOVERY_ACCEPTANCE_OUTCOME, "recovery acceptance outcome differs")
 phase_ab = recovery.get("phaseABRegression", {})
@@ -618,8 +781,14 @@ findings = recovery.get("findings", [])
 require(len(findings) == 9, "recovery state does not contain exactly nine findings")
 require(all(item.get("status") == "PASS" for item in findings), "recovery state contains a nonpassing finding")
 phase_c = recovery.get("phaseCContinuation", {})
-require(phase_c.get("applicationVersion") == marketing, "Phase C application version differs")
-require(phase_c.get("applicationBuild") == build, "Phase C application build differs")
+require(
+    phase_c.get("applicationVersion") == HISTORICAL_APPLICATION_VERSION,
+    "historical Phase C application version differs",
+)
+require(
+    phase_c.get("applicationBuild") == HISTORICAL_APPLICATION_BUILD,
+    "historical Phase C application build differs",
+)
 require(phase_c.get("status") == "PASS", "Phase C continuation status differs")
 require(phase_c.get("outcome") == PHASE_C_OUTCOME, "Phase C outcome differs")
 require(
@@ -691,8 +860,14 @@ for relative, (key_path, expected) in phase_c_evidence.items():
     require(value == expected, f"{relative} is not {expected}")
 
 repository_regression = json.loads(read("docs/verification/elven-phase-c/RepositoryRegression.json"))
-require(repository_regression.get("applicationVersion") == marketing, "repository regression application version differs")
-require(repository_regression.get("applicationBuild") == build, "repository regression application build differs")
+require(
+    repository_regression.get("applicationVersion") == HISTORICAL_APPLICATION_VERSION,
+    "historical repository regression application version differs",
+)
+require(
+    repository_regression.get("applicationBuild") == HISTORICAL_APPLICATION_BUILD,
+    "historical repository regression application build differs",
+)
 require(
     repository_regression.get("auditedSourceCommit") == AUDITED_SOURCE_COMMIT,
     "repository regression audited source commit differs",
@@ -701,8 +876,14 @@ require("physicalDeviceStatus" not in repository_regression, "repository regress
 require("physicalDevicePending" not in repository_regression, "repository regression retains hardware procedures")
 
 publication_audit = json.loads(read("docs/verification/elven-phase-c/PublicationAudit.json"))
-require(publication_audit.get("applicationVersion") == marketing, "publication audit application version differs")
-require(publication_audit.get("applicationBuild") == build, "publication audit application build differs")
+require(
+    publication_audit.get("applicationVersion") == HISTORICAL_APPLICATION_VERSION,
+    "historical publication audit application version differs",
+)
+require(
+    publication_audit.get("applicationBuild") == HISTORICAL_APPLICATION_BUILD,
+    "historical publication audit application build differs",
+)
 require(publication_audit.get("sourceBranch") == "feature/elven-phase-c-production", "publication audit source branch differs")
 require(publication_audit.get("auditedSourceCommit") == AUDITED_SOURCE_COMMIT, "publication audit source commit differs")
 require(publication_audit.get("evidenceCommit") == EVIDENCE_COMMIT, "publication audit evidence commit differs")
@@ -792,10 +973,23 @@ named_package_patterns = [
     re.compile("".join(("gpt", r"[- _]?", r"\d")), re.IGNORECASE),
 ]
 
-tracked = sorted(set(
-    git("ls-files", "-z").split("\0")
-    + git("ls-files", "--others", "--exclude-standard", "-z").split("\0")
-))
+if HAS_GIT:
+    tracked = sorted(set(
+        git("ls-files", "-z").split("\0")
+        + git("ls-files", "--others", "--exclude-standard", "-z").split("\0")
+    ))
+else:
+    manifest_paths = {
+        record.get("path", "")
+        for record in SOURCE_MANIFEST_DOCUMENT.get("files", [])
+        if isinstance(record, dict) and isinstance(record.get("path"), str)
+    }
+    evidence_paths = {
+        path.relative_to(ROOT).as_posix()
+        for path in SOURCE_MANIFEST.parent.rglob("*")
+        if path.is_file()
+    }
+    tracked = sorted(manifest_paths | evidence_paths)
 text_suffixes = {".md", ".json", ".swift", ".sh", ".py", ".rb", ".yml", ".yaml", ".plist", ".pbxproj"}
 for relative in filter(None, tracked):
     path = ROOT / relative
@@ -815,10 +1009,11 @@ for relative in filter(None, tracked):
         if any(token in lowered for token in publication_tokens) or any(pattern.search(line) for pattern in named_package_patterns):
             ERRORS.append(f"publication-sensitive text: {relative}:{number}")
 
-branch = git("branch", "--show-current").strip().lower()
-require(not any(token in branch for token in publication_tokens), "branch name violates publication policy")
-metadata = git("log", "origin/main..HEAD", "--format=%H%n%an%n%ae%n%s%n%b").lower()
-require(not any(token in metadata for token in publication_tokens), "commit metadata violates publication policy")
+if HAS_GIT:
+    branch = git("branch", "--show-current").strip().lower()
+    require(not any(token in branch for token in publication_tokens), "branch name violates publication policy")
+    metadata = git("log", "origin/main..HEAD", "--format=%H%n%an%n%ae%n%s%n%b").lower()
+    require(not any(token in metadata for token in publication_tokens), "commit metadata violates publication policy")
 
 if ERRORS:
     for error in ERRORS:

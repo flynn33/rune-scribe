@@ -335,7 +335,7 @@ struct VaultProgressView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .background(Color.runeNavy)
+        .runeSemanticPresentationSurface()
         .preferredColorScheme(.dark)
         .modifier(VaultProgressFrameModifier())
         .task { await session.loadActiveThemeCatalogVisuals() }
@@ -381,7 +381,7 @@ struct VaultProgressView: View {
             .padding(.horizontal, RuneMetrics.pad)
             .padding(.vertical, 12)
         }
-        .background(Color.runeNavy)
+        .background(Color.runeBackgroundSecondary.opacity(0.48))
     }
 
     private var loadingView: some View {

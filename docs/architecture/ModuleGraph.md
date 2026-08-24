@@ -139,7 +139,7 @@ At the recorded snapshot, the strict JSON decoder accepted only the schema keys 
 force. The Core and UI manifests targeted iOS and macOS, required runtime `1.0.0`,
 carried module version `1.0.34`, used no entitlement requirement, and disabled
 production diagnostics. Unknown fields and duplicate array entries failed before
-activation. Current Core, Progression, and UI module version `1.0.38` is recorded in
+activation. Current Core, Progression, and UI module version `1.0.39` is recorded in
 their compiled descriptors and manifests; the current graph is governed by the
 controlling policy and `project.yml`, not this snapshot.
 

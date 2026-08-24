@@ -3,12 +3,71 @@ import Foundation
 import RuneScribeContracts
 import RuneScribeUIRuntime
 
+enum OutboundShareFontFallbackReason: Equatable, Sendable {
+    case cipherUnavailable
+    case importedFontUnregistered
+    case importedFontUnsupported
+}
+
+enum OutboundShareFontProjection: Equatable, Sendable {
+    case themeScript
+    case registeredImportedFont(ThemeFontPostScriptName)
+    case themeScriptFallback(OutboundShareFontFallbackReason)
+
+    var fontPostScriptNameOverride: ThemeFontPostScriptName? {
+        guard case .registeredImportedFont(let postScriptName) = self else {
+            return nil
+        }
+        return postScriptName
+    }
+
+    var shareFallbackNotice: String? {
+        switch self {
+        case .themeScriptFallback(.importedFontUnregistered),
+             .themeScriptFallback(.importedFontUnsupported):
+            "Custom script unavailable — shares use the Codex script."
+        case .themeScriptFallback(.cipherUnavailable):
+            "Cipher unavailable — shares use the Codex script."
+        case .themeScript, .registeredImportedFont:
+            nil
+        }
+    }
+}
+
+enum OutboundShareFontPolicy {
+    static func projection(
+        for cipherID: UUID?,
+        in ciphers: [CipherViewState]
+    ) -> OutboundShareFontProjection {
+        guard let cipherID else { return .themeScript }
+        guard let cipher = ciphers.first(where: { $0.id == cipherID }) else {
+            return .themeScriptFallback(.cipherUnavailable)
+        }
+        guard cipher.fontSource == .imported else { return .themeScript }
+        guard cipher.fontIsRegistered else {
+            return .themeScriptFallback(.importedFontUnregistered)
+        }
+        guard let postScriptName = ThemeFontPostScriptName(
+            rawValue: cipher.fontName
+        ) else {
+            return .themeScriptFallback(.importedFontUnsupported)
+        }
+        return .registeredImportedFont(postScriptName)
+    }
+}
+
 @MainActor
 extension RuneScribeUISession {
     func makeOutboundSharePresentationWithLegacyFallback(
         inscription: String,
         accessibilityLabel: String,
-        operationID: RuntimeOperationID
+        operationID: RuntimeOperationID,
+        cipherID: UUID? = nil,
+        selection: SharePresentationSelection? = nil,
+        descriptor: ThemeDescriptor? = nil,
+        effects: RuntimeEffectsPreference? = nil,
+        colorMode: ShareArtifactColorMode = .standard,
+        systemReduceMotion: Bool = false
     ) async -> OutboundSharePresentationPreparation {
         guard let capturedAt = snapshot?.capturedAt else {
             return OutboundSharePresentationPreparation(
@@ -21,7 +80,13 @@ extension RuneScribeUISession {
                 inscription: inscription,
                 accessibilityLabel: accessibilityLabel,
                 operationID: operationID,
-                capturedAt: capturedAt
+                capturedAt: capturedAt,
+                cipherID: cipherID,
+                selection: selection,
+                descriptor: descriptor,
+                effects: effects,
+                colorMode: colorMode,
+                systemReduceMotion: systemReduceMotion
             )
             return OutboundSharePresentationPreparation(
                 presentation: presentation,
@@ -41,27 +106,41 @@ extension RuneScribeUISession {
         inscription: String,
         accessibilityLabel: String,
         operationID: RuntimeOperationID,
-        capturedAt: Date
+        capturedAt: Date,
+        cipherID: UUID? = nil,
+        selection requestedSelection: SharePresentationSelection? = nil,
+        descriptor requestedDescriptor: ThemeDescriptor? = nil,
+        effects: RuntimeEffectsPreference? = nil,
+        colorMode: ShareArtifactColorMode = .standard,
+        systemReduceMotion: Bool = false
     ) async throws -> OutboundSharePresentationDTO {
         guard let snapshot = themeSnapshot,
               !snapshot.isEmergencyPresentation,
-              let themeCoordinatorClientHandle,
-              let provider = snapshot.providers.first(where: {
-                  $0.codexID == snapshot.effectiveCodexID
-              }),
-              let activeVisuals = activeThemeVisualPresentation,
-              activeVisuals.plan.codex.codexID == snapshot.effectiveCodexID
+              let themeCoordinatorClientHandle
         else { throw ShareArtifactRenderError.unavailableSelection }
 
-        let descriptor = snapshot.effectiveTheme
-        let selection = try ShareBuilderPolicy.selection(
-            descriptor: descriptor,
-            codexOwned: provider.isOwned,
-            providerAvailable: provider.state == .available,
-            ownedArtifactIDs: ownedThemeArtifactIDs,
-            relicID: selectedThemeRelicID,
-            sealID: selectedThemeSealID,
-            frameID: selectedThemeFrameID
+        let descriptor = requestedDescriptor ?? snapshot.effectiveTheme
+        guard let provider = snapshot.providers.first(where: {
+            $0.codexID == descriptor.codex.id
+        }) else { throw ShareArtifactRenderError.unavailableSelection }
+        let selection = if let requestedSelection {
+            try requestedSelectionValidated(
+                requestedSelection,
+                descriptor: descriptor,
+                provider: provider
+            )
+        } else {
+            try makeShareBuilderCatalog(
+                descriptor: descriptor,
+                provider: provider
+            ).validatedSelection()
+        }
+        let effectiveEffects = (effects ?? appearanceEffectsPreference).effective(
+            systemReduceMotion: systemReduceMotion
+        )
+        let fontProjection = OutboundShareFontPolicy.projection(
+            for: cipherID,
+            in: ciphers
         )
         let request = try ShareArtifactRenderRequest(
             selection: selection,
@@ -70,12 +149,11 @@ extension RuneScribeUISession {
             capturedAt: capturedAt,
             localeIdentifier: descriptor.defaultLocaleIdentifier,
             scale: 1,
+            colorMode: colorMode,
+            reduceMotion: effectiveEffects != .full,
             accessibilityLabel: accessibilityLabel,
             provenanceLabel: "Source details included",
-            fontPostScriptNameOverride: activeCipher?.fontSource == .imported
-                && activeCipher?.fontIsRegistered == true
-                ? ThemeFontPostScriptName(rawValue: inscriptionFontPostScriptName)
-                : nil
+            fontPostScriptNameOverride: fontProjection.fontPostScriptNameOverride
         )
         let plan = try ShareArtifactRenderPolicy.plan(
             request: request,
@@ -84,6 +162,7 @@ extension RuneScribeUISession {
         var resourceData: [ThemeResourceID: Data] = [:]
         var imageReferences: [ThemeResourceID: RuntimeThemeImageReference] = [:]
         for resource in plan.resourceMetadata {
+            try Task.checkCancellation()
             let resolved: ResolvedThemeResourceDTO
             do {
                 resolved = try await themeCoordinatorClientHandle.resolveResource(
@@ -113,7 +192,7 @@ extension RuneScribeUISession {
                                 metadata: resource
                             ),
                             expectedCodexID: descriptor.codex.id,
-                            contentRevision: activeVisuals.revision
+                            contentRevision: snapshot.revision
                         )
                 } catch {
                     throw Self.outboundShareImageReferenceError(
@@ -127,16 +206,14 @@ extension RuneScribeUISession {
                 throw ShareArtifactRenderError.invalidResource(resource.resourceID)
             }
         }
-        guard themeSnapshot?.revision == snapshot.revision,
-              let currentVisuals = activeThemeVisualPresentation,
-              currentVisuals.revision == activeVisuals.revision,
-              currentVisuals.plan == activeVisuals.plan
+        try Task.checkCancellation()
+        guard themeSnapshot?.revision == snapshot.revision
         else { throw ShareArtifactRenderError.unavailableSelection }
         let output = try ShareArtifactStaticRenderer.render(
             plan: plan,
             resourceData: resourceData,
             imageReferences: imageReferences,
-            contentRevision: activeVisuals.revision
+            contentRevision: snapshot.revision
         )
         let provenance = try outboundProvenance(
             descriptor: descriptor,
@@ -154,6 +231,26 @@ extension RuneScribeUISession {
             safePreviewData: safePreviewData,
             signedProvenance: nil
         )
+    }
+
+    private func requestedSelectionValidated(
+        _ selection: SharePresentationSelection,
+        descriptor: ThemeDescriptor,
+        provider: ThemeProviderSummaryDTO
+    ) throws -> SharePresentationSelection {
+        let validated = try ShareBuilderPolicy.selection(
+            descriptor: descriptor,
+            codexOwned: provider.isOwned,
+            providerAvailable: provider.state == .available,
+            ownedArtifactIDs: ownedThemeArtifactIDs,
+            relicID: selection.relicID,
+            sealID: selection.sealID,
+            frameID: selection.frameID
+        )
+        guard validated == selection else {
+            throw ShareArtifactRenderError.unknownSelection
+        }
+        return validated
     }
 
     private func outboundProvenance(

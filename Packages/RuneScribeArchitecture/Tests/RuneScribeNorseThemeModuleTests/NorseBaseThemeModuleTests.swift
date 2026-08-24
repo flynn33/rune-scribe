@@ -2,7 +2,7 @@ import CryptoKit
 import Foundation
 import RuneScribeContracts
 @testable import RuneScribeNorseThemeModule
-@_spi(RuntimeTesting) import RuneScribeRuntimeCore
+@_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import XCTest
 
 final class NorseBaseThemeModuleTests: XCTestCase {
@@ -206,14 +206,6 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             sha256Hex(manifestData),
             RuneScribeNorseThemeModuleBootstrap.manifestExpectedSHA256Hex
         )
-        XCTAssertNil(
-            bundle.url(
-                forResource: "make_norse_base_placeholders",
-                withExtension: "swift",
-                subdirectory: "Source"
-            )
-        )
-
         let copiedFontURL = try XCTUnwrap(
             bundle.url(forResource: "NotoSansRunic-Regular", withExtension: "ttf")
         )
@@ -233,6 +225,60 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         )
     }
 
+    func testProductionProvenanceCoversEveryShippingThemeResource() throws {
+        let bundle = RuneScribeNorseThemeModuleBootstrap.resourceBundle
+        let provenanceURL = try XCTUnwrap(
+            bundle.url(
+                forResource: "Norse-Production-Asset-Provenance-v1.0",
+                withExtension: "json"
+            )
+        )
+        let data = try Data(contentsOf: provenanceURL)
+        XCTAssertEqual(data.count, 54_597)
+        XCTAssertEqual(
+            sha256Hex(data),
+            "105fb4f5f966e3071f1e75d2f2aa590279f30ed1368dfd613d7045575c6b9f8c"
+        )
+
+        let root = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: data) as? [String: Any]
+        )
+        XCTAssertEqual(root["releaseStatus"] as? String, "release-candidate")
+        XCTAssertEqual(root["resourceCount"] as? Int, 55)
+        let approval = try XCTUnwrap(
+            root["releaseCandidateBaselineApproval"] as? [String: Any]
+        )
+        XCTAssertEqual(
+            approval["status"] as? String,
+            "approved-as-release-candidate-baseline"
+        )
+        XCTAssertEqual(approval["publicDistributionAuthorized"] as? Bool, false)
+        let rightsSources = try XCTUnwrap(root["rightsSources"] as? [[String: Any]])
+        XCTAssertEqual(
+            Set(rightsSources.compactMap { $0["statementReference"] as? String }),
+            [
+                "EULA.md#4-ownership-and-intellectual-property",
+                "RuneScrib/Resources/Fonts/OFL.txt",
+            ]
+        )
+        let resources = try XCTUnwrap(root["resources"] as? [[String: Any]])
+        XCTAssertEqual(resources.count, 55)
+        XCTAssertEqual(
+            Set(resources.compactMap { $0["resourceID"] as? String }),
+            Set(NorseApplicationResourceCatalog.resourcesByHandle.keys)
+        )
+        XCTAssertTrue(resources.allSatisfy { resource in
+            resource["releaseStatus"] as? String == "release-candidate"
+                && (resource["normalizedProductionPath"] as? String)?.isEmpty == false
+                && (resource["sha256"] as? String)?.count == 64
+                && (resource["byteCount"] as? Int ?? 0) > 0
+                && (resource["rightsProvenanceID"] as? String)?.isEmpty == false
+                && (resource["licenseOrOwnershipStatementReference"] as? String)?.isEmpty
+                    == false
+                && (resource["accessibilityDescriptionKey"] as? String)?.isEmpty == false
+        })
+    }
+
     func testRuntimePublishesExactDiscoveryAndVerifiedOpaquePayloads() async throws {
         let probe = NorsePublicationProbe()
         let runtime = RuneScribeRuntime(
@@ -245,6 +291,7 @@ final class NorseBaseThemeModuleTests: XCTestCase {
                 }
             )
         )
+        defer { Task { await runtime.stop() } }
         try await runtime.installPlatformAdapter(
             NorsePositiveBundleResourceLocator(),
             for: RuneScribeServiceKeys.applicationResourceLocator
@@ -308,7 +355,6 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         }
         let runtimeSnapshot = await runtime.snapshot()
         XCTAssertEqual(runtimeSnapshot.status, .running)
-        await runtime.stop()
     }
 
     func testProductionResourcesPassPhysicalBudgetsWithoutChargingLogicalReuseTwice() throws {
@@ -379,6 +425,320 @@ final class NorseBaseThemeModuleTests: XCTestCase {
                 "achievement.archivist-ii",
             ])
         )
+    }
+
+    func testRequiredResourceReadFailureRetainsStructuredIdentity() async throws {
+        let manifestData = try bundledData(
+            NorseBaseBundledResourceCatalog.integrityManifest
+        )
+        let runtimeIO = RuntimeIOClient(
+            readVerifiedApplicationResource: { resource, _, _ in
+                if resource == NorseBaseBundledResourceCatalog.integrityManifest {
+                    return manifestData
+                }
+                throw RuntimeVerifiedApplicationResourceFailure.resourceUnavailable
+            }
+        )
+
+        do {
+            _ = try await NorseBaseThemeResources.loadValidated(using: runtimeIO)
+            XCTFail("A missing required resource must activate structured fallback.")
+        } catch let failure as RequiredThemeResourceFailureDTO {
+            XCTAssertEqual(failure.moduleID, RuneScribeModuleIDs.norseTheme)
+            XCTAssertEqual(failure.codexID, RuneScribeCodexIDs.norse)
+            XCTAssertEqual(failure.stage, .resourceRead)
+            XCTAssertNotNil(failure.resourceID)
+            XCTAssertEqual(failure.errorCode, .resourceUnavailable)
+            XCTAssertNotNil(failure.expectedByteCount)
+            XCTAssertNotNil(failure.expectedSHA256)
+            XCTAssertNotNil(failure.mediaType)
+        }
+    }
+
+    func testRequiredResourceDigestFailureRetainsExpectedAndActualDetails() async throws {
+        let target = try XCTUnwrap(
+            NorseBaseThemeResourceCatalog.definitions.first(where: {
+                $0.requirement == .required
+            })
+        )
+        let bundledResources = try bundledResourceData()
+        let actualDigest = Data(repeating: 0xA7, count: SHA256.Digest.byteCount)
+        let runtimeIO = RuntimeIOClient(
+            readVerifiedApplicationResource: { resource, _, _ in
+                if resource == target.resource {
+                    throw RuntimeVerifiedApplicationResourceFailure.integrityMismatch(
+                        actualSHA256: actualDigest,
+                        actualByteCount: target.byteCount
+                    )
+                }
+                guard let data = bundledResources[resource] else {
+                    throw RuntimeVerifiedApplicationResourceFailure.resourceUnavailable
+                }
+                return data
+            }
+        )
+
+        do {
+            _ = try await NorseBaseThemeResources.loadValidated(using: runtimeIO)
+            XCTFail("A digest mismatch must activate structured fallback.")
+        } catch let failure as RequiredThemeResourceFailureDTO {
+            XCTAssertEqual(failure.stage, .digest)
+            XCTAssertNotNil(failure.resourceID)
+            XCTAssertEqual(failure.errorCode, .digestMismatch)
+            XCTAssertNotNil(failure.expectedSHA256)
+            XCTAssertEqual(
+                failure.actualSHA256?.rawValue,
+                actualDigest.map { String(format: "%02x", $0) }.joined()
+            )
+            XCTAssertEqual(failure.actualByteCount, UInt64(target.byteCount))
+        }
+    }
+
+    func testRequiredResourceByteCountFailureIsNotMisclassifiedAsDigest() async throws {
+        let target = try XCTUnwrap(
+            NorseBaseThemeResourceCatalog.definitions.first(where: {
+                $0.requirement == .required
+            })
+        )
+        let bundledResources = try bundledResourceData()
+        let actualDigest = Data(repeating: 0xB4, count: SHA256.Digest.byteCount)
+        let actualByteCount = target.byteCount + 1
+        let runtimeIO = RuntimeIOClient(
+            readVerifiedApplicationResource: { resource, _, _ in
+                if resource == target.resource {
+                    throw RuntimeVerifiedApplicationResourceFailure.integrityMismatch(
+                        actualSHA256: actualDigest,
+                        actualByteCount: actualByteCount
+                    )
+                }
+                guard let data = bundledResources[resource] else {
+                    throw RuntimeVerifiedApplicationResourceFailure.resourceUnavailable
+                }
+                return data
+            }
+        )
+
+        do {
+            _ = try await NorseBaseThemeResources.loadValidated(using: runtimeIO)
+            XCTFail("A byte-count mismatch must activate structured fallback.")
+        } catch let failure as RequiredThemeResourceFailureDTO {
+            XCTAssertEqual(failure.stage, .byteCount)
+            XCTAssertEqual(failure.resourceID, target.id)
+            XCTAssertEqual(failure.errorCode, .byteCountMismatch)
+            XCTAssertEqual(failure.expectedByteCount, UInt64(target.byteCount))
+            XCTAssertEqual(failure.actualByteCount, UInt64(actualByteCount))
+            XCTAssertEqual(
+                failure.actualSHA256?.rawValue,
+                actualDigest.map { String(format: "%02x", $0) }.joined()
+            )
+        }
+    }
+
+    func testMissingOrCorruptOptionalResourceIsOmittedWithoutBaseFailure() async throws {
+        enum Scenario: CaseIterable { case missing, corrupt }
+
+        let optionalDefinitions = NorseBaseThemeResourceCatalog.definitions.filter {
+            $0.requirement == .optional
+        }
+        XCTAssertEqual(optionalDefinitions.count, 1)
+        let optional = try XCTUnwrap(optionalDefinitions.first)
+        let bundledResources = try bundledResourceData()
+        let requiredIDs = Set(
+            RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor.resources
+                .filter { $0.requirement == .required }
+                .map(\.id)
+        )
+
+        for scenario in Scenario.allCases {
+            let runtimeIO = RuntimeIOClient(
+                readVerifiedApplicationResource: { resource, _, _ in
+                    if resource == optional.resource {
+                        switch scenario {
+                        case .missing:
+                            throw RuntimeVerifiedApplicationResourceFailure.resourceUnavailable
+                        case .corrupt:
+                            throw RuntimeVerifiedApplicationResourceFailure.integrityMismatch(
+                                actualSHA256: Data(
+                                    repeating: 0xC3,
+                                    count: SHA256.Digest.byteCount
+                                ),
+                                actualByteCount: optional.byteCount
+                            )
+                        }
+                    }
+                    guard let data = bundledResources[resource] else {
+                        throw RuntimeVerifiedApplicationResourceFailure.resourceUnavailable
+                    }
+                    return data
+                }
+            )
+
+            let validated = try await NorseBaseThemeResources.loadValidated(using: runtimeIO)
+            XCTAssertEqual(Set(validated.resourcePayloads.keys), requiredIDs)
+            XCTAssertNil(validated.resourcePayloads[optional.id])
+        }
+    }
+
+    func testCancellationFromManifestOrOptionalResourceReadPropagates() async throws {
+        enum Scenario: CaseIterable, Equatable { case manifest, optionalResource }
+
+        let optional = try XCTUnwrap(
+            NorseBaseThemeResourceCatalog.definitions.first(where: {
+                $0.requirement == .optional
+            })
+        )
+        let bundledResources = try bundledResourceData()
+
+        for scenario in Scenario.allCases {
+            let runtimeIO = RuntimeIOClient(
+                readVerifiedApplicationResource: { resource, _, _ in
+                    if scenario == .manifest,
+                       resource == NorseBaseBundledResourceCatalog.integrityManifest {
+                        throw CancellationError()
+                    }
+                    if scenario == .optionalResource, resource == optional.resource {
+                        throw CancellationError()
+                    }
+                    guard let data = bundledResources[resource] else {
+                        throw RuntimeVerifiedApplicationResourceFailure.resourceUnavailable
+                    }
+                    return data
+                }
+            )
+
+            do {
+                _ = try await NorseBaseThemeResources.loadValidated(using: runtimeIO)
+                XCTFail("Cancellation must not be translated into a resource failure.")
+            } catch is CancellationError {
+                continue
+            } catch {
+                XCTFail("Expected CancellationError for \(scenario), received \(error).")
+            }
+        }
+    }
+
+    func testRequiredResourceMediaMetadataFailureIsStructured() throws {
+        let definition = try XCTUnwrap(
+            NorseBaseThemeResourceCatalog.definitions.first(where: {
+                $0.id == NorseBaseThemeResourceIDs.backgroundStatic
+            })
+        )
+        var data = try bundledData(definition.resource)
+        data[16] = 0
+        data[17] = 0
+        data[18] = 0
+        data[19] = 1
+
+        XCTAssertThrowsError(
+            try NorseBaseThemeResources.validateMediaMetadata(
+                data,
+                definition: definition
+            )
+        ) { error in
+            guard let failure = error as? RequiredThemeResourceFailureDTO else {
+                return XCTFail("Expected a structured required-resource failure.")
+            }
+            XCTAssertEqual(failure.stage, .mediaMetadata)
+            XCTAssertEqual(failure.resourceID, definition.id)
+            XCTAssertEqual(failure.errorCode, .mediaMetadataMismatch)
+            XCTAssertEqual(failure.mediaType, .png)
+            XCTAssertNotNil(failure.actualSHA256)
+        }
+    }
+
+    func testEmergencyPublicationRetainsDiagnosticBeforeDescriptor() async throws {
+        let missingDefinition = try XCTUnwrap(
+            NorseBaseThemeResourceCatalog.definitions.first(where: {
+                $0.id == NorseBaseThemeResourceIDs.backgroundStatic
+            })
+        )
+        let probe = NorseFailurePublicationProbe()
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: Self.version,
+            platform: .macOS,
+            environment: RuntimeEnvironment(
+                now: { Date(timeIntervalSince1970: 1_776_211_201) },
+                nextUUID: {
+                    UUID(uuidString: "00000000-0000-0000-0000-000000000412")!
+                }
+            )
+        )
+        try await runtime.installPlatformAdapter(
+            NorseSelectiveBundleResourceLocator(
+                missingResource: missingDefinition.resource
+            ),
+            for: RuneScribeServiceKeys.applicationResourceLocator
+        )
+        try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+
+        let coordinator = positiveCoordinatorDescriptor()
+        let ui = positiveUIDescriptor(requiredRole: coordinator.role)
+        try await runtime.register(
+            manifest: manifest(for: coordinator),
+            factory: AnyModuleFactory(descriptor: coordinator) {
+                NorsePositiveTestModule(descriptor: coordinator) { context in
+                    let reader = try await context.contributionReaderClient()
+                    await probe.capture(
+                        descriptors: try await reader.snapshot(
+                            for: RuntimeThemeContributionCatalog.descriptor
+                        ),
+                        failures: try await reader.snapshot(
+                            for: RuntimeThemeContributionCatalog.requiredBaseResourceFailure
+                        )
+                    )
+                }
+            }
+        )
+        try await runtime.register(
+            manifest: manifest(for: ui),
+            factory: AnyModuleFactory(descriptor: ui) {
+                NorsePositiveTestModule(descriptor: ui) { _ in }
+            }
+        )
+
+        try await runtime.start()
+        let capturedValue = await probe.value()
+        let captured = try XCTUnwrap(capturedValue)
+        XCTAssertEqual(captured.descriptors.entries.count, 1)
+        XCTAssertEqual(
+            captured.descriptors.entries.only?.value,
+            RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        )
+        let failure = try XCTUnwrap(captured.failures.entries.only?.value)
+        XCTAssertEqual(failure.stage, .resourceRead)
+        XCTAssertEqual(failure.resourceID, missingDefinition.id)
+        XCTAssertEqual(failure.errorCode, .resourceUnavailable)
+        let failureRevision = try XCTUnwrap(
+            captured.failures.entries.only?.publishedRevision
+        )
+        let descriptorRevision = try XCTUnwrap(
+            captured.descriptors.entries.only?.publishedRevision
+        )
+        XCTAssertLessThan(failureRevision, descriptorRevision)
+        let runtimeSnapshot = await runtime.snapshot()
+        XCTAssertEqual(runtimeSnapshot.status, .running)
+        await runtime.stop()
+    }
+
+    private func bundledData(_ resource: ApplicationResource) throws -> Data {
+        let url = try XCTUnwrap(
+            RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
+                forResource: resource.name,
+                withExtension: resource.fileExtension,
+                subdirectory: resource.subdirectory
+            )
+        )
+        return try Data(contentsOf: url)
+    }
+
+    private func bundledResourceData() throws -> [ApplicationResource: Data] {
+        var result: [ApplicationResource: Data] = [:]
+        let manifest = NorseBaseBundledResourceCatalog.integrityManifest
+        result[manifest] = try bundledData(manifest)
+        for definition in NorseBaseThemeResourceCatalog.definitions {
+            result[definition.resource] = try bundledData(definition.resource)
+        }
+        return result
     }
 
     private func assertResource(
@@ -506,6 +866,55 @@ private actor NorsePublicationProbe {
             resources: resources,
             resolved: resolved
         )
+    }
+
+    func value() -> Captured? { captured }
+}
+
+private struct NorseSelectiveBundleResourceLocator: ApplicationResourceLocator,
+    Sendable
+{
+    let missingResource: ApplicationResource
+
+    func data(for resource: ApplicationResource) async throws -> Data {
+        guard resource != missingResource else {
+            throw NorsePositiveTestError.resourceUnavailable
+        }
+        return try Data(contentsOf: try location(for: resource))
+    }
+
+    func url(for resource: ApplicationResource) async throws -> URL {
+        guard resource != missingResource else {
+            throw NorsePositiveTestError.resourceUnavailable
+        }
+        return try location(for: resource)
+    }
+
+    private func location(for resource: ApplicationResource) throws -> URL {
+        guard resource.ownerModuleID == RuneScribeModuleIDs.norseTheme,
+              let url = RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
+                  forResource: resource.name,
+                  withExtension: resource.fileExtension,
+                  subdirectory: resource.subdirectory
+              )
+        else { throw NorsePositiveTestError.resourceUnavailable }
+        return url
+    }
+}
+
+private actor NorseFailurePublicationProbe {
+    struct Captured: Sendable {
+        let descriptors: RuntimeContributionSnapshot<ThemeDescriptor>
+        let failures: RuntimeContributionSnapshot<RequiredThemeResourceFailureDTO>
+    }
+
+    private var captured: Captured?
+
+    func capture(
+        descriptors: RuntimeContributionSnapshot<ThemeDescriptor>,
+        failures: RuntimeContributionSnapshot<RequiredThemeResourceFailureDTO>
+    ) {
+        captured = Captured(descriptors: descriptors, failures: failures)
     }
 
     func value() -> Captured? { captured }

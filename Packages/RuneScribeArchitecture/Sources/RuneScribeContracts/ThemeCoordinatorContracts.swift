@@ -19,6 +19,81 @@ public enum ThemeSelectionFallbackReason: String, Codable, Hashable, Sendable {
     case invalidResources = "invalid-resources"
 }
 
+public enum RequiredThemeResourceFailureStage: String, Codable, CaseIterable,
+    Hashable, Sendable
+{
+    case manifestRead = "manifest-read"
+    case manifestIntegrity = "manifest-integrity"
+    case resourceRead = "resource-read"
+    case byteCount = "byte-count"
+    case digest
+    case mediaMetadata = "media-metadata"
+    case semanticJSON = "semantic-json"
+    case geometry
+    case budget
+    case contributionPublication = "contribution-publication"
+}
+
+public enum RequiredThemeResourceFailureCode: String, Codable, CaseIterable,
+    Hashable, Sendable
+{
+    case resourceUnavailable = "resource-unavailable"
+    case contentTooLarge = "content-too-large"
+    case byteCountMismatch = "byte-count-mismatch"
+    case digestMismatch = "digest-mismatch"
+    case invalidIntegrityManifest = "invalid-integrity-manifest"
+    case mediaMetadataMismatch = "media-metadata-mismatch"
+    case invalidSemanticJSON = "invalid-semantic-json"
+    case invalidGeometry = "invalid-geometry"
+    case resourceBudgetExceeded = "resource-budget-exceeded"
+    case resourceSetMismatch = "resource-set-mismatch"
+    case contributionRejected = "contribution-rejected"
+    case unexpectedFailure = "unexpected-failure"
+}
+
+/// Bounded, privacy-safe details for a required Theme provider failure. Every
+/// string is represented by an existing validated identifier or fixed enum; the
+/// value cannot carry paths, package bytes, plaintext, contacts, or arbitrary
+/// error descriptions.
+public struct RequiredThemeResourceFailureDTO: Error, Codable, Equatable, Hashable,
+    Sendable
+{
+    public let moduleID: ModuleIdentifier
+    public let codexID: CodexID
+    public let stage: RequiredThemeResourceFailureStage
+    public let resourceID: ThemeResourceID?
+    public let errorCode: RequiredThemeResourceFailureCode
+    public let expectedByteCount: UInt64?
+    public let actualByteCount: UInt64?
+    public let expectedSHA256: ThemeSHA256Digest?
+    public let actualSHA256: ThemeSHA256Digest?
+    public let mediaType: ThemeResourceMediaType?
+
+    public init(
+        moduleID: ModuleIdentifier,
+        codexID: CodexID,
+        stage: RequiredThemeResourceFailureStage,
+        resourceID: ThemeResourceID? = nil,
+        errorCode: RequiredThemeResourceFailureCode,
+        expectedByteCount: UInt64? = nil,
+        actualByteCount: UInt64? = nil,
+        expectedSHA256: ThemeSHA256Digest? = nil,
+        actualSHA256: ThemeSHA256Digest? = nil,
+        mediaType: ThemeResourceMediaType? = nil
+    ) {
+        self.moduleID = moduleID
+        self.codexID = codexID
+        self.stage = stage
+        self.resourceID = resourceID
+        self.errorCode = errorCode
+        self.expectedByteCount = expectedByteCount
+        self.actualByteCount = actualByteCount
+        self.expectedSHA256 = expectedSHA256
+        self.actualSHA256 = actualSHA256
+        self.mediaType = mediaType
+    }
+}
+
 public struct ThemeProviderSummaryDTO: Codable, Equatable, Hashable, Sendable {
     public let codexID: CodexID
     public let moduleID: ModuleIdentifier
@@ -57,12 +132,15 @@ public enum ThemeCoordinatorContractError: Error, Equatable, Sendable {
     case missingBaseProvider
     case invalidFallbackState
     case resourceIntegrityMismatch
+    case invalidRequiredBaseResourceFailure
     case tooManyProviders(maximum: Int)
     case tooManyDiagnostics(maximum: Int)
+    case tooManyRequiredBaseResourceFailures(maximum: Int)
 }
 
 public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
     public static let maximumProviderCount = 64
+    public static let maximumRequiredBaseResourceFailureCount = 8
 
     public let revision: UInt64
     public let capturedAt: Date
@@ -73,6 +151,7 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
     public let effectiveTheme: ThemeDescriptor
     public let providers: [ThemeProviderSummaryDTO]
     public let presentationInventories: [SharePresentationProviderInventory]
+    public let requiredBaseResourceFailures: [RequiredThemeResourceFailureDTO]
 
     public init(
         revision: UInt64,
@@ -83,7 +162,8 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
         effectiveTheme: ThemeDescriptor,
         providers: [ThemeProviderSummaryDTO],
         presentationInventories: [SharePresentationProviderInventory] = [],
-        isEmergencyPresentation: Bool = false
+        isEmergencyPresentation: Bool = false,
+        requiredBaseResourceFailures: [RequiredThemeResourceFailureDTO] = []
     ) throws {
         guard capturedAt.timeIntervalSinceReferenceDate.isFinite else {
             throw ThemeCoordinatorContractError.invalidCapturedAt
@@ -161,24 +241,41 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
             }
         } else {
             switch fallbackReason {
-        case .none:
-            guard preferredCodexID == effectiveCodexID else {
-                throw ThemeCoordinatorContractError.invalidFallbackState
-            }
-        case .missingPreference, .invalidPreference:
-            guard preferredCodexID == nil,
-                  effectiveCodexID == RuneScribeCodexIDs.norse
-            else {
-                throw ThemeCoordinatorContractError.invalidFallbackState
-            }
-        case .unknownCodex, .locked, .unavailable, .incompatible, .invalidResources:
-            guard let preferredCodexID,
-                  preferredCodexID != effectiveCodexID,
-                  effectiveCodexID == RuneScribeCodexIDs.norse
-            else {
-                throw ThemeCoordinatorContractError.invalidFallbackState
+            case .none:
+                guard preferredCodexID == effectiveCodexID else {
+                    throw ThemeCoordinatorContractError.invalidFallbackState
+                }
+            case .missingPreference, .invalidPreference:
+                guard preferredCodexID == nil,
+                      effectiveCodexID == RuneScribeCodexIDs.norse
+                else {
+                    throw ThemeCoordinatorContractError.invalidFallbackState
+                }
+            case .unknownCodex, .locked, .unavailable, .incompatible,
+                 .invalidResources:
+                guard let preferredCodexID,
+                      preferredCodexID != effectiveCodexID,
+                      effectiveCodexID == RuneScribeCodexIDs.norse
+                else {
+                    throw ThemeCoordinatorContractError.invalidFallbackState
+                }
             }
         }
+
+        let normalizedFailures = Self.normalizedRequiredBaseFailures(
+            requiredBaseResourceFailures
+        )
+        guard normalizedFailures.count <= Self.maximumRequiredBaseResourceFailureCount else {
+            throw ThemeCoordinatorContractError.tooManyRequiredBaseResourceFailures(
+                maximum: Self.maximumRequiredBaseResourceFailureCount
+            )
+        }
+        guard normalizedFailures.allSatisfy({ failure in
+            failure.moduleID == RuneScribeModuleIDs.norseTheme
+                && failure.codexID == RuneScribeCodexIDs.norse
+        }), normalizedFailures.isEmpty || isEmergencyPresentation
+        else {
+            throw ThemeCoordinatorContractError.invalidRequiredBaseResourceFailure
         }
 
         self.revision = revision
@@ -192,6 +289,7 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
         self.presentationInventories = normalizedInventories.sorted {
             $0.codexID < $1.codexID
         }
+        self.requiredBaseResourceFailures = normalizedFailures
     }
 
     public init(from decoder: Decoder) throws {
@@ -217,8 +315,18 @@ public struct ThemeCoordinatorSnapshotDTO: Codable, Equatable, Sendable {
             isEmergencyPresentation: try container.decodeIfPresent(
                 Bool.self,
                 forKey: .isEmergencyPresentation
-            ) ?? false
+            ) ?? false,
+            requiredBaseResourceFailures: try container.decodeIfPresent(
+                [RequiredThemeResourceFailureDTO].self,
+                forKey: .requiredBaseResourceFailures
+            ) ?? []
         )
+    }
+
+    private static func normalizedRequiredBaseFailures(
+        _ failures: [RequiredThemeResourceFailureDTO]
+    ) -> [RequiredThemeResourceFailureDTO] {
+        Array(Set(failures)).sorted(by: requiredThemeResourceFailureOrdering)
     }
 }
 
@@ -232,6 +340,16 @@ public struct SelectThemeCodexCommand: Codable, Equatable, Sendable {
     ) {
         self.codexID = codexID
         self.expectedSnapshotRevision = expectedSnapshotRevision
+    }
+}
+
+/// Requests one provider descriptor for an operation-local presentation draft.
+/// Reading this value never changes the persisted selected Codex.
+public struct ThemeProviderDescriptorRequestDTO: Codable, Equatable, Sendable {
+    public let codexID: CodexID
+
+    public init(codexID: CodexID) {
+        self.codexID = codexID
     }
 }
 
@@ -335,6 +453,7 @@ public struct ThemeProviderDiagnosticDTO: Codable, Equatable, Hashable, Sendable
 
 public struct ThemeCoordinatorDiagnosticsDTO: Codable, Equatable, Sendable {
     public static let maximumDiagnosticCount = 128
+    public static let maximumRequiredBaseResourceFailureCount = 8
 
     public let capturedAt: Date
     public let contributionRevision: UInt64
@@ -343,6 +462,7 @@ public struct ThemeCoordinatorDiagnosticsDTO: Codable, Equatable, Sendable {
     public let effectiveCodexID: CodexID
     public let fallbackReason: ThemeSelectionFallbackReason
     public let providers: [ThemeProviderDiagnosticDTO]
+    public let requiredBaseResourceFailures: [RequiredThemeResourceFailureDTO]
 
     public init(
         capturedAt: Date,
@@ -351,7 +471,8 @@ public struct ThemeCoordinatorDiagnosticsDTO: Codable, Equatable, Sendable {
         preferredCodexID: CodexID?,
         effectiveCodexID: CodexID,
         fallbackReason: ThemeSelectionFallbackReason,
-        providers: [ThemeProviderDiagnosticDTO]
+        providers: [ThemeProviderDiagnosticDTO],
+        requiredBaseResourceFailures: [RequiredThemeResourceFailureDTO] = []
     ) throws {
         guard capturedAt.timeIntervalSinceReferenceDate.isFinite else {
             throw ThemeCoordinatorContractError.invalidCapturedAt
@@ -360,6 +481,21 @@ public struct ThemeCoordinatorDiagnosticsDTO: Codable, Equatable, Sendable {
             throw ThemeCoordinatorContractError.tooManyDiagnostics(
                 maximum: Self.maximumDiagnosticCount
             )
+        }
+        let normalizedFailures = Array(Set(requiredBaseResourceFailures)).sorted(
+            by: requiredThemeResourceFailureOrdering
+        )
+        guard normalizedFailures.count <= Self.maximumRequiredBaseResourceFailureCount else {
+            throw ThemeCoordinatorContractError.tooManyRequiredBaseResourceFailures(
+                maximum: Self.maximumRequiredBaseResourceFailureCount
+            )
+        }
+        guard normalizedFailures.allSatisfy({ failure in
+            failure.moduleID == RuneScribeModuleIDs.norseTheme
+                && failure.codexID == RuneScribeCodexIDs.norse
+        }), normalizedFailures.isEmpty || fallbackReason == .invalidResources
+        else {
+            throw ThemeCoordinatorContractError.invalidRequiredBaseResourceFailure
         }
         self.capturedAt = capturedAt
         self.contributionRevision = contributionRevision
@@ -371,7 +507,74 @@ public struct ThemeCoordinatorDiagnosticsDTO: Codable, Equatable, Sendable {
             if lhs.moduleID != rhs.moduleID { return lhs.moduleID < rhs.moduleID }
             return (lhs.codexID?.rawValue ?? "") < (rhs.codexID?.rawValue ?? "")
         }
+        self.requiredBaseResourceFailures = normalizedFailures
     }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        try self.init(
+            capturedAt: container.decode(Date.self, forKey: .capturedAt),
+            contributionRevision: container.decode(
+                UInt64.self,
+                forKey: .contributionRevision
+            ),
+            resourceRevision: container.decode(
+                UInt64.self,
+                forKey: .resourceRevision
+            ),
+            preferredCodexID: container.decodeIfPresent(
+                CodexID.self,
+                forKey: .preferredCodexID
+            ),
+            effectiveCodexID: container.decode(
+                CodexID.self,
+                forKey: .effectiveCodexID
+            ),
+            fallbackReason: container.decode(
+                ThemeSelectionFallbackReason.self,
+                forKey: .fallbackReason
+            ),
+            providers: container.decode(
+                [ThemeProviderDiagnosticDTO].self,
+                forKey: .providers
+            ),
+            requiredBaseResourceFailures: try container.decodeIfPresent(
+                [RequiredThemeResourceFailureDTO].self,
+                forKey: .requiredBaseResourceFailures
+            ) ?? []
+        )
+    }
+}
+
+private func requiredThemeResourceFailureOrdering(
+    _ lhs: RequiredThemeResourceFailureDTO,
+    _ rhs: RequiredThemeResourceFailureDTO
+) -> Bool {
+    let left: [String] = [
+        lhs.moduleID.rawValue,
+        lhs.codexID.rawValue,
+        lhs.stage.rawValue,
+        lhs.resourceID?.rawValue ?? "",
+        lhs.errorCode.rawValue,
+        lhs.expectedByteCount.map { String($0) } ?? "",
+        lhs.actualByteCount.map { String($0) } ?? "",
+        lhs.expectedSHA256?.rawValue ?? "",
+        lhs.actualSHA256?.rawValue ?? "",
+        lhs.mediaType?.rawValue ?? "",
+    ]
+    let right: [String] = [
+        rhs.moduleID.rawValue,
+        rhs.codexID.rawValue,
+        rhs.stage.rawValue,
+        rhs.resourceID?.rawValue ?? "",
+        rhs.errorCode.rawValue,
+        rhs.expectedByteCount.map { String($0) } ?? "",
+        rhs.actualByteCount.map { String($0) } ?? "",
+        rhs.expectedSHA256?.rawValue ?? "",
+        rhs.actualSHA256?.rawValue ?? "",
+        rhs.mediaType?.rawValue ?? "",
+    ]
+    return left.lexicographicallyPrecedes(right)
 }
 
 public enum RuneScribeThemeEventIDs {

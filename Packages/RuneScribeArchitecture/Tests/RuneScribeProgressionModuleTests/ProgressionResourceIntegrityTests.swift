@@ -90,7 +90,10 @@ func resourceLoaderUsesVerifiedRuntimeIORail() async throws {
 func resourceLoaderFailsClosedForMissingOrIntegrityRejectedBytes() async {
     for failure in [
         RuntimeVerifiedApplicationResourceFailure.resourceUnavailable,
-        RuntimeVerifiedApplicationResourceFailure.integrityMismatch,
+        RuntimeVerifiedApplicationResourceFailure.integrityMismatch(
+            actualSHA256: Data(repeating: 0xAB, count: SHA256.Digest.byteCount),
+            actualByteCount: 1
+        ),
     ] {
         let runtimeIO = RuntimeIOClient(
             readVerifiedApplicationResource: { _, _, _ in throw failure }

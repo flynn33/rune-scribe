@@ -1,12 +1,12 @@
 import Foundation
 import RuneScribeContracts
-import RuneScribeCoreModule
+@testable import RuneScribeCoreModule
 import RuneScribeNorseThemeModule
 import RuneScribePlatform
 @_spi(RuntimeTesting) import RuneScribeRuntimeCore
 import RuneScribeTestSupport
 import RuneScribeThemeCoordinatorModule
-import RuneScribeUIModule
+@testable import RuneScribeUIModule
 import RuneScribeUIRuntime
 import XCTest
 
@@ -17,7 +17,7 @@ final class ArchitectureIntegrationTests: XCTestCase {
             platform: .macOS
         )
         let capture = EmergencyFallbackUICapture()
-        try await registerHostPlatformServices(
+        let shareArtifacts = try await registerHostPlatformServices(
             on: runtime,
             unavailableNorseResource: NorseBaseBundledResourceCatalog.notoSansRunic
         )
@@ -34,7 +34,8 @@ final class ArchitectureIntegrationTests: XCTestCase {
                     context in
                     await capture.store(
                         application: try await context.applicationClient(),
-                        theme: try await context.themeCoordinatorClient()
+                        theme: try await context.themeCoordinatorClient(),
+                        runtimeIO: try await context.runtimeIOClient()
                     )
                 }
             }
@@ -44,11 +45,37 @@ final class ArchitectureIntegrationTests: XCTestCase {
         defer { Task { await runtime.stop() } }
         let capturedApplication = await capture.applicationClient()
         let capturedTheme = await capture.themeClient()
+        let capturedRuntimeIO = await capture.runtimeIOClient()
         let application = try XCTUnwrap(capturedApplication)
         let theme = try XCTUnwrap(capturedTheme)
+        let runtimeIO = try XCTUnwrap(capturedRuntimeIO)
         let themeSnapshot = try await theme.snapshot()
         XCTAssertTrue(themeSnapshot.isEmergencyPresentation)
         XCTAssertEqual(themeSnapshot.fallbackReason, .invalidResources)
+
+        let uiSession = await MainActor.run {
+            RuneScribeUISession(
+                applicationClient: application,
+                runtimeIO: runtimeIO,
+                themeCoordinatorClient: theme,
+                resourcePresentation: RuntimeApplicationResourcePresentation(
+                    splashVideo: nil,
+                    metalLibrary: nil
+                ),
+                productMetadata: .unavailable
+            )
+        }
+        try await uiSession.prepareInitialTheme()
+        try await MainActor.run { try uiSession.start() }
+        defer { Task { @MainActor in await uiSession.stop() } }
+        let emergencyUIState = await MainActor.run {
+            (
+                uiSession.themeSnapshot?.isEmergencyPresentation,
+                uiSession.themeScriptPresentation
+            )
+        }
+        XCTAssertEqual(emergencyUIState.0, true)
+        XCTAssertEqual(emergencyUIState.1, .baseFallback)
 
         let cipher = try await application.createCipher(
             CreateCipherCommand(name: "Emergency Presentation Decode")
@@ -65,6 +92,86 @@ final class ArchitectureIntegrationTests: XCTestCase {
         XCTAssertEqual(decoded.plaintext, "Readable despite damaged presentation bytes")
         XCTAssertEqual(decoded.cipherID, cipher.id)
 
+        let typedPresentation = try OutboundSharePresentationDTO(
+            metadata: SharePresentationMetadata(
+                selection: SharePresentationSelection(
+                    codexID: RuneScribeCodexIDs.norse,
+                    scriptID: ScriptID(rawValue: "script.base-runes")!,
+                    relicID: ArtifactID(
+                        rawValue: "relic.norse.runestone.weathered"
+                    )!,
+                    sealID: ArtifactID(rawValue: "seal.norse.knotwork")!
+                ),
+                compatibility: .norseInteractiveFallback
+            )
+        )
+        let typedArtifact = try await application.prepareMessageShare(
+            PrepareMessageShareCommand(
+                runes: encoded.runes,
+                senderName: "Typed Emergency Sender",
+                cipherID: cipher.id,
+                presentation: typedPresentation
+            )
+        )
+        let storedTypedBytes = await shareArtifacts.data(for: typedArtifact.id)
+        let typedBytes = try XCTUnwrap(storedTypedBytes)
+        XCTAssertTrue(RuneScribePackage.hasMagic(typedBytes))
+        let typedImport = try await application.importFile(
+            inboundMessageFile(typedBytes, idSuffix: 1)
+        )
+        XCTAssertEqual(typedImport.disposition, .receivedMessage)
+        let typedMessageID = try XCTUnwrap(typedImport.receivedMessageID)
+        let typedMessage = try await waitForPendingMessage(
+            id: typedMessageID,
+            in: uiSession
+        )
+        XCTAssertEqual(
+            typedMessage.plaintext,
+            "Readable despite damaged presentation bytes"
+        )
+        XCTAssertEqual(typedMessage.presentation?.renderMode, .norseInteractiveFallback)
+        XCTAssertFalse(
+            RootEmergencyThemeWarningPolicy.shouldShow(
+                isEmergencyPresentation: true,
+                isDismissed: false,
+                showSplash: false,
+                isLocked: false,
+                hasPendingImport: false,
+                hasPendingMessage: true,
+                hasActiveReveal: false
+            ),
+            "The emergency warning must not cover the readable received-message UI."
+        )
+        try await application.dismissReceivedMessage(id: typedMessageID)
+        try await application.releaseShareArtifact(id: typedArtifact.id)
+
+        let legacyArtifact = try await application.prepareMessageShare(
+            PrepareMessageShareCommand(
+                runes: encoded.runes,
+                senderName: "Legacy Emergency Sender",
+                cipherID: cipher.id
+            )
+        )
+        let storedLegacyBytes = await shareArtifacts.data(for: legacyArtifact.id)
+        let legacyBytes = try XCTUnwrap(storedLegacyBytes)
+        XCTAssertFalse(RuneScribePackage.hasMagic(legacyBytes))
+        let legacyImport = try await application.importFile(
+            inboundMessageFile(legacyBytes, idSuffix: 2)
+        )
+        XCTAssertEqual(legacyImport.disposition, .receivedMessage)
+        let legacyMessageID = try XCTUnwrap(legacyImport.receivedMessageID)
+        let legacyMessage = try await waitForPendingMessage(
+            id: legacyMessageID,
+            in: uiSession
+        )
+        XCTAssertEqual(
+            legacyMessage.plaintext,
+            "Readable despite damaged presentation bytes"
+        )
+        XCTAssertNil(legacyMessage.presentation)
+        try await application.dismissReceivedMessage(id: legacyMessageID)
+        try await application.releaseShareArtifact(id: legacyArtifact.id)
+
         let running = await runtime.snapshot()
         XCTAssertEqual(running.status, .running)
         XCTAssertEqual(running.moduleStates[RuneScribeModuleIDs.core], .active)
@@ -73,6 +180,44 @@ final class ArchitectureIntegrationTests: XCTestCase {
             running.moduleStates[RuneScribeModuleIDs.themeCoordinator],
             .active
         )
+    }
+
+    private func inboundMessageFile(
+        _ data: Data,
+        idSuffix: UInt8
+    ) -> InboundFileDTO {
+        var bytes = [UInt8](repeating: 0, count: 16)
+        bytes[15] = idSuffix
+        let identifier = UUID(uuid: (
+            bytes[0], bytes[1], bytes[2], bytes[3],
+            bytes[4], bytes[5], bytes[6], bytes[7],
+            bytes[8], bytes[9], bytes[10], bytes[11],
+            bytes[12], bytes[13], bytes[14], bytes[15]
+        ))
+        return InboundFileDTO(
+            metadata: InboundInputMetadataDTO(
+                id: InboundInputID(rawValue: identifier),
+                receivedAt: Date(timeIntervalSince1970: TimeInterval(idSuffix)),
+                source: .fileImporter,
+                isColdStart: false
+            ),
+            data: data,
+            declaredContentType: RuneScribeWireFormat.contentType
+        )
+    }
+
+    private func waitForPendingMessage(
+        id: MessageID,
+        in session: RuneScribeUISession
+    ) async throws -> PendingMessageViewState {
+        for _ in 0 ..< 200 {
+            if let message = await MainActor.run(body: { session.pendingMessage }),
+               message.id == id {
+                return message
+            }
+            try await Task.sleep(nanoseconds: 10_000_000)
+        }
+        throw EmergencyFallbackTestError.pendingMessageTimeout
     }
 
     func testBundledSkeletonBootsNonUIBeforeExactlyOneUI() async throws {
@@ -137,6 +282,54 @@ final class ArchitectureIntegrationTests: XCTestCase {
         XCTAssertEqual(stopped.moduleStates[RuneScribeModuleIDs.primaryUI], .stopped)
         let stoppedRootState = await MainActor.run { rootStore.state }
         XCTAssertEqual(stoppedRootState, .booting)
+    }
+
+    func testRealUIBootsThroughRequiredBaseResourceFailure() async throws {
+        let rootStore = await MainActor.run { RootViewPresentationStore() }
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: SemanticVersion(
+                major: UInt(1),
+                minor: UInt(0),
+                patch: UInt(0)
+            ),
+            platform: .macOS
+        )
+        try await registerHostPlatformServices(
+            on: runtime,
+            unavailableNorseResource: NorseBaseBundledResourceCatalog.notoSansRunic
+        )
+        try await runtime.register(
+            manifest: RuneScribeCoreModuleBootstrap.manifest(),
+            factory: RuneScribeCoreModuleBootstrap.factory()
+        )
+        try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeCoordinatorModuleBootstrap.register(with: runtime)
+        try await runtime.register(
+            manifest: RuneScribeUIModuleBootstrap.manifest(),
+            factory: RuneScribeUIModuleBootstrap.factory()
+        )
+        let rootPresentationAdapter = await MainActor.run {
+            rootStore.runtimeHostAdapter(productMetadata: .unavailable)
+        }
+        try await runtime.installStandardPort(
+            rootPresentationAdapter,
+            for: .standard
+        )
+
+        try await runtime.start()
+        let running = await runtime.snapshot()
+        let runningRootState = await MainActor.run { rootStore.state }
+        XCTAssertEqual(running.status, .running)
+        XCTAssertEqual(
+            running.moduleStates[RuneScribeModuleIDs.primaryUI],
+            .active
+        )
+        XCTAssertEqual(
+            runningRootState,
+            .ready(moduleID: RuneScribeModuleIDs.primaryUI)
+        )
+
+        await runtime.stop()
     }
 
     func testProgressionStoreFailurePreservesCoreUtilitiesAndNeutralAvailability() async throws {
@@ -247,8 +440,12 @@ final class ArchitectureIntegrationTests: XCTestCase {
                     cipherID: cipher.id
                 )
             )
-            XCTAssertEqual(messageArtifact.reference, .opaque(messageArtifact.id))
+            XCTAssertEqual(messageArtifact.reference, .file(messageArtifact.id))
+            XCTAssertEqual(messageArtifact.contentType, RuneScribeWireFormat.contentType)
+            XCTAssertEqual(messageArtifact.fileExtension, RuneScribeWireFormat.fileExtension)
             XCTAssertFalse(messageArtifact.requiresKeyDelivery)
+            let messageData = await shareArtifacts.data(for: messageArtifact.id)
+            XCTAssertFalse(try XCTUnwrap(messageData).isEmpty)
             try await application.releaseShareArtifact(id: messageArtifact.id)
             let messageArtifactRetained = await shareArtifacts.contains(messageArtifact.id)
             XCTAssertFalse(messageArtifactRetained)
@@ -447,17 +644,25 @@ private struct IntegrationApplicationResources: ApplicationResourceLocator {
 private actor EmergencyFallbackUICapture {
     private var application: RuntimeApplicationClient?
     private var theme: RuntimeThemeCoordinatorClient?
+    private var runtimeIO: RuntimeIOClient?
 
     func store(
         application: RuntimeApplicationClient,
-        theme: RuntimeThemeCoordinatorClient
+        theme: RuntimeThemeCoordinatorClient,
+        runtimeIO: RuntimeIOClient
     ) {
         self.application = application
         self.theme = theme
+        self.runtimeIO = runtimeIO
     }
 
     func applicationClient() -> RuntimeApplicationClient? { application }
     func themeClient() -> RuntimeThemeCoordinatorClient? { theme }
+    func runtimeIOClient() -> RuntimeIOClient? { runtimeIO }
+}
+
+private enum EmergencyFallbackTestError: Error {
+    case pendingMessageTimeout
 }
 
 private struct IntegrationTestModule: RuneScribeModule {

@@ -324,12 +324,19 @@ final class RuneScribeMacParityTests: XCTestCase {
 
             let settledWorkspacePNG = try renderPNG(
                 AnyView(
-                    ContentView(
-                        initialSettledArtifact: ContentViewSettledArtifactSeed(
-                            composition: composition,
-                            presentation: presentation
+                    ZStack {
+                        RuntimeMetalBackground()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .ignoresSafeArea()
+                            .clipped()
+
+                        ContentView(
+                            initialSettledArtifact: ContentViewSettledArtifactSeed(
+                                composition: composition,
+                                presentation: presentation
+                            )
                         )
-                    )
+                    }
                     .environmentObject(harness.session)
                     .environment(
                         \.runtimeApplicationResourcePresentation,
@@ -556,6 +563,154 @@ final class RuneScribeMacParityTests: XCTestCase {
             )
             XCTAssertTrue(state.hasEditableTextView)
             XCTAssertEqual(state.text, "")
+        }
+    }
+
+    func testOptionalProviderUsesSharedWorkspaceSettingsAndVaultScaffoldWithDistinctResources()
+        async throws
+    {
+        try await withHarness { harness in
+            let norseReady = await eventually {
+                harness.session.runtimePresentationSettingsReady
+                    && harness.session.activeThemeVisualPresentation?.plan.codexID
+                        == RuneScribeCodexIDs.norse
+            }
+            XCTAssertTrue(norseReady)
+            await harness.session.loadActiveThemeCatalogVisuals()
+            await harness.session.loadThemeCodexCardPreviews()
+
+            harness.session.progressionSnapshot = try ProgressionSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 1_700_000_000),
+                availability: .available,
+                storeHealth: .loaded,
+                catalogID: nil,
+                catalogVersion: nil
+            )
+            harness.session.progressionRailState = .available
+
+            let norsePresentation = try XCTUnwrap(
+                harness.session.activeThemeVisualPresentation
+            )
+            let norseWorkspacePNG = try renderPNG(
+                AnyView(RootView(session: harness.session)),
+                size: CGSize(width: 720, height: 780),
+                warmup: 0.2
+            )
+            let norseSettingsPNG = try renderPNG(
+                AnyView(SettingsView().environmentObject(harness.session)),
+                size: CGSize(width: 760, height: 900),
+                warmup: 0.2
+            )
+            let norseVaultPNG = try renderPNG(
+                AnyView(VaultProgressView().environmentObject(harness.session)),
+                size: CGSize(width: 840, height: 940),
+                afterClicking: CGPoint(x: 400, y: 140)
+            )
+
+            try await harness.unlockMoonleaf()
+            let moonleafAvailable = await eventually {
+                harness.session.themeSnapshot?.providers.contains(where: {
+                    $0.codexID == RuneScribeThemeMoonleafModuleBootstrap.codexID
+                        && $0.state == .available
+                        && $0.isOwned
+                        && $0.isSelectable
+                }) == true
+            }
+            XCTAssertTrue(moonleafAvailable)
+            await harness.session.selectCodex(
+                RuneScribeThemeMoonleafModuleBootstrap.codexID
+            )
+            let moonleafSelected = await eventually {
+                harness.session.themeSnapshot?.effectiveCodexID
+                    == RuneScribeThemeMoonleafModuleBootstrap.codexID
+                    && harness.session.activeThemeVisualPresentation?.plan.codexID
+                        == RuneScribeThemeMoonleafModuleBootstrap.codexID
+            }
+            XCTAssertTrue(moonleafSelected)
+            await harness.session.loadActiveThemeCatalogVisuals()
+            await harness.session.loadThemeCodexCardPreviews()
+
+            let moonleafSnapshot = try XCTUnwrap(harness.session.themeSnapshot)
+            let moonleafPresentation = try XCTUnwrap(
+                harness.session.activeThemeVisualPresentation
+            )
+            XCTAssertEqual(
+                moonleafSnapshot.effectiveTheme.id,
+                RuneScribeThemeMoonleafModuleBootstrap.discoveryDescriptor.id
+            )
+            XCTAssertFalse(moonleafSnapshot.isEmergencyPresentation)
+            XCTAssertNotEqual(
+                moonleafPresentation.plan.backgroundStatic.id,
+                norsePresentation.plan.backgroundStatic.id
+            )
+            XCTAssertNotEqual(
+                moonleafPresentation.plan.codex.selected.id,
+                norsePresentation.plan.codex.selected.id
+            )
+            XCTAssertNotNil(
+                moonleafPresentation.imageReference(
+                    for: moonleafPresentation.plan.backgroundStatic
+                )?.image
+            )
+            XCTAssertNotNil(
+                harness.session.themeCodexCardImageReferences[
+                    RuneScribeThemeMoonleafModuleBootstrap.codexID
+                ]?.image
+            )
+
+            let moonleafWorkspacePNG = try renderPNG(
+                AnyView(RootView(session: harness.session)),
+                size: CGSize(width: 720, height: 780),
+                warmup: 0.2
+            )
+            let moonleafSettingsPNG = try renderPNG(
+                AnyView(SettingsView().environmentObject(harness.session)),
+                size: CGSize(width: 760, height: 900),
+                warmup: 0.2
+            )
+            let moonleafVaultPNG = try renderPNG(
+                AnyView(VaultProgressView().environmentObject(harness.session)),
+                size: CGSize(width: 840, height: 940),
+                afterClicking: CGPoint(x: 400, y: 140)
+            )
+
+            for png in [moonleafWorkspacePNG, moonleafSettingsPNG, moonleafVaultPNG] {
+                try assertDetailedPNG(png, minimumUniqueSampleColors: 48)
+            }
+            try assertMaterialPNGChange(
+                from: norseWorkspacePNG,
+                to: moonleafWorkspacePNG,
+                minimumChangedSampleRatio: 0.08
+            )
+            try assertMaterialPNGChange(
+                from: norseSettingsPNG,
+                to: moonleafSettingsPNG,
+                minimumChangedSampleRatio: 0.03
+            )
+            try assertMaterialPNGChange(
+                from: norseVaultPNG,
+                to: moonleafVaultPNG,
+                minimumChangedSampleRatio: 0.03
+            )
+            attachPNG(
+                moonleafWorkspacePNG,
+                name: "macos-optional-provider-workspace"
+            )
+            attachPNG(
+                moonleafSettingsPNG,
+                name: "macos-optional-provider-settings"
+            )
+            attachPNG(
+                moonleafVaultPNG,
+                name: "macos-optional-provider-vault"
+            )
+
+            XCTAssertEqual(
+                harness.session.themeSnapshot?.effectiveCodexID,
+                RuneScribeThemeMoonleafModuleBootstrap.codexID,
+                "Rendering the shared workspace, Settings, and Vault scaffold must retain the optional provider selection."
+            )
         }
     }
 
@@ -975,6 +1130,265 @@ final class RuneScribeMacParityTests: XCTestCase {
         }
     }
 
+    func testCipherLibraryFileExportSavedAndCancelledNeverRecordDeliveryOrProgression()
+        async throws
+    {
+        try await withHarness { harness in
+            let activeCipher = try XCTUnwrap(harness.session.activeCipher)
+            XCTAssertFalse(activeCipher.delivered)
+            let initialCiphers = harness.session.ciphers
+            let initialProgression = harness.session.progressionSnapshot
+
+            for terminalResult in [FileExportTerminalResult.saved, .cancelled] {
+                let artifact = try await harness.session.prepareCipherShare(
+                    cipherID: activeCipher.id,
+                    displayName: activeCipher.label,
+                    representation: .file
+                )
+                guard case .file = artifact.reference else {
+                    return XCTFail("Cipher Library Export must prepare a file artifact.")
+                }
+                let fileURL = try await harness.shareURL(for: artifact.id)
+                XCTAssertTrue(FileManager.default.fileExists(atPath: fileURL.path))
+                guard case .themedCipher = try FileRouter.decode(
+                    Data(contentsOf: fileURL)
+                ) else {
+                    return XCTFail("Cipher Library Export must preserve cipher-invitation semantics.")
+                }
+
+                let transfer = try await harness.session.shareTransfer(for: artifact.id)
+                try await transfer.reportPresented(on: .fileExport)
+                let report = RuneScribeUtilityShareReportMapper.fileExport(terminalResult)
+                XCTAssertEqual(report.routeClass, .fileExport)
+                XCTAssertEqual(
+                    report.result,
+                    terminalResult == .saved ? .completionUnavailable : .cancelled
+                )
+                let evidence = try await transfer.finish(report)
+                XCTAssertEqual(evidence.artifactID, artifact.id)
+                XCTAssertEqual(evidence.report, report)
+                let completion = try await harness.session.completeShareArtifact(
+                    evidence: evidence
+                )
+                XCTAssertEqual(
+                    completion,
+                    .released,
+                    "A decoder file export is not message delivery."
+                )
+                await transfer.close()
+
+                XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
+                XCTAssertEqual(harness.session.ciphers, initialCiphers)
+                XCTAssertFalse(try XCTUnwrap(harness.session.activeCipher).delivered)
+                XCTAssertEqual(harness.session.progressionSnapshot, initialProgression)
+                do {
+                    _ = try await harness.session.shareTransfer(for: artifact.id)
+                    XCTFail("Terminal Cipher Library Export retained its artifact lease.")
+                } catch {
+                    // Core released the saved or cancelled Export artifact.
+                }
+            }
+        }
+    }
+
+    func testShareBuilderPurposesUseFixedSecurityContractsAndRuntimeFourByThreePreviews()
+        async throws
+    {
+        try await withHarness { harness in
+            let presentationReady = await eventually {
+                harness.session.runtimeSettingsSnapshot != nil
+                    && harness.session.activeThemeVisualPresentation != nil
+            }
+            XCTAssertTrue(presentationReady)
+
+            let activeCipher = try XCTUnwrap(harness.session.activeCipher)
+            let encoded = try await harness.session.encode(
+                "Hosted Share Builder parity",
+                cipherID: activeCipher.id
+            )
+            let shareHandle = try XCTUnwrap(encoded.shareHandle)
+            let catalog = try harness.session.makeShareBuilderCatalog()
+            let cases: [(
+                name: String,
+                source: ShareBuilderSource,
+                identifier: String,
+                summary: String
+            )] = [
+                (
+                    "first-delivery",
+                    .encryptedMessage(
+                        runes: encoded.runes,
+                        senderName: "Hosted Sender",
+                        cipherID: activeCipher.id,
+                        messageHandle: shareHandle,
+                        requiresKeyDelivery: true
+                    ),
+                    "share-builder.security.first-delivery",
+                    "Key included — this first delivery contains the shared cipher."
+                ),
+                (
+                    "established",
+                    .encryptedMessage(
+                        runes: encoded.runes,
+                        senderName: "Hosted Sender",
+                        cipherID: activeCipher.id,
+                        messageHandle: shareHandle,
+                        requiresKeyDelivery: false
+                    ),
+                    "share-builder.security.established",
+                    "Uses your shared key — this message does not resend the cipher."
+                ),
+                (
+                    "cipher-invitation",
+                    .cipherInvitation(
+                        cipherID: activeCipher.id,
+                        displayName: activeCipher.label
+                    ),
+                    "share-builder.security.cipher-invitation",
+                    "Contains shared cipher — anyone who imports this invitation receives the decoder for this cipher."
+                ),
+            ]
+
+            var previewDigests: [String: String] = [:]
+            for testCase in cases {
+                XCTAssertEqual(
+                    testCase.source.purpose.securityAccessibilityIdentifier,
+                    testCase.identifier
+                )
+                XCTAssertEqual(
+                    testCase.source.purpose.securitySummary,
+                    testCase.summary
+                )
+
+                let preview = try await harness.session.renderShareBuilderPreview(
+                    source: testCase.source,
+                    catalog: catalog
+                )
+                let metadata = try XCTUnwrap(preview.metadata.safePreview)
+                let data = try XCTUnwrap(preview.safePreviewData)
+                let bitmap = try XCTUnwrap(NSBitmapImageRep(data: data))
+                XCTAssertEqual(data.count, Int(metadata.byteLength))
+                XCTAssertEqual(bitmap.pixelsWide, Int(metadata.pixelSize.width))
+                XCTAssertEqual(bitmap.pixelsHigh, Int(metadata.pixelSize.height))
+                XCTAssertEqual(
+                    UInt64(metadata.pixelSize.width) * 3,
+                    UInt64(metadata.pixelSize.height) * 4
+                )
+                XCTAssertEqual(
+                    preview.metadata.selection,
+                    try catalog.validatedSelection()
+                )
+                XCTAssertFalse(
+                    preview.metadata.compatibility.contains(
+                        .highContrastPreviewAvailable
+                    )
+                )
+                previewDigests[testCase.name] = Self.digestHex(data)
+                attachPNG(data, name: "macos-share-builder-\(testCase.name)-preview")
+            }
+
+            XCTAssertEqual(
+                previewDigests["first-delivery"],
+                previewDigests["established"],
+                "Security purpose must not fork the shared themed preview renderer."
+            )
+            XCTAssertNotEqual(
+                previewDigests["first-delivery"],
+                previewDigests["cipher-invitation"],
+                "Purpose-appropriate preview content must remain visible."
+            )
+
+            let highContrastPreview = try await harness.session.renderShareBuilderPreview(
+                source: cases[0].source,
+                catalog: catalog,
+                colorMode: .highContrast
+            )
+            let highContrastData = try XCTUnwrap(highContrastPreview.safePreviewData)
+            XCTAssertTrue(
+                highContrastPreview.metadata.compatibility.contains(
+                    .highContrastPreviewAvailable
+                )
+            )
+            XCTAssertTrue(highContrastPreview.metadata.resources.contains(where: {
+                $0.resourceID == catalog.descriptor.codex.background.highContrastResourceID
+            }))
+            XCTAssertNotEqual(
+                Self.digestHex(highContrastData),
+                previewDigests["first-delivery"]
+            )
+            attachPNG(highContrastData, name: "macos-share-builder-high-contrast-preview")
+
+            for source in [cases[0].source, cases[2].source] {
+                let prepared = try await harness.session.prepareShareBuilderArtifact(
+                    source: source,
+                    catalog: catalog,
+                    colorMode: .highContrast
+                )
+                let fileURL = try await harness.shareURL(for: prepared.artifact.id)
+                let routed = try FileRouter.decode(Data(contentsOf: fileURL))
+                let presentation: SharePresentationIntake?
+                switch routed {
+                case .themedCipher(_, _, let intake),
+                     .themedMessage(_, _, let intake):
+                    presentation = intake
+                case .cipher, .message:
+                    presentation = nil
+                }
+                let metadata = try XCTUnwrap(presentation?.metadata)
+                XCTAssertTrue(
+                    metadata.compatibility.contains(.highContrastPreviewAvailable)
+                )
+                XCTAssertTrue(metadata.resources.contains(where: {
+                    $0.resourceID
+                        == catalog.descriptor.codex.background.highContrastResourceID
+                }))
+                await prepared.transfer.close()
+                await harness.session.releaseShareArtifact(id: prepared.artifact.id)
+            }
+
+            var changedCatalog = catalog
+            changedCatalog.selectEffects(
+                catalog.draft.effects == .off ? .full : .off
+            )
+            XCTAssertTrue(changedCatalog.hasChangesFromDefaults)
+            let focusRecorder = ShareBuilderKeyboardFocusRecorder()
+            let hostedBuilder = AnyView(
+                ShareBuilderView(
+                    source: cases[0].source,
+                    initialCatalog: changedCatalog,
+                    onKeyboardFocusChanged: { focusRecorder.record($0) }
+                )
+                    .environmentObject(harness.session)
+            )
+            let builderPNG = try renderPNG(
+                hostedBuilder,
+                size: CGSize(width: 720, height: 780),
+                warmup: 0.75
+            )
+            try assertDetailedPNG(builderPNG, minimumUniqueSampleColors: 48)
+            attachPNG(builderPNG, name: "macos-share-builder-first-delivery")
+            traverseKeyboardFocus(
+                hostedBuilder,
+                size: CGSize(width: 720, height: 780),
+                warmup: 0.75
+            )
+            XCTAssertEqual(
+                focusRecorder.targets,
+                [
+                    .codex,
+                    .relic,
+                    .seal,
+                    .frame,
+                    .effects,
+                    .reset,
+                    .save,
+                    .share,
+                ],
+                "Tab traversal must be Codex, Relic, Seal, Frame, effects, reset, save, then Share."
+            )
+        }
+    }
+
     private func withHarness(
         unavailableThemeResource: ApplicationResource? = nil,
         _ operation: (MacParityHarness) async throws -> Void
@@ -1100,13 +1514,17 @@ final class RuneScribeMacParityTests: XCTestCase {
         }
     }
 
-    private func renderPNG(_ view: AnyView, size: CGSize) throws -> Data {
+    private func renderPNG(
+        _ view: AnyView,
+        size: CGSize,
+        warmup: TimeInterval = 0.03
+    ) throws -> Data {
         let hostingView = NSHostingView(
             rootView: view.frame(width: size.width, height: size.height)
         )
         hostingView.frame = NSRect(origin: .zero, size: size)
         hostingView.layoutSubtreeIfNeeded()
-        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.03))
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: warmup))
         hostingView.layoutSubtreeIfNeeded()
         hostingView.displayIfNeeded()
 
@@ -1276,7 +1694,8 @@ final class RuneScribeMacParityTests: XCTestCase {
 
     private func inspectKeyboardFocus(
         _ view: AnyView,
-        size: CGSize
+        size: CGSize,
+        warmup: TimeInterval = 0.05
     ) -> KeyboardFocusReport {
         _ = NSApplication.shared
         let hostingView = NSHostingView(
@@ -1288,7 +1707,7 @@ final class RuneScribeMacParityTests: XCTestCase {
         defer { window.orderOut(nil) }
 
         hostingView.layoutSubtreeIfNeeded()
-        RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: warmup))
         window.recalculateKeyViewLoop()
 
         var chain: [NSView] = []
@@ -1308,6 +1727,35 @@ final class RuneScribeMacParityTests: XCTestCase {
             focusableViewCount: focusable.count,
             acceptedFirstResponder: accepted
         )
+    }
+
+    private func traverseKeyboardFocus(
+        _ view: AnyView,
+        size: CGSize,
+        warmup: TimeInterval = 0.05
+    ) {
+        _ = NSApplication.shared
+        let hostingView = NSHostingView(
+            rootView: view.frame(width: size.width, height: size.height)
+        )
+        let window = makeInteractiveOffscreenWindow(size: size)
+        window.contentView = hostingView
+        window.makeKeyAndOrderFront(nil)
+        defer { window.orderOut(nil) }
+
+        hostingView.layoutSubtreeIfNeeded()
+        RunLoop.main.run(until: Date(timeIntervalSinceNow: warmup))
+        window.recalculateKeyViewLoop()
+
+        _ = window.makeFirstResponder(nil)
+        var seen: Set<ObjectIdentifier> = []
+        while seen.count < 256 {
+            window.selectNextKeyView(nil)
+            RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.02))
+            guard let keyView = window.firstResponder as? NSView,
+                  seen.insert(ObjectIdentifier(keyView)).inserted
+            else { break }
+        }
     }
 
     private func makeOffscreenWindow(size: CGSize) -> NSWindow {
@@ -1512,6 +1960,10 @@ private final class MacParityHarness {
                 bundle: .main,
                 moduleBundles:
                     RuneScribeNorseThemeModuleBootstrap.ownerScopedResourceBundles
+                        .merging(
+                            RuneScribeThemeMoonleafModuleBootstrap
+                                .ownerScopedResourceBundles
+                        ) { _, replacement in replacement }
             ),
             unavailableResource: unavailableThemeResource
         )
@@ -1640,6 +2092,7 @@ private final class MacParityHarness {
             }
         )
         try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeMoonleafModuleBootstrap.register(with: runtime)
         try await RuneScribeThemeCoordinatorModuleBootstrap.register(with: runtime)
         try await runtime.register(
             manifest: RuneScribeUIModuleBootstrap.manifest(),
@@ -1709,6 +2162,17 @@ private final class MacParityHarness {
 
     func shareURL(for artifactID: ShareArtifactID) async throws -> URL {
         try await shareArtifacts.presentationURL(for: artifactID)
+    }
+
+    func unlockMoonleaf() async throws {
+        try await runtime.reconcileEntitlements(
+            try ProgressionEntitlementSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 1_700_000_100),
+                includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                earnedUnlockIDs: [RuneScribeThemeMoonleafModuleBootstrap.unlockID]
+            )
+        )
     }
 
     func importSelectedFile(_ fileURL: URL) async throws -> ImportResultDTO {
@@ -1901,6 +2365,19 @@ private struct KeyboardFocusReport {
     let keyViewCount: Int
     let focusableViewCount: Int
     let acceptedFirstResponder: Bool
+}
+
+@MainActor
+private final class ShareBuilderKeyboardFocusRecorder {
+    private(set) var targets: [ShareBuilderKeyboardFocusTarget] = []
+
+    func record(_ target: ShareBuilderKeyboardFocusTarget?) {
+        guard targets.last != .share,
+              let target,
+              targets.last != target
+        else { return }
+        targets.append(target)
+    }
 }
 
 private struct ContentEditingState {

@@ -4,12 +4,80 @@ import RuneScribeContracts
 import RuneScribeUIRuntime
 import SwiftUI
 
+struct CipherLibraryShareOperationGate: Equatable, Sendable {
+    struct Lease: Equatable, Sendable {
+        let cipherID: UUID
+        let operationID: UUID
+    }
+
+    struct Cancellation: Equatable, Sendable {
+        let export: Lease?
+        let preparation: Lease?
+    }
+
+    private(set) var export: Lease?
+    private(set) var preparation: Lease?
+
+    var exportCipherID: UUID? { export?.cipherID }
+    var preparingCipherID: UUID? { preparation?.cipherID }
+
+    mutating func beginExport(cipherID: UUID, operationID: UUID) -> Bool {
+        guard export == nil else { return false }
+        export = Lease(cipherID: cipherID, operationID: operationID)
+        return true
+    }
+
+    mutating func beginPreparation(cipherID: UUID, operationID: UUID) -> Bool {
+        guard preparation == nil else { return false }
+        preparation = Lease(cipherID: cipherID, operationID: operationID)
+        return true
+    }
+
+    func ownsExport(operationID: UUID) -> Bool {
+        export?.operationID == operationID
+    }
+
+    func ownsPreparation(operationID: UUID) -> Bool {
+        preparation?.operationID == operationID
+    }
+
+    @discardableResult
+    mutating func finishExport(operationID: UUID) -> Bool {
+        guard export?.operationID == operationID else { return false }
+        export = nil
+        return true
+    }
+
+    @discardableResult
+    mutating func finishPreparation(operationID: UUID) -> Bool {
+        guard preparation?.operationID == operationID else { return false }
+        preparation = nil
+        return true
+    }
+
+    mutating func cancelOperations(for cipherID: UUID? = nil) -> Cancellation {
+        let cancelledExport = export.flatMap { lease in
+            cipherID == nil || lease.cipherID == cipherID ? lease : nil
+        }
+        let cancelledPreparation = preparation.flatMap { lease in
+            cipherID == nil || lease.cipherID == cipherID ? lease : nil
+        }
+        if cancelledExport != nil { export = nil }
+        if cancelledPreparation != nil { preparation = nil }
+        return Cancellation(
+            export: cancelledExport,
+            preparation: cancelledPreparation
+        )
+    }
+}
+
 /// The cipher library: create, import, label, select, export, and delete the
 /// user's cipher/decipher pairs. The active cipher (used for both encoding and
 /// decoding on the main screen) is highlighted and switchable here.
 struct CipherLibraryView: View {
 
     private struct CipherQRShare: Identifiable {
+        let cipherID: UUID
         let artifact: ShareArtifactDTO
         let transfer: OpaqueShareTransfer
         let label: String
@@ -18,18 +86,24 @@ struct CipherLibraryView: View {
     }
 
     private struct CipherLinkShare {
+        let cipherID: UUID
         let artifact: ShareArtifactDTO
         let transfer: OpaqueShareTransfer
+        let label: String
     }
 
     @EnvironmentObject private var session: RuneScribeUISession
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    @Environment(\.runtimeAccessibilityPreferences) private var accessibilityPreferences
 
     // Export
     @State private var showExporter = false
     @State private var exportArtifact: ShareArtifactDTO?
     @State private var exportTransfer: OpaqueShareTransfer?
     @State private var exportFilename = "RuneScrib-Decoder"
+    @State private var exportPreparationTask: Task<Void, Never>?
 
     // Import
     @State private var showImporter = false
@@ -49,7 +123,15 @@ struct CipherLibraryView: View {
 
     // Share via QR
     @State private var qrShare: CipherQRShare?
-    @State private var linkArtifacts: [UUID: CipherLinkShare] = [:]
+    @State private var fallbackLinkShare: CipherLinkShare?
+    @State private var fallbackLinkLaunchID: UUID?
+    @State private var primaryShare: PreparedShareBuilderArtifact?
+    @State private var primaryShareLaunchID: UUID?
+    @State private var primaryShareCipherID: UUID?
+    @State private var shareBuilderSource: ShareBuilderSource?
+    @State private var sharePreparationTask: Task<Void, Never>?
+    @State private var shareOperations = CipherLibraryShareOperationGate()
+    @State private var isViewActive = false
 
     // In-app QR scanner (iOS) → confirm
     @State private var showScanner = false
@@ -70,6 +152,11 @@ struct CipherLibraryView: View {
         case idle
         case success(String)
         case failure(String)
+    }
+
+    private enum FallbackSharePurpose {
+        case link
+        case qr
     }
 
     var body: some View {
@@ -95,7 +182,7 @@ struct CipherLibraryView: View {
             statusFooter
         }
         .runeSheetFrame()
-        .background(Color.runeNavy)
+        .runeSemanticPresentationSurface()
         .preferredColorScheme(.dark)
         .runtimeShareArtifactExporter(
             isPresented: $showExporter,
@@ -121,6 +208,9 @@ struct CipherLibraryView: View {
             ) { completion in
                 finishQRShare(share, completion: completion)
             }
+        }
+        .sheet(item: $shareBuilderSource) { source in
+            ShareBuilderView(source: source)
         }
         .sheet(isPresented: $showScanner) { scannerSheet }
         .sheet(item: $pendingScan) { pending in
@@ -179,6 +269,7 @@ struct CipherLibraryView: View {
                 deleteTarget = nil
                 Task {
                     do {
+                        await releasePreparedShares(for: target.id)
                         try await session.deleteCipher(id: target.id)
                         status = .success("Deleted cipher.")
                     } catch {
@@ -214,6 +305,7 @@ struct CipherLibraryView: View {
         }
         // One-time prompt offering contacts import the first time the library opens.
         .onAppear {
+            isViewActive = true
             evaluateContactsPromptIfReady()
         }
         .onChange(of: session.runtimePresentationSettingsReady) { _, _ in
@@ -229,10 +321,11 @@ struct CipherLibraryView: View {
         .sheet(isPresented: $showContactsManager) {
             ContactsView()
         }
-        .task(id: session.ciphers.map(\.id)) {
-            await prepareLinkArtifacts()
+        .background { automaticShareLaunchers }
+        .onDisappear {
+            isViewActive = false
+            releasePreparedShares()
         }
-        .onDisappear { releaseLinkArtifacts() }
     }
 
     private func evaluateContactsPromptIfReady() {
@@ -307,6 +400,10 @@ struct CipherLibraryView: View {
 
     private func cipherCard(_ cipher: CipherViewState) -> some View {
         let isActive = cipher.id == session.activeCipher?.id
+        let shareFallbackNotice = OutboundShareFontPolicy.projection(
+            for: cipher.id,
+            in: session.ciphers
+        ).shareFallbackNotice
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -323,6 +420,13 @@ struct CipherLibraryView: View {
             HStack(spacing: 14) {
                 metaLabel("ID", cipher.shortPublicID)
                 metaLabel("CREATED", cipher.createdAt.formatted(.dateTime.day().month(.abbreviated).year()))
+            }
+
+            if let shareFallbackNotice {
+                Label(shareFallbackNotice, systemImage: "exclamationmark.triangle")
+                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                    .foregroundColor(.runeGold)
+                    .accessibilityIdentifier("cipher.share-fallback")
             }
 
             contactControl(cipher)
@@ -454,49 +558,67 @@ struct CipherLibraryView: View {
         spacing: CGFloat
     ) -> some View {
         HStack(spacing: spacing) {
-            // Share the offline `runescribe://import?…` deep link — the same payload
-            // as the QR. Recipients tapping the link in Messages / Mail / Notes open
-            // the app and land on the import sheet through the Core input service. (A `.runescribe`
-            // *file* is still available from Export; files do not single-tap-launch
-            // third-party apps from Messages, so sharing a file here broke auto-import.)
-            if let share = linkArtifacts[cipher.id],
-               case .opaque = share.artifact.reference {
-                RuneScribeCipherLinkShareLink(
-                    transfer: share.transfer,
-                    cipherLabel: cipher.label,
-                    onFinish: { completion in
-                        completeLinkShare(
-                            cipherID: cipher.id,
-                            artifact: share.artifact,
-                            completion: completion
-                        )
-                    }
-                ) {
-                    cardIconChrome("square.and.arrow.up")
-                }
+            Button {
+                beginPrimaryShare(cipher)
+            } label: {
+                Label(
+                    shareOperations.preparingCipherID == cipher.id ? "Preparing…" : "Share",
+                    systemImage: shareOperations.preparingCipherID == cipher.id
+                        ? "clock"
+                        : "square.and.arrow.up"
+                )
+                .lineLimit(1)
+                .frame(minHeight: 44)
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 12, weight: .semibold, design: .monospaced))
+            .foregroundColor(.runeBlue)
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
+            .accessibilityLabel("Share \(cipher.label)")
+            .disabled(shareOperations.preparingCipherID != nil || primaryShare != nil)
+            .accessibilityIdentifier("cipher.primary-share")
 
-                cardIconButton("qrcode", help: "Show QR code for \(cipher.label)") {
-                    linkArtifacts.removeValue(forKey: cipher.id)
-                    qrShare = CipherQRShare(
-                        artifact: share.artifact,
-                        transfer: share.transfer,
-                        label: cipher.label
-                    )
-                }
-            } else {
-                cardIconChrome("square.and.arrow.up", tint: .runeSilver.opacity(0.3))
-                    .help("Preparing the cipher link…")
-                cardIconChrome("qrcode", tint: .runeSilver.opacity(0.3))
-                    .help("Preparing the cipher link…")
+            Button {
+                shareBuilderSource = .cipherInvitation(
+                    cipherID: cipher.id,
+                    displayName: cipher.label
+                )
+            } label: {
+                Label("Customize", systemImage: "slider.horizontal.3")
+                    .lineLimit(1)
+                    .frame(minHeight: 44)
             }
+            .buttonStyle(.plain)
+            .font(.system(size: 12, weight: .semibold, design: .monospaced))
+            .foregroundColor(.runeSilver)
+            .frame(minWidth: 44, minHeight: 44)
+            .contentShape(Rectangle())
+            .disabled(shareOperations.preparingCipherID != nil)
+            .accessibilityLabel("Customize Share for \(cipher.label)")
+            .accessibilityIdentifier("cipher.customize-share")
 
-            cardIconButton("arrow.down.doc", help: "Export \(cipher.label)") { beginExport(cipher) }
-            cardIconButton("pencil", help: "Rename \(cipher.label)") {
-                renameTarget = cipher; renameLabel = cipher.label; showRename = true
+            Menu {
+                Button("Export File") { beginExport(cipher) }
+                    .disabled(shareOperations.exportCipherID != nil)
+                Button("Show QR") { beginFallbackShare(cipher, purpose: .qr) }
+                Button("Share Link") { beginFallbackShare(cipher, purpose: .link) }
+                Divider()
+                Button("Rename") {
+                    renameTarget = cipher
+                    renameLabel = cipher.label
+                    showRename = true
+                }
+                Button("Delete", role: .destructive) {
+                    deleteTarget = cipher
+                    showDelete = true
+                }
+            } label: {
+                cardIconChrome("ellipsis")
             }
-            cardIconButton("trash", help: "Delete \(cipher.label)", tint: .runeDanger.opacity(0.85)) {
-                deleteTarget = cipher; showDelete = true
-            }
+            .menuIndicator(.hidden)
+            .help("More actions for \(cipher.label)")
+            .accessibilityLabel("More actions for \(cipher.label)")
         }
     }
 
@@ -588,32 +710,76 @@ struct CipherLibraryView: View {
     }
 
     private func beginExport(_ cipher: CipherViewState) {
-        Task {
+        let operationID = UUID()
+        guard shareOperations.beginExport(
+            cipherID: cipher.id,
+            operationID: operationID
+        ) else { return }
+        exportPreparationTask = Task { @MainActor in
+            var artifact: ShareArtifactDTO?
+            var transfer: OpaqueShareTransfer?
             do {
-                let artifact = try await session.prepareCipherShare(
+                let preparedArtifact = try await session.prepareCipherShare(
                     cipherID: cipher.id,
                     displayName: cipher.label,
-                    representation: .file
+                    representation: .file,
+                    colorMode: shareColorMode,
+                    systemReduceMotion: effectiveReduceMotion
                 )
-                guard case .file = artifact.reference else {
-                    await session.releaseShareArtifact(id: artifact.id)
-                    status = .failure("The decoder file could not be prepared.")
-                    return
+                artifact = preparedArtifact
+                try Task.checkCancellation()
+                guard case .file = preparedArtifact.reference else {
+                    throw OpaqueSharePresentationError.unavailable
                 }
-                let transfer = try await session.shareTransfer(for: artifact.id)
-                exportArtifact = artifact
-                exportFilename = artifact.displayName
-                exportTransfer = transfer
+                guard isViewActive,
+                      shareOperations.ownsExport(operationID: operationID),
+                      session.ciphers.contains(where: { $0.id == cipher.id })
+                else {
+                    throw CancellationError()
+                }
+                let preparedTransfer = try await session.shareTransfer(
+                    for: preparedArtifact.id
+                )
+                transfer = preparedTransfer
+                try Task.checkCancellation()
+                guard isViewActive,
+                      shareOperations.ownsExport(operationID: operationID),
+                      session.ciphers.contains(where: { $0.id == cipher.id })
+                else {
+                    throw CancellationError()
+                }
+                exportArtifact = preparedArtifact
+                exportFilename = preparedArtifact.displayName
+                exportTransfer = preparedTransfer
                 status = .idle
                 showExporter = true
+                exportPreparationTask = nil
             } catch {
-                presentFailure(error)
+                await transfer?.close()
+                if let artifact {
+                    await session.releaseShareArtifact(id: artifact.id)
+                }
+                let wasCurrent = shareOperations.finishExport(
+                    operationID: operationID
+                )
+                if wasCurrent {
+                    exportPreparationTask = nil
+                }
+                if wasCurrent, !Task.isCancelled {
+                    presentFailure(error)
+                }
             }
         }
     }
 
     private func finishExport(_ completion: SharePresentationCompletion) {
-        guard let artifact = exportArtifact else { return }
+        guard let artifact = exportArtifact,
+              let exportLease = shareOperations.export
+        else { return }
+        guard shareOperations.finishExport(
+            operationID: exportLease.operationID
+        ) else { return }
+        showExporter = false
         exportArtifact = nil
         let transfer = exportTransfer
         exportTransfer = nil
@@ -624,6 +790,7 @@ struct CipherLibraryView: View {
                 do {
                     _ = try await session.completeShareArtifact(evidence: evidence)
                 } catch {
+                    await session.releaseShareArtifact(id: artifact.id)
                     presentFailure(error)
                 }
             case .success:
@@ -651,60 +818,148 @@ struct CipherLibraryView: View {
         }
     }
 
-    private func prepareLinkArtifacts() async {
-        let liveIDs = Set(session.ciphers.map(\.id))
-        let stale = linkArtifacts.filter { !liveIDs.contains($0.key) }
-        for share in stale.values {
-            await share.transfer.close()
-            await session.releaseShareArtifact(id: share.artifact.id)
-        }
-        linkArtifacts = linkArtifacts.filter { liveIDs.contains($0.key) }
-
-        for cipher in session.ciphers where linkArtifacts[cipher.id] == nil {
+    private func beginPrimaryShare(_ cipher: CipherViewState) {
+        let operationID = UUID()
+        guard primaryShare == nil,
+              shareOperations.beginPreparation(
+                  cipherID: cipher.id,
+                  operationID: operationID
+              )
+        else { return }
+        sharePreparationTask = Task { @MainActor in
             do {
-                let artifact = try await session.prepareCipherShare(
+                let catalog = try session.makeShareBuilderCatalog()
+                let source = ShareBuilderSource.cipherInvitation(
                     cipherID: cipher.id,
-                    displayName: cipher.label,
-                    representation: .link
+                    displayName: cipher.label
                 )
-                guard case .opaque = artifact.reference else {
-                    await session.releaseShareArtifact(id: artifact.id)
-                    continue
+                let prepared = try await session.prepareShareBuilderArtifact(
+                    source: source,
+                    catalog: catalog,
+                    colorMode: shareColorMode,
+                    systemReduceMotion: effectiveReduceMotion
+                )
+                try Task.checkCancellation()
+                guard isViewActive,
+                      shareOperations.ownsPreparation(operationID: operationID),
+                      session.ciphers.contains(where: { $0.id == cipher.id })
+                else {
+                    await prepared.transfer.close()
+                    await session.releaseShareArtifact(id: prepared.artifact.id)
+                    throw CancellationError()
                 }
-                let transfer = try await session.shareTransfer(for: artifact.id)
-                linkArtifacts[cipher.id] = CipherLinkShare(
-                    artifact: artifact,
-                    transfer: transfer
-                )
+                guard shareOperations.finishPreparation(
+                    operationID: operationID
+                ) else {
+                    await prepared.transfer.close()
+                    await session.releaseShareArtifact(id: prepared.artifact.id)
+                    return
+                }
+                sharePreparationTask = nil
+                primaryShare = prepared
+                primaryShareCipherID = cipher.id
+                primaryShareLaunchID = UUID()
+                status = .idle
             } catch {
-                // Unsupported hand-crafted ciphers retain the disabled affordance.
+                let wasCurrent = shareOperations.finishPreparation(
+                    operationID: operationID
+                )
+                if wasCurrent {
+                    sharePreparationTask = nil
+                }
+                if wasCurrent, !Task.isCancelled {
+                    presentFailure(error)
+                }
             }
         }
     }
 
-    private func completeLinkShare(
-        cipherID: UUID,
-        artifact: ShareArtifactDTO,
-        completion: SharePresentationCompletion
+    private func beginFallbackShare(
+        _ cipher: CipherViewState,
+        purpose: FallbackSharePurpose
     ) {
-        let transfer = linkArtifacts.removeValue(forKey: cipherID)?.transfer
-        Task {
-            await transfer?.close()
-            switch completion {
-            case .success(let evidence) where evidence.artifactID == artifact.id:
-                do {
-                    _ = try await session.completeShareArtifact(evidence: evidence)
-                } catch {
+        let operationID = UUID()
+        guard fallbackLinkShare == nil,
+              qrShare == nil,
+              shareOperations.beginPreparation(
+                  cipherID: cipher.id,
+                  operationID: operationID
+              )
+        else { return }
+        sharePreparationTask = Task { @MainActor in
+            var artifact: ShareArtifactDTO?
+            var transfer: OpaqueShareTransfer?
+            do {
+                let preparedArtifact = try await session.prepareCipherShare(
+                    cipherID: cipher.id,
+                    displayName: cipher.label,
+                    representation: .link,
+                    colorMode: shareColorMode,
+                    systemReduceMotion: effectiveReduceMotion
+                )
+                artifact = preparedArtifact
+                try Task.checkCancellation()
+                guard case .opaque = preparedArtifact.reference else {
+                    throw OpaqueSharePresentationError.unavailable
+                }
+                guard isViewActive,
+                      shareOperations.ownsPreparation(operationID: operationID),
+                      session.ciphers.contains(where: { $0.id == cipher.id })
+                else {
+                    throw CancellationError()
+                }
+                let preparedTransfer = try await session.shareTransfer(
+                    for: preparedArtifact.id
+                )
+                transfer = preparedTransfer
+                try Task.checkCancellation()
+                guard isViewActive,
+                      shareOperations.ownsPreparation(operationID: operationID),
+                      session.ciphers.contains(where: { $0.id == cipher.id })
+                else {
+                    throw CancellationError()
+                }
+                guard shareOperations.finishPreparation(
+                    operationID: operationID
+                ) else {
+                    await preparedTransfer.close()
+                    await session.releaseShareArtifact(id: preparedArtifact.id)
+                    return
+                }
+                sharePreparationTask = nil
+                switch purpose {
+                case .link:
+                    fallbackLinkShare = CipherLinkShare(
+                        cipherID: cipher.id,
+                        artifact: preparedArtifact,
+                        transfer: preparedTransfer,
+                        label: cipher.label
+                    )
+                    fallbackLinkLaunchID = UUID()
+                case .qr:
+                    qrShare = CipherQRShare(
+                        cipherID: cipher.id,
+                        artifact: preparedArtifact,
+                        transfer: preparedTransfer,
+                        label: cipher.label
+                    )
+                }
+                status = .idle
+            } catch {
+                await transfer?.close()
+                if let artifact {
+                    await session.releaseShareArtifact(id: artifact.id)
+                }
+                let wasCurrent = shareOperations.finishPreparation(
+                    operationID: operationID
+                )
+                if wasCurrent {
+                    sharePreparationTask = nil
+                }
+                if wasCurrent, !Task.isCancelled {
                     presentFailure(error)
                 }
-            case .success:
-                await session.releaseShareArtifact(id: artifact.id)
-                status = .failure("The cipher share could not be finalized.")
-            case .failure(let error):
-                await session.releaseShareArtifact(id: artifact.id)
-                presentFailure(error)
             }
-            await prepareLinkArtifacts()
         }
     }
 
@@ -712,9 +967,194 @@ struct CipherLibraryView: View {
         _ share: CipherQRShare,
         completion: SharePresentationCompletion
     ) {
-        if qrShare?.id == share.id {
-            qrShare = nil
+        guard qrShare?.id == share.id else { return }
+        qrShare = nil
+        Task {
+            await share.transfer.close()
+            switch completion {
+            case .success(let evidence) where evidence.artifactID == share.artifact.id:
+                do {
+                    _ = try await session.completeShareArtifact(evidence: evidence)
+                } catch {
+                    await session.releaseShareArtifact(id: share.artifact.id)
+                    presentFailure(error)
+                }
+            case .success:
+                await session.releaseShareArtifact(id: share.artifact.id)
+                status = .failure("The QR share could not be finalized.")
+            case .failure(let error):
+                await session.releaseShareArtifact(id: share.artifact.id)
+                presentFailure(error)
+            }
         }
+    }
+
+    private func releasePreparedShares() {
+        session.setRevealBlocker(.systemShare, active: false)
+        _ = shareOperations.cancelOperations()
+        let exportTask = exportPreparationTask
+        exportPreparationTask = nil
+        exportTask?.cancel()
+        let preparationTask = sharePreparationTask
+        sharePreparationTask = nil
+        preparationTask?.cancel()
+
+        showExporter = false
+        let exportArtifact = exportArtifact
+        self.exportArtifact = nil
+        let exportTransfer = exportTransfer
+        self.exportTransfer = nil
+
+        let primary = primaryShare
+        primaryShare = nil
+        primaryShareLaunchID = nil
+        primaryShareCipherID = nil
+        let fallback = fallbackLinkShare
+        fallbackLinkShare = nil
+        fallbackLinkLaunchID = nil
+        let qr = qrShare
+        qrShare = nil
+        Task {
+            await exportTask?.value
+            await preparationTask?.value
+            await exportTransfer?.close()
+            if let exportArtifact {
+                await session.releaseShareArtifact(id: exportArtifact.id)
+            }
+            if let primary {
+                await primary.transfer.close()
+                await session.releaseShareArtifact(id: primary.artifact.id)
+            }
+            if let fallback {
+                await fallback.transfer.close()
+                await session.releaseShareArtifact(id: fallback.artifact.id)
+            }
+            if let qr {
+                await qr.transfer.close()
+                await session.releaseShareArtifact(id: qr.artifact.id)
+            }
+        }
+    }
+
+    private func releasePreparedShares(for cipherID: UUID) async {
+        session.setRevealBlocker(.systemShare, active: false)
+        let cancellation = shareOperations.cancelOperations(for: cipherID)
+        let exportTask = cancellation.export == nil ? nil : exportPreparationTask
+        if cancellation.export != nil {
+            exportPreparationTask = nil
+            exportTask?.cancel()
+        }
+        let preparationTask = cancellation.preparation == nil
+            ? nil
+            : sharePreparationTask
+        if cancellation.preparation != nil {
+            sharePreparationTask = nil
+            preparationTask?.cancel()
+        }
+
+        let cancelledExportArtifact = cancellation.export == nil ? nil : exportArtifact
+        let cancelledExportTransfer = cancellation.export == nil ? nil : exportTransfer
+        if cancellation.export != nil {
+            showExporter = false
+            exportArtifact = nil
+            exportTransfer = nil
+        }
+
+        await exportTask?.value
+        await preparationTask?.value
+        await cancelledExportTransfer?.close()
+        if let cancelledExportArtifact {
+            await session.releaseShareArtifact(id: cancelledExportArtifact.id)
+        }
+        if primaryShareCipherID == cipherID, let primaryShare {
+            self.primaryShare = nil
+            primaryShareLaunchID = nil
+            primaryShareCipherID = nil
+            await primaryShare.transfer.close()
+            await session.releaseShareArtifact(id: primaryShare.artifact.id)
+        }
+        if fallbackLinkShare?.cipherID == cipherID, let fallbackLinkShare {
+            self.fallbackLinkShare = nil
+            fallbackLinkLaunchID = nil
+            await fallbackLinkShare.transfer.close()
+            await session.releaseShareArtifact(id: fallbackLinkShare.artifact.id)
+        }
+        if qrShare?.cipherID == cipherID, let qrShare {
+            self.qrShare = nil
+            await qrShare.transfer.close()
+            await session.releaseShareArtifact(id: qrShare.artifact.id)
+        }
+    }
+
+    @ViewBuilder
+    private var automaticShareLaunchers: some View {
+        if let primaryShare, let primaryShareLaunchID {
+            RuneScribePreparedFileShareLauncher(
+                transfer: primaryShare.transfer,
+                launchID: primaryShareLaunchID,
+                onPresented: {
+                    session.setRevealBlocker(.systemShare, active: true)
+                },
+                onFinish: { completion in
+                    finishPrimaryShare(primaryShare, completion: completion)
+                }
+            )
+        }
+        if let fallbackLinkShare, let fallbackLinkLaunchID {
+            RuneScribePreparedCipherLinkLauncher(
+                transfer: fallbackLinkShare.transfer,
+                cipherLabel: fallbackLinkShare.label,
+                launchID: fallbackLinkLaunchID,
+                onPresented: {
+                    session.setRevealBlocker(.systemShare, active: true)
+                },
+                onFinish: { completion in
+                    finishFallbackLinkShare(
+                        fallbackLinkShare,
+                        completion: completion
+                    )
+                }
+            )
+        }
+    }
+
+    private func finishPrimaryShare(
+        _ prepared: PreparedShareBuilderArtifact,
+        completion: SharePresentationCompletion
+    ) {
+        guard primaryShare?.artifact.id == prepared.artifact.id else { return }
+        primaryShare = nil
+        primaryShareLaunchID = nil
+        primaryShareCipherID = nil
+        session.setRevealBlocker(.systemShare, active: false)
+        Task {
+            do {
+                let routeResult = try await session.finishShareBuilderArtifact(
+                    prepared,
+                    completion: completion
+                )
+                switch ShareBuilderTerminalDisposition(routeResult: routeResult) {
+                case .completed:
+                    status = .success("Shared the themed cipher invitation.")
+                case .cancelled:
+                    status = .idle
+                case .failed:
+                    status = .failure("The cipher invitation was not shared.")
+                }
+            } catch {
+                status = .failure("The cipher invitation was not shared.")
+            }
+        }
+    }
+
+    private func finishFallbackLinkShare(
+        _ share: CipherLinkShare,
+        completion: SharePresentationCompletion
+    ) {
+        guard fallbackLinkShare?.artifact.id == share.artifact.id else { return }
+        fallbackLinkShare = nil
+        fallbackLinkLaunchID = nil
+        session.setRevealBlocker(.systemShare, active: false)
         Task {
             await share.transfer.close()
             switch completion {
@@ -725,24 +1165,11 @@ struct CipherLibraryView: View {
                     presentFailure(error)
                 }
             case .success:
-                await session.releaseShareArtifact(id: share.artifact.id)
-                status = .failure("The QR share could not be finalized.")
+                status = .failure("The fallback link could not be finalized.")
             case .failure(let error):
-                await session.releaseShareArtifact(id: share.artifact.id)
                 presentFailure(error)
             }
-            await prepareLinkArtifacts()
-        }
-    }
-
-    private func releaseLinkArtifacts() {
-        let shares = Array(linkArtifacts.values)
-        linkArtifacts.removeAll()
-        Task {
-            for share in shares {
-                await share.transfer.close()
-                await session.releaseShareArtifact(id: share.artifact.id)
-            }
+            await session.releaseShareArtifact(id: share.artifact.id)
         }
     }
 
@@ -798,6 +1225,19 @@ struct CipherLibraryView: View {
                 presentFailure(error)
             }
         }
+    }
+
+    private var shareColorMode: ShareArtifactColorMode {
+        usesIncreasedContrast ? .highContrast : .standard
+    }
+
+    private var effectiveReduceMotion: Bool {
+        accessibilityReduceMotion || accessibilityPreferences.forcesReduceMotion
+    }
+
+    private var usesIncreasedContrast: Bool {
+        colorSchemeContrast == .increased
+            || accessibilityPreferences.forcesIncreasedContrast
     }
 
     private func presentFailure(_ error: Error) {

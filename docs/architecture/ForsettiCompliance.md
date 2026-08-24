@@ -95,7 +95,7 @@ At the recorded snapshot, both declared schema `1.0`, policy profile
 `forsetti-pattern-b-standalone`, minimum runtime `1.0.0`, module version `1.0.34`, iOS
 17/macOS 15 support, no entitlement requirement, and production diagnostics disabled.
 The runtime compared each decoded manifest with its compiled `ModuleDescriptor` before
-a factory could be used. Current Core, Progression, and UI module version `1.0.38` is
+a factory could be used. Current Core, Progression, and UI module version `1.0.39` is
 recorded in their compiled descriptors and manifests. Current activation and mediation
 authority is the controlling policy and live source, not this historical snapshot.
 

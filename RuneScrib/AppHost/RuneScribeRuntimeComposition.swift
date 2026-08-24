@@ -59,7 +59,12 @@ import RuneScribeUIRuntime
             .merging(RuneScribeThemeSunspireModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
             .merging(RuneScribeThemeWildwoodModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
             .merging(RuneScribeThemeGloamthornModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
-        resources = BundleApplicationResourceLocator(bundle: bundle, moduleBundles: moduleBundles)
+        resources = RuneScribeNorseThemeQualification.applicationResourceLocator(
+            base: BundleApplicationResourceLocator(
+                bundle: bundle,
+                moduleBundles: moduleBundles
+            )
+        )
         fonts = CoreTextFontRegistrar()
         contacts = SystemContactAccessService()
         self.cloudSync = cloudSync ?? AppleCloudKitProgressionTransport()
@@ -111,6 +116,12 @@ import RuneScribeUIRuntime
                 isConfigured = true
             }
             guard generation == activationGeneration, activationState == .starting else { return }
+            try await RuneScribeRuntimeSimulatorQualification.applyIfRequested(
+                to: runtime,
+                optionalProviderUnlockIDs: [
+                    "moonleaf": RuneScribeThemeMoonleafModuleBootstrap.unlockID,
+                ]
+            )
             try await runtime.start()
             guard generation == activationGeneration, activationState == .starting else { return }
             activationState = .running

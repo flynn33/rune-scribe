@@ -38,7 +38,7 @@ public enum RuntimeVerifiedApplicationResourceFailure: Error, Equatable, Sendabl
     case invalidMaximumByteCount
     case resourceUnavailable
     case contentTooLarge
-    case integrityMismatch
+    case integrityMismatch(actualSHA256: Data, actualByteCount: Int)
 }
 
 public struct RuntimeApplicationResourceSession: Sendable {
@@ -2597,7 +2597,10 @@ actor RuntimeIOGateway {
             expectedSHA256,
             data: value
         ) else {
-            throw RuntimeVerifiedApplicationResourceFailure.integrityMismatch
+            throw RuntimeVerifiedApplicationResourceFailure.integrityMismatch(
+                actualSHA256: RuntimeCryptographicDigest.sha256(value),
+                actualByteCount: value.count
+            )
         }
         return value
     }

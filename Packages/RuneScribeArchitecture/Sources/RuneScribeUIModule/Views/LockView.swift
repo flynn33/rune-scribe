@@ -13,8 +13,6 @@ struct LockView: View {
 
     var body: some View {
         ZStack {
-            Color.runeNavy.ignoresSafeArea()
-
             VStack(spacing: 0) {
                 RuneHeader(slot: .appLocked, subtitle: "Locked")
 
@@ -54,6 +52,7 @@ struct LockView: View {
             }
         }
         .runeRootFrame()
+        .runeSemanticPresentationSurface(.privacy)
         .preferredColorScheme(.dark)
     }
 }

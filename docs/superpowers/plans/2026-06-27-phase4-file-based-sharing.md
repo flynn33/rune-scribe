@@ -1,7 +1,7 @@
 # Rune Scribe — Phase 4 (revised): File-based, server-free sharing
 
 > **Historical implementation plan.** This record preserves the approved build-20 design
-> transition; the current application is version 1.0.38 build 38. Hardware-only procedures
+> transition and records version 1.0.38 build 38. Hardware-only procedures
 > in the historical task body are owner-operated optional observations outside Agent Coding
 > scope and have no acceptance, completion, blocker, residual-work, PASS/FAIL, or
 > pull-request-readiness effect.

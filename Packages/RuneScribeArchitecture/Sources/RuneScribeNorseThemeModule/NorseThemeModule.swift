@@ -92,16 +92,36 @@ public struct RuneScribeNorseThemeModule: RuntimeConstructibleModule {
             )
         } catch is CancellationError {
             throw CancellationError()
+        } catch let failure as RequiredThemeResourceFailureDTO {
+            try await publishEmergencyPresentation(
+                after: failure,
+                context: context
+            )
         } catch {
-            // Shipping validation rejects missing Base resources. If installed
-            // bytes become unreadable, retain the descriptor contribution so
-            // the coordinator can expose its runtime-owned emergency snapshot
-            // without blocking Core encode/decode readiness.
-            try await context.publishThemeDescriptor(
-                RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+            try await publishEmergencyPresentation(
+                after: RequiredThemeResourceFailureDTO(
+                    moduleID: RuneScribeModuleIDs.norseTheme,
+                    codexID: RuneScribeCodexIDs.norse,
+                    stage: .contributionPublication,
+                    errorCode: .contributionRejected
+                ),
+                context: context
             )
         }
     }
 
     public func stop() async {}
+
+    private func publishEmergencyPresentation(
+        after failure: RequiredThemeResourceFailureDTO,
+        context: ModuleContext
+    ) async throws {
+        // Publish bounded provenance before the descriptor-only contribution.
+        // The coordinator can then retain an inspectable emergency diagnostic
+        // without blocking Core encode/decode availability.
+        try await context.publishRequiredBaseResourceFailure(failure)
+        try await context.publishThemeDescriptor(
+            RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        )
+    }
 }

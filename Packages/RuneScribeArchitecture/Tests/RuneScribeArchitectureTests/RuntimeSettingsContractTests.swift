@@ -26,6 +26,7 @@ final class RuntimeSettingsContractTests: XCTestCase {
         )
 
         XCTAssertEqual(decoded, value)
+        XCTAssertTrue(encoded.rawValue.contains(#""schemaVersion":2"#))
         XCTAssertLessThan(
             encoded.rawValue.range(of: "codex.moonleaf")!.lowerBound,
             encoded.rawValue.range(of: "codex.norse")!.lowerBound
@@ -76,7 +77,7 @@ final class RuntimeSettingsContractTests: XCTestCase {
         }
 
         let future = try XCTUnwrap(RuntimeSettingText(
-            rawValue: #"{"kind":"relic","schemaVersion":2,"selections":[]}"#
+            rawValue: #"{"kind":"relic","schemaVersion":3,"selections":[]}"#
         ))
         XCTAssertThrowsError(try RuntimeArtifactSelectionCodec.decodeForRead(
             future,
@@ -84,7 +85,7 @@ final class RuntimeSettingsContractTests: XCTestCase {
         )) { error in
             XCTAssertEqual(
                 error as? RuntimeArtifactSelectionContractError,
-                .unsupportedVersion(2)
+                .unsupportedVersion(3)
             )
         }
 
@@ -108,6 +109,162 @@ final class RuntimeSettingsContractTests: XCTestCase {
             unexpected,
             expectedKind: .relic
         ))
+
+        for schemaVersion in ["true", "false", "1.5"] {
+            let text = try XCTUnwrap(RuntimeSettingText(
+                rawValue: #"{"kind":"relic","schemaVersion":\#(schemaVersion),"selections":[]}"#
+            ))
+            XCTAssertThrowsError(
+                try RuntimeArtifactSelectionCodec.decodeForRead(text, expectedKind: .relic),
+                "schemaVersion=\(schemaVersion) must not decode as an integer"
+            )
+        }
+
+        let nestedUnexpected = try XCTUnwrap(RuntimeSettingText(
+            rawValue: #"{"kind":"relic","schemaVersion":1,"selections":[{"artifactID":"relic.norse.one","codexID":"codex.norse","extra":true}]}"#
+        ))
+        XCTAssertThrowsError(try RuntimeArtifactSelectionCodec.decodeForRead(
+            nestedUnexpected,
+            expectedKind: .relic
+        )) { error in
+            XCTAssertEqual(
+                error as? RuntimeArtifactSelectionContractError,
+                .unexpectedFields
+            )
+        }
+
+        let nonCanonical = try XCTUnwrap(RuntimeSettingText(
+            rawValue: #"{"kind":"relic", "schemaVersion":2,"selections":[]}"#
+        ))
+        XCTAssertThrowsError(try RuntimeArtifactSelectionCodec.decodeCurrentWrite(
+            nonCanonical,
+            expectedKind: .relic
+        )) { error in
+            XCTAssertEqual(
+                error as? RuntimeArtifactSelectionContractError,
+                .nonCanonical
+            )
+        }
+    }
+
+    func testArtifactSelectionV2PersistsExplicitOptionalNone() throws {
+        let codexID = try XCTUnwrap(CodexID(rawValue: "codex.norse"))
+        let fallbackSeal = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.knotwork"))
+        let empty = try RuntimeCodexArtifactSelectionMap(kind: .seal)
+        let explicitNone = try empty.setting(nil, for: codexID)
+
+        XCTAssertNil(empty.storedPreference(for: codexID))
+        XCTAssertEqual(
+            explicitNone.storedPreference(for: codexID),
+            RuntimeArtifactSelectionPreference.none
+        )
+        XCTAssertNil(explicitNone[codexID])
+        XCTAssertNil(explicitNone.resolvedArtifactID(
+            for: codexID,
+            availableArtifactIDs: [fallbackSeal],
+            fallbackArtifactID: fallbackSeal
+        ))
+
+        let encoded = try RuntimeArtifactSelectionCodec.encode(explicitNone)
+        XCTAssertEqual(
+            encoded.rawValue,
+            #"{"kind":"seal","schemaVersion":2,"selections":[{"artifactID":null,"codexID":"codex.norse"}]}"#
+        )
+        let decoded = try RuntimeArtifactSelectionCodec.decodeForRead(
+            encoded,
+            expectedKind: .seal
+        )
+        XCTAssertEqual(decoded.encoding, .current)
+        XCTAssertEqual(
+            decoded.value.storedPreference(for: codexID),
+            RuntimeArtifactSelectionPreference.none
+        )
+        XCTAssertEqual(
+            try RuntimeArtifactSelectionCodec.decodeCurrentWrite(
+                encoded,
+                expectedKind: .seal
+            ),
+            explicitNone
+        )
+    }
+
+    func testArtifactSelectionReadsV1AndUnversionedNoneButWritesOnlyV2() throws {
+        let codexID = try XCTUnwrap(CodexID(rawValue: "codex.norse"))
+        let versionOne = try XCTUnwrap(RuntimeSettingText(
+            rawValue: #"{"kind":"frame","schemaVersion":1,"selections":[{"artifactID":"frame.none","codexID":"codex.norse"}]}"#
+        ))
+        let decodedV1 = try RuntimeArtifactSelectionCodec.decodeForRead(
+            versionOne,
+            expectedKind: .frame
+        )
+        XCTAssertEqual(decodedV1.encoding, .legacySchemaVersion(1))
+        XCTAssertEqual(
+            decodedV1.value.storedPreference(for: codexID),
+            RuntimeArtifactSelectionPreference.none
+        )
+        XCTAssertThrowsError(try RuntimeArtifactSelectionCodec.decodeCurrentWrite(
+            versionOne,
+            expectedKind: .frame
+        )) { error in
+            XCTAssertEqual(
+                error as? RuntimeArtifactSelectionContractError,
+                .nonCanonical
+            )
+        }
+
+        let unversioned = try XCTUnwrap(RuntimeSettingText(
+            rawValue: "codex.norse=frame.none"
+        ))
+        let decodedUnversioned = try RuntimeArtifactSelectionCodec.decodeForRead(
+            unversioned,
+            expectedKind: .frame
+        )
+        XCTAssertEqual(decodedUnversioned.encoding, .legacyUnversioned)
+        XCTAssertEqual(
+            decodedUnversioned.value.storedPreference(for: codexID),
+            RuntimeArtifactSelectionPreference.none
+        )
+
+        let canonicalV2 = try RuntimeArtifactSelectionCodec.encode(decodedV1.value)
+        XCTAssertTrue(canonicalV2.rawValue.contains(#""artifactID":null"#))
+        XCTAssertTrue(canonicalV2.rawValue.contains(#""schemaVersion":2"#))
+        XCTAssertNoThrow(try RuntimeArtifactSelectionCodec.decodeCurrentWrite(
+            canonicalV2,
+            expectedKind: .frame
+        ))
+    }
+
+    func testArtifactSelectionRejectsNullRelicAndSentinelIDsInV2() throws {
+        let nullRelic = try XCTUnwrap(RuntimeSettingText(
+            rawValue: #"{"kind":"relic","schemaVersion":2,"selections":[{"artifactID":null,"codexID":"codex.norse"}]}"#
+        ))
+        XCTAssertThrowsError(try RuntimeArtifactSelectionCodec.decodeForRead(
+            nullRelic,
+            expectedKind: .relic
+        )) { error in
+            XCTAssertEqual(
+                error as? RuntimeArtifactSelectionContractError,
+                .artifactKindMismatch
+            )
+        }
+
+        for (kind, sentinel) in [
+            (RuntimeArtifactSelectionKind.seal, "seal.none"),
+            (.frame, "frame.none"),
+        ] {
+            let text = try XCTUnwrap(RuntimeSettingText(
+                rawValue: #"{"kind":"\#(kind.rawValue)","schemaVersion":2,"selections":[{"artifactID":"\#(sentinel)","codexID":"codex.norse"}]}"#
+            ))
+            XCTAssertThrowsError(try RuntimeArtifactSelectionCodec.decodeForRead(
+                text,
+                expectedKind: kind
+            )) { error in
+                XCTAssertEqual(
+                    error as? RuntimeArtifactSelectionContractError,
+                    .artifactKindMismatch
+                )
+            }
+        }
     }
 
     func testArtifactSelectionBoundAndSafeFallback() throws {
@@ -183,6 +340,30 @@ final class RuntimeSettingsContractTests: XCTestCase {
         }
         XCTAssertThrowsError(try RuntimeSelectedCodexPreference(
             codexID: XCTUnwrap(CodexID(rawValue: "theme.moonleaf"))
+        ))
+
+        for schemaVersion in ["true", "false", "1.5"] {
+            let text = try XCTUnwrap(RuntimeSettingText(
+                rawValue: #"{"codexID":"codex.moonleaf","schemaVersion":\#(schemaVersion)}"#
+            ))
+            XCTAssertThrowsError(
+                try RuntimeSelectedCodexPreferenceCodec.decodeForRead(text),
+                "schemaVersion=\(schemaVersion) must not decode as an integer"
+            )
+        }
+
+        let unexpected = try XCTUnwrap(RuntimeSettingText(
+            rawValue: #"{"codexID":"codex.moonleaf","extra":true,"schemaVersion":1}"#
+        ))
+        XCTAssertThrowsError(try RuntimeSelectedCodexPreferenceCodec.decodeForRead(unexpected)) {
+            XCTAssertEqual(
+                $0 as? RuntimeArtifactSelectionContractError,
+                .unexpectedFields
+            )
+        }
+
+        XCTAssertNil(RuntimeSettingText(
+            rawValue: String(repeating: "x", count: RuntimeSettingText.maximumUTF8Count + 1)
         ))
     }
 

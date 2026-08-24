@@ -127,6 +127,11 @@ final class ShareArtifactRendererTests: XCTestCase {
             ("medium", max(2, pageCapacity / 2), 1),
             ("long", pageCapacity, 1),
             ("paginated", pageCapacity + 1, 2),
+            (
+                "maximum-paginated",
+                pageCapacity * ShareArtifactRenderPolicy.maximumPageCount,
+                ShareArtifactRenderPolicy.maximumPageCount
+            ),
         ]
         for (label, characterCount, expectedPageCount) in cases {
             let inscription = String(repeating: "ᚠ", count: characterCount)
@@ -383,6 +388,27 @@ final class ShareArtifactRendererTests: XCTestCase {
         XCTAssertEqual(presentation.resources, metadata)
         XCTAssertTrue(presentation.compatibility.contains(.safePreviewPresent))
         XCTAssertTrue(presentation.compatibility.contains(.monochromePreviewAvailable))
+
+        if let qualificationPath = ProcessInfo.processInfo.environment[
+            "RUNE_SCRIBE_PREVIEW_QUALIFICATION_OUTPUT"
+        ] {
+            let qualification: [String: Any] = [
+                "schemaVersion": "1.0",
+                "testIdentifier": "RuneScribeUIModuleTests.ShareArtifactRendererTests/"
+                    + "testStaticRendererProducesBoundedFourByThreePreview",
+                "previewBytes": output.pagePNGData[0].count,
+                "previewWidthPixels": Int(output.safePreviewMetadata.pixelSize.width),
+                "previewHeightPixels": Int(output.safePreviewMetadata.pixelSize.height),
+            ]
+            let encodedQualification = try JSONSerialization.data(
+                withJSONObject: qualification,
+                options: [.sortedKeys]
+            )
+            try encodedQualification.write(
+                to: URL(fileURLWithPath: qualificationPath),
+                options: .atomic
+            )
+        }
 
         let constrainedCache = RuntimeThemeDecodedResourceCache(
             maximumDecodedByteCount: 4 * 3 * 4

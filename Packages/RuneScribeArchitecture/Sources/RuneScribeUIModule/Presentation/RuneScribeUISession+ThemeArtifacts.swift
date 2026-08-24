@@ -18,6 +18,14 @@ enum ThemeArtifactSelectionKind: Sendable {
         case .frame: .frame
         }
     }
+
+    var visualKind: ThemeVisualArtifactKind {
+        switch self {
+        case .relic: .relic
+        case .seal: .seal
+        case .frame: .frame
+        }
+    }
 }
 
 struct ThemeArtifactPickerItem: Identifiable, Equatable, Sendable {
@@ -131,22 +139,29 @@ extension RuneScribeUISession {
     }
 
     func clearThemeFrame() async {
+        await clearOptionalThemeArtifact(kind: .frame)
+    }
+
+    func clearThemeSeal() async {
+        await clearOptionalThemeArtifact(kind: .seal)
+    }
+
+    private func clearOptionalThemeArtifact(kind: RuntimeArtifactSelectionKind) async {
         guard let codexID = themeSnapshot?.effectiveCodexID,
               let runtimeSettingsClientHandle
         else {
             themeSelectionError = "That appearance is not available."
             return
         }
-        let current = runtimeSettingsSnapshot?.artifactSelections(for: .frame)
-            ?? RuneScribeRuntimeSettings.defaultArtifactSelections(for: .frame)
-        guard let frameNone = ArtifactID(rawValue: "frame.none"),
-              let selections = try? current.setting(frameNone, for: codexID)
+        let current = runtimeSettingsSnapshot?.artifactSelections(for: kind)
+            ?? RuneScribeRuntimeSettings.defaultArtifactSelections(for: kind)
+        guard let selections = try? current.setting(nil, for: codexID)
         else {
             themeSelectionError = "That appearance could not be saved."
             return
         }
         let existingRevision = runtimeSettingsSnapshot?.settings.first(where: {
-            $0.settingID == RuneScribeRuntimeSettings.selectedFrameByCodex
+            $0.settingID == kind.settingID
         })?.revision
         do {
             _ = try await runtimeSettingsClientHandle.setArtifactSelections(

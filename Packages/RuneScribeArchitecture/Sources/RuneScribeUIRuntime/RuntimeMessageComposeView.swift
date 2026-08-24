@@ -46,10 +46,7 @@ public enum MessageComposeAttachmentSetupPolicy {
         requiredAttachmentWasPresent: Bool,
         requiredAttachmentAccepted: Bool
     ) -> MessageComposeAttachmentSetupDecision {
-        guard requiredAttachmentWasPresent else {
-            return .presentComposer(requiredAttachmentAccepted: false)
-        }
-        guard requiredAttachmentAccepted else { return .fail }
+        guard requiredAttachmentWasPresent, requiredAttachmentAccepted else { return .fail }
         return .presentComposer(requiredAttachmentAccepted: true)
     }
 }
@@ -68,11 +65,11 @@ public struct MessageComposeCompletionGate: Equatable, Sendable {
     }
 }
 
-/// Thin SwiftUI bridge to the system Messages compose sheet. Presents a prefilled
-/// draft (runes + import link); the user taps Send in Apple's own UI. When the message
-/// must carry the cipher key (the first message to a contact), the key rides as a real
-/// `.runescribe` attachment — and this bridge refuses to quietly mark the key delivered
-/// unless that attachment was actually accepted and the user actually sent.
+/// Thin SwiftUI bridge to the system Messages compose sheet. The user taps Send
+/// in Apple's own UI. Canonical themed first and established deliveries use a
+/// `.runescribe` attachment; only the first includes the cipher key. This bridge
+/// rejects an attachment that the composer cannot accept and records key delivery
+/// only after an eligible sent result.
 public struct MessageComposeView: UIViewControllerRepresentable {
     private let messageText: String
     private let recipients: [String]?
@@ -95,10 +92,10 @@ public struct MessageComposeView: UIViewControllerRepresentable {
         attachment?.presentationURL
     }
 
-    /// Whether this device can send this message at all. Pass `requiredAttachment: true`
-    /// when the message must carry the key file: the device must then also support
-    /// attachments and our UTI, so the key can't be silently dropped. Callers must
-    /// preflight this before presenting the composer.
+    /// Whether this device can send this message at all. Pass
+    /// `requiredAttachment: true` for the canonical themed package so the
+    /// attachment cannot be silently dropped. Callers must preflight this before
+    /// presenting the composer.
     ///
     /// The `MFMessageComposeViewController` capability probes are main-actor-isolated, so
     /// this accessor is too; it is only read from the view body / a button action.

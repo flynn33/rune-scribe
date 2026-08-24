@@ -58,16 +58,39 @@ enum RootPendingPresentationPolicy {
     }
 }
 
+enum RootEmergencyThemeWarningPolicy {
+    static func shouldShow(
+        isEmergencyPresentation: Bool,
+        isDismissed: Bool,
+        showSplash: Bool,
+        isLocked: Bool,
+        hasPendingImport: Bool,
+        hasPendingMessage: Bool,
+        hasActiveReveal: Bool
+    ) -> Bool {
+        isEmergencyPresentation
+            && !isDismissed
+            && !showSplash
+            && !isLocked
+            && !hasPendingImport
+            && !hasPendingMessage
+            && !hasActiveReveal
+    }
+}
+
 /// Hosts the main interface and overlays the lock screen whenever the app is
 /// locked. The Core lifecycle path re-locks on background, while this view plays
 /// the launch splash on a cold start when the 30-day intro schedule allows.
 struct RootView: View {
     @ObservedObject private var session: RuneScribeUISession
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
 
     /// Created once with the process-owned session, so a background/foreground
     /// transition never re-evaluates the cold-launch splash schedule.
     @State private var showSplash: Bool
     @State private var didEvaluateColdLaunchSplash = false
+    @State private var isEmergencyThemeWarningDismissed = false
+    @State private var showsEmergencyThemeWarningDetails = false
 
     init(session: RuneScribeUISession) {
         self.session = session
@@ -97,9 +120,39 @@ struct RootView: View {
         )
     }
 
+    private var showsEmergencyThemeWarning: Bool {
+        RootEmergencyThemeWarningPolicy.shouldShow(
+            isEmergencyPresentation: session.themeSnapshot?.isEmergencyPresentation == true,
+            isDismissed: isEmergencyThemeWarningDismissed,
+            showSplash: showSplash,
+            isLocked: session.isLocked,
+            hasPendingImport: session.pendingImport != nil,
+            hasPendingMessage: session.pendingMessage != nil,
+            hasActiveReveal: session.activeReveal != nil
+        )
+    }
+
     var body: some View {
         ZStack {
             ContentView()
+
+            if showsEmergencyThemeWarning {
+                VStack(spacing: 0) {
+                    RequiredBaseThemeWarning(
+                        failures: session.themeSnapshot?.requiredBaseResourceFailures ?? [],
+                        showsDetails: $showsEmergencyThemeWarningDetails,
+                        dismiss: {
+                            isEmergencyThemeWarningDismissed = true
+                            showsEmergencyThemeWarningDetails = false
+                        }
+                    )
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 12)
+                .safeAreaPadding(.top, 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .zIndex(0.75)
+            }
 
             if let reveal = session.activeReveal,
                !revealIsBlockedAtRoot {
@@ -124,7 +177,18 @@ struct RootView: View {
                 .ignoresSafeArea()
             }
         }
+        // The application shell is the single owner of the provider-neutral
+        // Theme background. A background receives the resolved root bounds
+        // without contributing its renderer's ideal size to workspace layout.
+        .background {
+            RuntimeMetalBackground()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea()
+                .clipped()
+                .accessibilityIdentifier(rootBackgroundAccessibilityIdentifier)
+        }
         .animation(.easeInOut(duration: 0.25), value: session.isLocked)
+        .animation(.easeInOut(duration: 0.2), value: showsEmergencyThemeWarning)
         .onChange(of: session.runtimePresentationSettingsReady, initial: true) { _, _ in
             evaluateColdLaunchSplashIfReady()
         }
@@ -236,6 +300,20 @@ struct RootView: View {
             \.runtimeApplicationResourcePresentation,
             session.resourcePresentation
         )
+        .runeSimulatorAccessibilityQualification()
+    }
+
+    private var rootBackgroundAccessibilityIdentifier: String {
+        let themeID = session.themeSnapshot?.effectiveTheme.id.rawValue ?? "unavailable"
+        let variant = if session.themeSnapshot?.isEmergencyPresentation == true {
+            "emergency"
+        } else if colorSchemeContrast == .increased
+                    || SimulatorAccessibilityQualification.isRequested {
+            "high-contrast"
+        } else {
+            "standard"
+        }
+        return "theme.root-background.\(themeID).\(variant)"
     }
 
     private func evaluateColdLaunchSplashIfReady() {
@@ -258,5 +336,115 @@ struct RootView: View {
     private func dismissPendingMessage() {
         guard let id = session.pendingMessage?.id else { return }
         Task { await session.dismissReceivedMessage(id: id) }
+    }
+}
+
+private struct RequiredBaseThemeWarning: View {
+    let failures: [RequiredThemeResourceFailureDTO]
+    @Binding var showsDetails: Bool
+    let dismiss: () -> Void
+
+    private let accessibilityMessage =
+        "Appearance resources could not be verified. Rune Scribe is using a standard emergency appearance. Your ciphers and messages remain available."
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 10) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(Color.runeWarning)
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Appearance resources could not be verified.")
+                        .font(.headline)
+                        .foregroundStyle(Color.runeTextPrimary)
+                    Text(
+                        "Rune Scribe is using a standard emergency appearance. "
+                            + "Your ciphers and messages remain available."
+                    )
+                    .font(.subheadline)
+                    .foregroundStyle(Color.runeSilver)
+                }
+
+                Spacer(minLength: 4)
+
+                Button(action: dismiss) {
+                    Image(systemName: "xmark")
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Dismiss appearance warning")
+            }
+
+            Button(showsDetails ? "Hide Details" : "Details") {
+                showsDetails.toggle()
+            }
+            .buttonStyle(.bordered)
+            .frame(minHeight: 44)
+            .accessibilityHint("Shows sanitized appearance diagnostics")
+
+            if showsDetails {
+                Divider()
+                if failures.isEmpty {
+                    Text("No additional resource details are available.")
+                        .font(.caption)
+                        .foregroundStyle(Color.runeSilver)
+                } else {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(Array(failures.enumerated()), id: \.offset) { _, failure in
+                                RequiredBaseThemeFailureDetails(failure: failure)
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(maxHeight: 150)
+                }
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                .fill(Color.runeParchment)
+                .shadow(color: .black.opacity(0.28), radius: 10, y: 4)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                .strokeBorder(Color.runeWarning.opacity(0.65), lineWidth: 1)
+        )
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(accessibilityMessage)
+        .accessibilityIdentifier("required-base-theme-warning")
+    }
+}
+
+private struct RequiredBaseThemeFailureDetails: View {
+    let failure: RequiredThemeResourceFailureDTO
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text("Stage: \(failure.stage.rawValue)")
+            if let resourceID = failure.resourceID {
+                Text("Resource: \(resourceID.rawValue)")
+            }
+            Text("Code: \(failure.errorCode.rawValue)")
+            if let expected = failure.expectedByteCount,
+               let actual = failure.actualByteCount {
+                Text("Bytes: expected \(expected), received \(actual)")
+            }
+            if let expected = failure.expectedSHA256,
+               let actual = failure.actualSHA256 {
+                Text("Expected SHA-256: \(expected.rawValue)")
+                Text("Received SHA-256: \(actual.rawValue)")
+            }
+            if let mediaType = failure.mediaType {
+                Text("Media: \(mediaType.rawValue)")
+            }
+        }
+        .font(.caption.monospaced())
+        .foregroundStyle(Color.runeSilver)
+        .textSelection(.enabled)
+        .accessibilityElement(children: .combine)
     }
 }

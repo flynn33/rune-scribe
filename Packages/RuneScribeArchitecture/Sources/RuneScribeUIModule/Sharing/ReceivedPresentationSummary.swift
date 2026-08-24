@@ -8,6 +8,18 @@ import AppKit
 import UIKit
 #endif
 
+enum ValidatedSafePreviewImageDecoder {
+    static func image(from safePreviewData: Data) -> Image? {
+        #if os(macOS)
+        guard let image = NSImage(data: safePreviewData) else { return nil }
+        return Image(nsImage: image)
+        #elseif os(iOS)
+        guard let image = UIImage(data: safePreviewData) else { return nil }
+        return Image(uiImage: image)
+        #endif
+    }
+}
+
 struct ReceivedPresentationViewModel: Equatable, Sendable {
     let codexTitle: String
     let renderStatusTitle: String
@@ -143,12 +155,6 @@ struct ReceivedPresentationSummary: View {
 
     private var previewImage: Image? {
         guard let safePreviewData else { return nil }
-        #if os(macOS)
-        guard let image = NSImage(data: safePreviewData) else { return nil }
-        return Image(nsImage: image)
-        #elseif os(iOS)
-        guard let image = UIImage(data: safePreviewData) else { return nil }
-        return Image(uiImage: image)
-        #endif
+        return ValidatedSafePreviewImageDecoder.image(from: safePreviewData)
     }
 }

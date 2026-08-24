@@ -1,8 +1,8 @@
 # Rune Scribe — Phase 4: Apple Messages Send & Key Auto-Exchange — Implementation Plan
 
 > **Historical plan.** Publication-sensitive bridge identifiers have been neutralized.
-> Do not execute its site commands; current deployment records are authoritative. The
-> current application is version 1.0.38 build 38. Hardware-only procedures in this plan
+> Do not execute its site commands; current deployment records are authoritative. This
+> historical snapshot records version 1.0.38 build 38. Hardware-only procedures in this plan
 > are owner-operated optional observations outside Agent Coding scope and have no
 > acceptance, completion, blocker, residual-work, PASS/FAIL, or pull-request-readiness
 > effect.

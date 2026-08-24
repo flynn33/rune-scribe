@@ -1036,6 +1036,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
     @Published internal private(set) var splashPlayer: AVPlayer?
     @Published internal private(set) var metalResource: RuntimeMetalResource?
     @Published internal private(set) var themeBackgroundRevision: UInt64 = 0
+    @Published internal private(set) var themeEffectsPreference: RuntimeEffectsPreference = .full
 
     private var splashLease: RuntimeApplicationResourceLease?
     private var metalLease: RuntimeApplicationResourceLease?
@@ -1088,6 +1089,17 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
 
     public func makeMetalView() -> AnyView {
         AnyView(RuntimeMetalPresentationView(presentation: self))
+    }
+
+    /// Applies the runtime-owned optional-effects preference to the application
+    /// background. High contrast remains authoritative, system Reduce Motion
+    /// caps Full at Reduced, and Off always selects a static presentation.
+    public func setThemeEffectsPreference(_ preference: RuntimeEffectsPreference) {
+        guard themeEffectsPreference != preference else { return }
+        themeEffectsPreference = preference
+        if preference != .full {
+            stopMetal()
+        }
     }
 
     public func makeThemeImageReference(
@@ -1442,8 +1454,13 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         if increasedContrast {
             return .highContrast
         }
-        if reduceMotion {
+        switch themeEffectsPreference.effective(systemReduceMotion: reduceMotion) {
+        case .reduced:
             return .reduceMotion
+        case .off:
+            return .staticBase
+        case .full:
+            break
         }
         if themeBackgroundConfiguration?.parameters != nil,
            metalResource != nil {
@@ -1467,6 +1484,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
 
     func startMetal() async {
         guard !isClosed,
+              themeEffectsPreference == .full,
               metalResource == nil,
               !metalIsStarting,
               let metalLibrarySession
@@ -1483,6 +1501,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
                 return
             }
             guard !isClosed,
+                  themeEffectsPreference == .full,
                   themeBackgroundConfiguration?.parameters != nil,
                   let device = MTLCreateSystemDefaultDevice(),
                   let library = try? device.makeLibrary(URL: lease.url),
@@ -1503,7 +1522,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
                 }
             }
         } catch {
-            // Missing or revoked optional presentation resources degrade to a static header.
+            // Missing or revoked optional presentation resources degrade to a static background.
         }
     }
 
@@ -1760,12 +1779,15 @@ private struct RuntimeMetalPresentationView: View {
     @ObservedObject var presentation: RuntimeApplicationResourcePresentation
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    @Environment(\.runtimeAccessibilityPreferences) private var accessibilityPreferences
 
     var body: some View {
         selectedBackground
             .task(id: loadingIdentity) {
-                guard !reduceMotion,
-                      colorSchemeContrast != .increased,
+                guard presentation.themeEffectsPreference.effective(
+                    systemReduceMotion: effectiveReduceMotion
+                ) == .full,
+                      !usesIncreasedContrast,
                       presentation.themeBackgroundParameters != nil
                 else { return }
                 await presentation.startMetal()
@@ -1775,8 +1797,8 @@ private struct RuntimeMetalPresentationView: View {
     @ViewBuilder
     private var selectedBackground: some View {
         switch presentation.themeBackgroundPresentationVariant(
-            reduceMotion: reduceMotion,
-            increasedContrast: colorSchemeContrast == .increased
+            reduceMotion: effectiveReduceMotion,
+            increasedContrast: usesIncreasedContrast
         ) {
         case .highContrast:
             if let image = presentation.highContrastThemeBackgroundImage {
@@ -1820,9 +1842,19 @@ private struct RuntimeMetalPresentationView: View {
     private var loadingIdentity: RuntimeMetalLoadingIdentity {
         RuntimeMetalLoadingIdentity(
             revision: presentation.themeBackgroundRevision,
-            reduceMotion: reduceMotion,
-            increasedContrast: colorSchemeContrast == .increased
+            reduceMotion: effectiveReduceMotion,
+            increasedContrast: usesIncreasedContrast,
+            effectsPreference: presentation.themeEffectsPreference
         )
+    }
+
+    private var effectiveReduceMotion: Bool {
+        reduceMotion || accessibilityPreferences.forcesReduceMotion
+    }
+
+    private var usesIncreasedContrast: Bool {
+        colorSchemeContrast == .increased
+            || accessibilityPreferences.forcesIncreasedContrast
     }
 }
 
@@ -1830,6 +1862,7 @@ private struct RuntimeMetalLoadingIdentity: Equatable {
     let revision: UInt64
     let reduceMotion: Bool
     let increasedContrast: Bool
+    let effectsPreference: RuntimeEffectsPreference
 }
 
 private struct RuntimeMetalSurfaceIdentity: Hashable {

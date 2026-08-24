@@ -675,6 +675,31 @@ final class RuntimeApplicationResourcePresentationTests: XCTestCase {
             .highContrast
         )
 
+        presentation.setThemeEffectsPreference(.reduced)
+        XCTAssertEqual(
+            presentation.themeBackgroundPresentationVariant(
+                reduceMotion: false,
+                increasedContrast: false
+            ),
+            .reduceMotion
+        )
+        presentation.setThemeEffectsPreference(.off)
+        XCTAssertEqual(
+            presentation.themeBackgroundPresentationVariant(
+                reduceMotion: false,
+                increasedContrast: false
+            ),
+            .staticBase
+        )
+        XCTAssertEqual(
+            presentation.themeBackgroundPresentationVariant(
+                reduceMotion: false,
+                increasedContrast: true
+            ),
+            .highContrast
+        )
+        presentation.setThemeEffectsPreference(.full)
+
         XCTAssertNotNil(presentation.staticThemeBackgroundImage)
         XCTAssertEqual(cache.decodedImageCount, 1)
         XCTAssertEqual(cache.totalDecodedByteCount, 4)

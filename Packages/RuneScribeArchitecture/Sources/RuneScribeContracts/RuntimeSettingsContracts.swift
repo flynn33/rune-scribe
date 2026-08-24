@@ -69,6 +69,33 @@ public struct RuntimeSettingDescriptor: Codable, Equatable, Sendable {
     }
 }
 
+/// The persisted preference for optional decorative motion and presentation
+/// effects. Required security feedback and readable text never depend on this
+/// value.
+public enum RuntimeEffectsPreference: String, Codable, CaseIterable, Sendable {
+    case full
+    case reduced
+    case off
+
+    public var settingValue: RuntimeSettingValue {
+        .text(RuntimeSettingText(rawValue: rawValue)!)
+    }
+
+    public static func storedValue(_ value: RuntimeSettingValue?) -> Self {
+        guard let rawValue = value?.textValue?.rawValue,
+              let preference = Self(rawValue: rawValue)
+        else { return .full }
+        return preference
+    }
+
+    /// System Reduce Motion is an upper bound. It changes effective behavior,
+    /// not the value saved by the user.
+    public func effective(systemReduceMotion: Bool) -> Self {
+        guard systemReduceMotion, self == .full else { return self }
+        return .reduced
+    }
+}
+
 public struct RuntimeSettingDTO: Codable, Equatable, Sendable {
     public let settingID: RuntimeSettingID
     public let value: RuntimeSettingValue
@@ -168,6 +195,9 @@ public enum RuneScribeRuntimeSettings {
     public static let selectedFrameByCodex = RuntimeSettingID(
         rawValue: "setting.appearance.selected-frame-by-codex"
     )!
+    public static let effectsPreference = RuntimeSettingID(
+        rawValue: "setting.appearance.effects-preference"
+    )!
     public static let contactsImportPrompted = RuntimeSettingID(
         rawValue: "setting.presentation.contacts-import-prompted"
     )!
@@ -178,10 +208,10 @@ public enum RuneScribeRuntimeSettings {
     public static func defaultArtifactSelections(
         for kind: RuntimeArtifactSelectionKind
     ) -> RuntimeCodexArtifactSelectionMap {
-        let artifactID: ArtifactID = switch kind {
+        let artifactID: ArtifactID? = switch kind {
         case .relic: ArtifactID(rawValue: "relic.norse.runestone.weathered")!
         case .seal: ArtifactID(rawValue: "seal.norse.knotwork")!
-        case .frame: ArtifactID(rawValue: "frame.none")!
+        case .frame: nil
         }
         let selection = try! RuntimeCodexArtifactSelection(
             codexID: RuneScribeCodexIDs.norse,
@@ -235,6 +265,10 @@ public enum RuneScribeRuntimeSettings {
             defaultValue: defaultArtifactSelectionValue(for: .frame)
         ),
         RuntimeSettingDescriptor(
+            settingID: effectsPreference,
+            defaultValue: RuntimeEffectsPreference.full.settingValue
+        ),
+        RuntimeSettingDescriptor(
             settingID: contactsImportPrompted,
             defaultValue: .boolean(false)
         ),
@@ -279,6 +313,10 @@ public extension RuntimeSettingsSnapshotDTO {
             return RuneScribeRuntimeSettings.defaultArtifactSelections(for: kind)
         }
         return decoded.value
+    }
+
+    var effectsPreference: RuntimeEffectsPreference {
+        RuntimeEffectsPreference.storedValue(self[RuneScribeRuntimeSettings.effectsPreference])
     }
 }
 
