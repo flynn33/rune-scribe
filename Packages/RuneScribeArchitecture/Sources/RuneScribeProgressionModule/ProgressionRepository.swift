@@ -415,16 +415,27 @@ struct ProgressionRepository: Sendable {
             if stored.health.quarantinedRecordCount ==
                 stored.projection.metadata.knownInactiveQuarantineCount
             {
+                let legacyArtifactAliasPolicy:
+                    ProgressionLegacyArtifactAliasValidationPolicy =
+                        ProgressionNorseV2Migration.applies(
+                            from: stored.projection.metadata.catalogVersion,
+                            to: bundle.catalog.catalogVersion
+                        ) ? .allEvents : .incomingOnly
                 do {
                     try await validateProjectionLedgerProvenance(
                         stored.projection,
-                        bundle: bundle
+                        bundle: bundle,
+                        legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
                     )
                 } catch {
                     try await quarantineActiveProjection(stored.projection, error: error)
                     throw error
                 }
-                try await validateActiveAppliedLedger(stored.projection, bundle: bundle)
+                try await validateActiveAppliedLedger(
+                    stored.projection,
+                    bundle: bundle,
+                    legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
+                )
             }
             if stored.health.quarantinedRecordCount !=
                 stored.projection.metadata.knownInactiveQuarantineCount
@@ -668,9 +679,11 @@ struct ProgressionRepository: Sendable {
                 )
             }
             if metadata.catalogVersion < bundle.catalog.catalogVersion {
-                try ProgressionCatalogCompatibility.validateAddOnlyUpgrade(
+                try ProgressionCatalogCompatibility.validateUpgrade(
                     from: migrations[0].compatibilityFingerprints,
-                    to: ProgressionCatalogCompatibility.fingerprints(for: bundle)
+                    to: ProgressionCatalogCompatibility.fingerprints(for: bundle),
+                    fromVersion: metadata.catalogVersion,
+                    toVersion: bundle.catalog.catalogVersion
                 )
             }
             recoveredCatalogMigration = migrations[0]
@@ -2319,6 +2332,26 @@ struct ProgressionRepository: Sendable {
         )
     }
 
+    func structurallyValidatedAcknowledgementRecords(
+        generation: String,
+        bundle: ValidatedProgressionCatalogBundle
+    ) async throws -> [ProgressionLocatedRecord<PendingRevealRecord>] {
+        var values: [ProgressionLocatedRecord<PendingRevealRecord>] = []
+        var cursor: ModuleStateScanCursor?
+        repeat {
+            let page = try await acknowledgementPage(
+                generation: generation,
+                validationRecords: [:],
+                bundle: bundle,
+                validateReferences: false,
+                cursor: cursor
+            )
+            values.append(contentsOf: page.records)
+            cursor = try await refreshedCursor(page.next)
+        } while cursor != nil
+        return values
+    }
+
     func validatePreservedRevealReferences(
         _ records: [ProgressionLocatedRecord<PendingRevealRecord>],
         against projection: ProgressionProjection,
@@ -3388,6 +3421,10 @@ struct ProgressionRepository: Sendable {
               ProgressionDeterminism.isDigest(sourceGeneration),
               ProgressionDeterminism.isDigest(destinationGeneration)
         else { throw ProgressionDomainError.invalidRecord("generation-copy") }
+        let migratesNorseV2 = ProgressionNorseV2Migration.applies(
+            from: sourceProjection.metadata.catalogVersion,
+            to: bundle.catalog.catalogVersion
+        )
 
         var cursor: ModuleStateScanCursor?
         var terminalProcessedEventCount: UInt64 = 0
@@ -3399,10 +3436,39 @@ struct ProgressionRepository: Sendable {
             )
             for record in page.records {
                 if record.outcome == .applied {
+                    let expected: ProcessedEventRecord
+                    if migratesNorseV2 {
+                        guard case let .accepted(sourceEvent) =
+                                ProgressionEventValidator.validate(
+                                    record.envelope,
+                                    bundle: bundle,
+                                    legacyArtifactAliasPolicy: .allEvents
+                                )
+                        else {
+                            throw ProgressionDomainError.invalidRecord(
+                                "generation-copy-applied-event"
+                            )
+                        }
+                        let event = try ProgressionEventValidator
+                            .canonicalizingLegacyArtifactAliases(
+                                in: sourceEvent,
+                                bundle: bundle
+                            )
+                        expected = ProcessedEventRecord(
+                            envelope: event.envelope,
+                            envelopeDigest: event.envelopeDigest,
+                            semanticDigest: event.semanticDigest,
+                            outcome: .applied,
+                            transactionID: record.transactionID,
+                            appliedRevision: record.appliedRevision
+                        )
+                    } else {
+                        expected = record
+                    }
                     guard try await processedEvent(
                         record.eventID,
                         generation: destinationGeneration
-                    ) == record else {
+                    ) == expected else {
                         throw ProgressionDomainError.invalidRecord(
                             "generation-copy-applied-event"
                         )
@@ -4779,7 +4845,9 @@ struct ProgressionRepository: Sendable {
         _ record: ProcessedEventRecord,
         generation: String,
         semanticGeneration: String? = nil,
-        bundle: ValidatedProgressionCatalogBundle
+        bundle: ValidatedProgressionCatalogBundle,
+        legacyArtifactAliasPolicy: ProgressionLegacyArtifactAliasValidationPolicy =
+            .incomingOnly
     ) async throws {
         try record.validate()
         switch record.outcome {
@@ -4788,7 +4856,8 @@ struct ProgressionRepository: Sendable {
         case .duplicate:
             guard case let .accepted(event) = ProgressionEventValidator.validate(
                 record.envelope,
-                bundle: bundle
+                bundle: bundle,
+                legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
             ), record.semanticDigest == event.semanticDigest,
             let semantic = try await semanticRecord(
                 event.semanticDigest,
@@ -4803,7 +4872,8 @@ struct ProgressionRepository: Sendable {
         case .ignoredIneligible:
             guard case .ignored = ProgressionEventValidator.validate(
                 record.envelope,
-                bundle: bundle
+                bundle: bundle,
+                legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
             ), record.semanticDigest == nil
             else {
                 throw ProgressionDomainError.invalidRecord("terminal-ignored-semantics")
@@ -4811,7 +4881,8 @@ struct ProgressionRepository: Sendable {
         case .rejectedPermanent:
             let validation = ProgressionEventValidator.validate(
                 record.envelope,
-                bundle: bundle
+                bundle: bundle,
+                legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
             )
             let isCatalogRejection: Bool
             if case let .rejected(code) = validation {
@@ -4841,7 +4912,9 @@ struct ProgressionRepository: Sendable {
 
     func validateActiveAppliedLedger(
         _ projection: ProgressionProjection,
-        bundle: ValidatedProgressionCatalogBundle
+        bundle: ValidatedProgressionCatalogBundle,
+        legacyArtifactAliasPolicy: ProgressionLegacyArtifactAliasValidationPolicy =
+            .incomingOnly
     ) async throws {
         let metadata = projection.metadata
         let generation = metadata.activeGeneration
@@ -4865,7 +4938,8 @@ struct ProgressionRepository: Sendable {
                 }
                 guard case .accepted = ProgressionEventValidator.validate(
                     order.envelope,
-                    bundle: bundle
+                    bundle: bundle,
+                    legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
                 ) else {
                     try await quarantineAppliedEventOrder(
                         revision: order.appliedRevision,
@@ -4908,7 +4982,8 @@ struct ProgressionRepository: Sendable {
             for order in page.records {
                 guard case let .accepted(event) = ProgressionEventValidator.validate(
                     order.envelope,
-                    bundle: bundle
+                    bundle: bundle,
+                    legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
                 ) else {
                     throw ProgressionDomainError.invalidRecord("active-ledger-event")
                 }
@@ -4967,7 +5042,8 @@ struct ProgressionRepository: Sendable {
                 case .applied:
                     guard case let .accepted(event) = ProgressionEventValidator.validate(
                         record.envelope,
-                        bundle: bundle
+                        bundle: bundle,
+                        legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
                     ), record.semanticDigest == event.semanticDigest
                     else {
                         try await quarantineProcessedEvent(
@@ -4983,7 +5059,8 @@ struct ProgressionRepository: Sendable {
                         try await validateTerminalProcessedRecord(
                             record,
                             generation: generation,
-                            bundle: bundle
+                            bundle: bundle,
+                            legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
                         )
                     } catch {
                         try await quarantineProcessedEvent(
@@ -5033,6 +5110,10 @@ struct ProgressionRepository: Sendable {
                 label: "upgrade-migration-baseline"
             )
         }
+        let migratesNorseV2 = ProgressionNorseV2Migration.applies(
+            from: projection.metadata.catalogVersion,
+            to: bundle.catalog.catalogVersion
+        )
         let priorKeys = Set(migrations[0].compatibilityFingerprints.map(\.stableKey))
         let catalog = bundle.catalog
         let priorStatisticIDs = Set(priorKeys.compactMap { key -> StatisticID? in
@@ -5249,9 +5330,18 @@ struct ProgressionRepository: Sendable {
                 let expected: UInt64
                 switch statistic.dimension {
                 case .contentID:
-                    expected = UInt64(ownership.keys.filter {
-                        catalog.content(id: $0)?.countsAsArtifact == true
-                    }.count)
+                    if migratesNorseV2 {
+                        expected = UInt64(ownership.keys.filter { contentID in
+                            guard let canonicalID = ProgressionNorseV2Migration
+                                .canonicalContentID(contentID, catalog: catalog)
+                            else { return false }
+                            return catalog.content(id: canonicalID)?.countsAsArtifact == true
+                        }.count)
+                    } else {
+                        expected = UInt64(ownership.keys.filter {
+                            catalog.content(id: $0)?.countsAsArtifact == true
+                        }.count)
+                    }
                 case .achievementID:
                     expected = UInt64(completions.count)
                 default:
@@ -5326,6 +5416,10 @@ struct ProgressionRepository: Sendable {
                 )
             }
             let migration = migrations[0]
+            let migratesNorseV2 = ProgressionNorseV2Migration.applies(
+                from: stored.metadata.catalogVersion,
+                to: bundle.catalog.catalogVersion
+            )
             let priorKeys = Set(migration.compatibilityFingerprints.map { $0.stableKey })
             let priorAchievementIDs = Set(priorKeys.compactMap { key -> AchievementID? in
                 guard key.hasPrefix("achievement:") else { return nil }
@@ -5367,6 +5461,30 @@ struct ProgressionRepository: Sendable {
             for logical in stored.logicalRecords() {
                 switch logical {
                 case let .statisticCounter(record):
+                    if migratesNorseV2,
+                       case let .statisticContentUse(use)? = stored.records[
+                        logical.identity.replacingOccurrences(
+                            of: "counter|",
+                            with: "content-use|"
+                        )
+                       ]
+                    {
+                        let canonical = try ProgressionNorseV2Migration.canonicalContentUse(
+                            use,
+                            generation: replayed.metadata.activeGeneration,
+                            catalog: bundle.catalog
+                        )
+                        guard case let .statisticCounter(current)? = replayed.records[
+                            logical.identity
+                        ], current.value == UInt64(canonical.contentIDs.count)
+                        else {
+                            throw ProgressionProjectionIntegrityIssue(
+                                categories: [.statisticCounter],
+                                label: "upgrade-replay-statistic-value"
+                            )
+                        }
+                        continue
+                    }
                     guard let definition = bundle.catalog.statistic(
                         id: record.statisticID
                     ) else {
@@ -5382,9 +5500,20 @@ struct ProgressionRepository: Sendable {
                             label: "upgrade-replay-statistic-value"
                         )
                     }
-                case .statisticContentUse:
+                case let .statisticContentUse(record):
+                    let expected = if migratesNorseV2 {
+                        ProgressionLogicalRecord.statisticContentUse(
+                            try ProgressionNorseV2Migration.canonicalContentUse(
+                                record,
+                                generation: replayed.metadata.activeGeneration,
+                                catalog: bundle.catalog
+                            )
+                        )
+                    } else {
+                        logical
+                    }
                     try requireEquivalent(
-                        logical,
+                        expected,
                         categories: [.statisticCounter],
                         label: "upgrade-replay-content-use"
                     )
@@ -5418,27 +5547,76 @@ struct ProgressionRepository: Sendable {
                         categories: [.milestoneCompletion],
                         label: "upgrade-replay-milestone-completion"
                     )
-                case .grant:
+                case let .grant(record):
+                    let expected: ProgressionLogicalRecord
+                    if migratesNorseV2 {
+                        guard let mapped = ProgressionNorseV2Migration.mappedGrant(
+                            record,
+                            generation: replayed.metadata.activeGeneration,
+                            catalog: bundle.catalog
+                        ) else {
+                            throw ProgressionProjectionIntegrityIssue(
+                                categories: [.grant],
+                                label: "upgrade-replay-grant-map"
+                            )
+                        }
+                        expected = .grant(mapped)
+                    } else {
+                        expected = logical
+                    }
                     try requireEquivalent(
-                        logical,
+                        expected,
                         categories: [.grant],
                         label: "upgrade-replay-grant"
                     )
-                case .ownership:
-                    try requireEquivalent(
-                        logical,
-                        categories: [.ownership],
-                        label: "upgrade-replay-ownership"
-                    )
+                case let .ownership(record):
+                    let expected = if migratesNorseV2 {
+                        ProgressionLogicalRecord.ownership(
+                            try ProgressionNorseV2Migration.mappedOwnership(
+                                record,
+                                oldProjection: stored,
+                                generation: replayed.metadata.activeGeneration,
+                                catalog: bundle.catalog
+                            )
+                        )
+                    } else {
+                        logical
+                    }
+                    guard case let .ownership(current)? = replayed.records[expected.identity],
+                          case let .ownership(value) = expected,
+                          Set(value.sourceGrantKeys).isSubset(
+                            of: Set(current.sourceGrantKeys)
+                          ),
+                          current.contentID == value.contentID,
+                          value.grantedAt == nil || current.grantedAt.map({
+                              $0 <= value.grantedAt!
+                          }) == true
+                    else {
+                        throw ProgressionProjectionIntegrityIssue(
+                            categories: [.ownership],
+                            label: "upgrade-replay-ownership"
+                        )
+                    }
                 case .entitlement:
                     try requireEquivalent(
                         logical,
                         categories: [.entitlement],
                         label: "upgrade-replay-entitlement"
                     )
-                case .encounter:
+                case let .encounter(record):
+                    let expected = if migratesNorseV2 {
+                        ProgressionLogicalRecord.encounter(
+                            try ProgressionNorseV2Migration.canonicalEncounter(
+                                record,
+                                generation: replayed.metadata.activeGeneration,
+                                catalog: bundle.catalog
+                            )
+                        )
+                    } else {
+                        logical
+                    }
                     try requireEquivalent(
-                        logical,
+                        expected,
                         categories: [.encounter],
                         label: "upgrade-replay-encounter"
                     )
@@ -5449,16 +5627,41 @@ struct ProgressionRepository: Sendable {
                         label: "upgrade-replay-title"
                     )
                 case .revealQueueState:
-                    try requireEquivalent(
-                        logical,
-                        categories: [.pendingReveal],
-                        label: "upgrade-replay-reveal-queue"
-                    )
+                    if !migratesNorseV2 {
+                        try requireEquivalent(
+                            logical,
+                            categories: [.pendingReveal],
+                            label: "upgrade-replay-reveal-queue"
+                        )
+                    }
                 case .catalogMigration:
                     continue
-                case .existingUserMigration:
+                case let .existingUserMigration(record):
+                    let expected = if migratesNorseV2 {
+                        ProgressionLogicalRecord.existingUserMigration(
+                            ExistingUserMigrationRecord(
+                                generation: replayed.metadata.activeGeneration,
+                                snapshotSchemaVersion: record.snapshotSchemaVersion,
+                                transactionID: record.transactionID,
+                                snapshotDigest: record.snapshotDigest,
+                                cipherCount: record.cipherCount,
+                                handoffSchemaVersion: record.handoffSchemaVersion,
+                                pageCount: record.pageCount,
+                                completedAt: record.completedAt,
+                                grantTransactionID: record.grantTransactionID,
+                                revealBundle: try record.revealBundle.map {
+                                    try ProgressionNorseV2Migration.canonicalRevealBundle(
+                                        $0,
+                                        catalog: bundle.catalog
+                                    )
+                                }
+                            )
+                        )
+                    } else {
+                        logical
+                    }
                     try requireEquivalent(
-                        logical,
+                        expected,
                         categories: [.catalogMigration],
                         label: "upgrade-replay-existing-user-migration"
                     )
@@ -5476,7 +5679,10 @@ struct ProgressionRepository: Sendable {
                     isPriorIdentity = priorAchievementIDs.contains(record.achievementID)
                     categories = [.achievementCompletion]
                 case let .milestoneCompletion(record):
-                    isPriorIdentity = priorRuleIDs.contains(record.ruleID)
+                    isPriorIdentity = priorRuleIDs.contains(record.ruleID) && !(
+                        migratesNorseV2 &&
+                            record.ruleID.rawValue == "rule.codex.norse.mastery"
+                    )
                     categories = [.milestoneCompletion]
                 case let .grant(record):
                     let itemKey = "grant-item:\(record.grantGroupID.rawValue):\(record.contentID.rawValue)"
@@ -5521,7 +5727,9 @@ struct ProgressionRepository: Sendable {
 
     private func validateProjectionLedgerProvenance(
         _ projection: ProgressionProjection,
-        bundle: ValidatedProgressionCatalogBundle
+        bundle: ValidatedProgressionCatalogBundle,
+        legacyArtifactAliasPolicy: ProgressionLegacyArtifactAliasValidationPolicy =
+            .incomingOnly
     ) async throws {
         let generation = projection.metadata.activeGeneration
         let existingUserMigrations = projection.records(matching: {
@@ -5562,7 +5770,8 @@ struct ProgressionRepository: Sendable {
                         : record.completedAt <= processed.envelope.occurredAt),
                        case .accepted = ProgressionEventValidator.validate(
                         processed.envelope,
-                        bundle: bundle
+                        bundle: bundle,
+                        legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
                        )
                     else {
                         throw ProgressionProjectionIntegrityIssue(
@@ -5627,7 +5836,8 @@ struct ProgressionRepository: Sendable {
                         : record.completedAt <= processed.envelope.occurredAt),
                        case .accepted = ProgressionEventValidator.validate(
                         processed.envelope,
-                        bundle: bundle
+                        bundle: bundle,
+                        legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
                        )
                     else {
                         throw ProgressionProjectionIntegrityIssue(
@@ -6437,6 +6647,24 @@ struct ProgressionRepository: Sendable {
         metadataOverride: ProgressionMetadataRecord? = nil,
         ledgerGenerationOverride: String? = nil
     ) async throws {
+        let storedContentIDs = [reveal.primaryContentID] + reveal.secondaryContentIDs
+        if ProgressionNorseV2Migration.isCurrentCatalog(bundle.catalog),
+           storedContentIDs.contains(where: { bundle.catalog.content(id: $0) == nil })
+        {
+            let canonical = try ProgressionNorseV2Migration.canonicalReveal(
+                reveal,
+                generation: reveal.generation,
+                catalog: bundle.catalog
+            )
+            try await validateQueuedRevealReferences(
+                canonical,
+                validationRecords: validationRecords,
+                bundle: bundle,
+                metadataOverride: metadataOverride,
+                ledgerGenerationOverride: ledgerGenerationOverride
+            )
+            return
+        }
         let contentIDs = [reveal.primaryContentID] + reveal.secondaryContentIDs
         let achievementSources = Set(reveal.sourceAchievementIDs.map {
             ProgressionGrantSource.achievement($0)

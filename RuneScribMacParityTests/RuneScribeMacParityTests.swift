@@ -27,11 +27,11 @@ final class RuneScribeMacParityTests: XCTestCase {
             XCTAssertFalse(snapshot.isEmergencyPresentation)
             XCTAssertEqual(
                 harness.session.selectedThemeRelicID?.rawValue,
-                "relic.norse.runestone.weathered"
+                "relic.norse.runestone-tablet"
             )
             XCTAssertEqual(
                 harness.session.selectedThemeSealID?.rawValue,
-                "seal.norse.knotwork"
+                "seal.norse.valknut"
             )
             XCTAssertNil(harness.session.selectedThemeFrameID)
 
@@ -50,7 +50,7 @@ final class RuneScribeMacParityTests: XCTestCase {
             XCTAssertEqual(presentation.revision, presentation.plan.revision)
             XCTAssertEqual(presentation.plan.themeID.rawValue, "theme.norse.base")
             XCTAssertEqual(presentation.plan.codexID.rawValue, "codex.norse")
-            XCTAssertEqual(presentation.plan.relics.count, 5)
+            XCTAssertEqual(presentation.plan.relics.count, 3)
             XCTAssertEqual(presentation.plan.seals.count, 6)
             XCTAssertEqual(presentation.plan.frames.count, 1)
             XCTAssertEqual(presentation.plan.crests.count, 1)
@@ -165,15 +165,17 @@ final class RuneScribeMacParityTests: XCTestCase {
                     isSelectable: visual.availability == .included
                 )
             }
-            let knotworkID = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.knotwork"))
-            let forgeFlameID = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.forge-flame"))
-            let knotwork = try XCTUnwrap(pickerItems.first(where: { $0.id == knotworkID }))
-            let forgeFlame = try XCTUnwrap(pickerItems.first(where: { $0.id == forgeFlameID }))
-            XCTAssertEqual(knotwork.name, "Knotwork Mark")
-            XCTAssertEqual(knotwork.state, .selected)
-            XCTAssertEqual(forgeFlame.name, "Forge Flame")
-            XCTAssertEqual(forgeFlame.state, .owned)
-            for item in [knotwork, forgeFlame] {
+            let valknutID = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.valknut"))
+            let ravenshieldID = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.ravenshield"))
+            let valknut = try XCTUnwrap(pickerItems.first(where: { $0.id == valknutID }))
+            let ravenshield = try XCTUnwrap(
+                pickerItems.first(where: { $0.id == ravenshieldID })
+            )
+            XCTAssertEqual(valknut.name, "Valknut Seal")
+            XCTAssertEqual(valknut.state, .selected)
+            XCTAssertEqual(ravenshield.name, "Ravenshield Seal")
+            XCTAssertEqual(ravenshield.state, .owned)
+            for item in [valknut, ravenshield] {
                 let visual = try XCTUnwrap(
                     presentation.plan.catalog.first(where: { $0.id == item.id })
                 )
@@ -269,7 +271,7 @@ final class RuneScribeMacParityTests: XCTestCase {
                 colorMode: .standard,
                 reduceMotion: false,
                 accessibilityLabel:
-                    "Settled Norse artifact using Weathered Rune Stone and Knotwork Seal",
+                    "Settled Norse artifact using Runestone Tablet and Valknut Seal",
                 provenanceLabel: "Runtime-admitted Norse resources"
             )
             XCTAssertEqual(composition.selection, selection)

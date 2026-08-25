@@ -186,6 +186,7 @@ struct RootView: View {
                 .ignoresSafeArea()
                 .clipped()
                 .accessibilityIdentifier(rootBackgroundAccessibilityIdentifier)
+                .runtimeViewportFrameProbe(rootBackgroundAccessibilityIdentifier)
         }
         .animation(.easeInOut(duration: 0.25), value: session.isLocked)
         .animation(.easeInOut(duration: 0.2), value: showsEmergencyThemeWarning)

@@ -162,8 +162,8 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         let selection = try SharePresentationSelection(
             codexID: CodexID(rawValue: "codex.norse")!,
             scriptID: ScriptID(rawValue: "script.base-runes")!,
-            relicID: ArtifactID(rawValue: "relic.norse.runestone.weathered")!,
-            sealID: ArtifactID(rawValue: "seal.norse.knotwork")!
+            relicID: ArtifactID(rawValue: "relic.norse.runestone-tablet")!,
+            sealID: ArtifactID(rawValue: "seal.norse.valknut")!
         )
         let builderCommand = PrepareMessageShareCommand(
             runes: encoded.runes,

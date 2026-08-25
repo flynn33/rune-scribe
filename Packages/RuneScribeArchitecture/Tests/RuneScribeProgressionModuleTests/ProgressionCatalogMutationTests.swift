@@ -367,11 +367,11 @@ func rejectsImpossibleOwnedDomainsAndMisclassifiedIncludedContent() throws {
         let echoIndex = content.firstIndex {
             $0["contentID"] as? String == "seal.progression.echo"
         }!
-        let knotworkIndex = content.firstIndex {
-            $0["contentID"] as? String == "seal.norse.knotwork"
+        let valknutIndex = content.firstIndex {
+            $0["contentID"] as? String == "seal.norse.valknut"
         }!
         content[echoIndex]["availability"] = "included"
-        content[knotworkIndex]["availability"] = "permanent"
+        content[valknutIndex]["availability"] = "permanent"
         root["content"] = content
     }
     #expect(validationFailure {
@@ -463,7 +463,7 @@ func rejectsDuplicateIdentifiersAndUnknownGrantReferences() throws {
 }
 
 @Test
-func frozenRuneStoneCannotReceiveAVersionOneGrant() throws {
+func legacyNorseContentCannotReceiveACurrentGrant() throws {
     let catalogData = try fixtureData(
         ProgressionCatalogResourceCatalog.catalogDescriptor
     )

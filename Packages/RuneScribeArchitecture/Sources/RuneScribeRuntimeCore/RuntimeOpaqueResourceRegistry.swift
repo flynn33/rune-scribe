@@ -252,13 +252,13 @@ public struct OpaqueResourceBudget: Equatable, Sendable {
         maximumDescriptorBytes: 256 * 1_024,
         maximumImageBytes: 8 * 1_024 * 1_024,
         maximumImageDimension: 4_096,
-        maximumImageCatalogBytes: 32 * 1_024 * 1_024,
+        maximumImageCatalogBytes: 96 * 1_024 * 1_024,
         maximumFontBytes: 8 * 1_024 * 1_024,
         maximumFontCatalogBytes: 16 * 1_024 * 1_024,
         maximumAnimationCatalogBytes: 16 * 1_024 * 1_024,
         maximumSoundBytes: 2 * 1_024 * 1_024,
         maximumSoundCatalogBytes: 8 * 1_024 * 1_024,
-        maximumModuleBytes: 64 * 1_024 * 1_024
+        maximumModuleBytes: 112 * 1_024 * 1_024
     )
 }
 

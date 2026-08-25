@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""Generate deterministic provenance for the exact Norse production resources."""
+"""Generate deterministic provenance for the exact Norse v2 resource catalog."""
 
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
-import struct
 import sys
 from typing import Any
 
 
+MODULE_ID = "com.runescribe.module.theme.norse"
 CATALOG_RELATIVE = Path(
     "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/"
     "NorseApplicationResourceCatalog.swift"
@@ -23,42 +23,32 @@ MODULE_RELATIVE = Path(
 RESOURCE_ROOT_RELATIVE = MODULE_RELATIVE / "Resources"
 INTEGRITY_RELATIVE = (
     RESOURCE_ROOT_RELATIVE
-    / "Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+    / "Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json"
 )
 PROVENANCE_RELATIVE = (
     RESOURCE_ROOT_RELATIVE
-    / "Production/Metadata/Norse-Production-Asset-Provenance-v1.0.json"
+    / "Production/Metadata/Norse-Production-Asset-Provenance-v2.0.json"
 )
 DESCRIPTOR_RELATIVE = MODULE_RELATIVE / "NorseBaseThemeDescriptor.swift"
-GENERATOR_RELATIVE = Path("scripts/generate-norse-production-provenance.py")
-BASELINE_APPROVAL_RELATIVE = Path(
-    "docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md"
+DERIVATION_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4/generated/norse/Metadata/"
+    "Norse-Production-Asset-Derivation-v4.0.json"
 )
+SOURCE_MASTERS_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4/source-masters/norse"
+)
+GENERATOR_RELATIVE = Path("scripts/generate-norse-production-provenance.py")
 BASE_OWNERSHIP_RELATIVE = Path("EULA.md")
 FONT_LICENSE_RELATIVE = Path("RuneScrib/Resources/Fonts/OFL.txt")
 
 BASE_RIGHTS_ID = "rights.norse.base"
 FONT_RIGHTS_ID = "rights.norse.font.noto"
-BASE_RIGHTS_DECLARATION_REFERENCE = (
-    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
-    "NorseBaseThemeDescriptor.swift#rights.norse.base"
-)
-FONT_RIGHTS_DECLARATION_REFERENCE = (
-    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
-    "NorseBaseThemeDescriptor.swift#rights.norse.font.noto"
-)
 BASE_RIGHTS_REFERENCE = "EULA.md#4-ownership-and-intellectual-property"
 FONT_RIGHTS_REFERENCE = "RuneScrib/Resources/Fonts/OFL.txt"
-BASELINE_APPROVAL_REFERENCE = (
-    "docs/product-roadmap/"
-    "Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md"
-    "#rem-007-finalize-release-candidate-norse-provenance"
+CATALOG_PATTERN = re.compile(
+    r'^\s*"([^"]+)": resource\("([^"]+)", "([^"]+)"\),\s*$',
+    re.MULTILINE,
 )
-
-CONSTANT_PATTERN = re.compile(
-    r'public static let (\w+) = resource\("([^"]+)", "([^"]+)"\)'
-)
-HANDLE_PATTERN = re.compile(r'^\s*"([^"]+)":\s*(\w+),\s*$', re.MULTILINE)
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -73,177 +63,149 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def media_type(file_extension: str) -> str:
-    values = {
-        "json": "application/json",
-        "pdf": "application/pdf",
-        "png": "image/png",
-        "ttf": "font/ttf",
-        "wav": "audio/wav",
-    }
-    try:
-        return values[file_extension.lower()]
-    except KeyError as error:
-        raise ValueError(f"unsupported Norse shipping extension: {file_extension}") from error
-
-
-def png_dimensions(path: Path) -> dict[str, int] | None:
-    if path.suffix.lower() != ".png":
-        return None
-    header = path.read_bytes()[:24]
-    if len(header) != 24 or header[:8] != b"\x89PNG\r\n\x1a\n" or header[12:16] != b"IHDR":
-        raise ValueError(f"invalid PNG header: {path}")
-    width, height = struct.unpack(">II", header[16:24])
-    return {"height": height, "width": width}
+def read_json(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError(f"JSON root must be an object: {path}")
+    return value
 
 
 def parse_catalog(root: Path) -> dict[str, tuple[str, str]]:
     source = (root / CATALOG_RELATIVE).read_text(encoding="utf-8")
-    constants = {
-        name: (resource_name, extension)
-        for name, resource_name, extension in CONSTANT_PATTERN.findall(source)
+    values = {
+        handle: (name, extension)
+        for handle, name, extension in CATALOG_PATTERN.findall(source)
     }
-    handles: dict[str, tuple[str, str]] = {}
-    for resource_id, constant_name in HANDLE_PATTERN.findall(source):
-        if constant_name not in constants:
-            raise ValueError(
-                f"Norse catalog handle {resource_id} uses unknown constant {constant_name}"
-            )
-        handles[resource_id] = constants[constant_name]
-    if len(handles) != 55:
-        raise ValueError(f"Norse catalog must declare exactly 55 resource handles, got {len(handles)}")
-    return handles
-
-
-def production_files_by_name(root: Path) -> dict[str, Path]:
-    resource_root = root / RESOURCE_ROOT_RELATIVE
-    paths = [
-        path
-        for path in resource_root.rglob("*")
-        if path.is_file()
-        and not path.is_symlink()
-        and "Source" not in path.relative_to(resource_root).parts
-        and path not in {root / INTEGRITY_RELATIVE, root / PROVENANCE_RELATIVE}
-    ]
-    by_name: dict[str, Path] = {}
-    collisions: set[str] = set()
-    for path in paths:
-        if path.name in by_name:
-            collisions.add(path.name)
-        else:
-            by_name[path.name] = path
-    if collisions:
+    if len(values) != 70:
         raise ValueError(
-            "Norse shipping resources have colliding basenames: "
-            + ", ".join(sorted(collisions))
+            f"Norse v2 catalog must declare exactly 70 handles, got {len(values)}"
         )
-    return by_name
+    return values
 
 
-def semantic_role(resource_id: str, integrity_by_id: dict[str, dict[str, Any]]) -> str:
-    if resource_id in integrity_by_id:
-        return str(integrity_by_id[resource_id]["semanticRole"])
-    if resource_id.startswith("resource.seal.norse.") and resource_id.endswith(".thumbnail"):
-        return "seal.thumbnail"
-    if resource_id == "resource.frame.norse.carved-knotwork.static-fallback":
-        return "frame.static-fallback"
-    if resource_id == "resource.crest.norse.forge-master.static-fallback":
-        return "crest.static-fallback"
-    raise ValueError(f"missing semantic role for {resource_id}")
+def normalized_resource_path(resource_root: Path, value: str) -> Path:
+    relative = PurePosixPath(value)
+    if relative.is_absolute() or ".." in relative.parts or relative.as_posix() != value:
+        raise ValueError(f"resource path is not normalized: {value}")
+    path = resource_root / Path(*relative.parts)
+    if not path.is_file() or path.is_symlink():
+        raise ValueError(f"resource is not a regular file: {value}")
+    return path
 
 
-def source_classification(resource_id: str, extension: str) -> str:
-    if resource_id == "resource.font.norse.noto-sans-runic":
-        return "bundled-font"
-    if extension == "json":
-        return "metadata"
-    return "commissioned-or-original-project-art"
+def validate_integrity_resource(
+    resource_root: Path,
+    resource: dict[str, Any],
+) -> Path:
+    required = {
+        "resourceHandle",
+        "path",
+        "semanticRole",
+        "mediaType",
+        "byteLength",
+        "sha256",
+        "requiredForActiveContent",
+        "activeInCurrentCatalog",
+    }
+    if not required.issubset(resource):
+        raise ValueError("integrity resource fields are incomplete")
+    path = normalized_resource_path(resource_root, str(resource["path"]))
+    if path.stat().st_size != resource["byteLength"]:
+        raise ValueError(f"resource byte count differs: {resource['resourceHandle']}")
+    if sha256_file(path) != resource["sha256"]:
+        raise ValueError(f"resource digest differs: {resource['resourceHandle']}")
+    if resource["activeInCurrentCatalog"] is not True:
+        raise ValueError(f"resource is not active: {resource['resourceHandle']}")
+    return path
 
 
 def accessibility_key(resource_id: str) -> str:
     if resource_id.startswith("resource.relic.norse."):
-        value = resource_id.removeprefix("resource.")
-        value = value.removesuffix(".art").removesuffix(".geometry")
-        return f"{value}.accessibility-label"
-    if resource_id.startswith("resource.share-fallback.norse."):
-        value = resource_id.removeprefix("resource.share-fallback.")
-        return f"relic.{value}.accessibility-label"
+        slug = resource_id.split(".")[3]
+        return f"relic.norse.{slug}.accessibility-label"
     if resource_id.startswith("resource.seal.norse."):
-        value = resource_id.removeprefix("resource.")
-        value = value.removesuffix(".vector").removesuffix(".thumbnail")
-        return f"{value}.accessibility-label"
+        slug = resource_id.split(".")[3]
+        return f"seal.norse.{slug}.accessibility-label"
     if resource_id.startswith("resource.frame.norse."):
-        value = resource_id.removeprefix("resource.")
-        value = value.removesuffix(".vector").removesuffix(".static-fallback")
-        return f"{value}.accessibility-label"
+        return "frame.norse.carved-knotwork.accessibility-label"
     if resource_id.startswith("resource.crest.norse."):
-        value = resource_id.removeprefix("resource.")
-        value = value.removesuffix(".vector").removesuffix(".static-fallback")
-        return f"{value}.accessibility-label"
+        return "crest.norse.raven-mastery.accessibility-label"
     if resource_id.startswith("resource.background.norse."):
-        return "background.norse.accessibility-label"
-    if resource_id.startswith("resource.script.norse.") or resource_id.startswith(
-        "resource.font.norse."
-    ):
-        return "script.base-runes.accessibility-label"
-    if resource_id.startswith("resource.codex-"):
+        return "background.norse.cold-sea-hall.accessibility-label"
+    if resource_id.startswith("resource.codex-card.norse."):
         return "vault.norse.accessibility-label"
+    if resource_id.startswith(("resource.script.norse.", "resource.font.norse.")):
+        return "script.base-runes.accessibility-label"
     return "codex.norse.accessibility-label"
 
 
-def fallback_relationships(resource_id: str) -> tuple[list[str], list[str]]:
-    has_fallbacks: dict[str, list[str]] = {
-        "resource.background.norse.forge.static": [
-            "resource.background.norse.high-contrast"
-        ],
-        "resource.crest.norse.forge-master.vector": [
-            "resource.crest.norse.forge-master.static-fallback"
-        ],
-        "resource.frame.norse.carved-knotwork.vector": [
-            "resource.frame.norse.carved-knotwork.static-fallback"
-        ],
-    }
-    for name in (
-        "ironbound-shield",
-        "raven-medallion",
-        "runestone.blackstone",
-        "runestone.frozen",
-        "runestone.weathered",
-        "sealed-parchment",
-    ):
-        has_fallbacks[f"resource.relic.norse.{name}.art"] = [
-            f"resource.share-fallback.norse.{name}"
+def fallback_map() -> dict[str, list[str]]:
+    values: dict[str, list[str]] = {}
+    for slug in ("runestone-tablet", "dragonwood-plaque", "stormforged-stele"):
+        primary = f"resource.relic.norse.{slug}.master"
+        values[primary] = [
+            f"resource.relic.norse.{slug}.thumbnail",
+            f"resource.relic.norse.{slug}.high-contrast",
+            f"resource.relic.norse.{slug}.static-share-fallback",
         ]
-    for name in (
-        "echo-rune",
-        "forge-flame",
-        "forge-hammer",
-        "knotwork",
-        "longship",
-        "raven",
-    ):
-        has_fallbacks[f"resource.seal.norse.{name}.vector"] = [
-            f"resource.seal.norse.{name}.thumbnail"
+    for slug in ("valknut", "ravenshield", "mjolnir", "wolkin", "yggdrasil", "berserk"):
+        values[f"resource.seal.norse.{slug}.vector-master"] = [
+            f"resource.seal.norse.{slug}.monochrome-fallback",
+            f"resource.seal.norse.{slug}.thumbnail",
         ]
-    fallback_for: dict[str, list[str]] = {}
-    for primary, fallbacks in has_fallbacks.items():
-        for fallback in fallbacks:
-            fallback_for.setdefault(fallback, []).append(primary)
-    return sorted(has_fallbacks.get(resource_id, [])), sorted(fallback_for.get(resource_id, []))
+    values["resource.frame.norse.carved-knotwork.vector-master"] = [
+        "resource.frame.norse.carved-knotwork.static-fallback"
+    ]
+    values["resource.crest.norse.raven-mastery.vector-master"] = [
+        "resource.crest.norse.raven-mastery.static-fallback",
+        "resource.crest.norse.raven-mastery.thumbnail",
+    ]
+    values["resource.background.norse.cold-sea-hall.standard"] = [
+        "resource.background.norse.cold-sea-hall.reduce-motion",
+        "resource.background.norse.cold-sea-hall.high-contrast",
+        "resource.background.norse.cold-sea-hall.macos-wide-crop",
+    ]
+    values["resource.codex-card.norse.owned"] = [
+        "resource.codex-card.norse.locked",
+        "resource.codex-card.norse.encountered",
+        "resource.codex-card.norse.selected",
+        "resource.codex-card.norse.unavailable",
+    ]
+    values["resource.script.norse.specimen.standard"] = [
+        "resource.script.norse.specimen.high-contrast",
+        "resource.script.norse.specimen.static-fallback",
+    ]
+    return values
+
+
+def source_classification(media_type: str, resource_id: str) -> str:
+    if resource_id == "resource.font.norse.noto-sans-runic":
+        return "bundled-font"
+    if media_type in {"image/png", "application/pdf"}:
+        return "generated-derivative"
+    if media_type == "application/json":
+        return "metadata"
+    return "original-project-resource"
 
 
 def generator_inputs(root: Path) -> list[dict[str, str]]:
-    inputs = [
+    values = [
         CATALOG_RELATIVE,
         DESCRIPTOR_RELATIVE,
         INTEGRITY_RELATIVE,
-        BASELINE_APPROVAL_RELATIVE,
+        DERIVATION_RELATIVE,
         BASE_OWNERSHIP_RELATIVE,
         FONT_LICENSE_RELATIVE,
     ]
+    source_root = root / SOURCE_MASTERS_RELATIVE
+    values.extend(
+        path.relative_to(root)
+        for path in sorted(source_root.rglob("*"))
+        if path.is_file() and not path.is_symlink()
+    )
     return [
-        {"path": path.as_posix(), "sha256": sha256_file(root / path)}
-        for path in inputs
+        {"path": value.as_posix(), "sha256": sha256_file(root / value)}
+        for value in values
     ]
 
 
@@ -261,70 +223,84 @@ def aggregate_sha256(resources: list[dict[str, Any]]) -> str:
 
 def build_document(root: Path) -> dict[str, Any]:
     root = root.resolve()
-    handles = parse_catalog(root)
-    integrity = json.loads((root / INTEGRITY_RELATIVE).read_text(encoding="utf-8"))
+    catalog = parse_catalog(root)
+    integrity = read_json(root / INTEGRITY_RELATIVE)
     integrity_resources = integrity.get("resources")
-    if not isinstance(integrity_resources, list) or len(integrity_resources) != 47:
-        raise ValueError("Norse integrity manifest must contain exactly 47 resources")
-    integrity_by_id = {
-        str(item["resourceHandle"]): item for item in integrity_resources
+    if integrity.get("schemaVersion") != "2.0" or not isinstance(
+        integrity_resources, list
+    ):
+        raise ValueError("Norse v2 integrity manifest is invalid")
+    by_id = {
+        str(item.get("resourceHandle")): item
+        for item in integrity_resources
+        if isinstance(item, dict)
     }
-    if len(integrity_by_id) != 47:
-        raise ValueError("Norse integrity manifest contains duplicate resource handles")
+    if len(integrity_resources) != 70 or len(by_id) != 70:
+        raise ValueError("Norse v2 integrity manifest must contain 70 unique resources")
+    if set(by_id) != set(catalog):
+        raise ValueError("Norse v2 catalog and integrity identities differ")
 
-    files_by_name = production_files_by_name(root)
     resource_root = root / RESOURCE_ROOT_RELATIVE
+    fallbacks = fallback_map()
+    fallback_for: dict[str, list[str]] = {}
+    for primary, values in fallbacks.items():
+        for value in values:
+            fallback_for.setdefault(value, []).append(primary)
+
+    derivation_sha = sha256_file(root / DERIVATION_RELATIVE)
     resources: list[dict[str, Any]] = []
-    for resource_id in sorted(handles):
-        resource_name, extension = handles[resource_id]
-        basename = f"{resource_name}.{extension}"
-        try:
-            path = files_by_name[basename]
-        except KeyError as error:
-            raise ValueError(f"missing Norse shipping resource: {basename}") from error
-        relative = path.relative_to(resource_root).as_posix()
-        has_fallbacks, fallback_for = fallback_relationships(resource_id)
-        rights_id = FONT_RIGHTS_ID if resource_id == "resource.font.norse.noto-sans-runic" else BASE_RIGHTS_ID
+    for resource_id in sorted(by_id):
+        integrity_resource = by_id[resource_id]
+        path = validate_integrity_resource(resource_root, integrity_resource)
+        media_type = str(integrity_resource["mediaType"])
+        classification = source_classification(media_type, resource_id)
+        rights_id = (
+            FONT_RIGHTS_ID
+            if resource_id == "resource.font.norse.noto-sans-runic"
+            else BASE_RIGHTS_ID
+        )
         resources.append(
             {
                 "accessibilityDescriptionKey": accessibility_key(resource_id),
-                "activeInV1": bool(
-                    integrity_by_id.get(resource_id, {}).get("activeInV1", True)
-                ),
+                "activeInCurrentCatalog": True,
                 "byteCount": path.stat().st_size,
-                "fallbackForResourceIDs": fallback_for,
-                "fallbackResourceIDs": has_fallbacks,
-                "generatorToolInputSHA256": None,
-                "licenseOrOwnershipStatementReference": (
-                    FONT_RIGHTS_REFERENCE if rights_id == FONT_RIGHTS_ID else BASE_RIGHTS_REFERENCE
+                "derivationRecordSHA256": (
+                    derivation_sha if classification == "generated-derivative" else None
                 ),
-                "mediaType": media_type(extension),
-                "normalizedProductionPath": relative,
-                "pixelDimensions": png_dimensions(path),
-                "releaseStatus": "release-candidate",
+                "fallbackForResourceIDs": sorted(fallback_for.get(resource_id, [])),
+                "fallbackResourceIDs": sorted(fallbacks.get(resource_id, [])),
+                "licenseOrOwnershipStatementReference": (
+                    FONT_RIGHTS_REFERENCE
+                    if rights_id == FONT_RIGHTS_ID
+                    else BASE_RIGHTS_REFERENCE
+                ),
+                "mediaType": media_type,
+                "normalizedProductionPath": str(integrity_resource["path"]),
+                "pixelDimensions": integrity_resource.get("dimensions"),
+                "qualificationStatus": "local-qualification-candidate",
                 "requiredForActiveContent": bool(
-                    integrity_by_id.get(resource_id, {}).get("requiredForActiveContent", True)
+                    integrity_resource["requiredForActiveContent"]
                 ),
                 "resourceID": resource_id,
                 "rightsProvenanceID": rights_id,
-                "semanticRole": semantic_role(resource_id, integrity_by_id),
-                "sha256": sha256_file(path),
-                "sourceClassification": source_classification(resource_id, extension),
+                "semanticRole": str(integrity_resource["semanticRole"]),
+                "sha256": str(integrity_resource["sha256"]),
+                "sourceClassification": classification,
             }
         )
 
     inputs = generator_inputs(root)
     input_digest = hashlib.sha256()
-    for item in inputs:
-        input_digest.update(f"{item['path']}\0{item['sha256']}\n".encode("utf-8"))
+    for value in inputs:
+        input_digest.update(
+            f"{value['path']}\0{value['sha256']}\n".encode("utf-8")
+        )
     return {
         "aggregateSHA256": aggregate_sha256(resources),
-        "releaseCandidateBaselineApproval": {
-            "authority": "Raven Forge remediation amendment",
+        "authority": {
+            "package": "Rune-Scribe-Theme-Fidelity-Remediation-v4.0",
             "publicDistributionAuthorized": False,
-            "reference": BASELINE_APPROVAL_REFERENCE,
-            "scope": "Exact current audited Resources/Production bytes",
-            "status": "approved-as-release-candidate-baseline",
+            "scope": "Norse v2 local implementation and qualification only",
         },
         "generator": {
             "inputAggregateSHA256": input_digest.hexdigest(),
@@ -332,24 +308,21 @@ def build_document(root: Path) -> dict[str, Any]:
             "path": GENERATOR_RELATIVE.as_posix(),
             "sha256": sha256_file(root / GENERATOR_RELATIVE),
         },
-        "moduleID": "com.runescribe.module.theme.norse",
-        "recordID": "production-asset-provenance.norse.v1",
-        "releaseStatus": "release-candidate",
+        "moduleID": MODULE_ID,
+        "recordID": "production-asset-provenance.norse.v2",
         "resourceCount": len(resources),
         "resources": resources,
         "rightsSources": [
             {
-                "declarationReference": BASE_RIGHTS_DECLARATION_REFERENCE,
                 "id": BASE_RIGHTS_ID,
                 "statementReference": BASE_RIGHTS_REFERENCE,
             },
             {
-                "declarationReference": FONT_RIGHTS_DECLARATION_REFERENCE,
                 "id": FONT_RIGHTS_ID,
                 "statementReference": FONT_RIGHTS_REFERENCE,
             },
         ],
-        "schemaVersion": "1.0",
+        "schemaVersion": "2.0",
     }
 
 
@@ -357,33 +330,30 @@ def encoded_document(document: dict[str, Any]) -> bytes:
     return (json.dumps(document, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser()
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parent.parent)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--check", action="store_true")
-    args = parser.parse_args()
-
-    root = args.root.resolve()
-    output = (args.output or (root / PROVENANCE_RELATIVE)).resolve()
+    arguments = parser.parse_args(sys.argv[1:] if argv is None else argv)
+    root = arguments.root.resolve()
+    output = (arguments.output or (root / PROVENANCE_RELATIVE)).resolve()
     try:
         generated = encoded_document(build_document(root))
-    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
-        print(f"FAIL: unable to generate Norse production provenance: {error}", file=sys.stderr)
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
+        print(f"FAIL: unable to generate Norse v2 provenance: {error}", file=sys.stderr)
         return 1
-
-    if args.check:
+    if arguments.check:
         try:
             existing = output.read_bytes()
         except OSError as error:
             print(f"FAIL: unable to read {output}: {error}", file=sys.stderr)
             return 1
         if existing != generated:
-            print(f"FAIL: Norse production provenance differs: {output}", file=sys.stderr)
+            print(f"FAIL: Norse v2 provenance differs: {output}", file=sys.stderr)
             return 1
-        print(f"PASS: Norse production provenance is deterministic ({sha256_bytes(generated)})")
+        print(f"PASS: deterministic Norse v2 provenance ({sha256_bytes(generated)})")
         return 0
-
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_bytes(generated)
     print(f"WROTE: {output}")

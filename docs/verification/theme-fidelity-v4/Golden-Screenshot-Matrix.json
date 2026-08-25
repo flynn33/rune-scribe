@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "1.0",
+  "destinations": [
+    "iPhone portrait",
+    "iPad portrait",
+    "macOS standard",
+    "macOS resized"
+  ],
+  "themes": {
+    "Norse": {
+      "requiredSurfaces": [
+        "workspace-empty",
+        "compose-short",
+        "compose-long",
+        "inscription-preview",
+        "received-cipher",
+        "share-builder",
+        "static-share",
+        "settings-codex-card",
+        "settings-defaults-preview",
+        "vault-locked",
+        "vault-progress",
+        "vault-encountered",
+        "vault-owned",
+        "vault-selected",
+        "relic-picker",
+        "seal-picker",
+        "mastery",
+        "high-contrast",
+        "reduce-motion",
+        "large-text"
+      ]
+    },
+    "Moonleaf": {
+      "requiredSurfaces": [
+        "workspace-empty",
+        "compose-short",
+        "compose-long",
+        "inscription-preview",
+        "received-cipher",
+        "share-builder",
+        "static-share",
+        "settings-codex-card",
+        "settings-defaults-preview",
+        "vault-locked",
+        "vault-progress",
+        "vault-encountered",
+        "vault-owned",
+        "vault-selected",
+        "relic-picker",
+        "seal-picker",
+        "mastery",
+        "high-contrast",
+        "reduce-motion",
+        "large-text"
+      ]
+    },
+    "Sunspire": {
+      "requiredSurfaces": [
+        "workspace-empty",
+        "compose-short",
+        "compose-long",
+        "inscription-preview",
+        "received-cipher",
+        "share-builder",
+        "static-share",
+        "settings-codex-card",
+        "settings-defaults-preview",
+        "vault-locked",
+        "vault-progress",
+        "vault-encountered",
+        "vault-owned",
+        "vault-selected",
+        "relic-picker",
+        "seal-picker",
+        "mastery",
+        "high-contrast",
+        "reduce-motion",
+        "large-text"
+      ]
+    },
+    "Wildwood": {
+      "requiredSurfaces": [
+        "workspace-empty",
+        "compose-short",
+        "compose-long",
+        "inscription-preview",
+        "received-cipher",
+        "share-builder",
+        "static-share",
+        "settings-codex-card",
+        "settings-defaults-preview",
+        "vault-locked",
+        "vault-progress",
+        "vault-encountered",
+        "vault-owned",
+        "vault-selected",
+        "relic-picker",
+        "seal-picker",
+        "mastery",
+        "high-contrast",
+        "reduce-motion",
+        "large-text"
+      ]
+    },
+    "Gloamthorn": {
+      "requiredSurfaces": [
+        "workspace-empty",
+        "compose-short",
+        "compose-long",
+        "inscription-preview",
+        "received-cipher",
+        "share-builder",
+        "static-share",
+        "settings-codex-card",
+        "settings-defaults-preview",
+        "vault-locked",
+        "vault-progress",
+        "vault-encountered",
+        "vault-owned",
+        "vault-selected",
+        "relic-picker",
+        "seal-picker",
+        "mastery",
+        "high-contrast",
+        "reduce-motion",
+        "large-text"
+      ]
+    }
+  }
+}

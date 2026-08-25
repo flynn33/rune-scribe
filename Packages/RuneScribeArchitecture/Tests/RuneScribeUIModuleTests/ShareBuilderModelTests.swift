@@ -72,7 +72,9 @@ final class ShareBuilderModelTests: XCTestCase {
 
     func testStaleStoredSealFallsBackWithoutConflatingExplicitNone() throws {
         let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
-        let staleSealID = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.removed"))
+        let staleSealID = try XCTUnwrap(
+            ArtifactID(rawValue: "seal.gloamthorn.thornmoon")
+        )
         let settings = try settingsSnapshot(
             descriptor: descriptor,
             sealID: staleSealID,
@@ -91,7 +93,9 @@ final class ShareBuilderModelTests: XCTestCase {
     func testStaleAndMissingFrameFallBackWithoutConflatingExplicitNone() throws {
         let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
         let fallbackFrame = try XCTUnwrap(descriptor.codex.frames.first)
-        let staleFrameID = try XCTUnwrap(ArtifactID(rawValue: "frame.norse.removed"))
+        let staleFrameID = try XCTUnwrap(
+            ArtifactID(rawValue: "frame.gloamthorn.briar-court")
+        )
         let owned = Set([fallbackFrame.metadata.id])
 
         let staleSettings = try settingsSnapshot(

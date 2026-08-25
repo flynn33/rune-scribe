@@ -5,22 +5,71 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import re
 import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Optional, Sequence, Union
 
 
 EXPECTED_VERSION = "1.0.39"
 EXPECTED_BUILD = "39"
-EXPECTED_MANIFEST_SHA256 = (
-    "4c59d88099a7561d9983b148d5d4ab860c514d5b0645f03df1f5ac8cc9338a30"
+EXPECTED_V2_RESOURCE_COUNT = 70
+EXPECTED_NEGATIVE_MUTATION_COUNT = 25
+EXPECTED_V2_GENERATOR_SHA256 = (
+    "09c0ff40fefc5f9bd1c9500693fef9cac47c0b6a30346674b8b73db156d65cd3"
 )
 EXPECTED_FONT_SHA256 = (
     "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
+)
+NORSE_V2_GENERATOR_RELATIVE = "scripts/generate-norse-v2-resource-catalog.py"
+NORSE_V2_MANIFEST_RELATIVE = (
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
+    "Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json"
+)
+NORSE_V2_CATALOG_RELATIVE = (
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/"
+    "NorseApplicationResourceCatalog.swift"
+)
+NORSE_V2_PINS_RELATIVE = (
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
+    "NorseV2ResourcePins.swift"
+)
+NORSE_MODULE_MANIFEST_RELATIVE = (
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
+    "Resources/module-manifest.json"
+)
+EXPECTED_CURRENT_ARTIFACT_IDS = {
+    "relic.norse.runestone-tablet",
+    "relic.norse.dragonwood-plaque",
+    "relic.norse.stormforged-stele",
+    "seal.norse.valknut",
+    "seal.norse.ravenshield",
+    "seal.norse.mjolnir",
+    "seal.norse.wolkin",
+    "seal.norse.yggdrasil",
+    "seal.norse.berserk",
+    "frame.norse.carved-knotwork",
+    "crest.norse.raven-mastery",
+}
+OBSOLETE_CURRENT_CONTENT_IDS = (
+    "relic.norse.runestone.weathered",
+    "relic.norse.raven-medallion",
+    "relic.norse.ironbound-shield",
+    "relic.norse.sealed-parchment",
+    "relic.norse.runestone.blackstone",
+    "relic.norse.runestone.frozen",
+    "seal.norse.knotwork",
+    "seal.norse.forge-flame",
+    "seal.norse.raven",
+    "seal.norse.longship",
+    "seal.norse.forge-hammer",
+    "seal.norse.echo-rune",
+    "crest.norse.forge-master",
+    "background.norse.forge-v1",
 )
 
 REQUIRED_EVIDENCE_JSON = (
@@ -108,6 +157,8 @@ class Validator:
         self.profile = profile
         self.findings: list[Finding] = []
         self.checks: list[str] = []
+        self.integrity_manifest_sha256: Optional[str] = None
+        self.norse_v2_unique_physical_bytes: Optional[int] = None
 
     def add(
         self,
@@ -215,20 +266,70 @@ class Validator:
         )
 
     def check_resource_integrity(self) -> None:
-        relative = (
-            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
-            "Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+        generator_path = self.root / NORSE_V2_GENERATOR_RELATIVE
+        generator_data = generator_path.read_bytes() if generator_path.is_file() else b""
+        generator_hash_matches = (
+            bool(generator_data)
+            and not generator_path.is_symlink()
+            and hashlib.sha256(generator_data).hexdigest()
+            == EXPECTED_V2_GENERATOR_SHA256
         )
+        self.require(
+            generator_hash_matches,
+            "NRV-002",
+            "norse-v2-generator-ratchet",
+            "Norse v2 catalog generator source differs from the accepted ratchet",
+            NORSE_V2_GENERATOR_RELATIVE,
+        )
+
+        generator: Any = None
+        specs: tuple[Any, ...] = ()
+        expected_resources: list[dict[str, Any]] = []
+        expected_manifest_data: Optional[bytes] = None
+        if generator_hash_matches:
+            try:
+                generator = load_python_module(
+                    generator_path,
+                    "_runescribe_norse_v2_resource_generator",
+                )
+                specs = tuple(generator.resource_specs())
+                generator.ensure_exact_files(self.root, specs)
+                expected_resources = [
+                    generator.integrity_resource(self.root, value) for value in specs
+                ]
+                expected_manifest_data = generator.encoded_json(
+                    generator.manifest_document(expected_resources)
+                )
+            except (ImportError, OSError, KeyError, TypeError, ValueError) as error:
+                self.add(
+                    "NRV-002",
+                    "norse-v2-generator-output",
+                    f"cannot derive exact Norse v2 outputs: {error}",
+                    NORSE_V2_GENERATOR_RELATIVE,
+                )
+
+        self.require(
+            len(specs) == EXPECTED_V2_RESOURCE_COUNT
+            and len({value.handle for value in specs}) == EXPECTED_V2_RESOURCE_COUNT
+            and len({value.relative_path for value in specs}) == EXPECTED_V2_RESOURCE_COUNT,
+            "NRV-002",
+            "norse-v2-generator-inventory",
+            f"accepted generator must define exactly {EXPECTED_V2_RESOURCE_COUNT} unique resources",
+            NORSE_V2_GENERATOR_RELATIVE,
+        )
+
+        relative = NORSE_V2_MANIFEST_RELATIVE
         manifest_path = self.root / relative
-        if not manifest_path.is_file():
+        if not manifest_path.is_file() or manifest_path.is_symlink():
             self.add("NRV-002", "norse-resource-integrity", "accepted manifest is missing", relative)
             return
         manifest_data = manifest_path.read_bytes()
+        self.integrity_manifest_sha256 = hashlib.sha256(manifest_data).hexdigest()
         self.require(
-            hashlib.sha256(manifest_data).hexdigest() == EXPECTED_MANIFEST_SHA256,
+            expected_manifest_data is not None and manifest_data == expected_manifest_data,
             "NRV-002",
             "norse-resource-integrity",
-            "accepted Norse integrity manifest bytes changed",
+            "Norse v2 integrity manifest differs from deterministic current-byte derivation",
             relative,
         )
         try:
@@ -236,12 +337,42 @@ class Validator:
         except json.JSONDecodeError as error:
             self.add("NRV-002", "norse-resource-integrity", f"invalid manifest JSON: {error}", relative)
             return
+        self.require(
+            isinstance(manifest, dict)
+            and manifest.get("schemaVersion") == "2.0"
+            and manifest.get("manifestID") == "norse-resource-integrity.v2"
+            and manifest.get("moduleID") == "com.runescribe.module.theme.norse",
+            "NRV-002",
+            "norse-resource-integrity-identity",
+            "Norse v2 integrity manifest identity differs",
+            relative,
+        )
         entries = manifest.get("resources", []) if isinstance(manifest, dict) else []
         self.require(
-            isinstance(entries, list) and len(entries) == 47,
+            isinstance(entries, list) and len(entries) == EXPECTED_V2_RESOURCE_COUNT,
             "NRV-002",
             "norse-resource-integrity",
-            "accepted manifest must contain exactly 47 resources",
+            f"accepted manifest must contain exactly {EXPECTED_V2_RESOURCE_COUNT} resources",
+            relative,
+        )
+        manifest_handles = {
+            entry.get("resourceHandle")
+            for entry in entries
+            if isinstance(entry, dict) and isinstance(entry.get("resourceHandle"), str)
+        } if isinstance(entries, list) else set()
+        manifest_paths = {
+            entry.get("path")
+            for entry in entries
+            if isinstance(entry, dict) and isinstance(entry.get("path"), str)
+        } if isinstance(entries, list) else set()
+        self.require(
+            len(manifest_handles) == EXPECTED_V2_RESOURCE_COUNT
+            and manifest_handles == {value.handle for value in specs}
+            and len(manifest_paths) == EXPECTED_V2_RESOURCE_COUNT
+            and manifest_paths == {value.relative_path for value in specs},
+            "NRV-002",
+            "norse-v2-exact-resource-set",
+            "manifest handles or paths differ from the exact generated Norse v2 inventory",
             relative,
         )
         resource_root = manifest_path.parents[2]
@@ -250,7 +381,7 @@ class Validator:
                 self.add("NRV-002", "norse-resource-integrity", "manifest resource is not an object", relative)
                 continue
             manifest_relative = str(entry.get("path", ""))
-            normalized = Path(manifest_relative)
+            normalized = PurePosixPath(manifest_relative)
             if (
                 not manifest_relative
                 or normalized.is_absolute()
@@ -264,7 +395,7 @@ class Validator:
                     relative,
                 )
                 continue
-            resource_path = resource_root / normalized
+            resource_path = resource_root.joinpath(*normalized.parts)
             if not resource_path.is_file() or resource_path.is_symlink():
                 self.add(
                     "NRV-002",
@@ -276,13 +407,77 @@ class Validator:
             data = resource_path.read_bytes()
             expected_length = entry.get("byteLength")
             expected_hash = entry.get("sha256")
-            if len(data) != expected_length or hashlib.sha256(data).hexdigest() != expected_hash:
+            valid_entry = (
+                isinstance(entry.get("resourceHandle"), str)
+                and isinstance(entry.get("semanticRole"), str)
+                and isinstance(entry.get("mediaType"), str)
+                and isinstance(expected_length, int)
+                and expected_length > 0
+                and isinstance(expected_hash, str)
+                and re.fullmatch(r"[0-9a-f]{64}", expected_hash) is not None
+                and entry.get("requiredForActiveContent") is True
+                and entry.get("activeInCurrentCatalog") is True
+            )
+            if (
+                not valid_entry
+                or len(data) != expected_length
+                or hashlib.sha256(data).hexdigest() != expected_hash
+            ):
                 self.add(
                     "NRV-002",
                     "norse-resource-integrity",
                     f"resource bytes differ from accepted manifest: {manifest_relative}",
                     resource_path,
                 )
+
+        if generator is not None and expected_manifest_data is not None:
+            expected_catalog = generator.application_catalog_source(specs).encode("utf-8")
+            catalog_path = self.root / NORSE_V2_CATALOG_RELATIVE
+            self.require(
+                catalog_path.is_file()
+                and not catalog_path.is_symlink()
+                and catalog_path.read_bytes() == expected_catalog,
+                "NRV-002",
+                "norse-v2-application-catalog",
+                "application resource catalog differs from the accepted v2 generator output",
+                NORSE_V2_CATALOG_RELATIVE,
+            )
+            expected_pins = generator.pins_source(
+                expected_resources,
+                expected_manifest_data,
+            ).encode("utf-8")
+            pins_path = self.root / NORSE_V2_PINS_RELATIVE
+            self.require(
+                pins_path.is_file()
+                and not pins_path.is_symlink()
+                and pins_path.read_bytes() == expected_pins,
+                "NRV-002",
+                "norse-v2-resource-pins",
+                "frozen Swift resource pins differ from current manifest and physical bytes",
+                NORSE_V2_PINS_RELATIVE,
+            )
+            self.check_module_manifest_resources(generator, specs)
+
+        budget = manifest.get("budgetSummary") if isinstance(manifest, dict) else None
+        calculated_budget = generator.manifest_document(expected_resources).get(
+            "budgetSummary"
+        ) if generator is not None and expected_resources else None
+        if isinstance(budget, dict) and isinstance(budget.get("uniquePhysicalBytes"), int):
+            self.norse_v2_unique_physical_bytes = budget["uniquePhysicalBytes"]
+        self.require(
+            isinstance(budget, dict)
+            and budget == calculated_budget
+            and isinstance(budget.get("largestResourceBytes"), int)
+            and budget["largestResourceBytes"] <= 8 * 1_024 * 1_024
+            and isinstance(budget.get("staticImageBytes"), int)
+            and budget["staticImageBytes"] <= 96 * 1_024 * 1_024
+            and isinstance(budget.get("uniquePhysicalBytes"), int)
+            and budget["uniquePhysicalBytes"] <= 112 * 1_024 * 1_024,
+            "NRV-002",
+            "norse-v2-resource-budgets",
+            "Norse v2 physical bytes exceed or differ from the accepted 8/96/112 MiB policy",
+            relative,
+        )
 
         test_relative = (
             "Packages/RuneScribeArchitecture/Tests/RuneScribeNorseThemeModuleTests/"
@@ -308,6 +503,94 @@ class Validator:
             "required Base Script identity changed",
             descriptor_relative,
         )
+        descriptor_artifact_ids = set(
+            re.findall(r'"((?:relic|seal|frame|crest)\.norse\.[a-z0-9.-]+)"', descriptor)
+        )
+        self.require(
+            descriptor_artifact_ids == EXPECTED_CURRENT_ARTIFACT_IDS,
+            "NRV-002",
+            "norse-v2-current-artifact-set",
+            "current Norse descriptor artifact IDs differ from the exact v2 set",
+            descriptor_relative,
+        )
+        self.check_obsolete_current_content_ids(descriptor_relative, manifest_path)
+
+    def check_module_manifest_resources(self, generator: Any, specs: tuple[Any, ...]) -> None:
+        document = self.json_record(
+            NORSE_MODULE_MANIFEST_RELATIVE,
+            "NRV-002",
+            "norse-v2-module-manifest",
+        )
+        if document is None:
+            return
+        runtime_requirements = document.get("runtimeRequirements")
+        required = runtime_requirements.get("requiredResources") \
+            if isinstance(runtime_requirements, dict) else None
+        expected = [
+            {
+                "name": "module-manifest",
+                "fileExtension": "json",
+                "subdirectory": None,
+                "ownerModuleID": generator.MODULE_ID,
+            },
+            {
+                "name": Path(generator.INTEGRITY_BASENAME).stem,
+                "fileExtension": "json",
+                "subdirectory": None,
+                "ownerModuleID": generator.MODULE_ID,
+            },
+        ]
+        expected.extend(
+            {
+                "name": value.application_name,
+                "fileExtension": value.extension,
+                "subdirectory": None,
+                "ownerModuleID": generator.MODULE_ID,
+            }
+            for value in specs
+        )
+        self.require(
+            required == expected,
+            "NRV-002",
+            "norse-v2-module-manifest",
+            "module manifest resource declarations differ from the exact v2 catalog",
+            NORSE_MODULE_MANIFEST_RELATIVE,
+        )
+
+    def check_obsolete_current_content_ids(
+        self,
+        descriptor_relative: str,
+        manifest_path: Path,
+    ) -> None:
+        current_text_paths = [
+            self.root / descriptor_relative,
+            self.root / NORSE_V2_CATALOG_RELATIVE,
+            self.root / NORSE_V2_PINS_RELATIVE,
+            self.root / NORSE_MODULE_MANIFEST_RELATIVE,
+            manifest_path,
+        ]
+        production = manifest_path.parents[1]
+        current_text_paths.extend(sorted(production.rglob("*.json")))
+        for path in dict.fromkeys(current_text_paths):
+            try:
+                source = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                continue
+            obsolete = sorted(
+                identifier
+                for identifier in OBSOLETE_CURRENT_CONTENT_IDS
+                if re.search(
+                    rf"(?<![a-z0-9-]){re.escape(identifier)}(?![a-z0-9-])",
+                    source,
+                )
+            )
+            self.require(
+                not obsolete,
+                "NRV-002",
+                "norse-v2-current-content-ids",
+                f"current v2 content contains obsolete IDs: {', '.join(obsolete)}",
+                path,
+            )
 
     def check_generic_architecture(self) -> None:
         ui_root = self.root / "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule"
@@ -420,7 +703,12 @@ class Validator:
         required_plan_tokens = (
             "let revision",
             "let codex",
-            "let scriptID",
+            "let script",
+            "var scriptID",
+            "let backgroundStatic",
+            "let backgroundReduceMotion",
+            "let backgroundHighContrast",
+            "let chrome",
             "let relics",
             "let seals",
             "let frames",
@@ -459,6 +747,7 @@ class Validator:
                     "locked: try image(vault.lockedSilhouetteResourceID)",
                     "encountered: try image(vault.encounteredResourceID)",
                     "selected: try image(vault.selectedResourceID)",
+                    "unavailable: try image(vault.unavailableResourceID ?? vault.cardResourceID)",
                 )
             ),
             "NRV-004",
@@ -574,6 +863,106 @@ class Validator:
                 f"{name} must be present and no greater than {ceiling}",
                 runtime_relative,
             )
+        opaque_relative = (
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/"
+            "RuntimeOpaqueResourceRegistry.swift"
+        )
+        opaque = self.read(opaque_relative, "NRV-005", "theme-resource-budget")
+        scaffold = swift_call_body(opaque, "themeScaffold", "Self")
+        scaffold_limits = {
+            "maximumImageBytes": (8 * 1_024 * 1_024, 8 * 1_024 * 1_024),
+            "maximumImageDimension": (4_096, 4_096),
+            "maximumImageCatalogBytes": (96 * 1_024 * 1_024, 96 * 1_024 * 1_024),
+            "maximumFontCatalogBytes": (16 * 1_024 * 1_024, 16 * 1_024 * 1_024),
+            "maximumAnimationCatalogBytes": (16 * 1_024 * 1_024, 16 * 1_024 * 1_024),
+            "maximumSoundBytes": (2 * 1_024 * 1_024, 2 * 1_024 * 1_024),
+            "maximumSoundCatalogBytes": (8 * 1_024 * 1_024, 8 * 1_024 * 1_024),
+            "maximumModuleBytes": (112 * 1_024 * 1_024, 112 * 1_024 * 1_024),
+        }
+        for name, (minimum, maximum) in scaffold_limits.items():
+            value = swift_labeled_integer_argument(scaffold or "", name)
+            self.require(
+                value is not None and minimum <= value <= maximum,
+                "NRV-005",
+                "theme-resource-budget",
+                f"themeScaffold {name} must remain at the accepted v2 policy value",
+                opaque_relative,
+            )
+
+        norse_resources_relative = (
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
+            "NorseBaseThemeResources.swift"
+        )
+        norse_resources = self.read(
+            norse_resources_relative,
+            "NRV-002",
+            "norse-v2-resource-budgets",
+        )
+        budget_tokens = (
+            "staticBytes <= 96 * 1_024 * 1_024",
+            "fontBytes <= 16 * 1_024 * 1_024",
+            "animationBytes <= 16 * 1_024 * 1_024",
+            "soundBytes <= 8 * 1_024 * 1_024",
+            "largest <= 8 * 1_024 * 1_024",
+            "total <= 112 * 1_024 * 1_024",
+        )
+        self.require(
+            all(token in norse_resources for token in budget_tokens),
+            "NRV-002",
+            "norse-v2-resource-budgets",
+            "Norse loader no longer enforces the accepted v2 resource budget policy",
+            norse_resources_relative,
+        )
+
+        share_relative = (
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/"
+            "SharePresentationContracts.swift"
+        )
+        share = self.read(share_relative, "NRV-005", "provider-inventory-budget")
+        share_metadata = swift_declaration_body(
+            share,
+            "struct",
+            "SharePresentationMetadata",
+        )
+        share_metadata_limit = swift_integer_constant(
+            share_metadata or "",
+            "maximumDeclaredResourceBytes",
+        )
+        self.require(
+            share_metadata_limit is not None
+            and 0 < share_metadata_limit <= 64 * 1_024 * 1_024,
+            "NRV-005",
+            "share-metadata-budget",
+            "share metadata aggregate resource ceiling must remain bounded at 64 MiB",
+            share_relative,
+        )
+        provider_inventory = swift_declaration_body(
+            share,
+            "struct",
+            "SharePresentationProviderInventory",
+        )
+        provider_limit = swift_integer_constant(
+            provider_inventory or "",
+            "maximumDeclaredResourceBytes",
+        )
+        provider_count = swift_integer_constant(
+            provider_inventory or "",
+            "maximumResourceCount",
+        )
+        self.require(
+            provider_inventory is not None
+            and "Self.maximumDeclaredResourceBytes - declaredBytes" in provider_inventory
+            and provider_limit is not None
+            and self.norse_v2_unique_physical_bytes is not None
+            and self.norse_v2_unique_physical_bytes <= provider_limit
+            and provider_limit <= 112 * 1_024 * 1_024
+            and provider_count is not None
+            and EXPECTED_V2_RESOURCE_COUNT <= provider_count <= 256,
+            "NRV-005",
+            "provider-inventory-budget",
+            "provider inventory must admit the exact v2 catalog within a separate bounded ceiling",
+            share_relative,
+        )
         self.require(
             "DispatchSourceMemoryPressure" in runtime
             and ("purge" in runtime or "removeAll" in runtime),
@@ -818,10 +1207,10 @@ class Validator:
         ios_ui = self.read(ios_ui_relative, "NRV-021", "focused-ios-visual-test")
         required_norse_ids = (
             "theme.codex-card.codex.norse",
-            "theme.artifact-thumbnail.relic.norse.runestone.weathered",
-            "theme.artifact-thumbnail.seal.norse.knotwork",
+            "theme.artifact-thumbnail.relic.norse.runestone-tablet",
+            "theme.artifact-thumbnail.seal.norse.valknut",
             "theme.artifact-preview",
-            "theme.artifact-preview.relic.norse.runestone.weathered",
+            "theme.artifact-preview.relic.norse.runestone-tablet",
             "theme.vault.codex.norse",
         )
         positive_visual_tests = [
@@ -1055,11 +1444,11 @@ class Validator:
                 "theme.norse.base",
                 "codex.norse",
                 "isEmergencyPresentation",
-                "relic.norse.runestone.weathered",
-                EXPECTED_MANIFEST_SHA256,
+                "relic.norse.runestone-tablet",
+                self.integrity_manifest_sha256 or "missing-v2-integrity-hash",
             ),
             "ResourceCoverage.json": (
-                EXPECTED_MANIFEST_SHA256,
+                self.integrity_manifest_sha256 or "missing-v2-integrity-hash",
                 EXPECTED_FONT_SHA256,
                 "descriptorResourceCount",
                 "verifiedEntries",
@@ -1067,8 +1456,8 @@ class Validator:
             "ActiveVisualPlanValidation.json": (
                 "ActiveThemeVisualResourcePlan",
                 "codex.norse",
-                "relic.norse.runestone.weathered",
-                "seal.norse.knotwork",
+                "relic.norse.runestone-tablet",
+                "seal.norse.valknut",
                 "frame",
                 "crest",
             ),
@@ -1157,7 +1546,7 @@ class Validator:
             mutations = mutation.get("mutations")
             self.require(
                 isinstance(mutations, list)
-                and len(mutations) == 20
+                and len(mutations) == EXPECTED_NEGATIVE_MUTATION_COUNT
                 and all(
                     isinstance(item, dict)
                     and item.get("result") == "PASS"
@@ -1166,7 +1555,8 @@ class Validator:
                 ),
                 "NRV-018",
                 "negative-mutation-evidence",
-                "NegativeMutations.json must record 20 deterministically rejected mutations",
+                "NegativeMutations.json must record "
+                f"{EXPECTED_NEGATIVE_MUTATION_COUNT} deterministically rejected mutations",
                 evidence_root / "NegativeMutations.json",
             )
             restoration = mutation.get("sourceRestoration", {})
@@ -1471,7 +1861,8 @@ def swift_test_function_bodies(source: str) -> list[tuple[str, str]]:
 
 def swift_integer_constant(source: str, name: str) -> Optional[int]:
     match = re.search(
-        rf"\b(?:static\s+)?let\s+{re.escape(name)}(?:\s*:\s*Int)?\s*=\s*([^\n;]+)",
+        rf"\b(?:static\s+)?let\s+{re.escape(name)}"
+        rf"(?:\s*:\s*[A-Za-z][A-Za-z0-9_.<>?]*)?\s*=\s*([^\n;]+)",
         strip_comments_and_strings(source),
     )
     if match is None:
@@ -1484,6 +1875,60 @@ def swift_integer_constant(source: str, name: str) -> Optional[int]:
     except (SyntaxError, TypeError, ZeroDivisionError):
         return None
     return value if isinstance(value, int) else None
+
+
+def swift_call_body(source: str, property_name: str, callee: str) -> Optional[str]:
+    masked = strip_comments_and_strings(source)
+    match = re.search(
+        rf"\bstatic\s+let\s+{re.escape(property_name)}\s*=\s*{re.escape(callee)}\s*\(",
+        masked,
+    )
+    if match is None:
+        return None
+    opening = masked.find("(", match.start())
+    depth = 0
+    for index in range(opening, len(masked)):
+        if masked[index] == "(":
+            depth += 1
+        elif masked[index] == ")":
+            depth -= 1
+            if depth == 0:
+                return source[opening + 1:index]
+    return None
+
+
+def swift_labeled_integer_argument(source: str, name: str) -> Optional[int]:
+    match = re.search(
+        rf"\b{re.escape(name)}\s*:\s*([^,\n]+)",
+        strip_comments_and_strings(source),
+    )
+    if match is None:
+        return None
+    return evaluate_integer_expression(match.group(1))
+
+
+def evaluate_integer_expression(expression: str) -> Optional[int]:
+    normalized = expression.replace("_", "").strip()
+    if re.fullmatch(r"[0-9*() +\-/]+", normalized) is None:
+        return None
+    try:
+        value = eval(normalized, {"__builtins__": {}}, {})
+    except (SyntaxError, TypeError, ZeroDivisionError):
+        return None
+    return value if isinstance(value, int) else None
+
+
+def load_python_module(path: Path, name: str) -> Any:
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load Python module: {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        sys.modules.pop(name, None)
+    return module
 
 
 def parse_utc_timestamp(value: Any) -> Optional[datetime]:

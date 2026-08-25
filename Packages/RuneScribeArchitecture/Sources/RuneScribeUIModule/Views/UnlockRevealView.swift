@@ -137,6 +137,7 @@ struct UnlockRevealView: View {
         .accessibilityHint("Dismiss to continue; the rest of Rune Scribe remains available")
         .accessibilityHidden(plan == nil)
         .allowsHitTesting(plan != nil)
+        .runtimeViewportFrameProbe("progression.unlock-reveal")
     }
 
     private var sourceSummary: String {

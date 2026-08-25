@@ -244,6 +244,7 @@ final class SharePresentationSectionTests: XCTestCase {
                 provenanceStatus: .unverified
             )
             XCTAssertEqual(resolution.effectiveCodexID, RuneScribeCodexIDs.norse)
+            XCTAssertNil(resolution.effectiveSelection)
             XCTAssertEqual(resolution.renderMode, .norseInteractiveFallback)
             XCTAssertEqual(resolution.safePreviewStatus, .valid)
         }
@@ -357,6 +358,120 @@ final class SharePresentationSectionTests: XCTestCase {
         XCTAssertEqual(corrupt.effectiveCodexID, RuneScribeCodexIDs.norse)
         XCTAssertEqual(corrupt.renderMode, .norseInteractiveFallback)
         XCTAssertEqual(corrupt.resourceMetadata, hashBoundMetadata.resources)
+    }
+
+    func testProviderInventoryAccepts112MiBAndRejectsTheNextByte() throws {
+        let oneMiB: UInt64 = 1024 * 1024
+        let perResourceBytes = 8 * oneMiB
+        XCTAssertEqual(
+            SharePresentationProviderInventory.maximumDeclaredResourceBytes,
+            112 * oneMiB
+        )
+
+        func resource(_ index: Int, byteLength: UInt64) throws
+            -> SharePresentationProviderResourceInventory
+        {
+            try SharePresentationProviderResourceInventory(
+                resourceID: ThemeResourceID(
+                    rawValue: String(format: "resource.inventory-boundary.%03d", index)
+                )!,
+                role: ThemeResourceRoles.backgroundStaticBase,
+                mediaType: .pdf,
+                byteLength: byteLength,
+                pixelSize: nil,
+                sha256: ThemeSHA256Digest(
+                    rawValue: String(repeating: "a", count: 64)
+                )!
+            )
+        }
+
+        func inventory(
+            resources: [SharePresentationProviderResourceInventory]
+        ) throws -> SharePresentationProviderInventory {
+            try SharePresentationProviderInventory(
+                codexID: CodexID(rawValue: "codex.inventory-boundary")!,
+                scriptIDs: [ScriptID(rawValue: "script.inventory-boundary")!],
+                relicIDs: [ArtifactID(rawValue: "relic.inventory-boundary")!],
+                sealIDs: [],
+                frameIDs: [],
+                resources: resources
+            )
+        }
+
+        let acceptedResources = try (0 ..< 14).map {
+            try resource($0, byteLength: perResourceBytes)
+        }
+        XCTAssertNoThrow(try inventory(resources: acceptedResources))
+
+        let rejectedResources = acceptedResources + [
+            try resource(14, byteLength: 1),
+        ]
+        XCTAssertThrowsError(try inventory(resources: rejectedResources)) { error in
+            XCTAssertEqual(
+                error as? SharePresentationContractError,
+                .invalidProviderInventory
+            )
+        }
+    }
+
+    func testLegacyNorseSelectionRendersWithCurrentIDsAndRetainsEncounterProvenance()
+        throws
+    {
+        typealias Artifacts = NorseArtifactCompatibilityAuthority
+        let requested = try SharePresentationSelection(
+            codexID: RuneScribeCodexIDs.norse,
+            scriptID: NorseProgressionRewardAuthority.baseScriptID,
+            relicID: ArtifactID(
+                rawValue: Artifacts.Legacy.weatheredRunestone.rawValue
+            )!,
+            sealID: ArtifactID(rawValue: Artifacts.Legacy.knotworkSeal.rawValue)!
+        )
+        let metadata = try SharePresentationMetadata(
+            selection: requested,
+            compatibility: .norseInteractiveFallback
+        )
+        let inventory = try SharePresentationProviderInventory(
+            codexID: RuneScribeCodexIDs.norse,
+            scriptIDs: [NorseProgressionRewardAuthority.baseScriptID],
+            relicIDs: Artifacts.currentRelicIDs.map {
+                ArtifactID(rawValue: $0.rawValue)!
+            },
+            sealIDs: Artifacts.currentSealIDs.map {
+                ArtifactID(rawValue: $0.rawValue)!
+            },
+            frameIDs: Artifacts.currentFrameIDs.map {
+                ArtifactID(rawValue: $0.rawValue)!
+            },
+            resources: []
+        )
+        let resolved = try SharePresentationResolver.resolve(
+            metadata: metadata,
+            providerAvailability: .available,
+            safePreviewStatus: .absent,
+            provenanceStatus: .unavailable,
+            providerInventories: [inventory]
+        )
+        XCTAssertEqual(resolved.providerAvailability, .available)
+        XCTAssertEqual(resolved.requestedSelection, requested)
+        XCTAssertEqual(
+            resolved.effectiveSelection?.relicID.rawValue,
+            Artifacts.Current.runestoneTablet.rawValue
+        )
+        XCTAssertEqual(
+            resolved.effectiveSelection?.sealID?.rawValue,
+            Artifacts.Current.valknutSeal.rawValue
+        )
+
+        let projection = SharePresentationProgressionProjection.inbound(
+            SharePresentationIntake(
+                metadata: metadata,
+                safePreviewData: nil,
+                safePreviewStatus: .absent,
+                provenanceStatus: .unavailable
+            )
+        )
+        XCTAssertEqual(projection.codexIDs, [requested.codexID])
+        XCTAssertEqual(projection.artifactIDs, requested.artifactIDs)
     }
 
     func testSignedProvenanceVerifiesAndInvalidSignatureDoesNotBlockPayload() throws {

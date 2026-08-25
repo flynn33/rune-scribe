@@ -1,37 +1,36 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "2.0",
   "locale": "en",
   "codex": {
     "codex.norse": {
       "name": "Norse Codex",
-      "description": "The permanent founding Codex of Rune Scribe, presented with weathered stone, forged iron, gold light, and the Base Rune Script."
+      "description": "The permanent founding Codex of Rune Scribe, presented with weathered stone, carved dark wood, forged iron, restrained bronze, and the Base Rune Script."
     }
   },
   "relics": {
-    "relic.norse.runestone.weathered": "A broad weathered stone tablet held within an iron and gold frame, with a raven crest above the inscription.",
-    "relic.norse.raven-medallion": "A circular forged medallion with a pale stone inscription face and a raven crest, suited to shorter messages.",
-    "relic.norse.ironbound-shield": "A round wooden shield reinforced by iron, with a pale circular inscription field at its center.",
-    "relic.norse.sealed-parchment": "A wide aged parchment with iron fittings and a raven seal, suited to longer messages.",
-    "relic.norse.runestone.blackstone": "A ceremonial black stone tablet crossed by restrained gold and blue forge-light cracks.",
-    "relic.norse.runestone.frozen": "A pale blue rune stone edged with frost and ice, with a clear central inscription field."
+    "relic.norse.runestone-tablet": "A broad carved runestone tablet with a dimensional iron-and-knotwork border and round raven crest.",
+    "relic.norse.dragonwood-plaque": "A tall dark carved-wood plaque with forged iron fittings and a sculpted dragon crown.",
+    "relic.norse.stormforged-stele": "A tall weathered war-stele with blackened iron fittings and a carved hammer crest."
   },
   "seals": {
-    "seal.norse.knotwork": "An interlaced gold knot surrounding a small blue center stone.",
-    "seal.norse.forge-flame": "A gold forge flame with a blue inner flame.",
-    "seal.norse.raven": "A silver raven in profile on a dark forged medallion.",
-    "seal.norse.longship": "A longship with two sails above a single blue wave.",
-    "seal.norse.forge-hammer": "A forged hammer with a small blue spark.",
-    "seal.norse.echo-rune": "A central rune between expanding gold and blue echo arcs."
+    "seal.norse.valknut": "An aged bronze medallion bearing a sculpted interlocked Valknut.",
+    "seal.norse.ravenshield": "A forged shield medallion bearing a sculpted raven.",
+    "seal.norse.mjolnir": "A relief medallion bearing the hammer Mjolnir.",
+    "seal.norse.wolkin": "An aged medallion bearing a longship beneath the northern sky.",
+    "seal.norse.yggdrasil": "A sculpted medallion bearing the world tree Yggdrasil.",
+    "seal.norse.berserk": "A dark forged medallion bearing a battle-worn warrior mark."
   },
   "frame": {
-    "frame.norse.carved-knotwork": "A carved silver and gold knotwork frame with restrained corner ornaments."
+    "frame.norse.carved-knotwork": "A carved silver-and-gold mastery frame with sculpted knotwork corner ornaments."
   },
   "crest": {
-    "crest.norse.forge-master": "A shield-shaped Forge Master crest showing an anvil, blue flame, and paired silver wings."
+    "crest.norse.raven-mastery": "A weathered shield crest bearing a sculpted silver raven and restrained blue enamel."
   },
   "background": {
-    "background.norse.forge-v1": "A dark navy and midnight-purple field with subdued blue energy bands and small gold rune glows.",
-    "background.norse.high-contrast": "A nearly black static field with bright, simplified gold and blue accents."
+    "background.norse.cold-sea-hall": "A cold northern sea, distant longship and fjord settlement, and an ancient timber hall under deep navy light."
+  },
+  "title": {
+    "title.norse.master-of-runes": "Master of Runes, the Norse Codex mastery title."
   },
   "policies": {
     "decorativeRunicHeadings": "Hide the decorative runic heading from VoiceOver when the adjacent localized subtitle already names the destination.",

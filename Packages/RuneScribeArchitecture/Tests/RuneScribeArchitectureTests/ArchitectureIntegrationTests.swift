@@ -98,9 +98,9 @@ final class ArchitectureIntegrationTests: XCTestCase {
                     codexID: RuneScribeCodexIDs.norse,
                     scriptID: ScriptID(rawValue: "script.base-runes")!,
                     relicID: ArtifactID(
-                        rawValue: "relic.norse.runestone.weathered"
+                        rawValue: "relic.norse.runestone-tablet"
                     )!,
-                    sealID: ArtifactID(rawValue: "seal.norse.knotwork")!
+                    sealID: ArtifactID(rawValue: "seal.norse.valknut")!
                 ),
                 compatibility: .norseInteractiveFallback
             )

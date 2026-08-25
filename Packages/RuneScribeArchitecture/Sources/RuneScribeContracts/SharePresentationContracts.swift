@@ -504,6 +504,7 @@ public struct SharePresentationProviderInventory: Codable, Equatable, Hashable, 
     public static let maximumScriptCount = 16
     public static let maximumArtifactCount = 128
     public static let maximumResourceCount = 256
+    public static let maximumDeclaredResourceBytes: UInt64 = 112 * 1024 * 1024
 
     public let codexID: CodexID
     public let scriptIDs: [ScriptID]
@@ -535,7 +536,7 @@ public struct SharePresentationProviderInventory: Codable, Equatable, Hashable, 
         var declaredBytes: UInt64 = 0
         for resource in resources {
             guard resource.byteLength
-                    <= SharePresentationMetadata.maximumDeclaredResourceBytes - declaredBytes
+                    <= Self.maximumDeclaredResourceBytes - declaredBytes
             else {
                 throw SharePresentationContractError.invalidProviderInventory
             }
@@ -594,6 +595,66 @@ public struct SharePresentationProviderInventory: Codable, Equatable, Hashable, 
 public enum SharePresentationProviderCompatibilityResolver {
     public static let maximumProviderCount = 64
 
+    /// Returns the installed-selection identity used for interactive rendering.
+    /// Only a requested Norse Codex selection is eligible for legacy aliases;
+    /// the caller must retain the original selection as provenance.
+    public static func effectiveSelection(
+        for selection: SharePresentationSelection
+    ) -> SharePresentationSelection? {
+        guard selection.codexID == RuneScribeCodexIDs.norse else {
+            return selection
+        }
+        do {
+            return try SharePresentationSelection(
+                codexID: selection.codexID,
+                scriptID: selection.scriptID,
+                relicID: NorseArtifactCompatibilityAuthority.canonicalArtifactID(
+                    selection.relicID,
+                    as: .relic
+                ),
+                sealID: try selection.sealID.map {
+                    try NorseArtifactCompatibilityAuthority.canonicalArtifactID(
+                        $0,
+                        as: .seal
+                    )
+                },
+                frameID: try selection.frameID.map {
+                    try NorseArtifactCompatibilityAuthority.canonicalArtifactID(
+                        $0,
+                        as: .frame
+                    )
+                },
+                presentationVersion: selection.presentationVersion
+            )
+        } catch {
+            return nil
+        }
+    }
+
+    /// Outbound contracts may contain non-Norse providers, but may never emit
+    /// a legacy or unknown identifier from the Norse artifact namespaces.
+    public static func isCurrentOutboundSelection(
+        _ selection: SharePresentationSelection
+    ) -> Bool {
+        do {
+            let relicID = try NorseArtifactCompatibilityAuthority.canonicalArtifactID(
+                selection.relicID,
+                as: .relic
+            )
+            let sealID = try selection.sealID.map {
+                try NorseArtifactCompatibilityAuthority.canonicalArtifactID($0, as: .seal)
+            }
+            let frameID = try selection.frameID.map {
+                try NorseArtifactCompatibilityAuthority.canonicalArtifactID($0, as: .frame)
+            }
+            return relicID == selection.relicID
+                && sealID == selection.sealID
+                && frameID == selection.frameID
+        } catch {
+            return false
+        }
+    }
+
     public static func resolve(
         metadata: SharePresentationMetadata,
         providerAvailability: ShareProviderAvailability,
@@ -620,13 +681,15 @@ public enum SharePresentationProviderCompatibilityResolver {
         guard inventories.count <= maximumProviderCount,
               Set(inventories.map(\.codexID)).count == inventories.count
         else { return .corrupt }
+        guard let effectiveSelection = effectiveSelection(for: selection)
+        else { return .incompatible }
         guard let inventory = inventories.first(where: {
-            $0.codexID == selection.codexID
+            $0.codexID == effectiveSelection.codexID
         }) else { return .unknown }
-        guard inventory.scriptIDs.contains(selection.scriptID),
-              inventory.relicIDs.contains(selection.relicID),
-              selection.sealID.map(inventory.sealIDs.contains) ?? true,
-              selection.frameID.map(inventory.frameIDs.contains) ?? true
+        guard inventory.scriptIDs.contains(effectiveSelection.scriptID),
+              inventory.relicIDs.contains(effectiveSelection.relicID),
+              effectiveSelection.sealID.map(inventory.sealIDs.contains) ?? true,
+              effectiveSelection.frameID.map(inventory.frameIDs.contains) ?? true
         else { return .incompatible }
 
         let installedResources = Dictionary(
@@ -724,6 +787,11 @@ public struct OutboundSharePresentationDTO: Codable, Equatable, Sendable {
         safePreviewData: Data? = nil,
         signedProvenance: ShareSignedProvenance? = nil
     ) throws {
+        guard SharePresentationProviderCompatibilityResolver
+            .isCurrentOutboundSelection(metadata.selection)
+        else {
+            throw SharePresentationContractError.invalidArtifactIdentifier
+        }
         guard metadata.safePreview.map({ descriptor in
             guard let safePreviewData else { return false }
             return safePreviewData.count == Int(descriptor.byteLength)
@@ -797,6 +865,7 @@ public enum ShareEncounterRecordingStatus: String, Codable, CaseIterable, Sendab
 
 public struct ReceivedSharePresentation: Codable, Equatable, Hashable, Sendable {
     public let requestedSelection: SharePresentationSelection
+    public let effectiveSelection: SharePresentationSelection?
     public let effectiveCodexID: CodexID
     public let providerAvailability: ShareProviderAvailability
     public let renderMode: ReceivedShareRenderMode
@@ -807,6 +876,7 @@ public struct ReceivedSharePresentation: Codable, Equatable, Hashable, Sendable 
 
     public init(
         requestedSelection: SharePresentationSelection,
+        effectiveSelection: SharePresentationSelection? = nil,
         effectiveCodexID: CodexID,
         providerAvailability: ShareProviderAvailability,
         renderMode: ReceivedShareRenderMode,
@@ -821,12 +891,24 @@ public struct ReceivedSharePresentation: Codable, Equatable, Hashable, Sendable 
         switch renderMode {
         case .requestedCodex:
             guard providerAvailability == .available,
-                  effectiveCodexID == requestedSelection.codexID
+                  effectiveCodexID == requestedSelection.codexID,
+                  let expectedEffectiveSelection =
+                    SharePresentationProviderCompatibilityResolver.effectiveSelection(
+                        for: requestedSelection
+                    )
             else { throw SharePresentationContractError.invalidObservation }
+            let resolvedEffectiveSelection = effectiveSelection
+                ?? expectedEffectiveSelection
+            guard resolvedEffectiveSelection == expectedEffectiveSelection else {
+                throw SharePresentationContractError.invalidObservation
+            }
+            self.effectiveSelection = resolvedEffectiveSelection
         case .norseInteractiveFallback:
             guard providerAvailability != .available,
-                  effectiveCodexID == RuneScribeCodexIDs.norse
+                  effectiveCodexID == RuneScribeCodexIDs.norse,
+                  effectiveSelection == nil
             else { throw SharePresentationContractError.invalidObservation }
+            self.effectiveSelection = nil
         }
         self.requestedSelection = requestedSelection
         self.effectiveCodexID = effectiveCodexID
@@ -845,6 +927,10 @@ public struct ReceivedSharePresentation: Codable, Equatable, Hashable, Sendable 
             requestedSelection: container.decode(
                 SharePresentationSelection.self,
                 forKey: .requestedSelection
+            ),
+            effectiveSelection: container.decodeIfPresent(
+                SharePresentationSelection.self,
+                forKey: .effectiveSelection
             ),
             effectiveCodexID: container.decode(CodexID.self, forKey: .effectiveCodexID),
             providerAvailability: container.decode(
@@ -873,6 +959,7 @@ public struct ReceivedSharePresentation: Codable, Equatable, Hashable, Sendable 
 
     private enum CodingKeys: String, CodingKey, CaseIterable {
         case requestedSelection
+        case effectiveSelection
         case effectiveCodexID
         case providerAvailability
         case renderMode

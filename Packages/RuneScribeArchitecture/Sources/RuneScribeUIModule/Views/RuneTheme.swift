@@ -222,9 +222,29 @@ struct RuneHeader: View {
         .frame(height: height)
         .frame(maxWidth: .infinity)
         .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(Color.runeGold.opacity(0.35))
-                .frame(height: 1)
+            ZStack {
+                Rectangle()
+                    .fill(Color.runeGold.opacity(0.35))
+                    .frame(height: 1)
+                ThemeChromeImage(slot: .divider)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 18)
+                    .opacity(0.88)
+                    .allowsHitTesting(false)
+            }
+        }
+        .overlay(alignment: .topLeading) {
+            ThemeChromeImage(slot: .cornerOrnament)
+                .frame(width: 52, height: 52)
+                .opacity(0.72)
+                .allowsHitTesting(false)
+        }
+        .overlay(alignment: .topTrailing) {
+            ThemeChromeImage(slot: .cornerOrnament)
+                .scaleEffect(x: -1, y: 1)
+                .frame(width: 52, height: 52)
+                .opacity(0.72)
+                .allowsHitTesting(false)
         }
     }
 
@@ -327,7 +347,7 @@ struct RunePanel<Content: View>: View {
             content()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
+        .padding(20)
         .background(
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
                 .fill(Color.runeParchment)

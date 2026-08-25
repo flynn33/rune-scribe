@@ -581,12 +581,18 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
         async throws
     {
         let fixture = try await makeFixture()
-        var repositoryRoot = URL(fileURLWithPath: #filePath)
-        for _ in 0..<5 { repositoryRoot.deleteLastPathComponent() }
-        let approvedURL = repositoryRoot.appendingPathComponent(
-            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.raven.pdf"
+        let approvedURL = try XCTUnwrap(
+            Bundle.module.url(
+                forResource: "single-page-object-stream.pdf",
+                withExtension: "base64"
+            )
         )
-        let approved = try Data(contentsOf: approvedURL)
+        let approved = try XCTUnwrap(
+            Data(
+                base64Encoded: try Data(contentsOf: approvedURL),
+                options: .ignoreUnknownCharacters
+            )
+        )
         XCTAssertNotNil(approved.range(of: Data("/ObjStm".utf8)))
         let approvedDeclaration = makeDeclaration(
             id: "vector.compressed-object-stream",

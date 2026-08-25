@@ -278,9 +278,9 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
                 )
                 XCTAssertEqual(
                     plan.sealResourceID,
-                    variant.colorMode == .standard
-                        ? seal.vectorResourceID
-                        : seal.monochromeFallbackResourceID
+                    variant.colorMode == .monochrome
+                        ? seal.monochromeFallbackResourceID
+                        : seal.vectorResourceID
                 )
 
                 let resourceData = try loadPlanResources(

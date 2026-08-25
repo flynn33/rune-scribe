@@ -27,14 +27,92 @@
     ],
     "requiredResources": [
       {
-        "name": "NotoSansRunic-Regular",
-        "fileExtension": "ttf",
+        "name": "module-manifest",
+        "fileExtension": "json",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.norse"
       },
       {
-        "name": "module-manifest",
+        "name": "Norse-Resource-Integrity-Manifest-v2.0",
         "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "norse-accessibility.en",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "background.norse.cold-sea-hall.high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "background.norse.cold-sea-hall.macos-wide-crop",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "background.norse.cold-sea-hall.reduce-motion",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "background.norse.cold-sea-hall.standard",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "codex-card.norse.encountered",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "codex-card.norse.locked",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "codex-card.norse.owned",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "codex-card.norse.selected",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "codex-card.norse.unavailable",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "crest.norse.raven-mastery.static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "crest.norse.raven-mastery.thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "crest.norse.raven-mastery.vector-master",
+        "fileExtension": "pdf",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.norse"
       },
@@ -63,6 +141,300 @@
         "ownerModuleID": "com.runescribe.module.theme.norse"
       },
       {
+        "name": "NotoSansRunic-Regular",
+        "fileExtension": "ttf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "frame.norse.carved-knotwork.static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "frame.norse.carved-knotwork.vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "Norse-Decorative-Heading-Slots-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "norse-content.en",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "Norse-Semantic-Palette-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "panel.norse.card-border",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "panel.norse.corner-ornament",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "panel.norse.divider",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "panel.norse.primary-button",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "panel.norse.tab-selector",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "Norse-Progression-Bindings-v2.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.dragonwood-plaque.geometry",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.dragonwood-plaque.high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.dragonwood-plaque",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "share-fallback.norse.dragonwood-plaque",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.dragonwood-plaque.thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.runestone-tablet.geometry",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.runestone-tablet.high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.runestone-tablet",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "share-fallback.norse.runestone-tablet",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.runestone-tablet.thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.stormforged-stele.geometry",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.stormforged-stele.high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.stormforged-stele",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "share-fallback.norse.stormforged-stele",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "relic.norse.stormforged-stele.thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "Norse-Script-Mapping-v1.0",
+        "fileExtension": "json",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "script.base-runes.specimen.high-contrast",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "script.base-runes.specimen.standard",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "script.base-runes.specimen.static-fallback",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.berserk.monochrome",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.berserk.thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.berserk.vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.mjolnir.monochrome",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.mjolnir.thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.mjolnir.vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.ravenshield.monochrome",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.ravenshield.thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.ravenshield.vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.valknut.monochrome",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.valknut.thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.valknut.vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.wolkin.monochrome",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.wolkin.thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.wolkin.vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.yggdrasil.monochrome",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.yggdrasil.thumbnail",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
+        "name": "seal.norse.yggdrasil.vector-master",
+        "fileExtension": "pdf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.norse"
+      },
+      {
         "name": "sound.norse.unlock-codex",
         "fileExtension": "wav",
         "subdirectory": null,
@@ -83,288 +455,6 @@
       {
         "name": "sound.norse.unlock-relic",
         "fileExtension": "wav",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "background.norse.forge.static",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "background.norse.high-contrast",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "codex-card.norse.v1",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "codex-silhouette.norse.v1",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "crest.norse.forge-master",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "crest.norse.forge-master",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "frame.norse.carved-knotwork",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "frame.norse.carved-knotwork",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.ironbound-shield.geometry",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.raven-medallion.geometry",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.runestone.blackstone.geometry",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.runestone.frozen.geometry",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.runestone.weathered.geometry",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.sealed-parchment.geometry",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "norse-accessibility.en",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "norse-content.en",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "Norse-Background-Profile-v1.0",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "Norse-Decorative-Heading-Slots-v1.0",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "Norse-Progression-Bindings-v1.0",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "Norse-Resource-Integrity-Manifest-v1.0",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "Norse-Script-Mapping-v1.0",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "Norse-Semantic-Palette-v1.0",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.ironbound-shield",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.raven-medallion",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.runestone.blackstone",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.runestone.frozen",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.runestone.weathered",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "relic.norse.sealed-parchment",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "script.base-runes.specimen",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.echo-rune",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.echo-rune",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.forge-flame",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.forge-flame",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.forge-hammer",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.forge-hammer",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.knotwork",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.knotwork",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.longship",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.longship",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.raven",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "seal.norse.raven",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "share-fallback.norse.ironbound-shield",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "share-fallback.norse.raven-medallion",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "share-fallback.norse.runestone.blackstone",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "share-fallback.norse.runestone.frozen",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "share-fallback.norse.runestone.weathered",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.norse"
-      },
-      {
-        "name": "share-fallback.norse.sealed-parchment",
-        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.norse"
       }

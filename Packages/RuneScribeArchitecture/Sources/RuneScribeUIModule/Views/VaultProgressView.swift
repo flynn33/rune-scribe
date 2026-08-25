@@ -22,6 +22,20 @@ enum VaultProgressSection: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
+enum VaultProgressInitialViewport: Hashable, Sendable {
+    case journey(CodexID)
+    case achievement(AchievementID)
+    case artifact(ArtifactID)
+
+    var id: String {
+        switch self {
+        case .journey(let codexID): "journey.\(codexID.rawValue)"
+        case .achievement(let achievementID): "achievement.\(achievementID.rawValue)"
+        case .artifact(let artifactID): "artifact.\(artifactID.rawValue)"
+        }
+    }
+}
+
 enum ProgressionAchievementPath: String, CaseIterable, Sendable {
     case scribe = "Scribe"
     case courier = "Courier"
@@ -305,7 +319,16 @@ struct VaultProgressView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
-    @State private var section: VaultProgressSection = .journey
+    @State private var section: VaultProgressSection
+    @State private var initialScrollTarget: String?
+
+    init(
+        initialSection: VaultProgressSection = .journey,
+        initialViewport: VaultProgressInitialViewport? = nil
+    ) {
+        _section = State(initialValue: initialSection)
+        _initialScrollTarget = State(initialValue: initialViewport?.id)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -424,22 +447,26 @@ struct VaultProgressView: View {
                 .accessibilityLabel("Progress is read only while local records recover")
             }
 
-            GeometryReader { proxy in
+            GeometryReader { geometry in
                 ScrollView {
-                    switch section {
-                    case .journey:
-                        journey(snapshot, width: proxy.size.width)
-                    case .achievements:
-                        achievements(snapshot)
-                    case .statistics:
-                        statistics(snapshot)
-                    case .vault:
-                        vault(snapshot)
-                    case .archive:
-                        archive(snapshot)
+                    Group {
+                        switch section {
+                        case .journey:
+                            journey(snapshot, width: geometry.size.width)
+                        case .achievements:
+                            achievements(snapshot)
+                        case .statistics:
+                            statistics(snapshot)
+                        case .vault:
+                            vault(snapshot)
+                        case .archive:
+                            archive(snapshot)
+                        }
                     }
+                    .scrollTargetLayout()
                 }
                 .scrollIndicators(.automatic)
+                .scrollPosition(id: $initialScrollTarget, anchor: .center)
             }
         }
     }
@@ -472,8 +499,10 @@ struct VaultProgressView: View {
             LazyVGrid(columns: columns, alignment: .leading, spacing: RuneMetrics.sectionGap) {
                 ForEach(snapshot.codexGates.sorted(by: { $0.journeyOrder < $1.journeyOrder }), id: \.codexID) { gate in
                     journeyCard(gate, ownership: ownershipByCodex[gate.codexID])
+                        .id(VaultProgressInitialViewport.journey(gate.codexID).id)
                 }
             }
+            .scrollTargetLayout()
 
             if snapshot.codexGates.isEmpty {
                 emptyState(
@@ -582,8 +611,11 @@ struct VaultProgressView: View {
                             .foregroundColor(.runeGoldBright)
                         ForEach(items, id: \.achievementID) { achievement in
                             achievementCard(achievement)
+                                .id(VaultProgressInitialViewport
+                                    .achievement(achievement.achievementID).id)
                         }
                     }
+                    .scrollTargetLayout()
                 }
             }
 
@@ -636,6 +668,10 @@ struct VaultProgressView: View {
             }
             .accessibilityElement(children: .combine)
         }
+        .accessibilityIdentifier("progression.achievement.\(achievement.achievementID.rawValue)")
+        .runtimeViewportFrameProbe(
+            "progression.achievement.\(achievement.achievementID.rawValue)"
+        )
     }
 
     private func statistics(_ snapshot: ProgressionSnapshotDTO) -> some View {
@@ -747,6 +783,7 @@ struct VaultProgressView: View {
                 .foregroundColor(.runeGoldBright)
             LazyVGrid(columns: themeCatalogColumns, alignment: .leading, spacing: 12) {
                 ForEach(items) { item in
+                    let viewportID = VaultProgressInitialViewport.artifact(item.artifactID).id
                     ThemeArtifactTile(
                         item: ThemeArtifactBrowserItem(
                             id: item.artifactID,
@@ -767,8 +804,22 @@ struct VaultProgressView: View {
                     ) {
                         vaultArtifactArtwork(item)
                     }
+                    .overlay {
+                        if initialScrollTarget == viewportID {
+                            RoundedRectangle(
+                                cornerRadius: RuneMetrics.corner,
+                                style: .continuous
+                            )
+                            .strokeBorder(Color.runeGoldBright, lineWidth: 2)
+                            .shadow(color: Color.runeGold.opacity(0.35), radius: 4)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
+                        }
+                    }
+                    .id(viewportID)
                 }
             }
+            .scrollTargetLayout()
         }
     }
 
@@ -795,7 +846,7 @@ struct VaultProgressView: View {
                     identifierPrefix: "theme.vault",
                     action: {}
                 ) {
-                    vaultCodexArtwork(descriptor)
+                    vaultCodexArtwork(descriptor, unavailable: !isAvailable)
                 }
                 Label(
                     isAvailable ? "Provider available" : "Provider unavailable; safe presentation in use",
@@ -828,10 +879,17 @@ struct VaultProgressView: View {
         return [GridItem(.adaptive(minimum: 190, maximum: 280), spacing: 12, alignment: .top)]
     }
 
-    private func vaultCodexArtwork(_ descriptor: ThemeDescriptor) -> AnyView {
-        if let presentation = session.activeThemeVisualPresentation,
-           let image = presentation.imageReference(for: presentation.plan.codex.selected)?.image {
-            return AnyView(image.resizable().scaledToFill())
+    private func vaultCodexArtwork(
+        _ descriptor: ThemeDescriptor,
+        unavailable: Bool
+    ) -> AnyView {
+        if let presentation = session.activeThemeVisualPresentation {
+            let imagePlan = unavailable
+                ? presentation.plan.codex.unavailable
+                : presentation.plan.codex.selected
+            if let image = presentation.imageReference(for: imagePlan)?.image {
+                return AnyView(image.resizable().scaledToFill())
+            }
         }
         return AnyView(ThemeVisualPlaceholder(
             systemImage: "books.vertical",
@@ -953,7 +1011,7 @@ struct VaultProgressView: View {
 private struct VaultProgressFrameModifier: ViewModifier {
     func body(content: Content) -> some View {
         #if os(macOS)
-        content.frame(minWidth: 820, idealWidth: 900, minHeight: 680, idealHeight: 760)
+        content.frame(minWidth: 620, idealWidth: 900, minHeight: 680, idealHeight: 760)
         #else
         content.frame(maxWidth: .infinity, maxHeight: .infinity)
         #endif

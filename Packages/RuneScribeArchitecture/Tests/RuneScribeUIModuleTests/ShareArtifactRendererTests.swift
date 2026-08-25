@@ -6,6 +6,7 @@ import RuneScribeContracts
 import RuneScribeNorseThemeModule
 @testable import RuneScribeUIRuntime
 @testable import RuneScribeUIModule
+import SwiftUI
 import XCTest
 
 @MainActor
@@ -81,6 +82,11 @@ final class ShareArtifactRendererTests: XCTestCase {
             descriptor.codex.background.highContrastResourceID
         )
         XCTAssertNotNil(first.sealAnchor)
+        let fontResourceID = try XCTUnwrap(descriptor.codex.scripts.first(where: {
+            $0.id == selection.scriptID
+        })?.fontResourceID)
+        XCTAssertEqual(first.fontResourceID, fontResourceID)
+        XCTAssertEqual(first.composition.fontResourceID, fontResourceID)
         XCTAssertEqual(
             first.pages.map(\.inscription).joined().replacingOccurrences(of: "\n", with: ""),
             request.inscription
@@ -98,8 +104,22 @@ final class ShareArtifactRendererTests: XCTestCase {
         XCTAssertEqual(first.composition, interactive)
         XCTAssertEqual(
             interactive.sealResourceID,
-            includedSeal.monochromeFallbackResourceID
+            includedSeal.vectorResourceID
         )
+
+        let canvas = ThemeArtifactCanvas(
+            plan: first.composition,
+            page: try XCTUnwrap(first.pages.first),
+            context: .interactivePreview,
+            image: { _ in Image(systemName: "photo") }
+        )
+        RuntimeThemeSemanticResourceUseObservation.end()
+        XCTAssertFalse(canvas.reportGlyphTextResourceUse())
+        var observed = Set<ThemeResourceID>()
+        RuntimeThemeSemanticResourceUseObservation.begin { observed.insert($0) }
+        defer { RuntimeThemeSemanticResourceUseObservation.end() }
+        XCTAssertTrue(canvas.reportGlyphTextResourceUse())
+        XCTAssertEqual(observed, [fontResourceID])
     }
 
     func testRenderPlanCoversShortMediumLongPaginatedAndOverflowInscriptions() throws {
@@ -233,6 +253,8 @@ final class ShareArtifactRendererTests: XCTestCase {
         XCTAssertEqual(staticPlan.composition, interactivePlan)
         XCTAssertEqual(staticPlan.fontPostScriptName, override.rawValue)
         XCTAssertTrue(staticPlan.composition.usesExternalFontOverride)
+        XCTAssertNil(staticPlan.fontResourceID)
+        XCTAssertNil(staticPlan.composition.fontResourceID)
         let themeFontID = try XCTUnwrap(descriptor.codex.scripts.first(where: {
             $0.id == selection.scriptID
         })?.fontResourceID)
@@ -355,6 +377,7 @@ final class ShareArtifactRendererTests: XCTestCase {
             sealAnchor: layout.sealAnchors.first?.point,
             sealScale: 0.18,
             fontPostScriptName: "Helvetica",
+            fontResourceID: nil,
             resourceMetadata: metadata
         )
 
@@ -492,6 +515,7 @@ final class ShareArtifactRendererTests: XCTestCase {
                 sealAnchor: plan.sealAnchor,
                 sealScale: plan.sealScale,
                 fontPostScriptName: plan.fontPostScriptName,
+                fontResourceID: plan.fontResourceID,
                 resourceMetadata: plan.resourceMetadata
             )
             let variant = try ShareArtifactStaticRenderer.render(

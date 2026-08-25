@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "2.0",
+  "artifactID": "relic.norse.runestone-tablet",
+  "displayName": "Runestone Tablet",
+  "canvasPixels": {
+    "width": 2048,
+    "height": 1536
+  },
+  "deterministicCrop": {
+    "x": 0.12,
+    "y": 0.06,
+    "width": 0.76,
+    "height": 0.85
+  },
+  "normalizedContentSafeArea": {
+    "x": 0.18,
+    "y": 0.18,
+    "width": 0.64,
+    "height": 0.64
+  },
+  "normalizedInscriptionSafeArea": {
+    "type": "rectangle",
+    "x": 0.23,
+    "y": 0.30,
+    "width": 0.54,
+    "height": 0.45
+  },
+  "sealAnchors": [
+    {
+      "id": "lower-left",
+      "x": 0.23,
+      "y": 0.78,
+      "radius": 0.06
+    },
+    {
+      "id": "lower-right",
+      "x": 0.77,
+      "y": 0.78,
+      "radius": 0.06
+    }
+  ],
+  "layouts": [
+    {
+      "length": "short",
+      "maximumLines": 2,
+      "minimumGlyphScale": 0.72
+    },
+    {
+      "length": "medium",
+      "maximumLines": 4,
+      "minimumGlyphScale": 0.6
+    },
+    {
+      "length": "long",
+      "maximumLines": 7,
+      "minimumGlyphScale": 0.5
+    }
+  ],
+  "textAlignment": "center",
+  "requiresNonColorSelectionCue": true
+}

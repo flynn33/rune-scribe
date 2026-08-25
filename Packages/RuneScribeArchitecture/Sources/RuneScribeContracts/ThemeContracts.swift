@@ -574,6 +574,8 @@ public enum ThemeResourceMediaType: String, Codable, Hashable, Sendable {
 public enum ThemeResourceRoles {
     public static let scriptFont = make("script.font")
     public static let scriptStaticFallback = make("script.static-fallback")
+    public static let scriptSpecimenStandard = make("script.specimen-standard")
+    public static let scriptSpecimenHighContrast = make("script.specimen-high-contrast")
     public static let scriptGlyphVector = make("script.glyph-vector")
     public static let relicMaster = make("relic.master")
     public static let relicThumbnail = make("relic.thumbnail")
@@ -586,15 +588,23 @@ public enum ThemeResourceRoles {
     public static let frameStaticFallback = make("frame.static-fallback")
     public static let crestVectorMaster = make("crest.vector-master")
     public static let crestStaticFallback = make("crest.static-fallback")
+    public static let crestThumbnail = make("crest.thumbnail")
     public static let backgroundStaticBase = make("background.static-base")
     public static let backgroundReduceMotion = make("background.reduce-motion")
     public static let backgroundHighContrast = make("background.high-contrast")
+    public static let backgroundMacOSWideCrop = make("background.macos-wide-crop")
     public static let backgroundMotion = make("background.motion")
     public static let backgroundRendererParameters = make("background.parameters")
     public static let vaultCard = make("vault.card")
     public static let vaultLockedSilhouette = make("vault.locked-silhouette")
     public static let vaultEncountered = make("vault.encountered")
     public static let vaultSelected = make("vault.selected")
+    public static let vaultUnavailable = make("vault.unavailable")
+    public static let panelCardBorder = make("panel.card-border")
+    public static let panelCornerOrnament = make("panel.corner-ornament")
+    public static let panelDivider = make("panel.divider")
+    public static let panelPrimaryButton = make("panel.primary-button")
+    public static let panelTabSelector = make("panel.tab-selector")
     public static let localizationStrings = make("localization.strings")
 
     private static func make(_ rawValue: String) -> ThemeResourceRoleID {
@@ -769,6 +779,8 @@ public struct ThemeScriptDescriptor: Codable, Hashable, Sendable {
     public let fontVersion: UInt32?
     public let fontPostScriptName: ThemeFontPostScriptName?
     public let staticFallbackResourceID: ThemeResourceID
+    public let standardSpecimenResourceID: ThemeResourceID?
+    public let highContrastSpecimenResourceID: ThemeResourceID?
     public let fallbackScriptID: ScriptID
     public let recommendedPointSizes: ThemeScalarRange
     public let accessibility: ThemeAccessibilityMetadata
@@ -787,7 +799,9 @@ public struct ThemeScriptDescriptor: Codable, Hashable, Sendable {
         fallbackScriptID: ScriptID,
         recommendedPointSizes: ThemeScalarRange,
         accessibility: ThemeAccessibilityMetadata,
-        rightsID: ThemeProvenanceID
+        rightsID: ThemeProvenanceID,
+        standardSpecimenResourceID: ThemeResourceID? = nil,
+        highContrastSpecimenResourceID: ThemeResourceID? = nil
     ) throws {
         self.id = id
         self.displayName = displayName
@@ -798,6 +812,8 @@ public struct ThemeScriptDescriptor: Codable, Hashable, Sendable {
         self.fontVersion = fontVersion
         self.fontPostScriptName = fontPostScriptName
         self.staticFallbackResourceID = staticFallbackResourceID
+        self.standardSpecimenResourceID = standardSpecimenResourceID
+        self.highContrastSpecimenResourceID = highContrastSpecimenResourceID
         self.fallbackScriptID = fallbackScriptID
         self.recommendedPointSizes = recommendedPointSizes
         self.accessibility = accessibility
@@ -846,6 +862,8 @@ public struct ThemeScriptDescriptor: Codable, Hashable, Sendable {
     fileprivate var requiredResourceIDs: Set<ThemeResourceID> {
         var result = Set([staticFallbackResourceID])
         if let fontResourceID { result.insert(fontResourceID) }
+        if let standardSpecimenResourceID { result.insert(standardSpecimenResourceID) }
+        if let highContrastSpecimenResourceID { result.insert(highContrastSpecimenResourceID) }
         result.formUnion(glyphs.compactMap(\.vectorResourceID))
         return result
     }
@@ -1203,15 +1221,18 @@ public struct ThemeCrestDescriptor: Codable, Hashable, Sendable {
     public let metadata: ThemeArtifactMetadata
     public let vectorResourceID: ThemeResourceID
     public let staticFallbackResourceID: ThemeResourceID
+    public let thumbnailResourceID: ThemeResourceID?
 
     public init(
         metadata: ThemeArtifactMetadata,
         vectorResourceID: ThemeResourceID,
-        staticFallbackResourceID: ThemeResourceID
+        staticFallbackResourceID: ThemeResourceID,
+        thumbnailResourceID: ThemeResourceID? = nil
     ) throws {
         self.metadata = metadata
         self.vectorResourceID = vectorResourceID
         self.staticFallbackResourceID = staticFallbackResourceID
+        self.thumbnailResourceID = thumbnailResourceID
         try validate()
     }
 
@@ -1220,7 +1241,7 @@ public struct ThemeCrestDescriptor: Codable, Hashable, Sendable {
     }
 
     fileprivate var requiredResourceIDs: Set<ThemeResourceID> {
-        [vectorResourceID, staticFallbackResourceID]
+        Set([vectorResourceID, staticFallbackResourceID] + [thumbnailResourceID].compactMap { $0 })
     }
 }
 
@@ -1242,6 +1263,7 @@ public struct ThemeBackgroundDescriptor: Codable, Hashable, Sendable {
     public let staticBaseResourceID: ThemeResourceID
     public let reduceMotionResourceID: ThemeResourceID
     public let highContrastResourceID: ThemeResourceID
+    public let macOSWideResourceID: ThemeResourceID?
     public let optionalMotionResourceID: ThemeResourceID?
     public let rendererParametersResourceID: ThemeResourceID?
     public let motionIntensity: ThemeMotionIntensity
@@ -1256,6 +1278,7 @@ public struct ThemeBackgroundDescriptor: Codable, Hashable, Sendable {
         staticBaseResourceID: ThemeResourceID,
         reduceMotionResourceID: ThemeResourceID,
         highContrastResourceID: ThemeResourceID,
+        macOSWideResourceID: ThemeResourceID? = nil,
         optionalMotionResourceID: ThemeResourceID? = nil,
         rendererParametersResourceID: ThemeResourceID? = nil,
         motionIntensity: ThemeMotionIntensity,
@@ -1269,6 +1292,7 @@ public struct ThemeBackgroundDescriptor: Codable, Hashable, Sendable {
         self.staticBaseResourceID = staticBaseResourceID
         self.reduceMotionResourceID = reduceMotionResourceID
         self.highContrastResourceID = highContrastResourceID
+        self.macOSWideResourceID = macOSWideResourceID
         self.optionalMotionResourceID = optionalMotionResourceID
         self.rendererParametersResourceID = rendererParametersResourceID
         self.motionIntensity = motionIntensity
@@ -1293,6 +1317,9 @@ public struct ThemeBackgroundDescriptor: Codable, Hashable, Sendable {
         if let rendererParametersResourceID {
             result.insert(rendererParametersResourceID)
         }
+        if let macOSWideResourceID {
+            result.insert(macOSWideResourceID)
+        }
         return result
     }
 
@@ -1308,6 +1335,7 @@ public struct ThemeVaultDescriptor: Codable, Hashable, Sendable {
     public let lockedSilhouetteResourceID: ThemeResourceID
     public let encounteredResourceID: ThemeResourceID
     public let selectedResourceID: ThemeResourceID
+    public let unavailableResourceID: ThemeResourceID?
     public let accessibility: ThemeAccessibilityMetadata
     public let rightsID: ThemeProvenanceID
 
@@ -1318,6 +1346,7 @@ public struct ThemeVaultDescriptor: Codable, Hashable, Sendable {
         lockedSilhouetteResourceID: ThemeResourceID,
         encounteredResourceID: ThemeResourceID,
         selectedResourceID: ThemeResourceID,
+        unavailableResourceID: ThemeResourceID? = nil,
         accessibility: ThemeAccessibilityMetadata,
         rightsID: ThemeProvenanceID
     ) throws {
@@ -1327,6 +1356,7 @@ public struct ThemeVaultDescriptor: Codable, Hashable, Sendable {
         self.lockedSilhouetteResourceID = lockedSilhouetteResourceID
         self.encounteredResourceID = encounteredResourceID
         self.selectedResourceID = selectedResourceID
+        self.unavailableResourceID = unavailableResourceID
         self.accessibility = accessibility
         self.rightsID = rightsID
         try validate()
@@ -1338,7 +1368,11 @@ public struct ThemeVaultDescriptor: Codable, Hashable, Sendable {
     }
 
     fileprivate var requiredResourceIDs: Set<ThemeResourceID> {
-        [cardResourceID, lockedSilhouetteResourceID, encounteredResourceID, selectedResourceID]
+        var result = Set([cardResourceID, lockedSilhouetteResourceID, encounteredResourceID, selectedResourceID])
+        if let unavailableResourceID {
+            result.insert(unavailableResourceID)
+        }
+        return result
     }
 }
 
@@ -1753,6 +1787,20 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
                 role: ThemeResourceRoles.scriptStaticFallback,
                 media: stillMedia
             )
+            if let standardSpecimenResourceID = script.standardSpecimenResourceID {
+                try require(
+                    standardSpecimenResourceID,
+                    role: ThemeResourceRoles.scriptSpecimenStandard,
+                    media: stillMedia
+                )
+            }
+            if let highContrastSpecimenResourceID = script.highContrastSpecimenResourceID {
+                try require(
+                    highContrastSpecimenResourceID,
+                    role: ThemeResourceRoles.scriptSpecimenHighContrast,
+                    media: stillMedia
+                )
+            }
             for glyph in script.glyphs {
                 if let vectorResourceID = glyph.vectorResourceID {
                     try require(
@@ -1827,6 +1875,13 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
                 role: ThemeResourceRoles.crestStaticFallback,
                 media: stillMedia
             )
+            if let thumbnailResourceID = crest.thumbnailResourceID {
+                try require(
+                    thumbnailResourceID,
+                    role: ThemeResourceRoles.crestThumbnail,
+                    media: thumbnailMedia
+                )
+            }
         }
         try require(
             codex.background.staticBaseResourceID,
@@ -1846,6 +1901,13 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
             role: ThemeResourceRoles.backgroundHighContrast,
             media: stillMedia
         )
+        if let macOSWide = codex.background.macOSWideResourceID {
+            try require(
+                macOSWide,
+                role: ThemeResourceRoles.backgroundMacOSWideCrop,
+                media: stillMedia
+            )
+        }
         if let motion = codex.background.optionalMotionResourceID {
             try require(motion, role: ThemeResourceRoles.backgroundMotion, media: motionMedia)
         }
@@ -1872,6 +1934,13 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
             roles: [ThemeResourceRoles.vaultSelected, ThemeResourceRoles.vaultCard],
             media: stillMedia
         )
+        if let unavailableResourceID = codex.vault.unavailableResourceID {
+            try require(
+                unavailableResourceID,
+                role: ThemeResourceRoles.vaultUnavailable,
+                media: stillMedia
+            )
+        }
         for localization in localizations {
             try require(
                 localization.stringsResourceID,

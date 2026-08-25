@@ -123,6 +123,14 @@ RUNTIME_PRESENTATION = (
     "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/"
     "RuntimeApplicationResourcePresentation.swift"
 )
+RUNTIME_OPAQUE_REGISTRY = (
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/"
+    "RuntimeOpaqueResourceRegistry.swift"
+)
+SHARE_PRESENTATION_CONTRACTS = (
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/"
+    "SharePresentationContracts.swift"
+)
 NORSE_DESCRIPTOR = (
     "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
     "NorseBaseThemeDescriptor.swift"
@@ -130,6 +138,15 @@ NORSE_DESCRIPTOR = (
 NORSE_TEST = (
     "Packages/RuneScribeArchitecture/Tests/RuneScribeNorseThemeModuleTests/"
     "NorseBaseThemeModuleTests.swift"
+)
+NORSE_V2_GENERATOR = "scripts/generate-norse-v2-resource-catalog.py"
+NORSE_V2_CATALOG = (
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/"
+    "NorseApplicationResourceCatalog.swift"
+)
+NORSE_MASTERY_ANIMATION = (
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
+    "Resources/Production/Animation/effect.norse.reveal-mastery.json"
 )
 FALLBACK_BINDING = (
     "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/"
@@ -300,6 +317,24 @@ def exceed_decoded_cache_budget(root: Path) -> list[str]:
     )
 
 
+def weaken_theme_resource_per_item_budget(root: Path) -> list[str]:
+    return replace_once(
+        root,
+        RUNTIME_OPAQUE_REGISTRY,
+        "maximumImageBytes: 8 * 1_024 * 1_024,",
+        "maximumImageBytes: 16 * 1_024 * 1_024,",
+    )
+
+
+def undersize_provider_inventory_budget(root: Path) -> list[str]:
+    return replace_once(
+        root,
+        SHARE_PRESENTATION_CONTRACTS,
+        "public static let maximumDeclaredResourceBytes: UInt64 = 112 * 1024 * 1024",
+        "public static let maximumDeclaredResourceBytes: UInt64 = 64 * 1024 * 1024",
+    )
+
+
 def blank_on_optional_provider_failure(root: Path) -> list[str]:
     return replace_once(
         root,
@@ -318,20 +353,44 @@ def change_script_identity(root: Path) -> list[str]:
     )
 
 
+def alter_v2_generator_source(root: Path) -> list[str]:
+    return replace_once(
+        root,
+        NORSE_V2_GENERATOR,
+        'spec(prefix + ".master", "relic.master",',
+        'spec(prefix + ".master", "relic.changed-master",',
+    )
+
+
+def alter_generated_application_catalog(root: Path) -> list[str]:
+    return replace_once(
+        root,
+        NORSE_V2_CATALOG,
+        '"resource.relic.norse.runestone-tablet.master":',
+        '"resource.relic.norse.runestone-tablet.changed-master":',
+    )
+
+
+def introduce_legacy_current_content_id(root: Path) -> list[str]:
+    return replace_once(
+        root,
+        NORSE_MASTERY_ANIMATION,
+        '"resourceRole": "crest.norse.raven-mastery"',
+        '"resourceRole": "crest.norse.forge-master"',
+    )
+
+
 def alter_norse_asset_byte(root: Path) -> list[str]:
     manifest_relative = (
         "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
-        "Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+        "Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json"
     )
     manifest_path = root / manifest_relative
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     first = manifest["resources"][0]
-    basename = Path(first["path"]).name
-    production = manifest_path.parents[1]
-    matches = [path for path in production.rglob(basename) if path.is_file()]
-    if len(matches) != 1:
-        raise RuntimeError(f"accepted asset does not resolve uniquely: {basename}")
-    target = matches[0]
+    target = manifest_path.parents[2] / first["path"]
+    if not target.is_file() or target.is_symlink():
+        raise RuntimeError(f"accepted asset does not resolve exactly: {first['path']}")
     relative = target.relative_to(root).as_posix()
     atomic_write(target, target.read_bytes() + b"\x00")
     return [relative]
@@ -451,6 +510,18 @@ MUTATIONS = (
         exceed_decoded_cache_budget,
     ),
     Mutation(
+        "weaken-theme-resource-per-item-budget",
+        "Raise the Theme resource per-item budget above 8 MiB.",
+        "NRV-005",
+        weaken_theme_resource_per_item_budget,
+    ),
+    Mutation(
+        "undersize-provider-inventory-budget",
+        "Reduce provider inventory capacity below the exact Norse v2 catalog.",
+        "NRV-005",
+        undersize_provider_inventory_budget,
+    ),
+    Mutation(
         "blank-ui-on-optional-provider-failure",
         "Make optional provider failure blank the UI instead of falling back.",
         "NRV-014",
@@ -461,6 +532,24 @@ MUTATIONS = (
         "Change script.base-runes.",
         "NRV-004",
         change_script_identity,
+    ),
+    Mutation(
+        "alter-norse-v2-generator-source",
+        "Change the accepted Norse v2 resource generator source.",
+        "NRV-002",
+        alter_v2_generator_source,
+    ),
+    Mutation(
+        "alter-generated-norse-application-catalog",
+        "Make the generated application catalog differ from the pinned v2 generator.",
+        "NRV-002",
+        alter_generated_application_catalog,
+    ),
+    Mutation(
+        "introduce-legacy-norse-current-content-id",
+        "Reintroduce a legacy Norse artifact ID into current v2 content.",
+        "NRV-002",
+        introduce_legacy_current_content_id,
     ),
     Mutation(
         "alter-norse-production-asset-byte",
@@ -490,6 +579,26 @@ def copy_repository(source: Path, destination: Path) -> None:
     shutil.copytree(source, destination, symlinks=True, ignore=ignored)
 
 
+SOURCE_FINGERPRINT_IGNORED_DIRECTORIES = frozenset({
+    ".git",
+    ".build",
+    "build",
+    "DerivedData",
+    "__pycache__",
+})
+
+
+def source_fingerprint_includes(root: Path, path: Path) -> bool:
+    relative = path.relative_to(root)
+    if path.name == ".DS_Store":
+        return False
+    return not any(
+        part in SOURCE_FINGERPRINT_IGNORED_DIRECTORIES
+        or part.endswith(".xcresult")
+        for part in relative.parts
+    )
+
+
 def source_fingerprint(root: Path) -> str:
     digest = hashlib.sha256()
     roots = [
@@ -508,7 +617,11 @@ def source_fingerprint(root: Path) -> str:
         if candidate.is_file():
             files.append(candidate)
         elif candidate.is_dir():
-            files.extend(path for path in candidate.rglob("*") if path.is_file())
+            files.extend(
+                path
+                for path in candidate.rglob("*")
+                if path.is_file() and source_fingerprint_includes(root, path)
+            )
     for path in sorted(files, key=lambda item: item.relative_to(root).as_posix()):
         relative = path.relative_to(root).as_posix().encode("utf-8")
         digest.update(len(relative).to_bytes(4, "big"))
@@ -784,7 +897,7 @@ def parse_arguments(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     parser.add_argument(
         "--list",
         action="store_true",
-        help="list the exact 20 mutation IDs and expected gates without running them",
+        help="list the exact 25 mutation IDs and expected gates without running them",
     )
     return parser.parse_args(argv)
 

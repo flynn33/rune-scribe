@@ -169,7 +169,8 @@ let package = Package(
                 "RuneScribeRuntimeCore",
                 "RuneScribeTestSupport",
                 "RuneScribeUIPresentationContracts",
-            ]
+            ],
+            resources: [.process("Fixtures")]
         ),
         .testTarget(
             name: "RuneScribePlatformTests",

@@ -66,6 +66,10 @@ final class SemanticThemePresentationTests: XCTestCase {
             plan.backgroundRendererParametersResourceID,
             descriptor.codex.background.rendererParametersResourceID
         )
+        XCTAssertEqual(
+            plan.backgroundMacOSWideResourceID,
+            descriptor.codex.background.macOSWideResourceID
+        )
         XCTAssertTrue(plan.vectorResourceIDByToken.isEmpty)
         XCTAssertEqual(plan.unlockAnimationResourceIDByTier.count, 4)
     }
@@ -99,6 +103,20 @@ final class SemanticThemePresentationTests: XCTestCase {
         XCTAssertEqual(plan.codex.codexID, descriptor.codex.id)
         XCTAssertEqual(plan.codex.card.id, descriptor.codex.vault.cardResourceID)
         XCTAssertEqual(plan.codex.selected.id, descriptor.codex.vault.selectedResourceID)
+        XCTAssertEqual(plan.codex.unavailable.id, descriptor.codex.vault.unavailableResourceID)
+        let script = try XCTUnwrap(descriptor.codex.scripts.first(where: {
+            $0.id == descriptor.codex.primaryScriptID
+        }))
+        XCTAssertEqual(plan.script.scriptID, script.id)
+        XCTAssertEqual(plan.script.staticFallback.id, script.staticFallbackResourceID)
+        XCTAssertEqual(
+            plan.script.standardSpecimen?.id,
+            script.standardSpecimenResourceID
+        )
+        XCTAssertEqual(
+            plan.script.highContrastSpecimen?.id,
+            script.highContrastSpecimenResourceID
+        )
         XCTAssertEqual(plan.selectedRelicID, descriptor.codex.defaultRelicID)
         XCTAssertEqual(
             plan.selectedRelic?.primary.id,
@@ -125,7 +143,7 @@ final class SemanticThemePresentationTests: XCTestCase {
     func testNorseActiveVisualPlanDeclaresExactCatalogFallbacksAndOptionalFrame() throws {
         let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
         let seal = try XCTUnwrap(descriptor.codex.seals.first(where: {
-            $0.metadata.id.rawValue == "seal.norse.knotwork"
+            $0.metadata.id.rawValue == "seal.norse.valknut"
         }))
         let frame = try XCTUnwrap(descriptor.codex.frames.first(where: {
             $0.metadata.id.rawValue == "frame.norse.carved-knotwork"
@@ -149,27 +167,71 @@ final class SemanticThemePresentationTests: XCTestCase {
         XCTAssertEqual(plan.codex.locked.id, descriptor.codex.vault.lockedSilhouetteResourceID)
         XCTAssertEqual(plan.codex.encountered.id, descriptor.codex.vault.encounteredResourceID)
         XCTAssertEqual(plan.codex.selected.id, descriptor.codex.vault.selectedResourceID)
+        XCTAssertEqual(plan.codex.unavailable.id, descriptor.codex.vault.unavailableResourceID)
         XCTAssertEqual(Set(plan.relics.map(\.id.rawValue)), [
-            "relic.norse.runestone.weathered",
-            "relic.norse.raven-medallion",
-            "relic.norse.ironbound-shield",
-            "relic.norse.sealed-parchment",
-            "relic.norse.runestone.blackstone",
+            "relic.norse.runestone-tablet",
+            "relic.norse.dragonwood-plaque",
+            "relic.norse.stormforged-stele",
         ])
         XCTAssertEqual(Set(plan.seals.map(\.id.rawValue)), [
-            "seal.norse.knotwork",
-            "seal.norse.forge-flame",
-            "seal.norse.raven",
-            "seal.norse.longship",
-            "seal.norse.forge-hammer",
-            "seal.norse.echo-rune",
+            "seal.norse.valknut",
+            "seal.norse.ravenshield",
+            "seal.norse.mjolnir",
+            "seal.norse.wolkin",
+            "seal.norse.yggdrasil",
+            "seal.norse.berserk",
         ])
         XCTAssertEqual(plan.frames.map(\.id.rawValue), ["frame.norse.carved-knotwork"])
-        XCTAssertEqual(plan.crests.map(\.id.rawValue), ["crest.norse.forge-master"])
+        XCTAssertEqual(plan.crests.map(\.id.rawValue), ["crest.norse.raven-mastery"])
+        XCTAssertEqual(
+            plan.script.standardSpecimen?.id.rawValue,
+            "resource.script.norse.specimen.standard"
+        )
+        XCTAssertEqual(
+            plan.script.standardSpecimen?.role,
+            ThemeResourceRoles.scriptSpecimenStandard
+        )
+        XCTAssertEqual(
+            plan.script.highContrastSpecimen?.id.rawValue,
+            "resource.script.norse.specimen.high-contrast"
+        )
+        XCTAssertEqual(
+            plan.script.highContrastSpecimen?.role,
+            ThemeResourceRoles.scriptSpecimenHighContrast
+        )
+        XCTAssertEqual(
+            plan.crests.first?.thumbnail.id.rawValue,
+            "resource.crest.norse.raven-mastery.thumbnail"
+        )
+        XCTAssertEqual(
+            plan.crests.first?.thumbnail.role,
+            ThemeResourceRoles.crestThumbnail
+        )
         XCTAssertEqual(plan.selectedFrame?.id, frame.metadata.id)
         XCTAssertEqual(plan.selectedFrame?.primary.id, frame.vectorResourceID)
         XCTAssertEqual(plan.selectedFrame?.standard.id, frame.staticFallbackResourceID)
-        XCTAssertEqual(plan.selectedSeal?.highContrast.id, seal.monochromeFallbackResourceID)
+        XCTAssertEqual(plan.selectedSeal?.highContrast.id, seal.vectorResourceID)
+        XCTAssertEqual(plan.chrome.images.count, 5)
+        XCTAssertEqual(
+            plan.chrome.panelBorder?.id.rawValue,
+            "resource.panel.norse.card-border"
+        )
+        XCTAssertEqual(
+            plan.chrome.cornerOrnament?.id.rawValue,
+            "resource.panel.norse.corner-ornament"
+        )
+        XCTAssertEqual(
+            plan.chrome.divider?.id.rawValue,
+            "resource.panel.norse.divider"
+        )
+        XCTAssertEqual(
+            plan.chrome.primaryButton?.id.rawValue,
+            "resource.panel.norse.primary-button"
+        )
+        XCTAssertEqual(
+            plan.chrome.tabSelector?.id.rawValue,
+            "resource.panel.norse.tab-selector"
+        )
 
         let references = Dictionary(uniqueKeysWithValues: descriptor.resources.map {
             ($0.id, $0)
@@ -179,10 +241,11 @@ final class SemanticThemePresentationTests: XCTestCase {
             plan.codex.locked,
             plan.codex.encountered,
             plan.codex.selected,
+            plan.codex.unavailable,
             plan.backgroundStatic,
             plan.backgroundReduceMotion,
             plan.backgroundHighContrast,
-        ] + plan.catalog.flatMap {
+        ] + plan.script.images + plan.chrome.images + plan.catalog.flatMap {
             [$0.primary, $0.thumbnail, $0.standard, $0.highContrast]
         }
         for imagePlan in imagePlans {
@@ -228,6 +291,8 @@ final class SemanticThemePresentationTests: XCTestCase {
             XCTAssertTrue(componentSource.contains(identifier), identifier)
         }
         XCTAssertTrue(contentSource.contains("ThemeArtifactPreview("))
+        XCTAssertTrue(componentSource.contains("ThemeChromeImage(slot: .panelBorder)"))
+        XCTAssertTrue(componentSource.contains("ThemeChromeImage(slot: .tabSelector)"))
         XCTAssertTrue(settingsSource.contains("ThemeCodexCardView("))
         XCTAssertTrue(vaultSource.contains("identifierPrefix: \"theme.vault\""))
         XCTAssertTrue(vaultSource.contains("identifierPrefix: \"theme.vault-artifact\""))
@@ -466,11 +531,70 @@ final class SemanticThemePresentationTests: XCTestCase {
         XCTAssertFalse(animating.usesVectorPresentation)
     }
 
+    func testSemanticResourceUseReportsOnlyTheRealizedFontOrDisplayedVectorTokens() {
+        let fontID = ThemeResourceID(rawValue: "resource.test.script-font")!
+        let usedVectorID = ThemeResourceID(rawValue: "resource.test.vector.used")!
+        let unusedVectorID = ThemeResourceID(rawValue: "resource.test.vector.unused")!
+        let vectors = [
+            "ᚠ": Data([0x01]),
+            "ᚡ": Data([0x02]),
+        ]
+        let vectorIDs = [
+            "ᚠ": usedVectorID,
+            "ᚡ": unusedVectorID,
+        ]
+        let encoded = RuneInscriptionText(
+            source: "AAA",
+            target: "ᚠXᚠ",
+            start: Date(timeIntervalSince1970: 0),
+            direction: .encode,
+            fontResourceID: fontID,
+            vectorDataByToken: vectors,
+            vectorResourceIDByToken: vectorIDs,
+            settled: true
+        )
+        let decoded = RuneInscriptionText(
+            source: "ᚠ",
+            target: "A",
+            start: Date(timeIntervalSince1970: 0),
+            direction: .decode,
+            fontResourceID: fontID,
+            vectorDataByToken: vectors,
+            vectorResourceIDByToken: vectorIDs,
+            settled: true
+        )
+        let animating = RuneInscriptionText(
+            source: "A",
+            target: "ᚠ",
+            start: Date(timeIntervalSince1970: 0),
+            direction: .encode,
+            fontResourceID: fontID,
+            vectorDataByToken: vectors,
+            vectorResourceIDByToken: vectorIDs,
+            settled: false
+        )
+
+        XCTAssertEqual(encoded.renderedSemanticResourceIDs, [usedVectorID])
+        XCTAssertEqual(decoded.renderedSemanticResourceIDs, [fontID])
+        XCTAssertEqual(animating.renderedSemanticResourceIDs, [fontID])
+        XCTAssertFalse(encoded.renderedSemanticResourceIDs.contains(unusedVectorID))
+        XCTAssertFalse(encoded.renderedSemanticResourceIDs.contains(fontID))
+
+        RuntimeThemeSemanticResourceUseObservation.end()
+        XCTAssertFalse(encoded.reportRenderedSemanticResourceUse())
+
+        var observed = Set<ThemeResourceID>()
+        RuntimeThemeSemanticResourceUseObservation.begin { observed.insert($0) }
+        defer { RuntimeThemeSemanticResourceUseObservation.end() }
+        XCTAssertTrue(encoded.reportRenderedSemanticResourceUse())
+        XCTAssertEqual(observed, [usedVectorID])
+    }
+
     #if os(macOS)
     func testVectorPresentationRendersARealProviderPDFGlyph() throws {
         let url = try XCTUnwrap(
             RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
-                forResource: "seal.norse.raven",
+                forResource: "seal.norse.ravenshield.vector-master",
                 withExtension: "pdf"
             )
         )

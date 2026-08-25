@@ -506,13 +506,13 @@ func corruptProjectionActivatesRecoveryRebuildsAndRemainsUsableAfterRelaunch() a
     }
     await twiceRecovered.shutdown()
     let upgradedAfterRecovery = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: fixture.additiveVersionTwoBundle(),
+        catalogBundle: fixture.additiveVersionThreeBundle(),
         stateClient: fixture.client
     )
     #expect(try await fixture.snapshot(
         from: upgradedAfterRecovery,
         suffix: "upgrade-after-recovery"
-    ).catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+    ).catalogVersion == ProgressionCatalogVersion(rawValue: 3))
     await upgradedAfterRecovery.shutdown()
 }
 
@@ -550,8 +550,8 @@ func archivePreservesPerArtifactHistoryOwnedFirstAndDeterministicProvenance() as
     let service = try await fixture.bootstrap()
     let firstAt = Date(timeIntervalSince1970: 2_000_001_000)
     let laterAt = Date(timeIntervalSince1970: 2_000_001_500)
-    let firstArtifact = ArtifactID(rawValue: "relic.norse.ironbound-shield")!
-    let laterArtifact = ArtifactID(rawValue: "relic.norse.raven-medallion")!
+    let firstArtifact = ArtifactID(rawValue: "relic.norse.stormforged-stele")!
+    let laterArtifact = ArtifactID(rawValue: "relic.norse.dragonwood-plaque")!
 
     for event in try [
         fixture.presentationEvent(
@@ -649,7 +649,7 @@ func artifactFreePresentationUsesStableOptionalSemanticSentinel() async throws {
         index: 42,
         semanticIndex: 40,
         occurredAt: Date(timeIntervalSince1970: 2_000_002_200),
-        artifacts: [ArtifactID(rawValue: "relic.norse.ironbound-shield")!],
+        artifacts: [ArtifactID(rawValue: "relic.norse.stormforged-stele")!],
         provenance: .verified
     )
     guard case .applied = try await service.applyEvent(
@@ -863,7 +863,7 @@ func revealPresentationIsHeadOnlyIdempotentAndSurvivesRelaunchRebuildAndUpgrade(
     await relaunched.shutdown()
 
     let upgraded = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: fixture.additiveVersionTwoBundle(),
+        catalogBundle: fixture.additiveVersionThreeBundle(),
         stateClient: fixture.client
     )
     #expect(try await fixture.snapshot(
@@ -1026,13 +1026,13 @@ func acknowledgedRevealSurvivesRecoveryFromACorruptCompletionShard() async throw
 @Test
 func additiveCatalogUpgradeResumesAfterFaultGrantsNewContentAndRejectsDowngrade() async throws {
     let fixture = try ProgressionDurableFixture()
-    let versionOne = try await fixture.bootstrap()
-    await versionOne.shutdown()
-    let versionTwoBundle = fixture.additiveVersionTwoBundle()
+    let versionTwo = try await fixture.bootstrap()
+    await versionTwo.shutdown()
+    let versionThreeBundle = fixture.additiveVersionThreeBundle()
     await fixture.store.injectFault(at: .afterTransactionCommit)
     do {
         _ = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-            catalogBundle: versionTwoBundle,
+            catalogBundle: versionThreeBundle,
             stateClient: fixture.client
         )
         Issue.record("Faulted catalog upgrade unexpectedly completed activation.")
@@ -1043,15 +1043,15 @@ func additiveCatalogUpgradeResumesAfterFaultGrantsNewContentAndRejectsDowngrade(
     let upgraded: RuneScribeProgressionServiceActor
     do {
         upgraded = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-            catalogBundle: versionTwoBundle,
+            catalogBundle: versionThreeBundle,
             stateClient: fixture.client
         )
     } catch {
         Issue.record("The additive catalog upgrade failed: \(error)")
         throw error
     }
-    let upgradedSnapshot = try await fixture.snapshot(from: upgraded, suffix: "upgrade-v2")
-    #expect(upgradedSnapshot.catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+    let upgradedSnapshot = try await fixture.snapshot(from: upgraded, suffix: "upgrade-v3")
+    #expect(upgradedSnapshot.catalogVersion == ProgressionCatalogVersion(rawValue: 3))
     let addedTitle = TitleID(rawValue: "title.upgrade.wayfinder")!
     #expect(upgradedSnapshot.ownership.contains {
         $0.reference == .title(addedTitle) && $0.state == .owned
@@ -1067,7 +1067,7 @@ func additiveCatalogUpgradeResumesAfterFaultGrantsNewContentAndRejectsDowngrade(
     await upgraded.shutdown()
 
     let relaunched = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: versionTwoBundle,
+        catalogBundle: versionThreeBundle,
         stateClient: fixture.client
     )
     #expect(try await relaunched.applyEvent(
@@ -1078,38 +1078,38 @@ func additiveCatalogUpgradeResumesAfterFaultGrantsNewContentAndRejectsDowngrade(
 
     do {
         _ = try await fixture.bootstrap()
-        Issue.record("A v2 namespace was opened with the older v1 catalog.")
+        Issue.record("A v3 namespace was opened with the older v2 catalog.")
     } catch {
         // Downgrade rejection is the expected fail-closed behavior.
     }
 }
 
 @Test
-func olderCorruptProjectionActivatesWithAdditiveCatalogAndRebuildsDirectlyToV2() async throws {
+func olderCorruptProjectionActivatesWithAdditiveCatalogAndRebuildsDirectlyToV3() async throws {
     let fixture = try ProgressionDurableFixture()
-    let versionOne = try await fixture.bootstrap()
-    guard case .applied = try await versionOne.applyEvent(
+    let versionTwo = try await fixture.bootstrap()
+    guard case .applied = try await versionTwo.applyEvent(
         fixture.cipherEvent(index: 151),
-        metadata: fixture.metadata(operation: "progression.event.apply", suffix: "v1-q-source")
+        metadata: fixture.metadata(operation: "progression.event.apply", suffix: "v2-q-source")
     ) else {
-        Issue.record("The v1 recovery source event did not apply.")
+        Issue.record("The v2 recovery source event did not apply.")
         return
     }
-    await versionOne.shutdown()
+    await versionTwo.shutdown()
     try await fixture.client.corruptProjectionShard(
         category: .statisticCounter,
         shardIndex: 0
     )
 
-    let versionTwoBundle = fixture.additiveVersionTwoBundle()
+    let versionThreeBundle = fixture.additiveVersionThreeBundle()
     let degraded = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: versionTwoBundle,
+        catalogBundle: versionThreeBundle,
         stateClient: fixture.client
     )
     #expect(try await degraded.diagnosticsSummary(
         metadata: fixture.metadata(
             operation: "progression.diagnostics.summary",
-            suffix: "v2-q-degraded"
+            suffix: "v3-q-degraded"
         )
     ).availability == .degraded)
     _ = try await degraded.rebuild(
@@ -1118,23 +1118,23 @@ func olderCorruptProjectionActivatesWithAdditiveCatalogAndRebuildsDirectlyToV2()
         ),
         metadata: fixture.metadata(
             operation: "progression.recovery.rebuild",
-            suffix: "v1-q-direct-v2"
+            suffix: "v2-q-direct-v3"
         )
     )
     #expect(try await fixture.snapshot(
         from: degraded,
-        suffix: "v1-q-v2-promoted"
-    ).catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+        suffix: "v2-q-v3-promoted"
+    ).catalogVersion == ProgressionCatalogVersion(rawValue: 3))
     await degraded.shutdown()
 
     let relaunched = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: versionTwoBundle,
+        catalogBundle: versionThreeBundle,
         stateClient: fixture.client
     )
     #expect(try await fixture.snapshot(
         from: relaunched,
-        suffix: "v1-q-v2-relaunch"
-    ).catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+        suffix: "v2-q-v3-relaunch"
+    ).catalogVersion == ProgressionCatalogVersion(rawValue: 3))
     await relaunched.shutdown()
 }
 
@@ -1215,28 +1215,28 @@ func storageValidConflictingOrderUsesTheCommittedProcessedEnvelope() async throw
 func additiveUpgradeRepairsAPreviouslyDiscoveredAppliedOrderQuarantine() async throws {
     let fixture = try ProgressionDurableFixture()
     let event = try fixture.cipherEvent(index: 142)
-    let versionOne = try await fixture.bootstrap()
-    guard case .applied = try await versionOne.applyEvent(
+    let versionTwo = try await fixture.bootstrap()
+    guard case .applied = try await versionTwo.applyEvent(
         event,
         metadata: fixture.metadata(operation: "progression.event.apply", suffix: "v2-order-source")
     ) else {
         Issue.record("The v2 repair source event did not apply.")
         return
     }
-    await versionOne.shutdown()
+    await versionTwo.shutdown()
     try await fixture.client.corruptAndDiscoverAppliedOrder(revision: 1)
 
     let upgraded = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: fixture.additiveVersionTwoBundle(),
+        catalogBundle: fixture.additiveVersionThreeBundle(),
         stateClient: fixture.client
     )
     #expect(try await fixture.snapshot(
         from: upgraded,
-        suffix: "v2-order-repaired"
-    ).catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+        suffix: "v3-order-repaired"
+    ).catalogVersion == ProgressionCatalogVersion(rawValue: 3))
     #expect(try await upgraded.applyEvent(
         event,
-        metadata: fixture.metadata(operation: "progression.event.apply", suffix: "v2-order-replay")
+        metadata: fixture.metadata(operation: "progression.event.apply", suffix: "v3-order-replay")
     ) == .duplicate)
     await upgraded.shutdown()
 }
@@ -1276,31 +1276,31 @@ func forgedAcknowledgementReferenceBlocksRebuildAndDirectUpgradePromotion() asyn
     await service.shutdown()
     try await fixture.client.rewriteAcknowledgementWithUnknownPrimary()
 
-    let degradedV2 = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: fixture.additiveVersionTwoBundle(),
+    let degradedV3 = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
+        catalogBundle: fixture.additiveVersionThreeBundle(),
         stateClient: fixture.client
     )
-    #expect(try await degradedV2.diagnosticsSummary(
+    #expect(try await degradedV3.diagnosticsSummary(
         metadata: fixture.metadata(
             operation: "progression.diagnostics.summary",
-            suffix: "ack-reference-v2-degraded"
+            suffix: "ack-reference-v3-degraded"
         )
     ).availability == .degraded)
     do {
-        _ = try await degradedV2.rebuild(
+        _ = try await degradedV3.rebuild(
             ProgressionRecoveryRequest(
                 confirmationToken: UUID(uuidString: "77000000-0000-0000-0000-000000000002")!
             ),
             metadata: fixture.metadata(
                 operation: "progression.recovery.rebuild",
-                suffix: "ack-reference-v2-rebuild"
+                suffix: "ack-reference-v3-rebuild"
             )
         )
-        Issue.record("A forged acknowledgement permitted direct v2 promotion.")
+        Issue.record("A forged acknowledgement permitted direct v3 promotion.")
     } catch {
         // Irreconstructible acknowledgement evidence keeps recovery fail closed.
     }
-    await degradedV2.shutdown()
+    await degradedV3.shutdown()
     let afterUpgradeAttempt = try await fixture.client.activeMetadata()
     #expect(afterUpgradeAttempt.activeGeneration == before.activeGeneration)
     #expect(afterUpgradeAttempt.catalogVersion == before.catalogVersion)
@@ -1329,8 +1329,8 @@ func forgedAcknowledgementReferenceBlocksRebuildAndDirectUpgradePromotion() asyn
 @Test
 func additiveUpgradeRefusesABrokenStoredGrantOwnershipLink() async throws {
     let fixture = try ProgressionDurableFixture()
-    let versionOne = try await fixture.bootstrap()
-    guard case .applied = try await versionOne.applyEvent(
+    let versionTwo = try await fixture.bootstrap()
+    guard case .applied = try await versionTwo.applyEvent(
         fixture.messageEncodedEvent(
             index: 144,
             occurredAt: Date(timeIntervalSince1970: 1_999_999_700)
@@ -1341,11 +1341,11 @@ func additiveUpgradeRefusesABrokenStoredGrantOwnershipLink() async throws {
         return
     }
     let before = try await fixture.client.activeMetadata()
-    await versionOne.shutdown()
+    await versionTwo.shutdown()
     try await fixture.client.removeOneEarnedGrantWithoutUpdatingOwnership()
 
     let degraded = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: fixture.additiveVersionTwoBundle(),
+        catalogBundle: fixture.additiveVersionThreeBundle(),
         stateClient: fixture.client
     )
     #expect(try await degraded.diagnosticsSummary(
@@ -1662,46 +1662,46 @@ func sameEventIDWithDifferentEnvelopeIsRejectedWithoutMutatingState() async thro
 @Test
 func additiveRewardUpgradeAppendsOneRevealAndRebuildNeverResurrectsHistoricalReveals() async throws {
     let fixture = try ProgressionDurableFixture()
-    let versionOne = try await fixture.bootstrap()
-    guard case .applied = try await versionOne.applyEvent(
+    let versionTwo = try await fixture.bootstrap()
+    guard case .applied = try await versionTwo.applyEvent(
         fixture.messageEncodedEvent(
             index: 130,
             occurredAt: Date(timeIntervalSince1970: 1_999_999_900)
         ),
-        metadata: fixture.metadata(operation: "progression.event.apply", suffix: "upgrade-reward-v1")
+        metadata: fixture.metadata(operation: "progression.event.apply", suffix: "upgrade-reward-v2")
     ) else {
         Issue.record("The historical reward event did not apply.")
         return
     }
-    let versionOneSnapshot = try await fixture.snapshot(
-        from: versionOne,
-        suffix: "upgrade-reward-v1-snapshot"
+    let versionTwoSnapshot = try await fixture.snapshot(
+        from: versionTwo,
+        suffix: "upgrade-reward-v2-snapshot"
     )
-    let originalReveal = try #require(versionOneSnapshot.nextReveal)
+    let originalReveal = try #require(versionTwoSnapshot.nextReveal)
     let sourceAchievementID = try #require(originalReveal.sourceAchievementIDs.first)
-    await versionOne.shutdown()
+    await versionTwo.shutdown()
 
-    let versionTwoBundle = fixture.additiveEventRewardVersionTwoBundle(
+    let versionThreeBundle = fixture.additiveEventRewardVersionThreeBundle(
         sourceAchievementID: sourceAchievementID
     )
     let upgraded = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: versionTwoBundle,
+        catalogBundle: versionThreeBundle,
         stateClient: fixture.client
     )
-    let afterUpgrade = try await fixture.snapshot(from: upgraded, suffix: "upgrade-reward-v2")
+    let afterUpgrade = try await fixture.snapshot(from: upgraded, suffix: "upgrade-reward-v3")
     #expect(afterUpgrade.pendingRevealCount == 2)
     #expect(afterUpgrade.nextReveal?.revealID == originalReveal.revealID)
     let diagnostics = try await upgraded.diagnosticsSummary(
         metadata: fixture.metadata(operation: "progression.diagnostics.summary", suffix: "upgrade-hashes")
     )
-    #expect(diagnostics.catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+    #expect(diagnostics.catalogVersion == ProgressionCatalogVersion(rawValue: 3))
     #expect(
         diagnostics.hashes.first(where: { $0.kind == .catalog })?.digest
-            == versionTwoBundle.integrityMetadata.catalogSHA256
+            == versionThreeBundle.integrityMetadata.catalogSHA256
     )
     #expect(
         diagnostics.hashes.first(where: { $0.kind == .eventCatalog })?.digest
-            == versionTwoBundle.integrityMetadata.eventCatalogSHA256
+            == versionThreeBundle.integrityMetadata.eventCatalogSHA256
     )
 
     _ = try await upgraded.rebuild(
@@ -1732,7 +1732,7 @@ func additiveRewardUpgradeAppendsOneRevealAndRebuildNeverResurrectsHistoricalRev
         from: upgraded,
         suffix: "upgrade-replacement"
     ).nextReveal)
-    #expect(replacement.revealID == RevealID(rawValue: "reveal.upgrade.1.2"))
+    #expect(replacement.revealID == RevealID(rawValue: "reveal.upgrade.2.3"))
     #expect(replacement.primaryRewardID == .title(
         TitleID(rawValue: "title.upgrade.event-reward")!
     ))
@@ -1937,13 +1937,13 @@ func revealEvidenceUsesTheRebuiltAppliedLedgerAcrossRecoveryAndUpgrade() async t
         try await fixture.client.corruptAndDiscoverProcessedEvent(event.eventID)
 
         let upgraded = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-            catalogBundle: fixture.additiveVersionTwoBundle(),
+            catalogBundle: fixture.additiveVersionThreeBundle(),
             stateClient: fixture.client
         )
         #expect(try await upgraded.diagnosticsSummary(
             metadata: fixture.metadata(
                 operation: "progression.diagnostics.summary",
-                suffix: "ack-ledger-v2-degraded"
+                suffix: "ack-ledger-v3-degraded"
             )
         ).availability == .degraded)
         _ = try await upgraded.rebuild(
@@ -1952,11 +1952,11 @@ func revealEvidenceUsesTheRebuiltAppliedLedgerAcrossRecoveryAndUpgrade() async t
             ),
             metadata: fixture.metadata(
                 operation: "progression.recovery.rebuild",
-                suffix: "ack-ledger-v2-rebuild"
+                suffix: "ack-ledger-v3-rebuild"
             )
         )
-        let snapshot = try await fixture.snapshot(from: upgraded, suffix: "ack-ledger-v2")
-        #expect(snapshot.catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+        let snapshot = try await fixture.snapshot(from: upgraded, suffix: "ack-ledger-v3")
+        #expect(snapshot.catalogVersion == ProgressionCatalogVersion(rawValue: 3))
         #expect(snapshot.pendingRevealCount == 0)
         #expect(try await upgraded.applyEvent(
             event,
@@ -2276,7 +2276,7 @@ struct ProgressionDurableFixture {
         )
     }
 
-    func additiveVersionTwoBundle() -> ValidatedProgressionCatalogBundle {
+    func additiveVersionThreeBundle() -> ValidatedProgressionCatalogBundle {
         let addedContentID = ProgressionContentID(rawValue: "title.upgrade.wayfinder")!
         let addedContent = ProgressionContentDefinition(
             contentID: addedContentID,
@@ -2306,7 +2306,7 @@ struct ProgressionDurableFixture {
         let catalog = ProgressionCatalog(
             schemaVersion: bundle.catalog.schemaVersion,
             catalogID: bundle.catalog.catalogID,
-            catalogVersion: ProgressionCatalogVersion(rawValue: 2)!,
+            catalogVersion: ProgressionCatalogVersion(rawValue: 3)!,
             packageVersion: bundle.catalog.packageVersion,
             status: bundle.catalog.status,
             effectiveDate: bundle.catalog.effectiveDate,
@@ -2326,7 +2326,7 @@ struct ProgressionDurableFixture {
         let eventCatalog = ProgressionEventCatalog(
             schemaVersion: bundle.eventCatalog.schemaVersion,
             catalogID: bundle.eventCatalog.catalogID,
-            catalogVersion: ProgressionCatalogVersion(rawValue: 2)!,
+            catalogVersion: ProgressionCatalogVersion(rawValue: 3)!,
             status: bundle.eventCatalog.status,
             effectiveDate: bundle.eventCatalog.effectiveDate,
             eventEnvelope: bundle.eventCatalog.eventEnvelope,
@@ -2341,7 +2341,7 @@ struct ProgressionDurableFixture {
         let bindings = ProgressionFutureThemeBindingContract(
             schemaVersion: bundle.futureThemeBindings.schemaVersion,
             contractID: bundle.futureThemeBindings.contractID,
-            version: ProgressionCatalogVersion(rawValue: 2)!,
+            version: ProgressionCatalogVersion(rawValue: 3)!,
             status: bundle.futureThemeBindings.status,
             bindings: bundle.futureThemeBindings.bindings,
             rules: bundle.futureThemeBindings.rules,
@@ -2424,10 +2424,10 @@ struct ProgressionDurableFixture {
         )
     }
 
-    func additiveEventRewardVersionTwoBundle(
+    func additiveEventRewardVersionThreeBundle(
         sourceAchievementID: AchievementID
     ) -> ValidatedProgressionCatalogBundle {
-        let base = additiveVersionTwoBundle()
+        let base = additiveVersionThreeBundle()
         let achievement = base.catalog.achievement(id: sourceAchievementID)!
         let contentID = ProgressionContentID(rawValue: "title.upgrade.event-reward")!
         let content = ProgressionContentDefinition(

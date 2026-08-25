@@ -1,6 +1,36 @@
 import RuneScribeContracts
 import SwiftUI
 
+/// Displays an optional provider-owned chrome resource without exposing Theme
+/// implementation details to the shared UI. Each resource stays bound to the
+/// active visual-plan revision through `ActiveThemeVisualPresentation`.
+struct ThemeChromeImage: View {
+    @EnvironmentObject private var session: RuneScribeUISession
+
+    let slot: ThemeChromeVisualSlot
+
+    var body: some View {
+        if let reference = session.activeThemeVisualPresentation?
+            .chromeImageReference(for: slot),
+           let image = reference.image {
+            switch slot {
+            case .cornerOrnament:
+                image
+                    .resizable()
+                    .scaledToFit()
+                    .accessibilityHidden(true)
+            case .panelBorder, .divider, .primaryButton, .tabSelector:
+                image
+                    .resizable(resizingMode: .stretch)
+                    .clipped()
+                    .accessibilityHidden(true)
+            }
+        } else {
+            Color.clear.accessibilityHidden(true)
+        }
+    }
+}
+
 enum ThemeVisualContentState: String, Equatable, Hashable, Sendable {
     case owned = "Owned"
     case locked = "Locked"
@@ -82,29 +112,38 @@ struct ThemeCodexCardView<Artwork: View>: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(alignment: .center, spacing: 12) {
-                artwork
-                    .aspectRatio(3 / 4, contentMode: .fill)
-                    .frame(width: 64, height: 84)
-                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 10) {
+                GeometryReader { geometry in
+                    artwork
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .clipped()
+                }
+                .aspectRatio(16 / 9, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .accessibilityHidden(true)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(displayName)
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(Color.runeTextPrimary)
-                    Text(summary)
-                        .font(.caption)
-                        .foregroundStyle(Color.runeSilver)
-                        .lineLimit(3)
+                HStack(alignment: .bottom, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(displayName)
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(Color.runeTextPrimary)
+                        Text(summary)
+                            .font(.caption)
+                            .foregroundStyle(Color.runeSilver)
+                            .lineLimit(3)
+                    }
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                     Label(state.rawValue, systemImage: state.systemImage)
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(state == .selected ? Color.runeSelected : Color.runeSilver)
+                        .foregroundStyle(
+                            state == .selected ? Color.runeSelected : Color.runeSilver
+                        )
+                        .fixedSize(horizontal: true, vertical: false)
                 }
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(8)
+            .padding(12)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -116,11 +155,18 @@ struct ThemeCodexCardView<Artwork: View>: View {
                     lineWidth: state == .selected ? 2 : 1
                 )
         }
+        .overlay {
+            ThemeChromeImage(slot: .panelBorder)
+                .opacity(0.12)
+                .clipped()
+                .allowsHitTesting(false)
+        }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
         .accessibilityValue(state.rawValue)
         .accessibilityHint(accessibilityHint)
         .accessibilityIdentifier("\(identifierPrefix).\(codexID.rawValue)")
+        .runtimeViewportFrameProbe("\(identifierPrefix).\(codexID.rawValue)")
     }
 }
 
@@ -193,6 +239,15 @@ struct ThemeArtifactSelectionControl<Artwork: View>: View {
             }
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
             .contentShape(Rectangle())
+            .background {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(Color.runeBackgroundSecondary.opacity(0.88))
+                    ThemeChromeImage(slot: .tabSelector)
+                        .opacity(0.22)
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+            }
         }
         .buttonStyle(.plain)
         .disabled(!allowsNone && item == nil)
@@ -264,15 +319,19 @@ struct ThemeArtifactTile<Artwork: View>: View {
         .accessibilityValue(accessibilityValue)
         .accessibilityHint(item.accessibilityHint ?? "")
         .accessibilityIdentifier("\(identifierPrefix).\(item.id.rawValue)")
+        .runtimeViewportFrameProbe("\(identifierPrefix).\(item.id.rawValue)")
     }
 
     private var tileContent: some View {
         VStack(alignment: .leading, spacing: 8) {
-            artwork
-                .aspectRatio(4 / 3, contentMode: .fit)
-                .frame(maxWidth: .infinity)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .accessibilityHidden(true)
+            GeometryReader { geometry in
+                artwork
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .clipped()
+            }
+            .aspectRatio(4 / 3, contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .accessibilityHidden(true)
             Text(item.name)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(Color.runeTextPrimary)
@@ -345,6 +404,7 @@ struct ThemeArtifactBrowserView<Artwork: View>: View {
         }
         .navigationTitle(title)
         .accessibilityIdentifier("theme.artifact-picker")
+        .runtimeViewportFrameProbe("theme.artifact-picker")
     }
 
     private var columns: [GridItem] {
@@ -394,6 +454,7 @@ struct ThemeArtifactPreview: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("theme.artifact-preview")
+        .runtimeViewportFrameProbe("theme.artifact-preview")
         .onChange(of: plan.selection) { _, _ in pageIndex = 0 }
     }
 

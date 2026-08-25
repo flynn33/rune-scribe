@@ -239,6 +239,7 @@ struct ThemeArtifactCompositionPlan: Equatable, Sendable {
     let sealAnchor: ThemeNormalizedPoint?
     let sealScale: Double
     let fontPostScriptName: String
+    let fontResourceID: ThemeResourceID?
     let usesExternalFontOverride: Bool
     let colorMode: ShareArtifactColorMode
     let accessibilityLabel: String
@@ -260,6 +261,7 @@ struct ShareArtifactRenderPlan: Equatable, Sendable {
     let sealAnchor: ThemeNormalizedPoint?
     let sealScale: Double
     let fontPostScriptName: String
+    let fontResourceID: ThemeResourceID?
     let resourceMetadata: [SharePresentationResourceMetadata]
 
     var composition: ThemeArtifactCompositionPlan {
@@ -276,6 +278,7 @@ struct ShareArtifactRenderPlan: Equatable, Sendable {
             sealAnchor: sealAnchor,
             sealScale: sealScale,
             fontPostScriptName: fontPostScriptName,
+            fontResourceID: fontResourceID,
             usesExternalFontOverride: request.fontPostScriptNameOverride != nil,
             colorMode: request.colorMode,
             accessibilityLabel: request.accessibilityLabel,
@@ -407,9 +410,12 @@ enum ThemeArtifactCompositionPolicy {
         case .standard, .monochrome: relic.staticFallbackResourceID
         }
         let sealResourceID: ThemeResourceID? = seal.map {
-            colorMode == .standard
-                ? $0.vectorResourceID
-                : $0.monochromeFallbackResourceID
+            switch colorMode {
+            case .standard, .highContrast:
+                $0.vectorResourceID
+            case .monochrome:
+                $0.monochromeFallbackResourceID
+            }
         }
         let frameResourceID = frame?.staticFallbackResourceID
         let backgroundResourceID: ThemeResourceID = if colorMode == .highContrast {
@@ -436,6 +442,8 @@ enum ThemeArtifactCompositionPolicy {
             fontPostScriptName: fontPostScriptNameOverride?.rawValue
                 ?? script.fontPostScriptName?.rawValue
                 ?? "NotoSansRunic-Regular",
+            fontResourceID: fontPostScriptNameOverride == nil
+                ? script.fontResourceID : nil,
             usesExternalFontOverride: fontPostScriptNameOverride != nil,
             colorMode: colorMode,
             accessibilityLabel: accessibilityLabel,
@@ -483,16 +491,13 @@ enum ShareArtifactRenderPolicy {
             descriptor: descriptor,
             preferredSealAnchor: preferredSealAnchor
         )
-        let script = descriptor.codex.scripts.first(where: {
-            $0.id == composition.selection.scriptID
-        })
         var seenResourceIDs = Set<ThemeResourceID>()
         let resourceIDs = [
             composition.relicResourceID,
             composition.sealResourceID,
             composition.frameResourceID,
             composition.backgroundResourceID,
-            composition.usesExternalFontOverride ? nil : script?.fontResourceID,
+            composition.fontResourceID,
         ].compactMap { $0 }.filter { seenResourceIDs.insert($0).inserted }
         let references = Dictionary(uniqueKeysWithValues: descriptor.resources.map {
             ($0.id, $0)
@@ -528,6 +533,7 @@ enum ShareArtifactRenderPolicy {
             sealAnchor: composition.sealAnchor,
             sealScale: composition.sealScale,
             fontPostScriptName: composition.fontPostScriptName,
+            fontResourceID: composition.fontResourceID,
             resourceMetadata: metadata
         )
     }
@@ -765,6 +771,9 @@ struct ThemeArtifactCanvas: View {
                     )
                     .position(point(for: plan.layout.glyphSafeRegion, in: geometry.size))
                     .accessibilityHidden(true)
+                    .onAppear {
+                        reportGlyphTextResourceUse()
+                    }
 
                 if let sealResourceID = plan.sealResourceID,
                    let anchor = plan.sealAnchor {
@@ -829,6 +838,12 @@ struct ThemeArtifactCanvas: View {
         .accessibilityLabel(Text(plan.accessibilityLabel))
         .accessibilityValue(Text(page.inscription))
         .accessibilityHint(Text("The sender-rendered inscription remains available when its Codex is not."))
+    }
+
+    @discardableResult
+    func reportGlyphTextResourceUse() -> Bool {
+        guard let fontResourceID = plan.fontResourceID else { return false }
+        return RuntimeThemeSemanticResourceUseObservation.report(fontResourceID)
     }
 
     private func regionImage(

@@ -1161,6 +1161,14 @@ private struct SyntheticThemeDefinition: Sendable {
             codex["palette"] = palette
         }
         scripts[0]["portability"] = portability.rawValue
+        if var relics = codex["relics"] as? [[String: Any]],
+           let reservedIndex = relics.indices.last,
+           var metadata = relics[reservedIndex]["metadata"] as? [String: Any]
+        {
+            metadata["availability"] = ThemeArtifactAvailability.reservedInactive.rawValue
+            relics[reservedIndex]["metadata"] = metadata
+            codex["relics"] = relics
+        }
 
         var additionalSource: (ThemeResourceID, ThemeResourceID)?
         if portability == .vectorRendered {

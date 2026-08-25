@@ -16,14 +16,22 @@ struct RuneScribButtonStyle: ButtonStyle {
             .padding(.horizontal, 24)
             .frame(minHeight: 46)
             .background(
-                RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                    .fill(
-                        isEnabled
-                        ? LinearGradient(colors: [.runeGoldBright, .runeGold],
-                                         startPoint: .top, endPoint: .bottom)
-                        : LinearGradient(colors: [Color.runeUnavailable.opacity(0.35), Color.runeUnavailable.opacity(0.30)],
-                                         startPoint: .top, endPoint: .bottom)
-                    )
+                ZStack {
+                    RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                        .fill(
+                            isEnabled
+                            ? LinearGradient(colors: [.runeGoldBright, .runeGold],
+                                             startPoint: .top, endPoint: .bottom)
+                            : LinearGradient(colors: [Color.runeUnavailable.opacity(0.35), Color.runeUnavailable.opacity(0.30)],
+                                             startPoint: .top, endPoint: .bottom)
+                        )
+                    ThemeChromeImage(slot: .primaryButton)
+                        .opacity(isEnabled ? 0.20 : 0.10)
+                        .clipShape(RoundedRectangle(
+                            cornerRadius: RuneMetrics.corner,
+                            style: .continuous
+                        ))
+                }
             )
             .overlay(
                 RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)

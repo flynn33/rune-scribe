@@ -1,0 +1,1730 @@
+{
+  "aggregateSHA256": "904cd7c7ffd85e2b3dc2143c622da01bae092efe15a870319c839a9d89fe7a4f",
+  "authority": {
+    "package": "Rune-Scribe-Theme-Fidelity-Remediation-v4.0",
+    "publicDistributionAuthorized": false,
+    "scope": "Norse v2 local implementation and qualification only"
+  },
+  "generator": {
+    "inputAggregateSHA256": "e89e47784060d6958fdb6e339d67c72116438f12c890a84203ee85c078993942",
+    "inputs": [
+      {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/NorseApplicationResourceCatalog.swift",
+        "sha256": "508da364798d9f7b2bd92aff8070713bd1822bcd30fe1b89469cfe688823f3ac"
+      },
+      {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeDescriptor.swift",
+        "sha256": "2d65cf77e46ac06a22e272261ed491578cba014bdb6396f916fe9ae3da7e1345"
+      },
+      {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json",
+        "sha256": "ec7c34baf2fb43bfc77f6c07e6a8e875ec02098bdb0879ee618ecac1c99105dc"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/generated/norse/Metadata/Norse-Production-Asset-Derivation-v4.0.json",
+        "sha256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1"
+      },
+      {
+        "path": "EULA.md",
+        "sha256": "a4076fe63aa2ac3ffb8bd26bbd776631a9eda42b602e35f01e294612b55553f2"
+      },
+      {
+        "path": "RuneScrib/Resources/Fonts/OFL.txt",
+        "sha256": "b0fbcb9eaf0f5f415358bfefa5999ee75e18cde4a275b78285b2140a9e381865"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+        "sha256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/cold-sea-hall-authoring.png",
+        "sha256": "ae4fcaa25554db68d0554163504b8e78792b99e4c300c32ca5d480b8a3a54f54"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/dragonwood-plaque-authoring.png",
+        "sha256": "357437d3d0ae303a6dfc3fa7dc532270f32b10f522859ba73ef78489f4443ab5"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+        "sha256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/raven-mastery-crest-authoring.png",
+        "sha256": "088121044ddbeff52d529e26080b1a1b192f5c5c5498ab8d1cb971673193730f"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+        "sha256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.monochrome.png",
+        "sha256": "3b67068ae6be712d0d516e6f1fdca2cb7e4d9d913de80bd3c0bd352f96320ec0"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.png",
+        "sha256": "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.thumbnail.png",
+        "sha256": "70733bcc64d087cfcbc5cfb58b0bca2601b10bba22a4f69c67b9bd817a538b47"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.monochrome.png",
+        "sha256": "7d3644fafcc95e635ffaa8881a7734da0a05f17affb2604c4a26314d74f4551e"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.png",
+        "sha256": "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.thumbnail.png",
+        "sha256": "bbf9273e15da472ec04fdc5514bd4faccba9322afcc9df8452ecee7e9a07d419"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.monochrome.png",
+        "sha256": "3585d4963ffd43b5c27f2e9c8ae809ccf646a13306e5c6b2b3cc32a1b66babd7"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.png",
+        "sha256": "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.thumbnail.png",
+        "sha256": "09322298c8bd5b3f68d48e924767467dfccee175e0d44e87110977cd6f2a0900"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.monochrome.png",
+        "sha256": "7fb26639ad65986fcb52e4b31bc4280e27890e4345e4de74dc6b5957482a2027"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.png",
+        "sha256": "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.thumbnail.png",
+        "sha256": "35c5f281b6ad405b6a3cb5084edc864b05546deab10ca93ca5d45767334c8431"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.monochrome.png",
+        "sha256": "bbb12a59b76b91ab2aaaa8eca3c53a88a2fe0a06beb5c4b9867a7f0784e9fc16"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.png",
+        "sha256": "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.thumbnail.png",
+        "sha256": "993359c98592c586a47cf06a2129c01c6dd92a474c64b481f34dbd6a83e8d885"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.monochrome.png",
+        "sha256": "d296cea98b7283f67b9cb1b9e50547e16299dc8dcbf45872ed0701b746266907"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.png",
+        "sha256": "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.thumbnail.png",
+        "sha256": "718f6a33bca1ab684e434e482808572a6b06d3fdb0a790212ed048423ad00226"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
+        "sha256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d"
+      }
+    ],
+    "path": "scripts/generate-norse-production-provenance.py",
+    "sha256": "368a9939c28ea31ffcdc1916d1f418d571d13ea106294292d496672d42b0a65a"
+  },
+  "moduleID": "com.runescribe.module.theme.norse",
+  "recordID": "production-asset-provenance.norse.v2",
+  "resourceCount": 70,
+  "resources": [
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 2599,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Localization/norse-accessibility.en.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.accessibility.norse.en",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "accessibility-localization",
+      "sha256": "45a305302f353fa4382692d835dd7bab98cf12730655badc2fabc3e274b0981a",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "background.norse.cold-sea-hall.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 7462801,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.background.norse.cold-sea-hall.standard"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Background/background.norse.cold-sea-hall.high-contrast.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 3072
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.background.norse.cold-sea-hall.high-contrast",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "background.high-contrast",
+      "sha256": "128b8b744a44ee4480e574cd2a19f9d94621ad4f57eb46a83c8bbd7f9580fd92",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "background.norse.cold-sea-hall.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 6405013,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.background.norse.cold-sea-hall.standard"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Background/background.norse.cold-sea-hall.macos-wide-crop.png",
+      "pixelDimensions": {
+        "height": 1920,
+        "width": 3072
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.background.norse.cold-sea-hall.macos-wide-crop",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "background.macos-wide-crop",
+      "sha256": "9cec63416ab55a0254bf1e127e96a56069f4974b69b2d28610279dc5ea71080a",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "background.norse.cold-sea-hall.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 6727206,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.background.norse.cold-sea-hall.standard"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Background/background.norse.cold-sea-hall.reduce-motion.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 3072
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.background.norse.cold-sea-hall.reduce-motion",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "background.reduce-motion",
+      "sha256": "e3e6684f3c24d3eccbeafbf47aec443a5bfe5b049277f7b2e6539451e1d83110",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "background.norse.cold-sea-hall.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 6727206,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.background.norse.cold-sea-hall.high-contrast",
+        "resource.background.norse.cold-sea-hall.macos-wide-crop",
+        "resource.background.norse.cold-sea-hall.reduce-motion"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Background/background.norse.cold-sea-hall.standard.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 3072
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.background.norse.cold-sea-hall.standard",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "background.static-base",
+      "sha256": "e3e6684f3c24d3eccbeafbf47aec443a5bfe5b049277f7b2e6539451e1d83110",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "vault.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1467808,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.codex-card.norse.owned"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/CodexCard/codex-card.norse.encountered.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.codex-card.norse.encountered",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "vault.encountered",
+      "sha256": "907f12884fc0474a9b6d165838b91516c895cd539e1f49af29e942152f25de50",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "vault.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 628752,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.codex-card.norse.owned"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/CodexCard/codex-card.norse.locked.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.codex-card.norse.locked",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "vault.locked-silhouette",
+      "sha256": "5cfce91a52b0326f05e18e77e4472f24467005c8b2ea816bd7d6c9ecf68cb5bb",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "vault.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1703464,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.codex-card.norse.encountered",
+        "resource.codex-card.norse.locked",
+        "resource.codex-card.norse.selected",
+        "resource.codex-card.norse.unavailable"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/CodexCard/codex-card.norse.owned.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.codex-card.norse.owned",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "vault.card",
+      "sha256": "7971d6a86d90247ef290b404ddd22b82ef72bead9fe2224c656b38a41bcf6542",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "vault.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1852180,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.codex-card.norse.owned"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/CodexCard/codex-card.norse.selected.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.codex-card.norse.selected",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "vault.selected",
+      "sha256": "b12bd537bfd492d745675e50d29406feb1e5622590dc4daa1728a40c45c7ecd6",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "vault.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 438670,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.codex-card.norse.owned"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/CodexCard/codex-card.norse.unavailable.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.codex-card.norse.unavailable",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "vault.unavailable",
+      "sha256": "b637fa76bb301056b751e43b8d0e64935aa74101a8cd34e46d09c3d22448fad2",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "crest.norse.raven-mastery.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1472195,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.crest.norse.raven-mastery.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Crest/crest.norse.raven-mastery.static-fallback.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1024
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.crest.norse.raven-mastery.static-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "crest.static-fallback",
+      "sha256": "34c0c8b00c0e020d88e52870557ef336fce6be72f0533511ec70f294dacd392d",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "crest.norse.raven-mastery.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 377397,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.crest.norse.raven-mastery.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Crest/crest.norse.raven-mastery.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.crest.norse.raven-mastery.thumbnail",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "crest.thumbnail",
+      "sha256": "c17408c41caa73b022fac9d191868f1b7596decd49d16732fc688ee05c0b1f14",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "crest.norse.raven-mastery.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 5498088,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.crest.norse.raven-mastery.static-fallback",
+        "resource.crest.norse.raven-mastery.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/pdf",
+      "normalizedProductionPath": "Production/Crest/crest.norse.raven-mastery.vector-master.pdf",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.crest.norse.raven-mastery.vector-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "crest.vector-master",
+      "sha256": "3be3247dcdc64d9b149328a590b94538a411ca68d02ed6d6b1ae1722924f45eb",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 960,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Animation/effect.norse.reveal-codex.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.effect.norse.reveal-codex",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "unlock-animation-cue",
+      "sha256": "7bb5b550ad37ea2cebf7619d78c165a62101b4e9a7b0d1dcee78801768161b4d",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 884,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Animation/effect.norse.reveal-mastery.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.effect.norse.reveal-mastery",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "unlock-animation-cue",
+      "sha256": "a1a183f594df57a4513606ab775e04fe523ed100ba6111e50bc8cd05ef6f9dc8",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 638,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Animation/effect.norse.reveal-minor.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.effect.norse.reveal-minor",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "unlock-animation-cue",
+      "sha256": "7886f75c160e25dfca5afa836b5ba0a87bf0669eee7da7f40ab441c855f11eb5",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 797,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Animation/effect.norse.reveal-relic.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.effect.norse.reveal-relic",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "unlock-animation-cue",
+      "sha256": "1f72a5bdd443ea8edb38604c90d7de8c5b6cefa18f486b7ddee918996a22cb0f",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "script.base-runes.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 55800,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "RuneScrib/Resources/Fonts/OFL.txt",
+      "mediaType": "font/ttf",
+      "normalizedProductionPath": "NotoSansRunic-Regular.ttf",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.font.norse.noto-sans-runic",
+      "rightsProvenanceID": "rights.norse.font.noto",
+      "semanticRole": "script.font",
+      "sha256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b",
+      "sourceClassification": "bundled-font"
+    },
+    {
+      "accessibilityDescriptionKey": "frame.norse.carved-knotwork.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1702455,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.frame.norse.carved-knotwork.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Frame/frame.norse.carved-knotwork.static-fallback.png",
+      "pixelDimensions": {
+        "height": 1600,
+        "width": 1280
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.frame.norse.carved-knotwork.static-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "frame.static-fallback",
+      "sha256": "894248bfa33af582af86e7d67f011f23ccbadcdcfaafa9f91fd6a70b14f53fe3",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "frame.norse.carved-knotwork.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 2964853,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.frame.norse.carved-knotwork.static-fallback"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/pdf",
+      "normalizedProductionPath": "Production/Frame/frame.norse.carved-knotwork.vector-master.pdf",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.frame.norse.carved-knotwork.vector-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "frame.vector-master",
+      "sha256": "a526591264443b54f7eef2490a1f95d36a1150cf7da12ee202caf4bc503eb08b",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 779,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Metadata/Norse-Decorative-Heading-Slots-v1.0.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.headings.norse",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "decorative-heading-catalog",
+      "sha256": "190a7682b2e4b40251aca028841223e4624b87448534fb3c1fc2a855d586d1e4",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 7731,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Localization/norse-content.en.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.localization.norse.en",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "localization.strings",
+      "sha256": "22cc8513a17af26cfd65efaf3ba31bc16eb7d1c755665f547768814e3a8d989c",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 2556,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Metadata/Norse-Semantic-Palette-v1.0.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.palette.norse.semantic",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "semantic-palette",
+      "sha256": "33403c431735ae92c81816667e3c4040f16da3ff1b0846533a539d024a48652c",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 811914,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Panel/panel.norse.card-border.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.panel.norse.card-border",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "panel.card-border",
+      "sha256": "465ac028ab73c5bb96facea6341e482967879483339a55d885cacb3a7ef9af74",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 265867,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Panel/panel.norse.corner-ornament.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.panel.norse.corner-ornament",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "panel.corner-ornament",
+      "sha256": "9117f527927b19ba9d213baff5ce9b465a5500bc0631315a333218d73fea6b63",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 441844,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Panel/panel.norse.divider.png",
+      "pixelDimensions": {
+        "height": 240,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.panel.norse.divider",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "panel.divider",
+      "sha256": "70cb18b00f1e3e459295421d4a9d85dfd0ed6a4f570dfd872eeb9f6d6454f600",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 628386,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Panel/panel.norse.primary-button.png",
+      "pixelDimensions": {
+        "height": 320,
+        "width": 1200
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.panel.norse.primary-button",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "panel.primary-button",
+      "sha256": "8cec96b8c65d1a32c553bd51c93c7cff0c584d5c712f5cc2cdf8766c9a332f8c",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 408083,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Panel/panel.norse.tab-selector.png",
+      "pixelDimensions": {
+        "height": 240,
+        "width": 1200
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.panel.norse.tab-selector",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "panel.tab-selector",
+      "sha256": "01c9a3038f5534d0a4f0d010e7fd0f1cdc4a0f23056b6e2cef1334a1012342b3",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 4315,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Metadata/Norse-Progression-Bindings-v2.0.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.progression-bindings.norse",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "progression-binding-catalog",
+      "sha256": "cfc9635e79913eb848a52486bf47c4b4718fa7527dfd86849ecb6acf720d0ff3",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.dragonwood-plaque.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1103,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Geometry/relic.norse.dragonwood-plaque.geometry.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.dragonwood-plaque.geometry",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.geometry",
+      "sha256": "a8580cc7c5ef9d6f3477080f8d495ce7a0c2a6a7f2552f53c2ccd36201bb9cee",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.dragonwood-plaque.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1881997,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.relic.norse.dragonwood-plaque.master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Relics/relic.norse.dragonwood-plaque.high-contrast.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 1536
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.dragonwood-plaque.high-contrast",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.high-contrast",
+      "sha256": "ca3c749c99e7484c7cf0b81d63b536a5913ec7003079bbaab5f07d06d286485c",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.dragonwood-plaque.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 3241745,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.relic.norse.dragonwood-plaque.high-contrast",
+        "resource.relic.norse.dragonwood-plaque.static-share-fallback",
+        "resource.relic.norse.dragonwood-plaque.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Relics/relic.norse.dragonwood-plaque.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 1536
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.dragonwood-plaque.master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.master",
+      "sha256": "a923601593c1836528118f3ad383f69776611dec0d8a10433d54b5bd43c8062f",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.dragonwood-plaque.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1329172,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.relic.norse.dragonwood-plaque.master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/ShareFallbacks/share-fallback.norse.dragonwood-plaque.png",
+      "pixelDimensions": {
+        "height": 1200,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.dragonwood-plaque.static-share-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.static-share-fallback",
+      "sha256": "61a56baa040da53fc567b4f997d97fe8eb04233c965c0afc0758303bafc549b3",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.dragonwood-plaque.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 254354,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.relic.norse.dragonwood-plaque.master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Relics/relic.norse.dragonwood-plaque.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.dragonwood-plaque.thumbnail",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.thumbnail",
+      "sha256": "9a627bc54913a3104215921ee3a2de77f3a10a39e412e5da9ee6f56a535cdca4",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.runestone-tablet.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1099,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Geometry/relic.norse.runestone-tablet.geometry.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.runestone-tablet.geometry",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.geometry",
+      "sha256": "17b36650d1bccaff63c9d55b95e633f9c8f4d16c96b056abadfda3ddfe6f1830",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.runestone-tablet.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 2885150,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.relic.norse.runestone-tablet.master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Relics/relic.norse.runestone-tablet.high-contrast.png",
+      "pixelDimensions": {
+        "height": 1536,
+        "width": 2048
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.runestone-tablet.high-contrast",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.high-contrast",
+      "sha256": "a16efebdf490886006d326f5470b7832f653cfd533ec8de5f010be549930a0ec",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.runestone-tablet.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 4448361,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.relic.norse.runestone-tablet.high-contrast",
+        "resource.relic.norse.runestone-tablet.static-share-fallback",
+        "resource.relic.norse.runestone-tablet.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Relics/relic.norse.runestone-tablet.png",
+      "pixelDimensions": {
+        "height": 1536,
+        "width": 2048
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.runestone-tablet.master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.master",
+      "sha256": "2d2f64fd6cfee7874f77bf4877372438cc81e5d75bd9695401c89b9b775f8736",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.runestone-tablet.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 2960942,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.relic.norse.runestone-tablet.master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/ShareFallbacks/share-fallback.norse.runestone-tablet.png",
+      "pixelDimensions": {
+        "height": 1200,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.runestone-tablet.static-share-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.static-share-fallback",
+      "sha256": "86fe4a0412589af58c98d6c7b1d206163aa40d398b77d8038d61507070c9ed02",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.runestone-tablet.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 325877,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.relic.norse.runestone-tablet.master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Relics/relic.norse.runestone-tablet.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.runestone-tablet.thumbnail",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.thumbnail",
+      "sha256": "0c8e46139a12cb97a32a8159282fb3977f4818aedaec9314cac8b774fc01438a",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.stormforged-stele.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1103,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Geometry/relic.norse.stormforged-stele.geometry.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.stormforged-stele.geometry",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.geometry",
+      "sha256": "696afd4d7e3b9eb37fe85ad5d13ea6c2d234d3a26d49ef37b79cc1b55534776f",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.stormforged-stele.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 2403574,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.relic.norse.stormforged-stele.master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Relics/relic.norse.stormforged-stele.high-contrast.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 1536
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.stormforged-stele.high-contrast",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.high-contrast",
+      "sha256": "bd825ac8a9e3ce67b8ecc64dc3cd44a46730897fc4953a46440efca7b040d98b",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.stormforged-stele.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 4222923,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.relic.norse.stormforged-stele.high-contrast",
+        "resource.relic.norse.stormforged-stele.static-share-fallback",
+        "resource.relic.norse.stormforged-stele.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Relics/relic.norse.stormforged-stele.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 1536
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.stormforged-stele.master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.master",
+      "sha256": "b90175dbc2bf4fcd150c84975161eaa04c806b7f90f4fceed2ab456d7bea3296",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.stormforged-stele.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1669381,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.relic.norse.stormforged-stele.master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/ShareFallbacks/share-fallback.norse.stormforged-stele.png",
+      "pixelDimensions": {
+        "height": 1200,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.stormforged-stele.static-share-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.static-share-fallback",
+      "sha256": "adecfca5dc28bacc26b2db4db35cfdc6918fa1fdbf3368b481caa7bce46321c6",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "relic.norse.stormforged-stele.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 298539,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.relic.norse.stormforged-stele.master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Relics/relic.norse.stormforged-stele.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.relic.norse.stormforged-stele.thumbnail",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "relic.thumbnail",
+      "sha256": "77b6058a24139b633c509136654a9bad9cb0b29210c4551400744d52c75741b1",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "script.base-runes.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 4552,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/json",
+      "normalizedProductionPath": "Production/Metadata/Norse-Script-Mapping-v1.0.json",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.script.norse.mapping",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "script.mapping",
+      "sha256": "c66c76259ac7c8e4ac9ad0c42417f49ad4546d6901e339612dec6ef243627264",
+      "sourceClassification": "metadata"
+    },
+    {
+      "accessibilityDescriptionKey": "script.base-runes.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 31985,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.script.norse.specimen.standard"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Script/script.base-runes.specimen.high-contrast.png",
+      "pixelDimensions": {
+        "height": 600,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.script.norse.specimen.high-contrast",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "script.specimen-high-contrast",
+      "sha256": "f2841e0a78e2f621fbbb5bfff0d52b2643f179a8701d69163204e4ef226c25ea",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "script.base-runes.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 34899,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.script.norse.specimen.high-contrast",
+        "resource.script.norse.specimen.static-fallback"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Script/script.base-runes.specimen.standard.png",
+      "pixelDimensions": {
+        "height": 600,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.script.norse.specimen.standard",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "script.specimen-standard",
+      "sha256": "40fdca54af924fe1782ec39cbf4e43fc7fc071ea031d5278c7d482d3c92a1b06",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "script.base-runes.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 35163,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.script.norse.specimen.standard"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Script/script.base-runes.specimen.static-fallback.png",
+      "pixelDimensions": {
+        "height": 600,
+        "width": 1600
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.script.norse.specimen.static-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "script.static-fallback",
+      "sha256": "fa83c5225ab145b83de7611086e60a9a42f4ed73010e3f65d9b99a5802bfcfab",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.berserk.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 615248,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.berserk.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.berserk.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1024
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.berserk.monochrome-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.monochrome-fallback",
+      "sha256": "5fb57230f481cd4a745931ffac4fc1214d013c1337e1008fa294afe39b5ed083",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.berserk.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 252810,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.berserk.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.berserk.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.berserk.thumbnail",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.thumbnail",
+      "sha256": "e0f99b2608c7bb6c28d2c72c0ab66f367c39d83774bc612502a283666aed5e72",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.berserk.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1261278,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.berserk.monochrome-fallback",
+        "resource.seal.norse.berserk.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/pdf",
+      "normalizedProductionPath": "Production/Seals/seal.norse.berserk.vector-master.pdf",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.berserk.vector-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.vector-master",
+      "sha256": "b25e1b3238fac4f70de17a5b2d4e2dcdbc0a4332a2bd9572e043ffb0d2463b22",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.mjolnir.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 736867,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.mjolnir.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.mjolnir.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1024
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.mjolnir.monochrome-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.monochrome-fallback",
+      "sha256": "4fc3dff392954cadf08b94a326bd51e3757288dc885b56a0fe20270d90bb6aa2",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.mjolnir.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 276287,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.mjolnir.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.mjolnir.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.mjolnir.thumbnail",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.thumbnail",
+      "sha256": "d63e544734eb3d79288db86caffe3980585d37c5e0f6a4dd775c56550b3e4490",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.mjolnir.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1363466,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.mjolnir.monochrome-fallback",
+        "resource.seal.norse.mjolnir.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/pdf",
+      "normalizedProductionPath": "Production/Seals/seal.norse.mjolnir.vector-master.pdf",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.mjolnir.vector-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.vector-master",
+      "sha256": "3936b37e8cf7d5ecbb659193b4a8492b4c196b05bbf5b23e37b369aefc5efb65",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.ravenshield.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 696677,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.ravenshield.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.ravenshield.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1024
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.ravenshield.monochrome-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.monochrome-fallback",
+      "sha256": "f35057515cdf8f5eea53f2874e2599d86ebe991b4a37ef9acd1ea2bd48b2d82a",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.ravenshield.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 300788,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.ravenshield.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.ravenshield.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.ravenshield.thumbnail",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.thumbnail",
+      "sha256": "ed148a3323576acea5a2a38151aa9b4a15938c246d04ac2f671e49aac9076098",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.ravenshield.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1412426,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.ravenshield.monochrome-fallback",
+        "resource.seal.norse.ravenshield.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/pdf",
+      "normalizedProductionPath": "Production/Seals/seal.norse.ravenshield.vector-master.pdf",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.ravenshield.vector-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.vector-master",
+      "sha256": "a7fc80977e3119ab9f03f7e9ed381ca4c658008f18516f3826a3ff01b2691db5",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.valknut.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 728781,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.valknut.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.valknut.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1024
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.valknut.monochrome-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.monochrome-fallback",
+      "sha256": "0e29c109e3e2c336feb9144525c798641017d4834d0585650a459ecd895b8609",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.valknut.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 316346,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.valknut.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.valknut.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.valknut.thumbnail",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.thumbnail",
+      "sha256": "ef000b901cb8b1c030c0130771a371b8212377925ad63aa93f1a9ece34dcd270",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.valknut.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1548479,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.valknut.monochrome-fallback",
+        "resource.seal.norse.valknut.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/pdf",
+      "normalizedProductionPath": "Production/Seals/seal.norse.valknut.vector-master.pdf",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.valknut.vector-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.vector-master",
+      "sha256": "b4aaf0fbbf7be11638dcfe4ff0a2f144f00d45d01dd045786fbfa684b5be184b",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.wolkin.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 663971,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.wolkin.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.wolkin.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1024
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.wolkin.monochrome-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.monochrome-fallback",
+      "sha256": "7cc7c8b566f61324bb7abda0feecce296fd1f6bfde9ff3dd33cdee77593ee90e",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.wolkin.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 277177,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.wolkin.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.wolkin.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.wolkin.thumbnail",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.thumbnail",
+      "sha256": "83865f5861beb360f0cb8c4d88e8774cfd6eb902234e4b13decf63de92be9acf",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.wolkin.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1397335,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.wolkin.monochrome-fallback",
+        "resource.seal.norse.wolkin.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/pdf",
+      "normalizedProductionPath": "Production/Seals/seal.norse.wolkin.vector-master.pdf",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.wolkin.vector-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.vector-master",
+      "sha256": "d7658b59fa392db89a88a0b029053916a051c04ca45e39c8897b907088f62780",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.yggdrasil.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 660650,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.yggdrasil.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.yggdrasil.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1024
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.yggdrasil.monochrome-fallback",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.monochrome-fallback",
+      "sha256": "9c2a96295fe0857ea7e98214f042accdebe8e18c2e93293c7ad02944ed7d466f",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.yggdrasil.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 277970,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [
+        "resource.seal.norse.yggdrasil.vector-master"
+      ],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.yggdrasil.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.yggdrasil.thumbnail",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.thumbnail",
+      "sha256": "4edf20db47e214d6f86f80cd45353fa0b861f810e9918affba878669a40fd105",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.yggdrasil.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 1378247,
+      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.yggdrasil.monochrome-fallback",
+        "resource.seal.norse.yggdrasil.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "application/pdf",
+      "normalizedProductionPath": "Production/Seals/seal.norse.yggdrasil.vector-master.pdf",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.yggdrasil.vector-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.vector-master",
+      "sha256": "831093e7e0a98bd7b081ddb52016be89354ee463d6d937e56830f679139ceea9",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 422444,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "audio/wav",
+      "normalizedProductionPath": "Production/Audio/sound.norse.unlock-codex.wav",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.sound.norse.unlock-codex",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "unlock-sound",
+      "sha256": "92002d43b73dfbb6240ab8c3166b5044f9ebec9dc919925934774875caaa92f8",
+      "sourceClassification": "original-project-resource"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 508844,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "audio/wav",
+      "normalizedProductionPath": "Production/Audio/sound.norse.unlock-mastery.wav",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.sound.norse.unlock-mastery",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "unlock-sound",
+      "sha256": "a5e4be793829f6abc73727f6441894d79d0e93b548f754dc35005aac529f2682",
+      "sourceClassification": "original-project-resource"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 157484,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "audio/wav",
+      "normalizedProductionPath": "Production/Audio/sound.norse.unlock-minor.wav",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.sound.norse.unlock-minor",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "unlock-sound",
+      "sha256": "86ff6f83532792c120885c4177fbf4577aea4d9c93ce1a00ae92ef675d663231",
+      "sourceClassification": "original-project-resource"
+    },
+    {
+      "accessibilityDescriptionKey": "codex.norse.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 245804,
+      "derivationRecordSHA256": null,
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "audio/wav",
+      "normalizedProductionPath": "Production/Audio/sound.norse.unlock-relic.wav",
+      "pixelDimensions": null,
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.sound.norse.unlock-relic",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "unlock-sound",
+      "sha256": "fd03dc2727db17991724175ad4de0e8441ceb635157869147e3ec4c4246d17d0",
+      "sourceClassification": "original-project-resource"
+    }
+  ],
+  "rightsSources": [
+    {
+      "id": "rights.norse.base",
+      "statementReference": "EULA.md#4-ownership-and-intellectual-property"
+    },
+    {
+      "id": "rights.norse.font.noto",
+      "statementReference": "RuneScrib/Resources/Fonts/OFL.txt"
+    }
+  ],
+  "schemaVersion": "2.0"
+}

@@ -126,8 +126,8 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(defaultFrame.exists, app.debugDescription)
         XCTAssertTrue(effects.exists, app.debugDescription)
         XCTAssertTrue(defaultsPreview.waitForExistence(timeout: 8), app.debugDescription)
-        XCTAssertEqual(defaultRelic.label, "Default Relic: Weathered Rune Stone")
-        XCTAssertEqual(defaultSeal.label, "Default Seal: Knotwork Mark")
+        XCTAssertEqual(defaultRelic.label, "Default Relic: Runestone Tablet")
+        XCTAssertEqual(defaultSeal.label, "Default Seal: Valknut Seal")
         XCTAssertEqual(defaultFrame.label, "Default Frame: None")
         assertFourByThree(defaultsPreview)
 
@@ -162,10 +162,10 @@ final class RuneScribeParityUITests: XCTestCase {
         tapCloseControl(in: app)
 
         let relicThumbnail = app.descendants(matching: .any)[
-            "theme.artifact-thumbnail.relic.norse.runestone.weathered"
+            "theme.artifact-thumbnail.relic.norse.runestone-tablet"
         ].firstMatch
         let sealThumbnail = app.descendants(matching: .any)[
-            "theme.artifact-thumbnail.seal.norse.knotwork"
+            "theme.artifact-thumbnail.seal.norse.valknut"
         ].firstMatch
         XCTAssertTrue(relicThumbnail.waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertTrue(sealThumbnail.waitForExistence(timeout: 8), app.debugDescription)
@@ -207,7 +207,7 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(artifactPicker.waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertTrue(
             app.descendants(matching: .any)[
-                "theme.artifact-picker.relic.norse.runestone.weathered"
+                "theme.artifact-picker.relic.norse.runestone-tablet"
             ].firstMatch.waitForExistence(timeout: 8),
             app.debugDescription
         )
@@ -245,7 +245,7 @@ final class RuneScribeParityUITests: XCTestCase {
 
         let preview = app.descendants(matching: .any)["theme.artifact-preview"].firstMatch
         let relicPreview = app.descendants(matching: .any)[
-            "theme.artifact-preview.relic.norse.runestone.weathered"
+            "theme.artifact-preview.relic.norse.runestone-tablet"
         ].firstMatch
         XCTAssertTrue(preview.waitForExistence(timeout: 10), app.debugDescription)
         XCTAssertTrue(relicPreview.waitForExistence(timeout: 10), app.debugDescription)
@@ -283,7 +283,7 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(vaultCodex.waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertTrue(app.staticTexts["Provider available"].exists)
         let vaultRelic = app.descendants(matching: .any)[
-            "theme.vault-artifact.relic.norse.runestone.weathered"
+            "theme.vault-artifact.relic.norse.runestone-tablet"
         ].firstMatch
         scrollUntilVisible(vaultRelic, in: app)
         XCTAssertTrue(vaultRelic.waitForExistence(timeout: 8), app.debugDescription)
@@ -339,12 +339,12 @@ final class RuneScribeParityUITests: XCTestCase {
 
         seal.tap()
         let lockedSeal = app.buttons[
-            "share-builder.seal.option.seal.norse.echo-rune"
+            "share-builder.seal.option.seal.norse.yggdrasil"
         ].firstMatch
         XCTAssertTrue(lockedSeal.waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertEqual(
             lockedSeal.label,
-            "Echo Rune Seal, Not selected, Locked, unavailable"
+            "Yggdrasil Seal, Not selected, Locked, unavailable"
         )
         XCTAssertFalse(lockedSeal.isEnabled)
 
@@ -991,7 +991,7 @@ final class RuneScribeParityUITests: XCTestCase {
         )
 
         let defaultsPreview = app.descendants(matching: .any)[
-            "theme.artifact-preview.relic.norse.runestone.weathered"
+            "theme.artifact-preview.relic.norse.runestone-tablet"
         ].firstMatch
         scrollUntilVisible(defaultsPreview, in: app)
         XCTAssertTrue(defaultsPreview.waitForExistence(timeout: 8), app.debugDescription)
@@ -1095,8 +1095,8 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(seal.waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertTrue(frame.waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertTrue(effects.waitForExistence(timeout: 8), app.debugDescription)
-        XCTAssertEqual(relic.label, "Relic: Weathered Rune Stone", file: file, line: line)
-        XCTAssertEqual(seal.label, "Seal: Knotwork Mark", file: file, line: line)
+        XCTAssertEqual(relic.label, "Relic: Runestone Tablet", file: file, line: line)
+        XCTAssertEqual(seal.label, "Seal: Valknut Seal", file: file, line: line)
         XCTAssertEqual(frame.label, "Frame: None", file: file, line: line)
         XCTAssertEqual(
             relic.value as? String,

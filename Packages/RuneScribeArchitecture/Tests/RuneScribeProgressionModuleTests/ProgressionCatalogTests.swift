@@ -8,7 +8,7 @@ import Testing
 func bundledCatalogDecodesWithExactInventory() throws {
     let bundle = try validatedBundle()
 
-    #expect(bundle.catalog.content.count == 82)
+    #expect(bundle.catalog.content.count == 80)
     #expect(bundle.catalog.statistics.count == 18)
     #expect(bundle.catalog.achievements.count == 15)
     #expect(bundle.catalog.milestones.count == 30)
