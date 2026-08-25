@@ -1,0 +1,153 @@
+{
+  "schemaVersion": "1.0",
+  "authorityRoot": "docs/verification/theme-fidelity-v4/authority",
+  "shippingRoots": [
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeWildwoodModule/Resources/Production",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeGloamthornModule/Resources/Production"
+  ],
+  "rejectedRoots": [
+    "docs/verification/theme-fidelity-v4/rejected"
+  ],
+  "assets": [
+    {
+      "path": "goldens/norse-theme-board.png",
+      "sha256": "fbbe85687008d2d158b2793d5d5c4e9eccffcde452a727ca02f66c270b619835",
+      "dimensions": [1536, 1024],
+      "theme": "Norse",
+      "role": "complete-theme-board",
+      "tier": "controlling"
+    },
+    {
+      "path": "goldens/moonleaf-catalog-a.png",
+      "sha256": "963a75730431c01e51878dd92778845f5ee26641eb97022024b254c5ac86ed47",
+      "dimensions": [941, 1672],
+      "theme": "Moonleaf",
+      "role": "catalog-screen-alternate",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/moonleaf-catalog-b.png",
+      "sha256": "de8a822b01fba2c3ba9cba8f6821f51463da51e18836d8712620b6fd06c462f4",
+      "dimensions": [941, 1672],
+      "theme": "Moonleaf",
+      "role": "catalog-screen",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/moonleaf-compose-a.png",
+      "sha256": "7130dc97a202f860998f77d32e00b47b9cc20977efca52ed98ac649a9519f3c7",
+      "dimensions": [941, 1672],
+      "theme": "Moonleaf",
+      "role": "compose-screen-primary",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/moonleaf-compose-b.png",
+      "sha256": "dd235b6b046b5817bd2e0e25f969d04ac6e5ffd9f99d469ff66a2c9c5d1c7483",
+      "dimensions": [941, 1672],
+      "theme": "Moonleaf",
+      "role": "compose-screen-secondary",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/moonleaf-style-board.png",
+      "sha256": "8a3ebfc272e4834c8ee3775d7910dc52eaf106594fe6091bd3a99db3caf764ba",
+      "dimensions": [1122, 1402],
+      "theme": "Moonleaf",
+      "role": "material-style-board",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/moonleaf-inscription-preview.png",
+      "sha256": "412a80685dadc10367faa0c76dc87ee12a1b8c34d0dcbee0a9ea977619a981f1",
+      "dimensions": [941, 1672],
+      "theme": "Moonleaf",
+      "role": "inscription-preview-screen",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/moonleaf-received-a.png",
+      "sha256": "cbdd75feae38d7a0c5fa721621faeaa81f5d3fa793e46cf49687bbab3f90e708",
+      "dimensions": [941, 1672],
+      "theme": "Moonleaf",
+      "role": "received-cipher-primary",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/moonleaf-received-b.png",
+      "sha256": "72b14fbc8265afa6767a7be57804275b360b449537b641f68d6b9b4d606b70c2",
+      "dimensions": [941, 1672],
+      "theme": "Moonleaf",
+      "role": "received-cipher-secondary",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/moonleaf-relic-detail.png",
+      "sha256": "f41b3550578a047bf676f8a3e7d8322a75bb9240b7023a3759513d9d2ea85dbe",
+      "dimensions": [941, 1672],
+      "theme": "Moonleaf",
+      "role": "relic-detail-screen",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/sunspire-catalog.png",
+      "sha256": "4b6494f3498660b16aa662d5306fdc21972c93c2c9d7d45f45fad0b566ab1a77",
+      "dimensions": [941, 1672],
+      "theme": "Sunspire",
+      "role": "catalog-screen",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/sunspire-style-board.png",
+      "sha256": "3178c022aaa88488a7a26ee9d1dca07d51ffdc4f6efe034bd93925423abe7935",
+      "dimensions": [1122, 1402],
+      "theme": "Sunspire",
+      "role": "material-style-board",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/wildwood-catalog.png",
+      "sha256": "c590da2e8a10d38019889e899a1ae161aa3aaa20dc3cbd2cee40045c1acd6d1d",
+      "dimensions": [941, 1672],
+      "theme": "Wildwood",
+      "role": "catalog-screen",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/wildwood-style-board.png",
+      "sha256": "1587b8f92fa95bfe4cb7afd82d2ba87b407c57e07ffac40fca0ccb226e40f1e6",
+      "dimensions": [1122, 1402],
+      "theme": "Wildwood",
+      "role": "material-style-board",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/gloamthorn-catalog.png",
+      "sha256": "a6c222b04cb64cb77e77e1eb17982668f3ff61e2bcf4a4389e535d3da7b3b10a",
+      "dimensions": [941, 1672],
+      "theme": "Gloamthorn",
+      "role": "catalog-screen",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/cross-theme-overview.png",
+      "sha256": "ba582ec7bebe80f90f8821b720aa637a6527abb18ef6aff8f882ba7e790ecdee",
+      "dimensions": [1536, 1024],
+      "theme": "All",
+      "role": "cross-theme-overview",
+      "tier": "authoritative"
+    },
+    {
+      "path": "goldens/vault-elven-unlock-progress.png",
+      "sha256": "0edf9aadcbf515d2db31de3c6c4af853f7f5a78287321f2458b461d6fb7eb724",
+      "dimensions": [941, 1672],
+      "theme": "All",
+      "role": "vault-unlock-progress",
+      "tier": "authoritative"
+    }
+  ],
+  "comparisons": []
+}
