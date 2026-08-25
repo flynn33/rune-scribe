@@ -11,6 +11,13 @@
   "rejectedRoots": [
     "docs/verification/theme-fidelity-v4/rejected"
   ],
+  "rejectedAssetSHA256": [
+    "25cb3e61bc4468e3abddcf43bbf9fc5e6b0b9ba332cac9c3e8e847e51ae2416d",
+    "3e7785d8cb86c660100099d35d9a8acd06bb655e82c8e142ad458eedd4cfae09",
+    "9fbd46a85c35850a664fbaf958e600ad8f2f7d3b16f2261ea5d4724510780a18",
+    "c5ac9b2ff99fed8044ba2f1f5ca26baeea66d93d4d8ee3c11a4d769344dcced1",
+    "e5046275c3ce7b6366dfa8330a708bf8c52bd106c0d55912deb76895deff2210"
+  ],
   "assets": [
     {
       "path": "goldens/norse-theme-board.png",
