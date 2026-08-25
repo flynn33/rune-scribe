@@ -831,6 +831,7 @@ def validate_record(
             )
     attested_frame_ids: set[str] = set()
     required_element_ids: list[str] | None = None
+    clipped_element_ids: set[str] = set()
     viewport = record.get("viewportAssertions")
     if viewport is None:
         findings.append(
@@ -890,6 +891,7 @@ def validate_record(
                 f"{expected['record']} viewportAssertions.clippedElementIDs "
                 "must be a subset of requiredElementIDs"
             )
+        clipped_element_ids = set(clipped)
         if clipped:
             findings.append(
                 diagnostic(
@@ -996,10 +998,22 @@ def validate_record(
         missing_required_frames = sorted(
             set(required_element_ids) - attested_frame_ids
         )
-        if missing_required_frames:
+        unexplained_missing_frames = sorted(
+            set(missing_required_frames) - clipped_element_ids
+        )
+        if unexplained_missing_frames:
             raise IndexError(
                 f"{expected['record']} required viewport elements lack attested frames: "
-                + ", ".join(missing_required_frames)
+                + ", ".join(unexplained_missing_frames)
+            )
+        if missing_required_frames:
+            findings.append(
+                diagnostic(
+                    "required-element-frames-unattested",
+                    expected["png"],
+                    "clipped required elements have no rendered frame: "
+                    + ", ".join(missing_required_frames),
+                )
             )
     safe_preview = record.get("safePreviewEvidence")
     if expected["surface"] != "received-cipher":

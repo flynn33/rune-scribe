@@ -111,6 +111,23 @@ def bind_content_seed(record: dict) -> None:
 
 
 class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
+    def test_canonical_json_hash_is_utf8_and_shared_by_capture_tools(self) -> None:
+        document = {
+            "environmentDescription": "RuneScrib-iOS · Built with macOS",
+            "result": "Passed",
+        }
+        encoded = json.dumps(
+            document,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+        expected = hashlib.sha256(encoded).hexdigest()
+        self.assertEqual(extractor.canonical_json_sha256(document), expected)
+        self.assertEqual(indexer.canonical_json_sha256(document), expected)
+        self.assertEqual(capture_runner.canonical_json_sha256(document), expected)
+
     def test_comparator_argv_contains_one_script_and_canonical_manifest_is_fixed(self) -> None:
         candidate = Path("/tmp/capture.png")
         capture_record = Path("/tmp/capture.capture.json")
@@ -622,6 +639,11 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
             record["viewportAssertions"]["clippedElementIDs"] = []
             with self.assertRaisesRegex(indexer.IndexError, "lack attested frames"):
                 validate_capture_record(record, expected, png)
+            record["viewportAssertions"]["clippedElementIDs"] = ["artifact.preview"]
+            self.assertEqual(
+                [finding["code"] for finding in validate_capture_record(record, expected, png)],
+                ["layout-clipping", "required-element-frames-unattested"],
+            )
             record["viewportAssertions"]["requiredElementCount"] = 1
             record["viewportAssertions"]["requiredElementIDs"] = [
                 "theme-fidelity.viewport"

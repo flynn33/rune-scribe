@@ -149,7 +149,13 @@ def xcresult_summary(result_bundle: Path) -> dict[str, Any]:
 
 
 def canonical_json_sha256(document: Any) -> str:
-    encoded = json.dumps(document, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    encoded = json.dumps(
+        document,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest()
 
 
