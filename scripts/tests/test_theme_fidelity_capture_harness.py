@@ -524,6 +524,16 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
             record["renderedResourceIDs"] = [
                 "resource.background.moonleaf.moonlit-canopy.output.background-static-base"
             ]
+            record["renderedResourceBindings"] = [
+                {
+                    "codexID": "codex.moonleaf",
+                    "resourceID": (
+                        "resource.background.moonleaf.moonlit-canopy."
+                        "output.background-static-base"
+                    ),
+                    "visualPlanRevision": 1,
+                }
+            ]
             record["viewportAssertions"] = {
                 "requiredElementCount": 1,
                 "requiredElementIDs": ["theme-fidelity.viewport"],
@@ -545,15 +555,32 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
             }
             self.assertEqual(validate_capture_record(record, expected, png), [])
             record["renderedResourceIDs"] = [
-                "resource.relic.norse.runestone.weathered.art"
+                "resource.background.moonleaf.moonlit-canopy.output.background-static-base",
+                "resource.relic.norse.runestone.weathered.art",
             ]
-            with self.assertRaisesRegex(
-                indexer.IndexError, "absent from the active theme"
-            ):
+            record["renderedResourceBindings"] = [
+                {
+                    "codexID": "codex.moonleaf",
+                    "resourceID": (
+                        "resource.background.moonleaf.moonlit-canopy."
+                        "output.background-static-base"
+                    ),
+                    "visualPlanRevision": 1,
+                },
+                {
+                    "codexID": "codex.norse",
+                    "resourceID": "resource.relic.norse.runestone.weathered.art",
+                    "visualPlanRevision": 1,
+                },
+            ]
+            self.assertEqual(validate_capture_record(record, expected, png), [])
+            record["renderedResourceBindings"][1]["codexID"] = "codex.moonleaf"
+            with self.assertRaisesRegex(indexer.IndexError, "owning Codex manifest"):
                 validate_capture_record(record, expected, png)
             record["renderedResourceIDs"] = [
                 "resource.background.moonleaf.moonlit-canopy.output.background-static-base"
             ]
+            record["renderedResourceBindings"] = record["renderedResourceBindings"][:1]
             record["viewportAssertions"]["requiredElementCount"] = 2
             with self.assertRaisesRegex(indexer.IndexError, "does not match"):
                 validate_capture_record(record, expected, png)
@@ -660,6 +687,18 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
                     "resource.background.norse.forge.static",
                     "resource.relic.norse.runestone.weathered.art",
                 ],
+                "renderedResourceBindings": [
+                    {
+                        "codexID": "codex.norse",
+                        "resourceID": "resource.background.norse.forge.static",
+                        "visualPlanRevision": 1,
+                    },
+                    {
+                        "codexID": "codex.norse",
+                        "resourceID": "resource.relic.norse.runestone.weathered.art",
+                        "visualPlanRevision": 1,
+                    },
+                ],
                 "viewportAssertions": {
                     "requiredElementCount": 2,
                     "requiredElementIDs": [
@@ -706,7 +745,7 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
             record["safePreviewEvidence"]["resourceIDs"] = [
                 "resource.font.norse.noto-sans-runic"
             ]
-            with self.assertRaisesRegex(indexer.IndexError, "subset of renderedResourceIDs"):
+            with self.assertRaisesRegex(indexer.IndexError, "active-Codex rendered resources"):
                 validate_capture_record(record, expected, png)
             record["safePreviewEvidence"]["resourceIDs"] = [
                 "resource.background.moonleaf.moonlit-canopy.output.background-static-base"

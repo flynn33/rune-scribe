@@ -161,6 +161,7 @@ REQUIRED_RECORD_KEYS = {
 }
 EVIDENCE_RECORD_KEYS = {
     "elementFrames",
+    "renderedResourceBindings",
     "renderedResourceIDs",
     "safePreviewEvidence",
     "viewportAssertions",
@@ -711,6 +712,7 @@ def validate_record(
     findings: list[dict[str, str]] = []
     rendered_resources = record.get("renderedResourceIDs")
     rendered_resource_set: set[str] = set()
+    active_rendered_resource_set: set[str] = set()
     if rendered_resources is None:
         findings.append(
             diagnostic(
@@ -731,12 +733,80 @@ def validate_record(
         )
     else:
         rendered_resource_set = set(rendered_resources)
-        undeclared_rendered = sorted(rendered_resource_set - allowed_resource_ids)
-        if undeclared_rendered:
+    rendered_resource_bindings = record.get("renderedResourceBindings")
+    if rendered_resources is not None and rendered_resource_bindings is None:
+        findings.append(
+            diagnostic(
+                "rendered-resource-bindings-unverified",
+                expected["png"],
+                "capture record does not bind rendered resources to owning Codices and revision",
+            )
+        )
+    elif rendered_resource_bindings is not None:
+        if not isinstance(rendered_resource_bindings, list) or not rendered_resource_bindings:
             raise IndexError(
-                f"{expected['record']} renderedResourceIDs are absent from the active "
-                "theme production integrity manifest: "
-                + ", ".join(undeclared_rendered)
+                f"{expected['record']} renderedResourceBindings must be a non-empty array"
+            )
+        allowed_by_codex_id: dict[str, frozenset[str]] = {}
+        for (_, owning_codex_id), resource_ids in allowed_resource_ids_by_theme_codex.items():
+            prior = allowed_by_codex_id.setdefault(owning_codex_id, resource_ids)
+            if prior != resource_ids:
+                raise IndexError(
+                    f"production integrity manifest ownership is ambiguous for {owning_codex_id}"
+                )
+        normalized_bindings: list[tuple[str, str, int]] = []
+        for binding in rendered_resource_bindings:
+            if not isinstance(binding, dict) or set(binding) != {
+                "codexID",
+                "resourceID",
+                "visualPlanRevision",
+            }:
+                raise IndexError(
+                    f"{expected['record']} renderedResourceBindings keys are invalid"
+                )
+            owning_codex_id = binding.get("codexID")
+            resource_id = binding.get("resourceID")
+            revision = binding.get("visualPlanRevision")
+            if (
+                not isinstance(owning_codex_id, str)
+                or not owning_codex_id
+                or not isinstance(resource_id, str)
+                or not resource_id
+                or isinstance(revision, bool)
+                or not isinstance(revision, int)
+                or revision <= 0
+            ):
+                raise IndexError(
+                    f"{expected['record']} renderedResourceBindings values are invalid"
+                )
+            owning_resource_ids = allowed_by_codex_id.get(owning_codex_id)
+            if owning_resource_ids is None or resource_id not in owning_resource_ids:
+                raise IndexError(
+                    f"{expected['record']} rendered resource {resource_id} is absent from "
+                    f"owning Codex manifest {owning_codex_id}"
+                )
+            if revision != record["visualPlanRevision"]:
+                raise IndexError(
+                    f"{expected['record']} rendered resource revision differs from visualPlanRevision"
+                )
+            normalized_bindings.append((owning_codex_id, resource_id, revision))
+            if owning_codex_id == record["codexID"]:
+                active_rendered_resource_set.add(resource_id)
+        if (
+            normalized_bindings != sorted(normalized_bindings)
+            or len(normalized_bindings) != len(set(normalized_bindings))
+        ):
+            raise IndexError(
+                f"{expected['record']} renderedResourceBindings must be sorted and unique"
+            )
+        bound_resource_set = {binding[1] for binding in normalized_bindings}
+        if bound_resource_set != rendered_resource_set:
+            raise IndexError(
+                f"{expected['record']} renderedResourceIDs differ from renderedResourceBindings"
+            )
+        if not active_rendered_resource_set:
+            raise IndexError(
+                f"{expected['record']} renderedResourceBindings omit the active Codex"
             )
     attested_frame_ids: set[str] = set()
     required_element_ids: list[str] | None = None
@@ -971,10 +1041,15 @@ def validate_record(
                 raise IndexError(
                     f"{expected['record']} valid safePreviewEvidence is incomplete"
                 )
-            if not set(resource_ids).issubset(rendered_resource_set):
+            preview_rendered_resource_set = (
+                active_rendered_resource_set
+                if rendered_resource_bindings is not None
+                else rendered_resource_set
+            )
+            if not set(resource_ids).issubset(preview_rendered_resource_set):
                 raise IndexError(
                     f"{expected['record']} valid safePreviewEvidence.resourceIDs must be "
-                    "a subset of renderedResourceIDs"
+                    "a subset of the active-Codex rendered resources"
                 )
             if preview_element_id not in attested_frame_ids:
                 findings.append(

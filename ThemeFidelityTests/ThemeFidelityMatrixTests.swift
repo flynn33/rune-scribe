@@ -38,10 +38,10 @@ final class ThemeFidelityMatrixTests: XCTestCase {
     func testCaptureThemeFidelitySmoke() async throws {
         try await capture(
             themes: [.norse],
-            surfaces: [.workspaceEmpty, .staticShare],
+            surfaces: [.workspaceEmpty, .shareBuilder, .staticShare],
             destinations: ThemeFidelityDestination.smokeDestinations,
             requireUnclippedViewport: true,
-            distinctCaptureSurfaces: [.workspaceEmpty, .staticShare]
+            distinctCaptureSurfaces: [.workspaceEmpty, .shareBuilder, .staticShare]
         )
     }
 
@@ -123,6 +123,17 @@ final class ThemeFidelityMatrixTests: XCTestCase {
 
         XCTAssertFalse(destinations.isEmpty)
 
+        var declaredResourceIDsByCodexID: [CodexID: Set<ThemeResourceID>] = [:]
+        for registeredTheme in ThemeFidelityTheme.allCases {
+            let descriptor = try await fixture.themeClient.providerDescriptor(
+                for: registeredTheme.codexID
+            )
+            declaredResourceIDsByCodexID[descriptor.codex.id] = Set(
+                descriptor.resources.map(\.id)
+            )
+        }
+        XCTAssertEqual(declaredResourceIDsByCodexID.count, ThemeFidelityTheme.allCases.count)
+
         var attachmentNames = Set<String>()
         var digestOwners: [String: String] = [:]
         var renderedCount = 0
@@ -153,11 +164,19 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                         model: model,
                         session: fixture.session
                     )
-                    var observedResourceIDs = Set<ThemeResourceID>()
-                    var unexpectedObservedResourceIDs = Set<ThemeResourceID>()
-                    let validateObservedResourceID: (ThemeResourceID) -> Bool = { resourceID in
+                    var observedResourceBindings = Set<ThemeFidelityRenderedResourceBinding>()
+                    var unexpectedResourceBindings = Set<ThemeFidelityRenderedResourceBinding>()
+                    let activeBinding: (ThemeResourceID) -> ThemeFidelityRenderedResourceBinding = {
+                        resourceID in
+                        ThemeFidelityRenderedResourceBinding(
+                            codexID: descriptor.codex.id.rawValue,
+                            resourceID: resourceID.rawValue,
+                            visualPlanRevision: model.visualPlanRevision
+                        )
+                    }
+                    let validateActiveResourceID: (ThemeResourceID) -> Bool = { resourceID in
                         guard activeDescriptorResourceIDs.contains(resourceID) else {
-                            unexpectedObservedResourceIDs.insert(resourceID)
+                            unexpectedResourceBindings.insert(activeBinding(resourceID))
                             return false
                         }
                         return true
@@ -166,15 +185,23 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                     do {
                         fixture.session.resourcePresentation.beginRenderedResourceObservation {
                             identity in
-                            guard validateObservedResourceID(identity.resourceID),
-                                  identity.codexID == descriptor.codex.id,
-                                  identity.contentRevision == model.visualPlanRevision
-                            else { return }
-                            observedResourceIDs.insert(identity.resourceID)
+                            let binding = ThemeFidelityRenderedResourceBinding(
+                                codexID: identity.codexID.rawValue,
+                                resourceID: identity.resourceID.rawValue,
+                                visualPlanRevision: identity.contentRevision
+                            )
+                            guard identity.contentRevision == model.visualPlanRevision,
+                                  declaredResourceIDsByCodexID[identity.codexID]?
+                                      .contains(identity.resourceID) == true
+                            else {
+                                unexpectedResourceBindings.insert(binding)
+                                return
+                            }
+                            observedResourceBindings.insert(binding)
                         }
                         RuntimeThemeSemanticResourceUseObservation.begin {
-                            guard validateObservedResourceID($0) else { return }
-                            observedResourceIDs.insert($0)
+                            guard validateActiveResourceID($0) else { return }
+                            observedResourceBindings.insert(activeBinding($0))
                         }
                         defer {
                             RuntimeThemeSemanticResourceUseObservation.end()
@@ -196,16 +223,16 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                         model.safePreviewRenderedResourceIDs.compactMap(
                             ThemeResourceID.init(rawValue:)
                         ).forEach { resourceID in
-                            guard validateObservedResourceID(resourceID) else { return }
-                            observedResourceIDs.insert(resourceID)
+                            guard validateActiveResourceID(resourceID) else { return }
+                            observedResourceBindings.insert(activeBinding(resourceID))
                         }
                     }
-                    let unexpectedResourceIDs = unexpectedObservedResourceIDs
-                        .map(\.rawValue)
+                    let unexpectedResourceIDs = unexpectedResourceBindings
+                        .map(\.description)
                         .sorted()
                     XCTAssertTrue(
                         unexpectedResourceIDs.isEmpty,
-                        "Observed resources absent from active descriptor for \(name.png): "
+                        "Observed resources lack owning Codex or revision authority for \(name.png): "
                             + unexpectedResourceIDs.joined(separator: ", ")
                     )
                     guard unexpectedResourceIDs.isEmpty else {
@@ -215,7 +242,7 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                         )
                     }
                     let rendered = renderedWithoutResources.recording(
-                        renderedResourceIDs: observedResourceIDs.map(\.rawValue)
+                        renderedResourceBindings: Array(observedResourceBindings)
                     )
                     XCTAssertEqual(rendered.width, destination.pixelWidth)
                     XCTAssertEqual(rendered.height, destination.pixelHeight)
@@ -223,6 +250,12 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                     XCTAssertFalse(
                         rendered.renderedResourceIDs.isEmpty,
                         "No runtime-rendered theme resources observed for \(name.png)"
+                    )
+                    XCTAssertTrue(
+                        rendered.renderedResourceBindings.contains(where: {
+                            $0.codexID == descriptor.codex.id.rawValue
+                        }),
+                        "No active-Codex theme resources observed for \(name.png)"
                     )
                     if requireUnclippedViewport {
                         XCTAssertTrue(
@@ -247,6 +280,7 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                         model: model,
                         contentSeed: contentSeed,
                         renderedResourceIDs: rendered.renderedResourceIDs,
+                        renderedResourceBindings: rendered.renderedResourceBindings,
                         viewportAssertions: rendered.viewportAssertions,
                         elementFrames: rendered.elementFrames,
                         safePreviewEvidence: try ThemeFidelitySafePreviewEvidence.make(
@@ -407,16 +441,36 @@ private struct ThemeFidelityRenderedPNG {
     let viewportAssertions: ThemeFidelityViewportAssertions
     let elementFrames: ThemeFidelityElementFrames
     let renderedResourceIDs: [String]
+    let renderedResourceBindings: [ThemeFidelityRenderedResourceBinding]
 
-    func recording(renderedResourceIDs: [String]) -> Self {
-        Self(
+    func recording(
+        renderedResourceBindings: [ThemeFidelityRenderedResourceBinding]
+    ) -> Self {
+        let bindings = Array(Set(renderedResourceBindings)).sorted()
+        return Self(
             data: data,
             width: width,
             height: height,
             viewportAssertions: viewportAssertions,
             elementFrames: elementFrames,
-            renderedResourceIDs: Array(Set(renderedResourceIDs)).sorted()
+            renderedResourceIDs: Array(Set(bindings.map(\.resourceID))).sorted(),
+            renderedResourceBindings: bindings
         )
+    }
+}
+
+private struct ThemeFidelityRenderedResourceBinding: Codable, Hashable, Comparable {
+    let codexID: String
+    let resourceID: String
+    let visualPlanRevision: UInt64
+
+    var description: String {
+        "\(codexID)/\(resourceID)@\(visualPlanRevision)"
+    }
+
+    static func < (lhs: Self, rhs: Self) -> Bool {
+        (lhs.codexID, lhs.resourceID, lhs.visualPlanRevision)
+            < (rhs.codexID, rhs.resourceID, rhs.visualPlanRevision)
     }
 }
 
@@ -836,6 +890,7 @@ private struct ThemeFidelityCaptureRecord: Encodable {
     let pngSHA256: String
     let byteCount: Int
     let renderedResourceIDs: [String]
+    let renderedResourceBindings: [ThemeFidelityRenderedResourceBinding]
     let viewportAssertions: ThemeFidelityViewportAssertions
     let elementFrames: ThemeFidelityElementFrames
     let safePreviewEvidence: ThemeFidelitySafePreviewEvidence?
@@ -845,6 +900,7 @@ private struct ThemeFidelityCaptureRecord: Encodable {
          surface: ThemeFidelitySurface, destination: ThemeFidelityDestination,
          model: ThemeFidelityRenderModel, contentSeed: ThemeFidelityContentSeed,
          renderedResourceIDs: [String],
+         renderedResourceBindings: [ThemeFidelityRenderedResourceBinding],
          viewportAssertions: ThemeFidelityViewportAssertions,
          elementFrames: ThemeFidelityElementFrames,
          safePreviewEvidence: ThemeFidelitySafePreviewEvidence?,
@@ -873,6 +929,7 @@ private struct ThemeFidelityCaptureRecord: Encodable {
         self.pngSHA256 = pngSHA256
         self.byteCount = byteCount
         self.renderedResourceIDs = Array(Set(renderedResourceIDs)).sorted()
+        self.renderedResourceBindings = Array(Set(renderedResourceBindings)).sorted()
         self.viewportAssertions = viewportAssertions
         self.elementFrames = elementFrames
         self.safePreviewEvidence = safePreviewEvidence
@@ -2048,7 +2105,8 @@ private final class ThemeFidelityPersistentRenderer {
                 pointFrames: probeStore.frames,
                 scale: destination.scale
             ),
-            renderedResourceIDs: []
+            renderedResourceIDs: [],
+            renderedResourceBindings: []
         )
         #elseif os(iOS)
         let bounds = CGRect(origin: .zero, size: destination.pointSize)
@@ -2113,7 +2171,8 @@ private final class ThemeFidelityPersistentRenderer {
                 pointFrames: probeStore.frames,
                 scale: destination.scale
             ),
-            renderedResourceIDs: []
+            renderedResourceIDs: [],
+            renderedResourceBindings: []
         )
         #endif
     }
