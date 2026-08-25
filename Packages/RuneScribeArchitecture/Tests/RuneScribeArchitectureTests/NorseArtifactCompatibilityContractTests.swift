@@ -1,0 +1,319 @@
+import RuneScribeContracts
+import XCTest
+
+final class NorseArtifactCompatibilityContractTests: XCTestCase {
+    private typealias Artifacts = NorseArtifactCompatibilityAuthority
+    private typealias Rewards = NorseProgressionRewardAuthority
+
+    func testLegacyAliasInventoryExactlyMatchesTheApprovedTransition() {
+        XCTAssertEqual(rawMap(Artifacts.relicAliases), [
+            "relic.norse.runestone.weathered": "relic.norse.runestone-tablet",
+            "relic.norse.raven-medallion": "relic.norse.dragonwood-plaque",
+            "relic.norse.ironbound-shield": "relic.norse.stormforged-stele",
+            "relic.norse.sealed-parchment": "relic.norse.dragonwood-plaque",
+            "relic.norse.runestone.blackstone": "relic.norse.stormforged-stele",
+            "relic.norse.runestone.frozen": "relic.norse.runestone-tablet",
+        ])
+        XCTAssertEqual(rawMap(Artifacts.sealAliases), [
+            "seal.norse.knotwork": "seal.norse.valknut",
+            "seal.norse.forge-flame": "seal.norse.ravenshield",
+            "seal.norse.raven": "seal.norse.ravenshield",
+            "seal.norse.longship": "seal.norse.wolkin",
+            "seal.norse.forge-hammer": "seal.norse.mjolnir",
+            "seal.norse.echo-rune": "seal.norse.yggdrasil",
+        ])
+        XCTAssertEqual(rawMap(Artifacts.frameAliases), [
+            "frame.norse.carved-knotwork": "frame.norse.carved-knotwork",
+        ])
+        XCTAssertEqual(rawMap(Artifacts.crestAliases), [
+            "crest.norse.forge-master": "crest.norse.raven-mastery",
+        ])
+    }
+
+    func testCurrentCatalogSelectableSetsAndDefaultsAreExact() {
+        XCTAssertEqual(Artifacts.legacyCatalogVersion, 1)
+        XCTAssertEqual(Artifacts.currentCatalogVersion, 2)
+        XCTAssertEqual(rawValues(Artifacts.currentRelicIDs), [
+            "relic.norse.runestone-tablet",
+            "relic.norse.dragonwood-plaque",
+            "relic.norse.stormforged-stele",
+        ])
+        XCTAssertEqual(rawValues(Artifacts.currentSealIDs), [
+            "seal.norse.valknut",
+            "seal.norse.ravenshield",
+            "seal.norse.mjolnir",
+            "seal.norse.wolkin",
+            "seal.norse.yggdrasil",
+            "seal.norse.berserk",
+        ])
+        XCTAssertEqual(rawValues(Artifacts.currentFrameIDs), [
+            "frame.norse.carved-knotwork",
+        ])
+        XCTAssertEqual(rawValues(Artifacts.currentCrestIDs), [
+            "crest.norse.raven-mastery",
+        ])
+
+        XCTAssertEqual(
+            Artifacts.currentSelectableRelicIDs,
+            Artifacts.currentRelicIDs
+        )
+        XCTAssertEqual(
+            Artifacts.currentSelectableSealIDs,
+            Artifacts.currentSealIDs
+        )
+        XCTAssertEqual(
+            Artifacts.currentSelectableFrameIDs,
+            Artifacts.currentFrameIDs
+        )
+        XCTAssertTrue(Artifacts.currentSelectableCrestIDs.isEmpty)
+
+        XCTAssertEqual(
+            Artifacts.defaultRelicID.rawValue,
+            "relic.norse.runestone-tablet"
+        )
+        XCTAssertEqual(Artifacts.defaultSealID.rawValue, "seal.norse.valknut")
+        XCTAssertNil(Artifacts.defaultFrameID)
+        XCTAssertNil(Artifacts.defaultCrestID)
+        XCTAssertEqual(
+            Artifacts.defaultArtifactID(for: .relic)?.rawValue,
+            "relic.norse.runestone-tablet"
+        )
+        XCTAssertEqual(
+            Artifacts.defaultArtifactID(for: .seal)?.rawValue,
+            "seal.norse.valknut"
+        )
+        XCTAssertNil(Artifacts.defaultArtifactID(for: .frame))
+        XCTAssertNil(Artifacts.defaultArtifactID(for: .crest))
+
+        XCTAssertTrue(Set(Artifacts.relicAliases.keys).isDisjoint(
+            with: Artifacts.currentSelectableRelicIDs
+        ))
+        XCTAssertTrue(Set(Artifacts.sealAliases.keys).isDisjoint(
+            with: Artifacts.currentSelectableSealIDs
+        ))
+        XCTAssertTrue(Set(Artifacts.crestAliases.keys).isDisjoint(
+            with: Artifacts.currentCrestIDs
+        ))
+        XCTAssertEqual(
+            Set(Artifacts.frameAliases.keys),
+            Artifacts.currentSelectableFrameIDs
+        )
+    }
+
+    func testLegacyAndCurrentIdentifiersCanonicalizeExactlyAndIdempotently() throws {
+        for (legacy, current) in Artifacts.relicAliases {
+            XCTAssertEqual(try Artifacts.canonicalRelicID(legacy), current)
+        }
+        for current in Artifacts.currentRelicIDs {
+            XCTAssertEqual(try Artifacts.canonicalRelicID(current), current)
+        }
+        for (legacy, current) in Artifacts.sealAliases {
+            XCTAssertEqual(try Artifacts.canonicalSealID(legacy), current)
+        }
+        for current in Artifacts.currentSealIDs {
+            XCTAssertEqual(try Artifacts.canonicalSealID(current), current)
+        }
+        for (legacy, current) in Artifacts.frameAliases {
+            XCTAssertEqual(try Artifacts.canonicalFrameID(legacy), current)
+        }
+        for current in Artifacts.currentFrameIDs {
+            XCTAssertEqual(try Artifacts.canonicalFrameID(current), current)
+        }
+        for (legacy, current) in Artifacts.crestAliases {
+            XCTAssertEqual(try Artifacts.canonicalCrestID(legacy), current)
+        }
+        for current in Artifacts.currentCrestIDs {
+            XCTAssertEqual(try Artifacts.canonicalCrestID(current), current)
+        }
+
+        for kind in NorseArtifactCompatibilityKind.allCases {
+            for identifier in Artifacts.currentArtifactIDs(for: kind) {
+                XCTAssertEqual(
+                    try Artifacts.canonicalArtifactID(identifier, as: kind),
+                    identifier
+                )
+            }
+        }
+    }
+
+    func testCanonicalizationPassesThroughNonNorseAndRejectsUnknownNorseOrWrongKind() throws {
+        let nonNorse: [(NorseArtifactCompatibilityKind, String)] = [
+            (.relic, "relic.moonleaf.tablet"),
+            (.seal, "seal.sunspire.golden-lark"),
+            (.frame, "frame.progression.collector"),
+            (.crest, "crest.moonleaf.moonbloom"),
+        ]
+        for (kind, rawValue) in nonNorse {
+            let identifier = try XCTUnwrap(ArtifactID(rawValue: rawValue))
+            XCTAssertEqual(
+                try Artifacts.canonicalArtifactID(identifier, as: kind),
+                identifier
+            )
+        }
+
+        let unknownNorse: [(NorseArtifactCompatibilityKind, String)] = [
+            (.relic, "relic.norse.unapproved-relic"),
+            (.seal, "seal.norse.unapproved-seal"),
+            (.frame, "frame.norse.unapproved-frame"),
+            (.crest, "crest.norse.unapproved-crest"),
+        ]
+        for (kind, rawValue) in unknownNorse {
+            let identifier = try XCTUnwrap(ArtifactID(rawValue: rawValue))
+            XCTAssertThrowsError(
+                try Artifacts.canonicalArtifactID(identifier, as: kind)
+            ) { error in
+                XCTAssertEqual(
+                    error as? NorseArtifactCompatibilityError,
+                    .unsupportedNorseIdentifier(kind: kind, identifier: rawValue)
+                )
+            }
+        }
+
+        let sealAsRelic = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.valknut"))
+        XCTAssertThrowsError(
+            try Artifacts.canonicalArtifactID(sealAsRelic, as: .relic)
+        ) { error in
+            XCTAssertEqual(
+                error as? NorseArtifactCompatibilityError,
+                .kindMismatch(expected: .relic, identifier: sealAsRelic.rawValue)
+            )
+        }
+    }
+
+    func testProgressionSourceRewardAuthorityExactlyMatchesCurrentRows() {
+        let current = NorseArtifactCompatibilityAuthority.Current.self
+        let expectedIdentifiers: [
+            NorseProgressionRewardSource: NorseProgressionRewardSourceIdentifier
+        ] = [
+            .baseIncluded: .grantGroup(
+                GrantGroupID(rawValue: "grant-group.base.norse.included")!
+            ),
+            .firstInscription: .achievement(
+                AchievementID(rawValue: "achievement.first-inscription")!
+            ),
+            .firstDispatch: .achievement(
+                AchievementID(rawValue: "achievement.first-dispatch")!
+            ),
+            .correspondent: .achievement(
+                AchievementID(rawValue: "achievement.correspondent")!
+            ),
+            .courierI: .achievement(AchievementID(rawValue: "achievement.courier-1")!),
+            .courierII: .achievement(AchievementID(rawValue: "achievement.courier-2")!),
+            .archivistI: .achievement(
+                AchievementID(rawValue: "achievement.archivist-1")!
+            ),
+            .archivistII: .achievement(
+                AchievementID(rawValue: "achievement.archivist-2")!
+            ),
+            .norseEcho: .rule(RuleID(rawValue: "rule.codex.norse.echo-five")!),
+            .norseMastery: .rule(RuleID(rawValue: "rule.codex.norse.mastery")!),
+        ]
+        let expectedRewards: [
+            NorseProgressionRewardSource: [ProgressionContentReference]
+        ] = [
+            .baseIncluded: [
+                artifact(current.runestoneTablet.rawValue),
+                artifact(current.valknutSeal.rawValue),
+                artifact(current.ravenshieldSeal.rawValue),
+                artifact(Rewards.baseScriptID.rawValue),
+                .codex(RuneScribeCodexIDs.norse),
+            ],
+            .firstInscription: [artifact(current.mjolnirSeal.rawValue)],
+            .firstDispatch: [artifact(current.dragonwoodPlaque.rawValue)],
+            .correspondent: [artifact(current.wolkinSeal.rawValue)],
+            .courierI: [artifact(current.yggdrasilSeal.rawValue)],
+            .courierII: [artifact(current.stormforgedStele.rawValue)],
+            .archivistI: [artifact(current.carvedKnotworkFrame.rawValue)],
+            .archivistII: [
+                .title(Rewards.archivistTitleID),
+                artifact(current.berserkSeal.rawValue),
+            ],
+            .norseEcho: [artifact(current.yggdrasilSeal.rawValue)],
+            .norseMastery: [
+                .crest(current.ravenMasteryCrest),
+                .title(Rewards.masterOfRunesTitleID),
+            ],
+        ]
+
+        XCTAssertEqual(
+            Set(Rewards.routes.map(\.source)),
+            Set(NorseProgressionRewardSource.allCases)
+        )
+        XCTAssertEqual(Rewards.routes.count, NorseProgressionRewardSource.allCases.count)
+        for source in NorseProgressionRewardSource.allCases {
+            let route = Rewards.route(for: source)
+            XCTAssertEqual(source.identifier, expectedIdentifiers[source])
+            XCTAssertEqual(route.rewards, expectedRewards[source])
+            XCTAssertEqual(
+                route.role,
+                source == .norseEcho ? .idempotentSecondRoute : .primary
+            )
+        }
+
+        XCTAssertEqual(
+            Rewards.route(for: .courierI).rewards,
+            Rewards.route(for: .norseEcho).rewards
+        )
+        XCTAssertEqual(
+            Rewards.route(for: .archivistII).rewards.first,
+            .title(Rewards.archivistTitleID)
+        )
+    }
+
+    func testVisualAliasesRemainSeparateFromProgressionSourceRewards() throws {
+        XCTAssertEqual(
+            try Artifacts.canonicalSealID(Artifacts.Legacy.ravenSeal),
+            Artifacts.Current.ravenshieldSeal
+        )
+        XCTAssertEqual(
+            Rewards.route(for: .firstInscription).rewards,
+            [artifact(Artifacts.Current.mjolnirSeal.rawValue)]
+        )
+
+        XCTAssertEqual(
+            try Artifacts.canonicalSealID(Artifacts.Legacy.forgeHammerSeal),
+            Artifacts.Current.mjolnirSeal
+        )
+        XCTAssertEqual(
+            Rewards.route(for: .courierI).rewards,
+            [artifact(Artifacts.Current.yggdrasilSeal.rawValue)]
+        )
+
+        XCTAssertEqual(
+            try Artifacts.canonicalRelicID(Artifacts.Legacy.sealedParchment),
+            Artifacts.Current.dragonwoodPlaque
+        )
+        XCTAssertTrue(Rewards.route(for: .archivistII).rewards.contains(
+            artifact(Artifacts.Current.berserkSeal.rawValue)
+        ))
+
+        XCTAssertEqual(
+            try Artifacts.canonicalRelicID(Artifacts.Legacy.blackstoneRunestone),
+            Artifacts.Current.stormforgedStele
+        )
+        XCTAssertEqual(Rewards.route(for: .norseMastery).rewards, [
+            .crest(Artifacts.Current.ravenMasteryCrest),
+            .title(Rewards.masterOfRunesTitleID),
+        ])
+    }
+
+    private func rawMap<Domain>(
+        _ values: [
+            RoadmapStringIdentifier<Domain>: RoadmapStringIdentifier<Domain>
+        ]
+    ) -> [String: String] {
+        Dictionary(uniqueKeysWithValues: values.map {
+            ($0.key.rawValue, $0.value.rawValue)
+        })
+    }
+
+    private func rawValues<Domain>(
+        _ values: Set<RoadmapStringIdentifier<Domain>>
+    ) -> Set<String> {
+        Set(values.map(\.rawValue))
+    }
+
+    private func artifact(_ rawValue: String) -> ProgressionContentReference {
+        .artifact(ArtifactID(rawValue: rawValue)!)
+    }
+}
