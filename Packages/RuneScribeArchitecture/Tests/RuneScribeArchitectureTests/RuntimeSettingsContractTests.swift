@@ -6,7 +6,7 @@ final class RuntimeSettingsContractTests: XCTestCase {
     func testArtifactSelectionCurrentEncodingIsCanonicalSortedAndRoundTrips() throws {
         let norse = try selection(
             codex: "codex.norse",
-            artifact: "relic.norse.raven-medallion",
+            artifact: "relic.norse.dragonwood-plaque",
             kind: .relic
         )
         let moonleaf = try selection(
@@ -45,7 +45,7 @@ final class RuntimeSettingsContractTests: XCTestCase {
         XCTAssertEqual(decoded.encoding, .legacyUnversioned)
         XCTAssertEqual(
             decoded.value[try XCTUnwrap(CodexID(rawValue: "codex.norse"))]?.rawValue,
-            "relic.norse.raven-medallion"
+            "relic.norse.dragonwood-plaque"
         )
         XCTAssertThrowsError(
             try RuntimeArtifactSelectionCodec.decodeCurrentWrite(
@@ -60,6 +60,108 @@ final class RuntimeSettingsContractTests: XCTestCase {
             ),
             decoded.value
         )
+    }
+
+    func testArtifactSelectionCanonicalizesEveryLegacyNorseAliasAndRejectsStaleWrites()
+        throws
+    {
+        let aliases: [
+            (RuntimeArtifactSelectionKind, String, String)
+        ] = NorseArtifactCompatibilityAuthority.relicAliases.map {
+            (.relic, $0.key.rawValue, $0.value.rawValue)
+        } + NorseArtifactCompatibilityAuthority.sealAliases.map {
+            (.seal, $0.key.rawValue, $0.value.rawValue)
+        }
+        let codexID = try XCTUnwrap(CodexID(rawValue: "codex.norse"))
+
+        for (kind, legacy, current) in aliases {
+            let legacyText = try XCTUnwrap(RuntimeSettingText(
+                rawValue: "codex.norse=\(legacy)"
+            ))
+            let decoded = try RuntimeArtifactSelectionCodec.decodeForRead(
+                legacyText,
+                expectedKind: kind
+            )
+            XCTAssertEqual(decoded.value[codexID]?.rawValue, current, legacy)
+
+            let staleMap = try RuntimeCodexArtifactSelectionMap(
+                kind: kind,
+                selections: [try selection(
+                    codex: codexID.rawValue,
+                    artifact: legacy,
+                    kind: kind
+                )]
+            )
+            XCTAssertThrowsError(
+                try RuntimeArtifactSelectionCodec.encode(staleMap),
+                legacy
+            ) { error in
+                XCTAssertEqual(
+                    error as? RuntimeArtifactSelectionContractError,
+                    .invalidArtifactID
+                )
+            }
+        }
+
+        let frameID = NorseArtifactCompatibilityAuthority.Current
+            .carvedKnotworkFrame.rawValue
+        let frameText = try XCTUnwrap(RuntimeSettingText(
+            rawValue: "codex.norse=\(frameID)"
+        ))
+        let decodedFrame = try RuntimeArtifactSelectionCodec.decodeForRead(
+            frameText,
+            expectedKind: .frame
+        )
+        XCTAssertEqual(decodedFrame.value[codexID]?.rawValue, frameID)
+        XCTAssertNoThrow(try RuntimeArtifactSelectionCodec.encode(decodedFrame.value))
+    }
+
+    func testArtifactSelectionRejectsUnknownNorseButPreservesNonNorseAndNone() throws {
+        let unknownText = try XCTUnwrap(RuntimeSettingText(
+            rawValue: "codex.norse=seal.norse.future-seal"
+        ))
+        XCTAssertThrowsError(try RuntimeArtifactSelectionCodec.decodeForRead(
+            unknownText,
+            expectedKind: .seal
+        )) { error in
+            XCTAssertEqual(
+                error as? RuntimeArtifactSelectionContractError,
+                .invalidArtifactID
+            )
+        }
+
+        let unknownMap = try RuntimeCodexArtifactSelectionMap(
+            kind: .seal,
+            selections: [try selection(
+                codex: "codex.norse",
+                artifact: "seal.norse.future-seal",
+                kind: .seal
+            )]
+        )
+        XCTAssertThrowsError(try RuntimeArtifactSelectionCodec.encode(unknownMap))
+
+        let moonleaf = try RuntimeCodexArtifactSelectionMap(
+            kind: .relic,
+            selections: [try selection(
+                codex: "codex.moonleaf",
+                artifact: "relic.moonleaf.silver-leaf",
+                kind: .relic
+            )]
+        )
+        let moonleafEncoded = try RuntimeArtifactSelectionCodec.encode(moonleaf)
+        XCTAssertEqual(
+            try RuntimeArtifactSelectionCodec.decodeCurrentWrite(
+                moonleafEncoded,
+                expectedKind: .relic
+            ),
+            moonleaf
+        )
+
+        let none = try RuntimeCodexArtifactSelectionMap(kind: .frame).setting(
+            nil,
+            for: XCTUnwrap(CodexID(rawValue: "codex.norse"))
+        )
+        XCTAssertNoThrow(try RuntimeArtifactSelectionCodec.encode(none))
     }
 
     func testArtifactSelectionRejectsDuplicatesFutureMalformedAndWrongKinds() throws {
@@ -149,7 +251,7 @@ final class RuntimeSettingsContractTests: XCTestCase {
 
     func testArtifactSelectionV2PersistsExplicitOptionalNone() throws {
         let codexID = try XCTUnwrap(CodexID(rawValue: "codex.norse"))
-        let fallbackSeal = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.knotwork"))
+        let fallbackSeal = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.valknut"))
         let empty = try RuntimeCodexArtifactSelectionMap(kind: .seal)
         let explicitNone = try empty.setting(nil, for: codexID)
 

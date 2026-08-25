@@ -117,6 +117,14 @@ public enum RuntimeArtifactSelectionKind: String, Codable, CaseIterable, Sendabl
         guard let artifactID else { return permitsExplicitNone }
         return accepts(artifactID)
     }
+
+    fileprivate var norseCompatibilityKind: NorseArtifactCompatibilityKind {
+        switch self {
+        case .relic: .relic
+        case .seal: .seal
+        case .frame: .frame
+        }
+    }
 }
 
 public enum RuntimeArtifactSelectionContractError: Error, Equatable, Sendable {
@@ -280,6 +288,7 @@ public enum RuntimeArtifactSelectionCodec {
     public static func encode(
         _ value: RuntimeCodexArtifactSelectionMap
     ) throws -> RuntimeSettingText {
+        try validateCurrentNorseArtifacts(value)
         let encodedSelections: [[String: Any]] = value.selections.map { selection in
             var encoded: [String: Any] = ["codexID": selection.codexID.rawValue]
             encoded["artifactID"] = selection.artifactID?.rawValue ?? NSNull()
@@ -317,7 +326,7 @@ public enum RuntimeArtifactSelectionCodec {
         if text.rawValue.first == "{" {
             let decoded = try decodeVersionedValue(text, expectedKind: expectedKind)
             return RuntimeArtifactSelectionDecodeResult(
-                value: decoded.value,
+                value: try canonicalizedForRead(decoded.value),
                 encoding: decoded.schemaVersion
                     == RuntimeCodexArtifactSelectionMap.currentSchemaVersion
                     ? .current
@@ -325,7 +334,9 @@ public enum RuntimeArtifactSelectionCodec {
             )
         }
         return RuntimeArtifactSelectionDecodeResult(
-            value: try decodeLegacyValue(text.rawValue, expectedKind: expectedKind),
+            value: try canonicalizedForRead(
+                decodeLegacyValue(text.rawValue, expectedKind: expectedKind)
+            ),
             encoding: .legacyUnversioned
         )
     }
@@ -449,5 +460,50 @@ public enum RuntimeArtifactSelectionCodec {
             )
         }
         return try RuntimeCodexArtifactSelectionMap(kind: expectedKind, selections: selections)
+    }
+
+    private static func canonicalizedForRead(
+        _ value: RuntimeCodexArtifactSelectionMap
+    ) throws -> RuntimeCodexArtifactSelectionMap {
+        let selections = try value.selections.map { selection in
+            guard let artifactID = selection.artifactID else { return selection }
+            let canonical = try canonicalNorseArtifactID(
+                artifactID,
+                kind: value.kind
+            )
+            return try RuntimeCodexArtifactSelection(
+                codexID: selection.codexID,
+                artifactID: canonical,
+                kind: value.kind
+            )
+        }
+        return try RuntimeCodexArtifactSelectionMap(
+            kind: value.kind,
+            selections: selections
+        )
+    }
+
+    private static func validateCurrentNorseArtifacts(
+        _ value: RuntimeCodexArtifactSelectionMap
+    ) throws {
+        for selection in value.selections {
+            guard let artifactID = selection.artifactID else { continue }
+            guard try canonicalNorseArtifactID(artifactID, kind: value.kind) == artifactID
+            else { throw RuntimeArtifactSelectionContractError.invalidArtifactID }
+        }
+    }
+
+    private static func canonicalNorseArtifactID(
+        _ artifactID: ArtifactID,
+        kind: RuntimeArtifactSelectionKind
+    ) throws -> ArtifactID {
+        do {
+            return try NorseArtifactCompatibilityAuthority.canonicalArtifactID(
+                artifactID,
+                as: kind.norseCompatibilityKind
+            )
+        } catch {
+            throw RuntimeArtifactSelectionContractError.invalidArtifactID
+        }
     }
 }

@@ -297,6 +297,179 @@ final class NorseArtifactCompatibilityContractTests: XCTestCase {
         ])
     }
 
+    func testInboundNorseAliasesResolveCurrentInventoryAndPreserveRequestedSelection()
+        throws
+    {
+        let requested = try norseSelection(
+            relic: Artifacts.Legacy.weatheredRunestone.rawValue,
+            seal: Artifacts.Legacy.knotworkSeal.rawValue,
+            frame: Artifacts.Legacy.carvedKnotworkFrame.rawValue
+        )
+        let expected = try norseSelection(
+            relic: Artifacts.Current.runestoneTablet.rawValue,
+            seal: Artifacts.Current.valknutSeal.rawValue,
+            frame: Artifacts.Current.carvedKnotworkFrame.rawValue
+        )
+        let inventory = try currentNorseInventory()
+
+        XCTAssertEqual(
+            SharePresentationProviderCompatibilityResolver.resolve(
+                selection: requested,
+                resources: [],
+                providerAvailability: .available,
+                inventories: [inventory]
+            ),
+            .available
+        )
+        XCTAssertEqual(
+            SharePresentationProviderCompatibilityResolver.effectiveSelection(
+                for: requested
+            ),
+            expected
+        )
+
+        let presentation = try ReceivedSharePresentation(
+            requestedSelection: requested,
+            effectiveCodexID: RuneScribeCodexIDs.norse,
+            providerAvailability: .available,
+            renderMode: .requestedCodex,
+            safePreviewStatus: .absent,
+            provenanceStatus: .unavailable
+        )
+        XCTAssertEqual(presentation.requestedSelection, requested)
+        XCTAssertEqual(presentation.effectiveSelection, expected)
+
+        var legacyObject = try XCTUnwrap(
+            JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(presentation)
+            ) as? [String: Any]
+        )
+        legacyObject.removeValue(forKey: "effectiveSelection")
+        let legacyData = try JSONSerialization.data(withJSONObject: legacyObject)
+        let decodedLegacy = try JSONDecoder().decode(
+            ReceivedSharePresentation.self,
+            from: legacyData
+        )
+        XCTAssertEqual(decodedLegacy.requestedSelection, requested)
+        XCTAssertEqual(decodedLegacy.effectiveSelection, expected)
+
+        XCTAssertThrowsError(try ReceivedSharePresentation(
+            requestedSelection: requested,
+            effectiveSelection: requested,
+            effectiveCodexID: RuneScribeCodexIDs.norse,
+            providerAvailability: .available,
+            renderMode: .requestedCodex,
+            safePreviewStatus: .absent,
+            provenanceStatus: .unavailable
+        )) { error in
+            XCTAssertEqual(
+                error as? SharePresentationContractError,
+                .invalidObservation
+            )
+        }
+    }
+
+    func testInboundUnknownNorseIDsFailClosedAndAliasesDoNotBypassResourceIntegrity()
+        throws
+    {
+        let unknown = try norseSelection(
+            relic: "relic.norse.future-relic",
+            seal: Artifacts.Current.valknutSeal.rawValue
+        )
+        let inventory = try currentNorseInventory()
+        XCTAssertNil(
+            SharePresentationProviderCompatibilityResolver.effectiveSelection(
+                for: unknown
+            )
+        )
+        XCTAssertEqual(
+            SharePresentationProviderCompatibilityResolver.resolve(
+                selection: unknown,
+                resources: [],
+                providerAvailability: .available,
+                inventories: [inventory]
+            ),
+            .incompatible
+        )
+        XCTAssertThrowsError(try ReceivedSharePresentation(
+            requestedSelection: unknown,
+            effectiveCodexID: RuneScribeCodexIDs.norse,
+            providerAvailability: .available,
+            renderMode: .requestedCodex,
+            safePreviewStatus: .absent,
+            provenanceStatus: .unavailable
+        ))
+
+        let requested = try norseSelection(
+            relic: Artifacts.Legacy.weatheredRunestone.rawValue,
+            seal: Artifacts.Legacy.knotworkSeal.rawValue
+        )
+        let declaredResource = try resourceMetadata(digestCharacter: "b")
+        let installedResource = try resourceMetadata(digestCharacter: "a")
+        let resourceInventory = try currentNorseInventory(resources: [
+            SharePresentationProviderResourceInventory(metadata: installedResource),
+        ])
+        XCTAssertEqual(
+            SharePresentationProviderCompatibilityResolver.resolve(
+                selection: requested,
+                resources: [declaredResource],
+                providerAvailability: .available,
+                inventories: [resourceInventory]
+            ),
+            .corrupt
+        )
+        XCTAssertEqual(
+            SharePresentationProviderCompatibilityResolver.resolve(
+                selection: requested,
+                resources: [declaredResource],
+                providerAvailability: .available,
+                inventories: [inventory]
+            ),
+            .incompatible
+        )
+    }
+
+    func testOutboundShareContractRejectsLegacyAndUnknownNorseSelections() throws {
+        let current = try norseSelection(
+            relic: Artifacts.Current.runestoneTablet.rawValue,
+            seal: Artifacts.Current.valknutSeal.rawValue
+        )
+        XCTAssertNoThrow(try OutboundSharePresentationDTO(
+            metadata: shareMetadata(selection: current)
+        ))
+
+        for selection in [
+            try norseSelection(
+                relic: Artifacts.Legacy.weatheredRunestone.rawValue,
+                seal: Artifacts.Current.valknutSeal.rawValue
+            ),
+            try norseSelection(
+                relic: Artifacts.Current.runestoneTablet.rawValue,
+                seal: "seal.norse.future-seal"
+            ),
+        ] {
+            XCTAssertThrowsError(try OutboundSharePresentationDTO(
+                metadata: shareMetadata(selection: selection)
+            )) { error in
+                XCTAssertEqual(
+                    error as? SharePresentationContractError,
+                    .invalidArtifactIdentifier
+                )
+            }
+        }
+
+        let nonNorse = try SharePresentationSelection(
+            codexID: CodexID(rawValue: "codex.moonleaf")!,
+            scriptID: ScriptID(rawValue: "script.moonleaf")!,
+            relicID: ArtifactID(rawValue: "relic.moonleaf.silver-leaf")!,
+            sealID: ArtifactID(rawValue: "seal.moonleaf.firefly")!,
+            frameID: nil
+        )
+        XCTAssertNoThrow(try OutboundSharePresentationDTO(
+            metadata: shareMetadata(selection: nonNorse)
+        ))
+    }
+
     private func rawMap<Domain>(
         _ values: [
             RoadmapStringIdentifier<Domain>: RoadmapStringIdentifier<Domain>
@@ -315,5 +488,61 @@ final class NorseArtifactCompatibilityContractTests: XCTestCase {
 
     private func artifact(_ rawValue: String) -> ProgressionContentReference {
         .artifact(ArtifactID(rawValue: rawValue)!)
+    }
+
+    private func norseSelection(
+        relic: String,
+        seal: String? = nil,
+        frame: String? = nil
+    ) throws -> SharePresentationSelection {
+        try SharePresentationSelection(
+            codexID: RuneScribeCodexIDs.norse,
+            scriptID: Rewards.baseScriptID,
+            relicID: ArtifactID(rawValue: relic)!,
+            sealID: seal.map { ArtifactID(rawValue: $0)! },
+            frameID: frame.map { ArtifactID(rawValue: $0)! }
+        )
+    }
+
+    private func currentNorseInventory(
+        resources: [SharePresentationProviderResourceInventory] = []
+    ) throws -> SharePresentationProviderInventory {
+        try SharePresentationProviderInventory(
+            codexID: RuneScribeCodexIDs.norse,
+            scriptIDs: [Rewards.baseScriptID],
+            relicIDs: Artifacts.currentRelicIDs.map {
+                ArtifactID(rawValue: $0.rawValue)!
+            },
+            sealIDs: Artifacts.currentSealIDs.map {
+                ArtifactID(rawValue: $0.rawValue)!
+            },
+            frameIDs: Artifacts.currentFrameIDs.map {
+                ArtifactID(rawValue: $0.rawValue)!
+            },
+            resources: resources
+        )
+    }
+
+    private func shareMetadata(
+        selection: SharePresentationSelection
+    ) throws -> SharePresentationMetadata {
+        try SharePresentationMetadata(
+            selection: selection,
+            compatibility: .norseInteractiveFallback
+        )
+    }
+
+    private func resourceMetadata(
+        digestCharacter: Character
+    ) throws -> SharePresentationResourceMetadata {
+        try SharePresentationResourceMetadata(
+            resourceID: ThemeResourceID(rawValue: "resource.norse.share-background")!,
+            role: ThemeResourceRoles.backgroundStaticBase,
+            mediaType: .pdf,
+            byteLength: 512,
+            sha256: ThemeSHA256Digest(
+                rawValue: String(repeating: digestCharacter, count: 64)
+            )!
+        )
     }
 }

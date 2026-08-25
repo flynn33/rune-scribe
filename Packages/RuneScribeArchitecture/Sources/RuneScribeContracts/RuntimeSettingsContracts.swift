@@ -209,9 +209,12 @@ public enum RuneScribeRuntimeSettings {
         for kind: RuntimeArtifactSelectionKind
     ) -> RuntimeCodexArtifactSelectionMap {
         let artifactID: ArtifactID? = switch kind {
-        case .relic: ArtifactID(rawValue: "relic.norse.runestone.weathered")!
-        case .seal: ArtifactID(rawValue: "seal.norse.knotwork")!
-        case .frame: nil
+        case .relic:
+            NorseArtifactCompatibilityAuthority.defaultArtifactID(for: .relic)
+        case .seal:
+            NorseArtifactCompatibilityAuthority.defaultArtifactID(for: .seal)
+        case .frame:
+            NorseArtifactCompatibilityAuthority.defaultArtifactID(for: .frame)
         }
         let selection = try! RuntimeCodexArtifactSelection(
             codexID: RuneScribeCodexIDs.norse,
