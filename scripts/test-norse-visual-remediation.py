@@ -579,6 +579,26 @@ def copy_repository(source: Path, destination: Path) -> None:
     shutil.copytree(source, destination, symlinks=True, ignore=ignored)
 
 
+SOURCE_FINGERPRINT_IGNORED_DIRECTORIES = frozenset({
+    ".git",
+    ".build",
+    "build",
+    "DerivedData",
+    "__pycache__",
+})
+
+
+def source_fingerprint_includes(root: Path, path: Path) -> bool:
+    relative = path.relative_to(root)
+    if path.name == ".DS_Store":
+        return False
+    return not any(
+        part in SOURCE_FINGERPRINT_IGNORED_DIRECTORIES
+        or part.endswith(".xcresult")
+        for part in relative.parts
+    )
+
+
 def source_fingerprint(root: Path) -> str:
     digest = hashlib.sha256()
     roots = [
@@ -597,7 +617,11 @@ def source_fingerprint(root: Path) -> str:
         if candidate.is_file():
             files.append(candidate)
         elif candidate.is_dir():
-            files.extend(path for path in candidate.rglob("*") if path.is_file())
+            files.extend(
+                path
+                for path in candidate.rglob("*")
+                if path.is_file() and source_fingerprint_includes(root, path)
+            )
     for path in sorted(files, key=lambda item: item.relative_to(root).as_posix()):
         relative = path.relative_to(root).as_posix().encode("utf-8")
         digest.update(len(relative).to_bytes(4, "big"))
