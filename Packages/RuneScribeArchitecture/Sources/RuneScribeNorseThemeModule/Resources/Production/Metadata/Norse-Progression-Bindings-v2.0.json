@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "2.0",
+  "catalogContract": "Rune Scribe Progression catalog version 2",
+  "authorityRule": "Progression owns achievement, milestone, ownership, encounter, and grant truth. The Norse Theme declares current content identities and presentation cues only.",
+  "codex": {
+    "contentID": "codex.norse",
+    "entitlementID": "unlock.codex.norse",
+    "entitlementKind": "always",
+    "initialGrantPolicy": {
+      "newInstall": "Grant silently during first-run state creation.",
+      "existingUserMigration": "Grant silently and idempotently without replaying a Codex-unlocked cue.",
+      "revocable": false
+    }
+  },
+  "grants": [
+    {"contentID": "script.base-runes", "trigger": "grant.base.norse", "grantTiming": "with-base-codex", "revealPolicy": "none"},
+    {"contentID": "relic.norse.runestone-tablet", "trigger": "grant.base.norse", "grantTiming": "with-base-codex", "revealPolicy": "none"},
+    {"contentID": "seal.norse.valknut", "trigger": "grant.base.norse", "grantTiming": "with-base-codex", "revealPolicy": "none"},
+    {"contentID": "seal.norse.ravenshield", "trigger": "grant.base.norse", "grantTiming": "with-base-codex", "revealPolicy": "none"},
+    {"contentID": "seal.norse.mjolnir", "trigger": "achievement.first-inscription", "revealEffectID": "effect.norse.reveal-minor", "soundCueID": "sound.norse.unlock-minor"},
+    {"contentID": "relic.norse.dragonwood-plaque", "trigger": "achievement.first-dispatch", "revealEffectID": "effect.norse.reveal-relic", "soundCueID": "sound.norse.unlock-relic"},
+    {"contentID": "seal.norse.wolkin", "trigger": "achievement.correspondent", "revealEffectID": "effect.norse.reveal-minor", "soundCueID": "sound.norse.unlock-minor"},
+    {"contentID": "seal.norse.yggdrasil", "trigger": "achievement.courier-1", "revealEffectID": "effect.norse.reveal-minor", "soundCueID": "sound.norse.unlock-minor"},
+    {"contentID": "relic.norse.stormforged-stele", "trigger": "achievement.courier-2", "revealEffectID": "effect.norse.reveal-relic", "soundCueID": "sound.norse.unlock-relic"},
+    {"contentID": "frame.norse.carved-knotwork", "trigger": "achievement.archivist-1", "revealEffectID": "effect.norse.reveal-relic", "soundCueID": "sound.norse.unlock-relic"},
+    {"contentID": "title.archivist", "trigger": "achievement.archivist-2", "revealEffectID": "effect.norse.reveal-minor", "soundCueID": "sound.norse.unlock-minor", "retainedGlobalGrant": true},
+    {"contentID": "seal.norse.berserk", "trigger": "achievement.archivist-2", "revealEffectID": "effect.norse.reveal-minor", "soundCueID": "sound.norse.unlock-minor"},
+    {
+      "contentID": "seal.norse.yggdrasil",
+      "trigger": "rule.codex.norse.echo-five",
+      "ruleMeaning": "Decode five valid incoming messages whose authenticated presentation metadata names codex.norse.",
+      "routePolicy": "Idempotent second route. Do not duplicate ownership, reveal, sound, or haptic when Courier I already granted the Seal.",
+      "revealEffectID": "effect.norse.reveal-minor",
+      "soundCueID": "sound.norse.unlock-minor"
+    },
+    {"contentID": "crest.norse.raven-mastery", "trigger": "rule.codex.norse.mastery", "revealEffectID": "effect.norse.reveal-mastery", "soundCueID": "sound.norse.unlock-mastery"},
+    {"contentID": "title.norse.master-of-runes", "trigger": "rule.codex.norse.mastery", "grantTiming": "atomically-with-raven-mastery-crest", "revealEffectID": "effect.norse.reveal-mastery", "soundCueID": "sound.norse.unlock-mastery"}
+  ],
+  "reconciliation": {
+    "onGrant": "Forsetti refreshes the runtime-composed ownership and selectability snapshot without restart.",
+    "onMissingThemeResource": "Ownership remains; the item is marked unavailable and the Norse Base fallback preserves readability.",
+    "onDuplicateEvent": "No duplicate grant, reveal, sound, or haptic.",
+    "crossDevice": "A synchronized grant celebrated elsewhere appears as a quiet New badge rather than replaying the full reveal."
+  },
+  "migration": {
+    "sourceCatalogVersion": 1,
+    "targetCatalogVersion": 2,
+    "canonicalizationAuthority": "NorseArtifactCompatibilityAuthority",
+    "preserve": ["achievement completions", "content-use provenance", "grant history", "provider observations"],
+    "revealPolicy": "Legacy-to-current identity replacement is silent and idempotent."
+  }
+}

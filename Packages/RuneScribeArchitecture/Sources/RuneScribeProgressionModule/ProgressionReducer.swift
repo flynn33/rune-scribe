@@ -17,6 +17,11 @@ struct ProgressionValidatedEvent: Sendable {
     let envelopeDigest: String
 }
 
+enum ProgressionLegacyArtifactAliasValidationPolicy: Equatable {
+    case incomingOnly
+    case allEvents
+}
+
 enum ProgressionEventValidator {
     static let unknownEvent = rejection("progression.event-unknown")
     static let invalidSource = rejection("progression.event-source")
@@ -27,7 +32,9 @@ enum ProgressionEventValidator {
 
     static func validate(
         _ envelope: DomainEventEnvelope,
-        bundle: ValidatedProgressionCatalogBundle
+        bundle: ValidatedProgressionCatalogBundle,
+        legacyArtifactAliasPolicy: ProgressionLegacyArtifactAliasValidationPolicy =
+            .incomingOnly
     ) -> ProgressionEventValidationResult {
         guard envelope.schemaVersion == 1 else { return .unsupportedSchema }
         guard envelope.sourceModuleID == RuneScribeModuleIDs.core else {
@@ -47,7 +54,11 @@ enum ProgressionEventValidator {
             )
             try validatePayload(envelope.payload, definition: definition)
             try validateEligibility(envelope, bundle: bundle)
-            try validateCatalogIdentifiers(envelope.payload, catalog: bundle.catalog)
+            try validateCatalogIdentifiers(
+                envelope,
+                catalog: bundle.catalog,
+                legacyArtifactAliasPolicy: legacyArtifactAliasPolicy
+            )
             let semanticMaterial = try semanticMaterial(
                 eventType: envelope.eventType,
                 definition: definition,
@@ -110,18 +121,64 @@ enum ProgressionEventValidator {
         }
     }
 
+    static func canonicalizingLegacyArtifactAliases(
+        in event: ProgressionValidatedEvent,
+        bundle: ValidatedProgressionCatalogBundle
+    ) throws -> ProgressionValidatedEvent {
+        let containsLegacyArtifact = event.envelope.payload.artifactIDs.contains {
+            guard let contentID = ProgressionContentID(rawValue: $0.rawValue) else {
+                return true
+            }
+            return bundle.catalog.content(id: contentID)?.countsAsArtifact != true
+        }
+        guard containsLegacyArtifact else { return event }
+        let canonicalArtifactIDs = try ProgressionNorseV2Migration.canonicalArtifactIDs(
+            event.envelope.payload.artifactIDs,
+            catalog: bundle.catalog
+        )
+        let original = event.envelope
+        let envelope = try original.replacingArtifactIDs(canonicalArtifactIDs)
+        let semanticMaterial = try semanticMaterial(
+            eventType: envelope.eventType,
+            definition: event.definition,
+            payload: envelope.payload
+        )
+        return ProgressionValidatedEvent(
+            envelope: envelope,
+            definition: event.definition,
+            semanticMaterial: semanticMaterial,
+            semanticDigest: ProgressionDeterminism.digest128(semanticMaterial),
+            envelopeDigest: try ProgressionDeterminism.encodedDigest(envelope)
+        )
+    }
+
     private static func validateCatalogIdentifiers(
-        _ payload: DomainEventPayload,
-        catalog: ProgressionCatalog
+        _ envelope: DomainEventEnvelope,
+        catalog: ProgressionCatalog,
+        legacyArtifactAliasPolicy: ProgressionLegacyArtifactAliasValidationPolicy
     ) throws {
-        for codexID in payload.codexIDs {
+        for codexID in envelope.payload.codexIDs {
             guard let contentID = ProgressionContentID(rawValue: codexID.rawValue),
                   catalog.content(id: contentID)?.kind == .codex
             else { throw ProgressionDomainError.unknownContent(codexID.rawValue) }
         }
-        for artifactID in payload.artifactIDs {
-            guard let contentID = ProgressionContentID(rawValue: artifactID.rawValue),
-                  catalog.content(id: contentID)?.countsAsArtifact == true
+
+        let permitsLegacyAliases = legacyArtifactAliasPolicy == .allEvents || [
+            "runescribe.message.imported",
+            "runescribe.message.decoded",
+            "runescribe.presentation.observed",
+        ].contains(envelope.eventType.rawValue)
+        for artifactID in envelope.payload.artifactIDs {
+            if let contentID = ProgressionContentID(rawValue: artifactID.rawValue),
+               catalog.content(id: contentID)?.countsAsArtifact == true
+            {
+                continue
+            }
+            guard permitsLegacyAliases,
+                  ProgressionNorseV2Migration.canonicalArtifactID(
+                artifactID,
+                catalog: catalog
+                  ) != nil
             else { throw ProgressionDomainError.unknownContent(artifactID.rawValue) }
         }
     }
@@ -776,15 +833,14 @@ enum ProgressionReducer {
         }
 
         for fact in external.encounters {
+            let artifactIDs = try ProgressionNorseV2Migration.canonicalArtifactIDs(
+                fact.artifactIDs,
+                catalog: bundle.catalog
+            )
             guard let codexContentID = ProgressionContentID(rawValue: fact.codexID.rawValue),
                   bundle.catalog.content(id: codexContentID)?.kind == .codex,
                   fact.encounterCount > 0,
-                  fact.firstEncounteredAt <= fact.lastEncounteredAt,
-                  fact.artifactIDs.allSatisfy({ artifactID in
-                      guard let contentID = ProgressionContentID(rawValue: artifactID.rawValue)
-                      else { return false }
-                      return bundle.catalog.content(id: contentID)?.countsAsArtifact == true
-                  })
+                  fact.firstEncounteredAt <= fact.lastEncounteredAt
             else { continue }
             let identity = "encounter|\(fact.codexID.rawValue)"
             if case let .encounter(existing)? = projection.records[identity] {
@@ -793,7 +849,7 @@ enum ProgressionReducer {
                         ($0.artifactID, $0)
                     }
                 )
-                for artifactID in fact.artifactIDs where observations[artifactID] == nil {
+                for artifactID in artifactIDs where observations[artifactID] == nil {
                     observations[artifactID] = EncounterRecord.ArtifactObservation(
                         artifactID: artifactID,
                         firstEncounteredAt: fact.firstEncounteredAt,
@@ -824,7 +880,7 @@ enum ProgressionReducer {
                 try projection.upsert(.encounter(EncounterRecord(
                     generation: generation,
                     codexID: fact.codexID,
-                    artifactIDs: fact.artifactIDs,
+                    artifactIDs: artifactIDs,
                     firstEncounteredAt: fact.firstEncounteredAt,
                     lastEncounteredAt: fact.lastEncounteredAt,
                     encounterCount: fact.encounterCount,
@@ -1178,8 +1234,11 @@ enum ProgressionReducer {
                             firstObservedAt: event.envelope.occurredAt
                         )
                     } else {
-                        guard let contentID = ProgressionContentID(rawValue: value),
-                              bundle.catalog.content(id: contentID) != nil
+                        guard let rawContentID = ProgressionContentID(rawValue: value),
+                              let contentID = ProgressionNorseV2Migration.canonicalContentID(
+                                rawContentID,
+                                catalog: bundle.catalog
+                              )
                         else { throw ProgressionDomainError.unknownContent(value) }
                         _ = try state.addCatalogContent(
                             statisticID: statisticID,
@@ -1207,8 +1266,11 @@ enum ProgressionReducer {
                                 firstObservedAt: event.envelope.occurredAt
                             )
                         } else {
-                            guard let contentID = ProgressionContentID(rawValue: value),
-                                  bundle.catalog.content(id: contentID) != nil
+                            guard let rawContentID = ProgressionContentID(rawValue: value),
+                                  let contentID = ProgressionNorseV2Migration.canonicalContentID(
+                                    rawContentID,
+                                    catalog: bundle.catalog
+                                  )
                             else { throw ProgressionDomainError.unknownContent(value) }
                             _ = try state.addCatalogContent(
                                 statisticID: statisticID,
@@ -1233,6 +1295,10 @@ enum ProgressionReducer {
             return
         }
         let generation = state.projection.metadata.activeGeneration
+        let artifactIDs = try ProgressionNorseV2Migration.canonicalArtifactIDs(
+            event.envelope.payload.artifactIDs,
+            catalog: bundle.catalog
+        )
         for codexID in event.envelope.payload.codexIDs.sorted() {
             guard let contentID = ProgressionContentID(rawValue: codexID.rawValue),
                   let content = bundle.catalog.content(id: contentID),
@@ -1244,7 +1310,7 @@ enum ProgressionReducer {
                     existing.artifactObservations.map { ($0.artifactID, $0) }
                 )
                 let eventProvenance = event.envelope.payload.provenanceStatus ?? .absent
-                for artifactID in event.envelope.payload.artifactIDs {
+                for artifactID in artifactIDs {
                     if var observation = observations[artifactID] {
                         let (artifactCount, artifactOverflow) = observation.encounterCount
                             .addingReportingOverflow(1)
@@ -1297,7 +1363,7 @@ enum ProgressionReducer {
                 try state.projection.upsert(.encounter(EncounterRecord(
                     generation: generation,
                     codexID: codexID,
-                    artifactIDs: event.envelope.payload.artifactIDs,
+                    artifactIDs: artifactIDs,
                     firstEncounteredAt: event.envelope.occurredAt,
                     lastEncounteredAt: event.envelope.occurredAt,
                     encounterCount: 1,
@@ -1661,7 +1727,9 @@ enum ProgressionReducer {
         catalog: ProgressionCatalog
     ) -> Bool {
         guard let filter = statistic.filter else { return true }
-        let contentID = ProgressionContentID(rawValue: value)
+        let contentID = ProgressionContentID(rawValue: value).flatMap {
+            ProgressionNorseV2Migration.canonicalContentID($0, catalog: catalog)
+        }
         switch filter {
         case "owned relic IDs only":
             return contentID.map {

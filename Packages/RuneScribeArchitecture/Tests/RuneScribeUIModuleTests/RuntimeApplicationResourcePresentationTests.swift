@@ -458,8 +458,61 @@ final class RuntimeApplicationResourcePresentationTests: XCTestCase {
             contentRevision: 12
         )
         XCTAssertNotNil(catalog.image)
-        XCTAssertEqual(cache.encodedEntryCount, 2)
-        XCTAssertEqual(cache.retainedEntryCount, 2)
+        XCTAssertEqual(cache.encodedEntryCount, 1)
+        XCTAssertEqual(cache.retainedEntryCount, 1)
+    }
+
+    func testIdenticalVerifiedContentAcrossRevisionsSharesBoundedCacheAndPreservesObservation() throws {
+        let fixture = try makeThemeImageContractFixture()
+        let cache = RuntimeThemeDecodedResourceCache(
+            maximumTotalEncodedImageByteCount: fixture.resolved.data.count
+        )
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: nil,
+            decodedResourceCache: cache
+        )
+        var observedIdentities: [RuntimeThemeRenderedResourceIdentity] = []
+        presentation.beginRenderedResourceObservation {
+            observedIdentities.append($0)
+        }
+
+        let first = try presentation.makeThemeImageReference(
+            resolvedResource: fixture.resolved,
+            expectedReference: fixture.reference,
+            expectedCodexID: fixture.codexID,
+            contentRevision: 71
+        )
+        let second = try presentation.makeThemeImageReference(
+            resolvedResource: fixture.resolved,
+            expectedReference: fixture.reference,
+            expectedCodexID: fixture.codexID,
+            contentRevision: 72
+        )
+
+        XCTAssertEqual(cache.encodedEntryCount, 1)
+        XCTAssertEqual(cache.retainedEntryCount, 1)
+        XCTAssertEqual(cache.totalEncodedByteCount, fixture.resolved.data.count)
+        XCTAssertNotNil(first.image)
+        XCTAssertNotNil(second.image)
+        XCTAssertEqual(cache.entryCount, 1)
+        XCTAssertEqual(cache.decodedImageCreationCount, 1)
+        XCTAssertEqual(
+            observedIdentities,
+            [
+                RuntimeThemeRenderedResourceIdentity(
+                    codexID: fixture.codexID,
+                    resourceID: fixture.reference.id,
+                    contentRevision: 71
+                ),
+                RuntimeThemeRenderedResourceIdentity(
+                    codexID: fixture.codexID,
+                    resourceID: fixture.reference.id,
+                    contentRevision: 72
+                ),
+            ]
+        )
+        presentation.endRenderedResourceObservation()
     }
 
     func testRenderedResourceObservationReportsSuccessfulImageAccessOnly() throws {
@@ -678,10 +731,10 @@ final class RuntimeApplicationResourcePresentationTests: XCTestCase {
             highContrast: references[1],
             rendererParametersData: validThemeBackgroundParameters
         )
-        XCTAssertEqual(cache.encodedEntryCount, 2)
+        XCTAssertEqual(cache.encodedEntryCount, 1)
 
         try presentation.commitThemeBackground(prepared)
-        XCTAssertEqual(cache.encodedEntryCount, 2)
+        XCTAssertEqual(cache.encodedEntryCount, 1)
         XCTAssertEqual(presentation.themeBackgroundRevision, 1)
     }
 

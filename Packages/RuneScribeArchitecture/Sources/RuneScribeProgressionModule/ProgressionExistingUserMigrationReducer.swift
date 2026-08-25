@@ -88,6 +88,12 @@ enum ProgressionExistingUserMigrationReducer {
                 bundle: bundle
             )
         }
+        let expectedRevealBundle = try record.revealBundle.map {
+            try ProgressionNorseV2Migration.canonicalRevealBundle(
+                $0,
+                catalog: bundle.catalog
+            )
+        }
         guard case let .existingUserMigration(replayed)? = output.projection.records[
             "existing-user-migration|1"
         ], replayed.snapshotSchemaVersion == record.snapshotSchemaVersion,
@@ -98,7 +104,7 @@ enum ProgressionExistingUserMigrationReducer {
             replayed.pageCount == record.pageCount,
             replayed.completedAt == record.completedAt,
             replayed.grantTransactionID == record.grantTransactionID,
-            replayed.revealBundle == record.revealBundle
+            replayed.revealBundle == expectedRevealBundle
         else {
             throw ProgressionDomainError.invalidRecord(
                 "existing-user-migration-replay-mismatch"

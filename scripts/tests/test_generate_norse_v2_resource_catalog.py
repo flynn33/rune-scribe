@@ -23,12 +23,12 @@ SPEC.loader.exec_module(GENERATOR)
 class NorseV2ResourceCatalogGeneratorTests(unittest.TestCase):
     def test_inventory_is_exact_unique_and_current(self) -> None:
         values = GENERATOR.resource_specs()
-        self.assertEqual(len(values), 71)
-        self.assertEqual(len({value.handle for value in values}), 71)
-        self.assertEqual(len({value.relative_path for value in values}), 71)
+        self.assertEqual(len(values), 70)
+        self.assertEqual(len({value.handle for value in values}), 70)
+        self.assertEqual(len({value.relative_path for value in values}), 70)
         self.assertEqual(
             len({(value.application_name, value.extension) for value in values}),
-            71,
+            70,
         )
         handles = {value.handle for value in values}
         self.assertIn("resource.relic.norse.runestone-tablet.master", handles)

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "contractID": "runescribe.progression.future-theme-binding",
-  "version": 1,
+  "version": 2,
   "status": "approved",
   "bindings": [
     {

@@ -24,9 +24,15 @@ enum ProgressionCatalogUpgradeCoordinator {
               migrations[0].catalogVersion == oldMetadata.catalogVersion
         else { throw ProgressionDomainError.invalidRecord("catalog-upgrade-migration") }
         let currentFingerprints = try ProgressionCatalogCompatibility.fingerprints(for: bundle)
-        try ProgressionCatalogCompatibility.validateAddOnlyUpgrade(
+        try ProgressionCatalogCompatibility.validateUpgrade(
             from: migrations[0].compatibilityFingerprints,
-            to: currentFingerprints
+            to: currentFingerprints,
+            fromVersion: oldMetadata.catalogVersion,
+            toVersion: catalog.catalogVersion
+        )
+        let migratesNorseV2 = ProgressionNorseV2Migration.applies(
+            from: oldMetadata.catalogVersion,
+            to: catalog.catalogVersion
         )
         let existingUserMigrations = storedState.projection.logicalRecords().compactMap {
             logical -> ExistingUserMigrationRecord? in
@@ -102,24 +108,62 @@ enum ProgressionCatalogUpgradeCoordinator {
             )
         }
         var queuedReveals: [RevealID: PendingRevealRecord] = [:]
+        var priorRevealSignatures = Set<String>()
+        if migratesNorseV2 {
+            let acknowledgements = try await repository
+                .structurallyValidatedAcknowledgementRecords(
+                    generation: oldMetadata.activeGeneration,
+                    bundle: bundle
+                )
+            for acknowledgement in acknowledgements {
+                let canonical = try ProgressionNorseV2Migration.canonicalReveal(
+                    acknowledgement.value,
+                    generation: newGeneration,
+                    catalog: catalog
+                )
+                priorRevealSignatures.insert(
+                    ProgressionNorseV2Migration.revealContentSignature(canonical)
+                )
+            }
+        }
+        var rebasedReveals: [PendingRevealRecord] = []
         for located in priorQueuedRevealRecords {
             let record = located.value
-            let rebased = PendingRevealRecord(
-                generation: newGeneration,
-                revealID: record.revealID,
-                transactionID: record.transactionID,
-                createdRevision: record.createdRevision,
-                createdAt: record.createdAt,
-                state: record.state,
-                presentedAt: record.presentedAt,
-                acknowledgedAt: record.acknowledgedAt,
-                tier: record.tier,
-                primaryContentID: record.primaryContentID,
-                secondaryContentIDs: record.secondaryContentIDs,
-                sourceAchievementIDs: record.sourceAchievementIDs,
-                sourceRuleIDs: record.sourceRuleIDs,
-                nextRevealID: record.nextRevealID
-            )
+            let rebased = if migratesNorseV2 {
+                try ProgressionNorseV2Migration.canonicalReveal(
+                    record,
+                    generation: newGeneration,
+                    catalog: catalog
+                )
+            } else {
+                PendingRevealRecord(
+                    generation: newGeneration,
+                    revealID: record.revealID,
+                    transactionID: record.transactionID,
+                    createdRevision: record.createdRevision,
+                    createdAt: record.createdAt,
+                    state: record.state,
+                    presentedAt: record.presentedAt,
+                    acknowledgedAt: record.acknowledgedAt,
+                    tier: record.tier,
+                    primaryContentID: record.primaryContentID,
+                    secondaryContentIDs: record.secondaryContentIDs,
+                    sourceAchievementIDs: record.sourceAchievementIDs,
+                    sourceRuleIDs: record.sourceRuleIDs,
+                    nextRevealID: record.nextRevealID
+                )
+            }
+            try rebased.validate()
+            if migratesNorseV2 {
+                let signature = ProgressionNorseV2Migration.revealContentSignature(rebased)
+                guard priorRevealSignatures.insert(signature).inserted else { continue }
+            }
+            rebasedReveals.append(rebased)
+        }
+        for index in rebasedReveals.indices {
+            var rebased = rebasedReveals[index]
+            rebased.nextRevealID = rebasedReveals.indices.contains(index + 1)
+                ? rebasedReveals[index + 1].revealID : nil
             try rebased.validate()
             queuedReveals[rebased.revealID] = rebased
         }
@@ -127,11 +171,16 @@ enum ProgressionCatalogUpgradeCoordinator {
             "reveal-queue-state"
         ] else { throw ProgressionDomainError.invalidRecord("reveal-queue-state-missing") }
         try priorQueueState.validate()
+        guard let pendingCount = UInt16(exactly: queuedReveals.count) else {
+            throw ProgressionDomainError.invalidRecord("catalog-upgrade-reveal-count")
+        }
+        let queueHead = rebasedReveals.first?.revealID
+        let queueTailID = rebasedReveals.last?.revealID
         try projection.upsert(.revealQueueState(ProgressionRevealQueueStateRecord(
             generation: newGeneration,
-            pendingCount: priorQueueState.pendingCount,
-            headRevealID: priorQueueState.headRevealID,
-            tailRevealID: priorQueueState.tailRevealID
+            pendingCount: pendingCount,
+            headRevealID: queueHead,
+            tailRevealID: queueTailID
         )))
         var replayState = ProgressionRepositoryState(
             projection: projection,
@@ -139,17 +188,33 @@ enum ProgressionCatalogUpgradeCoordinator {
             inactiveShards: [:],
             health: storedState.health
         )
-        var queueTail = priorQueueState.tailRevealID.flatMap { queuedReveals[$0] }
+        var queueTail = queueTailID.flatMap { queuedReveals[$0] }
         var cursor: ModuleStateScanCursor?
         var priorAppliedRevision: UInt64?
         var priorAppliedAt: Date? = existingUserMigration?.completedAt
-        let previouslyOwnedContentIDs = Set(
-            validatedStoredState.projection.logicalRecords().compactMap {
-                logical -> ProgressionContentID? in
-                guard case let .ownership(record) = logical else { return nil }
-                return record.contentID
-            }
-        )
+        let previouslyOwnedContentIDs: Set<ProgressionContentID>
+        if migratesNorseV2 {
+            previouslyOwnedContentIDs = try Set(
+                validatedStoredState.projection.logicalRecords().compactMap {
+                    logical -> ProgressionContentID? in
+                    guard case let .ownership(record) = logical else { return nil }
+                    return try ProgressionNorseV2Migration.mappedOwnership(
+                        record,
+                        oldProjection: validatedStoredState.projection,
+                        generation: newGeneration,
+                        catalog: catalog
+                    ).contentID
+                }
+            )
+        } else {
+            previouslyOwnedContentIDs = Set(
+                validatedStoredState.projection.logicalRecords().compactMap {
+                    logical -> ProgressionContentID? in
+                    guard case let .ownership(record) = logical else { return nil }
+                    return record.contentID
+                }
+            )
+        }
 
         try await repository.captureRecoveryEventCandidates(
             from: oldMetadata.activeGeneration,
@@ -181,10 +246,21 @@ enum ProgressionCatalogUpgradeCoordinator {
                         throw error
                     }
                 }
-                guard case let .accepted(event) = ProgressionEventValidator.validate(
-                    storedProcessed?.envelope ?? order.envelope,
-                    bundle: bundle
+                let sourceEnvelope = storedProcessed?.envelope ?? order.envelope
+                guard case let .accepted(sourceEvent) = ProgressionEventValidator.validate(
+                    sourceEnvelope,
+                    bundle: bundle,
+                    legacyArtifactAliasPolicy: migratesNorseV2 ? .allEvents : .incomingOnly
                 ) else { throw ProgressionDomainError.invalidRecord("catalog-upgrade-event") }
+                let event = if migratesNorseV2 {
+                    try ProgressionEventValidator.canonicalizingLegacyArtifactAliases(
+                        in: sourceEvent,
+                        bundle: bundle
+                    )
+                } else {
+                    sourceEvent
+                }
+                let canonicalizedHistoricalEnvelope = event.envelope != sourceEnvelope
                 let processed = ProcessedEventRecord(
                     envelope: event.envelope,
                     envelopeDigest: try ProgressionDeterminism.encodedDigest(event.envelope),
@@ -196,13 +272,17 @@ enum ProgressionCatalogUpgradeCoordinator {
                     appliedRevision: order.appliedRevision
                 )
                 if let storedProcessed, storedProcessed != processed {
-                    guard order.sourceCumulativeDigest != nil else {
+                    guard canonicalizedHistoricalEnvelope ||
+                            order.sourceCumulativeDigest != nil
+                    else {
                         throw ProgressionDomainError.invalidRecord("catalog-upgrade-event")
                     }
-                    try await repository.quarantineProcessedEvent(
-                        eventID: order.eventID,
-                        generation: oldMetadata.activeGeneration
-                    )
+                    if !canonicalizedHistoricalEnvelope {
+                        try await repository.quarantineProcessedEvent(
+                            eventID: order.eventID,
+                            generation: oldMetadata.activeGeneration
+                        )
+                    }
                 }
 
                 projection = replayState.projection
@@ -243,20 +323,22 @@ enum ProgressionCatalogUpgradeCoordinator {
                 )
                 if let sourceDigest = order.sourceCumulativeDigest {
                     if sourceDigest != reduced.projection.metadata.appliedEventDigest {
-                        guard order.hasProcessedSource else {
+                        guard canonicalizedHistoricalEnvelope || order.hasProcessedSource else {
                             throw ProgressionDomainError.invalidRecord(
                                 "catalog-upgrade-ledger-digest"
                             )
                         }
-                        try await repository.quarantineAppliedEventOrder(
-                            revision: order.appliedRevision,
-                            generation: oldMetadata.activeGeneration
-                        )
+                        if !canonicalizedHistoricalEnvelope {
+                            try await repository.quarantineAppliedEventOrder(
+                                revision: order.appliedRevision,
+                                generation: oldMetadata.activeGeneration
+                            )
+                        }
                     }
                 }
                 let rebuiltOrder = try ProgressionAppliedEventOrderRecord(
                     appliedRevision: order.appliedRevision,
-                    envelope: order.envelope,
+                    envelope: event.envelope,
                     cumulativeDigest: reduced.projection.metadata.appliedEventDigest!
                 )
                 try await repository.stageAppliedLedger(
@@ -302,10 +384,19 @@ enum ProgressionCatalogUpgradeCoordinator {
         } while cursor != nil
 
         projection = replayState.projection
+        if migratesNorseV2 {
+            try ProgressionNorseV2Migration.migrateProjectionFacts(
+                from: validatedStoredState.projection,
+                in: &projection,
+                catalog: catalog
+            )
+        }
         try await repository.preflightDerivedIndexesForCleanup(
             generation: oldMetadata.activeGeneration,
             replacementGeneration: newGeneration,
-            expectedQueuedRevealIDs: Set(queuedReveals.keys)
+            expectedQueuedRevealIDs: Set(
+                priorQueuedRevealRecords.map(\.value.revealID)
+            )
         )
         let preCopyHealth = try await repository.client.health()
         let copySummary = try await repository.copyGenerationScopedRecords(
@@ -342,7 +433,11 @@ enum ProgressionCatalogUpgradeCoordinator {
             to: projection,
             bundle: bundle
         )
-        try validateMonotonicState(from: validatedStoredState.projection, to: projection)
+        try validateMonotonicState(
+            from: validatedStoredState.projection,
+            to: projection,
+            catalog: catalog
+        )
         let (revision, overflow) = oldMetadata.revision.addingReportingOverflow(1)
         let (commandReceiptCount, commandOverflow) = projection.metadata.commandReceiptCount
             .addingReportingOverflow(1)
@@ -452,33 +547,141 @@ enum ProgressionCatalogUpgradeCoordinator {
 
     private static func validateMonotonicState(
         from old: ProgressionProjection,
-        to new: ProgressionProjection
+        to new: ProgressionProjection,
+        catalog: ProgressionCatalog
     ) throws {
+        let migratesNorseV2 = ProgressionNorseV2Migration.applies(
+            from: old.metadata.catalogVersion,
+            to: catalog.catalogVersion
+        )
+        var canonicalArtifactContentIDs = Set<ProgressionContentID>()
+        if migratesNorseV2 {
+            for prior in old.logicalRecords() {
+                guard case let .ownership(ownership) = prior else { continue }
+                let contentID = try ProgressionNorseV2Migration.mappedOwnership(
+                    ownership,
+                    oldProjection: old,
+                    generation: new.metadata.activeGeneration,
+                    catalog: catalog
+                ).contentID
+                guard catalog.content(id: contentID)?.countsAsArtifact == true else {
+                    continue
+                }
+                canonicalArtifactContentIDs.insert(contentID)
+            }
+        }
+        let canonicalArtifactCount = UInt64(canonicalArtifactContentIDs.count)
         for logical in old.logicalRecords() {
             switch logical {
             case let .statisticCounter(record):
+                if migratesNorseV2,
+                   case .statisticContentUse? = old.records[
+                    logical.identity.replacingOccurrences(
+                        of: "counter|",
+                        with: "content-use|"
+                    )
+                   ]
+                {
+                    continue
+                }
+                if migratesNorseV2,
+                   let definition = catalog.statistic(id: record.statisticID),
+                   definition.storage == .derived,
+                   definition.dimension == .contentID
+                {
+                    guard case let .statisticCounter(current)? = new.records[
+                        logical.identity
+                    ], current.value >= canonicalArtifactCount
+                    else {
+                        throw ProgressionDomainError.invalidRecord(
+                            "catalog-upgrade-revocation"
+                        )
+                    }
+                    continue
+                }
                 guard case let .statisticCounter(current)? = new.records[logical.identity],
                       current.value >= record.value
                 else { throw ProgressionDomainError.invalidRecord("catalog-upgrade-revocation") }
             case let .statisticContentUse(record):
+                let expected = if migratesNorseV2 {
+                    try ProgressionNorseV2Migration.canonicalContentUse(
+                        record,
+                        generation: new.metadata.activeGeneration,
+                        catalog: catalog
+                    )
+                } else {
+                    record
+                }
                 guard case let .statisticContentUse(current)? = new.records[logical.identity],
-                      Set(record.contentIDs).isSubset(of: Set(current.contentIDs))
+                      Set(expected.contentIDs).isSubset(of: Set(current.contentIDs))
                 else { throw ProgressionDomainError.invalidRecord("catalog-upgrade-revocation") }
             case let .achievementProgress(record):
+                if migratesNorseV2,
+                   let achievement = catalog.achievement(id: record.achievementID),
+                   let statistic = catalog.statistic(id: achievement.progress.statisticID),
+                   statistic.storage == .derived,
+                   statistic.dimension == .contentID
+                {
+                    guard case let .achievementProgress(current)? = new.records[
+                        logical.identity
+                    ], current.current >= min(canonicalArtifactCount, current.target)
+                    else {
+                        throw ProgressionDomainError.invalidRecord(
+                            "catalog-upgrade-revocation"
+                        )
+                    }
+                    continue
+                }
                 guard case let .achievementProgress(current)? = new.records[logical.identity],
                       current.current >= record.current
                 else { throw ProgressionDomainError.invalidRecord("catalog-upgrade-revocation") }
-            case .achievementCompletion, .milestoneCompletion, .grant, .entitlement:
+            case .achievementCompletion, .milestoneCompletion, .entitlement:
                 guard new.records[logical.identity] != nil else {
                     throw ProgressionDomainError.invalidRecord("catalog-upgrade-revocation")
                 }
+            case let .grant(record):
+                let identity = if migratesNorseV2 {
+                    ProgressionNorseV2Migration.mappedGrantIdentity(
+                        record,
+                        catalog: catalog
+                    )
+                } else {
+                    logical.identity
+                }
+                guard let identity, case let .grant(current)? = new.records[identity],
+                      current.grantGroupID == record.grantGroupID,
+                      current.source == record.source,
+                      current.transactionID == record.transactionID,
+                      current.grantedAt == record.grantedAt
+                else { throw ProgressionDomainError.invalidRecord("catalog-upgrade-revocation") }
             case let .ownership(record):
-                guard case let .ownership(current)? = new.records[logical.identity],
-                      Set(record.sourceGrantKeys).isSubset(of: Set(current.sourceGrantKeys))
+                let expected = if migratesNorseV2 {
+                    try ProgressionNorseV2Migration.mappedOwnership(
+                        record,
+                        oldProjection: old,
+                        generation: new.metadata.activeGeneration,
+                        catalog: catalog
+                    )
+                } else {
+                    record
+                }
+                guard case let .ownership(current)? = new.records[
+                    "ownership|\(expected.contentID.rawValue)"
+                ],
+                Set(expected.sourceGrantKeys).isSubset(of: Set(current.sourceGrantKeys))
                 else { throw ProgressionDomainError.invalidRecord("catalog-upgrade-revocation") }
             case let .encounter(record):
+                let expected = if migratesNorseV2 {
+                    try ProgressionNorseV2Migration.canonicalEncounter(
+                        record,
+                        generation: new.metadata.activeGeneration,
+                        catalog: catalog
+                    )
+                } else {
+                    record
+                }
                 guard case let .encounter(current)? = new.records[logical.identity],
-                      sameEncounter(record, current)
+                      sameEncounter(expected, current)
                 else { throw ProgressionDomainError.invalidRecord("catalog-upgrade-revocation") }
             case .titleSelection, .revealQueueState, .catalogMigration,
                  .existingUserMigration:

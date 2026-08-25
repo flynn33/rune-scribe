@@ -86,7 +86,15 @@ RECIPE_DEFINITIONS: dict[str, dict[str, Any]] = {
             "lanczos-resize",
             "fixed-high-contrast-transform",
         ],
-        "parameters": {"color": 0.9, "contrast": 1.35, "sharpness": 1.08},
+        "parameters": {
+            "color": 0.55,
+            "contrast": 1.48,
+            "sharpness": 1.1,
+            "innerFaceInsetRatios": [0.14, 0.18, 0.14, 0.17],
+            "innerFaceLuminanceScale": 0.09,
+            "innerFaceLuminanceCeiling": 24,
+            "innerFaceFeatherRatio": 0.008,
+        },
     },
     "alpha-pad-without-cropping-v1": {
         "operations": ["mode-normalization", "transparent-center-pad"],
@@ -360,9 +368,34 @@ def high_contrast_rgba(image: Image.Image) -> Image.Image:
     rgba = _normalized_rgba(image)
     alpha = rgba.getchannel("A")
     rgb = rgba.convert("RGB")
-    rgb = ImageEnhance.Color(rgb).enhance(0.9)
-    rgb = ImageEnhance.Contrast(rgb).enhance(1.35)
-    rgb = ImageEnhance.Sharpness(rgb).enhance(1.08)
+    rgb = ImageEnhance.Color(rgb).enhance(0.55)
+    rgb = ImageEnhance.Contrast(rgb).enhance(1.48)
+    rgb = ImageEnhance.Sharpness(rgb).enhance(1.1)
+
+    bounds = alpha.getbbox()
+    if bounds is not None:
+        left, top, right, bottom = bounds
+        width = right - left
+        height = bottom - top
+        face_bounds = (
+            left + round(width * 0.14),
+            top + round(height * 0.18),
+            right - round(width * 0.14),
+            bottom - round(height * 0.17),
+        )
+        if face_bounds[2] > face_bounds[0] and face_bounds[3] > face_bounds[1]:
+            mask = Image.new("L", rgba.size, 0)
+            radius = max(1, round(min(width, height) * 0.06))
+            ImageDraw.Draw(mask).rounded_rectangle(face_bounds, radius=radius, fill=255)
+            feather = max(1, round(min(width, height) * 0.008))
+            mask = mask.filter(ImageFilter.GaussianBlur(radius=feather))
+            mask = Image.composite(mask, Image.new("L", rgba.size, 0), alpha)
+
+            luminance = ImageOps.grayscale(rgb).point(
+                lambda value: min(24, round(value * 0.09))
+            )
+            dark_face = Image.merge("RGB", (luminance, luminance, luminance))
+            rgb = Image.composite(dark_face, rgb, mask)
     red, green, blue = rgb.split()
     return _despill_partial_alpha(Image.merge("RGBA", (red, green, blue, alpha)))
 

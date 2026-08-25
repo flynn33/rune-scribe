@@ -260,7 +260,7 @@ def theme_progression_coupling_errors(path, text)
       next unless line.match?(pattern)
       references << "#{path}:#{index + 1}: Theme source may not reference #{label}"
     end
-    binding_data = path.end_with?("/Resources/Production/Metadata/Norse-Progression-Bindings-v1.0.json") ||
+    binding_data = path.match?(%r{/Resources/Production/Metadata/Norse-Progression-Bindings-v(?:1|2)\.0\.json\z}) ||
       path.end_with?("/Resources/Production/Localization/norse-content.en.json")
     unless binding_data
       THEME_RULE_CATALOG_PATTERNS.each do |pattern, label|

@@ -783,6 +783,7 @@ struct VaultProgressView: View {
                 .foregroundColor(.runeGoldBright)
             LazyVGrid(columns: themeCatalogColumns, alignment: .leading, spacing: 12) {
                 ForEach(items) { item in
+                    let viewportID = VaultProgressInitialViewport.artifact(item.artifactID).id
                     ThemeArtifactTile(
                         item: ThemeArtifactBrowserItem(
                             id: item.artifactID,
@@ -803,7 +804,19 @@ struct VaultProgressView: View {
                     ) {
                         vaultArtifactArtwork(item)
                     }
-                    .id(VaultProgressInitialViewport.artifact(item.artifactID).id)
+                    .overlay {
+                        if initialScrollTarget == viewportID {
+                            RoundedRectangle(
+                                cornerRadius: RuneMetrics.corner,
+                                style: .continuous
+                            )
+                            .strokeBorder(Color.runeGoldBright, lineWidth: 2)
+                            .shadow(color: Color.runeGold.opacity(0.35), radius: 4)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
+                        }
+                    }
+                    .id(viewportID)
                 }
             }
             .scrollTargetLayout()
@@ -833,7 +846,7 @@ struct VaultProgressView: View {
                     identifierPrefix: "theme.vault",
                     action: {}
                 ) {
-                    vaultCodexArtwork(descriptor)
+                    vaultCodexArtwork(descriptor, unavailable: !isAvailable)
                 }
                 Label(
                     isAvailable ? "Provider available" : "Provider unavailable; safe presentation in use",
@@ -866,10 +879,17 @@ struct VaultProgressView: View {
         return [GridItem(.adaptive(minimum: 190, maximum: 280), spacing: 12, alignment: .top)]
     }
 
-    private func vaultCodexArtwork(_ descriptor: ThemeDescriptor) -> AnyView {
-        if let presentation = session.activeThemeVisualPresentation,
-           let image = presentation.imageReference(for: presentation.plan.codex.selected)?.image {
-            return AnyView(image.resizable().scaledToFill())
+    private func vaultCodexArtwork(
+        _ descriptor: ThemeDescriptor,
+        unavailable: Bool
+    ) -> AnyView {
+        if let presentation = session.activeThemeVisualPresentation {
+            let imagePlan = unavailable
+                ? presentation.plan.codex.unavailable
+                : presentation.plan.codex.selected
+            if let image = presentation.imageReference(for: imagePlan)?.image {
+                return AnyView(image.resizable().scaledToFill())
+            }
         }
         return AnyView(ThemeVisualPlaceholder(
             systemImage: "books.vertical",
@@ -991,7 +1011,7 @@ struct VaultProgressView: View {
 private struct VaultProgressFrameModifier: ViewModifier {
     func body(content: Content) -> some View {
         #if os(macOS)
-        content.frame(minWidth: 820, idealWidth: 900, minHeight: 680, idealHeight: 760)
+        content.frame(minWidth: 620, idealWidth: 900, minHeight: 680, idealHeight: 760)
         #else
         content.frame(maxWidth: .infinity, maxHeight: .infinity)
         #endif

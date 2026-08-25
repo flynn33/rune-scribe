@@ -409,7 +409,7 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
             },
         )
         self.assertIn(
-            "resource.relic.norse.runestone.weathered.art",
+            "resource.relic.norse.runestone-tablet.master",
             resource_ids[("Norse", "codex.norse")],
         )
         self.assertIn(
@@ -417,7 +417,7 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
             resource_ids[("Moonleaf", "codex.moonleaf")],
         )
         self.assertNotIn(
-            "resource.relic.norse.runestone.weathered.art",
+            "resource.relic.norse.runestone-tablet.master",
             resource_ids[("Moonleaf", "codex.moonleaf")],
         )
 
@@ -573,7 +573,7 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
             self.assertEqual(validate_capture_record(record, expected, png), [])
             record["renderedResourceIDs"] = [
                 "resource.background.moonleaf.moonlit-canopy.output.background-static-base",
-                "resource.relic.norse.runestone.weathered.art",
+                "resource.relic.norse.runestone-tablet.master",
             ]
             record["renderedResourceBindings"] = [
                 {
@@ -586,7 +586,7 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
                 },
                 {
                     "codexID": "codex.norse",
-                    "resourceID": "resource.relic.norse.runestone.weathered.art",
+                    "resourceID": "resource.relic.norse.runestone-tablet.master",
                     "visualPlanRevision": 1,
                 },
             ]
@@ -723,18 +723,18 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
                 "pngSHA256": digest,
                 "byteCount": png.stat().st_size,
                 "renderedResourceIDs": [
-                    "resource.background.norse.forge.static",
-                    "resource.relic.norse.runestone.weathered.art",
+                    "resource.background.norse.cold-sea-hall.standard",
+                    "resource.relic.norse.runestone-tablet.master",
                 ],
                 "renderedResourceBindings": [
                     {
                         "codexID": "codex.norse",
-                        "resourceID": "resource.background.norse.forge.static",
+                        "resourceID": "resource.background.norse.cold-sea-hall.standard",
                         "visualPlanRevision": 1,
                     },
                     {
                         "codexID": "codex.norse",
-                        "resourceID": "resource.relic.norse.runestone.weathered.art",
+                        "resourceID": "resource.relic.norse.runestone-tablet.master",
                         "visualPlanRevision": 1,
                     },
                 ],
@@ -772,7 +772,7 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
                     "byteCount": 100,
                     "sha256": "a" * 64,
                     "resourceIDs": [
-                        "resource.relic.norse.runestone.weathered.art"
+                        "resource.relic.norse.runestone-tablet.master"
                     ],
                     "decodedPreviewElementID": "received.safe-preview",
                     "failureCode": None,
@@ -794,7 +794,7 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
             ):
                 validate_capture_record(record, expected, png)
             record["safePreviewEvidence"]["resourceIDs"] = [
-                "resource.relic.norse.runestone.weathered.art"
+                "resource.relic.norse.runestone-tablet.master"
             ]
 
             record["elementFrames"]["frames"] = record["elementFrames"]["frames"][1:]

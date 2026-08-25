@@ -33,41 +33,112 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         XCTAssertEqual(
             descriptor.codex.relics.map { $0.metadata.id.rawValue },
             [
-                "relic.norse.runestone.weathered",
-                "relic.norse.raven-medallion",
-                "relic.norse.ironbound-shield",
-                "relic.norse.sealed-parchment",
-                "relic.norse.runestone.blackstone",
-                "relic.norse.runestone.frozen",
+                "relic.norse.runestone-tablet",
+                "relic.norse.dragonwood-plaque",
+                "relic.norse.stormforged-stele",
             ]
         )
         XCTAssertEqual(
             descriptor.codex.seals.map { $0.metadata.id.rawValue },
             [
-                "seal.norse.knotwork",
-                "seal.norse.forge-flame",
-                "seal.norse.raven",
-                "seal.norse.longship",
-                "seal.norse.forge-hammer",
-                "seal.norse.echo-rune",
+                "seal.norse.valknut",
+                "seal.norse.ravenshield",
+                "seal.norse.mjolnir",
+                "seal.norse.wolkin",
+                "seal.norse.yggdrasil",
+                "seal.norse.berserk",
             ]
         )
         XCTAssertEqual(descriptor.codex.frames.map { $0.metadata.id.rawValue }, [
             "frame.norse.carved-knotwork",
         ])
         XCTAssertEqual(descriptor.codex.crests.map { $0.metadata.id.rawValue }, [
-            "crest.norse.forge-master",
+            "crest.norse.raven-mastery",
         ])
         XCTAssertEqual(
-            descriptor.codex.relics.last?.metadata.availability,
-            .reservedInactive
+            descriptor.codex.relics.first?.metadata.availability,
+            .included
         )
         XCTAssertNil(descriptor.codex.background.optionalMotionResourceID)
-        XCTAssertEqual(descriptor.resources.count, 55)
+        XCTAssertNil(descriptor.codex.background.rendererParametersResourceID)
+        XCTAssertEqual(
+            descriptor.codex.background.macOSWideResourceID,
+            NorseBaseThemeResourceIDs.backgroundMacOSWide
+        )
+        XCTAssertEqual(descriptor.resources.count, 70)
         XCTAssertEqual(
             descriptor.resources.filter { $0.requirement == .optional }.map(\.id.rawValue),
-            ["resource.relic.norse.runestone.frozen.geometry"]
+            []
         )
+    }
+
+    func testDiscoveryDescriptorMatchesApprovedNorseV2CatalogNamesAndStates() throws {
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+
+        XCTAssertEqual(descriptor.id.rawValue, "theme.norse.base")
+        XCTAssertEqual(descriptor.codex.displayName.fallbackValue, "Norse Codex")
+        XCTAssertEqual(
+            descriptor.codex.background.id.rawValue,
+            "background.norse.cold-sea-hall"
+        )
+        XCTAssertEqual(
+            descriptor.codex.background.displayName.fallbackValue,
+            "Cold Sea and Ancient Hall"
+        )
+        XCTAssertEqual(
+            descriptor.codex.relics.map(\.metadata.displayName.fallbackValue),
+            ["Runestone Tablet", "Dragonwood Plaque", "Stormforged Stele"]
+        )
+        XCTAssertEqual(
+            descriptor.codex.relics.map(\.metadata.availability),
+            [.included, .earned, .earned]
+        )
+        XCTAssertEqual(descriptor.codex.relics.map(\.isDefault), [true, false, false])
+        XCTAssertEqual(
+            descriptor.codex.seals.map(\.metadata.displayName.fallbackValue),
+            [
+                "Valknut Seal",
+                "Ravenshield Seal",
+                "Mjolnir Seal",
+                "Wolkin Seal",
+                "Yggdrasil Seal",
+                "Berserk Seal",
+            ]
+        )
+        XCTAssertEqual(
+            descriptor.codex.seals.map(\.metadata.availability),
+            [.included, .included, .earned, .earned, .earned, .earned]
+        )
+        XCTAssertEqual(
+            descriptor.codex.frames.only?.metadata.displayName.fallbackValue,
+            "Norse Mastery Frame"
+        )
+        XCTAssertEqual(
+            descriptor.codex.crests.only?.metadata.displayName.fallbackValue,
+            "Raven Mastery Crest"
+        )
+
+        let currentArtifactIDs = Set(
+            descriptor.codex.relics.map(\.metadata.id.rawValue)
+                + descriptor.codex.seals.map(\.metadata.id.rawValue)
+                + descriptor.codex.frames.map(\.metadata.id.rawValue)
+                + descriptor.codex.crests.map(\.metadata.id.rawValue)
+        )
+        XCTAssertTrue(currentArtifactIDs.isDisjoint(with: [
+            "relic.norse.runestone.weathered",
+            "relic.norse.raven-medallion",
+            "relic.norse.ironbound-shield",
+            "relic.norse.sealed-parchment",
+            "relic.norse.runestone.blackstone",
+            "relic.norse.runestone.frozen",
+            "seal.norse.knotwork",
+            "seal.norse.forge-flame",
+            "seal.norse.raven",
+            "seal.norse.longship",
+            "seal.norse.forge-hammer",
+            "seal.norse.echo-rune",
+            "crest.norse.forge-master",
+        ]))
     }
 
     func testDiscoveryDescriptorUsesExactSemanticResourceBindings() throws {
@@ -90,13 +161,19 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         )
         assertResource(
             descriptor.codex.background.reduceMotionResourceID,
-            role: ThemeResourceRoles.backgroundStaticBase,
+            role: ThemeResourceRoles.backgroundReduceMotion,
             media: .png,
             in: resources
         )
         assertResource(
             descriptor.codex.background.highContrastResourceID,
             role: ThemeResourceRoles.backgroundHighContrast,
+            media: .png,
+            in: resources
+        )
+        assertResource(
+            descriptor.codex.background.macOSWideResourceID,
+            role: ThemeResourceRoles.backgroundMacOSWideCrop,
             media: .png,
             in: resources
         )
@@ -114,20 +191,26 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         )
         assertResource(
             descriptor.codex.vault.encounteredResourceID,
-            role: ThemeResourceRoles.vaultCard,
+            role: ThemeResourceRoles.vaultEncountered,
             media: .png,
             in: resources
         )
         assertResource(
             descriptor.codex.vault.selectedResourceID,
-            role: ThemeResourceRoles.vaultCard,
+            role: ThemeResourceRoles.vaultSelected,
+            media: .png,
+            in: resources
+        )
+        assertResource(
+            descriptor.codex.vault.unavailableResourceID,
+            role: ThemeResourceRoles.vaultUnavailable,
             media: .png,
             in: resources
         )
         for relic in descriptor.codex.relics {
             assertResource(relic.primaryResourceID, role: ThemeResourceRoles.relicMaster, media: .png, in: resources)
-            XCTAssertEqual(relic.thumbnailResourceID, relic.primaryResourceID)
-            assertResource(relic.thumbnailResourceID, role: ThemeResourceRoles.relicMaster, media: .png, in: resources)
+            XCTAssertNotEqual(relic.thumbnailResourceID, relic.primaryResourceID)
+            assertResource(relic.thumbnailResourceID, role: ThemeResourceRoles.relicThumbnail, media: .png, in: resources)
             assertResource(
                 relic.staticFallbackResourceID,
                 role: ThemeResourceRoles.relicStaticShareFallback,
@@ -136,17 +219,17 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             )
             assertResource(
                 relic.highContrastResourceID,
-                role: ThemeResourceRoles.relicStaticShareFallback,
+                role: ThemeResourceRoles.relicHighContrast,
                 media: .png,
                 in: resources
             )
         }
         for seal in descriptor.codex.seals {
             assertResource(seal.vectorResourceID, role: ThemeResourceRoles.sealVectorMaster, media: .pdf, in: resources)
-            XCTAssertEqual(seal.monochromeFallbackResourceID, seal.thumbnailResourceID)
+            XCTAssertNotEqual(seal.monochromeFallbackResourceID, seal.thumbnailResourceID)
             assertResource(
                 seal.monochromeFallbackResourceID,
-                role: ThemeResourceRoles.sealThumbnail,
+                role: ThemeResourceRoles.sealMonochromeFallback,
                 media: .png,
                 in: resources
             )
@@ -161,17 +244,10 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         )
         assertResource(
             NorseBaseThemeResourceIDs.scriptMapping,
-            role: ThemeResourceRoleID(rawValue: "script-mapping")!,
+            role: ThemeResourceRoleID(rawValue: "script.mapping")!,
             media: .json,
             in: resources
         )
-        assertResource(
-            NorseBaseThemeResourceIDs.backgroundParameters,
-            role: ThemeResourceRoleID(rawValue: "background.parameters")!,
-            media: .json,
-            in: resources
-        )
-
         let font = try XCTUnwrap(resources[NorseBaseThemeResourceIDs.font])
         XCTAssertEqual(
             font.integrity.sha256.rawValue,
@@ -197,7 +273,7 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             Set(manifest.runtimeRequirements.requiredResources),
             NorseBaseBundledResourceCatalog.all
         )
-        XCTAssertEqual(NorseApplicationResourceCatalog.resourcesByHandle.count, 55)
+        XCTAssertEqual(NorseApplicationResourceCatalog.resourcesByHandle.count, 70)
         XCTAssertEqual(
             Set(NorseApplicationResourceCatalog.resourcesByHandle.values),
             Set(NorseBaseThemeResourceCatalog.definitions.map(\.resource))
@@ -229,30 +305,30 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         let bundle = RuneScribeNorseThemeModuleBootstrap.resourceBundle
         let provenanceURL = try XCTUnwrap(
             bundle.url(
-                forResource: "Norse-Production-Asset-Provenance-v1.0",
+                forResource: "Norse-Production-Asset-Provenance-v2.0",
                 withExtension: "json"
             )
         )
         let data = try Data(contentsOf: provenanceURL)
-        XCTAssertEqual(data.count, 54_597)
+        XCTAssertEqual(data.count, 80_939)
         XCTAssertEqual(
             sha256Hex(data),
-            "105fb4f5f966e3071f1e75d2f2aa590279f30ed1368dfd613d7045575c6b9f8c"
+            "5efb78a1c309719717b2a9adbbc875f9fc5c7c37b5e1b84f574e7a1ff0835a64"
         )
 
         let root = try XCTUnwrap(
             JSONSerialization.jsonObject(with: data) as? [String: Any]
         )
-        XCTAssertEqual(root["releaseStatus"] as? String, "release-candidate")
-        XCTAssertEqual(root["resourceCount"] as? Int, 55)
-        let approval = try XCTUnwrap(
-            root["releaseCandidateBaselineApproval"] as? [String: Any]
+        XCTAssertEqual(root["schemaVersion"] as? String, "2.0")
+        XCTAssertEqual(root["resourceCount"] as? Int, 70)
+        let authority = try XCTUnwrap(
+            root["authority"] as? [String: Any]
         )
         XCTAssertEqual(
-            approval["status"] as? String,
-            "approved-as-release-candidate-baseline"
+            authority["scope"] as? String,
+            "Norse v2 local implementation and qualification only"
         )
-        XCTAssertEqual(approval["publicDistributionAuthorized"] as? Bool, false)
+        XCTAssertEqual(authority["publicDistributionAuthorized"] as? Bool, false)
         let rightsSources = try XCTUnwrap(root["rightsSources"] as? [[String: Any]])
         XCTAssertEqual(
             Set(rightsSources.compactMap { $0["statementReference"] as? String }),
@@ -262,13 +338,14 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             ]
         )
         let resources = try XCTUnwrap(root["resources"] as? [[String: Any]])
-        XCTAssertEqual(resources.count, 55)
+        XCTAssertEqual(resources.count, 70)
         XCTAssertEqual(
             Set(resources.compactMap { $0["resourceID"] as? String }),
             Set(NorseApplicationResourceCatalog.resourcesByHandle.keys)
         )
         XCTAssertTrue(resources.allSatisfy { resource in
-            resource["releaseStatus"] as? String == "release-candidate"
+            resource["qualificationStatus"] as? String == "local-qualification-candidate"
+                && resource["activeInCurrentCatalog"] as? Bool == true
                 && (resource["normalizedProductionPath"] as? String)?.isEmpty == false
                 && (resource["sha256"] as? String)?.count == 64
                 && (resource["byteCount"] as? Int ?? 0) > 0
@@ -371,18 +448,35 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         let report = try NorseBaseThemeResources.budgetReport(
             physicalPayloads: payloads
         )
-        XCTAssertEqual(report.uniquePhysicalBytes, 31_879_723)
-        XCTAssertEqual(report.staticImageBytes, 30_455_573)
+        XCTAssertEqual(report.uniquePhysicalBytes, 89_592_539)
+        XCTAssertEqual(report.staticImageBytes, 88_173_047)
         XCTAssertEqual(report.fontBytes, 55_800)
-        XCTAssertEqual(report.animationBytes, 3_277)
+        XCTAssertEqual(report.animationBytes, 3_279)
         XCTAssertEqual(report.soundBytes, 1_334_576)
-        XCTAssertEqual(report.largestResourceBytes, 2_568_492)
+        XCTAssertEqual(report.largestResourceBytes, 7_462_801)
+    }
+
+    func testBundledNorseV2ResourcesLoadAsOneValidatedRevision() async throws {
+        let bundledResources = try bundledResourceData()
+        let runtimeIO = RuntimeIOClient(
+            readVerifiedApplicationResource: { resource, _, _ in
+                guard let data = bundledResources[resource] else {
+                    throw RuntimeVerifiedApplicationResourceFailure.resourceUnavailable
+                }
+                return data
+            }
+        )
+
+        let validated = try await NorseBaseThemeResources.loadValidated(using: runtimeIO)
+
+        XCTAssertEqual(validated.descriptor.contentVersion, 2)
+        XCTAssertEqual(validated.resourcePayloads.count, 70)
     }
 
     func testProgressionBindingsUseOnlyLiveAchievementIdentifiers() throws {
         let bindingsURL = try XCTUnwrap(
             RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
-                forResource: "Norse-Progression-Bindings-v1.0",
+                forResource: "Norse-Progression-Bindings-v2.0",
                 withExtension: "json"
             )
         )
@@ -534,57 +628,24 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         }
     }
 
-    func testMissingOrCorruptOptionalResourceIsOmittedWithoutBaseFailure() async throws {
-        enum Scenario: CaseIterable { case missing, corrupt }
-
+    func testEveryNorseV2ResourceIsRequiredForTheCurrentCatalog() throws {
         let optionalDefinitions = NorseBaseThemeResourceCatalog.definitions.filter {
             $0.requirement == .optional
         }
-        XCTAssertEqual(optionalDefinitions.count, 1)
-        let optional = try XCTUnwrap(optionalDefinitions.first)
-        let bundledResources = try bundledResourceData()
-        let requiredIDs = Set(
-            RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor.resources
-                .filter { $0.requirement == .required }
-                .map(\.id)
+        XCTAssertTrue(optionalDefinitions.isEmpty)
+        XCTAssertEqual(NorseBaseThemeResourceCatalog.definitions.count, 70)
+        XCTAssertEqual(
+            Set(NorseBaseThemeResourceCatalog.definitions.map(\.id)),
+            Set(RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor.resources.map(\.id))
         )
-
-        for scenario in Scenario.allCases {
-            let runtimeIO = RuntimeIOClient(
-                readVerifiedApplicationResource: { resource, _, _ in
-                    if resource == optional.resource {
-                        switch scenario {
-                        case .missing:
-                            throw RuntimeVerifiedApplicationResourceFailure.resourceUnavailable
-                        case .corrupt:
-                            throw RuntimeVerifiedApplicationResourceFailure.integrityMismatch(
-                                actualSHA256: Data(
-                                    repeating: 0xC3,
-                                    count: SHA256.Digest.byteCount
-                                ),
-                                actualByteCount: optional.byteCount
-                            )
-                        }
-                    }
-                    guard let data = bundledResources[resource] else {
-                        throw RuntimeVerifiedApplicationResourceFailure.resourceUnavailable
-                    }
-                    return data
-                }
-            )
-
-            let validated = try await NorseBaseThemeResources.loadValidated(using: runtimeIO)
-            XCTAssertEqual(Set(validated.resourcePayloads.keys), requiredIDs)
-            XCTAssertNil(validated.resourcePayloads[optional.id])
-        }
     }
 
-    func testCancellationFromManifestOrOptionalResourceReadPropagates() async throws {
-        enum Scenario: CaseIterable, Equatable { case manifest, optionalResource }
+    func testCancellationFromManifestOrRequiredResourceReadPropagates() async throws {
+        enum Scenario: CaseIterable, Equatable { case manifest, requiredResource }
 
-        let optional = try XCTUnwrap(
+        let required = try XCTUnwrap(
             NorseBaseThemeResourceCatalog.definitions.first(where: {
-                $0.requirement == .optional
+                $0.requirement == .required
             })
         )
         let bundledResources = try bundledResourceData()
@@ -596,7 +657,7 @@ final class NorseBaseThemeModuleTests: XCTestCase {
                        resource == NorseBaseBundledResourceCatalog.integrityManifest {
                         throw CancellationError()
                     }
-                    if scenario == .optionalResource, resource == optional.resource {
+                    if scenario == .requiredResource, resource == required.resource {
                         throw CancellationError()
                     }
                     guard let data = bundledResources[resource] else {

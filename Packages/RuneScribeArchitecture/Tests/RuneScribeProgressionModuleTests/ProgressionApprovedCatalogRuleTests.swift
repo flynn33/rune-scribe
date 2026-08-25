@@ -157,7 +157,7 @@ func everyApprovedAchievementAndMilestoneRuleHasExactBoundaryBehavior() throws {
 }
 
 @Test
-func approvedPreownershipCollectorMasterAndFrozenSemanticsAreExplicit() throws {
+func approvedPreownershipCollectorMasterAndCurrentNorseSemanticsAreExplicit() throws {
     let catalog = try approvedCatalogBundle().catalog
     let incoming = try #require(catalog.milestones.first {
         $0.ruleID.rawValue == "rule.codex.moonleaf.incoming-five"
@@ -219,12 +219,24 @@ func approvedPreownershipCollectorMasterAndFrozenSemanticsAreExplicit() throws {
     #expect(masterThreshold == 10)
     #expect(excluding.map(\.rawValue) == ["achievement.master-scribe"])
 
-    let frozenID = "relic.norse.runestone.frozen"
-    let frozen = try #require(catalog.content.first { $0.contentID.rawValue == frozenID })
-    #expect(frozen.availability == .seasonalDeferred)
-    #expect(!catalog.grantGroups.flatMap(\.items).contains {
-        $0.contentID.rawValue == frozenID
+    let currentNorseContent = Set(catalog.content.compactMap { content -> String? in
+        let value = content.contentID.rawValue
+        return value.contains(".norse.") ? value : nil
     })
+    #expect(currentNorseContent == [
+        "crest.norse.raven-mastery",
+        "frame.norse.carved-knotwork",
+        "relic.norse.dragonwood-plaque",
+        "relic.norse.runestone-tablet",
+        "relic.norse.stormforged-stele",
+        "seal.norse.berserk",
+        "seal.norse.mjolnir",
+        "seal.norse.ravenshield",
+        "seal.norse.valknut",
+        "seal.norse.wolkin",
+        "seal.norse.yggdrasil",
+        "title.norse.master-of-runes",
+    ])
 }
 
 @Test
@@ -660,15 +672,15 @@ private let approvedMilestoneGrantMappings = [
 ]
 
 private let approvedGrantGroupDefinitions = """
-grant-group.base.norse.included|none|codex.norse|unlock.codex.norse,codex.norse,script.base-runes,relic.norse.runestone.weathered,seal.norse.knotwork,seal.norse.forge-flame
-grant-group.first-inscription|micro|seal.norse.raven|seal.norse.raven
-grant-group.first-dispatch|artifact|relic.norse.raven-medallion|relic.norse.raven-medallion
+grant-group.base.norse.included|none|codex.norse|unlock.codex.norse,codex.norse,script.base-runes,relic.norse.runestone-tablet,seal.norse.valknut,seal.norse.ravenshield
+grant-group.first-inscription|micro|seal.norse.mjolnir|seal.norse.mjolnir
+grant-group.first-dispatch|artifact|relic.norse.dragonwood-plaque|relic.norse.dragonwood-plaque
 grant-group.echo-returns|micro|title.listener|title.listener
-grant-group.correspondent|micro|seal.norse.longship|seal.norse.longship
-grant-group.courier-1|micro|seal.norse.forge-hammer|seal.norse.forge-hammer
-grant-group.courier-2|artifact|relic.norse.ironbound-shield|relic.norse.ironbound-shield
+grant-group.correspondent|micro|seal.norse.wolkin|seal.norse.wolkin
+grant-group.courier-1|micro|seal.norse.yggdrasil|seal.norse.yggdrasil
+grant-group.courier-2|artifact|relic.norse.stormforged-stele|relic.norse.stormforged-stele
 grant-group.archivist-1|artifact|frame.norse.carved-knotwork|frame.norse.carved-knotwork
-grant-group.archivist-2|artifact|title.archivist|title.archivist,relic.norse.sealed-parchment
+grant-group.archivist-2|artifact|title.archivist|title.archivist,seal.norse.berserk
 grant-group.relic-bearer|micro|seal.progression.relic-bearer|seal.progression.relic-bearer
 grant-group.seal-keeper|artifact|frame.progression.collector|frame.progression.collector
 grant-group.many-worlds|micro|title.wayfarer|title.wayfarer
@@ -703,8 +715,8 @@ grant-group.codex.gloamthorn.incoming-five|micro|seal.gloamthorn.veiled-serpent|
 grant-group.codex.gloamthorn.ten-shares|artifact|relic.gloamthorn.duskbriar-stele|relic.gloamthorn.duskbriar-stele,seal.gloamthorn.pact-crown
 grant-group.codex.gloamthorn.encounter|micro|seal.gloamthorn.echo-wisp|seal.gloamthorn.echo-wisp
 grant-group.codex.gloamthorn.mastery|mastery|crest.gloamthorn.gloam-sovereign|frame.gloamthorn.briar-court,crest.gloamthorn.gloam-sovereign
-grant-group.codex.norse.echo-five|micro|seal.norse.echo-rune|seal.norse.echo-rune
-grant-group.codex.norse.mastery|mastery|relic.norse.runestone.blackstone|relic.norse.runestone.blackstone,crest.norse.forge-master
+grant-group.codex.norse.echo-five|micro|seal.norse.yggdrasil|seal.norse.yggdrasil
+grant-group.codex.norse.mastery|mastery|crest.norse.raven-mastery|crest.norse.raven-mastery,title.norse.master-of-runes
 """.split(separator: "\n").map(String.init)
 
 private func approvedCatalogBundle() throws -> ValidatedProgressionCatalogBundle {

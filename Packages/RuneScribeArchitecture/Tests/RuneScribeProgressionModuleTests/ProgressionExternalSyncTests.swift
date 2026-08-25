@@ -39,11 +39,11 @@ func externalMergeUsesLocalRulesToCompleteAndGrantDurably() async throws {
         },
         grants: [RuntimeProgressionGrantFact(
             grantID: GrantTransactionID(rawValue: "transaction.remote.first-inscription")!,
-            contentID: "seal.norse.raven",
+            contentID: "seal.norse.mjolnir",
             firstGrantedAt: completedAt,
             provenanceMaterial: "achievement.first-inscription"
         )],
-        ownedContentIDs: initial.projection.ownedContentIDs + ["seal.norse.raven"]
+        ownedContentIDs: initial.projection.ownedContentIDs + ["seal.norse.mjolnir"]
     )
     let delivery = RuntimeProgressionExternalMergeDelivery(
         deliveryID: UUID(uuidString: "91000000-0000-0000-0000-000000000001")!,
@@ -63,7 +63,7 @@ func externalMergeUsesLocalRulesToCompleteAndGrantDurably() async throws {
     #expect(achievement.completedAt == completedAt)
     #expect(achievement.progress.isComplete)
     #expect(applied.snapshot.ownership.contains { value in
-        value.reference == .artifact(ArtifactID(rawValue: "seal.norse.raven")!)
+        value.reference == .artifact(ArtifactID(rawValue: "seal.norse.mjolnir")!)
             && value.state == .owned
     })
 
@@ -76,7 +76,7 @@ func externalMergeUsesLocalRulesToCompleteAndGrantDurably() async throws {
     #expect(persisted.achievements.first { $0.achievementID == achievementID }?.completedAt
         == completedAt)
     #expect(persisted.ownership.contains { value in
-        value.reference == .artifact(ArtifactID(rawValue: "seal.norse.raven")!)
+        value.reference == .artifact(ArtifactID(rawValue: "seal.norse.mjolnir")!)
             && value.state == .owned
     })
     await relaunched.shutdown()
@@ -93,11 +93,11 @@ func externalGrantClaimAloneCannotGrantOwnership() async throws {
         basedOn: initial.projection,
         grants: [RuntimeProgressionGrantFact(
             grantID: GrantTransactionID(rawValue: "transaction.remote.unvalidated")!,
-            contentID: "seal.norse.raven",
+            contentID: "seal.norse.mjolnir",
             firstGrantedAt: Date(timeIntervalSince1970: 2_000_000_050),
             provenanceMaterial: nil
         )],
-        ownedContentIDs: initial.projection.ownedContentIDs + ["seal.norse.raven"]
+        ownedContentIDs: initial.projection.ownedContentIDs + ["seal.norse.mjolnir"]
     )
     let delivery = RuntimeProgressionExternalMergeDelivery(
         deliveryID: UUID(uuidString: "91000000-0000-0000-0000-000000000002")!,
@@ -112,7 +112,7 @@ func externalGrantClaimAloneCannotGrantOwnership() async throws {
 
     let applied = try await service.applyExternalMerge(delivery)
     #expect(!applied.snapshot.ownership.contains { value in
-        value.reference == .artifact(ArtifactID(rawValue: "seal.norse.raven")!)
+        value.reference == .artifact(ArtifactID(rawValue: "seal.norse.mjolnir")!)
             && value.state == .owned
     })
     await service.shutdown()
@@ -626,11 +626,11 @@ func twoProgressionStoresConvergeThroughRuntimeApplyAcknowledgeAndResync() async
         $0.achievementID == achievementID
     }?.completedAt == earlierCompletion)
     #expect(firstState.snapshot.ownership.filter {
-        $0.reference == .artifact(ArtifactID(rawValue: "seal.norse.raven")!)
+        $0.reference == .artifact(ArtifactID(rawValue: "seal.norse.mjolnir")!)
             && $0.state == .owned
     }.count == 1)
     #expect(secondState.snapshot.ownership.filter {
-        $0.reference == .artifact(ArtifactID(rawValue: "seal.norse.raven")!)
+        $0.reference == .artifact(ArtifactID(rawValue: "seal.norse.mjolnir")!)
             && $0.state == .owned
     }.count == 1)
     #expect(await firstRuntime.coordinator.pendingCloudMergeDelivery() == nil)
@@ -644,7 +644,7 @@ func twoProgressionStoresConvergeThroughRuntimeApplyAcknowledgeAndResync() async
         firstCompletedAt: earlierCompletion
     )])
     let achievementGrants = replica.grants.filter {
-        $0.contentID.rawValue == "seal.norse.raven"
+        $0.contentID.rawValue == "seal.norse.mjolnir"
     }
     #expect(achievementGrants.count == 2)
     #expect(Set(achievementGrants.map(\.firstGrantedAt)) == [earlierCompletion])

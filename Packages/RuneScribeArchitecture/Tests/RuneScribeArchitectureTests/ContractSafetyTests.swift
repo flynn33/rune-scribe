@@ -423,6 +423,31 @@ final class ContractSafetyTests: XCTestCase {
             payload: payload
         )
 
+        let replacementArtifactID = try XCTUnwrap(
+            ArtifactID(rawValue: "artifact.base.second-mark")
+        )
+        let replacement = try envelope.replacingArtifactIDs([
+            replacementArtifactID,
+        ])
+        XCTAssertEqual(replacement.schemaVersion, envelope.schemaVersion)
+        XCTAssertEqual(replacement.eventID, envelope.eventID)
+        XCTAssertEqual(replacement.correlationID, envelope.correlationID)
+        XCTAssertEqual(replacement.eventType, envelope.eventType)
+        XCTAssertEqual(replacement.sourceModuleID, envelope.sourceModuleID)
+        XCTAssertEqual(replacement.occurredAt, envelope.occurredAt)
+        XCTAssertEqual(replacement.eligibility, envelope.eligibility)
+        XCTAssertEqual(replacement.payload.cipherToken, payload.cipherToken)
+        XCTAssertEqual(replacement.payload.codexIDs, payload.codexIDs)
+        XCTAssertEqual(replacement.payload.artifactIDs, [replacementArtifactID])
+        XCTAssertThrowsError(
+            try envelope.replacingArtifactIDs(
+                Array(
+                    repeating: replacementArtifactID,
+                    count: DomainEventPayload.maximumArtifactIDs + 1
+                )
+            )
+        )
+
         try assertCodableRoundTrip(envelope)
         let encoded = try JSONEncoder().encode(envelope)
         let encodedText = String(decoding: encoded, as: UTF8.self)

@@ -193,12 +193,16 @@ class NorseProductionAssetBuilderTests(unittest.TestCase):
         self.assertLess(box[3], padded.height)
 
     def test_high_contrast_relic_transform_preserves_alpha(self) -> None:
-        source = Image.new("RGBA", (5, 5), (60, 50, 40, 255))
+        source = Image.new("RGBA", (100, 80), (90, 72, 52, 255))
         source.putpixel((0, 0), (0, 0, 0, 0))
         source.putpixel((1, 1), (120, 90, 50, 128))
         transformed = BUILDER.high_contrast_rgba(source)
         self.assertEqual(transformed.getchannel("A").tobytes(), source.getchannel("A").tobytes())
         self.assertNotEqual(transformed.getpixel((2, 2))[:3], source.getpixel((2, 2))[:3])
+        self.assertLess(
+            sum(transformed.getpixel((50, 40))[:3]),
+            sum(transformed.getpixel((5, 5))[:3]) // 2,
+        )
         self.assertEqual(transformed.getpixel((0, 0)), (0, 0, 0, 0))
 
     def test_codex_card_states_are_exact_and_visually_distinct(self) -> None:

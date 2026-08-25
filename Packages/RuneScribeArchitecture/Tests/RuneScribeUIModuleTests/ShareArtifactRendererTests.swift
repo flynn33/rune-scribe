@@ -104,7 +104,7 @@ final class ShareArtifactRendererTests: XCTestCase {
         XCTAssertEqual(first.composition, interactive)
         XCTAssertEqual(
             interactive.sealResourceID,
-            includedSeal.monochromeFallbackResourceID
+            includedSeal.vectorResourceID
         )
 
         let canvas = ThemeArtifactCanvas(

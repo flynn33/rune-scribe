@@ -815,6 +815,9 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             codex.vault.encounteredResourceID,
             codex.vault.selectedResourceID,
         ]
+        if let unavailableResourceID = codex.vault.unavailableResourceID {
+            declaredPreviewResourceIDs.insert(unavailableResourceID)
+        }
         for relic in codex.relics
             where relic.metadata.availability != .reservedInactive
         {

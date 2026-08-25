@@ -15,6 +15,61 @@ import XCTest
 
 @MainActor
 final class RuneScribeUISessionTests: XCTestCase {
+    func testCodexCardPreviewRolesFollowProviderVisualState() {
+        func provider(
+            state: ThemeProviderState,
+            isOwned: Bool,
+            isSelected: Bool = false
+        ) -> ThemeProviderSummaryDTO {
+            ThemeProviderSummaryDTO(
+                codexID: RuneScribeCodexIDs.norse,
+                moduleID: RuneScribeModuleIDs.norseTheme,
+                displayName: "Norse",
+                state: state,
+                isOwned: isOwned,
+                isSelectable: state == .available && isOwned,
+                isSelected: isSelected
+            )
+        }
+
+        XCTAssertEqual(
+            RuneScribeUISession.codexCardPreviewRoleCandidates(
+                for: provider(state: .available, isOwned: true, isSelected: true)
+            ),
+            [ThemeResourceRoles.vaultSelected, ThemeResourceRoles.vaultCard]
+        )
+        XCTAssertEqual(
+            RuneScribeUISession.codexCardPreviewRoleCandidates(
+                for: provider(state: .available, isOwned: true)
+            ),
+            [ThemeResourceRoles.vaultCard]
+        )
+        XCTAssertEqual(
+            RuneScribeUISession.codexCardPreviewRoleCandidates(
+                for: provider(state: .available, isOwned: false)
+            ),
+            [ThemeResourceRoles.vaultLockedSilhouette]
+        )
+        XCTAssertEqual(
+            RuneScribeUISession.codexCardPreviewRoleCandidates(
+                for: provider(state: .locked, isOwned: false)
+            ),
+            [ThemeResourceRoles.vaultLockedSilhouette]
+        )
+        for state in [
+            ThemeProviderState.unavailable,
+            .incompatible,
+            .invalidResources,
+        ] {
+            XCTAssertEqual(
+                RuneScribeUISession.codexCardPreviewRoleCandidates(
+                    for: provider(state: state, isOwned: false)
+                ),
+                [ThemeResourceRoles.vaultUnavailable]
+            )
+        }
+    }
+
     func testRootPendingPresentationPrioritizesImportConfirmation() {
         XCTAssertEqual(
             RootPendingPresentationPolicy.selection(
@@ -896,6 +951,45 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertEqual(rootStore.state, .booting)
     }
 
+    func testInitialThemeVisualAdoptionEagerlyBindsScriptSpecimensAndCrestThumbnail()
+        async throws
+    {
+        let (session, runtime) = try await makeThemeVisualSession()
+        defer { Task { await runtime.stop() } }
+
+        try await session.prepareInitialTheme()
+
+        let presentation = try XCTUnwrap(session.activeThemeVisualPresentation)
+        let scriptPlans = presentation.plan.script.images
+        let crestThumbnail = try XCTUnwrap(presentation.plan.crests.first).thumbnail
+        XCTAssertEqual(Set(scriptPlans.map(\.id.rawValue)), [
+            "resource.script.norse.specimen.standard",
+            "resource.script.norse.specimen.high-contrast",
+            "resource.script.norse.specimen.static-fallback",
+        ])
+        XCTAssertEqual(
+            crestThumbnail.id.rawValue,
+            "resource.crest.norse.raven-mastery.thumbnail"
+        )
+
+        for imagePlan in scriptPlans + [crestThumbnail] {
+            let reference = try XCTUnwrap(
+                presentation.imageReference(for: imagePlan),
+                imagePlan.id.rawValue
+            )
+            XCTAssertEqual(reference.resourceID, imagePlan.id)
+            XCTAssertEqual(reference.codexID, presentation.plan.codexID)
+            XCTAssertEqual(reference.role, imagePlan.role)
+            XCTAssertEqual(reference.mediaType, imagePlan.mediaType)
+            XCTAssertEqual(reference.integrity.byteLength, imagePlan.byteLength)
+            XCTAssertEqual(reference.integrity.pixelSize, imagePlan.pixelSize)
+            XCTAssertEqual(reference.integrity.sha256, imagePlan.sha256)
+            XCTAssertEqual(reference.contentRevision, presentation.revision)
+        }
+
+        await runtime.stop()
+    }
+
     func testThemeVisualAdoptionIsAtomicAcrossArtifactAndProviderChanges() async throws {
         let capture = ThemeVisualSessionClientCapture()
         let quickShareArtifactID = ShareArtifactID(
@@ -996,14 +1090,14 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertEqual(session.themeSnapshot?.isEmergencyPresentation, false)
         XCTAssertEqual(
             session.selectedThemeRelicID?.rawValue,
-            "relic.norse.runestone.weathered"
+            "relic.norse.runestone-tablet"
         )
-        XCTAssertEqual(session.selectedThemeSealID?.rawValue, "seal.norse.knotwork")
+        XCTAssertEqual(session.selectedThemeSealID?.rawValue, "seal.norse.valknut")
         XCTAssertNil(session.selectedThemeFrameID)
 
         let initial = try XCTUnwrap(session.activeThemeVisualPresentation)
         XCTAssertEqual(initial.revision, initial.plan.revision)
-        XCTAssertEqual(initial.plan.relics.count, 5)
+        XCTAssertEqual(initial.plan.relics.count, 3)
         XCTAssertEqual(initial.plan.seals.count, 6)
         XCTAssertEqual(initial.plan.frames.count, 1)
         XCTAssertEqual(initial.plan.crests.count, 1)
@@ -1011,7 +1105,7 @@ final class RuneScribeUISessionTests: XCTestCase {
             $0.codexID == RuneScribeCodexIDs.norse
                 && $0.contentRevision == initial.revision
         })
-        for imagePlan in [
+        let eagerImagePlans = [
             initial.plan.codex.selected,
             initial.plan.backgroundStatic,
             initial.plan.backgroundReduceMotion,
@@ -1022,9 +1116,21 @@ final class RuneScribeUISessionTests: XCTestCase {
             try XCTUnwrap(initial.plan.selectedSeal).thumbnail,
             try XCTUnwrap(initial.plan.selectedSeal).standard,
             try XCTUnwrap(initial.plan.selectedSeal).highContrast,
-        ] {
+        ] + initial.plan.script.images + [
+            try XCTUnwrap(initial.plan.crests.first).thumbnail,
+        ]
+        for imagePlan in eagerImagePlans {
             XCTAssertNotNil(initial.imageReference(for: imagePlan), imagePlan.id.rawValue)
         }
+        XCTAssertEqual(Set(initial.plan.script.images.map(\.id.rawValue)), [
+            "resource.script.norse.specimen.standard",
+            "resource.script.norse.specimen.high-contrast",
+            "resource.script.norse.specimen.static-fallback",
+        ])
+        XCTAssertEqual(
+            initial.plan.crests.first?.thumbnail.id.rawValue,
+            "resource.crest.norse.raven-mastery.thumbnail"
+        )
 
         _ = try await session.makeOutboundSharePresentation(
             inscription: "ᚱᚢᚾᛖ",
@@ -1084,14 +1190,14 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertTrue(settingsReady)
         let preArtifactRevision = catalogLoaded.revision
         let coordinatorRevision = session.themeSnapshot?.revision
-        let forgeFlame = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.forge-flame"))
-        await session.selectThemeArtifact(forgeFlame, kind: .seal)
+        let ravenshield = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.ravenshield"))
+        await session.selectThemeArtifact(ravenshield, kind: .seal)
         let artifactAdopted = await eventually {
-            guard session.selectedThemeSealID == forgeFlame,
+            guard session.selectedThemeSealID == ravenshield,
                   let presentation = session.activeThemeVisualPresentation
             else { return false }
             return presentation.revision > preArtifactRevision
-                && presentation.plan.selectedSealID == forgeFlame
+                && presentation.plan.selectedSealID == ravenshield
                 && presentation.imageReferences.values.allSatisfy {
                     $0.contentRevision == presentation.revision
                         && $0.codexID == presentation.plan.codex.codexID
@@ -2551,7 +2657,10 @@ final class RuneScribeUISessionTests: XCTestCase {
         ]
 
         for (name, view, size) in views {
-            let pngData = try renderPNG(view, size: size)
+            let pngData = try renderPNG(
+                AnyView(view.environmentObject(session)),
+                size: size
+            )
             XCTAssertGreaterThan(pngData.count, 10_000, "\(name) did not render meaningful output")
             try writeParityArtifactIfRequested(pngData, name: name)
         }
@@ -2589,6 +2698,106 @@ final class RuneScribeUISessionTests: XCTestCase {
             productMetadata: productMetadata
         )
         return (session, harness.runtime)
+    }
+
+    private func makeThemeVisualSession() async throws -> (
+        session: RuneScribeUISession,
+        runtime: RuneScribeRuntime
+    ) {
+        let capture = ThemeVisualSessionClientCapture()
+        let quickShareArtifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "85A00000-0000-0000-0000-000000000002")!
+        )
+        let applicationService = ControllableApplicationService(
+            preparedMessageArtifact: ShareArtifactDTO(
+                id: quickShareArtifactID,
+                reference: .file(quickShareArtifactID),
+                displayName: "Initial Theme Visuals.runescribe",
+                contentType: RuneScribeWireFormat.contentType,
+                fileExtension: RuneScribeWireFormat.fileExtension,
+                lifetime: .singleUse,
+                requiresKeyDelivery: false
+            )
+        )
+        let runtime = RuneScribeRuntime(
+            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 39),
+            platform: .macOS
+        )
+        let norseFontURL = try XCTUnwrap(
+            RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
+                forResource: "NotoSansRunic-Regular",
+                withExtension: "ttf"
+            )
+        )
+        let gloamthornFontURL = try XCTUnwrap(
+            RuneScribeThemeGloamthornModuleBootstrap.resourceBundle.url(
+                forResource: "gloamthorn-script-primary",
+                withExtension: "ttf"
+            )
+        )
+
+        try await runtime.installPlatformAdapter(
+            ThemeVisualApplicationResources(),
+            for: RuneScribeServiceKeys.applicationResourceLocator
+        )
+        try await runtime.installPlatformAdapter(
+            InMemoryFontRegistrar(namesByData: [
+                try Data(contentsOf: norseFontURL): "NotoSansRunic-Regular",
+                try Data(contentsOf: gloamthornFontURL):
+                    "RavenForgeGloamthornScript-Regular",
+            ]),
+            for: RuneScribeServiceKeys.systemFontRegistrar
+        )
+        try await runtime.installPlatformAdapter(
+            InMemoryModuleStateStore(),
+            for: RuneScribeServiceKeys.moduleStateStore
+        )
+        try await runtime.installPlatformAdapter(
+            LifetimeClipboard(),
+            for: RuneScribeServiceKeys.clipboardWrite
+        )
+        try await runtime.installPlatformAdapter(
+            UnavailableInboundFileReader(),
+            for: RuneScribeServiceKeys.inboundFileReader
+        )
+        try await runtime.installPlatformAdapter(
+            SharePresentationProbe(),
+            for: RuneScribeServiceKeys.sharePresentation
+        )
+        try await runtime.register(
+            manifest: TestCoreModule.manifest,
+            factory: TestCoreModule.factory(applicationService: applicationService)
+        )
+        try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
+        try await RuneScribeThemeGloamthornModuleBootstrap.register(with: runtime)
+        try await runtime.register(
+            manifest: RuneScribeThemeCoordinatorModuleBootstrap.manifest(),
+            factory: RuneScribeThemeCoordinatorModuleBootstrap.factory()
+        )
+        try await runtime.register(
+            manifest: RuneScribeUIModuleBootstrap.manifest(),
+            factory: ThemeVisualSessionClientModule.factory(capture: capture)
+        )
+        try await runtime.start()
+
+        return (
+            RuneScribeUISession(
+                applicationClient: try await capture.requireApplicationClient(),
+                runtimeIO: try await capture.requireRuntimeIOClient(),
+                availabilityClient: try await capture.requireAvailabilityClient(),
+                themeCoordinatorClient: try await capture.requireThemeCoordinatorClient(),
+                runtimeSettingsClient: try await capture.requireRuntimeSettingsClient(),
+                resourcePresentation: RuntimeApplicationResourcePresentation(
+                    splashVideo: nil,
+                    metalLibrary: nil
+                ),
+                productMetadata: RuneScribeUIProductMetadata(
+                    version: "1.0.39",
+                    buildNumber: "39"
+                )
+            ),
+            runtime
+        )
     }
 
     private func makeApplicationClientHarness(

@@ -220,6 +220,14 @@ facts. New opaque seeds and pending evidence live inside the versioned encrypted
 ledger and do not alter shared payload bytes. If Progression or any optional provider
 is unavailable, Base/Norse presentation and all communication utility remain usable.
 
+The Norse catalog-v1 artifact identities are accepted only while upgrading an exact
+catalog-v1 state or admitting authenticated incoming import, decode, and presentation
+facts. New outgoing share facts and presentation metadata must use the current
+catalog-v2 identities. Unknown current or future identities fail closed. Migration
+canonicalizes content-use, grant, ownership, Encounter, and reveal records while
+preserving completion provenance and suppressing replacement reveals for rewards that
+were already earned.
+
 ## Catalog upgrade, quarantine, and recovery
 
 Catalog resources are strict-decoded, cross-referenced, cycle-checked, and hash-bound.
@@ -350,7 +358,7 @@ no GameKit calls are present.
 
 - `crest.gloamthorn.gloam-sovereign`
 - `crest.moonleaf.moonbloom`
-- `crest.norse.forge-master`
+- `crest.norse.raven-mastery`
 - `crest.sunspire.first-light`
 - `crest.wildwood.heartwood-crown`
 
@@ -372,12 +380,9 @@ no GameKit calls are present.
 - `relic.moonleaf.ivybound-plaque`
 - `relic.moonleaf.tablet`
 - `relic.moonleaf.whisperbark-stele`
-- `relic.norse.ironbound-shield`
-- `relic.norse.raven-medallion`
-- `relic.norse.runestone.blackstone`
-- `relic.norse.runestone.frozen`
-- `relic.norse.runestone.weathered`
-- `relic.norse.sealed-parchment`
+- `relic.norse.dragonwood-plaque`
+- `relic.norse.runestone-tablet`
+- `relic.norse.stormforged-stele`
 - `relic.progression.collector`
 - `relic.sunspire.auric-stele`
 - `relic.sunspire.dawnfire-tablet`
@@ -385,8 +390,6 @@ no GameKit calls are present.
 - `relic.wildwood.elderbark-stele`
 - `relic.wildwood.mossbound-plaque`
 - `relic.wildwood.rootsong-tablet`
-
-`relic.norse.runestone.frozen` is deferred and has no active rule.
 
 ### Seals
 
@@ -402,12 +405,12 @@ no GameKit calls are present.
 - `seal.moonleaf.night-owl`
 - `seal.moonleaf.starflower`
 - `seal.moonleaf.woodland-stag`
-- `seal.norse.echo-rune`
-- `seal.norse.forge-flame`
-- `seal.norse.forge-hammer`
-- `seal.norse.knotwork`
-- `seal.norse.longship`
-- `seal.norse.raven`
+- `seal.norse.berserk`
+- `seal.norse.mjolnir`
+- `seal.norse.ravenshield`
+- `seal.norse.valknut`
+- `seal.norse.wolkin`
+- `seal.norse.yggdrasil`
 - `seal.progression.echo`
 - `seal.progression.relic-bearer`
 - `seal.sunspire.dawnflower`
@@ -428,4 +431,22 @@ no GameKit calls are present.
 - `title.archivist`
 - `title.listener`
 - `title.master-scribe`
+- `title.norse.master-of-runes`
 - `title.wayfarer`
+
+### Norse catalog-v1 aliases
+
+The exact catalog-v1 migration aliases are:
+
+- `relic.norse.runestone.weathered` and `relic.norse.runestone.frozen` to
+  `relic.norse.runestone-tablet`
+- `relic.norse.raven-medallion` and `relic.norse.sealed-parchment` to
+  `relic.norse.dragonwood-plaque`
+- `relic.norse.ironbound-shield` and `relic.norse.runestone.blackstone` to
+  `relic.norse.stormforged-stele`
+- `seal.norse.knotwork` to `seal.norse.valknut`
+- `seal.norse.forge-flame` and `seal.norse.raven` to `seal.norse.ravenshield`
+- `seal.norse.longship` to `seal.norse.wolkin`
+- `seal.norse.forge-hammer` to `seal.norse.mjolnir`
+- `seal.norse.echo-rune` to `seal.norse.yggdrasil`
+- `crest.norse.forge-master` to `crest.norse.raven-mastery`

@@ -26,6 +26,7 @@ public enum RuntimeThemeBackgroundInstallationError: Error, Equatable, Sendable 
     case invalidStaticBaseData
     case invalidReduceMotionData
     case invalidHighContrastData
+    case invalidMacOSWideData
     case invalidBackgroundReference
     case preparedBackgroundOwnerMismatch
     case preparedBackgroundAlreadyCommitted
@@ -65,10 +66,7 @@ struct RuntimeThemeRenderedResourceIdentity: Equatable, Hashable, Sendable {
     let contentRevision: UInt64
 }
 
-private struct RuntimeThemeDecodedResourceKey: Hashable, Sendable {
-    let codexID: CodexID?
-    let resourceID: ThemeResourceID?
-    let contentRevision: UInt64?
+private struct RuntimeThemeDecodedContentKey: Hashable, Sendable {
     let sha256: ThemeSHA256Digest
 }
 
@@ -78,7 +76,8 @@ struct RuntimeThemeDecodedImageHandle: Sendable {
         case pdf
     }
 
-    fileprivate let key: RuntimeThemeDecodedResourceKey
+    fileprivate let key: RuntimeThemeDecodedContentKey
+    fileprivate let renderedResourceIdentity: RuntimeThemeRenderedResourceIdentity?
     fileprivate let kind: Kind
     let encodedByteCount: Int
     let pixelWidth: Int
@@ -112,9 +111,9 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
     private let encodedByteLimit: Int
     private let decodedByteLimit: Int
     private let entryLimit: Int
-    private var encodedEntries: [RuntimeThemeDecodedResourceKey: EncodedEntry] = [:]
-    private var decodedEntries: [RuntimeThemeDecodedResourceKey: DecodedEntry] = [:]
-    private var retainedKeyCounts: [RuntimeThemeDecodedResourceKey: Int] = [:]
+    private var encodedEntries: [RuntimeThemeDecodedContentKey: EncodedEntry] = [:]
+    private var decodedEntries: [RuntimeThemeDecodedContentKey: DecodedEntry] = [:]
+    private var retainedKeyCounts: [RuntimeThemeDecodedContentKey: Int] = [:]
     private var accessOrder: UInt64 = 0
     private var memoryPressureSource: (any DispatchSourceMemoryPressure)?
     private var renderedResourceObserver:
@@ -174,12 +173,8 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         )!
         return try prepareImage(
             data: data,
-            key: RuntimeThemeDecodedResourceKey(
-                codexID: nil,
-                resourceID: nil,
-                contentRevision: nil,
-                sha256: sha256
-            ),
+            key: RuntimeThemeDecodedContentKey(sha256: sha256),
+            renderedResourceIdentity: nil,
             expectedMediaType: nil
         )
     }
@@ -194,11 +189,11 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
     ) throws -> RuntimeThemeDecodedImageHandle {
         try prepareImage(
             data: data,
-            key: RuntimeThemeDecodedResourceKey(
+            key: RuntimeThemeDecodedContentKey(sha256: sha256),
+            renderedResourceIdentity: RuntimeThemeRenderedResourceIdentity(
                 codexID: codexID,
                 resourceID: resourceID,
-                contentRevision: contentRevision,
-                sha256: sha256
+                contentRevision: contentRevision
             ),
             expectedMediaType: expectedMediaType
         )
@@ -206,7 +201,8 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
 
     private func prepareImage(
         data: Data,
-        key: RuntimeThemeDecodedResourceKey,
+        key: RuntimeThemeDecodedContentKey,
+        renderedResourceIdentity: RuntimeThemeRenderedResourceIdentity?,
         expectedMediaType: ThemeResourceMediaType?
     ) throws -> RuntimeThemeDecodedImageHandle {
         guard !data.isEmpty else {
@@ -249,6 +245,7 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         )
         let handle = RuntimeThemeDecodedImageHandle(
             key: key,
+            renderedResourceIdentity: renderedResourceIdentity,
             kind: kind,
             encodedByteCount: data.count,
             pixelWidth: dimensions.width,
@@ -618,12 +615,12 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         }
     }
 
-    private func removeDecodedEntry(for key: RuntimeThemeDecodedResourceKey) {
+    private func removeDecodedEntry(for key: RuntimeThemeDecodedContentKey) {
         guard let removed = decodedEntries.removeValue(forKey: key) else { return }
         totalDecodedByteCount -= removed.decodedByteCount
     }
 
-    private func removeEncodedEntry(for key: RuntimeThemeDecodedResourceKey) {
+    private func removeEncodedEntry(for key: RuntimeThemeDecodedContentKey) {
         guard retainedKeyCounts[key] == nil,
               let removed = encodedEntries.removeValue(forKey: key)
         else { return }
@@ -640,17 +637,9 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         for handle: RuntimeThemeDecodedImageHandle
     ) {
         guard let renderedResourceObserver,
-              let codexID = handle.key.codexID,
-              let resourceID = handle.key.resourceID,
-              let contentRevision = handle.key.contentRevision
+              let renderedResourceIdentity = handle.renderedResourceIdentity
         else { return }
-        renderedResourceObserver(
-            RuntimeThemeRenderedResourceIdentity(
-                codexID: codexID,
-                resourceID: resourceID,
-                contentRevision: contentRevision
-            )
-        )
+        renderedResourceObserver(renderedResourceIdentity)
     }
 }
 
@@ -971,10 +960,12 @@ fileprivate struct RuntimeThemeBackgroundConfiguration {
     let staticBase: RuntimeThemeBackgroundImage
     let reduceMotion: RuntimeThemeBackgroundImage
     let highContrast: RuntimeThemeBackgroundImage
+    let macOSWide: RuntimeThemeBackgroundImage?
     let parameters: RuntimeThemeBackgroundParameters?
 
     var imageHandles: [RuntimeThemeDecodedImageHandle] {
         [staticBase.handle, reduceMotion.handle, highContrast.handle]
+            + (macOSWide.map { [$0.handle] } ?? [])
     }
 }
 
@@ -1275,12 +1266,14 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         staticBaseData: Data,
         reduceMotionData: Data,
         highContrastData: Data,
+        macOSWideData: Data? = nil,
         rendererParametersData: Data?
     ) throws {
         let prepared = try prepareThemeBackground(
             staticBaseData: staticBaseData,
             reduceMotionData: reduceMotionData,
             highContrastData: highContrastData,
+            macOSWideData: macOSWideData,
             rendererParametersData: rendererParametersData
         )
         try commitThemeBackground(prepared)
@@ -1290,6 +1283,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         staticBaseData: Data,
         reduceMotionData: Data,
         highContrastData: Data,
+        macOSWideData: Data? = nil,
         rendererParametersData: Data?
     ) throws -> RuntimePreparedThemeBackground {
         guard !isClosed else {
@@ -1318,6 +1312,17 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
             ])
             throw RuntimeThemeBackgroundInstallationError.invalidHighContrastData
         }
+        let macOSWide = macOSWideData.flatMap {
+            RuntimeThemeBackgroundImage(data: $0, cache: decodedResourceCache)
+        }
+        if macOSWideData != nil, macOSWide == nil {
+            decodedResourceCache.discardIfUnretained([
+                staticBase.handle,
+                reduceMotion.handle,
+                highContrast.handle,
+            ])
+            throw RuntimeThemeBackgroundInstallationError.invalidMacOSWideData
+        }
 
         let parameters = rendererParametersData.flatMap {
             try? RuntimeThemeBackgroundParameters.decode(from: $0)
@@ -1328,6 +1333,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
                 staticBase: staticBase,
                 reduceMotion: reduceMotion,
                 highContrast: highContrast,
+                macOSWide: macOSWide,
                 parameters: parameters
             ),
             cache: decodedResourceCache
@@ -1338,19 +1344,23 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         staticBase: RuntimeThemeImageReference,
         reduceMotion: RuntimeThemeImageReference,
         highContrast: RuntimeThemeImageReference,
+        macOSWide: RuntimeThemeImageReference? = nil,
         rendererParametersData: Data?
     ) throws -> RuntimePreparedThemeBackground {
         guard !isClosed else {
             throw RuntimeThemeBackgroundInstallationError.presentationClosed
         }
         let references = [staticBase, reduceMotion, highContrast]
+            + (macOSWide.map { [$0] } ?? [])
         guard references.allSatisfy({ $0.cache === decodedResourceCache }),
               Set(references.map(\.codexID)).count == 1,
               Set(references.map(\.contentRevision)).count == 1,
               staticBase.role == ThemeResourceRoles.backgroundStaticBase,
               (reduceMotion.role == ThemeResourceRoles.backgroundReduceMotion
                   || reduceMotion.role == ThemeResourceRoles.backgroundStaticBase),
-              highContrast.role == ThemeResourceRoles.backgroundHighContrast
+              highContrast.role == ThemeResourceRoles.backgroundHighContrast,
+              macOSWide?.role == ThemeResourceRoles.backgroundMacOSWideCrop
+                  || macOSWide == nil
         else {
             throw RuntimeThemeBackgroundInstallationError
                 .invalidBackgroundReference
@@ -1370,6 +1380,9 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
                 highContrast: RuntimeThemeBackgroundImage(
                     handle: highContrast.handle
                 ),
+                macOSWide: macOSWide.map {
+                    RuntimeThemeBackgroundImage(handle: $0.handle)
+                },
                 parameters: parameters
             ),
             cache: decodedResourceCache
@@ -1492,6 +1505,12 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
 
     var highContrastThemeBackgroundImage: Image? {
         themeBackgroundConfiguration?.highContrast.image(
+            using: decodedResourceCache
+        )
+    }
+
+    var macOSWideThemeBackgroundImage: Image? {
+        themeBackgroundConfiguration?.macOSWide?.image(
             using: decodedResourceCache
         )
     }
@@ -1688,15 +1707,25 @@ private struct RuntimeThemeBackgroundFallback: View {
 
 private struct RuntimeThemeBackgroundStaticView: View {
     let image: Image
+    var wideImage: Image? = nil
 
     var body: some View {
-        ZStack {
-            RuntimeThemeBackgroundFallback()
-            image
-                .resizable()
-                .scaledToFill()
+        GeometryReader { proxy in
+            ZStack {
+                RuntimeThemeBackgroundFallback()
+                if proxy.size.width / max(proxy.size.height, 1) >= 1.25,
+                   let wideImage {
+                    wideImage
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    image
+                        .resizable()
+                        .scaledToFill()
+                }
+            }
+            .clipped()
         }
-        .clipped()
     }
 }
 
@@ -1890,7 +1919,10 @@ private struct RuntimeMetalPresentationView: View {
             }
         case .staticBase:
             if let image = presentation.staticThemeBackgroundImage {
-                RuntimeThemeBackgroundStaticView(image: image)
+                RuntimeThemeBackgroundStaticView(
+                    image: image,
+                    wideImage: presentation.macOSWideThemeBackgroundImage
+                )
             } else {
                 RuntimeThemeBackgroundFallback()
             }

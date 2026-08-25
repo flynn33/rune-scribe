@@ -12,6 +12,7 @@ struct ThemePresentationResourcePlan: Equatable, Sendable {
     let backgroundStaticResourceID: ThemeResourceID
     let backgroundReduceMotionResourceID: ThemeResourceID
     let backgroundHighContrastResourceID: ThemeResourceID
+    let backgroundMacOSWideResourceID: ThemeResourceID?
     let backgroundRendererParametersResourceID: ThemeResourceID?
     let decorativeHeadingResourceID: ThemeResourceID?
     let unlockAnimationResourceIDByTier: [String: ThemeResourceID]
@@ -36,6 +37,7 @@ struct ThemePresentationResourcePlan: Equatable, Sendable {
         backgroundStaticResourceID = descriptor.codex.background.staticBaseResourceID
         backgroundReduceMotionResourceID = descriptor.codex.background.reduceMotionResourceID
         backgroundHighContrastResourceID = descriptor.codex.background.highContrastResourceID
+        backgroundMacOSWideResourceID = descriptor.codex.background.macOSWideResourceID
         backgroundRendererParametersResourceID =
             descriptor.codex.background.rendererParametersResourceID
         decorativeHeadingResourceID = descriptor.resources.first(where: {
@@ -100,6 +102,50 @@ struct ThemeCodexVisualPlan: Equatable, Sendable {
     let locked: ThemeVisualImagePlan
     let encountered: ThemeVisualImagePlan
     let selected: ThemeVisualImagePlan
+    let unavailable: ThemeVisualImagePlan
+}
+
+struct ThemeScriptVisualPlan: Equatable, Sendable {
+    let scriptID: ScriptID
+    let staticFallback: ThemeVisualImagePlan
+    let standardSpecimen: ThemeVisualImagePlan?
+    let highContrastSpecimen: ThemeVisualImagePlan?
+
+    var images: [ThemeVisualImagePlan] {
+        [staticFallback, standardSpecimen, highContrastSpecimen]
+            .compactMap { $0 }
+    }
+}
+
+enum ThemeChromeVisualSlot: CaseIterable, Equatable, Hashable, Sendable {
+    case panelBorder
+    case cornerOrnament
+    case divider
+    case primaryButton
+    case tabSelector
+}
+
+struct ThemeChromeVisualPlan: Equatable, Sendable {
+    let panelBorder: ThemeVisualImagePlan?
+    let cornerOrnament: ThemeVisualImagePlan?
+    let divider: ThemeVisualImagePlan?
+    let primaryButton: ThemeVisualImagePlan?
+    let tabSelector: ThemeVisualImagePlan?
+
+    var images: [ThemeVisualImagePlan] {
+        [panelBorder, cornerOrnament, divider, primaryButton, tabSelector]
+            .compactMap { $0 }
+    }
+
+    func image(for slot: ThemeChromeVisualSlot) -> ThemeVisualImagePlan? {
+        switch slot {
+        case .panelBorder: panelBorder
+        case .cornerOrnament: cornerOrnament
+        case .divider: divider
+        case .primaryButton: primaryButton
+        case .tabSelector: tabSelector
+        }
+    }
 }
 
 struct ThemeArtifactVisualPlan: Identifiable, Equatable, Sendable {
@@ -134,10 +180,11 @@ struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
     let themeID: ThemeID
     let codexID: CodexID
     let codex: ThemeCodexVisualPlan
-    let scriptID: ScriptID
+    let script: ThemeScriptVisualPlan
     let backgroundStatic: ThemeVisualImagePlan
     let backgroundReduceMotion: ThemeVisualImagePlan
     let backgroundHighContrast: ThemeVisualImagePlan
+    let chrome: ThemeChromeVisualPlan
     let relics: [ThemeArtifactVisualPlan]
     let seals: [ThemeArtifactVisualPlan]
     let frames: [ThemeArtifactVisualPlan]
@@ -145,6 +192,8 @@ struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
     let selectedRelicID: ArtifactID
     let selectedSealID: ArtifactID?
     let selectedFrameID: ArtifactID?
+
+    var scriptID: ScriptID { script.scriptID }
 
     var catalog: [ThemeArtifactVisualPlan] {
         relics + seals + frames + crests
@@ -187,6 +236,15 @@ struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
                 throw ThemePresentationResourceError.missing(id)
             }
             return ThemeVisualImagePlan(codexID: descriptor.codex.id, reference: reference)
+        }
+        func uniqueImage(role: ThemeResourceRoleID) throws -> ThemeVisualImagePlan? {
+            let matches = descriptor.resources.filter { $0.role == role }
+            guard matches.count <= 1 else {
+                throw ThemePresentationResourceError.identityMismatch
+            }
+            return matches.first.map {
+                ThemeVisualImagePlan(codexID: descriptor.codex.id, reference: $0)
+            }
         }
         func artifact(
             _ metadata: ThemeArtifactMetadata,
@@ -238,12 +296,34 @@ struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
             card: try image(vault.cardResourceID),
             locked: try image(vault.lockedSilhouetteResourceID),
             encountered: try image(vault.encounteredResourceID),
-            selected: try image(vault.selectedResourceID)
+            selected: try image(vault.selectedResourceID),
+            unavailable: try image(vault.unavailableResourceID ?? vault.cardResourceID)
         )
-        scriptID = descriptor.codex.primaryScriptID
+        guard let primaryScript = descriptor.codex.scripts.first(where: {
+            $0.id == descriptor.codex.primaryScriptID
+        }) else {
+            throw ThemePresentationResourceError.identityMismatch
+        }
+        script = ThemeScriptVisualPlan(
+            scriptID: primaryScript.id,
+            staticFallback: try image(primaryScript.staticFallbackResourceID),
+            standardSpecimen: try primaryScript.standardSpecimenResourceID.map {
+                try image($0)
+            },
+            highContrastSpecimen: try primaryScript.highContrastSpecimenResourceID.map {
+                try image($0)
+            }
+        )
         backgroundStatic = try image(descriptor.codex.background.staticBaseResourceID)
         backgroundReduceMotion = try image(descriptor.codex.background.reduceMotionResourceID)
         backgroundHighContrast = try image(descriptor.codex.background.highContrastResourceID)
+        chrome = ThemeChromeVisualPlan(
+            panelBorder: try uniqueImage(role: ThemeResourceRoles.panelCardBorder),
+            cornerOrnament: try uniqueImage(role: ThemeResourceRoles.panelCornerOrnament),
+            divider: try uniqueImage(role: ThemeResourceRoles.panelDivider),
+            primaryButton: try uniqueImage(role: ThemeResourceRoles.panelPrimaryButton),
+            tabSelector: try uniqueImage(role: ThemeResourceRoles.panelTabSelector)
+        )
         relics = try descriptor.codex.relics.compactMap { relic in
             guard relic.metadata.availability != .reservedInactive else { return nil }
             return try artifact(
@@ -265,7 +345,7 @@ struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
                 primaryID: seal.vectorResourceID,
                 thumbnailID: seal.thumbnailResourceID,
                 standardID: seal.vectorResourceID,
-                highContrastID: seal.monochromeFallbackResourceID,
+                highContrastID: seal.vectorResourceID,
                 sealAllowedScale: seal.allowedScale,
                 sealScaleReference: seal.scaleReference,
                 sealAllowedAnchors: seal.allowedAnchors
@@ -290,7 +370,7 @@ struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
                 crest.metadata,
                 kind: .crest,
                 primaryID: crest.vectorResourceID,
-                thumbnailID: crest.staticFallbackResourceID,
+                thumbnailID: crest.thumbnailResourceID ?? crest.staticFallbackResourceID,
                 standardID: crest.staticFallbackResourceID,
                 highContrastID: crest.staticFallbackResourceID
             )
@@ -351,6 +431,13 @@ struct ActiveThemeVisualPresentation {
 
     func image(for resourceID: ThemeResourceID) -> Image? {
         imageReferences[resourceID]?.image
+    }
+
+    func chromeImageReference(
+        for slot: ThemeChromeVisualSlot
+    ) -> RuntimeThemeImageReference? {
+        guard let imagePlan = plan.chrome.image(for: slot) else { return nil }
+        return imageReference(for: imagePlan)
     }
 }
 

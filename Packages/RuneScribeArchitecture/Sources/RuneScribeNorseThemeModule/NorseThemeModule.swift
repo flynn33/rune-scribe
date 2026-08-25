@@ -42,7 +42,7 @@ public enum RuneScribeNorseThemeModuleBootstrap {
         try await runtime.register(
             manifestResource: manifestResource,
             expectedSHA256: manifestExpectedSHA256,
-            maximumByteCount: 16 * 1_024,
+            maximumByteCount: 32 * 1_024,
             factory: factory(),
             themeDiscovery: discoveryDescriptor
         )
@@ -61,7 +61,7 @@ public enum RuneScribeNorseThemeModuleBootstrap {
     }
 
     public static let manifestExpectedSHA256Hex =
-        "cd7d1d28ef3efff04daf2f6ad9103dc83d174e00470592a9d918d187ac8cb804"
+        "9cc17fb4504eb975972b521237c4c80566a0b1a13fd71b8dd885e69ff3a86a5d"
 
     private static func data(fromHex value: String) -> Data {
         var bytes = [UInt8]()

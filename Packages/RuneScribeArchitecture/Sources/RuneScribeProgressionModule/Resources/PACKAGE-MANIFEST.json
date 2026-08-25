@@ -22,8 +22,8 @@
     },
     {
       "path": "Rune-Scribe-Progression-Catalog-v1.0.json",
-      "bytes": 101246,
-      "sha256": "7b7586d0749abab41aded3e9b3457b665c3a8869ae6d849f9adc55e621a5a142"
+      "bytes": 100646,
+      "sha256": "b0e824154dc282f222f179c85fe16b20973d46af94d61058f3d35af28a450c74"
     },
     {
       "path": "Rune-Scribe-Progression-Codex-Implementation-Instructions-v1.0.md",
@@ -33,12 +33,12 @@
     {
       "path": "Rune-Scribe-Progression-Event-Catalog-v1.0.json",
       "bytes": 8950,
-      "sha256": "b2ae5b795f75b0c6847d195990d62365d57a7d715d20aff8f44c2c420bd8c2a9"
+      "sha256": "0a06997167dfc86a835e89b42149cfb2a2dc0fb6de56e09ea6b4c80502bb5efc"
     },
     {
       "path": "Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json",
       "bytes": 2684,
-      "sha256": "2236c49f7e7096701c90acc17283871685577780a05aeb8b8a673f4b35d8277b"
+      "sha256": "83349a52999a9e78f5ffa0e3c557cb3d9d2c67b88cfd10d86f777d38b6a12d91"
     },
     {
       "path": "Rune-Scribe-Progression-Plain-English-Overview-v1.0.md",

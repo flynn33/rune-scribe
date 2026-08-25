@@ -638,29 +638,29 @@ func faultMatrixCoversEveryRebuildTransactionAcrossRelaunch() async throws {
 @Test
 func faultMatrixCoversEveryCatalogUpgradeTransactionAcrossRelaunch() async throws {
     let baseline = try ProgressionDurableFixture()
-    let baselineV1 = try await seededFaultService(baseline, index: 173)
+    let baselineV2 = try await seededFaultService(baseline, index: 173)
     let baselineBefore = try await baseline.snapshot(
-        from: baselineV1,
+        from: baselineV2,
         suffix: "fault-upgrade-baseline-before"
     )
     let oldGeneration = try await baseline.client.activeMetadata().activeGeneration
-    await baselineV1.shutdown()
+    await baselineV2.shutdown()
     await baseline.client.clearRecordedTransactions()
-    let baselineV2 = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: baseline.additiveVersionTwoBundle(),
+    let baselineV3 = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
+        catalogBundle: baseline.additiveVersionThreeBundle(),
         stateClient: baseline.client
     )
     let baselineAfter = try await baseline.snapshot(
-        from: baselineV2,
+        from: baselineV3,
         suffix: "fault-upgrade-baseline-after"
     )
     let newGeneration = try await baseline.client.activeMetadata().activeGeneration
     let baselineTransactions = await baseline.client.recordedTransactions()
-    await baselineV2.shutdown()
+    await baselineV3.shutdown()
 
     #expect(!baselineTransactions.isEmpty)
     #expect(oldGeneration != newGeneration)
-    #expect(baselineAfter.catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+    #expect(baselineAfter.catalogVersion == ProgressionCatalogVersion(rawValue: 3))
     assertUpgradePhaseCoverage(
         baselineTransactions,
         oldGeneration: oldGeneration,
@@ -673,9 +673,9 @@ func faultMatrixCoversEveryCatalogUpgradeTransactionAcrossRelaunch() async throw
     for faultPoint in transactionFaultPoints {
         for transactionIndex in baselineTransactions.indices {
             let fixture = try ProgressionDurableFixture()
-            let versionOne = try await seededFaultService(fixture, index: 173)
+            let versionTwo = try await seededFaultService(fixture, index: 173)
             let scenarioOldGeneration = try await fixture.client.activeMetadata().activeGeneration
-            await versionOne.shutdown()
+            await versionTwo.shutdown()
             await fixture.client.clearRecordedTransactions()
             await fixture.store.injectFault(
                 at: faultPoint,
@@ -683,16 +683,16 @@ func faultMatrixCoversEveryCatalogUpgradeTransactionAcrossRelaunch() async throw
             )
 
             let interrupted = try? await RuneScribeProgressionServiceActor.bootstrapForTesting(
-                catalogBundle: fixture.additiveVersionTwoBundle(),
+                catalogBundle: fixture.additiveVersionThreeBundle(),
                 stateClient: fixture.client
             )
             await interrupted?.shutdown()
             let interruptedMetadata = try await fixture.client.activeMetadata()
             #expect(
-                interruptedMetadata.catalogVersion == ProgressionCatalogVersion(rawValue: 1) ||
-                    interruptedMetadata.catalogVersion == ProgressionCatalogVersion(rawValue: 2)
+                interruptedMetadata.catalogVersion == ProgressionCatalogVersion(rawValue: 2) ||
+                    interruptedMetadata.catalogVersion == ProgressionCatalogVersion(rawValue: 3)
             )
-            if interruptedMetadata.catalogVersion == ProgressionCatalogVersion(rawValue: 1) {
+            if interruptedMetadata.catalogVersion == ProgressionCatalogVersion(rawValue: 2) {
                 #expect(interruptedMetadata.activeGeneration == scenarioOldGeneration)
                 #expect(interruptedMetadata.revision == baselineBefore.revision)
             } else {
@@ -700,7 +700,7 @@ func faultMatrixCoversEveryCatalogUpgradeTransactionAcrossRelaunch() async throw
             }
 
             let recovered = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-                catalogBundle: fixture.additiveVersionTwoBundle(),
+                catalogBundle: fixture.additiveVersionThreeBundle(),
                 stateClient: fixture.client
             )
             let final = try await fixture.snapshot(
@@ -716,7 +716,7 @@ func faultMatrixCoversEveryCatalogUpgradeTransactionAcrossRelaunch() async throw
         }
     }
 
-    #expect(beforeFingerprint.catalogVersion == ProgressionCatalogVersion(rawValue: 1))
+    #expect(beforeFingerprint.catalogVersion == ProgressionCatalogVersion(rawValue: 2))
 }
 
 @Test

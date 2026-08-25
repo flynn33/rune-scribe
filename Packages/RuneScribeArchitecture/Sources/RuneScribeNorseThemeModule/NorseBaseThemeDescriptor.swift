@@ -38,23 +38,25 @@ public enum NorseBaseThemeDescriptorFactory {
                 hint: "Presents the canonical 32-value Rune Scribe mapping.",
                 hidesRedundantGlyphs: true
             ),
-            rightsID: fontRightsID
+            rightsID: fontRightsID,
+            standardSpecimenResourceID: NorseBaseThemeResourceIDs.scriptSpecimenStandard,
+            highContrastSpecimenResourceID: NorseBaseThemeResourceIDs.scriptSpecimenHighContrast
         )
 
         let background = try ThemeBackgroundDescriptor(
-            id: ThemeBackgroundID(rawValue: "background.norse.forge-v1")!,
-            displayName: localized("background.norse.name", "Norse Forge Background"),
+            id: ThemeBackgroundID(rawValue: "background.norse.cold-sea-hall")!,
+            displayName: localized("background.norse.name", "Cold Sea and Ancient Hall"),
             staticBaseResourceID: NorseBaseThemeResourceIDs.backgroundStatic,
             reduceMotionResourceID: NorseBaseThemeResourceIDs.backgroundReduceMotion,
             highContrastResourceID: NorseBaseThemeResourceIDs.backgroundHighContrast,
-            rendererParametersResourceID: NorseBaseThemeResourceIDs.backgroundParameters,
+            macOSWideResourceID: NorseBaseThemeResourceIDs.backgroundMacOSWide,
             motionIntensity: .subtle,
             performanceClass: .standard,
             parallaxAllowed: false,
             accessibility: accessibility(
                 "background.norse",
-                label: "Dark Norse forge background",
-                hint: "Uses restrained gold and blue forge light behind the workspace."
+                label: "Cold northern sea and ancient hall",
+                hint: "Uses deep navy atmosphere, cold sea light, and an ancient timber hall behind the workspace."
             ),
             rightsID: presentationRightsID
         )
@@ -66,6 +68,7 @@ public enum NorseBaseThemeDescriptorFactory {
             lockedSilhouetteResourceID: NorseBaseThemeResourceIDs.vaultLocked,
             encounteredResourceID: NorseBaseThemeResourceIDs.vaultEncountered,
             selectedResourceID: NorseBaseThemeResourceIDs.vaultSelected,
+            unavailableResourceID: NorseBaseThemeResourceIDs.vaultUnavailable,
             accessibility: accessibility(
                 "vault.norse",
                 label: "Norse Founding Codex collection",
@@ -81,7 +84,7 @@ public enum NorseBaseThemeDescriptorFactory {
             shortDescription: localized("codex.norse.tagline", "The Founding Codex."),
             longDescription: localized(
                 "codex.norse.description",
-                "The permanent Rune Scribe Base Codex, shaped from weathered stone, forged iron, aged parchment, and restrained knotwork."
+                "The permanent Rune Scribe Base Codex, shaped from weathered stone, carved dark wood, forged iron, and restrained knotwork."
             ),
             accessibility: accessibility(
                 "codex.norse",
@@ -91,7 +94,7 @@ public enum NorseBaseThemeDescriptorFactory {
             palette: try palette(),
             primaryScriptID: scriptID,
             fallbackScriptID: scriptID,
-            defaultRelicID: artifactID("relic.norse.runestone.weathered"),
+            defaultRelicID: artifactID("relic.norse.runestone-tablet"),
             scripts: [script],
             relics: relics,
             seals: try makeSeals(codexID: codexID, rightsID: presentationRightsID),
@@ -109,7 +112,7 @@ public enum NorseBaseThemeDescriptorFactory {
             policyClass: ThemeDescriptor.providerPolicyClass,
             criticality: .requiredBase,
             schemaVersion: ThemeContractVersion.current,
-            contentVersion: 1,
+            contentVersion: 2,
             minimumUIContractVersion: ThemeContractVersion.current,
             platformCompatibility: [
                 try ThemePlatformCompatibility(platform: .iOS, minimumMajorVersion: 17),
@@ -158,12 +161,9 @@ public enum NorseBaseThemeDescriptorFactory {
         rightsID: ThemeProvenanceID
     ) throws -> [ThemeRelicDescriptor] {
         let definitions: [RelicDefinition] = [
-            RelicDefinition(id: "relic.norse.runestone.weathered", name: "Weathered Rune Stone", description: "A broad weathered stone canvas framed in forged iron and restrained knotwork. The dependable Norse surface for short and long inscriptions.", rarity: .forged, availability: .included, isDefault: true, width: 4, height: 3, safeArea: (0.19, 0.22, 0.62, 0.57), anchors: [(0.16, 0.83, .lowerLeft), (0.84, 0.83, .lowerRight)], maximumLines: 7),
-            RelicDefinition(id: "relic.norse.raven-medallion", name: "Raven Medallion", description: "A circular forged medallion with a pale stone face and raven crest, intended for concise messages.", rarity: .inscribed, availability: .earned, width: 1, height: 1, safeArea: (0.275, 0.30, 0.45, 0.43), anchors: [(0.50, 0.82, .bottomCenter)], maximumLines: 2),
-            RelicDefinition(id: "relic.norse.ironbound-shield", name: "Ironbound Round Shield", description: "A round wooden shield reinforced with iron, with a protected central field for compact inscriptions.", rarity: .inscribed, availability: .earned, width: 1, height: 1, safeArea: (0.285, 0.285, 0.43, 0.43), anchors: [(0.23, 0.76, .lowerLeft), (0.77, 0.76, .lowerRight)], maximumLines: 4),
-            RelicDefinition(id: "relic.norse.sealed-parchment", name: "Sealed Parchment", description: "A wide sheet of aged parchment held by forged fittings and a raven seal, optimized for longer messages.", rarity: .inscribed, availability: .earned, width: 4, height: 3, safeArea: (0.23, 0.22, 0.54, 0.55), anchors: [(0.20, 0.80, .lowerLeft), (0.78, 0.77, .lowerRight)], maximumLines: 7),
-            RelicDefinition(id: "relic.norse.runestone.blackstone", name: "Blackstone Rune Stone", description: "A ceremonial black stone tablet crossed by restrained gold and blue forge-light cracks, awarded for Norse mastery.", rarity: .rare, availability: .mastery, width: 4, height: 3, safeArea: (0.20, 0.22, 0.60, 0.56), anchors: [(0.16, 0.83, .lowerLeft), (0.84, 0.83, .lowerRight)], maximumLines: 7),
-            RelicDefinition(id: "relic.norse.runestone.frozen", name: "Frozen Rune Stone", description: "A pale rune stone edged with frost and ice, reserved for a separately approved winter Season challenge.", rarity: .mythic, availability: .reservedInactive, width: 4, height: 3, safeArea: (0.20, 0.22, 0.60, 0.56), anchors: [(0.16, 0.83, .lowerLeft), (0.84, 0.83, .lowerRight)], maximumLines: 7),
+            RelicDefinition(id: "relic.norse.runestone-tablet", name: "Runestone Tablet", description: "A broad weathered stone tablet with a dimensional iron-and-knotwork border and paired raven crest.", rarity: .forged, availability: .included, isDefault: true, width: 4, height: 3, safeArea: (0.23, 0.30, 0.54, 0.45), anchors: [(0.23, 0.78, .lowerLeft), (0.77, 0.78, .lowerRight)], maximumLines: 7),
+            RelicDefinition(id: "relic.norse.dragonwood-plaque", name: "Dragonwood Plaque", description: "A tall plaque of dark carved wood enclosed by forged iron and crowned by a sculpted dragon.", rarity: .inscribed, availability: .earned, width: 3, height: 4, safeArea: (0.27, 0.31, 0.46, 0.42), anchors: [(0.30, 0.78, .lowerLeft), (0.70, 0.78, .lowerRight)], maximumLines: 6),
+            RelicDefinition(id: "relic.norse.stormforged-stele", name: "Stormforged Stele", description: "A tall war-stele of weathered stone and blackened iron beneath a carved hammer crest.", rarity: .rare, availability: .earned, width: 3, height: 4, safeArea: (0.27, 0.36, 0.46, 0.40), anchors: [(0.30, 0.81, .lowerLeft), (0.70, 0.81, .lowerRight)], maximumLines: 6),
         ]
 
         return try definitions.map { definition in
@@ -178,9 +178,7 @@ public enum NorseBaseThemeDescriptorFactory {
                     description: definition.description,
                     rarity: definition.rarity,
                     availability: definition.availability,
-                    accessibilityHint: definition.id.hasSuffix(".frozen")
-                        ? "Reserved and unavailable until a separately approved winter challenge grants it."
-                        : "Uses a bounded inscription area and approved seal anchors.",
+                    accessibilityHint: "Uses a bounded inscription area and approved seal anchors.",
                     rightsID: rightsID
                 ),
                 isDefault: definition.isDefault,
@@ -196,12 +194,12 @@ public enum NorseBaseThemeDescriptorFactory {
 
     private static func makeSeals(codexID: CodexID, rightsID: ThemeProvenanceID) throws -> [ThemeSealDescriptor] {
         let definitions: [(String, String, String, ThemeRarityToken, ThemeArtifactAvailability)] = [
-            ("seal.norse.knotwork", "Knotwork Mark", "An interlaced gold knot surrounding a small blue center stone.", .forged, .included),
-            ("seal.norse.forge-flame", "Forge Flame", "A gold forge flame with a restrained blue inner flame.", .forged, .included),
-            ("seal.norse.raven", "Raven Seal", "A silver raven in profile on a dark forged medallion.", .inscribed, .earned),
-            ("seal.norse.longship", "Longship Seal", "A longship above a single blue wave, representing sustained correspondence.", .inscribed, .earned),
-            ("seal.norse.forge-hammer", "Forge Hammer Seal", "A forged hammer with a small blue spark.", .inscribed, .earned),
-            ("seal.norse.echo-rune", "Echo Rune Seal", "A central rune between expanding gold and blue echo arcs.", .rare, .earned),
+            ("seal.norse.valknut", "Valknut Seal", "An aged bronze medallion bearing a sculpted interlocked Valknut.", .forged, .included),
+            ("seal.norse.ravenshield", "Ravenshield Seal", "A forged shield medallion bearing a sculpted raven.", .forged, .included),
+            ("seal.norse.mjolnir", "Mjolnir Seal", "A relief medallion bearing the hammer Mjolnir.", .inscribed, .earned),
+            ("seal.norse.wolkin", "Wolkin Seal", "An aged medallion bearing a longship beneath the northern sky.", .inscribed, .earned),
+            ("seal.norse.yggdrasil", "Yggdrasil Seal", "A sculpted medallion bearing the world tree Yggdrasil.", .inscribed, .earned),
+            ("seal.norse.berserk", "Berserk Seal", "A dark forged medallion bearing a battle-worn warrior mark.", .rare, .earned),
         ]
         return try definitions.map { rawID, name, description, rarity, availability in
             let id = artifactID(rawID)
@@ -211,16 +209,16 @@ public enum NorseBaseThemeDescriptorFactory {
                 vectorResourceID: resources.vector,
                 monochromeFallbackResourceID: resources.monochrome,
                 thumbnailResourceID: resources.thumbnail,
-                allowedScale: ThemeScalarRange(minimum: 0.10, maximum: 0.30),
+                allowedScale: ThemeScalarRange(minimum: 0.12, maximum: 0.24),
                 scaleReference: .relicShortEdge,
-                allowedAnchors: [.lowerLeft, .lowerRight, .bottomCenter, .topCenter]
+                allowedAnchors: [.lowerLeft, .lowerRight]
             )
         }
     }
 
     private static func makeFrames(relics: [ThemeRelicDescriptor], codexID: CodexID, rightsID: ThemeProvenanceID) throws -> [ThemeFrameDescriptor] {
         [try ThemeFrameDescriptor(
-            metadata: artifact(id: artifactID("frame.norse.carved-knotwork"), codexID: codexID, name: "Carved Knotwork Frame", description: "A carved silver-and-gold knotwork border with restrained corner ornaments.", rarity: .inscribed, availability: .earned, accessibilityHint: "Adds a decorative border without changing or obscuring the message.", rightsID: rightsID),
+            metadata: artifact(id: artifactID("frame.norse.carved-knotwork"), codexID: codexID, name: "Norse Mastery Frame", description: "A carved silver-and-gold knotwork mastery border with sculpted corner ornaments.", rarity: .inscribed, availability: .earned, accessibilityHint: "Adds a mastery border without changing or obscuring the message.", rightsID: rightsID),
             vectorResourceID: NorseBaseThemeResourceIDs.frameVector,
             staticFallbackResourceID: NorseBaseThemeResourceIDs.frameStatic,
             compatibleRelicIDs: relics.map(\.metadata.id),
@@ -230,9 +228,10 @@ public enum NorseBaseThemeDescriptorFactory {
 
     private static func makeCrests(codexID: CodexID, rightsID: ThemeProvenanceID) throws -> [ThemeCrestDescriptor] {
         [try ThemeCrestDescriptor(
-            metadata: artifact(id: artifactID("crest.norse.forge-master"), codexID: codexID, name: "Forge Master Crest", description: "A shield-shaped crest showing an anvil, blue flame, and paired silver wings.", rarity: .rare, availability: .mastery, accessibilityHint: "Marks Norse mastery without replacing the message label.", rightsID: rightsID),
+            metadata: artifact(id: artifactID("crest.norse.raven-mastery"), codexID: codexID, name: "Raven Mastery Crest", description: "A weathered shield crest bearing a sculpted silver raven and restrained blue enamel.", rarity: .rare, availability: .mastery, accessibilityHint: "Marks Norse mastery without replacing the message label.", rightsID: rightsID),
             vectorResourceID: NorseBaseThemeResourceIDs.crestVector,
-            staticFallbackResourceID: NorseBaseThemeResourceIDs.crestStatic
+            staticFallbackResourceID: NorseBaseThemeResourceIDs.crestStatic,
+            thumbnailResourceID: NorseBaseThemeResourceIDs.crestThumbnail
         )]
     }
 

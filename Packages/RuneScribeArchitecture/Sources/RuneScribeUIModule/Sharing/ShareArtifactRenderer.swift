@@ -410,9 +410,12 @@ enum ThemeArtifactCompositionPolicy {
         case .standard, .monochrome: relic.staticFallbackResourceID
         }
         let sealResourceID: ThemeResourceID? = seal.map {
-            colorMode == .standard
-                ? $0.vectorResourceID
-                : $0.monochromeFallbackResourceID
+            switch colorMode {
+            case .standard, .highContrast:
+                $0.vectorResourceID
+            case .monochrome:
+                $0.monochromeFallbackResourceID
+            }
         }
         let frameResourceID = frame?.staticFallbackResourceID
         let backgroundResourceID: ThemeResourceID = if colorMode == .highContrast {

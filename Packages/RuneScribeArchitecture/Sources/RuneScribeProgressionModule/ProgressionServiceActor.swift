@@ -1194,6 +1194,10 @@ public actor RuneScribeProgressionServiceActor: RuneScribeProgressionService,
         let oldGeneration = priorState.projection.metadata.activeGeneration
         let upgradingCatalog = priorState.projection.metadata.catalogVersion <
             bundle.catalog.catalogVersion
+        let migratesNorseV2 = ProgressionNorseV2Migration.applies(
+            from: priorState.projection.metadata.catalogVersion,
+            to: bundle.catalog.catalogVersion
+        )
         let priorMigration: CatalogMigrationRecord?
         if upgradingCatalog {
             let migrations = priorState.projection.records(
@@ -1206,9 +1210,11 @@ public actor RuneScribeProgressionServiceActor: RuneScribeProgressionService,
                   migrations[0].catalogVersion ==
                     priorState.projection.metadata.catalogVersion
             else { throw ProgressionDomainError.invalidRecord("recovery-catalog-upgrade") }
-            try ProgressionCatalogCompatibility.validateAddOnlyUpgrade(
+            try ProgressionCatalogCompatibility.validateUpgrade(
                 from: migrations[0].compatibilityFingerprints,
-                to: ProgressionCatalogCompatibility.fingerprints(for: bundle)
+                to: ProgressionCatalogCompatibility.fingerprints(for: bundle),
+                fromVersion: priorState.projection.metadata.catalogVersion,
+                toVersion: bundle.catalog.catalogVersion
             )
             priorMigration = migrations[0]
         } else {
@@ -1365,10 +1371,21 @@ public actor RuneScribeProgressionServiceActor: RuneScribeProgressionService,
                         throw error
                     }
                 }
-                guard case let .accepted(event) = ProgressionEventValidator.validate(
-                    storedProcessed?.envelope ?? order.envelope,
-                    bundle: bundle
+                let sourceEnvelope = storedProcessed?.envelope ?? order.envelope
+                guard case let .accepted(sourceEvent) = ProgressionEventValidator.validate(
+                    sourceEnvelope,
+                    bundle: bundle,
+                    legacyArtifactAliasPolicy: migratesNorseV2 ? .allEvents : .incomingOnly
                 ) else { throw ProgressionDomainError.invalidRecord("rebuild-event-invalid") }
+                let event = if migratesNorseV2 {
+                    try ProgressionEventValidator.canonicalizingLegacyArtifactAliases(
+                        in: sourceEvent,
+                        bundle: bundle
+                    )
+                } else {
+                    sourceEvent
+                }
+                let canonicalizedHistoricalEnvelope = event.envelope != sourceEnvelope
                 let processed = ProcessedEventRecord(
                     envelope: event.envelope,
                     envelopeDigest: try ProgressionDeterminism.encodedDigest(event.envelope),
@@ -1378,15 +1395,19 @@ public actor RuneScribeProgressionServiceActor: RuneScribeProgressionService,
                     appliedRevision: order.appliedRevision
                 )
                 if let storedProcessed, storedProcessed != processed {
-                    guard order.sourceCumulativeDigest != nil else {
+                    guard canonicalizedHistoricalEnvelope ||
+                            order.sourceCumulativeDigest != nil
+                    else {
                         throw ProgressionDomainError.invalidRecord(
                             "rebuild-processed-event-mismatch"
                         )
                     }
-                    try await repository.quarantineProcessedEvent(
-                        eventID: order.eventID,
-                        generation: oldGeneration
-                    )
+                    if !canonicalizedHistoricalEnvelope {
+                        try await repository.quarantineProcessedEvent(
+                            eventID: order.eventID,
+                            generation: oldGeneration
+                        )
+                    }
                 }
 
                 projection = replayState.projection
@@ -1428,18 +1449,20 @@ public actor RuneScribeProgressionServiceActor: RuneScribeProgressionService,
                 )
                 if let sourceDigest = order.sourceCumulativeDigest {
                     if sourceDigest != reduced.projection.metadata.appliedEventDigest {
-                        guard order.hasProcessedSource else {
+                        guard canonicalizedHistoricalEnvelope || order.hasProcessedSource else {
                             throw ProgressionDomainError.invalidRecord("rebuild-ledger-digest")
                         }
-                        try await repository.quarantineAppliedEventOrder(
-                            revision: order.appliedRevision,
-                            generation: oldGeneration
-                        )
+                        if !canonicalizedHistoricalEnvelope {
+                            try await repository.quarantineAppliedEventOrder(
+                                revision: order.appliedRevision,
+                                generation: oldGeneration
+                            )
+                        }
                     }
                 }
                 let rebuiltOrder = try ProgressionAppliedEventOrderRecord(
                     appliedRevision: order.appliedRevision,
-                    envelope: order.envelope,
+                    envelope: event.envelope,
                     cumulativeDigest: reduced.projection.metadata.appliedEventDigest!
                 )
                 try await repository.stageAppliedLedger(

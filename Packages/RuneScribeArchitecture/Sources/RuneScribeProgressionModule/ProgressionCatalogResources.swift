@@ -161,7 +161,7 @@ public enum ProgressionCatalogResourceCatalog {
     public static let packageManifestDescriptor = ProgressionCatalogResourceDescriptor(
         resource: packageManifest,
         expectedByteCount: 2_064,
-        expectedSHA256Hex: "93984e063bcdb0e8408a6bc8e95ccf9902efcca67b7358ecb99c2494c04993f9",
+        expectedSHA256Hex: "869b63e892da5f597cc3abce5a6d2c5eb420bd582084c06df9ac770aa31293b9",
         maximumByteCount: 4_096
     )
     public static let catalogSchemaDescriptor = ProgressionCatalogResourceDescriptor(
@@ -172,20 +172,20 @@ public enum ProgressionCatalogResourceCatalog {
     )
     public static let catalogDescriptor = ProgressionCatalogResourceDescriptor(
         resource: catalog,
-        expectedByteCount: 101_246,
-        expectedSHA256Hex: "7b7586d0749abab41aded3e9b3457b665c3a8869ae6d849f9adc55e621a5a142",
+        expectedByteCount: 100_646,
+        expectedSHA256Hex: "b0e824154dc282f222f179c85fe16b20973d46af94d61058f3d35af28a450c74",
         maximumByteCount: 128 * 1_024
     )
     public static let eventCatalogDescriptor = ProgressionCatalogResourceDescriptor(
         resource: eventCatalog,
         expectedByteCount: 8_950,
-        expectedSHA256Hex: "b2ae5b795f75b0c6847d195990d62365d57a7d715d20aff8f44c2c420bd8c2a9",
+        expectedSHA256Hex: "0a06997167dfc86a835e89b42149cfb2a2dc0fb6de56e09ea6b4c80502bb5efc",
         maximumByteCount: 16 * 1_024
     )
     public static let futureThemeBindingsDescriptor = ProgressionCatalogResourceDescriptor(
         resource: futureThemeBindings,
         expectedByteCount: 2_684,
-        expectedSHA256Hex: "2236c49f7e7096701c90acc17283871685577780a05aeb8b8a673f4b35d8277b",
+        expectedSHA256Hex: "83349a52999a9e78f5ffa0e3c557cb3d9d2c67b88cfd10d86f777d38b6a12d91",
         maximumByteCount: 8_192
     )
 

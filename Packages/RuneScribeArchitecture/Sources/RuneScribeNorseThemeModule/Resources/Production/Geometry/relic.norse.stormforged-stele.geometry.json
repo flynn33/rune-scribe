@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "2.0",
+  "artifactID": "relic.norse.stormforged-stele",
+  "displayName": "Stormforged Stele",
+  "canvasPixels": {
+    "width": 1536,
+    "height": 2048
+  },
+  "deterministicCrop": {
+    "x": 0.10,
+    "y": 0.03,
+    "width": 0.80,
+    "height": 0.95
+  },
+  "normalizedContentSafeArea": {
+    "x": 0.22,
+    "y": 0.27,
+    "width": 0.56,
+    "height": 0.58
+  },
+  "normalizedInscriptionSafeArea": {
+    "type": "rectangle",
+    "x": 0.27,
+    "y": 0.36,
+    "width": 0.46,
+    "height": 0.40
+  },
+  "sealAnchors": [
+    {
+      "id": "lower-left",
+      "x": 0.30,
+      "y": 0.81,
+      "radius": 0.055
+    },
+    {
+      "id": "lower-right",
+      "x": 0.70,
+      "y": 0.81,
+      "radius": 0.055
+    }
+  ],
+  "layouts": [
+    {
+      "length": "short",
+      "maximumLines": 2,
+      "minimumGlyphScale": 0.72
+    },
+    {
+      "length": "medium",
+      "maximumLines": 4,
+      "minimumGlyphScale": 0.6
+    },
+    {
+      "length": "long",
+      "maximumLines": 6,
+      "minimumGlyphScale": 0.5
+    }
+  ],
+  "textAlignment": "center",
+  "requiresNonColorSelectionCue": true
+}

@@ -97,7 +97,7 @@ func existingUserMigrationMatchesEveryArchivistBoundaryWithoutInventingEvents() 
             ))
             #expect(reveal.secondaryRewardIDs == [
                 .artifact(ArtifactID(rawValue: "frame.norse.carved-knotwork")!),
-                .artifact(ArtifactID(rawValue: "relic.norse.sealed-parchment")!),
+                .artifact(ArtifactID(rawValue: "seal.norse.berserk")!),
             ])
             #expect(reveal.sourceAchievementIDs.map(\.rawValue) == [
                 "achievement.archivist-1",
@@ -127,10 +127,10 @@ func existingUserMigrationMatchesEveryArchivistBoundaryWithoutInventingEvents() 
                 $0.state == .owned
             }.map(migrationReferenceRawValue)) == [
                 "codex:codex.norse",
-                "artifact:relic.norse.runestone.weathered",
+                "artifact:relic.norse.runestone-tablet",
                 "artifact:script.base-runes",
-                "artifact:seal.norse.forge-flame",
-                "artifact:seal.norse.knotwork",
+                "artifact:seal.norse.ravenshield",
+                "artifact:seal.norse.valknut",
                 "entitlement:unlock.codex.norse",
             ])
         }
@@ -1064,13 +1064,13 @@ func rebuildPreservesPendingAndAcknowledgedMigrationRevealExactlyOnce() async th
 @Test
 func catalogUpgradePreservesMigrationSeedsWithoutReapplyingInitialMigration() async throws {
     let fixture = try ProgressionDurableFixture()
-    let versionOne = try await migrationService(fixture)
+    let versionTwo = try await migrationService(fixture)
     let delivery = try migrationDelivery(
         count: 20,
         transactionID: migrationTransactionID(220),
         mixedOrigins: true
     )
-    guard case .applied = try await versionOne.applyExistingUserMigration(
+    guard case .applied = try await versionTwo.applyExistingUserMigration(
         delivery,
         metadata: fixture.metadata(
             operation: "progression.migration.existing-user.apply",
@@ -1080,31 +1080,31 @@ func catalogUpgradePreservesMigrationSeedsWithoutReapplyingInitialMigration() as
         Issue.record("The upgrade fixture migration did not apply.")
         return
     }
-    let pending = try await fixture.snapshot(from: versionOne, suffix: "migration-upgrade-v1")
+    let pending = try await fixture.snapshot(from: versionTwo, suffix: "migration-upgrade-v2")
     let revealID = try #require(pending.nextReveal?.revealID)
     try await fixture.markPresented(
         revealID,
-        using: versionOne,
+        using: versionTwo,
         suffix: "migration-upgrade-ack",
         timestamp: Date(timeIntervalSince1970: 2_000_000_000)
     )
-    try await versionOne.acknowledgeReveal(
+    try await versionTwo.acknowledgeReveal(
         AcknowledgeProgressionRevealCommand(revealID: revealID),
         metadata: fixture.metadata(
             operation: "progression.reveal.acknowledge",
             suffix: "migration-upgrade-ack"
         )
     )
-    await versionOne.shutdown()
+    await versionTwo.shutdown()
 
-    let versionTwoBundle = fixture.additiveVersionTwoBundle()
-    let versionTwo = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: versionTwoBundle,
+    let versionThreeBundle = fixture.additiveVersionThreeBundle()
+    let versionThree = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
+        catalogBundle: versionThreeBundle,
         stateClient: fixture.client,
         requiresExistingUserMigration: true
     )
-    let upgraded = try await fixture.snapshot(from: versionTwo, suffix: "migration-upgrade-v2")
-    #expect(upgraded.catalogVersion?.rawValue == 2)
+    let upgraded = try await fixture.snapshot(from: versionThree, suffix: "migration-upgrade-v3")
+    #expect(upgraded.catalogVersion?.rawValue == 3)
     #expect(upgraded.pendingRevealCount == 0)
     #expect(upgraded.statistics.first {
         $0.statisticID.rawValue == "stat.cipher.created-or-imported.unique" &&
@@ -1121,14 +1121,14 @@ func catalogUpgradePreservesMigrationSeedsWithoutReapplyingInitialMigration() as
     #expect(try await repository.existingUserMigrationSeeds(
         generation: metadata.activeGeneration
     ).count == 20)
-    #expect(try await versionTwo.applyExistingUserMigration(
+    #expect(try await versionThree.applyExistingUserMigration(
         delivery,
         metadata: fixture.metadata(
             operation: "progression.migration.existing-user.apply",
             suffix: "migration-upgrade-retry"
         )
     ) == .duplicate)
-    await versionTwo.shutdown()
+    await versionThree.shutdown()
 }
 
 @Test

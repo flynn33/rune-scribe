@@ -850,23 +850,23 @@ errors = []
 expected = {
   "PACKAGE-MANIFEST.json" => [
     2064,
-    "93984e063bcdb0e8408a6bc8e95ccf9902efcca67b7358ecb99c2494c04993f9"
+    "869b63e892da5f597cc3abce5a6d2c5eb420bd582084c06df9ac770aa31293b9"
   ],
   "Rune-Scribe-Progression-Catalog-Schema-v1.0.json" => [
     3108,
     "4c0d538229877a035ad9444d4e89a6ae13ae46cb190f9677761b945c173ed6dd"
   ],
   "Rune-Scribe-Progression-Catalog-v1.0.json" => [
-    101246,
-    "7b7586d0749abab41aded3e9b3457b665c3a8869ae6d849f9adc55e621a5a142"
+    100646,
+    "b0e824154dc282f222f179c85fe16b20973d46af94d61058f3d35af28a450c74"
   ],
   "Rune-Scribe-Progression-Event-Catalog-v1.0.json" => [
     8950,
-    "b2ae5b795f75b0c6847d195990d62365d57a7d715d20aff8f44c2c420bd8c2a9"
+    "0a06997167dfc86a835e89b42149cfb2a2dc0fb6de56e09ea6b4c80502bb5efc"
   ],
   "Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json" => [
     2684,
-    "2236c49f7e7096701c90acc17283871685577780a05aeb8b8a673f4b35d8277b"
+    "83349a52999a9e78f5ffa0e3c557cb3d9d2c67b88cfd10d86f777d38b6a12d91"
   ],
   "module-manifest.json" => [
     2494,
@@ -953,29 +953,21 @@ expected_by_module = {
   "Norse Theme" => {}
 }
 
-norse_integrity_name = "Norse-Resource-Integrity-Manifest-v1.0.json"
+norse_integrity_name = "Norse-Resource-Integrity-Manifest-v2.0.json"
 norse_integrity_contract = [
-  24_187,
-  "4c59d88099a7561d9983b148d5d4ab860c514d5b0645f03df1f5ac8cc9338a30"
+  36_084,
+  "ec7c34baf2fb43bfc77f6c07e6a8e875ec02098bdb0879ee618ecac1c99105dc"
 ]
 norse_fixed_resources = {
   "module-manifest.json" => [
-    11_726,
-    "cd7d1d28ef3efff04daf2f6ad9103dc83d174e00470592a9d918d187ac8cb804"
+    14_833,
+    "9cc17fb4504eb975972b521237c4c80566a0b1a13fd71b8dd885e69ff3a86a5d"
   ],
   norse_integrity_name => norse_integrity_contract,
-  "Norse-Production-Asset-Provenance-v1.0.json" => [
-    54_597,
-    "105fb4f5f966e3071f1e75d2f2aa590279f30ed1368dfd613d7045575c6b9f8c"
-  ],
-  "crest.norse.forge-master.png" => [123_379, "50a2620294a19c3fa6be7129e1d4973c90ee7abea3fe71ce5640f60ca4a6635f"],
-  "frame.norse.carved-knotwork.png" => [120_537, "632dc82de68d83a8ecec315d7ca7bbda54bbf242b3d5afed3691af0af0d4d36a"],
-  "seal.norse.echo-rune.png" => [159_691, "f98d9f2de501b78586363c3abe0b4949142bdd46523bc2e7c6a4e5d95da6aa36"],
-  "seal.norse.forge-flame.png" => [145_780, "431f95199fd660c29d73d381236b7570bd70da380bf9cdbbd5ffefdfb89d9d2d"],
-  "seal.norse.forge-hammer.png" => [154_174, "5734f5802b5af981ea8691fb720e1e258f32eaf5e7cd38eb447c86fd0f98b126"],
-  "seal.norse.knotwork.png" => [163_306, "b08af25f444603ef8ae702d0317db5eb8dc072e518fb5a0d3ab296166e0091b6"],
-  "seal.norse.longship.png" => [155_920, "0dd5edbb301588219bbc4d12a07d24e558f47db794ee5e9150f650be1b0e769f"],
-  "seal.norse.raven.png" => [152_556, "8ffb0a2bd84838e6142e16130dff93277929cc442629edda2af7570537789448"]
+  "Norse-Production-Asset-Provenance-v2.0.json" => [
+    80_939,
+    "5efb78a1c309719717b2a9adbbc875f9fc5c7c37b5e1b84f574e7a1ff0835a64"
+  ]
 }
 
 norse_root = roots.fetch("macOS Norse Theme")
@@ -987,7 +979,7 @@ else
   begin
     integrity = JSON.parse(File.read(norse_integrity_path))
     resources = integrity.fetch("resources")
-    errors << "Norse Theme integrity manifest does not declare exactly 47 production resources" unless resources.length == 47
+    errors << "Norse Theme integrity manifest does not declare exactly 70 production resources" unless resources.length == 70
     manifest_resources = resources.to_h do |resource|
       [File.basename(resource.fetch("path")), [resource.fetch("byteLength"), resource.fetch("sha256")]]
     end
@@ -1713,11 +1705,11 @@ paths.each_with_index do |path, index|
     errors << "#{platform} Norse Theme runtime requirements are missing" unless requirements.is_a?(Hash)
     errors << "#{platform} Norse Theme required services differ" unless requirements.is_a?(Hash) && requirements["requiredServices"] == ["ApplicationResourceLocator"]
     errors << "#{platform} Norse Theme required module roles differ" unless requirements.is_a?(Hash) && requirements["requiredModuleRoles"] == []
-    unless required_resources.is_a?(Array) && required_resources.length == 57
-      errors << "#{platform} Norse Theme does not declare exactly 57 required resources"
+    unless required_resources.is_a?(Array) && required_resources.length == 72
+      errors << "#{platform} Norse Theme does not declare exactly 72 required resources"
     else
       identities = required_resources.map { |resource| [resource["name"], resource["fileExtension"]] }
-      errors << "#{platform} Norse Theme required resource identities are not unique" unless identities.uniq.length == 57
+      errors << "#{platform} Norse Theme required resource identities are not unique" unless identities.uniq.length == 72
       errors << "#{platform} Norse Theme required resources are not flat owner-scoped declarations" unless required_resources.all? { |resource| resource["subdirectory"].nil? && resource["ownerModuleID"] == owner }
     end
     errors << "#{platform} Norse Theme requested capabilities differ" unless manifest["capabilitiesRequested"] == expected_capabilities

@@ -504,6 +504,7 @@ public struct SharePresentationProviderInventory: Codable, Equatable, Hashable, 
     public static let maximumScriptCount = 16
     public static let maximumArtifactCount = 128
     public static let maximumResourceCount = 256
+    public static let maximumDeclaredResourceBytes: UInt64 = 112 * 1024 * 1024
 
     public let codexID: CodexID
     public let scriptIDs: [ScriptID]
@@ -535,7 +536,7 @@ public struct SharePresentationProviderInventory: Codable, Equatable, Hashable, 
         var declaredBytes: UInt64 = 0
         for resource in resources {
             guard resource.byteLength
-                    <= SharePresentationMetadata.maximumDeclaredResourceBytes - declaredBytes
+                    <= Self.maximumDeclaredResourceBytes - declaredBytes
             else {
                 throw SharePresentationContractError.invalidProviderInventory
             }

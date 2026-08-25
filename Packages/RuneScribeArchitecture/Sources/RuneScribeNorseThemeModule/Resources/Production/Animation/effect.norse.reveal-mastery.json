@@ -13,7 +13,7 @@
     },
     {
       "type": "crestSettle",
-      "resourceRole": "crest.norse.forge-master",
+      "resourceRole": "crest.norse.raven-mastery",
       "start": 0.72,
       "duration": 0.78,
       "fromScale": 1.12

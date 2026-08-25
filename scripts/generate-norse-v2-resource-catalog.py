@@ -32,7 +32,6 @@ PINS_RELATIVE = Path(
     "NorseV2ResourcePins.swift"
 )
 PROVENANCE_BASENAMES = {
-    "Norse-Production-Asset-Provenance-v1.0.json",
     "Norse-Production-Asset-Provenance-v2.0.json",
 }
 
@@ -108,7 +107,6 @@ def resource_specs() -> tuple[ResourceSpec, ...]:
             spec("resource.background.norse.cold-sea-hall.reduce-motion", "background.reduce-motion", "Production/Background/background.norse.cold-sea-hall.reduce-motion.png"),
             spec("resource.background.norse.cold-sea-hall.high-contrast", "background.high-contrast", "Production/Background/background.norse.cold-sea-hall.high-contrast.png"),
             spec("resource.background.norse.cold-sea-hall.macos-wide-crop", "background.macos-wide-crop", "Production/Background/background.norse.cold-sea-hall.macos-wide-crop.png"),
-            spec("resource.background.norse.profile", "background.parameters", "Production/Metadata/Norse-Background-Profile-v2.0.json"),
         )
     )
 
@@ -160,8 +158,8 @@ def resource_specs() -> tuple[ResourceSpec, ...]:
         )
 
     ordered = tuple(sorted(values, key=lambda value: value.handle))
-    if len(ordered) != 71:
-        raise ValueError(f"Norse v2 resource inventory must contain 71 entries, got {len(ordered)}")
+    if len(ordered) != 70:
+        raise ValueError(f"Norse v2 resource inventory must contain 70 entries, got {len(ordered)}")
     if len({value.handle for value in ordered}) != len(ordered):
         raise ValueError("duplicate Norse v2 resource handle")
     if len({value.relative_path for value in ordered}) != len(ordered):
@@ -224,12 +222,6 @@ def ensure_exact_files(root: Path, specs: tuple[ResourceSpec, ...]) -> None:
         and path.name not in PROVENANCE_BASENAMES
         and path.name != INTEGRITY_BASENAME
     }
-    legacy_integrity = {
-        path.relative_to(resource_root)
-        for path in resource_root.rglob("Norse-Resource-Integrity-Manifest-*.json")
-        if path.name != INTEGRITY_BASENAME
-    }
-    actual -= legacy_integrity
     missing = sorted(str(path) for path in expected - actual)
     extra = sorted(str(path) for path in actual - expected)
     if missing or extra:
@@ -408,7 +400,7 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1
-    print("Generated exact 71-resource Norse v2 catalog and integrity pins")
+    print("Generated exact 70-resource Norse v2 catalog and integrity pins")
     return 0
 
 

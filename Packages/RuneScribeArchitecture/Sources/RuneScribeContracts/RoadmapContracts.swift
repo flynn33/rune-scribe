@@ -428,6 +428,35 @@ public struct DomainEventEnvelope: Codable, Equatable, Sendable {
         )
     }
 
+    public func replacingArtifactIDs(
+        _ artifactIDs: [ArtifactID]
+    ) throws -> Self {
+        let replacementPayload = try DomainEventPayload(
+            cipherToken: payload.cipherToken,
+            messageToken: payload.messageToken,
+            packageToken: payload.packageToken,
+            relationshipToken: payload.relationshipToken,
+            origin: payload.origin,
+            routeClass: payload.routeClass,
+            codexIDs: payload.codexIDs,
+            artifactIDs: artifactIDs,
+            keyIncluded: payload.keyIncluded,
+            linkedRelationship: payload.linkedRelationship,
+            embeddedCipher: payload.embeddedCipher,
+            provenanceStatus: payload.provenanceStatus
+        )
+        return try Self(
+            schemaVersion: schemaVersion,
+            eventID: eventID,
+            correlationID: correlationID,
+            eventType: eventType,
+            sourceModuleID: sourceModuleID,
+            occurredAt: occurredAt,
+            eligibility: eligibility,
+            payload: replacementPayload
+        )
+    }
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(schemaVersion, forKey: .schemaVersion)

@@ -59,13 +59,13 @@ THEME_RESOURCE_MANIFESTS = {
     "Norse": {
         "path": Path(
             "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
-            "Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+            "Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json"
         ),
         "collectionKey": "resources",
         "resourceIDKey": "resourceHandle",
         "identity": {
-            "schemaVersion": "1.0",
-            "manifestID": "resource-integrity.norse.v1",
+            "schemaVersion": "2.0",
+            "manifestID": "norse-resource-integrity.v2",
             "moduleID": "com.runescribe.module.theme.norse",
         },
     },

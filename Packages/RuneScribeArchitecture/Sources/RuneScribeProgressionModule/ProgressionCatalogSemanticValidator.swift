@@ -11,7 +11,7 @@ enum ProgressionCatalogSemanticValidator {
         guard catalog.catalogID.rawValue == "runescribe.progression.catalog" else {
             return try invalid("$catalog.catalogID", "Unexpected catalog identifier.")
         }
-        guard catalog.catalogVersion.rawValue == 1 else {
+        guard catalog.catalogVersion.rawValue == 2 else {
             return try invalid("$catalog.catalogVersion", "Unexpected catalog version.")
         }
         guard catalog.packageVersion.description == "1.0.0" else {
@@ -41,7 +41,7 @@ enum ProgressionCatalogSemanticValidator {
     }
 
     private static func validateContent(_ catalog: ProgressionCatalog) throws {
-        try Support.requireCount(catalog.content, 82, name: "content")
+        try Support.requireCount(catalog.content, 80, name: "content")
         try Support.requireUnique(
             catalog.content.map(\.contentID),
             kind: "contentID",
@@ -50,22 +50,22 @@ enum ProgressionCatalogSemanticValidator {
 
         let expectedKinds: [ProgressionCatalogContentKind: Int] = [
             .codex: 5, .crest: 5, .entitlement: 5, .frame: 7,
-            .relic: 19, .script: 5, .seal: 32, .title: 4,
+            .relic: 16, .script: 5, .seal: 32, .title: 5,
         ]
         let actualKinds = Dictionary(grouping: catalog.content, by: \.kind).mapValues(\.count)
         guard actualKinds == expectedKinds else {
-            return try invalid("$catalog.content", "Content kind inventory does not match v1.")
+            return try invalid("$catalog.content", "Content kind inventory does not match v2.")
         }
         let expectedAvailability: [ProgressionContentAvailability: Int] = [
-            .earned: 12, .included: 5, .permanent: 54,
-            .permanentMastery: 10, .seasonalDeferred: 1,
+            .earned: 12, .included: 6, .permanent: 52,
+            .permanentMastery: 10,
         ]
         let actualAvailability = Dictionary(
             grouping: catalog.content,
             by: \.availability
         ).mapValues(\.count)
         guard actualAvailability == expectedAvailability else {
-            return try invalid("$catalog.content", "Availability inventory does not match v1.")
+            return try invalid("$catalog.content", "Availability inventory does not match v2.")
         }
 
         let codexContent = Set(
@@ -73,7 +73,7 @@ enum ProgressionCatalogSemanticValidator {
         )
         let expectedCodexCounts = [
             "<none>": 9,
-            "codex.norse": 17,
+            "codex.norse": 15,
             "codex.moonleaf": 14,
             "codex.sunspire": 14,
             "codex.wildwood": 14,
@@ -125,17 +125,98 @@ enum ProgressionCatalogSemanticValidator {
             }
         }
 
-        let deferred = catalog.content.filter { $0.availability == .seasonalDeferred }
-        guard deferred.count == 1,
-              deferred[0].contentID.rawValue == "relic.norse.runestone.frozen",
-              deferred[0].displayName == "Frozen Rune Stone",
-              deferred[0].kind == .relic,
-              deferred[0].countsAsArtifact
-        else {
-            return try invalid(
-                "$catalog.content",
-                "Frozen Rune Stone must be the sole seasonal-deferred v1 item."
-            )
+        guard catalog.content.allSatisfy({ $0.availability != .seasonalDeferred }) else {
+            return try invalid("$catalog.content", "Catalog v2 has no seasonal content item.")
+        }
+        try validateNorseV2Content(catalog)
+    }
+
+    private static func validateNorseV2Content(_ catalog: ProgressionCatalog) throws {
+        struct Expected {
+            let kind: ProgressionCatalogContentKind
+            let displayName: String
+            let availability: ProgressionContentAvailability
+            let rarity: String
+        }
+        let expected: [String: Expected] = [
+            "codex.norse": .init(
+                kind: .codex, displayName: "Norse Codex",
+                availability: .included, rarity: "Forged"
+            ),
+            "crest.norse.raven-mastery": .init(
+                kind: .crest, displayName: "Raven Mastery Crest",
+                availability: .permanentMastery, rarity: "Mythic"
+            ),
+            "frame.norse.carved-knotwork": .init(
+                kind: .frame, displayName: "Norse Mastery Frame",
+                availability: .permanent, rarity: "Inscribed"
+            ),
+            "relic.norse.dragonwood-plaque": .init(
+                kind: .relic, displayName: "Dragonwood Plaque",
+                availability: .permanent, rarity: "Inscribed"
+            ),
+            "relic.norse.runestone-tablet": .init(
+                kind: .relic, displayName: "Runestone Tablet",
+                availability: .included, rarity: "Forged"
+            ),
+            "relic.norse.stormforged-stele": .init(
+                kind: .relic, displayName: "Stormforged Stele",
+                availability: .permanent, rarity: "Rare"
+            ),
+            "script.base-runes": .init(
+                kind: .script, displayName: "Base Rune Script",
+                availability: .included, rarity: "Forged"
+            ),
+            "seal.norse.berserk": .init(
+                kind: .seal, displayName: "Berserk Seal",
+                availability: .permanent, rarity: "Inscribed"
+            ),
+            "seal.norse.mjolnir": .init(
+                kind: .seal, displayName: "Mjolnir Seal",
+                availability: .permanent, rarity: "Inscribed"
+            ),
+            "seal.norse.ravenshield": .init(
+                kind: .seal, displayName: "Ravenshield Seal",
+                availability: .included, rarity: "Forged"
+            ),
+            "seal.norse.valknut": .init(
+                kind: .seal, displayName: "Valknut Seal",
+                availability: .included, rarity: "Forged"
+            ),
+            "seal.norse.wolkin": .init(
+                kind: .seal, displayName: "Wolkin Seal",
+                availability: .permanent, rarity: "Inscribed"
+            ),
+            "seal.norse.yggdrasil": .init(
+                kind: .seal, displayName: "Yggdrasil Seal",
+                availability: .permanent, rarity: "Inscribed"
+            ),
+            "title.norse.master-of-runes": .init(
+                kind: .title, displayName: "Master of Runes",
+                availability: .permanentMastery, rarity: "Mythic"
+            ),
+            "unlock.codex.norse": .init(
+                kind: .entitlement,
+                displayName: "Norse Codex Create and Select Right",
+                availability: .included, rarity: "Forged"
+            ),
+        ]
+        let actual = catalog.content.filter { $0.codexID?.rawValue == "codex.norse" }
+        guard Set(actual.map { $0.contentID.rawValue }) == Set(expected.keys) else {
+            return try invalid("$catalog.content", "Norse v2 content identifiers are invalid.")
+        }
+        for item in actual {
+            guard let value = expected[item.contentID.rawValue],
+                  item.kind == value.kind,
+                  item.displayName == value.displayName,
+                  item.availability == value.availability,
+                  item.rarity.rawValue == value.rarity
+            else {
+                return try invalid(
+                    "$catalog.content.\(item.contentID.rawValue)",
+                    "Norse v2 content metadata is invalid."
+                )
+            }
         }
     }
 
@@ -382,7 +463,123 @@ enum ProgressionCatalogSemanticValidator {
             .distinctCountAtLeast: 62,
         ]
         guard operatorCounts == expectedOperators else {
-            return try invalid("$catalog", "Rule operator inventory does not match catalog v1.")
+            return try invalid("$catalog", "Rule operator inventory does not match catalog v2.")
+        }
+        try validateNorseV2Mastery(catalog)
+    }
+
+    private static func validateNorseV2Mastery(_ catalog: ProgressionCatalog) throws {
+        let codex = CodexID(rawValue: "codex.norse")!
+        let relics = [
+            ProgressionContentID(rawValue: "relic.norse.runestone-tablet")!,
+            ProgressionContentID(rawValue: "relic.norse.dragonwood-plaque")!,
+            ProgressionContentID(rawValue: "relic.norse.stormforged-stele")!,
+        ]
+        let expectedRule = ProgressionRule.all([
+            .contentOwned(ProgressionContentID(rawValue: "codex.norse")!),
+            .distinctCountAtLeast(
+                statisticID: StatisticID(rawValue: "stat.codex.share.unique-message")!,
+                threshold: 15,
+                bucketID: codex
+            ),
+            .distinctCountAtLeast(
+                statisticID: StatisticID(
+                    rawValue: "stat.codex.relationship-presented.unique"
+                )!,
+                threshold: 5,
+                bucketID: codex
+            ),
+            .allListedContentUsed(
+                statisticID: StatisticID(rawValue: "stat.codex.relic-used.unique")!,
+                bucketID: codex,
+                contentIDs: relics
+            ),
+            .distinctCountAtLeast(
+                statisticID: StatisticID(rawValue: "stat.codex.seal-used.unique")!,
+                threshold: 4,
+                bucketID: codex
+            ),
+            .distinctCountAtLeast(
+                statisticID: StatisticID(
+                    rawValue: "stat.codex.incoming-decode.unique-package"
+                )!,
+                threshold: 5,
+                bucketID: codex
+            ),
+        ])
+        let expectedProgress = [
+            ProgressionProgressComponent(
+                type: .statistic,
+                statisticID: StatisticID(rawValue: "stat.codex.share.unique-message")!,
+                target: 15,
+                bucketID: codex,
+                contentIDs: nil,
+                minimumBuckets: nil,
+                minimumValuePerBucket: nil,
+                achievementID: nil,
+                contentID: nil
+            ),
+            ProgressionProgressComponent(
+                type: .statistic,
+                statisticID: StatisticID(
+                    rawValue: "stat.codex.relationship-presented.unique"
+                )!,
+                target: 5,
+                bucketID: codex,
+                contentIDs: nil,
+                minimumBuckets: nil,
+                minimumValuePerBucket: nil,
+                achievementID: nil,
+                contentID: nil
+            ),
+            ProgressionProgressComponent(
+                type: .allContentUsed,
+                statisticID: StatisticID(rawValue: "stat.codex.relic-used.unique")!,
+                target: nil,
+                bucketID: codex,
+                contentIDs: relics,
+                minimumBuckets: nil,
+                minimumValuePerBucket: nil,
+                achievementID: nil,
+                contentID: nil
+            ),
+            ProgressionProgressComponent(
+                type: .statistic,
+                statisticID: StatisticID(rawValue: "stat.codex.seal-used.unique")!,
+                target: 4,
+                bucketID: codex,
+                contentIDs: nil,
+                minimumBuckets: nil,
+                minimumValuePerBucket: nil,
+                achievementID: nil,
+                contentID: nil
+            ),
+            ProgressionProgressComponent(
+                type: .statistic,
+                statisticID: StatisticID(
+                    rawValue: "stat.codex.incoming-decode.unique-package"
+                )!,
+                target: 5,
+                bucketID: codex,
+                contentIDs: nil,
+                minimumBuckets: nil,
+                minimumValuePerBucket: nil,
+                achievementID: nil,
+                contentID: nil
+            ),
+        ]
+        guard let mastery = catalog.milestone(id: RuleID(
+            rawValue: "rule.codex.norse.mastery"
+        )!),
+        mastery.rule == expectedRule,
+        mastery.progressComponents == expectedProgress,
+        mastery.grantGroupID.rawValue == "grant-group.codex.norse.mastery",
+        mastery.revealTier == .mastery
+        else {
+            return try invalid(
+                "$catalog.milestones.rule.codex.norse.mastery",
+                "Norse mastery must require all three current Relics."
+            )
         }
     }
 
@@ -430,7 +627,7 @@ enum ProgressionCatalogSemanticValidator {
                 )
             }
         default:
-            return try invalid("\(path).rule", "Unexpected v1 Achievement rule shape.")
+            return try invalid("\(path).rule", "Unexpected v2 Achievement rule shape.")
         }
     }
 
@@ -877,16 +1074,16 @@ enum ProgressionCatalogSemanticValidator {
             if let notes = group.notes { try Support.requireText(notes, path: "\(path).notes") }
         }
         try Support.requireCount(granted, 81, name: "grant items")
-        try Support.requireUnique(granted, kind: "globally granted contentID", describe: \.rawValue)
-        let frozen = ProgressionContentID(rawValue: "relic.norse.runestone.frozen")!
-        guard Set(granted) == contentIDs.subtracting([frozen]) else {
+        guard Set(granted) == contentIDs else {
+            return try invalid("$catalog.grantGroups", "Every v2 content item must be granted.")
+        }
+        let duplicates = Dictionary(grouping: granted, by: { $0 }).filter { $0.value.count > 1 }
+        let yggdrasil = ProgressionContentID(rawValue: "seal.norse.yggdrasil")!
+        guard duplicates.count == 1, duplicates[yggdrasil]?.count == 2 else {
             return try invalid(
                 "$catalog.grantGroups",
-                "Every v1 content item except Frozen Rune Stone must be granted exactly once."
+                "Yggdrasil must be the sole duplicated grant item and have exactly two routes."
             )
-        }
-        guard !granted.contains(frozen) else {
-            return try invalid("$catalog.grantGroups", "Frozen Rune Stone cannot have a v1 grant.")
         }
 
         let expectedTiers: [ProgressionCatalogRevealTier: Int] = [
@@ -898,11 +1095,11 @@ enum ProgressionCatalogSemanticValidator {
         }
         guard let base = catalog.grantGroups.first(where: {
             $0.grantGroupID.rawValue == "grant-group.base.norse.included"
-        }), base.revealTier == .none, base.items.count == 6,
-            !base.items.contains(where: { $0.contentID == frozen })
+        }), base.revealTier == .none, base.items.count == 6
         else {
             return try invalid("$catalog.grantGroups", "Base Norse grant is invalid.")
         }
+        try validateNorseV2GrantGroups(catalog)
         let includedContent = Set(
             catalog.content.filter { $0.availability == .included }.map(\.contentID)
         )
@@ -955,6 +1152,82 @@ enum ProgressionCatalogSemanticValidator {
                     "Grant completion-source cardinality is invalid."
                 )
             }
+        }
+    }
+
+    private static func validateNorseV2GrantGroups(_ catalog: ProgressionCatalog) throws {
+        struct Expected {
+            let items: [String]
+            let primary: String
+            let tier: ProgressionCatalogRevealTier
+        }
+        let expected: [String: Expected] = [
+            "grant-group.base.norse.included": .init(
+                items: [
+                    "unlock.codex.norse", "codex.norse", "script.base-runes",
+                    "relic.norse.runestone-tablet", "seal.norse.valknut",
+                    "seal.norse.ravenshield",
+                ],
+                primary: "codex.norse", tier: .none
+            ),
+            "grant-group.first-inscription": .init(
+                items: ["seal.norse.mjolnir"],
+                primary: "seal.norse.mjolnir", tier: .micro
+            ),
+            "grant-group.first-dispatch": .init(
+                items: ["relic.norse.dragonwood-plaque"],
+                primary: "relic.norse.dragonwood-plaque", tier: .artifact
+            ),
+            "grant-group.correspondent": .init(
+                items: ["seal.norse.wolkin"],
+                primary: "seal.norse.wolkin", tier: .micro
+            ),
+            "grant-group.courier-1": .init(
+                items: ["seal.norse.yggdrasil"],
+                primary: "seal.norse.yggdrasil", tier: .micro
+            ),
+            "grant-group.courier-2": .init(
+                items: ["relic.norse.stormforged-stele"],
+                primary: "relic.norse.stormforged-stele", tier: .artifact
+            ),
+            "grant-group.archivist-1": .init(
+                items: ["frame.norse.carved-knotwork"],
+                primary: "frame.norse.carved-knotwork", tier: .artifact
+            ),
+            "grant-group.archivist-2": .init(
+                items: ["title.archivist", "seal.norse.berserk"],
+                primary: "title.archivist", tier: .artifact
+            ),
+            "grant-group.codex.norse.echo-five": .init(
+                items: ["seal.norse.yggdrasil"],
+                primary: "seal.norse.yggdrasil", tier: .micro
+            ),
+            "grant-group.codex.norse.mastery": .init(
+                items: ["crest.norse.raven-mastery", "title.norse.master-of-runes"],
+                primary: "crest.norse.raven-mastery", tier: .mastery
+            ),
+        ]
+        for (groupID, value) in expected {
+            guard let id = GrantGroupID(rawValue: groupID),
+                  let group = catalog.grantGroup(id: id),
+                  group.items.map({ $0.contentID.rawValue }) == value.items,
+                  group.items.allSatisfy({ $0.grantKind == .permanent }),
+                  group.primaryContentID.rawValue == value.primary,
+                  group.revealTier == value.tier
+            else {
+                return try invalid(
+                    "$catalog.grantGroups.\(groupID)",
+                    "Norse v2 reward route is invalid."
+                )
+            }
+        }
+        guard catalog.grantGroup(id: GrantGroupID(
+            rawValue: "grant-group.codex.norse.echo-five"
+        )!)?.notes?.contains("Idempotent second route to Yggdrasil Seal") == true else {
+            return try invalid(
+                "$catalog.grantGroups.grant-group.codex.norse.echo-five.notes",
+                "The idempotent Echo route must be documented."
+            )
         }
     }
 

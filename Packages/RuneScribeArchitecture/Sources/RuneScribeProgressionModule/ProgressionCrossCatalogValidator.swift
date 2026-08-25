@@ -18,7 +18,7 @@ enum ProgressionEventCatalogSemanticValidator {
     static func validate(_ catalog: ProgressionEventCatalog) throws {
         guard catalog.schemaVersion == "1.0",
               catalog.catalogID.rawValue == "runescribe.progression.event-catalog",
-              catalog.catalogVersion.rawValue == 1
+              catalog.catalogVersion.rawValue == 2
         else { return try invalid("$events", "Unexpected event catalog identity.") }
         try Support.requireDate(catalog.effectiveDate, path: "$events.effectiveDate")
         try Support.requireText(catalog.eventEnvelope, path: "$events.eventEnvelope")
@@ -39,7 +39,7 @@ enum ProgressionEventCatalogSemanticValidator {
             describe: { $0 }
         )
         guard Set(catalog.events.map { $0.eventType.rawValue }) == Set(expected.keys) else {
-            return try invalid("$events.events", "Event type inventory does not match v1.")
+            return try invalid("$events.events", "Event type inventory does not match v2.")
         }
         for (index, event) in catalog.events.enumerated() {
             let path = "$events.events[\(index)]"
@@ -70,7 +70,7 @@ enum ProgressionEventCatalogSemanticValidator {
                           || shape.keyIncluded != nil
                           || shape.linkedRelationship != nil
                   )
-            else { return try invalid(path, "Event payload or update shape does not match v1.") }
+            else { return try invalid(path, "Event payload or update shape does not match v2.") }
             let available = Set(event.requiredPayload).union(event.optionalPayload ?? [])
             guard Set(event.semanticDedupe).isSubset(of: available) else {
                 return try invalid("\(path).semanticDedupe", "Dedupe fields must be payload fields.")
@@ -123,7 +123,7 @@ enum ProgressionEventCatalogSemanticValidator {
             else {
                 return try invalid(
                     "$events.shareRoutePolicy[\(index)]",
-                    "Share route eligibility does not match v1."
+                    "Share route eligibility does not match v2."
                 )
             }
             if let notes = route.notes {
@@ -220,7 +220,7 @@ enum ProgressionThemeBindingSemanticValidator {
     static func validate(_ contract: ProgressionFutureThemeBindingContract) throws {
         guard contract.schemaVersion == "1.0",
               contract.contractID.rawValue == "runescribe.progression.future-theme-binding",
-              contract.version.rawValue == 1,
+              contract.version.rawValue == 2,
               contract.status == .approved
         else { return try invalid("$bindings", "Unexpected theme-binding identity.") }
         try Support.requireCount(contract.bindings, 5, name: "theme bindings")

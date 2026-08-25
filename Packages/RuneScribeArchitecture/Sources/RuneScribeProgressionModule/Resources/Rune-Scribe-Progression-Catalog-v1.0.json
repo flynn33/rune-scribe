@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "catalogID": "runescribe.progression.catalog",
-  "catalogVersion": 1,
+  "catalogVersion": 2,
   "packageVersion": "1.0.0",
   "status": "approved-controlling-implementation-input",
   "effectiveDate": "2026-08-12",
@@ -94,9 +94,9 @@
       "codexID": "codex.moonleaf"
     },
     {
-      "contentID": "crest.norse.forge-master",
+      "contentID": "crest.norse.raven-mastery",
       "kind": "crest",
-      "displayName": "Forge Master Crest",
+      "displayName": "Raven Mastery Crest",
       "countsAsArtifact": true,
       "availability": "permanent-mastery",
       "rarity": "Mythic",
@@ -141,7 +141,7 @@
     {
       "contentID": "frame.norse.carved-knotwork",
       "kind": "frame",
-      "displayName": "Carved Knotwork Frame",
+      "displayName": "Norse Mastery Frame",
       "countsAsArtifact": true,
       "availability": "permanent",
       "rarity": "Inscribed",
@@ -238,58 +238,30 @@
       "codexID": "codex.moonleaf"
     },
     {
-      "contentID": "relic.norse.ironbound-shield",
+      "contentID": "relic.norse.dragonwood-plaque",
       "kind": "relic",
-      "displayName": "Ironbound Round Shield",
-      "countsAsArtifact": true,
-      "availability": "permanent",
-      "rarity": "Rare",
-      "codexID": "codex.norse"
-    },
-    {
-      "contentID": "relic.norse.raven-medallion",
-      "kind": "relic",
-      "displayName": "Raven Medallion",
+      "displayName": "Dragonwood Plaque",
       "countsAsArtifact": true,
       "availability": "permanent",
       "rarity": "Inscribed",
       "codexID": "codex.norse"
     },
     {
-      "contentID": "relic.norse.runestone.blackstone",
+      "contentID": "relic.norse.runestone-tablet",
       "kind": "relic",
-      "displayName": "Blackstone Rune Stone",
+      "displayName": "Runestone Tablet",
       "countsAsArtifact": true,
-      "availability": "permanent-mastery",
-      "rarity": "Mythic",
-      "codexID": "codex.norse"
-    },
-    {
-      "contentID": "relic.norse.runestone.frozen",
-      "kind": "relic",
-      "displayName": "Frozen Rune Stone",
-      "countsAsArtifact": true,
-      "availability": "seasonal-deferred",
-      "rarity": "Mythic",
-      "codexID": "codex.norse",
-      "notes": "No active v1 rule; requires a future approved Season catalog."
-    },
-    {
-      "contentID": "relic.norse.runestone.weathered",
-      "kind": "relic",
-      "displayName": "Weathered Rune Stone",
-      "countsAsArtifact": true,
-      "availability": "permanent",
+      "availability": "included",
       "rarity": "Forged",
       "codexID": "codex.norse"
     },
     {
-      "contentID": "relic.norse.sealed-parchment",
+      "contentID": "relic.norse.stormforged-stele",
       "kind": "relic",
-      "displayName": "Sealed Parchment",
+      "displayName": "Stormforged Stele",
       "countsAsArtifact": true,
       "availability": "permanent",
-      "rarity": "Inscribed",
+      "rarity": "Rare",
       "codexID": "codex.norse"
     },
     {
@@ -509,54 +481,54 @@
       "codexID": "codex.moonleaf"
     },
     {
-      "contentID": "seal.norse.echo-rune",
+      "contentID": "seal.norse.berserk",
       "kind": "seal",
-      "displayName": "Echo Rune Seal",
-      "countsAsArtifact": true,
-      "availability": "permanent",
-      "rarity": "Rare",
-      "codexID": "codex.norse"
-    },
-    {
-      "contentID": "seal.norse.forge-flame",
-      "kind": "seal",
-      "displayName": "Forge Flame",
-      "countsAsArtifact": true,
-      "availability": "included",
-      "rarity": "Forged",
-      "codexID": "codex.norse"
-    },
-    {
-      "contentID": "seal.norse.forge-hammer",
-      "kind": "seal",
-      "displayName": "Forge Hammer Seal",
+      "displayName": "Berserk Seal",
       "countsAsArtifact": true,
       "availability": "permanent",
       "rarity": "Inscribed",
       "codexID": "codex.norse"
     },
     {
-      "contentID": "seal.norse.knotwork",
+      "contentID": "seal.norse.mjolnir",
       "kind": "seal",
-      "displayName": "Knotwork Mark",
-      "countsAsArtifact": true,
-      "availability": "included",
-      "rarity": "Forged",
-      "codexID": "codex.norse"
-    },
-    {
-      "contentID": "seal.norse.longship",
-      "kind": "seal",
-      "displayName": "Longship Seal",
+      "displayName": "Mjolnir Seal",
       "countsAsArtifact": true,
       "availability": "permanent",
       "rarity": "Inscribed",
       "codexID": "codex.norse"
     },
     {
-      "contentID": "seal.norse.raven",
+      "contentID": "seal.norse.ravenshield",
       "kind": "seal",
-      "displayName": "Raven Seal",
+      "displayName": "Ravenshield Seal",
+      "countsAsArtifact": true,
+      "availability": "included",
+      "rarity": "Forged",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "seal.norse.valknut",
+      "kind": "seal",
+      "displayName": "Valknut Seal",
+      "countsAsArtifact": true,
+      "availability": "included",
+      "rarity": "Forged",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "seal.norse.wolkin",
+      "kind": "seal",
+      "displayName": "Wolkin Seal",
+      "countsAsArtifact": true,
+      "availability": "permanent",
+      "rarity": "Inscribed",
+      "codexID": "codex.norse"
+    },
+    {
+      "contentID": "seal.norse.yggdrasil",
+      "kind": "seal",
+      "displayName": "Yggdrasil Seal",
       "countsAsArtifact": true,
       "availability": "permanent",
       "rarity": "Inscribed",
@@ -714,6 +686,15 @@
       "availability": "permanent",
       "rarity": "Mythic",
       "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "title.norse.master-of-runes",
+      "kind": "title",
+      "displayName": "Master of Runes",
+      "countsAsArtifact": false,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.norse"
     },
     {
       "contentID": "title.wayfarer",
@@ -2538,10 +2519,9 @@
             "statisticID": "stat.codex.relic-used.unique",
             "bucketID": "codex.norse",
             "contentIDs": [
-              "relic.norse.runestone.weathered",
-              "relic.norse.raven-medallion",
-              "relic.norse.ironbound-shield",
-              "relic.norse.sealed-parchment"
+              "relic.norse.runestone-tablet",
+              "relic.norse.dragonwood-plaque",
+              "relic.norse.stormforged-stele"
             ]
           },
           {
@@ -2578,10 +2558,9 @@
           "statisticID": "stat.codex.relic-used.unique",
           "bucketID": "codex.norse",
           "contentIDs": [
-            "relic.norse.runestone.weathered",
-            "relic.norse.raven-medallion",
-            "relic.norse.ironbound-shield",
-            "relic.norse.sealed-parchment"
+            "relic.norse.runestone-tablet",
+            "relic.norse.dragonwood-plaque",
+            "relic.norse.stormforged-stele"
           ]
         },
         {
@@ -2616,15 +2595,15 @@
           "grantKind": "permanent"
         },
         {
-          "contentID": "relic.norse.runestone.weathered",
+          "contentID": "relic.norse.runestone-tablet",
           "grantKind": "permanent"
         },
         {
-          "contentID": "seal.norse.knotwork",
+          "contentID": "seal.norse.valknut",
           "grantKind": "permanent"
         },
         {
-          "contentID": "seal.norse.forge-flame",
+          "contentID": "seal.norse.ravenshield",
           "grantKind": "permanent"
         }
       ],
@@ -2636,23 +2615,23 @@
       "grantGroupID": "grant-group.first-inscription",
       "items": [
         {
-          "contentID": "seal.norse.raven",
+          "contentID": "seal.norse.mjolnir",
           "grantKind": "permanent"
         }
       ],
       "revealTier": "micro",
-      "primaryContentID": "seal.norse.raven"
+      "primaryContentID": "seal.norse.mjolnir"
     },
     {
       "grantGroupID": "grant-group.first-dispatch",
       "items": [
         {
-          "contentID": "relic.norse.raven-medallion",
+          "contentID": "relic.norse.dragonwood-plaque",
           "grantKind": "permanent"
         }
       ],
       "revealTier": "artifact",
-      "primaryContentID": "relic.norse.raven-medallion"
+      "primaryContentID": "relic.norse.dragonwood-plaque"
     },
     {
       "grantGroupID": "grant-group.echo-returns",
@@ -2669,34 +2648,34 @@
       "grantGroupID": "grant-group.correspondent",
       "items": [
         {
-          "contentID": "seal.norse.longship",
+          "contentID": "seal.norse.wolkin",
           "grantKind": "permanent"
         }
       ],
       "revealTier": "micro",
-      "primaryContentID": "seal.norse.longship"
+      "primaryContentID": "seal.norse.wolkin"
     },
     {
       "grantGroupID": "grant-group.courier-1",
       "items": [
         {
-          "contentID": "seal.norse.forge-hammer",
+          "contentID": "seal.norse.yggdrasil",
           "grantKind": "permanent"
         }
       ],
       "revealTier": "micro",
-      "primaryContentID": "seal.norse.forge-hammer"
+      "primaryContentID": "seal.norse.yggdrasil"
     },
     {
       "grantGroupID": "grant-group.courier-2",
       "items": [
         {
-          "contentID": "relic.norse.ironbound-shield",
+          "contentID": "relic.norse.stormforged-stele",
           "grantKind": "permanent"
         }
       ],
       "revealTier": "artifact",
-      "primaryContentID": "relic.norse.ironbound-shield"
+      "primaryContentID": "relic.norse.stormforged-stele"
     },
     {
       "grantGroupID": "grant-group.archivist-1",
@@ -2717,7 +2696,7 @@
           "grantKind": "permanent"
         },
         {
-          "contentID": "relic.norse.sealed-parchment",
+          "contentID": "seal.norse.berserk",
           "grantKind": "permanent"
         }
       ],
@@ -3222,27 +3201,28 @@
       "grantGroupID": "grant-group.codex.norse.echo-five",
       "items": [
         {
-          "contentID": "seal.norse.echo-rune",
+          "contentID": "seal.norse.yggdrasil",
           "grantKind": "permanent"
         }
       ],
       "revealTier": "micro",
-      "primaryContentID": "seal.norse.echo-rune"
+      "primaryContentID": "seal.norse.yggdrasil",
+      "notes": "Idempotent second route to Yggdrasil Seal; ownership and reveal are unchanged when Courier I already granted it."
     },
     {
       "grantGroupID": "grant-group.codex.norse.mastery",
       "items": [
         {
-          "contentID": "relic.norse.runestone.blackstone",
+          "contentID": "crest.norse.raven-mastery",
           "grantKind": "permanent"
         },
         {
-          "contentID": "crest.norse.forge-master",
+          "contentID": "title.norse.master-of-runes",
           "grantKind": "permanent"
         }
       ],
       "revealTier": "mastery",
-      "primaryContentID": "relic.norse.runestone.blackstone"
+      "primaryContentID": "crest.norse.raven-mastery"
     }
   ],
   "journeyGraph": {

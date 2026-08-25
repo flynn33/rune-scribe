@@ -716,6 +716,9 @@ final class RuneScribeUISession: ObservableObject {
             plan.backgroundReduceMotionResourceID,
             plan.backgroundHighContrastResourceID,
         ])
+        if let macOSWide = plan.backgroundMacOSWideResourceID {
+            imageResourceIDs.insert(macOSWide)
+        }
         for resourceID in imageResourceIDs.sorted() {
             guard let resource = resolved[resourceID],
                   let expected = references[resourceID]
@@ -746,6 +749,9 @@ final class RuneScribeUISession: ObservableObject {
             staticBase: staticBackgroundReference,
             reduceMotion: reduceMotionBackgroundReference,
             highContrast: highContrastBackgroundReference,
+            macOSWide: plan.backgroundMacOSWideResourceID.flatMap {
+                imageReferences[$0]
+            },
             rendererParametersData: parameters
         )
         let visualPresentation = ActiveThemeVisualPresentation(
@@ -826,6 +832,9 @@ final class RuneScribeUISession: ObservableObject {
         if let parameters = plan.backgroundRendererParametersResourceID {
             resourceIDs.insert(parameters)
         }
+        if let macOSWide = plan.backgroundMacOSWideResourceID {
+            resourceIDs.insert(macOSWide)
+        }
         resourceIDs.formUnion(plan.unlockAnimationResourceIDByTier.values)
         if let headings = plan.decorativeHeadingResourceID {
             resourceIDs.insert(headings)
@@ -846,7 +855,20 @@ final class RuneScribeUISession: ObservableObject {
             result[imagePlan.id] = imagePlan
         }
 
+        try insert(plan.codex.card)
+        try insert(plan.codex.locked)
+        try insert(plan.codex.encountered)
         try insert(plan.codex.selected)
+        try insert(plan.codex.unavailable)
+        for imagePlan in plan.script.images {
+            try insert(imagePlan)
+        }
+        for imagePlan in plan.chrome.images {
+            try insert(imagePlan)
+        }
+        for crest in plan.crests {
+            try insert(crest.thumbnail)
+        }
         if let relic = plan.selectedRelic {
             try insert(relic.thumbnail)
             try insert(relic.standard)
@@ -992,25 +1014,11 @@ final class RuneScribeUISession: ObservableObject {
         for provider in snapshot.providers where loaded[provider.codexID] == nil {
             if Task.isCancelled { return }
             guard themeAdoptionGeneration == generation else { return }
-            let expectedRole: ThemeResourceRoleID
-            switch provider.state {
-            case .available:
-                expectedRole = provider.isSelected
-                    ? ThemeResourceRoles.vaultSelected
-                    : ThemeResourceRoles.vaultCard
-            case .locked:
-                expectedRole = ThemeResourceRoles.vaultLockedSilhouette
-            case .unavailable, .incompatible, .invalidResources:
-                continue
-            }
+            let roleCandidates = Self.codexCardPreviewRoleCandidates(for: provider)
             guard let inventory = inventories[provider.codexID],
-                  let expected = inventory.resources.first(where: {
-                      $0.role == expectedRole
-                  }) ?? (provider.isSelected
-                      ? inventory.resources.first(where: {
-                          $0.role == ThemeResourceRoles.vaultCard
-                      })
-                      : nil)
+                  let expected = roleCandidates.lazy.compactMap({ role in
+                      inventory.resources.first(where: { $0.role == role })
+                  }).first
             else { continue }
 
             do {
@@ -1046,6 +1054,26 @@ final class RuneScribeUISession: ObservableObject {
               activeThemeVisualPresentation?.revision == active.revision
         else { return }
         themeCodexCardImageReferences = loaded
+    }
+
+    static func codexCardPreviewRoleCandidates(
+        for provider: ThemeProviderSummaryDTO
+    ) -> [ThemeResourceRoleID] {
+        if provider.isSelected {
+            return [ThemeResourceRoles.vaultSelected, ThemeResourceRoles.vaultCard]
+        }
+        switch provider.state {
+        case .available:
+            return [
+                provider.isOwned
+                    ? ThemeResourceRoles.vaultCard
+                    : ThemeResourceRoles.vaultLockedSilhouette,
+            ]
+        case .locked:
+            return [ThemeResourceRoles.vaultLockedSilhouette]
+        case .unavailable, .incompatible, .invalidResources:
+            return [ThemeResourceRoles.vaultUnavailable]
+        }
     }
 
     private func adoptImportPresentation(_ state: ImportStateDTO) {

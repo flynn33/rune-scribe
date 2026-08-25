@@ -378,6 +378,14 @@ private enum ThemeFidelityTheme: String, CaseIterable, Codable, Sendable {
         }
     }
     var codexID: CodexID { descriptor.codex.id }
+    var masteryTitleID: TitleID {
+        switch self {
+        case .norse:
+            TitleID(rawValue: "title.norse.master-of-runes")!
+        case .moonleaf, .sunspire, .wildwood, .gloamthorn:
+            TitleID(rawValue: "title.\(slug).mastery")!
+        }
+    }
 }
 
 private struct ThemeFidelityDestination: Equatable, Sendable {
@@ -1911,7 +1919,7 @@ private struct ThemeFidelityRoute {
                 isHidden: false,
                 localPointWeight: 5,
                 rewards: try ProgressionRewardSummaryDTO(
-                    contentIDs: [ArtifactID(rawValue: "seal.norse.raven")!]
+                    contentIDs: [ArtifactID(rawValue: "seal.norse.mjolnir")!]
                 )
             )]
         }
@@ -1973,7 +1981,7 @@ private struct ThemeFidelityRoute {
            let crestID = CrestID(rawValue: crest.metadata.id.rawValue) {
             secondary.append(.crest(crestID))
         }
-        secondary.append(.title(TitleID(rawValue: "title.\(model.theme.slug).mastery")!))
+        secondary.append(.title(model.theme.masteryTitleID))
         return try ProgressionRevealSummaryDTO(
             revealID: RevealID(rawValue: "reveal.\(model.theme.slug).mastery")!,
             transactionID: GrantTransactionID(

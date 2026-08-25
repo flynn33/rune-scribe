@@ -30,7 +30,10 @@ THEMES = (
         "theme": "Norse",
         "module": "RuneScribeNorseThemeModule",
         "production": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production",
-        "manifest": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json",
+        "manifest": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json",
+        "controlManifests": [
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Production-Asset-Provenance-v2.0.json",
+        ],
         "records": "resources",
         "id": "resourceHandle",
         "bytes": "byteLength",
@@ -237,11 +240,16 @@ def inventory_theme(root: Path, definition: Dict[str, str]) -> Tuple[Dict[str, A
     }
     actual_paths.update(path for path in declared if path.is_file())
     manifest_resolved = manifest_path.resolve()
+    control_manifests = {manifest_resolved}
+    control_manifests.update(
+        (root / path).resolve()
+        for path in definition.get("controlManifests", [])
+    )
 
     for path in sorted(actual_paths):
         relative = path.relative_to(resource_root.resolve()).as_posix()
         record = declared.get(path)
-        is_control_manifest = path == manifest_resolved
+        is_control_manifest = path in control_manifests
         digest = sha256_file(path)
         byte_count = path.stat().st_size
         resource_id = record.get(definition["id"]) if record else None
@@ -254,7 +262,13 @@ def inventory_theme(root: Path, definition: Dict[str, str]) -> Tuple[Dict[str, A
             "byteLength": byte_count,
             "sha256": digest,
             "resourceID": resource_id,
-            "role": record.get(definition["role"]) if record else "integrity-manifest" if is_control_manifest else None,
+            "role": record.get(definition["role"]) if record else (
+                "integrity-manifest"
+                if path == manifest_resolved
+                else "production-provenance"
+                if is_control_manifest
+                else None
+            ),
             "declared": record is not None,
             "controlManifest": is_control_manifest,
             "consumedBySource": isinstance(resource_id, str) and resource_id in corpus,
