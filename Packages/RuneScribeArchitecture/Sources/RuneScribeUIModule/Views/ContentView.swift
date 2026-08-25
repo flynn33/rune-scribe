@@ -134,8 +134,15 @@ struct ContentView: View {
     /// One glyph size shared by the editor and the inscription so the text never
     /// changes size when it transforms — only the glyphs change.
     private let glyphSize: CGFloat = 20
+    private let initialViewportProbeID: String
 
-    init(initialSettledArtifact: ContentViewSettledArtifactSeed? = nil) {
+    init(
+        initialInputText: String = "",
+        initialSettledArtifact: ContentViewSettledArtifactSeed? = nil,
+        initialViewportProbeID: String = "workspace.text-frame"
+    ) {
+        self.initialViewportProbeID = initialViewportProbeID
+        _inputText = State(initialValue: initialInputText)
         guard let initialSettledArtifact else { return }
         _boxPhase = State(initialValue: .result)
         _targetSnapshot = State(
@@ -416,7 +423,10 @@ struct ContentView: View {
                                         direction: transformDirection,
                                         fontSize: glyphSize,
                                         fontName: session.inscriptionFontPostScriptName,
+                                        fontResourceID: session.inscriptionFontResourceID,
                                         vectorDataByToken: session.inscriptionVectorDataByToken,
+                                        vectorResourceIDByToken:
+                                            session.inscriptionVectorResourceIDByToken,
                                         settled: boxPhase == .result)
                         .padding(.horizontal, 15)
                         .padding(.vertical, 15)
@@ -441,7 +451,10 @@ struct ContentView: View {
                                             direction: transformDirection,
                                             fontSize: glyphSize,
                                             fontName: session.inscriptionFontPostScriptName,
+                                            fontResourceID: session.inscriptionFontResourceID,
                                             vectorDataByToken: session.inscriptionVectorDataByToken,
+                                            vectorResourceIDByToken:
+                                                session.inscriptionVectorResourceIDByToken,
                                             settled: true)
                             .padding(.horizontal, 15)
                             .padding(.vertical, 15)
@@ -456,6 +469,7 @@ struct ContentView: View {
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
                 .strokeBorder(Color.runeBlue.opacity(0.35), lineWidth: 1)
         )
+        .runtimeViewportFrameProbe(initialViewportProbeID)
     }
 
     // MARK: - Action Area

@@ -377,12 +377,28 @@ final class RuneScribeUISession: ObservableObject {
         )
     }
 
+    var inscriptionFontResourceID: ThemeResourceID? {
+        guard ThemeScriptFontSelector.usesThemeVectors(
+            cipherFontSource: activeCipher?.fontSource,
+            cipherFontIsRegistered: activeCipher?.fontIsRegistered ?? false
+        ) else { return nil }
+        return themeScriptPresentation.fontResourceID
+    }
+
     var inscriptionVectorDataByToken: [String: Data] {
         guard ThemeScriptFontSelector.usesThemeVectors(
             cipherFontSource: activeCipher?.fontSource,
             cipherFontIsRegistered: activeCipher?.fontIsRegistered ?? false
         ) else { return [:] }
         return themeScriptPresentation.vectorDataByToken
+    }
+
+    var inscriptionVectorResourceIDByToken: [String: ThemeResourceID] {
+        guard ThemeScriptFontSelector.usesThemeVectors(
+            cipherFontSource: activeCipher?.fontSource,
+            cipherFontIsRegistered: activeCipher?.fontIsRegistered ?? false
+        ) else { return [:] }
+        return themeScriptPresentation.vectorResourceIDByToken
     }
 
     var contacts: [ContactViewState] {
@@ -750,7 +766,9 @@ final class RuneScribeUISession: ObservableObject {
         themeScriptPresentation = ThemeScriptPresentation(
             scriptID: plan.scriptID,
             fontPostScriptName: registeredFontName,
-            vectorDataByToken: vectorData
+            fontResourceID: plan.fontResourceID,
+            vectorDataByToken: vectorData,
+            vectorResourceIDByToken: plan.vectorResourceIDByToken
         )
         themeUnlockAnimationDataByTier = Dictionary(
             uniqueKeysWithValues: plan.unlockAnimationResourceIDByTier.compactMap {

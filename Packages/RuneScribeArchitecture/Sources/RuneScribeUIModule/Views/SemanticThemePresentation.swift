@@ -435,16 +435,40 @@ enum RuneThemeHeadingInterpreter {
     static func reset() { current = [:] }
 }
 
+@MainActor
+enum RuntimeThemeSemanticResourceUseObservation {
+    private static var observer: ((ThemeResourceID) -> Void)?
+
+    static func begin(_ observer: @escaping (ThemeResourceID) -> Void) {
+        self.observer = observer
+    }
+
+    static func end() {
+        observer = nil
+    }
+
+    @discardableResult
+    static func report(_ resourceID: ThemeResourceID) -> Bool {
+        guard let observer else { return false }
+        observer(resourceID)
+        return true
+    }
+}
+
 struct ThemeScriptPresentation: Equatable, Sendable {
     static let baseFallback = ThemeScriptPresentation(
         scriptID: ScriptID(rawValue: "script.base-runes")!,
         fontPostScriptName: "NotoSansRunic-Regular",
-        vectorDataByToken: [:]
+        fontResourceID: nil,
+        vectorDataByToken: [:],
+        vectorResourceIDByToken: [:]
     )
 
     let scriptID: ScriptID
     let fontPostScriptName: String
+    let fontResourceID: ThemeResourceID?
     let vectorDataByToken: [String: Data]
+    let vectorResourceIDByToken: [String: ThemeResourceID]
 }
 
 enum ThemePresentationResourceError: Error, Equatable, Sendable {

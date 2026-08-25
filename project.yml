@@ -288,6 +288,7 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: RuneScribIOSTests
+      - path: ThemeFidelityTests
       - path: Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift
         group: CompatibilityMatrix
     dependencies:
@@ -382,6 +383,7 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: RuneScribMacParityTests
+      - path: ThemeFidelityTests
       - path: Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift
         group: CompatibilityMatrix
     dependencies:
@@ -449,7 +451,7 @@ schemes:
     build:
       targets:
         RuneScribMacParityHost: all
-        RuneScribMacParityTests: all
+        RuneScribMacParityTests: [test]
     test:
       targets:
         - RuneScribMacParityTests

@@ -59,6 +59,12 @@ public enum RuntimeThemeImageKind: String, Equatable, Hashable, Sendable {
     case vectorPDF = "vector-pdf"
 }
 
+struct RuntimeThemeRenderedResourceIdentity: Equatable, Hashable, Sendable {
+    let codexID: CodexID
+    let resourceID: ThemeResourceID
+    let contentRevision: UInt64
+}
+
 private struct RuntimeThemeDecodedResourceKey: Hashable, Sendable {
     let codexID: CodexID?
     let resourceID: ThemeResourceID?
@@ -111,6 +117,8 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
     private var retainedKeyCounts: [RuntimeThemeDecodedResourceKey: Int] = [:]
     private var accessOrder: UInt64 = 0
     private var memoryPressureSource: (any DispatchSourceMemoryPressure)?
+    private var renderedResourceObserver:
+        ((RuntimeThemeRenderedResourceIdentity) -> Void)?
 
     private(set) var totalEncodedByteCount = 0
     private(set) var totalDecodedByteCount = 0
@@ -282,14 +290,21 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         return image(for: handle)
     }
 
-    func image(for handle: RuntimeThemeDecodedImageHandle) -> Image? {
+    func image(
+        for handle: RuntimeThemeDecodedImageHandle,
+        recordsRenderedResource: Bool = true
+    ) -> Image? {
         guard var encodedEntry = encodedEntries[handle.key] else { return nil }
         encodedEntry.accessOrder = nextAccessOrder()
         encodedEntries[handle.key] = encodedEntry
         if var entry = decodedEntries[handle.key] {
             entry.accessOrder = nextAccessOrder()
             decodedEntries[handle.key] = entry
-            return entry.image.map(Self.swiftUIImage)
+            guard let image = entry.image.map(Self.swiftUIImage) else { return nil }
+            if recordsRenderedResource {
+                recordRenderedResource(for: handle)
+            }
+            return image
         }
         guard handle.decodedByteCount <= decodedByteLimit else {
             return nil
@@ -314,7 +329,21 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         )
         totalDecodedByteCount += actualByteCount
         decodedImageCreationCount += 1
-        return Self.swiftUIImage(decodedImage)
+        let image = Self.swiftUIImage(decodedImage)
+        if recordsRenderedResource {
+            recordRenderedResource(for: handle)
+        }
+        return image
+    }
+
+    func beginRenderedResourceObservation(
+        _ observer: @escaping (RuntimeThemeRenderedResourceIdentity) -> Void
+    ) {
+        renderedResourceObserver = observer
+    }
+
+    func endRenderedResourceObservation() {
+        renderedResourceObserver = nil
     }
 
     func validateImage(_ handle: RuntimeThemeDecodedImageHandle) -> Bool {
@@ -606,6 +635,23 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         accessOrder &+= 1
         return accessOrder
     }
+
+    private func recordRenderedResource(
+        for handle: RuntimeThemeDecodedImageHandle
+    ) {
+        guard let renderedResourceObserver,
+              let codexID = handle.key.codexID,
+              let resourceID = handle.key.resourceID,
+              let contentRevision = handle.key.contentRevision
+        else { return }
+        renderedResourceObserver(
+            RuntimeThemeRenderedResourceIdentity(
+                codexID: codexID,
+                resourceID: resourceID,
+                contentRevision: contentRevision
+            )
+        )
+    }
 }
 
 @MainActor
@@ -625,7 +671,7 @@ final class RuntimeThemeDecodedResourceReference: ObservableObject {
     }
 
     var image: Image? {
-        handle.flatMap(cache.image(for:))
+        handle.flatMap { cache.image(for: $0) }
     }
 
     deinit {
@@ -1102,6 +1148,16 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         }
     }
 
+    func beginRenderedResourceObservation(
+        _ observer: @escaping (RuntimeThemeRenderedResourceIdentity) -> Void
+    ) {
+        decodedResourceCache.beginRenderedResourceObservation(observer)
+    }
+
+    func endRenderedResourceObservation() {
+        decodedResourceCache.endRenderedResourceObservation()
+    }
+
     public func makeThemeImageReference(
         resolvedResource: ResolvedThemeResourceDTO,
         expectedReference: ThemeResourceReference,
@@ -1196,7 +1252,10 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
             decodedResourceCache.discardIfUnretained([handle])
             throw RuntimeThemeImageReferenceError.pixelDimensionsMismatch
         }
-        guard decodedResourceCache.image(for: handle) != nil else {
+        guard decodedResourceCache.image(
+            for: handle,
+            recordsRenderedResource: false
+        ) != nil else {
             decodedResourceCache.discardIfUnretained([handle])
             throw RuntimeThemeImageReferenceError.cacheCapacityExceeded
         }
@@ -1341,6 +1400,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
     public func close() async {
         guard !isClosed else { return }
         isClosed = true
+        decodedResourceCache.endRenderedResourceObservation()
         let releasedHandles = themeBackgroundConfiguration?.imageHandles ?? []
         themeBackgroundConfiguration = nil
         themeBackgroundRevision &+= 1

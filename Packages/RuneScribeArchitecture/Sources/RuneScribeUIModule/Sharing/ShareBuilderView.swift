@@ -15,6 +15,11 @@ enum ShareBuilderKeyboardFocusTarget: String, CaseIterable, Hashable, Sendable {
 
 }
 
+enum ShareBuilderInitialViewport: String, Sendable {
+    case controls
+    case preview
+}
+
 struct ShareBuilderView: View {
     @EnvironmentObject private var session: RuneScribeUISession
     @Environment(\.dismiss) private var dismiss
@@ -26,16 +31,19 @@ struct ShareBuilderView: View {
     private let onLifecycleEnded: () -> Void
     private let initialCatalog: ShareBuilderCatalog?
     private let onKeyboardFocusChanged: (ShareBuilderKeyboardFocusTarget?) -> Void
+    private let initialViewport: ShareBuilderInitialViewport?
 
     init(
         source: ShareBuilderSource,
         onLifecycleEnded: @escaping () -> Void = {},
         initialCatalog: ShareBuilderCatalog? = nil,
+        initialViewport: ShareBuilderInitialViewport? = nil,
         onKeyboardFocusChanged: @escaping (ShareBuilderKeyboardFocusTarget?) -> Void = { _ in }
     ) {
         self.source = source
         self.onLifecycleEnded = onLifecycleEnded
         self.initialCatalog = initialCatalog
+        self.initialViewport = initialViewport
         self.onKeyboardFocusChanged = onKeyboardFocusChanged
         _catalog = State(initialValue: initialCatalog)
         _isLoadingCatalog = State(initialValue: initialCatalog == nil)
@@ -76,19 +84,28 @@ struct ShareBuilderView: View {
                 ProgressView("Loading appearance defaults…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let catalog {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
-                        codexPanel(catalog)
-                        artifactPanel(catalog)
-                        extrasPanel(catalog)
-                        previewPanel
-                        securitySummary
-                        defaultsActions(catalog)
-                        shareAction
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
+                            codexPanel(catalog)
+                                .id(ShareBuilderInitialViewport.controls.rawValue)
+                            artifactPanel(catalog)
+                            extrasPanel(catalog)
+                            previewPanel
+                                .id(ShareBuilderInitialViewport.preview.rawValue)
+                            securitySummary
+                            defaultsActions(catalog)
+                            shareAction
+                        }
+                        .padding(RuneMetrics.pad)
+                        .frame(maxWidth: 760)
+                        .frame(maxWidth: .infinity)
                     }
-                    .padding(RuneMetrics.pad)
-                    .frame(maxWidth: 760)
-                    .frame(maxWidth: .infinity)
+                    .task(id: initialViewport) {
+                        guard let initialViewport else { return }
+                        await Task.yield()
+                        proxy.scrollTo(initialViewport.rawValue, anchor: .top)
+                    }
                 }
             } else {
                 ContentUnavailableView(
@@ -112,6 +129,7 @@ struct ShareBuilderView: View {
         }
         .onDisappear { endLifecycle() }
         .accessibilityIdentifier("share-builder")
+        .runtimeViewportFrameProbe("share-builder")
     }
 
     private func codexPanel(_ catalog: ShareBuilderCatalog) -> some View {

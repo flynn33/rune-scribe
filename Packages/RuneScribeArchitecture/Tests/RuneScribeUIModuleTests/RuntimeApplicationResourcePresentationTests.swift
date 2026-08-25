@@ -462,6 +462,65 @@ final class RuntimeApplicationResourcePresentationTests: XCTestCase {
         XCTAssertEqual(cache.retainedEntryCount, 2)
     }
 
+    func testRenderedResourceObservationReportsSuccessfulImageAccessOnly() throws {
+        let fixture = try makeThemeImageContractFixture()
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: nil
+        )
+        var observedIdentities: [RuntimeThemeRenderedResourceIdentity] = []
+        presentation.beginRenderedResourceObservation {
+            observedIdentities.append($0)
+        }
+
+        let reference = try presentation.makeThemeImageReference(
+            resolvedResource: fixture.resolved,
+            expectedReference: fixture.reference,
+            expectedCodexID: fixture.codexID,
+            contentRevision: 47
+        )
+
+        XCTAssertTrue(observedIdentities.isEmpty)
+        XCTAssertNotNil(reference.image)
+        XCTAssertEqual(
+            observedIdentities,
+            [
+                RuntimeThemeRenderedResourceIdentity(
+                    codexID: fixture.codexID,
+                    resourceID: fixture.reference.id,
+                    contentRevision: 47
+                ),
+            ]
+        )
+        presentation.endRenderedResourceObservation()
+    }
+
+    func testRenderedResourceObservationIsInertByDefaultAndEndClearsIt() throws {
+        let fixture = try makeThemeImageContractFixture()
+        let presentation = RuntimeApplicationResourcePresentation(
+            splashVideo: nil,
+            metalLibrary: nil
+        )
+        let reference = try presentation.makeThemeImageReference(
+            resolvedResource: fixture.resolved,
+            expectedReference: fixture.reference,
+            expectedCodexID: fixture.codexID,
+            contentRevision: 53
+        )
+        var observedIdentities: [RuntimeThemeRenderedResourceIdentity] = []
+
+        XCTAssertNotNil(reference.image)
+        presentation.beginRenderedResourceObservation {
+            observedIdentities.append($0)
+        }
+        XCTAssertNotNil(reference.image)
+        XCTAssertEqual(observedIdentities.count, 1)
+
+        presentation.endRenderedResourceObservation()
+        XCTAssertNotNil(reference.image)
+        XCTAssertEqual(observedIdentities.count, 1)
+    }
+
     func testThemeImageReferenceRejectsForgedContentMediaAndDimensions() throws {
         let fixture = try makeThemeImageContractFixture()
         let presentation = RuntimeApplicationResourcePresentation(

@@ -121,6 +121,7 @@ struct ThemeCodexCardView<Artwork: View>: View {
         .accessibilityValue(state.rawValue)
         .accessibilityHint(accessibilityHint)
         .accessibilityIdentifier("\(identifierPrefix).\(codexID.rawValue)")
+        .runtimeViewportFrameProbe("\(identifierPrefix).\(codexID.rawValue)")
     }
 }
 
@@ -264,6 +265,7 @@ struct ThemeArtifactTile<Artwork: View>: View {
         .accessibilityValue(accessibilityValue)
         .accessibilityHint(item.accessibilityHint ?? "")
         .accessibilityIdentifier("\(identifierPrefix).\(item.id.rawValue)")
+        .runtimeViewportFrameProbe("\(identifierPrefix).\(item.id.rawValue)")
     }
 
     private var tileContent: some View {
@@ -345,6 +347,7 @@ struct ThemeArtifactBrowserView<Artwork: View>: View {
         }
         .navigationTitle(title)
         .accessibilityIdentifier("theme.artifact-picker")
+        .runtimeViewportFrameProbe("theme.artifact-picker")
     }
 
     private var columns: [GridItem] {
@@ -394,6 +397,7 @@ struct ThemeArtifactPreview: View {
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("theme.artifact-preview")
+        .runtimeViewportFrameProbe("theme.artifact-preview")
         .onChange(of: plan.selection) { _, _ in pageIndex = 0 }
     }
 

@@ -132,6 +132,8 @@ struct ReceivedPresentationSummary: View {
                     .scaledToFit()
                     .aspectRatio(4.0 / 3.0, contentMode: .fit)
                     .accessibilityLabel(Text(model.safePreviewTitle))
+                    .accessibilityIdentifier("received.safe-preview")
+                    .runtimeViewportFrameProbe("received.safe-preview")
             }
             Text("Sender Codex: \(model.codexTitle)")
                 .font(.caption)

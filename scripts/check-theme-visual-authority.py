@@ -47,7 +47,39 @@ ASSET_KEYS = {
     "role",
     "tier",
 }
-COMPARISON_KEYS = {"id", "reference", "mask", "focalRegion"}
+LEGACY_COMPARISON_KEYS = {"id", "capture", "reference", "mask", "focalRegion"}
+RESPONSIVE_COMPARISON_KEYS = {
+    "id",
+    "capture",
+    "policy",
+    "stateSeedSHA256",
+    "regions",
+    "layoutAssertions",
+}
+RESPONSIVE_REGION_KEYS = {
+    "id",
+    "reference",
+    "sourceCrop",
+    "sourceCropSHA256",
+    "candidateElementID",
+    "mask",
+    "thresholds",
+}
+LAYOUT_ASSERTION_KEYS = {
+    "requiredElementIDs",
+    "withinViewportElementIDs",
+    "requireNoClippedElements",
+}
+RESPONSIVE_POLICY = "responsive-regions-v1"
+PLATFORM_MASK_ROLE = "platform-controlled-mask"
+FIXED_THRESHOLDS = {
+    "luminanceSSIM": 0.92,
+    "edgeSSIM": 0.94,
+    "focalSSIM": 0.95,
+    "medianDeltaE": 4.0,
+    "p95DeltaE": 12.0,
+    "maxFractionDeltaEAbove20": 0.02,
+}
 SHA256_PATTERN = re.compile(r"[0-9a-f]{64}\Z")
 IDENTIFIER_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
 PLACEHOLDER_PATTERN = re.compile(
@@ -112,6 +144,22 @@ def image_dimensions(path: Path) -> Tuple[int, int]:
     with Image.open(path) as image:
         image.load()
         return image.size
+
+
+def source_crop_sha256(path: Path, region: Sequence[int]) -> str:
+    """Hash the golden identity, crop coordinates, and canonical RGB pixels."""
+    x, y, width, height = region
+    with Image.open(path) as image:
+        image.load()
+        pixels = image.convert("RGB").crop((x, y, x + width, y + height)).tobytes()
+    digest = hashlib.sha256()
+    digest.update(b"responsive-regions-v1\0rgb\0")
+    digest.update(sha256_file(path).encode("ascii"))
+    digest.update(b"\0")
+    for value in (x, y, width, height):
+        digest.update(value.to_bytes(8, byteorder="big", signed=False))
+    digest.update(pixels)
+    return digest.hexdigest()
 
 
 def placeholder_reason(path: Path, role: Optional[str] = None) -> Optional[str]:
@@ -499,28 +547,13 @@ class AuthorityChecker:
             )
             return
         identifiers: Set[str] = set()
+        captures: Set[str] = set()
         for index, record in enumerate(comparisons):
             label = "comparisons[{}]".format(index)
             if not isinstance(record, dict):
                 self.add("invalid-comparison-record", label, "comparison must be an object")
                 continue
-            unknown = sorted(set(record) - COMPARISON_KEYS)
-            required = {"id", "reference", "focalRegion"}
-            missing = sorted(required - set(record))
-            if unknown:
-                self.add(
-                    "unknown-comparison-field",
-                    label,
-                    "unknown fields: {}".format(", ".join(unknown)),
-                )
-            if missing:
-                self.add(
-                    "missing-comparison-field",
-                    label,
-                    "missing fields: {}".format(", ".join(missing)),
-                )
-                continue
-            identifier = record["id"]
+            identifier = record.get("id")
             if not isinstance(identifier, str) or IDENTIFIER_PATTERN.fullmatch(identifier) is None:
                 self.add(
                     "invalid-comparison-id",
@@ -532,44 +565,347 @@ class AuthorityChecker:
             else:
                 identifiers.add(identifier)
 
-            reference = record["reference"]
+            capture = record.get("capture")
+            if capture is not None:
+                if not self.valid_capture_name(capture):
+                    self.add(
+                        "invalid-comparison-capture",
+                        label,
+                        "capture must be a canonical PNG filename",
+                    )
+                elif capture in captures:
+                    self.add(
+                        "duplicate-comparison-capture",
+                        label,
+                        "capture is mapped more than once",
+                    )
+                else:
+                    captures.add(capture)
+
+            if record.get("policy") == RESPONSIVE_POLICY:
+                self.validate_responsive_comparison(record, label)
+            else:
+                self.validate_legacy_comparison(record, label)
+
+    def validate_legacy_comparison(self, record: Dict[str, Any], label: str) -> None:
+        unknown = sorted(set(record) - LEGACY_COMPARISON_KEYS)
+        required = {"id", "reference", "focalRegion"}
+        missing = sorted(required - set(record))
+        if unknown:
+            self.add(
+                "unknown-comparison-field",
+                label,
+                "unknown fields: {}".format(", ".join(unknown)),
+            )
+        if missing:
+            self.add(
+                "missing-comparison-field",
+                label,
+                "missing fields: {}".format(", ".join(missing)),
+            )
+            return
+
+        reference = record["reference"]
+        reference_record = self.declared_assets.get(reference)
+        if reference_record is None:
+            self.add(
+                "unknown-comparison-reference",
+                label,
+                "reference must name a declared authority asset",
+            )
+            return
+        dimensions = reference_record.get("dimensions")
+        focal = record["focalRegion"]
+        if not self.valid_region(focal, dimensions):
+            self.add(
+                "invalid-focal-region",
+                label,
+                "focalRegion must be an in-bounds x,y,width,height rectangle at least 7 pixels wide and high",
+            )
+        mask = record.get("mask")
+        if mask is not None:
+            mask_record = self.declared_assets.get(mask)
+            if mask_record is None:
+                self.add(
+                    "unknown-comparison-mask",
+                    label,
+                    "mask must name a declared authority asset",
+                )
+            elif "mask" not in str(mask_record.get("role", "")).lower():
+                self.add(
+                    "invalid-comparison-mask-role",
+                    mask,
+                    "comparison mask must use a mask role",
+                )
+            elif mask_record.get("dimensions") != dimensions:
+                self.add(
+                    "comparison-mask-dimensions",
+                    mask,
+                    "comparison mask dimensions must match its reference",
+                )
+
+    def validate_responsive_comparison(
+        self, record: Dict[str, Any], label: str
+    ) -> None:
+        unknown = sorted(set(record) - RESPONSIVE_COMPARISON_KEYS)
+        missing = sorted(RESPONSIVE_COMPARISON_KEYS - set(record))
+        if unknown:
+            self.add(
+                "unknown-responsive-comparison-field",
+                label,
+                "unknown fields: {}".format(", ".join(unknown)),
+            )
+        if missing:
+            self.add(
+                "missing-responsive-comparison-field",
+                label,
+                "missing fields: {}".format(", ".join(missing)),
+            )
+            return
+
+        seed_digest = record.get("stateSeedSHA256")
+        if not isinstance(seed_digest, str) or SHA256_PATTERN.fullmatch(seed_digest) is None:
+            self.add(
+                "invalid-responsive-seed-digest",
+                label,
+                "stateSeedSHA256 must be a lowercase SHA-256",
+            )
+
+        raw_regions = record.get("regions")
+        if not isinstance(raw_regions, list) or not raw_regions:
+            self.add(
+                "invalid-responsive-regions",
+                label,
+                "regions must be a non-empty array",
+            )
+            return
+
+        region_ids: List[str] = []
+        candidate_ids: Set[str] = set()
+        for index, region in enumerate(raw_regions):
+            region_label = "{}.regions[{}]".format(label, index)
+            if not isinstance(region, dict):
+                self.add(
+                    "invalid-responsive-region",
+                    region_label,
+                    "region must be an object",
+                )
+                continue
+            unknown = sorted(set(region) - RESPONSIVE_REGION_KEYS)
+            missing = sorted(RESPONSIVE_REGION_KEYS - set(region))
+            if unknown:
+                self.add(
+                    "unknown-responsive-region-field",
+                    region_label,
+                    "unknown fields: {}".format(", ".join(unknown)),
+                )
+            if missing:
+                self.add(
+                    "missing-responsive-region-field",
+                    region_label,
+                    "missing fields: {}".format(", ".join(missing)),
+                )
+                continue
+
+            region_id = region.get("id")
+            if not isinstance(region_id, str) or IDENTIFIER_PATTERN.fullmatch(region_id) is None:
+                self.add(
+                    "invalid-responsive-region-id",
+                    region_label,
+                    "id must be a stable identifier",
+                )
+            else:
+                region_ids.append(region_id)
+
+            candidate_id = region.get("candidateElementID")
+            if not isinstance(candidate_id, str) or IDENTIFIER_PATTERN.fullmatch(candidate_id) is None:
+                self.add(
+                    "invalid-candidate-element-id",
+                    region_label,
+                    "candidateElementID must be a stable identifier",
+                )
+            else:
+                candidate_ids.add(candidate_id)
+
+            if region.get("thresholds") != FIXED_THRESHOLDS:
+                self.add(
+                    "responsive-threshold-mutation",
+                    region_label,
+                    "thresholds must exactly match the fixed visual-fidelity policy",
+                )
+
+            reference = region.get("reference")
             reference_record = self.declared_assets.get(reference)
             if reference_record is None:
                 self.add(
-                    "unknown-comparison-reference",
-                    label,
+                    "unknown-responsive-reference",
+                    region_label,
                     "reference must name a declared authority asset",
                 )
                 continue
-            dimensions = reference_record.get("dimensions")
-            focal = record["focalRegion"]
-            if not self.valid_region(focal, dimensions):
+            if not isinstance(reference, str) or Path(reference).parts[:1] != ("goldens",):
                 self.add(
-                    "invalid-focal-region",
-                    label,
-                    "focalRegion must be an in-bounds x,y,width,height rectangle at least 7 pixels wide and high",
+                    "responsive-reference-not-golden",
+                    region_label,
+                    "responsive source crops must come from hash-pinned goldens",
                 )
-            mask = record.get("mask")
+
+            dimensions = reference_record.get("dimensions")
+            crop = region.get("sourceCrop")
+            if not self.valid_region(crop, dimensions):
+                self.add(
+                    "invalid-responsive-source-crop",
+                    region_label,
+                    "sourceCrop must be an in-bounds x,y,width,height rectangle at least 7 pixels wide and high",
+                )
+                continue
+            crop_digest = region.get("sourceCropSHA256")
+            if not isinstance(crop_digest, str) or SHA256_PATTERN.fullmatch(crop_digest) is None:
+                self.add(
+                    "invalid-responsive-crop-digest",
+                    region_label,
+                    "sourceCropSHA256 must be a lowercase SHA-256",
+                )
+            reference_path = self.resolve_authority_asset(
+                reference, "{}.reference".format(region_label)
+            )
+            if reference_path is not None and reference_path.is_file():
+                try:
+                    actual_crop_digest = source_crop_sha256(reference_path, crop)
+                except (OSError, UnidentifiedImageError, ValueError) as error:
+                    self.add(
+                        "invalid-responsive-source-crop",
+                        region_label,
+                        "source crop cannot be decoded: {}".format(error),
+                    )
+                else:
+                    if crop_digest != actual_crop_digest:
+                        self.add(
+                            "stale-responsive-crop-digest",
+                            region_label,
+                            "source crop pixels do not match sourceCropSHA256",
+                        )
+
+            mask = region.get("mask")
             if mask is not None:
                 mask_record = self.declared_assets.get(mask)
                 if mask_record is None:
                     self.add(
-                        "unknown-comparison-mask",
-                        label,
+                        "unknown-responsive-mask",
+                        region_label,
                         "mask must name a declared authority asset",
                     )
-                elif "mask" not in str(mask_record.get("role", "")).lower():
+                elif str(mask_record.get("role", "")).lower() != PLATFORM_MASK_ROLE:
                     self.add(
-                        "invalid-comparison-mask-role",
+                        "responsive-mask-not-platform-only",
                         mask,
-                        "comparison mask must use a mask role",
+                        "responsive masks must use the platform-controlled-mask role",
                     )
-                elif mask_record.get("dimensions") != dimensions:
+                elif mask_record.get("dimensions") != crop[2:4]:
                     self.add(
-                        "comparison-mask-dimensions",
+                        "responsive-mask-dimensions",
                         mask,
-                        "comparison mask dimensions must match its reference",
+                        "responsive mask dimensions must match sourceCrop width and height",
                     )
+                else:
+                    mask_path = self.resolve_authority_asset(
+                        mask, "{}.mask".format(region_label)
+                    )
+                    if mask_path is not None and mask_path.is_file():
+                        try:
+                            with Image.open(mask_path) as image:
+                                image.load()
+                                values = set(image.convert("L").getdata())
+                        except (OSError, UnidentifiedImageError) as error:
+                            self.add(
+                                "invalid-responsive-mask",
+                                mask,
+                                "responsive mask cannot be decoded: {}".format(error),
+                            )
+                        else:
+                            if not values.issubset({0, 255}):
+                                self.add(
+                                    "invalid-responsive-mask",
+                                    mask,
+                                    "responsive mask must contain only black and white pixels",
+                                )
+                            elif 255 not in values:
+                                self.add(
+                                    "invalid-responsive-mask",
+                                    mask,
+                                    "responsive mask excludes every pixel",
+                                )
+
+        if region_ids != sorted(region_ids) or len(region_ids) != len(set(region_ids)):
+            self.add(
+                "responsive-region-order",
+                label,
+                "regions must be sorted by unique id",
+            )
+
+        layout = record.get("layoutAssertions")
+        if not isinstance(layout, dict) or set(layout) != LAYOUT_ASSERTION_KEYS:
+            self.add(
+                "invalid-layout-assertions",
+                label,
+                "layoutAssertions must contain only requiredElementIDs, withinViewportElementIDs, and requireNoClippedElements",
+            )
+            return
+        required_ids = self.valid_identifier_list(
+            layout.get("requiredElementIDs"), "requiredElementIDs", label
+        )
+        within_ids = self.valid_identifier_list(
+            layout.get("withinViewportElementIDs"), "withinViewportElementIDs", label
+        )
+        if layout.get("requireNoClippedElements") is not True:
+            self.add(
+                "invalid-layout-assertions",
+                label,
+                "requireNoClippedElements must be true",
+            )
+        if required_ids is not None and within_ids is not None:
+            if not set(within_ids).issubset(set(required_ids)):
+                self.add(
+                    "invalid-layout-assertions",
+                    label,
+                    "withinViewportElementIDs must be a subset of requiredElementIDs",
+                )
+            if not candidate_ids.issubset(set(within_ids)):
+                self.add(
+                    "invalid-layout-assertions",
+                    label,
+                    "every candidateElementID must be required within the viewport",
+                )
+
+    def valid_identifier_list(
+        self, value: Any, field: str, label: str
+    ) -> Optional[List[str]]:
+        if not (
+            isinstance(value, list)
+            and value
+            and all(
+                isinstance(item, str) and IDENTIFIER_PATTERN.fullmatch(item) is not None
+                for item in value
+            )
+            and value == sorted(value)
+            and len(value) == len(set(value))
+        ):
+            self.add(
+                "invalid-layout-assertions",
+                label,
+                "{} must be a sorted unique non-empty stable-identifier array".format(field),
+            )
+            return None
+        return value
+
+    @staticmethod
+    def valid_capture_name(value: Any) -> bool:
+        return (
+            isinstance(value, str)
+            and bool(value)
+            and Path(value).name == value
+            and value.endswith(".png")
+        )
 
     @staticmethod
     def valid_region(region: Any, dimensions: Any) -> bool:

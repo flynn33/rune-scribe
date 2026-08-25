@@ -4,6 +4,18 @@ import RuneScribeContracts
 import RuneScribeUIRuntime
 import SwiftUI
 
+enum SettingsInitialViewport: String, Sendable {
+    case codexCard
+    case defaultsPreview
+
+    var scrollTargetID: String {
+        switch self {
+        case .codexCard: rawValue
+        case .defaultsPreview: "settings.defaults-preview-end"
+        }
+    }
+}
+
 /// App settings: the 4-digit app-lock PIN, an About section attributing the app
 /// to Raven Forge Software, and access to the End-User License Agreement.
 struct SettingsView: View {
@@ -19,6 +31,11 @@ struct SettingsView: View {
     @State private var showContacts = false
     @State private var showVaultProgress = false
     @State private var showThemeFailureDetails = false
+    @State private var initialScrollTarget: String?
+
+    init(initialViewport: SettingsInitialViewport? = nil) {
+        _initialScrollTarget = State(initialValue: initialViewport?.scrollTargetID)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -39,7 +56,9 @@ struct SettingsView: View {
                     licensePanel
                 }
                 .padding(RuneMetrics.pad)
+                .scrollTargetLayout()
             }
+            .scrollPosition(id: $initialScrollTarget, anchor: .center)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .runeSheetFrame()
@@ -148,6 +167,7 @@ struct SettingsView: View {
                                     ? "high-contrast"
                                     : "standard")
                     )
+                    .scrollTargetLayout()
                 } else {
                     Label(
                         "Codex appearances are temporarily unavailable.",
@@ -168,6 +188,7 @@ struct SettingsView: View {
             await session.loadThemeCodexCardPreviews()
             await session.loadActiveThemeCatalogVisuals()
         }
+        .id(SettingsInitialViewport.codexCard.rawValue)
     }
 
     private var selectedCodexDefaults: some View {
@@ -223,9 +244,11 @@ struct SettingsView: View {
                 .foregroundColor(.runeSilver)
 
             appearanceDefaultsPreview
+                .id(SettingsInitialViewport.defaultsPreview.rawValue)
         }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("appearance.selected-codex-defaults")
+        .id(SettingsInitialViewport.defaultsPreview.scrollTargetID)
     }
 
     private func appearanceArtifactMenu(
@@ -304,6 +327,7 @@ struct SettingsView: View {
                     .accessibilityLabel("Preview of the selected Codex defaults")
                     .accessibilityValue(plan.accessibilityLabel)
                     .accessibilityIdentifier("appearance.defaults-preview")
+                    .runtimeViewportFrameProbe("appearance.defaults-preview")
 
                 ThemeArtifactPreview(
                     plan: plan,

@@ -1,8 +1,9 @@
 // RuneScrib/Views/Components/RuneInscriptionText.swift
 
-import SwiftUI
 import Foundation
+import RuneScribeContracts
 import RuneScribeUIRuntime
+import SwiftUI
 
 /// The in-place transformation animation: the output is inscribed one glyph at a
 /// time, left to right. Each landing glyph flares bright, then dims to its resting
@@ -28,7 +29,9 @@ struct RuneInscriptionText: View {
     let direction: Direction
     var fontSize: CGFloat = 24
     var fontName: String = "Noto Sans Runic"
+    var fontResourceID: ThemeResourceID?
     var vectorDataByToken: [String: Data] = [:]
+    var vectorResourceIDByToken: [String: ThemeResourceID] = [:]
     var settled: Bool = false
 
     init(source: String,
@@ -37,7 +40,9 @@ struct RuneInscriptionText: View {
          direction: Direction,
          fontSize: CGFloat = 24,
          fontName: String = "Noto Sans Runic",
+         fontResourceID: ThemeResourceID? = nil,
          vectorDataByToken: [String: Data] = [:],
+         vectorResourceIDByToken: [String: ThemeResourceID] = [:],
          settled: Bool = false) {
         // The cipher maps one character to one character, so source and target are
         // always the same length. Pad with spaces (a no-op glyph) only as defensive
@@ -51,7 +56,9 @@ struct RuneInscriptionText: View {
         self.direction = direction
         self.fontSize = fontSize
         self.fontName = fontName
+        self.fontResourceID = fontResourceID
         self.vectorDataByToken = vectorDataByToken
+        self.vectorResourceIDByToken = vectorResourceIDByToken
         self.settled = settled
     }
 
@@ -93,6 +100,9 @@ struct RuneInscriptionText: View {
                 color: direction == .encode ? .runeGold : .runeTextPrimary,
                 lineSpacing: 7
             )
+            .onAppear {
+                reportRenderedSemanticResourceUse()
+            }
         } else if settled {
             glyphText(finalAttributed)
                 .textSelection(.enabled)
@@ -101,6 +111,28 @@ struct RuneInscriptionText: View {
                 let t = timeline.date.timeIntervalSince(start)
                 glyphText(attributed(at: t))
             }
+        }
+    }
+
+    var renderedSemanticResourceIDs: [ThemeResourceID] {
+        if usesVectorPresentation {
+            var seen = Set<ThemeResourceID>()
+            return targetChars.compactMap { character in
+                let token = String(character)
+                guard vectorDataByToken[token] != nil,
+                      let resourceID = vectorResourceIDByToken[token],
+                      seen.insert(resourceID).inserted
+                else { return nil }
+                return resourceID
+            }
+        }
+        return fontResourceID.map { [$0] } ?? []
+    }
+
+    @discardableResult
+    func reportRenderedSemanticResourceUse() -> Bool {
+        renderedSemanticResourceIDs.reduce(false) { reported, resourceID in
+            RuntimeThemeSemanticResourceUseObservation.report(resourceID) || reported
         }
     }
 
@@ -113,6 +145,9 @@ struct RuneInscriptionText: View {
             .font(.runic(fontSize, fontName: fontName))
             .lineSpacing(7)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .onAppear {
+                reportRenderedSemanticResourceUse()
+            }
     }
 
     // MARK: - Attributed Builders

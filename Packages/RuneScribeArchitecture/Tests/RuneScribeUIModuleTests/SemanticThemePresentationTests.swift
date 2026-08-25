@@ -466,6 +466,65 @@ final class SemanticThemePresentationTests: XCTestCase {
         XCTAssertFalse(animating.usesVectorPresentation)
     }
 
+    func testSemanticResourceUseReportsOnlyTheRealizedFontOrDisplayedVectorTokens() {
+        let fontID = ThemeResourceID(rawValue: "resource.test.script-font")!
+        let usedVectorID = ThemeResourceID(rawValue: "resource.test.vector.used")!
+        let unusedVectorID = ThemeResourceID(rawValue: "resource.test.vector.unused")!
+        let vectors = [
+            "ᚠ": Data([0x01]),
+            "ᚡ": Data([0x02]),
+        ]
+        let vectorIDs = [
+            "ᚠ": usedVectorID,
+            "ᚡ": unusedVectorID,
+        ]
+        let encoded = RuneInscriptionText(
+            source: "AAA",
+            target: "ᚠXᚠ",
+            start: Date(timeIntervalSince1970: 0),
+            direction: .encode,
+            fontResourceID: fontID,
+            vectorDataByToken: vectors,
+            vectorResourceIDByToken: vectorIDs,
+            settled: true
+        )
+        let decoded = RuneInscriptionText(
+            source: "ᚠ",
+            target: "A",
+            start: Date(timeIntervalSince1970: 0),
+            direction: .decode,
+            fontResourceID: fontID,
+            vectorDataByToken: vectors,
+            vectorResourceIDByToken: vectorIDs,
+            settled: true
+        )
+        let animating = RuneInscriptionText(
+            source: "A",
+            target: "ᚠ",
+            start: Date(timeIntervalSince1970: 0),
+            direction: .encode,
+            fontResourceID: fontID,
+            vectorDataByToken: vectors,
+            vectorResourceIDByToken: vectorIDs,
+            settled: false
+        )
+
+        XCTAssertEqual(encoded.renderedSemanticResourceIDs, [usedVectorID])
+        XCTAssertEqual(decoded.renderedSemanticResourceIDs, [fontID])
+        XCTAssertEqual(animating.renderedSemanticResourceIDs, [fontID])
+        XCTAssertFalse(encoded.renderedSemanticResourceIDs.contains(unusedVectorID))
+        XCTAssertFalse(encoded.renderedSemanticResourceIDs.contains(fontID))
+
+        RuntimeThemeSemanticResourceUseObservation.end()
+        XCTAssertFalse(encoded.reportRenderedSemanticResourceUse())
+
+        var observed = Set<ThemeResourceID>()
+        RuntimeThemeSemanticResourceUseObservation.begin { observed.insert($0) }
+        defer { RuntimeThemeSemanticResourceUseObservation.end() }
+        XCTAssertTrue(encoded.reportRenderedSemanticResourceUse())
+        XCTAssertEqual(observed, [usedVectorID])
+    }
+
     #if os(macOS)
     func testVectorPresentationRendersARealProviderPDFGlyph() throws {
         let url = try XCTUnwrap(
