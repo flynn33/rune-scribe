@@ -754,6 +754,12 @@ def validate_record(
                 raise IndexError(
                     f"production integrity manifest ownership is ambiguous for {owning_codex_id}"
                 )
+        declared_owner_codex_ids_by_resource: dict[str, set[str]] = {}
+        for owning_codex_id, resource_ids in allowed_by_codex_id.items():
+            for resource_id in resource_ids:
+                declared_owner_codex_ids_by_resource.setdefault(resource_id, set()).add(
+                    owning_codex_id
+                )
         normalized_bindings: list[tuple[str, str, int]] = []
         for binding in rendered_resource_bindings:
             if not isinstance(binding, dict) or set(binding) != {
@@ -780,10 +786,25 @@ def validate_record(
                     f"{expected['record']} renderedResourceBindings values are invalid"
                 )
             owning_resource_ids = allowed_by_codex_id.get(owning_codex_id)
-            if owning_resource_ids is None or resource_id not in owning_resource_ids:
+            if owning_resource_ids is None:
                 raise IndexError(
-                    f"{expected['record']} rendered resource {resource_id} is absent from "
-                    f"owning Codex manifest {owning_codex_id}"
+                    f"{expected['record']} rendered resource has unknown owning Codex "
+                    f"{owning_codex_id}"
+                )
+            if resource_id not in owning_resource_ids:
+                declared_owners = declared_owner_codex_ids_by_resource.get(resource_id, set())
+                if declared_owners:
+                    raise IndexError(
+                        f"{expected['record']} rendered resource {resource_id} is bound to "
+                        f"{owning_codex_id}, but its manifest owner is "
+                        + ", ".join(sorted(declared_owners))
+                    )
+                findings.append(
+                    diagnostic(
+                        "rendered-resource-missing-from-owning-manifest",
+                        expected["png"],
+                        f"{resource_id} rendered for {owning_codex_id} but is undeclared",
+                    )
                 )
             if revision != record["visualPlanRevision"]:
                 raise IndexError(
@@ -1019,10 +1040,24 @@ def validate_record(
             )
         undeclared_preview = sorted(set(resource_ids) - allowed_resource_ids)
         if undeclared_preview:
-            raise IndexError(
-                f"{expected['record']} safePreviewEvidence.resourceIDs are absent from "
-                "the active theme production integrity manifest: "
-                + ", ".join(undeclared_preview)
+            globally_declared = {
+                resource_id
+                for resource_ids in allowed_resource_ids_by_theme_codex.values()
+                for resource_id in resource_ids
+            }
+            cross_theme_preview = sorted(set(undeclared_preview) & globally_declared)
+            if cross_theme_preview:
+                raise IndexError(
+                    f"{expected['record']} safePreviewEvidence.resourceIDs belong to "
+                    "another Codex manifest: " + ", ".join(cross_theme_preview)
+                )
+            findings.append(
+                diagnostic(
+                    "safe-preview-resource-missing-from-active-manifest",
+                    expected["png"],
+                    "safe preview rendered active-Codex resources missing from its "
+                    "integrity manifest: " + ", ".join(undeclared_preview),
+                )
             )
         if status == "valid":
             byte_count = safe_preview.get("byteCount")

@@ -291,11 +291,14 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                         pngSHA256: digest,
                         byteCount: rendered.data.count
                     )
-                    attach(
-                        try JSONEncoder.themeFidelity.encode(record),
-                        name: name.record,
-                        type: "public.json"
-                    )
+                    let recordData = try JSONEncoder.themeFidelity.encode(record)
+                    guard let recordObject = try JSONSerialization.jsonObject(
+                        with: recordData
+                    ) as? [String: Any],
+                    recordObject.keys.contains("sealID"),
+                    recordObject.keys.contains("frameID")
+                    else { throw ThemeFidelityCaptureError.renderFailed }
+                    attach(recordData, name: name.record, type: "public.json")
                     renderedCount += 1
                 }
             }
@@ -895,6 +898,35 @@ private struct ThemeFidelityCaptureRecord: Encodable {
     let elementFrames: ThemeFidelityElementFrames
     let safePreviewEvidence: ThemeFidelitySafePreviewEvidence?
 
+    private enum CodingKeys: String, CodingKey {
+        case schemaVersion
+        case stateSeed
+        case stateSeedSHA256
+        case contentSeed
+        case stateID
+        case themeName
+        case themeID
+        case codexID
+        case relicID
+        case sealID
+        case frameID
+        case surface
+        case destination
+        case pointWidth
+        case pointHeight
+        case scale
+        case pixelWidth
+        case pixelHeight
+        case visualPlanRevision
+        case pngSHA256
+        case byteCount
+        case renderedResourceIDs
+        case renderedResourceBindings
+        case viewportAssertions
+        case elementFrames
+        case safePreviewEvidence
+    }
+
     @MainActor
     init(theme: ThemeFidelityTheme, descriptor: ThemeDescriptor,
          surface: ThemeFidelitySurface, destination: ThemeFidelityDestination,
@@ -933,6 +965,46 @@ private struct ThemeFidelityCaptureRecord: Encodable {
         self.viewportAssertions = viewportAssertions
         self.elementFrames = elementFrames
         self.safePreviewEvidence = safePreviewEvidence
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(schemaVersion, forKey: .schemaVersion)
+        try container.encode(stateSeed, forKey: .stateSeed)
+        try container.encode(stateSeedSHA256, forKey: .stateSeedSHA256)
+        try container.encode(contentSeed, forKey: .contentSeed)
+        try container.encode(stateID, forKey: .stateID)
+        try container.encode(themeName, forKey: .themeName)
+        try container.encode(themeID, forKey: .themeID)
+        try container.encode(codexID, forKey: .codexID)
+        try container.encode(relicID, forKey: .relicID)
+        if let sealID {
+            try container.encode(sealID, forKey: .sealID)
+        } else {
+            try container.encodeNil(forKey: .sealID)
+        }
+        if let frameID {
+            try container.encode(frameID, forKey: .frameID)
+        } else {
+            try container.encodeNil(forKey: .frameID)
+        }
+        try container.encode(surface, forKey: .surface)
+        try container.encode(destination, forKey: .destination)
+        try container.encode(pointWidth, forKey: .pointWidth)
+        try container.encode(pointHeight, forKey: .pointHeight)
+        try container.encode(scale, forKey: .scale)
+        try container.encode(pixelWidth, forKey: .pixelWidth)
+        try container.encode(pixelHeight, forKey: .pixelHeight)
+        try container.encode(visualPlanRevision, forKey: .visualPlanRevision)
+        try container.encode(pngSHA256, forKey: .pngSHA256)
+        try container.encode(byteCount, forKey: .byteCount)
+        try container.encode(renderedResourceIDs, forKey: .renderedResourceIDs)
+        try container.encode(renderedResourceBindings, forKey: .renderedResourceBindings)
+        try container.encode(viewportAssertions, forKey: .viewportAssertions)
+        try container.encode(elementFrames, forKey: .elementFrames)
+        if let safePreviewEvidence {
+            try container.encode(safePreviewEvidence, forKey: .safePreviewEvidence)
+        }
     }
 }
 

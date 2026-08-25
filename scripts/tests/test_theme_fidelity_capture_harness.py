@@ -575,8 +575,25 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
             ]
             self.assertEqual(validate_capture_record(record, expected, png), [])
             record["renderedResourceBindings"][1]["codexID"] = "codex.moonleaf"
-            with self.assertRaisesRegex(indexer.IndexError, "owning Codex manifest"):
+            with self.assertRaisesRegex(indexer.IndexError, "manifest owner"):
                 validate_capture_record(record, expected, png)
+            descriptor_only_id = "resource.moonleaf.descriptor-only"
+            record["renderedResourceIDs"] = [
+                "resource.background.moonleaf.moonlit-canopy.output.background-static-base",
+                descriptor_only_id,
+            ]
+            record["renderedResourceBindings"] = [
+                record["renderedResourceBindings"][0],
+                {
+                    "codexID": "codex.moonleaf",
+                    "resourceID": descriptor_only_id,
+                    "visualPlanRevision": 1,
+                },
+            ]
+            self.assertEqual(
+                [finding["code"] for finding in validate_capture_record(record, expected, png)],
+                ["rendered-resource-missing-from-owning-manifest"],
+            )
             record["renderedResourceIDs"] = [
                 "resource.background.moonleaf.moonlit-canopy.output.background-static-base"
             ]
@@ -751,7 +768,7 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
                 "resource.background.moonleaf.moonlit-canopy.output.background-static-base"
             ]
             with self.assertRaisesRegex(
-                indexer.IndexError, "absent from the active theme"
+                indexer.IndexError, "another Codex manifest"
             ):
                 validate_capture_record(record, expected, png)
             record["safePreviewEvidence"]["resourceIDs"] = [
