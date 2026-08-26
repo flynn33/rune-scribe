@@ -21,10 +21,19 @@ import zlib
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-PACKAGE_ROOT = Path(
-    "/Users/jimdaley/Documents/RavenForge/RuneScribe/"
-    "Rune-Scribe-Codex-Remediation-Package-v1.0"
-)
+
+
+def resolve_package_root() -> Path:
+    package_name = "Rune-Scribe-Codex-Remediation-Package-v1.0"
+    raven_forge_root = Path.home() / "Documents/RavenForge"
+    candidates = (
+        raven_forge_root / "Projects/RuneScribe" / package_name,
+        raven_forge_root / "RuneScribe" / package_name,
+    )
+    return next((path for path in candidates if path.is_dir()), candidates[0])
+
+
+PACKAGE_ROOT = resolve_package_root()
 
 
 def load_script(name: str, filename: str):

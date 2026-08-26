@@ -288,14 +288,14 @@ WRITTEN_SCREENSHOT_CONTRACTS: dict[str, tuple[str, str]] = {
 }
 DOMAIN_RESULT_PRODUCER = "scripts/capture-remediation-domain-results.py"
 EXPECTED_DOMAIN_PRODUCER_SHA256 = (
-    "102c1d263d335bc6c4ad88f3025ca0e92e519321b9f5c077bcc7df366e675d1f"
+    "0939968018b9321c46af8771d2f01f316bed0f4719e677ce37b666790c6c423c"
 )
 EXPECTED_DOMAIN_PRODUCER_POLICY_SHA256 = (
-    "d4681f73c873a6d79a50bb071fbd839196fee344fdf2e5a989714cc431120338"
+    "6c99db1d6169d568851486ef59a6b5db7942299597629dd250a788bf0b8a1a23"
 )
 SHIPPING_CHECKER_PATH = "scripts/check-shipping-products.sh"
 EXPECTED_SHIPPING_CHECKER_SHA256 = (
-    "7a054350e086de7bc920cdd265b608c541200160704ae221bc32715d32aa1134"
+    "e51e6d05cfecaa9097ecc7b016ec30846cd662276c0ad3893679d1e950c7a2e9"
 )
 EXPECTED_SHIPPING_CHECK_COUNT = 101
 DOMAIN_SHIPPING_VALIDATION_LOG = (
@@ -391,15 +391,15 @@ SOURCE_AREA_PATHS: dict[str, tuple[tuple[str, ...], ...]] = {
         ("Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SettingsView.swift",),
     ),
     "RSA-006": (
-        ("Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json",),
+        ("Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json",),
         (
             "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Source/Norse-Production-Provenance-Tooling.md",
             "scripts/check-norse-production-provenance.py",
             "scripts/generate-norse-production-provenance.py",
         ),
         (
-            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Production-Asset-Provenance-v1.0.json",
-            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json",
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Production-Asset-Provenance-v2.0.json",
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json",
         ),
     ),
     "RSA-007": (

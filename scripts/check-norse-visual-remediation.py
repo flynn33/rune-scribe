@@ -1187,7 +1187,8 @@ class Validator:
             "theme.artifact-picker": ('"theme.artifact-picker"',),
             "theme.artifact-preview.<relicID>": (
                 '"theme.artifact-preview"',
-                '"theme.artifact-preview.\(plan.selection.relicID.rawValue)"',
+                "ThemeCaptureIdentifier.artifactPreview(",
+                '"theme.artifact-preview.\(relicID.rawValue)"',
             ),
             "theme.vault.<codexID>": ('identifierPrefix: "theme.vault"',),
             "theme.vault-artifact.<artifactID>": (

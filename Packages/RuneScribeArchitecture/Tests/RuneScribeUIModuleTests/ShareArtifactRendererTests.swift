@@ -401,6 +401,12 @@ final class ShareArtifactRendererTests: XCTestCase {
         )
         XCTAssertEqual(output.safePreviewMetadata.mediaType, .png)
         XCTAssertEqual(
+            output.rendererOutputID,
+            "renderer.static-share.\(request.selection.codexID.rawValue)."
+                + "\(request.selection.relicID.rawValue)."
+                + "\(request.selection.sealID?.rawValue ?? "seal.none").monochrome"
+        )
+        XCTAssertEqual(
             Double(output.safePreviewMetadata.pixelSize.width)
                 / Double(output.safePreviewMetadata.pixelSize.height),
             4.0 / 3.0,
@@ -619,6 +625,42 @@ final class ShareArtifactRendererTests: XCTestCase {
         )) {
             XCTAssertEqual($0 as? ShareArtifactRenderError, .invalidResource(resourceID))
         }
+    }
+
+    func testOutboundShareAcceptsProviderOwnedPDFDimensionsOmittedFromShareMetadata() throws {
+        let codexID = CodexID(rawValue: "codex.test.share-vector")!
+        let resourceID = ThemeResourceID(rawValue: "resource.test.share-vector")!
+        let data = Data("validated-vector-bytes".utf8)
+        let digest = ThemeSHA256Digest(rawValue: SHA256.hash(data: data).map {
+            String(format: "%02x", $0)
+        }.joined())!
+        let metadata = try SharePresentationResourceMetadata(
+            resourceID: resourceID,
+            role: ThemeResourceRoles.sealVectorMaster,
+            mediaType: .pdf,
+            byteLength: UInt64(data.count),
+            pixelSize: nil,
+            sha256: digest
+        )
+        let resolved = try ResolvedThemeResourceDTO(
+            codexID: codexID,
+            resourceID: resourceID,
+            role: metadata.role,
+            mediaType: metadata.mediaType,
+            integrity: ThemeResourceIntegrity(
+                sha256: digest,
+                byteLength: UInt64(data.count),
+                pixelSize: ThemePixelSize(width: 1_024, height: 1_024)
+            ),
+            verifiedSHA256: digest,
+            data: data
+        )
+
+        XCTAssertNoThrow(try RuneScribeUISession.validateOutboundShareResolvedResource(
+            resolved,
+            expected: metadata,
+            codexID: codexID
+        ))
     }
 
     func testOutboundShareMapsRuntimeReferenceFailuresPrecisely() {

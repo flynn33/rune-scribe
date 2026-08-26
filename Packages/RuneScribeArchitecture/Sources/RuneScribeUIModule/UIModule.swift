@@ -1,12 +1,13 @@
 import Foundation
-import RuneScribeContracts
-import RuneScribeRuntimeCore
+@_spi(ThemeFidelityQualification) import RuneScribeContracts
+@_spi(ThemeFidelityQualification) import RuneScribeRuntimeCore
 import RuneScribeUIPresentationContracts
 import RuneScribeUIRuntime
 import SwiftUI
 
 enum UIModuleResourceError: Error, Equatable, Sendable {
     case manifestMissing
+    case invalidQualificationLaunch
 }
 
 public enum RuneScribeUIModuleBootstrap {
@@ -79,6 +80,15 @@ public enum RuneScribeUIModuleBootstrap {
     public static func factory() -> AnyModuleFactory {
         AnyModuleFactory(moduleType: RuneScribeUIModule.self)
     }
+
+    @_spi(ThemeFidelityQualification)
+    public static func factory(
+        qualificationResolution: ThemeFidelityQualificationLaunch.Resolution
+    ) -> AnyModuleFactory {
+        AnyModuleFactory(qualificationDescriptor: descriptor) {
+            RuneScribeUIModule(qualificationResolution: qualificationResolution)
+        }
+    }
 }
 
 @MainActor
@@ -88,18 +98,46 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
 
     private var session: RuneScribeUISession?
     private var rootPresentationClient: RuntimeRootPresentationClient?
+    private nonisolated let qualificationResolution: ThemeFidelityQualificationLaunch.Resolution
 
-    public nonisolated init() {}
+    public nonisolated init() {
+        qualificationResolution = ThemeFidelityQualificationLaunch.resolve()
+    }
+
+    @_spi(ThemeFidelityQualification)
+    public nonisolated init(
+        qualificationResolution: ThemeFidelityQualificationLaunch.Resolution
+    ) {
+        self.qualificationResolution = qualificationResolution
+    }
 
     public func start(context: ModuleContext) async throws {
+        let qualificationLaunch: ThemeFidelityQualificationLaunch?
+        switch qualificationResolution {
+        case .notRequested:
+            qualificationLaunch = nil
+        case .invalid:
+            throw UIModuleResourceError.invalidQualificationLaunch
+        case .validated(let launch):
+            qualificationLaunch = launch
+        }
+
         let applicationClient = try await context.applicationClient()
         let runtimeIO = try await context.runtimeIOClient()
         let availabilityClient = try await context.runtimeAvailabilityClient()
-        let progressionClient = try? await context.progressionClient()
+        let progressionClient = qualificationLaunch == nil
+            ? try? await context.progressionClient()
+            : nil
         let themeCoordinatorClient = try await context.themeCoordinatorClient()
-        let runtimeSettingsClient = try? await context.runtimeSettingsClient()
-        let cloudGameCenterStatusClient = try? await context.cloudGameCenterStatusClient()
-        let unlockFeedbackClient = try? await context.unlockFeedbackClient()
+        let runtimeSettingsClient = qualificationLaunch == nil
+            ? try? await context.runtimeSettingsClient()
+            : nil
+        let cloudGameCenterStatusClient = qualificationLaunch == nil
+            ? try? await context.cloudGameCenterStatusClient()
+            : nil
+        let unlockFeedbackClient = qualificationLaunch == nil
+            ? try? await context.unlockFeedbackClient()
+            : nil
         let rootPresentationClient = try await context.rootPresentationClient()
         let productMetadata = try await rootPresentationClient.productMetadata()
         let inboundFileImportSession = try await runtimeIO.inboundFileImportSession {
@@ -136,8 +174,17 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
         do {
             try await session.prepareInitialTheme()
             try session.start()
+            let rootView: AnyView
+            if let qualificationLaunch {
+                rootView = AnyView(ThemeFidelityQualificationHostView(
+                    launch: qualificationLaunch,
+                    session: session
+                ))
+            } else {
+                rootView = AnyView(RootView(session: session))
+            }
             let contribution = RootViewContribution(moduleID: descriptor.moduleID) {
-                AnyView(RootView(session: session))
+                rootView
             }
             try await rootPresentationClient.present(contribution)
             self.session = session

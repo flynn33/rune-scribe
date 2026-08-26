@@ -81,6 +81,15 @@ public struct AnyModuleFactory: Sendable {
         makeClosure = make
     }
 
+    @_spi(ThemeFidelityQualification)
+    public init(
+        qualificationDescriptor descriptor: ModuleDescriptor,
+        make: @escaping @Sendable () throws -> any RuneScribeModule
+    ) {
+        self.descriptor = descriptor
+        makeClosure = make
+    }
+
     public func makeModule() throws -> any RuneScribeModule {
         try makeClosure()
     }

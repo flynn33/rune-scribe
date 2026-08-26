@@ -34,4 +34,15 @@ enum OutboundSharePresentationStatus: Equatable, Sendable {
 struct OutboundSharePresentationPreparation: Sendable {
     let presentation: OutboundSharePresentationDTO?
     let status: OutboundSharePresentationStatus
+    let rendererOutputID: String?
+
+    init(
+        presentation: OutboundSharePresentationDTO?,
+        status: OutboundSharePresentationStatus,
+        rendererOutputID: String? = nil
+    ) {
+        self.presentation = presentation
+        self.status = status
+        self.rendererOutputID = rendererOutputID
+    }
 }

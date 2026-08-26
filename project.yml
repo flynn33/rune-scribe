@@ -310,6 +310,15 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: RuneScribIOSUITests
+      - path: ThemeFidelityXCUITests
+      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Comparison-Authority-v1.2.json
+        buildPhase: resources
+      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Candidate-Capture-Catalog-v1.2.json
+        buildPhase: resources
+      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.2.json
+        buildPhase: resources
+      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Runtime-Probe-Catalog-v1.2.json
+        buildPhase: resources
     dependencies:
       - target: RuneScrib-iOS
       - package: RuneScribeArchitecture
@@ -336,6 +345,7 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: RuneScribMacParityHost
+      - path: RuneScrib/AppHost/RuneScribeRuntimeComposition.swift
     dependencies:
       - package: RuneScribeArchitecture
         product: RuneScribeContracts
@@ -347,6 +357,18 @@ targets:
         product: RuneScribeCoreModule
       - package: RuneScribeArchitecture
         product: RuneScribeProgressionModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeNorseThemeModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeMoonleafModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeSunspireModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeWildwoodModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeGloamthornModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeThemeCoordinatorModule
       - package: RuneScribeArchitecture
         product: RuneScribePlatform
       - package: RuneScribeArchitecture
@@ -412,6 +434,30 @@ targets:
         CODE_SIGN_STYLE: Manual
         CODE_SIGN_IDENTITY: "-"
         DEVELOPMENT_TEAM: ""
+  RuneScribMacParityUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: ThemeFidelityXCUITests
+      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Comparison-Authority-v1.2.json
+        buildPhase: resources
+      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Candidate-Capture-Catalog-v1.2.json
+        buildPhase: resources
+      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.2.json
+        buildPhase: resources
+      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Runtime-Probe-Catalog-v1.2.json
+        buildPhase: resources
+    dependencies:
+      - target: RuneScribMacParityHost
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.macos-parity-ui-tests
+        ENABLE_HARDENED_RUNTIME: NO
+        ENABLE_APP_SANDBOX: NO
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        DEVELOPMENT_TEAM: ""
   RuneScribArchitectureTests:
     type: bundle.unit-test
     platform: macOS
@@ -455,3 +501,25 @@ schemes:
     test:
       targets:
         - RuneScribMacParityTests
+  RuneScrib-Theme-Fidelity-iOS-XCUI:
+    build:
+      targets:
+        RuneScrib-iOS: all
+        RuneScribIOSUITests: [test]
+    test:
+      config: Release
+      environmentVariables:
+        RUNESCRIBE_XCUI_ENTRY_FILTER: "$(RUNESCRIBE_XCUI_ENTRY_FILTER)"
+      targets:
+        - RuneScribIOSUITests
+  RuneScrib-Theme-Fidelity-macOS-XCUI:
+    build:
+      targets:
+        RuneScribMacParityHost: all
+        RuneScribMacParityUITests: [test]
+    test:
+      config: Release
+      environmentVariables:
+        RUNESCRIBE_XCUI_ENTRY_FILTER: "$(RUNESCRIBE_XCUI_ENTRY_FILTER)"
+      targets:
+        - RuneScribMacParityUITests

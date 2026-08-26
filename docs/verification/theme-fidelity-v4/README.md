@@ -53,7 +53,48 @@ Every capture record must identify the actual active visual-plan revision and re
 
 Baseline is structural evidence. Decoding, record/digest binding, dimensions, matrix cardinality, exact XCTest identity and outcome, result-bundle destination binding, attachment content UTIs, device identity, toolchain identity, and pre-build/post-build source equality are mandatory. Extraction requires both the exact selected Simulator UDID and exact `modelName`; a family-name prefix is insufficient. The indexer independently binds the extraction bundle to the hashed selection document and verifies that every iPhone/iPad capture dimension and scale matches the selected approved model policy. Blank/detail, byte-duplicate, layout-clipping, rendered-resource, material-similarity, duplicate-visual-class, and unbalanced-appearance-transition findings are recorded as nonblocking diagnostics.
 
-Use `--phase final` for Phase 10. Final blocks every baseline diagnostic and requires exactly 400 non-pending comparison mappings. The orchestrator always invokes the comparator for all 400 manifest mappings during that run; it does not accept a prebuilt comparison index. Each invocation and mapping is bound to the candidate and capture-record digests, authority comparison ID and region policy, passing report digest, and PNG heatmap digest, and the run report includes all 400 invocation records plus their canonical aggregate digest. During final indexing, the repository comparator independently recomputes every report and heatmap from the bound inputs, so a digest-consistent but hand-authored PASS payload is rejected. A successful run produces exactly 400 canonical PNGs and 400 capture records, three hashed result bundles, an extraction report, hashed toolchain provenance, pre-build and post-build source manifests, a capture index, and a source-bound run report. It does not update authority images or comparison policy.
+Use `--phase final` for Phase 10. Final blocks every baseline diagnostic and activates the imported v4.2 executable authority: exactly 400 entries and 1,104 one-to-one reference mappings must pass. The orchestrator runs all six Release result bundles—hosted and XCUI bundles for iPhone, iPad, and macOS—and then executes every declared image metric, structural assertion, runtime probe, and negative invariant. It does not accept a prebuilt comparison index. Each result is bound to the exact candidate source, capture record, authority mapping, passing report digest, and any required candidate capture or heatmap digest. The v1.2 executor independently recomputes the declared results and writes a 400-entry, 1,104-mapping visual-comparison index. A successful run produces 400 canonical full-screen PNGs and records, the exact focal candidate captures and heatmaps required by the mappings, six hashed result bundles, an extraction report, hashed toolchain provenance, equal pre-build and post-build source manifests, a capture index, and a source-bound run report. It does not update authority images or comparison policy.
+
+After the remaining source-bound gates have produced their current logs and structured results, assemble the minimum v4.2 evidence contract and its true 40-gate summary:
+
+```sh
+python3 scripts/assemble-theme-fidelity-v42-evidence.py \
+  --capture-run docs/verification/theme-fidelity-v4/final/evidence/final-capture-run.json \
+  --qualification-results <absolute-current-qualification-results.json>
+```
+
+The qualification document must bind each non-visual artifact to the final source SHA, a successful command execution, and the artifact's exact SHA-256. Missing, failed, stale, or hash-invalid evidence stops assembly; file presence alone is never treated as PASS.
+
+Its schema is intentionally small. Each logical artifact name comes directly from `Gate-Catalog-v4.2.json`; `gateIDs` must include every gate that consumes that artifact. JSON artifacts must also report top-level PASS with no failures.
+
+```json
+{
+  "schemaVersion": "1.0",
+  "sourceSHA": "<40-character-final-source-SHA>",
+  "executions": [
+    {
+      "id": "architecture-and-mediation",
+      "gateIDs": ["ARC-001"],
+      "command": ["./scripts/check-architecture.sh"],
+      "startTimestamp": "<ISO-8601>",
+      "endTimestamp": "<ISO-8601>",
+      "destination": "local-macOS-host",
+      "toolchain": {"xcode": "<version>"},
+      "exitCode": 0,
+      "result": "PASS",
+      "failures": [],
+      "artifacts": [
+        {
+          "logicalName": "architecture.log",
+          "path": "<absolute-current-log-path>",
+          "sha256": "<64-character-SHA-256>",
+          "kind": "log"
+        }
+      ]
+    }
+  ]
+}
+```
 
 Focused tooling checks:
 

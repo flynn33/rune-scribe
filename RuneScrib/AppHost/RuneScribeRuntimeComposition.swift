@@ -1,34 +1,25 @@
 import Foundation
-import RuneScribeContracts
+@_spi(ThemeFidelityQualification) import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribeThemeGloamthornModule
 import RuneScribeThemeMoonleafModule
 import RuneScribeNorseThemeModule
-import RuneScribePlatform
+@_spi(ThemeFidelityQualification) import RuneScribePlatform
 import RuneScribeProgressionModule
 @_spi(RuntimeOperationAuthority) import RuneScribeRuntimeCore
 import RuneScribeThemeSunspireModule
 import RuneScribeThemeCoordinatorModule
 import RuneScribeThemeWildwoodModule
-import RuneScribeUIModule
+@_spi(ThemeFidelityQualification) import RuneScribeUIModule
 import RuneScribeUIRuntime
+private enum RuntimeCompositionQualificationError: Error { case invalidLaunch }
+
 @MainActor final class RuneScribeRuntimeComposition {
     private let runtime: RuneScribeRuntime
     private let coreFactory: AnyModuleFactory
-    private let secureValues: any SecureValueStore
-    private let protectedFiles: any ProtectedFileStore
-    private let inboundFiles: any InboundFileReader
-    private let shareArtifacts: AppleShareArtifactStore
+    private let platformEnvironment: ApplePlatformServiceEnvironment
+    private let qualificationResolution: ThemeFidelityQualificationLaunch.Resolution
     private let resources: any ApplicationResourceLocator
-    private let fonts: any SystemFontRegistrar
-    private let contacts: any ContactAccessService
-    private let cloudSync: any CloudSyncTransport
-    private let gameCenterReporting: any GameCenterReporting
-    private let clipboardRead: any ClipboardReading
-    private let clipboardWrite: any ClipboardWriting
-    private let clock: any ClockProviding
-    private let uuid: any UUIDProviding
-    private let moduleStateStore: (any ModuleStateStore)?
     private let rootPresentationAdapter: RuntimeRootPresentationHostAdapter
     private var isConfigured = false, startIsInFlight = false
     private var activationState: RuntimeActivationState = .idle
@@ -43,16 +34,23 @@ import RuneScribeUIRuntime
     init(
         bundle: Bundle = .main,
         injectedCoreFactory: AnyModuleFactory? = nil,
-        moduleStateStore: (any ModuleStateStore)? = try? AppleSQLiteModuleStateStore(),
-        inboundFiles: any InboundFileReader = AppleInboundFileReader(),
+        qualificationResolution: ThemeFidelityQualificationLaunch.Resolution =
+            ThemeFidelityQualificationLaunch.resolve(),
+        moduleStateStore: @autoclosure () -> (any ModuleStateStore)? = try? AppleSQLiteModuleStateStore(),
+        inboundFiles: @autoclosure () -> any InboundFileReader = AppleInboundFileReader(),
         cloudSync: (any CloudSyncTransport)? = nil
     ) {
-        let shareArtifacts = AppleShareArtifactStore()
-        let systemClipboard = SystemClipboardService()
-        secureValues = AppleKeychainStore()
-        protectedFiles = AppleProtectedFileStore()
-        self.inboundFiles = inboundFiles
-        self.shareArtifacts = shareArtifacts
+        self.qualificationResolution = qualificationResolution
+        switch qualificationResolution {
+        case .invalid, .validated:
+            platformEnvironment = .isolatedQualification()
+        case .notRequested:
+            platformEnvironment = ApplePlatformServiceEnvironment(
+                moduleStateStore: moduleStateStore(),
+                inboundFiles: inboundFiles(),
+                cloudSync: cloudSync
+            )
+        }
         let moduleBundles = RuneScribeProgressionModuleBootstrap.ownerScopedResourceBundles
             .merging(RuneScribeNorseThemeModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
             .merging(RuneScribeThemeMoonleafModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
@@ -65,15 +63,6 @@ import RuneScribeUIRuntime
                 moduleBundles: moduleBundles
             )
         )
-        fonts = CoreTextFontRegistrar()
-        contacts = SystemContactAccessService()
-        self.cloudSync = cloudSync ?? AppleCloudKitProgressionTransport()
-        gameCenterReporting = AppleGameCenterReportingAdapter()
-        clipboardRead = systemClipboard
-        clipboardWrite = systemClipboard
-        clock = SystemClock()
-        uuid = SystemUUIDProvider()
-        self.moduleStateStore = moduleStateStore
         coreFactory = injectedCoreFactory ?? RuneScribeCoreModuleBootstrap.factory()
         let version = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String, buildNumber = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String
         let rootPresentationStore = RootViewPresentationStore()
@@ -111,17 +100,37 @@ import RuneScribeUIRuntime
             waiters.forEach { $0.resume() }
         }
         do {
+            guard qualificationResolution != .invalid else { throw RuntimeCompositionQualificationError.invalidLaunch }
             if !isConfigured {
                 try await configure()
                 isConfigured = true
             }
             guard generation == activationGeneration, activationState == .starting else { return }
-            try await RuneScribeRuntimeSimulatorQualification.applyIfRequested(
-                to: runtime,
-                optionalProviderUnlockIDs: [
-                    "moonleaf": RuneScribeThemeMoonleafModuleBootstrap.unlockID,
-                ]
-            )
+            switch qualificationResolution {
+            case .notRequested:
+                try await RuneScribeRuntimeSimulatorQualification.applyIfRequested(
+                    to: runtime,
+                    optionalProviderUnlockIDs: [
+                        "moonleaf": RuneScribeThemeMoonleafModuleBootstrap.unlockID,
+                    ]
+                )
+            case .invalid:
+                throw RuntimeCompositionQualificationError.invalidLaunch
+            case .validated:
+                try await runtime.reconcileEntitlements(
+                    try ProgressionEntitlementSnapshotDTO(
+                        revision: 4_200,
+                        capturedAt: Date(timeIntervalSince1970: 1_700_000_000),
+                        includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                        earnedUnlockIDs: [
+                            RuneScribeThemeMoonleafModuleBootstrap.unlockID,
+                            RuneScribeThemeSunspireModuleBootstrap.unlockID,
+                            RuneScribeThemeWildwoodModuleBootstrap.unlockID,
+                            RuneScribeThemeGloamthornModuleBootstrap.unlockID,
+                        ]
+                    )
+                )
+            }
             try await runtime.start()
             guard generation == activationGeneration, activationState == .starting else { return }
             activationState = .running
@@ -179,7 +188,7 @@ import RuneScribeUIRuntime
     }
     private func configure() async throws {
         try await runtime.installPlatformAdapter(resources, for: RuneScribeServiceKeys.applicationResourceLocator)
-        if let moduleStateStore { try await runtime.installPlatformAdapter(moduleStateStore, for: RuneScribeServiceKeys.moduleStateStore) }
+        if let moduleStateStore = platformEnvironment.moduleStateStore { try await runtime.installPlatformAdapter(moduleStateStore, for: RuneScribeServiceKeys.moduleStateStore) }
         try await runtime.register(manifest: RuneScribeCoreModuleBootstrap.manifest(), factory: coreFactory)
         try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
         try await RuneScribeThemeMoonleafModuleBootstrap.register(with: runtime)
@@ -188,30 +197,21 @@ import RuneScribeUIRuntime
         try await RuneScribeThemeGloamthornModuleBootstrap.register(with: runtime)
         try await RuneScribeThemeCoordinatorModuleBootstrap.register(with: runtime)
         try await RuneScribeProgressionModuleBootstrap.register(with: runtime)
-        try await runtime.register(manifest: RuneScribeUIModuleBootstrap.manifest(), factory: RuneScribeUIModuleBootstrap.factory())
-        try await runtime.installStandardPort(
-            rootPresentationAdapter,
-            for: .standard
-        )
-        try await runtime.installPlatformAdapter(secureValues, for: RuneScribeServiceKeys.secureValueStore)
-        try await runtime.installPlatformAdapter(protectedFiles, for: RuneScribeServiceKeys.protectedFileStore)
-        try await runtime.installPlatformAdapter(inboundFiles, for: RuneScribeServiceKeys.inboundFileReader)
-        try await runtime.installPlatformAdapter(shareArtifacts, for: RuneScribeServiceKeys.shareArtifactStore)
-        try await runtime.installPlatformAdapter(shareArtifacts, for: RuneScribeServiceKeys.sharePresentation)
-        try await runtime.installPlatformAdapter(fonts, for: RuneScribeServiceKeys.systemFontRegistrar)
-        try await runtime.installPlatformAdapter(contacts, for: RuneScribeServiceKeys.contactAccess)
-        try await runtime.installPlatformAdapter(
-            cloudSync,
-            for: RuneScribeServiceKeys.cloudSyncTransport
-        )
-        try await runtime.installPlatformAdapter(
-            gameCenterReporting,
-            for: RuneScribeServiceKeys.gameCenterReporting
-        )
-        try await runtime.installPlatformAdapter(clipboardRead, for: RuneScribeServiceKeys.clipboardRead)
-        try await runtime.installPlatformAdapter(clipboardWrite, for: RuneScribeServiceKeys.clipboardWrite)
-        try await runtime.installPlatformAdapter(clock, for: RuneScribeServiceKeys.clock)
-        try await runtime.installPlatformAdapter(uuid, for: RuneScribeServiceKeys.uuid)
+        try await runtime.register(manifest: RuneScribeUIModuleBootstrap.manifest(), factory: RuneScribeUIModuleBootstrap.factory(qualificationResolution: qualificationResolution))
+        try await runtime.installStandardPort(rootPresentationAdapter, for: .standard)
+        try await runtime.installPlatformAdapter(platformEnvironment.secureValues, for: RuneScribeServiceKeys.secureValueStore)
+        try await runtime.installPlatformAdapter(platformEnvironment.protectedFiles, for: RuneScribeServiceKeys.protectedFileStore)
+        try await runtime.installPlatformAdapter(platformEnvironment.inboundFiles, for: RuneScribeServiceKeys.inboundFileReader)
+        try await runtime.installPlatformAdapter(platformEnvironment.shareArtifacts, for: RuneScribeServiceKeys.shareArtifactStore)
+        try await runtime.installPlatformAdapter(platformEnvironment.shareArtifacts, for: RuneScribeServiceKeys.sharePresentation)
+        try await runtime.installPlatformAdapter(platformEnvironment.fonts, for: RuneScribeServiceKeys.systemFontRegistrar)
+        try await runtime.installPlatformAdapter(platformEnvironment.contacts, for: RuneScribeServiceKeys.contactAccess)
+        try await runtime.installPlatformAdapter(platformEnvironment.cloudSync, for: RuneScribeServiceKeys.cloudSyncTransport)
+        try await runtime.installPlatformAdapter(platformEnvironment.gameCenterReporting, for: RuneScribeServiceKeys.gameCenterReporting)
+        try await runtime.installPlatformAdapter(platformEnvironment.clipboard, for: RuneScribeServiceKeys.clipboardRead)
+        try await runtime.installPlatformAdapter(platformEnvironment.clipboard, for: RuneScribeServiceKeys.clipboardWrite)
+        try await runtime.installPlatformAdapter(platformEnvironment.clock, for: RuneScribeServiceKeys.clock)
+        try await runtime.installPlatformAdapter(platformEnvironment.uuid, for: RuneScribeServiceKeys.uuid)
         try await runtime.installPlatformAdapter(AppleUnlockFeedbackService(), for: RuneScribeUnlockFeedback.serviceKey)
     }
     private static var platform: SupportedPlatform {

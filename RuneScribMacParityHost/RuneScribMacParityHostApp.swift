@@ -13,6 +13,20 @@ private final class RuneScribMacParityHostDelegate: NSObject,
     private var selfTest: NativeShareSelfTest?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if let size = QualificationHostConfiguration.windowSize {
+            Task { @MainActor in
+                for _ in 0..<80 {
+                    if let window = NSApp.windows.first {
+                        window.setContentSize(size)
+                        window.center()
+                        window.makeKeyAndOrderFront(nil)
+                        NSApp.activate(ignoringOtherApps: true)
+                        return
+                    }
+                    try? await Task.sleep(nanoseconds: 25_000_000)
+                }
+            }
+        }
         guard let reportURL = Self.selfTestReportURL() else { return }
         NSApp.activate()
         let selfTest = NativeShareSelfTest(reportURL: reportURL)
@@ -40,13 +54,50 @@ private final class RuneScribMacParityHostDelegate: NSObject,
 struct RuneScribMacParityHostApp: App {
     @NSApplicationDelegateAdaptor(RuneScribMacParityHostDelegate.self)
     private var applicationDelegate
+    private let qualificationRuntime: RuneScribeRuntimeComposition? = {
+        guard QualificationHostConfiguration.isEnabled else { return nil }
+        return RuneScribeRuntimeComposition(moduleStateStore: nil)
+    }()
 
     var body: some Scene {
         WindowGroup {
-            EmptyView()
+            if let qualificationRuntime {
+                RuntimePresentedRootView(
+                    store: qualificationRuntime.rootPresentationStore
+                )
+                .task { await qualificationRuntime.start() }
+                .onDisappear {
+                    Task { await qualificationRuntime.stop() }
+                }
+            } else {
+                EmptyView()
+            }
         }
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 1, height: 1)
+        .defaultSize(
+            width: QualificationHostConfiguration.windowSize?.width ?? 1,
+            height: QualificationHostConfiguration.windowSize?.height ?? 1
+        )
+    }
+}
+
+private enum QualificationHostConfiguration {
+    static let isEnabled = ProcessInfo.processInfo.environment[
+        "RUNESCRIBE_QUALIFICATION"
+    ] == "theme-fidelity-v4.2"
+
+    static var windowSize: CGSize? {
+        guard isEnabled else { return nil }
+        switch ProcessInfo.processInfo.environment[
+            "RUNESCRIBE_QUALIFICATION_DESTINATION"
+        ] {
+        case "macos-standard":
+            return CGSize(width: 720, height: 900)
+        case "macos-resized":
+            return CGSize(width: 980, height: 720)
+        default:
+            return nil
+        }
     }
 }
 

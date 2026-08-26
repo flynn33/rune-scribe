@@ -83,7 +83,10 @@ enum RootEmergencyThemeWarningPolicy {
 /// the launch splash on a cold start when the 30-day intro schedule allows.
 struct RootView: View {
     @ObservedObject private var session: RuneScribeUISession
+    private let allowsColdLaunchSplash: Bool
+    @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    @Environment(\.runtimeAccessibilityPreferences) private var accessibilityPreferences
 
     /// Created once with the process-owned session, so a background/foreground
     /// transition never re-evaluates the cold-launch splash schedule.
@@ -92,8 +95,12 @@ struct RootView: View {
     @State private var isEmergencyThemeWarningDismissed = false
     @State private var showsEmergencyThemeWarningDetails = false
 
-    init(session: RuneScribeUISession) {
+    init(
+        session: RuneScribeUISession,
+        allowsColdLaunchSplash: Bool = true
+    ) {
         self.session = session
+        self.allowsColdLaunchSplash = allowsColdLaunchSplash
         _showSplash = State(initialValue: false)
     }
 
@@ -187,6 +194,7 @@ struct RootView: View {
                 .clipped()
                 .accessibilityIdentifier(rootBackgroundAccessibilityIdentifier)
                 .runtimeViewportFrameProbe(rootBackgroundAccessibilityIdentifier)
+                .themeCaptureViewportIdentifier(rootBackgroundCaptureIdentifier)
         }
         .animation(.easeInOut(duration: 0.25), value: session.isLocked)
         .animation(.easeInOut(duration: 0.2), value: showsEmergencyThemeWarning)
@@ -317,8 +325,30 @@ struct RootView: View {
         return "theme.root-background.\(themeID).\(variant)"
     }
 
+    private var rootBackgroundCaptureIdentifier: String? {
+        guard session.themeSnapshot?.isEmergencyPresentation != true,
+              let themeID = session.themeSnapshot?.effectiveTheme.id
+        else { return nil }
+        let usesIncreasedContrast = colorSchemeContrast == .increased
+            || accessibilityPreferences.forcesIncreasedContrast
+            || SimulatorAccessibilityQualification.isRequested
+        let variant: ThemeCaptureIdentifier.BackgroundVariant
+        if usesIncreasedContrast {
+            variant = .highContrast
+        } else {
+            let effectiveReduceMotion = accessibilityReduceMotion
+                || accessibilityPreferences.forcesReduceMotion
+                || SimulatorAccessibilityQualification.isRequested
+            variant = session.effectiveEffectsPreference(
+                systemReduceMotion: effectiveReduceMotion
+            ) == .reduced ? .reduceMotion : .standard
+        }
+        return ThemeCaptureIdentifier.background(themeID: themeID, variant: variant)
+    }
+
     private func evaluateColdLaunchSplashIfReady() {
-        guard session.runtimePresentationSettingsReady,
+        guard allowsColdLaunchSplash,
+              session.runtimePresentationSettingsReady,
               !didEvaluateColdLaunchSplash
         else { return }
         didEvaluateColdLaunchSplash = true

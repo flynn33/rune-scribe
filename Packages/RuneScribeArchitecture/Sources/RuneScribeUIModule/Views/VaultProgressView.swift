@@ -314,6 +314,20 @@ enum VaultProgressPresentation {
     }
 }
 
+enum VaultProgressCodexOwnershipFixture: Sendable {
+    case unowned
+    case owned
+    case selected
+}
+
+struct VaultProgressCodexCardFixture: Sendable {
+    let visualState: ThemeVisualContentState
+    let providerIsAvailable: Bool
+    let ownership: VaultProgressCodexOwnershipFixture
+    let isSelectable: Bool
+    let showsSelectedArtifacts: Bool
+}
+
 struct VaultProgressView: View {
     @EnvironmentObject private var session: RuneScribeUISession
     @Environment(\.dismiss) private var dismiss
@@ -321,13 +335,19 @@ struct VaultProgressView: View {
 
     @State private var section: VaultProgressSection
     @State private var initialScrollTarget: String?
+    private let initialCodexCardState: ThemeVisualContentState?
+    private let initialCodexCardFixture: VaultProgressCodexCardFixture?
 
     init(
         initialSection: VaultProgressSection = .journey,
-        initialViewport: VaultProgressInitialViewport? = nil
+        initialViewport: VaultProgressInitialViewport? = nil,
+        initialCodexCardState: ThemeVisualContentState? = nil,
+        initialCodexCardFixture: VaultProgressCodexCardFixture? = nil
     ) {
         _section = State(initialValue: initialSection)
         _initialScrollTarget = State(initialValue: initialViewport?.id)
+        self.initialCodexCardState = initialCodexCardState
+        self.initialCodexCardFixture = initialCodexCardFixture
     }
 
     var body: some View {
@@ -361,6 +381,7 @@ struct VaultProgressView: View {
         .runeSemanticPresentationSurface()
         .preferredColorScheme(.dark)
         .modifier(VaultProgressFrameModifier())
+        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenVaultProgress)
         .task { await session.loadActiveThemeCatalogVisuals() }
         .alert("Progress Unavailable", isPresented: Binding(
             get: { session.progressionCommandError != nil },
@@ -458,7 +479,10 @@ struct VaultProgressView: View {
                         case .statistics:
                             statistics(snapshot)
                         case .vault:
-                            vault(snapshot)
+                            vault(
+                                snapshot,
+                                viewportHeight: geometry.size.height
+                            )
                         case .archive:
                             archive(snapshot)
                         }
@@ -551,6 +575,11 @@ struct VaultProgressView: View {
                 )
                 .font(.footnote)
                 .foregroundColor(.runeSilver)
+                .themeCaptureIdentifier(
+                    ThemeCaptureIdentifier.journeyRequirementCount(
+                        codexID: gate.codexID
+                    )
+                )
 
                 if !gate.components.isEmpty {
                     VStack(alignment: .leading, spacing: 7) {
@@ -590,8 +619,23 @@ struct VaultProgressView: View {
                         .foregroundColor(.runeSilver)
                 }
             }
-            .accessibilityElement(children: .combine)
+            .accessibilityElement(children: .contain)
         }
+        .themeCaptureIdentifier(journeyCardCaptureIdentifier(
+            gate: gate,
+            ownership: ownership
+        ))
+    }
+
+    private func journeyCardCaptureIdentifier(
+        gate: ProgressionCodexGateDTO,
+        ownership: ProgressionOwnershipDTO?
+    ) -> String? {
+        if gate.unlockedAt == nil {
+            return ThemeCaptureIdentifier.journeyProgress(codexID: gate.codexID)
+        }
+        guard ownership?.state == .owned else { return nil }
+        return ThemeCaptureIdentifier.vault(codexID: gate.codexID, state: .owned)
     }
 
     private func achievements(_ snapshot: ProgressionSnapshotDTO) -> some View {
@@ -716,7 +760,10 @@ struct VaultProgressView: View {
         .padding(RuneMetrics.pad)
     }
 
-    private func vault(_ snapshot: ProgressionSnapshotDTO) -> some View {
+    private func vault(
+        _ snapshot: ProgressionSnapshotDTO,
+        viewportHeight: CGFloat
+    ) -> some View {
         let ownedContent = VaultProgressPresentation.ownedContent(from: snapshot.ownership)
         let ownedTitles = snapshot.titles.filter(\.isOwned)
 
@@ -729,7 +776,10 @@ struct VaultProgressView: View {
                 .foregroundColor(.runeSilver)
 
             if let descriptor = session.themeSnapshot?.effectiveTheme {
-                activeCodexCard(descriptor)
+                activeCodexCard(
+                    descriptor,
+                    viewportHeight: viewportHeight
+                )
                 themeCollection(
                     VaultProgressPresentation.themeCatalog(
                         descriptor: descriptor,
@@ -823,43 +873,91 @@ struct VaultProgressView: View {
         }
     }
 
-    private func activeCodexCard(_ descriptor: ThemeDescriptor) -> some View {
-        let isAvailable = session.themeSnapshot?.isEmergencyPresentation == false
+    private func activeCodexCard(
+        _ descriptor: ThemeDescriptor,
+        viewportHeight: CGFloat
+    ) -> some View {
+        let runtimeIsAvailable = session.themeSnapshot?.isEmergencyPresentation == false
+        let isAvailable = initialCodexCardFixture?.providerIsAvailable
+            ?? runtimeIsAvailable
+        let providerPresentation: (text: String, systemImage: String) = isAvailable
+            ? ("Provider available", "checkmark.circle")
+            : ("Provider unavailable; safe presentation in use", "exclamationmark.circle")
+        let visualState = initialCodexCardFixture?.visualState
+            ?? initialCodexCardState
+            ?? (isAvailable ? .selected : .unavailable)
         let provider = session.themeSnapshot?.providers.first(where: {
             $0.codexID == descriptor.codex.id
         })
-        let selectedArtifacts = [
-            session.activeThemeVisualPresentation?.plan.selectedRelic?.displayName,
-            session.activeThemeVisualPresentation?.plan.selectedSeal?.displayName,
-            session.activeThemeVisualPresentation?.plan.selectedFrame?.displayName,
-        ].compactMap { $0 }.joined(separator: ", ")
+        let ownershipPresentation: (text: String, systemImage: String, isOwned: Bool)
+        if let fixture = initialCodexCardFixture {
+            ownershipPresentation = switch fixture.ownership {
+            case .unowned: ("Not owned", "lock.fill", false)
+            case .owned: ("Owned", "checkmark.seal", true)
+            case .selected: ("Owned and selected", "checkmark.seal", true)
+            }
+        } else {
+            ownershipPresentation = provider?.isOwned == true
+                ? ("Owned and selected", "checkmark.seal", true)
+                : ("Ownership unavailable", "lock.fill", false)
+        }
+        let showsSelectedArtifacts = initialCodexCardFixture?.showsSelectedArtifacts ?? true
+        let selectedArtifacts = showsSelectedArtifacts
+            ? [
+                session.activeThemeVisualPresentation?.plan.selectedRelic?.displayName,
+                session.activeThemeVisualPresentation?.plan.selectedSeal?.displayName,
+                session.activeThemeVisualPresentation?.plan.selectedFrame?.displayName,
+            ].compactMap { $0 }.joined(separator: ", ")
+            : ""
+        let qualificationMaximumWidth = initialCodexCardFixture.map { _ in
+            max(1, viewportHeight - 96) * 16 / 9
+        }
         return RunePanel(title: "Active Codex", systemImage: "books.vertical", accent: .runeGold) {
             VStack(alignment: .leading, spacing: 10) {
-                ThemeCodexCardView(
+                let card = ThemeCodexCardView(
                     codexID: descriptor.codex.id,
                     displayName: descriptor.codex.displayName.fallbackValue,
                     summary: descriptor.codex.shortDescription.fallbackValue,
-                    state: isAvailable ? .selected : .unavailable,
+                    state: visualState,
                     accessibilityLabel: descriptor.codex.accessibility.label.fallbackValue,
                     accessibilityHint: descriptor.codex.accessibility.hint?.fallbackValue ?? "",
-                    isEnabled: false,
+                    isEnabled: initialCodexCardFixture?.isSelectable ?? false,
                     identifierPrefix: "theme.vault",
+                    captureIdentifier: ThemeCaptureIdentifier.vault(
+                        codexID: descriptor.codex.id,
+                        state: visualState
+                    ),
                     action: {}
                 ) {
-                    vaultCodexArtwork(descriptor, unavailable: !isAvailable)
+                    vaultCodexArtwork(descriptor, state: visualState)
+                }
+                if let qualificationMaximumWidth {
+                    card.frame(maxWidth: qualificationMaximumWidth)
+                } else {
+                    card
                 }
                 Label(
-                    isAvailable ? "Provider available" : "Provider unavailable; safe presentation in use",
-                    systemImage: isAvailable ? "checkmark.circle" : "exclamationmark.circle"
+                    providerPresentation.text,
+                    systemImage: providerPresentation.systemImage
                 )
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(isAvailable ? Color.runeGoldBright : Color.runeWarning)
+                .themeCaptureLeafIdentifier(
+                    ThemeCaptureIdentifier.vaultProviderState(codexID: descriptor.codex.id),
+                    accessibilityLabel: providerPresentation.text
+                )
                 Label(
-                    provider?.isOwned == true ? "Owned and selected" : "Ownership unavailable",
-                    systemImage: provider?.isOwned == true ? "checkmark.seal" : "lock.fill"
+                    ownershipPresentation.text,
+                    systemImage: ownershipPresentation.systemImage
                 )
                 .font(.footnote.weight(.semibold))
-                .foregroundStyle(provider?.isOwned == true ? Color.runeGoldBright : Color.runeLocked)
+                .foregroundStyle(
+                    ownershipPresentation.isOwned ? Color.runeGoldBright : Color.runeLocked
+                )
+                .themeCaptureLeafIdentifier(
+                    ThemeCaptureIdentifier.vaultOwnershipState(codexID: descriptor.codex.id),
+                    accessibilityLabel: ownershipPresentation.text
+                )
                 Text("Script: \(descriptor.codex.primaryScriptID.rawValue)")
                     .font(.footnote)
                     .foregroundStyle(Color.runeSilver)
@@ -881,12 +979,21 @@ struct VaultProgressView: View {
 
     private func vaultCodexArtwork(
         _ descriptor: ThemeDescriptor,
-        unavailable: Bool
+        state: ThemeVisualContentState
     ) -> AnyView {
         if let presentation = session.activeThemeVisualPresentation {
-            let imagePlan = unavailable
-                ? presentation.plan.codex.unavailable
-                : presentation.plan.codex.selected
+            let imagePlan = switch state {
+            case .locked:
+                presentation.plan.codex.locked
+            case .encountered:
+                presentation.plan.codex.encountered
+            case .selected:
+                presentation.plan.codex.selected
+            case .unavailable:
+                presentation.plan.codex.unavailable
+            case .owned, .progress:
+                presentation.plan.codex.card
+            }
             if let image = presentation.imageReference(for: imagePlan)?.image {
                 return AnyView(image.resizable().scaledToFill())
             }

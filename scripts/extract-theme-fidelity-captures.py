@@ -20,19 +20,65 @@ try:
         DestinationPolicyError,
         validate_selection,
     )
+    from scripts.theme_fidelity_xcui_evidence import (
+        CANDIDATE_ATTACHMENT_NAME,
+        UI_TEST_TARGET_KIND,
+        UI_TEST_TARGETS_BY_ROLE,
+        XCUI_QUERY_ATTACHMENT_NAME,
+        XCUI_SIDECAR_NAME,
+        XCUI_TEST_IDENTIFIER,
+        XCUIEvidenceError,
+        expected_inventory,
+        expected_inventory_for_role,
+        index_entries,
+        load_repository_authority,
+        load_repository_candidates,
+        load_repository_seeds,
+        validate_sidecar,
+    )
 except ModuleNotFoundError:
     from theme_fidelity_destination_policy import (  # type: ignore[no-redef]
         DestinationPolicyError,
         validate_selection,
     )
+    from theme_fidelity_xcui_evidence import (  # type: ignore[no-redef]
+        CANDIDATE_ATTACHMENT_NAME,
+        UI_TEST_TARGET_KIND,
+        UI_TEST_TARGETS_BY_ROLE,
+        XCUI_QUERY_ATTACHMENT_NAME,
+        XCUI_SIDECAR_NAME,
+        XCUI_TEST_IDENTIFIER,
+        XCUIEvidenceError,
+        expected_inventory,
+        expected_inventory_for_role,
+        index_entries,
+        load_repository_authority,
+        load_repository_candidates,
+        load_repository_seeds,
+        validate_sidecar,
+    )
 
 
-SCHEMA_VERSION = "1.0"
+SCHEMA_VERSION = "1.2"
+THEMES = ("norse", "moonleaf", "sunspire", "wildwood", "gloamthorn")
+SURFACES = (
+    "workspace-empty", "compose-short", "compose-long", "inscription-preview",
+    "received-cipher", "share-builder", "static-share", "settings-codex-card",
+    "settings-defaults-preview", "vault-locked", "vault-progress",
+    "vault-encountered", "vault-owned", "vault-selected", "relic-picker",
+    "seal-picker", "mastery", "high-contrast", "reduce-motion", "large-text",
+)
 CAPTURE_NAME = re.compile(
     r"^(norse|moonleaf|sunspire|wildwood|gloamthorn)--"
     r"([a-z0-9-]+)--"
     r"(iphone-portrait|ipad-portrait|macos-standard|macos-resized)"
     r"(?:\.png|\.capture\.json)$"
+)
+AUXILIARY_NAME = re.compile(
+    r"^(norse|moonleaf|sunspire|wildwood|gloamthorn)--"
+    r"([a-z0-9-]+)--"
+    r"(iphone-portrait|ipad-portrait|macos-standard|macos-resized)--"
+    r"(stability-b|renderer-output|optional-codex-locked)\.png$"
 )
 XCRESULT_NAME_SUFFIX = re.compile(
     r"^(?P<base>.+)_(?P<ordinal>[0-9]+)_"
@@ -40,24 +86,56 @@ XCRESULT_NAME_SUFFIX = re.compile(
     r"(?P<extension>\.png|\.json)$"
 )
 EXPECTED_TEST_IDENTIFIER = "ThemeFidelityMatrixTests/testCaptureThemeFidelityMatrix()"
+XCODE_TEST_URL_AUTHORITY = "com.apple.xcode"
+XCODE_TEST_URL_PROJECT = "RuneScrib"
 BUNDLE_EXPECTATIONS = {
     "iphone": {
         "destinations": {"iphone-portrait"},
         "platform": "iOS Simulator",
-        "attachmentCount": 200,
+        "attachmentCount": 211,
+        "testIdentifier": EXPECTED_TEST_IDENTIFIER,
     },
     "ipad": {
         "destinations": {"ipad-portrait"},
         "platform": "iOS Simulator",
-        "attachmentCount": 200,
+        "attachmentCount": 211,
+        "testIdentifier": EXPECTED_TEST_IDENTIFIER,
     },
     "macos": {
         "destinations": {"macos-standard", "macos-resized"},
         "platform": "macOS",
         "modelPrefix": "Mac",
-        "attachmentCount": 400,
+        "attachmentCount": 422,
+        "testIdentifier": EXPECTED_TEST_IDENTIFIER,
+    },
+    "iphone-xcui": {
+        "destinations": {"iphone-portrait"},
+        "platform": "iOS Simulator",
+        "attachmentCount": 264,
+        "testIdentifier": XCUI_TEST_IDENTIFIER,
+        "targetName": UI_TEST_TARGETS_BY_ROLE["iphone-xcui"],
+        "targetKind": UI_TEST_TARGET_KIND,
+    },
+    "ipad-xcui": {
+        "destinations": {"ipad-portrait"},
+        "platform": "iOS Simulator",
+        "attachmentCount": 264,
+        "testIdentifier": XCUI_TEST_IDENTIFIER,
+        "targetName": UI_TEST_TARGETS_BY_ROLE["ipad-xcui"],
+        "targetKind": UI_TEST_TARGET_KIND,
+    },
+    "macos-xcui": {
+        "destinations": {"macos-standard", "macos-resized"},
+        "platform": "macOS",
+        "modelPrefix": "Mac",
+        "attachmentCount": 528,
+        "testIdentifier": XCUI_TEST_IDENTIFIER,
+        "targetName": UI_TEST_TARGETS_BY_ROLE["macos-xcui"],
+        "targetKind": UI_TEST_TARGET_KIND,
     },
 }
+HOSTED_ROLES = frozenset({"iphone", "ipad", "macos"})
+XCUI_ROLES = frozenset({"iphone-xcui", "ipad-xcui", "macos-xcui"})
 
 
 class BundleBinding(NamedTuple):
@@ -70,6 +148,48 @@ class BundleBinding(NamedTuple):
 
 class ExtractionError(ValueError):
     pass
+
+
+def hosted_role(role: str) -> str:
+    return role.removesuffix("-xcui")
+
+
+def is_xcui_role(role: str) -> bool:
+    return role in XCUI_ROLES
+
+
+def expected_xcui_test_identifier_url(role: str) -> str:
+    if role not in XCUI_ROLES:
+        raise ExtractionError(f"result bundle role is not XCUI: {role}")
+    target_name = BUNDLE_EXPECTATIONS[role]["targetName"]
+    test_case, test_method = XCUI_TEST_IDENTIFIER.removesuffix("()").split("/", 1)
+    return (
+        f"test://{XCODE_TEST_URL_AUTHORITY}/{XCODE_TEST_URL_PROJECT}/"
+        f"{target_name}/{test_case}/{test_method}"
+    )
+
+
+def validate_xcui_test_identity(role: str, record: dict[str, Any]) -> dict[str, str]:
+    expected_identifier = BUNDLE_EXPECTATIONS[role]["testIdentifier"]
+    expected_url = expected_xcui_test_identifier_url(role)
+    if record.get("testIdentifier") != expected_identifier:
+        raise ExtractionError(
+            f"{role} attachment test identifier is {record.get('testIdentifier')!r}, "
+            f"expected {expected_identifier!r}"
+        )
+    if record.get("testIdentifierURL") != expected_url:
+        raise ExtractionError(
+            f"{role} attachment test identifier URL is "
+            f"{record.get('testIdentifierURL')!r}, expected {expected_url!r}"
+        )
+    path_components = expected_url.removeprefix(
+        f"test://{XCODE_TEST_URL_AUTHORITY}/"
+    ).split("/")
+    return {
+        "projectName": path_components[0],
+        "targetName": path_components[1],
+        "targetKind": BUNDLE_EXPECTATIONS[role]["targetKind"],
+    }
 
 
 def sha256_file(path: Path) -> str:
@@ -204,7 +324,8 @@ def validate_summary(binding: BundleBinding, summary: dict[str, Any]) -> dict[st
         raise ExtractionError(
             f"{binding.role} result platform is {device['platform']!r}, expected {expectation['platform']!r}"
         )
-    if binding.role in {"iphone", "ipad"}:
+    base_role = hosted_role(binding.role)
+    if base_role in {"iphone", "ipad"}:
         if device["modelName"] != binding.expected_model_name:
             raise ExtractionError(
                 f"{binding.role} result model {device['modelName']!r} does not match exact "
@@ -212,7 +333,7 @@ def validate_summary(binding: BundleBinding, summary: dict[str, Any]) -> dict[st
             )
     elif not device["modelName"].startswith(expectation["modelPrefix"]):
         raise ExtractionError(f"macos result model is not a Mac destination")
-    if binding.role == "macos" and device["architecture"] != "arm64":
+    if base_role == "macos" and device["architecture"] != "arm64":
         raise ExtractionError(
             f"macos result architecture is {device['architecture']!r}, expected 'arm64'"
         )
@@ -270,22 +391,53 @@ def flatten_attachments(manifest: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 def canonical_attachment_name(suggested: str) -> str | None:
     """Recover the exact XCTest attachment name from xcresult export decoration."""
-    if CAPTURE_NAME.fullmatch(suggested):
-        return suggested
+    patterns = (
+        CAPTURE_NAME,
+        AUXILIARY_NAME,
+        CANDIDATE_ATTACHMENT_NAME,
+        XCUI_SIDECAR_NAME,
+        XCUI_QUERY_ATTACHMENT_NAME,
+    )
     decorated = XCRESULT_NAME_SUFFIX.fullmatch(suggested)
-    if decorated is None:
-        return None
-    candidate = decorated.group("base") + decorated.group("extension")
-    if CAPTURE_NAME.fullmatch(candidate):
-        return candidate
-    return None
+    if decorated is not None:
+        candidate = decorated.group("base") + decorated.group("extension")
+        if XCRESULT_NAME_SUFFIX.fullmatch(candidate) is not None:
+            return None
+        return candidate if any(pattern.fullmatch(candidate) for pattern in patterns) else None
+    return suggested if any(pattern.fullmatch(suggested) for pattern in patterns) else None
 
 
 def destination_slug(name: str) -> str:
-    match = CAPTURE_NAME.fullmatch(name)
+    match = (
+        CAPTURE_NAME.fullmatch(name)
+        or AUXILIARY_NAME.fullmatch(name)
+        or CANDIDATE_ATTACHMENT_NAME.fullmatch(name)
+        or XCUI_SIDECAR_NAME.fullmatch(name)
+        or XCUI_QUERY_ATTACHMENT_NAME.fullmatch(name)
+    )
     if match is None:
         raise ExtractionError(f"attachment name is not canonical: {name}")
     return match.group(3)
+
+
+def expected_attachment_names(role: str) -> set[str]:
+    if role in XCUI_ROLES:
+        authority, probes = load_repository_authority(
+            Path(__file__).resolve().parents[1]
+        )
+        return set(expected_inventory_for_role(authority, probes, role).attachments)
+    destinations = BUNDLE_EXPECTATIONS[role]["destinations"]
+    expected: set[str] = set()
+    for destination in destinations:
+        for theme in THEMES:
+            for surface in SURFACES:
+                stem = f"{theme}--{surface}--{destination}"
+                expected.add(f"{stem}.png")
+                expected.add(f"{stem}.capture.json")
+            expected.add(f"{theme}--reduce-motion--{destination}--stability-b.png")
+            expected.add(f"{theme}--static-share--{destination}--renderer-output.png")
+        expected.add(f"norse--vault-locked--{destination}--optional-codex-locked.png")
+    return expected
 
 
 def validate_attachment_content(path: Path, canonical_name: str) -> str:
@@ -306,16 +458,19 @@ def validate_attachment_content(path: Path, canonical_name: str) -> str:
     return "public.json"
 
 
-def validate_bindings(bindings: list[BundleBinding]) -> None:
+def validate_bindings(bindings: list[BundleBinding], require_xcui: bool = False) -> None:
     roles = [binding.role for binding in bindings]
-    if len(roles) != len(BUNDLE_EXPECTATIONS) or set(roles) != set(BUNDLE_EXPECTATIONS):
+    expected_roles = HOSTED_ROLES | XCUI_ROLES if require_xcui else HOSTED_ROLES
+    if len(roles) != len(expected_roles) or set(roles) != expected_roles:
         raise ExtractionError(
-            "result bundle roles must be exactly once each: iphone, ipad, macos"
+            "result bundle roles must be exactly once each: "
+            + ", ".join(sorted(expected_roles))
         )
     if len({binding.path.resolve() for binding in bindings}) != len(bindings):
         raise ExtractionError("result bundle paths must be distinct")
     for binding in bindings:
-        if binding.role in {"iphone", "ipad"}:
+        base_role = hosted_role(binding.role)
+        if base_role in {"iphone", "ipad"}:
             if not binding.expected_device_id:
                 raise ExtractionError(f"{binding.role} result bundle requires an expected device ID")
             if not binding.expected_model_name:
@@ -325,7 +480,7 @@ def validate_bindings(bindings: list[BundleBinding]) -> None:
             try:
                 validate_selection(
                     binding.destination_selection,
-                    binding.role,
+                    base_role,
                     binding.expected_device_id,
                     binding.expected_model_name,
                 )
@@ -337,10 +492,41 @@ def extract(
     bindings: list[BundleBinding],
     output: Path,
     simulator_selection_source: dict[str, Any] | None = None,
+    require_xcui: bool | None = None,
 ) -> dict[str, Any]:
-    validate_bindings(bindings)
+    if require_xcui is None:
+        require_xcui = any(is_xcui_role(binding.role) for binding in bindings)
+    validate_bindings(bindings, require_xcui=require_xcui)
+    authority: dict[str, Any] | None = None
+    probes: dict[str, dict[str, Any]] | None = None
+    seeds: dict[str, dict[str, Any]] | None = None
+    candidates: dict[str, dict[str, Any]] | None = None
+    authority_entries: dict[str, dict[str, Any]] = {}
+    inventory = None
+    if require_xcui:
+        try:
+            repository_root = Path(__file__).resolve().parents[1]
+            authority, probes = load_repository_authority(repository_root)
+            seeds = load_repository_seeds(repository_root)
+            candidates = load_repository_candidates(repository_root)
+            authority_entries = index_entries(authority)
+            inventory = expected_inventory(authority, probes)
+        except XCUIEvidenceError as error:
+            raise ExtractionError(str(error)) from error
     output.mkdir(parents=True, exist_ok=True)
-    existing = [path.name for path in output.iterdir() if CAPTURE_NAME.fullmatch(path.name)]
+    existing = [
+        path.name for path in output.iterdir()
+        if any(
+            pattern.fullmatch(path.name)
+            for pattern in (
+                CAPTURE_NAME,
+                AUXILIARY_NAME,
+                CANDIDATE_ATTACHMENT_NAME,
+                XCUI_SIDECAR_NAME,
+                XCUI_QUERY_ATTACHMENT_NAME,
+            )
+        )
+    ]
     if existing:
         raise ExtractionError(
             "capture output already contains matrix attachments: " + ", ".join(sorted(existing)[:8])
@@ -358,16 +544,24 @@ def extract(
             provenance = validate_summary(binding, summary)
             exported = temporary_root / f"bundle-{index}"
             manifest = export_attachments(result_bundle, exported)
-            if len(manifest) != 1 or manifest[0].get("testIdentifier") != EXPECTED_TEST_IDENTIFIER:
+            expected_test_identifier = BUNDLE_EXPECTATIONS[binding.role]["testIdentifier"]
+            if len(manifest) != 1 or manifest[0].get("testIdentifier") != expected_test_identifier:
                 identifiers = [record.get("testIdentifier") for record in manifest]
                 raise ExtractionError(
                     f"{binding.role} attachment test identifiers are {identifiers!r}, "
-                    f"expected exactly {EXPECTED_TEST_IDENTIFIER!r}"
+                    f"expected exactly {expected_test_identifier!r}"
+                )
+            source_test_identity: dict[str, str] | None = None
+            if is_xcui_role(binding.role):
+                source_test_identity = validate_xcui_test_identity(
+                    binding.role,
+                    manifest[0],
                 )
             manifest_path = exported / "manifest.json"
             if not manifest_path.is_file():
                 raise ExtractionError(f"attachment export omitted manifest.json: {result_bundle}")
             selected_count = 0
+            selected_names: set[str] = set()
             for attachment in flatten_attachments(manifest):
                 suggested = attachment.get("suggestedHumanReadableName")
                 exported_name = attachment.get("exportedFileName")
@@ -378,10 +572,19 @@ def extract(
                     raise ExtractionError(
                         f"{binding.role} result bundle contains a non-matrix attachment: {suggested}"
                     )
-                if attachment.get("testIdentifier") != EXPECTED_TEST_IDENTIFIER:
+                if attachment.get("testIdentifier") != expected_test_identifier:
                     raise ExtractionError(
                         f"attachment belongs to unexpected test: {attachment.get('testIdentifier')!r}"
                     )
+                if is_xcui_role(binding.role):
+                    attachment_identity = validate_xcui_test_identity(
+                        binding.role,
+                        attachment,
+                    )
+                    if attachment_identity != source_test_identity:
+                        raise ExtractionError(
+                            f"{binding.role} attachment source test identity changed"
+                        )
                 if destination_slug(canonical_name) not in BUNDLE_EXPECTATIONS[binding.role]["destinations"]:
                     raise ExtractionError(
                         f"{binding.role} result bundle contains a capture for another destination: "
@@ -438,12 +641,30 @@ def extract(
                     "resultBundleRole": binding.role,
                     "resultBundle": str(result_bundle),
                 }
+                if is_xcui_role(binding.role):
+                    assert source_test_identity is not None
+                    copied[canonical_name].update(
+                        {
+                            "sourceTargetName": source_test_identity["targetName"],
+                            "sourceTargetKind": source_test_identity["targetKind"],
+                            "sourceProjectName": source_test_identity["projectName"],
+                        }
+                    )
                 selected_count += 1
+                selected_names.add(canonical_name)
             expected_count = BUNDLE_EXPECTATIONS[binding.role]["attachmentCount"]
             if selected_count != expected_count:
                 raise ExtractionError(
                     f"{binding.role} result bundle produced {selected_count} matrix attachments, "
                     f"expected {expected_count}"
+                )
+            expected_names = expected_attachment_names(binding.role)
+            if selected_names != expected_names:
+                missing = sorted(expected_names - selected_names)
+                extra = sorted(selected_names - expected_names)
+                raise ExtractionError(
+                    f"{binding.role} attachment set differs; "
+                    f"missing={missing[:8]}, extra={extra[:8]}"
                 )
             bundles.append(
                 {
@@ -451,7 +672,11 @@ def extract(
                     "path": str(result_bundle),
                     "sha256": result_bundle_digest(result_bundle),
                     "selectedAttachmentCount": selected_count,
-                    "expectedTestIdentifier": EXPECTED_TEST_IDENTIFIER,
+                    "expectedTestIdentifier": expected_test_identifier,
+                    "expectedTestIdentifierURL": (
+                        expected_xcui_test_identifier_url(binding.role)
+                        if is_xcui_role(binding.role) else None
+                    ),
                     "outcome": "Passed",
                     "summarySHA256": canonical_json_sha256(summary),
                     "attachmentManifestSHA256": canonical_json_sha256(manifest),
@@ -462,11 +687,88 @@ def extract(
                 }
             )
 
-    png_count = sum(name.endswith(".png") for name in copied)
+    validated_sidecars: list[dict[str, Any]] = []
+    if require_xcui:
+        assert (
+            authority is not None
+            and probes is not None
+            and seeds is not None
+            and candidates is not None
+            and inventory is not None
+        )
+        actual_xcui = {
+            name
+            for name in copied
+            if CANDIDATE_ATTACHMENT_NAME.fullmatch(name)
+            or XCUI_SIDECAR_NAME.fullmatch(name)
+            or XCUI_QUERY_ATTACHMENT_NAME.fullmatch(name)
+        }
+        if actual_xcui != set(inventory.attachments):
+            missing = sorted(set(inventory.attachments) - actual_xcui)
+            extra = sorted(actual_xcui - set(inventory.attachments))
+            raise ExtractionError(
+                "XCUI attachment set differs; "
+                f"missing={missing[:8]}, extra={extra[:8]}"
+            )
+        entries_by_sidecar = {
+            f"{entry['theme'].lower()}--{entry['surface']}--{entry['destination']}.xcui.json": entry
+            for entry in authority_entries.values()
+        }
+        for name in sorted(inventory.sidecars):
+            entry = entries_by_sidecar.get(name)
+            if entry is None:
+                raise ExtractionError(f"XCUI sidecar is not bound to an authority entry: {name}")
+            try:
+                validated = validate_sidecar(
+                    output / name,
+                    entry,
+                    probes,
+                    seeds,
+                    candidates,
+                    output,
+                    copied,
+                )
+            except XCUIEvidenceError as error:
+                raise ExtractionError(str(error)) from error
+            validated_sidecars.append(
+                {
+                    "name": name,
+                    "sha256": validated.sha256,
+                    "entryID": entry["id"],
+                    "sourceTest": validated.source_test,
+                    "deterministicSeed": validated.deterministic_seed,
+                    "candidateElementCaptureCount": len(validated.candidate_captures),
+                    "structuralWitnessCount": len(validated.structural_witnesses),
+                    "xcuiProbeEvidenceCount": len(validated.probe_evidence),
+                }
+            )
+
+    png_count = sum(CAPTURE_NAME.fullmatch(name) is not None and name.endswith(".png") for name in copied)
+    auxiliary_png_count = sum(AUXILIARY_NAME.fullmatch(name) is not None for name in copied)
     record_count = sum(name.endswith(".capture.json") for name in copied)
-    if png_count != 400 or record_count != 400:
+    candidate_png_count = sum(
+        CANDIDATE_ATTACHMENT_NAME.fullmatch(name) is not None for name in copied
+    )
+    xcui_query_png_count = sum(
+        XCUI_QUERY_ATTACHMENT_NAME.fullmatch(name) is not None for name in copied
+    )
+    xcui_sidecar_count = sum(
+        XCUI_SIDECAR_NAME.fullmatch(name) is not None for name in copied
+    )
+    if png_count != 400 or auxiliary_png_count != 44 or record_count != 400:
         raise ExtractionError(
-            f"expected 400 PNG and 400 capture records, found {png_count} PNG and {record_count} records"
+            "expected 400 primary PNG, 44 auxiliary PNG, and 400 capture records; "
+            f"found {png_count}, {auxiliary_png_count}, and {record_count}"
+        )
+    if require_xcui and (
+        candidate_png_count != 672
+        or xcui_query_png_count != 4
+        or xcui_sidecar_count != 380
+        or len(copied) != 1900
+    ):
+        raise ExtractionError(
+            "expected 672 candidate PNG, 4 XCUI query PNG, and 380 XCUI sidecars; "
+            f"found {candidate_png_count}, {xcui_query_png_count}, and {xcui_sidecar_count}"
         )
     tool = subprocess.run(
         ["xcrun", "--find", "xcresulttool"],
@@ -479,15 +781,22 @@ def extract(
         detail = tool.stderr.strip() or tool.stdout.strip()
         raise ExtractionError(f"unable to resolve xcresulttool provenance: {detail}")
     return {
-        "schemaVersion": SCHEMA_VERSION,
+        "schemaVersion": SCHEMA_VERSION if require_xcui else "1.1",
         "result": "pass",
         "captureRoot": str(output.resolve()),
         "pngCount": png_count,
+        "auxiliaryPNGCount": auxiliary_png_count,
         "recordCount": record_count,
+        "candidatePNGCount": candidate_png_count,
+        "xcuiQueryPNGCount": xcui_query_png_count,
+        "xcuiSidecarCount": xcui_sidecar_count,
+        "attachmentCount": len(copied),
         "expectedTestIdentifier": EXPECTED_TEST_IDENTIFIER,
+        "expectedXCUITestIdentifier": XCUI_TEST_IDENTIFIER if require_xcui else None,
         "xcresulttool": tool.stdout.strip(),
         "simulatorSelectionSource": simulator_selection_source,
         "resultBundles": bundles,
+        "xcuiSidecars": validated_sidecars,
         "attachments": [copied[name] for name in sorted(copied)],
     }
 
@@ -500,13 +809,16 @@ def parse_binding(
 ) -> BundleBinding:
     role, separator, path = raw.partition("=")
     if not separator or role not in BUNDLE_EXPECTATIONS or not path:
-        raise ExtractionError("--result-bundle must use ROLE=PATH for iphone, ipad, or macos")
+        raise ExtractionError(
+            "--result-bundle must use ROLE=PATH for hosted or matching -xcui roles"
+        )
+    base_role = hosted_role(role)
     return BundleBinding(
         role,
         Path(path),
-        expected_devices.get(role),
-        expected_models.get(role),
-        selections.get(role),
+        expected_devices.get(base_role),
+        expected_models.get(base_role),
+        selections.get(base_role),
     )
 
 
@@ -592,7 +904,15 @@ def main() -> int:
     except ExtractionError as error:
         print(f"FAIL: {error}", file=sys.stderr)
         return 1
-    print(f"PASS: extracted {report['pngCount']} PNG captures and {report['recordCount']} records")
+    print(
+        "PASS: extracted "
+        f"{report['pngCount']} primary PNG captures, "
+        f"{report['auxiliaryPNGCount']} auxiliary PNG captures, "
+        f"{report['recordCount']} records, "
+        f"{report['candidatePNGCount']} candidate element PNGs, "
+        f"{report['xcuiQueryPNGCount']} XCUI query PNGs, and "
+        f"{report['xcuiSidecarCount']} XCUI sidecars"
+    )
     print(f"REPORT: {report_path.resolve()}")
     return 0
 

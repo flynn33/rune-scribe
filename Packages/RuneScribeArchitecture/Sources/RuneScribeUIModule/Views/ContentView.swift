@@ -34,6 +34,14 @@ private struct MessageSharePreparation: Equatable, Sendable {
 struct ContentViewSettledArtifactSeed {
     let composition: ThemeArtifactCompositionPlan
     let presentation: ActiveThemeVisualPresentation
+
+    init(
+        composition: ThemeArtifactCompositionPlan,
+        presentation: ActiveThemeVisualPresentation
+    ) {
+        self.composition = composition
+        self.presentation = presentation
+    }
 }
 
 struct ContentView: View {
@@ -91,6 +99,14 @@ struct ContentView: View {
             case .frame: .frame
             }
         }
+
+        var captureKind: ThemeCaptureIdentifier.PickerKind? {
+            switch self {
+            case .relic: .relic
+            case .seal: .seal
+            case .frame: nil
+            }
+        }
     }
 
     // MARK: - State
@@ -135,13 +151,22 @@ struct ContentView: View {
     /// changes size when it transforms — only the glyphs change.
     private let glyphSize: CGFloat = 20
     private let initialViewportProbeID: String
+    private let initialComposeCaptureLength: ThemeCaptureIdentifier.ComposeLength?
+    private let forcesScrollableWorkspaceLayout: Bool
+    private let qualificationViewportWidth: CGFloat?
 
     init(
         initialInputText: String = "",
         initialSettledArtifact: ContentViewSettledArtifactSeed? = nil,
-        initialViewportProbeID: String = "workspace.text-frame"
+        initialViewportProbeID: String = "workspace.text-frame",
+        initialComposeCaptureLength: ThemeCaptureIdentifier.ComposeLength? = nil,
+        forcesScrollableWorkspaceLayout: Bool = false,
+        qualificationViewportWidth: CGFloat? = nil
     ) {
         self.initialViewportProbeID = initialViewportProbeID
+        self.initialComposeCaptureLength = initialComposeCaptureLength
+        self.forcesScrollableWorkspaceLayout = forcesScrollableWorkspaceLayout
+        self.qualificationViewportWidth = qualificationViewportWidth
         _inputText = State(initialValue: initialInputText)
         guard let initialSettledArtifact else { return }
         _boxPhase = State(initialValue: .result)
@@ -214,9 +239,13 @@ struct ContentView: View {
                 )
 
                 workspaceBodyContainer
+                    .themeCaptureIdentifier(
+                        ThemeCaptureIdentifier.workspacePrimarySurface
+                    )
             }
         }
         .runeRootFrame()
+        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenWorkspace)
         .background { automaticMessageShareLauncher }
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showLibrary) {
@@ -283,27 +312,39 @@ struct ContentView: View {
     private var workspaceBodyContainer: some View {
         if usesScrollableWorkspaceLayout {
             GeometryReader { proxy in
+                #if os(iOS)
+                let viewportWidth: CGFloat? = qualificationViewportWidth ?? proxy.size.width
+                #else
+                let viewportWidth = qualificationViewportWidth
+                #endif
+                let maximumCanvasWidth = viewportWidth.map {
+                    let horizontalLimit = $0 - (2 * RuneMetrics.pad) - 20
+                    let verticalLimit = max(1, proxy.size.height - 24)
+                        * CGFloat(ShareArtifactRenderPlan.outputWidth)
+                        / CGFloat(ShareArtifactRenderPlan.outputHeight)
+                    return max(1, min(horizontalLimit, verticalLimit))
+                }
                 ScrollView {
-                    workspaceBody
+                    workspaceBody(maximumCanvasWidth: maximumCanvasWidth)
                         .frame(minHeight: proxy.size.height, alignment: .top)
                 }
                 .scrollDismissesKeyboard(.immediately)
                 .scrollBounceBehavior(.basedOnSize)
             }
         } else {
-            workspaceBody
+            workspaceBody(maximumCanvasWidth: nil)
         }
     }
 
     private var usesScrollableWorkspaceLayout: Bool {
         #if os(iOS)
-        dynamicTypeSize.isAccessibilitySize
+        forcesScrollableWorkspaceLayout || dynamicTypeSize.isAccessibilitySize
         #else
-        false
+        forcesScrollableWorkspaceLayout
         #endif
     }
 
-    private var workspaceBody: some View {
+    private func workspaceBody(maximumCanvasWidth: CGFloat?) -> some View {
         // Fixed layout — only the content inside `textFrame` changes when
         // converting. Nothing here appears, disappears, or resizes.
         VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
@@ -325,7 +366,7 @@ struct ContentView: View {
             .pickerStyle(.segmented)
             .labelsHidden()
 
-            textFrame
+            textFrame(maximumCanvasWidth: maximumCanvasWidth)
                 .frame(maxHeight: .infinity)
 
             // At least the 46pt button-row height. The transforming-phase
@@ -342,12 +383,20 @@ struct ContentView: View {
     // MARK: - Text Frame (fixed size; only the inner content changes)
 
     private func artifactBrowserSheet(_ browser: ArtifactBrowser) -> AnyView {
-        AnyView(NavigationStack {
+        let codexID = session.themeSnapshot?.effectiveTheme.codex.id
+        let captureIdentifier = browser.captureKind.flatMap { kind in
+            codexID.map { ThemeCaptureIdentifier.artifactPicker(kind: kind, codexID: $0) }
+        }
+        let screenCaptureIdentifier = browser.captureKind.flatMap { kind in
+            codexID.map { ThemeCaptureIdentifier.artifactPickerScreen(kind: kind, codexID: $0) }
+        }
+        return AnyView(NavigationStack {
             ThemeArtifactBrowserView(
                 title: "Choose \(browser.title)",
                 items: artifactBrowserItems(browser),
                 includesNone: browser != .relic,
                 canSelectNone: session.activeThemeProviderIsAvailable,
+                captureIdentifier: captureIdentifier,
                 selectNone: {
                     artifactBrowser = nil
                     Task {
@@ -375,10 +424,11 @@ struct ContentView: View {
                 }
             }
         }
-        .task { await session.loadActiveThemeCatalogVisuals() })
+        .task { await session.loadActiveThemeCatalogVisuals() }
+        .themeCaptureViewportIdentifier(screenCaptureIdentifier))
     }
 
-    private var textFrame: some View {
+    private func textFrame(maximumCanvasWidth: CGFloat?) -> some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
                 .fill(Color.runeParchment)
@@ -439,6 +489,7 @@ struct ContentView: View {
                    presentation.revision == presentation.plan.revision {
                     ThemeArtifactPreview(
                         plan: resultArtifactComposition,
+                        maximumCanvasWidth: maximumCanvasWidth,
                         image: { presentation.image(for: $0) }
                     )
                     .padding(10)
@@ -470,6 +521,17 @@ struct ContentView: View {
                 .strokeBorder(Color.runeBlue.opacity(0.35), lineWidth: 1)
         )
         .runtimeViewportFrameProbe(initialViewportProbeID)
+        .themeCaptureIdentifier(composeCaptureIdentifier)
+    }
+
+    private var composeCaptureIdentifier: String? {
+        guard let initialComposeCaptureLength,
+              let codexID = session.themeSnapshot?.effectiveTheme.codex.id
+        else { return nil }
+        return ThemeCaptureIdentifier.compose(
+            length: initialComposeCaptureLength,
+            codexID: codexID
+        )
     }
 
     // MARK: - Action Area
@@ -541,6 +603,8 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(RuneSecondaryButtonStyle())
+                .accessibilityIdentifier("workspace.result.clear")
+                .runtimeViewportFrameProbe("workspace.result.clear")
             }
         }
     }
@@ -569,6 +633,8 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity)
         }
         .buttonStyle(RuneSecondaryButtonStyle())
+        .accessibilityIdentifier("workspace.result.edit")
+        .runtimeViewportFrameProbe("workspace.result.edit")
     }
 
     private func resultCopyButton(resistsCompression: Bool) -> some View {
@@ -587,6 +653,8 @@ struct ContentView: View {
         }
         .buttonStyle(RuneScribButtonStyle())
         .disabled(!allowsPlainResultCopy)
+        .accessibilityIdentifier("workspace.result.copy")
+        .runtimeViewportFrameProbe("workspace.result.copy")
     }
 
     #if os(iOS)
@@ -640,6 +708,8 @@ struct ContentView: View {
                 || messageArtifactPreparationTask != nil
                 || pendingMessageArtifact != nil
         )
+        .accessibilityIdentifier("message.imessage-share")
+        .runtimeViewportFrameProbe("message.imessage-share")
     }
     #endif
 
@@ -661,6 +731,7 @@ struct ContentView: View {
                 || messageArtifactPreparationTask != nil
         )
         .accessibilityIdentifier("message.customize-share")
+        .runtimeViewportFrameProbe("message.customize-share")
     }
 
     // MARK: - Active Cipher Bar
@@ -1198,6 +1269,7 @@ struct ContentView: View {
                 || pendingMessageArtifact != nil
         )
         .accessibilityIdentifier("message.quick-share")
+        .runtimeViewportFrameProbe("message.quick-share")
     }
 
     @ViewBuilder

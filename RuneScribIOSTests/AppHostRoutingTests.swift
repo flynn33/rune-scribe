@@ -1,5 +1,5 @@
 import Foundation
-import RuneScribeContracts
+@_spi(ThemeFidelityQualification) import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
 @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore

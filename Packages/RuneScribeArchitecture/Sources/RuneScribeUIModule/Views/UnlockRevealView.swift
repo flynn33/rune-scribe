@@ -9,27 +9,54 @@ struct UnlockRevealView: View {
     @Environment(\.runtimeAccessibilityPreferences) private var accessibilityPreferences
 
     let reveal: ProgressionRevealSummaryDTO
+    let initialThemeVisualPresentation: ActiveThemeVisualPresentation?
 
     @State private var plan: UnlockRevealPresentationPlan?
     @State private var isVisible = false
     @State private var finishRequested = false
 
+    init(
+        reveal: ProgressionRevealSummaryDTO,
+        initialPlan: UnlockRevealPresentationPlan? = nil,
+        initialThemeVisualPresentation: ActiveThemeVisualPresentation? = nil
+    ) {
+        self.reveal = reveal
+        self.initialThemeVisualPresentation = initialThemeVisualPresentation
+        _plan = State(initialValue: initialPlan)
+        _isVisible = State(initialValue: initialPlan != nil)
+    }
+
     var body: some View {
-        VStack {
-            Spacer()
-            HStack {
-                Spacer(minLength: 12)
-                revealCard
-                    .frame(maxWidth: 520)
-                    .opacity(isVisible ? 1 : 0)
-                    .scaleEffect(movementScale)
-                    .offset(y: movementOffset)
-                Spacer(minLength: 12)
+        ZStack {
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer(minLength: 12)
+                    revealCard
+                        .frame(maxWidth: 520)
+                        .opacity(isVisible ? 1 : 0)
+                        .scaleEffect(movementScale)
+                        .offset(y: movementOffset)
+                    Spacer(minLength: 12)
+                }
+                .padding(.bottom, 18)
             }
-            .padding(.bottom, 18)
+            if let identifier = masteryScreenCaptureIdentifier {
+                Rectangle()
+                    .fill(Color.black.opacity(0.001))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Mastery screen")
+                    .accessibilityIdentifier(identifier)
+                    .runtimeViewportFrameProbe(identifier)
+                    .allowsHitTesting(false)
+            }
         }
-        .accessibilityElement(children: .contain)
         .task(id: reveal.revealID) {
+            await session.loadActiveThemeCatalogVisuals()
+        }
+        .task(id: reveal.revealID) {
+            guard plan == nil else { return }
             while !Task.isCancelled {
                 if let newPlan = await session.revealPresentationDidStart(
                     revealID: reveal.revealID,
@@ -100,6 +127,8 @@ struct UnlockRevealView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
+            masteryRewardVisuals
+
             if !reveal.secondaryRewardIDs.isEmpty {
                 Divider().overlay(Color.runeSilver.opacity(0.25))
                 VStack(alignment: .leading, spacing: 5) {
@@ -108,11 +137,12 @@ struct UnlockRevealView: View {
                         .foregroundColor(.runeSilver)
                     ForEach(Array(reveal.secondaryRewardIDs.enumerated()), id: \.offset) { _, reward in
                         Label(
-                            ProgressionRevealPresentationPolicy.contentName(reward),
+                            rewardName(reward),
                             systemImage: "plus.circle.fill"
                         )
                         .font(.subheadline)
                         .foregroundColor(.runeTextPrimary)
+                        .themeCaptureIdentifier(masteryRewardIdentifier(reward))
                     }
                 }
             }
@@ -138,6 +168,142 @@ struct UnlockRevealView: View {
         .accessibilityHidden(plan == nil)
         .allowsHitTesting(plan != nil)
         .runtimeViewportFrameProbe("progression.unlock-reveal")
+        .themeCaptureIdentifier(masteryPanelCaptureIdentifier)
+    }
+
+    @ViewBuilder
+    private var masteryRewardVisuals: some View {
+        if let presentation = masteryVisualPresentation,
+           let frame = masteryFrameVisual,
+           let crest = masteryCrestVisual,
+           let frameImage = presentation.imageReference(for: frame.thumbnail)?.image,
+           let crestImage = presentation.imageReference(for: crest.visual.thumbnail)?.image {
+            Divider().overlay(Color.runeSilver.opacity(0.25))
+            HStack(alignment: .top, spacing: 12) {
+                masteryRewardVisual(
+                    image: frameImage,
+                    title: frame.displayName,
+                    kind: "Frame",
+                    identifier: ThemeCaptureIdentifier.masteryFrame(
+                        artifactID: frame.id
+                    )
+                )
+                masteryRewardVisual(
+                    image: crestImage,
+                    title: crest.visual.displayName,
+                    kind: "Crest",
+                    identifier: ThemeCaptureIdentifier.masteryCrest(
+                        crestID: crest.id
+                    )
+                )
+            }
+        }
+    }
+
+    private func masteryRewardVisual(
+        image: Image,
+        title: String,
+        kind: String,
+        identifier: String
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            image
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .aspectRatio(4 / 3, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .accessibilityLabel("\(kind): \(title)")
+                .themeCaptureIdentifier(identifier)
+            Text(kind.uppercased())
+                .font(.caption2.weight(.bold))
+                .foregroundColor(.runeSilver)
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundColor(.runeTextPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var masteryCodexID: CodexID? {
+        guard reveal.tier == .mastery else { return nil }
+        for reward in allRewardIDs {
+            if case .codex(let codexID) = reward { return codexID }
+        }
+        return nil
+    }
+
+    private var masteryFrameVisual: ThemeArtifactVisualPlan? {
+        guard let presentation = masteryVisualPresentation else { return nil }
+        let frameIDs = Set(allRewardIDs.compactMap { reward -> ArtifactID? in
+            if case .artifact(let artifactID) = reward { return artifactID }
+            return nil
+        })
+        return presentation.plan.frames.first(where: { frameIDs.contains($0.id) })
+    }
+
+    private var masteryCrestVisual: (id: CrestID, visual: ThemeArtifactVisualPlan)? {
+        guard let presentation = masteryVisualPresentation else { return nil }
+        for reward in allRewardIDs {
+            guard case .crest(let crestID) = reward,
+                  let visual = presentation.plan.crests.first(where: {
+                      $0.id.rawValue == crestID.rawValue
+                  })
+            else { continue }
+            return (crestID, visual)
+        }
+        return nil
+    }
+
+    private var allRewardIDs: [ProgressionContentReference] {
+        [reveal.primaryRewardID] + reveal.secondaryRewardIDs
+    }
+
+    private func masteryRewardIdentifier(
+        _ reward: ProgressionContentReference
+    ) -> String? {
+        guard case .title(let titleID) = reward else { return nil }
+        return ThemeCaptureIdentifier.masteryTitle(titleID: titleID)
+    }
+
+    private func rewardName(_ reward: ProgressionContentReference) -> String {
+        if case .title(let titleID) = reward,
+           let title = session.progressionSnapshot?.titles.first(where: {
+               $0.titleID == titleID
+           }) {
+            return title.presentation.displayName
+        }
+        return ProgressionRevealPresentationPolicy.contentName(reward)
+    }
+
+    private var masteryVisualsAreReady: Bool {
+        guard let presentation = masteryVisualPresentation,
+              let frame = masteryFrameVisual,
+              let crest = masteryCrestVisual
+        else { return false }
+        return presentation.imageReference(for: frame.thumbnail)?.image != nil
+            && presentation.imageReference(for: crest.visual.thumbnail)?.image != nil
+    }
+
+    private var masteryVisualPresentation: ActiveThemeVisualPresentation? {
+        initialThemeVisualPresentation ?? session.activeThemeVisualPresentation
+    }
+
+    private var masteryPanelCaptureIdentifier: String? {
+        guard plan != nil,
+              masteryVisualsAreReady,
+              let codexID = masteryCodexID
+        else { return nil }
+        return ThemeCaptureIdentifier.mastery(codexID: codexID)
+    }
+
+    private var masteryScreenCaptureIdentifier: String? {
+        guard plan != nil,
+              masteryVisualsAreReady,
+              let codexID = masteryCodexID
+        else { return nil }
+        return ThemeCaptureIdentifier.masteryScreen(codexID: codexID)
     }
 
     private var sourceSummary: String {

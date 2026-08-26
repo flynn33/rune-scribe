@@ -1,5 +1,5 @@
 import Foundation
-import RuneScribeContracts
+@_spi(ThemeFidelityQualification) import RuneScribeContracts
 import RuneScribeCoreModule
 import RuneScribePlatform
 @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
@@ -10,6 +10,89 @@ import XCTest
 
 @MainActor
 final class RuntimeCompositionTests: XCTestCase {
+    func testQualificationLaunchParsingAndAdapterFactoriesFailClosed() async throws {
+        let validEnvironment = [
+            "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+            "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+            "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+            "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+            "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID":
+                "relic.norse.runestone-tablet",
+            "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+            "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-short",
+            "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+            "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines",
+            "RUNESCRIBE_QUALIFICATION_DESTINATION": "macos-standard",
+        ]
+        let validated = ThemeFidelityQualificationLaunch.resolve(
+            environment: validEnvironment,
+            hostAuthorizationOverride: true
+        )
+        guard case .validated = validated else {
+            return XCTFail("Expected the complete qualification tuple to validate")
+        }
+        XCTAssertEqual(
+            ThemeFidelityQualificationLaunch.resolve(
+                environment: validEnvironment,
+                hostAuthorizationOverride: false
+            ),
+            .notRequested
+        )
+
+        var stateStoreFactoryWasCalled = false
+        var inboundFactoryWasCalled = false
+        func makeStateStore() -> any ModuleStateStore {
+            stateStoreFactoryWasCalled = true
+            return InMemoryModuleStateStore()
+        }
+        func makeInboundReader() -> any InboundFileReader {
+            inboundFactoryWasCalled = true
+            return InMemoryInboundFileReader()
+        }
+
+        let validatedComposition = RuneScribeRuntimeComposition(
+            qualificationResolution: validated,
+            moduleStateStore: makeStateStore(),
+            inboundFiles: makeInboundReader()
+        )
+        XCTAssertFalse(stateStoreFactoryWasCalled)
+        XCTAssertFalse(inboundFactoryWasCalled)
+
+        await validatedComposition.start()
+        let qualificationSnapshot = await validatedComposition.runtimeSnapshot
+        XCTAssertFalse(validatedComposition.startupFailed)
+        XCTAssertEqual(qualificationSnapshot.entitlementSnapshot.revision, 4_200)
+        XCTAssertEqual(
+            qualificationSnapshot.entitlementSnapshot.includedUnlockIDs,
+            [RuneScribeUnlockIDs.norseCodex]
+        )
+        XCTAssertEqual(
+            Set(qualificationSnapshot.entitlementSnapshot.earnedUnlockIDs.map(\.rawValue)),
+            Set([
+                "unlock.codex.moonleaf",
+                "unlock.codex.sunspire",
+                "unlock.codex.wildwood",
+                "unlock.codex.gloamthorn",
+            ])
+        )
+        await validatedComposition.stop()
+
+        var invalidEnvironment = validEnvironment
+        invalidEnvironment["RUNESCRIBE_QUALIFICATION_RESET_STATE"] = "0"
+        let invalid = ThemeFidelityQualificationLaunch.resolve(
+            environment: invalidEnvironment,
+            hostAuthorizationOverride: true
+        )
+        XCTAssertEqual(invalid, .invalid)
+        _ = RuneScribeRuntimeComposition(
+            qualificationResolution: invalid,
+            moduleStateStore: makeStateStore(),
+            inboundFiles: makeInboundReader()
+        )
+        XCTAssertFalse(stateStoreFactoryWasCalled)
+        XCTAssertFalse(inboundFactoryWasCalled)
+    }
+
     func testMacAppDelegateForwardsLifecycleThroughInjectedRuntime() async {
         let fixture = makeFixture()
         let delegate = AppDelegate(runtime: fixture.composition)

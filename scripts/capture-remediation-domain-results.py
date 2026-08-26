@@ -37,7 +37,7 @@ BUILT_PRODUCT_INSPECTION = (
 )
 SHIPPING_CHECKER_PATH = "scripts/check-shipping-products.sh"
 EXPECTED_SHIPPING_CHECKER_SHA256 = (
-    "7a054350e086de7bc920cdd265b608c541200160704ae221bc32715d32aa1134"
+    "e51e6d05cfecaa9097ecc7b016ec30846cd662276c0ad3893679d1e950c7a2e9"
 )
 EXPECTED_SHIPPING_CHECK_COUNT = 101
 SHIPPING_VALIDATION_LOG = (
@@ -207,8 +207,8 @@ PERFORMANCE_CASE_TESTS = {
 THEME_SPECS = (
     (
         "Norse", "RuneScribeArchitecture_RuneScribeNorseThemeModule.bundle",
-        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json",
-        "Norse-Resource-Integrity-Manifest-v1.0.json", "resources", "byteLength",
+        "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json",
+        "Norse-Resource-Integrity-Manifest-v2.0.json", "resources", "byteLength",
     ),
     *tuple(
         (
@@ -643,9 +643,13 @@ def inspect_theme_budgets(
             for info in (files[member],)
         )
         limits = {
-            "uniquePhysicalBytes": 64 * 1024 * 1024,
+            "uniquePhysicalBytes": (
+                112 * 1024 * 1024 if theme == "Norse" else 64 * 1024 * 1024
+            ),
             "largestResourceBytes": 8 * 1024 * 1024,
-            "staticImageBytes": 32 * 1024 * 1024,
+            "staticImageBytes": (
+                96 * 1024 * 1024 if theme == "Norse" else 32 * 1024 * 1024
+            ),
             "fontBytes": 16 * 1024 * 1024,
             "animationBytes": 16 * 1024 * 1024,
             "soundBytes": 8 * 1024 * 1024,

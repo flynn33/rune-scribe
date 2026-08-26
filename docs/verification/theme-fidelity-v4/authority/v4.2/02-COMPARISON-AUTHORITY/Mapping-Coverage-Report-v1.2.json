@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.2",
+  "result": "PASS",
+  "entryCount": 400,
+  "themeSurfaceAuthorityCount": 100,
+  "referenceMappingCount": 1104,
+  "mappingDispositionCounts": {
+    "image-metric": 400,
+    "structural-assertion": 700,
+    "negative-invariant": 4
+  },
+  "referenceRoleCounts": {
+    "focal": 380,
+    "structural-only": 704,
+    "full-screen": 20
+  },
+  "entryComparisonModeCounts": {
+    "explicit-image-mappings": 60,
+    "responsive-structural-plus-explicit-focal": 183,
+    "negative-invariant": 4,
+    "responsive-structural-only": 133,
+    "runtime-behavior-plus-explicit-reference-mappings": 20
+  },
+  "entriesByTheme": {
+    "Norse": 80,
+    "Moonleaf": 80,
+    "Sunspire": 80,
+    "Wildwood": 80,
+    "Gloamthorn": 80
+  },
+  "entriesByDestination": {
+    "iphone-portrait": 100,
+    "ipad-portrait": 100,
+    "macos-standard": 100,
+    "macos-resized": 100
+  },
+  "negativeInvariantEntries": [
+    "Norse|vault-locked|iphone-portrait",
+    "Norse|vault-locked|ipad-portrait",
+    "Norse|vault-locked|macos-standard",
+    "Norse|vault-locked|macos-resized"
+  ],
+  "reduceMotionEntries": [
+    "Norse|reduce-motion|iphone-portrait",
+    "Norse|reduce-motion|ipad-portrait",
+    "Norse|reduce-motion|macos-standard",
+    "Norse|reduce-motion|macos-resized",
+    "Moonleaf|reduce-motion|iphone-portrait",
+    "Moonleaf|reduce-motion|ipad-portrait",
+    "Moonleaf|reduce-motion|macos-standard",
+    "Moonleaf|reduce-motion|macos-resized",
+    "Sunspire|reduce-motion|iphone-portrait",
+    "Sunspire|reduce-motion|ipad-portrait",
+    "Sunspire|reduce-motion|macos-standard",
+    "Sunspire|reduce-motion|macos-resized",
+    "Wildwood|reduce-motion|iphone-portrait",
+    "Wildwood|reduce-motion|ipad-portrait",
+    "Wildwood|reduce-motion|macos-standard",
+    "Wildwood|reduce-motion|macos-resized",
+    "Gloamthorn|reduce-motion|iphone-portrait",
+    "Gloamthorn|reduce-motion|ipad-portrait",
+    "Gloamthorn|reduce-motion|macos-standard",
+    "Gloamthorn|reduce-motion|macos-resized"
+  ],
+  "groupsWithReferenceCandidateCountMismatch": [],
+  "mappingsMissingExactCandidateSource": [],
+  "mappingsMissingSourceCrop": [],
+  "mappingsContainingPlaceholders": [],
+  "requiresFurtherOwnerInput": false
+}

@@ -1,0 +1,1323 @@
+{
+  "schemaVersion": "1.2",
+  "catalogID": "runescribe.theme-fidelity.candidate-capture-catalog.v4.2",
+  "candidateCount": 188,
+  "candidates": [
+    {
+      "id": "appearance.defaults-preview.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "appearance.defaults-preview.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "appearance.defaults-preview.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "appearance.defaults-preview.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "appearance.defaults-preview.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "renderer.static-share.codex.gloamthorn.relic.gloamthorn.nightthorn-tablet.seal.gloamthorn.thornmoon.standard",
+      "kind": "renderer-output",
+      "captureOperation": "deterministic-png-export",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "renderer.static-share.codex.moonleaf.relic.moonleaf.tablet.seal.moonleaf.crescentleaf.standard",
+      "kind": "renderer-output",
+      "captureOperation": "deterministic-png-export",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "renderer.static-share.codex.norse.relic.norse.runestone-tablet.seal.norse.valknut.standard",
+      "kind": "renderer-output",
+      "captureOperation": "deterministic-png-export",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "renderer.static-share.codex.sunspire.relic.sunspire.dawnfire-tablet.seal.sunspire.sunleaf-crest.standard",
+      "kind": "renderer-output",
+      "captureOperation": "deterministic-png-export",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "renderer.static-share.codex.wildwood.relic.wildwood.rootsong-tablet.seal.wildwood.rooted-tree.standard",
+      "kind": "renderer-output",
+      "captureOperation": "deterministic-png-export",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.artifact-picker.relic.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.artifact-picker.relic.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.artifact-picker.relic.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.artifact-picker.relic.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.artifact-picker.relic.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.artifact-picker.seal.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.artifact-picker.seal.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.artifact-picker.seal.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.artifact-picker.seal.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.artifact-picker.seal.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.mastery.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.mastery.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.mastery.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.mastery.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.mastery.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.received-cipher",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.settings.appearance",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.share-builder",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.vault-progress",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "screen.workspace",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "share-builder",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "share-builder.preview.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "share-builder.preview.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "share-builder.preview.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "share-builder.preview.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "share-builder.preview.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.gloamthorn.duskbriar-stele",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.gloamthorn.nightthorn-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.gloamthorn.umbral-plaque",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.moonleaf.ivybound-plaque",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.moonleaf.tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.moonleaf.whisperbark-stele",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.norse.dragonwood-plaque",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.norse.runestone-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.norse.stormforged-stele",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.sunspire.auric-stele",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.sunspire.dawnfire-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.sunspire.solvine-plaque",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.wildwood.elderbark-stele",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.wildwood.mossbound-plaque",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.relic.wildwood.rootsong-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Relic picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.gloamthorn.echo-wisp",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.gloamthorn.eclipse-bloom",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.gloamthorn.nightglass-moth",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.gloamthorn.pact-crown",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.gloamthorn.thornmoon",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.gloamthorn.veiled-serpent",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.moonleaf.crescentleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.moonleaf.echo-firefly",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.moonleaf.moonwell",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.moonleaf.night-owl",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.moonleaf.starflower",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.moonleaf.woodland-stag",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.norse.berserk",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.norse.mjolnir",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.norse.ravenshield",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.norse.valknut",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.norse.wolkin",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.norse.yggdrasil",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.sunspire.dawnflower",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.sunspire.echo-ember",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.sunspire.golden-lark",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.sunspire.radiant-spire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.sunspire.sunleaf-crest",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.sunspire.sunwheel",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.wildwood.acorn-knot",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.wildwood.echo-seed",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.wildwood.fern-spiral",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.wildwood.lantern-moth",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.wildwood.rooted-tree",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-picker.seal.wildwood.wild-fox",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact Seal picker tile.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-preview",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-preview.relic.gloamthorn.nightthorn-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-preview.relic.moonleaf.tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-preview.relic.norse.runestone-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-preview.relic.sunspire.dawnfire-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.artifact-preview.relic.wildwood.rootsong-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.gloamthorn.production.high-contrast",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.gloamthorn.production.reduce-motion",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.gloamthorn.production.standard",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.moonleaf.production.high-contrast",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.moonleaf.production.reduce-motion",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.moonleaf.production.standard",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.norse.base.high-contrast",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.norse.base.reduce-motion",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.norse.base.standard",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.sunspire.production.high-contrast",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.sunspire.production.reduce-motion",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.sunspire.production.standard",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.wildwood.production.high-contrast",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.wildwood.production.reduce-motion",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.background.theme.wildwood.production.standard",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.codex-card.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.codex-card.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.codex-card.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.codex-card.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.codex-card.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.compose.long.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.compose.long.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.compose.long.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.compose.long.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.compose.long.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.compose.short.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.compose.short.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.compose.short.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.compose.short.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.compose.short.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.codex.gloamthorn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.codex.moonleaf",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.codex.norse",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.codex.sunspire",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.codex.wildwood",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.crest.crest.gloamthorn.gloam-sovereign",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.crest.crest.moonleaf.moonbloom",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.crest.crest.norse.raven-mastery",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.crest.crest.sunspire.first-light",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.crest.crest.wildwood.heartwood-crown",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.frame.frame.gloamthorn.briar-court",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.frame.frame.moonleaf.silvervine",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.frame.frame.norse.carved-knotwork",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.frame.frame.sunspire.laurel-of-dawn",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.mastery.frame.frame.wildwood.living-root",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.gloamthorn.production.high-contrast",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.gloamthorn.production.large-text",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.gloamthorn.production.reduce-motion",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.moonleaf.production.high-contrast",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.moonleaf.production.large-text",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.moonleaf.production.reduce-motion",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.norse.base.high-contrast",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.norse.base.large-text",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.norse.base.reduce-motion",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.sunspire.production.high-contrast",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.sunspire.production.large-text",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.sunspire.production.reduce-motion",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.wildwood.production.high-contrast",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.wildwood.production.large-text",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.presentation.theme.wildwood.production.reduce-motion",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact provider-neutral Theme presentation wrapper.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.received.artifact-preview.relic.gloamthorn.nightthorn-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.received.artifact-preview.relic.moonleaf.tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.received.artifact-preview.relic.norse.runestone-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.received.artifact-preview.relic.sunspire.dawnfire-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.received.artifact-preview.relic.wildwood.rootsong-tablet",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.gloamthorn.encountered",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.gloamthorn.locked",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.gloamthorn.owned",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.gloamthorn.progress",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.gloamthorn.selected",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.moonleaf.encountered",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.moonleaf.locked",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.moonleaf.owned",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.moonleaf.progress",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.moonleaf.selected",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.norse.encountered",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.norse.locked",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.norse.owned",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.norse.progress",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.norse.selected",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.sunspire.encountered",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.sunspire.locked",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.sunspire.owned",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.sunspire.progress",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.sunspire.selected",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.wildwood.encountered",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.wildwood.locked",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.wildwood.owned",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.wildwood.progress",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "theme.vault.codex.wildwood.selected",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    },
+    {
+      "id": "workspace.primary-surface",
+      "kind": "accessibility-element",
+      "captureOperation": "xcui-element-screenshot",
+      "purpose": "Exact complete candidate source for the declared Theme fidelity surface.",
+      "missingBehavior": "Add this exact stable identifier or renderer output ID at the corresponding provider-neutral wrapper, then continue autonomously. Do not substitute a nearby element."
+    }
+  ]
+}

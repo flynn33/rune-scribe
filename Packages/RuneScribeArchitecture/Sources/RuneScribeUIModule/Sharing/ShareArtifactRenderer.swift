@@ -542,6 +542,7 @@ enum ShareArtifactRenderPolicy {
 struct ShareArtifactStaticOutput: Equatable, Sendable {
     let pagePNGData: [Data]
     let safePreviewMetadata: ShareSafePreviewMetadata
+    let rendererOutputID: String
 
     func presentationMetadata(
         for plan: ShareArtifactRenderPlan,
@@ -641,7 +642,13 @@ enum ShareArtifactStaticRenderer {
         )
         return ShareArtifactStaticOutput(
             pagePNGData: pageData,
-            safePreviewMetadata: metadata
+            safePreviewMetadata: metadata,
+            rendererOutputID: ThemeCaptureIdentifier.staticShareRendererOutput(
+                codexID: plan.request.selection.codexID,
+                relicID: plan.request.selection.relicID,
+                sealID: plan.request.selection.sealID,
+                colorMode: plan.request.colorMode
+            )
         )
     }
 
@@ -671,12 +678,15 @@ enum ShareArtifactStaticRenderer {
                 guard let image = imageReferences[resourceID] else {
                     throw ShareArtifactRenderError.missingResource(resourceID)
                 }
+                let pixelSizeMatches = metadata.mediaType == .pdf
+                    ? metadata.pixelSize == nil
+                    : image.integrity.pixelSize == metadata.pixelSize
                 guard image.codexID == plan.request.selection.codexID,
                       image.resourceID == metadata.resourceID,
                       image.role == metadata.role,
                       image.mediaType == metadata.mediaType,
                       image.integrity.byteLength == metadata.byteLength,
-                      image.integrity.pixelSize == metadata.pixelSize,
+                      pixelSizeMatches,
                       image.integrity.sha256 == metadata.sha256
                 else {
                     throw ShareArtifactRenderError.invalidResource(resourceID)
@@ -730,7 +740,22 @@ struct ThemeArtifactCanvas: View {
     let plan: ThemeArtifactCompositionPlan
     let page: ShareArtifactRenderPage
     let context: ThemeArtifactCanvasContext
+    let maximumWidth: CGFloat?
     let image: (ThemeResourceID) -> Image
+
+    init(
+        plan: ThemeArtifactCompositionPlan,
+        page: ShareArtifactRenderPage,
+        context: ThemeArtifactCanvasContext,
+        maximumWidth: CGFloat? = nil,
+        image: @escaping (ThemeResourceID) -> Image
+    ) {
+        self.plan = plan
+        self.page = page
+        self.context = context
+        self.maximumWidth = maximumWidth
+        self.image = image
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -834,6 +859,7 @@ struct ThemeArtifactCanvas: View {
             .grayscale(plan.colorMode == .monochrome ? 1 : 0)
         }
         .modifier(ThemeArtifactCanvasSizing(context: context))
+        .modifier(ThemeArtifactCanvasMaximumWidth(maximumWidth: maximumWidth))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(plan.accessibilityLabel))
         .accessibilityValue(Text(page.inscription))
@@ -920,6 +946,24 @@ private struct ThemeArtifactCanvasSizing: ViewModifier {
                 width: CGFloat(ShareArtifactRenderPlan.outputWidth),
                 height: CGFloat(ShareArtifactRenderPlan.outputHeight)
             )
+        }
+    }
+}
+
+private struct ThemeArtifactCanvasMaximumWidth: ViewModifier {
+    let maximumWidth: CGFloat?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let maximumWidth {
+            content.frame(
+                width: maximumWidth,
+                height: maximumWidth
+                    * CGFloat(ShareArtifactRenderPlan.outputHeight)
+                    / CGFloat(ShareArtifactRenderPlan.outputWidth)
+            )
+        } else {
+            content
         }
     }
 }

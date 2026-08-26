@@ -1,0 +1,1732 @@
+{
+  "schemaVersion": "1.2",
+  "catalogID": "runescribe.theme-fidelity.deterministic-seed-catalog.v4.2",
+  "seedCount": 100,
+  "seeds": [
+    {
+      "id": "seed.gloamthorn.compose-long",
+      "theme": "Gloamthorn",
+      "surface": "compose-long",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-long",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "long-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.compose-short",
+      "theme": "Gloamthorn",
+      "surface": "compose-short",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-short",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.high-contrast",
+      "theme": "Gloamthorn",
+      "surface": "high-contrast",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "high-contrast",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "high-contrast",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.inscription-preview",
+      "theme": "Gloamthorn",
+      "surface": "inscription-preview",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "inscription-preview",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.large-text",
+      "theme": "Gloamthorn",
+      "surface": "large-text",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "large-text",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "accessibility-xxxl",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.mastery",
+      "theme": "Gloamthorn",
+      "surface": "mastery",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "mastery",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.received-cipher",
+      "theme": "Gloamthorn",
+      "surface": "received-cipher",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "received-cipher",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.reduce-motion",
+      "theme": "Gloamthorn",
+      "surface": "reduce-motion",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "reduce-motion",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "reduce-motion",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.relic-picker",
+      "theme": "Gloamthorn",
+      "surface": "relic-picker",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "relic-picker",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.seal-picker",
+      "theme": "Gloamthorn",
+      "surface": "seal-picker",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "seal-picker",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.settings-codex-card",
+      "theme": "Gloamthorn",
+      "surface": "settings-codex-card",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "settings-codex-card",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.settings-defaults-preview",
+      "theme": "Gloamthorn",
+      "surface": "settings-defaults-preview",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "settings-defaults-preview",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.share-builder",
+      "theme": "Gloamthorn",
+      "surface": "share-builder",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "share-builder",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.static-share",
+      "theme": "Gloamthorn",
+      "surface": "static-share",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "static-share",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.vault-encountered",
+      "theme": "Gloamthorn",
+      "surface": "vault-encountered",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-encountered",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "encountered"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.vault-locked",
+      "theme": "Gloamthorn",
+      "surface": "vault-locked",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-locked",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "locked"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.vault-owned",
+      "theme": "Gloamthorn",
+      "surface": "vault-owned",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-owned",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "owned"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.vault-progress",
+      "theme": "Gloamthorn",
+      "surface": "vault-progress",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-progress",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "progress"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.vault-selected",
+      "theme": "Gloamthorn",
+      "surface": "vault-selected",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-selected",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "selected"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.gloamthorn.workspace-empty",
+      "theme": "Gloamthorn",
+      "surface": "workspace-empty",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.gloamthorn.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.gloamthorn",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "workspace-empty",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.gloamthorn.nightthorn-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.gloamthorn.thornmoon",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.compose-long",
+      "theme": "Moonleaf",
+      "surface": "compose-long",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-long",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "long-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.compose-short",
+      "theme": "Moonleaf",
+      "surface": "compose-short",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-short",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.high-contrast",
+      "theme": "Moonleaf",
+      "surface": "high-contrast",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "high-contrast",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "high-contrast",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.inscription-preview",
+      "theme": "Moonleaf",
+      "surface": "inscription-preview",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "inscription-preview",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.large-text",
+      "theme": "Moonleaf",
+      "surface": "large-text",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "large-text",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "accessibility-xxxl",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.mastery",
+      "theme": "Moonleaf",
+      "surface": "mastery",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "mastery",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.received-cipher",
+      "theme": "Moonleaf",
+      "surface": "received-cipher",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "received-cipher",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.reduce-motion",
+      "theme": "Moonleaf",
+      "surface": "reduce-motion",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "reduce-motion",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "reduce-motion",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.relic-picker",
+      "theme": "Moonleaf",
+      "surface": "relic-picker",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "relic-picker",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.seal-picker",
+      "theme": "Moonleaf",
+      "surface": "seal-picker",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "seal-picker",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.settings-codex-card",
+      "theme": "Moonleaf",
+      "surface": "settings-codex-card",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "settings-codex-card",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.settings-defaults-preview",
+      "theme": "Moonleaf",
+      "surface": "settings-defaults-preview",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "settings-defaults-preview",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.share-builder",
+      "theme": "Moonleaf",
+      "surface": "share-builder",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "share-builder",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.static-share",
+      "theme": "Moonleaf",
+      "surface": "static-share",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "static-share",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.vault-encountered",
+      "theme": "Moonleaf",
+      "surface": "vault-encountered",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-encountered",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "encountered"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.vault-locked",
+      "theme": "Moonleaf",
+      "surface": "vault-locked",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-locked",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "locked"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.vault-owned",
+      "theme": "Moonleaf",
+      "surface": "vault-owned",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-owned",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "owned"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.vault-progress",
+      "theme": "Moonleaf",
+      "surface": "vault-progress",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-progress",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "progress"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.vault-selected",
+      "theme": "Moonleaf",
+      "surface": "vault-selected",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-selected",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "selected"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.moonleaf.workspace-empty",
+      "theme": "Moonleaf",
+      "surface": "workspace-empty",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.moonleaf.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.moonleaf",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "workspace-empty",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.moonleaf.tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.moonleaf.crescentleaf",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.compose-long",
+      "theme": "Norse",
+      "surface": "compose-long",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-long",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "long-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.compose-short",
+      "theme": "Norse",
+      "surface": "compose-short",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-short",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.high-contrast",
+      "theme": "Norse",
+      "surface": "high-contrast",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "high-contrast",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "high-contrast",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.inscription-preview",
+      "theme": "Norse",
+      "surface": "inscription-preview",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "inscription-preview",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.large-text",
+      "theme": "Norse",
+      "surface": "large-text",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "large-text",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "accessibility-xxxl",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.mastery",
+      "theme": "Norse",
+      "surface": "mastery",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "mastery",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.received-cipher",
+      "theme": "Norse",
+      "surface": "received-cipher",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "received-cipher",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.reduce-motion",
+      "theme": "Norse",
+      "surface": "reduce-motion",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "reduce-motion",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "reduce-motion",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.relic-picker",
+      "theme": "Norse",
+      "surface": "relic-picker",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "relic-picker",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.seal-picker",
+      "theme": "Norse",
+      "surface": "seal-picker",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "seal-picker",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.settings-codex-card",
+      "theme": "Norse",
+      "surface": "settings-codex-card",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "settings-codex-card",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.settings-defaults-preview",
+      "theme": "Norse",
+      "surface": "settings-defaults-preview",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "settings-defaults-preview",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.share-builder",
+      "theme": "Norse",
+      "surface": "share-builder",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "share-builder",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.static-share",
+      "theme": "Norse",
+      "surface": "static-share",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "static-share",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.vault-encountered",
+      "theme": "Norse",
+      "surface": "vault-encountered",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-encountered",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "encountered"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.vault-locked",
+      "theme": "Norse",
+      "surface": "vault-locked",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-locked",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "locked"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.vault-owned",
+      "theme": "Norse",
+      "surface": "vault-owned",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-owned",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "owned"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.vault-progress",
+      "theme": "Norse",
+      "surface": "vault-progress",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-progress",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "progress"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.vault-selected",
+      "theme": "Norse",
+      "surface": "vault-selected",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-selected",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "selected"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.norse.workspace-empty",
+      "theme": "Norse",
+      "surface": "workspace-empty",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.norse.base",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.norse",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "workspace-empty",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.norse.runestone-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.norse.valknut",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.compose-long",
+      "theme": "Sunspire",
+      "surface": "compose-long",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-long",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "long-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.compose-short",
+      "theme": "Sunspire",
+      "surface": "compose-short",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-short",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.high-contrast",
+      "theme": "Sunspire",
+      "surface": "high-contrast",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "high-contrast",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "high-contrast",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.inscription-preview",
+      "theme": "Sunspire",
+      "surface": "inscription-preview",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "inscription-preview",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.large-text",
+      "theme": "Sunspire",
+      "surface": "large-text",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "large-text",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "accessibility-xxxl",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.mastery",
+      "theme": "Sunspire",
+      "surface": "mastery",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "mastery",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.received-cipher",
+      "theme": "Sunspire",
+      "surface": "received-cipher",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "received-cipher",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.reduce-motion",
+      "theme": "Sunspire",
+      "surface": "reduce-motion",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "reduce-motion",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "reduce-motion",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.relic-picker",
+      "theme": "Sunspire",
+      "surface": "relic-picker",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "relic-picker",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.seal-picker",
+      "theme": "Sunspire",
+      "surface": "seal-picker",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "seal-picker",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.settings-codex-card",
+      "theme": "Sunspire",
+      "surface": "settings-codex-card",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "settings-codex-card",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.settings-defaults-preview",
+      "theme": "Sunspire",
+      "surface": "settings-defaults-preview",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "settings-defaults-preview",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.share-builder",
+      "theme": "Sunspire",
+      "surface": "share-builder",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "share-builder",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.static-share",
+      "theme": "Sunspire",
+      "surface": "static-share",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "static-share",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.vault-encountered",
+      "theme": "Sunspire",
+      "surface": "vault-encountered",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-encountered",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "encountered"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.vault-locked",
+      "theme": "Sunspire",
+      "surface": "vault-locked",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-locked",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "locked"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.vault-owned",
+      "theme": "Sunspire",
+      "surface": "vault-owned",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-owned",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "owned"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.vault-progress",
+      "theme": "Sunspire",
+      "surface": "vault-progress",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-progress",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "progress"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.vault-selected",
+      "theme": "Sunspire",
+      "surface": "vault-selected",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-selected",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "selected"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.sunspire.workspace-empty",
+      "theme": "Sunspire",
+      "surface": "workspace-empty",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.sunspire.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.sunspire",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "workspace-empty",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.sunspire.dawnfire-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.sunspire.sunleaf-crest",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.compose-long",
+      "theme": "Wildwood",
+      "surface": "compose-long",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-long",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "long-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.compose-short",
+      "theme": "Wildwood",
+      "surface": "compose-short",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "compose-short",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.high-contrast",
+      "theme": "Wildwood",
+      "surface": "high-contrast",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "high-contrast",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "high-contrast",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.inscription-preview",
+      "theme": "Wildwood",
+      "surface": "inscription-preview",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "inscription-preview",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.large-text",
+      "theme": "Wildwood",
+      "surface": "large-text",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "large-text",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "accessibility-xxxl",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.mastery",
+      "theme": "Wildwood",
+      "surface": "mastery",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "mastery",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.received-cipher",
+      "theme": "Wildwood",
+      "surface": "received-cipher",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "received-cipher",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.reduce-motion",
+      "theme": "Wildwood",
+      "surface": "reduce-motion",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "reduce-motion",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "reduce-motion",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.relic-picker",
+      "theme": "Wildwood",
+      "surface": "relic-picker",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "relic-picker",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.seal-picker",
+      "theme": "Wildwood",
+      "surface": "seal-picker",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "seal-picker",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.settings-codex-card",
+      "theme": "Wildwood",
+      "surface": "settings-codex-card",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "settings-codex-card",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.settings-defaults-preview",
+      "theme": "Wildwood",
+      "surface": "settings-defaults-preview",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "settings-defaults-preview",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "short-two-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.share-builder",
+      "theme": "Wildwood",
+      "surface": "share-builder",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "share-builder",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.static-share",
+      "theme": "Wildwood",
+      "surface": "static-share",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "static-share",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "received-six-lines"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.vault-encountered",
+      "theme": "Wildwood",
+      "surface": "vault-encountered",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-encountered",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "encountered"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.vault-locked",
+      "theme": "Wildwood",
+      "surface": "vault-locked",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-locked",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "locked"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.vault-owned",
+      "theme": "Wildwood",
+      "surface": "vault-owned",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-owned",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "owned"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.vault-progress",
+      "theme": "Wildwood",
+      "surface": "vault-progress",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-progress",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "progress"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.vault-selected",
+      "theme": "Wildwood",
+      "surface": "vault-selected",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "vault-selected",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+        "RUNESCRIBE_QUALIFICATION_VAULT_STATE": "selected"
+      },
+      "operatorInputRequired": false
+    },
+    {
+      "id": "seed.wildwood.workspace-empty",
+      "theme": "Wildwood",
+      "surface": "workspace-empty",
+      "launchEnvironment": {
+        "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+        "RUNESCRIBE_QUALIFICATION_THEME_ID": "theme.wildwood.production",
+        "RUNESCRIBE_QUALIFICATION_CODEX_ID": "codex.wildwood",
+        "RUNESCRIBE_QUALIFICATION_SURFACE": "workspace-empty",
+        "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": "relic.wildwood.rootsong-tablet",
+        "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": "seal.wildwood.rooted-tree",
+        "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+        "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty"
+      },
+      "operatorInputRequired": false
+    }
+  ]
+}

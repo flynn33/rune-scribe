@@ -1,0 +1,728 @@
+{
+  "schemaVersion": "1.0",
+  "authorityVersion": "4.2",
+  "status": "active-acceptance-authority",
+  "sourcePackage": {
+    "identity": "Rune-Scribe-Theme-Fidelity-v4.2-Executable-Authority",
+    "originalPackageManifestSHA256": "e3c0a9ddf371ff75ffe37855548ccbf5bb309c8dfe1a9ee64b0ffeaf36d285f0",
+    "originalPackageValidationSHA256": "590472d3f1a1c3191f992ff93de2f650e2cd718c8c2fe50dec282d134a9942eb",
+    "originalPackageChecksumsSHA256": "e2f287a9aa698b0bd5f007c3acd122e4eba4bbe4711a68278bedfe00febe7504",
+    "v4.0ArchiveSHA256": "0f903b22d8032370b74cb89aa23300af6ba5f34c729f68b950ce52439c7ff238",
+    "v4.1ArchiveSHA256": "e9884de9868acbb50657512628363dbb8d566498006b07071c4a65b68a635c1d"
+  },
+  "importPolicy": {
+    "includedRoots": [
+      "01-CONTROLLING-DECISIONS",
+      "02-COMPARISON-AUTHORITY",
+      "03-AUTHORITY-ASSETS",
+      "04-VERIFICATION-PATCH"
+    ],
+    "excludedContent": "Package orchestration and handoff material is not repository-owned acceptance authority."
+  },
+  "legacyAuthority": {
+    "path": "docs/verification/theme-fidelity-v4/authority/asset-manifest.json",
+    "sha256": "68105fca6e59d053007afff72b2d966c80ac55a427209f32b0e47f148b30d6e1",
+    "status": "historical-inactive"
+  },
+  "repositoryPolicy": {
+    "shippingRoots": [
+      "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production",
+      "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production",
+      "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production",
+      "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeWildwoodModule/Resources/Production",
+      "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeGloamthornModule/Resources/Production"
+    ],
+    "rejectedRoots": [
+      "docs/verification/theme-fidelity-v4/rejected"
+    ],
+    "rejectedAssetSHA256": [
+      "25cb3e61bc4468e3abddcf43bbf9fc5e6b0b9ba332cac9c3e8e847e51ae2416d",
+      "3e7785d8cb86c660100099d35d9a8acd06bb655e82c8e142ad458eedd4cfae09",
+      "9fbd46a85c35850a664fbaf958e600ad8f2f7d3b16f2261ea5d4724510780a18",
+      "c5ac9b2ff99fed8044ba2f1f5ca26baeea66d93d4d8ee3c11a4d769344dcced1",
+      "e5046275c3ce7b6366dfa8330a708bf8c52bd106c0d55912deb76895deff2210"
+    ]
+  },
+  "activeFiles": {
+    "comparisonAuthority": "02-COMPARISON-AUTHORITY/Comparison-Authority-v1.2.json",
+    "comparisonSchema": "02-COMPARISON-AUTHORITY/Comparison-Authority-Schema-v1.2.json",
+    "candidateCatalog": "02-COMPARISON-AUTHORITY/Candidate-Capture-Catalog-v1.2.json",
+    "runtimeProbeCatalog": "02-COMPARISON-AUTHORITY/Runtime-Probe-Catalog-v1.2.json",
+    "deterministicSeedCatalog": "02-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.2.json",
+    "mappingCoverageReport": "02-COMPARISON-AUTHORITY/Mapping-Coverage-Report-v1.2.json",
+    "mappingIndex": "02-COMPARISON-AUTHORITY/Reference-Candidate-Mapping-Index-v1.2.csv",
+    "assetManifest": "03-AUTHORITY-ASSETS/AUTHORITY-ASSET-MANIFEST-v1.2.json",
+    "gateCatalog": "04-VERIFICATION-PATCH/Gate-Catalog-v4.2.json",
+    "matrix": "04-VERIFICATION-PATCH/Golden-Screenshot-Matrix-v1.2.json",
+    "evidenceSchema": "04-VERIFICATION-PATCH/Visual-Comparison-Evidence-Index-Schema-v1.2.json"
+  },
+  "fileCount": 133,
+  "payloadAggregateSHA256": "f20bece87e58bf299ac0cced7d25bfa79ffbbc80e04b003025943e19734cacdd",
+  "files": [
+    {
+      "path": "01-CONTROLLING-DECISIONS/Authority-Precedence-v4.2.md",
+      "byteCount": 579,
+      "sha256": "08bba322801d465317eeae97f1cf578e6ef02f556af2926244396cce01f19473"
+    },
+    {
+      "path": "01-CONTROLLING-DECISIONS/Executable-Reference-Mapping-Decision.md",
+      "byteCount": 804,
+      "sha256": "0975c9d2dd10bf5bea6bfa128a23f718fdd12ad72ab17501a441ec749d00b56c"
+    },
+    {
+      "path": "01-CONTROLLING-DECISIONS/Historical-Evidence-Boundary.md",
+      "byteCount": 956,
+      "sha256": "e4a4c01faf2d1393973b7ddeaecb62a1493ead3ba8ae9e7dd61470d23e8b8107"
+    },
+    {
+      "path": "01-CONTROLLING-DECISIONS/Norse-Base-Vault-State-Decision.md",
+      "byteCount": 1487,
+      "sha256": "ccf5131d23212c2fe6b19d09aac0435789df1ceef2b775ed0603071df11dabd7"
+    },
+    {
+      "path": "01-CONTROLLING-DECISIONS/Reduce-Motion-Evidence-Decision.md",
+      "byteCount": 1367,
+      "sha256": "18c4eeb36886649212acfcbb4c287bbf616507b3b8dccde6539d3c3c89d259ec"
+    },
+    {
+      "path": "02-COMPARISON-AUTHORITY/Candidate-Capture-Catalog-v1.2.json",
+      "byteCount": 81858,
+      "sha256": "526307351d7f8baf4c3dea7bf60d6241e340b0a3cb566b0129aec32c59c6fc95"
+    },
+    {
+      "path": "02-COMPARISON-AUTHORITY/Comparison-Authority-Index.md",
+      "byteCount": 638,
+      "sha256": "70dc9903cb892092a9446c01c9d5ce09c7ea0deaf9e3dfae45be46ba7519d3ff"
+    },
+    {
+      "path": "02-COMPARISON-AUTHORITY/Comparison-Authority-Schema-v1.2.json",
+      "byteCount": 1841,
+      "sha256": "f6221b1827bcbab2b6711bae64d51712c4e730f13b8ab95fdb951e2815e952b4"
+    },
+    {
+      "path": "02-COMPARISON-AUTHORITY/Comparison-Authority-v1.2.json",
+      "byteCount": 2416934,
+      "sha256": "d09f15bdf1c7b3853f8db75527f83fffce9ac714abe1df5cce6e7de391f096d0"
+    },
+    {
+      "path": "02-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.2.json",
+      "byteCount": 81007,
+      "sha256": "424c54f1868ae31ec90711280f09d14693a5dfbd70e4ce6232ef024b655dcb6a"
+    },
+    {
+      "path": "02-COMPARISON-AUTHORITY/Mapping-Coverage-Report-v1.2.json",
+      "byteCount": 2212,
+      "sha256": "949813c141c4a320d3e15d1d19dc088327c7fc501507b90d1c04cbf31f669632"
+    },
+    {
+      "path": "02-COMPARISON-AUTHORITY/Reference-Candidate-Mapping-Index-v1.2.csv",
+      "byteCount": 389858,
+      "sha256": "47f181e9c5dcbbb41b9340073fd59a4cd25d9388cd8adb2de46b88fc7179de56"
+    },
+    {
+      "path": "02-COMPARISON-AUTHORITY/Runtime-Probe-Catalog-v1.2.json",
+      "byteCount": 19173,
+      "sha256": "6f8465bbd73f9ec8e95d37f9ae50fd33fcc116ff5bcded115ea685f81adfcbee"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/AUTHORITY-ASSET-MANIFEST-v1.2.json",
+      "byteCount": 36871,
+      "sha256": "269728078b44d02ff69e2680b650c6a14827a5dc6b4b7532a122c12ec9532e16"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Gloamthorn/gloamthorn-codex-catalog-final.png",
+      "byteCount": 2349000,
+      "sha256": "f121a4dad91b65741321ca014bc2650a6913afadc91e19348aa9bbf375037ac0"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-codex-catalog-final-alt.png",
+      "byteCount": 1972527,
+      "sha256": "0a3fb35ab47efb272dab404a081a5d4d603fef91ec9d4093a917bf77311f66a1"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-codex-catalog-final.png",
+      "byteCount": 2068067,
+      "sha256": "72ef342adec3f194318c0af3e19b2b4dac40f23de160f31f2c22c5ae12a7c368"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-codex-catalog-series.png",
+      "byteCount": 1972527,
+      "sha256": "0a3fb35ab47efb272dab404a081a5d4d603fef91ec9d4093a917bf77311f66a1"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-compose-a.png",
+      "byteCount": 2088108,
+      "sha256": "b02a1fee731eeaae5846f29a2d1e4621e2c98fb8b47a962ca64efa4fe64f1467"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-compose-final-a.png",
+      "byteCount": 2088108,
+      "sha256": "b02a1fee731eeaae5846f29a2d1e4621e2c98fb8b47a962ca64efa4fe64f1467"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-compose-final-b.png",
+      "byteCount": 1802374,
+      "sha256": "c30b5df472b19abd4241afe77e20516e29a34ba3fd55f2404307b0a5ecf50fde"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-high-fidelity-style-board.png",
+      "byteCount": 2797874,
+      "sha256": "b79e29845ab6f6f04ea2a24afc8b62ff239dba9e3d2cab51da245227b4ff1eff"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-inscription-preview-final.png",
+      "byteCount": 2127300,
+      "sha256": "a19fdfeb693f50bb2cdf17a851cf19a911ea4c87e9db19d1889dfae7a23c9626"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-received-cipher-a.png",
+      "byteCount": 2112267,
+      "sha256": "23b96619f911ffc58be81e95869ea16b39b2e689a6b6164be77829d8e2a85b67"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-received-cipher-b.png",
+      "byteCount": 2069747,
+      "sha256": "79446a4e03976835f5727b3e9285f00e004602cba8c9496122bed115b0657db4"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-received-cipher-final-a.png",
+      "byteCount": 2112267,
+      "sha256": "23b96619f911ffc58be81e95869ea16b39b2e689a6b6164be77829d8e2a85b67"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-received-cipher-final-b.png",
+      "byteCount": 2069747,
+      "sha256": "79446a4e03976835f5727b3e9285f00e004602cba8c9496122bed115b0657db4"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-tablet-detail-a.png",
+      "byteCount": 2146122,
+      "sha256": "fc6ba65b4683815366b14c30b3178f67f89e085b226a07a82f5b820034eabc1b"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-tablet-detail-final.png",
+      "byteCount": 2146122,
+      "sha256": "fc6ba65b4683815366b14c30b3178f67f89e085b226a07a82f5b820034eabc1b"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Norse/norse-codex-controlling-board.png",
+      "byteCount": 2705645,
+      "sha256": "e9c1f4a00ebbd7666d409193dc39222494e2414b48d9b42bbfacfb14cd087bd6"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Sunspire/sunspire-codex-catalog-final.png",
+      "byteCount": 2375470,
+      "sha256": "a99ecdcaa15f9a3233ea7515c991e02c789303d6113ca514c19c94b1ea72bc67"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Sunspire/sunspire-high-fidelity-style-board.png",
+      "byteCount": 2857741,
+      "sha256": "dcd7024da9b2d93913d0c375318f2f77b0b00881eedcd781eb02d7f762a03ecf"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Wildwood/wildwood-codex-catalog-final.png",
+      "byteCount": 2527117,
+      "sha256": "1f004173f5b876da5858c4accfbb96172c2a74a7ca92f009a3a9849553e18bd7"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/Wildwood/wildwood-high-fidelity-style-board.png",
+      "byteCount": 2739126,
+      "sha256": "cff3e991e450de7ca92cc176eb5be3c48c5c6698787250ee5e6cdf23a6a87a05"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/cross-theme-production-overview.png",
+      "byteCount": 2511567,
+      "sha256": "9d61a2ae8c2dc39d6a571abf2953cad1621d871bc92b60ca15c3294090394d83"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Controlling-Goldens/vault-elven-codex-unlock-progress.png",
+      "byteCount": 2005543,
+      "sha256": "818dbd5057589d2095cc6b3c5e32a8d7072523a0093ef9317dce24b37ce995e1"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.berserk.monochrome.png",
+      "byteCount": 645400,
+      "sha256": "3b67068ae6be712d0d516e6f1fdca2cb7e4d9d913de80bd3c0bd352f96320ec0"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.berserk.png",
+      "byteCount": 763686,
+      "sha256": "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.berserk.thumbnail.png",
+      "byteCount": 259117,
+      "sha256": "70733bcc64d087cfcbc5cfb58b0bca2601b10bba22a4f69c67b9bd817a538b47"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.mjolnir.monochrome.png",
+      "byteCount": 705242,
+      "sha256": "7d3644fafcc95e635ffaa8881a7734da0a05f17affb2604c4a26314d74f4551e"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.mjolnir.png",
+      "byteCount": 849370,
+      "sha256": "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.mjolnir.thumbnail.png",
+      "byteCount": 295111,
+      "sha256": "bbf9273e15da472ec04fdc5514bd4faccba9322afcc9df8452ecee7e9a07d419"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.ravenshield.monochrome.png",
+      "byteCount": 730467,
+      "sha256": "3585d4963ffd43b5c27f2e9c8ae809ccf646a13306e5c6b2b3cc32a1b66babd7"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.ravenshield.png",
+      "byteCount": 905500,
+      "sha256": "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.ravenshield.thumbnail.png",
+      "byteCount": 308236,
+      "sha256": "09322298c8bd5b3f68d48e924767467dfccee175e0d44e87110977cd6f2a0900"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.valknut.monochrome.png",
+      "byteCount": 762653,
+      "sha256": "7fb26639ad65986fcb52e4b31bc4280e27890e4345e4de74dc6b5957482a2027"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.valknut.png",
+      "byteCount": 940081,
+      "sha256": "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.valknut.thumbnail.png",
+      "byteCount": 322621,
+      "sha256": "35c5f281b6ad405b6a3cb5084edc864b05546deab10ca93ca5d45767334c8431"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.wolkin.monochrome.png",
+      "byteCount": 693545,
+      "sha256": "bbb12a59b76b91ab2aaaa8eca3c53a88a2fe0a06beb5c4b9867a7f0784e9fc16"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.wolkin.png",
+      "byteCount": 824491,
+      "sha256": "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.wolkin.thumbnail.png",
+      "byteCount": 283338,
+      "sha256": "993359c98592c586a47cf06a2129c01c6dd92a474c64b481f34dbd6a83e8d885"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.yggdrasil.monochrome.png",
+      "byteCount": 690512,
+      "sha256": "d296cea98b7283f67b9cb1b9e50547e16299dc8dcbf45872ed0701b746266907"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.yggdrasil.png",
+      "byteCount": 833872,
+      "sha256": "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Production-Candidates/Norse/Seals/seal.norse.yggdrasil.thumbnail.png",
+      "byteCount": 283830,
+      "sha256": "718f6a33bca1ab684e434e482808572a6b06d3fdb0a790212ed048423ad00226"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Gloamthorn/relic-duskbriar-stele-reference.png",
+      "byteCount": 185115,
+      "sha256": "b248c0b8cf86aa6dcf33a9a7057b7d55f4bf7657a484bd6afb0aa01edb775584"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Gloamthorn/relic-duskbriar-stele-reference.thumbnail.png",
+      "byteCount": 373635,
+      "sha256": "838e562473c285d661cbd6c9592bb9c15304fbfb9947d61876089557068d1c88"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Gloamthorn/relic-nightthorn-tablet-reference.png",
+      "byteCount": 545959,
+      "sha256": "d697177200a2ec0990590270ef2354acbb48f09af0a0a00770afd1d1d42efe39"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Gloamthorn/relic-nightthorn-tablet-reference.thumbnail.png",
+      "byteCount": 559749,
+      "sha256": "6fa95a31dee76417be0eaede02324acdc645425312044725f23786145c3399c9"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Gloamthorn/relic-umbral-plaque-reference.png",
+      "byteCount": 142131,
+      "sha256": "5b8fc04d7f1730189db4b941b43f4fb1a540c4d2b4a1fb3b6e2aac3dd5cfd8b1"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Gloamthorn/relic-umbral-plaque-reference.thumbnail.png",
+      "byteCount": 380526,
+      "sha256": "de12b219bc0321f7737778e403da37590254afd1755f45b6f0b0906f4e359cd8"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/motif-central-relic-reference.png",
+      "byteCount": 1055042,
+      "sha256": "513afa1abb23dac099cbe6788f13867227ab3d5886634d9291226bdbbe73c041"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/motif-central-relic-reference.thumbnail.png",
+      "byteCount": 441788,
+      "sha256": "d56ae495585f9bea407ae1533521eb3193be5e505bdb001c891ce8d0f8e05294"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/relic-ivybound-plaque-reference.png",
+      "byteCount": 152926,
+      "sha256": "c3e8009bfe6cf4436b44ed406a690c3d57438120de7b412480bdf7219207024a"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/relic-ivybound-plaque-reference.thumbnail.png",
+      "byteCount": 427726,
+      "sha256": "30b63cdc5aa798a80c24fabaebf02f3400d7ff12fb4b173648b00d9f8c7bc22e"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/relic-moonleaf-tablet-reference.png",
+      "byteCount": 443978,
+      "sha256": "06e58cc199113d2533d694db44f605be508f85e6be33b1076570d5a018f8f91f"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/relic-moonleaf-tablet-reference.thumbnail.png",
+      "byteCount": 463029,
+      "sha256": "6ad4c3c92eb5d868605cdd455c19b4df82dd82d730c667845502ff6749665b3d"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/relic-whisperbark-stele-reference.png",
+      "byteCount": 163892,
+      "sha256": "80e7aa747cf2b250004f3b9e248523be887569b75e0b8af1a2250f3ab3b2b997"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/relic-whisperbark-stele-reference.thumbnail.png",
+      "byteCount": 325797,
+      "sha256": "10569caf50877f7de0d9048cc64e8eb4694dcc71f8946fcd8ef1a707b673f2b8"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/script-specimen-reference.png",
+      "byteCount": 457075,
+      "sha256": "438f8fb82262e16abfd246ceca08e24c9cccdd141be6f6d22fed32a71546e90d"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/script-specimen-reference.thumbnail.png",
+      "byteCount": 131589,
+      "sha256": "35fe20a7dbb1667ea086df162deaf0c414c49f8973615ee2926700043726f098"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/seal-crescentleaf-reference.png",
+      "byteCount": 299183,
+      "sha256": "f328c3f3ea9ff14616e71517faca85fe10d4da716cf2b2bcc4b84d6e88c3f0c0"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/seal-crescentleaf-reference.thumbnail.png",
+      "byteCount": 425892,
+      "sha256": "486d50fe2aeb821d806efdd4e7af8c82d0cdc07d1c9f2d880f179292efeea648"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/seal-woodland-stag-reference.png",
+      "byteCount": 279247,
+      "sha256": "cd069361a104a2a0967eed5ddb5540e95e20e4d0c7e943164484cc2faedc242e"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/seal-woodland-stag-reference.thumbnail.png",
+      "byteCount": 464914,
+      "sha256": "4a5b4b585764231cd2ba300edb964909ec936e07f8eee22feb56a205a841a7a0"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/00-approved-board.png",
+      "byteCount": 2705645,
+      "sha256": "e9c1f4a00ebbd7666d409193dc39222494e2414b48d9b42bbfacfb14cd087bd6"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/01-script-panel.png",
+      "byteCount": 502548,
+      "sha256": "8e04534d85e5c5685f14523d68212e0b1645b718e8ab483ade826bd928499b4d"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/02-relic-catalog.png",
+      "byteCount": 926371,
+      "sha256": "a30d3d6ac5112da8c1606008b307678e27611c4455c82e45b43bf0f5bb41fcf3"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/03-seal-catalog.png",
+      "byteCount": 728233,
+      "sha256": "58494460016fbb9a8e944604d36cfb5ed266554fb63fcfccf78e6f585b2b5a53"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/04-compose-workspace.png",
+      "byteCount": 575029,
+      "sha256": "619a137fbcc760b60b28f1a1569cf289922fc37e39102040435782de17f7c2d6"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/05-short-message.png",
+      "byteCount": 355601,
+      "sha256": "aae1f3bf5cff4b94fbc2ca6eb86eedbeb2cabb8281588c53aef5d6d13e9efbe7"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/06-long-message.png",
+      "byteCount": 486630,
+      "sha256": "49860b3f30e633dda4c15186d6d40f80a34192265c048bf20c9dfdcf774a12a1"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/07-received-cipher.png",
+      "byteCount": 414084,
+      "sha256": "3f840710d4e1b3637d3f2abbfbdb59cbac174502485b824aca53797740d6224f"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/08-share-preview.png",
+      "byteCount": 458634,
+      "sha256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/09-vault-cards.png",
+      "byteCount": 433774,
+      "sha256": "d6789ddc7137cc5e197f2830ca81a72b5ddffec0f865cbe3c769a54db75d7004"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/10-background-treatment.png",
+      "byteCount": 542851,
+      "sha256": "78fa42c5712c796f43efea41bab7dc8249fa076265b6903dc33d70f39756a810"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/11-mastery-rewards.png",
+      "byteCount": 424747,
+      "sha256": "12cd6180852261263b8e6b8d119dc6d7f33da6431f9e0ac7e0a6b4e2649eeb26"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/12-accessibility-variants.png",
+      "byteCount": 514951,
+      "sha256": "a074a682c4a28abf7a9a80cea7577af4824b346e2672c6f7cb938f9547887cff"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/background-reference.png",
+      "byteCount": 183037,
+      "sha256": "200ac342465eddb2a7d5861cef3b8357d0c89be513e2a237d9845af84c741d73"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/background-reference.thumbnail.png",
+      "byteCount": 228839,
+      "sha256": "03b80efe5ac7c1afdec406cfd4e029120a8e25a11ccdd099420cfa0de5b44e03"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/mastery-reference.png",
+      "byteCount": 151487,
+      "sha256": "53e6ee4d30d1f3be91c7afe91aa93b975b0d6e6617222ac7a1687fd4377994c2"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/mastery-reference.thumbnail.png",
+      "byteCount": 233447,
+      "sha256": "aa32d2a755ad46032248aecc354948f693d650ed94f70101e5f6416a10e984d8"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-dragonwood-plaque-reference.png",
+      "byteCount": 100496,
+      "sha256": "0ad79d60ba52118e11e9ef68a4fd2895d0db6d2870f430f703e34a7c8a803ccf"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-dragonwood-plaque-reference.thumbnail.png",
+      "byteCount": 238878,
+      "sha256": "4c9e3bf1bd03c3b9be7e8212e0fc7b033f798ff4fe8827559b812cdf0be20ebb"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+      "byteCount": 108523,
+      "sha256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.thumbnail.png",
+      "byteCount": 259413,
+      "sha256": "fcfb5d84dfac7d93c6f4a294a4d86d64e7094f4917e82d370e41671e87bcfe14"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-stormforged-stele-reference.png",
+      "byteCount": 92426,
+      "sha256": "de8845428e1c8e937448c1fd34c1a0f6137a6623e0f26611ff969758d3646fe7"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-stormforged-stele-reference.thumbnail.png",
+      "byteCount": 218135,
+      "sha256": "c701c51d493cb79b25d8e929d1ff989bcebf5043bedee7f55b116df9ab46e323"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/vault-card-reference.png",
+      "byteCount": 160137,
+      "sha256": "9a056285ad7a17a58966da921936b38622818f886fed8112772ad959d0771463"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/vault-card-reference.thumbnail.png",
+      "byteCount": 262440,
+      "sha256": "8192660326c4f3549f9b14334de276a7f9fa6ad41f8b75b2a331de22cdec2d70"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/motif-scroll-reference.png",
+      "byteCount": 948959,
+      "sha256": "896d2aaf8a3c75242160511441a914a2150f543e8d4e4d2618045e26682a1776"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/motif-scroll-reference.thumbnail.png",
+      "byteCount": 392993,
+      "sha256": "be1e71853e952d20ed6212e3d6c5a9fc74286f2a8dd320a4f87b787563e99bc9"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/relic-auric-stele-reference.png",
+      "byteCount": 169983,
+      "sha256": "ac627d94ce1c3c2e67aa96ba073619c6d72548b1319e88c345a711ef46a20fab"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/relic-auric-stele-reference.thumbnail.png",
+      "byteCount": 342365,
+      "sha256": "79d046fe8440adcb602e5a350a99335d8b4e250eafcce7313984cb57459eaeb9"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/relic-dawnfire-tablet-reference.png",
+      "byteCount": 542780,
+      "sha256": "e1e7c42e94f285381bf175be618b102bc0dfa8dd5fc36fa43270adfcbf64f4d4"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/relic-dawnfire-tablet-reference.thumbnail.png",
+      "byteCount": 576035,
+      "sha256": "4511ae0df20472851fb470c5fed1232bf7e1ec583688de2f33daa4be62ed99f0"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/relic-solvine-plaque-reference.png",
+      "byteCount": 154034,
+      "sha256": "20aa5f2ac850b2175974c7cf5514c2dce7ed0736dd63868dda85165ca08934cb"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/relic-solvine-plaque-reference.thumbnail.png",
+      "byteCount": 425900,
+      "sha256": "298928fc38455aae549aa705363d2d5fe79f68cf5557cdeae6ad548ae0ffd096"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/script-specimen-reference.png",
+      "byteCount": 364509,
+      "sha256": "efd2109345b71793918c4e8f1407d2c283f0e651231da7ade1a93ea1e44f26c3"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/script-specimen-reference.thumbnail.png",
+      "byteCount": 101340,
+      "sha256": "086975e758457c4bb300c855785fae7cd1f7f0ecb689d60e649013b4ab73dfc4"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/seal-golden-lark-reference.png",
+      "byteCount": 225731,
+      "sha256": "2f9cade52e1b9d7292056f5052077f7c08be81c24fed39ad708ff861dbd10a4f"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/seal-golden-lark-reference.thumbnail.png",
+      "byteCount": 392710,
+      "sha256": "bfc426c57a553b83160a2739bdf10f91656360461ce5ec97b35b1c5291c15a9e"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/seal-sunleaf-reference.png",
+      "byteCount": 226398,
+      "sha256": "0c22590da2e087abd69649e3599f75812d5e3dd2297b94d03376c9006e75f094"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Sunspire/seal-sunleaf-reference.thumbnail.png",
+      "byteCount": 377649,
+      "sha256": "25aaa877fe51c2219a5a7ef9b47636c0c242fd7d4697960c17bd9e64ecd1e40b"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/motif-codex-reference.png",
+      "byteCount": 1048264,
+      "sha256": "a8eaaf0b891609a2eb736c981d9c9aec430510678bf011a9335c08521b76039e"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/motif-codex-reference.thumbnail.png",
+      "byteCount": 415751,
+      "sha256": "2228ca72661588e0c529437eb8a0c49bd9c131f2545d97b713a0a04a1ad31f4b"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/relic-elderbark-stele-reference.png",
+      "byteCount": 199145,
+      "sha256": "7882cb87d6e80841285abfe962cf06075b64922e65ca94310709ba3006e67b8a"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/relic-elderbark-stele-reference.thumbnail.png",
+      "byteCount": 395004,
+      "sha256": "ef538b9f81df131424b4959324c2577f1eb1e42f1a25119195ef5322e2c528e9"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/relic-mossbound-plaque-reference.png",
+      "byteCount": 169939,
+      "sha256": "4d6ef1a7f8e7b8c8cf5e99c223f3e9aaac85f14e4c76f9501440d7dffc1c58d2"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/relic-mossbound-plaque-reference.thumbnail.png",
+      "byteCount": 463608,
+      "sha256": "221c56c579b29899e456d4a7a205c0a4188226e1517ada989420ed691747df37"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/relic-rootsong-tablet-reference.png",
+      "byteCount": 579329,
+      "sha256": "366ca15971f02813323e8d5484230e48f422c50bec13c1deff2f4218eba86838"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/relic-rootsong-tablet-reference.thumbnail.png",
+      "byteCount": 614043,
+      "sha256": "8d55ce1fa0aeafc0d96fee39db823c75ef98870067b201dfa19ebe93d1a4cc82"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/script-specimen-reference.png",
+      "byteCount": 319178,
+      "sha256": "61801b1d1196d538f43da4e57ca5ac7cd21e34ff6934d4541ad2a89648610b38"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/script-specimen-reference.thumbnail.png",
+      "byteCount": 92592,
+      "sha256": "1c5e58612bc1112c0a3bc9a03ffafbc5f41b6249e5e29fb8b3eb0aa36ddc10cf"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/seal-lantern-moth-reference.png",
+      "byteCount": 284188,
+      "sha256": "2a9c37ff18fe521868a48754985eb7e9960ae4ce5f1830d93a7b72f5fa3da8dd"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/seal-lantern-moth-reference.thumbnail.png",
+      "byteCount": 396739,
+      "sha256": "2bd1aa7e16908f935623f7260a1d3fe89e0b4324913d6ad89bf73f0bde8d7462"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/seal-rooted-tree-reference.png",
+      "byteCount": 278146,
+      "sha256": "b7f3040eb49ce3e84e99eeb0d28d5f821587c7dbfe864b940a519abf3207de82"
+    },
+    {
+      "path": "03-AUTHORITY-ASSETS/Reference-Slices/Wildwood/seal-rooted-tree-reference.thumbnail.png",
+      "byteCount": 442587,
+      "sha256": "4751e9593b83744a9971e42a0cc717d79c152bb556cb465de9d829511e4ee7ff"
+    },
+    {
+      "path": "04-VERIFICATION-PATCH/Candidate-Identifier-Application-Manual.md",
+      "byteCount": 976,
+      "sha256": "1cd02bcce5cccc37a310c62c1fa144955c02d725d1c104db704d6418ce008d21"
+    },
+    {
+      "path": "04-VERIFICATION-PATCH/Evidence-Directory-Contract.md",
+      "byteCount": 575,
+      "sha256": "3ddc7c93e6fbe01e3db599c6eec9be603acbfd9cb3aacaa096135b809ac5e683"
+    },
+    {
+      "path": "04-VERIFICATION-PATCH/Gate-Catalog-v4.2.json",
+      "byteCount": 14137,
+      "sha256": "9398406ccd7a32bd3a12ee65b8a26de4c2c265223707d3ae234c0450e78d5b7a"
+    },
+    {
+      "path": "04-VERIFICATION-PATCH/Golden-Screenshot-Matrix-v1.2.json",
+      "byteCount": 270352,
+      "sha256": "bd98883bb40b4d40e507069e61dc74408afdd580fd60583a0fe06ca4cec75455"
+    },
+    {
+      "path": "04-VERIFICATION-PATCH/Visual-Comparison-Evidence-Index-Schema-v1.2.json",
+      "byteCount": 613,
+      "sha256": "ec487ace4826e7b50d21515a11b70be1666e7a545d67dce05dfbab3074c595e4"
+    },
+    {
+      "path": "04-VERIFICATION-PATCH/Visual-Fidelity-Policy-v1.2.md",
+      "byteCount": 1488,
+      "sha256": "3989ef96f42488d6f253b4424036ccda119b9a9e5e5e91f9feac1aca844da258"
+    }
+  ]
+}

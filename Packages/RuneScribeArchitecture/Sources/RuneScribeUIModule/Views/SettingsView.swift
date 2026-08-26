@@ -24,7 +24,9 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.runtimeAccessibilityPreferences) private var accessibilityPreferences
+    @Environment(\.themeCaptureIdentifiersEnabled) private var themeCaptureIdentifiersEnabled
 
     @State private var pinFlow: PINFlowView.Mode?
     @State private var showLicense = false
@@ -64,6 +66,7 @@ struct SettingsView: View {
         .runeSheetFrame()
         .runeSemanticPresentationSurface()
         .preferredColorScheme(.dark)
+        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenSettingsAppearance)
         .sheet(item: $pinFlow) { mode in
             PINFlowView(mode: mode)
         }
@@ -152,20 +155,18 @@ struct SettingsView: View {
                     }
                     .accessibilityElement(children: .contain)
                     .accessibilityLabel("Active theme presentation")
-                    .accessibilityValue(
-                        snapshot.isEmergencyPresentation
-                            ? "Emergency"
-                            : usesIncreasedContrast
-                                ? "High Contrast"
-                                : "Standard"
-                    )
+                    .accessibilityValue(themePresentationAccessibilityValue)
                     .accessibilityIdentifier(
-                        "theme.presentation.\(snapshot.effectiveTheme.id.rawValue)."
-                            + (snapshot.isEmergencyPresentation
-                                ? "emergency"
-                                : usesIncreasedContrast
-                                    ? "high-contrast"
-                                    : "standard")
+                        ThemeCaptureIdentifier.presentation(
+                            themeID: snapshot.effectiveTheme.id,
+                            variant: themePresentationVariant
+                        )
+                    )
+                    .runtimeViewportFrameProbe(
+                        ThemeCaptureIdentifier.presentation(
+                            themeID: snapshot.effectiveTheme.id,
+                            variant: themePresentationVariant
+                        )
                     )
                     .scrollTargetLayout()
                 } else {
@@ -334,9 +335,17 @@ struct SettingsView: View {
                     image: { presentation.image(for: $0) }
                 )
                 .aspectRatio(4.0 / 3.0, contentMode: .fit)
-                .accessibilityHidden(true)
+                .themeCaptureAccessibilityHiddenWhenDisabled()
+                .themeCaptureIdentifier(
+                    ThemeCaptureIdentifier.workspacePrimarySurface
+                )
             }
             .clipShape(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous))
+            .themeCaptureIdentifier(
+                ThemeCaptureIdentifier.settingsDefaultsPreview(
+                    codexID: plan.selection.codexID
+                )
+            )
         } else {
             Color.clear
             .aspectRatio(4.0 / 3.0, contentMode: .fit)
@@ -411,6 +420,25 @@ struct SettingsView: View {
     private var usesIncreasedContrast: Bool {
         colorSchemeContrast == .increased
             || accessibilityPreferences.forcesIncreasedContrast
+    }
+
+    private var themePresentationVariant: ThemeCaptureIdentifier.PresentationVariant {
+        if session.themeSnapshot?.isEmergencyPresentation == true { return .emergency }
+        if usesIncreasedContrast { return .highContrast }
+        guard themeCaptureIdentifiersEnabled else { return .standard }
+        if effectiveReduceMotion { return .reduceMotion }
+        if dynamicTypeSize.isAccessibilitySize { return .largeText }
+        return .standard
+    }
+
+    private var themePresentationAccessibilityValue: String {
+        switch themePresentationVariant {
+        case .standard: "Standard"
+        case .emergency: "Emergency"
+        case .highContrast: "High Contrast"
+        case .reduceMotion: "Reduce Motion"
+        case .largeText: "Large Text"
+        }
     }
 
     private func providerStatus(_ provider: ThemeProviderSummaryDTO) -> String {

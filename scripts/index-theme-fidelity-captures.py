@@ -14,17 +14,55 @@ import re
 import subprocess
 import sys
 import tempfile
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 try:
     from scripts.theme_fidelity_destination_policy import (
         DestinationPolicyError,
         validate_selection,
     )
+    from scripts.theme_fidelity_xcui_evidence import (
+        CANDIDATE_ATTACHMENT_NAME,
+        UI_TEST_TARGET_KIND,
+        UI_TEST_TARGETS_BY_ROLE,
+        XCUI_OPERATION,
+        XCUI_QUERY_ATTACHMENT_NAME,
+        XCUI_SIDECAR_NAME,
+        XCUI_TEST_IDENTIFIER,
+        XCUIEvidenceError,
+        candidate_attachment_name,
+        expected_inventory,
+        index_entries as index_xcui_entries,
+        load_repository_authority,
+        load_repository_candidates,
+        load_repository_seeds,
+        sidecar_name,
+        validate_sidecar,
+        xcui_probe_ids_for_entry,
+    )
 except ModuleNotFoundError:
     from theme_fidelity_destination_policy import (  # type: ignore[no-redef]
         DestinationPolicyError,
         validate_selection,
+    )
+    from theme_fidelity_xcui_evidence import (  # type: ignore[no-redef]
+        CANDIDATE_ATTACHMENT_NAME,
+        UI_TEST_TARGET_KIND,
+        UI_TEST_TARGETS_BY_ROLE,
+        XCUI_OPERATION,
+        XCUI_QUERY_ATTACHMENT_NAME,
+        XCUI_SIDECAR_NAME,
+        XCUI_TEST_IDENTIFIER,
+        XCUIEvidenceError,
+        candidate_attachment_name,
+        expected_inventory,
+        index_entries as index_xcui_entries,
+        load_repository_authority,
+        load_repository_candidates,
+        load_repository_seeds,
+        sidecar_name,
+        validate_sidecar,
+        xcui_probe_ids_for_entry,
     )
 
 try:
@@ -47,6 +85,8 @@ DEFAULT_AUTHORITY_MANIFEST = Path(
     "docs/verification/theme-fidelity-v4/authority/asset-manifest.json"
 )
 EXPECTED_TEST_IDENTIFIER = "ThemeFidelityMatrixTests/testCaptureThemeFidelityMatrix()"
+XCODE_TEST_URL_AUTHORITY = "com.apple.xcode"
+XCODE_TEST_URL_PROJECT = "RuneScrib"
 VIEWPORT_ELEMENT_ID = "theme-fidelity.viewport"
 EXPECTED_THEMES = {
     "Norse": ("theme.norse.base", "codex.norse"),
@@ -161,17 +201,51 @@ REQUIRED_RECORD_KEYS = {
 }
 EVIDENCE_RECORD_KEYS = {
     "elementFrames",
+    "reduceMotionStability",
     "renderedResourceBindings",
     "renderedResourceIDs",
+    "rendererOutputs",
+    "runtimeDiagnostics",
+    "runtimeProbeObservations",
     "safePreviewEvidence",
+    "structuralAssertionObservations",
     "viewportAssertions",
 }
 BUNDLE_DESTINATIONS = {
     "iphone": {"iphone-portrait"},
     "ipad": {"ipad-portrait"},
     "macos": {"macos-standard", "macos-resized"},
+    "iphone-xcui": {"iphone-portrait"},
+    "ipad-xcui": {"ipad-portrait"},
+    "macos-xcui": {"macos-standard", "macos-resized"},
 }
-EXPECTED_BUNDLE_ATTACHMENT_COUNTS = {"iphone": 200, "ipad": 200, "macos": 400}
+LEGACY_BUNDLE_ATTACHMENT_COUNTS = {"iphone": 200, "ipad": 200, "macos": 400}
+HOSTED_V12_BUNDLE_ATTACHMENT_COUNTS = {"iphone": 211, "ipad": 211, "macos": 422}
+V12_BUNDLE_ATTACHMENT_COUNTS = {
+    **HOSTED_V12_BUNDLE_ATTACHMENT_COUNTS,
+    "iphone-xcui": 264,
+    "ipad-xcui": 264,
+    "macos-xcui": 528,
+}
+HOSTED_BUNDLE_ROLES = frozenset({"iphone", "ipad", "macos"})
+XCUI_BUNDLE_ROLES = frozenset({"iphone-xcui", "ipad-xcui", "macos-xcui"})
+
+
+def expected_xcui_test_identifier_url(role: str) -> str:
+    if role not in XCUI_BUNDLE_ROLES:
+        raise IndexError(f"result bundle role is not XCUI: {role}")
+    target_name = UI_TEST_TARGETS_BY_ROLE[role]
+    test_case, test_method = XCUI_TEST_IDENTIFIER.removesuffix("()").split("/", 1)
+    return (
+        f"test://{XCODE_TEST_URL_AUTHORITY}/{XCODE_TEST_URL_PROJECT}/"
+        f"{target_name}/{test_case}/{test_method}"
+    )
+AUXILIARY_CAPTURE_NAME = re.compile(
+    r"^(norse|moonleaf|sunspire|wildwood|gloamthorn)--"
+    r"([a-z0-9-]+)--"
+    r"(iphone-portrait|ipad-portrait|macos-standard|macos-resized)--"
+    r"(stability-b|renderer-output|optional-codex-locked)\.png$"
+)
 FINAL_COMPARISON_KEYS = {
     "capture",
     "candidateSHA256",
@@ -334,6 +408,10 @@ class IndexError(ValueError):
 
 
 _COMPARATOR_MODULE: Any = None
+
+
+def hosted_bundle_role(role: str) -> str:
+    return role.removesuffix("-xcui")
 
 
 def sha256_file(path: Path) -> str:
@@ -1387,20 +1465,87 @@ def validate_source_manifest_pair(
         raise IndexError(f"source changed between pre-build and post-build manifests: {detail}")
 
 
+def v12_auxiliary_names(destinations: Iterable[str] | None = None) -> set[str]:
+    selected_destinations = set(destinations or DESTINATION_SLUGS.values())
+    names: set[str] = set()
+    for destination in selected_destinations:
+        for theme in EXPECTED_THEMES:
+            slug = theme.lower()
+            names.add(f"{slug}--reduce-motion--{destination}--stability-b.png")
+            names.add(f"{slug}--static-share--{destination}--renderer-output.png")
+        names.add(f"norse--vault-locked--{destination}--optional-codex-locked.png")
+    return names
+
+
 def validate_captures(
     root: Path,
     matrix_path: Path,
     capture_root: Path,
     phase: str,
+    require_xcui: bool = False,
 ) -> tuple[list[dict[str, Any]], dict[str, dict[str, int]], list[dict[str, str]]]:
     matrix = load_matrix(matrix_path)
     expected = expected_entries(matrix)
     expected_pngs = {entry["png"] for entry in expected}
     actual_pngs = {path.name for path in capture_root.glob("*.png") if path.is_file()}
-    if actual_pngs != expected_pngs:
-        missing = sorted(expected_pngs - actual_pngs)
-        extra = sorted(actual_pngs - expected_pngs)
-        raise IndexError(f"PNG set differs; missing={missing[:8]}, extra={extra[:8]}")
+    auxiliary_pngs = {name for name in actual_pngs if AUXILIARY_CAPTURE_NAME.fullmatch(name)}
+    expected_auxiliary = v12_auxiliary_names()
+    actual_candidate_pngs = {
+        name for name in actual_pngs if CANDIDATE_ATTACHMENT_NAME.fullmatch(name)
+    }
+    actual_query_pngs = {
+        name for name in actual_pngs if XCUI_QUERY_ATTACHMENT_NAME.fullmatch(name)
+    }
+    actual_sidecars = {
+        path.name for path in capture_root.glob("*.xcui.json") if path.is_file()
+    }
+    xcui_active = require_xcui or bool(
+        actual_candidate_pngs or actual_query_pngs or actual_sidecars
+    )
+    authority: dict[str, Any] | None = None
+    probes: dict[str, dict[str, Any]] | None = None
+    seeds: dict[str, dict[str, Any]] | None = None
+    candidates: dict[str, dict[str, Any]] | None = None
+    authority_entries: dict[str, dict[str, Any]] = {}
+    inventory = None
+    if xcui_active:
+        try:
+            authority, probes = load_repository_authority(root)
+            seeds = load_repository_seeds(root)
+            candidates = load_repository_candidates(root)
+            authority_entries = index_xcui_entries(authority)
+            inventory = expected_inventory(authority, probes)
+        except XCUIEvidenceError as error:
+            raise IndexError(str(error)) from error
+        expected_complete_pngs = (
+            expected_pngs
+            | expected_auxiliary
+            | set(inventory.candidate_pngs)
+            | set(inventory.query_pngs)
+        )
+        if actual_pngs != expected_complete_pngs:
+            missing = sorted(expected_complete_pngs - actual_pngs)
+            extra = sorted(actual_pngs - expected_complete_pngs)
+            raise IndexError(
+                f"v1.2 PNG set differs; missing={missing[:8]}, extra={extra[:8]}"
+            )
+        if actual_sidecars != set(inventory.sidecars):
+            missing = sorted(set(inventory.sidecars) - actual_sidecars)
+            extra = sorted(actual_sidecars - set(inventory.sidecars))
+            raise IndexError(
+                f"XCUI sidecar set differs; missing={missing[:8]}, extra={extra[:8]}"
+            )
+    else:
+        if actual_pngs != expected_pngs and actual_pngs != expected_pngs | expected_auxiliary:
+            missing = sorted(expected_pngs - actual_pngs)
+            extra = sorted(actual_pngs - expected_pngs - expected_auxiliary)
+            raise IndexError(f"PNG set differs; missing={missing[:8]}, extra={extra[:8]}")
+        if auxiliary_pngs and auxiliary_pngs != expected_auxiliary:
+            missing = sorted(expected_auxiliary - auxiliary_pngs)
+            extra = sorted(auxiliary_pngs - expected_auxiliary)
+            raise IndexError(
+                f"v1.2 auxiliary PNG set differs; missing={missing[:8]}, extra={extra[:8]}"
+            )
     expected_records = {entry["record"] for entry in expected}
     actual_records = {
         path.name for path in capture_root.glob("*.capture.json") if path.is_file()
@@ -1409,6 +1554,44 @@ def validate_captures(
         missing = sorted(expected_records - actual_records)
         extra = sorted(actual_records - expected_records)
         raise IndexError(f"capture record set differs; missing={missing[:8]}, extra={extra[:8]}")
+    if xcui_active:
+        actual_jsons = {
+            path.name for path in capture_root.glob("*.json") if path.is_file()
+        }
+        expected_jsons = expected_records | actual_sidecars
+        if actual_jsons != expected_jsons:
+            missing = sorted(expected_jsons - actual_jsons)
+            extra = sorted(actual_jsons - expected_jsons)
+            raise IndexError(
+                f"v1.2 JSON attachment set differs; missing={missing[:8]}, extra={extra[:8]}"
+            )
+
+    validated_sidecars: dict[str, Any] = {}
+    if xcui_active:
+        assert (
+            probes is not None
+            and seeds is not None
+            and candidates is not None
+            and inventory is not None
+        )
+        entries_by_sidecar = {
+            sidecar_name(entry): entry for entry in authority_entries.values()
+        }
+        for name in sorted(inventory.sidecars):
+            entry = entries_by_sidecar.get(name)
+            if entry is None:
+                raise IndexError(f"XCUI sidecar lacks an authority entry: {name}")
+            try:
+                validated_sidecars[entry["id"]] = validate_sidecar(
+                    capture_root / name,
+                    entry,
+                    probes,
+                    seeds,
+                    candidates,
+                    capture_root,
+                )
+            except XCUIEvidenceError as error:
+                raise IndexError(str(error)) from error
 
     captures: list[dict[str, Any]] = []
     normalized: dict[str, Any] = {}
@@ -1435,15 +1618,34 @@ def validate_captures(
             png_digests[digest] = entry["png"]
         state_seeds.add(record["stateSeed"])
         normalized[entry["png"]] = metrics.pop("normalized")
-        captures.append(
-            {
+        capture = {
                 **record,
                 "png": entry["png"],
                 "record": entry["record"],
                 "comparisonResult": "not-evaluated",
                 "quality": metrics,
             }
-        )
+        if xcui_active:
+            authority_id = (
+                f"{record['themeName']}|{record['surface']}|"
+                f"{DESTINATION_SLUGS[record['destination']]}"
+            )
+            validated = validated_sidecars.get(authority_id)
+            if validated is not None:
+                capture["xcuiEvidence"] = {
+                    "path": str(validated.path),
+                    "sha256": validated.sha256,
+                    "sourceTest": validated.source_test,
+                    "deterministicSeed": validated.deterministic_seed,
+                    "candidateElementCaptures": list(
+                        validated.candidate_captures.values()
+                    ),
+                    "structuralWitnesses": list(
+                        validated.structural_witnesses.values()
+                    ),
+                    "xcuiProbeEvidence": list(validated.probe_evidence.values()),
+                }
+        captures.append(capture)
     if len(state_seeds) != 1:
         raise IndexError(f"capture state seeds differ: {sorted(state_seeds)}")
     for detail in material_uniqueness_findings(captures, normalized):
@@ -1463,6 +1665,15 @@ def result_bundle_digest(path: Path) -> str:
 
 
 def capture_destination_slug(name: str) -> str:
+    for pattern in (
+        AUXILIARY_CAPTURE_NAME,
+        CANDIDATE_ATTACHMENT_NAME,
+        XCUI_SIDECAR_NAME,
+        XCUI_QUERY_ATTACHMENT_NAME,
+    ):
+        match = pattern.fullmatch(name)
+        if match is not None:
+            return match.group("destination") if "destination" in match.groupdict() else match.group(3)
     for destination_slug in DESTINATION_SLUGS.values():
         if name.endswith(f"--{destination_slug}.png") or name.endswith(
             f"--{destination_slug}.capture.json"
@@ -1502,14 +1713,32 @@ def validate_extraction_report(
     captures: list[dict[str, Any]],
 ) -> dict[str, Any]:
     report = load_json(report_path)
-    if not isinstance(report, dict) or report.get("schemaVersion") != SCHEMA_VERSION:
+    if not isinstance(report, dict) or report.get("schemaVersion") not in {
+        "1.0",
+        "1.1",
+        "1.2",
+    }:
         raise IndexError("extraction report schema is invalid")
+    extraction_schema = report["schemaVersion"]
     exact = {
         "result": "pass",
         "pngCount": 400,
         "recordCount": 400,
         "expectedTestIdentifier": EXPECTED_TEST_IDENTIFIER,
     }
+    if extraction_schema == "1.1":
+        exact["auxiliaryPNGCount"] = 44
+    elif extraction_schema == "1.2":
+        exact.update(
+            {
+                "auxiliaryPNGCount": 44,
+                "candidatePNGCount": 672,
+                "xcuiQueryPNGCount": 4,
+                "xcuiSidecarCount": 380,
+                "attachmentCount": 1900,
+                "expectedXCUITestIdentifier": XCUI_TEST_IDENTIFIER,
+            }
+        )
     for key, expected in exact.items():
         if report.get(key) != expected:
             raise IndexError(
@@ -1548,19 +1777,39 @@ def validate_extraction_report(
         raise IndexError("Simulator selection source no longer matches its bound evidence")
 
     bundles = report.get("resultBundles")
-    if not isinstance(bundles, list) or len(bundles) != 3:
-        raise IndexError("extraction report must contain exactly three result bundles")
+    expected_roles = (
+        set(BUNDLE_DESTINATIONS)
+        if extraction_schema == "1.2"
+        else set(HOSTED_BUNDLE_ROLES)
+    )
+    if not isinstance(bundles, list) or len(bundles) != len(expected_roles):
+        raise IndexError(
+            f"extraction report must contain exactly {len(expected_roles)} result bundles"
+        )
     by_role: dict[str, dict[str, Any]] = {}
     for bundle in bundles:
-        if not isinstance(bundle, dict) or bundle.get("role") not in BUNDLE_DESTINATIONS:
+        if not isinstance(bundle, dict) or bundle.get("role") not in expected_roles:
             raise IndexError("extraction report contains an invalid result-bundle role")
         role = bundle["role"]
         if role in by_role:
             raise IndexError(f"extraction report repeats result-bundle role {role}")
-        if bundle.get("selectedAttachmentCount") != EXPECTED_BUNDLE_ATTACHMENT_COUNTS[role]:
+        if extraction_schema == "1.2":
+            expected_bundle_counts = V12_BUNDLE_ATTACHMENT_COUNTS
+        elif extraction_schema == "1.1":
+            expected_bundle_counts = HOSTED_V12_BUNDLE_ATTACHMENT_COUNTS
+        else:
+            expected_bundle_counts = LEGACY_BUNDLE_ATTACHMENT_COUNTS
+        if bundle.get("selectedAttachmentCount") != expected_bundle_counts[role]:
             raise IndexError(f"{role} result bundle attachment count is invalid")
-        if bundle.get("expectedTestIdentifier") != EXPECTED_TEST_IDENTIFIER:
+        expected_test_identifier = (
+            XCUI_TEST_IDENTIFIER if role in XCUI_BUNDLE_ROLES else EXPECTED_TEST_IDENTIFIER
+        )
+        if bundle.get("expectedTestIdentifier") != expected_test_identifier:
             raise IndexError(f"{role} result bundle test identifier is invalid")
+        if role in XCUI_BUNDLE_ROLES and bundle.get(
+            "expectedTestIdentifierURL"
+        ) != expected_xcui_test_identifier_url(role):
+            raise IndexError(f"{role} result bundle test identifier URL is invalid")
         if bundle.get("outcome") != "Passed":
             raise IndexError(f"{role} result bundle outcome is not Passed")
         path_value = bundle.get("path")
@@ -1584,22 +1833,26 @@ def validate_extraction_report(
         ):
             if not isinstance(device.get(key), str) or not device[key]:
                 raise IndexError(f"{role} result bundle device.{key} is invalid")
-        expected_platform = "macOS" if role == "macos" else "iOS Simulator"
+        base_role = hosted_bundle_role(role)
+        expected_platform = "macOS" if base_role == "macos" else "iOS Simulator"
         if device["platform"] != expected_platform:
             raise IndexError(f"{role} result bundle is bound to the wrong destination")
         destination_selection = bundle.get("destinationSelection")
-        if role in {"iphone", "ipad"}:
+        if base_role in {"iphone", "ipad"}:
             try:
                 validated_selection = validate_selection(
-                    destination_selection, role, device["deviceId"], device["modelName"]
+                    destination_selection,
+                    base_role,
+                    device["deviceId"],
+                    device["modelName"],
                 )
             except DestinationPolicyError as error:
                 raise IndexError(str(error)) from error
-            if selection_document["destinations"][role] != validated_selection:
+            if selection_document["destinations"][base_role] != validated_selection:
                 raise IndexError(f"{role} result bundle selection differs from source evidence")
         elif destination_selection is not None or not device["modelName"].startswith("Mac"):
             raise IndexError("macos result bundle is bound to the wrong destination")
-        if role == "macos" and device["architecture"] != "arm64":
+        if base_role == "macos" and device["architecture"] != "arm64":
             raise IndexError("macos result bundle architecture must be arm64")
         for key in (
             "configurationName",
@@ -1625,16 +1878,16 @@ def validate_extraction_report(
         if (
             not isinstance(attachment_manifest, list)
             or len(attachment_manifest) != 1
-            or attachment_manifest[0].get("testIdentifier") != EXPECTED_TEST_IDENTIFIER
+            or attachment_manifest[0].get("testIdentifier") != expected_test_identifier
             or not isinstance(attachment_manifest[0].get("attachments"), list)
             or len(attachment_manifest[0]["attachments"])
-            != EXPECTED_BUNDLE_ATTACHMENT_COUNTS[role]
+            != expected_bundle_counts[role]
             or canonical_json_sha256(attachment_manifest)
             != bundle["attachmentManifestSHA256"]
         ):
             raise IndexError(f"{role} embedded attachment manifest is invalid")
         by_role[role] = bundle
-    if set(by_role) != set(BUNDLE_DESTINATIONS):
+    if set(by_role) != expected_roles:
         raise IndexError("extraction report result-bundle roles are incomplete")
 
     validate_destination_selection_dimensions(by_role, captures)
@@ -1644,10 +1897,38 @@ def validate_extraction_report(
         for capture in captures
         for key in ("png", "record")
     }
+    authority = None
+    probes = None
+    seeds = None
+    candidates = None
+    authority_entries: dict[str, dict[str, Any]] = {}
+    inventory = None
+    if extraction_schema in {"1.1", "1.2"}:
+        expected_names.update(v12_auxiliary_names())
+    if extraction_schema == "1.2":
+        try:
+            repository_root = Path(__file__).resolve().parents[1]
+            authority, probes = load_repository_authority(repository_root)
+            seeds = load_repository_seeds(repository_root)
+            candidates = load_repository_candidates(repository_root)
+            authority_entries = index_xcui_entries(authority)
+            inventory = expected_inventory(authority, probes)
+        except XCUIEvidenceError as error:
+            raise IndexError(str(error)) from error
+        expected_names.update(inventory.attachments)
     attachments = report.get("attachments")
-    if not isinstance(attachments, list) or len(attachments) != 800:
-        raise IndexError("extraction report must contain exactly 800 attachment records")
+    expected_attachment_count = {
+        "1.0": 800,
+        "1.1": 844,
+        "1.2": 1900,
+    }[extraction_schema]
+    if not isinstance(attachments, list) or len(attachments) != expected_attachment_count:
+        raise IndexError(
+            "extraction report must contain exactly "
+            f"{expected_attachment_count} attachment records"
+        )
     names: set[str] = set()
+    attachment_records: dict[str, dict[str, Any]] = {}
     for attachment in attachments:
         if not isinstance(attachment, dict) or not isinstance(attachment.get("name"), str):
             raise IndexError("extraction report contains an invalid attachment record")
@@ -1655,6 +1936,7 @@ def validate_extraction_report(
         if name in names:
             raise IndexError(f"extraction report repeats attachment {name}")
         names.add(name)
+        attachment_records[name] = attachment
         if name not in expected_names:
             raise IndexError(f"extraction report contains an unexpected attachment {name}")
         role = attachment.get("resultBundleRole")
@@ -1663,8 +1945,11 @@ def validate_extraction_report(
         if capture_destination_slug(name) not in BUNDLE_DESTINATIONS[role]:
             raise IndexError(f"{name} is bound to the wrong result bundle")
         expected_uti = "public.png" if name.endswith(".png") else "public.json"
+        expected_test_identifier = (
+            XCUI_TEST_IDENTIFIER if role in XCUI_BUNDLE_ROLES else EXPECTED_TEST_IDENTIFIER
+        )
         exact_attachment = {
-            "testIdentifier": EXPECTED_TEST_IDENTIFIER,
+            "testIdentifier": expected_test_identifier,
             "attachmentUTI": expected_uti,
             "attachmentUTISource": "validated-content",
             "configurationName": by_role[role]["configurationName"],
@@ -1672,6 +1957,15 @@ def validate_extraction_report(
             "deviceID": by_role[role]["device"]["deviceId"],
             "resultBundle": by_role[role]["path"],
         }
+        if role in XCUI_BUNDLE_ROLES:
+            exact_attachment.update(
+                {
+                    "testIdentifierURL": expected_xcui_test_identifier_url(role),
+                    "sourceTargetName": UI_TEST_TARGETS_BY_ROLE[role],
+                    "sourceTargetKind": UI_TEST_TARGET_KIND,
+                    "sourceProjectName": XCODE_TEST_URL_PROJECT,
+                }
+            )
         for key, expected in exact_attachment.items():
             if attachment.get(key) != expected:
                 raise IndexError(f"{name} {key} does not match result-bundle provenance")
@@ -1684,10 +1978,80 @@ def validate_extraction_report(
             raise IndexError(f"{name} no longer matches its extracted attachment record")
     if names != expected_names:
         raise IndexError("extraction report attachment set is incomplete")
+    if extraction_schema == "1.2":
+        assert (
+            probes is not None
+            and seeds is not None
+            and candidates is not None
+            and inventory is not None
+        )
+        entries_by_sidecar = {
+            sidecar_name(entry): entry for entry in authority_entries.values()
+        }
+        capture_by_id = {
+            (
+                f"{capture['themeName']}|{capture['surface']}|"
+                f"{DESTINATION_SLUGS[capture['destination']]}"
+            ): capture
+            for capture in captures
+        }
+        sidecar_summaries = report.get("xcuiSidecars")
+        if not isinstance(sidecar_summaries, list) or len(sidecar_summaries) != 380:
+            raise IndexError("extraction report must contain exactly 380 XCUI sidecar summaries")
+        summaries_by_name = {
+            item.get("name"): item for item in sidecar_summaries if isinstance(item, dict)
+        }
+        if set(summaries_by_name) != set(inventory.sidecars):
+            raise IndexError("extraction report XCUI sidecar summary set differs")
+        for name in sorted(inventory.sidecars):
+            entry = entries_by_sidecar.get(name)
+            if entry is None:
+                raise IndexError(f"XCUI sidecar lacks an authority entry: {name}")
+            try:
+                validated = validate_sidecar(
+                    capture_root / name,
+                    entry,
+                    probes,
+                    seeds,
+                    candidates,
+                    capture_root,
+                    attachment_records,
+                )
+            except XCUIEvidenceError as error:
+                raise IndexError(str(error)) from error
+            expected_summary = {
+                "name": name,
+                "sha256": validated.sha256,
+                "entryID": entry["id"],
+                "sourceTest": validated.source_test,
+                "deterministicSeed": validated.deterministic_seed,
+                "candidateElementCaptureCount": len(validated.candidate_captures),
+                "structuralWitnessCount": len(validated.structural_witnesses),
+                "xcuiProbeEvidenceCount": len(validated.probe_evidence),
+            }
+            if summaries_by_name[name] != expected_summary:
+                raise IndexError(f"XCUI sidecar summary differs: {name}")
+            indexed_capture = capture_by_id.get(entry["id"])
+            indexed_xcui = (
+                indexed_capture.get("xcuiEvidence")
+                if isinstance(indexed_capture, dict)
+                else None
+            )
+            if not isinstance(indexed_xcui, dict) or (
+                indexed_xcui.get("path") != str(validated.path)
+                or indexed_xcui.get("sha256") != validated.sha256
+                or indexed_xcui.get("sourceTest") != validated.source_test
+                or indexed_xcui.get("deterministicSeed")
+                != validated.deterministic_seed
+            ):
+                raise IndexError(f"indexed XCUI evidence binding differs: {entry['id']}")
     return {
         "path": str(report_path.resolve()),
         "sha256": sha256_file(report_path),
         "expectedTestIdentifier": EXPECTED_TEST_IDENTIFIER,
+        "expectedXCUITestIdentifier": (
+            XCUI_TEST_IDENTIFIER if extraction_schema == "1.2" else None
+        ),
         "attachmentCount": len(attachments),
         "xcresulttool": report["xcresulttool"],
         "resultBundles": bundles,
@@ -2657,6 +3021,419 @@ def validate_final_comparisons(
     }
 
 
+def validate_v12_xcui_candidate_provenance(
+    capture_root: Path,
+    entry: Mapping[str, Any],
+    expected_mapping: Mapping[str, Any],
+    result: Mapping[str, Any],
+    capture: Mapping[str, Any],
+) -> None:
+    candidate_id = expected_mapping.get("candidateElementID")
+    if not isinstance(candidate_id, str):
+        return
+    evidence = capture.get("xcuiEvidence")
+    if not isinstance(evidence, dict):
+        raise IndexError(f"v1.2 mapping lacks indexed XCUI evidence: {result.get('mappingID')}")
+    candidates = evidence.get("candidateElementCaptures")
+    indexed = {
+        item.get("candidateID"): item
+        for item in candidates
+        if isinstance(item, dict) and isinstance(item.get("candidateID"), str)
+    } if isinstance(candidates, list) else {}
+    item = indexed.get(candidate_id)
+    if not isinstance(item, dict):
+        raise IndexError(f"v1.2 mapping lacks its exact XCUI attachment: {result.get('mappingID')}")
+    provenance = result.get("candidateProvenance")
+    expected_provenance_keys = {
+        "attachment",
+        "attachmentSHA256",
+        "byteCount",
+        "pixelWidth",
+        "pixelHeight",
+        "declaredOperation",
+        "actualOperation",
+        "xcuiSidecar",
+        "xcuiSidecarSHA256",
+        "sourceTest",
+        "queryPredicate",
+        "matchCount",
+        "elementIdentifier",
+        "coordinateOrigin",
+        "coordinateUnits",
+        "elementFrame",
+        "windowFrame",
+        "label",
+        "value",
+        "isEnabled",
+        "isHittable",
+        "manualCoordinatesUsed",
+    }
+    if not isinstance(provenance, dict) or set(provenance) != expected_provenance_keys:
+        raise IndexError(f"v1.2 XCUI candidate provenance keys differ: {result.get('mappingID')}")
+    attachment = (capture_root / candidate_attachment_name(entry, candidate_id)).resolve()
+    sidecar = (capture_root / sidecar_name(entry)).resolve()
+    exact = {
+        "candidateID": candidate_id,
+        "candidateSourceKind": XCUI_OPERATION,
+        "candidateDimensions": [item["pixelWidth"], item["pixelHeight"]],
+    }
+    for key, expected in exact.items():
+        if result.get(key) != expected:
+            raise IndexError(f"v1.2 XCUI candidate {key} differs: {result.get('mappingID')}")
+    expected_provenance = {
+        "attachment": str(attachment),
+        "attachmentSHA256": item["sha256"],
+        "byteCount": item["byteCount"],
+        "pixelWidth": item["pixelWidth"],
+        "pixelHeight": item["pixelHeight"],
+        "declaredOperation": XCUI_OPERATION,
+        "actualOperation": XCUI_OPERATION,
+        "xcuiSidecar": str(sidecar),
+        "xcuiSidecarSHA256": evidence.get("sha256"),
+        "sourceTest": evidence.get("sourceTest"),
+        "queryPredicate": item["queryPredicate"],
+        "matchCount": item["matchCount"],
+        "elementIdentifier": item["elementIdentifier"],
+        "coordinateOrigin": item["coordinateOrigin"],
+        "coordinateUnits": item["coordinateUnits"],
+        "elementFrame": item["elementFrame"],
+        "windowFrame": item["windowFrame"],
+        "label": item["label"],
+        "value": item["value"],
+        "isEnabled": item["isEnabled"],
+        "isHittable": item["isHittable"],
+        "manualCoordinatesUsed": False,
+    }
+    if provenance != expected_provenance:
+        raise IndexError(f"v1.2 XCUI candidate provenance differs: {result.get('mappingID')}")
+    if (
+        not attachment.is_file()
+        or sha256_file(attachment) != item["sha256"]
+        or attachment.stat().st_size != item["byteCount"]
+        or not sidecar.is_file()
+        or sha256_file(sidecar) != evidence.get("sha256")
+    ):
+        raise IndexError(f"v1.2 XCUI candidate source binding failed: {result.get('mappingID')}")
+
+
+def validate_v12_xcui_probe_result(
+    capture_root: Path,
+    catalog: Mapping[str, Any],
+    result: Mapping[str, Any],
+    capture: Mapping[str, Any],
+) -> None:
+    source = catalog.get("source")
+    if not isinstance(source, str) or not source.startswith("xcui-"):
+        return
+    evidence = capture.get("xcuiEvidence")
+    if not isinstance(evidence, dict):
+        raise IndexError(f"v1.2 XCUI probe lacks indexed UI evidence: {result.get('probeID')}")
+    probe_items = evidence.get("xcuiProbeEvidence")
+    indexed = {
+        item.get("probeID"): item
+        for item in probe_items
+        if isinstance(item, dict) and isinstance(item.get("probeID"), str)
+    } if isinstance(probe_items, list) else {}
+    item = indexed.get(result.get("probeID"))
+    if not isinstance(item, dict):
+        raise IndexError(f"v1.2 XCUI probe lacks its exact sidecar record: {result.get('probeID')}")
+    for key in ("source", "operator", "expected", "observed"):
+        expected = item.get(key) if key == "observed" else catalog.get(key)
+        if type(result.get(key)) is not type(expected) or result.get(key) != expected:
+            raise IndexError(f"v1.2 XCUI probe {key} differs: {result.get('probeID')}")
+    attachment = (capture_root / item["attachmentName"]).resolve()
+    sidecar = Path(str(evidence.get("path"))).resolve()
+    expected_details = {
+        "xcuiSidecar": str(sidecar),
+        "xcuiSidecarSHA256": evidence.get("sha256"),
+        "sourceTest": evidence.get("sourceTest"),
+        "queryPredicate": item.get("queryPredicate"),
+        "matchCount": item.get("matchCount"),
+        "candidateID": item.get("candidateID"),
+        "attachment": str(attachment),
+        "attachmentSHA256": item.get("attachmentSHA256"),
+        "pixelWidth": item.get("pixelWidth"),
+        "pixelHeight": item.get("pixelHeight"),
+        "coordinateOrigin": item.get("coordinateOrigin"),
+        "coordinateUnits": item.get("coordinateUnits"),
+        "elementFrame": item.get("elementFrame"),
+        "containerFrame": item.get("containerFrame"),
+    }
+    if result.get("observationDetails") != expected_details:
+        raise IndexError(f"v1.2 XCUI probe provenance differs: {result.get('probeID')}")
+    if (
+        not attachment.is_file()
+        or sha256_file(attachment) != item.get("attachmentSHA256")
+        or not sidecar.is_file()
+        or sha256_file(sidecar) != evidence.get("sha256")
+    ):
+        raise IndexError(f"v1.2 XCUI probe source binding failed: {result.get('probeID')}")
+
+
+def validate_v12_comparisons(
+    root: Path,
+    capture_root: Path,
+    captures: list[dict[str, Any]],
+    comparison_index_path: Path,
+    expected_source_sha: str,
+) -> dict[str, Any]:
+    authority_path = root / (
+        "docs/verification/theme-fidelity-v4/authority/v4.2/"
+        "02-COMPARISON-AUTHORITY/Comparison-Authority-v1.2.json"
+    )
+    asset_manifest_path = root / (
+        "docs/verification/theme-fidelity-v4/authority/v4.2/"
+        "03-AUTHORITY-ASSETS/AUTHORITY-ASSET-MANIFEST-v1.2.json"
+    )
+    authority = load_json(authority_path)
+    document = load_json(comparison_index_path)
+    try:
+        _, probe_catalog = load_repository_authority(root)
+    except XCUIEvidenceError as error:
+        raise IndexError(str(error)) from error
+    if not isinstance(authority, dict) or authority.get("schemaVersion") != "1.2":
+        raise IndexError("v1.2 comparison authority is invalid")
+    if not isinstance(document, dict) or document.get("schemaVersion") != "1.2":
+        raise IndexError("v1.2 comparison evidence index is invalid")
+    exact = {
+        "sourceSHA": expected_source_sha,
+        "comparisonAuthoritySHA256": sha256_file(authority_path),
+        "authorityAssetManifestSHA256": sha256_file(asset_manifest_path),
+        "entryCount": 400,
+        "mappingCount": 1104,
+        "passingEntryCount": 400,
+        "passingMappingCount": 1104,
+        "result": "PASS",
+    }
+    for key, expected in exact.items():
+        if document.get(key) != expected:
+            raise IndexError(f"v1.2 comparison evidence {key} differs")
+    entries = document.get("entries")
+    authority_entries = authority.get("entries")
+    if not isinstance(entries, list) or len(entries) != 400:
+        raise IndexError("v1.2 comparison evidence must contain exactly 400 entries")
+    if not isinstance(authority_entries, list) or len(authority_entries) != 400:
+        raise IndexError("v1.2 comparison authority must contain exactly 400 entries")
+    expected_by_id = {entry.get("id"): entry for entry in authority_entries}
+    if len(expected_by_id) != 400 or None in expected_by_id:
+        raise IndexError("v1.2 comparison authority entry IDs are invalid")
+    captures_by_identity = {
+        (capture["themeName"], capture["surface"], DESTINATION_SLUGS[capture["destination"]]): capture
+        for capture in captures
+    }
+    seen_entries: set[str] = set()
+    seen_mappings: set[str] = set()
+    indexed_mappings: list[dict[str, Any]] = []
+    for result in entries:
+        if not isinstance(result, dict):
+            raise IndexError("v1.2 comparison evidence contains an invalid entry")
+        entry_id = result.get("entryID")
+        expected = expected_by_id.get(entry_id)
+        if expected is None or entry_id in seen_entries:
+            raise IndexError(f"v1.2 comparison evidence entry is unexpected: {entry_id!r}")
+        seen_entries.add(entry_id)
+        identity = (expected["theme"], expected["surface"], expected["destination"])
+        capture = captures_by_identity.get(identity)
+        if capture is None:
+            raise IndexError(f"v1.2 comparison evidence lacks a bound capture: {entry_id}")
+        if result.get("result") != "PASS" or result.get("failures") != []:
+            raise IndexError(f"v1.2 comparison entry is failed or pending: {entry_id}")
+        capture_binding = result.get("capture")
+        if not isinstance(capture_binding, dict):
+            raise IndexError(f"v1.2 comparison entry lacks capture provenance: {entry_id}")
+        final_path_value = capture_binding.get("path")
+        if not isinstance(final_path_value, str):
+            raise IndexError(f"v1.2 comparison final capture path is invalid: {entry_id}")
+        final_path = Path(final_path_value).resolve()
+        if (
+            not final_path.is_file()
+            or capture_binding.get("sha256") != capture["pngSHA256"]
+            or sha256_file(final_path) != capture["pngSHA256"]
+        ):
+            raise IndexError(f"v1.2 comparison final capture hash differs: {entry_id}")
+        expected_mapping_ids = {
+            mapping["mappingID"] for mapping in expected.get("referenceMappings", [])
+        }
+        expected_mapping_by_id = {
+            mapping["mappingID"]: mapping
+            for mapping in expected.get("referenceMappings", [])
+        }
+        mapping_results = result.get("mappingResults")
+        if not isinstance(mapping_results, list):
+            raise IndexError(f"v1.2 comparison mapping results are invalid: {entry_id}")
+        actual_mapping_ids = {
+            mapping.get("mappingID") for mapping in mapping_results if isinstance(mapping, dict)
+        }
+        if actual_mapping_ids != expected_mapping_ids or len(mapping_results) != len(expected_mapping_ids):
+            raise IndexError(f"v1.2 comparison mapping coverage differs: {entry_id}")
+        for mapping in mapping_results:
+            mapping_id = mapping["mappingID"]
+            expected_mapping = expected_mapping_by_id[mapping_id]
+            if mapping_id in seen_mappings:
+                raise IndexError(f"v1.2 comparison mapping is reused: {mapping_id}")
+            seen_mappings.add(mapping_id)
+            if mapping.get("result") != "PASS" or mapping.get("failures") != []:
+                raise IndexError(f"v1.2 comparison mapping failed: {mapping_id}")
+            exact_mapping_values = {
+                "sourceSHA": expected_source_sha,
+                "comparisonAuthoritySHA256": sha256_file(authority_path),
+                "authorityAssetManifestSHA256": sha256_file(asset_manifest_path),
+                "scoreDisposition": expected_mapping["scoreDisposition"],
+                "normalizationPolicy": expected_mapping["normalizationPolicy"],
+                "thresholdProfile": expected_mapping["thresholdProfile"],
+                "referenceSHA256": expected_mapping["referenceSHA256"],
+            }
+            for key, expected_value in exact_mapping_values.items():
+                if mapping.get(key) != expected_value:
+                    raise IndexError(f"v1.2 mapping {key} differs: {mapping_id}")
+            validate_v12_xcui_candidate_provenance(
+                capture_root,
+                expected,
+                expected_mapping,
+                mapping,
+                capture,
+            )
+            for path_key, hash_key in (
+                ("report", "reportSHA256"),
+                ("candidate", "candidateSHA256"),
+                ("heatmap", "heatmapSHA256"),
+            ):
+                path_value = mapping.get(path_key)
+                hash_value = mapping.get(hash_key)
+                if path_value is None and hash_value is None:
+                    continue
+                if not isinstance(path_value, str) or not valid_sha256(hash_value):
+                    raise IndexError(f"v1.2 {path_key} provenance is invalid: {mapping_id}")
+                path = Path(path_value).resolve()
+                if (
+                    not is_within(path, comparison_index_path.parent)
+                    or not path.is_file()
+                    or sha256_file(path) != hash_value
+                ):
+                    raise IndexError(f"v1.2 {path_key} hash differs: {mapping_id}")
+            if not isinstance(mapping.get("report"), str):
+                raise IndexError(f"v1.2 mapping report is missing: {mapping_id}")
+            disposition = expected_mapping["scoreDisposition"]
+            if disposition == "negative-invariant":
+                if mapping.get("candidate") is not None or mapping.get("heatmap") is not None:
+                    raise IndexError(f"negative-invariant mapping has image output: {mapping_id}")
+                probe_result = mapping.get("probeResult")
+                if not isinstance(probe_result, dict) or probe_result.get("result") != "PASS":
+                    raise IndexError(f"negative-invariant mapped probe failed: {mapping_id}")
+            else:
+                if not isinstance(mapping.get("candidate"), str):
+                    raise IndexError(f"v1.2 candidate output is missing: {mapping_id}")
+            if disposition == "image-metric":
+                checks = mapping.get("checks")
+                metrics = mapping.get("metrics")
+                if (
+                    not isinstance(mapping.get("heatmap"), str)
+                    or not isinstance(metrics, dict)
+                    or not isinstance(checks, dict)
+                    or not checks
+                    or any(value is not True for value in checks.values())
+                ):
+                    raise IndexError(f"v1.2 image metrics are incomplete or failed: {mapping_id}")
+            else:
+                if mapping.get("heatmap") is not None or mapping.get("heatmapSHA256") is not None:
+                    raise IndexError(f"non-image mapping has a heatmap: {mapping_id}")
+            assertion_results = mapping.get("structuralAssertionResults")
+            expected_assertions = set(expected_mapping.get("structuralAssertionIDs", []))
+            if not isinstance(assertion_results, list):
+                raise IndexError(f"v1.2 mapping structural results are invalid: {mapping_id}")
+            actual_assertions = {
+                assertion.get("assertionID")
+                for assertion in assertion_results if isinstance(assertion, dict)
+            }
+            if (
+                actual_assertions != expected_assertions
+                or len(assertion_results) != len(expected_assertions)
+                or any(
+                    not isinstance(assertion, dict) or assertion.get("result") != "PASS"
+                    for assertion in assertion_results
+                )
+            ):
+                raise IndexError(f"v1.2 mapping structural assertion failed: {mapping_id}")
+            if isinstance(expected_mapping.get("candidateElementID"), str) and any(
+                assertion.get("source") != "xcui-sidecar-raw-query"
+                for assertion in assertion_results
+            ):
+                raise IndexError(
+                    f"v1.2 XCUI mapping structural source differs: {mapping_id}"
+                )
+            indexed_mappings.append(
+                {
+                    "entryID": entry_id,
+                    "mappingID": mapping_id,
+                    "candidateSHA256": mapping.get("candidateSHA256"),
+                    "heatmapSHA256": mapping.get("heatmapSHA256"),
+                }
+            )
+        expected_probe_ids = set(expected.get("runtimeProbeIDs", []))
+        probe_results = result.get("runtimeProbeResults")
+        if not isinstance(probe_results, list):
+            raise IndexError(f"v1.2 runtime probe results are invalid: {entry_id}")
+        actual_probe_ids = {
+            probe.get("probeID") for probe in probe_results if isinstance(probe, dict)
+        }
+        if actual_probe_ids != expected_probe_ids or len(probe_results) != len(expected_probe_ids):
+            raise IndexError(f"v1.2 runtime probe coverage differs: {entry_id}")
+        if any(
+            probe.get("result") != "PASS" or probe.get("failures") != []
+            for probe in probe_results
+        ):
+            raise IndexError(f"v1.2 runtime probe failed: {entry_id}")
+        for probe_result in probe_results:
+            if not isinstance(probe_result, dict):
+                raise IndexError(f"v1.2 runtime probe result is invalid: {entry_id}")
+            probe_id = probe_result.get("probeID")
+            catalog = probe_catalog.get(probe_id) if isinstance(probe_id, str) else None
+            if not isinstance(catalog, dict):
+                raise IndexError(f"v1.2 runtime probe is undeclared: {probe_id!r}")
+            validate_v12_xcui_probe_result(
+                capture_root,
+                catalog,
+                probe_result,
+                capture,
+            )
+        entry_assertion_results = result.get("structuralAssertionResults")
+        expected_entry_assertions = set(expected.get("entryStructuralAssertionIDs", []))
+        if not isinstance(entry_assertion_results, list):
+            raise IndexError(f"v1.2 entry structural results are invalid: {entry_id}")
+        actual_entry_assertions = {
+            assertion.get("assertionID")
+            for assertion in entry_assertion_results if isinstance(assertion, dict)
+        }
+        if (
+            actual_entry_assertions != expected_entry_assertions
+            or len(entry_assertion_results) != len(expected_entry_assertions)
+            or any(
+                not isinstance(assertion, dict)
+                or assertion.get("result") != "PASS"
+                for assertion in entry_assertion_results
+            )
+        ):
+            raise IndexError(f"v1.2 entry structural assertion failed: {entry_id}")
+        if isinstance(capture.get("xcuiEvidence"), dict) and any(
+            assertion.get("source") != "xcui-sidecar-raw-query"
+            for assertion in entry_assertion_results
+        ):
+            raise IndexError(f"v1.2 XCUI entry structural source differs: {entry_id}")
+        capture["comparisonResult"] = "pass"
+    if seen_entries != set(expected_by_id) or len(seen_mappings) != 1104:
+        raise IndexError("v1.2 comparison evidence lacks exact entry/mapping coverage")
+    return {
+        "path": str(comparison_index_path.resolve()),
+        "sha256": sha256_file(comparison_index_path),
+        "authorityManifest": str(authority_path.resolve()),
+        "authorityManifestSHA256": sha256_file(authority_path),
+        "assetManifest": str(asset_manifest_path.resolve()),
+        "assetManifestSHA256": sha256_file(asset_manifest_path),
+        "mappingCount": len(indexed_mappings),
+        "mappings": indexed_mappings,
+    }
+
+
 def build_evidence(arguments: argparse.Namespace) -> dict[str, Any]:
     capture_root = arguments.captures.resolve()
     matrix_path = arguments.matrix.resolve()
@@ -2681,36 +3458,53 @@ def build_evidence(arguments: argparse.Namespace) -> dict[str, Any]:
     current_source = source_manifest(root, [source_exclusion])
     validate_source_manifest_pair(source_after, current_source)
 
+    extraction_report_path = arguments.extraction_report.resolve()
+    extraction_schema = load_json(extraction_report_path).get("schemaVersion")
     captures, dimensions, capture_findings = validate_captures(
         root,
         matrix_path,
         capture_root,
         arguments.phase,
+        require_xcui=extraction_schema == "1.2",
     )
     extraction = validate_extraction_report(
-        arguments.extraction_report.resolve(), capture_root, captures
+        extraction_report_path, capture_root, captures
     )
     toolchain = validate_toolchain_report(arguments.toolchain_report.resolve())
     if Path(extraction["xcresulttool"]).resolve() != Path(
         toolchain["details"]["executables"]["xcresulttool"]["path"]
     ).resolve():
         raise IndexError("extraction xcresulttool differs from the hashed toolchain")
-    if len(arguments.command_log) != 3:
-        raise IndexError("exactly three hosted capture command logs are required")
+    expected_command_log_count = 6 if extraction_schema == "1.2" else 3
+    if len(arguments.command_log) != expected_command_log_count:
+        raise IndexError(
+            f"exactly {expected_command_log_count} capture command logs are required"
+        )
     runtime_findings, command_logs = runtime_diagnostics(arguments.command_log)
     all_findings = capture_findings + runtime_findings
     enforce_final_diagnostics(arguments.phase, runtime_findings, "runtime")
 
     if arguments.phase == "final":
         if arguments.comparison_index is None:
-            raise IndexError("final phase requires a 400-entry comparison index")
-        comparison = validate_final_comparisons(
-            root,
-            capture_root,
-            captures,
-            arguments.comparison_index.resolve(),
-            arguments.authority_manifest.resolve(),
-        )
+            raise IndexError("final phase requires a comparison index")
+        comparison_index_path = arguments.comparison_index.resolve()
+        comparison_document = load_json(comparison_index_path)
+        if comparison_document.get("schemaVersion") == "1.2":
+            comparison = validate_v12_comparisons(
+                root,
+                capture_root,
+                captures,
+                comparison_index_path,
+                source_after["sourceSHA"],
+            )
+        else:
+            comparison = validate_final_comparisons(
+                root,
+                capture_root,
+                captures,
+                comparison_index_path,
+                arguments.authority_manifest.resolve(),
+            )
     else:
         comparison = {
             "required": False,
