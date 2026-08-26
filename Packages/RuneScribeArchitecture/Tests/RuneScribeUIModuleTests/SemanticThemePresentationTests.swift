@@ -291,6 +291,18 @@ final class SemanticThemePresentationTests: XCTestCase {
             XCTAssertTrue(componentSource.contains(identifier), identifier)
         }
         XCTAssertTrue(contentSource.contains("ThemeArtifactPreview("))
+        XCTAssertTrue(
+            componentSource.contains(
+                ".overlay { artifactCanvasAccessibilityElement(page: page) }"
+            )
+        )
+        XCTAssertFalse(componentSource.contains("if maximumCanvasWidth != nil"))
+        XCTAssertTrue(
+            settingsSource.contains(
+                ".themeCaptureViewportIdentifier(\n"
+                    + "                    ThemeCaptureIdentifier.workspacePrimarySurface"
+            )
+        )
         XCTAssertTrue(componentSource.contains("ThemeChromeImage(slot: .panelBorder)"))
         XCTAssertTrue(componentSource.contains("ThemeChromeImage(slot: .tabSelector)"))
         XCTAssertTrue(settingsSource.contains("ThemeCodexCardView("))

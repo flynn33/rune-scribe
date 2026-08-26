@@ -481,16 +481,9 @@ struct ThemeArtifactPreview: View {
     var body: some View {
         VStack(spacing: 8) {
             if hasRequiredImages, let page = currentPage {
-                if maximumCanvasWidth != nil {
-                    artifactCanvas(page: page)
-                        .accessibilityHidden(true)
-                        .overlay { artifactCanvasAccessibilityElement(page: page) }
-                } else {
-                    artifactCanvas(page: page)
-                        .accessibilityIdentifier(artifactCanvasIdentifier)
-                        .runtimeViewportFrameProbe(artifactCanvasIdentifier)
-                        .themeCaptureIdentifier(captureIdentifier)
-                }
+                artifactCanvas(page: page)
+                    .accessibilityHidden(true)
+                    .overlay { artifactCanvasAccessibilityElement(page: page) }
 
                 if plan.pages.count > 1 {
                     HStack {

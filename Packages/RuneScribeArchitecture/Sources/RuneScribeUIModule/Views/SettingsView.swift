@@ -336,7 +336,7 @@ struct SettingsView: View {
                 )
                 .aspectRatio(4.0 / 3.0, contentMode: .fit)
                 .themeCaptureAccessibilityHiddenWhenDisabled()
-                .themeCaptureIdentifier(
+                .themeCaptureViewportIdentifier(
                     ThemeCaptureIdentifier.workspacePrimarySurface
                 )
             }
