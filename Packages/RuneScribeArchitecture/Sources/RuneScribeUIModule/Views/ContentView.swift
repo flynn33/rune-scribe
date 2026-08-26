@@ -521,7 +521,7 @@ struct ContentView: View {
                 .strokeBorder(Color.runeBlue.opacity(0.35), lineWidth: 1)
         )
         .runtimeViewportFrameProbe(initialViewportProbeID)
-        .themeCaptureIdentifier(composeCaptureIdentifier)
+        .themeCaptureViewportIdentifier(composeCaptureIdentifier)
     }
 
     private var composeCaptureIdentifier: String? {

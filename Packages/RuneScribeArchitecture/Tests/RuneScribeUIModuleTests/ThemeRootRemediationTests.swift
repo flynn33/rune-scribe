@@ -83,6 +83,10 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertTrue(content.contains(".frame(minHeight: proxy.size.height, alignment: .top)"))
         XCTAssertTrue(content.contains(".scrollDismissesKeyboard(.immediately)"))
         XCTAssertTrue(content.contains(".scrollBounceBehavior(.basedOnSize)"))
+        XCTAssertTrue(
+            content.contains(".themeCaptureViewportIdentifier(composeCaptureIdentifier)")
+        )
+        XCTAssertFalse(content.contains(".themeCaptureIdentifier(composeCaptureIdentifier)"))
         XCTAssertTrue(content.contains("@FocusState private var inputIsFocused: Bool"))
         XCTAssertTrue(content.contains("ToolbarItemGroup(placement: .keyboard)"))
         XCTAssertTrue(content.contains("Button(\"Done\") { inputIsFocused = false }"))
