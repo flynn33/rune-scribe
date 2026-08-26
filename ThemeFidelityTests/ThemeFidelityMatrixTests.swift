@@ -2106,9 +2106,14 @@ private struct ThemeFidelityRoute {
             warmup = 0.8
         case .shareBuilder:
             let cipher = try requireActiveCipher(session)
+            var catalog = try session.makeShareBuilderCatalog()
+            let originalEffects = catalog.draft.effects
+            catalog.selectEffects(originalEffects == .full ? .reduced : .full)
+            catalog.markCurrentDraftAsDefaults()
+            catalog.selectEffects(originalEffects)
             content = AnyView(ShareBuilderView(
                 source: .cipherInvitation(cipherID: cipher.id, displayName: cipher.label),
-                initialCatalog: try session.makeShareBuilderCatalog(),
+                initialCatalog: catalog,
                 initialViewport: .controls
             ))
             let identifier = "share-builder"

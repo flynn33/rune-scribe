@@ -153,17 +153,20 @@ struct ContentView: View {
     private let initialViewportProbeID: String
     private let initialComposeCaptureLength: ThemeCaptureIdentifier.ComposeLength?
     private let forcesScrollableWorkspaceLayout: Bool
+    private let qualificationViewportWidth: CGFloat?
 
     init(
         initialInputText: String = "",
         initialSettledArtifact: ContentViewSettledArtifactSeed? = nil,
         initialViewportProbeID: String = "workspace.text-frame",
         initialComposeCaptureLength: ThemeCaptureIdentifier.ComposeLength? = nil,
-        forcesScrollableWorkspaceLayout: Bool = false
+        forcesScrollableWorkspaceLayout: Bool = false,
+        qualificationViewportWidth: CGFloat? = nil
     ) {
         self.initialViewportProbeID = initialViewportProbeID
         self.initialComposeCaptureLength = initialComposeCaptureLength
         self.forcesScrollableWorkspaceLayout = forcesScrollableWorkspaceLayout
+        self.qualificationViewportWidth = qualificationViewportWidth
         _inputText = State(initialValue: initialInputText)
         guard let initialSettledArtifact else { return }
         _boxPhase = State(initialValue: .result)
@@ -242,7 +245,7 @@ struct ContentView: View {
             }
         }
         .runeRootFrame()
-        .themeCaptureIdentifier(ThemeCaptureIdentifier.screenWorkspace)
+        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenWorkspace)
         .background { automaticMessageShareLauncher }
         .preferredColorScheme(.dark)
         .sheet(isPresented: $showLibrary) {
@@ -309,15 +312,27 @@ struct ContentView: View {
     private var workspaceBodyContainer: some View {
         if usesScrollableWorkspaceLayout {
             GeometryReader { proxy in
+                #if os(iOS)
+                let viewportWidth: CGFloat? = qualificationViewportWidth ?? proxy.size.width
+                #else
+                let viewportWidth = qualificationViewportWidth
+                #endif
+                let maximumCanvasWidth = viewportWidth.map {
+                    let horizontalLimit = $0 - (2 * RuneMetrics.pad) - 20
+                    let verticalLimit = max(1, proxy.size.height - 24)
+                        * CGFloat(ShareArtifactRenderPlan.outputWidth)
+                        / CGFloat(ShareArtifactRenderPlan.outputHeight)
+                    return max(1, min(horizontalLimit, verticalLimit))
+                }
                 ScrollView {
-                    workspaceBody
+                    workspaceBody(maximumCanvasWidth: maximumCanvasWidth)
                         .frame(minHeight: proxy.size.height, alignment: .top)
                 }
                 .scrollDismissesKeyboard(.immediately)
                 .scrollBounceBehavior(.basedOnSize)
             }
         } else {
-            workspaceBody
+            workspaceBody(maximumCanvasWidth: nil)
         }
     }
 
@@ -325,11 +340,11 @@ struct ContentView: View {
         #if os(iOS)
         forcesScrollableWorkspaceLayout || dynamicTypeSize.isAccessibilitySize
         #else
-        false
+        forcesScrollableWorkspaceLayout
         #endif
     }
 
-    private var workspaceBody: some View {
+    private func workspaceBody(maximumCanvasWidth: CGFloat?) -> some View {
         // Fixed layout — only the content inside `textFrame` changes when
         // converting. Nothing here appears, disappears, or resizes.
         VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
@@ -351,7 +366,7 @@ struct ContentView: View {
             .pickerStyle(.segmented)
             .labelsHidden()
 
-            textFrame
+            textFrame(maximumCanvasWidth: maximumCanvasWidth)
                 .frame(maxHeight: .infinity)
 
             // At least the 46pt button-row height. The transforming-phase
@@ -410,10 +425,10 @@ struct ContentView: View {
             }
         }
         .task { await session.loadActiveThemeCatalogVisuals() }
-        .themeCaptureIdentifier(screenCaptureIdentifier))
+        .themeCaptureViewportIdentifier(screenCaptureIdentifier))
     }
 
-    private var textFrame: some View {
+    private func textFrame(maximumCanvasWidth: CGFloat?) -> some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
                 .fill(Color.runeParchment)
@@ -474,6 +489,7 @@ struct ContentView: View {
                    presentation.revision == presentation.plan.revision {
                     ThemeArtifactPreview(
                         plan: resultArtifactComposition,
+                        maximumCanvasWidth: maximumCanvasWidth,
                         image: { presentation.image(for: $0) }
                     )
                     .padding(10)

@@ -221,7 +221,8 @@ final class RuneScribeUISession: ObservableObject {
         while Date() < deadline {
             if themeSnapshot?.revision == snapshot.revision,
                themeSnapshot?.effectiveCodexID == codexID,
-               activeThemeVisualPresentation?.plan.codexID == codexID
+               activeThemeVisualPresentation?.plan.codexID == codexID,
+               activeThemeVisualPresentation?.revision == themeAdoptionGeneration
             {
                 return
             }

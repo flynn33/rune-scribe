@@ -88,6 +88,7 @@ struct ThemeCodexCardView<Artwork: View>: View {
     let captureIdentifier: String?
     let action: () -> Void
     private let artwork: Artwork
+    @Environment(\.themeCaptureIdentifiersEnabled) private var captureIdentifiersEnabled
 
     init(
         codexID: CodexID,
@@ -170,9 +171,15 @@ struct ThemeCodexCardView<Artwork: View>: View {
         .accessibilityLabel(accessibilityLabel)
         .accessibilityValue(state.rawValue)
         .accessibilityHint(accessibilityHint)
-        .accessibilityIdentifier("\(identifierPrefix).\(codexID.rawValue)")
-        .runtimeViewportFrameProbe("\(identifierPrefix).\(codexID.rawValue)")
-        .themeCaptureIdentifier(captureIdentifier)
+        .accessibilityIdentifier(resolvedAccessibilityIdentifier)
+        .runtimeViewportFrameProbe(resolvedAccessibilityIdentifier)
+    }
+
+    private var resolvedAccessibilityIdentifier: String {
+        if captureIdentifiersEnabled, let captureIdentifier {
+            return captureIdentifier
+        }
+        return "\(identifierPrefix).\(codexID.rawValue)"
     }
 }
 
@@ -184,6 +191,7 @@ struct ThemeArtifactSelectionControl<Artwork: View>: View {
     let allowsNone: Bool
     let action: () -> Void
     private let artwork: Artwork
+    @Environment(\.themeCaptureIdentifiersEnabled) private var captureIdentifiersEnabled
 
     init(
         title: String,
@@ -261,13 +269,18 @@ struct ThemeArtifactSelectionControl<Artwork: View>: View {
         .accessibilityLabel("Selected \(title), \(item?.name ?? (allowsNone ? "None" : "Unavailable"))")
         .accessibilityValue(selectionState)
         .accessibilityHint("Opens the \(title.lowercased()) browser")
-        .accessibilityIdentifier(
-            item.map { "theme.artifact-thumbnail.\($0.id.rawValue)" }
-                ?? "theme.artifact-selection.\(kind.rawValue.lowercased())"
-        )
+        .accessibilityIdentifier(accessibilityIdentifier)
         .runtimeViewportFrameProbe(
             "workspace.artifact-control.\(kind.rawValue.lowercased())"
         )
+    }
+
+    private var accessibilityIdentifier: String {
+        if captureIdentifiersEnabled {
+            return "workspace.artifact-control.\(kind.rawValue.lowercased())"
+        }
+        return item.map { "theme.artifact-thumbnail.\($0.id.rawValue)" }
+            ?? "theme.artifact-selection.\(kind.rawValue.lowercased())"
     }
 
     private var selectionState: String {
@@ -449,39 +462,35 @@ struct ThemeArtifactBrowserView<Artwork: View>: View {
 struct ThemeArtifactPreview: View {
     let plan: ThemeArtifactCompositionPlan
     let captureIdentifier: String?
+    let maximumCanvasWidth: CGFloat?
     let image: (ThemeResourceID) -> Image?
     @State private var pageIndex = 0
 
     init(
         plan: ThemeArtifactCompositionPlan,
         captureIdentifier: String? = nil,
+        maximumCanvasWidth: CGFloat? = nil,
         image: @escaping (ThemeResourceID) -> Image?
     ) {
         self.plan = plan
         self.captureIdentifier = captureIdentifier
+        self.maximumCanvasWidth = maximumCanvasWidth
         self.image = image
     }
 
     var body: some View {
         VStack(spacing: 8) {
             if hasRequiredImages, let page = currentPage {
-                ThemeArtifactCanvas(
-                    plan: plan,
-                    page: page,
-                    context: .interactivePreview,
-                    image: { requiredImage($0) }
-                )
-                .accessibilityIdentifier(
-                    ThemeCaptureIdentifier.artifactPreview(
-                        relicID: plan.selection.relicID
-                    )
-                )
-                .runtimeViewportFrameProbe(
-                    ThemeCaptureIdentifier.artifactPreview(
-                        relicID: plan.selection.relicID
-                    )
-                )
-                .themeCaptureIdentifier(captureIdentifier)
+                if maximumCanvasWidth != nil {
+                    artifactCanvas(page: page)
+                        .accessibilityHidden(true)
+                        .overlay { artifactCanvasAccessibilityElement(page: page) }
+                } else {
+                    artifactCanvas(page: page)
+                        .accessibilityIdentifier(artifactCanvasIdentifier)
+                        .runtimeViewportFrameProbe(artifactCanvasIdentifier)
+                        .themeCaptureIdentifier(captureIdentifier)
+                }
 
                 if plan.pages.count > 1 {
                     HStack {
@@ -513,6 +522,39 @@ struct ThemeArtifactPreview: View {
     private var currentPage: ShareArtifactRenderPage? {
         guard plan.pages.indices.contains(pageIndex) else { return plan.pages.first }
         return plan.pages[pageIndex]
+    }
+
+    private var artifactCanvasIdentifier: String {
+        ThemeCaptureIdentifier.artifactPreview(relicID: plan.selection.relicID)
+    }
+
+    @ViewBuilder
+    private func artifactCanvas(page: ShareArtifactRenderPage) -> some View {
+        let canvas = ThemeArtifactCanvas(
+            plan: plan,
+            page: page,
+            context: .interactivePreview,
+            maximumWidth: maximumCanvasWidth,
+            image: { requiredImage($0) }
+        )
+        canvas
+    }
+
+    private func artifactCanvasAccessibilityElement(
+        page: ShareArtifactRenderPage
+    ) -> some View {
+        return Rectangle()
+            .fill(Color.clear)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(plan.accessibilityLabel))
+            .accessibilityValue(Text(page.inscription))
+            .accessibilityHint(
+                Text("The sender-rendered inscription remains available when its Codex is not.")
+            )
+            .accessibilityIdentifier(artifactCanvasIdentifier)
+            .runtimeViewportFrameProbe(artifactCanvasIdentifier)
+            .themeCaptureIdentifier(captureIdentifier)
+            .allowsHitTesting(false)
     }
 
     private var hasRequiredImages: Bool {

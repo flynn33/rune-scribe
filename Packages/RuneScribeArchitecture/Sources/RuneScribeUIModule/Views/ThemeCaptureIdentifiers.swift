@@ -148,6 +148,59 @@ private struct ThemeCaptureIdentifiersEnabledKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+private struct ThemeCaptureLeafIdentifierWrapper<Content: View>: View {
+    let content: Content
+    let identifier: String?
+    let accessibilityLabel: String
+    let accessibilityValue: String?
+    @Environment(\.themeCaptureIdentifiersEnabled) private var isEnabled
+
+    @ViewBuilder
+    var body: some View {
+        if isEnabled, let identifier {
+            if let accessibilityValue {
+                content
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(accessibilityLabel)
+                    .accessibilityValue(accessibilityValue)
+                    .accessibilityIdentifier(identifier)
+                    .runtimeViewportFrameProbe(identifier)
+            } else {
+                content
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(accessibilityLabel)
+                    .accessibilityIdentifier(identifier)
+                    .runtimeViewportFrameProbe(identifier)
+            }
+        } else {
+            content
+        }
+    }
+}
+
+private struct ThemeCaptureViewportIdentifierWrapper<Content: View>: View {
+    let content: Content
+    let identifier: String?
+    @Environment(\.themeCaptureIdentifiersEnabled) private var isEnabled
+
+    @ViewBuilder
+    var body: some View {
+        if isEnabled, let identifier {
+            content.background {
+                Rectangle()
+                    .fill(Color.clear)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Theme capture viewport")
+                    .accessibilityIdentifier(identifier)
+                    .runtimeViewportFrameProbe(identifier)
+                    .allowsHitTesting(false)
+            }
+        } else {
+            content
+        }
+    }
+}
+
 extension EnvironmentValues {
     var themeCaptureIdentifiersEnabled: Bool {
         get { self[ThemeCaptureIdentifiersEnabledKey.self] }
@@ -172,6 +225,23 @@ private struct ThemeCaptureAccessibilityHiddenWhenDisabled<Content: View>: View 
 extension View {
     func themeCaptureIdentifier(_ identifier: String?) -> some View {
         ThemeCaptureIdentifierWrapper(content: self, identifier: identifier)
+    }
+
+    func themeCaptureViewportIdentifier(_ identifier: String?) -> some View {
+        ThemeCaptureViewportIdentifierWrapper(content: self, identifier: identifier)
+    }
+
+    func themeCaptureLeafIdentifier(
+        _ identifier: String?,
+        accessibilityLabel: String,
+        accessibilityValue: String? = nil
+    ) -> some View {
+        ThemeCaptureLeafIdentifierWrapper(
+            content: self,
+            identifier: identifier,
+            accessibilityLabel: accessibilityLabel,
+            accessibilityValue: accessibilityValue
+        )
     }
 
     func themeCaptureAccessibilityHiddenWhenDisabled() -> some View {

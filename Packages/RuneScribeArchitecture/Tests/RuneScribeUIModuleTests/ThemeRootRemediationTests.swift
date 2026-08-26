@@ -73,6 +73,12 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertTrue(content.contains("private var workspaceBodyContainer"))
         XCTAssertTrue(content.contains("dynamicTypeSize.isAccessibilitySize"))
         XCTAssertTrue(content.contains("GeometryReader { proxy in"))
+        XCTAssertTrue(
+            content.contains(
+                "let viewportWidth: CGFloat? = qualificationViewportWidth ?? proxy.size.width"
+            )
+        )
+        XCTAssertTrue(content.contains("let maximumCanvasWidth = viewportWidth.map"))
         XCTAssertTrue(content.contains("ScrollView {\n                    workspaceBody"))
         XCTAssertTrue(content.contains(".frame(minHeight: proxy.size.height, alignment: .top)"))
         XCTAssertTrue(content.contains(".scrollDismissesKeyboard(.immediately)"))

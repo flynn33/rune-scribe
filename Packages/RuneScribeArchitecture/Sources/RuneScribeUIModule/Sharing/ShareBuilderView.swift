@@ -130,7 +130,7 @@ struct ShareBuilderView: View {
         .onDisappear { endLifecycle() }
         .accessibilityIdentifier("share-builder")
         .runtimeViewportFrameProbe("share-builder")
-        .themeCaptureIdentifier(ThemeCaptureIdentifier.screenShareBuilder)
+        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenShareBuilder)
     }
 
     private func codexPanel(_ catalog: ShareBuilderCatalog) -> some View {

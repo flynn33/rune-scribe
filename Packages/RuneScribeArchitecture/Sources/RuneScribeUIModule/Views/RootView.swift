@@ -83,6 +83,7 @@ enum RootEmergencyThemeWarningPolicy {
 /// the launch splash on a cold start when the 30-day intro schedule allows.
 struct RootView: View {
     @ObservedObject private var session: RuneScribeUISession
+    private let allowsColdLaunchSplash: Bool
     @Environment(\.accessibilityReduceMotion) private var accessibilityReduceMotion
     @Environment(\.colorSchemeContrast) private var colorSchemeContrast
     @Environment(\.runtimeAccessibilityPreferences) private var accessibilityPreferences
@@ -94,8 +95,12 @@ struct RootView: View {
     @State private var isEmergencyThemeWarningDismissed = false
     @State private var showsEmergencyThemeWarningDetails = false
 
-    init(session: RuneScribeUISession) {
+    init(
+        session: RuneScribeUISession,
+        allowsColdLaunchSplash: Bool = true
+    ) {
         self.session = session
+        self.allowsColdLaunchSplash = allowsColdLaunchSplash
         _showSplash = State(initialValue: false)
     }
 
@@ -189,7 +194,7 @@ struct RootView: View {
                 .clipped()
                 .accessibilityIdentifier(rootBackgroundAccessibilityIdentifier)
                 .runtimeViewportFrameProbe(rootBackgroundAccessibilityIdentifier)
-                .themeCaptureIdentifier(rootBackgroundCaptureIdentifier)
+                .themeCaptureViewportIdentifier(rootBackgroundCaptureIdentifier)
         }
         .animation(.easeInOut(duration: 0.25), value: session.isLocked)
         .animation(.easeInOut(duration: 0.2), value: showsEmergencyThemeWarning)
@@ -342,7 +347,8 @@ struct RootView: View {
     }
 
     private func evaluateColdLaunchSplashIfReady() {
-        guard session.runtimePresentationSettingsReady,
+        guard allowsColdLaunchSplash,
+              session.runtimePresentationSettingsReady,
               !didEvaluateColdLaunchSplash
         else { return }
         didEvaluateColdLaunchSplash = true

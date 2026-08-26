@@ -104,7 +104,7 @@ struct ReceivedMessageView: View {
         .runeSheetFrame()
         .runeSemanticPresentationSurface()
         .preferredColorScheme(.dark)
-        .themeCaptureIdentifier(ThemeCaptureIdentifier.screenReceivedCipher)
+        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenReceivedCipher)
     }
 
     private var identityTitle: String {

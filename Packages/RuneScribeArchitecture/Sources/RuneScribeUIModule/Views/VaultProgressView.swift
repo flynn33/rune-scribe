@@ -381,7 +381,7 @@ struct VaultProgressView: View {
         .runeSemanticPresentationSurface()
         .preferredColorScheme(.dark)
         .modifier(VaultProgressFrameModifier())
-        .themeCaptureIdentifier(ThemeCaptureIdentifier.screenVaultProgress)
+        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenVaultProgress)
         .task { await session.loadActiveThemeCatalogVisuals() }
         .alert("Progress Unavailable", isPresented: Binding(
             get: { session.progressionCommandError != nil },
@@ -479,7 +479,10 @@ struct VaultProgressView: View {
                         case .statistics:
                             statistics(snapshot)
                         case .vault:
-                            vault(snapshot)
+                            vault(
+                                snapshot,
+                                viewportHeight: geometry.size.height
+                            )
                         case .archive:
                             archive(snapshot)
                         }
@@ -757,7 +760,10 @@ struct VaultProgressView: View {
         .padding(RuneMetrics.pad)
     }
 
-    private func vault(_ snapshot: ProgressionSnapshotDTO) -> some View {
+    private func vault(
+        _ snapshot: ProgressionSnapshotDTO,
+        viewportHeight: CGFloat
+    ) -> some View {
         let ownedContent = VaultProgressPresentation.ownedContent(from: snapshot.ownership)
         let ownedTitles = snapshot.titles.filter(\.isOwned)
 
@@ -770,7 +776,10 @@ struct VaultProgressView: View {
                 .foregroundColor(.runeSilver)
 
             if let descriptor = session.themeSnapshot?.effectiveTheme {
-                activeCodexCard(descriptor)
+                activeCodexCard(
+                    descriptor,
+                    viewportHeight: viewportHeight
+                )
                 themeCollection(
                     VaultProgressPresentation.themeCatalog(
                         descriptor: descriptor,
@@ -864,10 +873,16 @@ struct VaultProgressView: View {
         }
     }
 
-    private func activeCodexCard(_ descriptor: ThemeDescriptor) -> some View {
+    private func activeCodexCard(
+        _ descriptor: ThemeDescriptor,
+        viewportHeight: CGFloat
+    ) -> some View {
         let runtimeIsAvailable = session.themeSnapshot?.isEmergencyPresentation == false
         let isAvailable = initialCodexCardFixture?.providerIsAvailable
             ?? runtimeIsAvailable
+        let providerPresentation: (text: String, systemImage: String) = isAvailable
+            ? ("Provider available", "checkmark.circle")
+            : ("Provider unavailable; safe presentation in use", "exclamationmark.circle")
         let visualState = initialCodexCardFixture?.visualState
             ?? initialCodexCardState
             ?? (isAvailable ? .selected : .unavailable)
@@ -894,9 +909,12 @@ struct VaultProgressView: View {
                 session.activeThemeVisualPresentation?.plan.selectedFrame?.displayName,
             ].compactMap { $0 }.joined(separator: ", ")
             : ""
+        let qualificationMaximumWidth = initialCodexCardFixture.map { _ in
+            max(1, viewportHeight - 96) * 16 / 9
+        }
         return RunePanel(title: "Active Codex", systemImage: "books.vertical", accent: .runeGold) {
             VStack(alignment: .leading, spacing: 10) {
-                ThemeCodexCardView(
+                let card = ThemeCodexCardView(
                     codexID: descriptor.codex.id,
                     displayName: descriptor.codex.displayName.fallbackValue,
                     summary: descriptor.codex.shortDescription.fallbackValue,
@@ -913,16 +931,20 @@ struct VaultProgressView: View {
                 ) {
                     vaultCodexArtwork(descriptor, state: visualState)
                 }
+                if let qualificationMaximumWidth {
+                    card.frame(maxWidth: qualificationMaximumWidth)
+                } else {
+                    card
+                }
                 Label(
-                    isAvailable ? "Provider available" : "Provider unavailable; safe presentation in use",
-                    systemImage: isAvailable ? "checkmark.circle" : "exclamationmark.circle"
+                    providerPresentation.text,
+                    systemImage: providerPresentation.systemImage
                 )
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(isAvailable ? Color.runeGoldBright : Color.runeWarning)
-                .themeCaptureIdentifier(
-                    ThemeCaptureIdentifier.vaultProviderState(
-                        codexID: descriptor.codex.id
-                    )
+                .themeCaptureLeafIdentifier(
+                    ThemeCaptureIdentifier.vaultProviderState(codexID: descriptor.codex.id),
+                    accessibilityLabel: providerPresentation.text
                 )
                 Label(
                     ownershipPresentation.text,
@@ -932,10 +954,9 @@ struct VaultProgressView: View {
                 .foregroundStyle(
                     ownershipPresentation.isOwned ? Color.runeGoldBright : Color.runeLocked
                 )
-                .themeCaptureIdentifier(
-                    ThemeCaptureIdentifier.vaultOwnershipState(
-                        codexID: descriptor.codex.id
-                    )
+                .themeCaptureLeafIdentifier(
+                    ThemeCaptureIdentifier.vaultOwnershipState(codexID: descriptor.codex.id),
+                    accessibilityLabel: ownershipPresentation.text
                 )
                 Text("Script: \(descriptor.codex.primaryScriptID.rawValue)")
                     .font(.footnote)

@@ -125,7 +125,7 @@ enum ThemeFidelityQualificationRoute {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .ignoresSafeArea()
                         .clipped()
-                        .themeCaptureIdentifier(backgroundIdentifier)
+                        .themeCaptureViewportIdentifier(backgroundIdentifier)
                 }
                 content
                 ThemeFidelityQualificationDiagnosticOverlay(
@@ -186,9 +186,15 @@ enum ThemeFidelityQualificationRoute {
         model: ThemeFidelityQualificationRenderModel,
         session: RuneScribeUISession
     ) throws -> AnyView {
+        let workspaceViewportWidth = qualificationWorkspaceViewportWidth(
+            for: launch.destination
+        )
         switch launch.surface {
         case .workspaceEmpty:
-            return AnyView(RootView(session: session))
+            return AnyView(RootView(
+                session: session,
+                allowsColdLaunchSplash: false
+            ))
         case .composeShort:
             return AnyView(ContentView(
                 initialSettledArtifact: ContentViewSettledArtifactSeed(
@@ -196,7 +202,8 @@ enum ThemeFidelityQualificationRoute {
                     presentation: model.presentation
                 ),
                 initialComposeCaptureLength: .short,
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: workspaceViewportWidth
             ))
         case .composeLong:
             return AnyView(ContentView(
@@ -205,7 +212,8 @@ enum ThemeFidelityQualificationRoute {
                     presentation: model.presentation
                 ),
                 initialComposeCaptureLength: .long,
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: workspaceViewportWidth
             ))
         case .inscriptionPreview:
             return AnyView(ContentView(
@@ -213,7 +221,8 @@ enum ThemeFidelityQualificationRoute {
                     composition: model.previewPlan,
                     presentation: model.presentation
                 ),
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: workspaceViewportWidth
             ))
         case .receivedCipher:
             return AnyView(ReceivedMessageView(pending: try receivedMessage(model: model)))
@@ -221,12 +230,17 @@ enum ThemeFidelityQualificationRoute {
             guard let cipher = session.activeCipher else {
                 throw ThemeFidelityQualificationRouteError.runtimeDidNotSettle
             }
+            var catalog = try session.makeShareBuilderCatalog()
+            let originalEffects = catalog.draft.effects
+            catalog.selectEffects(originalEffects == .full ? .reduced : .full)
+            catalog.markCurrentDraftAsDefaults()
+            catalog.selectEffects(originalEffects)
             return AnyView(ShareBuilderView(
                 source: .cipherInvitation(
                     cipherID: cipher.id,
                     displayName: cipher.label
                 ),
-                initialCatalog: try session.makeShareBuilderCatalog(),
+                initialCatalog: catalog,
                 initialViewport: .controls
             ))
         case .staticShare:
@@ -333,7 +347,8 @@ enum ThemeFidelityQualificationRoute {
                     composition: model.highContrastPlan,
                     presentation: model.presentation
                 ),
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: workspaceViewportWidth
             ))
         case .reduceMotion:
             return AnyView(ContentView(
@@ -341,7 +356,8 @@ enum ThemeFidelityQualificationRoute {
                     composition: model.reduceMotionPlan,
                     presentation: model.presentation
                 ),
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: workspaceViewportWidth
             ))
         case .largeText:
             return AnyView(ContentView(
@@ -349,9 +365,24 @@ enum ThemeFidelityQualificationRoute {
                     composition: model.shortPlan,
                     presentation: model.presentation
                 ),
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: workspaceViewportWidth
             ))
         }
+    }
+
+    private static func qualificationWorkspaceViewportWidth(
+        for destination: ThemeFidelityQualificationLaunch.Destination
+    ) -> CGFloat? {
+        #if os(macOS)
+        switch destination {
+        case .macOSStandard: 720
+        case .macOSResized: 980
+        case .iPhonePortrait, .iPadPortrait: nil
+        }
+        #else
+        nil
+        #endif
     }
 
     private static let receivedCipherID = UUID(
@@ -459,7 +490,7 @@ enum ThemeFidelityQualificationRoute {
                     .scaledToFill()
             }
         }
-        .themeCaptureIdentifier(ThemeCaptureIdentifier.artifactPickerScreen(
+        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.artifactPickerScreen(
             kind: captureKind,
             codexID: model.descriptor.codex.id
         ))
@@ -1260,6 +1291,7 @@ private struct ThemeFidelityQualificationDiagnosticOverlay: View {
                     .accessibilityLabel(witness.label)
                     .accessibilityValue(witness.value)
                     .accessibilityIdentifier(witness.id)
+                    .accessibilityAddTraits(.isStaticText)
             }
             Rectangle()
                 .fill(Color.black.opacity(0.001))
@@ -1268,6 +1300,7 @@ private struct ThemeFidelityQualificationDiagnosticOverlay: View {
                 .accessibilityLabel("Live dynamic type size")
                 .accessibilityValue(dynamicTypeValue)
                 .accessibilityIdentifier("theme-fidelity.diagnostic.dynamic-type")
+                .accessibilityAddTraits(.isStaticText)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .allowsHitTesting(false)

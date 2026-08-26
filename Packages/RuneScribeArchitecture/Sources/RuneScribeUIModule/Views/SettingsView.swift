@@ -66,7 +66,7 @@ struct SettingsView: View {
         .runeSheetFrame()
         .runeSemanticPresentationSurface()
         .preferredColorScheme(.dark)
-        .themeCaptureIdentifier(ThemeCaptureIdentifier.screenSettingsAppearance)
+        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenSettingsAppearance)
         .sheet(item: $pinFlow) { mode in
             PINFlowView(mode: mode)
         }

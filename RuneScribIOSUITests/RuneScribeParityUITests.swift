@@ -249,6 +249,10 @@ final class RuneScribeParityUITests: XCTestCase {
         ].firstMatch
         XCTAssertTrue(preview.waitForExistence(timeout: 10), app.debugDescription)
         XCTAssertTrue(relicPreview.waitForExistence(timeout: 10), app.debugDescription)
+        assertFourByThree(relicPreview)
+        assertHorizontallyContained(relicPreview, in: viewportBounds)
+        XCTAssertGreaterThanOrEqual(relicPreview.frame.minY, viewportBounds.minY - 1)
+        XCTAssertLessThanOrEqual(relicPreview.frame.maxY, viewportBounds.maxY + 1)
         let resultElements = [
             app.buttons["Edit"],
             app.buttons["Copy Runes"],
@@ -1015,12 +1019,31 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(encodeButton.isHittable, app.debugDescription)
         encodeButton.tap()
 
-        let customizeShare = app.buttons["message.customize-share"]
-        XCTAssertTrue(customizeShare.waitForExistence(timeout: 12), app.debugDescription)
         let unlockDismiss = app.buttons["Dismiss"]
         if unlockDismiss.waitForExistence(timeout: 2), unlockDismiss.isHittable {
             unlockDismiss.tap()
         }
+
+        let workspacePreview = app.descendants(matching: .any)[
+            "theme.artifact-preview.relic.norse.runestone-tablet"
+        ].firstMatch
+        XCTAssertTrue(workspacePreview.waitForExistence(timeout: 8), app.debugDescription)
+        let workspacePreviewScrollFrame = try XCTUnwrap(
+            scrollUntilContained(workspacePreview, in: app)
+        )
+        assertFourByThree(workspacePreview)
+        assertHorizontallyContained(workspacePreview, in: window.frame)
+        XCTAssertGreaterThanOrEqual(
+            workspacePreview.frame.minY,
+            workspacePreviewScrollFrame.minY - 1
+        )
+        XCTAssertLessThanOrEqual(
+            workspacePreview.frame.maxY,
+            workspacePreviewScrollFrame.maxY + 1
+        )
+
+        let customizeShare = app.buttons["message.customize-share"]
+        XCTAssertTrue(customizeShare.waitForExistence(timeout: 12), app.debugDescription)
         scrollUntilVisible(customizeShare, in: app)
         XCTAssertTrue(customizeShare.isHittable, app.debugDescription)
         customizeShare.tap()
@@ -1050,6 +1073,62 @@ final class RuneScribeParityUITests: XCTestCase {
         )
         try auditAccessibility(in: app)
         keepScreenshot(app, named: "iphone-accessibility5-high-contrast-share-builder")
+    }
+
+    func testAccessibility5WorkspacePreviewFitsIPadViewport() throws {
+        let app = XCUIApplication()
+        app.launchEnvironment["RUNESCRIBE_QUALIFICATION_ACCESSIBILITY"] =
+            "accessibility5-high-contrast-reduced-motion"
+        app.launch()
+
+        let skipIntro = app.buttons["Skip intro"]
+        if skipIntro.waitForExistence(timeout: 12) {
+            skipIntro.tap()
+        }
+
+        let window = app.windows.firstMatch
+        XCTAssertTrue(window.waitForExistence(timeout: 8), app.debugDescription)
+        guard window.frame.width >= 700 else {
+            throw XCTSkip("The iPad accessibility workspace is qualified on iPad.")
+        }
+
+        let editor = app.textViews.matching(
+            NSPredicate(format: "label == %@", "Message to encode")
+        ).firstMatch
+        let encodeButton = app.buttons["RUNE SCRIBE"]
+        XCTAssertTrue(editor.waitForExistence(timeout: 8), app.debugDescription)
+        XCTAssertTrue(encodeButton.waitForExistence(timeout: 8), app.debugDescription)
+        editor.tap()
+        editor.typeText("Accessible iPad preview")
+
+        let workspaceDone = app.buttons["workspace.keyboard.done"]
+        XCTAssertTrue(workspaceDone.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(workspaceDone.isHittable, app.debugDescription)
+        workspaceDone.tap()
+        XCTAssertTrue(
+            app.keyboards.firstMatch.waitForNonExistence(timeout: 5),
+            app.debugDescription
+        )
+
+        scrollUntilVisible(encodeButton, in: app)
+        XCTAssertTrue(encodeButton.isHittable, app.debugDescription)
+        encodeButton.tap()
+
+        let unlockDismiss = app.buttons["Dismiss"]
+        if unlockDismiss.waitForExistence(timeout: 2), unlockDismiss.isHittable {
+            unlockDismiss.tap()
+        }
+
+        let preview = app.descendants(matching: .any)[
+            "theme.artifact-preview.relic.norse.runestone-tablet"
+        ].firstMatch
+        XCTAssertTrue(preview.waitForExistence(timeout: 12), app.debugDescription)
+        let scrollFrame = try XCTUnwrap(scrollUntilContained(preview, in: app))
+        assertFourByThree(preview)
+        assertHorizontallyContained(preview, in: window.frame)
+        XCTAssertGreaterThanOrEqual(preview.frame.minY, scrollFrame.minY - 1)
+        XCTAssertLessThanOrEqual(preview.frame.maxY, scrollFrame.maxY + 1)
+        keepScreenshot(app, named: "ipad-accessibility5-workspace-preview")
     }
 
     private func assertShareBuilder(
@@ -1464,6 +1543,37 @@ final class RuneScribeParityUITests: XCTestCase {
                 scrollSurface.swipeUp(velocity: .slow)
             }
         }
+    }
+
+    private func scrollUntilContained(
+        _ element: XCUIElement,
+        in app: XCUIApplication
+    ) -> CGRect? {
+        guard element.exists, !element.identifier.isEmpty else { return nil }
+        let containingScrollViews = app.scrollViews.allElementsBoundByIndex.filter {
+            $0.exists
+                && $0.descendants(matching: .any)
+                    .matching(identifier: element.identifier).count == 1
+        }
+        guard let scrollSurface = containingScrollViews.max(by: {
+            $0.frame.height < $1.frame.height
+        }) else { return nil }
+
+        let permittedFrame = scrollSurface.frame.insetBy(dx: -1, dy: -1)
+        for _ in 0..<12 {
+            let elementFrame = element.frame
+            if permittedFrame.contains(elementFrame) {
+                return scrollSurface.frame
+            }
+            if elementFrame.minY < permittedFrame.minY {
+                scrollSurface.swipeDown(velocity: .slow)
+            } else if elementFrame.maxY > permittedFrame.maxY {
+                scrollSurface.swipeUp(velocity: .slow)
+            } else {
+                return scrollSurface.frame
+            }
+        }
+        return scrollSurface.frame
     }
 
     private func auditAccessibility(in app: XCUIApplication) throws {

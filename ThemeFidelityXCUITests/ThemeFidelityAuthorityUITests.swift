@@ -633,6 +633,72 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
         return String(describing: raw)
     }
 
+    private func preferredScrollView(
+        in app: XCUIApplication,
+        intersecting element: XCUIElement? = nil
+    ) -> XCUIElement? {
+        let candidates = app.scrollViews.allElementsBoundByIndex.filter(\.exists)
+        guard !candidates.isEmpty else { return nil }
+        if let element, element.exists {
+            let containingCandidates = candidates.filter {
+                elementIsDescendant(element, of: $0)
+            }
+            if let candidate = containingCandidates.max(by: {
+                $0.frame.height < $1.frame.height
+            }) {
+                return candidate
+            }
+            let elementFrame = element.frame
+            let intersectingCandidates = candidates.filter {
+                $0.frame.intersects(elementFrame)
+            }
+            if let candidate = intersectingCandidates.max(by: {
+                $0.frame.height < $1.frame.height
+            }) {
+                return candidate
+            }
+        }
+        return candidates.max(by: { $0.frame.height < $1.frame.height })
+    }
+
+    private func elementIsDescendant(
+        _ element: XCUIElement,
+        of ancestor: XCUIElement
+    ) -> Bool {
+        let identifier = element.identifier
+        guard !identifier.isEmpty else { return false }
+        return ancestor.descendants(matching: .any)
+            .matching(identifier: identifier).count == 1
+    }
+
+    private func scroll(
+        _ scrollView: XCUIElement,
+        towardStart: Bool,
+        distance: CGFloat? = nil
+    ) {
+        #if os(macOS)
+        let coordinate = scrollView.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)
+        )
+        let magnitude: CGFloat
+        if let distance {
+            magnitude = min(max(distance, 1), 600)
+        } else {
+            magnitude = 600
+        }
+        coordinate.scroll(
+            byDeltaX: 0,
+            deltaY: towardStart ? magnitude : -magnitude
+        )
+        #else
+        if towardStart {
+            scrollView.swipeDown()
+        } else {
+            scrollView.swipeUp()
+        }
+        #endif
+    }
+
     private func waitForQualificationReadiness(
         entry: AuthorityEntry,
         seed: DeterministicSeed,
@@ -696,12 +762,11 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
         let query = app.descendants(matching: .any).matching(identifier: identifier)
         let element = query.firstMatch
         if !element.waitForExistence(timeout: min(timeout, 4)) {
-            let scrollView = app.scrollViews.firstMatch
-            if scrollView.exists {
-                for _ in 0..<8 { scrollView.swipeDown() }
+            if let scrollView = preferredScrollView(in: app) {
+                for _ in 0..<8 { scroll(scrollView, towardStart: true) }
                 let deadline = Date().addingTimeInterval(max(0, timeout - 4))
                 while Date() < deadline, !element.exists {
-                    scrollView.swipeUp()
+                    scroll(scrollView, towardStart: false)
                     settle(for: 0.15)
                 }
             }
@@ -723,27 +788,59 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
         in app: XCUIApplication,
         container: CGRect
     ) throws {
-        let permittedContainer = container.insetBy(dx: -0.5, dy: -0.5)
+        let baseContainer = container.insetBy(dx: -0.5, dy: -0.5)
+        let scrollView = preferredScrollView(in: app, intersecting: element)
+        let belongsToScrollView = scrollView.map {
+            elementIsDescendant(element, of: $0)
+        } ?? false
+        let permittedContainer: CGRect
+        if let scrollView, belongsToScrollView {
+            let scrollViewport = container.intersection(scrollView.frame)
+            try require(
+                !scrollViewport.isNull && scrollViewport.width > 0 && scrollViewport.height > 0,
+                "Scroll viewport does not intersect its evidence container: "
+                    + "\(element.identifier); scroll=\(scrollView.frame); "
+                    + "container=\(baseContainer)"
+            )
+            permittedContainer = scrollViewport.insetBy(dx: -0.5, dy: -0.5)
+        } else {
+            permittedContainer = baseContainer
+        }
         guard !permittedContainer.contains(element.frame) else { return }
-        let scrollView = app.scrollViews.firstMatch
-        guard scrollView.exists else {
+        guard let scrollView, belongsToScrollView else {
             throw CaptureFailure(
-                "Exact element is outside its container and no scroll view exists: \(element.identifier)"
+                "Exact element is outside its container and has no containing scroll view: "
+                    + "\(element.identifier); element=\(element.frame); "
+                    + "container=\(permittedContainer)"
             )
         }
         for _ in 0..<16 {
             let frame = element.frame
             if permittedContainer.contains(frame) { return }
+            let alignmentInset = min(
+                8,
+                max(0, (permittedContainer.height - frame.height) / 2)
+            )
             if frame.minY < permittedContainer.minY {
-                scrollView.swipeDown()
+                scroll(
+                    scrollView,
+                    towardStart: true,
+                    distance: permittedContainer.minY - frame.minY + alignmentInset
+                )
             } else {
-                scrollView.swipeUp()
+                scroll(
+                    scrollView,
+                    towardStart: false,
+                    distance: frame.maxY - permittedContainer.maxY + alignmentInset
+                )
             }
             settle(for: 0.15)
         }
         try require(
             permittedContainer.contains(element.frame),
-            "Exact element remained partially outside its container: \(element.identifier)"
+            "Exact element remained partially outside its container: "
+                + "\(element.identifier); element=\(element.frame); "
+                + "container=\(permittedContainer)"
         )
     }
 

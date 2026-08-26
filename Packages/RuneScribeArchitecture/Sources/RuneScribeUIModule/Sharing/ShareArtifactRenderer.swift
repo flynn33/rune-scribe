@@ -740,7 +740,22 @@ struct ThemeArtifactCanvas: View {
     let plan: ThemeArtifactCompositionPlan
     let page: ShareArtifactRenderPage
     let context: ThemeArtifactCanvasContext
+    let maximumWidth: CGFloat?
     let image: (ThemeResourceID) -> Image
+
+    init(
+        plan: ThemeArtifactCompositionPlan,
+        page: ShareArtifactRenderPage,
+        context: ThemeArtifactCanvasContext,
+        maximumWidth: CGFloat? = nil,
+        image: @escaping (ThemeResourceID) -> Image
+    ) {
+        self.plan = plan
+        self.page = page
+        self.context = context
+        self.maximumWidth = maximumWidth
+        self.image = image
+    }
 
     var body: some View {
         GeometryReader { geometry in
@@ -844,6 +859,7 @@ struct ThemeArtifactCanvas: View {
             .grayscale(plan.colorMode == .monochrome ? 1 : 0)
         }
         .modifier(ThemeArtifactCanvasSizing(context: context))
+        .modifier(ThemeArtifactCanvasMaximumWidth(maximumWidth: maximumWidth))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(plan.accessibilityLabel))
         .accessibilityValue(Text(page.inscription))
@@ -930,6 +946,24 @@ private struct ThemeArtifactCanvasSizing: ViewModifier {
                 width: CGFloat(ShareArtifactRenderPlan.outputWidth),
                 height: CGFloat(ShareArtifactRenderPlan.outputHeight)
             )
+        }
+    }
+}
+
+private struct ThemeArtifactCanvasMaximumWidth: ViewModifier {
+    let maximumWidth: CGFloat?
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if let maximumWidth {
+            content.frame(
+                width: maximumWidth,
+                height: maximumWidth
+                    * CGFloat(ShareArtifactRenderPlan.outputHeight)
+                    / CGFloat(ShareArtifactRenderPlan.outputWidth)
+            )
+        } else {
+            content
         }
     }
 }
