@@ -1598,19 +1598,15 @@ private final class ThemeFidelityRuntimeFixture {
     }
 
     func select(_ theme: ThemeFidelityTheme) async throws {
-        var snapshot = try await themeClient.snapshot()
-        if snapshot.effectiveCodexID != theme.codexID {
-            snapshot = try await themeClient.selectCodex(
-                SelectThemeCodexCommand(
-                    codexID: theme.codexID,
-                    expectedSnapshotRevision: snapshot.revision
-                )
-            )
-        }
+        try await session.prepareQualificationTheme(codexID: theme.codexID)
+        let snapshot = try await themeClient.snapshot()
         guard snapshot.effectiveCodexID == theme.codexID,
               await Self.eventually({
                   self.session.themeSnapshot?.effectiveCodexID == theme.codexID
-                      && self.session.activeThemeVisualPresentation?.plan.codexID == theme.codexID
+                      && self.session.activeThemeVisualPresentation?.plan.codexID
+                          == theme.codexID
+                      && self.session.activeThemeVisualPresentation?.revision
+                          == self.session.activeThemeVisualPresentation?.plan.revision
               })
         else { throw ThemeFidelityCaptureError.runtimeDidNotSettle }
         await session.loadActiveThemeCatalogVisuals()
@@ -1678,6 +1674,7 @@ private final class ThemeFidelityRuntimeFixture {
                 \.runtimeAccessibilityPreferences,
                 RuntimeAccessibilityPreferences(forcesReduceMotion: true)
             )
+            .environment(\.themeCaptureIdentifiersEnabled, true)
             .preferredColorScheme(.dark)
         )
         return ThemeFidelityLockedCodexFixture(

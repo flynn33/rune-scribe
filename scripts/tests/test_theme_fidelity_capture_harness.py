@@ -275,6 +275,7 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
             self.assertNotIn("CODE_SIGNING_ALLOWED=NO", command)
             self.assertEqual(command[:2], ["xcodebuild", "test"])
             self.assertIn("RUNESCRIBE_THEME_FIDELITY_PHASE=baseline", command)
+            self.assertEqual(command.count("ENABLE_TESTABILITY=YES"), 1)
         with self.assertRaisesRegex(capture_runner.CaptureError, "phase"):
             capture_runner.hosted_capture_jobs(
                 "unknown",

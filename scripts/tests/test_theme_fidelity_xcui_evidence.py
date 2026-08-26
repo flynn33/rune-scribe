@@ -842,6 +842,10 @@ class ThemeFidelityXCUIEvidenceTests(unittest.TestCase):
         for label, command in jobs:
             with self.subTest(job=label):
                 self.assertEqual(command[command.index("-configuration") + 1], "Release")
+                if label.endswith("-xcui"):
+                    self.assertNotIn("ENABLE_TESTABILITY=YES", command)
+                else:
+                    self.assertEqual(command.count("ENABLE_TESTABILITY=YES"), 1)
         schemes = {
             label: command[command.index("-scheme") + 1]
             for label, command in jobs

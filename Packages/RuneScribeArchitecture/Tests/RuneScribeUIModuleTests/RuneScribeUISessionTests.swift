@@ -9,7 +9,7 @@ import RuneScribeThemeGloamthornModule
 import RuneScribeTestSupport
 import RuneScribeThemeCoordinatorModule
 @testable import RuneScribeUIModule
-import RuneScribeUIRuntime
+@testable import RuneScribeUIRuntime
 import SwiftUI
 import XCTest
 
@@ -1188,6 +1188,11 @@ final class RuneScribeUISessionTests: XCTestCase {
                 && session.snapshot?.revision == 38
         }
         XCTAssertTrue(settingsReady)
+        XCTAssertEqual(
+            session.activeThemeVisualPresentation?.revision,
+            catalogLoaded.revision,
+            "Replaying the already committed coordinator snapshot must not rebind resources"
+        )
         let preArtifactRevision = catalogLoaded.revision
         let coordinatorRevision = session.themeSnapshot?.revision
         let ravenshield = try XCTUnwrap(ArtifactID(rawValue: "seal.norse.ravenshield"))
@@ -1205,6 +1210,30 @@ final class RuneScribeUISessionTests: XCTestCase {
         }
         XCTAssertTrue(artifactAdopted)
         XCTAssertEqual(session.themeSnapshot?.revision, coordinatorRevision)
+        let artifactPresentation = try XCTUnwrap(session.activeThemeVisualPresentation)
+        do {
+            var observedShareResources: [RuntimeThemeRenderedResourceIdentity] = []
+            session.resourcePresentation.beginRenderedResourceObservation {
+                observedShareResources.append($0)
+            }
+            defer { session.resourcePresentation.endRenderedResourceObservation() }
+            _ = try await session.makeOutboundSharePresentation(
+                inscription: "ᚱᚢᚾᛖ",
+                accessibilityLabel: "Rebound Norse visual adoption proof",
+                operationID: RuntimeOperationID(
+                    rawValue: "share.render.norse-proof.rebound-authority"
+                ),
+                capturedAt: Date(timeIntervalSince1970: 1_700_000_000)
+            )
+            XCTAssertFalse(observedShareResources.isEmpty)
+            XCTAssertEqual(
+                Set(observedShareResources.map(\.contentRevision)),
+                [artifactPresentation.revision]
+            )
+            XCTAssertTrue(observedShareResources.allSatisfy {
+                $0.codexID == artifactPresentation.plan.codexID
+            })
+        }
 
         try await runtime.reconcileEntitlements(
             ProgressionEntitlementSnapshotDTO(
@@ -1223,6 +1252,39 @@ final class RuneScribeUISessionTests: XCTestCase {
             }) == true
         }
         XCTAssertTrue(providerAvailable)
+        let inactiveCatalog = try await session.loadShareBuilderCatalog(
+            codexID: RuneScribeThemeGloamthornModuleBootstrap.codexID
+        )
+        let inactiveSnapshotRevision = try XCTUnwrap(session.themeSnapshot).revision
+        XCTAssertNotEqual(
+            session.activeThemeVisualPresentation?.revision,
+            inactiveSnapshotRevision
+        )
+        do {
+            var observedShareResources: [RuntimeThemeRenderedResourceIdentity] = []
+            session.resourcePresentation.beginRenderedResourceObservation {
+                observedShareResources.append($0)
+            }
+            defer { session.resourcePresentation.endRenderedResourceObservation() }
+            _ = try await session.makeOutboundSharePresentation(
+                inscription: "ᚱᚢᚾᛖ",
+                accessibilityLabel: "Inactive Gloamthorn authority proof",
+                operationID: RuntimeOperationID(
+                    rawValue: "share.render.gloamthorn-proof.inactive-authority"
+                ),
+                capturedAt: Date(timeIntervalSince1970: 1_700_000_000),
+                selection: try inactiveCatalog.validatedSelection(),
+                descriptor: inactiveCatalog.descriptor
+            )
+            XCTAssertFalse(observedShareResources.isEmpty)
+            XCTAssertEqual(
+                Set(observedShareResources.map(\.contentRevision)),
+                [inactiveSnapshotRevision]
+            )
+            XCTAssertTrue(observedShareResources.allSatisfy {
+                $0.codexID == RuneScribeThemeGloamthornModuleBootstrap.codexID
+            })
+        }
 
         await session.selectCodex(RuneScribeThemeGloamthornModuleBootstrap.codexID)
         await session.selectCodex(RuneScribeCodexIDs.norse)

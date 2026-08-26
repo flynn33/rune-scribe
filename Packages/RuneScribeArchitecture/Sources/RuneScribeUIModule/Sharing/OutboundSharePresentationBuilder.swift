@@ -153,6 +153,7 @@ extension RuneScribeUISession {
         guard let provider = snapshot.providers.first(where: {
             $0.codexID == descriptor.codex.id
         }) else { throw ShareArtifactRenderError.unavailableSelection }
+        let usesActiveVisualAuthority = descriptor.codex.id == snapshot.effectiveCodexID
         let selection = if let requestedSelection {
             try requestedSelectionValidated(
                 requestedSelection,
@@ -190,6 +191,10 @@ extension RuneScribeUISession {
             descriptor: descriptor
         )
         var resourceData: [ThemeResourceID: Data] = [:]
+        var resolvedImageResources: [(
+            metadata: SharePresentationResourceMetadata,
+            resolved: ResolvedThemeResourceDTO
+        )] = []
         var imageReferences: [ThemeResourceID: RuntimeThemeImageReference] = [:]
         for resource in plan.resourceMetadata {
             try Task.checkCancellation()
@@ -214,22 +219,7 @@ extension RuneScribeUISession {
             )
             switch resource.mediaType {
             case .png, .heif, .pdf:
-                do {
-                    imageReferences[resource.resourceID] = try resourcePresentation
-                        .makeThemeImageReference(
-                            resolvedResource: resolved,
-                            expectedInventory: SharePresentationProviderResourceInventory(
-                                metadata: resource
-                            ),
-                            expectedCodexID: descriptor.codex.id,
-                            contentRevision: snapshot.revision
-                        )
-                } catch {
-                    throw Self.outboundShareImageReferenceError(
-                        for: resource.resourceID,
-                        underlying: error
-                    )
-                }
+                resolvedImageResources.append((resource, resolved))
             case .ttf, .otf:
                 resourceData[resource.resourceID] = resolved.data
             case .json, .mp4, .quickTime, .m4a, .caf, .wav:
@@ -239,11 +229,40 @@ extension RuneScribeUISession {
         try Task.checkCancellation()
         guard themeSnapshot?.revision == snapshot.revision
         else { throw ShareArtifactRenderError.unavailableSelection }
+        let contentRevision: UInt64
+        if usesActiveVisualAuthority {
+            guard let active = activeThemeVisualPresentation,
+                  active.plan.themeID == descriptor.id,
+                  active.plan.codexID == descriptor.codex.id,
+                  active.plan.revision == active.revision
+            else { throw ShareArtifactRenderError.unavailableSelection }
+            contentRevision = active.revision
+        } else {
+            contentRevision = snapshot.revision
+        }
+        for (resource, resolved) in resolvedImageResources {
+            do {
+                imageReferences[resource.resourceID] = try resourcePresentation
+                    .makeThemeImageReference(
+                        resolvedResource: resolved,
+                        expectedInventory: SharePresentationProviderResourceInventory(
+                            metadata: resource
+                        ),
+                        expectedCodexID: descriptor.codex.id,
+                        contentRevision: contentRevision
+                    )
+            } catch {
+                throw Self.outboundShareImageReferenceError(
+                    for: resource.resourceID,
+                    underlying: error
+                )
+            }
+        }
         let output = try ShareArtifactStaticRenderer.render(
             plan: plan,
             resourceData: resourceData,
             imageReferences: imageReferences,
-            contentRevision: snapshot.revision
+            contentRevision: contentRevision
         )
         let provenance = try outboundProvenance(
             descriptor: descriptor,

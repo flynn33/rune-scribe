@@ -631,6 +631,11 @@ final class RuneScribeUISession: ObservableObject {
 
     private func adoptTheme(_ nextSnapshot: ThemeCoordinatorSnapshotDTO) {
         latestThemeCoordinatorRevision = nextSnapshot.revision
+        if themeSnapshot == nextSnapshot,
+           activeThemeVisualPresentation?.plan.codexID == nextSnapshot.effectiveCodexID
+        {
+            return
+        }
         scheduleThemeResourceAdoption(nextSnapshot)
     }
 

@@ -326,6 +326,7 @@ def hosted_capture_jobs(
         "-parallel-testing-enabled",
         "NO",
         f"RUNESCRIBE_THEME_FIDELITY_PHASE={phase}",
+        "ENABLE_TESTABILITY=YES",
     ]
     return [
         (
