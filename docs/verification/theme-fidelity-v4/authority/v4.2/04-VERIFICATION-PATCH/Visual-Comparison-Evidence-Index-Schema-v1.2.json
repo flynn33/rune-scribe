@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "runescribe.theme-fidelity.visual-comparison-index.schema.v1.2",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "sourceSHA",
+    "entryCount",
+    "mappingCount",
+    "entries"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.2"
+    },
+    "sourceSHA": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "entryCount": {
+      "const": 400
+    },
+    "mappingCount": {
+      "const": 1104
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 400,
+      "maxItems": 400
+    }
+  }
+}

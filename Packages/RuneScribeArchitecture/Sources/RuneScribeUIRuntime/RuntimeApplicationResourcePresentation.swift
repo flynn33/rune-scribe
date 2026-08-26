@@ -1044,14 +1044,23 @@ private struct RuntimeThemeExpectedImageIdentity {
         integrity = reference.integrity
     }
 
-    init(inventory: SharePresentationProviderResourceInventory) throws {
+    init(
+        inventory: SharePresentationProviderResourceInventory,
+        resolvedIntegrity: ThemeResourceIntegrity
+    ) throws {
         resourceID = inventory.resourceID
         role = inventory.role
         mediaType = inventory.mediaType
+        // Provider inventories omit PDF page dimensions by contract. Preserve
+        // the admitted provider resource's dimensions so vector decoding can
+        // still prove the complete local resource identity.
+        let pixelSize = inventory.mediaType == .pdf
+            ? resolvedIntegrity.pixelSize
+            : inventory.pixelSize
         integrity = try ThemeResourceIntegrity(
             sha256: inventory.sha256,
             byteLength: inventory.byteLength,
-            pixelSize: inventory.pixelSize
+            pixelSize: pixelSize
         )
     }
 }
@@ -1074,6 +1083,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
     @Published internal private(set) var metalResource: RuntimeMetalResource?
     @Published internal private(set) var themeBackgroundRevision: UInt64 = 0
     @Published internal private(set) var themeEffectsPreference: RuntimeEffectsPreference = .full
+    @Published internal private(set) var activeThemeAnimationCount = 0
 
     private var splashLease: RuntimeApplicationResourceLease?
     private var metalLease: RuntimeApplicationResourceLease?
@@ -1083,6 +1093,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
     private var splashEndObserver: RuntimeNotificationObserver?
     private var splashFinishCallback: (@MainActor () -> Void)?
     private var themeBackgroundConfiguration: RuntimeThemeBackgroundConfiguration?
+    private var activeThemeAnimationIdentities = Set<RuntimeMetalSurfaceIdentity>()
     private var splashIsStarting = false
     private var metalIsStarting = false
     private var splashDidFinish = false
@@ -1174,7 +1185,8 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         let expected: RuntimeThemeExpectedImageIdentity
         do {
             expected = try RuntimeThemeExpectedImageIdentity(
-                inventory: expectedInventory
+                inventory: expectedInventory,
+                resolvedIntegrity: resolvedResource.integrity
             )
         } catch {
             throw RuntimeThemeImageReferenceError.integrityMismatch
@@ -1407,6 +1419,8 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         themeBackgroundConfiguration = nil
         themeBackgroundRevision &+= 1
         decodedResourceCache.release(releasedHandles)
+        activeThemeAnimationIdentities.removeAll()
+        activeThemeAnimationCount = 0
         stopMetal()
     }
 
@@ -1418,6 +1432,8 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         themeBackgroundConfiguration = nil
         themeBackgroundRevision &+= 1
         decodedResourceCache.release(releasedHandles)
+        activeThemeAnimationIdentities.removeAll()
+        activeThemeAnimationCount = 0
         let splashLease = clearSplashPresentation()
         let metalLease = clearMetalPresentation()
         await splashLease?.close()
@@ -1546,6 +1562,16 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
             return .animated
         }
         return .staticBase
+    }
+
+    fileprivate func themeAnimationDidAppear(_ identity: RuntimeMetalSurfaceIdentity) {
+        guard activeThemeAnimationIdentities.insert(identity).inserted else { return }
+        activeThemeAnimationCount = activeThemeAnimationIdentities.count
+    }
+
+    fileprivate func themeAnimationDidDisappear(_ identity: RuntimeMetalSurfaceIdentity) {
+        guard activeThemeAnimationIdentities.remove(identity) != nil else { return }
+        activeThemeAnimationCount = activeThemeAnimationIdentities.count
     }
 
     func finishSplash() {
@@ -1904,16 +1930,17 @@ private struct RuntimeMetalPresentationView: View {
         case .animated:
             if let parameters = presentation.themeBackgroundParameters,
                let resource = presentation.metalResource {
+                let identity = RuntimeMetalSurfaceIdentity(
+                    resource: ObjectIdentifier(resource),
+                    revision: presentation.themeBackgroundRevision
+                )
                 RuntimeMetalSurface(
                     resource: resource,
                     parameters: parameters
                 )
-                .id(
-                    RuntimeMetalSurfaceIdentity(
-                        resource: ObjectIdentifier(resource),
-                        revision: presentation.themeBackgroundRevision
-                    )
-                )
+                .id(identity)
+                .onAppear { presentation.themeAnimationDidAppear(identity) }
+                .onDisappear { presentation.themeAnimationDidDisappear(identity) }
             } else {
                 RuntimeThemeBackgroundFallback()
             }

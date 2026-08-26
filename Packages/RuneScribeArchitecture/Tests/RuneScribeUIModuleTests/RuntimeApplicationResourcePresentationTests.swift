@@ -398,8 +398,16 @@ final class RuntimeApplicationResourcePresentationTests: XCTestCase {
         let fixture = try makeThemeImageContractFixture(
             role: ThemeResourceRoles.sealVectorMaster,
             mediaType: .pdf,
-            pixelSize: nil,
+            pixelSize: ThemePixelSize(width: 2, height: 3),
             data: data
+        )
+        let metadata = try SharePresentationResourceMetadata(
+            resourceID: fixture.reference.id,
+            role: fixture.reference.role,
+            mediaType: fixture.reference.mediaType,
+            byteLength: fixture.reference.integrity.byteLength,
+            pixelSize: nil,
+            sha256: fixture.reference.integrity.sha256
         )
         let presentation = RuntimeApplicationResourcePresentation(
             splashVideo: nil,
@@ -407,9 +415,7 @@ final class RuntimeApplicationResourcePresentationTests: XCTestCase {
         )
         let reference = try presentation.makeThemeImageReference(
             resolvedResource: fixture.resolved,
-            expectedInventory: SharePresentationProviderResourceInventory(
-                reference: fixture.reference
-            ),
+            expectedInventory: SharePresentationProviderResourceInventory(metadata: metadata),
             expectedCodexID: fixture.codexID,
             contentRevision: 17
         )

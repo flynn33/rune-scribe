@@ -3,4 +3,5 @@
 *.png binary
 *.ttf binary
 *.wav binary
+docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Reference-Candidate-Mapping-Index-v1.2.csv binary
 docs/product-roadmap/Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md whitespace=-trailing-space

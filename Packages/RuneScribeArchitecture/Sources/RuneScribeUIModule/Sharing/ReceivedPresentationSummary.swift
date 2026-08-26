@@ -22,6 +22,7 @@ enum ValidatedSafePreviewImageDecoder {
 
 struct ReceivedPresentationViewModel: Equatable, Sendable {
     let codexTitle: String
+    let relicID: ArtifactID
     let renderStatusTitle: String
     let renderStatusDetail: String
     let renderStatusSystemImage: String
@@ -35,6 +36,7 @@ struct ReceivedPresentationViewModel: Equatable, Sendable {
 
     init(_ presentation: ReceivedSharePresentation) {
         codexTitle = presentation.requestedSelection.codexID.rawValue
+        relicID = presentation.requestedSelection.relicID
         if presentation.renderMode == .requestedCodex {
             renderStatusTitle = "Sender Codex available"
             renderStatusDetail = "The inscription is using the sender's requested Codex."
@@ -134,6 +136,11 @@ struct ReceivedPresentationSummary: View {
                     .accessibilityLabel(Text(model.safePreviewTitle))
                     .accessibilityIdentifier("received.safe-preview")
                     .runtimeViewportFrameProbe("received.safe-preview")
+                    .themeCaptureIdentifier(
+                        ThemeCaptureIdentifier.receivedArtifactPreview(
+                            relicID: model.relicID
+                        )
+                    )
             }
             Text("Sender Codex: \(model.codexTitle)")
                 .font(.caption)

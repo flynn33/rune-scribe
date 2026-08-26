@@ -27,11 +27,11 @@ NORSE_RESOURCE_ROOT = Path(
 )
 NORSE_PROVENANCE = (
     NORSE_RESOURCE_ROOT
-    / "Production/Metadata/Norse-Production-Asset-Provenance-v1.0.json"
+    / "Production/Metadata/Norse-Production-Asset-Provenance-v2.0.json"
 )
 NORSE_INTEGRITY = (
     NORSE_RESOURCE_ROOT
-    / "Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+    / "Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json"
 )
 MOONLEAF_INTEGRITY = Path(
     "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/"
@@ -107,6 +107,11 @@ TEMPLATE_PATHS = (
     Path("project.yml"),
     Path("RuneScrib.xcodeproj/project.pbxproj"),
     Path("RuneScrib/Resources/Fonts/OFL.txt"),
+    Path(
+        "docs/verification/theme-fidelity-v4/generated/norse/Metadata/"
+        "Norse-Production-Asset-Derivation-v4.0.json"
+    ),
+    Path("docs/verification/theme-fidelity-v4/source-masters/norse"),
     Path(
         "docs/product-roadmap/"
         "Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md"

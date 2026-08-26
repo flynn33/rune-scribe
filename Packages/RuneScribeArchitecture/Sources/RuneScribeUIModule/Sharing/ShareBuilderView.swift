@@ -130,6 +130,7 @@ struct ShareBuilderView: View {
         .onDisappear { endLifecycle() }
         .accessibilityIdentifier("share-builder")
         .runtimeViewportFrameProbe("share-builder")
+        .themeCaptureIdentifier(ThemeCaptureIdentifier.screenShareBuilder)
     }
 
     private func codexPanel(_ catalog: ShareBuilderCatalog) -> some View {
@@ -265,6 +266,9 @@ struct ShareBuilderView: View {
             .accessibilityLabel("Four by three preview of the current share appearance")
             .accessibilityValue(previewAccessibilityValue)
             .accessibilityIdentifier("share-builder.preview")
+            .themeCaptureIdentifier(catalog.map {
+                ThemeCaptureIdentifier.shareBuilderPreview(codexID: $0.draft.codexID)
+            })
         }
     }
 
@@ -306,6 +310,7 @@ struct ShareBuilderView: View {
         .buttonStyle(RuneSecondaryButtonStyle())
         .disabled(!catalog.hasChangesFromDefaults || isSaving || isPreparingShare)
         .accessibilityIdentifier("share-builder.reset-defaults")
+        .runtimeViewportFrameProbe("share-builder.reset-defaults")
         .focusable()
         .focused($keyboardFocus, equals: .reset)
     }
@@ -320,6 +325,7 @@ struct ShareBuilderView: View {
         .buttonStyle(RuneSecondaryButtonStyle())
         .disabled(!catalog.hasChangesFromDefaults || isSaving || isPreparingShare)
         .accessibilityIdentifier("share-builder.save-defaults")
+        .runtimeViewportFrameProbe("share-builder.save-defaults")
         .focusable()
         .focused($keyboardFocus, equals: .save)
     }
@@ -345,6 +351,7 @@ struct ShareBuilderView: View {
             .buttonStyle(RuneScribButtonStyle())
             .disabled(catalog == nil || isPreparingShare || preparedShare != nil)
             .accessibilityIdentifier("share-builder.share")
+            .runtimeViewportFrameProbe("share-builder.share")
             .focusable()
             .focused($keyboardFocus, equals: .share)
         }

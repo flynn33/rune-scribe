@@ -19,6 +19,9 @@ SCHEMA_VERSION = "1.0"
 DEFAULT_MANIFEST = Path(
     "docs/verification/theme-fidelity-v4/authority/asset-manifest.json"
 )
+ACTIVE_V12_IMPORT_MANIFEST = Path(
+    "docs/verification/theme-fidelity-v4/authority/v4.2/IMPORT-MANIFEST.json"
+)
 IMAGE_EXTENSIONS = {
     ".bmp",
     ".gif",
@@ -975,18 +978,31 @@ def parse_arguments(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parse_arguments(argv)
     root = args.root.resolve()
-    manifest = root / DEFAULT_MANIFEST
-    checker = AuthorityChecker(root, manifest)
+    active_manifest = root / ACTIVE_V12_IMPORT_MANIFEST
+    if active_manifest.is_file():
+        from theme_fidelity_authority_v12 import AuthorityV12Checker
+
+        manifest = active_manifest
+        checker = AuthorityV12Checker(root, manifest)
+    else:
+        manifest = root / DEFAULT_MANIFEST
+        checker = AuthorityChecker(root, manifest)
     result = checker.run()
     if args.output is not None:
         output = (args.output if args.output.is_absolute() else root / args.output).resolve()
-        protected = output == manifest.resolve()
+        protected = output in {
+            manifest.resolve(),
+            (root / DEFAULT_MANIFEST).resolve(),
+        }
+        protected_roots = [(root / DEFAULT_MANIFEST).parent.resolve()]
         if checker.authority_root is not None:
+            protected_roots.append(checker.authority_root.resolve())
+        for protected_root in protected_roots:
             try:
-                output.relative_to(checker.authority_root.resolve())
+                output.relative_to(protected_root)
                 protected = True
             except ValueError:
-                pass
+                continue
         if protected:
             result["result"] = "FAIL"
             result["findings"] = sorted(

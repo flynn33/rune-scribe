@@ -3,17 +3,59 @@
 
 from __future__ import annotations
 
+import argparse
+from datetime import datetime, timezone
 import json
 import hashlib
+import importlib.util
 import re
 import subprocess
 import sys
 from datetime import date
 from pathlib import Path
 
+from documentation_source_manifest import is_current_manifest, validate_current_manifest
+
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_MANIFEST = ROOT / "docs/verification/remediation-v1/SOURCE-MANIFEST.json"
+
+
+def parse_arguments() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--source-manifest",
+        type=Path,
+        default=Path("docs/verification/remediation-v1/SOURCE-MANIFEST.json"),
+        help=(
+            "Source manifest to verify. The default preserves the historical "
+            "remediation-v1 behavior; v4.2 callers pass the capture runner's "
+            "source-only manifest explicitly."
+        ),
+    )
+    parser.add_argument(
+        "--source-exclusion",
+        action="append",
+        type=Path,
+        default=[],
+        help="Repository path excluded by a current capture-runner source manifest.",
+    )
+    parser.add_argument("--result-json", type=Path)
+    return parser.parse_args()
+
+
+ARGUMENTS = parse_arguments()
+SOURCE_MANIFEST = (
+    ARGUMENTS.source_manifest.resolve()
+    if ARGUMENTS.source_manifest.is_absolute()
+    else (ROOT / ARGUMENTS.source_manifest).resolve()
+)
+SOURCE_EXCLUSIONS = [
+    path.resolve() if path.is_absolute() else (ROOT / path).resolve()
+    for path in ARGUMENTS.source_exclusion
+]
+START_TIMESTAMP = datetime.now(timezone.utc).isoformat(timespec="seconds").replace(
+    "+00:00", "Z"
+)
 ERRORS: list[str] = []
 RECOVERY_STATUS = "PASS / CLOSED"
 RECOVERY_ACCEPTANCE_OUTCOME = "PASS / UNBLOCKED FOR PHASE C"
@@ -84,6 +126,18 @@ def git_available() -> bool:
         return False
 
 
+def load_current_manifest_checker():
+    path = ROOT / "scripts/index-theme-fidelity-captures.py"
+    specification = importlib.util.spec_from_file_location(
+        "documentation_alignment_capture_indexer", path
+    )
+    if specification is None or specification.loader is None:
+        raise RuntimeError(f"unable to load current source-manifest checker: {path}")
+    module = importlib.util.module_from_spec(specification)
+    specification.loader.exec_module(module)
+    return module
+
+
 def validate_source_manifest(has_git: bool) -> dict[str, object]:
     if not SOURCE_MANIFEST.is_file():
         if not has_git:
@@ -91,6 +145,33 @@ def validate_source_manifest(has_git: bool) -> dict[str, object]:
                 "Git metadata is absent and the final deterministic source manifest is missing"
             )
         return {}
+    try:
+        document = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exception:
+        ERRORS.append(f"final deterministic source manifest is invalid: {exception}")
+        return {}
+    if not isinstance(document, dict):
+        ERRORS.append("final deterministic source manifest must be a JSON object")
+        return {}
+    if is_current_manifest(document):
+        try:
+            checker = load_current_manifest_checker()
+        except Exception as exception:
+            ERRORS.append(f"unable to load current source-manifest checker: {exception}")
+        else:
+            ERRORS.extend(
+                validate_current_manifest(
+                    document,
+                    root=ROOT,
+                    exclusions=SOURCE_EXCLUSIONS,
+                    head=git("rev-parse", "HEAD").strip() if has_git else None,
+                    recompute=lambda root, exclusions: checker.source_manifest(
+                        root, exclusions
+                    ),
+                )
+            )
+        return document
+
     result = subprocess.run(
         [
             sys.executable,
@@ -109,12 +190,7 @@ def validate_source_manifest(has_git: bool) -> dict[str, object]:
         ERRORS.append(
             f"final deterministic source manifest does not match this tree: {detail}"
         )
-    try:
-        document = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exception:
-        ERRORS.append(f"final deterministic source manifest is invalid: {exception}")
-        return {}
-    return document if isinstance(document, dict) else {}
+    return document
 
 
 HAS_GIT = git_available()
@@ -1014,6 +1090,33 @@ if HAS_GIT:
     require(not any(token in branch for token in publication_tokens), "branch name violates publication policy")
     metadata = git("log", "origin/main..HEAD", "--format=%H%n%an%n%ae%n%s%n%b").lower()
     require(not any(token in metadata for token in publication_tokens), "commit metadata violates publication policy")
+
+END_TIMESTAMP = datetime.now(timezone.utc).isoformat(timespec="seconds").replace(
+    "+00:00", "Z"
+)
+RESULT_DOCUMENT = {
+    "schemaVersion": "1.0",
+    "sourceSHA": SOURCE_MANIFEST_DOCUMENT.get("sourceSHA"),
+    "sourceManifest": str(SOURCE_MANIFEST),
+    "sourceExclusions": [str(path) for path in SOURCE_EXCLUSIONS],
+    "command": [sys.executable, str(Path(__file__).resolve()), *sys.argv[1:]],
+    "startTimestamp": START_TIMESTAMP,
+    "endTimestamp": END_TIMESTAMP,
+    "destination": "source-worktree",
+    "result": "FAIL" if ERRORS else "PASS",
+    "failures": ERRORS,
+}
+if ARGUMENTS.result_json is not None:
+    result_path = (
+        ARGUMENTS.result_json.resolve()
+        if ARGUMENTS.result_json.is_absolute()
+        else (ROOT / ARGUMENTS.result_json).resolve()
+    )
+    result_path.parent.mkdir(parents=True, exist_ok=True)
+    result_path.write_text(
+        json.dumps(RESULT_DOCUMENT, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 if ERRORS:
     for error in ERRORS:

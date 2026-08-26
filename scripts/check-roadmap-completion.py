@@ -337,6 +337,10 @@ def validate_host() -> None:
     host = (ROOT / "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift").read_text(
         encoding="utf-8"
     )
+    platform_environment = (
+        ROOT
+        / "Packages/RuneScribeArchitecture/Sources/RuneScribePlatform/Qualification/ApplePlatformServiceEnvironment.swift"
+    ).read_text(encoding="utf-8")
     for record in PROVIDERS.values():
         bootstrap = f"{record['product']}Bootstrap"
         for required in (
@@ -347,13 +351,21 @@ def validate_host() -> None:
             if required not in host:
                 error(f"host lacks {required}")
     for required in (
-        "AppleCloudKitProgressionTransport()",
+        "ApplePlatformServiceEnvironment(",
         "RuneScribeServiceKeys.cloudSyncTransport",
-        "AppleGameCenterReportingAdapter()",
         "RuneScribeServiceKeys.gameCenterReporting",
     ):
         if required not in host:
             error(f"host lacks runtime-owned platform integration: {required}")
+    for required in (
+        "AppleCloudKitProgressionTransport()",
+        "AppleGameCenterReportingAdapter()",
+    ):
+        if required not in platform_environment:
+            error(
+                "platform environment lacks runtime-owned production integration: "
+                + required
+            )
 
 
 def validate_entitlements() -> None:

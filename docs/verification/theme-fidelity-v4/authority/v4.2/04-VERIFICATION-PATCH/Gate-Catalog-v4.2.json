@@ -1,0 +1,518 @@
+{
+  "schemaVersion": "1.2",
+  "gates": [
+    {
+      "id": "PKG-001",
+      "category": "package",
+      "blocking": true,
+      "description": "v4.0, v4.1, and v4.2 package integrity passes; 400 entries, 1104 exact one-to-one reference mappings, candidate IDs, source-crop declarations, deterministic seeds, runtime probes, and asset hashes validate.",
+      "requiredEvidence": [
+        "package-validation.json",
+        "comparison-authority-validation.json",
+        "authority-asset-validation.json"
+      ],
+      "dependsOn": []
+    },
+    {
+      "id": "SRC-001",
+      "category": "source",
+      "blocking": true,
+      "description": "Work begins from fetched latest origin/main in an isolated clean worktree.",
+      "requiredEvidence": [
+        "baseline.json",
+        "git-status.txt"
+      ],
+      "dependsOn": [
+        "PKG-001"
+      ]
+    },
+    {
+      "id": "SRC-002",
+      "category": "source",
+      "blocking": true,
+      "description": "Final evidence is bound to the proposed source head and no source changed afterward.",
+      "requiredEvidence": [
+        "source-manifest.json",
+        "evidence-source-binding.json"
+      ],
+      "dependsOn": [
+        "SRC-001"
+      ]
+    },
+    {
+      "id": "ARC-001",
+      "category": "architecture",
+      "blocking": true,
+      "description": "Existing architecture and Forsetti mediation checks pass.",
+      "requiredEvidence": [
+        "architecture.log"
+      ],
+      "dependsOn": [
+        "SRC-001"
+      ]
+    },
+    {
+      "id": "ARC-002",
+      "category": "architecture",
+      "blocking": true,
+      "description": "Production UI imports no Theme implementation target and contains no provider-specific branch.",
+      "requiredEvidence": [
+        "theme-isolation.json",
+        "negative-mutations.json"
+      ],
+      "dependsOn": [
+        "ARC-001"
+      ]
+    },
+    {
+      "id": "AST-001",
+      "category": "assets",
+      "blocking": true,
+      "description": "Every Theme resource is declared, uniquely owned, hash-valid, dimension-valid, and consumed.",
+      "requiredEvidence": [
+        "asset-inventory.json",
+        "resource-coverage.json"
+      ],
+      "dependsOn": [
+        "SRC-001"
+      ]
+    },
+    {
+      "id": "AST-002",
+      "category": "assets",
+      "blocking": true,
+      "description": "No placeholder, rejected baseline, blank image, system-symbol Artifact substitute, or obsolete visual is shipped.",
+      "requiredEvidence": [
+        "asset-quality-audit.json",
+        "negative-mutations.json"
+      ],
+      "dependsOn": [
+        "AST-001"
+      ]
+    },
+    {
+      "id": "NORS-001",
+      "category": "theme",
+      "blocking": true,
+      "description": "Norse descriptor content exactly matches the approved catalog.",
+      "requiredEvidence": [
+        "norse-catalog-validation.json"
+      ],
+      "dependsOn": [
+        "AST-001"
+      ]
+    },
+    {
+      "id": "NORS-002",
+      "category": "theme",
+      "blocking": true,
+      "description": "Norse Script, Relics, Seals, Frame, Crest, background, cards, and accessibility variants resolve and render.",
+      "requiredEvidence": [
+        "norse-resource-validation.json"
+      ],
+      "dependsOn": [
+        "NORS-001"
+      ]
+    },
+    {
+      "id": "NORS-003",
+      "category": "visual",
+      "blocking": true,
+      "description": "All Norse visual mappings pass and all four Base-owned vault-locked negative-invariant entries pass through their exact probes.",
+      "requiredEvidence": [
+        "norse-focal-comparison.json",
+        "norse-heatmaps/",
+        "norse-base-vault-invariant.json"
+      ],
+      "dependsOn": [
+        "NORS-002"
+      ]
+    },
+    {
+      "id": "MOON-001",
+      "category": "theme",
+      "blocking": true,
+      "description": "Moonleaf descriptor content exactly matches the approved catalog.",
+      "requiredEvidence": [
+        "moonleaf-catalog-validation.json"
+      ],
+      "dependsOn": [
+        "AST-001"
+      ]
+    },
+    {
+      "id": "MOON-002",
+      "category": "theme",
+      "blocking": true,
+      "description": "Moonleaf Script, Relics, Seals, Frame, Crest, background, cards, and accessibility variants resolve and render.",
+      "requiredEvidence": [
+        "moonleaf-resource-validation.json"
+      ],
+      "dependsOn": [
+        "MOON-001"
+      ]
+    },
+    {
+      "id": "MOON-003",
+      "category": "visual",
+      "blocking": true,
+      "description": "Moonleaf focal assets pass the visual-fidelity thresholds.",
+      "requiredEvidence": [
+        "moonleaf-focal-comparison.json",
+        "moonleaf-heatmaps/"
+      ],
+      "dependsOn": [
+        "MOON-002"
+      ]
+    },
+    {
+      "id": "SUNS-001",
+      "category": "theme",
+      "blocking": true,
+      "description": "Sunspire descriptor content exactly matches the approved catalog.",
+      "requiredEvidence": [
+        "sunspire-catalog-validation.json"
+      ],
+      "dependsOn": [
+        "AST-001"
+      ]
+    },
+    {
+      "id": "SUNS-002",
+      "category": "theme",
+      "blocking": true,
+      "description": "Sunspire Script, Relics, Seals, Frame, Crest, background, cards, and accessibility variants resolve and render.",
+      "requiredEvidence": [
+        "sunspire-resource-validation.json"
+      ],
+      "dependsOn": [
+        "SUNS-001"
+      ]
+    },
+    {
+      "id": "SUNS-003",
+      "category": "visual",
+      "blocking": true,
+      "description": "Sunspire focal assets pass the visual-fidelity thresholds.",
+      "requiredEvidence": [
+        "sunspire-focal-comparison.json",
+        "sunspire-heatmaps/"
+      ],
+      "dependsOn": [
+        "SUNS-002"
+      ]
+    },
+    {
+      "id": "WILD-001",
+      "category": "theme",
+      "blocking": true,
+      "description": "Wildwood descriptor content exactly matches the approved catalog.",
+      "requiredEvidence": [
+        "wildwood-catalog-validation.json"
+      ],
+      "dependsOn": [
+        "AST-001"
+      ]
+    },
+    {
+      "id": "WILD-002",
+      "category": "theme",
+      "blocking": true,
+      "description": "Wildwood Script, Relics, Seals, Frame, Crest, background, cards, and accessibility variants resolve and render.",
+      "requiredEvidence": [
+        "wildwood-resource-validation.json"
+      ],
+      "dependsOn": [
+        "WILD-001"
+      ]
+    },
+    {
+      "id": "WILD-003",
+      "category": "visual",
+      "blocking": true,
+      "description": "Wildwood focal assets pass the visual-fidelity thresholds.",
+      "requiredEvidence": [
+        "wildwood-focal-comparison.json",
+        "wildwood-heatmaps/"
+      ],
+      "dependsOn": [
+        "WILD-002"
+      ]
+    },
+    {
+      "id": "GLOA-001",
+      "category": "theme",
+      "blocking": true,
+      "description": "Gloamthorn descriptor content exactly matches the approved catalog.",
+      "requiredEvidence": [
+        "gloamthorn-catalog-validation.json"
+      ],
+      "dependsOn": [
+        "AST-001"
+      ]
+    },
+    {
+      "id": "GLOA-002",
+      "category": "theme",
+      "blocking": true,
+      "description": "Gloamthorn Script, Relics, Seals, Frame, Crest, background, cards, and accessibility variants resolve and render.",
+      "requiredEvidence": [
+        "gloamthorn-resource-validation.json"
+      ],
+      "dependsOn": [
+        "GLOA-001"
+      ]
+    },
+    {
+      "id": "GLOA-003",
+      "category": "visual",
+      "blocking": true,
+      "description": "Gloamthorn focal assets pass the visual-fidelity thresholds.",
+      "requiredEvidence": [
+        "gloamthorn-focal-comparison.json",
+        "gloamthorn-heatmaps/"
+      ],
+      "dependsOn": [
+        "GLOA-002"
+      ]
+    },
+    {
+      "id": "NOR-MIG-001",
+      "category": "migration",
+      "blocking": true,
+      "description": "Every legacy Norse content ID migrates or resolves through a tested compatibility alias without data loss.",
+      "requiredEvidence": [
+        "norse-migration.json"
+      ],
+      "dependsOn": [
+        "NORS-001"
+      ]
+    },
+    {
+      "id": "NOR-MIG-002",
+      "category": "migration",
+      "blocking": true,
+      "description": "Legacy incoming packages and unknown future presentation IDs remain readable with safe fallback.",
+      "requiredEvidence": [
+        "norse-wire-compatibility.json"
+      ],
+      "dependsOn": [
+        "NOR-MIG-001"
+      ]
+    },
+    {
+      "id": "UI-001",
+      "category": "ui",
+      "blocking": true,
+      "description": "Provider-neutral shared scaffold renders all five Themes across required application surfaces.",
+      "requiredEvidence": [
+        "ui-surface-coverage.json"
+      ],
+      "dependsOn": [
+        "NORS-003",
+        "MOON-003",
+        "SUNS-003",
+        "WILD-003",
+        "GLOA-003"
+      ]
+    },
+    {
+      "id": "UI-002",
+      "category": "ui",
+      "blocking": true,
+      "description": "Interactive and static sharing use the same composition plan and geometry.",
+      "requiredEvidence": [
+        "interactive-static-parity.json"
+      ],
+      "dependsOn": [
+        "UI-001"
+      ]
+    },
+    {
+      "id": "UI-003",
+      "category": "ui",
+      "blocking": true,
+      "description": "Responsive layouts pass iPhone, iPad, macOS standard, and macOS resize assertions.",
+      "requiredEvidence": [
+        "responsive-layout.json"
+      ],
+      "dependsOn": [
+        "UI-001"
+      ]
+    },
+    {
+      "id": "PRG-001",
+      "category": "progression",
+      "blocking": true,
+      "description": "All Codex gates and Artifact ladders pass exact boundary, replay, deduplication, and negative tests.",
+      "requiredEvidence": [
+        "progression-catalog.json",
+        "progression-boundaries.json"
+      ],
+      "dependsOn": [
+        "UI-001"
+      ]
+    },
+    {
+      "id": "PRG-002",
+      "category": "progression",
+      "blocking": true,
+      "description": "Live entitlement reconciliation activates newly earned optional providers without restart.",
+      "requiredEvidence": [
+        "live-activation.json"
+      ],
+      "dependsOn": [
+        "PRG-001"
+      ]
+    },
+    {
+      "id": "PRG-003",
+      "category": "progression",
+      "blocking": true,
+      "description": "Provider failure preserves ownership and falls back to Norse without blocking utility.",
+      "requiredEvidence": [
+        "provider-failure.json"
+      ],
+      "dependsOn": [
+        "PRG-002"
+      ]
+    },
+    {
+      "id": "ACC-001",
+      "category": "accessibility",
+      "blocking": true,
+      "description": "VoiceOver, Dynamic Type, focus, hit targets, no-color-only state, High Contrast, and all 20 exact Reduce Motion records pass.",
+      "requiredEvidence": [
+        "accessibility.json",
+        "reduce-motion-runtime-evidence.json",
+        "reduce-motion-frame-comparisons/"
+      ],
+      "dependsOn": [
+        "UI-003"
+      ]
+    },
+    {
+      "id": "VIS-001",
+      "category": "visual",
+      "blocking": true,
+      "description": "All 400 executable authority entries and all 1104 exact reference mappings pass through the declared metric, structural, runtime, or negative-invariant mode.",
+      "requiredEvidence": [
+        "visual-comparison-index.json",
+        "comparison-authority-validation.json",
+        "final-screenshots/",
+        "focal-captures/",
+        "heatmaps/",
+        "responsive-layout-assertions.json"
+      ],
+      "dependsOn": [
+        "UI-002",
+        "UI-003",
+        "ACC-001"
+      ]
+    },
+    {
+      "id": "TST-001",
+      "category": "tests",
+      "blocking": true,
+      "description": "Swift package tests pass with zero failures.",
+      "requiredEvidence": [
+        "swift-test.log"
+      ],
+      "dependsOn": [
+        "PRG-003"
+      ]
+    },
+    {
+      "id": "TST-002",
+      "category": "tests",
+      "blocking": true,
+      "description": "macOS Release build, hosted tests, parity, resize, and visual suites pass.",
+      "requiredEvidence": [
+        "macos.json"
+      ],
+      "dependsOn": [
+        "TST-001",
+        "VIS-001"
+      ]
+    },
+    {
+      "id": "TST-003",
+      "category": "tests",
+      "blocking": true,
+      "description": "iPhone Simulator Release build, hosted, UI, accessibility, and visual suites pass.",
+      "requiredEvidence": [
+        "iphone.json"
+      ],
+      "dependsOn": [
+        "TST-001",
+        "VIS-001"
+      ]
+    },
+    {
+      "id": "TST-004",
+      "category": "tests",
+      "blocking": true,
+      "description": "iPad Simulator Release build, hosted, UI, accessibility, and visual suites pass.",
+      "requiredEvidence": [
+        "ipad.json"
+      ],
+      "dependsOn": [
+        "TST-001",
+        "VIS-001"
+      ]
+    },
+    {
+      "id": "REG-001",
+      "category": "regression",
+      "blocking": true,
+      "description": "Cryptography, import/export, legacy payload, sharing transport, cloud, Game Center optionality, and shipping inspections pass.",
+      "requiredEvidence": [
+        "full-regression.json"
+      ],
+      "dependsOn": [
+        "TST-002",
+        "TST-003",
+        "TST-004"
+      ]
+    },
+    {
+      "id": "NEG-001",
+      "category": "negative",
+      "blocking": true,
+      "description": "All required negative mutations are rejected and the worktree is restored exactly.",
+      "requiredEvidence": [
+        "negative-mutations.json"
+      ],
+      "dependsOn": [
+        "REG-001"
+      ]
+    },
+    {
+      "id": "DOC-001",
+      "category": "documentation",
+      "blocking": true,
+      "description": "Current v4 docs, manifests, status, content catalog, and source-bound evidence are synchronized without rewriting historical evidence.",
+      "requiredEvidence": [
+        "documentation-alignment.json",
+        "historical-evidence-boundary.json"
+      ],
+      "dependsOn": [
+        "NEG-001"
+      ]
+    },
+    {
+      "id": "AUD-001",
+      "category": "audit",
+      "blocking": true,
+      "description": "Final self-audit finds no omitted instruction, stale evidence, failed gate, open defect, or prohibited action.",
+      "requiredEvidence": [
+        "final-self-audit.md",
+        "gate-summary.json"
+      ],
+      "dependsOn": [
+        "DOC-001",
+        "SRC-002"
+      ]
+    }
+  ]
+}

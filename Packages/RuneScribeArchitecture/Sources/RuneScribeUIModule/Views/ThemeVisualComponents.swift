@@ -35,6 +35,7 @@ enum ThemeVisualContentState: String, Equatable, Hashable, Sendable {
     case owned = "Owned"
     case locked = "Locked"
     case encountered = "Encountered"
+    case progress = "Progress"
     case unavailable = "Unavailable"
     case selected = "Selected"
 
@@ -43,6 +44,7 @@ enum ThemeVisualContentState: String, Equatable, Hashable, Sendable {
         case .owned: "checkmark.seal"
         case .locked: "lock.fill"
         case .encountered: "eye"
+        case .progress: "circle.dashed"
         case .unavailable: "exclamationmark.circle"
         case .selected: "checkmark.circle.fill"
         }
@@ -83,6 +85,7 @@ struct ThemeCodexCardView<Artwork: View>: View {
     let accessibilityHint: String
     let isEnabled: Bool
     let identifierPrefix: String
+    let captureIdentifier: String?
     let action: () -> Void
     private let artwork: Artwork
 
@@ -95,6 +98,7 @@ struct ThemeCodexCardView<Artwork: View>: View {
         accessibilityHint: String = "",
         isEnabled: Bool,
         identifierPrefix: String = "theme.codex-card",
+        captureIdentifier: String? = nil,
         action: @escaping () -> Void,
         @ViewBuilder artwork: () -> Artwork
     ) {
@@ -106,6 +110,7 @@ struct ThemeCodexCardView<Artwork: View>: View {
         self.accessibilityHint = accessibilityHint
         self.isEnabled = isEnabled
         self.identifierPrefix = identifierPrefix
+        self.captureIdentifier = captureIdentifier
         self.action = action
         self.artwork = artwork()
     }
@@ -167,6 +172,7 @@ struct ThemeCodexCardView<Artwork: View>: View {
         .accessibilityHint(accessibilityHint)
         .accessibilityIdentifier("\(identifierPrefix).\(codexID.rawValue)")
         .runtimeViewportFrameProbe("\(identifierPrefix).\(codexID.rawValue)")
+        .themeCaptureIdentifier(captureIdentifier)
     }
 }
 
@@ -258,6 +264,9 @@ struct ThemeArtifactSelectionControl<Artwork: View>: View {
         .accessibilityIdentifier(
             item.map { "theme.artifact-thumbnail.\($0.id.rawValue)" }
                 ?? "theme.artifact-selection.\(kind.rawValue.lowercased())"
+        )
+        .runtimeViewportFrameProbe(
+            "workspace.artifact-control.\(kind.rawValue.lowercased())"
         )
     }
 
@@ -377,10 +386,31 @@ struct ThemeArtifactBrowserView<Artwork: View>: View {
     let items: [ThemeArtifactBrowserItem]
     let includesNone: Bool
     let canSelectNone: Bool
+    let captureIdentifier: String?
     let selectNone: () -> Void
     let select: (ThemeArtifactBrowserItem) -> Void
     let artwork: (ThemeArtifactBrowserItem) -> Artwork
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    init(
+        title: String,
+        items: [ThemeArtifactBrowserItem],
+        includesNone: Bool,
+        canSelectNone: Bool,
+        captureIdentifier: String? = nil,
+        selectNone: @escaping () -> Void,
+        select: @escaping (ThemeArtifactBrowserItem) -> Void,
+        @ViewBuilder artwork: @escaping (ThemeArtifactBrowserItem) -> Artwork
+    ) {
+        self.title = title
+        self.items = items
+        self.includesNone = includesNone
+        self.canSelectNone = canSelectNone
+        self.captureIdentifier = captureIdentifier
+        self.selectNone = selectNone
+        self.select = select
+        self.artwork = artwork
+    }
 
     var body: some View {
         ScrollView {
@@ -401,6 +431,7 @@ struct ThemeArtifactBrowserView<Artwork: View>: View {
                 }
             }
             .padding(RuneMetrics.pad)
+            .themeCaptureIdentifier(captureIdentifier)
         }
         .navigationTitle(title)
         .accessibilityIdentifier("theme.artifact-picker")
@@ -417,8 +448,19 @@ struct ThemeArtifactBrowserView<Artwork: View>: View {
 
 struct ThemeArtifactPreview: View {
     let plan: ThemeArtifactCompositionPlan
+    let captureIdentifier: String?
     let image: (ThemeResourceID) -> Image?
     @State private var pageIndex = 0
+
+    init(
+        plan: ThemeArtifactCompositionPlan,
+        captureIdentifier: String? = nil,
+        image: @escaping (ThemeResourceID) -> Image?
+    ) {
+        self.plan = plan
+        self.captureIdentifier = captureIdentifier
+        self.image = image
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -429,7 +471,17 @@ struct ThemeArtifactPreview: View {
                     context: .interactivePreview,
                     image: { requiredImage($0) }
                 )
-                .accessibilityIdentifier("theme.artifact-preview.\(plan.selection.relicID.rawValue)")
+                .accessibilityIdentifier(
+                    ThemeCaptureIdentifier.artifactPreview(
+                        relicID: plan.selection.relicID
+                    )
+                )
+                .runtimeViewportFrameProbe(
+                    ThemeCaptureIdentifier.artifactPreview(
+                        relicID: plan.selection.relicID
+                    )
+                )
+                .themeCaptureIdentifier(captureIdentifier)
 
                 if plan.pages.count > 1 {
                     HStack {

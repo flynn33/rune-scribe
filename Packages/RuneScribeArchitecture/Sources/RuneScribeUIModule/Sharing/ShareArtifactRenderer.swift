@@ -542,6 +542,7 @@ enum ShareArtifactRenderPolicy {
 struct ShareArtifactStaticOutput: Equatable, Sendable {
     let pagePNGData: [Data]
     let safePreviewMetadata: ShareSafePreviewMetadata
+    let rendererOutputID: String
 
     func presentationMetadata(
         for plan: ShareArtifactRenderPlan,
@@ -641,7 +642,13 @@ enum ShareArtifactStaticRenderer {
         )
         return ShareArtifactStaticOutput(
             pagePNGData: pageData,
-            safePreviewMetadata: metadata
+            safePreviewMetadata: metadata,
+            rendererOutputID: ThemeCaptureIdentifier.staticShareRendererOutput(
+                codexID: plan.request.selection.codexID,
+                relicID: plan.request.selection.relicID,
+                sealID: plan.request.selection.sealID,
+                colorMode: plan.request.colorMode
+            )
         )
     }
 
@@ -671,12 +678,15 @@ enum ShareArtifactStaticRenderer {
                 guard let image = imageReferences[resourceID] else {
                     throw ShareArtifactRenderError.missingResource(resourceID)
                 }
+                let pixelSizeMatches = metadata.mediaType == .pdf
+                    ? metadata.pixelSize == nil
+                    : image.integrity.pixelSize == metadata.pixelSize
                 guard image.codexID == plan.request.selection.codexID,
                       image.resourceID == metadata.resourceID,
                       image.role == metadata.role,
                       image.mediaType == metadata.mediaType,
                       image.integrity.byteLength == metadata.byteLength,
-                      image.integrity.pixelSize == metadata.pixelSize,
+                      pixelSizeMatches,
                       image.integrity.sha256 == metadata.sha256
                 else {
                     throw ShareArtifactRenderError.invalidResource(resourceID)

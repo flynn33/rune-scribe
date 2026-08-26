@@ -76,7 +76,7 @@ extension RuneScribeUISession {
             )
         }
         do {
-            let presentation = try await makeOutboundSharePresentation(
+            let output = try await makeOutboundSharePresentationOutput(
                 inscription: inscription,
                 accessibilityLabel: accessibilityLabel,
                 operationID: operationID,
@@ -89,8 +89,9 @@ extension RuneScribeUISession {
                 systemReduceMotion: systemReduceMotion
             )
             return OutboundSharePresentationPreparation(
-                presentation: presentation,
-                status: .themed
+                presentation: output.presentation,
+                status: .themed,
+                rendererOutputID: output.rendererOutputID
             )
         } catch {
             return OutboundSharePresentationPreparation(
@@ -114,6 +115,35 @@ extension RuneScribeUISession {
         colorMode: ShareArtifactColorMode = .standard,
         systemReduceMotion: Bool = false
     ) async throws -> OutboundSharePresentationDTO {
+        try await makeOutboundSharePresentationOutput(
+            inscription: inscription,
+            accessibilityLabel: accessibilityLabel,
+            operationID: operationID,
+            capturedAt: capturedAt,
+            cipherID: cipherID,
+            selection: requestedSelection,
+            descriptor: requestedDescriptor,
+            effects: effects,
+            colorMode: colorMode,
+            systemReduceMotion: systemReduceMotion
+        ).presentation
+    }
+
+    private func makeOutboundSharePresentationOutput(
+        inscription: String,
+        accessibilityLabel: String,
+        operationID: RuntimeOperationID,
+        capturedAt: Date,
+        cipherID: UUID?,
+        selection requestedSelection: SharePresentationSelection?,
+        descriptor requestedDescriptor: ThemeDescriptor?,
+        effects: RuntimeEffectsPreference?,
+        colorMode: ShareArtifactColorMode,
+        systemReduceMotion: Bool
+    ) async throws -> (
+        presentation: OutboundSharePresentationDTO,
+        rendererOutputID: String
+    ) {
         guard let snapshot = themeSnapshot,
               !snapshot.isEmergencyPresentation,
               let themeCoordinatorClientHandle
@@ -226,10 +256,13 @@ extension RuneScribeUISession {
         guard let safePreviewData = output.pagePNGData.first else {
             throw ShareArtifactRenderError.renderingFailed
         }
-        return try OutboundSharePresentationDTO(
-            metadata: metadata,
-            safePreviewData: safePreviewData,
-            signedProvenance: nil
+        return (
+            presentation: try OutboundSharePresentationDTO(
+                metadata: metadata,
+                safePreviewData: safePreviewData,
+                signedProvenance: nil
+            ),
+            rendererOutputID: output.rendererOutputID
         )
     }
 
@@ -302,12 +335,18 @@ extension RuneScribeUISession {
         let digest = SHA256.hash(data: resolved.data).map {
             String(format: "%02x", $0)
         }.joined()
+        // Share metadata intentionally omits vector page dimensions. The
+        // provider-owned resolved resource remains the authority for those
+        // dimensions and is decoded again before rendering.
+        let pixelSizeMatches = expected.mediaType == .pdf
+            ? expected.pixelSize == nil
+            : resolved.integrity.pixelSize == expected.pixelSize
         guard resolved.codexID == codexID,
               resolved.resourceID == expected.resourceID,
               resolved.role == expected.role,
               resolved.mediaType == expected.mediaType,
               resolved.integrity.byteLength == expected.byteLength,
-              resolved.integrity.pixelSize == expected.pixelSize,
+              pixelSizeMatches,
               resolved.integrity.sha256 == expected.sha256,
               UInt64(resolved.data.count) == expected.byteLength,
               digest == expected.sha256.rawValue

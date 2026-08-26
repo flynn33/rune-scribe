@@ -35,6 +35,9 @@ MATRIX_SHA256 = "bf49d24a1ac9ef881c25504a17ceeea4befe9d685fe46fd469f99b43f4ae833
 DEFAULT_AUTHORITY_MANIFEST = Path(
     "docs/verification/theme-fidelity-v4/authority/asset-manifest.json"
 )
+V12_IMPORT_MANIFEST = Path(
+    "docs/verification/theme-fidelity-v4/authority/v4.2/IMPORT-MANIFEST.json"
+)
 
 
 class CaptureError(ValueError):
@@ -318,6 +321,8 @@ def hosted_capture_jobs(
         "test",
         "-project",
         "RuneScrib.xcodeproj",
+        "-configuration",
+        "Release",
         "-parallel-testing-enabled",
         "NO",
         f"RUNESCRIBE_THEME_FIDELITY_PHASE={phase}",
@@ -366,6 +371,75 @@ def hosted_capture_jobs(
                 "-resultBundlePath",
                 str(results / "macos.xcresult"),
                 "-only-testing:RuneScribMacParityTests/ThemeFidelityMatrixTests/testCaptureThemeFidelityMatrix",
+            ],
+        ),
+    ]
+
+
+def xcui_capture_jobs(
+    phase: str,
+    iphone_id: str,
+    ipad_id: str,
+    derived: Path,
+    results: Path,
+) -> list[tuple[str, list[str]]]:
+    if phase not in {"baseline", "final"}:
+        raise CaptureError(f"invalid XCUI capture phase: {phase}")
+    common = [
+        "xcodebuild",
+        "test",
+        "-project",
+        "RuneScrib.xcodeproj",
+        "-configuration",
+        "Release",
+        "-parallel-testing-enabled",
+        "NO",
+        f"RUNESCRIBE_THEME_FIDELITY_PHASE={phase}",
+    ]
+    return [
+        (
+            "iphone-xcui",
+            common
+            + [
+                "-scheme",
+                "RuneScrib-Theme-Fidelity-iOS-XCUI",
+                "-destination",
+                f"platform=iOS Simulator,id={iphone_id}",
+                "-derivedDataPath",
+                str(derived / "iphone-xcui"),
+                "-resultBundlePath",
+                str(results / "iphone-xcui.xcresult"),
+                "-only-testing:RuneScribIOSUITests/ThemeFidelityAuthorityUITests/testCaptureThemeFidelityAuthority",
+            ],
+        ),
+        (
+            "ipad-xcui",
+            common
+            + [
+                "-scheme",
+                "RuneScrib-Theme-Fidelity-iOS-XCUI",
+                "-destination",
+                f"platform=iOS Simulator,id={ipad_id}",
+                "-derivedDataPath",
+                str(derived / "ipad-xcui"),
+                "-resultBundlePath",
+                str(results / "ipad-xcui.xcresult"),
+                "-only-testing:RuneScribIOSUITests/ThemeFidelityAuthorityUITests/testCaptureThemeFidelityAuthority",
+            ],
+        ),
+        (
+            "macos-xcui",
+            common
+            + [
+                "-scheme",
+                "RuneScrib-Theme-Fidelity-macOS-XCUI",
+                "-destination",
+                "platform=macOS",
+                "-derivedDataPath",
+                str(derived / "macos-xcui"),
+                "-resultBundlePath",
+                str(results / "macos-xcui.xcresult"),
+                "-only-testing:RuneScribMacParityUITests/ThemeFidelityAuthorityUITests/testCaptureThemeFidelityAuthority",
             ],
         ),
     ]
@@ -524,6 +598,58 @@ def generate_comparison_index(
     }
 
 
+def generate_v12_comparison_index(
+    root: Path,
+    captures: Path,
+    output_root: Path,
+    toolchain_report: Path,
+    log: Path,
+    source_exclusion: Path,
+) -> tuple[Path, dict[str, Any]]:
+    command = [
+        sys.executable,
+        str(root / "scripts/execute-theme-fidelity-authority-v12.py"),
+        "--root",
+        str(root),
+        "--captures",
+        str(captures),
+        "--output-root",
+        str(output_root),
+        "--toolchain-report",
+        str(toolchain_report),
+        "--source-exclusion",
+        str(source_exclusion),
+    ]
+    result = run_command(command, root, log)
+    index = output_root / "visual-comparison-index.json"
+    if not index.is_file():
+        raise CaptureError("v1.2 authority execution did not produce an evidence index")
+    try:
+        document = json.loads(index.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise CaptureError(f"v1.2 authority evidence index is invalid: {error}") from error
+    result.update(
+        {
+            "authorityVersion": "1.2",
+            "index": str(index.resolve()),
+            "indexSHA256": sha256_file(index),
+            "entryCount": document.get("entryCount"),
+            "mappingCount": document.get("mappingCount"),
+            "passingEntryCount": document.get("passingEntryCount"),
+            "passingMappingCount": document.get("passingMappingCount"),
+            "evidenceResult": document.get("result"),
+        }
+    )
+    if result["exitCode"] == 0 and document.get("result") == "PASS" and (
+        document.get("entryCount") != 400
+        or document.get("mappingCount") != 1104
+        or document.get("passingEntryCount") != 400
+        or document.get("passingMappingCount") != 1104
+    ):
+        raise CaptureError("v1.2 authority execution lacks exact passing coverage")
+    return index, result
+
+
 def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=Path.cwd())
@@ -593,23 +719,35 @@ def main() -> int:
             derived,
             results,
         )
+        if (root / V12_IMPORT_MANIFEST).is_file():
+            jobs.extend(
+                xcui_capture_jobs(
+                    arguments.phase,
+                    iphone["udid"],
+                    ipad["udid"],
+                    derived,
+                    results,
+                )
+            )
         for label, command in jobs:
             command_result = run_command(command, root, logs / f"{label}.log")
             command_results.append(command_result)
             if command_result["exitCode"] != 0:
                 raise CaptureError(f"capture command failed; see {command_result['log']}")
         build_ended = timestamp()
-        result_bundles = [results / "iphone.xcresult", results / "ipad.xcresult", results / "macos.xcresult"]
+        result_bundles = {
+            label: results / f"{label}.xcresult" for label, _ in jobs
+        }
 
         extraction_command = [
             sys.executable,
             str(root / "scripts/extract-theme-fidelity-captures.py"),
             "--result-bundle",
-            f"iphone={result_bundles[0]}",
+            f"iphone={result_bundles['iphone']}",
             "--result-bundle",
-            f"ipad={result_bundles[1]}",
+            f"ipad={result_bundles['ipad']}",
             "--result-bundle",
-            f"macos={result_bundles[2]}",
+            f"macos={result_bundles['macos']}",
             "--expected-device",
             f"iphone={iphone['udid']}",
             "--expected-device",
@@ -625,29 +763,53 @@ def main() -> int:
             "--report",
             str(evidence / "extraction.json"),
         ]
+        for role in ("iphone-xcui", "ipad-xcui", "macos-xcui"):
+            if role in result_bundles:
+                extraction_command.extend(
+                    ["--result-bundle", f"{role}={result_bundles[role]}"]
+                )
         extraction_result = run_command(extraction_command, root, logs / "extraction.log")
         command_results.append(extraction_result)
         if extraction_result["exitCode"] != 0:
             raise CaptureError("attachment extraction failed")
 
         if arguments.phase == "final":
-            comparison_index = evidence / "final-comparison-index.json"
-            comparison_run = generate_comparison_index(
-                root,
-                matrix,
-                captures,
-                authority_manifest,
-                comparison_index,
-                logs / "comparisons.log",
-                indexer,
-            )
-            if (
-                comparison_run.get("invocationCount") != 400
-                or len(comparison_run.get("invocations", [])) != 400
-                or comparison_run.get("invocationsSHA256")
-                != canonical_json_sha256(comparison_run["invocations"])
-            ):
-                raise CaptureError("final comparison run lacks 400 bound invocations")
+            if (root / V12_IMPORT_MANIFEST).is_file():
+                comparison_index, comparison_run = generate_v12_comparison_index(
+                    root,
+                    captures,
+                    phase_root / "authority-v1.2",
+                    toolchain_path,
+                    logs / "comparisons-v1.2.log",
+                    phase_root,
+                )
+                command_results.append(comparison_run)
+                if (
+                    comparison_run.get("exitCode") != 0
+                    or comparison_run.get("evidenceResult") != "PASS"
+                ):
+                    raise CaptureError(
+                        "v1.2 authority execution failed; see "
+                        f"{comparison_index} and {logs / 'comparisons-v1.2.log'}"
+                    )
+            else:
+                comparison_index = evidence / "final-comparison-index.json"
+                comparison_run = generate_comparison_index(
+                    root,
+                    matrix,
+                    captures,
+                    authority_manifest,
+                    comparison_index,
+                    logs / "comparisons.log",
+                    indexer,
+                )
+                if (
+                    comparison_run.get("invocationCount") != 400
+                    or len(comparison_run.get("invocations", [])) != 400
+                    or comparison_run.get("invocationsSHA256")
+                    != canonical_json_sha256(comparison_run["invocations"])
+                ):
+                    raise CaptureError("final comparison run lacks 400 bound invocations")
         else:
             comparison_index = None
 

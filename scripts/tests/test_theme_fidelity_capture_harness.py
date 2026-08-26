@@ -869,6 +869,64 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
                 "../norse--compose-long--iphone-portrait.png"
             )
         )
+        self.assertIsNotNone(
+            extractor.AUXILIARY_NAME.fullmatch(
+                "sunspire--reduce-motion--ipad-portrait--stability-b.png"
+            )
+        )
+        self.assertIsNotNone(
+            extractor.AUXILIARY_NAME.fullmatch(
+                "norse--vault-locked--macos-standard--optional-codex-locked.png"
+            )
+        )
+        self.assertIsNone(
+            extractor.AUXILIARY_NAME.fullmatch(
+                "norse--workspace-empty--iphone-portrait--unapproved.png"
+            )
+        )
+
+    def test_extractor_requires_exact_v12_auxiliary_attachment_sets(self) -> None:
+        self.assertEqual(len(extractor.expected_attachment_names("iphone")), 211)
+        self.assertEqual(len(extractor.expected_attachment_names("ipad")), 211)
+        self.assertEqual(len(extractor.expected_attachment_names("macos")), 422)
+
+    def test_xcui_extractor_binds_test_identifier_url_to_exact_target(self) -> None:
+        role = "iphone-xcui"
+        expected_url = (
+            "test://com.apple.xcode/RuneScrib/RuneScribIOSUITests/"
+            "ThemeFidelityAuthorityUITests/testCaptureThemeFidelityAuthority"
+        )
+        self.assertEqual(
+            extractor.expected_xcui_test_identifier_url(role),
+            expected_url,
+        )
+        identity = extractor.validate_xcui_test_identity(role, {
+            "testIdentifier": extractor.XCUI_TEST_IDENTIFIER,
+            "testIdentifierURL": expected_url,
+        })
+        self.assertEqual(identity["projectName"], "RuneScrib")
+        self.assertEqual(identity["targetName"], "RuneScribIOSUITests")
+        self.assertEqual(
+            identity["targetKind"],
+            "com.apple.product-type.bundle.ui-testing",
+        )
+
+        with self.assertRaisesRegex(
+            extractor.ExtractionError,
+            "test identifier URL",
+        ):
+            extractor.validate_xcui_test_identity(role, {
+                "testIdentifier": extractor.XCUI_TEST_IDENTIFIER,
+                "testIdentifierURL": expected_url.replace(
+                    "RuneScribIOSUITests",
+                    "AnotherUITestTarget",
+                ),
+            })
+
+        self.assertEqual(
+            indexer.expected_xcui_test_identifier_url(role),
+            expected_url,
+        )
 
     def test_extractor_recovers_xcresult_decorated_names_without_ambiguity(self) -> None:
         suffix = "_0_570E0EB5-19B7-4236-8332-85D14C912D5B"
@@ -883,6 +941,12 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
                 f"moonleaf--vault-owned--ipad-portrait.capture{suffix}.json"
             ),
             "moonleaf--vault-owned--ipad-portrait.capture.json",
+        )
+        self.assertEqual(
+            extractor.canonical_attachment_name(
+                f"wildwood--static-share--macos-standard--renderer-output{suffix}.png"
+            ),
+            "wildwood--static-share--macos-standard--renderer-output.png",
         )
         self.assertIsNone(
             extractor.canonical_attachment_name(

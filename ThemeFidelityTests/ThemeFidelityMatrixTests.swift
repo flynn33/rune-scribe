@@ -1,6 +1,7 @@
 import CoreGraphics
 import CryptoKit
 import Foundation
+import ImageIO
 import RuneScribeContracts
 @testable import RuneScribeCoreModule
 import RuneScribeNorseThemeModule
@@ -52,7 +53,6 @@ final class ThemeFidelityMatrixTests: XCTestCase {
             .inscriptionPreview,
             .settingsCodexCard,
             .settingsDefaultsPreview,
-            .vaultLocked,
             .vaultProgress,
             .vaultEncountered,
             .vaultOwned,
@@ -137,6 +137,9 @@ final class ThemeFidelityMatrixTests: XCTestCase {
         var attachmentNames = Set<String>()
         var digestOwners: [String: String] = [:]
         var renderedCount = 0
+        var reduceMotionAttachmentCount = 0
+        var rendererOutputAttachmentCount = 0
+        var optionalLockedAttachmentCount = 0
         for theme in themes {
             try await fixture.select(theme)
             let descriptor = try await fixture.themeClient.providerDescriptor(for: theme.codexID)
@@ -145,6 +148,10 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                 descriptor: descriptor,
                 session: fixture.session
             )
+            guard let snapshot = fixture.session.themeSnapshot,
+                  snapshot.effectiveCodexID == descriptor.codex.id,
+                  snapshot.effectiveTheme.id == descriptor.id
+            else { throw ThemeFidelityCaptureError.runtimeDidNotSettle }
             let activeDescriptorResourceIDs = Set(descriptor.resources.map(\.id))
             for destination in destinations {
                 for surface in surfaces {
@@ -182,6 +189,7 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                         return true
                     }
                     let renderedWithoutResources: ThemeFidelityRenderedPNG
+                    var stabilityCaptureB: ThemeFidelityImageCapture?
                     do {
                         fixture.session.resourcePresentation.beginRenderedResourceObservation {
                             identity in
@@ -215,6 +223,12 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                             coveringElementIDs: route.coveringElementIDs,
                             warmup: route.warmup
                         )
+                        if surface == .reduceMotion {
+                            try await Task.sleep(for: .milliseconds(1_550))
+                            stabilityCaptureB = try renderer.recapture(
+                                destination: destination
+                            )
+                        }
                     }
                     if surface == .receivedCipher,
                        renderedWithoutResources.elementFrames.frames.contains(where: {
@@ -272,6 +286,163 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                         )
                     }
                     attach(rendered.data, name: name.png, type: "public.png")
+
+                    let reduceMotionStability: ThemeFidelityReduceMotionStability?
+                    if surface == .reduceMotion {
+                        guard let captureB = stabilityCaptureB else {
+                            throw ThemeFidelityCaptureError.renderFailed
+                        }
+                        let separation = captureB.capturedAt.timeIntervalSince(
+                            rendered.capturedAt
+                        )
+                        XCTAssertGreaterThanOrEqual(separation, 1.5)
+                        XCTAssertEqual(captureB.width, rendered.width)
+                        XCTAssertEqual(captureB.height, rendered.height)
+                        XCTAssertTrue(
+                            attachmentNames.insert(name.reduceMotionCaptureB).inserted,
+                            name.reduceMotionCaptureB
+                        )
+                        attach(
+                            captureB.data,
+                            name: name.reduceMotionCaptureB,
+                            type: "public.png"
+                        )
+                        reduceMotionAttachmentCount += 1
+                        reduceMotionStability = try ThemeFidelityReduceMotionStability(
+                            captureATimestamp: ThemeFidelityEvidence.iso8601(
+                                rendered.capturedAt
+                            ),
+                            captureBTimestamp: ThemeFidelityEvidence.iso8601(
+                                captureB.capturedAt
+                            ),
+                            separationSeconds: separation,
+                            captureASHA256: digest,
+                            captureBSHA256: Self.sha256(captureB.data),
+                            captureBAttachmentName: name.reduceMotionCaptureB,
+                            luminanceSSIM: ThemeFidelityEvidence.luminanceSSIM(
+                                rendered.data,
+                                captureB.data
+                            )
+                        )
+                    } else {
+                        reduceMotionStability = nil
+                    }
+
+                    var rendererOutputs: [ThemeFidelityRendererOutput] = []
+                    if surface == .staticShare {
+                        guard let outputData = model.safePreviewData else {
+                            throw ThemeFidelityCaptureError.safePreviewUnavailable(
+                                model.safePreviewDiagnostic
+                            )
+                        }
+                        let dimensions = try ThemeFidelityEvidence.pngDimensions(outputData)
+                        XCTAssertTrue(
+                            attachmentNames.insert(name.rendererOutput).inserted,
+                            name.rendererOutput
+                        )
+                        attach(outputData, name: name.rendererOutput, type: "public.png")
+                        rendererOutputAttachmentCount += 1
+                        rendererOutputs = [ThemeFidelityRendererOutput(
+                            outputID: try model.requireSafePreviewRendererOutputID(),
+                            attachmentName: name.rendererOutput,
+                            usesPrimaryCapture: false,
+                            sha256: Self.sha256(outputData),
+                            byteCount: outputData.count,
+                            pixelWidth: dimensions.width,
+                            pixelHeight: dimensions.height
+                        )]
+                    }
+
+                    var optionalLockedRendererCovered = false
+                    if theme == .norse, surface == .vaultLocked {
+                        let lockedFixture = try await fixture.makeOptionalLockedCodexFixture()
+                        let lockedRendered = try renderer.render(
+                            lockedFixture.view,
+                            identity: name.optionalLockedCodex,
+                            destination: destination,
+                            requiredElementIDs: [lockedFixture.elementID],
+                            coveringElementIDs: [],
+                            warmup: 0.25
+                        )
+                        optionalLockedRendererCovered =
+                            lockedRendered.data.count > 4_096
+                            && lockedRendered.viewportAssertions.clippedElementIDs.isEmpty
+                            && lockedRendered.elementFrames.frames.contains(where: {
+                                $0.elementID == lockedFixture.elementID
+                            })
+                        XCTAssertTrue(optionalLockedRendererCovered)
+                        XCTAssertTrue(
+                            attachmentNames.insert(name.optionalLockedCodex).inserted,
+                            name.optionalLockedCodex
+                        )
+                        attach(
+                            lockedRendered.data,
+                            name: name.optionalLockedCodex,
+                            type: "public.png"
+                        )
+                        optionalLockedAttachmentCount += 1
+                        _ = lockedFixture.imageReference
+                    }
+
+                    guard let captureSnapshot = fixture.session.themeSnapshot,
+                          captureSnapshot.effectiveCodexID == descriptor.codex.id,
+                          captureSnapshot.effectiveTheme.id == descriptor.id
+                    else { throw ThemeFidelityCaptureError.runtimeDidNotSettle }
+                    let runtimeDiagnostics = ThemeFidelityEvidence.runtimeDiagnostics(
+                        surface: surface,
+                        model: model,
+                        snapshot: captureSnapshot,
+                        session: fixture.session,
+                        destination: destination,
+                        rendered: rendered,
+                        optionalLockedRendererCovered: optionalLockedRendererCovered
+                    )
+                    let runtimeProbeObservations = ThemeFidelityEvidence
+                        .runtimeProbeObservations(
+                            theme: theme,
+                            surface: surface,
+                            diagnostics: runtimeDiagnostics,
+                            stability: reduceMotionStability
+                        )
+                    let expectedRuntimeProbeCount = if theme == .norse,
+                                                       surface == .vaultLocked {
+                        4
+                    } else if surface == .reduceMotion {
+                        6
+                    } else {
+                        1
+                    }
+                    XCTAssertEqual(
+                        runtimeProbeObservations.count,
+                        expectedRuntimeProbeCount
+                    )
+                    XCTAssertEqual(
+                        Set(runtimeProbeObservations.map(\.probeID)).count,
+                        expectedRuntimeProbeCount
+                    )
+                    let structuralAssertionObservations = try ThemeFidelityEvidence
+                        .structuralAssertionObservations(
+                            surface: surface,
+                            model: model,
+                            snapshot: captureSnapshot,
+                            destination: destination,
+                            route: route,
+                            rendered: rendered,
+                            runtimeDiagnostics: runtimeDiagnostics,
+                            rendererOutputs: rendererOutputs
+                        )
+                    XCTAssertEqual(
+                        Set(structuralAssertionObservations.keys),
+                        Set(ThemeFidelityEvidence.structuralAssertionIDs(for: surface))
+                    )
+                    ThemeFidelityEvidence.assertRuntimeRequirements(
+                        theme: theme,
+                        surface: surface,
+                        diagnostics: runtimeDiagnostics,
+                        stability: reduceMotionStability,
+                        file: #filePath,
+                        line: #line
+                    )
                     let record = try ThemeFidelityCaptureRecord(
                         theme: theme,
                         descriptor: descriptor,
@@ -288,6 +459,11 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                             model: model,
                             rendered: rendered
                         ),
+                        runtimeDiagnostics: runtimeDiagnostics,
+                        reduceMotionStability: reduceMotionStability,
+                        rendererOutputs: rendererOutputs,
+                        runtimeProbeObservations: runtimeProbeObservations,
+                        structuralAssertionObservations: structuralAssertionObservations,
                         pngSHA256: digest,
                         byteCount: rendered.data.count
                     )
@@ -304,6 +480,19 @@ final class ThemeFidelityMatrixTests: XCTestCase {
             }
         }
         XCTAssertEqual(renderedCount, themes.count * surfaces.count * destinations.count)
+        XCTAssertEqual(
+            reduceMotionAttachmentCount,
+            surfaces.contains(.reduceMotion) ? themes.count * destinations.count : 0
+        )
+        XCTAssertEqual(
+            rendererOutputAttachmentCount,
+            surfaces.contains(.staticShare) ? themes.count * destinations.count : 0
+        )
+        XCTAssertEqual(
+            optionalLockedAttachmentCount,
+            surfaces.contains(.vaultLocked) && themes.contains(.norse)
+                ? destinations.count : 0
+        )
     }
 
     private func attach(_ data: Data, name: String, type: String) {
@@ -431,11 +620,17 @@ private struct ThemeFidelityDestination: Equatable, Sendable {
 private struct ThemeFidelityCaptureName {
     let png: String
     let record: String
+    let reduceMotionCaptureB: String
+    let rendererOutput: String
+    let optionalLockedCodex: String
     init(theme: ThemeFidelityTheme, surface: ThemeFidelitySurface,
          destination: ThemeFidelityDestination) {
         let stem = "\(theme.slug)--\(surface.rawValue)--\(destination.slug)"
         png = "\(stem).png"
         record = "\(stem).capture.json"
+        reduceMotionCaptureB = "\(stem)--stability-b.png"
+        rendererOutput = "\(stem)--renderer-output.png"
+        optionalLockedCodex = "\(stem)--optional-codex-locked.png"
     }
 }
 
@@ -449,6 +644,7 @@ private struct ThemeFidelityRenderedPNG {
     let data: Data
     let width: Int
     let height: Int
+    let capturedAt: Date
     let viewportAssertions: ThemeFidelityViewportAssertions
     let elementFrames: ThemeFidelityElementFrames
     let renderedResourceIDs: [String]
@@ -462,12 +658,20 @@ private struct ThemeFidelityRenderedPNG {
             data: data,
             width: width,
             height: height,
+            capturedAt: capturedAt,
             viewportAssertions: viewportAssertions,
             elementFrames: elementFrames,
             renderedResourceIDs: Array(Set(bindings.map(\.resourceID))).sorted(),
             renderedResourceBindings: bindings
         )
     }
+}
+
+private struct ThemeFidelityImageCapture {
+    let data: Data
+    let width: Int
+    let height: Int
+    let capturedAt: Date
 }
 
 private struct ThemeFidelityRenderedResourceBinding: Codable, Hashable, Comparable {
@@ -649,8 +853,10 @@ private struct ThemeFidelityContentSeed: Encodable {
         let plaintext: String? = switch surface {
         case .composeShort:
             model.shortText
-        case .composeLong, .largeText:
+        case .composeLong:
             model.longText
+        case .largeText:
+            model.shortText
         case .inscriptionPreview, .staticShare, .highContrast, .reduceMotion:
             model.previewText
         case .receivedCipher:
@@ -692,7 +898,7 @@ private struct ThemeFidelityContentSeed: Encodable {
                 sealID: model.selection.sealID?.rawValue,
                 frameID: model.selection.frameID?.rawValue
             ),
-            progression: surface.contentSeedProgression,
+            progression: surface.contentSeedProgression(for: model.theme),
             locale: "en_US_POSIX",
             calendar: "gregorian",
             timeZone: "GMT",
@@ -740,11 +946,13 @@ private extension ThemeFidelitySurface {
         }
     }
 
-    var contentSeedProgression: ThemeFidelityContentSeed.Progression {
+    func contentSeedProgression(
+        for theme: ThemeFidelityTheme
+    ) -> ThemeFidelityContentSeed.Progression {
         switch self {
         case .vaultLocked:
             ThemeFidelityContentSeed.Progression(
-                ownershipState: "locked", achievementID: nil,
+                ownershipState: theme == .norse ? "owned" : "locked", achievementID: nil,
                 completedRuleCount: nil, requiredRuleCount: nil
             )
         case .vaultEncountered:
@@ -781,7 +989,7 @@ private extension ThemeFidelitySurface {
         ThemeFidelityContentSeed.Accessibility(
             increasedContrast: self == .highContrast,
             reduceMotion: self == .reduceMotion,
-            dynamicTypeSize: self == .largeText ? "accessibility2" : "large"
+            dynamicTypeSize: self == .largeText ? "accessibility5" : "large"
         )
     }
 
@@ -878,6 +1086,92 @@ private struct ThemeFidelitySafePreviewEvidence: Encodable {
     }
 }
 
+private enum ThemeFidelityJSONValue: Encodable, Equatable {
+    case bool(Bool)
+    case integer(Int)
+    case unsignedInteger(UInt64)
+    case number(Double)
+    case string(String)
+    case strings([String])
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch self {
+        case let .bool(value):
+            try container.encode(value)
+        case let .integer(value):
+            try container.encode(value)
+        case let .unsignedInteger(value):
+            try container.encode(value)
+        case let .number(value):
+            try container.encode(value)
+        case let .string(value):
+            try container.encode(value)
+        case let .strings(value):
+            try container.encode(value)
+        }
+    }
+}
+
+private struct ThemeFidelityRuntimeDiagnostics: Encodable {
+    struct Preview: Encodable {
+        let elementID: String
+        let exists: Bool
+        let visible: Bool
+        let viewportContained: Bool
+    }
+
+    struct NorseBase: Encodable {
+        let owned: Bool
+        let selectable: Bool
+        let fallbackAvailable: Bool
+        let lockedElementCount: Int
+        let optionalLockedRendererCovered: Bool
+    }
+
+    let activeThemeID: String
+    let activeCodexID: String
+    let effectiveMotionMode: String
+    let activeThemeAnimationCount: Int
+    let effectiveBackgroundResourceID: String
+    let declaredReduceMotionBackgroundResourceID: String
+    let visualPlanRevision: UInt64
+    let preview: Preview
+    let norseBase: NorseBase
+}
+
+private struct ThemeFidelityReduceMotionStability: Encodable {
+    let captureATimestamp: String
+    let captureBTimestamp: String
+    let separationSeconds: Double
+    let captureASHA256: String
+    let captureBSHA256: String
+    let captureBAttachmentName: String
+    let luminanceSSIM: Double
+}
+
+private struct ThemeFidelityRendererOutput: Encodable {
+    let outputID: String
+    let attachmentName: String
+    let usesPrimaryCapture: Bool
+    let sha256: String
+    let byteCount: Int
+    let pixelWidth: Int
+    let pixelHeight: Int
+}
+
+private struct ThemeFidelityRuntimeProbeObservation: Encodable {
+    let probeID: String
+    let source: String
+    let observed: ThemeFidelityJSONValue
+}
+
+private struct ThemeFidelityStructuralAssertionObservation: Encodable {
+    let source: String
+    let observed: ThemeFidelityJSONValue
+    let details: [String: ThemeFidelityJSONValue]
+}
+
 private struct ThemeFidelityCaptureRecord: Encodable {
     let schemaVersion: String
     let stateSeed: String
@@ -905,6 +1199,12 @@ private struct ThemeFidelityCaptureRecord: Encodable {
     let viewportAssertions: ThemeFidelityViewportAssertions
     let elementFrames: ThemeFidelityElementFrames
     let safePreviewEvidence: ThemeFidelitySafePreviewEvidence?
+    let runtimeDiagnostics: ThemeFidelityRuntimeDiagnostics
+    let reduceMotionStability: ThemeFidelityReduceMotionStability?
+    let rendererOutputs: [ThemeFidelityRendererOutput]
+    let runtimeProbeObservations: [ThemeFidelityRuntimeProbeObservation]
+    let structuralAssertionObservations:
+        [String: ThemeFidelityStructuralAssertionObservation]
 
     private enum CodingKeys: String, CodingKey {
         case schemaVersion
@@ -933,6 +1233,11 @@ private struct ThemeFidelityCaptureRecord: Encodable {
         case viewportAssertions
         case elementFrames
         case safePreviewEvidence
+        case runtimeDiagnostics
+        case reduceMotionStability
+        case rendererOutputs
+        case runtimeProbeObservations
+        case structuralAssertionObservations
     }
 
     @MainActor
@@ -944,6 +1249,12 @@ private struct ThemeFidelityCaptureRecord: Encodable {
          viewportAssertions: ThemeFidelityViewportAssertions,
          elementFrames: ThemeFidelityElementFrames,
          safePreviewEvidence: ThemeFidelitySafePreviewEvidence?,
+         runtimeDiagnostics: ThemeFidelityRuntimeDiagnostics,
+         reduceMotionStability: ThemeFidelityReduceMotionStability?,
+         rendererOutputs: [ThemeFidelityRendererOutput],
+         runtimeProbeObservations: [ThemeFidelityRuntimeProbeObservation],
+         structuralAssertionObservations:
+             [String: ThemeFidelityStructuralAssertionObservation],
          pngSHA256: String, byteCount: Int) throws {
         schemaVersion = "1.0"
         stateSeed = ThemeFidelityRuntimeFixture.stateSeed
@@ -973,6 +1284,11 @@ private struct ThemeFidelityCaptureRecord: Encodable {
         self.viewportAssertions = viewportAssertions
         self.elementFrames = elementFrames
         self.safePreviewEvidence = safePreviewEvidence
+        self.runtimeDiagnostics = runtimeDiagnostics
+        self.reduceMotionStability = reduceMotionStability
+        self.rendererOutputs = rendererOutputs
+        self.runtimeProbeObservations = runtimeProbeObservations
+        self.structuralAssertionObservations = structuralAssertionObservations
     }
 
     func encode(to encoder: Encoder) throws {
@@ -1013,6 +1329,16 @@ private struct ThemeFidelityCaptureRecord: Encodable {
         if let safePreviewEvidence {
             try container.encode(safePreviewEvidence, forKey: .safePreviewEvidence)
         }
+        try container.encode(runtimeDiagnostics, forKey: .runtimeDiagnostics)
+        if let reduceMotionStability {
+            try container.encode(reduceMotionStability, forKey: .reduceMotionStability)
+        }
+        try container.encode(rendererOutputs, forKey: .rendererOutputs)
+        try container.encode(runtimeProbeObservations, forKey: .runtimeProbeObservations)
+        try container.encode(
+            structuralAssertionObservations,
+            forKey: .structuralAssertionObservations
+        )
     }
 }
 
@@ -1046,6 +1372,13 @@ private final class ThemeFidelityUUIDProvider: UUIDProviding, @unchecked Sendabl
             )
         )!
     }
+}
+
+@MainActor
+private struct ThemeFidelityLockedCodexFixture {
+    let view: AnyView
+    let elementID: String
+    let imageReference: RuntimeThemeImageReference
 }
 
 @MainActor
@@ -1284,6 +1617,76 @@ private final class ThemeFidelityRuntimeFixture {
         await session.loadThemeCodexCardPreviews()
     }
 
+    func makeOptionalLockedCodexFixture() async throws -> ThemeFidelityLockedCodexFixture {
+        let descriptor = try await themeClient.providerDescriptor(
+            for: ThemeFidelityTheme.moonleaf.codexID
+        )
+        let resourceID = descriptor.codex.vault.lockedSilhouetteResourceID
+        guard let expectedReference = descriptor.resources.first(where: {
+            $0.id == resourceID
+        }) else {
+            throw ThemeFidelityCaptureError.missingResource(resourceID)
+        }
+        let resolved = try await themeClient.resolveCatalogPreviewResource(
+            codexID: descriptor.codex.id,
+            resourceID: resourceID
+        )
+        let contentRevision = session.activeThemeVisualPresentation?.revision ?? 1
+        let imageReference = try session.resourcePresentation.makeThemeImageReference(
+            resolvedResource: resolved,
+            expectedReference: expectedReference,
+            expectedCodexID: descriptor.codex.id,
+            contentRevision: contentRevision
+        )
+        guard let image = imageReference.image else {
+            throw ThemeFidelityCaptureError.renderFailed
+        }
+        guard let elementID = ThemeCaptureIdentifier.vault(
+            codexID: descriptor.codex.id,
+            state: .locked
+        ) else { throw ThemeFidelityCaptureError.renderFailed }
+        let view = AnyView(
+            ScrollView {
+                ThemeCodexCardView(
+                    codexID: descriptor.codex.id,
+                    displayName: descriptor.codex.displayName.fallbackValue,
+                    summary: descriptor.codex.shortDescription.fallbackValue,
+                    state: .locked,
+                    accessibilityLabel: descriptor.codex.accessibility.label.fallbackValue,
+                    accessibilityHint: "Locked optional Codex fixture",
+                    isEnabled: false,
+                    identifierPrefix: "theme-fidelity.optional-locked",
+                    captureIdentifier: elementID,
+                    action: {}
+                ) {
+                    image.resizable().scaledToFill()
+                }
+                .padding(RuneMetrics.pad)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background {
+                RuntimeMetalBackground()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea()
+            }
+            .environmentObject(session)
+            .environment(
+                \.runtimeApplicationResourcePresentation,
+                session.resourcePresentation
+            )
+            .environment(
+                \.runtimeAccessibilityPreferences,
+                RuntimeAccessibilityPreferences(forcesReduceMotion: true)
+            )
+            .preferredColorScheme(.dark)
+        )
+        return ThemeFidelityLockedCodexFixture(
+            view: view,
+            elementID: elementID,
+            imageReference: imageReference
+        )
+    }
+
     func stop() async {
         await service.stopInboundProcessing()
         await session.stop()
@@ -1439,11 +1842,14 @@ private struct ThemeFidelityRenderModel {
     let shortText: String
     let longText: String
     let previewText: String
+    let shortPlan: ThemeArtifactCompositionPlan
+    let longPlan: ThemeArtifactCompositionPlan
     let previewPlan: ThemeArtifactCompositionPlan
     let highContrastPlan: ThemeArtifactCompositionPlan
     let reduceMotionPlan: ThemeArtifactCompositionPlan
     let presentation: ActiveThemeVisualPresentation
     let safePreviewData: Data?
+    let safePreviewRendererOutputID: String?
     let safePreviewStatus: ShareSafePreviewStatus
     let safePreviewDiagnostic: String
     let safePreviewResourceMetadata: [SharePresentationResourceMetadata]
@@ -1476,12 +1882,13 @@ private struct ThemeFidelityRenderModel {
         let preview = Array(repeating: short, count: 4).joined(separator: " ")
 
         func plan(
+            inscription: String = preview,
             mode: ShareArtifactColorMode = .standard,
             reduceMotion: Bool = false
         ) throws -> ThemeArtifactCompositionPlan {
             try ThemeArtifactCompositionPolicy.interactivePlan(
                 selection: selection,
-                inscription: preview,
+                inscription: inscription,
                 descriptor: descriptor,
                 colorMode: mode,
                 reduceMotion: reduceMotion,
@@ -1505,11 +1912,14 @@ private struct ThemeFidelityRenderModel {
             shortText: short,
             longText: long,
             previewText: preview,
+            shortPlan: plan(inscription: short),
+            longPlan: plan(inscription: long),
             previewPlan: previewPlan,
             highContrastPlan: plan(mode: .highContrast),
             reduceMotionPlan: plan(reduceMotion: true),
             presentation: presentation,
             safePreviewData: safePreview.data,
+            safePreviewRendererOutputID: safePreview.rendererOutputID,
             safePreviewStatus: safePreview.status,
             safePreviewDiagnostic: safePreview.diagnostic,
             safePreviewResourceMetadata: safePreview.resourceMetadata,
@@ -1534,7 +1944,8 @@ private struct ThemeFidelityRenderModel {
         status: ShareSafePreviewStatus,
         diagnostic: String,
         resourceMetadata: [SharePresentationResourceMetadata],
-        resourceIDs: [String]
+        resourceIDs: [String],
+        rendererOutputID: String?
     ) {
         let preparation = await session.makeOutboundSharePresentationWithLegacyFallback(
             inscription: inscription,
@@ -1558,13 +1969,23 @@ private struct ThemeFidelityRenderModel {
                 outbound.metadata.resources,
                 Array(Set(outbound.metadata.resources.map {
                     $0.resourceID.rawValue
-                })).sorted()
+                })).sorted(),
+                preparation.rendererOutputID
             )
         }
         if ThemeFidelityPhase.requiresValidSafePreview {
             throw ThemeFidelityCaptureError.safePreviewUnavailable(diagnostic)
         }
-        return (nil, .absent, diagnostic, [], [])
+        return (nil, .absent, diagnostic, [], [], nil)
+    }
+
+    func requireSafePreviewRendererOutputID() throws -> String {
+        guard let safePreviewRendererOutputID else {
+            throw ThemeFidelityCaptureError.safePreviewUnavailable(
+                "share.renderer-output-id-unavailable"
+            )
+        }
+        return safePreviewRendererOutputID
     }
 
 }
@@ -1583,6 +2004,7 @@ private struct ThemeFidelityRoute {
 
     let view: AnyView
     let requiredElementIDs: [String]
+    let authorityElementIDs: [String]
     let coveringElementIDs: Set<String>
     let warmup: TimeInterval
 
@@ -1594,6 +2016,7 @@ private struct ThemeFidelityRoute {
         try configureProgression(surface: surface, model: model, session: session)
         let rootID = ThemeFidelityViewport.rootID
         var requiredIDs = [rootID]
+        var authorityIDs: [String] = []
         var coveringIDs = Set<String>()
         var warmup: TimeInterval = 0.25
         let routeAccessibilityPreferences = surface.runtimeAccessibilityPreferences
@@ -1602,33 +2025,83 @@ private struct ThemeFidelityRoute {
         switch surface {
         case .workspaceEmpty:
             content = AnyView(RootView(session: session))
-            let variant = "standard"
-            let identifier = "theme.root-background.\(model.descriptor.id.rawValue).\(variant)"
-            requiredIDs.append(identifier)
-            coveringIDs.insert(identifier)
+            let identifiers = [
+                ThemeCaptureIdentifier.screenWorkspace,
+                ThemeCaptureIdentifier.workspacePrimarySurface,
+            ]
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
         case .composeShort:
             content = AnyView(ContentView(
-                initialInputText: model.shortText,
-                initialViewportProbeID: "workspace.input.compose-short"
+                initialSettledArtifact: ContentViewSettledArtifactSeed(
+                    composition: model.shortPlan,
+                    presentation: model.presentation
+                ),
+                initialViewportProbeID: "workspace.input.compose-short",
+                initialComposeCaptureLength: .short,
+                forcesScrollableWorkspaceLayout: true
             ))
-            requiredIDs.append("workspace.input.compose-short")
+            let identifiers = [
+                ThemeCaptureIdentifier.screenWorkspace,
+                ThemeCaptureIdentifier.compose(
+                    length: .short,
+                    codexID: model.descriptor.codex.id
+                ),
+                ThemeCaptureIdentifier.artifactPreview(
+                    relicID: model.selection.relicID
+                ),
+            ]
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
         case .composeLong:
             content = AnyView(ContentView(
-                initialInputText: model.longText,
-                initialViewportProbeID: "workspace.input.compose-long"
+                initialSettledArtifact: ContentViewSettledArtifactSeed(
+                    composition: model.longPlan,
+                    presentation: model.presentation
+                ),
+                initialViewportProbeID: "workspace.input.compose-long",
+                initialComposeCaptureLength: .long,
+                forcesScrollableWorkspaceLayout: true
             ))
-            requiredIDs.append("workspace.input.compose-long")
+            let identifiers = [
+                ThemeCaptureIdentifier.screenWorkspace,
+                ThemeCaptureIdentifier.compose(
+                    length: .long,
+                    codexID: model.descriptor.codex.id
+                ),
+                ThemeCaptureIdentifier.artifactPreview(
+                    relicID: model.selection.relicID
+                ),
+            ]
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
         case .inscriptionPreview:
-            content = AnyView(ContentView(initialSettledArtifact: ContentViewSettledArtifactSeed(
-                composition: model.previewPlan,
-                presentation: model.presentation
-            )))
-            let identifier = "theme.artifact-preview"
-            requiredIDs.append(identifier)
+            content = AnyView(ContentView(
+                initialSettledArtifact: ContentViewSettledArtifactSeed(
+                    composition: model.previewPlan,
+                    presentation: model.presentation
+                ),
+                forcesScrollableWorkspaceLayout: true
+            ))
+            let identifiers = [
+                ThemeCaptureIdentifier.screenWorkspace,
+                ThemeCaptureIdentifier.artifactPreview(
+                    relicID: model.selection.relicID
+                ),
+            ]
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
         case .receivedCipher:
             content = AnyView(ReceivedMessageView(pending: try receivedMessage(model: model)))
+            requiredIDs.append(ThemeCaptureIdentifier.screenReceivedCipher)
+            authorityIDs.append(ThemeCaptureIdentifier.screenReceivedCipher)
             if model.safePreviewStatus == .valid {
                 requiredIDs.append("received.safe-preview")
+                let identifier = ThemeCaptureIdentifier.receivedArtifactPreview(
+                    relicID: model.selection.relicID
+                )
+                requiredIDs.append(identifier)
+                authorityIDs.append(identifier)
             }
             warmup = 0.8
         case .shareBuilder:
@@ -1640,6 +2113,14 @@ private struct ThemeFidelityRoute {
             ))
             let identifier = "share-builder"
             requiredIDs.append(identifier)
+            let identifiers = [
+                ThemeCaptureIdentifier.screenShareBuilder,
+                ThemeCaptureIdentifier.shareBuilderPreview(
+                    codexID: model.descriptor.codex.id
+                ),
+            ]
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
             warmup = 0.8
         case .staticShare:
             guard let page = model.previewPlan.pages.first else {
@@ -1676,24 +2157,69 @@ private struct ThemeFidelityRoute {
                 }
             )
             requiredIDs.append("theme.static-share")
+            authorityIDs.append("theme.static-share")
         case .settingsCodexCard:
             content = AnyView(SettingsView(initialViewport: .codexCard))
             let identifier = "theme.codex-card.\(model.descriptor.codex.id.rawValue)"
-            requiredIDs.append(identifier)
+            let identifiers = [identifier, ThemeCaptureIdentifier.screenSettingsAppearance]
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
             warmup = 0.8
         case .settingsDefaultsPreview:
             content = AnyView(SettingsView(initialViewport: .defaultsPreview))
-            let identifier = "appearance.defaults-preview"
-            requiredIDs.append(identifier)
+            let identifiers = [
+                ThemeCaptureIdentifier.screenSettingsAppearance,
+                ThemeCaptureIdentifier.workspacePrimarySurface,
+                ThemeCaptureIdentifier.settingsDefaultsPreview(
+                    codexID: model.descriptor.codex.id
+                ),
+                ThemeCaptureIdentifier.artifactPreview(
+                    relicID: model.selection.relicID
+                ),
+            ]
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
             warmup = 0.8
-        case .vaultLocked, .vaultEncountered, .vaultOwned, .vaultSelected:
-            let artifactID = focusedVaultArtifactID(surface: surface, model: model)
+        case .vaultLocked:
+            if model.theme == .norse {
+                content = AnyView(VaultProgressView(initialSection: .vault))
+            } else {
+                content = AnyView(VaultProgressView(
+                    initialSection: .vault,
+                    initialCodexCardState: .locked
+                ))
+            }
+            requiredIDs.append(ThemeCaptureIdentifier.screenVaultProgress)
+            authorityIDs.append(ThemeCaptureIdentifier.screenVaultProgress)
+            if model.theme != .norse,
+               let identifier = ThemeCaptureIdentifier.vault(
+                   codexID: model.descriptor.codex.id,
+                   state: .locked
+               ) {
+                requiredIDs.append(identifier)
+                authorityIDs.append(identifier)
+            }
+            warmup = 0.8
+        case .vaultEncountered, .vaultOwned, .vaultSelected:
+            let visualState: ThemeVisualContentState = switch surface {
+            case .vaultEncountered: .encountered
+            case .vaultOwned: .owned
+            case .vaultSelected: .selected
+            default: .selected
+            }
             content = AnyView(VaultProgressView(
                 initialSection: .vault,
-                initialViewport: .artifact(artifactID)
+                initialCodexCardState: visualState
             ))
-            let identifier = "theme.vault-artifact.\(artifactID.rawValue)"
-            requiredIDs.append(identifier)
+            requiredIDs.append(ThemeCaptureIdentifier.screenVaultProgress)
+            authorityIDs.append(ThemeCaptureIdentifier.screenVaultProgress)
+            if let identifier = ThemeCaptureIdentifier.vault(
+                codexID: model.descriptor.codex.id,
+                state: visualState
+            ) {
+                requiredIDs.append(identifier)
+                authorityIDs.append(identifier)
+            }
             warmup = 0.8
         case .vaultProgress:
             let achievementID = AchievementID(rawValue: "achievement.first-inscription")!
@@ -1702,53 +2228,140 @@ private struct ThemeFidelityRoute {
                 initialViewport: .achievement(achievementID)
             ))
             requiredIDs.append("progression.achievement.\(achievementID.rawValue)")
+            requiredIDs.append(ThemeCaptureIdentifier.screenVaultProgress)
+            authorityIDs.append(ThemeCaptureIdentifier.screenVaultProgress)
             warmup = 0.8
         case .relicPicker:
             content = AnyView(artifactBrowser(kind: .relic, model: model))
-            let identifier = "theme.artifact-picker"
-            requiredIDs.append(identifier)
+            var identifiers = [
+                ThemeCaptureIdentifier.artifactPicker(
+                    kind: .relic,
+                    codexID: model.descriptor.codex.id
+                ),
+                ThemeCaptureIdentifier.artifactPickerScreen(
+                    kind: .relic,
+                    codexID: model.descriptor.codex.id
+                ),
+            ]
+            identifiers.append(contentsOf: model.descriptor.codex.relics
+                .filter { $0.metadata.availability != .reservedInactive }
+                .map { "theme.artifact-picker.\($0.metadata.id.rawValue)" })
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
         case .sealPicker:
             content = AnyView(artifactBrowser(kind: .seal, model: model))
-            let identifier = "theme.artifact-picker"
-            requiredIDs.append(identifier)
+            var identifiers = [
+                ThemeCaptureIdentifier.artifactPicker(
+                    kind: .seal,
+                    codexID: model.descriptor.codex.id
+                ),
+                ThemeCaptureIdentifier.artifactPickerScreen(
+                    kind: .seal,
+                    codexID: model.descriptor.codex.id
+                ),
+            ]
+            identifiers.append(contentsOf: model.descriptor.codex.seals
+                .filter { $0.metadata.availability != .reservedInactive }
+                .map { "theme.artifact-picker.\($0.metadata.id.rawValue)" })
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
         case .mastery:
             let reveal = try masteryReveal(model: model)
             session.revealQueue.adopt(head: reveal, canPresent: true)
             session.setRevealBlocker(.rootPresentation, active: false)
             content = AnyView(UnlockRevealView(reveal: reveal))
             requiredIDs.append("progression.unlock-reveal")
+            let identifiers = [
+                ThemeCaptureIdentifier.mastery(codexID: model.descriptor.codex.id),
+                ThemeCaptureIdentifier.masteryScreen(codexID: model.descriptor.codex.id),
+            ] + model.descriptor.codex.frames.prefix(1).map {
+                ThemeCaptureIdentifier.masteryFrame(artifactID: $0.metadata.id)
+            } + model.descriptor.codex.crests.prefix(1).compactMap {
+                CrestID(rawValue: $0.metadata.id.rawValue).map {
+                    ThemeCaptureIdentifier.masteryCrest(crestID: $0)
+                }
+            }
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
             warmup = 0.4
         case .highContrast:
-            content = AnyView(ContentView(initialSettledArtifact: ContentViewSettledArtifactSeed(
-                composition: model.highContrastPlan,
-                presentation: model.presentation
-            )))
-            let identifier = "theme.artifact-preview"
-            requiredIDs.append(identifier)
+            content = AnyView(ContentView(
+                initialSettledArtifact: ContentViewSettledArtifactSeed(
+                    composition: model.highContrastPlan,
+                    presentation: model.presentation
+                ),
+                forcesScrollableWorkspaceLayout: true
+            ))
+            let identifiers = [
+                ThemeCaptureIdentifier.screenWorkspace,
+                ThemeCaptureIdentifier.artifactPreview(
+                    relicID: model.selection.relicID
+                ),
+            ]
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
         case .reduceMotion:
-            content = AnyView(ContentView(initialSettledArtifact: ContentViewSettledArtifactSeed(
-                composition: model.reduceMotionPlan,
-                presentation: model.presentation
-            )))
-            let identifier = "theme.artifact-preview"
-            requiredIDs.append(identifier)
+            content = AnyView(ContentView(
+                initialSettledArtifact: ContentViewSettledArtifactSeed(
+                    composition: model.reduceMotionPlan,
+                    presentation: model.presentation
+                ),
+                forcesScrollableWorkspaceLayout: true
+            ))
+            let identifiers = [
+                ThemeCaptureIdentifier.screenWorkspace,
+                ThemeCaptureIdentifier.artifactPreview(
+                    relicID: model.selection.relicID
+                ),
+            ]
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
         case .largeText:
             content = AnyView(ContentView(
-                initialInputText: model.longText,
-                initialViewportProbeID: "workspace.input.large-text"
+                initialSettledArtifact: ContentViewSettledArtifactSeed(
+                    composition: model.shortPlan,
+                    presentation: model.presentation
+                ),
+                initialViewportProbeID: "workspace.input.large-text",
+                forcesScrollableWorkspaceLayout: true
             )
-                .environment(\.dynamicTypeSize, .accessibility2))
-            requiredIDs.append("workspace.input.large-text")
+                .environment(\.dynamicTypeSize, .accessibility5))
+            let identifiers = [
+                ThemeCaptureIdentifier.screenWorkspace,
+                ThemeCaptureIdentifier.artifactPreview(
+                    relicID: model.selection.relicID
+                ),
+            ]
+            requiredIDs.append(contentsOf: identifiers)
+            authorityIDs.append(contentsOf: identifiers)
+        }
+
+        let backgroundVariant: ThemeCaptureIdentifier.BackgroundVariant = switch surface {
+        case .reduceMotion: .reduceMotion
+        case .highContrast: .highContrast
+        default: .standard
+        }
+        let backgroundIdentifier = ThemeCaptureIdentifier.background(
+            themeID: model.descriptor.id,
+            variant: backgroundVariant
+        )
+        if surface == .workspaceEmpty || surface == .reduceMotion {
+            requiredIDs.append(backgroundIdentifier)
+            authorityIDs.append(backgroundIdentifier)
+            coveringIDs.insert(backgroundIdentifier)
         }
 
         let hosted = AnyView(
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background {
-                    RuntimeMetalBackground()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .ignoresSafeArea()
-                        .clipped()
+                    if surface != .workspaceEmpty {
+                        RuntimeMetalBackground()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .ignoresSafeArea()
+                            .clipped()
+                            .themeCaptureIdentifier(backgroundIdentifier)
+                    }
                 }
                 .environmentObject(session)
                 .environment(
@@ -1759,6 +2372,7 @@ private struct ThemeFidelityRoute {
                     \.runtimeAccessibilityPreferences,
                     routeAccessibilityPreferences
                 )
+                .environment(\.themeCaptureIdentifiersEnabled, true)
                 .environment(\.locale, Locale(identifier: "en_US_POSIX"))
                 .environment(\.calendar, Calendar(identifier: .gregorian))
                 .environment(\.timeZone, TimeZone(secondsFromGMT: 0)!)
@@ -1768,6 +2382,7 @@ private struct ThemeFidelityRoute {
         return Self(
             view: hosted,
             requiredElementIDs: Array(Set(requiredIDs)).sorted(),
+            authorityElementIDs: Array(Set(authorityIDs)).sorted(),
             coveringElementIDs: coveringIDs,
             warmup: warmup
         )
@@ -1809,6 +2424,8 @@ private struct ThemeFidelityRoute {
         kind: ThemeVisualArtifactKind,
         model: ThemeFidelityRenderModel
     ) -> some View {
+        let captureKind: ThemeCaptureIdentifier.PickerKind = kind == .relic
+            ? .relic : .seal
         let items: [ThemeArtifactBrowserItem]
         switch kind {
         case .relic:
@@ -1840,12 +2457,20 @@ private struct ThemeFidelityRoute {
                 items: items,
                 includesNone: false,
                 canSelectNone: false,
+                captureIdentifier: ThemeCaptureIdentifier.artifactPicker(
+                    kind: captureKind,
+                    codexID: model.descriptor.codex.id
+                ),
                 selectNone: {},
                 select: { _ in }
             ) { item in
                 model.artwork(item.resourceID, label: item.accessibilityLabel)
             }
         }
+        .themeCaptureIdentifier(ThemeCaptureIdentifier.artifactPickerScreen(
+            kind: captureKind,
+            codexID: model.descriptor.codex.id
+        ))
     }
 
     private static func browserItem(
@@ -2002,6 +2627,909 @@ private struct ThemeFidelityRoute {
                 AchievementID(rawValue: "achievement.\(model.theme.slug).mastery")!,
             ]
         )
+    }
+}
+
+@MainActor
+private enum ThemeFidelityEvidence {
+    static func iso8601(_ date: Date) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.string(from: date)
+    }
+
+    static func pngDimensions(_ data: Data) throws -> (width: Int, height: Int) {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil)
+        else { throw ThemeFidelityCaptureError.renderFailed }
+        return (image.width, image.height)
+    }
+
+    static func luminanceSSIM(_ first: Data, _ second: Data) throws -> Double {
+        if first == second { return 1 }
+        let firstPixels = try luminancePixels(first)
+        let secondPixels = try luminancePixels(second)
+        guard firstPixels.width == secondPixels.width,
+              firstPixels.height == secondPixels.height,
+              firstPixels.values.count == secondPixels.values.count,
+              !firstPixels.values.isEmpty
+        else { throw ThemeFidelityCaptureError.renderFailed }
+
+        let count = Double(firstPixels.values.count)
+        let firstMean = firstPixels.values.reduce(0, +) / count
+        let secondMean = secondPixels.values.reduce(0, +) / count
+        var firstVariance = 0.0
+        var secondVariance = 0.0
+        var covariance = 0.0
+        for index in firstPixels.values.indices {
+            let firstDelta = firstPixels.values[index] - firstMean
+            let secondDelta = secondPixels.values[index] - secondMean
+            firstVariance += firstDelta * firstDelta
+            secondVariance += secondDelta * secondDelta
+            covariance += firstDelta * secondDelta
+        }
+        let varianceDivisor = max(1, count - 1)
+        firstVariance /= varianceDivisor
+        secondVariance /= varianceDivisor
+        covariance /= varianceDivisor
+        let c1 = 0.0001
+        let c2 = 0.0009
+        let numerator = (2 * firstMean * secondMean + c1) * (2 * covariance + c2)
+        let denominator = (firstMean * firstMean + secondMean * secondMean + c1)
+            * (firstVariance + secondVariance + c2)
+        guard denominator > 0 else { return firstMean == secondMean ? 1 : 0 }
+        return Swift.min(1.0, Swift.max(-1.0, numerator / denominator))
+    }
+
+    static func runtimeDiagnostics(
+        surface: ThemeFidelitySurface,
+        model: ThemeFidelityRenderModel,
+        snapshot: ThemeCoordinatorSnapshotDTO,
+        session: RuneScribeUISession,
+        destination: ThemeFidelityDestination,
+        rendered: ThemeFidelityRenderedPNG,
+        optionalLockedRendererCovered: Bool
+    ) -> ThemeFidelityRuntimeDiagnostics {
+        let variant = session.resourcePresentation.themeBackgroundPresentationVariant(
+            reduceMotion: surface == .reduceMotion,
+            increasedContrast: surface == .highContrast
+        )
+        let background = model.descriptor.codex.background
+        let configuredBackgroundResourceID: ThemeResourceID? = switch variant {
+        case .semanticFallback:
+            nil
+        case .staticBase:
+            background.staticBaseResourceID
+        case .reduceMotion:
+            background.reduceMotionResourceID
+        case .highContrast:
+            background.highContrastResourceID
+        case .animated:
+            background.optionalMotionResourceID
+                ?? background.rendererParametersResourceID
+                ?? background.staticBaseResourceID
+        }
+        let observedResourceIDs = Set(rendered.renderedResourceIDs)
+        let effectiveBackgroundResourceID = configuredBackgroundResourceID.map {
+            observedResourceIDs.contains($0.rawValue)
+                ? $0.rawValue : "unobserved:\($0.rawValue)"
+        } ?? "semantic-fallback"
+        let effectiveMotionMode: String = switch variant {
+        case .semanticFallback:
+            "semantic-fallback"
+        case .staticBase:
+            "static"
+        case .reduceMotion:
+            "reduce-motion"
+        case .highContrast:
+            "high-contrast"
+        case .animated:
+            "full-motion"
+        }
+        let previewID = ThemeCaptureIdentifier.artifactPreview(
+            relicID: model.selection.relicID
+        )
+        let previewFrame = rendered.elementFrames.frames.first(where: {
+            $0.elementID == previewID
+        })
+        let viewport = CGRect(
+            x: 0,
+            y: 0,
+            width: destination.pixelWidth,
+            height: destination.pixelHeight
+        )
+        let previewRect = previewFrame.map(frameRect)
+        let previewExists = previewRect.map { !$0.isNull && !$0.isEmpty } ?? false
+        let previewVisible = previewRect.map {
+            !$0.intersection(viewport).isNull && !$0.intersection(viewport).isEmpty
+        } ?? false
+        let tolerance = destination.scale
+        let previewContained = previewRect.map {
+            viewport.insetBy(dx: -tolerance, dy: -tolerance).contains($0)
+        } ?? false
+
+        let norseCodexID = ThemeFidelityTheme.norse.codexID
+        let norseProvider = snapshot.providers.first(where: {
+            $0.codexID == norseCodexID
+        })
+        let norseInventoryExists = snapshot.presentationInventories.contains(where: {
+            $0.codexID == norseCodexID
+        })
+        let reportedLockedNorseElements = rendered.elementFrames.frames.filter {
+            $0.elementID.contains(norseCodexID.rawValue)
+                && $0.elementID.localizedCaseInsensitiveContains("locked")
+        }.count
+        let providerLockedCount = norseProvider?.state == .locked ? 1 : 0
+
+        return ThemeFidelityRuntimeDiagnostics(
+            activeThemeID: snapshot.effectiveTheme.id.rawValue,
+            activeCodexID: snapshot.effectiveCodexID.rawValue,
+            effectiveMotionMode: effectiveMotionMode,
+            activeThemeAnimationCount: session.resourcePresentation
+                .activeThemeAnimationCount,
+            effectiveBackgroundResourceID: effectiveBackgroundResourceID,
+            declaredReduceMotionBackgroundResourceID:
+                background.reduceMotionResourceID.rawValue,
+            visualPlanRevision: model.visualPlanRevision,
+            preview: ThemeFidelityRuntimeDiagnostics.Preview(
+                elementID: previewID,
+                exists: previewExists,
+                visible: previewVisible,
+                viewportContained: previewContained
+            ),
+            norseBase: ThemeFidelityRuntimeDiagnostics.NorseBase(
+                owned: norseProvider?.isOwned == true,
+                selectable: norseProvider?.isSelectable == true,
+                fallbackAvailable: norseProvider?.state == .available
+                    && norseProvider?.isOwned == true
+                    && norseInventoryExists
+                    && !snapshot.requiredBaseResourceFailures.contains(where: {
+                        $0.codexID == norseCodexID
+                    }),
+                lockedElementCount: reportedLockedNorseElements + providerLockedCount,
+                optionalLockedRendererCovered: optionalLockedRendererCovered
+            )
+        )
+    }
+
+    static func runtimeProbeObservations(
+        theme: ThemeFidelityTheme,
+        surface: ThemeFidelitySurface,
+        diagnostics: ThemeFidelityRuntimeDiagnostics,
+        stability: ThemeFidelityReduceMotionStability?
+    ) -> [ThemeFidelityRuntimeProbeObservation] {
+        if theme == .norse, surface == .vaultLocked {
+            return [
+                probe(
+                    "probe.norse.base-owned",
+                    source: "hosted-progression-diagnostic",
+                    .bool(diagnostics.norseBase.owned)
+                ),
+                probe(
+                    "probe.norse.base-selectable",
+                    source: "hosted-theme-diagnostic",
+                    .bool(diagnostics.norseBase.selectable)
+                ),
+                probe(
+                    "probe.norse.fallback-available",
+                    source: "hosted-theme-diagnostic",
+                    .bool(diagnostics.norseBase.fallbackAvailable)
+                ),
+                probe(
+                    "probe.optional-codex.locked-renderer-covered",
+                    source: "hosted-ui-fixture",
+                    .bool(diagnostics.norseBase.optionalLockedRendererCovered)
+                ),
+            ]
+        }
+
+        let themeProbeSuffix = diagnostics.activeThemeID
+        var observations = [probe(
+            "probe.theme.active.\(themeProbeSuffix)",
+            source: "hosted-runtime-diagnostic",
+            .string(diagnostics.activeThemeID)
+        )]
+        guard surface == .reduceMotion, let stability else { return observations }
+        observations.append(contentsOf: [
+            probe(
+                "probe.motion.mode.\(themeProbeSuffix)",
+                source: "hosted-runtime-diagnostic",
+                .string(diagnostics.effectiveMotionMode)
+            ),
+            probe(
+                "probe.motion.active-animation-count.\(themeProbeSuffix)",
+                source: "hosted-runtime-diagnostic",
+                .integer(diagnostics.activeThemeAnimationCount)
+            ),
+            probe(
+                "probe.motion.background-resource.\(themeProbeSuffix)",
+                source: "hosted-runtime-diagnostic",
+                .bool(
+                    diagnostics.effectiveBackgroundResourceID
+                        == diagnostics.declaredReduceMotionBackgroundResourceID
+                )
+            ),
+            probe(
+                "probe.motion.visual-plan-revision.\(themeProbeSuffix)",
+                source: "hosted-runtime-diagnostic",
+                .unsignedInteger(diagnostics.visualPlanRevision)
+            ),
+            probe(
+                "probe.motion.frame-stability.\(themeProbeSuffix)",
+                source: "visual-runner",
+                .number(stability.luminanceSSIM)
+            ),
+        ])
+        return observations
+    }
+
+    static func structuralAssertionObservations(
+        surface: ThemeFidelitySurface,
+        model: ThemeFidelityRenderModel,
+        snapshot: ThemeCoordinatorSnapshotDTO,
+        destination: ThemeFidelityDestination,
+        route: ThemeFidelityRoute,
+        rendered: ThemeFidelityRenderedPNG,
+        runtimeDiagnostics: ThemeFidelityRuntimeDiagnostics,
+        rendererOutputs: [ThemeFidelityRendererOutput]
+    ) throws -> [String: ThemeFidelityStructuralAssertionObservation] {
+        let assertionIDs = structuralAssertionIDs(for: surface)
+        let targetIDs = structuralElementIDs(
+            surface: surface,
+            route: route,
+            rendererOutputs: rendererOutputs
+        )
+        let frameMap = Dictionary(uniqueKeysWithValues: rendered.elementFrames.frames.map {
+            ($0.elementID, frameRect($0))
+        })
+        let rendererOutputIDs = Set(rendererOutputs.map(\.outputID))
+        let frameTargetIDs = targetIDs.filter { frameMap[$0] != nil }
+        let missingTargetIDs = targetIDs.filter {
+            frameMap[$0] == nil && !rendererOutputIDs.contains($0)
+        }
+        let viewport = CGRect(
+            x: 0,
+            y: 0,
+            width: destination.pixelWidth,
+            height: destination.pixelHeight
+        )
+        let tolerance = destination.scale
+        let visibleTargetIDs = frameTargetIDs.filter {
+            guard let frame = frameMap[$0] else { return false }
+            let intersection = frame.intersection(viewport)
+            return !intersection.isNull && !intersection.isEmpty
+        }
+        let containedTargetIDs = frameTargetIDs.filter {
+            guard let frame = frameMap[$0] else { return false }
+            return viewport.insetBy(dx: -tolerance, dy: -tolerance).contains(frame)
+        }
+        let usesRendererOutput = surface == .staticShare && !rendererOutputs.isEmpty
+        let elementExists = usesRendererOutput
+            ? !rendererOutputs.isEmpty
+            : missingTargetIDs.isEmpty && !targetIDs.isEmpty
+        let elementVisible = missingTargetIDs.isEmpty
+            && visibleTargetIDs.count == targetIDs.count
+        let elementContained = usesRendererOutput
+            ? true
+            : missingTargetIDs.isEmpty && containedTargetIDs.count == targetIDs.count
+
+        var result: [String: ThemeFidelityStructuralAssertionObservation] = [:]
+        for assertionID in assertionIDs {
+            switch assertionID {
+            case "assert.element.exists":
+                result[assertionID] = assertion(
+                    source: usesRendererOutput
+                        ? "production-static-renderer" : "hosted-frame-geometry",
+                    observed: .bool(elementExists),
+                    details: [
+                        "targetElementIDs": .strings(targetIDs),
+                        "missingElementIDs": .strings(missingTargetIDs),
+                    ]
+                )
+            case "assert.element.visible":
+                result[assertionID] = assertion(
+                    source: "hosted-frame-geometry",
+                    observed: .bool(elementVisible),
+                    details: [
+                        "targetElementIDs": .strings(targetIDs),
+                        "visibleElementIDs": .strings(visibleTargetIDs),
+                    ]
+                )
+            case "assert.element.viewport-contained":
+                result[assertionID] = assertion(
+                    source: "hosted-frame-geometry",
+                    observed: .bool(elementContained),
+                    details: [
+                        "targetElementIDs": .strings(targetIDs),
+                        "containedElementIDs": .strings(containedTargetIDs),
+                        "tolerancePoints": .number(1),
+                    ]
+                )
+            case "assert.no-horizontal-overflow":
+                let overflowing = frameTargetIDs.filter {
+                    guard let frame = frameMap[$0] else { return true }
+                    return frame.minX < -tolerance
+                        || frame.maxX > viewport.maxX + tolerance
+                }
+                result[assertionID] = assertion(
+                    source: "hosted-frame-geometry",
+                    observed: .bool(!overflowing.isEmpty || !missingTargetIDs.isEmpty),
+                    details: [
+                        "overflowingElementIDs": .strings(overflowing),
+                        "missingElementIDs": .strings(missingTargetIDs),
+                    ]
+                )
+            case "assert.mobile-hit-targets":
+                let controlIDs = hitTargetElementIDs(surface: surface)
+                let measuredControlIDs = controlIDs.filter { frameMap[$0] != nil }
+                let missingControlIDs = controlIDs.filter { frameMap[$0] == nil }
+                let minimumPoints = measuredControlIDs.compactMap { frameMap[$0] }.map {
+                    min($0.width, $0.height) / destination.scale
+                }.min() ?? 0
+                result[assertionID] = assertion(
+                    source: "hosted-exact-control-geometry",
+                    observed: .number(minimumPoints),
+                    details: [
+                        "requiredControlIDs": .strings(controlIDs),
+                        "measuredElementIDs": .strings(measuredControlIDs),
+                        "missingElementIDs": .strings(missingControlIDs),
+                        "minimumMeasuredPoints": .number(minimumPoints),
+                    ]
+                )
+            case "assert.no-placeholder-art":
+                let missingResources = missingVisualResources(
+                    surface: surface,
+                    model: model,
+                    rendered: rendered,
+                    rendererOutputs: rendererOutputs
+                )
+                result[assertionID] = assertion(
+                    source: "hosted-resource-binding",
+                    observed: .integer(missingResources.count),
+                    details: ["missingResourceIDs": .strings(missingResources)]
+                )
+            case "assert.no-system-symbol-artifact":
+                let missingResources = missingPickerArtworkResources(
+                    surface: surface,
+                    model: model,
+                    rendered: rendered
+                )
+                result[assertionID] = assertion(
+                    source: "hosted-resource-binding",
+                    observed: .integer(missingResources.count),
+                    details: ["missingArtworkResourceIDs": .strings(missingResources)]
+                )
+            case "assert.safe-region-no-overlap":
+                let plan = compositionPlan(surface: surface, model: model)
+                let overlaps = plan.sealAnchor.map {
+                    plan.layout.glyphSafeRegion.contains($0)
+                } ?? false
+                result[assertionID] = assertion(
+                    source: "active-composition-plan",
+                    observed: .bool(overlaps),
+                    details: [
+                        "layoutID": .string(plan.layout.id.rawValue),
+                        "sealPresent": .bool(plan.sealAnchor != nil),
+                    ]
+                )
+            case "assert.state-text-shape-truthful":
+                let truth = stateTruth(
+                    surface: surface,
+                    model: model,
+                    snapshot: snapshot,
+                    rendered: rendered,
+                    runtimeDiagnostics: runtimeDiagnostics
+                )
+                result[assertionID] = assertion(
+                    source: "hosted-runtime-state",
+                    observed: .bool(truth.value),
+                    details: truth.details
+                )
+            case "assert.interactive-static-plan-parity":
+                let request = try ShareArtifactRenderRequest(
+                    selection: model.selection,
+                    inscription: model.previewText,
+                    operationID: RuntimeOperationID(
+                        rawValue: "operation.theme-fidelity.plan-parity"
+                    ),
+                    capturedAt: ThemeFidelityRuntimeFixture.fixedDate,
+                    accessibilityLabel: model.previewPlan.accessibilityLabel,
+                    provenanceLabel: model.previewPlan.provenanceLabel
+                )
+                let staticPlan = try ShareArtifactRenderPolicy.plan(
+                    request: request,
+                    descriptor: model.descriptor
+                ).composition
+                result[assertionID] = assertion(
+                    source: "production-composition-policy",
+                    observed: .bool(staticPlan == model.previewPlan),
+                    details: [
+                        "interactiveBackgroundResourceID": .string(
+                            model.previewPlan.backgroundResourceID.rawValue
+                        ),
+                        "staticBackgroundResourceID": .string(
+                            staticPlan.backgroundResourceID.rawValue
+                        ),
+                    ]
+                )
+            case "assert.all-three-relics-present":
+                let expectedRelicIDs = model.descriptor.codex.relics
+                    .filter { $0.metadata.availability != .reservedInactive }
+                    .map(\.metadata.id.rawValue)
+                    .sorted()
+                let relicIDs = expectedRelicIDs.filter {
+                    frameMap["theme.artifact-picker.\($0)"] != nil
+                }
+                result[assertionID] = assertion(
+                    source: "hosted-exact-picker-tile-geometry",
+                    observed: .strings(relicIDs),
+                    details: [
+                        "observedCount": .integer(relicIDs.count),
+                        "expectedArtifactIDs": .strings(expectedRelicIDs),
+                        "missingArtifactIDs": .strings(
+                            expectedRelicIDs.filter { !relicIDs.contains($0) }
+                        ),
+                    ]
+                )
+            case "assert.all-six-seals-present":
+                let expectedSealIDs = model.descriptor.codex.seals
+                    .filter { $0.metadata.availability != .reservedInactive }
+                    .map(\.metadata.id.rawValue)
+                    .sorted()
+                let sealIDs = expectedSealIDs.filter {
+                    frameMap["theme.artifact-picker.\($0)"] != nil
+                }
+                result[assertionID] = assertion(
+                    source: "hosted-exact-picker-tile-geometry",
+                    observed: .strings(sealIDs),
+                    details: [
+                        "observedCount": .integer(sealIDs.count),
+                        "expectedArtifactIDs": .strings(expectedSealIDs),
+                        "missingArtifactIDs": .strings(
+                            expectedSealIDs.filter { !sealIDs.contains($0) }
+                        ),
+                    ]
+                )
+            case "assert.mastery-frame-crest-title-present":
+                let frame = model.descriptor.codex.frames.first
+                let crest = model.descriptor.codex.crests.first
+                let frameID = frame?.metadata.id.rawValue
+                let crestID = crest?.metadata.id.rawValue
+                let frameObserved = frame.map {
+                    frameMap[ThemeCaptureIdentifier.masteryFrame(
+                        artifactID: $0.metadata.id
+                    )] != nil
+                } ?? false
+                let crestObserved = crest.flatMap {
+                    CrestID(rawValue: $0.metadata.id.rawValue)
+                }.map {
+                    frameMap[ThemeCaptureIdentifier.masteryCrest(crestID: $0)] != nil
+                } ?? false
+                let panelObserved = frameMap[ThemeCaptureIdentifier.mastery(
+                    codexID: model.descriptor.codex.id
+                )] != nil || frameMap[ThemeCaptureIdentifier.masteryScreen(
+                    codexID: model.descriptor.codex.id
+                )] != nil
+                var components: [String] = []
+                if frameObserved, let frameID { components.append(frameID) }
+                if crestObserved, let crestID { components.append(crestID) }
+                if panelObserved { components.append(model.theme.masteryTitleID.rawValue) }
+                result[assertionID] = assertion(
+                    source: "hosted-mastery-geometry-and-reveal-model",
+                    observed: .strings(components.sorted()),
+                    details: [
+                        "observedCount": .integer(components.count),
+                        "frameVisualObserved": .bool(frameObserved),
+                        "crestVisualObserved": .bool(crestObserved),
+                        "titleModelObserved": .bool(panelObserved),
+                    ]
+                )
+            case "assert.large-text-required-controls-visible":
+                let controlIDs = largeTextControlIDs
+                let missingControlIDs = controlIDs.filter { frameMap[$0] == nil }
+                let visibleControlIDs = controlIDs.filter {
+                    guard let frame = frameMap[$0] else { return false }
+                    let intersection = frame.intersection(viewport)
+                    return !intersection.isNull && !intersection.isEmpty
+                }
+                let containedControlIDs = controlIDs.filter {
+                    guard let frame = frameMap[$0] else { return false }
+                    return viewport.insetBy(dx: -tolerance, dy: -tolerance).contains(frame)
+                }
+                let controlsVisible = missingControlIDs.isEmpty
+                    && visibleControlIDs.count == controlIDs.count
+                    && containedControlIDs.count == controlIDs.count
+                    && !model.shortText.isEmpty
+                result[assertionID] = assertion(
+                    source: "hosted-exact-large-text-control-geometry",
+                    observed: .bool(controlsVisible),
+                    details: [
+                        "requiredControlIDs": .strings(controlIDs),
+                        "missingControlIDs": .strings(missingControlIDs),
+                        "visibleControlIDs": .strings(visibleControlIDs),
+                        "containedControlIDs": .strings(containedControlIDs),
+                        "dynamicTypeSize": .string("accessibility5"),
+                    ]
+                )
+            default:
+                break
+            }
+        }
+        return result
+    }
+
+    static func assertRuntimeRequirements(
+        theme: ThemeFidelityTheme,
+        surface: ThemeFidelitySurface,
+        diagnostics: ThemeFidelityRuntimeDiagnostics,
+        stability: ThemeFidelityReduceMotionStability?,
+        file: StaticString,
+        line: UInt
+    ) {
+        XCTAssertEqual(
+            diagnostics.activeThemeID,
+            theme.descriptor.id.rawValue,
+            file: file,
+            line: line
+        )
+        XCTAssertEqual(
+            diagnostics.activeCodexID,
+            theme.codexID.rawValue,
+            file: file,
+            line: line
+        )
+        if surface == .reduceMotion {
+            XCTAssertEqual(diagnostics.effectiveMotionMode, "reduce-motion", file: file, line: line)
+            XCTAssertEqual(diagnostics.activeThemeAnimationCount, 0, file: file, line: line)
+            XCTAssertEqual(
+                diagnostics.effectiveBackgroundResourceID,
+                diagnostics.declaredReduceMotionBackgroundResourceID,
+                file: file,
+                line: line
+            )
+            XCTAssertGreaterThan(diagnostics.visualPlanRevision, 0, file: file, line: line)
+            XCTAssertTrue(diagnostics.preview.exists, file: file, line: line)
+            XCTAssertTrue(diagnostics.preview.visible, file: file, line: line)
+            XCTAssertTrue(diagnostics.preview.viewportContained, file: file, line: line)
+            XCTAssertNotNil(stability, file: file, line: line)
+            if let stability {
+                XCTAssertGreaterThanOrEqual(
+                    stability.separationSeconds,
+                    1.5,
+                    file: file,
+                    line: line
+                )
+                XCTAssertGreaterThanOrEqual(
+                    stability.luminanceSSIM,
+                    0.995,
+                    file: file,
+                    line: line
+                )
+            }
+        }
+        if theme == .norse, surface == .vaultLocked {
+            XCTAssertTrue(diagnostics.norseBase.owned, file: file, line: line)
+            XCTAssertTrue(diagnostics.norseBase.selectable, file: file, line: line)
+            XCTAssertTrue(diagnostics.norseBase.fallbackAvailable, file: file, line: line)
+            XCTAssertEqual(diagnostics.norseBase.lockedElementCount, 0, file: file, line: line)
+            XCTAssertTrue(
+                diagnostics.norseBase.optionalLockedRendererCovered,
+                file: file,
+                line: line
+            )
+        }
+    }
+
+    private static func probe(
+        _ id: String,
+        source: String,
+        _ observed: ThemeFidelityJSONValue
+    ) -> ThemeFidelityRuntimeProbeObservation {
+        ThemeFidelityRuntimeProbeObservation(
+            probeID: id,
+            source: source,
+            observed: observed
+        )
+    }
+
+    private static func assertion(
+        source: String,
+        observed: ThemeFidelityJSONValue,
+        details: [String: ThemeFidelityJSONValue]
+    ) -> ThemeFidelityStructuralAssertionObservation {
+        ThemeFidelityStructuralAssertionObservation(
+            source: source,
+            observed: observed,
+            details: details
+        )
+    }
+
+    private static func frameRect(_ frame: ThemeFidelityElementFrames.Frame) -> CGRect {
+        CGRect(x: frame.x, y: frame.y, width: frame.width, height: frame.height)
+    }
+
+    static func structuralAssertionIDs(
+        for surface: ThemeFidelitySurface
+    ) -> [String] {
+        return switch surface {
+        case .workspaceEmpty:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.no-horizontal-overflow",
+             "assert.mobile-hit-targets", "assert.no-placeholder-art"]
+        case .composeShort, .inscriptionPreview:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.safe-region-no-overlap",
+             "assert.no-placeholder-art"]
+        case .composeLong:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.safe-region-no-overlap",
+             "assert.no-horizontal-overflow"]
+        case .receivedCipher:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.state-text-shape-truthful"]
+        case .shareBuilder:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.mobile-hit-targets",
+             "assert.interactive-static-plan-parity"]
+        case .staticShare:
+            ["assert.element.exists", "assert.safe-region-no-overlap",
+             "assert.interactive-static-plan-parity", "assert.no-placeholder-art"]
+        case .settingsCodexCard:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.state-text-shape-truthful",
+             "assert.no-placeholder-art"]
+        case .settingsDefaultsPreview:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.interactive-static-plan-parity"]
+        case .vaultLocked:
+            ["assert.state-text-shape-truthful", "assert.element.viewport-contained"]
+        case .vaultProgress, .vaultEncountered, .vaultOwned, .vaultSelected:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.state-text-shape-truthful"]
+        case .relicPicker:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.all-three-relics-present",
+             "assert.no-system-symbol-artifact"]
+        case .sealPicker:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.all-six-seals-present",
+             "assert.no-system-symbol-artifact"]
+        case .mastery:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.mastery-frame-crest-title-present",
+             "assert.safe-region-no-overlap"]
+        case .highContrast:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.state-text-shape-truthful"]
+        case .reduceMotion:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained"]
+        case .largeText:
+            ["assert.element.exists", "assert.element.visible",
+             "assert.element.viewport-contained", "assert.no-horizontal-overflow",
+             "assert.large-text-required-controls-visible"]
+        }
+    }
+
+    private static func hitTargetElementIDs(
+        surface: ThemeFidelitySurface
+    ) -> [String] {
+        switch surface {
+        case .workspaceEmpty:
+            [
+                "workspace.artifact-control.relic",
+                "workspace.artifact-control.seal",
+                "workspace.artifact-control.frame",
+            ]
+        case .shareBuilder:
+            [
+                "share-builder.reset-defaults",
+                "share-builder.save-defaults",
+                "share-builder.share",
+            ]
+        default:
+            []
+        }
+    }
+
+    private static var largeTextControlIDs: [String] {
+        var identifiers = [
+            "workspace.result.edit",
+            "workspace.result.copy",
+            "message.quick-share",
+            "message.customize-share",
+            "workspace.result.clear",
+        ]
+        #if os(iOS)
+        identifiers.append("message.imessage-share")
+        #endif
+        return identifiers
+    }
+
+    private static func structuralElementIDs(
+        surface: ThemeFidelitySurface,
+        route: ThemeFidelityRoute,
+        rendererOutputs: [ThemeFidelityRendererOutput]
+    ) -> [String] {
+        if surface == .staticShare {
+            return rendererOutputs.map(\.outputID)
+        }
+        return route.authorityElementIDs
+    }
+
+    private static func compositionPlan(
+        surface: ThemeFidelitySurface,
+        model: ThemeFidelityRenderModel
+    ) -> ThemeArtifactCompositionPlan {
+        switch surface {
+        case .highContrast:
+            model.highContrastPlan
+        case .reduceMotion:
+            model.reduceMotionPlan
+        default:
+            model.previewPlan
+        }
+    }
+
+    private static func compositionResourceIDs(
+        _ plan: ThemeArtifactCompositionPlan
+    ) -> [ThemeResourceID] {
+        [
+            plan.relicResourceID,
+            plan.sealResourceID,
+            plan.frameResourceID,
+            plan.backgroundResourceID,
+        ].compactMap { $0 }
+    }
+
+    private static func missingVisualResources(
+        surface: ThemeFidelitySurface,
+        model: ThemeFidelityRenderModel,
+        rendered: ThemeFidelityRenderedPNG,
+        rendererOutputs: [ThemeFidelityRendererOutput]
+    ) -> [String] {
+        if surface == .staticShare {
+            return rendererOutputs.isEmpty ? ["renderer-output"] : []
+        }
+        let requiredIDs: [ThemeResourceID] = switch surface {
+        case .workspaceEmpty:
+            [model.descriptor.codex.background.staticBaseResourceID]
+        case .settingsCodexCard:
+            [model.descriptor.codex.vault.selectedResourceID]
+        default:
+            compositionResourceIDs(compositionPlan(surface: surface, model: model))
+        }
+        let renderedIDs = Set(rendered.renderedResourceIDs)
+        return Array(Set(requiredIDs)).filter { resourceID in
+            !renderedIDs.contains(resourceID.rawValue)
+        }.map(\.rawValue).sorted()
+    }
+
+    private static func missingPickerArtworkResources(
+        surface: ThemeFidelitySurface,
+        model: ThemeFidelityRenderModel,
+        rendered: ThemeFidelityRenderedPNG
+    ) -> [String] {
+        let resourceIDs: [ThemeResourceID]
+        switch surface {
+        case .relicPicker:
+            resourceIDs = model.descriptor.codex.relics
+                .filter { $0.metadata.availability != .reservedInactive }
+                .map(\.thumbnailResourceID)
+        case .sealPicker:
+            resourceIDs = model.descriptor.codex.seals
+                .filter { $0.metadata.availability != .reservedInactive }
+                .map(\.thumbnailResourceID)
+        default:
+            resourceIDs = []
+        }
+        let renderedIDs = Set(rendered.renderedResourceIDs)
+        return Array(Set(resourceIDs)).filter { resourceID in
+            !renderedIDs.contains(resourceID.rawValue)
+        }.map(\.rawValue).sorted()
+    }
+
+    private static func stateTruth(
+        surface: ThemeFidelitySurface,
+        model: ThemeFidelityRenderModel,
+        snapshot: ThemeCoordinatorSnapshotDTO,
+        rendered: ThemeFidelityRenderedPNG,
+        runtimeDiagnostics: ThemeFidelityRuntimeDiagnostics
+    ) -> (value: Bool, details: [String: ThemeFidelityJSONValue]) {
+        switch surface {
+        case .highContrast:
+            let truthful = model.highContrastPlan.colorMode == .highContrast
+                && model.highContrastPlan.backgroundResourceID
+                    == model.descriptor.codex.background.highContrastResourceID
+            return (truthful, [
+                "colorMode": .string(model.highContrastPlan.colorMode.rawValue),
+                "backgroundResourceID": .string(
+                    model.highContrastPlan.backgroundResourceID.rawValue
+                ),
+            ])
+        case .receivedCipher:
+            let renderedSafePreview = rendered.elementFrames.frames.contains(where: {
+                $0.elementID == "received.safe-preview"
+            })
+            let truthful = model.safePreviewStatus == .valid
+                ? renderedSafePreview && model.safePreviewData != nil
+                : !renderedSafePreview
+            return (truthful, [
+                "safePreviewStatus": .string(String(describing: model.safePreviewStatus)),
+                "safePreviewRendered": .bool(renderedSafePreview),
+            ])
+        case .settingsCodexCard:
+            let provider = snapshot.providers.first(where: {
+                $0.codexID == model.descriptor.codex.id
+            })
+            let truthful = provider?.isSelected == true
+                && snapshot.effectiveCodexID == model.descriptor.codex.id
+            return (truthful, [
+                "providerSelected": .bool(provider?.isSelected == true),
+                "providerState": .string(provider?.state.rawValue ?? "missing"),
+            ])
+        case .vaultLocked:
+            let truthful = model.theme == .norse
+                ? runtimeDiagnostics.norseBase.lockedElementCount == 0
+                : ThemeCaptureIdentifier.vault(
+                    codexID: model.descriptor.codex.id,
+                    state: .locked
+                ).map { lockedID in
+                    rendered.elementFrames.frames.contains(where: {
+                        $0.elementID == lockedID
+                    })
+                } ?? false
+            return (truthful, [
+                "themeID": .string(model.descriptor.id.rawValue),
+                "norseLockedElementCount": .integer(
+                    runtimeDiagnostics.norseBase.lockedElementCount
+                ),
+            ])
+        case .vaultProgress, .vaultEncountered, .vaultOwned, .vaultSelected:
+            let requiredVisible = rendered.viewportAssertions.clippedElementIDs.isEmpty
+            return (requiredVisible, [
+                "surface": .string(surface.rawValue),
+                "clippedElementIDs": .strings(
+                    rendered.viewportAssertions.clippedElementIDs
+                ),
+            ])
+        default:
+            return (true, ["surface": .string(surface.rawValue)])
+        }
+    }
+
+    private static func luminancePixels(
+        _ data: Data
+    ) throws -> (width: Int, height: Int, values: [Double]) {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil)
+        else { throw ThemeFidelityCaptureError.renderFailed }
+        let width = image.width
+        let height = image.height
+        var rgba = [UInt8](repeating: 0, count: width * height * 4)
+        let rendered = rgba.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(
+                data: buffer.baseAddress,
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: width * 4,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ) else { return false }
+            context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return true
+        }
+        guard rendered else { throw ThemeFidelityCaptureError.renderFailed }
+        var values = [Double]()
+        values.reserveCapacity(width * height)
+        for offset in stride(from: 0, to: rgba.count, by: 4) {
+            let red = Double(rgba[offset]) / 255
+            let green = Double(rgba[offset + 1]) / 255
+            let blue = Double(rgba[offset + 2]) / 255
+            values.append(0.2126 * red + 0.7152 * green + 0.0722 * blue)
+        }
+        return (width, height, values)
     }
 }
 
@@ -2175,6 +3703,7 @@ private final class ThemeFidelityPersistentRenderer {
             data: png,
             width: bitmap.pixelsWide,
             height: bitmap.pixelsHigh,
+            capturedAt: Date(),
             viewportAssertions: viewportAssertions(
                 viewportBounds: hostingView.bounds,
                 frames: probeStore.frames,
@@ -2241,6 +3770,7 @@ private final class ThemeFidelityPersistentRenderer {
             data: png,
             width: cgImage.width,
             height: cgImage.height,
+            capturedAt: Date(),
             viewportAssertions: viewportAssertions(
                 viewportBounds: controller.view.bounds,
                 frames: probeStore.frames,
@@ -2253,6 +3783,43 @@ private final class ThemeFidelityPersistentRenderer {
             ),
             renderedResourceIDs: [],
             renderedResourceBindings: []
+        )
+        #endif
+    }
+
+    func recapture(
+        destination: ThemeFidelityDestination
+    ) throws -> ThemeFidelityImageCapture {
+        #if os(macOS)
+        hostingView.layoutSubtreeIfNeeded()
+        hostingView.displayIfNeeded()
+        guard let bitmap = hostingView.bitmapImageRepForCachingDisplay(in: hostingView.bounds)
+        else { throw ThemeFidelityCaptureError.renderFailed }
+        hostingView.cacheDisplay(in: hostingView.bounds, to: bitmap)
+        guard let png = bitmap.representation(using: .png, properties: [:])
+        else { throw ThemeFidelityCaptureError.renderFailed }
+        return ThemeFidelityImageCapture(
+            data: png,
+            width: bitmap.pixelsWide,
+            height: bitmap.pixelsHigh,
+            capturedAt: Date()
+        )
+        #elseif os(iOS)
+        let bounds = CGRect(origin: .zero, size: destination.pointSize)
+        controller.view.layoutIfNeeded()
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = destination.scale
+        format.opaque = true
+        let image = UIGraphicsImageRenderer(size: destination.pointSize, format: format).image {
+            _ in controller.view.drawHierarchy(in: bounds, afterScreenUpdates: true)
+        }
+        guard let cgImage = image.cgImage, let png = image.pngData()
+        else { throw ThemeFidelityCaptureError.renderFailed }
+        return ThemeFidelityImageCapture(
+            data: png,
+            width: cgImage.width,
+            height: cgImage.height,
+            capturedAt: Date()
         )
         #endif
     }

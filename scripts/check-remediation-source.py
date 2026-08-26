@@ -102,12 +102,14 @@ NORSE_RESOURCE_ROOT = Path(
 )
 NORSE_PROVENANCE = (
     NORSE_RESOURCE_ROOT
-    / "Production/Metadata/Norse-Production-Asset-Provenance-v1.0.json"
+    / "Production/Metadata/Norse-Production-Asset-Provenance-v2.0.json"
 )
 NORSE_INTEGRITY = (
     NORSE_RESOURCE_ROOT
-    / "Production/Metadata/Norse-Resource-Integrity-Manifest-v1.0.json"
+    / "Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json"
 )
+EXPECTED_NORSE_PROVENANCE_SCHEMA_VERSION = "2.0"
+EXPECTED_NORSE_RESOURCE_COUNT = 70
 
 
 def sha256_file(path: Path) -> str:
@@ -312,8 +314,16 @@ class Checker:
         try:
             document = json.loads(provenance_path.read_text(encoding="utf-8"))
             resources = document["resources"]
-            if not isinstance(resources, list) or len(resources) != 55:
-                raise ValueError("provenance must contain 55 resources")
+            if (
+                document.get("schemaVersion")
+                != EXPECTED_NORSE_PROVENANCE_SCHEMA_VERSION
+                or document.get("resourceCount") != EXPECTED_NORSE_RESOURCE_COUNT
+                or not isinstance(resources, list)
+                or len(resources) != EXPECTED_NORSE_RESOURCE_COUNT
+            ):
+                raise ValueError(
+                    "provenance must identify schema 2.0 and contain 70 resources"
+                )
         except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
             self.add("RMS-006", check, NORSE_PROVENANCE, f"invalid provenance: {error}")
             return
@@ -615,8 +625,16 @@ def validate_norse_product(repository_root: Path, product_root: Path) -> list[Fi
     try:
         document = json.loads(provenance_path.read_text(encoding="utf-8"))
         resources = document["resources"]
-        if not isinstance(resources, list) or len(resources) != 55:
-            raise ValueError("provenance must contain 55 resources")
+        if (
+            document.get("schemaVersion")
+            != EXPECTED_NORSE_PROVENANCE_SCHEMA_VERSION
+            or document.get("resourceCount") != EXPECTED_NORSE_RESOURCE_COUNT
+            or not isinstance(resources, list)
+            or len(resources) != EXPECTED_NORSE_RESOURCE_COUNT
+        ):
+            raise ValueError(
+                "provenance must identify schema 2.0 and contain 70 resources"
+            )
     except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as error:
         return [
             Finding(
