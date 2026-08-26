@@ -691,11 +691,23 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
             deltaY: towardStart ? magnitude : -magnitude
         )
         #else
-        if towardStart {
-            scrollView.swipeDown()
-        } else {
-            scrollView.swipeUp()
-        }
+        let viewportHeight = max(scrollView.frame.height, 1)
+        let normalizedDistance = min(
+            max((distance ?? viewportHeight * 0.4) / viewportHeight, 0.05),
+            0.4
+        )
+        let start = scrollView.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)
+        )
+        let end = scrollView.coordinate(
+            withNormalizedOffset: CGVector(
+                dx: 0.5,
+                dy: towardStart
+                    ? 0.5 + normalizedDistance
+                    : 0.5 - normalizedDistance
+            )
+        )
+        start.press(forDuration: 0.05, thenDragTo: end)
         #endif
     }
 
