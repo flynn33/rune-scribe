@@ -17,12 +17,15 @@ from theme_fidelity_evidence_v42 import (  # noqa: E402
     CaptureEvidence,
     Context,
     EvidenceError,
+    StagingWriter,
     build_gate_records,
     build_responsive_aggregate,
     generated_logical_names,
     load_gate_catalog,
     sha256_file,
     validate_qualification_results,
+    write_capture_indexes,
+    write_platform_records,
 )
 from documentation_source_manifest import validate_current_manifest  # noqa: E402
 
@@ -31,6 +34,11 @@ GATE_CATALOG = (
     ROOT
     / "docs/verification/theme-fidelity-v4/authority/v4.2/04-VERIFICATION-PATCH"
     / "Gate-Catalog-v4.2.json"
+)
+COMPARISON_AUTHORITY = (
+    ROOT
+    / "docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY"
+    / "Comparison-Authority-v1.2.json"
 )
 SOURCE_SHA = "a" * 40
 
@@ -112,6 +120,118 @@ class ThemeFidelityEvidenceV42Tests(unittest.TestCase):
         )
         return path
 
+    def platform_capture_fixture(self, output_root: Path) -> CaptureEvidence:
+        authority = json.loads(COMPARISON_AUTHORITY.read_text(encoding="utf-8"))
+        entries = [
+            {"entryID": entry["id"], "destination": entry["destination"]}
+            for entry in authority["entries"]
+        ]
+        commands = []
+        for role in (
+            "iphone",
+            "iphone-xcui",
+            "ipad",
+            "ipad-xcui",
+            "macos",
+            "macos-xcui",
+        ):
+            log = output_root / "logs" / f"{role}.log"
+            log.parent.mkdir(parents=True, exist_ok=True)
+            log.write_text(f"{role} passed\n", encoding="utf-8")
+            commands.append(
+                {
+                    "command": ["fixture", role],
+                    "startTimestamp": "2026-08-25T12:00:00Z",
+                    "endTimestamp": "2026-08-25T12:00:01Z",
+                    "exitCode": 0,
+                    "result": "PASS",
+                    "failures": [],
+                    "log": str(log),
+                    "logSHA256": sha256_file(log),
+                }
+            )
+        marker = output_root / "fixture.json"
+        return CaptureEvidence(
+            run_path=marker,
+            run={"commands": commands},
+            index_path=marker,
+            index={"entries": entries},
+            source_before_path=marker,
+            source_after_path=marker,
+            source_manifest={},
+            records_by_entry={},
+        )
+
+    def focal_capture_fixture(
+        self, output_root: Path
+    ) -> tuple[
+        CaptureEvidence,
+        dict[str, list[dict[str, object]]],
+        dict[str, dict[str, object]],
+    ]:
+        authority = json.loads(COMPARISON_AUTHORITY.read_text(encoding="utf-8"))
+        artifact = output_root / "artifact.bin"
+        artifact.parent.mkdir(parents=True, exist_ok=True)
+        artifact.write_bytes(b"fixture")
+        entries: list[dict[str, object]] = []
+        grouped: dict[str, list[dict[str, object]]] = {
+            theme: [] for theme in ("Norse", "Moonleaf", "Sunspire", "Wildwood", "Gloamthorn")
+        }
+        semantics: dict[str, dict[str, object]] = {}
+        for authority_entry in authority["entries"]:
+            mappings = []
+            for authority_mapping in authority_entry["referenceMappings"]:
+                disposition = authority_mapping["scoreDisposition"]
+                mapping = {
+                    "mappingID": authority_mapping["mappingID"],
+                    "scoreDisposition": disposition,
+                    "report": str(artifact),
+                }
+                if disposition != "negative-invariant":
+                    mapping["candidate"] = str(artifact)
+                    mapping["candidateID"] = "fixture-candidate"
+                if disposition == "image-metric":
+                    mapping["heatmap"] = str(artifact)
+                mappings.append(mapping)
+                semantics[authority_mapping["mappingID"]] = {
+                    "scoreDisposition": disposition
+                }
+            entry = {
+                "entryID": authority_entry["id"],
+                "theme": authority_entry["theme"],
+                "surface": authority_entry["surface"],
+                "destination": authority_entry["destination"],
+                "capture": {"path": str(artifact)},
+                "mappingResults": mappings,
+            }
+            entries.append(entry)
+            grouped[authority_entry["theme"]].append(entry)
+        marker = output_root / "fixture.json"
+        capture = CaptureEvidence(
+            run_path=marker,
+            run={},
+            index_path=marker,
+            index={"entries": entries},
+            source_before_path=marker,
+            source_after_path=marker,
+            source_manifest={},
+            records_by_entry={},
+        )
+        return capture, grouped, semantics
+
+    def platform_context(self, output_root: Path) -> Context:
+        return Context(
+            root=ROOT,
+            output_root=output_root,
+            source_sha=SOURCE_SHA,
+            authority_sha="c" * 64,
+            asset_manifest_sha="d" * 64,
+            command=["fixture"],
+            start_timestamp="2026-08-25T12:00:00Z",
+            end_timestamp="2026-08-25T12:00:01Z",
+            toolchain={"fixture": "1"},
+        )
+
     def test_qualification_results_bind_all_non_visual_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -176,6 +296,116 @@ class ThemeFidelityEvidenceV42Tests(unittest.TestCase):
             [gate["id"] for gate in self.gates],
         )
         self.assertTrue(all(record["result"] == "PASS" for record in records))
+
+    def test_platform_records_use_authority_destination_counts(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output_root = root / "output"
+            capture = self.platform_capture_fixture(output_root)
+            writer = StagingWriter(self.platform_context(output_root), root / "stage")
+
+            write_platform_records(writer, writer.context, capture)
+
+            expected = {
+                "iphone": (100, {"iphone-portrait": 100}),
+                "ipad": (100, {"ipad-portrait": 100}),
+                "macos": (
+                    200,
+                    {"macos-resized": 100, "macos-standard": 100},
+                ),
+            }
+            for platform, (entry_count, destination_counts) in expected.items():
+                record = json.loads(
+                    (root / "stage/test-runs" / f"{platform}.json").read_text(
+                        encoding="utf-8"
+                    )
+                )
+                self.assertEqual(record["entryCount"], entry_count)
+                self.assertEqual(record["destinationEntryCounts"], destination_counts)
+
+    def test_platform_records_reject_incomplete_destination_counts(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output_root = root / "output"
+            capture = self.platform_capture_fixture(output_root)
+            capture.index["entries"] = capture.index["entries"][1:]
+            writer = StagingWriter(self.platform_context(output_root), root / "stage")
+
+            with self.assertRaisesRegex(
+                EvidenceError, "capture destination counts differ from comparison authority"
+            ):
+                write_platform_records(writer, writer.context, capture)
+
+    def test_theme_focal_records_use_authority_image_metric_counts(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output_root = root / "output"
+            capture, grouped, semantics = self.focal_capture_fixture(output_root)
+            writer = StagingWriter(self.platform_context(output_root), root / "stage")
+
+            write_capture_indexes(writer, writer.context, capture, grouped, semantics)
+
+            expected = {
+                "gloamthorn": 54,
+                "moonleaf": 74,
+                "norse": 148,
+                "sunspire": 62,
+                "wildwood": 62,
+            }
+            for theme, image_count in expected.items():
+                comparison = json.loads(
+                    (root / "stage/comparisons" / f"{theme}-focal-comparison.json").read_text(
+                        encoding="utf-8"
+                    )
+                )
+                heatmaps = json.loads(
+                    (root / "stage/heatmaps" / theme / "index.json").read_text(
+                        encoding="utf-8"
+                    )
+                )
+                self.assertEqual(comparison["imageMetricCount"], image_count)
+                self.assertEqual(heatmaps["heatmapCount"], image_count)
+
+    def test_theme_focal_records_reject_wrong_distribution_with_global_counts_intact(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            output_root = root / "output"
+            capture, grouped, semantics = self.focal_capture_fixture(output_root)
+            by_theme = {
+                theme: [entry for entry in capture.index["entries"] if entry["theme"] == theme]
+                for theme in ("Gloamthorn", "Moonleaf")
+            }
+            swap: tuple[dict[str, object], dict[str, object]] | None = None
+            for gloamthorn in by_theme["Gloamthorn"]:
+                gloamthorn_count = sum(
+                    mapping["scoreDisposition"] == "image-metric"
+                    for mapping in gloamthorn["mappingResults"]
+                )
+                for moonleaf in by_theme["Moonleaf"]:
+                    moonleaf_count = sum(
+                        mapping["scoreDisposition"] == "image-metric"
+                        for mapping in moonleaf["mappingResults"]
+                    )
+                    if gloamthorn_count != moonleaf_count:
+                        swap = gloamthorn, moonleaf
+                        break
+                if swap is not None:
+                    break
+            self.assertIsNotNone(swap)
+            gloamthorn, moonleaf = swap  # type: ignore[misc]
+            gloamthorn["theme"], moonleaf["theme"] = moonleaf["theme"], gloamthorn["theme"]
+            regrouped = {
+                theme: [entry for entry in capture.index["entries"] if entry["theme"] == theme]
+                for theme in ("Norse", "Moonleaf", "Sunspire", "Wildwood", "Gloamthorn")
+            }
+            writer = StagingWriter(self.platform_context(output_root), root / "stage")
+
+            with self.assertRaisesRegex(
+                EvidenceError, "focal evidence lacks exact passing coverage"
+            ):
+                write_capture_indexes(writer, writer.context, capture, regrouped, semantics)
 
     def test_responsive_aggregate_rechecks_every_assertion(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

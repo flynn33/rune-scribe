@@ -1057,6 +1057,49 @@ def authority_mapping_semantics(root: Path) -> dict[str, dict[str, Any]]:
     return semantics
 
 
+def authority_destination_entry_counts(root: Path) -> Counter[str]:
+    authority = load_json(root / DEFAULT_AUTHORITY, "comparison authority")
+    entries = authority.get("entries")
+    if not isinstance(entries, list) or len(entries) != EXPECTED_ENTRY_COUNT:
+        raise EvidenceError("comparison authority lacks exactly 400 entries")
+    counts: Counter[str] = Counter()
+    for ordinal, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            raise EvidenceError(f"comparison authority entry {ordinal} is invalid")
+        destination = entry.get("destination")
+        if destination not in EXPECTED_DESTINATIONS:
+            raise EvidenceError(
+                f"comparison authority entry {ordinal} has an undeclared destination"
+            )
+        counts[destination] += 1
+    if set(counts) != set(EXPECTED_DESTINATIONS):
+        raise EvidenceError("comparison authority lacks exact destination coverage")
+    return counts
+
+
+def authority_theme_image_metric_counts(root: Path) -> Counter[str]:
+    authority = load_json(root / DEFAULT_AUTHORITY, "comparison authority")
+    entries = authority.get("entries")
+    if not isinstance(entries, list) or len(entries) != EXPECTED_ENTRY_COUNT:
+        raise EvidenceError("comparison authority lacks exactly 400 entries")
+    counts: Counter[str] = Counter()
+    for ordinal, entry in enumerate(entries):
+        if not isinstance(entry, dict) or entry.get("theme") not in EXPECTED_THEMES:
+            raise EvidenceError(f"comparison authority entry {ordinal} has an undeclared theme")
+        mappings = entry.get("referenceMappings")
+        if not isinstance(mappings, list):
+            raise EvidenceError(f"comparison authority entry {ordinal} has invalid mappings")
+        counts[entry["theme"]] += sum(
+            1
+            for mapping in mappings
+            if isinstance(mapping, dict)
+            and mapping.get("scoreDisposition") == "image-metric"
+        )
+    if set(counts) != set(EXPECTED_THEMES):
+        raise EvidenceError("comparison authority lacks exact theme coverage")
+    return counts
+
+
 def command_bindings_for_platform(
     capture: CaptureEvidence,
     platform: str,
@@ -1201,6 +1244,7 @@ def write_capture_indexes(
         "Wildwood": "wildwood",
         "Gloamthorn": "gloamthorn",
     }
+    authority_image_counts = authority_theme_image_metric_counts(context.root)
     for theme in EXPECTED_THEMES:
         prefix = theme_logical_prefix[theme]
         theme_reports = [item for item in comparison_reports if item["theme"] == theme]
@@ -1208,7 +1252,12 @@ def write_capture_indexes(
             item for item in theme_reports if item["scoreDisposition"] == "image-metric"
         ]
         theme_heatmaps = [item for item in heatmaps if item["theme"] == theme]
-        if len(theme_reports) == 0 or len(image_reports) != 80 or len(theme_heatmaps) != 80:
+        expected_image_count = authority_image_counts[theme]
+        if (
+            len(theme_reports) == 0
+            or len(image_reports) != expected_image_count
+            or len(theme_heatmaps) != expected_image_count
+        ):
             raise EvidenceError(f"{theme} focal evidence lacks exact passing coverage")
         writer.record(
             f"comparisons/{prefix}-focal-comparison.json",
@@ -1550,6 +1599,10 @@ def write_platform_records(
         "ipad": {"ipad-portrait"},
         "macos": {"macos-standard", "macos-resized"},
     }
+    authority_counts = authority_destination_entry_counts(context.root)
+    capture_counts = Counter(entry["destination"] for entry in capture.index["entries"])
+    if capture_counts != authority_counts:
+        raise EvidenceError("capture destination counts differ from comparison authority")
     for platform, destinations in destination_sets.items():
         commands = command_bindings_for_platform(capture, platform, context.output_root)
         entries = [
@@ -1557,7 +1610,7 @@ def write_platform_records(
             for entry in capture.index["entries"]
             if entry["destination"] in destinations
         ]
-        expected_count = 160 if platform == "macos" else 80
+        expected_count = sum(authority_counts[destination] for destination in destinations)
         if len(entries) != expected_count:
             raise EvidenceError(f"{platform} evidence lacks {expected_count} entries")
         writer.record(
@@ -1566,6 +1619,10 @@ def write_platform_records(
             {
                 "platform": platform,
                 "destinations": sorted(destinations),
+                "destinationEntryCounts": {
+                    destination: authority_counts[destination]
+                    for destination in sorted(destinations)
+                },
                 "entryCount": len(entries),
                 "entriesSHA256": canonical_json_sha256(entries),
                 "executions": commands,
