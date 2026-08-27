@@ -95,6 +95,13 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertTrue(header.contains("var id: String { \"\\(systemImage).\\(help)\" }"))
     }
 
+    func testWorkspaceCanvasSizingIncludesMultiPagePreviewChrome() {
+        XCTAssertEqual(ContentView.workspaceCanvasVerticalInset(pageCount: nil), 24)
+        XCTAssertEqual(ContentView.workspaceCanvasVerticalInset(pageCount: 1), 24)
+        XCTAssertEqual(ContentView.workspaceCanvasVerticalInset(pageCount: 2), 78)
+        XCTAssertEqual(ContentView.workspaceCanvasVerticalInset(pageCount: 16), 78)
+    }
+
     func testPrimaryPresentationsUseSharedSemanticSurfaces() throws {
         let views = viewsDirectory()
         let theme = try source("RuneTheme.swift", in: views)

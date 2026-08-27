@@ -319,7 +319,12 @@ struct ContentView: View {
                 #endif
                 let maximumCanvasWidth = viewportWidth.map {
                     let horizontalLimit = $0 - (2 * RuneMetrics.pad) - 20
-                    let verticalLimit = max(1, proxy.size.height - 24)
+                    let verticalLimit = max(
+                        1,
+                        proxy.size.height - Self.workspaceCanvasVerticalInset(
+                            pageCount: resultArtifactComposition?.pages.count
+                        )
+                    )
                         * CGFloat(ShareArtifactRenderPlan.outputWidth)
                         / CGFloat(ShareArtifactRenderPlan.outputHeight)
                     return max(1, min(horizontalLimit, verticalLimit))
@@ -342,6 +347,17 @@ struct ContentView: View {
         #else
         forcesScrollableWorkspaceLayout
         #endif
+    }
+
+    nonisolated static func workspaceCanvasVerticalInset(pageCount: Int?) -> CGFloat {
+        let previewPadding: CGFloat = 20
+        let fitMargin: CGFloat = 4
+        let pagerSpacing: CGFloat = 8
+        let pagerMinimumHeight: CGFloat = 46
+        let pagerChrome = (pageCount ?? 0) > 1
+            ? pagerSpacing + pagerMinimumHeight
+            : 0
+        return previewPadding + fitMargin + pagerChrome
     }
 
     private func workspaceBody(maximumCanvasWidth: CGFloat?) -> some View {
