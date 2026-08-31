@@ -50,6 +50,24 @@ final class ThemeRootRemediationTests: XCTestCase {
         )
     }
 
+    func testReceivedCipherOpenCodexRoutesToAppearanceSettings() throws {
+        XCTAssertEqual(
+            RootReceivedMessageNavigationPolicy.openCodexRoute,
+            .openSettings
+        )
+
+        let views = viewsDirectory()
+        let root = try source("RootView.swift", in: views)
+        let received = try source("ReceivedMessageView.swift", in: views)
+
+        XCTAssertTrue(root.contains("onOpenCodex:"))
+        XCTAssertTrue(
+            root.contains("RootReceivedMessageNavigationPolicy.openCodexRoute")
+        )
+        XCTAssertTrue(received.contains("onOpenCodex?()"))
+        XCTAssertFalse(received.contains("libraryAction: { dismiss() }"))
+    }
+
     func testApplicationShellOwnsRuntimeBackgroundAndHeaderUsesScrim() throws {
         let views = viewsDirectory()
         let root = try source("RootView.swift", in: views)
@@ -81,8 +99,15 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertTrue(content.contains("let maximumCanvasWidth = viewportWidth.map"))
         XCTAssertTrue(content.contains("ScrollView {\n                    workspaceBody"))
         XCTAssertTrue(content.contains(".frame(minHeight: proxy.size.height, alignment: .top)"))
+        XCTAssertTrue(content.contains(".scrollPosition(id: $initialScrollTarget, anchor: .bottom)"))
+        XCTAssertTrue(content.contains(".id(ContentViewInitialViewport.resultActions.rawValue)"))
+        XCTAssertTrue(content.contains(".scrollTargetLayout()"))
+        XCTAssertTrue(content.contains("workspaceTextFrameMinimumHeight("))
         XCTAssertTrue(content.contains(".scrollDismissesKeyboard(.immediately)"))
         XCTAssertTrue(content.contains(".scrollBounceBehavior(.basedOnSize)"))
+        XCTAssertTrue(content.contains("ThemeChromeProtectedContentLayout("))
+        XCTAssertTrue(content.contains("panelPixelSize: panelBorderPixelSize"))
+        XCTAssertTrue(content.contains("private var panelBorderPixelSize: ThemePixelSize?"))
         XCTAssertTrue(
             content.contains(".themeCaptureViewportIdentifier(composeCaptureIdentifier)")
         )
@@ -93,6 +118,11 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertTrue(content.contains(".accessibilityIdentifier(\"workspace.keyboard.done\")"))
         XCTAssertFalse(header.contains("let id = UUID()"))
         XCTAssertTrue(header.contains("var id: String { \"\\(systemImage).\\(help)\" }"))
+
+        let qualification = try source("ThemeFidelityQualificationRoute.swift", in: views)
+        let largeTextStart = try XCTUnwrap(qualification.range(of: "case .largeText:"))
+        let largeTextSource = qualification[largeTextStart.lowerBound...]
+        XCTAssertTrue(largeTextSource.contains("initialViewport: .resultActions"))
     }
 
     func testWorkspaceCanvasSizingIncludesMultiPagePreviewChrome() {
@@ -100,6 +130,25 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertEqual(ContentView.workspaceCanvasVerticalInset(pageCount: 1), 24)
         XCTAssertEqual(ContentView.workspaceCanvasVerticalInset(pageCount: 2), 78)
         XCTAssertEqual(ContentView.workspaceCanvasVerticalInset(pageCount: 16), 78)
+
+        XCTAssertNil(ContentView.workspaceTextFrameMinimumHeight(
+            maximumCanvasWidth: nil,
+            pageCount: 1
+        ))
+        XCTAssertEqual(
+            ContentView.workspaceTextFrameMinimumHeight(
+                maximumCanvasWidth: 320,
+                pageCount: 1
+            ),
+            264
+        )
+        XCTAssertEqual(
+            ContentView.workspaceTextFrameMinimumHeight(
+                maximumCanvasWidth: 320,
+                pageCount: 2
+            ),
+            318
+        )
     }
 
     func testPrimaryPresentationsUseSharedSemanticSurfaces() throws {
@@ -146,6 +195,89 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertTrue(root.contains("showsDetails.toggle()"))
         XCTAssertTrue(root.contains("Dismiss appearance warning"))
         XCTAssertFalse(root.contains("alert(\"Appearance resources"))
+    }
+
+    func testUnlockRevealPrefersVerifiedProviderArtworkWithoutCropping() throws {
+        let reveal = try source("UnlockRevealView.swift", in: viewsDirectory())
+
+        XCTAssertTrue(reveal.contains("private var primaryRewardThemeImage: Image?"))
+        XCTAssertTrue(reveal.contains("presentation.imageReference(for: $0)?.image"))
+        XCTAssertTrue(reveal.contains("if let image = primaryRewardThemeImage"))
+        XCTAssertTrue(
+            reveal.contains(
+                "Image(systemName: reveal.primaryRewardPresentation.fallbackSystemImageName)"
+            )
+        )
+        XCTAssertFalse(reveal.contains(".scaledToFill()"))
+        XCTAssertTrue(reveal.contains("ThemeChromeImage(slot: .panelBorder)"))
+        XCTAssertTrue(reveal.contains("ThemeChromeProtectedContentLayout("))
+        XCTAssertTrue(reveal.contains("panelPixelSize: panelBorderPixelSize"))
+        XCTAssertTrue(reveal.contains(".allowsHitTesting(false)"))
+        XCTAssertFalse(reveal.contains(".padding(18)"))
+    }
+
+    func testPickerVaultAndShareArtworkRemainAspectFit() throws {
+        let settings = try source("SettingsView.swift", in: viewsDirectory())
+        let vault = try source("VaultProgressView.swift", in: viewsDirectory())
+        let share = try source("ShareBuilderView.swift", in: sharingDirectory())
+
+        XCTAssertFalse(settings.contains(".scaledToFill()"))
+        XCTAssertFalse(vault.contains(".scaledToFill()"))
+        XCTAssertFalse(share.contains(".scaledToFill()"))
+        XCTAssertTrue(settings.contains("image.resizable().scaledToFit()"))
+        XCTAssertTrue(settings.contains("Text(selected?.name ?? \"None\")"))
+        XCTAssertTrue(settings.contains(".layoutPriority(1)"))
+        XCTAssertTrue(settings.contains(".contentShape(Rectangle())\n            .accessibilityHidden(true)"))
+        XCTAssertTrue(settings.contains(".accessibilityElement(children: .ignore)"))
+        XCTAssertTrue(settings.contains(".accessibilityValue(selected?.name ?? \"None\")"))
+        let effectsDetailStart = try XCTUnwrap(
+            settings.range(of: "Text(appearanceEffectsDetail)")
+        )
+        let defaultsPreviewStart = try XCTUnwrap(
+            settings.range(
+                of: "appearanceDefaultsPreview",
+                range: effectsDetailStart.upperBound..<settings.endIndex
+            )
+        )
+        let effectsDetailSource = String(
+            settings[effectsDetailStart.lowerBound..<defaultsPreviewStart.lowerBound]
+        )
+        XCTAssertTrue(
+            effectsDetailSource.contains(".fixedSize(horizontal: false, vertical: true)")
+        )
+        XCTAssertTrue(vault.contains("image.resizable().scaledToFit()"))
+        XCTAssertTrue(share.contains("image.resizable().scaledToFit()"))
+    }
+
+    func testShareVaultAndCatalogControlsRemainTruthfulAndActionable() throws {
+        let views = viewsDirectory()
+        let share = try source("ShareBuilderView.swift", in: sharingDirectory())
+        let vault = try source("VaultProgressView.swift", in: views)
+        let catalog = try source("CodexCatalogRoot.swift", in: views)
+        let assemblies = try source("CodexProductionAssemblies.swift", in: views)
+
+        XCTAssertTrue(share.contains("if let image = renderedPreviewImage"))
+        XCTAssertFalse(share.contains("CodexSharePreviewCard("))
+        XCTAssertFalse(share.contains("runescribe://message"))
+
+        XCTAssertTrue(vault.contains("let state = activeCodexVisualState(descriptor)"))
+        XCTAssertTrue(vault.contains("heading: \"Current Vault State\""))
+        XCTAssertTrue(vault.contains("vault-progress.section-picker"))
+        XCTAssertTrue(vault.contains("vault-progress.section.\\(item.rawValue.lowercased())"))
+        XCTAssertFalse(vault.contains("heading: \"Vault Codex States\""))
+        XCTAssertFalse(vault.contains(".frame(height: 760)"))
+
+        XCTAssertTrue(catalog.contains("onGuide: { showsGuide = true }"))
+        XCTAssertFalse(catalog.contains("label: \"Codex guide\", action: {}"))
+        XCTAssertGreaterThanOrEqual(
+            catalog.components(separatedBy: ".disabled(!item.isSelectable)").count - 1,
+            2
+        )
+        XCTAssertTrue(
+            assemblies.contains(
+                "var selectState: ((CodexVaultCardStateModel) -> Void)? = nil"
+            )
+        )
     }
 
     private func viewsDirectory() -> URL {

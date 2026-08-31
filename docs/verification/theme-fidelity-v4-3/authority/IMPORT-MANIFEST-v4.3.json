@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0",
+  "authorityVersion": "4.3",
+  "status": "active-acceptance-authority",
+  "sourcePackage": {
+    "identity": "Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+    "payloadTreeSHA256": "f5afb18cac3ff92680aced4346e1fa8c50ceeda5e6264d6cecf50c753092a8b0",
+    "packageManifestSHA256": "e5fea0a6f7d3f6301ee2ac59973ffccda4a4627f542fd9d1aab139afba2c3039",
+    "packageValidationSHA256": "86cecdbb45935629dd72a5c2e257f204b4feb0fc26075bb92700206a92709713",
+    "packageChecksumsSHA256": "bae8f9524c318c230a1d6638ad38b593e84f89b35317988165cc0630e0d1d51a"
+  },
+  "importPolicy": {
+    "includedRoots": [
+      "03-COMPARISON-AUTHORITY",
+      "04-ASSETS machine-readable manifests and the authorized system-chrome mask",
+      "06-EVIDENCE machine-readable gate and qualification schemas",
+      "package validation and checksum records"
+    ],
+    "excludedContent": "Reference imagery remains immutable in the controlling external package and the existing hash-locked v4.2 authority store. Production renderers receive no authority image bytes."
+  },
+  "activeFiles": {
+    "comparisonAuthority": "03-COMPARISON-AUTHORITY/Comparison-Authority-v1.3.json",
+    "comparisonSchema": "03-COMPARISON-AUTHORITY/Comparison-Authority-Schema-v1.3.json",
+    "canonicalCatalog": "03-COMPARISON-AUTHORITY/Canonical-Render-Catalog-v1.3.json",
+    "canonicalSchema": "03-COMPARISON-AUTHORITY/Canonical-Render-Catalog-Schema-v1.3.json",
+    "responsiveCandidateCatalog": "03-COMPARISON-AUTHORITY/Responsive-Candidate-Catalog-v1.3.json",
+    "responsiveSurfaceMatrix": "03-COMPARISON-AUTHORITY/Responsive-Surface-Matrix-v1.3.json",
+    "runtimeProbeCatalog": "03-COMPARISON-AUTHORITY/Runtime-Probe-Catalog-v1.3.json",
+    "deterministicSeedCatalog": "03-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.3.json",
+    "mappingCoverageReport": "03-COMPARISON-AUTHORITY/Mapping-Coverage-Report-v1.3.json",
+    "mappingIndex": "03-COMPARISON-AUTHORITY/Reference-Candidate-Mapping-Index-v1.3.csv",
+    "translation": "03-COMPARISON-AUTHORITY/V4.2-to-V4.3-Mapping-Translation.json",
+    "conflictResolution": "03-COMPARISON-AUTHORITY/V4.2-Conflict-Resolution-Report.json",
+    "assetManifest": "04-ASSETS/FULL-ASSET-MANIFEST-v4.3.json",
+    "canonicalSystemChromeMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+    "gateCatalog": "06-EVIDENCE/Gate-Catalog-v4.3.json",
+    "finalQualificationSchema": "06-EVIDENCE/Final-Qualification-Schema-v1.3.json",
+    "packageChecksums": "SHA256SUMS.txt"
+  },
+  "authorityHashes": {
+    "comparisonAuthoritySHA256": "2762104ea48819888c96937800d903b9163cb13879ab24c663adf10101abfb2e",
+    "canonicalRenderCatalogSHA256": "da599d438dfcad6792e9d472fadf30eebfcdeb7904e267e174add8208b974c8e",
+    "gateCatalogSHA256": "5761076edf7b55043401e94dec516c822fe40aec696862e375e34d07857e9dca"
+  },
+  "counts": {
+    "responsiveEntries": 400,
+    "canonicalCandidates": 50,
+    "canonicalImageMappings": 400,
+    "responsiveStructuralMappings": 700,
+    "negativeInvariantMappings": 4,
+    "mappingInstances": 1104,
+    "runtimeProbeDefinitions": 50,
+    "runtimeProbeInstances": 576,
+    "deterministicSeeds": 100,
+    "blockingGates": 40,
+    "resolvedV4_2ConflictingEntries": 21
+  },
+  "requiresFurtherOwnerInput": false
+}

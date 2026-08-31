@@ -273,6 +273,7 @@ public enum ReceivedSenderIdentityStatusDTO: String, Codable, Hashable, Sendable
 
 public struct ReceivedMessageDTO: Equatable, Sendable {
     public let id: MessageID
+    public let receivedAt: Date
     public let plaintext: String
     public let senderName: String
     public let cipherID: CipherID
@@ -283,6 +284,7 @@ public struct ReceivedMessageDTO: Equatable, Sendable {
 
     public init(
         id: MessageID,
+        receivedAt: Date,
         plaintext: String,
         senderName: String,
         cipherID: CipherID,
@@ -290,6 +292,7 @@ public struct ReceivedMessageDTO: Equatable, Sendable {
         senderIdentityStatus: ReceivedSenderIdentityStatusDTO = .trustedLocalCipher
     ) {
         self.id = id
+        self.receivedAt = receivedAt
         self.plaintext = plaintext
         self.senderName = senderName
         self.cipherID = cipherID
@@ -301,6 +304,7 @@ public struct ReceivedMessageDTO: Equatable, Sendable {
 
     public init(
         id: MessageID,
+        receivedAt: Date,
         plaintext: String,
         senderName: String,
         cipherID: CipherID,
@@ -316,6 +320,7 @@ public struct ReceivedMessageDTO: Equatable, Sendable {
             throw SharePresentationContractError.invalidSafePreview
         }
         self.id = id
+        self.receivedAt = receivedAt
         self.plaintext = plaintext
         self.senderName = senderName
         self.cipherID = cipherID

@@ -108,10 +108,11 @@ TEMPLATE_PATHS = (
     Path("RuneScrib.xcodeproj/project.pbxproj"),
     Path("RuneScrib/Resources/Fonts/OFL.txt"),
     Path(
-        "docs/verification/theme-fidelity-v4/generated/norse/Metadata/"
-        "Norse-Production-Asset-Derivation-v4.0.json"
+        "docs/verification/theme-fidelity-v4-3/generated/norse/Metadata/"
+        "Norse-Production-Asset-Derivation-v4.3.json"
     ),
     Path("docs/verification/theme-fidelity-v4/source-masters/norse"),
+    Path("docs/verification/theme-fidelity-v4-3/source-masters/norse"),
     Path(
         "docs/product-roadmap/"
         "Rune-Scribe-Codex-Roadmap-Remediation-Amendment-v1.1.md"
@@ -157,6 +158,8 @@ TEMPLATE_PATHS = (
     Path("scripts/check-remediation-source.py"),
     Path("scripts/check-norse-production-provenance.py"),
     Path("scripts/generate-norse-production-provenance.py"),
+    Path("scripts/extract-norse-runestone-catalog-source.py"),
+    Path("scripts/extract-norse-runestone-message-source.py"),
     Path("scripts/check-remediation-completion.py"),
     Path("scripts/generate-remediation-evidence.py"),
     Path("scripts/capture-remediation-domain-results.py"),
@@ -596,8 +599,8 @@ def prove_optional_provider_degradation(case_root: Path, source_package: Path) -
         ),
         (
             "MoonleafThemeProviderTests."
-            "testThemeCoordinatorActivatesLiveAndPreservesOwnedPreferenceDuringProviderFailure",
-            "testThemeCoordinatorActivatesLiveAndPreservesOwnedPreferenceDuringProviderFailure",
+            "testThemeCoordinatorRestoresOwnedPreferenceAndDeferredCorruptionFailsClosed",
+            "testThemeCoordinatorRestoresOwnedPreferenceAndDeferredCorruptionFailsClosed",
         ),
     )
     for test_filter, expected_name in filters:

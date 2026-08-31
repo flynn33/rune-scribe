@@ -256,7 +256,10 @@ require(
     f"version-{marketing}%20build%20{build}" in readme,
     "README version badge differs from project version",
 )
-require("All nine Elven Series recovery findings pass simultaneously" in readme, "README lacks current recovery result")
+require(
+    "All nine Elven Series recovery findings pass simultaneously" in normalized_readme,
+    "README lacks current recovery result",
+)
 require(f"Recovery is {RECOVERY_STATUS}" in readme, "README lacks the closed recovery result")
 require(
     re.search(
@@ -268,20 +271,26 @@ require(
 )
 require("Phase C is PASS / MERGED TO MAIN" in readme, "README lacks current Phase C result")
 require(
-    "roadmap-completion program is source-complete" in readme
+    "roadmap-completion baseline remains source-complete" in readme
     and "and not shipped" in readme,
-    "README lacks the roadmap-completion no-ship result",
+    "README lacks the roadmap baseline no-ship result",
 )
 require("## 🗺 Implementation roadmap" in readme, "README lacks the implementation roadmap")
 readme_roadmap = readme.split("## 🗺 Implementation roadmap", 1)[-1].split("## 🔐 Security & privacy", 1)[0]
 require(
-    f"version {marketing} build {build} roadmap-completion program" in readme_roadmap,
+    f"version {marketing} build {build} roadmap-completion baseline" in readme_roadmap,
     "README roadmap version differs from the project version",
 )
 require(
-    "| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Complete; physical-device qualification owner-only |"
+    "| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Baseline complete; v4.3 Theme Fidelity qualification in progress |"
     in readme_roadmap,
     "README Wave 6 roadmap scope differs",
+)
+require("tests-1219%20package" in readme, "README package-test badge is stale")
+require(
+    "**1219 package tests** (1082 XCTest cases and 137 Swift Testing cases)"
+    in normalized_readme,
+    "README package-test inventory is stale",
 )
 require(
     "| P12 | Full Xcode, parity, device" not in readme_roadmap,
@@ -1125,6 +1134,7 @@ if ERRORS:
 
 print(
     f"Documentation alignment passed: version {marketing} build {build}, "
-    "recovery closed, Phase C history retained, roadmap source-complete, "
-    "owner testing discretionary before distribution, not shipped."
+    "recovery closed, Phase C history retained, roadmap baseline source-complete, "
+    "v4.3 qualification in progress, owner testing discretionary before distribution, "
+    "not shipped."
 )

@@ -1,0 +1,321 @@
+{
+  "authorityLimitation": {
+    "exactCompleteObjectAvailable": false,
+    "reason": "The approved 05, 06, and 08 message objects all bake Script glyphs into the stone and occlude the lower-right frame with the selected Valknut Seal.",
+    "resolution": "Use the complete visible 05 owner frame, replace the glyph field with accepted blank Runestone stone, and reconstruct only the hidden lower-right frame from the reflected unobscured lower-left owner-source quadrant; the owner-approved accessibility variant corroborates the bilateral ornament."
+  },
+  "controllingReferences": [
+    {
+      "logicalID": "canonical.norse.05-short-message.aae1f3bf5c",
+      "sha256": "aae1f3bf5cff4b94fbc2ca6eb86eedbeb2cabb8281588c53aef5d6d13e9efbe7",
+      "use": "controlling near-square frame and short-message geometry"
+    },
+    {
+      "logicalID": "canonical.norse.06-long-message.49860b3f30",
+      "sha256": "49860b3f30e633dda4c15186d6d40f80a34192265c048bf20c9dfdcf774a12a1",
+      "use": "long-message frame, field, and selected-Seal placement comparison"
+    },
+    {
+      "logicalID": "canonical.norse.08-share-preview.17232537b1",
+      "sha256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+      "use": "static-share scale and composition comparison"
+    }
+  ],
+  "corroboratingReference": {
+    "logicalID": "owner-reference.norse.12-accessibility-variants.a074a682c4",
+    "sha256": "a074a682c4a28abf7a9a80cea7577af4824b346e2672c6f7cb938f9547887cff",
+    "use": "corroborates the bilateral lower-corner frame ornament used by the source reflection"
+  },
+  "glyphFreeFieldSource": {
+    "path": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+    "sha256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d",
+    "sourceBounds": [
+      354,
+      297,
+      1095,
+      796
+    ]
+  },
+  "output": {
+    "alpha": {
+      "contentBounds": [
+        81,
+        137,
+        1519,
+        1479
+      ],
+      "extrema": [
+        0,
+        255
+      ],
+      "opaquePixelCount": 1500918,
+      "partialAlphaPixelCount": 210168,
+      "present": true,
+      "transparentPixelCount": 848914
+    },
+    "mode": "RGBA",
+    "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/ShareFallbacks/share-fallback.norse.runestone-tablet.png",
+    "pixelDimensions": {
+      "height": 1600,
+      "width": 1600
+    },
+    "semanticRole": "relic.static-share-fallback",
+    "sha256": "0f13268da38ea4edaff2ce626222f3fdc9bc89d0b01d9c61eac76fe425ddb902"
+  },
+  "recordID": "norse.runestone-tablet.message-static-reconstruction.v1",
+  "review": {
+    "aspectStatus": "near-square source geometry preserved without axis distortion",
+    "edgeStatus": "transparent perimeter with complete visible frame ornament",
+    "glyphStatus": "glyph-free; field reserved for production Script rendering",
+    "inspectionScales": [
+      "100%",
+      "200%",
+      "target-device"
+    ],
+    "sealStatus": "selected Seal removed; lower-right frame restored from owner-source ornament"
+  },
+  "schemaVersion": "1.0",
+  "sourceAuthority": {
+    "extractionBounds": {
+      "height": 189,
+      "width": 189,
+      "x": 356,
+      "y": 462
+    },
+    "logicalID": "owner-supplied-full-resolution-source-035",
+    "pixelDimensions": {
+      "height": 1024,
+      "width": 1536
+    },
+    "sha256": "13f1854dc64f7f70b7d54742d4b99aa6e15638b6c7262e380b455192ddabefb2"
+  },
+  "storedOwnerRegion": {
+    "containsCompleteUIScreen": false,
+    "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-message-owner-region.png",
+    "pixelDimensions": {
+      "height": 189,
+      "width": 189
+    },
+    "sha256": "75648b01d5caad185182aa5f78d73b078b2e7886b044b612092a8eb56eafe1ee"
+  },
+  "transformation": {
+    "aspectFit": true,
+    "blueKeyMaximum": 5,
+    "cornerDestination": [
+      109,
+      105
+    ],
+    "cornerJoinFeather": 8,
+    "cornerSourceBounds": [
+      0,
+      105,
+      80,
+      189
+    ],
+    "crestExclusionBounds": [
+      65,
+      -2,
+      124,
+      61
+    ],
+    "cropping": false,
+    "fieldMaterialCenterCrop": true,
+    "fieldPolygon": [
+      [
+        35,
+        55
+      ],
+      [
+        40,
+        49
+      ],
+      [
+        56,
+        45
+      ],
+      [
+        132,
+        45
+      ],
+      [
+        149,
+        53
+      ],
+      [
+        154,
+        63
+      ],
+      [
+        154,
+        139
+      ],
+      [
+        149,
+        149
+      ],
+      [
+        139,
+        156
+      ],
+      [
+        49,
+        156
+      ],
+      [
+        40,
+        150
+      ],
+      [
+        34,
+        141
+      ],
+      [
+        34,
+        63
+      ]
+    ],
+    "generativeFill": false,
+    "glyphBearingBounds": [
+      43,
+      69,
+      146,
+      139
+    ],
+    "nonUniformScaling": false,
+    "operations": [
+      "exact source-035 short-message object crop",
+      "fixed reviewed silhouette polygon",
+      "dark-blue board matte with largest-connected-component retention",
+      "Lanczos eight-times uniform working-scale expansion",
+      "horizontal reflection of the unobscured lower-left owner frame quadrant",
+      "join-only feather for the reconstructed lower-right frame",
+      "complete glyph-bearing field replacement from accepted blank stone source",
+      "raven-crest exclusion from the field replacement",
+      "centered transparent square padding",
+      "nonessential PNG metadata removal"
+    ],
+    "outputObjectCropping": false,
+    "referenceScreenshotEmbedded": false,
+    "runtimeGlyphPolicy": "No glyph pixels are baked into this fallback; production Script rendering supplies glyphs.",
+    "runtimeSealPolicy": "No user-selected Seal is baked into this fallback; production composition supplies the Seal.",
+    "selectedSealOcclusionBounds": [
+      136,
+      113,
+      189,
+      189
+    ],
+    "silhouettePolygon": [
+      [
+        10,
+        42
+      ],
+      [
+        15,
+        32
+      ],
+      [
+        25,
+        24
+      ],
+      [
+        35,
+        20
+      ],
+      [
+        60,
+        18
+      ],
+      [
+        78,
+        17
+      ],
+      [
+        85,
+        14
+      ],
+      [
+        96,
+        14
+      ],
+      [
+        105,
+        16
+      ],
+      [
+        115,
+        18
+      ],
+      [
+        132,
+        19
+      ],
+      [
+        151,
+        21
+      ],
+      [
+        164,
+        27
+      ],
+      [
+        173,
+        36
+      ],
+      [
+        179,
+        48
+      ],
+      [
+        182,
+        60
+      ],
+      [
+        182,
+        139
+      ],
+      [
+        177,
+        155
+      ],
+      [
+        166,
+        168
+      ],
+      [
+        151,
+        176
+      ],
+      [
+        131,
+        180
+      ],
+      [
+        57,
+        180
+      ],
+      [
+        36,
+        177
+      ],
+      [
+        20,
+        168
+      ],
+      [
+        10,
+        155
+      ],
+      [
+        5,
+        140
+      ],
+      [
+        5,
+        55
+      ]
+    ],
+    "sourceRegionCrop": true,
+    "stoneBrightnessScale": 0.82,
+    "uniformScaleFactor": 8
+  }
+}

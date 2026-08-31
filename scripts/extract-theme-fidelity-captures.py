@@ -16,12 +16,19 @@ import tempfile
 from typing import Any, NamedTuple
 
 try:
+    from scripts.theme_fidelity_authority_v13 import (
+        AuthorityV13Checker,
+        DEFAULT_IMPORT_MANIFEST,
+    )
     from scripts.theme_fidelity_destination_policy import (
         DestinationPolicyError,
         validate_selection,
     )
     from scripts.theme_fidelity_xcui_evidence import (
         CANDIDATE_ATTACHMENT_NAME,
+        CONTRACT_PATHS,
+        CONTRACT_V42,
+        CONTRACT_V43,
         UI_TEST_TARGET_KIND,
         UI_TEST_TARGETS_BY_ROLE,
         XCUI_QUERY_ATTACHMENT_NAME,
@@ -37,12 +44,19 @@ try:
         validate_sidecar,
     )
 except ModuleNotFoundError:
+    from theme_fidelity_authority_v13 import (  # type: ignore[no-redef]
+        AuthorityV13Checker,
+        DEFAULT_IMPORT_MANIFEST,
+    )
     from theme_fidelity_destination_policy import (  # type: ignore[no-redef]
         DestinationPolicyError,
         validate_selection,
     )
     from theme_fidelity_xcui_evidence import (  # type: ignore[no-redef]
         CANDIDATE_ATTACHMENT_NAME,
+        CONTRACT_PATHS,
+        CONTRACT_V42,
+        CONTRACT_V43,
         UI_TEST_TARGET_KIND,
         UI_TEST_TARGETS_BY_ROLE,
         XCUI_QUERY_ATTACHMENT_NAME,
@@ -60,6 +74,8 @@ except ModuleNotFoundError:
 
 
 SCHEMA_VERSION = "1.2"
+V43_SCHEMA_VERSION = "1.3"
+SOURCE_SHA_PATTERN = re.compile(r"[0-9a-f]{40}\Z")
 THEMES = ("norse", "moonleaf", "sunspire", "wildwood", "gloamthorn")
 SURFACES = (
     "workspace-empty", "compose-short", "compose-long", "inscription-preview",
@@ -420,12 +436,33 @@ def destination_slug(name: str) -> str:
     return match.group(3)
 
 
-def expected_attachment_names(role: str) -> set[str]:
+def expected_attachment_names(
+    role: str,
+    authority_contract: str = CONTRACT_V42,
+) -> set[str]:
     if role in XCUI_ROLES:
+        if authority_contract not in {CONTRACT_V42, CONTRACT_V43}:
+            raise ExtractionError(
+                f"unsupported authority contract: {authority_contract!r}"
+            )
+        repository_root = Path(__file__).resolve().parents[1]
         authority, probes = load_repository_authority(
-            Path(__file__).resolve().parents[1]
+            repository_root,
+            authority_contract,
         )
-        return set(expected_inventory_for_role(authority, probes, role).attachments)
+        candidates = load_repository_candidates(
+            repository_root,
+            authority_contract,
+        )
+        return set(
+            expected_inventory_for_role(
+                authority,
+                probes,
+                role,
+                candidates=candidates,
+                contract_version=authority_contract,
+            ).attachments
+        )
     destinations = BUNDLE_EXPECTATIONS[role]["destinations"]
     expected: set[str] = set()
     for destination in destinations:
@@ -438,6 +475,32 @@ def expected_attachment_names(role: str) -> set[str]:
             expected.add(f"{theme}--static-share--{destination}--renderer-output.png")
         expected.add(f"norse--vault-locked--{destination}--optional-codex-locked.png")
     return expected
+
+
+def authority_provenance(
+    repository_root: Path,
+    authority_contract: str,
+) -> dict[str, Any]:
+    specification = CONTRACT_PATHS.get(authority_contract)
+    if specification is None:
+        raise ExtractionError(f"unsupported authority contract: {authority_contract!r}")
+    files: dict[str, dict[str, str]] = {}
+    for key in ("authority", "probes", "seeds", "candidates"):
+        relative = specification[key]
+        if not isinstance(relative, Path):
+            raise ExtractionError(f"authority contract path is invalid: {key}")
+        path = (repository_root / relative).resolve()
+        if not path.is_file() or path.is_symlink():
+            raise ExtractionError(f"authority contract file is missing or linked: {path}")
+        files[key] = {
+            "path": relative.as_posix(),
+            "sha256": sha256_file(path),
+        }
+    return {
+        "contractVersion": authority_contract,
+        "schemaVersion": specification["schemaVersion"],
+        "files": files,
+    }
 
 
 def validate_attachment_content(path: Path, canonical_name: str) -> str:
@@ -493,26 +556,86 @@ def extract(
     output: Path,
     simulator_selection_source: dict[str, Any] | None = None,
     require_xcui: bool | None = None,
+    authority_contract: str = CONTRACT_V42,
+    source_sha: str | None = None,
 ) -> dict[str, Any]:
+    if authority_contract not in {CONTRACT_V42, CONTRACT_V43}:
+        raise ExtractionError(f"unsupported authority contract: {authority_contract!r}")
+    if authority_contract == CONTRACT_V43:
+        if source_sha is None or SOURCE_SHA_PATTERN.fullmatch(source_sha) is None:
+            raise ExtractionError(
+                "v4.3 extraction requires --source-sha as exactly 40 lowercase hex characters"
+            )
+        if require_xcui is False:
+            raise ExtractionError("v4.3 extraction requires all three XCUI result bundles")
+        require_xcui = True
+    elif source_sha is not None:
+        raise ExtractionError("--source-sha is only valid with --authority-contract v4.3")
     if require_xcui is None:
         require_xcui = any(is_xcui_role(binding.role) for binding in bindings)
     validate_bindings(bindings, require_xcui=require_xcui)
+    repository_root = Path(__file__).resolve().parents[1]
     authority: dict[str, Any] | None = None
     probes: dict[str, dict[str, Any]] | None = None
     seeds: dict[str, dict[str, Any]] | None = None
     candidates: dict[str, dict[str, Any]] | None = None
     authority_entries: dict[str, dict[str, Any]] = {}
     inventory = None
+    source_authority: dict[str, Any] | None = None
+    source_probes: dict[str, dict[str, Any]] | None = None
+    source_seeds: dict[str, dict[str, Any]] | None = None
+    source_candidates: dict[str, dict[str, Any]] | None = None
+    source_authority_entries: dict[str, dict[str, Any]] = {}
+    authority_validation: dict[str, Any] | None = None
+    target_authority_provenance: dict[str, Any] | None = None
+    source_authority_provenance: dict[str, Any] | None = None
     if require_xcui:
         try:
-            repository_root = Path(__file__).resolve().parents[1]
-            authority, probes = load_repository_authority(repository_root)
-            seeds = load_repository_seeds(repository_root)
-            candidates = load_repository_candidates(repository_root)
+            if authority_contract == CONTRACT_V43:
+                authority_validation = AuthorityV13Checker(
+                    repository_root,
+                    repository_root / DEFAULT_IMPORT_MANIFEST,
+                ).run()
+                if authority_validation.get("result") != "PASS":
+                    raise ExtractionError(
+                        "v4.3 authority import is invalid: "
+                        + json.dumps(
+                            authority_validation.get("findings", [])[:5],
+                            sort_keys=True,
+                        )
+                    )
+                target_authority_provenance = authority_provenance(
+                    repository_root, CONTRACT_V43
+                )
+                source_authority_provenance = authority_provenance(
+                    repository_root, CONTRACT_V43
+                )
+            authority, probes = load_repository_authority(
+                repository_root, authority_contract
+            )
+            seeds = load_repository_seeds(repository_root, authority_contract)
+            candidates = load_repository_candidates(
+                repository_root, authority_contract
+            )
             authority_entries = index_entries(authority)
-            inventory = expected_inventory(authority, probes)
+            inventory = expected_inventory(
+                authority,
+                probes,
+                candidates=candidates,
+                contract_version=authority_contract,
+            )
+            source_authority, source_probes = load_repository_authority(
+                repository_root, authority_contract
+            )
+            source_seeds = load_repository_seeds(repository_root, authority_contract)
+            source_candidates = load_repository_candidates(
+                repository_root, authority_contract
+            )
+            source_authority_entries = index_entries(source_authority)
         except XCUIEvidenceError as error:
             raise ExtractionError(str(error)) from error
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise ExtractionError(f"authority contract could not be read: {error}") from error
     output.mkdir(parents=True, exist_ok=True)
     existing = [
         path.name for path in output.iterdir()
@@ -560,8 +683,43 @@ def extract(
             manifest_path = exported / "manifest.json"
             if not manifest_path.is_file():
                 raise ExtractionError(f"attachment export omitted manifest.json: {result_bundle}")
-            selected_count = 0
-            selected_names: set[str] = set()
+            if is_xcui_role(binding.role):
+                assert (
+                    authority is not None
+                    and probes is not None
+                    and candidates is not None
+                    and source_authority is not None
+                    and source_probes is not None
+                    and source_seeds is not None
+                    and source_candidates is not None
+                )
+                target_inventory = expected_inventory_for_role(
+                    authority,
+                    probes,
+                    binding.role,
+                    candidates=candidates,
+                    contract_version=authority_contract,
+                )
+                source_inventory = expected_inventory_for_role(
+                    source_authority,
+                    source_probes,
+                    binding.role,
+                    candidates=source_candidates,
+                    contract_version=authority_contract,
+                )
+                target_names = set(target_inventory.attachments)
+                expected_source_names = set(source_inventory.attachments)
+            else:
+                target_inventory = None
+                source_inventory = None
+                target_names = expected_attachment_names(binding.role)
+                expected_source_names = target_names
+
+            role_sources: dict[str, tuple[Path, dict[str, Any]]] = {}
+            raw_attachment_records: dict[str, dict[str, Any]] = {}
+            raw_capture_root = temporary_root / f"raw-{index}"
+            if is_xcui_role(binding.role):
+                raw_capture_root.mkdir()
             for attachment in flatten_attachments(manifest):
                 suggested = attachment.get("suggestedHumanReadableName")
                 exported_name = attachment.get("exportedFileName")
@@ -617,15 +775,13 @@ def extract(
                 ):
                     raise ExtractionError(f"{canonical_name} attachment timestamp is missing")
                 attachment_uti = validate_attachment_content(source, canonical_name)
-                destination = output / canonical_name
                 digest = sha256_file(source)
-                if canonical_name in copied:
+                if canonical_name in role_sources:
                     raise ExtractionError(
-                        "duplicate canonical attachment name across result bundles: "
+                        "duplicate canonical attachment name in result bundle: "
                         f"{canonical_name}"
                     )
-                shutil.copyfile(source, destination)
-                copied[canonical_name] = {
+                metadata = {
                     "name": canonical_name,
                     "exportedSuggestedName": suggested,
                     "sha256": digest,
@@ -643,29 +799,96 @@ def extract(
                 }
                 if is_xcui_role(binding.role):
                     assert source_test_identity is not None
-                    copied[canonical_name].update(
+                    metadata.update(
                         {
                             "sourceTargetName": source_test_identity["targetName"],
                             "sourceTargetKind": source_test_identity["targetKind"],
                             "sourceProjectName": source_test_identity["projectName"],
                         }
                     )
-                selected_count += 1
-                selected_names.add(canonical_name)
-            expected_count = BUNDLE_EXPECTATIONS[binding.role]["attachmentCount"]
-            if selected_count != expected_count:
+                    shutil.copyfile(source, raw_capture_root / canonical_name)
+                    raw_attachment_records[canonical_name] = dict(metadata)
+                role_sources[canonical_name] = (source, metadata)
+
+            expected_source_count = len(expected_source_names)
+            if len(role_sources) != expected_source_count:
                 raise ExtractionError(
-                    f"{binding.role} result bundle produced {selected_count} matrix attachments, "
-                    f"expected {expected_count}"
+                    f"{binding.role} result bundle produced {len(role_sources)} matrix attachments, "
+                    f"expected {expected_source_count}"
                 )
-            expected_names = expected_attachment_names(binding.role)
-            if selected_names != expected_names:
-                missing = sorted(expected_names - selected_names)
-                extra = sorted(selected_names - expected_names)
+            source_names = set(role_sources)
+            if source_names != expected_source_names:
+                missing = sorted(expected_source_names - source_names)
+                extra = sorted(source_names - expected_source_names)
                 raise ExtractionError(
-                    f"{binding.role} attachment set differs; "
+                    f"{binding.role} source attachment set differs; "
                     f"missing={missing[:8]}, extra={extra[:8]}"
                 )
+
+            validated_source_sidecars: dict[str, dict[str, Any]] = {}
+            if is_xcui_role(binding.role):
+                assert source_inventory is not None
+                entries_by_sidecar = {
+                    (
+                        f"{entry['theme'].lower()}--{entry['surface']}--"
+                        f"{entry['destination']}.xcui.json"
+                    ): entry
+                    for entry in source_authority_entries.values()
+                }
+                for name in sorted(source_inventory.sidecars):
+                    entry = entries_by_sidecar.get(name)
+                    if entry is None:
+                        raise ExtractionError(
+                            "source XCUI sidecar is not bound to "
+                            f"{authority_contract} authority: {name}"
+                        )
+                    try:
+                        validated = validate_sidecar(
+                            raw_capture_root / name,
+                            entry,
+                            source_probes,
+                            source_seeds,
+                            source_candidates,
+                            raw_capture_root,
+                            raw_attachment_records,
+                            contract_version=authority_contract,
+                        )
+                    except XCUIEvidenceError as error:
+                        raise ExtractionError(str(error)) from error
+                    validated_source_sidecars[name] = validated.document
+
+            if not target_names.issubset(source_names):
+                missing = sorted(target_names - source_names)
+                raise ExtractionError(
+                    f"{binding.role} source cannot satisfy {authority_contract}; "
+                    f"missing={missing[:8]}"
+                )
+            for canonical_name in sorted(target_names):
+                source, source_metadata = role_sources[canonical_name]
+                if canonical_name in copied:
+                    raise ExtractionError(
+                        "duplicate canonical attachment name across result bundles: "
+                        f"{canonical_name}"
+                    )
+                destination = output / canonical_name
+                metadata = dict(source_metadata)
+                shutil.copyfile(source, destination)
+                validate_attachment_content(destination, canonical_name)
+                if authority_contract == CONTRACT_V43 and is_xcui_role(binding.role):
+                    metadata.update(
+                        {
+                            "sourceAttachmentSHA256": source_metadata["sha256"],
+                            "sourceAttachmentBytes": source_metadata["bytes"],
+                            "sourceAuthorityContract": CONTRACT_V43,
+                            "evidenceAuthorityContract": CONTRACT_V43,
+                            "extractionOperation": "direct-copy",
+                        }
+                    )
+                metadata["sha256"] = sha256_file(destination)
+                metadata["bytes"] = destination.stat().st_size
+                copied[canonical_name] = metadata
+
+            selected_count = len(target_names)
             bundles.append(
                 {
                     "role": binding.role,
@@ -686,6 +909,19 @@ def extract(
                     **provenance,
                 }
             )
+            if authority_contract == CONTRACT_V43:
+                bundles[-1]["sourceAttachmentCount"] = len(source_names)
+                if is_xcui_role(binding.role):
+                    bundles[-1].update(
+                        {
+                            "sourceAuthorityContract": CONTRACT_V43,
+                            "evidenceAuthorityContract": CONTRACT_V43,
+                            "extractionOperation": "direct-copy",
+                            "validatedSourceXCUISidecarCount": len(
+                                validated_source_sidecars
+                            ),
+                        }
+                    )
 
     validated_sidecars: list[dict[str, Any]] = []
     if require_xcui:
@@ -727,6 +963,7 @@ def extract(
                     candidates,
                     output,
                     copied,
+                    contract_version=authority_contract,
                 )
             except XCUIEvidenceError as error:
                 raise ExtractionError(str(error)) from error
@@ -760,16 +997,29 @@ def extract(
             "expected 400 primary PNG, 44 auxiliary PNG, and 400 capture records; "
             f"found {png_count}, {auxiliary_png_count}, and {record_count}"
         )
-    if require_xcui and (
-        candidate_png_count != 672
-        or xcui_query_png_count != 4
-        or xcui_sidecar_count != 380
-        or len(copied) != 1900
-    ):
-        raise ExtractionError(
-            "expected 672 candidate PNG, 4 XCUI query PNG, and 380 XCUI sidecars; "
-            f"found {candidate_png_count}, {xcui_query_png_count}, and {xcui_sidecar_count}"
+    if require_xcui:
+        assert inventory is not None
+        expected_xcui_counts = (
+            len(inventory.candidate_pngs),
+            len(inventory.query_pngs),
+            len(inventory.sidecars),
+            844 + len(inventory.attachments),
         )
+        actual_xcui_counts = (
+            candidate_png_count,
+            xcui_query_png_count,
+            xcui_sidecar_count,
+            len(copied),
+        )
+        if actual_xcui_counts != expected_xcui_counts:
+            raise ExtractionError(
+                f"expected {expected_xcui_counts[0]} candidate PNG, "
+                f"{expected_xcui_counts[1]} XCUI query PNG, and "
+                f"{expected_xcui_counts[2]} XCUI sidecars in "
+                f"{expected_xcui_counts[3]} attachments; found "
+                f"{actual_xcui_counts[0]}, {actual_xcui_counts[1]}, "
+                f"{actual_xcui_counts[2]}, and {actual_xcui_counts[3]}"
+            )
     tool = subprocess.run(
         ["xcrun", "--find", "xcresulttool"],
         check=False,
@@ -780,7 +1030,7 @@ def extract(
     if tool.returncode != 0 or not tool.stdout.strip():
         detail = tool.stderr.strip() or tool.stdout.strip()
         raise ExtractionError(f"unable to resolve xcresulttool provenance: {detail}")
-    return {
+    report = {
         "schemaVersion": SCHEMA_VERSION if require_xcui else "1.1",
         "result": "pass",
         "captureRoot": str(output.resolve()),
@@ -799,6 +1049,25 @@ def extract(
         "xcuiSidecars": validated_sidecars,
         "attachments": [copied[name] for name in sorted(copied)],
     }
+    if authority_contract == CONTRACT_V43:
+        assert (
+            source_sha is not None
+            and authority_validation is not None
+            and target_authority_provenance is not None
+            and source_authority_provenance is not None
+        )
+        report.update(
+            {
+                "schemaVersion": V43_SCHEMA_VERSION,
+                "sourceSHA": source_sha,
+                "authorityContract": CONTRACT_V43,
+                "sourceXCUIContract": CONTRACT_V43,
+                "authorityValidation": authority_validation,
+                "authorityProvenance": target_authority_provenance,
+                "sourceXCUIAuthorityProvenance": source_authority_provenance,
+            }
+        )
+    return report
 
 
 def parse_binding(
@@ -887,6 +1156,16 @@ def main() -> int:
     parser.add_argument("--simulator-selections", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--report", type=Path)
+    parser.add_argument(
+        "--authority-contract",
+        choices=(CONTRACT_V42, CONTRACT_V43),
+        default=CONTRACT_V42,
+        help="Evidence authority used for direct attachment extraction.",
+    )
+    parser.add_argument(
+        "--source-sha",
+        help="Exact tested application source SHA; required for v4.3 extraction.",
+    )
     arguments = parser.parse_args()
     report_path = arguments.report or arguments.output / "extraction.json"
     try:
@@ -899,7 +1178,13 @@ def main() -> int:
             parse_binding(raw, expected_devices, expected_models, selections)
             for raw in arguments.result_bundle
         ]
-        report = extract(bindings, arguments.output, selection_source)
+        report = extract(
+            bindings,
+            arguments.output,
+            selection_source,
+            authority_contract=arguments.authority_contract,
+            source_sha=arguments.source_sha,
+        )
         write_json(report_path, report)
     except ExtractionError as error:
         print(f"FAIL: {error}", file=sys.stderr)

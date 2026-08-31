@@ -73,6 +73,7 @@ struct ContactViewState: Identifiable, Equatable, Sendable {
 
 struct PendingMessageViewState: Identifiable, Equatable, Sendable {
     let id: MessageID
+    let receivedAt: Date
     let plaintext: String
     let senderName: String
     let cipherID: UUID
@@ -83,6 +84,7 @@ struct PendingMessageViewState: Identifiable, Equatable, Sendable {
 
     init(_ message: ReceivedMessageDTO) {
         id = message.id
+        receivedAt = message.receivedAt
         plaintext = message.plaintext
         senderName = message.senderName
         cipherID = message.cipherID.rawValue
@@ -97,6 +99,7 @@ struct PendingMessageViewState: Identifiable, Equatable, Sendable {
         themeSnapshot: ThemeCoordinatorSnapshotDTO?
     ) {
         id = message.id
+        receivedAt = message.receivedAt
         plaintext = message.plaintext
         senderName = message.senderName
         cipherID = message.cipherID.rawValue

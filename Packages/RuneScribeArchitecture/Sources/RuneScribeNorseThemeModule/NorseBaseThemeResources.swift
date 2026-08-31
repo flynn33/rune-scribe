@@ -80,6 +80,85 @@ public struct NorseBaseThemeResourceBudgetReport: Equatable, Sendable {
 }
 
 public enum NorseBaseThemeResources {
+    public static func loadDescriptorValidated(
+        using runtimeIO: RuntimeIOClient
+    ) async throws -> ThemeDescriptor {
+        let manifestData = try await read(
+            NorseBaseBundledResourceCatalog.integrityManifestDescriptor,
+            resourceID: nil,
+            mediaType: .json,
+            readStage: .manifestRead,
+            digestStage: .manifestIntegrity,
+            using: runtimeIO
+        )
+        guard NorseProductionManifest.validate(manifestData) else {
+            throw requiredFailure(
+                stage: .manifestIntegrity,
+                code: .invalidIntegrityManifest,
+                expectedByteCount: NorseBaseBundledResourceCatalog
+                    .integrityManifestDescriptor.expectedByteCount,
+                expectedSHA256Hex: NorseBaseBundledResourceCatalog
+                    .integrityManifestDescriptor.expectedSHA256Hex,
+                mediaType: .json
+            )
+        }
+
+        let semanticIDs = Set([
+            NorseBaseThemeResourceIDs.scriptMapping,
+            NorseBaseThemeResourceIDs.palette,
+            NorseBaseThemeResourceIDs.headings,
+            NorseBaseThemeResourceIDs.localization,
+            NorseBaseThemeResourceIDs.progressionBindings,
+        ]).union(NorseBaseThemeResourceIDs.geometryResourceIDs.values)
+        var semanticPayloads: [ThemeResourceID: Data] = [:]
+        for resourceID in semanticIDs.sorted() {
+            if let data = try await loadValidatedResource(
+                id: resourceID,
+                using: runtimeIO
+            ) {
+                semanticPayloads[resourceID] = data
+            }
+        }
+        try validateSemanticJSON(semanticPayloads)
+        _ = try declaredBudgetReport()
+
+        let descriptor = NorseBaseThemeDescriptorFactory.discoveryDescriptor
+        guard Set(NorseBaseThemeResourceCatalog.definitions.map(\.id))
+                == Set(descriptor.resources.map(\.id))
+        else {
+            throw requiredFailure(
+                stage: .contributionPublication,
+                code: .resourceSetMismatch
+            )
+        }
+        return descriptor
+    }
+
+    public static func loadValidatedResource(
+        id: ThemeResourceID,
+        using runtimeIO: RuntimeIOClient
+    ) async throws -> Data? {
+        guard let definition = NorseBaseThemeResourceCatalog.definitions.first(
+            where: { $0.id == id }
+        ) else { return nil }
+        do {
+            let data = try await read(
+                definition.bundledDescriptor,
+                resourceID: definition.id,
+                mediaType: definition.mediaType,
+                readStage: .resourceRead,
+                digestStage: .digest,
+                using: runtimeIO
+            )
+            try validateMediaMetadata(data, definition: definition)
+            return data
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch where definition.requirement == .optional {
+            return nil
+        }
+    }
+
     public static func loadValidated(using runtimeIO: RuntimeIOClient) async throws -> ValidatedNorseBaseTheme {
         let manifestData = try await read(
             NorseBaseBundledResourceCatalog.integrityManifestDescriptor,
@@ -157,6 +236,20 @@ public enum NorseBaseThemeResources {
         let unique = physicalPayloads.compactMap { resource, data in
             uniqueDefinitions[resource].map { ($0, data.count) }
         }
+        return try budgetReport(unique: unique)
+    }
+
+    private static func declaredBudgetReport() throws -> NorseBaseThemeResourceBudgetReport {
+        let uniqueDefinitions = Dictionary(
+            NorseBaseThemeResourceCatalog.definitions.map { ($0.resource, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        return try budgetReport(unique: uniqueDefinitions.values.map { ($0, $0.byteCount) })
+    }
+
+    private static func budgetReport(
+        unique: [(NorseBaseThemeResourceDefinition, Int)]
+    ) throws -> NorseBaseThemeResourceBudgetReport {
         let staticBytes = unique.filter { [.png, .heif, .pdf].contains($0.0.mediaType) }
             .reduce(0) { $0 + $1.1 }
         let fontBytes = unique.filter { [.ttf, .otf].contains($0.0.mediaType) }
@@ -495,7 +588,7 @@ enum NorseBaseThemeResourceIDs {
         uniqueKeysWithValues: NorseProgressionBindingCatalog.sealIDs.map { artifact in
             let suffix = artifact.rawValue.replacingOccurrences(of: "seal.norse.", with: "")
             return (artifact, SealResourceIDs(
-                vector: id("resource.seal.norse.\(suffix).vector-master"),
+                color: id("resource.seal.norse.\(suffix).color-master"),
                 monochrome: id("resource.seal.norse.\(suffix).monochrome-fallback"),
                 thumbnail: id("resource.seal.norse.\(suffix).thumbnail")
             ))
@@ -520,7 +613,7 @@ struct RelicResourceIDs: Sendable {
 }
 
 struct SealResourceIDs: Sendable {
-    let vector: ThemeResourceID
+    let color: ThemeResourceID
     let monochrome: ThemeResourceID
     let thumbnail: ThemeResourceID
 }
@@ -682,7 +775,7 @@ enum NorseProductionManifest {
         if NorseBaseThemeResourceIDs.relicResourceIDs.values.contains(where: { $0.thumbnail == id }) { return ThemeResourceRoles.relicThumbnail }
         if NorseBaseThemeResourceIDs.relicResourceIDs.values.contains(where: { $0.staticFallback == id }) { return ThemeResourceRoles.relicStaticShareFallback }
         if NorseBaseThemeResourceIDs.relicResourceIDs.values.contains(where: { $0.highContrast == id }) { return ThemeResourceRoles.relicHighContrast }
-        if NorseBaseThemeResourceIDs.sealResourceIDs.values.contains(where: { $0.vector == id }) { return ThemeResourceRoles.sealVectorMaster }
+        if NorseBaseThemeResourceIDs.sealResourceIDs.values.contains(where: { $0.color == id }) { return ThemeResourceRoles.sealColorMaster }
         if NorseBaseThemeResourceIDs.sealResourceIDs.values.contains(where: { $0.monochrome == id }) { return ThemeResourceRoles.sealMonochromeFallback }
         if NorseBaseThemeResourceIDs.sealResourceIDs.values.contains(where: { $0.thumbnail == id }) { return ThemeResourceRoles.sealThumbnail }
         if id == NorseBaseThemeResourceIDs.frameVector { return ThemeResourceRoles.frameVectorMaster }

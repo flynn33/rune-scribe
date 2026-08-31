@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "recordID": "theme-fidelity-v4.3-moonleaf-sunspire-frame-crest-masters",
+  "sourcePackageIdentity": "Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+  "sourcePackageRoot": ".",
+  "productionManual": "02-EXECUTION-INSTRUCTIONS/Production-Visual-Remediation-Manual.md",
+  "scope": "Independent transparent source masters only; runtime integration and owner review remain outside this record.",
+  "referenceSHA256": {
+    "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-002-1122x1402.png": "2d1696abd8a7ddbfe81b89c2eb84933a516ba5a4bf8eaa2dae0edcbb3d3758ef",
+    "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-022-941x1672.png": "cb49801223d93c34a3927a1a67a0b7c5428d28b1b55f6e1a1d737a2ecce33827",
+    "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-004-941x1672.png": "6186c6ecd82e25409904daa2460b3fc1953d7a8209a5f224649285f7de8d696f",
+    "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-013-1122x1402.png": "ea52db7c2f8a89354069b6f64a4751cb62ea439a968c6c1ba8309f8ac3145f5d"
+  },
+  "assets": [
+    {
+      "assetID": "moonleaf-silvervine-frame",
+      "theme": "moonleaf",
+      "role": "frame",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/moonleaf-silvervine-frame-production-master-v4.3.png",
+      "referencePaths": [
+        "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-002-1122x1402.png",
+        "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-022-941x1672.png"
+      ],
+      "prompt": "Using the approved Moonleaf references as visual authority, create one independent rectangular Elven frame on a truly transparent canvas: polished silver-white metal, muted sage enamel, slender interlaced vines and leaves, and moonlit green accents. Preserve four complete ornate corners and continuous low-detail edge-center bands suitable for protected-cap nine-slice use; keep the entire center and exterior transparent. No text, letters, numbers, glyphs, runes, UI, tablet, relic, scene, or background.",
+      "dimensions": { "width": 1536, "height": 1024 },
+      "alpha": {
+        "present": true,
+        "extrema": [0, 254],
+        "transparentPixels": 1249745,
+        "partialPixels": 323119,
+        "opaquePixels": 0,
+        "contentBoundsAlphaAtLeast8": [60, 11, 1475, 986]
+      },
+      "sha256": "0ea0fb618d19523b357225a2453f39fe0bac25a4dc5155168bc51ef51abd6b28",
+      "acceptance": "Accepted after full-canvas and 200-percent corner inspection: complete protected corners, quiet stretchable edge centers, empty transparent center/exterior, clean antialiased silhouette, and no text or glyph content.",
+      "rejectionHistory": "The first raster and two transparency corrections retained an opaque checkerboard field and were rejected; the accepted correction contains a real alpha channel. The final PNG received metadata normalization only.",
+      "ownerReview": "PENDING"
+    },
+    {
+      "assetID": "moonleaf-moonbloom-crest",
+      "theme": "moonleaf",
+      "role": "crest",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/moonleaf-moonbloom-crest-production-master-v4.3.png",
+      "referencePaths": [
+        "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-002-1122x1402.png",
+        "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-022-941x1672.png"
+      ],
+      "prompt": "Using the approved Moonleaf references as visual authority, create one independent noncircular Elven heraldic crest centered on a truly transparent canvas with generous clear margin: a silver crescent embracing moonbloom foliage, deep forest-green enamel, pale moonstone inlay, refined silver filigree, and restrained sage leaves. Keep the silhouette complete and suitable for aspect-fit placement. No text, letters, numbers, glyphs, runes, UI, tablet, relic, frame, scene, or background.",
+      "dimensions": { "width": 1280, "height": 1920 },
+      "alpha": {
+        "present": true,
+        "extrema": [0, 254],
+        "transparentPixels": 1584816,
+        "partialPixels": 872784,
+        "opaquePixels": 0,
+        "contentBoundsAlphaAtLeast8": [175, 192, 1111, 1682]
+      },
+      "sha256": "0fd535931d1d439a5c5fbe0908b3966d877a7a450f0da6ca11f5f11db36f9771",
+      "acceptance": "Accepted after full-canvas and 200-percent detail inspection: complete independent silhouette, clean antialiased alpha, ample transparent aspect-fit margin, Moonleaf material fidelity, and no text or glyph content.",
+      "rejectionHistory": "The first raster and two transparency corrections retained an opaque checkerboard field and were rejected. A later margin revision also lost alpha and was rejected. The accepted transparent object was centered by lossless transparent-canvas padding without changing its pixels.",
+      "ownerReview": "PENDING"
+    },
+    {
+      "assetID": "sunspire-laurel-of-dawn-frame",
+      "theme": "sunspire",
+      "role": "frame",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-laurel-of-dawn-frame-production-master-v4.3.png",
+      "referencePaths": [
+        "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-004-941x1672.png",
+        "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-013-1122x1402.png"
+      ],
+      "prompt": "Using the approved Sunspire references as visual authority, create one independent rectangular Elven frame on a truly transparent canvas: luminous polished gold, warm ivory inlay, pale celadon accents, and elegant laurel leaves illuminated by first light. Preserve four complete ornate corners and continuous low-detail edge-center bands suitable for protected-cap nine-slice use; keep the entire center and exterior transparent. No text, letters, numbers, glyphs, runes, UI, tablet, relic, scene, or background.",
+      "dimensions": { "width": 1536, "height": 1024 },
+      "alpha": {
+        "present": true,
+        "extrema": [0, 254],
+        "transparentPixels": 1231326,
+        "partialPixels": 341538,
+        "opaquePixels": 0,
+        "contentBoundsAlphaAtLeast8": [68, 20, 1468, 971]
+      },
+      "sha256": "0194d53a9c29d866eaeda63e5ef08837d2a6b0b5a69d96e146f4b38a77e3dba3",
+      "acceptance": "Accepted after full-canvas and 200-percent corner inspection: complete protected corners, quiet stretchable edge centers, empty transparent center/exterior, clean antialiased silhouette, and no text or glyph content.",
+      "rejectionHistory": "The first raster retained an opaque checkerboard field and was rejected; the first transparency correction produced the accepted real-alpha object. The final PNG received metadata normalization only.",
+      "ownerReview": "PENDING"
+    },
+    {
+      "assetID": "sunspire-first-light-crest",
+      "theme": "sunspire",
+      "role": "crest",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-first-light-crest-production-master-v4.3.png",
+      "referencePaths": [
+        "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-004-941x1672.png",
+        "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-013-1122x1402.png"
+      ],
+      "prompt": "Using the approved Sunspire references as visual authority, create one independent noncircular Elven heraldic crest centered on a truly transparent canvas with generous clear margin: a radiant first-light sun rising within an ivory leaf-shaped shield, polished gold filigree, warm marble enamel, and restrained laurel details. Keep the silhouette complete and suitable for aspect-fit placement. No text, letters, numbers, glyphs, runes, UI, tablet, relic, frame, scene, or background.",
+      "dimensions": { "width": 1280, "height": 1920 },
+      "alpha": {
+        "present": true,
+        "extrema": [0, 254],
+        "transparentPixels": 1581653,
+        "partialPixels": 875947,
+        "opaquePixels": 0,
+        "contentBoundsAlphaAtLeast8": [188, 197, 1093, 1675]
+      },
+      "sha256": "3a89b411b58f017bcb8f41b9581425baf3dd8c7b4e324b0f20a3a75e2172c70e",
+      "acceptance": "Accepted after full-canvas and 200-percent detail inspection: complete independent silhouette, clean antialiased alpha, ample transparent aspect-fit margin, Sunspire material fidelity, and no text or glyph content.",
+      "rejectionHistory": "The first raster and two transparency corrections retained an opaque checkerboard field and were rejected. A later margin revision also lost alpha and was rejected. The accepted transparent object was centered by lossless transparent-canvas padding without changing its pixels.",
+      "ownerReview": "PENDING"
+    }
+  ]
+}

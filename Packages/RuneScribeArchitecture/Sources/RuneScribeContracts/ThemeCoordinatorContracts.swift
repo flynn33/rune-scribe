@@ -343,34 +343,61 @@ public struct SelectThemeCodexCommand: Codable, Equatable, Sendable {
     }
 }
 
+/// Limits descriptor reads to the authority needed by the caller.
+public enum ThemeProviderDescriptorPurpose: String, Codable, Hashable, Sendable {
+    case selection
+    case receivedPresentation = "received-presentation"
+}
+
 /// Requests one provider descriptor for an operation-local presentation draft.
 /// Reading this value never changes the persisted selected Codex.
 public struct ThemeProviderDescriptorRequestDTO: Codable, Equatable, Sendable {
     public let codexID: CodexID
+    public let purpose: ThemeProviderDescriptorPurpose
 
-    public init(codexID: CodexID) {
+    public init(
+        codexID: CodexID,
+        purpose: ThemeProviderDescriptorPurpose = .selection
+    ) {
         self.codexID = codexID
+        self.purpose = purpose
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            codexID: try container.decode(CodexID.self, forKey: .codexID),
+            purpose: try container.decodeIfPresent(
+                ThemeProviderDescriptorPurpose.self,
+                forKey: .purpose
+            ) ?? .selection
+        )
     }
 }
 
 public enum ThemeResourceResolutionPurpose: String, Codable, Hashable, Sendable {
     case activePresentation = "active-presentation"
     case catalogPreview = "catalog-preview"
+    case receivedPresentation = "received-presentation"
+    case shareRendering = "share-rendering"
 }
 
 public struct ResolveThemeResourceRequestDTO: Codable, Equatable, Hashable, Sendable {
     public let codexID: CodexID
     public let resourceID: ThemeResourceID
     public let purpose: ThemeResourceResolutionPurpose
+    public let receivedPresentationSelection: SharePresentationSelection?
 
     public init(
         codexID: CodexID,
         resourceID: ThemeResourceID,
-        purpose: ThemeResourceResolutionPurpose = .activePresentation
+        purpose: ThemeResourceResolutionPurpose = .activePresentation,
+        receivedPresentationSelection: SharePresentationSelection? = nil
     ) {
         self.codexID = codexID
         self.resourceID = resourceID
         self.purpose = purpose
+        self.receivedPresentationSelection = receivedPresentationSelection
     }
 
     public init(from decoder: Decoder) throws {
@@ -384,7 +411,11 @@ public struct ResolveThemeResourceRequestDTO: Codable, Equatable, Hashable, Send
             purpose: try container.decodeIfPresent(
                 ThemeResourceResolutionPurpose.self,
                 forKey: .purpose
-            ) ?? .activePresentation
+            ) ?? .activePresentation,
+            receivedPresentationSelection: try container.decodeIfPresent(
+                SharePresentationSelection.self,
+                forKey: .receivedPresentationSelection
+            )
         )
     }
 }

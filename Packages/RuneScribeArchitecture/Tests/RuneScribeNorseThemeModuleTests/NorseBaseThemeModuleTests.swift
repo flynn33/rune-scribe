@@ -90,6 +90,14 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             ["Runestone Tablet", "Dragonwood Plaque", "Stormforged Stele"]
         )
         XCTAssertEqual(
+            descriptor.codex.relics.map(\.metadata.description.fallbackValue),
+            [
+                "Weathered stone with carved runes and iron knotwork. The canonical Norse canvas.",
+                "Dark dragonwood framed in forged iron. Ancient and resilient.",
+                "Tall war-stele of stone and iron. Marked by storms and victories.",
+            ]
+        )
+        XCTAssertEqual(
             descriptor.codex.relics.map(\.metadata.availability),
             [.included, .earned, .earned]
         )
@@ -225,7 +233,10 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             )
         }
         for seal in descriptor.codex.seals {
-            assertResource(seal.vectorResourceID, role: ThemeResourceRoles.sealVectorMaster, media: .pdf, in: resources)
+            let colorResourceID = try XCTUnwrap(seal.colorResourceID)
+            assertResource(colorResourceID, role: ThemeResourceRoles.sealColorMaster, media: .png, in: resources)
+            XCTAssertEqual(seal.standardResourceID, colorResourceID)
+            XCTAssertNil(seal.vectorResourceID)
             XCTAssertNotEqual(seal.monochromeFallbackResourceID, seal.thumbnailResourceID)
             assertResource(
                 seal.monochromeFallbackResourceID,
@@ -310,10 +321,10 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             )
         )
         let data = try Data(contentsOf: provenanceURL)
-        XCTAssertEqual(data.count, 80_939)
+        XCTAssertEqual(data.count, 82_579)
         XCTAssertEqual(
             sha256Hex(data),
-            "5efb78a1c309719717b2a9adbbc875f9fc5c7c37b5e1b84f574e7a1ff0835a64"
+            "810126e4109dc5686cf0dd9b1c38d9cc13bf6f76c5e0eceb108db2d6e9ed3175"
         )
 
         let root = try XCTUnwrap(
@@ -326,7 +337,7 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         )
         XCTAssertEqual(
             authority["scope"] as? String,
-            "Norse v2 local implementation and qualification only"
+            "Norse v2 production resources under v4.3 local qualification"
         )
         XCTAssertEqual(authority["publicDistributionAuthorized"] as? Bool, false)
         let rightsSources = try XCTUnwrap(root["rightsSources"] as? [[String: Any]])
@@ -354,6 +365,67 @@ final class NorseBaseThemeModuleTests: XCTestCase {
                     == false
                 && (resource["accessibilityDescriptionKey"] as? String)?.isEmpty == false
         })
+    }
+
+    func testApprovedNorseSealColorMastersRetainExactAuthorityBytes() throws {
+        struct ExpectedSeal {
+            let sha256: String
+            let width: UInt32
+            let height: UInt32
+        }
+
+        let expected: [String: ExpectedSeal] = [
+            "seal.norse.berserk": .init(
+                sha256: "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996",
+                width: 1_024,
+                height: 981
+            ),
+            "seal.norse.mjolnir": .init(
+                sha256: "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de",
+                width: 1_003,
+                height: 1_024
+            ),
+            "seal.norse.ravenshield": .init(
+                sha256: "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292",
+                width: 1_024,
+                height: 1_015
+            ),
+            "seal.norse.valknut": .init(
+                sha256: "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30",
+                width: 1_015,
+                height: 1_024
+            ),
+            "seal.norse.wolkin": .init(
+                sha256: "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e",
+                width: 1_013,
+                height: 1_024
+            ),
+            "seal.norse.yggdrasil": .init(
+                sha256: "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b",
+                width: 1_024,
+                height: 991
+            ),
+        ]
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        let resources = Dictionary(uniqueKeysWithValues: descriptor.resources.map { ($0.id, $0) })
+        let definitions = Dictionary(
+            uniqueKeysWithValues: NorseBaseThemeResourceCatalog.definitions.map { ($0.id, $0) }
+        )
+
+        XCTAssertEqual(Set(descriptor.codex.seals.map(\.metadata.id.rawValue)), Set(expected.keys))
+        for seal in descriptor.codex.seals {
+            let authority = try XCTUnwrap(expected[seal.metadata.id.rawValue])
+            let colorResourceID = try XCTUnwrap(seal.colorResourceID)
+            let reference = try XCTUnwrap(resources[colorResourceID])
+            let definition = try XCTUnwrap(definitions[colorResourceID])
+            let data = try bundledData(definition.resource)
+
+            XCTAssertEqual(reference.role, ThemeResourceRoles.sealColorMaster)
+            XCTAssertEqual(reference.integrity.sha256.rawValue, authority.sha256)
+            XCTAssertEqual(reference.integrity.pixelSize?.width, authority.width)
+            XCTAssertEqual(reference.integrity.pixelSize?.height, authority.height)
+            XCTAssertEqual(sha256Hex(data), authority.sha256)
+        }
     }
 
     func testRuntimePublishesExactDiscoveryAndVerifiedOpaquePayloads() async throws {
@@ -448,8 +520,8 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         let report = try NorseBaseThemeResources.budgetReport(
             physicalPayloads: payloads
         )
-        XCTAssertEqual(report.uniquePhysicalBytes, 89_592_539)
-        XCTAssertEqual(report.staticImageBytes, 88_173_047)
+        XCTAssertEqual(report.uniquePhysicalBytes, 86_409_000)
+        XCTAssertEqual(report.staticImageBytes, 84_989_635)
         XCTAssertEqual(report.fontBytes, 55_800)
         XCTAssertEqual(report.animationBytes, 3_279)
         XCTAssertEqual(report.soundBytes, 1_334_576)
@@ -707,7 +779,9 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         }
     }
 
-    func testEmergencyPublicationRetainsDiagnosticBeforeDescriptor() async throws {
+    func testDeferredRequiredResourceFailurePreservesDescriptorAndFailsClosedOnResolution()
+        async throws
+    {
         let missingDefinition = try XCTUnwrap(
             NorseBaseThemeResourceCatalog.definitions.first(where: {
                 $0.id == NorseBaseThemeResourceIDs.backgroundStatic
@@ -745,7 +819,8 @@ final class NorseBaseThemeModuleTests: XCTestCase {
                         ),
                         failures: try await reader.snapshot(
                             for: RuntimeThemeContributionCatalog.requiredBaseResourceFailure
-                        )
+                        ),
+                        resolver: try await context.opaqueResourceResolverClient()
                     )
                 }
             }
@@ -765,19 +840,37 @@ final class NorseBaseThemeModuleTests: XCTestCase {
             captured.descriptors.entries.only?.value,
             RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
         )
-        let failure = try XCTUnwrap(captured.failures.entries.only?.value)
-        XCTAssertEqual(failure.stage, .resourceRead)
-        XCTAssertEqual(failure.resourceID, missingDefinition.id)
-        XCTAssertEqual(failure.errorCode, .resourceUnavailable)
-        let failureRevision = try XCTUnwrap(
-            captured.failures.entries.only?.publishedRevision
+        XCTAssertTrue(captured.failures.entries.isEmpty)
+        let handle = OpaqueResourceHandle(
+            namespace: RuntimeThemeContributionCatalog.resourceNamespace(
+                for: RuneScribeCodexIDs.norse
+            ),
+            resourceID: OpaqueResourceID(rawValue: missingDefinition.id.rawValue)
         )
-        let descriptorRevision = try XCTUnwrap(
-            captured.descriptors.entries.only?.publishedRevision
-        )
-        XCTAssertLessThan(failureRevision, descriptorRevision)
+        do {
+            _ = try await probe.resolve(handle)
+            XCTFail("A deferred missing required resource must not be returned.")
+        } catch let failure as RequiredThemeResourceFailureDTO {
+            XCTAssertEqual(failure.stage, .resourceRead)
+            XCTAssertEqual(failure.resourceID, missingDefinition.id)
+            XCTAssertEqual(failure.errorCode, .resourceUnavailable)
+            XCTAssertEqual(
+                failure.expectedByteCount,
+                UInt64(missingDefinition.byteCount)
+            )
+            XCTAssertEqual(
+                failure.expectedSHA256?.rawValue,
+                missingDefinition.sha256Hex
+            )
+            XCTAssertEqual(failure.mediaType, missingDefinition.mediaType)
+        }
+
         let runtimeSnapshot = await runtime.snapshot()
         XCTAssertEqual(runtimeSnapshot.status, .running)
+        XCTAssertEqual(
+            runtimeSnapshot.moduleStates[RuneScribeModuleIDs.norseTheme],
+            .active
+        )
         await runtime.stop()
     }
 
@@ -970,19 +1063,28 @@ private actor NorseFailurePublicationProbe {
     }
 
     private var captured: Captured?
+    private var resolver: RuntimeOpaqueResourceResolverClient?
 
     func capture(
         descriptors: RuntimeContributionSnapshot<ThemeDescriptor>,
-        failures: RuntimeContributionSnapshot<RequiredThemeResourceFailureDTO>
+        failures: RuntimeContributionSnapshot<RequiredThemeResourceFailureDTO>,
+        resolver: RuntimeOpaqueResourceResolverClient
     ) {
         captured = Captured(descriptors: descriptors, failures: failures)
+        self.resolver = resolver
     }
 
     func value() -> Captured? { captured }
+
+    func resolve(_ handle: OpaqueResourceHandle) async throws -> ResolvedOpaqueResource {
+        guard let resolver else { throw NorsePositiveTestError.missingProbeClient }
+        return try await resolver.resolve(handle)
+    }
 }
 
 private enum NorsePositiveTestError: Error {
     case resourceUnavailable
+    case missingProbeClient
 }
 
 private func sha256Hex(_ data: Data) -> String {

@@ -17,7 +17,8 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
     private static let lockedQueryPredicate =
         "identifier CONTAINS[c] 'codex.norse' AND identifier CONTAINS[c] 'locked'"
 
-    override func setUpWithError() throws {
+    override func setUp() async throws {
+        try await super.setUp()
         continueAfterFailure = false
         #if os(iOS)
         XCUIDevice.shared.orientation = .portrait
@@ -63,20 +64,28 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
                     )
                 }
             } else {
+                let expected = try expectedInventory(for: destination)
+                let candidateCount = try entries.reduce(0) { count, entry in
+                    count + (try captureCandidateIDs(
+                        for: entry,
+                        probesByID: catalogs.probesByID,
+                        candidatesByID: catalogs.candidatesByID
+                    ).count)
+                }
                 try require(
-                    entries.count == 95,
-                    "Expected 95 affected entries for \(destination), found \(entries.count)"
+                    entries.count == expected.sidecars,
+                    "Expected \(expected.sidecars) affected entries for \(destination), found \(entries.count)"
                 )
                 try require(
-                    entries.reduce(0) { $0 + $1.candidateIDs.count } == 168,
-                    "Expected 168 candidate captures for \(destination)"
+                    candidateCount == expected.candidates,
+                    "Expected \(expected.candidates) candidate captures for \(destination)"
                 )
                 try require(
                     entries.reduce(0) {
                         $0 + $1.xcuiProbeIDs(using: catalogs.probesByID)
                             .filter { $0 == Self.lockedProbeID }.count
-                    } == 1,
-                    "Expected one locked query capture for \(destination)"
+                    } == expected.queries,
+                    "Expected \(expected.queries) locked query capture for \(destination)"
                 )
             }
 
@@ -96,10 +105,10 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
         }
 
         if filter == nil {
-            let multiplier = destinations.count
-            XCTAssertEqual(emitted.sidecars, 95 * multiplier)
-            XCTAssertEqual(emitted.candidates, 168 * multiplier)
-            XCTAssertEqual(emitted.queries, multiplier)
+            let expected = try destinations.reduce(into: CaptureInventory()) {
+                $0 += try expectedInventory(for: $1)
+            }
+            XCTAssertEqual(emitted, expected)
         } else {
             XCTAssertEqual(emitted.sidecars, 1)
         }
@@ -138,7 +147,11 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
             app: app
         )
 
-        let candidateIDs = entry.candidateIDs
+        let candidateIDs = try captureCandidateIDs(
+            for: entry,
+            probesByID: probesByID,
+            candidatesByID: candidatesByID
+        )
         if let firstCandidateID = candidateIDs.first {
             _ = try exactElement(
                 identifiedBy: firstCandidateID,
@@ -600,7 +613,7 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
                 expectedMatchCount: 1
             ))
             let titleID = entry.codexID == "codex.norse"
-                ? "title.norse.master-of-runes" : "title.master-scribe"
+                ? "title.norse.master-of-runes" : "title.\(themeComponent).mastery"
             try addExact("theme.mastery.title.\(titleID)")
             try add(StructuralWitnessSpecification(
                 witnessID: "query:mastery-title-set",
@@ -913,9 +926,14 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
             "Sidecar bundle role differs"
         )
 
+        let expectedCandidateIDs = try captureCandidateIDs(
+            for: entry,
+            probesByID: probesByID,
+            candidatesByID: candidatesByID
+        )
         let candidateIDs = sidecar.candidateElementCaptures.map(\.candidateID)
         try require(
-            candidateIDs == entry.candidateIDs,
+            candidateIDs == expectedCandidateIDs,
             "Sidecar candidate set or order differs for \(entry.id)"
         )
         for item in sidecar.candidateElementCaptures {
@@ -1048,22 +1066,70 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
         }
     }
 
+    private func captureCandidateIDs(
+        for entry: AuthorityEntry,
+        probesByID: [String: RuntimeProbe],
+        candidatesByID: [String: CandidateCatalogEntry]
+    ) throws -> [String] {
+        var identifiers = Set(entry.candidateIDs)
+        let probeIDs = entry.xcuiProbeIDs(using: probesByID)
+        if probeIDs.contains(where: { $0.hasPrefix("probe.motion.preview-") }) {
+            try require(
+                entry.codexID.hasPrefix("codex.")
+                    && entry.codexID.count > "codex.".count,
+                "Preview probe Codex identity is invalid for \(entry.id)"
+            )
+            let codexSlug = String(entry.codexID.dropFirst("codex.".count))
+            let prefix = "theme.artifact-preview.relic.\(codexSlug)."
+            let matches = candidatesByID.keys.filter { $0.hasPrefix(prefix) }.sorted()
+            try require(
+                matches.count == 1,
+                "Preview probe candidate is not unique for \(entry.id)"
+            )
+            identifiers.insert(matches[0])
+        }
+        for identifier in identifiers {
+            guard let candidate = candidatesByID[identifier] else {
+                throw CaptureFailure(
+                    "Entry references missing responsive candidate \(identifier)"
+                )
+            }
+            try require(
+                candidate.kind == "accessibility-element"
+                    && candidate.captureOperation == Self.captureOperation,
+                "Entry declares a non-XCUI responsive candidate \(identifier)"
+            )
+        }
+        return identifiers.sorted()
+    }
+
+    private func expectedInventory(for destination: String) throws -> CaptureInventory {
+        switch destination {
+        case "iphone-portrait":
+            CaptureInventory(sidecars: 70, candidates: 74, queries: 1)
+        case "ipad-portrait", "macos-standard", "macos-resized":
+            CaptureInventory(sidecars: 85, candidates: 89, queries: 1)
+        default:
+            throw CaptureFailure("Unsupported qualification destination \(destination)")
+        }
+    }
+
     private func loadCatalogs() throws -> Catalogs {
         let decoder = JSONDecoder()
         let authority: ComparisonAuthority = try decodeResource(
-            named: "Comparison-Authority-v1.2",
+            named: "Comparison-Authority-v1.3",
             using: decoder
         )
         let seeds: SeedCatalog = try decodeResource(
-            named: "Deterministic-Seed-Catalog-v1.2",
+            named: "Deterministic-Seed-Catalog-v1.3",
             using: decoder
         )
         let probes: RuntimeProbeCatalog = try decodeResource(
-            named: "Runtime-Probe-Catalog-v1.2",
+            named: "Runtime-Probe-Catalog-v1.3",
             using: decoder
         )
         let candidates: CandidateCatalog = try decodeResource(
-            named: "Candidate-Capture-Catalog-v1.2",
+            named: "Responsive-Candidate-Catalog-v1.3",
             using: decoder
         )
         return Catalogs(
@@ -1088,36 +1154,57 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
     }
 
     private func validateCatalogs(_ catalogs: Catalogs) throws {
+        let mappings = catalogs.authority.entries.flatMap(\.referenceMappings)
+        let mappingLaneCounts = Dictionary(
+            grouping: mappings,
+            by: \.evaluationLane
+        ).mapValues(\.count)
         try require(
-            catalogs.authority.schemaVersion == "1.2"
+            catalogs.authority.schemaVersion == "1.3"
                 && catalogs.authority.expectedEntryCount == 400
-                && catalogs.authority.entries.count == 400,
-            "Comparison authority must contain exactly 400 v1.2 entries"
+                && catalogs.authority.entries.count == 400
+                && catalogs.authority.expectedReferenceMappingCount == 1_104
+                && catalogs.authority.expectedCanonicalImageMappingCount == 400
+                && catalogs.authority.expectedResponsiveStructuralMappingCount == 700
+                && catalogs.authority.expectedNegativeInvariantMappingCount == 4
+                && mappings.count == 1_104
+                && mappingLaneCounts == [
+                    "canonical": 400,
+                    "responsive": 700,
+                    "runtime": 4,
+                ],
+            "Comparison authority must contain the exact v1.3 entry and mapping lanes"
         )
         try require(
             Set(catalogs.authority.entries.map(\.id)).count == 400,
             "Comparison authority entry IDs are not unique"
         )
         try require(
-            catalogs.seeds.schemaVersion == "1.2"
+            catalogs.seeds.schemaVersion == "1.3"
                 && catalogs.seeds.seedCount == 100
                 && catalogs.seeds.seeds.count == 100
                 && catalogs.seedsByID.count == 100,
-            "Seed catalog must contain exactly 100 unique v1.2 seeds"
+            "Seed catalog must contain exactly 100 unique v1.3 seeds"
         )
         try require(
-            catalogs.probes.schemaVersion == "1.2"
+            catalogs.probes.schemaVersion == "1.3"
                 && catalogs.probes.probeCount == 50
                 && catalogs.probes.probes.count == 50
                 && catalogs.probesByID.count == 50,
-            "Runtime probe catalog must contain exactly 50 unique v1.2 probes"
+            "Runtime probe catalog must contain exactly 50 unique v1.3 probes"
         )
         try require(
-            catalogs.candidates.schemaVersion == "1.2"
+            catalogs.candidates.schemaVersion == "1.3"
                 && catalogs.candidates.candidateCount == 188
                 && catalogs.candidates.candidates.count == 188
                 && catalogs.candidatesByID.count == 188,
-            "Candidate capture catalog must contain exactly 188 unique v1.2 candidates"
+            "Responsive candidate catalog must contain exactly 188 unique v1.3 candidates"
+        )
+        try require(
+            catalogs.authority.entries.reduce(0) {
+                $0 + $1.runtimeProbeIDs.count
+            } == 576,
+            "Comparison authority must contain exactly 576 runtime-probe instances"
         )
 
         let destinations = [
@@ -1128,6 +1215,7 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
         ]
         var total = CaptureInventory()
         for destination in destinations {
+            let expected = try expectedInventory(for: destination)
             let entries = catalogs.authority.entries.filter { entry in
                 entry.destination == destination
                     && (!entry.candidateIDs.isEmpty
@@ -1135,21 +1223,27 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
             }
             let inventory = CaptureInventory(
                 sidecars: entries.count,
-                candidates: entries.reduce(0) { $0 + $1.candidateIDs.count },
+                candidates: try entries.reduce(0) { count, entry in
+                    count + (try captureCandidateIDs(
+                        for: entry,
+                        probesByID: catalogs.probesByID,
+                        candidatesByID: catalogs.candidatesByID
+                    ).count)
+                },
                 queries: entries.reduce(0) {
                     $0 + $1.xcuiProbeIDs(using: catalogs.probesByID)
                         .filter { $0 == Self.lockedProbeID }.count
                 }
             )
             try require(
-                inventory == CaptureInventory(sidecars: 95, candidates: 168, queries: 1),
+                inventory == expected,
                 "Authority inventory differs for \(destination)"
             )
             total += inventory
         }
         try require(
-            total == CaptureInventory(sidecars: 380, candidates: 672, queries: 4),
-            "Full XCUI inventory must be 380 sidecars, 672 candidates, and 4 queries"
+            total == CaptureInventory(sidecars: 325, candidates: 341, queries: 4),
+            "Full XCUI inventory must be 325 sidecars, 341 candidates, and 4 queries"
         )
 
         for entry in catalogs.authority.entries {
@@ -1169,10 +1263,16 @@ final class ThemeFidelityAuthorityUITests: XCTestCase {
             for mapping in entry.referenceMappings
             where mapping.candidateElementID != nil {
                 try require(
-                    mapping.candidateCaptureOperation == Self.captureOperation,
+                    mapping.evaluationLane == "responsive"
+                        && mapping.candidateCaptureOperation == Self.captureOperation,
                     "Entry declares an unsupported candidate capture operation for \(entry.id)"
                 )
             }
+            _ = try captureCandidateIDs(
+                for: entry,
+                probesByID: catalogs.probesByID,
+                candidatesByID: catalogs.candidatesByID
+            )
         }
     }
 
@@ -1345,6 +1445,10 @@ private struct Catalogs {
 private struct ComparisonAuthority: Decodable {
     let schemaVersion: String
     let expectedEntryCount: Int
+    let expectedReferenceMappingCount: Int
+    let expectedCanonicalImageMappingCount: Int
+    let expectedResponsiveStructuralMappingCount: Int
+    let expectedNegativeInvariantMappingCount: Int
     let entries: [AuthorityEntry]
 }
 
@@ -1382,6 +1486,7 @@ private struct AuthorityEntry: Decodable {
 }
 
 private struct ReferenceMapping: Decodable {
+    let evaluationLane: String
     let candidateElementID: String?
     let candidateCaptureOperation: String
     let structuralAssertionIDs: [String]
@@ -1415,6 +1520,8 @@ private struct CandidateCatalog: Decodable {
 
 private struct CandidateCatalogEntry: Decodable {
     let id: String
+    let kind: String
+    let captureOperation: String
 }
 
 private struct RuntimeProbe: Decodable {

@@ -81,7 +81,7 @@ func resourceLoaderUsesVerifiedRuntimeIORail() async throws {
     let bundle = try await ProgressionCatalogResources.loadValidatedBundle(
         using: runtimeIO
     )
-    #expect(bundle.catalog.catalogVersion.rawValue == 2)
+    #expect(bundle.catalog.catalogVersion.rawValue == 3)
     #expect(bundle.eventCatalog.catalogVersion.rawValue == 2)
     #expect(bundle.futureThemeBindings.version.rawValue == 2)
 }

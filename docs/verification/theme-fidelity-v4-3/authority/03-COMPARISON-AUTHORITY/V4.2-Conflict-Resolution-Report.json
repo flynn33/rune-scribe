@@ -1,0 +1,866 @@
+{
+  "schemaVersion": "1.0",
+  "authorityCorrection": "v4.2 to v4.3",
+  "conflictingEntryCount": 21,
+  "result": "RESOLVED_BY_SEPARATE_CANONICAL_OUTPUTS",
+  "records": [
+    {
+      "entryID": "Norse|inscription-preview|iphone-portrait",
+      "v4_2ConflictingCandidateID": "theme.artifact-preview.relic.norse.runestone-tablet",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|inscription-preview|iphone-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/05-short-message.png",
+          "referenceSHA256": "aae1f3bf5cff4b94fbc2ca6eb86eedbeb2cabb8281588c53aef5d6d13e9efbe7",
+          "referenceDimensions": [
+            398,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.05-short-message.aae1f3bf5c",
+          "v4_3CanonicalWrapperID": "canonical.norse.05-short-message.aae1f3bf5c.wrapper",
+          "v4_3OutputDimensions": [
+            398,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|inscription-preview|iphone-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|inscription-preview|ipad-portrait",
+      "v4_2ConflictingCandidateID": "theme.artifact-preview.relic.norse.runestone-tablet",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|inscription-preview|ipad-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/05-short-message.png",
+          "referenceSHA256": "aae1f3bf5cff4b94fbc2ca6eb86eedbeb2cabb8281588c53aef5d6d13e9efbe7",
+          "referenceDimensions": [
+            398,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.05-short-message.aae1f3bf5c",
+          "v4_3CanonicalWrapperID": "canonical.norse.05-short-message.aae1f3bf5c.wrapper",
+          "v4_3OutputDimensions": [
+            398,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|inscription-preview|ipad-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|inscription-preview|macos-standard",
+      "v4_2ConflictingCandidateID": "theme.artifact-preview.relic.norse.runestone-tablet",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|inscription-preview|macos-standard|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/05-short-message.png",
+          "referenceSHA256": "aae1f3bf5cff4b94fbc2ca6eb86eedbeb2cabb8281588c53aef5d6d13e9efbe7",
+          "referenceDimensions": [
+            398,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.05-short-message.aae1f3bf5c",
+          "v4_3CanonicalWrapperID": "canonical.norse.05-short-message.aae1f3bf5c.wrapper",
+          "v4_3OutputDimensions": [
+            398,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|inscription-preview|macos-standard|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|inscription-preview|macos-resized",
+      "v4_2ConflictingCandidateID": "theme.artifact-preview.relic.norse.runestone-tablet",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|inscription-preview|macos-resized|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/05-short-message.png",
+          "referenceSHA256": "aae1f3bf5cff4b94fbc2ca6eb86eedbeb2cabb8281588c53aef5d6d13e9efbe7",
+          "referenceDimensions": [
+            398,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.05-short-message.aae1f3bf5c",
+          "v4_3CanonicalWrapperID": "canonical.norse.05-short-message.aae1f3bf5c.wrapper",
+          "v4_3OutputDimensions": [
+            398,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|inscription-preview|macos-resized|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|received-cipher|iphone-portrait",
+      "v4_2ConflictingCandidateID": "theme.received.artifact-preview.relic.norse.runestone-tablet",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|received-cipher|iphone-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/07-received-cipher.png",
+          "referenceSHA256": "3f840710d4e1b3637d3f2abbfbdb59cbac174502485b824aca53797740d6224f",
+          "referenceDimensions": [
+            496,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.07-received-cipher.3f840710d4",
+          "v4_3CanonicalWrapperID": "canonical.norse.07-received-cipher.3f840710d4.wrapper",
+          "v4_3OutputDimensions": [
+            496,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|received-cipher|iphone-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|received-cipher|ipad-portrait",
+      "v4_2ConflictingCandidateID": "theme.received.artifact-preview.relic.norse.runestone-tablet",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|received-cipher|ipad-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/07-received-cipher.png",
+          "referenceSHA256": "3f840710d4e1b3637d3f2abbfbdb59cbac174502485b824aca53797740d6224f",
+          "referenceDimensions": [
+            496,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.07-received-cipher.3f840710d4",
+          "v4_3CanonicalWrapperID": "canonical.norse.07-received-cipher.3f840710d4.wrapper",
+          "v4_3OutputDimensions": [
+            496,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|received-cipher|ipad-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|received-cipher|macos-standard",
+      "v4_2ConflictingCandidateID": "theme.received.artifact-preview.relic.norse.runestone-tablet",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|received-cipher|macos-standard|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/07-received-cipher.png",
+          "referenceSHA256": "3f840710d4e1b3637d3f2abbfbdb59cbac174502485b824aca53797740d6224f",
+          "referenceDimensions": [
+            496,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.07-received-cipher.3f840710d4",
+          "v4_3CanonicalWrapperID": "canonical.norse.07-received-cipher.3f840710d4.wrapper",
+          "v4_3OutputDimensions": [
+            496,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|received-cipher|macos-standard|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|received-cipher|macos-resized",
+      "v4_2ConflictingCandidateID": "theme.received.artifact-preview.relic.norse.runestone-tablet",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|received-cipher|macos-resized|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/07-received-cipher.png",
+          "referenceSHA256": "3f840710d4e1b3637d3f2abbfbdb59cbac174502485b824aca53797740d6224f",
+          "referenceDimensions": [
+            496,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.07-received-cipher.3f840710d4",
+          "v4_3CanonicalWrapperID": "canonical.norse.07-received-cipher.3f840710d4.wrapper",
+          "v4_3OutputDimensions": [
+            496,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|received-cipher|macos-resized|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|share-builder|iphone-portrait",
+      "v4_2ConflictingCandidateID": "share-builder.preview.codex.norse",
+      "incompatibleReferenceCount": 3,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|share-builder|iphone-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/08-share-preview.png",
+          "referenceSHA256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+          "referenceDimensions": [
+            506,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.08-share-preview.17232537b1",
+          "v4_3CanonicalWrapperID": "canonical.norse.08-share-preview.17232537b1.wrapper",
+          "v4_3OutputDimensions": [
+            506,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|share-builder|iphone-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/04-compose-workspace.png",
+          "referenceSHA256": "619a137fbcc760b60b28f1a1569cf289922fc37e39102040435782de17f7c2d6",
+          "referenceDimensions": [
+            700,
+            648
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.04-compose-workspace.619a137fbc",
+          "v4_3CanonicalWrapperID": "canonical.norse.04-compose-workspace.619a137fbc.wrapper",
+          "v4_3OutputDimensions": [
+            700,
+            648
+          ]
+        },
+        {
+          "mappingID": "Norse|share-builder|iphone-portrait|reference-03",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|share-builder|ipad-portrait",
+      "v4_2ConflictingCandidateID": "share-builder.preview.codex.norse",
+      "incompatibleReferenceCount": 3,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|share-builder|ipad-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/08-share-preview.png",
+          "referenceSHA256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+          "referenceDimensions": [
+            506,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.08-share-preview.17232537b1",
+          "v4_3CanonicalWrapperID": "canonical.norse.08-share-preview.17232537b1.wrapper",
+          "v4_3OutputDimensions": [
+            506,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|share-builder|ipad-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/04-compose-workspace.png",
+          "referenceSHA256": "619a137fbcc760b60b28f1a1569cf289922fc37e39102040435782de17f7c2d6",
+          "referenceDimensions": [
+            700,
+            648
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.04-compose-workspace.619a137fbc",
+          "v4_3CanonicalWrapperID": "canonical.norse.04-compose-workspace.619a137fbc.wrapper",
+          "v4_3OutputDimensions": [
+            700,
+            648
+          ]
+        },
+        {
+          "mappingID": "Norse|share-builder|ipad-portrait|reference-03",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|share-builder|macos-standard",
+      "v4_2ConflictingCandidateID": "share-builder.preview.codex.norse",
+      "incompatibleReferenceCount": 3,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|share-builder|macos-standard|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/08-share-preview.png",
+          "referenceSHA256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+          "referenceDimensions": [
+            506,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.08-share-preview.17232537b1",
+          "v4_3CanonicalWrapperID": "canonical.norse.08-share-preview.17232537b1.wrapper",
+          "v4_3OutputDimensions": [
+            506,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|share-builder|macos-standard|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/04-compose-workspace.png",
+          "referenceSHA256": "619a137fbcc760b60b28f1a1569cf289922fc37e39102040435782de17f7c2d6",
+          "referenceDimensions": [
+            700,
+            648
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.04-compose-workspace.619a137fbc",
+          "v4_3CanonicalWrapperID": "canonical.norse.04-compose-workspace.619a137fbc.wrapper",
+          "v4_3OutputDimensions": [
+            700,
+            648
+          ]
+        },
+        {
+          "mappingID": "Norse|share-builder|macos-standard|reference-03",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|share-builder|macos-resized",
+      "v4_2ConflictingCandidateID": "share-builder.preview.codex.norse",
+      "incompatibleReferenceCount": 3,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|share-builder|macos-resized|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/08-share-preview.png",
+          "referenceSHA256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+          "referenceDimensions": [
+            506,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.08-share-preview.17232537b1",
+          "v4_3CanonicalWrapperID": "canonical.norse.08-share-preview.17232537b1.wrapper",
+          "v4_3OutputDimensions": [
+            506,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|share-builder|macos-resized|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/04-compose-workspace.png",
+          "referenceSHA256": "619a137fbcc760b60b28f1a1569cf289922fc37e39102040435782de17f7c2d6",
+          "referenceDimensions": [
+            700,
+            648
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.04-compose-workspace.619a137fbc",
+          "v4_3CanonicalWrapperID": "canonical.norse.04-compose-workspace.619a137fbc.wrapper",
+          "v4_3OutputDimensions": [
+            700,
+            648
+          ]
+        },
+        {
+          "mappingID": "Norse|share-builder|macos-resized|reference-03",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|static-share|iphone-portrait",
+      "v4_2ConflictingCandidateID": "renderer.static-share.codex.norse.relic.norse.runestone-tablet.seal.norse.valknut.standard",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|static-share|iphone-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/08-share-preview.png",
+          "referenceSHA256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+          "referenceDimensions": [
+            506,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.08-share-preview.17232537b1",
+          "v4_3CanonicalWrapperID": "canonical.norse.08-share-preview.17232537b1.wrapper",
+          "v4_3OutputDimensions": [
+            506,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|static-share|iphone-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|static-share|ipad-portrait",
+      "v4_2ConflictingCandidateID": "renderer.static-share.codex.norse.relic.norse.runestone-tablet.seal.norse.valknut.standard",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|static-share|ipad-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/08-share-preview.png",
+          "referenceSHA256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+          "referenceDimensions": [
+            506,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.08-share-preview.17232537b1",
+          "v4_3CanonicalWrapperID": "canonical.norse.08-share-preview.17232537b1.wrapper",
+          "v4_3OutputDimensions": [
+            506,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|static-share|ipad-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|static-share|macos-standard",
+      "v4_2ConflictingCandidateID": "renderer.static-share.codex.norse.relic.norse.runestone-tablet.seal.norse.valknut.standard",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|static-share|macos-standard|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/08-share-preview.png",
+          "referenceSHA256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+          "referenceDimensions": [
+            506,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.08-share-preview.17232537b1",
+          "v4_3CanonicalWrapperID": "canonical.norse.08-share-preview.17232537b1.wrapper",
+          "v4_3OutputDimensions": [
+            506,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|static-share|macos-standard|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|static-share|macos-resized",
+      "v4_2ConflictingCandidateID": "renderer.static-share.codex.norse.relic.norse.runestone-tablet.seal.norse.valknut.standard",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|static-share|macos-resized|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/08-share-preview.png",
+          "referenceSHA256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+          "referenceDimensions": [
+            506,
+            700
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.08-share-preview.17232537b1",
+          "v4_3CanonicalWrapperID": "canonical.norse.08-share-preview.17232537b1.wrapper",
+          "v4_3OutputDimensions": [
+            506,
+            700
+          ]
+        },
+        {
+          "mappingID": "Norse|static-share|macos-resized|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/relic-runestone-tablet-reference.png",
+          "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+          "referenceDimensions": [
+            172,
+            307
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+          "v4_3CanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+          "v4_3OutputDimensions": [
+            172,
+            307
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|mastery|iphone-portrait",
+      "v4_2ConflictingCandidateID": "theme.mastery.codex.norse",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|mastery|iphone-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/11-mastery-rewards.png",
+          "referenceSHA256": "12cd6180852261263b8e6b8d119dc6d7f33da6431f9e0ac7e0a6b4e2649eeb26",
+          "referenceDimensions": [
+            792,
+            460
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.11-mastery-rewards.12cd618085",
+          "v4_3CanonicalWrapperID": "canonical.norse.11-mastery-rewards.12cd618085.wrapper",
+          "v4_3OutputDimensions": [
+            792,
+            460
+          ]
+        },
+        {
+          "mappingID": "Norse|mastery|iphone-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/mastery-reference.png",
+          "referenceSHA256": "53e6ee4d30d1f3be91c7afe91aa93b975b0d6e6617222ac7a1687fd4377994c2",
+          "referenceDimensions": [
+            402,
+            225
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.mastery-reference.53e6ee4d30",
+          "v4_3CanonicalWrapperID": "canonical.norse.mastery-reference.53e6ee4d30.wrapper",
+          "v4_3OutputDimensions": [
+            402,
+            225
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|mastery|ipad-portrait",
+      "v4_2ConflictingCandidateID": "theme.mastery.codex.norse",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|mastery|ipad-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/11-mastery-rewards.png",
+          "referenceSHA256": "12cd6180852261263b8e6b8d119dc6d7f33da6431f9e0ac7e0a6b4e2649eeb26",
+          "referenceDimensions": [
+            792,
+            460
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.11-mastery-rewards.12cd618085",
+          "v4_3CanonicalWrapperID": "canonical.norse.11-mastery-rewards.12cd618085.wrapper",
+          "v4_3OutputDimensions": [
+            792,
+            460
+          ]
+        },
+        {
+          "mappingID": "Norse|mastery|ipad-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/mastery-reference.png",
+          "referenceSHA256": "53e6ee4d30d1f3be91c7afe91aa93b975b0d6e6617222ac7a1687fd4377994c2",
+          "referenceDimensions": [
+            402,
+            225
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.mastery-reference.53e6ee4d30",
+          "v4_3CanonicalWrapperID": "canonical.norse.mastery-reference.53e6ee4d30.wrapper",
+          "v4_3OutputDimensions": [
+            402,
+            225
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|mastery|macos-standard",
+      "v4_2ConflictingCandidateID": "theme.mastery.codex.norse",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|mastery|macos-standard|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/11-mastery-rewards.png",
+          "referenceSHA256": "12cd6180852261263b8e6b8d119dc6d7f33da6431f9e0ac7e0a6b4e2649eeb26",
+          "referenceDimensions": [
+            792,
+            460
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.11-mastery-rewards.12cd618085",
+          "v4_3CanonicalWrapperID": "canonical.norse.11-mastery-rewards.12cd618085.wrapper",
+          "v4_3OutputDimensions": [
+            792,
+            460
+          ]
+        },
+        {
+          "mappingID": "Norse|mastery|macos-standard|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/mastery-reference.png",
+          "referenceSHA256": "53e6ee4d30d1f3be91c7afe91aa93b975b0d6e6617222ac7a1687fd4377994c2",
+          "referenceDimensions": [
+            402,
+            225
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.mastery-reference.53e6ee4d30",
+          "v4_3CanonicalWrapperID": "canonical.norse.mastery-reference.53e6ee4d30.wrapper",
+          "v4_3OutputDimensions": [
+            402,
+            225
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Norse|mastery|macos-resized",
+      "v4_2ConflictingCandidateID": "theme.mastery.codex.norse",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Norse|mastery|macos-resized|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/11-mastery-rewards.png",
+          "referenceSHA256": "12cd6180852261263b8e6b8d119dc6d7f33da6431f9e0ac7e0a6b4e2649eeb26",
+          "referenceDimensions": [
+            792,
+            460
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.11-mastery-rewards.12cd618085",
+          "v4_3CanonicalWrapperID": "canonical.norse.11-mastery-rewards.12cd618085.wrapper",
+          "v4_3OutputDimensions": [
+            792,
+            460
+          ]
+        },
+        {
+          "mappingID": "Norse|mastery|macos-resized|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Norse/mastery-reference.png",
+          "referenceSHA256": "53e6ee4d30d1f3be91c7afe91aa93b975b0d6e6617222ac7a1687fd4377994c2",
+          "referenceDimensions": [
+            402,
+            225
+          ],
+          "v4_3CanonicalCandidateID": "canonical.norse.mastery-reference.53e6ee4d30",
+          "v4_3CanonicalWrapperID": "canonical.norse.mastery-reference.53e6ee4d30.wrapper",
+          "v4_3OutputDimensions": [
+            402,
+            225
+          ]
+        }
+      ]
+    },
+    {
+      "entryID": "Moonleaf|static-share|iphone-portrait",
+      "v4_2ConflictingCandidateID": "renderer.static-share.codex.moonleaf.relic.moonleaf.tablet.seal.moonleaf.crescentleaf.standard",
+      "incompatibleReferenceCount": 2,
+      "resolution": "each distinct reference is assigned to its own exact-dimension canonical production output",
+      "resolvedMappings": [
+        {
+          "mappingID": "Moonleaf|static-share|iphone-portrait|reference-01",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Controlling-Goldens/Moonleaf/moonleaf-received-cipher-final-b.png",
+          "referenceSHA256": "79446a4e03976835f5727b3e9285f00e004602cba8c9496122bed115b0657db4",
+          "referenceDimensions": [
+            941,
+            1672
+          ],
+          "v4_3CanonicalCandidateID": "canonical.moonleaf.moonleaf-received-cipher-final-b.79446a4e03",
+          "v4_3CanonicalWrapperID": "canonical.moonleaf.moonleaf-received-cipher-final-b.79446a4e03.wrapper",
+          "v4_3OutputDimensions": [
+            941,
+            1672
+          ]
+        },
+        {
+          "mappingID": "Moonleaf|static-share|iphone-portrait|reference-02",
+          "referenceAssetV4_2": "03-AUTHORITY-ASSETS/Reference-Slices/Moonleaf/relic-moonleaf-tablet-reference.png",
+          "referenceSHA256": "06e58cc199113d2533d694db44f605be508f85e6be33b1076570d5a018f8f91f",
+          "referenceDimensions": [
+            525,
+            535
+          ],
+          "v4_3CanonicalCandidateID": "canonical.moonleaf.relic-moonleaf-tablet-reference.06e58cc199",
+          "v4_3CanonicalWrapperID": "canonical.moonleaf.relic-moonleaf-tablet-reference.06e58cc199.wrapper",
+          "v4_3OutputDimensions": [
+            525,
+            535
+          ]
+        }
+      ]
+    }
+  ]
+}

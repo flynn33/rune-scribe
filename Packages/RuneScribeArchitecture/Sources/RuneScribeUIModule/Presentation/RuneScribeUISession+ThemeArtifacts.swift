@@ -33,9 +33,41 @@ struct ThemeArtifactPickerItem: Identifiable, Equatable, Sendable {
     let name: String
     let description: String
     let rarity: ThemeRarityToken
+    let visualState: ThemeVisualContentState
     let isOwned: Bool
     let isSelectable: Bool
     let isSelected: Bool
+}
+
+struct ThemeArtifactCatalogRuntimeState: Equatable, Sendable {
+    let stateByArtifactID: [ArtifactID: ThemeVisualContentState]
+    let selectableArtifactIDs: Set<ArtifactID>
+    let unlockProgress: ProgressionNumericProgressDTO?
+
+    init(
+        stateByArtifactID: [ArtifactID: ThemeVisualContentState],
+        selectableArtifactIDs: Set<ArtifactID>,
+        unlockProgress: ProgressionNumericProgressDTO?
+    ) {
+        self.stateByArtifactID = stateByArtifactID
+        self.selectableArtifactIDs = selectableArtifactIDs
+        self.unlockProgress = unlockProgress
+    }
+
+    init(
+        relics: [ThemeArtifactPickerItem],
+        seals: [ThemeArtifactPickerItem],
+        unlockProgress: ProgressionNumericProgressDTO?
+    ) {
+        let items = relics + seals
+        stateByArtifactID = Dictionary(uniqueKeysWithValues: items.map {
+            ($0.id, $0.visualState)
+        })
+        selectableArtifactIDs = Set(items.compactMap {
+            $0.isSelectable ? $0.id : nil
+        })
+        self.unlockProgress = unlockProgress
+    }
 }
 
 extension RuneScribeUISession {
@@ -52,6 +84,12 @@ extension RuneScribeUISession {
                 name: relic.metadata.displayName.fallbackValue,
                 description: relic.metadata.description.fallbackValue,
                 rarity: relic.metadata.rarity,
+                visualState: themeArtifactVisualState(
+                    artifactID: relic.metadata.id,
+                    isOwned: isOwned,
+                    isSelected: relic.metadata.id == selectedThemeRelicID,
+                    providerAvailable: providerAvailable
+                ),
                 isOwned: isOwned,
                 isSelectable: providerAvailable && isOwned,
                 isSelected: relic.metadata.id == selectedThemeRelicID
@@ -72,6 +110,12 @@ extension RuneScribeUISession {
                 name: seal.metadata.displayName.fallbackValue,
                 description: seal.metadata.description.fallbackValue,
                 rarity: seal.metadata.rarity,
+                visualState: themeArtifactVisualState(
+                    artifactID: seal.metadata.id,
+                    isOwned: isOwned,
+                    isSelected: seal.metadata.id == selectedThemeSealID,
+                    providerAvailable: providerAvailable
+                ),
                 isOwned: isOwned,
                 isSelectable: providerAvailable && isOwned,
                 isSelected: seal.metadata.id == selectedThemeSealID
@@ -97,6 +141,12 @@ extension RuneScribeUISession {
                 name: frame.metadata.displayName.fallbackValue,
                 description: frame.metadata.description.fallbackValue,
                 rarity: frame.metadata.rarity,
+                visualState: themeArtifactVisualState(
+                    artifactID: frame.metadata.id,
+                    isOwned: isOwned,
+                    isSelected: frame.metadata.id == selectedThemeFrameID,
+                    providerAvailable: providerAvailable
+                ),
                 isOwned: isOwned,
                 isSelectable: providerAvailable && isOwned,
                 isSelected: frame.metadata.id == selectedThemeFrameID
@@ -189,5 +239,39 @@ extension RuneScribeUISession {
               })
         else { return false }
         return provider.state == .available && provider.isOwned
+    }
+
+    var activeThemeArtifactCatalogRuntimeState: ThemeArtifactCatalogRuntimeState {
+        let codexID = themeSnapshot?.effectiveCodexID
+        let progress = progressionSnapshot?.codexGates.first(where: {
+            $0.codexID == codexID
+        })?.progress
+        return ThemeArtifactCatalogRuntimeState(
+            relics: themeRelicItems,
+            seals: themeSealItems,
+            unlockProgress: progress
+        )
+    }
+
+    private func themeArtifactVisualState(
+        artifactID: ArtifactID,
+        isOwned: Bool,
+        isSelected: Bool,
+        providerAvailable: Bool
+    ) -> ThemeVisualContentState {
+        guard providerAvailable else { return .unavailable }
+        if isSelected, isOwned { return .selected }
+        if isOwned { return .owned }
+        let ownershipState = progressionSnapshot?.ownership.first(where: {
+            $0.reference == .artifact(artifactID)
+        })?.state
+        switch ownershipState {
+        case .encountered:
+            return .encountered
+        case .owned:
+            return .owned
+        case .locked, .none:
+            return .locked
+        }
     }
 }

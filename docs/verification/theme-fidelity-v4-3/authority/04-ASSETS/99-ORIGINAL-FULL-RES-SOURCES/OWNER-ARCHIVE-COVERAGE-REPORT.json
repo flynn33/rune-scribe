@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "result": "PASS",
+  "ownerArchiveSHA256": "ca74fd59e81016d39153739d660cefed86f72224c0bd99e33eedb74db937a8a1",
+  "ownerArchiveByteCount": 177075361,
+  "archiveEntryCount": 128,
+  "macOSResourceForkEntryCountExcluded": 64,
+  "sourceImageFileCount": 64,
+  "uniquePixelImageCount": 36,
+  "duplicateSourceImageCount": 28,
+  "includedNeutralFullResolutionImageCount": 36,
+  "coveragePercent": 100.0,
+  "pixelPolicy": "Every unique owner image is included as a lossless PNG re-export with pixels preserved and ancillary metadata and source filename removed.",
+  "sourceFilenamePolicy": "Source filenames and resource-fork entries are not carried into the handoff package.",
+  "manifest": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/FULL-RES-SOURCE-MANIFEST.json"
+}

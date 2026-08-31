@@ -289,6 +289,10 @@ targets:
     sources:
       - path: RuneScribIOSTests
       - path: ThemeFidelityTests
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Canonical-Render-Catalog-v1.3.json
+        buildPhase: resources
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.3.json
+        buildPhase: resources
       - path: Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift
         group: CompatibilityMatrix
     dependencies:
@@ -311,13 +315,13 @@ targets:
     sources:
       - path: RuneScribIOSUITests
       - path: ThemeFidelityXCUITests
-      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Comparison-Authority-v1.2.json
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Comparison-Authority-v1.3.json
         buildPhase: resources
-      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Candidate-Capture-Catalog-v1.2.json
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Responsive-Candidate-Catalog-v1.3.json
         buildPhase: resources
-      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.2.json
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.3.json
         buildPhase: resources
-      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Runtime-Probe-Catalog-v1.2.json
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Runtime-Probe-Catalog-v1.3.json
         buildPhase: resources
     dependencies:
       - target: RuneScrib-iOS
@@ -357,6 +361,10 @@ targets:
         product: RuneScribeCoreModule
       - package: RuneScribeArchitecture
         product: RuneScribeProgressionModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeCloudSyncModule
+      - package: RuneScribeArchitecture
+        product: RuneScribeGameCenterModule
       - package: RuneScribeArchitecture
         product: RuneScribeNorseThemeModule
       - package: RuneScribeArchitecture
@@ -406,6 +414,10 @@ targets:
     sources:
       - path: RuneScribMacParityTests
       - path: ThemeFidelityTests
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Canonical-Render-Catalog-v1.3.json
+        buildPhase: resources
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.3.json
+        buildPhase: resources
       - path: Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift
         group: CompatibilityMatrix
     dependencies:
@@ -440,13 +452,13 @@ targets:
     deploymentTarget: "15.0"
     sources:
       - path: ThemeFidelityXCUITests
-      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Comparison-Authority-v1.2.json
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Comparison-Authority-v1.3.json
         buildPhase: resources
-      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Candidate-Capture-Catalog-v1.2.json
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Responsive-Candidate-Catalog-v1.3.json
         buildPhase: resources
-      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.2.json
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.3.json
         buildPhase: resources
-      - path: docs/verification/theme-fidelity-v4/authority/v4.2/02-COMPARISON-AUTHORITY/Runtime-Probe-Catalog-v1.2.json
+      - path: docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/Runtime-Probe-Catalog-v1.3.json
         buildPhase: resources
     dependencies:
       - target: RuneScribMacParityHost
@@ -491,7 +503,12 @@ schemes:
       targets:
         RuneScrib-iOS: all
     test:
+      environmentVariables:
+        RUNESCRIBE_THEME_FIDELITY_CANONICAL_CANDIDATE: "$(RUNESCRIBE_THEME_FIDELITY_CANONICAL_CANDIDATE)"
+        RUNESCRIBE_THEME_FIDELITY_CANONICAL_ROOT: "$(RUNESCRIBE_THEME_FIDELITY_CANONICAL_ROOT)"
+        RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA: "$(RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA)"
       targets:
+        - RuneScribIOSTests
         - RuneScribIOSUITests
   RuneScrib-macOS-Parity:
     build:
@@ -499,6 +516,10 @@ schemes:
         RuneScribMacParityHost: all
         RuneScribMacParityTests: [test]
     test:
+      environmentVariables:
+        RUNESCRIBE_THEME_FIDELITY_CANONICAL_CANDIDATE: "$(RUNESCRIBE_THEME_FIDELITY_CANONICAL_CANDIDATE)"
+        RUNESCRIBE_THEME_FIDELITY_CANONICAL_ROOT: "$(RUNESCRIBE_THEME_FIDELITY_CANONICAL_ROOT)"
+        RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA: "$(RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA)"
       targets:
         - RuneScribMacParityTests
   RuneScrib-Theme-Fidelity-iOS-XCUI:

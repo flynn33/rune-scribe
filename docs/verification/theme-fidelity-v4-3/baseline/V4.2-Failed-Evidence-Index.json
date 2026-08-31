@@ -1,0 +1,486 @@
+{
+  "schemaVersion": "1.0",
+  "recordType": "historical-failed-evidence-index",
+  "sourceSHA": "250f666ec6e7da2d76df7abdcffc595996ad49ae",
+  "historicalRunDate": "2026-08-27",
+  "historicalResult": "FAIL",
+  "disposition": "diagnostic-only-not-v4.3-acceptance-evidence",
+  "preservedEvidence": {
+    "root": "/Users/jimdaley/Projects/Rune-Scribe-Theme-Fidelity-v4.2-Failed-Comparison-250f666-2026-08-27",
+    "fileCount": 13507,
+    "fileBytes": 3587336023,
+    "symlinkCount": 0,
+    "copyIntoRepository": false,
+    "mutationAllowed": false
+  },
+  "authorityBindings": {
+    "v4_2": {
+      "comparisonAuthoritySHA256": "d09f15bdf1c7b3853f8db75527f83fffce9ac714abe1df5cce6e7de391f096d0",
+      "authorityAssetManifestSHA256": "269728078b44d02ff69e2680b650c6a14827a5dc6b4b7532a122c12ec9532e16"
+    },
+    "v4_3": {
+      "importManifestPath": "docs/verification/theme-fidelity-v4-3/authority/IMPORT-MANIFEST-v4.3.json",
+      "importManifestSHA256": "a43be8c331fbb133c7d8a583f84b2f8a88670da32cc2a66682a53c298c3b9f2f",
+      "sourcePackageIdentity": "Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+      "sourcePackagePayloadTreeSHA256": "f5afb18cac3ff92680aced4346e1fa8c50ceeda5e6264d6cecf50c753092a8b0",
+      "sourcePackageManifestSHA256": "e5fea0a6f7d3f6301ee2ac59973ffccda4a4627f542fd9d1aab139afba2c3039",
+      "sourcePackageValidationSHA256": "86cecdbb45935629dd72a5c2e257f204b4feb0fc26075bb92700206a92709713",
+      "sourcePackageChecksumsSHA256": "bae8f9524c318c230a1d6638ad38b593e84f89b35317988165cc0630e0d1d51a",
+      "comparisonAuthoritySHA256": "2762104ea48819888c96937800d903b9163cb13879ab24c663adf10101abfb2e",
+      "canonicalRenderCatalogSHA256": "da599d438dfcad6792e9d472fadf30eebfcdeb7904e267e174add8208b974c8e",
+      "gateCatalogSHA256": "5761076edf7b55043401e94dec516c822fe40aec696862e375e34d07857e9dca"
+    }
+  },
+  "integrity": {
+    "authorityBlocker": {
+      "path": "AUTHORITY-BLOCKER.md",
+      "byteCount": 4113,
+      "sha256": "71427f6fab832edef14fa82abde5b20091ae2961174170afd971f82ee876c0ff"
+    },
+    "gateSummary": {
+      "path": "final/authority-v1.2/gate-summary.json",
+      "byteCount": 972,
+      "sha256": "b0f29a6acf2affb6bab1538ea346b62adea36411d09ecf18dc2df71e699688b7"
+    },
+    "visualComparisonIndex": {
+      "path": "final/authority-v1.2/visual-comparison-index.json",
+      "byteCount": 16907809,
+      "sha256": "81fc86512a41d53b895ba3178d1e55c55bc919fe12396781cb37678be8940089"
+    },
+    "authorityOutputAggregate": {
+      "root": "final/authority-v1.2",
+      "fileCountIncludingGateSummary": 4023,
+      "hashedFileCountExcludingGateSummary": 4022,
+      "sha256": "51046df794e13eb9fb93b18338b49b3dc8a87f4fce1e4641da2c065f3fb7acf6"
+    },
+    "captureRun": {
+      "path": "final/evidence/final-capture-run.json",
+      "byteCount": 13358,
+      "sha256": "bc4fbc094b31b0eb6310a843ff51976025b62e23adb641baac6131d9c2b3ceb4"
+    },
+    "extraction": {
+      "path": "final/evidence/extraction.json",
+      "byteCount": 3684909,
+      "sha256": "007e8816f1198b19233b6a5e7dfa9ae3fad030d8d24bf033afb89cee47ccaeee"
+    },
+    "sourceManifestBefore": {
+      "path": "final/evidence/final-source-before.json",
+      "byteCount": 360401,
+      "sha256": "38f218bed1c1936a65abdd77e7276b48a5c77f2b6bf0cf72a7b8efea6c8c1bd0"
+    },
+    "simulatorDestinations": {
+      "path": "final/evidence/simulator-destinations.json",
+      "byteCount": 1467,
+      "sha256": "eef3579ce730f7225fe8d55a656a2219a846b14311ee7b336f4a244450e8c402"
+    },
+    "toolchain": {
+      "path": "final/evidence/toolchain.json",
+      "byteCount": 1336,
+      "sha256": "5dd4518cae20257d0e7dd3400656a9d6b1b84df4a7caf607c16c88fe25091ffd",
+      "xcodeVersion": "26.2",
+      "xcodeBuild": "17C52",
+      "macOSVersion": "26.6.2",
+      "macOSBuild": "25G83",
+      "swiftVersion": "6.2.3",
+      "pythonVersion": "3.9.6"
+    }
+  },
+  "evidenceInventory": {
+    "captures": {
+      "path": "final/captures",
+      "fileCount": 1900,
+      "fileBytes": 938410039,
+      "pngCount": 1120,
+      "jsonCount": 780
+    },
+    "finalScreenshots": {
+      "path": "final/authority-v1.2/final",
+      "fileCount": 400,
+      "fileBytes": 514952300,
+      "pngCount": 400
+    },
+    "focalCaptures": {
+      "path": "final/authority-v1.2/focal-captures",
+      "fileCount": 1100,
+      "fileBytes": 460700647,
+      "pngCount": 1100
+    },
+    "comparisonReports": {
+      "path": "final/authority-v1.2/comparisons",
+      "fileCount": 1104,
+      "fileBytes": 8838679,
+      "jsonCount": 1104
+    },
+    "heatmaps": {
+      "path": "final/authority-v1.2/heatmaps",
+      "fileCount": 399,
+      "fileBytes": 120550216,
+      "pngCount": 399,
+      "missingMappingID": "Moonleaf|static-share|iphone-portrait|reference-01",
+      "missingReason": "comparison stopped before metric generation because the 941x900 candidate contradicted the declared portrait destination",
+      "missingMappingIsAuthorityResolved": true
+    },
+    "runtimeProbes": {
+      "path": "final/authority-v1.2/runtime-probes",
+      "fileCount": 576,
+      "fileBytes": 1958739,
+      "jsonCount": 576
+    },
+    "responsiveLayout": {
+      "path": "final/authority-v1.2/responsive-layout",
+      "fileCount": 400,
+      "fileBytes": 2435041,
+      "jsonCount": 400
+    },
+    "negativeMutations": {
+      "path": "final/authority-v1.2/negative-mutations",
+      "fileCount": 1,
+      "fileBytes": 130050,
+      "jsonCount": 1
+    },
+    "reduceMotion": {
+      "path": "final/authority-v1.2/reduce-motion",
+      "fileCount": 41,
+      "fileBytes": 35711830,
+      "pngCount": 40,
+      "jsonCount": 1
+    },
+    "resultBundles": {
+      "path": "final/results",
+      "fileCount": 7570,
+      "fileBytes": 1456530739
+    },
+    "logs": {
+      "path": "final/logs",
+      "fileCount": 8,
+      "fileBytes": 26143378
+    },
+    "evidenceManifests": {
+      "path": "final/evidence",
+      "fileCount": 5,
+      "fileBytes": 4061471,
+      "jsonCount": 5
+    }
+  },
+  "resultBundles": [
+    {
+      "role": "iphone",
+      "path": "final/results/iphone.xcresult",
+      "fileCount": 440,
+      "fileBytes": 164203571,
+      "allocatedBytes": 165556224,
+      "sha256": "928dd6c3b76f912ff7e1b2562157a3fe33809f4e9812552ff3496067645fa7c8",
+      "outcome": "Passed",
+      "selectedAttachmentCount": 211,
+      "summarySHA256": "9bef37552b05eb3d4c7309dc595edff3ac6e7f5911a12fe8fcc3215be4373cb0",
+      "attachmentManifestSHA256": "7228a1d5a0c1d41c12c9b746d63ea2b73185d423dae94728438c023963f76bfd"
+    },
+    {
+      "role": "ipad",
+      "path": "final/results/ipad.xcresult",
+      "fileCount": 440,
+      "fileBytes": 285563803,
+      "allocatedBytes": 286916608,
+      "sha256": "4c649e9010933d613113b32a707a8d5e53dbbfc593b740e3c202286df1921572",
+      "outcome": "Passed",
+      "selectedAttachmentCount": 211,
+      "summarySHA256": "ac77630262681363e32bb3c58e0155393edef711a4b9d08a025334787f0faa5a",
+      "attachmentManifestSHA256": "66d4856109f4bee5872ac6f000cb8ee1f1b74f6b2937b3caf7dc3a88ca96b4da"
+    },
+    {
+      "role": "macos",
+      "path": "final/results/macos.xcresult",
+      "fileCount": 2646,
+      "fileBytes": 127842542,
+      "allocatedBytes": 136679424,
+      "sha256": "7f68de9f38b8c47b5e615a393ba5017b3aff35c3d51135fa097a8804ffe313c6",
+      "outcome": "Passed",
+      "selectedAttachmentCount": 422,
+      "summarySHA256": "56b374d183895930f85e4955c4da51cf2adc95747052c87a4716a742c2e833dc",
+      "attachmentManifestSHA256": "00e920b932802ab2a7bb7d878ac35d320a8667e94d5415e6f7ec1c91bcc5c655"
+    },
+    {
+      "role": "iphone-xcui",
+      "path": "final/results/iphone-xcui.xcresult",
+      "fileCount": 534,
+      "fileBytes": 148380836,
+      "allocatedBytes": 150298624,
+      "sha256": "a4998e3502caf1d368cad7e5c62707b88b69bae9c995c50244e6d14b5b1b0745",
+      "outcome": "Passed",
+      "selectedAttachmentCount": 264,
+      "summarySHA256": "3b3469691d3d87776228b55873c1d68259e67c0ff8391b2938b85d0e39c194a9",
+      "attachmentManifestSHA256": "6e2ef00629481436baf2382d1269f8eba2cd4a91d891023c23065415135d532c"
+    },
+    {
+      "role": "ipad-xcui",
+      "path": "final/results/ipad-xcui.xcresult",
+      "fileCount": 540,
+      "fileBytes": 227038336,
+      "allocatedBytes": 228958208,
+      "sha256": "acd6a0c34b86b4167e6939a91b951d11b5ac9b05a3b7bf3598769584d9e6e6ac",
+      "outcome": "Passed",
+      "selectedAttachmentCount": 264,
+      "summarySHA256": "273084ee2c32dc92b969d5235db68eefc7818722cb6370129e7e2ff97b102e84",
+      "attachmentManifestSHA256": "ae5aec014aacb5985e81446e7520b8c052791f5a017bcb2897a3fc20a8feee04"
+    },
+    {
+      "role": "macos-xcui",
+      "path": "final/results/macos-xcui.xcresult",
+      "fileCount": 2970,
+      "fileBytes": 503501651,
+      "allocatedBytes": 513609728,
+      "sha256": "85f9bf3277631aeaf0f8937f1a110d2790dd2b853868c83e6284a74e2e7b873f",
+      "outcome": "Passed",
+      "selectedAttachmentCount": 528,
+      "summarySHA256": "a2b85a1bc4742a35a23a3028d05e15c968fc5f6a8c350ea6791487c1ab30742d",
+      "attachmentManifestSHA256": "178ea17f77f40b346e9dc72f362b14b03bf19ed403fff21eb7726c1716e18523"
+    }
+  ],
+  "logs": [
+    {
+      "path": "final/logs/comparisons-v1.2.log",
+      "byteCount": 315,
+      "sha256": "86cbcce3b98904573d757b36a5c4c2ff129a9f58e4da34816d44a83b60875b05"
+    },
+    {
+      "path": "final/logs/extraction.log",
+      "byteCount": 279,
+      "sha256": "b2af56b75fa671397cf7913400c83166fdf68b2d5b03fb079009f0bf740b8108"
+    },
+    {
+      "path": "final/logs/iphone.log",
+      "byteCount": 3224349,
+      "sha256": "9b189b661a5161e6c7c8528d0c10dc3988bcfb29d81facb79049cd643a0ecd09"
+    },
+    {
+      "path": "final/logs/ipad.log",
+      "byteCount": 3205590,
+      "sha256": "abb640bb1dac9a7a608ad9dd692755f2080e5818b7b0d9ae66ba989d6b434318"
+    },
+    {
+      "path": "final/logs/macos.log",
+      "byteCount": 3415056,
+      "sha256": "7b7c3233523708f0391e74f5e62da7525a38e66091a0c4a5919bb0f96d05b1ad"
+    },
+    {
+      "path": "final/logs/iphone-xcui.log",
+      "byteCount": 4796624,
+      "sha256": "ae5304fa2a05bd8e1b428b3ff947077c391ff44fdf8784cffbcb2bdfa5361015"
+    },
+    {
+      "path": "final/logs/ipad-xcui.log",
+      "byteCount": 4800666,
+      "sha256": "b84c5da9b83008c304b85c1ff894428de1b08727f1ed7038d757aaf05782ff77"
+    },
+    {
+      "path": "final/logs/macos-xcui.log",
+      "byteCount": 6700499,
+      "sha256": "a25057c95570f7e48f8534a5bfdddb48e6527d8d292cd07bc5ca0f199954ec1a"
+    }
+  ],
+  "historicalRunSummary": {
+    "entryCount": 400,
+    "passingEntryCount": 93,
+    "failedEntryCount": 307,
+    "mappingCount": 1104,
+    "passingMappingCount": 551,
+    "failedMappingCount": 553,
+    "imageMetricMappingCount": 400,
+    "passingImageMetricMappingCount": 0,
+    "failedImageMetricMappingCount": 400,
+    "structuralMappingCount": 700,
+    "passingStructuralMappingCount": 547,
+    "failedStructuralMappingCount": 153,
+    "negativeInvariantMappingCount": 4,
+    "passingNegativeInvariantMappingCount": 4,
+    "runtimeProbeEvaluationCount": 576,
+    "passingRuntimeProbeEvaluationCount": 576,
+    "hostedLanePassCount": 3,
+    "hostedLaneCount": 3,
+    "xcuiLanePassCount": 3,
+    "xcuiLaneCount": 3
+  },
+  "v4_3AuthorityResolution": {
+    "conflictResolutionPath": "docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/V4.2-Conflict-Resolution-Report.json",
+    "translationPath": "docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/V4.2-to-V4.3-Mapping-Translation.json",
+    "resolvedEntryCount": 21,
+    "resolvedImageMappingCount": 46,
+    "resolvedBySurface": [
+      {
+        "surface": "inscription-preview",
+        "entryCount": 4,
+        "imageMappingCount": 8
+      },
+      {
+        "surface": "mastery",
+        "entryCount": 4,
+        "imageMappingCount": 8
+      },
+      {
+        "surface": "received-cipher",
+        "entryCount": 4,
+        "imageMappingCount": 8
+      },
+      {
+        "surface": "share-builder",
+        "entryCount": 4,
+        "imageMappingCount": 12
+      },
+      {
+        "surface": "static-share",
+        "entryCount": 5,
+        "imageMappingCount": 10
+      }
+    ]
+  },
+  "postConflictDiagnostics": {
+    "remainingEntryCount": 379,
+    "passingEntryCount": 93,
+    "failedEntryCount": 286,
+    "remainingMappingCount": 1058,
+    "passingMappingCount": 551,
+    "failedMappingCount": 507,
+    "imageMappings": {
+      "count": 354,
+      "passingCount": 0,
+      "failedCount": 354,
+      "candidateDimensionMismatchCount": 354,
+      "failedRequiredCheckCountPerMapping": 5,
+      "additionalLuminanceSSIMFailureCount": 19,
+      "metricRanges": {
+        "focalOrLuminanceSSIM": {
+          "minimum": 0.07560419831896359,
+          "maximum": 0.5339074564472834
+        },
+        "edgeSSIM": {
+          "minimum": 0.11103668920505182,
+          "maximum": 0.5764642646013511
+        },
+        "medianDeltaE": {
+          "minimum": 4.126975059509277,
+          "maximum": 55.973655700683594
+        },
+        "p95DeltaE": {
+          "minimum": 21.436418533325195,
+          "maximum": 80.75048065185547
+        },
+        "severeDeltaEPercent": {
+          "minimum": 5.593109130859375,
+          "maximum": 88.02375793457031
+        }
+      },
+      "v4_3Interpretation": "Preserved responsive-candidate comparisons and heatmaps are diagnostic input only. They are not canonical v4.3 gate results and their candidate images must not be reused as canonical outputs."
+    },
+    "structuralMappings": {
+      "count": 700,
+      "passingCount": 547,
+      "failedCount": 153,
+      "failureClassifications": [
+        {
+          "classification": "evaluator-false-negative",
+          "assertionID": "assert.element.exists",
+          "count": 35,
+          "finding": "The hosted records contain hash-bound deterministic renderer outputs, but the v4.2 executor attempts element-frame or live-element lookup for the renderer output identifier."
+        },
+        {
+          "classification": "evaluator-false-negative",
+          "assertionID": "assert.mobile-hit-targets",
+          "count": 40,
+          "finding": "The macOS controls measure 46 or 49 points and satisfy the declared 44-point minimum, but the v4.2 executor adds an undeclared enabled-and-hittable requirement."
+        },
+        {
+          "classification": "accessibility-contract-platform-semantics-mismatch",
+          "assertionID": "assert.state-text-shape-truthful",
+          "count": 76,
+          "finding": "macOS witnesses carry truthful state text in accessibility labels while the v4.2 evaluator requires accessibility values; normalize the evidence contract or provide stable values before treating these as product failures."
+        },
+        {
+          "classification": "confirmed-product-behavior-inconsistency",
+          "assertionID": "assert.state-text-shape-truthful",
+          "count": 2,
+          "finding": "The Norse encountered artifact is deterministically nonselectable while the iPhone and iPad accessibility witnesses remain hittable."
+        }
+      ]
+    },
+    "negativeMappings": {
+      "count": 4,
+      "passingCount": 4,
+      "failedCount": 0
+    },
+    "failedMappingsByTheme": {
+      "Gloamthorn": {
+        "image": 54,
+        "structural": 32,
+        "total": 86
+      },
+      "Moonleaf": {
+        "image": 72,
+        "structural": 21,
+        "total": 93
+      },
+      "Norse": {
+        "image": 104,
+        "structural": 8,
+        "total": 112
+      },
+      "Sunspire": {
+        "image": 62,
+        "structural": 46,
+        "total": 108
+      },
+      "Wildwood": {
+        "image": 62,
+        "structural": 46,
+        "total": 108
+      }
+    },
+    "failedMappingsByDestination": {
+      "ipad-portrait": {
+        "image": 84,
+        "structural": 10,
+        "total": 94
+      },
+      "iphone-portrait": {
+        "image": 102,
+        "structural": 9,
+        "total": 111
+      },
+      "macos-resized": {
+        "image": 84,
+        "structural": 67,
+        "total": 151
+      },
+      "macos-standard": {
+        "image": 84,
+        "structural": 67,
+        "total": 151
+      }
+    },
+    "failedMappingsByCandidateSourceKind": {
+      "deterministic-renderer-output": 50,
+      "xcui-element-screenshot": 457
+    }
+  },
+  "pathRebasing": {
+    "indexPathsAreRelativeToPreservedRoot": true,
+    "historicalEmbeddedAbsolutePrefix": "/Users/jimdaley/GitHub/Rune-Scribe-Theme-Fidelity-v4/docs/verification/theme-fidelity-v4/",
+    "replacementRoot": "/Users/jimdaley/Projects/Rune-Scribe-Theme-Fidelity-v4.2-Failed-Comparison-250f666-2026-08-27/",
+    "rule": "When reading an embedded historical path, remove the historical absolute prefix and resolve the remaining evidence-relative path beneath replacementRoot.",
+    "integrityRequirement": "Rebasing changes only path resolution. It does not alter preserved files, recorded hashes, or historical results."
+  },
+  "acceptanceBoundary": {
+    "countsReusableForV4_3": {
+      "responsiveEntries": 400,
+      "mappingInstances": 1104,
+      "runtimeProbeInstances": 576,
+      "responsiveCandidates": 188,
+      "deterministicSeeds": 100,
+      "runtimeProbeDefinitions": 50
+    },
+    "v4_3RequiredCanonicalCandidateCount": 50,
+    "historicalImagesAcceptedAsV4_3CanonicalOutputs": false,
+    "historicalHeatmapsAcceptedAsV4_3GateResults": false,
+    "historicalPassingRuntimeProbeEvidenceAcceptedWithoutSourceReexecution": false,
+    "preservedEvidenceMayBeUsedForDiagnostics": true
+  }
+}

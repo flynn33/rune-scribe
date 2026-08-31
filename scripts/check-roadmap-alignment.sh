@@ -101,6 +101,7 @@ EXPECTED_ADRS = %w[
   ADR-RS-010-theme-resource-budgets.md
   ADR-RS-011-game-center-records.md
   ADR-RS-012-cipher-invitation-presentation.md
+  ADR-RS-013-production-theme-resource-budgets.md
 ].freeze
 
 def exact_keys(value, expected, label, errors)
@@ -353,7 +354,7 @@ def validate(document, root)
 
   decisions_root = root.join("docs/architecture/decisions")
   actual_adrs = Dir.glob(decisions_root.join("ADR-RS-*.md").to_s).map { |path| File.basename(path) }.sort
-  errors << "architecture decisions must contain exactly ADR-RS-001 through ADR-RS-012" unless actual_adrs == EXPECTED_ADRS.sort
+  errors << "architecture decisions must contain exactly ADR-RS-001 through ADR-RS-013" unless actual_adrs == EXPECTED_ADRS.sort
   index_path = decisions_root.join("README.md")
   if !index_path.file?
     errors << "architecture decision index is missing"
@@ -459,7 +460,7 @@ negative_cases.each do |name, test_case|
 end
 
 if errors.empty?
-  puts "Roadmap alignment guard passed: #{expected_task_ids.length} tasks, 12 decisions, immutable v1.0 authorities, remediation amendment, and variance semantics verified."
+  puts "Roadmap alignment guard passed: #{expected_task_ids.length} tasks, 13 decisions, immutable v1.0 authorities, remediation amendment, and variance semantics verified."
   exit 0
 end
 

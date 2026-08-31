@@ -10,12 +10,17 @@
 		00C20D49F14613A66733DD1B /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = CF4ADC70BD29BA2CE0411ABA /* RuneScribeTestSupport */; };
 		01C55610EF12C17DA83396B2 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
 		03EA37E99484E64D6EB3EC5A /* RuneScribeThemeGloamthornModule in Frameworks */ = {isa = PBXBuildFile; productRef = EF45D0B02426EBEAEF355F2D /* RuneScribeThemeGloamthornModule */; };
-		056BD5AEE7E613EDF8E57B83 /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 48DFF62265FBB6C3E9B529FC /* RuneScribeNorseThemeModule */; };
+		056BD5AEE7E613EDF8E57B83 /* RuneScribeCloudSyncModule in Frameworks */ = {isa = PBXBuildFile; productRef = 68E33821D4505DCC410DA135 /* RuneScribeCloudSyncModule */; };
 		09653943521792BB49FBC9A5 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = DBF4DFA847CDE3EC428631AF /* RuneScribeThemeSunspireModule */; };
 		0F2990FFD15A155F37384B6C /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = FC00F092BEFF6E296536B9D8 /* RuneScribeCoreModule */; };
+		1602C69370900B3F6573EF29 /* Deterministic-Seed-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 9C02B55AFAF19D9D920A814D /* Deterministic-Seed-Catalog-v1.3.json */; };
+		1805DD4B95A43B250BAAE1B3 /* Deterministic-Seed-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 9C02B55AFAF19D9D920A814D /* Deterministic-Seed-Catalog-v1.3.json */; };
 		199233F0AC33FEF97975F320 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */; };
-		1B8A34FBAB7EABD24BE46B77 /* Runtime-Probe-Catalog-v1.2.json in Resources */ = {isa = PBXBuildFile; fileRef = AC973ADF792DCD5371EA91D1 /* Runtime-Probe-Catalog-v1.2.json */; };
+		1AE12E0A6C6F52CAC5B76C7C /* Comparison-Authority-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3A31BA4896C83FECD82430 /* Comparison-Authority-v1.3.json */; };
+		1BBA2CBFCB3A0533BB280AD5 /* ThemeCanonicalRenderHarness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E0D1BAFC49BAB116BBE7B6 /* ThemeCanonicalRenderHarness.swift */; };
 		1CC0EAA7DFAE0294F058AAD4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */; };
+		1D3C60D26AD3E3A0DA6CC7E7 /* Canonical-Render-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 27DF8479CF8F5BC1D2E2A08D /* Canonical-Render-Catalog-v1.3.json */; };
+		23D54DA02744177CF8B06BC4 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 526327790FEC30FB6FC7338D /* RuneScribeUIModule */; };
 		28AAA89BFC5932A189636208 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = 0F79D307A70229C6BFB45BF4 /* RuneScribeThemeSunspireModule */; };
 		2B4FCAB266A85EBA67667F2F /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = C2F0441EABEA238EBD5DF206 /* RuneScribeThemeCoordinatorModule */; };
 		2C30E427CFA26A7350205404 /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = EC9D5F3D11B8AC2CE4AAB07A /* RuneScribeNorseThemeModule */; };
@@ -24,38 +29,38 @@
 		2EC98C8B92544DDCD3490556 /* ThemeFidelityMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 382C041081C83DEB0A9B75DE /* ThemeFidelityMatrixTests.swift */; };
 		2F3FADC64B3C38080BB0D112 /* RuneScribeThemeGloamthornModule in Frameworks */ = {isa = PBXBuildFile; productRef = 7AF155E409B644C03E87BD2E /* RuneScribeThemeGloamthornModule */; };
 		2F9C245CAF1771B5637C7E02 /* ThemeFidelityAuthorityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BCFD8F3AD00A68AB9A548DF /* ThemeFidelityAuthorityUITests.swift */; };
-		2FE527D176EDC940E5289219 /* Deterministic-Seed-Catalog-v1.2.json in Resources */ = {isa = PBXBuildFile; fileRef = CA3FF2A63E18E5476B75CD62 /* Deterministic-Seed-Catalog-v1.2.json */; };
 		34A07D593701D17AEC1FC143 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
 		3648E76D4DC6515672B26F81 /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0856EBE343F18E81979224CE /* RuneScribeRuntimeCore */; };
+		36C687CCDF36BAB8651E8DDF /* Deterministic-Seed-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 9C02B55AFAF19D9D920A814D /* Deterministic-Seed-Catalog-v1.3.json */; };
 		376EA6FEB49E1396C70B9220 /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 572D7824B339AD33DB4E055B /* RuneScribeThemeMoonleafModule */; };
 		38049FACD09DEBB67B1C6DAF /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		3828C5D79EBACBAE2932DCA1 /* ComplianceGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8794218367CD5682362E58C /* ComplianceGuardTests.swift */; };
+		3B8992804CD3C3970A71DE57 /* Deterministic-Seed-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 9C02B55AFAF19D9D920A814D /* Deterministic-Seed-Catalog-v1.3.json */; };
 		40A0F491D108F48D91D1E3A6 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = D531AAF50C10D2A6FABCD7ED /* RuneScribeThemeSunspireModule */; };
-		43834A80D91A8DB3F06431CA /* Candidate-Capture-Catalog-v1.2.json in Resources */ = {isa = PBXBuildFile; fileRef = 39EB6EF8D2E8E1DFD86B8A87 /* Candidate-Capture-Catalog-v1.2.json */; };
 		453F9C67E7131C528E6E781E /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = 7E0CAEB200DFACF10D6F3618 /* RuneScribeThemeCoordinatorModule */; };
 		469C9325BA26BDA76E53BD44 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 52B302D4A6F1BF026533FEFF /* RuneScribeUIModule */; };
 		49A2F2518A57128E5F05A105 /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 9C0E34DE3867BB9FDF5211F1 /* RuneScribeUIRuntime */; };
 		49B202E878AE83C746A4B887 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = A8A04E62141809DD6DDA8F52 /* RuneScribeThemeSunspireModule */; };
 		4C44236B13EEBA051D651277 /* DestinationCompatibilityMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9CA154D72FA203A0E62B33 /* DestinationCompatibilityMatrixTests.swift */; };
-		4F91CCF8FBB2E5EB73BFB321 /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 08D0C982F44BE4A0B08DF074 /* RuneScribeThemeMoonleafModule */; };
+		4E2B0F6386C2E70A1E40EAE0 /* Responsive-Candidate-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 445DADDDA8C13560D0CA9E86 /* Responsive-Candidate-Catalog-v1.3.json */; };
+		4F91CCF8FBB2E5EB73BFB321 /* RuneScribeGameCenterModule in Frameworks */ = {isa = PBXBuildFile; productRef = 3897F7E2F0BDD464208C3A76 /* RuneScribeGameCenterModule */; };
 		50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
-		5150102081B0436AD90E6596 /* Comparison-Authority-v1.2.json in Resources */ = {isa = PBXBuildFile; fileRef = 1EFACB0874ABB688975C0D7F /* Comparison-Authority-v1.2.json */; };
 		5205B409D9A92C2CDE6D5D68 /* ThemeFidelityAuthorityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BCFD8F3AD00A68AB9A548DF /* ThemeFidelityAuthorityUITests.swift */; };
 		556269C898714B3862D6F574 /* RuneScribeGameCenterModule in Frameworks */ = {isa = PBXBuildFile; productRef = 69D3FFF7846FC89455A3A32E /* RuneScribeGameCenterModule */; };
 		55BBA4421D3374DFFDED21C7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */; };
 		584241169D94C9A2AA41FD95 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
 		5B82C9DC93BF73D970B5820B /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 7A066175CBDEFCDCD2D588EC /* RuneScribeNorseThemeModule */; };
-		5BDB31D5FC0CB0D89537DA3B /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = 32F342F6124FA11E18978B1E /* RuneScribeThemeCoordinatorModule */; };
+		5BDB31D5FC0CB0D89537DA3B /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = E855F1D86151A705A0B337C2 /* RuneScribeThemeWildwoodModule */; };
 		61AD60DA89946689B85BE523 /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 93910CA2E43931ADB607B6E0 /* RuneScribeUIRuntime */; };
 		61DD380B448CD6318D7544DC /* PlatformPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */; };
 		65EDA0D38F675ABA0FDFEBA6 /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = 32499190D69DF97439CD3DDF /* RuneScribeThemeCoordinatorModule */; };
-		6C6A2CE5354094309B8C699D /* RuneScribeThemeGloamthornModule in Frameworks */ = {isa = PBXBuildFile; productRef = C7C41DA8358F7CE1BCCE7A60 /* RuneScribeThemeGloamthornModule */; };
+		6C6A2CE5354094309B8C699D /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = 759788C72A2D82DD55ACFBBC /* RuneScribeThemeSunspireModule */; };
+		6D001408A5A0E31630FC6473 /* Comparison-Authority-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3A31BA4896C83FECD82430 /* Comparison-Authority-v1.3.json */; };
 		6E70CD7158A62E597DC2C1EF /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 2CE6E93CB8CD48A870CF5C1A /* RuneScribeContracts */; };
 		72B61776820DF9CC19DF3B2E /* RuneScribeCloudSyncModule in Frameworks */ = {isa = PBXBuildFile; productRef = 1F4111F0023B8F4949C8A162 /* RuneScribeCloudSyncModule */; };
-		7DC787F07CD4DE37C5EDC27F /* Comparison-Authority-v1.2.json in Resources */ = {isa = PBXBuildFile; fileRef = 1EFACB0874ABB688975C0D7F /* Comparison-Authority-v1.2.json */; };
+		75A46C9425AC1A461CF3F182 /* Responsive-Candidate-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 445DADDDA8C13560D0CA9E86 /* Responsive-Candidate-Catalog-v1.3.json */; };
 		7E3C668B9F878D13520BDE95 /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 399C59CC597482097433F43B /* RuneScribeContracts */; };
 		8196FFC54AF35A7034F9585D /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 720BBF6E41D37A4CD1E0AC42 /* RuneScribeRuntimeCore */; };
-		85B30CD288980EB348EE2151 /* Runtime-Probe-Catalog-v1.2.json in Resources */ = {isa = PBXBuildFile; fileRef = AC973ADF792DCD5371EA91D1 /* Runtime-Probe-Catalog-v1.2.json */; };
 		8E8BF64F215D751B78111DC4 /* AppHostRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */; };
 		8F80EB6127FCD18CB29C7C3D /* CompatibilityBaselineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */; };
 		92A5D517711078FB5E702998 /* ThemeFidelityMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 382C041081C83DEB0A9B75DE /* ThemeFidelityMatrixTests.swift */; };
@@ -66,9 +71,10 @@
 		99B4D5CC341ADAAD426D63CF /* KeychainMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */; };
 		9AA4B4737E553835B70F9291 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = B3DFFDF31121756FBA7CFE9C /* RuneScribePlatform */; };
 		9B01C258EBB2B91127ABE1BC /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 13B5BAB3ED96974D3FAE69DD /* RuneScribeUIRuntime */; };
+		9B53ADAC188B98280C166ED9 /* Canonical-Render-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 27DF8479CF8F5BC1D2E2A08D /* Canonical-Render-Catalog-v1.3.json */; };
 		A700A5151432D38B2EA96278 /* RuneScribeProgressionModule in Frameworks */ = {isa = PBXBuildFile; productRef = 8C00F16A3B8AA272BD3510BF /* RuneScribeProgressionModule */; };
 		A86EDA53424B9C65FC09E8D5 /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5E51F0E25CDF33AA3544E166 /* RuneScribeRuntimeCore */; };
-		A8C00592A89A42B1F884E29A /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = 1602D1A139FE82FFA3C040DF /* RuneScribePlatform */; };
+		A8C00592A89A42B1F884E29A /* RuneScribeThemeGloamthornModule in Frameworks */ = {isa = PBXBuildFile; productRef = C7C41DA8358F7CE1BCCE7A60 /* RuneScribeThemeGloamthornModule */; };
 		AB261150949F57AD15EBE992 /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = 46DE32DD9F77B90055C568D0 /* RuneScribeThemeWildwoodModule */; };
 		AD024D560D851D28CD7A1FDD /* NativeShareOutcomeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */; };
 		ADE58C68BC79EBBE8A2CA9C5 /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */; };
@@ -82,21 +88,23 @@
 		BE33ADBB23CDC9ABFF5B2E0F /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 415BD6C69E96BAF82603E6EB /* RuneScribeTestSupport */; };
 		C0CF74DC37DD18955598A48F /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = B9866BDCD5A898F67A3260A2 /* RuneScribeTestSupport */; };
 		C305C65784148EA3C86B0EDC /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 09FD485949D234648935441D /* RuneScribeThemeMoonleafModule */; };
-		C480FA05E43031375A759376 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = 759788C72A2D82DD55ACFBBC /* RuneScribeThemeSunspireModule */; };
-		C80EEE249C2101E186FCCF3A /* Candidate-Capture-Catalog-v1.2.json in Resources */ = {isa = PBXBuildFile; fileRef = 39EB6EF8D2E8E1DFD86B8A87 /* Candidate-Capture-Catalog-v1.2.json */; };
+		C480FA05E43031375A759376 /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 48DFF62265FBB6C3E9B529FC /* RuneScribeNorseThemeModule */; };
+		C4C352A747B7E570A1713FF6 /* Runtime-Probe-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 2CCBF91A4CD4AF1B48E319CA /* Runtime-Probe-Catalog-v1.3.json */; };
 		C8CC6BD65F9BF9B0600C8F63 /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = 63C37183F979025E712FE1EA /* RuneScribeThemeWildwoodModule */; };
+		D7BA1BFC3B16E087C8A97CAD /* Runtime-Probe-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 2CCBF91A4CD4AF1B48E319CA /* Runtime-Probe-Catalog-v1.3.json */; };
 		DB267BDE0EA21B4EE3621035 /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 7E882999675FF418B476A8C0 /* RuneScribeThemeMoonleafModule */; };
+		DB7B1DE2531A5636DF5FC9CF /* ThemeCanonicalRenderHarness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E0D1BAFC49BAB116BBE7B6 /* ThemeCanonicalRenderHarness.swift */; };
 		DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		DCF8F4F29B85C086E1ED3EC6 /* RuneScribApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */; };
 		DF507FCE9560AFB1813D59E7 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = CE59E4D588F69BF2E639C88F /* RuneScribePlatform */; };
 		DF96354EF55869EE06DB0AB6 /* RuneScribMacParityHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */; };
 		E0D344E8AB8FD067801E6E67 /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 76FB922C8FCA530F81C93F60 /* RuneScribeContracts */; };
 		E187EDBC3B3509BEB5A9FD01 /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 53F50182A21E9655B7BCF177 /* RuneScribeThemeMoonleafModule */; };
-		E6CD4AD8727F54B979332049 /* Deterministic-Seed-Catalog-v1.2.json in Resources */ = {isa = PBXBuildFile; fileRef = CA3FF2A63E18E5476B75CD62 /* Deterministic-Seed-Catalog-v1.2.json */; };
 		E8945513767815C9E3871E78 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */; };
-		EB863784B843E3598C964876 /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = E855F1D86151A705A0B337C2 /* RuneScribeThemeWildwoodModule */; };
+		EB863784B843E3598C964876 /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 08D0C982F44BE4A0B08DF074 /* RuneScribeThemeMoonleafModule */; };
 		EBEBD948375A90B17D22CC6E /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = F029EB25BD69B97731BD8FA3 /* RuneScribeThemeWildwoodModule */; };
 		ED4A83259657D2E3ED6B240F /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 6CB0F11D349F8C67B5821299 /* RuneScribeUIModule */; };
+		F1B49CB7A450A0CB02F27C34 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = 1602D1A139FE82FFA3C040DF /* RuneScribePlatform */; };
 		F3C8BD65A026CB058E9873F9 /* RuneScribeMacParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */; };
 		F5F3A6BCE301F5227EA3C620 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */; };
 		F683D7C07ABEA5744FC8AA21 /* DestinationCompatibilityMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9CA154D72FA203A0E62B33 /* DestinationCompatibilityMatrixTests.swift */; };
@@ -104,7 +112,7 @@
 		F9A85A1AA048475516E0F38A /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = BCC1F886916AC74985CB05A1 /* RuneScribeNorseThemeModule */; };
 		FAE1E2AAB9525E7A3C4E51DC /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
 		FC8ADA1356B2126E5526B008 /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 6373255684CB8CBAFDAFDA71 /* RuneScribeNorseThemeModule */; };
-		FDC990994A6844300A815804 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 526327790FEC30FB6FC7338D /* RuneScribeUIModule */; };
+		FDC990994A6844300A815804 /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = 32F342F6124FA11E18978B1E /* RuneScribeThemeCoordinatorModule */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -148,14 +156,16 @@
 /* Begin PBXFileReference section */
 		002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHostRoutingTests.swift; sourceTree = "<group>"; };
 		0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribArchitectureTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		09E0D1BAFC49BAB116BBE7B6 /* ThemeCanonicalRenderHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeCanonicalRenderHarness.swift; sourceTree = "<group>"; };
 		1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RuneScribIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E4FF66651C4BB9C0C94DB4B /* RuneScrib.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuneScrib.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		1EFACB0874ABB688975C0D7F /* Comparison-Authority-v1.2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Comparison-Authority-v1.2.json"; sourceTree = "<group>"; };
+		27DF8479CF8F5BC1D2E2A08D /* Canonical-Render-Catalog-v1.3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Canonical-Render-Catalog-v1.3.json"; sourceTree = "<group>"; };
+		2CCBF91A4CD4AF1B48E319CA /* Runtime-Probe-Catalog-v1.3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Runtime-Probe-Catalog-v1.3.json"; sourceTree = "<group>"; };
 		33965AD6B626161B2307C925 /* RuneScribTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		382C041081C83DEB0A9B75DE /* ThemeFidelityMatrixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeFidelityMatrixTests.swift; sourceTree = "<group>"; };
-		39EB6EF8D2E8E1DFD86B8A87 /* Candidate-Capture-Catalog-v1.2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Candidate-Capture-Catalog-v1.2.json"; sourceTree = "<group>"; };
 		3BCFD8F3AD00A68AB9A548DF /* ThemeFidelityAuthorityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeFidelityAuthorityUITests.swift; sourceTree = "<group>"; };
 		41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeShareOutcomeTests.swift; sourceTree = "<group>"; };
+		445DADDDA8C13560D0CA9E86 /* Responsive-Candidate-Catalog-v1.3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Responsive-Candidate-Catalog-v1.3.json"; sourceTree = "<group>"; };
 		4B31D2BF5EC1E6D84B23D71C /* RuneScribMacParityTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribMacParityTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RuneScribIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		51CE0B6CA2B2FBDB70249458 /* RuneScribeArchitecture */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RuneScribeArchitecture; path = Packages/RuneScribeArchitecture; sourceTree = SOURCE_ROOT; };
@@ -167,16 +177,16 @@
 		88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityBaselineTests.swift; sourceTree = "<group>"; };
 		94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeParityUITests.swift; sourceTree = "<group>"; };
 		9B9CA154D72FA203A0E62B33 /* DestinationCompatibilityMatrixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DestinationCompatibilityMatrixTests.swift; path = Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift; sourceTree = "<group>"; };
+		9C02B55AFAF19D9D920A814D /* Deterministic-Seed-Catalog-v1.3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Deterministic-Seed-Catalog-v1.3.json"; sourceTree = "<group>"; };
 		A9AB41A04A01C3ECB14E8D8B /* RuneScrib.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RuneScrib.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		AC973ADF792DCD5371EA91D1 /* Runtime-Probe-Catalog-v1.2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Runtime-Probe-Catalog-v1.2.json"; sourceTree = "<group>"; };
 		ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribMacParityHostApp.swift; sourceTree = "<group>"; };
+		AF3A31BA4896C83FECD82430 /* Comparison-Authority-v1.3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Comparison-Authority-v1.3.json"; sourceTree = "<group>"; };
 		B6164CCB0C4A4342270DC5CA /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		BD88036C0FE8E9BFB419B68D /* RuneScribMacParityHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuneScribMacParityHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformPresentationTests.swift; sourceTree = "<group>"; };
 		C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeRuntimeComposition.swift; sourceTree = "<group>"; };
 		C4EDEF8A8D6DD1D6CEEF3BE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C8794218367CD5682362E58C /* ComplianceGuardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceGuardTests.swift; sourceTree = "<group>"; };
-		CA3FF2A63E18E5476B75CD62 /* Deterministic-Seed-Catalog-v1.2.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Deterministic-Seed-Catalog-v1.2.json"; sourceTree = "<group>"; };
 		CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeMacParityTests.swift; sourceTree = "<group>"; };
 		D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -224,14 +234,16 @@
 				61AD60DA89946689B85BE523 /* RuneScribeUIRuntime in Frameworks */,
 				0F2990FFD15A155F37384B6C /* RuneScribeCoreModule in Frameworks */,
 				2DA13728C48E6550A19E80AA /* RuneScribeProgressionModule in Frameworks */,
-				056BD5AEE7E613EDF8E57B83 /* RuneScribeNorseThemeModule in Frameworks */,
-				4F91CCF8FBB2E5EB73BFB321 /* RuneScribeThemeMoonleafModule in Frameworks */,
-				C480FA05E43031375A759376 /* RuneScribeThemeSunspireModule in Frameworks */,
-				EB863784B843E3598C964876 /* RuneScribeThemeWildwoodModule in Frameworks */,
-				6C6A2CE5354094309B8C699D /* RuneScribeThemeGloamthornModule in Frameworks */,
-				5BDB31D5FC0CB0D89537DA3B /* RuneScribeThemeCoordinatorModule in Frameworks */,
-				A8C00592A89A42B1F884E29A /* RuneScribePlatform in Frameworks */,
-				FDC990994A6844300A815804 /* RuneScribeUIModule in Frameworks */,
+				056BD5AEE7E613EDF8E57B83 /* RuneScribeCloudSyncModule in Frameworks */,
+				4F91CCF8FBB2E5EB73BFB321 /* RuneScribeGameCenterModule in Frameworks */,
+				C480FA05E43031375A759376 /* RuneScribeNorseThemeModule in Frameworks */,
+				EB863784B843E3598C964876 /* RuneScribeThemeMoonleafModule in Frameworks */,
+				6C6A2CE5354094309B8C699D /* RuneScribeThemeSunspireModule in Frameworks */,
+				5BDB31D5FC0CB0D89537DA3B /* RuneScribeThemeWildwoodModule in Frameworks */,
+				A8C00592A89A42B1F884E29A /* RuneScribeThemeGloamthornModule in Frameworks */,
+				FDC990994A6844300A815804 /* RuneScribeThemeCoordinatorModule in Frameworks */,
+				F1B49CB7A450A0CB02F27C34 /* RuneScribePlatform in Frameworks */,
+				23D54DA02744177CF8B06BC4 /* RuneScribeUIModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,25 +306,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1425FE1A368FD04B5D0CE594 /* 02-COMPARISON-AUTHORITY */ = {
-			isa = PBXGroup;
-			children = (
-				39EB6EF8D2E8E1DFD86B8A87 /* Candidate-Capture-Catalog-v1.2.json */,
-				1EFACB0874ABB688975C0D7F /* Comparison-Authority-v1.2.json */,
-				CA3FF2A63E18E5476B75CD62 /* Deterministic-Seed-Catalog-v1.2.json */,
-				AC973ADF792DCD5371EA91D1 /* Runtime-Probe-Catalog-v1.2.json */,
-			);
-			path = "02-COMPARISON-AUTHORITY";
-			sourceTree = "<group>";
-		};
-		185D30FAB0470AE567EAE996 /* authority */ = {
-			isa = PBXGroup;
-			children = (
-				A2000BF436D74D72ACDC00B4 /* v4.2 */,
-			);
-			path = authority;
-			sourceTree = "<group>";
-		};
 		2B9A530DB883B542FF1AFEE7 /* docs */ = {
 			isa = PBXGroup;
 			children = (
@@ -358,6 +351,14 @@
 			);
 			sourceTree = "<group>";
 		};
+		5004699205241C7455AFFB28 /* theme-fidelity-v4-3 */ = {
+			isa = PBXGroup;
+			children = (
+				917F1CC541DE4CFD534B6D18 /* authority */,
+			);
+			path = "theme-fidelity-v4-3";
+			sourceTree = "<group>";
+		};
 		5272F0D466DF0BE5C97CFC68 /* RuneScribMacParityHost */ = {
 			isa = PBXGroup;
 			children = (
@@ -383,6 +384,14 @@
 			path = Fonts;
 			sourceTree = "<group>";
 		};
+		917F1CC541DE4CFD534B6D18 /* authority */ = {
+			isa = PBXGroup;
+			children = (
+				C360C7381F73CCD9178850F3 /* 03-COMPARISON-AUTHORITY */,
+			);
+			path = authority;
+			sourceTree = "<group>";
+		};
 		9875A592B5AF26023CDC6CEC /* RuneScrib */ = {
 			isa = PBXGroup;
 			children = (
@@ -393,14 +402,6 @@
 			path = RuneScrib;
 			sourceTree = "<group>";
 		};
-		A2000BF436D74D72ACDC00B4 /* v4.2 */ = {
-			isa = PBXGroup;
-			children = (
-				1425FE1A368FD04B5D0CE594 /* 02-COMPARISON-AUTHORITY */,
-			);
-			path = v4.2;
-			sourceTree = "<group>";
-		};
 		B03791E99B717082B44F5378 /* RuneScribIOSUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -409,12 +410,16 @@
 			path = RuneScribIOSUITests;
 			sourceTree = "<group>";
 		};
-		C7C9C6D7B8FC9CBBCCE2D432 /* theme-fidelity-v4 */ = {
+		C360C7381F73CCD9178850F3 /* 03-COMPARISON-AUTHORITY */ = {
 			isa = PBXGroup;
 			children = (
-				185D30FAB0470AE567EAE996 /* authority */,
+				27DF8479CF8F5BC1D2E2A08D /* Canonical-Render-Catalog-v1.3.json */,
+				AF3A31BA4896C83FECD82430 /* Comparison-Authority-v1.3.json */,
+				9C02B55AFAF19D9D920A814D /* Deterministic-Seed-Catalog-v1.3.json */,
+				445DADDDA8C13560D0CA9E86 /* Responsive-Candidate-Catalog-v1.3.json */,
+				2CCBF91A4CD4AF1B48E319CA /* Runtime-Probe-Catalog-v1.3.json */,
 			);
-			path = "theme-fidelity-v4";
+			path = "03-COMPARISON-AUTHORITY";
 			sourceTree = "<group>";
 		};
 		D4AB11C27235965DA1BF0E1A /* RuneScribIOSTests */ = {
@@ -448,7 +453,7 @@
 		E268278AC6A3BE6AE91E6399 /* verification */ = {
 			isa = PBXGroup;
 			children = (
-				C7C9C6D7B8FC9CBBCCE2D432 /* theme-fidelity-v4 */,
+				5004699205241C7455AFFB28 /* theme-fidelity-v4-3 */,
 			);
 			path = verification;
 			sourceTree = "<group>";
@@ -499,6 +504,7 @@
 		F34BE723EA79D2658637728A /* ThemeFidelityTests */ = {
 			isa = PBXGroup;
 			children = (
+				09E0D1BAFC49BAB116BBE7B6 /* ThemeCanonicalRenderHarness.swift */,
 				382C041081C83DEB0A9B75DE /* ThemeFidelityMatrixTests.swift */,
 			);
 			path = ThemeFidelityTests;
@@ -662,6 +668,8 @@
 				93910CA2E43931ADB607B6E0 /* RuneScribeUIRuntime */,
 				FC00F092BEFF6E296536B9D8 /* RuneScribeCoreModule */,
 				B68A66859F99B164612C5EFB /* RuneScribeProgressionModule */,
+				68E33821D4505DCC410DA135 /* RuneScribeCloudSyncModule */,
+				3897F7E2F0BDD464208C3A76 /* RuneScribeGameCenterModule */,
 				48DFF62265FBB6C3E9B529FC /* RuneScribeNorseThemeModule */,
 				08D0C982F44BE4A0B08DF074 /* RuneScribeThemeMoonleafModule */,
 				759788C72A2D82DD55ACFBBC /* RuneScribeThemeSunspireModule */,
@@ -680,6 +688,7 @@
 			buildConfigurationList = C5578A7B4655C4175187DA6B /* Build configuration list for PBXNativeTarget "RuneScribMacParityTests" */;
 			buildPhases = (
 				637F403A3BEF27E71F1A4CBE /* Sources */,
+				7EFFAEEB440D9B6FA54AE6DB /* Resources */,
 				A7A0F1AEFE31077919969F7A /* Frameworks */,
 			);
 			buildRules = (
@@ -706,6 +715,7 @@
 			buildConfigurationList = B52BFD3B4B43442BB40D6BFE /* Build configuration list for PBXNativeTarget "RuneScribIOSTests" */;
 			buildPhases = (
 				E38093737CE2C17A124824A1 /* Sources */,
+				906F10417D378455821B8632 /* Resources */,
 				54D5990058621F8DF821B79F /* Frameworks */,
 			);
 			buildRules = (
@@ -827,10 +837,28 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				43834A80D91A8DB3F06431CA /* Candidate-Capture-Catalog-v1.2.json in Resources */,
-				7DC787F07CD4DE37C5EDC27F /* Comparison-Authority-v1.2.json in Resources */,
-				2FE527D176EDC940E5289219 /* Deterministic-Seed-Catalog-v1.2.json in Resources */,
-				85B30CD288980EB348EE2151 /* Runtime-Probe-Catalog-v1.2.json in Resources */,
+				6D001408A5A0E31630FC6473 /* Comparison-Authority-v1.3.json in Resources */,
+				1805DD4B95A43B250BAAE1B3 /* Deterministic-Seed-Catalog-v1.3.json in Resources */,
+				4E2B0F6386C2E70A1E40EAE0 /* Responsive-Candidate-Catalog-v1.3.json in Resources */,
+				C4C352A747B7E570A1713FF6 /* Runtime-Probe-Catalog-v1.3.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7EFFAEEB440D9B6FA54AE6DB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D3C60D26AD3E3A0DA6CC7E7 /* Canonical-Render-Catalog-v1.3.json in Resources */,
+				1602C69370900B3F6573EF29 /* Deterministic-Seed-Catalog-v1.3.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		906F10417D378455821B8632 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9B53ADAC188B98280C166ED9 /* Canonical-Render-Catalog-v1.3.json in Resources */,
+				36C687CCDF36BAB8651E8DDF /* Deterministic-Seed-Catalog-v1.3.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -848,10 +876,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C80EEE249C2101E186FCCF3A /* Candidate-Capture-Catalog-v1.2.json in Resources */,
-				5150102081B0436AD90E6596 /* Comparison-Authority-v1.2.json in Resources */,
-				E6CD4AD8727F54B979332049 /* Deterministic-Seed-Catalog-v1.2.json in Resources */,
-				1B8A34FBAB7EABD24BE46B77 /* Runtime-Probe-Catalog-v1.2.json in Resources */,
+				1AE12E0A6C6F52CAC5B76C7C /* Comparison-Authority-v1.3.json in Resources */,
+				3B8992804CD3C3970A71DE57 /* Deterministic-Seed-Catalog-v1.3.json in Resources */,
+				75A46C9425AC1A461CF3F182 /* Responsive-Candidate-Catalog-v1.3.json in Resources */,
+				D7BA1BFC3B16E087C8A97CAD /* Runtime-Probe-Catalog-v1.3.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -892,6 +920,7 @@
 			files = (
 				4C44236B13EEBA051D651277 /* DestinationCompatibilityMatrixTests.swift in Sources */,
 				F3C8BD65A026CB058E9873F9 /* RuneScribeMacParityTests.swift in Sources */,
+				DB7B1DE2531A5636DF5FC9CF /* ThemeCanonicalRenderHarness.swift in Sources */,
 				92A5D517711078FB5E702998 /* ThemeFidelityMatrixTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -933,6 +962,7 @@
 				99B4D5CC341ADAAD426D63CF /* KeychainMigrationTests.swift in Sources */,
 				AD024D560D851D28CD7A1FDD /* NativeShareOutcomeTests.swift in Sources */,
 				61DD380B448CD6318D7544DC /* PlatformPresentationTests.swift in Sources */,
+				1BBA2CBFCB3A0533BB280AD5 /* ThemeCanonicalRenderHarness.swift in Sources */,
 				2EC98C8B92544DDCD3490556 /* ThemeFidelityMatrixTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1676,6 +1706,10 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeThemeCoordinatorModule;
 		};
+		3897F7E2F0BDD464208C3A76 /* RuneScribeGameCenterModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeGameCenterModule;
+		};
 		399C59CC597482097433F43B /* RuneScribeContracts */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeContracts;
@@ -1735,6 +1769,10 @@
 		63C37183F979025E712FE1EA /* RuneScribeThemeWildwoodModule */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeThemeWildwoodModule;
+		};
+		68E33821D4505DCC410DA135 /* RuneScribeCloudSyncModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeCloudSyncModule;
 		};
 		69D3FFF7846FC89455A3A32E /* RuneScribeGameCenterModule */ = {
 			isa = XCSwiftPackageProductDependency;

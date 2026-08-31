@@ -32,7 +32,7 @@ public enum RuneScribeThemeSunspireModuleBootstrap {
     )
 
     public static let manifestResource = SunspireThemeBundledResourceCatalog.moduleManifest
-    public static let manifestExpectedSHA256Hex = "2f08f4b620b6ac061d6a1f653e0636d910b0527de699e0dd695c9bf817951c4c"
+    public static let manifestExpectedSHA256Hex = SunspireV43ResourcePins.moduleManifestSHA256Hex
     public static var manifestExpectedSHA256: Data {
         Data(hexadecimal: manifestExpectedSHA256Hex)
     }
@@ -66,10 +66,17 @@ public struct RuneScribeThemeSunspireModule: RuntimeConstructibleModule {
 
     public func start(context: ModuleContext) async throws {
         let runtimeIO = try await context.runtimeIOClient()
-        let theme = try await SunspireThemeResources.loadValidated(using: runtimeIO)
+        let descriptor = try await SunspireThemeResources.loadDescriptorValidated(
+            using: runtimeIO
+        )
         try await context.publishTheme(
-            descriptor: theme.descriptor,
-            resourcePayloads: theme.resourcePayloads
+            descriptor: descriptor,
+            resourceLoader: { resourceID in
+                try await SunspireThemeResources.loadValidatedResource(
+                    id: resourceID,
+                    using: runtimeIO
+                )
+            }
         )
     }
 

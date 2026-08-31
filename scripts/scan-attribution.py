@@ -16,8 +16,31 @@ TEXT_SUFFIXES = {
     ".swift", ".md", ".txt", ".json", ".yml", ".yaml", ".plist", ".xml",
     ".sh", ".py", ".rb", ".c", ".cc", ".cpp", ".h", ".hpp", ".m", ".mm",
 }
+BINARY_METADATA_SUFFIXES = {
+    ".png", ".jpg", ".jpeg", ".heic", ".heif", ".pdf",
+}
 EXCLUDED_CONTENT_PARTS = {".git", ".build", "DerivedData", "artifacts"}
 EXCLUDED_PATH_PARTS = {".git", ".build", "DerivedData"}
+IMMUTABLE_HISTORICAL_EVIDENCE_ROOTS = (
+    Path("docs/verification/theme-fidelity-v4"),
+    Path("docs/verification/theme-fidelity-v4-1"),
+    Path("docs/verification/theme-fidelity-v4-2"),
+)
+
+
+def binary_metadata_markers() -> tuple[bytes, ...]:
+    """Return publication-prohibited authorship/vendor markers for media metadata.
+
+    These markers are intentionally assembled from fragments so the scanner's own
+    source remains clean while still rejecting embedded provenance certificates or
+    text chunks in publication media.
+    """
+
+    return (
+        b"open" + b"ai",
+        b"chat" + b"gpt",
+        b"dall" + b"-e",
+    )
 
 
 def default_pattern_values() -> list[str]:
@@ -58,6 +81,37 @@ def text_files(root: Path):
         yield path
 
 
+def binary_metadata_files(root: Path):
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or path.suffix.lower() not in BINARY_METADATA_SUFFIXES:
+            continue
+        if any(part in EXCLUDED_CONTENT_PARTS for part in path.parts):
+            continue
+        relative = path.relative_to(root)
+        if is_immutable_historical_evidence(relative):
+            continue
+        yield path
+
+
+def is_immutable_historical_evidence(relative: Path) -> bool:
+    return any(
+        relative == historical or historical in relative.parents
+        for historical in IMMUTABLE_HISTORICAL_EVIDENCE_ROOTS
+    )
+
+
+def immutable_historical_media_count(root: Path) -> int:
+    count = 0
+    for path in root.rglob("*"):
+        if not path.is_file() or path.suffix.lower() not in BINARY_METADATA_SUFFIXES:
+            continue
+        if any(part in EXCLUDED_CONTENT_PARTS for part in path.parts):
+            continue
+        if is_immutable_historical_evidence(path.relative_to(root)):
+            count += 1
+    return count
+
+
 def publication_paths(root: Path):
     for path in sorted(root.rglob("*")):
         if not path.is_file() or any(part in EXCLUDED_PATH_PARTS for part in path.parts):
@@ -81,6 +135,20 @@ def scan_text(
                         "pattern": pattern.pattern,
                     }
                 )
+    return findings
+
+
+def scan_binary_metadata(root: Path, path: Path) -> list[dict[str, object]]:
+    value = path.read_bytes().lower()
+    findings: list[dict[str, object]] = []
+    for marker_index, marker in enumerate(binary_metadata_markers(), 1):
+        if marker in value:
+            findings.append(
+                {
+                    "source": path.relative_to(root).as_posix(),
+                    "binaryMetadataMarker": marker_index,
+                }
+            )
     return findings
 
 
@@ -128,6 +196,8 @@ def main() -> int:
     patterns = load_patterns(args.patterns.resolve() if args.patterns else None)
     findings: list[dict[str, object]] = []
     scanned = 0
+    scanned_binary = 0
+    immutable_historical_binary = immutable_historical_media_count(root)
     scanned_paths = 0
     for relative in publication_paths(root):
         scanned_paths += 1
@@ -147,6 +217,9 @@ def main() -> int:
         findings.extend(
             scan_text(path.relative_to(root).as_posix(), value, patterns)
         )
+    for path in binary_metadata_files(root):
+        scanned_binary += 1
+        findings.extend(scan_binary_metadata(root, path))
     messages = git_messages(root)
     if messages:
         findings.extend(scan_text("git-log", messages, patterns))
@@ -173,6 +246,11 @@ def main() -> int:
         "schemaVersion": "1.0",
         "result": "PASS" if not findings else "FAIL",
         "scannedTextFiles": scanned,
+        "scannedBinaryFiles": scanned_binary,
+        "preservedImmutableHistoricalMediaFiles": immutable_historical_binary,
+        "immutableHistoricalEvidenceRoots": [
+            path.as_posix() for path in IMMUTABLE_HISTORICAL_EVIDENCE_ROOTS
+        ],
         "scannedPathLabels": scanned_paths,
         "scannedPublicationTexts": scanned_publication_texts,
         "branchScanned": bool(branch),
@@ -186,13 +264,23 @@ def main() -> int:
         )
     if findings:
         for finding in findings:
-            print(
-                f"FAIL: {finding['source']}:{finding['line']} matched "
-                f"{finding['pattern']}",
-                file=sys.stderr,
-            )
+            if "binaryMetadataMarker" in finding:
+                print(
+                    f"FAIL: {finding['source']} contains prohibited binary metadata "
+                    f"marker {finding['binaryMetadataMarker']}",
+                    file=sys.stderr,
+                )
+            else:
+                print(
+                    f"FAIL: {finding['source']}:{finding['line']} matched "
+                    f"{finding['pattern']}",
+                    file=sys.stderr,
+                )
         return 1
-    print(f"PASS: scanned {scanned} text files")
+    print(
+        f"PASS: scanned {scanned} text files and {scanned_binary} media files; "
+        f"preserved {immutable_historical_binary} immutable historical media files"
+    )
     return 0
 
 

@@ -1,0 +1,510 @@
+{
+  "schemaVersion": "1.0",
+  "assetCount": 36,
+  "assets": [
+    {
+      "sourceIndex": 1,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-001-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "031c3f2785d80fba072d55ac47f510d2a660ecfc6095d4c4bc9d2be92f607542",
+      "normalizedSHA256": "720fa98f53dd0e6335ce466c3735f446b422b44c91debad1de654a48947b70f1",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 2,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-002-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "13d0fa072bed9d7eae6ce27b554cd6710be1a78fe4f67cea621eaf796e031690",
+      "normalizedSHA256": "2d1696abd8a7ddbfe81b89c2eb84933a516ba5a4bf8eaa2dae0edcbb3d3758ef",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 3,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-003-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "27bbe98f65edd1c0da8066f6b5de52a7dd27f0a79a438a9466bb087bdaa36930",
+      "normalizedSHA256": "76ba4b2886349f6e92873ec5f5f4b732465c23b9b1ac0587b442fc2c5e0d2906",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 4,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-004-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "316a6a7d849dadc7f9b7851f4844b20881f2fb1af8e87aca31b500bcff75d96a",
+      "normalizedSHA256": "6186c6ecd82e25409904daa2460b3fc1953d7a8209a5f224649285f7de8d696f",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 5,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-005-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "373d385ffdbded6dc27493cce8435adf6c6ac7a06f74d9a9244b5af8aaec27ea",
+      "normalizedSHA256": "311a56d0d65cfee32f76e0e2ca7b9495a923fac7a0553f957f4088e88cb754dd",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 6,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-006-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "386601b9767a6583fcbf7b73d9159c8aa67851f87f2e5a733f96a896c8a9b826",
+      "normalizedSHA256": "cb56d7415fdebae60d2bef7141001d7de3539732e16d1df71db5765a4810a792",
+      "duplicateFileCountInOwnerArchive": 4,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 7,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-007-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "46a7f4d47d5a7956c2bb305b1ee48bbd48a96ccc0f0340736ab895e61b2ea29d",
+      "normalizedSHA256": "cd25b1917511291081e3333ee7083b2be091cc590f215891c5510c77a2ad5713",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 8,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-008-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "46c2421dd4993537e925c25457a831bc0458d77ee9b32de3418858bbc65258a8",
+      "normalizedSHA256": "d3e77551f5698ec82bc492001a3e478bcda81b76f721e171f2417dea1e1952b5",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 9,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-009-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "4ec98c80256ded003cb0fe2e18ae12bba8437a37acefdaa175506accaff96b89",
+      "normalizedSHA256": "3b2720262795e86840b38d7bac8da702f16d4290a2f3e8e395e0ed198b33890e",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 10,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-010-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "529107079c74b3805251d5f84bae2780ce09f27af29cc75f123dc715b8f2874f",
+      "normalizedSHA256": "2d1696abd8a7ddbfe81b89c2eb84933a516ba5a4bf8eaa2dae0edcbb3d3758ef",
+      "duplicateFileCountInOwnerArchive": 4,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 11,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-011-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "5d23e8476066b245ddc800c4fdd6440a68cc13c7653f3a4cf0a1f2389a18cab3",
+      "normalizedSHA256": "cb56d7415fdebae60d2bef7141001d7de3539732e16d1df71db5765a4810a792",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 12,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-012-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "61bbad1793b5f988629e6efd7e302906d902b7ddeed1367d6bad4d65533fe895",
+      "normalizedSHA256": "76ba4b2886349f6e92873ec5f5f4b732465c23b9b1ac0587b442fc2c5e0d2906",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 13,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-013-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "6d1a62b74f95a0308a5aaf7b9d9da0d54e4c00a93a0be5139f7bcd049bf75ed3",
+      "normalizedSHA256": "ea52db7c2f8a89354069b6f64a4751cb62ea439a968c6c1ba8309f8ac3145f5d",
+      "duplicateFileCountInOwnerArchive": 4,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 14,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-014-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "6e4013f275b43da19795b973cc8c8208cd47909af03b5c6d74f36ed14ddc1f2a",
+      "normalizedSHA256": "3b2720262795e86840b38d7bac8da702f16d4290a2f3e8e395e0ed198b33890e",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 15,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-015-1536x1024.png",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "7737ec5ea26f3504fa46a36962ffecc1c529ecf341e806c69ddf0adac4df7d7d",
+      "normalizedSHA256": "e6f74be45f2b17657f70d1e48e73158d60bb4c3894f0455608cbefa0b9412020",
+      "duplicateFileCountInOwnerArchive": 2,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 16,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-016-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "8be78ee7fa1af7645c51154033e80693a680a3785600f7788ccdb1f266322fc5",
+      "normalizedSHA256": "2c3c6ee95e0ea5d79a2116224a91dc2d8da1e2e3c0e535ea14864e69eec232fb",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 17,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-017-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "90f2d1a682c1896fa753caa7eacb45577ae26aedd7c58eb60135984bbfad1b6a",
+      "normalizedSHA256": "804a3142fc740cd152325f026be84e7c04704487671a1d2f989db4ed2d4cbcb3",
+      "duplicateFileCountInOwnerArchive": 4,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 18,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-018-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "9495b83db074e6502b89b01eb6f723328244ca2366cfd6d27083742afdfa7325",
+      "normalizedSHA256": "2c3c6ee95e0ea5d79a2116224a91dc2d8da1e2e3c0e535ea14864e69eec232fb",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 19,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-019-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "9f4f69379e13fc8438674b6cf3d936877d6b054527cb66a3e415d3c83548e9ee",
+      "normalizedSHA256": "a04c5e39b25ab14e29c42f26943b3d3dd3b2e906663d566893b153b40ab93cb4",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 20,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-020-1536x1024.png",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "a5c43c8440194a57bdc8f81537af086db255a80c949fbc58243474f6f14da9f7",
+      "normalizedSHA256": "317f7fa87a2a83db3c2e19217cc0d60cfea7eaeea452d2f1f37b09ee13246aee",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 21,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-021-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "a735b3d974dac71bc88e25de30e7eb51e21d03c0a90e06bb8a3e4c57a8e0245c",
+      "normalizedSHA256": "e920f9dbad9aae4f2933b30609c9b59bb9f19e598c8fea2d514a704a3d043eb2",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 22,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-022-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "ab9a91c6a58e902aad8501e7f94c8126230e378b09e319dbecb2cde1b484cce5",
+      "normalizedSHA256": "cb49801223d93c34a3927a1a67a0b7c5428d28b1b55f6e1a1d737a2ecce33827",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 23,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-023-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "ad2b2f508ec8321a7b0ebd56a685fc1d24bf731848190728df6df80cde8e1466",
+      "normalizedSHA256": "1509f15a712cc109d6ddf2c0d05dde5da0659300353e671427ffe16b192496e7",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 24,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-024-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "b26a3f8f1cc78a76371532a223f8de3831e3fbbc2163a8cd1292c9cbbb5772ae",
+      "normalizedSHA256": "720fa98f53dd0e6335ce466c3735f446b422b44c91debad1de654a48947b70f1",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 25,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-025-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "b3e7975d50831fceb0e1902a80065e287aa3dc896086569e20e93c3d23f6f3cb",
+      "normalizedSHA256": "cd25b1917511291081e3333ee7083b2be091cc590f215891c5510c77a2ad5713",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 26,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-026-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "b3e7cbe9db03dc5e3b07b71fab00031c1507511027eb0054486ba0c44a1061da",
+      "normalizedSHA256": "f7bc08466f9093df7726930cd3dee6e6831d985b96a302ff21c314fba3cb97e2",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 27,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-027-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "b4d6214ad39ec74688c53a14342e41afa05554839074323462ba415b9b89248b",
+      "normalizedSHA256": "33fcaedc059728c6b0439e16f2673878c1cfe1dde5bc17eecf6ee48f6dd8b091",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 28,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-028-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "b50093e5ac7e1ad38916da0c76c4231929c826a36986b33ee3c00a4d6ee2e117",
+      "normalizedSHA256": "2799c67a2c962ad92e0fb09c674d97a08f44001f0d026f4b6eaea8c81674110c",
+      "duplicateFileCountInOwnerArchive": 2,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 29,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-029-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "b889504a55715fd97915872eb493c1f0195188fbdec399026492d3db7f914811",
+      "normalizedSHA256": "d7266005ded25354980969d37c67be24efc00c491a080a19d6adc88f840d8e63",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 30,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-030-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "bca8c8222725a11d84c2e7c0d6dde7c6d6a41fbdf10f2e878c684d1733a6abd9",
+      "normalizedSHA256": "cb49801223d93c34a3927a1a67a0b7c5428d28b1b55f6e1a1d737a2ecce33827",
+      "duplicateFileCountInOwnerArchive": 4,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 31,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-031-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "c2d553ea8989977ae9e3abf334489560a22a0851410335396920bb74bbd22a49",
+      "normalizedSHA256": "804a3142fc740cd152325f026be84e7c04704487671a1d2f989db4ed2d4cbcb3",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 32,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-032-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "d37b329cf578cfc905113d858a0a6f36d512a9909526718cb6a4b917eb501f66",
+      "normalizedSHA256": "d3e77551f5698ec82bc492001a3e478bcda81b76f721e171f2417dea1e1952b5",
+      "duplicateFileCountInOwnerArchive": 4,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 33,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-033-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "dd3cd7ae6aea5d437214fefe30e42b6cc03530acb7cd08f5f5728cb01b3fc910",
+      "normalizedSHA256": "d7266005ded25354980969d37c67be24efc00c491a080a19d6adc88f840d8e63",
+      "duplicateFileCountInOwnerArchive": 1,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 34,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-034-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "e4ea13f447bcc1e04b2fac11a5af12475515bc9544fe33cdf47c85d176d2ac1e",
+      "normalizedSHA256": "33fcaedc059728c6b0439e16f2673878c1cfe1dde5bc17eecf6ee48f6dd8b091",
+      "duplicateFileCountInOwnerArchive": 4,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 35,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-035-1536x1024.png",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "f1db49b3a9300a4fa707145a4be4098e5d9b21c0add3ae07bf2254b6dad61541",
+      "normalizedSHA256": "13f1854dc64f7f70b7d54742d4b99aa6e15638b6c7262e380b455192ddabefb2",
+      "duplicateFileCountInOwnerArchive": 3,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    },
+    {
+      "sourceIndex": 36,
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-036-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "sourceArchiveSHA256": "f9825fccb8a3ecc9d1e29f3d5b0dad9560d250b296df3a38a8ba5bcb64795a5f",
+      "normalizedSHA256": "6186c6ecd82e25409904daa2460b3fc1953d7a8209a5f224649285f7de8d696f",
+      "duplicateFileCountInOwnerArchive": 4,
+      "metadataPolicy": "pixel-preserving lossless PNG re-export with ancillary metadata removed",
+      "authority": "owner-supplied full-resolution source archive"
+    }
+  ]
+}

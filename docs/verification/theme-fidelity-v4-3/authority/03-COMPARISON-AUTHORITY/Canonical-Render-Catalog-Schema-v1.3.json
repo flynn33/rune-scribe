@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Rune Scribe Canonical Render Catalog v1.3",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "catalogID",
+    "candidateCount",
+    "candidates"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.3"
+    },
+    "candidateCount": {
+      "const": 50
+    },
+    "candidates": {
+      "type": "array",
+      "minItems": 50,
+      "maxItems": 50
+    }
+  },
+  "additionalProperties": true
+}

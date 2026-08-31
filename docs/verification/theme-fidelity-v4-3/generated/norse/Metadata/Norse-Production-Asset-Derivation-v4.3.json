@@ -1,0 +1,2659 @@
+{
+  "collectionID": "norse.production-asset-candidates.v4.3",
+  "derivation": {
+    "builderPath": "scripts/build-norse-production-assets.py",
+    "builderSHA256": "9560105534e98f9f5206e3f6a7e5dbdb6368aed79bf08549f48952decfcf4134",
+    "deterministic": true,
+    "nonessentialImageMetadata": "stripped"
+  },
+  "outputs": [
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Background/background.norse.cold-sea-hall.high-contrast.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 3072
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "background-high-contrast-v1",
+      "resourceID": "background.norse.cold-sea-hall",
+      "sha256": "128b8b744a44ee4480e574cd2a19f9d94621ad4f57eb46a83c8bbd7f9580fd92",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/cold-sea-hall-authoring.png",
+          "sha256": "ae4fcaa25554db68d0554163504b8e78792b99e4c300c32ca5d480b8a3a54f54"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/cold-sea-hall-authoring.png",
+      "sourceSHA256": "ae4fcaa25554db68d0554163504b8e78792b99e4c300c32ca5d480b8a3a54f54",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Background/background.norse.cold-sea-hall.high-contrast.png",
+      "variant": "high-contrast"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Background/background.norse.cold-sea-hall.macos-wide-crop.png",
+      "pixelDimensions": {
+        "height": 1920,
+        "width": 3072
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "background-macos-wide-crop-v1",
+      "resourceID": "background.norse.cold-sea-hall",
+      "sha256": "9cec63416ab55a0254bf1e127e96a56069f4974b69b2d28610279dc5ea71080a",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/cold-sea-hall-authoring.png",
+          "sha256": "ae4fcaa25554db68d0554163504b8e78792b99e4c300c32ca5d480b8a3a54f54"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/cold-sea-hall-authoring.png",
+      "sourceSHA256": "ae4fcaa25554db68d0554163504b8e78792b99e4c300c32ca5d480b8a3a54f54",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Background/background.norse.cold-sea-hall.macos-wide-crop.png",
+      "variant": "macos-wide-crop"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Background/background.norse.cold-sea-hall.reduce-motion.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 3072
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "background-static-normalization-v1",
+      "resourceID": "background.norse.cold-sea-hall",
+      "sha256": "21d6e66a585d698c5d20d17357417aaa574333b2d626645df10e9c940713a94d",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/cold-sea-hall-authoring.png",
+          "sha256": "ae4fcaa25554db68d0554163504b8e78792b99e4c300c32ca5d480b8a3a54f54"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/cold-sea-hall-authoring.png",
+      "sourceSHA256": "ae4fcaa25554db68d0554163504b8e78792b99e4c300c32ca5d480b8a3a54f54",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Background/background.norse.cold-sea-hall.reduce-motion.png",
+      "variant": "reduce-motion"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Background/background.norse.cold-sea-hall.standard.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 3072
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "background-static-normalization-v1",
+      "resourceID": "background.norse.cold-sea-hall",
+      "sha256": "21d6e66a585d698c5d20d17357417aaa574333b2d626645df10e9c940713a94d",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/cold-sea-hall-authoring.png",
+          "sha256": "ae4fcaa25554db68d0554163504b8e78792b99e4c300c32ca5d480b8a3a54f54"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/cold-sea-hall-authoring.png",
+      "sourceSHA256": "ae4fcaa25554db68d0554163504b8e78792b99e4c300c32ca5d480b8a3a54f54",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Background/background.norse.cold-sea-hall.standard.png",
+      "variant": "standard"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/CodexCard/codex-card.norse.encountered.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "codex-card-encountered-v1",
+      "resourceID": "codex.norse",
+      "sha256": "fca22a971c525b772056ce98288525f8e52965e9ea534b95f018c31420780b50",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+          "sha256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+      "sourceSHA256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/CodexCard/codex-card.norse.encountered.png",
+      "variant": "encountered"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/CodexCard/codex-card.norse.locked.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "codex-card-locked-v1",
+      "resourceID": "codex.norse",
+      "sha256": "5cfce91a52b0326f05e18e77e4472f24467005c8b2ea816bd7d6c9ecf68cb5bb",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+          "sha256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+      "sourceSHA256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/CodexCard/codex-card.norse.locked.png",
+      "variant": "locked"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/CodexCard/codex-card.norse.owned.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "codex-card-owned-v1",
+      "resourceID": "codex.norse",
+      "sha256": "7971d6a86d90247ef290b404ddd22b82ef72bead9fe2224c656b38a41bcf6542",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+          "sha256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+      "sourceSHA256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/CodexCard/codex-card.norse.owned.png",
+      "variant": "owned"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/CodexCard/codex-card.norse.selected.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "codex-card-selected-v1",
+      "resourceID": "codex.norse",
+      "sha256": "b12bd537bfd492d745675e50d29406feb1e5622590dc4daa1728a40c45c7ecd6",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+          "sha256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+      "sourceSHA256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/CodexCard/codex-card.norse.selected.png",
+      "variant": "selected"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/CodexCard/codex-card.norse.unavailable.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "codex-card-unavailable-v1",
+      "resourceID": "codex.norse",
+      "sha256": "b637fa76bb301056b751e43b8d0e64935aa74101a8cd34e46d09c3d22448fad2",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+          "sha256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+      "sourceSHA256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/CodexCard/codex-card.norse.unavailable.png",
+      "variant": "unavailable"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 551293,
+        "partialAlphaPixelCount": 8452,
+        "present": true,
+        "transparentPixelCount": 488831
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Crest/crest.norse.raven-mastery.static-fallback.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1024
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "crest-static-fallback-v1",
+      "resourceID": "crest.norse.raven-mastery",
+      "sha256": "34c0c8b00c0e020d88e52870557ef336fce6be72f0533511ec70f294dacd392d",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/raven-mastery-crest-authoring.png",
+          "sha256": "088121044ddbeff52d529e26080b1a1b192f5c5c5498ab8d1cb971673193730f"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/raven-mastery-crest-authoring.png",
+      "sourceSHA256": "088121044ddbeff52d529e26080b1a1b192f5c5c5498ab8d1cb971673193730f",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Crest/crest.norse.raven-mastery.static-fallback.png",
+      "variant": "static-fallback"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 136732,
+        "partialAlphaPixelCount": 4263,
+        "present": true,
+        "transparentPixelCount": 121149
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Crest/crest.norse.raven-mastery.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "crest-thumbnail-v1",
+      "resourceID": "crest.norse.raven-mastery",
+      "sha256": "c17408c41caa73b022fac9d191868f1b7596decd49d16732fc688ee05c0b1f14",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/raven-mastery-crest-authoring.png",
+          "sha256": "088121044ddbeff52d529e26080b1a1b192f5c5c5498ab8d1cb971673193730f"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/raven-mastery-crest-authoring.png",
+      "sourceSHA256": "088121044ddbeff52d529e26080b1a1b192f5c5c5498ab8d1cb971673193730f",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Crest/crest.norse.raven-mastery.thumbnail.png",
+      "variant": "thumbnail-512"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 2208553,
+        "partialAlphaPixelCount": 26716,
+        "pdfRepresentation": "soft-mask",
+        "present": true,
+        "transparentPixelCount": 1959035
+      },
+      "inputPreparationRecipeID": "magenta-matte-standard-v1",
+      "losslessRasterWrapper": true,
+      "mediaType": "application/pdf",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Crest/crest.norse.raven-mastery.vector-master.pdf",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 2048
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "lossless-alpha-pdf-wrapper-v1",
+      "resourceID": "crest.norse.raven-mastery",
+      "sha256": "3be3247dcdc64d9b149328a590b94538a411ca68d02ed6d6b1ae1722924f45eb",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/raven-mastery-crest-authoring.png",
+          "sha256": "088121044ddbeff52d529e26080b1a1b192f5c5c5498ab8d1cb971673193730f"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/raven-mastery-crest-authoring.png",
+      "sourceSHA256": "088121044ddbeff52d529e26080b1a1b192f5c5c5498ab8d1cb971673193730f",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Crest/crest.norse.raven-mastery.vector-master.pdf",
+      "variant": "standard"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 686060,
+        "partialAlphaPixelCount": 30984,
+        "present": true,
+        "transparentPixelCount": 1330956
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Frame/frame.norse.carved-knotwork.static-fallback.png",
+      "pixelDimensions": {
+        "height": 1600,
+        "width": 1280
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "frame-static-fallback-v1",
+      "resourceID": "frame.norse.carved-knotwork",
+      "sha256": "894248bfa33af582af86e7d67f011f23ccbadcdcfaafa9f91fd6a70b14f53fe3",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+          "sha256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+      "sourceSHA256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Frame/frame.norse.carved-knotwork.static-fallback.png",
+      "variant": "static-fallback"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 1124265,
+        "partialAlphaPixelCount": 50569,
+        "pdfRepresentation": "soft-mask",
+        "present": true,
+        "transparentPixelCount": 2181838
+      },
+      "inputPreparationRecipeID": "magenta-matte-standard-v1",
+      "losslessRasterWrapper": true,
+      "mediaType": "application/pdf",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Frame/frame.norse.carved-knotwork.vector-master.pdf",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 1639
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "lossless-alpha-pdf-wrapper-v1",
+      "resourceID": "frame.norse.carved-knotwork",
+      "sha256": "a526591264443b54f7eef2490a1f95d36a1150cf7da12ee202caf4bc503eb08b",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+          "sha256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+      "sourceSHA256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Frame/frame.norse.carved-knotwork.vector-master.pdf",
+      "variant": "standard"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 2208553,
+        "partialAlphaPixelCount": 26716,
+        "present": true,
+        "transparentPixelCount": 1959035
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Intermediates/crest.norse.raven-mastery.standard.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 2048
+      },
+      "promotionStatus": "derivation-only",
+      "recipeID": "magenta-matte-standard-v1",
+      "resourceID": "crest.norse.raven-mastery",
+      "sha256": "af0ad38aea3af443d08e4c62127bcff20021c662bd17afaeb3bf14cea4b9abb8",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/raven-mastery-crest-authoring.png",
+          "sha256": "088121044ddbeff52d529e26080b1a1b192f5c5c5498ab8d1cb971673193730f"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/raven-mastery-crest-authoring.png",
+      "sourceSHA256": "088121044ddbeff52d529e26080b1a1b192f5c5c5498ab8d1cb971673193730f",
+      "targetPath": null,
+      "variant": "standard-raster-intermediate"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 1124265,
+        "partialAlphaPixelCount": 50569,
+        "present": true,
+        "transparentPixelCount": 2181838
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Intermediates/frame.norse.carved-knotwork.standard.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 1639
+      },
+      "promotionStatus": "derivation-only",
+      "recipeID": "magenta-matte-standard-v1",
+      "resourceID": "frame.norse.carved-knotwork",
+      "sha256": "29b1d26c38a74d83b5a7bb8831e4b24dd51d6b22cb2f29385d0f3895d676febb",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+          "sha256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+      "sourceSHA256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092",
+      "targetPath": null,
+      "variant": "standard-raster-intermediate"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 330190,
+        "partialAlphaPixelCount": 27440,
+        "present": true,
+        "transparentPixelCount": 1082370
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Panel/panel.norse.card-border.png",
+      "pixelDimensions": {
+        "height": 900,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "panel-card-border-v1",
+      "resourceID": "panel.norse.card-border",
+      "sha256": "465ac028ab73c5bb96facea6341e482967879483339a55d885cacb3a7ef9af74",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+          "sha256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+      "sourceSHA256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Panel/panel.norse.card-border.png",
+      "variant": "card-border"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 101946,
+        "partialAlphaPixelCount": 4613,
+        "present": true,
+        "transparentPixelCount": 155585
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Panel/panel.norse.corner-ornament.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "panel-corner-ornament-v1",
+      "resourceID": "panel.norse.corner-ornament",
+      "sha256": "9117f527927b19ba9d213baff5ce9b465a5500bc0631315a333218d73fea6b63",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+          "sha256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+      "sourceSHA256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Panel/panel.norse.corner-ornament.png",
+      "variant": "corner-ornament"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 178051,
+        "partialAlphaPixelCount": 8774,
+        "present": true,
+        "transparentPixelCount": 197175
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Panel/panel.norse.divider.png",
+      "pixelDimensions": {
+        "height": 240,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "panel-divider-v1",
+      "resourceID": "panel.norse.divider",
+      "sha256": "70cb18b00f1e3e459295421d4a9d85dfd0ed6a4f570dfd872eeb9f6d6454f600",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+          "sha256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+      "sourceSHA256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Panel/panel.norse.divider.png",
+      "variant": "divider"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          255,
+          255
+        ],
+        "opaquePixelCount": 384000,
+        "partialAlphaPixelCount": 0,
+        "present": true,
+        "transparentPixelCount": 0
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Panel/panel.norse.primary-button.png",
+      "pixelDimensions": {
+        "height": 320,
+        "width": 1200
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "panel-primary-button-v1",
+      "resourceID": "panel.norse.primary-button",
+      "sha256": "8cec96b8c65d1a32c553bd51c93c7cff0c584d5c712f5cc2cdf8766c9a332f8c",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+          "sha256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092"
+        },
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+          "sha256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+      "sourceSHA256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Panel/panel.norse.primary-button.png",
+      "variant": "primary-button"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          255,
+          255
+        ],
+        "opaquePixelCount": 288000,
+        "partialAlphaPixelCount": 0,
+        "present": true,
+        "transparentPixelCount": 0
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Panel/panel.norse.tab-selector.png",
+      "pixelDimensions": {
+        "height": 240,
+        "width": 1200
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "panel-tab-selector-v1",
+      "resourceID": "panel.norse.tab-selector",
+      "sha256": "01c9a3038f5534d0a4f0d010e7fd0f1cdc4a0f23056b6e2cef1334a1012342b3",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+          "sha256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092"
+        },
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+          "sha256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+      "sourceSHA256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Panel/panel.norse.tab-selector.png",
+      "variant": "tab-selector"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 1534609,
+        "partialAlphaPixelCount": 24975,
+        "present": true,
+        "transparentPixelCount": 1586144
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Relics/relic.norse.dragonwood-plaque.high-contrast.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 1536
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "magenta-matte-high-contrast-v1",
+      "resourceID": "relic.norse.dragonwood-plaque",
+      "sha256": "ca3c749c99e7484c7cf0b81d63b536a5913ec7003079bbaab5f07d06d286485c",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/dragonwood-plaque-authoring.png",
+          "sha256": "357437d3d0ae303a6dfc3fa7dc532270f32b10f522859ba73ef78489f4443ab5"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/dragonwood-plaque-authoring.png",
+      "sourceSHA256": "357437d3d0ae303a6dfc3fa7dc532270f32b10f522859ba73ef78489f4443ab5",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.dragonwood-plaque.high-contrast.png",
+      "variant": "high-contrast"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 1534609,
+        "partialAlphaPixelCount": 24975,
+        "present": true,
+        "transparentPixelCount": 1586144
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Relics/relic.norse.dragonwood-plaque.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 1536
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "magenta-matte-standard-v1",
+      "resourceID": "relic.norse.dragonwood-plaque",
+      "sha256": "a923601593c1836528118f3ad383f69776611dec0d8a10433d54b5bd43c8062f",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/dragonwood-plaque-authoring.png",
+          "sha256": "357437d3d0ae303a6dfc3fa7dc532270f32b10f522859ba73ef78489f4443ab5"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/dragonwood-plaque-authoring.png",
+      "sourceSHA256": "357437d3d0ae303a6dfc3fa7dc532270f32b10f522859ba73ef78489f4443ab5",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.dragonwood-plaque.png",
+      "variant": "standard"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 94516,
+        "partialAlphaPixelCount": 4507,
+        "present": true,
+        "transparentPixelCount": 163121
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Relics/relic.norse.dragonwood-plaque.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "magenta-matte-contain-v1",
+      "resourceID": "relic.norse.dragonwood-plaque",
+      "sha256": "9a627bc54913a3104215921ee3a2de77f3a10a39e412e5da9ee6f56a535cdca4",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/dragonwood-plaque-authoring.png",
+          "sha256": "357437d3d0ae303a6dfc3fa7dc532270f32b10f522859ba73ef78489f4443ab5"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/dragonwood-plaque-authoring.png",
+      "sourceSHA256": "357437d3d0ae303a6dfc3fa7dc532270f32b10f522859ba73ef78489f4443ab5",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.dragonwood-plaque.thumbnail.png",
+      "variant": "thumbnail-512"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 1847964,
+        "partialAlphaPixelCount": 22155,
+        "present": true,
+        "transparentPixelCount": 1275609
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Relics/relic.norse.runestone-tablet.high-contrast.png",
+      "pixelDimensions": {
+        "height": 1536,
+        "width": 2048
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "magenta-matte-high-contrast-v1",
+      "resourceID": "relic.norse.runestone-tablet",
+      "sha256": "a16efebdf490886006d326f5470b7832f653cfd533ec8de5f010be549930a0ec",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+          "sha256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+      "sourceSHA256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.runestone-tablet.high-contrast.png",
+      "variant": "high-contrast"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 1847964,
+        "partialAlphaPixelCount": 22155,
+        "present": true,
+        "transparentPixelCount": 1275609
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Relics/relic.norse.runestone-tablet.png",
+      "pixelDimensions": {
+        "height": 1536,
+        "width": 2048
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "magenta-matte-standard-v1",
+      "resourceID": "relic.norse.runestone-tablet",
+      "sha256": "2d2f64fd6cfee7874f77bf4877372438cc81e5d75bd9695401c89b9b775f8736",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+          "sha256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+      "sourceSHA256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.runestone-tablet.png",
+      "variant": "standard"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 123582,
+        "partialAlphaPixelCount": 10713,
+        "present": true,
+        "transparentPixelCount": 127849
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Relics/relic.norse.runestone-tablet.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "owner-board-portrait-catalog-thumbnail-v1",
+      "resourceID": "relic.norse.runestone-tablet",
+      "sha256": "f8dfac0dff37334737e3019e39f88924a9a85f636f4a57f82b3bb5007a905d31",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-catalog-authoring.png",
+          "sha256": "e03573c99335fa553b71e2e49a1011d1d10ca1d4270501c6fd4cc88b3f9669b2"
+        },
+        {
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-catalog-owner-region.png",
+          "sha256": "57d4d5f00b5cb213a987eeb7ff56cb56d9d3da07e96bf054fce0fbca5c738409"
+        },
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+          "sha256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-catalog-authoring.png",
+      "sourceSHA256": "e03573c99335fa553b71e2e49a1011d1d10ca1d4270501c6fd4cc88b3f9669b2",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.runestone-tablet.thumbnail.png",
+      "variant": "thumbnail-512"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 1588824,
+        "partialAlphaPixelCount": 23319,
+        "present": true,
+        "transparentPixelCount": 1533585
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Relics/relic.norse.stormforged-stele.high-contrast.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 1536
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "magenta-matte-high-contrast-v1",
+      "resourceID": "relic.norse.stormforged-stele",
+      "sha256": "bd825ac8a9e3ce67b8ecc64dc3cd44a46730897fc4953a46440efca7b040d98b",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
+          "sha256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
+      "sourceSHA256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.stormforged-stele.high-contrast.png",
+      "variant": "high-contrast"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 1588824,
+        "partialAlphaPixelCount": 23319,
+        "present": true,
+        "transparentPixelCount": 1533585
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Relics/relic.norse.stormforged-stele.png",
+      "pixelDimensions": {
+        "height": 2048,
+        "width": 1536
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "magenta-matte-standard-v1",
+      "resourceID": "relic.norse.stormforged-stele",
+      "sha256": "b90175dbc2bf4fcd150c84975161eaa04c806b7f90f4fceed2ab456d7bea3296",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
+          "sha256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
+      "sourceSHA256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.stormforged-stele.png",
+      "variant": "standard"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 97815,
+        "partialAlphaPixelCount": 4475,
+        "present": true,
+        "transparentPixelCount": 159854
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Relics/relic.norse.stormforged-stele.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "magenta-matte-contain-v1",
+      "resourceID": "relic.norse.stormforged-stele",
+      "sha256": "77b6058a24139b633c509136654a9bad9cb0b29210c4551400744d52c75741b1",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
+          "sha256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
+      "sourceSHA256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Relics/relic.norse.stormforged-stele.thumbnail.png",
+      "variant": "thumbnail-512"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Script/script.base-runes.specimen.high-contrast.png",
+      "pixelDimensions": {
+        "height": 600,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "script-specimen-high-contrast-v1",
+      "resourceID": "script.base-runes",
+      "sha256": "f2841e0a78e2f621fbbb5bfff0d52b2643f179a8701d69163204e4ef226c25ea",
+      "sourceInputs": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+          "sha256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Script-Mapping-v1.0.json",
+          "sha256": "c66c76259ac7c8e4ac9ad0c42417f49ad4546d6901e339612dec6ef243627264"
+        }
+      ],
+      "sourcePath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+      "sourceSHA256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Script/script.base-runes.specimen.high-contrast.png",
+      "variant": "high-contrast"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Script/script.base-runes.specimen.standard.png",
+      "pixelDimensions": {
+        "height": 600,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "script-specimen-standard-v1",
+      "resourceID": "script.base-runes",
+      "sha256": "40fdca54af924fe1782ec39cbf4e43fc7fc071ea031d5278c7d482d3c92a1b06",
+      "sourceInputs": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+          "sha256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Script-Mapping-v1.0.json",
+          "sha256": "c66c76259ac7c8e4ac9ad0c42417f49ad4546d6901e339612dec6ef243627264"
+        }
+      ],
+      "sourcePath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+      "sourceSHA256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Script/script.base-runes.specimen.standard.png",
+      "variant": "standard"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "image/png",
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Script/script.base-runes.specimen.static-fallback.png",
+      "pixelDimensions": {
+        "height": 600,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "script-specimen-static-fallback-v1",
+      "resourceID": "script.base-runes",
+      "sha256": "fa83c5225ab145b83de7611086e60a9a42f4ed73010e3f65d9b99a5802bfcfab",
+      "sourceInputs": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+          "sha256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Script-Mapping-v1.0.json",
+          "sha256": "c66c76259ac7c8e4ac9ad0c42417f49ad4546d6901e339612dec6ef243627264"
+        }
+      ],
+      "sourcePath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+      "sourceSHA256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Script/script.base-runes.specimen.static-fallback.png",
+      "variant": "static-fallback"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 468050,
+        "partialAlphaPixelCount": 165065,
+        "present": true,
+        "transparentPixelCount": 371429
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.berserk.monochrome.png",
+      "pixelDimensions": {
+        "height": 981,
+        "width": 1024
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.berserk",
+      "sha256": "3b67068ae6be712d0d516e6f1fdca2cb7e4d9d913de80bd3c0bd352f96320ec0",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.monochrome.png",
+          "sha256": "3b67068ae6be712d0d516e6f1fdca2cb7e4d9d913de80bd3c0bd352f96320ec0"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.monochrome.png",
+      "sourceSHA256": "3b67068ae6be712d0d516e6f1fdca2cb7e4d9d913de80bd3c0bd352f96320ec0",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.berserk.monochrome.png",
+      "variant": "monochrome"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 468050,
+        "partialAlphaPixelCount": 165065,
+        "present": true,
+        "transparentPixelCount": 371429
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.berserk.png",
+      "pixelDimensions": {
+        "height": 981,
+        "width": 1024
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.berserk",
+      "sha256": "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.png",
+          "sha256": "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.png",
+      "sourceSHA256": "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.berserk.png",
+      "variant": "color-master"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 117017,
+        "partialAlphaPixelCount": 41137,
+        "present": true,
+        "transparentPixelCount": 103990
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.berserk.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.berserk",
+      "sha256": "70733bcc64d087cfcbc5cfb58b0bca2601b10bba22a4f69c67b9bd817a538b47",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.thumbnail.png",
+          "sha256": "70733bcc64d087cfcbc5cfb58b0bca2601b10bba22a4f69c67b9bd817a538b47"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.thumbnail.png",
+      "sourceSHA256": "70733bcc64d087cfcbc5cfb58b0bca2601b10bba22a4f69c67b9bd817a538b47",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.berserk.thumbnail.png",
+      "variant": "thumbnail-512"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 569105,
+        "partialAlphaPixelCount": 174301,
+        "present": true,
+        "transparentPixelCount": 283666
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.mjolnir.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1003
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.mjolnir",
+      "sha256": "7d3644fafcc95e635ffaa8881a7734da0a05f17affb2604c4a26314d74f4551e",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.monochrome.png",
+          "sha256": "7d3644fafcc95e635ffaa8881a7734da0a05f17affb2604c4a26314d74f4551e"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.monochrome.png",
+      "sourceSHA256": "7d3644fafcc95e635ffaa8881a7734da0a05f17affb2604c4a26314d74f4551e",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.mjolnir.monochrome.png",
+      "variant": "monochrome"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 569105,
+        "partialAlphaPixelCount": 174301,
+        "present": true,
+        "transparentPixelCount": 283666
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.mjolnir.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1003
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.mjolnir",
+      "sha256": "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.png",
+          "sha256": "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.png",
+      "sourceSHA256": "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.mjolnir.png",
+      "variant": "color-master"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 142253,
+        "partialAlphaPixelCount": 43310,
+        "present": true,
+        "transparentPixelCount": 76581
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.mjolnir.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.mjolnir",
+      "sha256": "bbf9273e15da472ec04fdc5514bd4faccba9322afcc9df8452ecee7e9a07d419",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.thumbnail.png",
+          "sha256": "bbf9273e15da472ec04fdc5514bd4faccba9322afcc9df8452ecee7e9a07d419"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.thumbnail.png",
+      "sourceSHA256": "bbf9273e15da472ec04fdc5514bd4faccba9322afcc9df8452ecee7e9a07d419",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.mjolnir.thumbnail.png",
+      "variant": "thumbnail-512"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 581369,
+        "partialAlphaPixelCount": 144864,
+        "present": true,
+        "transparentPixelCount": 313127
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.ravenshield.monochrome.png",
+      "pixelDimensions": {
+        "height": 1015,
+        "width": 1024
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.ravenshield",
+      "sha256": "3585d4963ffd43b5c27f2e9c8ae809ccf646a13306e5c6b2b3cc32a1b66babd7",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.monochrome.png",
+          "sha256": "3585d4963ffd43b5c27f2e9c8ae809ccf646a13306e5c6b2b3cc32a1b66babd7"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.monochrome.png",
+      "sourceSHA256": "3585d4963ffd43b5c27f2e9c8ae809ccf646a13306e5c6b2b3cc32a1b66babd7",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.ravenshield.monochrome.png",
+      "variant": "monochrome"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 581369,
+        "partialAlphaPixelCount": 144864,
+        "present": true,
+        "transparentPixelCount": 313127
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.ravenshield.png",
+      "pixelDimensions": {
+        "height": 1015,
+        "width": 1024
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.ravenshield",
+      "sha256": "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.png",
+          "sha256": "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.png",
+      "sourceSHA256": "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.ravenshield.png",
+      "variant": "color-master"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 145358,
+        "partialAlphaPixelCount": 36100,
+        "present": true,
+        "transparentPixelCount": 80686
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.ravenshield.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.ravenshield",
+      "sha256": "09322298c8bd5b3f68d48e924767467dfccee175e0d44e87110977cd6f2a0900",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.thumbnail.png",
+          "sha256": "09322298c8bd5b3f68d48e924767467dfccee175e0d44e87110977cd6f2a0900"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.thumbnail.png",
+      "sourceSHA256": "09322298c8bd5b3f68d48e924767467dfccee175e0d44e87110977cd6f2a0900",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.ravenshield.thumbnail.png",
+      "variant": "thumbnail-512"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 578321,
+        "partialAlphaPixelCount": 144913,
+        "present": true,
+        "transparentPixelCount": 316126
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.valknut.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1015
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.valknut",
+      "sha256": "7fb26639ad65986fcb52e4b31bc4280e27890e4345e4de74dc6b5957482a2027",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.monochrome.png",
+          "sha256": "7fb26639ad65986fcb52e4b31bc4280e27890e4345e4de74dc6b5957482a2027"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.monochrome.png",
+      "sourceSHA256": "7fb26639ad65986fcb52e4b31bc4280e27890e4345e4de74dc6b5957482a2027",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.valknut.monochrome.png",
+      "variant": "monochrome"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 578321,
+        "partialAlphaPixelCount": 144913,
+        "present": true,
+        "transparentPixelCount": 316126
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.valknut.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1015
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.valknut",
+      "sha256": "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.png",
+          "sha256": "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.png",
+      "sourceSHA256": "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.valknut.png",
+      "variant": "color-master"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 144519,
+        "partialAlphaPixelCount": 36049,
+        "present": true,
+        "transparentPixelCount": 81576
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.valknut.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.valknut",
+      "sha256": "35c5f281b6ad405b6a3cb5084edc864b05546deab10ca93ca5d45767334c8431",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.thumbnail.png",
+          "sha256": "35c5f281b6ad405b6a3cb5084edc864b05546deab10ca93ca5d45767334c8431"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.thumbnail.png",
+      "sourceSHA256": "35c5f281b6ad405b6a3cb5084edc864b05546deab10ca93ca5d45767334c8431",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.valknut.thumbnail.png",
+      "variant": "thumbnail-512"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 497830,
+        "partialAlphaPixelCount": 181774,
+        "present": true,
+        "transparentPixelCount": 357708
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.wolkin.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1013
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.wolkin",
+      "sha256": "bbb12a59b76b91ab2aaaa8eca3c53a88a2fe0a06beb5c4b9867a7f0784e9fc16",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.monochrome.png",
+          "sha256": "bbb12a59b76b91ab2aaaa8eca3c53a88a2fe0a06beb5c4b9867a7f0784e9fc16"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.monochrome.png",
+      "sourceSHA256": "bbb12a59b76b91ab2aaaa8eca3c53a88a2fe0a06beb5c4b9867a7f0784e9fc16",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.wolkin.monochrome.png",
+      "variant": "monochrome"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 497830,
+        "partialAlphaPixelCount": 181774,
+        "present": true,
+        "transparentPixelCount": 357708
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.wolkin.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1013
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.wolkin",
+      "sha256": "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.png",
+          "sha256": "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.png",
+      "sourceSHA256": "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.wolkin.png",
+      "variant": "color-master"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 124422,
+        "partialAlphaPixelCount": 45227,
+        "present": true,
+        "transparentPixelCount": 92495
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.wolkin.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.wolkin",
+      "sha256": "993359c98592c586a47cf06a2129c01c6dd92a474c64b481f34dbd6a83e8d885",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.thumbnail.png",
+          "sha256": "993359c98592c586a47cf06a2129c01c6dd92a474c64b481f34dbd6a83e8d885"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.thumbnail.png",
+      "sourceSHA256": "993359c98592c586a47cf06a2129c01c6dd92a474c64b481f34dbd6a83e8d885",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.wolkin.thumbnail.png",
+      "variant": "thumbnail-512"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 493713,
+        "partialAlphaPixelCount": 177741,
+        "present": true,
+        "transparentPixelCount": 343330
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.yggdrasil.monochrome.png",
+      "pixelDimensions": {
+        "height": 991,
+        "width": 1024
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.yggdrasil",
+      "sha256": "d296cea98b7283f67b9cb1b9e50547e16299dc8dcbf45872ed0701b746266907",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.monochrome.png",
+          "sha256": "d296cea98b7283f67b9cb1b9e50547e16299dc8dcbf45872ed0701b746266907"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.monochrome.png",
+      "sourceSHA256": "d296cea98b7283f67b9cb1b9e50547e16299dc8dcbf45872ed0701b746266907",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.yggdrasil.monochrome.png",
+      "variant": "monochrome"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 493713,
+        "partialAlphaPixelCount": 177741,
+        "present": true,
+        "transparentPixelCount": 343330
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.yggdrasil.png",
+      "pixelDimensions": {
+        "height": 991,
+        "width": 1024
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.yggdrasil",
+      "sha256": "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.png",
+          "sha256": "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.png",
+      "sourceSHA256": "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.yggdrasil.png",
+      "variant": "color-master"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 123433,
+        "partialAlphaPixelCount": 44326,
+        "present": true,
+        "transparentPixelCount": 94385
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Seals/seal.norse.yggdrasil.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "authority-exact-byte-copy-v1",
+      "resourceID": "seal.norse.yggdrasil",
+      "sha256": "718f6a33bca1ab684e434e482808572a6b06d3fdb0a790212ed048423ad00226",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.thumbnail.png",
+          "sha256": "718f6a33bca1ab684e434e482808572a6b06d3fdb0a790212ed048423ad00226"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.thumbnail.png",
+      "sourceSHA256": "718f6a33bca1ab684e434e482808572a6b06d3fdb0a790212ed048423ad00226",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Seals/seal.norse.yggdrasil.thumbnail.png",
+      "variant": "thumbnail-512"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 524977,
+        "partialAlphaPixelCount": 12660,
+        "present": true,
+        "transparentPixelCount": 1382363
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/ShareFallbacks/share-fallback.norse.dragonwood-plaque.png",
+      "pixelDimensions": {
+        "height": 1200,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "magenta-matte-contain-v1",
+      "resourceID": "relic.norse.dragonwood-plaque",
+      "sha256": "61a56baa040da53fc567b4f997d97fe8eb04233c965c0afc0758303bafc549b3",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/dragonwood-plaque-authoring.png",
+          "sha256": "357437d3d0ae303a6dfc3fa7dc532270f32b10f522859ba73ef78489f4443ab5"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/dragonwood-plaque-authoring.png",
+      "sourceSHA256": "357437d3d0ae303a6dfc3fa7dc532270f32b10f522859ba73ef78489f4443ab5",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/ShareFallbacks/share-fallback.norse.dragonwood-plaque.png",
+      "variant": "static-share-fallback"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 1500918,
+        "partialAlphaPixelCount": 210168,
+        "present": true,
+        "transparentPixelCount": 848914
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/ShareFallbacks/share-fallback.norse.runestone-tablet.png",
+      "pixelDimensions": {
+        "height": 1600,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "owner-board-near-square-message-static-fallback-v1",
+      "resourceID": "relic.norse.runestone-tablet",
+      "sha256": "0f13268da38ea4edaff2ce626222f3fdc9bc89d0b01d9c61eac76fe425ddb902",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-message-owner-region.png",
+          "sha256": "75648b01d5caad185182aa5f78d73b078b2e7886b044b612092a8eb56eafe1ee"
+        },
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+          "sha256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d"
+        },
+        {
+          "path": "scripts/extract-norse-runestone-message-source.py",
+          "sha256": "047240965dba82e89309be42654e54dc84873da3953bc2a6edd5d6e5ff9a1bd8"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-message-owner-region.png",
+      "sourceSHA256": "75648b01d5caad185182aa5f78d73b078b2e7886b044b612092a8eb56eafe1ee",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/ShareFallbacks/share-fallback.norse.runestone-tablet.png",
+      "variant": "static-share-fallback"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 543402,
+        "partialAlphaPixelCount": 11993,
+        "present": true,
+        "transparentPixelCount": 1364605
+      },
+      "mediaType": "image/png",
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/generated/norse/ShareFallbacks/share-fallback.norse.stormforged-stele.png",
+      "pixelDimensions": {
+        "height": 1200,
+        "width": 1600
+      },
+      "promotionStatus": "candidate",
+      "recipeID": "magenta-matte-contain-v1",
+      "resourceID": "relic.norse.stormforged-stele",
+      "sha256": "adecfca5dc28bacc26b2db4db35cfdc6918fa1fdbf3368b481caa7bce46321c6",
+      "sourceInputs": [
+        {
+          "path": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
+          "sha256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d"
+        }
+      ],
+      "sourcePath": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
+      "sourceSHA256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d",
+      "targetPath": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/ShareFallbacks/share-fallback.norse.stormforged-stele.png",
+      "variant": "static-share-fallback"
+    }
+  ],
+  "recipes": [
+    {
+      "operations": [
+        "validate-source-png",
+        "copy-authority-bytes-without-transformation"
+      ],
+      "parameters": {
+        "byteIdentity": true,
+        "cropping": false,
+        "reencoding": false,
+        "resizing": false
+      },
+      "recipeID": "authority-exact-byte-copy-v1"
+    },
+    {
+      "operations": [
+        "rgb-normalization",
+        "lanczos-resize",
+        "fixed-high-contrast-transform"
+      ],
+      "parameters": {
+        "color": 0.82,
+        "contrast": 1.3,
+        "sharpness": 1.08
+      },
+      "recipeID": "background-high-contrast-v1"
+    },
+    {
+      "operations": [
+        "rgb-normalization",
+        "center-crop-16-by-10",
+        "lanczos-resize"
+      ],
+      "parameters": {
+        "alignment": "center",
+        "cropping": true
+      },
+      "recipeID": "background-macos-wide-crop-v1"
+    },
+    {
+      "operations": [
+        "rgb-normalization",
+        "lanczos-resize"
+      ],
+      "parameters": {
+        "motion": false
+      },
+      "recipeID": "background-static-normalization-v1"
+    },
+    {
+      "operations": [
+        "center-fit-16-by-9",
+        "fixed-state-transform"
+      ],
+      "parameters": {
+        "brightness": 0.78,
+        "color": 0.55,
+        "contrast": 0.95
+      },
+      "recipeID": "codex-card-encountered-v1"
+    },
+    {
+      "operations": [
+        "center-fit-16-by-9",
+        "grayscale",
+        "fixed-state-transform"
+      ],
+      "parameters": {
+        "brightness": 0.46,
+        "contrast": 1.08
+      },
+      "recipeID": "codex-card-locked-v1"
+    },
+    {
+      "operations": [
+        "rgb-normalization",
+        "center-fit-16-by-9",
+        "lanczos-resize"
+      ],
+      "parameters": {
+        "brightness": 1.0,
+        "color": 1.0,
+        "contrast": 1.0
+      },
+      "recipeID": "codex-card-owned-v1"
+    },
+    {
+      "operations": [
+        "center-fit-16-by-9",
+        "fixed-state-transform"
+      ],
+      "parameters": {
+        "brightness": 1.06,
+        "color": 1.06,
+        "contrast": 1.16
+      },
+      "recipeID": "codex-card-selected-v1"
+    },
+    {
+      "operations": [
+        "center-fit-16-by-9",
+        "grayscale",
+        "fixed-state-transform"
+      ],
+      "parameters": {
+        "brightness": 0.3,
+        "contrast": 0.82
+      },
+      "recipeID": "codex-card-unavailable-v1"
+    },
+    {
+      "operations": [
+        "soft-magenta-matte",
+        "partial-alpha-magenta-despill",
+        "lanczos-resize"
+      ],
+      "parameters": {
+        "cropping": false,
+        "dimensions": [
+          1024,
+          1024
+        ]
+      },
+      "recipeID": "crest-static-fallback-v1"
+    },
+    {
+      "operations": [
+        "soft-magenta-matte",
+        "partial-alpha-magenta-despill",
+        "lanczos-resize"
+      ],
+      "parameters": {
+        "cropping": false,
+        "dimensions": [
+          512,
+          512
+        ]
+      },
+      "recipeID": "crest-thumbnail-v1"
+    },
+    {
+      "operations": [
+        "soft-magenta-matte",
+        "partial-alpha-magenta-despill",
+        "lanczos-resize"
+      ],
+      "parameters": {
+        "cropping": false,
+        "longEdge": 1600
+      },
+      "recipeID": "frame-static-fallback-v1"
+    },
+    {
+      "operations": [
+        "rgb-channel-extraction",
+        "alpha-soft-mask",
+        "flate-pdf-wrapper"
+      ],
+      "parameters": {
+        "alphaFilter": "FlateDecode",
+        "bitsPerComponent": 8,
+        "colorFilter": "FlateDecode",
+        "lossyEncoding": false
+      },
+      "recipeID": "lossless-alpha-pdf-wrapper-v1"
+    },
+    {
+      "operations": [
+        "soft-magenta-matte",
+        "three-by-three-median-edge-cleanup",
+        "partial-alpha-magenta-despill",
+        "lanczos-resize",
+        "aspect-fit-transparent-pad"
+      ],
+      "parameters": {
+        "alignment": "center",
+        "cropping": false
+      },
+      "recipeID": "magenta-matte-contain-v1"
+    },
+    {
+      "operations": [
+        "soft-magenta-matte",
+        "three-by-three-median-edge-cleanup",
+        "partial-alpha-magenta-despill",
+        "lanczos-resize",
+        "fixed-high-contrast-transform"
+      ],
+      "parameters": {
+        "color": 0.55,
+        "contrast": 1.48,
+        "innerFaceFeatherRatio": 0.008,
+        "innerFaceInsetRatios": [
+          0.14,
+          0.18,
+          0.14,
+          0.17
+        ],
+        "innerFaceLuminanceCeiling": 24,
+        "innerFaceLuminanceScale": 0.09,
+        "sharpness": 1.1
+      },
+      "recipeID": "magenta-matte-high-contrast-v1"
+    },
+    {
+      "operations": [
+        "soft-magenta-matte",
+        "three-by-three-median-edge-cleanup",
+        "partial-alpha-magenta-despill",
+        "lanczos-resize"
+      ],
+      "parameters": {
+        "balanceCeiling": 120,
+        "balanceFeather": 80,
+        "chromaFeather": 90,
+        "chromaFloor": 40,
+        "keyFeather": 80,
+        "keyFloor": 130,
+        "matteClamp": [
+          6,
+          249
+        ]
+      },
+      "recipeID": "magenta-matte-standard-v1"
+    },
+    {
+      "operations": [
+        "validate-pinned-owner-region-and-blank-stone-digests",
+        "apply-fixed-reviewed-silhouette-mask",
+        "reflect-unobscured-owner-frame-quadrant-into-seal-occlusion",
+        "replace-complete-glyph-bearing-field-from-accepted-blank-stone-source",
+        "preserve-raven-crest",
+        "lanczos-uniform-scale",
+        "transparent-center-pad"
+      ],
+      "parameters": {
+        "alignment": "center",
+        "blankStoneSHA256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d",
+        "cropping": false,
+        "extractorPath": "scripts/extract-norse-runestone-message-source.py",
+        "nonUniformScaling": false,
+        "outputDimensions": [
+          1600,
+          1600
+        ],
+        "ownerRegionSHA256": "75648b01d5caad185182aa5f78d73b078b2e7886b044b612092a8eb56eafe1ee",
+        "runtimeGlyphSource": "production Script renderer",
+        "runtimeSealSource": "user-selected production Seal"
+      },
+      "recipeID": "owner-board-near-square-message-static-fallback-v1"
+    },
+    {
+      "operations": [
+        "validate-owner-region-digest-and-bounds",
+        "apply-fixed-reviewed-silhouette-mask",
+        "replace-complete-glyph-bearing-field-from-accepted-blank-stone-source",
+        "preserve-portrait-frame-crest-and-shadow",
+        "lanczos-aspect-fit-transparent-pad"
+      ],
+      "parameters": {
+        "alignment": "center",
+        "authoringDimensions": [
+          768,
+          1024
+        ],
+        "cropping": false,
+        "extractionBounds": {
+          "height": 185,
+          "width": 142,
+          "x": 655,
+          "y": 104
+        },
+        "glyphFreeAuthoringSHA256": "e03573c99335fa553b71e2e49a1011d1d10ca1d4270501c6fd4cc88b3f9669b2",
+        "outputDimensions": [
+          512,
+          512
+        ],
+        "ownerSourceDimensions": [
+          1536,
+          1024
+        ],
+        "ownerSourceSHA256": "e9c1f4a00ebbd7666d409193dc39222494e2414b48d9b42bbfacfb14cd087bd6",
+        "runtimeGlyphSource": "production Script renderer",
+        "storedOwnerRegionSHA256": "57d4d5f00b5cb213a987eeb7ff56cb56d9d3da07e96bf054fce0fbca5c738409"
+      },
+      "recipeID": "owner-board-portrait-catalog-thumbnail-v1"
+    },
+    {
+      "operations": [
+        "magenta-matte",
+        "nine-slice-frame-composition"
+      ],
+      "parameters": {
+        "dimensions": [
+          1600,
+          900
+        ],
+        "transparentInterior": true
+      },
+      "recipeID": "panel-card-border-v1"
+    },
+    {
+      "operations": [
+        "magenta-matte",
+        "top-left-ornament-crop",
+        "lanczos-resize"
+      ],
+      "parameters": {
+        "dimensions": [
+          512,
+          512
+        ]
+      },
+      "recipeID": "panel-corner-ornament-v1"
+    },
+    {
+      "operations": [
+        "magenta-matte",
+        "top-rail-crop",
+        "aspect-fit-transparent-pad"
+      ],
+      "parameters": {
+        "dimensions": [
+          1600,
+          240
+        ]
+      },
+      "recipeID": "panel-divider-v1"
+    },
+    {
+      "operations": [
+        "codex-card-center-fit",
+        "fixed-state-transform",
+        "nine-slice-frame-composition"
+      ],
+      "parameters": {
+        "dimensions": [
+          1200,
+          320
+        ]
+      },
+      "recipeID": "panel-primary-button-v1"
+    },
+    {
+      "operations": [
+        "codex-card-center-fit",
+        "fixed-state-transform",
+        "nine-slice-frame-composition"
+      ],
+      "parameters": {
+        "dimensions": [
+          1200,
+          240
+        ]
+      },
+      "recipeID": "panel-tab-selector-v1"
+    },
+    {
+      "operations": [
+        "validate-32-glyph-mapping",
+        "freetype-rasterization"
+      ],
+      "parameters": {
+        "dimensions": [
+          1600,
+          600
+        ],
+        "glyphOrder": "U+16A0-through-U+16BF",
+        "palette": "black-and-white"
+      },
+      "recipeID": "script-specimen-high-contrast-v1"
+    },
+    {
+      "operations": [
+        "validate-32-glyph-mapping",
+        "freetype-rasterization"
+      ],
+      "parameters": {
+        "dimensions": [
+          1600,
+          600
+        ],
+        "glyphOrder": "U+16A0-through-U+16BF"
+      },
+      "recipeID": "script-specimen-standard-v1"
+    },
+    {
+      "operations": [
+        "validate-32-glyph-mapping",
+        "freetype-rasterization"
+      ],
+      "parameters": {
+        "dimensions": [
+          1600,
+          600
+        ],
+        "glyphOrder": "U+16A0-through-U+16BF",
+        "motion": false
+      },
+      "recipeID": "script-specimen-static-fallback-v1"
+    }
+  ],
+  "schemaVersion": "1.0",
+  "sourceRoots": {
+    "legacyV4": "docs/verification/theme-fidelity-v4/source-masters/norse",
+    "v4_3": "docs/verification/theme-fidelity-v4-3/source-masters/norse"
+  },
+  "sources": [
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "font/ttf",
+      "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/NotoSansRunic-Regular.ttf",
+      "sha256": "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "application/json",
+      "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Script-Mapping-v1.0.json",
+      "sha256": "c66c76259ac7c8e4ac9ad0c42417f49ad4546d6901e339612dec6ef243627264"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "application/octet-stream",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-message-owner-region.png",
+      "sha256": "75648b01d5caad185182aa5f78d73b078b2e7886b044b612092a8eb56eafe1ee"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "application/octet-stream",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+      "sha256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mediaType": "application/octet-stream",
+      "path": "scripts/extract-norse-runestone-message-source.py",
+      "sha256": "047240965dba82e89309be42654e54dc84873da3953bc2a6edd5d6e5ff9a1bd8"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
+      "pixelDimensions": {
+        "height": 941,
+        "width": 1672
+      },
+      "sha256": "b1284bd1abe78b93a23e661732a097e9559b72e02eada7031ca3f42ca69838ff"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/cold-sea-hall-authoring.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1536
+      },
+      "sha256": "ae4fcaa25554db68d0554163504b8e78792b99e4c300c32ca5d480b8a3a54f54"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/dragonwood-plaque-authoring.png",
+      "pixelDimensions": {
+        "height": 1448,
+        "width": 1086
+      },
+      "sha256": "357437d3d0ae303a6dfc3fa7dc532270f32b10f522859ba73ef78489f4443ab5"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/mastery-frame-authoring.png",
+      "pixelDimensions": {
+        "height": 1402,
+        "width": 1122
+      },
+      "sha256": "19fa2489f9411f660c74eb4762eda348f00661b3814c34d65259192e46fc3092"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/raven-mastery-crest-authoring.png",
+      "pixelDimensions": {
+        "height": 1254,
+        "width": 1254
+      },
+      "sha256": "088121044ddbeff52d529e26080b1a1b192f5c5c5498ab8d1cb971673193730f"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+      "pixelDimensions": {
+        "height": 1086,
+        "width": 1448
+      },
+      "sha256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 494836,
+        "partialAlphaPixelCount": 41932,
+        "present": true,
+        "transparentPixelCount": 249664
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-catalog-authoring.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 768
+      },
+      "sha256": "e03573c99335fa553b71e2e49a1011d1d10ca1d4270501c6fd4cc88b3f9669b2"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-catalog-owner-region.png",
+      "pixelDimensions": {
+        "height": 185,
+        "width": 142
+      },
+      "sha256": "57d4d5f00b5cb213a987eeb7ff56cb56d9d3da07e96bf054fce0fbca5c738409"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 468050,
+        "partialAlphaPixelCount": 165065,
+        "present": true,
+        "transparentPixelCount": 371429
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.monochrome.png",
+      "pixelDimensions": {
+        "height": 981,
+        "width": 1024
+      },
+      "sha256": "3b67068ae6be712d0d516e6f1fdca2cb7e4d9d913de80bd3c0bd352f96320ec0"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 468050,
+        "partialAlphaPixelCount": 165065,
+        "present": true,
+        "transparentPixelCount": 371429
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.png",
+      "pixelDimensions": {
+        "height": 981,
+        "width": 1024
+      },
+      "sha256": "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 117017,
+        "partialAlphaPixelCount": 41137,
+        "present": true,
+        "transparentPixelCount": 103990
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.berserk.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "sha256": "70733bcc64d087cfcbc5cfb58b0bca2601b10bba22a4f69c67b9bd817a538b47"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 569105,
+        "partialAlphaPixelCount": 174301,
+        "present": true,
+        "transparentPixelCount": 283666
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1003
+      },
+      "sha256": "7d3644fafcc95e635ffaa8881a7734da0a05f17affb2604c4a26314d74f4551e"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 569105,
+        "partialAlphaPixelCount": 174301,
+        "present": true,
+        "transparentPixelCount": 283666
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1003
+      },
+      "sha256": "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 142253,
+        "partialAlphaPixelCount": 43310,
+        "present": true,
+        "transparentPixelCount": 76581
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.mjolnir.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "sha256": "bbf9273e15da472ec04fdc5514bd4faccba9322afcc9df8452ecee7e9a07d419"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 581369,
+        "partialAlphaPixelCount": 144864,
+        "present": true,
+        "transparentPixelCount": 313127
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.monochrome.png",
+      "pixelDimensions": {
+        "height": 1015,
+        "width": 1024
+      },
+      "sha256": "3585d4963ffd43b5c27f2e9c8ae809ccf646a13306e5c6b2b3cc32a1b66babd7"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 581369,
+        "partialAlphaPixelCount": 144864,
+        "present": true,
+        "transparentPixelCount": 313127
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.png",
+      "pixelDimensions": {
+        "height": 1015,
+        "width": 1024
+      },
+      "sha256": "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 145358,
+        "partialAlphaPixelCount": 36100,
+        "present": true,
+        "transparentPixelCount": 80686
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.ravenshield.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "sha256": "09322298c8bd5b3f68d48e924767467dfccee175e0d44e87110977cd6f2a0900"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 578321,
+        "partialAlphaPixelCount": 144913,
+        "present": true,
+        "transparentPixelCount": 316126
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1015
+      },
+      "sha256": "7fb26639ad65986fcb52e4b31bc4280e27890e4345e4de74dc6b5957482a2027"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 578321,
+        "partialAlphaPixelCount": 144913,
+        "present": true,
+        "transparentPixelCount": 316126
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1015
+      },
+      "sha256": "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 144519,
+        "partialAlphaPixelCount": 36049,
+        "present": true,
+        "transparentPixelCount": 81576
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.valknut.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "sha256": "35c5f281b6ad405b6a3cb5084edc864b05546deab10ca93ca5d45767334c8431"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 497830,
+        "partialAlphaPixelCount": 181774,
+        "present": true,
+        "transparentPixelCount": 357708
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.monochrome.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1013
+      },
+      "sha256": "bbb12a59b76b91ab2aaaa8eca3c53a88a2fe0a06beb5c4b9867a7f0784e9fc16"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 497830,
+        "partialAlphaPixelCount": 181774,
+        "present": true,
+        "transparentPixelCount": 357708
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1013
+      },
+      "sha256": "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 124422,
+        "partialAlphaPixelCount": 45227,
+        "present": true,
+        "transparentPixelCount": 92495
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.wolkin.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "sha256": "993359c98592c586a47cf06a2129c01c6dd92a474c64b481f34dbd6a83e8d885"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 493713,
+        "partialAlphaPixelCount": 177741,
+        "present": true,
+        "transparentPixelCount": 343330
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.monochrome.png",
+      "pixelDimensions": {
+        "height": 991,
+        "width": 1024
+      },
+      "sha256": "d296cea98b7283f67b9cb1b9e50547e16299dc8dcbf45872ed0701b746266907"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 493713,
+        "partialAlphaPixelCount": 177741,
+        "present": true,
+        "transparentPixelCount": 343330
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.png",
+      "pixelDimensions": {
+        "height": 991,
+        "width": 1024
+      },
+      "sha256": "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b"
+    },
+    {
+      "alpha": {
+        "extrema": [
+          0,
+          255
+        ],
+        "opaquePixelCount": 123433,
+        "partialAlphaPixelCount": 44326,
+        "present": true,
+        "transparentPixelCount": 94385
+      },
+      "mode": "RGBA",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/seals/seal.norse.yggdrasil.thumbnail.png",
+      "pixelDimensions": {
+        "height": 512,
+        "width": 512
+      },
+      "sha256": "718f6a33bca1ab684e434e482808572a6b06d3fdb0a790212ed048423ad00226"
+    },
+    {
+      "alpha": {
+        "present": false
+      },
+      "mode": "RGB",
+      "path": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
+      "pixelDimensions": {
+        "height": 1448,
+        "width": 1086
+      },
+      "sha256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d"
+    }
+  ],
+  "stagingRoot": "docs/verification/theme-fidelity-v4-3/generated/norse",
+  "targetRoot": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production"
+}

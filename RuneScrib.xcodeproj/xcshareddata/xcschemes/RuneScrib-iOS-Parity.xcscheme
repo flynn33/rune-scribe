@@ -27,7 +27,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
+      shouldUseLaunchSchemeArgsEnv = "NO"
       onlyGenerateCoverageForSpecifiedTargets = "NO">
       <MacroExpansion>
          <BuildableReference
@@ -44,6 +44,17 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D286A58674744CBB19D5476D"
+               BuildableName = "RuneScribIOSTests.xctest"
+               BlueprintName = "RuneScribIOSTests"
+               ReferencedContainer = "container:RuneScrib.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "2DD54B0EDB51920A4B33A6A2"
                BuildableName = "RuneScribIOSUITests.xctest"
                BlueprintName = "RuneScribIOSUITests"
@@ -53,6 +64,23 @@
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "RUNESCRIBE_THEME_FIDELITY_CANONICAL_CANDIDATE"
+            value = "$(RUNESCRIBE_THEME_FIDELITY_CANONICAL_CANDIDATE)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "RUNESCRIBE_THEME_FIDELITY_CANONICAL_ROOT"
+            value = "$(RUNESCRIBE_THEME_FIDELITY_CANONICAL_ROOT)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA"
+            value = "$(RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

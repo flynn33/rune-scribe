@@ -419,12 +419,16 @@ struct VaultProgressView: View {
                     }
                     .buttonStyle(.plain)
                     .foregroundColor(section == item ? .runeSelected : .runeTextPrimary)
+                    .accessibilityIdentifier(
+                        "vault-progress.section.\(item.rawValue.lowercased())"
+                    )
                     .accessibilityValue(section == item ? "Selected" : "Not selected")
                 }
             }
             .padding(.horizontal, RuneMetrics.pad)
             .padding(.vertical, 12)
         }
+        .accessibilityIdentifier("vault-progress.section-picker")
         .background(Color.runeBackgroundSecondary.opacity(0.48))
     }
 
@@ -780,6 +784,7 @@ struct VaultProgressView: View {
                     descriptor,
                     viewportHeight: viewportHeight
                 )
+                vaultStateStack(descriptor, viewportHeight: viewportHeight)
                 themeCollection(
                     VaultProgressPresentation.themeCatalog(
                         descriptor: descriptor,
@@ -883,9 +888,7 @@ struct VaultProgressView: View {
         let providerPresentation: (text: String, systemImage: String) = isAvailable
             ? ("Provider available", "checkmark.circle")
             : ("Provider unavailable; safe presentation in use", "exclamationmark.circle")
-        let visualState = initialCodexCardFixture?.visualState
-            ?? initialCodexCardState
-            ?? (isAvailable ? .selected : .unavailable)
+        let visualState = activeCodexVisualState(descriptor)
         let provider = session.themeSnapshot?.providers.first(where: {
             $0.codexID == descriptor.codex.id
         })
@@ -970,6 +973,89 @@ struct VaultProgressView: View {
         }
     }
 
+    @ViewBuilder
+    private func vaultStateStack(
+        _ descriptor: ThemeDescriptor,
+        viewportHeight: CGFloat
+    ) -> some View {
+        let vault = descriptor.codex.vault
+        let state = activeCodexVisualState(descriptor)
+        let presentation = vaultPresentation(for: state, vault: vault)
+        let cards = [CodexVaultCardStateModel(
+            state: state,
+            heading: presentation.heading,
+            detail: presentation.detail,
+            resourceID: presentation.resourceID,
+            isApplicable: false
+        )]
+        if let presentation = session.activeThemeVisualPresentation,
+           cards.allSatisfy({ presentation.image(for: $0.resourceID) != nil }) {
+            CodexVaultCardStateStack(
+                model: CodexVaultCardStateStackModel(
+                    heading: "Current Vault State",
+                    codexName: descriptor.codex.displayName.fallbackValue,
+                    codexSubtitle: descriptor.codex.shortDescription.fallbackValue,
+                    cards: cards
+                ),
+                image: { resourceID in
+                    guard let image = presentation.image(for: resourceID) else {
+                        preconditionFailure(
+                            "Missing admitted vault image: \(resourceID.rawValue)"
+                        )
+                    }
+                    return image
+                }
+            )
+            .frame(height: min(520, max(320, viewportHeight * 0.58)))
+            .accessibilityIdentifier("vault.codex-state-stack")
+        }
+    }
+
+    private func activeCodexVisualState(
+        _ descriptor: ThemeDescriptor
+    ) -> ThemeVisualContentState {
+        if let fixture = initialCodexCardFixture { return fixture.visualState }
+        if let initialCodexCardState { return initialCodexCardState }
+        guard session.themeSnapshot?.isEmergencyPresentation == false,
+              let provider = session.themeSnapshot?.providers.first(where: {
+                  $0.codexID == descriptor.codex.id
+              })
+        else { return .unavailable }
+        switch provider.state {
+        case .available:
+            if provider.isSelected { return .selected }
+            return provider.isOwned ? .owned : .locked
+        case .locked:
+            return .locked
+        case .unavailable, .incompatible, .invalidResources:
+            return .unavailable
+        }
+    }
+
+    private func vaultPresentation(
+        for state: ThemeVisualContentState,
+        vault: ThemeVaultDescriptor
+    ) -> (heading: String, detail: String, resourceID: ThemeResourceID) {
+        switch state {
+        case .selected:
+            return ("Selected", "Active Codex", vault.selectedResourceID)
+        case .owned:
+            return ("Owned", "Available", vault.cardResourceID)
+        case .encountered:
+            return ("Encountered", "Continue the journey", vault.encounteredResourceID)
+        case .progress:
+            return ("In Progress", "Continue the journey", vault.encounteredResourceID)
+        case .locked:
+            return ("Locked", "Complete its requirements", vault.lockedSilhouetteResourceID)
+        case .unavailable:
+            return (
+                "Unavailable",
+                "Provider unavailable",
+                vault.unavailableResourceID ?? vault.lockedSilhouetteResourceID
+            )
+        }
+    }
+
     private var themeCatalogColumns: [GridItem] {
         if dynamicTypeSize.isAccessibilitySize {
             return [GridItem(.flexible(), spacing: 12, alignment: .top)]
@@ -995,7 +1081,7 @@ struct VaultProgressView: View {
                 presentation.plan.codex.card
             }
             if let image = presentation.imageReference(for: imagePlan)?.image {
-                return AnyView(image.resizable().scaledToFill())
+                return AnyView(image.resizable().scaledToFit())
             }
         }
         return AnyView(ThemeVisualPlaceholder(
@@ -1006,7 +1092,7 @@ struct VaultProgressView: View {
 
     private func vaultArtifactArtwork(_ item: ThemeCatalogCardPresentation) -> AnyView {
         if let image = session.activeThemeVisualPresentation?.image(for: item.resourceID) {
-            return AnyView(image.resizable().scaledToFill())
+            return AnyView(image.resizable().scaledToFit())
         }
         return AnyView(ThemeVisualPlaceholder(
             systemImage: item.kind.systemImage,

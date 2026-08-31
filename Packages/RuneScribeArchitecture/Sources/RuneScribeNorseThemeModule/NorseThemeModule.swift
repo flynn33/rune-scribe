@@ -61,7 +61,7 @@ public enum RuneScribeNorseThemeModuleBootstrap {
     }
 
     public static let manifestExpectedSHA256Hex =
-        "9cc17fb4504eb975972b521237c4c80566a0b1a13fd71b8dd885e69ff3a86a5d"
+        "0c5f4d6f743f90c8bdede5ab6c63503a2de34df5758f1cc0b01d3066b8800b0e"
 
     private static func data(fromHex value: String) -> Data {
         var bytes = [UInt8]()
@@ -85,10 +85,17 @@ public struct RuneScribeNorseThemeModule: RuntimeConstructibleModule {
     public func start(context: ModuleContext) async throws {
         let runtimeIO = try await context.runtimeIOClient()
         do {
-            let theme = try await NorseBaseThemeResources.loadValidated(using: runtimeIO)
+            let descriptor = try await NorseBaseThemeResources.loadDescriptorValidated(
+                using: runtimeIO
+            )
             try await context.publishTheme(
-                descriptor: theme.descriptor,
-                resourcePayloads: theme.resourcePayloads
+                descriptor: descriptor,
+                resourceLoader: { resourceID in
+                    try await NorseBaseThemeResources.loadValidatedResource(
+                        id: resourceID,
+                        using: runtimeIO
+                    )
+                }
             )
         } catch is CancellationError {
             throw CancellationError()

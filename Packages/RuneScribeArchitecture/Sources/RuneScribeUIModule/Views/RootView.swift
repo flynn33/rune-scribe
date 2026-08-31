@@ -58,6 +58,10 @@ enum RootPendingPresentationPolicy {
     }
 }
 
+enum RootReceivedMessageNavigationPolicy {
+    static let openCodexRoute: RuneScribeUIRoute = .openSettings
+}
+
 enum RootEmergencyThemeWarningPolicy {
     static func shouldShow(
         isEmergencyPresentation: Bool,
@@ -240,8 +244,37 @@ struct RootView: View {
                 }
             }
         )) { pending in
-            ReceivedMessageView(pending: pending) { message in
-                session.requestRoute(.replyToMessage(cipherID: message.cipherID))
+            ReceivedMessageView(
+                pending: pending,
+                presentationBinding: session.activeReceivedCipherPresentationBinding(
+                    pending: pending,
+                    state: .primary,
+                    relativeDate: Date(),
+                    reduceMotion: accessibilityReduceMotion
+                ),
+                onOpenCodex: {
+                    Task { @MainActor in
+                        await Task.yield()
+                        session.requestRoute(
+                            RootReceivedMessageNavigationPolicy.openCodexRoute
+                        )
+                    }
+                },
+                onReply: { message in
+                    session.requestRoute(.replyToMessage(cipherID: message.cipherID))
+                }
+            )
+            .task(id: ReceivedCipherPresentationRequest(
+                pending: pending,
+                themeSnapshotRevision: session.themeSnapshot?.revision,
+                state: .primary,
+                reduceMotion: accessibilityReduceMotion
+            )) {
+                try? await session.prepareActiveReceivedCipherPresentation(
+                    pending: pending,
+                    state: .primary,
+                    reduceMotion: accessibilityReduceMotion
+                )
             }
         }
         .alert("Import Failed", isPresented: Binding(

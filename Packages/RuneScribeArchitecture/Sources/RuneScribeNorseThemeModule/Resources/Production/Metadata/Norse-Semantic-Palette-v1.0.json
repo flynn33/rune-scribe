@@ -4,11 +4,11 @@
   "source": "Current hard-coded Rune Scribe presentation extracted into semantic roles without visual redesign.",
   "tokens": {
     "background.primary": {
-      "hex": "#080A1E",
+      "hex": "#051320",
       "rgba": [
-        0.031,
-        0.039,
-        0.118,
+        0.02,
+        0.075,
+        0.125,
         1
       ]
     },

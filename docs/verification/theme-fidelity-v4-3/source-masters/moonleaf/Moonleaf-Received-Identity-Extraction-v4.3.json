@@ -1,0 +1,350 @@
+{
+  "schemaVersion": "1.0",
+  "id": "moonleaf.received-identity.extraction.v4.3",
+  "theme": "Moonleaf",
+  "generatedAtUTC": "2026-08-27T00:00:00Z",
+  "pipeline": "scripts/extract-moonleaf-received-identity-v43.py",
+  "pipelineSHA256": "a0926182c694db1e3692ed63da15b721a4d897cf67ca2b81ea98427377a1b00b",
+  "authorityPolicy": "offline extraction from owner-supplied full-resolution received-state sources; neither owner sources nor source-region evidence are runtime resources",
+  "sourceSelection": {
+    "controllingReceivedStates": [
+      "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-a.png",
+      "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-b.png"
+    ],
+    "styleBoardReviewed": {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-002-1122x1402.png",
+      "sha256": "2d1696abd8a7ddbfe81b89c2eb84933a516ba5a4bf8eaa2dae0edcbb3d3758ef",
+      "use": "motif corroboration only; not an extraction source"
+    },
+    "decision": "use received-state owner sources because their sender identities, compact badge, and medallions are the exact controlling screen objects"
+  },
+  "authorityInputs": [
+    {
+      "label": "received-primary",
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-029-941x1672.png",
+      "sha256": "d7266005ded25354980969d37c67be24efc00c491a080a19d6adc88f840d8e63",
+      "semanticMapPixelSHA256RGBA": "3dc24ec9a26f3b2df4f5d226bfaeecb643b08e1fc1903e3a9cd2d3fc4d5f77d0",
+      "decodedPixelSHA256RGBA": "e01d727d3882914a0b6323d5c1f4a7b8ccf63403bbecbdab2c786a4dbe48e71a",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "controllingGolden": {
+        "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-a.png",
+        "sha256": "23b96619f911ffc58be81e95869ea16b39b2e689a6b6164be77829d8e2a85b67",
+        "pixelIdentical": true
+      },
+      "duplicateOwnerSource": {
+        "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-033-941x1672.png",
+        "sha256": "d7266005ded25354980969d37c67be24efc00c491a080a19d6adc88f840d8e63",
+        "byteIdentical": true
+      }
+    },
+    {
+      "label": "received-share",
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-009-941x1672.png",
+      "sha256": "3b2720262795e86840b38d7bac8da702f16d4290a2f3e8e395e0ed198b33890e",
+      "semanticMapPixelSHA256RGBA": "dfb2fb1f16d9b0e9302208cf6d21d57c3debcbb8f5fdbcc3f7ba8fdfb88ea20f",
+      "decodedPixelSHA256RGBA": "603ead20542138675c977e82a55fb3cc12f93f9da344095f1163024e5bc56410",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "controllingGolden": {
+        "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-b.png",
+        "sha256": "79446a4e03976835f5727b3e9285f00e004602cba8c9496122bed115b0657db4",
+        "pixelIdentical": true
+      },
+      "duplicateOwnerSource": {
+        "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-014-941x1672.png",
+        "sha256": "3b2720262795e86840b38d7bac8da702f16d4290a2f3e8e395e0ed198b33890e",
+        "byteIdentical": true
+      }
+    }
+  ],
+  "recipe": {
+    "cropCoordinates": "left, top, right-exclusive, bottom-exclusive source pixels",
+    "mask": "ellipse touching the crop edges with deterministic 8x8 subpixel coverage",
+    "resampling": "none",
+    "colorTransformation": "none",
+    "encoding": "lossless PNG with ancillary metadata omitted"
+  },
+  "reuseAssessment": {
+    "method": "uniformly resize the share medallion to the primary square with Lanczos; compare RGB only where both alpha values are at least 250",
+    "primaryDimensions": [
+      193,
+      193
+    ],
+    "shareDimensions": [
+      141,
+      141
+    ],
+    "comparedOpaquePixels": 28633,
+    "exactRGBPixelAgreementFraction": 0.0001397,
+    "meanAbsoluteChannelDifference": 45.82359515,
+    "maximumChannelDifference": 255,
+    "pixelIdenticalAfterUniformScale": false,
+    "decision": "use separate primary and share medallion resources"
+  },
+  "qualityReview": {
+    "oneHundredPercent": "PASS",
+    "twoHundredPercent": "PASS",
+    "transparentEdgeReview": "PASS",
+    "sourceRegionRoundTrip": "PASS",
+    "targetDeviceRuntime": "PENDING_PROVIDER_BINDING"
+  },
+  "outputs": [
+    {
+      "key": "primary-sender-avatar",
+      "resourceID": "resource.received.moonleaf.primary.sender-avatar",
+      "role": "received.primary.sender-avatar",
+      "surface": "received-primary",
+      "sourceLabel": "received-primary",
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-029-941x1672.png",
+      "sourceSHA256": "d7266005ded25354980969d37c67be24efc00c491a080a19d6adc88f840d8e63",
+      "boundsLTRBExclusive": [
+        56,
+        228,
+        163,
+        335
+      ],
+      "dimensions": [
+        107,
+        107
+      ],
+      "mask": {
+        "kind": "ellipse",
+        "boundary": "the four exact source-crop edges",
+        "coverageSampling": "8x8",
+        "transparentPixels": 2292,
+        "edgePixels": 340,
+        "opaquePixels": 8817
+      },
+      "transformation": "source-pixel crop plus geometric ellipse alpha coverage; no resize, rotation, color adjustment, filtering, or content repair",
+      "sourceRegionEvidence": {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/moonleaf-received-primary-sender-avatar.source-region.png",
+        "sha256": "0adfd8606265d32d84a6b843e97f882e24991fc6c970c24271fe8482137b799f",
+        "pixelSHA256RGB": "7fbd904667b668a3c4db44d3121cf08e87e081553b5d03a86f88ca6e45276a0a"
+      },
+      "output": {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/received/moonleaf-received-primary-sender-avatar.png",
+        "sha256": "3b262beebdfb316511d6fce7064e660403c37226ff9ab2f57fdb75eaf454621c",
+        "pixelSHA256RGBA": "aaa27fc799aa8558925282d33212e3d8d30702d9386bce70666b2715ee743f3f",
+        "bytes": 24958,
+        "mediaType": "image/png",
+        "dimensions": [
+          107,
+          107
+        ],
+        "hasAlpha": true
+      },
+      "comparisonBackToSource": {
+        "method": "alpha-composite the extracted RGBA pixels over their unchanged RGB source region and compare with that exact source region",
+        "maximumChannelDifference": 0,
+        "sourceRGBPlaneMaximumDifference": 0
+      }
+    },
+    {
+      "key": "share-sender-avatar",
+      "resourceID": "resource.received.moonleaf.share.sender-avatar",
+      "role": "received.share.sender-avatar",
+      "surface": "received-share-card",
+      "sourceLabel": "received-share",
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-009-941x1672.png",
+      "sourceSHA256": "3b2720262795e86840b38d7bac8da702f16d4290a2f3e8e395e0ed198b33890e",
+      "boundsLTRBExclusive": [
+        60,
+        224,
+        159,
+        323
+      ],
+      "dimensions": [
+        99,
+        99
+      ],
+      "mask": {
+        "kind": "ellipse",
+        "boundary": "the four exact source-crop edges",
+        "coverageSampling": "8x8",
+        "transparentPixels": 1952,
+        "edgePixels": 316,
+        "opaquePixels": 7533
+      },
+      "transformation": "source-pixel crop plus geometric ellipse alpha coverage; no resize, rotation, color adjustment, filtering, or content repair",
+      "sourceRegionEvidence": {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/moonleaf-received-share-sender-avatar.source-region.png",
+        "sha256": "5656f2db85b23bccb5e67b124d6f21e491d134c1ffecec3f5a86952c684a487f",
+        "pixelSHA256RGB": "0fb40ed54786da9b1847afc2b4bef5054d358d93dfedb32992ec9fd933d42fc2"
+      },
+      "output": {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/received/moonleaf-received-share-sender-avatar.png",
+        "sha256": "95754977ca429d79def1b0fe8aa84d845949e707f9379330bb4ae7041eb42d13",
+        "pixelSHA256RGBA": "29bb9d5f80ea7e4340f1d2ea385e224a24c85f543e918471f3c89dc74ef21eb0",
+        "bytes": 24037,
+        "mediaType": "image/png",
+        "dimensions": [
+          99,
+          99
+        ],
+        "hasAlpha": true
+      },
+      "comparisonBackToSource": {
+        "method": "alpha-composite the extracted RGBA pixels over their unchanged RGB source region and compare with that exact source region",
+        "maximumChannelDifference": 0,
+        "sourceRGBPlaneMaximumDifference": 0
+      }
+    },
+    {
+      "key": "share-codex-badge",
+      "resourceID": "resource.received.moonleaf.share.codex-badge",
+      "role": "received.share.codex-badge",
+      "surface": "received-share-card",
+      "sourceLabel": "received-share",
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-009-941x1672.png",
+      "sourceSHA256": "3b2720262795e86840b38d7bac8da702f16d4290a2f3e8e395e0ed198b33890e",
+      "boundsLTRBExclusive": [
+        657,
+        247,
+        700,
+        290
+      ],
+      "dimensions": [
+        43,
+        43
+      ],
+      "mask": {
+        "kind": "ellipse",
+        "boundary": "the four exact source-crop edges",
+        "coverageSampling": "8x8",
+        "transparentPixels": 328,
+        "edgePixels": 140,
+        "opaquePixels": 1381
+      },
+      "transformation": "source-pixel crop plus geometric ellipse alpha coverage; no resize, rotation, color adjustment, filtering, or content repair",
+      "sourceRegionEvidence": {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/moonleaf-received-share-codex-badge.source-region.png",
+        "sha256": "0dbd6e13ddaf472e3938c0c294094f98b955dd2fc672f650ef47b9ca32e75373",
+        "pixelSHA256RGB": "d3c6ecf049070d2dfd1cddebb730fd85c661e918562da35720e650ec8bc9090d"
+      },
+      "output": {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/received/moonleaf-received-share-codex-badge.png",
+        "sha256": "8d4a7c7375b292bcd7da239b8175a56cf7890491361aaf2f4babfd2a5f1acce1",
+        "pixelSHA256RGBA": "c9969e6fbfe161a626ba76c4b2119bd3b4f2c8c73a0488ee522834dee0b9a7b2",
+        "bytes": 5179,
+        "mediaType": "image/png",
+        "dimensions": [
+          43,
+          43
+        ],
+        "hasAlpha": true
+      },
+      "comparisonBackToSource": {
+        "method": "alpha-composite the extracted RGBA pixels over their unchanged RGB source region and compare with that exact source region",
+        "maximumChannelDifference": 0,
+        "sourceRGBPlaneMaximumDifference": 0
+      }
+    },
+    {
+      "key": "primary-medallion",
+      "resourceID": "resource.received.moonleaf.primary.medallion",
+      "role": "received.primary.medallion",
+      "surface": "received-primary",
+      "sourceLabel": "received-primary",
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-029-941x1672.png",
+      "sourceSHA256": "d7266005ded25354980969d37c67be24efc00c491a080a19d6adc88f840d8e63",
+      "boundsLTRBExclusive": [
+        688,
+        880,
+        881,
+        1073
+      ],
+      "dimensions": [
+        193,
+        193
+      ],
+      "mask": {
+        "kind": "ellipse",
+        "boundary": "the four exact source-crop edges",
+        "coverageSampling": "8x8",
+        "transparentPixels": 7672,
+        "edgePixels": 652,
+        "opaquePixels": 28925
+      },
+      "transformation": "source-pixel crop plus geometric ellipse alpha coverage; no resize, rotation, color adjustment, filtering, or content repair",
+      "sourceRegionEvidence": {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/moonleaf-received-primary-medallion.source-region.png",
+        "sha256": "5bac668e3a5cb12d1f4b06b79abccffb00b31c8e41300be8cd9d07b105dceb58",
+        "pixelSHA256RGB": "e352ad8421932e0c0582b58492e332aa25105575ef12fbef189dfe309f57071a"
+      },
+      "output": {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/received/moonleaf-received-primary-medallion.png",
+        "sha256": "1e6a5ea56453d5206469d9bcb05c15ddbe1dfe663a43610b649741ef8750c78a",
+        "pixelSHA256RGBA": "593f9f4901c0fe7caf52c1a4da02b8b4e9893ccdf82048fd68bdf4ced462ec15",
+        "bytes": 83253,
+        "mediaType": "image/png",
+        "dimensions": [
+          193,
+          193
+        ],
+        "hasAlpha": true
+      },
+      "comparisonBackToSource": {
+        "method": "alpha-composite the extracted RGBA pixels over their unchanged RGB source region and compare with that exact source region",
+        "maximumChannelDifference": 0,
+        "sourceRGBPlaneMaximumDifference": 0
+      }
+    },
+    {
+      "key": "share-medallion",
+      "resourceID": "resource.received.moonleaf.share.medallion",
+      "role": "received.share.medallion",
+      "surface": "received-share-card",
+      "sourceLabel": "received-share",
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-009-941x1672.png",
+      "sourceSHA256": "3b2720262795e86840b38d7bac8da702f16d4290a2f3e8e395e0ed198b33890e",
+      "boundsLTRBExclusive": [
+        625,
+        865,
+        766,
+        1006
+      ],
+      "dimensions": [
+        141,
+        141
+      ],
+      "mask": {
+        "kind": "ellipse",
+        "boundary": "the four exact source-crop edges",
+        "coverageSampling": "8x8",
+        "transparentPixels": 4048,
+        "edgePixels": 468,
+        "opaquePixels": 15365
+      },
+      "transformation": "source-pixel crop plus geometric ellipse alpha coverage; no resize, rotation, color adjustment, filtering, or content repair",
+      "sourceRegionEvidence": {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/moonleaf-received-share-medallion.source-region.png",
+        "sha256": "d52c5782f7fd0ee5675722e5242907d59c0f3aebac64fa4da7545a39ee0ae6cb",
+        "pixelSHA256RGB": "e0a17a0cc53de57f359cd1d34f2bb40b7109eb86db3b528ac292c8b04f6a9b31"
+      },
+      "output": {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/received/moonleaf-received-share-medallion.png",
+        "sha256": "bb0d0c8da37d1b105343abe5533a48d4774fbfe83db2a3ef2dc0944930f86a48",
+        "pixelSHA256RGBA": "a41e4af750eb2c773f9dcad858125fa71972df4b2e8752c634ac88db633f7522",
+        "bytes": 49437,
+        "mediaType": "image/png",
+        "dimensions": [
+          141,
+          141
+        ],
+        "hasAlpha": true
+      },
+      "comparisonBackToSource": {
+        "method": "alpha-composite the extracted RGBA pixels over their unchanged RGB source region and compare with that exact source region",
+        "maximumChannelDifference": 0,
+        "sourceRGBPlaneMaximumDifference": 0
+      }
+    }
+  ],
+  "rightsOwner": "Raven Forge Software",
+  "licenseNotice": "Owner-supplied proprietary source"
+}

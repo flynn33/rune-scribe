@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "catalogID": "runescribe.progression.catalog",
-  "catalogVersion": 2,
+  "catalogVersion": 3,
   "packageVersion": "1.0.0",
   "status": "approved-controlling-implementation-input",
   "effectiveDate": "2026-08-12",
@@ -670,6 +670,15 @@
       "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
     },
     {
+      "contentID": "title.gloamthorn.mastery",
+      "kind": "title",
+      "displayName": "Sovereign of the Gloam",
+      "countsAsArtifact": false,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.gloamthorn"
+    },
+    {
       "contentID": "title.listener",
       "kind": "title",
       "displayName": "Listener",
@@ -688,6 +697,15 @@
       "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
     },
     {
+      "contentID": "title.moonleaf.mastery",
+      "kind": "title",
+      "displayName": "Moonleaf Master",
+      "countsAsArtifact": false,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.moonleaf"
+    },
+    {
       "contentID": "title.norse.master-of-runes",
       "kind": "title",
       "displayName": "Master of Runes",
@@ -697,6 +715,15 @@
       "codexID": "codex.norse"
     },
     {
+      "contentID": "title.sunspire.mastery",
+      "kind": "title",
+      "displayName": "Bearer of First Light",
+      "countsAsArtifact": false,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.sunspire"
+    },
+    {
       "contentID": "title.wayfarer",
       "kind": "title",
       "displayName": "Wayfarer",
@@ -704,6 +731,15 @@
       "availability": "permanent",
       "rarity": "Rare",
       "notes": "Provider artwork is deferred; Progression may own the grant before a visual provider is available."
+    },
+    {
+      "contentID": "title.wildwood.mastery",
+      "kind": "title",
+      "displayName": "Keeper of the Heartwood",
+      "countsAsArtifact": false,
+      "availability": "permanent-mastery",
+      "rarity": "Mythic",
+      "codexID": "codex.wildwood"
     },
     {
       "contentID": "unlock.codex.gloamthorn",
@@ -2967,6 +3003,10 @@
         {
           "contentID": "crest.moonleaf.moonbloom",
           "grantKind": "permanent"
+        },
+        {
+          "contentID": "title.moonleaf.mastery",
+          "grantKind": "permanent"
         }
       ],
       "revealTier": "mastery",
@@ -3041,6 +3081,10 @@
         },
         {
           "contentID": "crest.sunspire.first-light",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "title.sunspire.mastery",
           "grantKind": "permanent"
         }
       ],
@@ -3117,6 +3161,10 @@
         {
           "contentID": "crest.wildwood.heartwood-crown",
           "grantKind": "permanent"
+        },
+        {
+          "contentID": "title.wildwood.mastery",
+          "grantKind": "permanent"
         }
       ],
       "revealTier": "mastery",
@@ -3191,6 +3239,10 @@
         },
         {
           "contentID": "crest.gloamthorn.gloam-sovereign",
+          "grantKind": "permanent"
+        },
+        {
+          "contentID": "title.gloamthorn.mastery",
           "grantKind": "permanent"
         }
       ],

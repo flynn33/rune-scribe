@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import RuneScribeContracts
 import RuneScribeNorseThemeModule
@@ -239,6 +240,152 @@ final class ShareBuilderModelTests: XCTestCase {
         }
     }
 
+    func testProviderFailureStateOverridesSelectedIdentity() {
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        for state in [
+            ThemeProviderState.unavailable,
+            .incompatible,
+            .invalidResources,
+        ] {
+            let provider = ThemeProviderSummaryDTO(
+                codexID: descriptor.codex.id,
+                moduleID: RuneScribeModuleIDs.norseTheme,
+                displayName: descriptor.codex.displayName.fallbackValue,
+                state: state,
+                isOwned: true,
+                isSelectable: false,
+                isSelected: true
+            )
+            XCTAssertEqual(
+                ShareBuilderProviderPresentationPolicy.state(
+                    for: provider,
+                    selectedCodexID: descriptor.codex.id
+                ),
+                .unavailable
+            )
+        }
+
+        let locked = ThemeProviderSummaryDTO(
+            codexID: descriptor.codex.id,
+            moduleID: RuneScribeModuleIDs.norseTheme,
+            displayName: descriptor.codex.displayName.fallbackValue,
+            state: .locked,
+            isOwned: true,
+            isSelectable: false,
+            isSelected: true
+        )
+        XCTAssertEqual(
+            ShareBuilderProviderPresentationPolicy.state(
+                for: locked,
+                selectedCodexID: descriptor.codex.id
+            ),
+            .locked
+        )
+    }
+
+    func testRenderedPreviewBindingRejectsEveryStaleInputAndAlteredBytes() throws {
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        let catalog = try makeCatalog(descriptor: descriptor)
+        let source = ShareBuilderSource.cipherInvitation(
+            cipherID: UUID(uuidString: "e0a70000-0000-0000-0000-000000000001")!,
+            displayName: "Bound invitation"
+        )
+        let previewData = Data("rendered-preview".utf8)
+        let presentation = try makePresentation(
+            selection: catalog.validatedSelection(),
+            safePreviewData: previewData
+        )
+        let rendered = try RenderedShareBuilderPreview(
+            source: source,
+            catalog: catalog,
+            themeRevision: revision(coordinator: 41, provider: 9),
+            colorMode: .standard,
+            systemReduceMotion: false,
+            presentation: presentation
+        )
+
+        XCTAssertTrue(rendered.matches(
+            source: source,
+            catalog: catalog,
+            themeRevision: revision(coordinator: 41, provider: 9),
+            colorMode: .standard,
+            systemReduceMotion: false
+        ))
+        XCTAssertFalse(rendered.matches(
+            source: .cipherInvitation(
+                cipherID: source.cipherID,
+                displayName: "Changed invitation"
+            ),
+            catalog: catalog,
+            themeRevision: revision(coordinator: 41, provider: 9),
+            colorMode: .standard,
+            systemReduceMotion: false
+        ))
+
+        var changedDraft = catalog
+        changedDraft.selectEffects(catalog.draft.effects == .off ? .full : .off)
+        XCTAssertFalse(rendered.matches(
+            source: source,
+            catalog: changedDraft,
+            themeRevision: revision(coordinator: 41, provider: 9),
+            colorMode: .standard,
+            systemReduceMotion: false
+        ))
+        XCTAssertFalse(rendered.matches(
+            source: source,
+            catalog: try makeCatalog(
+                descriptor: RuneScribeThemeGloamthornModuleBootstrap
+                    .discoveryDescriptor
+            ),
+            themeRevision: revision(coordinator: 41, provider: 9),
+            colorMode: .standard,
+            systemReduceMotion: false
+        ))
+        XCTAssertFalse(rendered.matches(
+            source: source,
+            catalog: catalog,
+            themeRevision: revision(coordinator: 42, provider: 9),
+            colorMode: .standard,
+            systemReduceMotion: false
+        ))
+        XCTAssertFalse(rendered.matches(
+            source: source,
+            catalog: catalog,
+            themeRevision: revision(coordinator: 41, provider: 10),
+            colorMode: .standard,
+            systemReduceMotion: false
+        ))
+        XCTAssertFalse(rendered.matches(
+            source: source,
+            catalog: catalog,
+            themeRevision: revision(coordinator: 41, provider: 9),
+            colorMode: .highContrast,
+            systemReduceMotion: false
+        ))
+        XCTAssertFalse(rendered.matches(
+            source: source,
+            catalog: catalog,
+            themeRevision: revision(coordinator: 41, provider: 9),
+            colorMode: .standard,
+            systemReduceMotion: true
+        ))
+
+        let altered = try OutboundSharePresentationDTO(
+            metadata: presentation.metadata,
+            safePreviewData: Data(repeating: 0xff, count: previewData.count)
+        )
+        XCTAssertThrowsError(try RenderedShareBuilderPreview(
+            source: source,
+            catalog: catalog,
+            themeRevision: revision(coordinator: 41, provider: 9),
+            colorMode: .standard,
+            systemReduceMotion: false,
+            presentation: altered
+        )) {
+            XCTAssertEqual($0 as? ShareArtifactRenderError, .renderingFailed)
+        }
+    }
+
     func testRelicChangeRemovesAnIncompatibleFrame() throws {
         let source = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
         let defaultRelicID = source.codex.defaultRelicID
@@ -420,6 +567,126 @@ final class ShareBuilderModelTests: XCTestCase {
         previewTask?.cancel()
     }
 
+    func testSharePreparationGenerationRejectsAccessibilityInvalidation() {
+        var gate = ShareBuilderPreparationGenerationGate()
+        let inFlight = gate.begin()
+        XCTAssertTrue(gate.accepts(inFlight))
+
+        gate.invalidate()
+
+        XCTAssertFalse(gate.accepts(inFlight))
+        let replacement = gate.begin()
+        XCTAssertTrue(gate.accepts(replacement))
+        XCTAssertFalse(gate.accepts(inFlight))
+    }
+
+    func testInitialAndSuspendedSelectionCatalogLoadsRejectSupersededThemeAuthority() async throws {
+        var generation = ShareBuilderCatalogLoadGenerationGate()
+        let initialLoad = generation.begin(themeRevision: 41)
+        let suspendedSelection = generation.begin(themeRevision: 41)
+        XCTAssertFalse(generation.accepts(
+            initialLoad,
+            currentThemeRevision: 41
+        ))
+        XCTAssertTrue(generation.accepts(
+            suspendedSelection,
+            currentThemeRevision: 41
+        ))
+        let suspension = CatalogLoadSuspensionGate()
+        let load = Task { @MainActor in
+            await suspension.suspendUntilReleased()
+            return suspendedSelection
+        }
+        await suspension.waitUntilSuspended()
+
+        generation.invalidate()
+        let replacement = generation.begin(themeRevision: 42)
+        await suspension.release()
+        let returnedSelection = await load.value
+
+        XCTAssertFalse(generation.accepts(
+            returnedSelection,
+            currentThemeRevision: 42
+        ))
+        XCTAssertTrue(generation.accepts(
+            replacement,
+            currentThemeRevision: 42
+        ))
+        XCTAssertFalse(generation.accepts(
+            replacement,
+            currentThemeRevision: 43
+        ))
+    }
+
+    func testTerminalGenerationPreventsOverlappingShareCompletion() throws {
+        var gate = ShareBuilderTerminalGenerationGate()
+        let first = try XCTUnwrap(gate.begin())
+        XCTAssertTrue(gate.isActive)
+        XCTAssertTrue(gate.accepts(first))
+        XCTAssertNil(gate.begin())
+
+        XCTAssertTrue(gate.complete(first))
+        XCTAssertFalse(gate.isActive)
+        XCTAssertFalse(gate.accepts(first))
+
+        let second = try XCTUnwrap(gate.begin())
+        gate.invalidate()
+        XCTAssertFalse(gate.isActive)
+        XCTAssertFalse(gate.complete(second))
+    }
+
+    func testPreparedPresentationAuthorityRejectsEveryVisibleOutputChange() {
+        let captured = ShareBuilderThemeAuthorityRevision(
+            coordinatorRevision: 8,
+            providerContentRevision: 13
+        )
+        XCTAssertTrue(ShareBuilderPreparedPresentationPolicy.isAuthorized(
+            capturedThemeRevision: captured,
+            capturedColorMode: .standard,
+            capturedSystemReduceMotion: false,
+            currentThemeRevision: captured,
+            currentColorMode: .standard,
+            currentSystemReduceMotion: false
+        ))
+
+        let changedTheme = ShareBuilderThemeAuthorityRevision(
+            coordinatorRevision: 9,
+            providerContentRevision: 13
+        )
+        XCTAssertFalse(ShareBuilderPreparedPresentationPolicy.isAuthorized(
+            capturedThemeRevision: captured,
+            capturedColorMode: .standard,
+            capturedSystemReduceMotion: false,
+            currentThemeRevision: changedTheme,
+            currentColorMode: .standard,
+            currentSystemReduceMotion: false
+        ))
+        XCTAssertFalse(ShareBuilderPreparedPresentationPolicy.isAuthorized(
+            capturedThemeRevision: captured,
+            capturedColorMode: .standard,
+            capturedSystemReduceMotion: false,
+            currentThemeRevision: captured,
+            currentColorMode: .highContrast,
+            currentSystemReduceMotion: false
+        ))
+        XCTAssertFalse(ShareBuilderPreparedPresentationPolicy.isAuthorized(
+            capturedThemeRevision: captured,
+            capturedColorMode: .standard,
+            capturedSystemReduceMotion: false,
+            currentThemeRevision: captured,
+            currentColorMode: .standard,
+            currentSystemReduceMotion: true
+        ))
+        XCTAssertFalse(ShareBuilderPreparedPresentationPolicy.isAuthorized(
+            capturedThemeRevision: captured,
+            capturedColorMode: .standard,
+            capturedSystemReduceMotion: false,
+            currentThemeRevision: nil,
+            currentColorMode: .standard,
+            currentSystemReduceMotion: false
+        ))
+    }
+
     private func makeCatalog(
         descriptor: ThemeDescriptor,
         settings: RuntimeSettingsSnapshotDTO? = nil,
@@ -432,6 +699,41 @@ final class ShareBuilderModelTests: XCTestCase {
             settings: settings,
             ownedArtifactIDs: ownedArtifactIDs,
             encounteredArtifactIDs: encounteredArtifactIDs
+        )
+    }
+
+    private func makePresentation(
+        selection: SharePresentationSelection,
+        safePreviewData: Data
+    ) throws -> OutboundSharePresentationDTO {
+        let digest = SHA256.hash(data: safePreviewData).map {
+            String(format: "%02x", $0)
+        }.joined()
+        let safePreview = try ShareSafePreviewMetadata(
+            mediaType: .png,
+            byteLength: UInt32(safePreviewData.count),
+            pixelSize: ThemePixelSize(width: 4, height: 3),
+            sha256: ThemeSHA256Digest(rawValue: digest)!
+        )
+        let metadata = try SharePresentationMetadata(
+            selection: selection,
+            safePreview: safePreview,
+            compatibility: SharePresentationCompatibilityFlags.safePreviewPresent
+                .union(.norseInteractiveFallback)
+        )
+        return try OutboundSharePresentationDTO(
+            metadata: metadata,
+            safePreviewData: safePreviewData
+        )
+    }
+
+    private func revision(
+        coordinator: UInt64,
+        provider: UInt64
+    ) -> ShareBuilderThemeAuthorityRevision {
+        ShareBuilderThemeAuthorityRevision(
+            coordinatorRevision: coordinator,
+            providerContentRevision: provider
         )
     }
 
@@ -614,6 +916,33 @@ private actor PreviewCancellationCapture {
 
     func record() {
         wasRecorded = true
+    }
+}
+
+private actor CatalogLoadSuspensionGate {
+    private var isSuspended = false
+    private var isReleased = false
+    private var suspensionWaiters: [CheckedContinuation<Void, Never>] = []
+    private var releaseWaiter: CheckedContinuation<Void, Never>?
+
+    func suspendUntilReleased() async {
+        isSuspended = true
+        let waiters = suspensionWaiters
+        suspensionWaiters.removeAll()
+        waiters.forEach { $0.resume() }
+        guard !isReleased else { return }
+        await withCheckedContinuation { releaseWaiter = $0 }
+    }
+
+    func waitUntilSuspended() async {
+        guard !isSuspended else { return }
+        await withCheckedContinuation { suspensionWaiters.append($0) }
+    }
+
+    func release() {
+        isReleased = true
+        releaseWaiter?.resume()
+        releaseWaiter = nil
     }
 }
 

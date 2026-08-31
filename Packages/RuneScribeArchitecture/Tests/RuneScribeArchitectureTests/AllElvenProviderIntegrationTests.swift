@@ -77,10 +77,10 @@ final class AllElvenProviderIntegrationTests: XCTestCase {
                     && providerSummary(
                         in: snapshot,
                         codexID: RuneScribeThemeMoonleafModuleBootstrap.codexID
-                    )?.state == .unavailable
+                    )?.state == .invalidResources
             }
 
-            XCTAssertEqual(isolated.fallbackReason, .unavailable)
+            XCTAssertEqual(isolated.fallbackReason, .invalidResources)
             XCTAssertFalse(isolated.isEmergencyPresentation)
             XCTAssertEqual(isolated.requiredBaseResourceFailures, [])
             XCTAssertFalse(
@@ -112,7 +112,7 @@ final class AllElvenProviderIntegrationTests: XCTestCase {
             assertRequiredModulesAreActive(running)
             XCTAssertEqual(
                 running.moduleStates[RuneScribeThemeMoonleafModuleBootstrap.moduleID],
-                .failed
+                .active
             )
         } catch {
             await isolatedRuntime.stop()
@@ -245,11 +245,11 @@ final class AllElvenProviderIntegrationTests: XCTestCase {
                 return moonleaf.state == .unavailable
                     && moonleaf.isOwned
                     && !moonleaf.isSelectable
-                    && gloamthorn.state == .unavailable
+                    && gloamthorn.state == .invalidResources
                     && gloamthorn.isOwned
                     && !gloamthorn.isSelectable
             }
-            XCTAssertEqual(isolated.fallbackReason, .unavailable)
+            XCTAssertEqual(isolated.fallbackReason, .invalidResources)
             XCTAssertEqual(isolated.effectiveTheme.codex.id, RuneScribeCodexIDs.norse)
             XCTAssertEqual(isolated.providers.count, 5)
             XCTAssertEqual(
@@ -313,7 +313,7 @@ final class AllElvenProviderIntegrationTests: XCTestCase {
             assertRequiredModulesAreActive(running)
             XCTAssertEqual(
                 running.moduleStates[RuneScribeThemeGloamthornModuleBootstrap.moduleID],
-                .failed
+                .active
             )
             XCTAssertEqual(
                 running.moduleStates[RuneScribeThemeMoonleafModuleBootstrap.moduleID],

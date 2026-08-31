@@ -6,6 +6,17 @@ release work and reviewed against the project version before merge. The format f
 [Semantic Versioning](https://semver.org/).
 
 <!-- NEW ENTRIES BELOW -->
+## [Unreleased]
+
+- Replace the contradictory v4.2 visual-comparison bindings with separate v4.3
+  responsive, canonical visual, and runtime lanes covering 400 application states,
+  50 canonical production renders, 576 runtime probes, and 1,104 mappings.
+- Expand the five Codices with provider-neutral production composition, protected panel
+  chrome, shared artifact rendering, responsive layouts, accessibility treatments, and
+  source-bound qualification tooling.
+- Qualification remains in progress; this entry does not claim final gate acceptance,
+  publication, merge, or shipment.
+
 ## [1.0.39] - 2026-08-23
 
 - Complete the authorized source remediation while preserving the repository's strict

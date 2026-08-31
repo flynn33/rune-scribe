@@ -37,7 +37,7 @@ BUILT_PRODUCT_INSPECTION = (
 )
 SHIPPING_CHECKER_PATH = "scripts/check-shipping-products.sh"
 EXPECTED_SHIPPING_CHECKER_SHA256 = (
-    "e51e6d05cfecaa9097ecc7b016ec30846cd662276c0ad3893679d1e950c7a2e9"
+    "8d3b18cf7f47ec91a27b5d2a0ad456fd0bb1f78cfca20ba8efb11e3f868a29c0"
 )
 EXPECTED_SHIPPING_CHECK_COUNT = 101
 SHIPPING_VALIDATION_LOG = (
@@ -643,12 +643,10 @@ def inspect_theme_budgets(
             for info in (files[member],)
         )
         limits = {
-            "uniquePhysicalBytes": (
-                112 * 1024 * 1024 if theme == "Norse" else 64 * 1024 * 1024
-            ),
+            "uniquePhysicalBytes": 112 * 1024 * 1024,
             "largestResourceBytes": 8 * 1024 * 1024,
             "staticImageBytes": (
-                96 * 1024 * 1024 if theme == "Norse" else 32 * 1024 * 1024
+                96 * 1024 * 1024
             ),
             "fontBytes": 16 * 1024 * 1024,
             "animationBytes": 16 * 1024 * 1024,

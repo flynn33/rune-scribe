@@ -6,7 +6,8 @@ import XCTest
 
 @MainActor
 final class RuneScribeParityUITests: XCTestCase {
-    override func setUpWithError() throws {
+    override func setUp() async throws {
+        try await super.setUp()
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
     }
@@ -126,9 +127,12 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(defaultFrame.exists, app.debugDescription)
         XCTAssertTrue(effects.exists, app.debugDescription)
         XCTAssertTrue(defaultsPreview.waitForExistence(timeout: 8), app.debugDescription)
-        XCTAssertEqual(defaultRelic.label, "Default Relic: Runestone Tablet")
-        XCTAssertEqual(defaultSeal.label, "Default Seal: Valknut Seal")
-        XCTAssertEqual(defaultFrame.label, "Default Frame: None")
+        XCTAssertEqual(defaultRelic.label, "Default Relic")
+        XCTAssertEqual(defaultRelic.value as? String, "Runestone Tablet")
+        XCTAssertEqual(defaultSeal.label, "Default Seal")
+        XCTAssertEqual(defaultSeal.value as? String, "Valknut Seal")
+        XCTAssertEqual(defaultFrame.label, "Default Frame")
+        XCTAssertEqual(defaultFrame.value as? String, "None")
         assertFourByThree(defaultsPreview)
 
         let offEffects = effects.buttons["Off"].firstMatch
@@ -201,37 +205,60 @@ final class RuneScribeParityUITests: XCTestCase {
         }
 
         relicThumbnail.tap()
-        let artifactPicker = app.descendants(matching: .any)[
-            "theme.artifact-picker"
+        let codexCatalog = app.descendants(matching: .any)[
+            "codex.catalog.root"
         ].firstMatch
-        XCTAssertTrue(artifactPicker.waitForExistence(timeout: 8), app.debugDescription)
-        XCTAssertTrue(
-            app.descendants(matching: .any)[
-                "theme.artifact-picker.relic.norse.runestone-tablet"
-            ].firstMatch.waitForExistence(timeout: 8),
+        XCTAssertTrue(codexCatalog.waitForExistence(timeout: 8), app.debugDescription)
+        let catalogFeaturedRelic = app.descendants(matching: .any)[
+            "codex.catalog.featured-relic"
+        ].firstMatch
+        XCTAssertTrue(catalogFeaturedRelic.waitForExistence(timeout: 8), app.debugDescription)
+        XCTAssertEqual(catalogFeaturedRelic.elementType, .button, app.debugDescription)
+        XCTAssertTrue(catalogFeaturedRelic.isHittable, app.debugDescription)
+        XCTAssertFalse(
+            catalogFeaturedRelic.label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
             app.debugDescription
         )
+        let catalogFrame = codexCatalog.frame
+        let windowFrame = app.windows.firstMatch.frame
+        XCTAssertGreaterThan(catalogFrame.width, 0)
+        XCTAssertGreaterThan(catalogFrame.height, 0)
+        XCTAssertGreaterThanOrEqual(catalogFrame.minX, windowFrame.minX - 1)
+        XCTAssertGreaterThanOrEqual(catalogFrame.minY, windowFrame.minY - 1)
+        XCTAssertLessThanOrEqual(catalogFrame.maxX, windowFrame.maxX + 1)
+        XCTAssertLessThanOrEqual(catalogFrame.maxY, windowFrame.maxY + 1)
+        let catalogBack = app.buttons["Back"]
+        XCTAssertTrue(catalogBack.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(catalogBack.isHittable, app.debugDescription)
+        let catalogGuide = app.buttons["Codex guide"]
+        let catalogRelicsTab = app.buttons["codex.catalog.tab.relics"]
+        let catalogSealsTab = app.buttons["codex.catalog.tab.seals"]
+        let catalogSupportingRelic = app.descendants(matching: .any)[
+            "codex.catalog.artifact.2"
+        ].firstMatch
+        let catalogPrimaryAction = app.buttons["codex.catalog.primary-action"]
+        let catalogElements = [
+            catalogBack,
+            catalogGuide,
+            catalogRelicsTab,
+            catalogSealsTab,
+            catalogFeaturedRelic,
+            catalogSupportingRelic,
+            catalogPrimaryAction
+        ]
+        for element in catalogElements {
+            XCTAssertTrue(element.waitForExistence(timeout: 5), app.debugDescription)
+            assertHorizontallyContained(element, in: windowFrame)
+        }
         if isPad {
-            let pickerFrame = artifactPicker.frame
-            let windowFrame = app.windows.firstMatch.frame
-            XCTAssertGreaterThanOrEqual(pickerFrame.width, 500)
-            XCTAssertGreaterThanOrEqual(pickerFrame.height, 500)
-            XCTAssertGreaterThanOrEqual(pickerFrame.minX, windowFrame.minX - 1)
-            XCTAssertGreaterThanOrEqual(pickerFrame.minY, windowFrame.minY - 1)
-            XCTAssertLessThanOrEqual(pickerFrame.maxX, windowFrame.maxX + 1)
-            XCTAssertLessThanOrEqual(pickerFrame.maxY, windowFrame.maxY + 1)
-            XCTAssertTrue(
-                app.buttons.matching(identifier: "Close").allElementsBoundByIndex.contains {
-                    $0.isHittable
-                },
-                app.debugDescription
-            )
+            XCTAssertGreaterThanOrEqual(catalogFrame.width, 500)
+            XCTAssertGreaterThanOrEqual(catalogFrame.height, 500)
         }
         try auditAccessibility(in: app)
         if !isPad {
             keepScreenshot(app, named: "iphone-artifact-picker-norse")
         }
-        tapCloseControl(in: app)
+        catalogBack.tap()
 
         let editor = app.textViews.matching(
             NSPredicate(format: "label == %@", "Message to encode")
@@ -276,10 +303,7 @@ final class RuneScribeParityUITests: XCTestCase {
 
         app.buttons["Vault and Progress"].tap()
         XCTAssertTrue(app.staticTexts["VAULT & PROGRESS"].waitForExistence(timeout: 5))
-        let vaultSection = app.buttons["Vault"]
-        app.scrollViews.firstMatch.swipeLeft()
-        XCTAssertTrue(vaultSection.waitForExistence(timeout: 5), app.debugDescription)
-        vaultSection.tap()
+        selectVaultProgressVaultSection(in: app)
         XCTAssertTrue(app.staticTexts["Active Codex Collection"].waitForExistence(timeout: 8))
         let vaultCodex = app.descendants(matching: .any)[
             "theme.vault.codex.norse"
@@ -291,6 +315,14 @@ final class RuneScribeParityUITests: XCTestCase {
         ].firstMatch
         scrollUntilVisible(vaultRelic, in: app)
         XCTAssertTrue(vaultRelic.waitForExistence(timeout: 8), app.debugDescription)
+        let selectedVaultState = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "Norse Codex, Selected"))
+            .firstMatch
+        XCTAssertTrue(
+            selectedVaultState.waitForExistence(timeout: 5),
+            app.debugDescription
+        )
+        XCTAssertEqual(selectedVaultState.value as? String, "Active Codex")
         try auditAccessibility(in: app)
         keepScreenshot(app, named: isPad ? "ipad-vault-norse" : "iphone-vault-norse")
     }
@@ -900,10 +932,7 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(vaultAndProgress.waitForExistence(timeout: 8), app.debugDescription)
         vaultAndProgress.tap()
         XCTAssertTrue(app.staticTexts["VAULT & PROGRESS"].waitForExistence(timeout: 8))
-        let vaultSection = app.buttons["Vault"]
-        app.scrollViews.firstMatch.swipeLeft()
-        XCTAssertTrue(vaultSection.waitForExistence(timeout: 8), app.debugDescription)
-        vaultSection.tap()
+        selectVaultProgressVaultSection(in: app)
         XCTAssertTrue(app.staticTexts["Active Codex Collection"].waitForExistence(timeout: 8))
 
         let vaultCodex = app.descendants(matching: .any)[
@@ -1020,8 +1049,11 @@ final class RuneScribeParityUITests: XCTestCase {
         encodeButton.tap()
 
         let unlockDismiss = app.buttons["Dismiss"]
-        if unlockDismiss.waitForExistence(timeout: 2), unlockDismiss.isHittable {
-            unlockDismiss.tap()
+        if unlockDismiss.waitForExistence(timeout: 2) {
+            XCTAssertTrue(
+                unlockDismiss.waitForNonExistence(timeout: 8),
+                "The reduced-motion unlock reveal did not complete automatically.\n\(app.debugDescription)"
+            )
         }
 
         let workspacePreview = app.descendants(matching: .any)[
@@ -1408,6 +1440,61 @@ final class RuneScribeParityUITests: XCTestCase {
         }
 
         XCTFail("No hittable Close control", file: file, line: line)
+    }
+
+    private func selectVaultProgressVaultSection(
+        in app: XCUIApplication,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        let picker = app.scrollViews["vault-progress.section-picker"]
+        XCTAssertTrue(
+            picker.waitForExistence(timeout: 8),
+            app.debugDescription,
+            file: file,
+            line: line
+        )
+
+        let vault = app.buttons["vault-progress.section.vault"]
+        XCTAssertTrue(vault.waitForExistence(timeout: 5), app.debugDescription, file: file, line: line)
+        for _ in 0..<4 {
+            let pickerFrame = picker.frame
+            let vaultFrame = vault.frame
+            if vaultFrame.width > 0,
+               vaultFrame.height > 0,
+               vaultFrame.minX >= pickerFrame.minX - 1,
+               vaultFrame.maxX <= pickerFrame.maxX + 1 {
+                break
+            }
+            picker.swipeLeft(velocity: .slow)
+        }
+        XCTAssertGreaterThanOrEqual(
+            vault.frame.minX,
+            picker.frame.minX - 1,
+            app.debugDescription,
+            file: file,
+            line: line
+        )
+        XCTAssertLessThanOrEqual(
+            vault.frame.maxX,
+            picker.frame.maxX + 1,
+            app.debugDescription,
+            file: file,
+            line: line
+        )
+        vault.tap()
+
+        let selected = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "value == %@", "Selected"),
+            object: vault
+        )
+        XCTAssertEqual(
+            XCTWaiter.wait(for: [selected], timeout: 5),
+            .completed,
+            app.debugDescription,
+            file: file,
+            line: line
+        )
     }
 
     private func openCipherLibrary(

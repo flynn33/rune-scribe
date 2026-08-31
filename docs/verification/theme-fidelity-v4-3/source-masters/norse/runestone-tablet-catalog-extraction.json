@@ -1,0 +1,204 @@
+{
+  "glyphFreeFieldSource": {
+    "path": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png",
+    "sha256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d",
+    "sourceBounds": [
+      354,
+      297,
+      1095,
+      796
+    ]
+  },
+  "output": {
+    "alpha": {
+      "extrema": [
+        0,
+        255
+      ],
+      "opaquePixelCount": 494836,
+      "partialAlphaPixelCount": 41932,
+      "present": true,
+      "transparentPixelCount": 249664
+    },
+    "mode": "RGBA",
+    "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-catalog-authoring.png",
+    "pixelDimensions": {
+      "height": 1024,
+      "width": 768
+    },
+    "sha256": "e03573c99335fa553b71e2e49a1011d1d10ca1d4270501c6fd4cc88b3f9669b2",
+    "thumbnailTargetDimensions": {
+      "height": 512,
+      "width": 512
+    }
+  },
+  "recordID": "norse.runestone-tablet.catalog-portrait-extraction.v1",
+  "review": {
+    "edgeStatus": "transparent silhouette retains the approved frame, ornament, and shadow",
+    "glyphStatus": "glyph-free; inscription field reserved for production Script rendering",
+    "inspectionScales": [
+      "100%",
+      "200%",
+      "target-device"
+    ]
+  },
+  "schemaVersion": "1.0",
+  "sourceAuthority": {
+    "extractionBounds": {
+      "height": 185,
+      "width": 142,
+      "x": 655,
+      "y": 104
+    },
+    "logicalID": "owner-supplied-norse-codex-board",
+    "pixelDimensions": {
+      "height": 1024,
+      "width": 1536
+    },
+    "sha256": "e9c1f4a00ebbd7666d409193dc39222494e2414b48d9b42bbfacfb14cd087bd6"
+  },
+  "storedOwnerRegion": {
+    "containsCompleteUIScreen": false,
+    "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-catalog-owner-region.png",
+    "pixelDimensions": {
+      "height": 185,
+      "width": 142
+    },
+    "sha256": "57d4d5f00b5cb213a987eeb7ff56cb56d9d3da07e96bf054fce0fbca5c738409"
+  },
+  "transformation": {
+    "aspectFit": true,
+    "crestExclusionBounds": [
+      42,
+      -4,
+      100,
+      54
+    ],
+    "cropping": false,
+    "fieldPolygon": [
+      [
+        31,
+        48
+      ],
+      [
+        36,
+        43
+      ],
+      [
+        51,
+        40
+      ],
+      [
+        91,
+        40
+      ],
+      [
+        106,
+        43
+      ],
+      [
+        111,
+        48
+      ],
+      [
+        112,
+        140
+      ],
+      [
+        106,
+        148
+      ],
+      [
+        99,
+        151
+      ],
+      [
+        42,
+        151
+      ],
+      [
+        35,
+        148
+      ],
+      [
+        29,
+        140
+      ],
+      [
+        29,
+        52
+      ]
+    ],
+    "glyphBearingBounds": [
+      37,
+      48,
+      110,
+      145
+    ],
+    "operations": [
+      "exact owner-region crop",
+      "fixed silhouette mask with full frame and shadow extent",
+      "Lanczos four-times working-scale expansion",
+      "complete glyph-field replacement from accepted blank stone source",
+      "crest exclusion",
+      "Lanczos portrait contain on transparent canvas",
+      "nonessential PNG metadata removal"
+    ],
+    "runtimeGlyphPolicy": "No glyph pixels are baked into this master; production Script rendering supplies glyphs.",
+    "silhouettePolygon": [
+      [
+        31,
+        11
+      ],
+      [
+        19,
+        20
+      ],
+      [
+        9,
+        44
+      ],
+      [
+        9,
+        166
+      ],
+      [
+        37,
+        175
+      ],
+      [
+        116,
+        175
+      ],
+      [
+        125,
+        171
+      ],
+      [
+        134,
+        158
+      ],
+      [
+        133,
+        40
+      ],
+      [
+        127,
+        24
+      ],
+      [
+        114,
+        12
+      ],
+      [
+        91,
+        6
+      ],
+      [
+        69,
+        4
+      ]
+    ],
+    "stoneBrightnessScale": 0.82
+  }
+}

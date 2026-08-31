@@ -7,6 +7,7 @@ import copy
 import importlib.util
 import json
 from pathlib import Path
+import shutil
 import sys
 import tempfile
 import unittest
@@ -19,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import theme_fidelity_execution_v12 as execution  # noqa: E402
+import theme_fidelity_destination_policy as destination_policy  # noqa: E402
 import theme_fidelity_xcui_evidence as xcui  # noqa: E402
 
 
@@ -54,6 +56,14 @@ class ThemeFidelityXCUIEvidenceTests(unittest.TestCase):
         cls.seeds = xcui.load_repository_seeds(ROOT)
         cls.candidates = xcui.load_repository_candidates(ROOT)
         cls.entries = xcui.index_entries(cls.authority)
+        cls.v43_authority, cls.v43_probes = xcui.load_repository_authority(
+            ROOT, xcui.CONTRACT_V43
+        )
+        cls.v43_seeds = xcui.load_repository_seeds(ROOT, xcui.CONTRACT_V43)
+        cls.v43_candidates = xcui.load_repository_candidates(
+            ROOT, xcui.CONTRACT_V43
+        )
+        cls.v43_entries = xcui.index_entries(cls.v43_authority)
 
     def entry(self, identifier: str) -> dict:
         return copy.deepcopy(self.entries[identifier])
@@ -77,11 +87,27 @@ class ThemeFidelityXCUIEvidenceTests(unittest.TestCase):
         root: Path,
         entry: dict,
         include_probes: bool = True,
+        contract_version: str = xcui.CONTRACT_V42,
     ) -> tuple[Path, dict, dict[str, dict]]:
+        if contract_version == xcui.CONTRACT_V43:
+            probes = self.v43_probes
+            seeds = self.v43_seeds
+            candidate_catalog = self.v43_candidates
+            candidate_ids = xcui.capture_candidate_ids_for_entry(
+                entry,
+                probes,
+                candidate_catalog,
+                contract_version,
+            )
+        else:
+            probes = self.probes
+            seeds = self.seeds
+            candidate_catalog = self.candidates
+            candidate_ids = xcui.candidate_ids_for_entry(entry)
         candidates: list[dict] = []
         attachment_records: dict[str, dict] = {}
         source_test = self.source_test(entry)
-        for candidate_id in xcui.candidate_ids_for_entry(entry):
+        for candidate_id in candidate_ids:
             name = xcui.candidate_attachment_name(entry, candidate_id)
             path = root / name
             self.write_png(path)
@@ -124,8 +150,8 @@ class ThemeFidelityXCUIEvidenceTests(unittest.TestCase):
 
         probe_evidence: list[dict] = []
         if include_probes:
-            for probe_id in xcui.xcui_probe_ids_for_entry(entry, self.probes):
-                catalog = self.probes[probe_id]
+            for probe_id in xcui.xcui_probe_ids_for_entry(entry, probes):
+                catalog = probes[probe_id]
                 if probe_id == "probe.norse.vault.locked-element-count":
                     candidate_id = None
                     attachment_name = xcui.query_attachment_name(entry)
@@ -136,7 +162,16 @@ class ThemeFidelityXCUIEvidenceTests(unittest.TestCase):
                     observed = 0
                     element_frame = None
                 else:
-                    candidate_id = xcui.expected_preview_candidate(entry)
+                    preview_ids = [
+                        identifier
+                        for identifier in candidate_ids
+                        if identifier.startswith("theme.artifact-preview.")
+                    ]
+                    if len(preview_ids) != 1:
+                        raise AssertionError(
+                            f"fixture preview candidate differs: {entry['id']}"
+                        )
+                    candidate_id = preview_ids[0]
                     attachment_name = xcui.candidate_attachment_name(
                         entry, candidate_id
                     )
@@ -184,13 +219,14 @@ class ThemeFidelityXCUIEvidenceTests(unittest.TestCase):
 
         structural_witnesses: list[dict] = []
         for specification in xcui.expected_structural_witnesses(
-            entry, self.candidates
+            entry, candidate_catalog
         ):
             match_count = specification["expectedMatchCount"]
             identifier = specification["expectedElementIdentifier"]
+            has_element = identifier is not None
             value = None
             if identifier == xcui.DIAGNOSTIC_STATE:
-                environment = self.seeds[entry["seedID"]]["launchEnvironment"]
+                environment = seeds[entry["seedID"]]["launchEnvironment"]
                 value = json.dumps({
                     "schemaVersion": "1.0",
                     "themeID": entry["themeID"],
@@ -219,7 +255,7 @@ class ThemeFidelityXCUIEvidenceTests(unittest.TestCase):
                     "elementIdentifier": identifier,
                     "coordinateOrigin": "top-left",
                     "coordinateUnits": "points",
-                    "elementFrame": None if match_count == 0 else {
+                    "elementFrame": None if not has_element else {
                         "x": 20.0,
                         "y": 40.0,
                         "width": 200.0,
@@ -231,10 +267,10 @@ class ThemeFidelityXCUIEvidenceTests(unittest.TestCase):
                         "width": 390.0,
                         "height": 844.0,
                     },
-                    "label": None if match_count == 0 else str(identifier),
+                    "label": None if not has_element else str(identifier),
                     "value": value,
-                    "isEnabled": None if match_count == 0 else True,
-                    "isHittable": None if match_count == 0 else True,
+                    "isEnabled": None if not has_element else True,
+                    "isHittable": None if not has_element else True,
                 }
             )
 
@@ -244,7 +280,7 @@ class ThemeFidelityXCUIEvidenceTests(unittest.TestCase):
             "theme": entry["theme"],
             "surface": entry["surface"],
             "destination": entry["destination"],
-            "deterministicSeed": copy.deepcopy(self.seeds[entry["seedID"]]),
+            "deterministicSeed": copy.deepcopy(seeds[entry["seedID"]]),
             "primaryCaptureAttachmentName": xcui.primary_capture_name(entry),
             "captureRecordAttachmentName": xcui.capture_record_name(entry),
             "sourceTest": source_test,
@@ -315,6 +351,413 @@ class ThemeFidelityXCUIEvidenceTests(unittest.TestCase):
                     ),
                     counts,
                 )
+
+    def test_v43_authority_inventory_is_exact_per_bundle_and_globally(self) -> None:
+        inventory = xcui.expected_inventory(
+            self.v43_authority,
+            self.v43_probes,
+            candidates=self.v43_candidates,
+            contract_version=xcui.CONTRACT_V43,
+        )
+        self.assertEqual(
+            (
+                len(inventory.sidecars),
+                len(inventory.candidate_pngs),
+                len(inventory.query_pngs),
+                len(inventory.attachments),
+            ),
+            (325, 341, 4, 670),
+        )
+        expected = {
+            "iphone-xcui": (70, 74, 1, 145),
+            "ipad-xcui": (85, 89, 1, 175),
+            "macos-xcui": (170, 178, 2, 350),
+        }
+        for role, counts in expected.items():
+            with self.subTest(role=role):
+                selected = xcui.expected_inventory_for_role(
+                    self.v43_authority,
+                    self.v43_probes,
+                    role,
+                    candidates=self.v43_candidates,
+                    contract_version=xcui.CONTRACT_V43,
+                )
+                self.assertEqual(
+                    (
+                        len(selected.sidecars),
+                        len(selected.candidate_pngs),
+                        len(selected.query_pngs),
+                        len(selected.attachments),
+                    ),
+                    counts,
+                )
+
+    def test_v43_reduce_motion_adds_exactly_one_probe_only_preview_capture(self) -> None:
+        expected_preview = {
+            "Norse": "theme.artifact-preview.relic.norse.runestone-tablet",
+            "Moonleaf": "theme.artifact-preview.relic.moonleaf.tablet",
+            "Sunspire": "theme.artifact-preview.relic.sunspire.dawnfire-tablet",
+            "Wildwood": "theme.artifact-preview.relic.wildwood.rootsong-tablet",
+            "Gloamthorn": "theme.artifact-preview.relic.gloamthorn.nightthorn-tablet",
+        }
+        entries = [
+            entry
+            for entry in self.v43_entries.values()
+            if entry["surface"] == "reduce-motion"
+        ]
+        self.assertEqual(len(entries), 20)
+        for entry in entries:
+            with self.subTest(entry=entry["id"]):
+                mapped = set(xcui.candidate_ids_for_entry(entry))
+                effective = xcui.capture_candidate_ids_for_entry(
+                    entry,
+                    self.v43_probes,
+                    self.v43_candidates,
+                    xcui.CONTRACT_V43,
+                )
+                added = set(effective) - mapped
+                self.assertEqual(added, {expected_preview[entry["theme"]]})
+                self.assertEqual(
+                    xcui.candidate_attachment_name(entry, next(iter(added))),
+                    (
+                        f"{entry['theme'].lower()}--reduce-motion--"
+                        f"{entry['destination']}--candidate-element--"
+                        f"{expected_preview[entry['theme']]}.png"
+                    ),
+                )
+
+    def test_v43_reduce_motion_rejects_missing_or_ambiguous_preview_candidate(self) -> None:
+        entry = copy.deepcopy(
+            self.v43_entries["Norse|reduce-motion|iphone-portrait"]
+        )
+        preview = "theme.artifact-preview.relic.norse.runestone-tablet"
+        missing = dict(self.v43_candidates)
+        missing.pop(preview)
+        with self.assertRaisesRegex(xcui.XCUIEvidenceError, "not unique"):
+            xcui.capture_candidate_ids_for_entry(
+                entry, self.v43_probes, missing, xcui.CONTRACT_V43
+            )
+
+        ambiguous = dict(self.v43_candidates)
+        ambiguous["theme.artifact-preview.relic.norse.unapproved"] = {
+            "id": "theme.artifact-preview.relic.norse.unapproved"
+        }
+        with self.assertRaisesRegex(xcui.XCUIEvidenceError, "not unique"):
+            xcui.capture_candidate_ids_for_entry(
+                entry, self.v43_probes, ambiguous, xcui.CONTRACT_V43
+            )
+
+    def test_v43_reduce_motion_sidecar_captures_probe_preview_directly(self) -> None:
+        entry = copy.deepcopy(
+            self.v43_entries["Norse|reduce-motion|iphone-portrait"]
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            sidecar_path, _, records = self.write_sidecar(
+                root,
+                entry,
+                contract_version=xcui.CONTRACT_V43,
+            )
+            validated = xcui.validate_sidecar(
+                sidecar_path,
+                entry,
+                self.v43_probes,
+                self.v43_seeds,
+                self.v43_candidates,
+                root,
+                records,
+                contract_version=xcui.CONTRACT_V43,
+            )
+            expected_ids = xcui.capture_candidate_ids_for_entry(
+                entry,
+                self.v43_probes,
+                self.v43_candidates,
+                xcui.CONTRACT_V43,
+            )
+            self.assertEqual(list(validated.candidate_captures), expected_ids)
+            self.assertEqual(
+                xcui.candidate_ids_for_entry(entry), ["screen.workspace"]
+            )
+            preview_probe = validated.probe_evidence[
+                "probe.motion.preview-contained.theme.norse.base"
+            ]
+            self.assertEqual(
+                preview_probe["candidateID"],
+                "theme.artifact-preview.relic.norse.runestone-tablet",
+            )
+
+    def test_v43_extractor_reads_direct_v43_bundles_and_preserves_legacy(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source_roots: dict[str, Path] = {}
+            roles = (
+                "iphone",
+                "ipad",
+                "macos",
+                "iphone-xcui",
+                "ipad-xcui",
+                "macos-xcui",
+            )
+            for role in roles:
+                source_root = root / f"{role}-attachments"
+                source_root.mkdir()
+                source_roots[role] = source_root
+                if role in extractor.XCUI_ROLES:
+                    inventory = xcui.expected_inventory_for_role(
+                        self.v43_authority,
+                        self.v43_probes,
+                        role,
+                        candidates=self.v43_candidates,
+                        contract_version=xcui.CONTRACT_V43,
+                    )
+                    for entry in self.v43_entries.values():
+                        if xcui.sidecar_name(entry) in inventory.sidecars:
+                            self.write_sidecar(
+                                source_root,
+                                copy.deepcopy(entry),
+                                contract_version=xcui.CONTRACT_V43,
+                            )
+                    self.assertEqual(
+                        {path.name for path in source_root.iterdir()},
+                        set(inventory.attachments),
+                    )
+                else:
+                    for name in extractor.expected_attachment_names(role):
+                        path = source_root / name
+                        if name.endswith(".png"):
+                            self.write_png(path)
+                        else:
+                            path.write_text("{}\n", encoding="utf-8")
+
+            result_roots = {
+                role: root / f"{role}.xcresult" for role in roles
+            }
+            for path in result_roots.values():
+                path.mkdir()
+
+            identifiers = {
+                "iphone": "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+                "ipad": (
+                    "com.apple.CoreSimulator.SimDeviceType."
+                    "iPad-Pro-13-inch-M5-12GB"
+                ),
+            }
+            selections: dict[str, dict] = {}
+            models: dict[str, str] = {}
+            device_ids = {"iphone": "iphone-id", "ipad": "ipad-id"}
+            for role in ("iphone", "ipad"):
+                policy = destination_policy.policy_for_device_type(
+                    identifiers[role], role
+                )
+                models[role] = policy["expectedModelName"]
+                selections[role] = destination_policy.build_selection(
+                    role,
+                    {
+                        "udid": device_ids[role],
+                        "name": f"{role} fixture",
+                        "deviceTypeIdentifier": identifiers[role],
+                    },
+                    {
+                        "identifier": identifiers[role],
+                        "name": policy["expectedModelName"],
+                        "pixelDimensions": policy["expectedPixelDimensions"],
+                        "scale": policy["expectedScale"],
+                    },
+                )
+
+            bindings = [
+                extractor.BundleBinding(
+                    role,
+                    result_roots[role],
+                    device_ids.get(role.removesuffix("-xcui")),
+                    models.get(role.removesuffix("-xcui")),
+                    selections.get(role.removesuffix("-xcui")),
+                )
+                for role in roles
+            ]
+            role_by_result = {
+                path.resolve(): role for role, path in result_roots.items()
+            }
+
+            def fake_summary(bundle: Path) -> dict:
+                role = role_by_result[bundle.resolve()]
+                base = role.removesuffix("-xcui")
+                model = models.get(base, "Mac Test")
+                device_id = device_ids.get(base, "mac-id")
+                platform = "macOS" if base == "macos" else "iOS Simulator"
+                return {
+                    "result": "Passed",
+                    "totalTestCount": 1,
+                    "passedTests": 1,
+                    "failedTests": 0,
+                    "skippedTests": 0,
+                    "expectedFailures": 0,
+                    "environmentDescription": "synthetic CLI extraction",
+                    "startTime": 1.0,
+                    "finishTime": 2.0,
+                    "devicesAndConfigurations": [{
+                        "passedTests": 1,
+                        "failedTests": 0,
+                        "skippedTests": 0,
+                        "expectedFailures": 0,
+                        "device": {
+                            "deviceId": device_id,
+                            "deviceName": model,
+                            "modelName": model,
+                            "osVersion": "1.0",
+                            "osBuildNumber": "1A1",
+                            "platform": platform,
+                            "architecture": "arm64",
+                        },
+                        "testPlanConfiguration": {
+                            "configurationName": "Test Scheme Action"
+                        },
+                    }],
+                }
+
+            def fake_export(bundle: Path, exported: Path) -> list[dict]:
+                role = role_by_result[bundle.resolve()]
+                base = role.removesuffix("-xcui")
+                model = models.get(base, "Mac Test")
+                device_id = device_ids.get(base, "mac-id")
+                exported.mkdir(parents=True)
+                attachments = []
+                for path in sorted(source_roots[role].iterdir()):
+                    shutil.copyfile(path, exported / path.name)
+                    attachments.append({
+                        "suggestedHumanReadableName": path.name,
+                        "exportedFileName": path.name,
+                        "configurationName": "Test Scheme Action",
+                        "deviceName": model,
+                        "deviceId": device_id,
+                        "isAssociatedWithFailure": False,
+                        "timestamp": 1.0,
+                    })
+                test_identifier = (
+                    xcui.XCUI_TEST_IDENTIFIER
+                    if role in extractor.XCUI_ROLES
+                    else extractor.EXPECTED_TEST_IDENTIFIER
+                )
+                manifest = [{
+                    "testIdentifier": test_identifier,
+                    "testIdentifierURL": (
+                        extractor.expected_xcui_test_identifier_url(role)
+                        if role in extractor.XCUI_ROLES
+                        else "test://theme-fidelity/hosted"
+                    ),
+                    "attachments": attachments,
+                }]
+                (exported / "manifest.json").write_text(
+                    json.dumps(manifest), encoding="utf-8"
+                )
+                return manifest
+
+            output = root / "captures"
+            with mock.patch.object(
+                extractor, "xcresult_summary", side_effect=fake_summary
+            ), mock.patch.object(
+                extractor, "export_attachments", side_effect=fake_export
+            ), mock.patch.object(
+                extractor.subprocess,
+                "run",
+                return_value=mock.Mock(
+                    returncode=0,
+                    stdout="/usr/bin/xcresulttool\n",
+                    stderr="",
+                ),
+            ):
+                report = extractor.extract(
+                    bindings,
+                    output,
+                    authority_contract=xcui.CONTRACT_V43,
+                    source_sha="a" * 40,
+                )
+
+                for role in extractor.XCUI_ROLES:
+                    source_root = source_roots[role]
+                    for path in source_root.iterdir():
+                        path.unlink()
+                    inventory = xcui.expected_inventory_for_role(
+                        self.authority,
+                        self.probes,
+                        role,
+                    )
+                    for entry in self.entries.values():
+                        if xcui.sidecar_name(entry) in inventory.sidecars:
+                            self.write_sidecar(source_root, copy.deepcopy(entry))
+                legacy_report = extractor.extract(
+                    bindings,
+                    root / "legacy-captures",
+                )
+
+            self.assertEqual(report["schemaVersion"], "1.3")
+            self.assertEqual(report["sourceSHA"], "a" * 40)
+            self.assertEqual(report["authorityContract"], xcui.CONTRACT_V43)
+            self.assertEqual(report["sourceXCUIContract"], xcui.CONTRACT_V43)
+            self.assertEqual(
+                (
+                    legacy_report["schemaVersion"],
+                    legacy_report["candidatePNGCount"],
+                    legacy_report["xcuiQueryPNGCount"],
+                    legacy_report["xcuiSidecarCount"],
+                    legacy_report["attachmentCount"],
+                ),
+                ("1.2", 672, 4, 380, 1900),
+            )
+            self.assertNotIn("authorityContract", legacy_report)
+            self.assertEqual(
+                (
+                    report["pngCount"],
+                    report["auxiliaryPNGCount"],
+                    report["recordCount"],
+                    report["candidatePNGCount"],
+                    report["xcuiQueryPNGCount"],
+                    report["xcuiSidecarCount"],
+                    report["attachmentCount"],
+                ),
+                (400, 44, 400, 341, 4, 325, 1514),
+            )
+            bundle_counts = {
+                item["role"]: (
+                    item["sourceAttachmentCount"],
+                    item["selectedAttachmentCount"],
+                )
+                for item in report["resultBundles"]
+            }
+            self.assertEqual(bundle_counts, {
+                "iphone": (211, 211),
+                "ipad": (211, 211),
+                "macos": (422, 422),
+                "iphone-xcui": (145, 145),
+                "ipad-xcui": (175, 175),
+                "macos-xcui": (350, 350),
+            })
+            direct_path = (
+                output / "norse--reduce-motion--iphone-portrait.xcui.json"
+            )
+            direct = json.loads(direct_path.read_text(encoding="utf-8"))
+            self.assertEqual(
+                [item["candidateID"] for item in direct["candidateElementCaptures"]],
+                [
+                    "screen.workspace",
+                    "theme.artifact-preview.relic.norse.runestone-tablet",
+                ],
+            )
+            direct_metadata = next(
+                item
+                for item in report["attachments"]
+                if item["name"] == direct_path.name
+            )
+            self.assertEqual(direct_metadata["sourceAuthorityContract"], "v4.3")
+            self.assertEqual(direct_metadata["evidenceAuthorityContract"], "v4.3")
+            self.assertEqual(direct_metadata["extractionOperation"], "direct-copy")
+            self.assertFalse(
+                (
+                    output /
+                    "norse--reduce-motion--iphone-portrait--candidate-element--"
+                    "theme.background.theme.norse.base.reduce-motion.png"
+                ).exists()
+            )
 
     def test_candidate_sidecar_rejects_operation_hash_dimension_and_hosted_source_mutations(self) -> None:
         entry = self.entry("Norse|inscription-preview|iphone-portrait")

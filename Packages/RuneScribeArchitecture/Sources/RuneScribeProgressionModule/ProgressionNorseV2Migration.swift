@@ -13,7 +13,7 @@ enum ProgressionNorseV2Migration {
         from: ProgressionCatalogVersion,
         to: ProgressionCatalogVersion
     ) -> Bool {
-        from.rawValue == 1 && to.rawValue == 2
+        from.rawValue == 1 && to.rawValue >= 2
     }
 
     static func isCurrentCatalog(_ catalog: ProgressionCatalog) -> Bool {

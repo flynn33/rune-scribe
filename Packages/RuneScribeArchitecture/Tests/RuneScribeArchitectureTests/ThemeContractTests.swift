@@ -1,9 +1,65 @@
 import CryptoKit
 import Foundation
-import RuneScribeContracts
+@_spi(ThemeFidelityQualification) import RuneScribeContracts
 import XCTest
 
 final class ThemeContractTests: XCTestCase {
+    func testQualificationMasterySeedsUseCodexSpecificTitles() throws {
+        let fixtures: [(
+            themeID: String,
+            codexID: String,
+            relicID: String,
+            sealID: String,
+            titleID: String,
+            title: String
+        )] = [
+            (
+                "theme.gloamthorn.production", "codex.gloamthorn",
+                "relic.gloamthorn.nightthorn-tablet", "seal.gloamthorn.thornmoon",
+                "title.gloamthorn.mastery", "Sovereign of the Gloam"
+            ),
+            (
+                "theme.moonleaf.production", "codex.moonleaf",
+                "relic.moonleaf.tablet", "seal.moonleaf.crescentleaf",
+                "title.moonleaf.mastery", "Moonleaf Master"
+            ),
+            (
+                "theme.sunspire.production", "codex.sunspire",
+                "relic.sunspire.dawnfire-tablet", "seal.sunspire.sunleaf-crest",
+                "title.sunspire.mastery", "Bearer of First Light"
+            ),
+            (
+                "theme.wildwood.production", "codex.wildwood",
+                "relic.wildwood.rootsong-tablet", "seal.wildwood.rooted-tree",
+                "title.wildwood.mastery", "Keeper of the Heartwood"
+            ),
+        ]
+
+        for fixture in fixtures {
+            let environment = [
+                "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",
+                "RUNESCRIBE_QUALIFICATION_RESET_STATE": "1",
+                "RUNESCRIBE_QUALIFICATION_THEME_ID": fixture.themeID,
+                "RUNESCRIBE_QUALIFICATION_CODEX_ID": fixture.codexID,
+                "RUNESCRIBE_QUALIFICATION_DEFAULT_RELIC_ID": fixture.relicID,
+                "RUNESCRIBE_QUALIFICATION_DEFAULT_SEAL_ID": fixture.sealID,
+                "RUNESCRIBE_QUALIFICATION_SURFACE": "mastery",
+                "RUNESCRIBE_QUALIFICATION_APPEARANCE": "standard",
+                "RUNESCRIBE_QUALIFICATION_MESSAGE_PROFILE": "empty",
+                "RUNESCRIBE_QUALIFICATION_DESTINATION": "macos-standard",
+            ]
+            guard case .validated(let launch) = ThemeFidelityQualificationLaunch.resolve(
+                environment: environment,
+                hostAuthorizationOverride: true
+            ) else {
+                XCTFail("Expected mastery seed to validate for \(fixture.codexID)")
+                continue
+            }
+            XCTAssertEqual(launch.masteryTitleID.rawValue, fixture.titleID)
+            XCTAssertEqual(launch.masteryTitlePresentation.displayName, fixture.title)
+        }
+    }
+
     func testCompleteDescriptorRoundTripsAndIsValueSemantic() throws {
         let descriptor = try makeDescriptor()
         let encoded = try JSONEncoder().encode(descriptor)
@@ -424,6 +480,30 @@ final class ThemeContractTests: XCTestCase {
             from: JSONEncoder().encode(catalog)
         )
         XCTAssertEqual(roundTrip, catalog)
+
+        let legacyDescriptor = Data(#"{"codexID":"codex.test"}"#.utf8)
+        let decodedDescriptor = try JSONDecoder().decode(
+            ThemeProviderDescriptorRequestDTO.self,
+            from: legacyDescriptor
+        )
+        XCTAssertEqual(decodedDescriptor.purpose, .selection)
+
+        let receivedSelection = try SharePresentationSelection(
+            codexID: identifier(CodexID.self, "codex.test"),
+            scriptID: identifier(ScriptID.self, "script.test"),
+            relicID: identifier(ArtifactID.self, "relic.test")
+        )
+        let received = ResolveThemeResourceRequestDTO(
+            codexID: identifier(CodexID.self, "codex.test"),
+            resourceID: resourceID("received"),
+            purpose: .receivedPresentation,
+            receivedPresentationSelection: receivedSelection
+        )
+        let receivedRoundTrip = try JSONDecoder().decode(
+            ResolveThemeResourceRequestDTO.self,
+            from: JSONEncoder().encode(received)
+        )
+        XCTAssertEqual(receivedRoundTrip, received)
     }
 
     func testGeometryRejectsOutOfBoundsOrDegenerateValues() {
@@ -437,6 +517,111 @@ final class ThemeContractTests: XCTestCase {
         XCTAssertThrowsError(try ThemeAspectRatio(width: 0, height: 1))
         XCTAssertThrowsError(try ThemePixelSize(width: 4097, height: 1))
         XCTAssertThrowsError(try ThemeScalarRange(minimum: 1, maximum: 0.5))
+    }
+
+    func testReceivedPresentationContractRoundTripsAndRejectsInvalidGeometry() throws {
+        let primary = try ThemeReceivedMedallionDescriptor(
+            resourceID: resourceID("received.primary.medallion"),
+            anchor: ThemeNormalizedPoint(x: 0.834, y: 0.84),
+            scale: 0.205
+        )
+        let share = try ThemeReceivedMedallionDescriptor(
+            resourceID: resourceID("received.share.medallion"),
+            anchor: ThemeNormalizedPoint(x: 0.757, y: 0.84),
+            scale: 0.161
+        )
+        let presentation = try ThemeReceivedPresentationDescriptor(
+            familyDisplayName: localized("codex.test.received-family.name", "Test Family"),
+            primarySenderAvatarResourceID: resourceID("received.primary.sender-avatar"),
+            shareSenderAvatarResourceID: resourceID("received.share.sender-avatar"),
+            shareCodexBadgeResourceID: resourceID("received.share.codex-badge"),
+            primaryMedallion: primary,
+            shareMedallion: share
+        )
+
+        let roundTrip = try JSONDecoder().decode(
+            ThemeReceivedPresentationDescriptor.self,
+            from: JSONEncoder().encode(presentation)
+        )
+        XCTAssertEqual(roundTrip, presentation)
+        requireSendable(roundTrip)
+
+        for invalidScale in [0, -0.01, 1.001, .infinity, .nan] {
+            XCTAssertThrowsError(
+                try ThemeReceivedMedallionDescriptor(
+                    resourceID: resourceID("received.invalid.medallion"),
+                    anchor: ThemeNormalizedPoint(x: 0.5, y: 0.5),
+                    scale: invalidScale
+                )
+            )
+        }
+
+        XCTAssertThrowsError(
+            try JSONDecoder().decode(
+                ThemeReceivedMedallionDescriptor.self,
+                from: Data(
+                    #"{"resourceID":"resource.received.invalid.medallion","anchor":{"x":1.01,"y":0.5},"scale":0.2}"#.utf8
+                )
+            )
+        )
+    }
+
+    func testReceivedPresentationIsBackwardCompatibleAndSemanticallyBound() throws {
+        let legacy = try makeDescriptor()
+        let legacyData = try JSONEncoder().encode(legacy)
+        XCTAssertNil(
+            try JSONDecoder().decode(ThemeDescriptor.self, from: legacyData)
+                .codex.receivedPresentation
+        )
+
+        let descriptor = try decodeDescriptor { object in
+            addReceivedPresentation(to: &object)
+        }
+        let presentation = try XCTUnwrap(descriptor.codex.receivedPresentation)
+        XCTAssertEqual(presentation.familyDisplayName.fallbackValue, "Test Family")
+        XCTAssertEqual(presentation.primaryMedallion.anchor.x, 0.834)
+        XCTAssertEqual(presentation.shareMedallion.scale, 0.161)
+        XCTAssertEqual(
+            try JSONDecoder().decode(
+                ThemeDescriptor.self,
+                from: JSONEncoder().encode(descriptor)
+            ),
+            descriptor
+        )
+
+        XCTAssertThrowsError(
+            try decodeDescriptor { object in
+                addReceivedPresentation(to: &object)
+                var resources = object["resources"] as! [[String: Any]]
+                resources.removeAll {
+                    $0["id"] as? String == "resource.received.share.codex-badge"
+                }
+                object["resources"] = resources
+            }
+        )
+        XCTAssertThrowsError(
+            try decodeDescriptor { object in
+                addReceivedPresentation(to: &object)
+                var resources = object["resources"] as! [[String: Any]]
+                let index = resources.firstIndex {
+                    $0["id"] as? String == "resource.received.primary.medallion"
+                }!
+                resources[index]["role"] = ThemeResourceRoles.sealThumbnail.rawValue
+                object["resources"] = resources
+            }
+        )
+        XCTAssertThrowsError(
+            try decodeDescriptor { object in
+                addReceivedPresentation(to: &object)
+                var codex = object["codex"] as! [String: Any]
+                var received = codex["receivedPresentation"] as! [String: Any]
+                var medallion = received["primaryMedallion"] as! [String: Any]
+                medallion["scale"] = 0
+                received["primaryMedallion"] = medallion
+                codex["receivedPresentation"] = received
+                object["codex"] = codex
+            }
+        )
     }
 
     func testLayoutRejectsSealAnchorCentersInsideGlyphSafeRegion() throws {
@@ -453,6 +638,69 @@ final class ThemeContractTests: XCTestCase {
                 object["codex"] = codex
             }
         )
+    }
+
+    func testCatalogSpecimenGeometryAndArtifactFacetsRoundTrip() throws {
+        let descriptor = try decodeDescriptor { object in
+            var codex = object["codex"] as! [String: Any]
+            var relics = codex["relics"] as! [[String: Any]]
+            var layouts = relics[0]["layouts"] as! [[String: Any]]
+            layouts[0]["catalogSpecimenRows"] = 3
+            layouts[0]["catalogSpecimenColumns"] = 9
+            relics[0]["layouts"] = layouts
+
+            var metadata = relics[0]["metadata"] as! [String: Any]
+            metadata["facets"] = [
+                ["key": "relic.test.facet.moonlit", "fallbackValue": "Moonlit"],
+                ["key": "relic.test.facet.eternal", "fallbackValue": "Eternal"],
+            ]
+            relics[0]["metadata"] = metadata
+            codex["relics"] = relics
+            object["codex"] = codex
+        }
+
+        let relic = try XCTUnwrap(descriptor.codex.relics.first)
+        let layout = try XCTUnwrap(relic.layouts.first)
+        XCTAssertEqual(layout.catalogSpecimenRows, 3)
+        XCTAssertEqual(layout.catalogSpecimenColumns, 9)
+        XCTAssertEqual(relic.metadata.facets?.map(\.fallbackValue), ["Moonlit", "Eternal"])
+
+        let roundTrip = try JSONDecoder().decode(
+            ThemeDescriptor.self,
+            from: JSONEncoder().encode(descriptor)
+        )
+        XCTAssertEqual(roundTrip, descriptor)
+    }
+
+    func testCatalogSpecimenGeometryRequiresAValidPair() throws {
+        for mutation: (inout [String: Any]) -> Void in [
+            { layout in layout["catalogSpecimenRows"] = 2 },
+            { layout in layout["catalogSpecimenColumns"] = 8 },
+            { layout in
+                layout["catalogSpecimenRows"] = 0
+                layout["catalogSpecimenColumns"] = 8
+            },
+            { layout in
+                layout["catalogSpecimenRows"] = 9
+                layout["catalogSpecimenColumns"] = 8
+            },
+            { layout in
+                layout["catalogSpecimenRows"] = 2
+                layout["catalogSpecimenColumns"] = 33
+            },
+        ] {
+            XCTAssertThrowsError(
+                try decodeDescriptor { object in
+                    var codex = object["codex"] as! [String: Any]
+                    var relics = codex["relics"] as! [[String: Any]]
+                    var layouts = relics[0]["layouts"] as! [[String: Any]]
+                    mutation(&layouts[0])
+                    relics[0]["layouts"] = layouts
+                    codex["relics"] = relics
+                    object["codex"] = codex
+                }
+            )
+        }
     }
 
     func testDescriptorRejectsMissingDefaultsFallbacksAndAccessibility() throws {
@@ -601,6 +849,41 @@ final class ThemeContractTests: XCTestCase {
         )
     }
 
+    func testRasterFirstSealOmitsVectorAndUsesColorAsStandardResource() throws {
+        let descriptor = try decodeDescriptor { object in
+            var codex = object["codex"] as! [String: Any]
+            var seals = codex["seals"] as! [[String: Any]]
+            seals[0].removeValue(forKey: "vectorResourceID")
+            seals[0]["colorResourceID"] = "resource.seal.color"
+            codex["seals"] = seals
+            object["codex"] = codex
+
+            var resources = object["resources"] as! [[String: Any]]
+            let index = resources.firstIndex {
+                $0["id"] as? String == "resource.seal.vector"
+            }!
+            resources[index]["id"] = "resource.seal.color"
+            resources[index]["role"] = ThemeResourceRoles.sealColorMaster.rawValue
+            resources[index]["mediaType"] = ThemeResourceMediaType.png.rawValue
+            object["resources"] = resources
+        }
+
+        let seal = try XCTUnwrap(descriptor.codex.seals.first)
+        XCTAssertNil(seal.vectorResourceID)
+        XCTAssertEqual(seal.colorResourceID, resourceID("seal.color"))
+        XCTAssertEqual(seal.standardResourceID, resourceID("seal.color"))
+
+        XCTAssertThrowsError(
+            try decodeDescriptor(descriptor) { object in
+                var codex = object["codex"] as! [String: Any]
+                var seals = codex["seals"] as! [[String: Any]]
+                seals[0].removeValue(forKey: "colorResourceID")
+                codex["seals"] = seals
+                object["codex"] = codex
+            }
+        )
+    }
+
     func testDescriptorFreezesNorseFallbackAndRequiredBaseIdentity() throws {
         XCTAssertThrowsError(
             try decodeDescriptor { object in
@@ -681,6 +964,63 @@ final class ThemeContractTests: XCTestCase {
         mutation(&object)
         let mutated = try JSONSerialization.data(withJSONObject: object, options: [.sortedKeys])
         return try JSONDecoder().decode(ThemeDescriptor.self, from: mutated)
+    }
+
+    private func addReceivedPresentation(to object: inout [String: Any]) {
+        var codex = object["codex"] as! [String: Any]
+        codex["receivedPresentation"] = [
+            "familyDisplayName": [
+                "key": "codex.test.received-family.name",
+                "fallbackValue": "Test Family",
+            ],
+            "primarySenderAvatarResourceID": "resource.received.primary.sender-avatar",
+            "shareSenderAvatarResourceID": "resource.received.share.sender-avatar",
+            "shareCodexBadgeResourceID": "resource.received.share.codex-badge",
+            "primaryMedallion": [
+                "resourceID": "resource.received.primary.medallion",
+                "anchor": ["x": 0.834, "y": 0.84],
+                "scale": 0.205,
+            ],
+            "shareMedallion": [
+                "resourceID": "resource.received.share.medallion",
+                "anchor": ["x": 0.757, "y": 0.84],
+                "scale": 0.161,
+            ],
+        ]
+        object["codex"] = codex
+
+        var resources = object["resources"] as! [[String: Any]]
+        let template = resources.first {
+            $0["id"] as? String == "resource.relic.thumbnail"
+        }!
+        for (id, role) in [
+            (
+                "resource.received.primary.sender-avatar",
+                ThemeResourceRoles.receivedPrimarySenderAvatar.rawValue
+            ),
+            (
+                "resource.received.share.sender-avatar",
+                ThemeResourceRoles.receivedShareSenderAvatar.rawValue
+            ),
+            (
+                "resource.received.share.codex-badge",
+                ThemeResourceRoles.receivedShareCodexBadge.rawValue
+            ),
+            (
+                "resource.received.primary.medallion",
+                ThemeResourceRoles.receivedPrimaryMedallion.rawValue
+            ),
+            (
+                "resource.received.share.medallion",
+                ThemeResourceRoles.receivedShareMedallion.rawValue
+            ),
+        ] {
+            var receivedResource = template
+            receivedResource["id"] = id
+            receivedResource["role"] = role
+            resources.append(receivedResource)
+        }
+        object["resources"] = resources
     }
 
     private func makeDescriptor(

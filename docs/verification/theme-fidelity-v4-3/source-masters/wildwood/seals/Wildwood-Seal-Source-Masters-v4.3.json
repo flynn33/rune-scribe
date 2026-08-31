@@ -1,0 +1,161 @@
+{
+  "schemaVersion": "1.0",
+  "themeID": "theme.wildwood.production",
+  "sourceClass": "reference-grounded-production-master",
+  "ownerReview": "PENDING",
+  "runtimeAuthority": false,
+  "repositoryRoot": ".",
+  "referencePackageIdentity": "Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+  "referenceRoot": ".",
+  "semanticContract": {
+    "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeWildwoodModule/WildwoodThemeDescriptor.swift",
+    "pathBase": "repositoryRoot",
+    "use": "stable Seal identity, description, and accessibility semantics only"
+  },
+  "commonReferences": [
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-008-1122x1402.png",
+      "pathBase": "referenceRoot",
+      "role": "controlling Wildwood material, palette, botanical craftsmanship, relief, and finish",
+      "sha256": "d3e77551f5698ec82bc492001a3e478bcda81b76f721e171f2417dea1e1952b5",
+      "use": "style-grounding-only"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-006-941x1672.png",
+      "pathBase": "referenceRoot",
+      "role": "controlling Wildwood catalog for object-family density, material hierarchy, and target finish",
+      "sha256": "cb56d7415fdebae60d2bef7141001d7de3539732e16d1df71db5765a4810a792",
+      "use": "style-grounding-only-complete-reference-never-copied"
+    }
+  ],
+  "assets": [
+    {
+      "sealID": "seal.wildwood.acorn-knot",
+      "displayName": "Acorn Knot",
+      "semanticIdentity": "One acorn wrapped in a three-loop root knot.",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/wildwood-acorn-knot-production-master-v4.3.png",
+      "prompt": "Use case: stylized-concept\nAsset type: Rune Scribe Wildwood production Seal color master\nPrimary request: Create one independent Acorn Knot medallion faithful to the approved Wildwood craftsmanship. It must unmistakably depict one mature acorn wrapped by one continuous root cord forming exactly three broad interlaced loops.\nInput images: Image 1 is the controlling Wildwood style board and Image 2 is the controlling Wildwood catalog. Use both only for material, palette, botanical craftsmanship, relief, and finish. Do not copy, crop, trace, reconstruct, or reproduce any screenshot composition or object from them.\nScene/backdrop: genuinely transparent exterior around the isolated emblem; no scene, panel, card, or rectangular backing.\nSubject: one centered circular dark elderbark and deep forest-green enamel medallion with an aged bronze-silver rim; a bold dimensional acorn at center; exactly three readable root-knot loops surrounding and supporting it; restrained moss and tiny leaf details within the emblem.\nStyle/medium: high-fidelity dimensional fantasy metalwork and hand-carved wood relief, grounded natural weight, aged bronze, dark walnut bark, restrained green enamel and moss, consistent with the approved Wildwood object family.\nComposition/framing: frontal orthographic, centered, isolated 1:1 canvas, generous transparent margin, full uncropped rim. Keep the acorn and three-loop knot bold and readable at 48-64 pixels.\nLighting/mood: filtered forest light, premium, ancient, quiet, no harsh bloom.\nConstraints: actual alpha transparency outside the emblem; exactly one independent emblem; exactly one acorn; exactly three broad root-knot loops; crisp edges, full rim, internal relief and shadow.\nAvoid: all text, letters, numbers, glyphs, runes, writing, sigils, logos, UI, buttons, cards, frames, screenshots, scenery, multiple emblems, animals, insects, flat line-icon styling, neon outlines, watermark.",
+      "sourceOutputSHA256": "a3beee6a9c5fdb815f54969b318b19aadd861e83f0f746a6ddd9516dc922dedd",
+      "sourceOutputDimensions": [1254, 1254],
+      "dimensions": [1024, 1024],
+      "sha256": "27e2a8a92dc286754cc5d8a51fbab471add997a38c2ffc6e5f1ce20cc2301136",
+      "alpha": {
+        "present": true,
+        "exteriorTransparent": true,
+        "nonzeroBoundingBox": [61, 46, 901, 911],
+        "transparentPixelCount": 409286,
+        "partialAlphaPixelCount": 42322,
+        "opaquePixelCount": 596968
+      },
+      "postprocess": {
+        "method": "deterministic near-white exterior key followed by uniform Lanczos downscale",
+        "recipe": "ffmpeg colorkey=0xffffff:0.075:0.035,scale=1024:1024:flags=lanczos,format=rgba",
+        "purpose": "remove the generated checker field while preserving the complete rendered emblem and true exterior alpha"
+      },
+      "review": {
+        "selection": "ACCEPTED_FOR_IMPLEMENTATION_INPUT",
+        "targetScale": "PASS_AT_64_PX",
+        "identity": "PASS",
+        "alphaEdges": "PASS",
+        "prohibitedContent": "ABSENT",
+        "notes": "One centered acorn and three broad interlaced root loops remain distinct at compact scale; the complete rim, relief, moss, and natural material hierarchy are preserved. Owner review remains pending."
+      }
+    },
+    {
+      "sealID": "seal.wildwood.fern-spiral",
+      "displayName": "Fern Spiral",
+      "semanticIdentity": "One curled fern frond forming a spiral.",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/wildwood-fern-spiral-production-master-v4.3.png",
+      "prompt": "Use case: stylized-concept\nAsset type: Rune Scribe Wildwood production Seal color master\nPrimary request: Create one independent Fern Spiral medallion faithful to the approved Wildwood craftsmanship. It must unmistakably depict one curled fern frond whose stem and leaflets form a single clear spiral.\nInput images: Image 1 is the controlling Wildwood style board and Image 2 is the controlling Wildwood catalog. Use both only for material, palette, botanical craftsmanship, relief, and finish. Do not copy, crop, trace, reconstruct, or reproduce any screenshot composition or object from them.\nScene/backdrop: genuinely transparent exterior around the isolated emblem; no scene, panel, card, or rectangular backing.\nSubject: one centered circular dark elderbark and deep forest-green enamel medallion with an aged bronze-silver rim; one dimensional fern fiddlehead curling inward as one strong clockwise spiral; broad readable leaflets; restrained moss and tiny root accents within the emblem.\nStyle/medium: high-fidelity dimensional fantasy metalwork and hand-carved botanical relief, grounded natural weight, aged bronze, dark walnut bark, restrained green enamel and moss, consistent with the approved Wildwood object family.\nComposition/framing: frontal orthographic, centered, isolated 1:1 canvas, generous transparent margin, full uncropped rim. Keep the fern silhouette and single spiral bold and readable at 48-64 pixels.\nLighting/mood: filtered forest light, premium, ancient, quietly unfurling, no harsh bloom.\nConstraints: actual alpha transparency outside the emblem; exactly one independent emblem; exactly one fern frond forming one clear spiral; crisp edges, full rim, internal relief and shadow.\nAvoid: all text, letters, numbers, glyphs, runes, writing, sigils, logos, UI, buttons, cards, frames, screenshots, scenery, flowers, animals, insects, multiple fronds, multiple emblems, flat line-icon styling, neon outlines, watermark.",
+      "sourceOutputSHA256": "8e6aa34af18ba7578c2468c05c57814113c6654ef18c7e1f59025cc020163b7b",
+      "sourceOutputDimensions": [1254, 1254],
+      "dimensions": [1024, 1024],
+      "sha256": "cffc7bf657fb96f4c0c71e338ec7f40ec4a068c62fee3a7ba2d37ebea717a3ec",
+      "alpha": {
+        "present": true,
+        "exteriorTransparent": true,
+        "nonzeroBoundingBox": [67, 43, 879, 910],
+        "transparentPixelCount": 444245,
+        "partialAlphaPixelCount": 39051,
+        "opaquePixelCount": 565280
+      },
+      "postprocess": {
+        "method": "deterministic near-white exterior key followed by uniform Lanczos downscale",
+        "recipe": "ffmpeg colorkey=0xffffff:0.075:0.035,scale=1024:1024:flags=lanczos,format=rgba",
+        "purpose": "remove the generated checker field while preserving the complete rendered emblem and true exterior alpha"
+      },
+      "review": {
+        "selection": "ACCEPTED_FOR_IMPLEMENTATION_INPUT",
+        "targetScale": "PASS_AT_64_PX",
+        "identity": "PASS",
+        "alphaEdges": "PASS",
+        "prohibitedContent": "ABSENT",
+        "notes": "The single large fern stem, curled fiddlehead, and broad leaflets preserve a clear spiral identity at compact scale; the complete rim and Wildwood material finish remain legible. Owner review remains pending."
+      }
+    },
+    {
+      "sealID": "seal.wildwood.wild-fox",
+      "displayName": "Wild Fox",
+      "semanticIdentity": "One forward-facing fox head with a leaf-shaped mark on its forehead.",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/wildwood-wild-fox-production-master-v4.3.png",
+      "prompt": "Use case: stylized-concept\nAsset type: Rune Scribe Wildwood production Seal color master\nPrimary request: Create one independent Wild Fox medallion faithful to the approved Wildwood craftsmanship. It must unmistakably depict one alert fox head facing forward with one simple leaf-shaped botanical mark centered on its forehead.\nInput images: Image 1 is the controlling Wildwood style board and Image 2 is the controlling Wildwood catalog. Use both only for material, palette, botanical craftsmanship, relief, and finish. Do not copy, crop, trace, reconstruct, or reproduce any screenshot composition or object from them.\nScene/backdrop: genuinely transparent exterior around the isolated emblem; no scene, panel, card, or rectangular backing.\nSubject: one centered circular dark elderbark and deep forest-green enamel medallion with an aged bronze-silver rim; one symmetrical forward-facing fox head in dimensional warm bronze and carved wood relief, alert ears and readable muzzle; exactly one small natural leaf shape on the forehead; restrained moss and root accents within the emblem.\nStyle/medium: high-fidelity dimensional fantasy metalwork and hand-carved wood relief, grounded natural weight, aged bronze, dark walnut bark, restrained green enamel and moss, consistent with the approved Wildwood object family.\nComposition/framing: frontal orthographic, centered, isolated 1:1 canvas, generous transparent margin, full uncropped rim. Keep the ears, face, muzzle, forehead leaf, and rim bold and readable at 48-64 pixels.\nLighting/mood: filtered forest light, clever and watchful, premium, ancient, no harsh bloom.\nConstraints: actual alpha transparency outside the emblem; exactly one independent emblem; exactly one fox head; exactly one unmistakably botanical leaf-shaped forehead mark, not a written symbol; crisp edges, full rim, internal relief and shadow.\nAvoid: all text, letters, numbers, glyphs, runes, writing, sigils, logos, UI, buttons, cards, frames, screenshots, scenery, full fox body, extra animals, multiple heads, multiple emblems, flat line-icon styling, neon outlines, watermark.",
+      "sourceOutputSHA256": "ea8b796279abab845b39acc89cfb8c2f1b5e6c05148bb39e2d1038c8cd737c2e",
+      "sourceOutputDimensions": [1254, 1254],
+      "dimensions": [1024, 1024],
+      "sha256": "f7978d0a2fcfff65f9a23ce799fef2e66f93c8003e343e76523b6ca3440c4c32",
+      "alpha": {
+        "present": true,
+        "exteriorTransparent": true,
+        "nonzeroBoundingBox": [10, 4, 1002, 1010],
+        "transparentPixelCount": 298175,
+        "partialAlphaPixelCount": 25027,
+        "opaquePixelCount": 725374
+      },
+      "postprocess": {
+        "method": "deterministic near-white exterior key followed by uniform Lanczos downscale",
+        "recipe": "ffmpeg colorkey=0xffffff:0.075:0.035,scale=1024:1024:flags=lanczos,format=rgba",
+        "purpose": "remove the generated checker field while preserving the complete rendered emblem and true exterior alpha"
+      },
+      "review": {
+        "selection": "ACCEPTED_FOR_IMPLEMENTATION_INPUT",
+        "targetScale": "PASS_AT_64_PX",
+        "identity": "PASS",
+        "alphaEdges": "PASS",
+        "prohibitedContent": "ABSENT",
+        "notes": "The alert ears, centered eyes and muzzle, and single natural leaf-shaped forehead detail remain unambiguous at compact scale; no written mark is present. Owner review remains pending."
+      }
+    },
+    {
+      "sealID": "seal.wildwood.echo-seed",
+      "displayName": "Echo Seed",
+      "semanticIdentity": "One seed with one emerging root inside two circular echo rings.",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/wildwood-echo-seed-production-master-v4.3.png",
+      "prompt": "Use case: stylized-concept\nAsset type: Rune Scribe Wildwood production Seal color master\nPrimary request: Create one independent Echo Seed medallion faithful to the approved Wildwood craftsmanship. It must unmistakably depict one seed with exactly one emerging root enclosed by exactly two complete circular echo rings.\nInput images: Image 1 is the controlling Wildwood style board and Image 2 is the controlling Wildwood catalog. Use both only for material, palette, botanical craftsmanship, relief, and finish. Do not copy, crop, trace, reconstruct, or reproduce any screenshot composition or object from them.\nScene/backdrop: genuinely transparent exterior around the isolated emblem; no scene, panel, card, or rectangular backing.\nSubject: one centered circular dark elderbark and deep forest-green enamel medallion with an aged bronze-silver rim; one bold dimensional seed at center with exactly one short root descending from it; exactly two complete concentric circular echo rings clearly separated around the seed; restrained moss and tiny leaf details within the emblem.\nStyle/medium: high-fidelity dimensional fantasy metalwork and hand-carved botanical relief, grounded natural weight, aged bronze, dark walnut bark, restrained green enamel and moss, consistent with the approved Wildwood object family.\nComposition/framing: frontal orthographic, centered, isolated 1:1 canvas, generous transparent margin, full uncropped rim. Keep seed, one root, two rings, and outer rim bold and readable at 48-64 pixels.\nLighting/mood: filtered forest light, carried memory and patient growth, premium, ancient, no harsh bloom.\nConstraints: actual alpha transparency outside the emblem; exactly one independent emblem; exactly one seed; exactly one emerging root; exactly two complete circular echo rings; crisp edges, full rim, internal relief and shadow.\nAvoid: all text, letters, numbers, glyphs, runes, writing, sigils, logos, UI, buttons, cards, frames, screenshots, scenery, trees, animals, insects, flowers, extra seeds, extra roots, extra rings, multiple emblems, flat line-icon styling, neon outlines, watermark.",
+      "sourceOutputSHA256": "9ff051e1eed2f086cfe9e48e3306333012aa43782fa4e62f8d8db4a745841dea",
+      "sourceOutputDimensions": [1254, 1254],
+      "dimensions": [1024, 1024],
+      "sha256": "0315bf69e15472ad106fd0ea66da3795828beea99dc4f0df161f85c5db166580",
+      "alpha": {
+        "present": true,
+        "exteriorTransparent": true,
+        "nonzeroBoundingBox": [33, 11, 954, 971],
+        "transparentPixelCount": 332726,
+        "partialAlphaPixelCount": 31489,
+        "opaquePixelCount": 684361
+      },
+      "postprocess": {
+        "method": "deterministic near-white exterior key followed by uniform Lanczos downscale",
+        "recipe": "ffmpeg colorkey=0xffffff:0.075:0.035,scale=1024:1024:flags=lanczos,format=rgba",
+        "purpose": "remove the generated checker field while preserving the complete rendered emblem and true exterior alpha"
+      },
+      "review": {
+        "selection": "ACCEPTED_FOR_IMPLEMENTATION_INPUT",
+        "targetScale": "PASS_AT_64_PX",
+        "identity": "PASS",
+        "alphaEdges": "PASS",
+        "prohibitedContent": "ABSENT",
+        "notes": "One central seed, one descending root, and two separated concentric echo rings remain readable at compact scale; the outer medallion rim is visually distinct from the two semantic rings. Owner review remains pending."
+      }
+    }
+  ]
+}

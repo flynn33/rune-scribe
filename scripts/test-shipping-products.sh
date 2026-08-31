@@ -361,7 +361,7 @@ RUBY
 }
 
 mutate_theme_budget() {
-  mkfile 65m "$(macos_resources "$1")/RuneScribeArchitecture_RuneScribeThemeMoonleafModule.bundle/oversize.dat"
+  mkfile 113m "$(macos_resources "$1")/RuneScribeArchitecture_RuneScribeThemeMoonleafModule.bundle/oversize.dat"
 }
 
 mutate_norse_required() {
@@ -444,7 +444,7 @@ assert_rejected provider-manifest-identity \
 assert_rejected duplicate-provider-resource-id \
   "macOS moonleaf output resource IDs are duplicated" mutate_duplicate_resource_id
 assert_rejected theme-module-budget \
-  "macOS moonleaf resource bundle exceeds the 64 MiB budget" mutate_theme_budget
+  "macOS moonleaf resource bundle exceeds the 112 MiB budget" mutate_theme_budget
 assert_rejected norse-required-base \
   "macOS Norse Theme criticality differs" mutate_norse_required
 assert_rejected placeholder-content \

@@ -5,10 +5,47 @@ import RuneScribeUIRuntime
 struct PreparedShareBuilderArtifact {
     let artifact: ShareArtifactDTO
     let transfer: OpaqueShareTransfer
+    let themeRevision: ShareBuilderThemeAuthorityRevision
+    let colorMode: ShareArtifactColorMode
+    let systemReduceMotion: Bool
 }
 
 @MainActor
 extension RuneScribeUISession {
+    func shareBuilderThemeAuthorityRevision(
+        for catalog: ShareBuilderCatalog
+    ) throws -> ShareBuilderThemeAuthorityRevision {
+        guard let themeSnapshot else {
+            throw ShareArtifactRenderError.unavailableSelection
+        }
+        guard let provider = themeSnapshot.providers.first(where: {
+            $0.codexID == catalog.descriptor.codex.id
+        }),
+            provider.moduleID == catalog.provider.moduleID,
+            provider.state == .available,
+            provider.isOwned,
+            provider.isSelectable
+        else { throw ShareArtifactRenderError.unavailableSelection }
+        let providerContentRevision: UInt64
+        if themeSnapshot.effectiveCodexID == catalog.descriptor.codex.id {
+            guard themeSnapshot.effectiveTheme == catalog.descriptor,
+                  let activeThemeVisualPresentation,
+                  activeThemeVisualPresentation.plan.themeID == catalog.descriptor.id,
+                  activeThemeVisualPresentation.plan.codexID
+                    == catalog.descriptor.codex.id,
+                  activeThemeVisualPresentation.plan.revision
+                    == activeThemeVisualPresentation.revision
+            else { throw ShareArtifactRenderError.unavailableSelection }
+            providerContentRevision = activeThemeVisualPresentation.revision
+        } else {
+            providerContentRevision = themeSnapshot.revision
+        }
+        return ShareBuilderThemeAuthorityRevision(
+            coordinatorRevision: themeSnapshot.revision,
+            providerContentRevision: providerContentRevision
+        )
+    }
+
     func loadShareBuilderCatalog(
         codexID: CodexID
     ) async throws -> ShareBuilderCatalog {
@@ -24,6 +61,10 @@ extension RuneScribeUISession {
             descriptor = snapshot.effectiveTheme
         } else {
             descriptor = try await themeCoordinatorClientHandle.providerDescriptor(for: codexID)
+        }
+        try Task.checkCancellation()
+        guard themeSnapshot?.revision == snapshot.revision else {
+            throw ShareArtifactRenderError.unavailableSelection
         }
         return try makeShareBuilderCatalog(
             descriptor: descriptor,
@@ -73,19 +114,31 @@ extension RuneScribeUISession {
         catalog: ShareBuilderCatalog,
         colorMode: ShareArtifactColorMode = .standard,
         systemReduceMotion: Bool = false
-    ) async throws -> OutboundSharePresentationDTO {
-        let selection = try catalog.validatedSelection()
-        let operationKind: String = switch source.purpose {
-        case .encryptedMessage: "message"
-        case .cipherInvitation: "cipher"
+    ) async throws -> RenderedShareBuilderPreview {
+        let themeRevision = try shareBuilderThemeAuthorityRevision(for: catalog)
+        guard let themeCapturedAt = themeSnapshot?.capturedAt else {
+            throw ShareArtifactRenderError.unavailableSelection
         }
-        return try await makeOutboundSharePresentation(
+        let selection = try catalog.validatedSelection()
+        let operationID: RuntimeOperationID
+        switch source.purpose {
+        case .encryptedMessage:
+            guard let messageHandle = source.messageHandle else {
+                throw OpaqueSharePresentationError.unavailable
+            }
+            operationID = RuntimeOperationID(
+                rawValue: "share.render.message.\(messageHandle.rawValue.uuidString.lowercased())"
+            )
+        case .cipherInvitation:
+            operationID = RuntimeOperationID(
+                rawValue: "share.render.cipher.\(source.cipherID.uuidString.lowercased())"
+            )
+        }
+        let presentation = try await makeOutboundSharePresentation(
             inscription: source.inscription,
             accessibilityLabel: "Rune Scribe share preview for \(source.displayName)",
-            operationID: RuntimeOperationID(
-                rawValue: "share.preview.\(operationKind).\(source.cipherID.uuidString.lowercased())"
-            ),
-            capturedAt: snapshot?.capturedAt ?? Date(),
+            operationID: operationID,
+            capturedAt: snapshot?.capturedAt ?? themeCapturedAt,
             cipherID: source.cipherID,
             selection: selection,
             descriptor: catalog.descriptor,
@@ -93,14 +146,37 @@ extension RuneScribeUISession {
             colorMode: colorMode,
             systemReduceMotion: systemReduceMotion
         )
+        guard (try? shareBuilderThemeAuthorityRevision(for: catalog))
+                == themeRevision
+        else {
+            throw ShareArtifactRenderError.unavailableSelection
+        }
+        return try RenderedShareBuilderPreview(
+            source: source,
+            catalog: catalog,
+            themeRevision: themeRevision,
+            colorMode: colorMode,
+            systemReduceMotion: systemReduceMotion,
+            presentation: presentation
+        )
     }
 
     func prepareShareBuilderArtifact(
         source: ShareBuilderSource,
         catalog: ShareBuilderCatalog,
+        renderedPreview: RenderedShareBuilderPreview,
         colorMode: ShareArtifactColorMode = .standard,
         systemReduceMotion: Bool = false
     ) async throws -> PreparedShareBuilderArtifact {
+        guard let themeRevision = try? shareBuilderThemeAuthorityRevision(for: catalog),
+              renderedPreview.matches(
+                  source: source,
+                  catalog: catalog,
+                  themeRevision: themeRevision,
+                  colorMode: colorMode,
+                  systemReduceMotion: systemReduceMotion
+              )
+        else { throw ShareArtifactRenderError.unavailableSelection }
         let selection = try catalog.validatedSelection()
         let artifact: ShareArtifactDTO
         switch source.purpose {
@@ -117,7 +193,8 @@ extension RuneScribeUISession {
                 descriptor: catalog.descriptor,
                 effects: catalog.draft.effects,
                 colorMode: colorMode,
-                systemReduceMotion: systemReduceMotion
+                systemReduceMotion: systemReduceMotion,
+                renderedPresentation: renderedPreview.presentation
             )
         case .cipherInvitation:
             artifact = try await prepareCipherShare(
@@ -128,8 +205,23 @@ extension RuneScribeUISession {
                 descriptor: catalog.descriptor,
                 effects: catalog.draft.effects,
                 colorMode: colorMode,
-                systemReduceMotion: systemReduceMotion
+                systemReduceMotion: systemReduceMotion,
+                renderedPresentation: renderedPreview.presentation
             )
+        }
+        guard let currentThemeRevision = try? shareBuilderThemeAuthorityRevision(
+                  for: catalog
+              ),
+              renderedPreview.matches(
+                  source: source,
+                  catalog: catalog,
+                  themeRevision: currentThemeRevision,
+                  colorMode: colorMode,
+                  systemReduceMotion: systemReduceMotion
+              )
+        else {
+            await releaseShareArtifact(id: artifact.id)
+            throw ShareArtifactRenderError.unavailableSelection
         }
         var transfer: OpaqueShareTransfer?
         do {
@@ -147,7 +239,24 @@ extension RuneScribeUISession {
             guard let transfer else {
                 throw OpaqueSharePresentationError.unavailable
             }
-            return PreparedShareBuilderArtifact(artifact: artifact, transfer: transfer)
+            guard let currentThemeRevision = try? shareBuilderThemeAuthorityRevision(
+                      for: catalog
+                  ),
+                  renderedPreview.matches(
+                      source: source,
+                      catalog: catalog,
+                      themeRevision: currentThemeRevision,
+                      colorMode: colorMode,
+                      systemReduceMotion: systemReduceMotion
+                  )
+            else { throw ShareArtifactRenderError.unavailableSelection }
+            return PreparedShareBuilderArtifact(
+                artifact: artifact,
+                transfer: transfer,
+                themeRevision: currentThemeRevision,
+                colorMode: colorMode,
+                systemReduceMotion: systemReduceMotion
+            )
         } catch {
             await transfer?.close()
             await releaseShareArtifact(id: artifact.id)

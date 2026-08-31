@@ -4,6 +4,13 @@ import RuneScribeContracts
 import RuneScribeRuntimeCore
 import RuneScribeUIRuntime
 
+private struct ThemeCodexPreviewReloadKey: Equatable, Sendable {
+    let adoptionGeneration: UInt64
+    let snapshotRevision: UInt64
+    let codexID: CodexID
+    let contentRevision: UInt64
+}
+
 @MainActor
 final class RuneScribeUISession: ObservableObject {
     @Published private(set) var snapshot: RuneScribeApplicationSnapshot?
@@ -17,6 +24,8 @@ final class RuneScribeUISession: ObservableObject {
     @Published private(set) var themeSnapshot: ThemeCoordinatorSnapshotDTO?
     @Published private(set) var themeScriptPresentation = ThemeScriptPresentation.baseFallback
     @Published private(set) var activeThemeVisualPresentation: ActiveThemeVisualPresentation?
+    @Published private(set) var receivedCipherPresentationLoadState:
+        ReceivedCipherPresentationLoadState = .idle
     @Published private(set) var themeCodexCardImageReferences:
         [CodexID: RuntimeThemeImageReference] = [:]
     var themeUnlockAnimationDataByTier: [String: Data] = [:]
@@ -59,7 +68,9 @@ final class RuneScribeUISession: ObservableObject {
     private var themeResourceTask: Task<Void, Never>?
     private var themeCatalogResourceTask: Task<Void, Never>?
     private var themeCodexPreviewTask: Task<Void, Never>?
+    private var themeCodexPreviewReloadKey: ThemeCodexPreviewReloadKey?
     private var themeAdoptionGeneration: UInt64 = 0
+    var receivedCipherPresentationGeneration: UInt64 = 0
     private var latestThemeCoordinatorRevision: UInt64?
     var settingsTask: Task<Void, Never>?
     private var cloudGameCenterStatusTask: Task<Void, Never>?
@@ -91,6 +102,12 @@ final class RuneScribeUISession: ObservableObject {
         self.resourcePresentation = resourcePresentation
         appVersion = productMetadata.version
         buildNumber = productMetadata.buildNumber
+    }
+
+    func setReceivedCipherPresentationLoadState(
+        _ state: ReceivedCipherPresentationLoadState
+    ) {
+        receivedCipherPresentationLoadState = state
     }
 
     deinit {
@@ -183,6 +200,7 @@ final class RuneScribeUISession: ObservableObject {
         let snapshot = try await themeCoordinatorClientHandle.snapshot()
         latestThemeCoordinatorRevision = snapshot.revision
         themeAdoptionGeneration &+= 1
+        receivedCipherPresentationGeneration &+= 1
         try await resolveAndCommitTheme(
             snapshot,
             adoptionGeneration: themeAdoptionGeneration
@@ -261,7 +279,9 @@ final class RuneScribeUISession: ObservableObject {
         self.themeResourceTask = nil
         self.themeCatalogResourceTask = nil
         self.themeCodexPreviewTask = nil
+        self.themeCodexPreviewReloadKey = nil
         themeAdoptionGeneration &+= 1
+        receivedCipherPresentationGeneration &+= 1
         latestThemeCoordinatorRevision = nil
         self.settingsTask = nil
         self.cloudGameCenterStatusTask = nil
@@ -272,6 +292,7 @@ final class RuneScribeUISession: ObservableObject {
         themeSnapshot = nil
         themeScriptPresentation = .baseFallback
         activeThemeVisualPresentation = nil
+        receivedCipherPresentationLoadState = .idle
         themeCodexCardImageReferences = [:]
         themeUnlockAnimationDataByTier = [:]
         themeSelectionError = nil
@@ -471,7 +492,7 @@ final class RuneScribeUISession: ObservableObject {
 
     var pendingMessage: PendingMessageViewState? {
         snapshot?.messageState.pendingMessage.map {
-            PendingMessageViewState($0, themeSnapshot: themeSnapshot)
+            receivedCipherPendingMessage($0)
         }
     }
 
@@ -673,19 +694,10 @@ final class RuneScribeUISession: ObservableObject {
             guard themeAdoptionGeneration == adoptionGeneration else {
                 throw CancellationError()
             }
-            resourcePresentation.clearThemeBackground()
-            RuneThemePaletteInterpreter.reset()
-            RuneThemeHeadingInterpreter.reset()
-            themeScriptPresentation = .baseFallback
-            themeUnlockAnimationDataByTier = [:]
-            themeSnapshot = snapshot
-            activeThemeVisualPresentation = nil
-            themeCodexCardImageReferences = [:]
-            selectedThemeRelicID = nil
-            selectedThemeSealID = nil
-            selectedThemeFrameID = nil
-            themeSelectionError =
-                "Norse appearance resources are unavailable. Rune Scribe is using its emergency system presentation; message data and decode remain available."
+            adoptKnownThemeFallback(
+                snapshot,
+                message: "Norse appearance resources are unavailable. Rune Scribe is using its emergency system presentation; message data and decode remain available."
+            )
             return
         }
         guard let themeCoordinatorClientHandle,
@@ -755,6 +767,8 @@ final class RuneScribeUISession: ObservableObject {
         let parameters = plan.backgroundRendererParametersResourceID.flatMap {
             resolved[$0]?.data
         }
+        let resourceGeneration = try resourcePresentation
+            .beginThemeResourceGeneration()
 
         var imageReferences: [ThemeResourceID: RuntimeThemeImageReference] = [:]
         var imageResourceIDs = Set(eagerImagePlans.keys)
@@ -775,7 +789,8 @@ final class RuneScribeUISession: ObservableObject {
                     resolvedResource: resource,
                     expectedReference: expected,
                     expectedCodexID: plan.codexID,
-                    contentRevision: adoptionGeneration
+                    contentRevision: adoptionGeneration,
+                    generation: resourceGeneration
                 )
         }
         guard let staticBackgroundReference = imageReferences[
@@ -799,7 +814,8 @@ final class RuneScribeUISession: ObservableObject {
             macOSWide: plan.backgroundMacOSWideResourceID.flatMap {
                 imageReferences[$0]
             },
-            rendererParametersData: parameters
+            rendererParametersData: parameters,
+            generation: resourceGeneration
         )
         let visualPresentation = ActiveThemeVisualPresentation(
             revision: adoptionGeneration,
@@ -811,7 +827,10 @@ final class RuneScribeUISession: ObservableObject {
         guard themeAdoptionGeneration == adoptionGeneration else {
             throw CancellationError()
         }
-        try resourcePresentation.commitThemeBackground(preparedBackground)
+        try resourcePresentation.commitThemeResourceGeneration(
+            resourceGeneration,
+            background: preparedBackground
+        )
         RuneThemePaletteInterpreter.install(descriptor)
         RuneThemeHeadingInterpreter.install(
             plan.decorativeHeadingResourceID.flatMap { resolved[$0]?.data }
@@ -838,6 +857,29 @@ final class RuneScribeUISession: ObservableObject {
             .map { [visualPlan.codex.codexID: $0] } ?? [:]
         activeThemeVisualPresentation = visualPresentation
         themeSelectionError = nil
+        scheduleThemeCodexCardPreviewReload(
+            snapshot: snapshot,
+            active: visualPresentation,
+            generation: adoptionGeneration
+        )
+    }
+
+    private func adoptKnownThemeFallback(
+        _ snapshot: ThemeCoordinatorSnapshotDTO,
+        message: String
+    ) {
+        resourcePresentation.clearThemeBackground()
+        RuneThemePaletteInterpreter.reset()
+        RuneThemeHeadingInterpreter.reset()
+        themeScriptPresentation = .baseFallback
+        themeUnlockAnimationDataByTier = [:]
+        themeSnapshot = snapshot
+        activeThemeVisualPresentation = nil
+        themeCodexCardImageReferences = [:]
+        selectedThemeRelicID = nil
+        selectedThemeSealID = nil
+        selectedThemeFrameID = nil
+        themeSelectionError = message
     }
 
     func reconcileThemeArtifactSelections() {
@@ -902,11 +944,7 @@ final class RuneScribeUISession: ObservableObject {
             result[imagePlan.id] = imagePlan
         }
 
-        try insert(plan.codex.card)
-        try insert(plan.codex.locked)
-        try insert(plan.codex.encountered)
         try insert(plan.codex.selected)
-        try insert(plan.codex.unavailable)
         for imagePlan in plan.script.images {
             try insert(imagePlan)
         }
@@ -1141,11 +1179,61 @@ final class RuneScribeUISession: ObservableObject {
 
     func loadThemeCodexCardPreviews() async {
         guard let snapshot = themeSnapshot,
-              let active = activeThemeVisualPresentation,
-              let client = themeCoordinatorClientHandle
+              let active = activeThemeVisualPresentation
         else { return }
 
-        let generation = themeAdoptionGeneration
+        let task = scheduleThemeCodexCardPreviewReload(
+            snapshot: snapshot,
+            active: active,
+            generation: themeAdoptionGeneration
+        )
+        await task.value
+    }
+
+    @discardableResult
+    private func scheduleThemeCodexCardPreviewReload(
+        snapshot: ThemeCoordinatorSnapshotDTO,
+        active: ActiveThemeVisualPresentation,
+        generation: UInt64
+    ) -> Task<Void, Never> {
+        let key = ThemeCodexPreviewReloadKey(
+            adoptionGeneration: generation,
+            snapshotRevision: snapshot.revision,
+            codexID: snapshot.effectiveCodexID,
+            contentRevision: active.revision
+        )
+        if themeCodexPreviewReloadKey == key,
+           let themeCodexPreviewTask
+        {
+            return themeCodexPreviewTask
+        }
+
+        themeCodexPreviewTask?.cancel()
+        themeCodexPreviewReloadKey = key
+        let task = Task { @MainActor [weak self] in
+            guard let self else { return }
+            await reloadThemeCodexCardPreviews(
+                snapshot: snapshot,
+                active: active,
+                generation: generation,
+                key: key
+            )
+            guard themeCodexPreviewReloadKey == key else { return }
+            themeCodexPreviewTask = nil
+            themeCodexPreviewReloadKey = nil
+        }
+        themeCodexPreviewTask = task
+        return task
+    }
+
+    private func reloadThemeCodexCardPreviews(
+        snapshot: ThemeCoordinatorSnapshotDTO,
+        active: ActiveThemeVisualPresentation,
+        generation: UInt64,
+        key: ThemeCodexPreviewReloadKey
+    ) async {
+        guard let client = themeCoordinatorClientHandle else { return }
+
         let inventories = Dictionary(
             uniqueKeysWithValues: snapshot.presentationInventories.map {
                 ($0.codexID, $0)
@@ -1157,7 +1245,9 @@ final class RuneScribeUISession: ObservableObject {
 
         for provider in snapshot.providers where loaded[provider.codexID] == nil {
             if Task.isCancelled { return }
-            guard themeAdoptionGeneration == generation else { return }
+            guard themeAdoptionGeneration == generation,
+                  themeCodexPreviewReloadKey == key
+            else { return }
             let roleCandidates = Self.codexCardPreviewRoleCandidates(for: provider)
             guard let inventory = inventories[provider.codexID],
                   let expected = roleCandidates.lazy.compactMap({ role in
@@ -1193,9 +1283,13 @@ final class RuneScribeUISession: ObservableObject {
             }
         }
 
-        guard themeAdoptionGeneration == generation,
+        guard !Task.isCancelled,
+              themeAdoptionGeneration == generation,
+              themeCodexPreviewReloadKey == key,
               themeSnapshot?.revision == snapshot.revision,
-              activeThemeVisualPresentation?.revision == active.revision
+              themeSnapshot?.effectiveCodexID == snapshot.effectiveCodexID,
+              activeThemeVisualPresentation?.revision == active.revision,
+              activeThemeVisualPresentation?.plan == active.plan
         else { return }
         themeCodexCardImageReferences = loaded
     }
@@ -1203,11 +1297,14 @@ final class RuneScribeUISession: ObservableObject {
     static func codexCardPreviewRoleCandidates(
         for provider: ThemeProviderSummaryDTO
     ) -> [ThemeResourceRoleID] {
-        if provider.isSelected {
-            return [ThemeResourceRoles.vaultSelected, ThemeResourceRoles.vaultCard]
-        }
         switch provider.state {
         case .available:
+            if provider.isSelected {
+                return [
+                    ThemeResourceRoles.vaultSelected,
+                    ThemeResourceRoles.vaultCard,
+                ]
+            }
             return [
                 provider.isOwned
                     ? ThemeResourceRoles.vaultCard

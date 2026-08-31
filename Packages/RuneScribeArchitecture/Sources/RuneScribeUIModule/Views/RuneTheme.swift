@@ -6,6 +6,7 @@
 // one type scale, and one set of paddings — symmetrical and cohesive across
 // both macOS and iOS.
 
+import RuneScribeContracts
 import RuneScribeUIRuntime
 import SwiftUI
 
@@ -340,21 +341,38 @@ struct RunePanel<Content: View>: View {
     let systemImage: String
     var accent: Color = .runeGold
     @ViewBuilder var content: () -> Content
+    @EnvironmentObject private var session: RuneScribeUISession
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            RuneEyebrow(title: title, systemImage: systemImage, accent: accent)
-            content()
+        ThemeChromeProtectedContentLayout(
+            panelPixelSize: panelBorderPixelSize,
+            minimumInsets: EdgeInsets(
+                top: 20,
+                leading: 20,
+                bottom: 20,
+                trailing: 20
+            )
+        ) {
+            VStack(alignment: .leading, spacing: 12) {
+                RuneEyebrow(title: title, systemImage: systemImage, accent: accent)
+                content()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .background(
+        .background {
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
                 .fill(Color.runeParchment)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                .strokeBorder(accent.opacity(0.18), lineWidth: 1)
-        )
+        }
+        .overlay {
+            ThemeChromeImage(slot: .panelBorder)
+                .allowsHitTesting(false)
+        }
+    }
+
+    private var panelBorderPixelSize: ThemePixelSize? {
+        session.activeThemeVisualPresentation?
+            .chromeImageReference(for: .panelBorder)?
+            .integrity.pixelSize
     }
 }

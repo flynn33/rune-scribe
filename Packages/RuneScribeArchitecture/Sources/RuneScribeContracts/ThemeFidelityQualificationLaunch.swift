@@ -165,14 +165,14 @@ private extension ThemeFidelityQualificationLaunch {
                     codexID: "codex.gloamthorn",
                     defaultRelicID: "relic.gloamthorn.nightthorn-tablet",
                     defaultSealID: "seal.gloamthorn.thornmoon",
-                    masteryTitleID: "title.master-scribe"
+                    masteryTitleID: "title.gloamthorn.mastery"
                 )
             case "theme.moonleaf.production":
                 Self(
                     codexID: "codex.moonleaf",
                     defaultRelicID: "relic.moonleaf.tablet",
                     defaultSealID: "seal.moonleaf.crescentleaf",
-                    masteryTitleID: "title.master-scribe"
+                    masteryTitleID: "title.moonleaf.mastery"
                 )
             case "theme.norse.base":
                 Self(
@@ -186,14 +186,14 @@ private extension ThemeFidelityQualificationLaunch {
                     codexID: "codex.sunspire",
                     defaultRelicID: "relic.sunspire.dawnfire-tablet",
                     defaultSealID: "seal.sunspire.sunleaf-crest",
-                    masteryTitleID: "title.master-scribe"
+                    masteryTitleID: "title.sunspire.mastery"
                 )
             case "theme.wildwood.production":
                 Self(
                     codexID: "codex.wildwood",
                     defaultRelicID: "relic.wildwood.rootsong-tablet",
                     defaultSealID: "seal.wildwood.rooted-tree",
-                    masteryTitleID: "title.master-scribe"
+                    masteryTitleID: "title.wildwood.mastery"
                 )
             default:
                 nil
@@ -204,10 +204,28 @@ private extension ThemeFidelityQualificationLaunch {
             titleID: String
         ) -> ProgressionPresentationDTO? {
             switch titleID {
-            case "title.master-scribe":
+            case "title.gloamthorn.mastery":
                 try? ProgressionPresentationDTO(
-                    displayName: "Master Scribe",
-                    summary: "Provider artwork is deferred; Progression may own the grant before a visual provider is available.",
+                    displayName: "Sovereign of the Gloam",
+                    summary: "Gloamthorn mastery distinction.",
+                    fallbackSystemImageName: "person.text.rectangle"
+                )
+            case "title.moonleaf.mastery":
+                try? ProgressionPresentationDTO(
+                    displayName: "Moonleaf Master",
+                    summary: "Moonleaf mastery distinction.",
+                    fallbackSystemImageName: "person.text.rectangle"
+                )
+            case "title.sunspire.mastery":
+                try? ProgressionPresentationDTO(
+                    displayName: "Bearer of First Light",
+                    summary: "Sunspire mastery distinction.",
+                    fallbackSystemImageName: "person.text.rectangle"
+                )
+            case "title.wildwood.mastery":
+                try? ProgressionPresentationDTO(
+                    displayName: "Keeper of the Heartwood",
+                    summary: "Wildwood mastery distinction.",
                     fallbackSystemImageName: "person.text.rectangle"
                 )
             case "title.norse.master-of-runes":

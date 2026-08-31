@@ -45,8 +45,9 @@ program. It is deliberately **not shipped**. The repository now contains:
 - exact legacy Cipher and Message readers plus a fail-before-allocation typed-container
   parser and complete old/new destination matrix;
 - the required Norse provider and four optional production Elven providers—Moonleaf,
-  Sunspire, Wildwood, and Gloamthorn—built from the accepted v3.1 corpus with 56 logical
-  resources and 184 unique shipping outputs;
+  Sunspire, Wildwood, and Gloamthorn—built from the accepted v3.1 corpus and v4.3
+  canonical source masters with 56 logical provider resources and 245 unique shipping
+  outputs;
 - runtime-bound Progression ownership and live provider activation without any
   provider-side rule evaluation;
 - a data-driven Artifact renderer, persisted Codex/Relic/Seal/Frame defaults, themed

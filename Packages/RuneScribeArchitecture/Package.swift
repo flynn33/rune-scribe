@@ -270,6 +270,7 @@ let package = Package(
                 "RuneScribeRuntimeCore",
                 "RuneScribeTestSupport",
                 "RuneScribeThemeCoordinatorModule",
+                "RuneScribeThemeMoonleafModule",
             ]
         ),
         .testTarget(

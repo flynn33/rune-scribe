@@ -139,6 +139,7 @@ final class SharePresentationSectionTests: XCTestCase {
         )
         XCTAssertThrowsError(try ReceivedMessageDTO(
             id: MessageID(rawValue: UUID()),
+            receivedAt: Date(timeIntervalSince1970: 1_000),
             plaintext: "Readable",
             senderName: "Sender",
             cipherID: CipherID(rawValue: UUID()),

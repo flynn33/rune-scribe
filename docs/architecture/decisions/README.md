@@ -29,6 +29,7 @@ package, binary, source copy, fetch, submodule, or local checkout.
 | [ADR-RS-010](ADR-RS-010-theme-resource-budgets.md) | Theme resource delivery and budgets | Accepted initial limits |
 | [ADR-RS-011](ADR-RS-011-game-center-records.md) | Game Center App Store record strategy | Accepted; source catalog and shared-platform strategy frozen |
 | [ADR-RS-012](ADR-RS-012-cipher-invitation-presentation.md) | Cipher-invitation presentation | Accepted; typed file Artifact with QR and link fallbacks |
+| [ADR-RS-013](ADR-RS-013-production-theme-resource-budgets.md) | Production Theme resource budgets | Accepted; supersedes ADR-RS-010 aggregate limits |
 
 Reversing an accepted decision requires a successor record that identifies the
 compatibility, migration, security, privacy, distribution, and rollback impact.

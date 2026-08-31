@@ -185,17 +185,26 @@ enum ProgressionCatalogCompatibility {
         fromVersion: ProgressionCatalogVersion,
         toVersion: ProgressionCatalogVersion
     ) throws {
-        if fromVersion.rawValue == 1, toVersion.rawValue == 2 {
-            return try validateNorseV1ToV2Upgrade(from: stored, to: current)
+        if fromVersion.rawValue == 1, toVersion.rawValue >= 2 {
+            return try validateNorseV1Upgrade(
+                from: stored,
+                to: current,
+                toVersion: toVersion
+            )
         }
         try validateAddOnlyUpgrade(from: stored, to: current)
     }
 
-    private static func validateNorseV1ToV2Upgrade(
+    private static func validateNorseV1Upgrade(
         from stored: [Fingerprint],
-        to current: [Fingerprint]
+        to current: [Fingerprint],
+        toVersion: ProgressionCatalogVersion
     ) throws {
-        guard stored.count == 312, current.count == 310 else {
+        let minimumCurrentCount = toVersion.rawValue >= 3 ? 318 : 310
+        let currentCountIsValid = toVersion.rawValue == 2
+            ? current.count == minimumCurrentCount
+            : current.count >= minimumCurrentCount
+        guard stored.count == 312, currentCountIsValid else {
             throw ProgressionDomainError.invalidRecord("catalog-v1-v2-fingerprint-count")
         }
         let prior = Dictionary(uniqueKeysWithValues: stored.map { ($0.stableKey, $0) })
@@ -204,13 +213,21 @@ enum ProgressionCatalogCompatibility {
         let added = norseV2AddedFingerprintDigests
         let changedPrior = norseV1ChangedFingerprintDigests
         let changedNext = norseV2ChangedFingerprintDigests
+        let elvenMasteryAdded = elvenMasteryV3AddedFingerprintDigests
+        let baseKeys = Set(prior.keys).subtracting(removed.keys).union(added.keys)
+        let expectedKeys = toVersion.rawValue >= 3
+            ? baseKeys.union(elvenMasteryAdded.keys)
+            : baseKeys
+        let keySetIsValid = toVersion.rawValue <= 3
+            ? Set(next.keys) == expectedKeys
+            : expectedKeys.isSubset(of: Set(next.keys))
 
         guard Set(removed.keys).isSubset(of: Set(prior.keys)),
               Set(added.keys).isSubset(of: Set(next.keys)),
               Set(changedPrior.keys) == Set(changedNext.keys),
               Set(changedPrior.keys).isSubset(of: Set(prior.keys)),
               Set(changedNext.keys).isSubset(of: Set(next.keys)),
-              Set(next.keys) == Set(prior.keys).subtracting(removed.keys).union(added.keys)
+              keySetIsValid
         else {
             throw ProgressionDomainError.invalidRecord("catalog-v1-v2-key-set")
         }
@@ -231,6 +248,15 @@ enum ProgressionCatalogCompatibility {
                 throw ProgressionDomainError.invalidRecord("catalog-v1-v2-changed-key")
             }
         }
+        if toVersion.rawValue >= 3 {
+            for (key, digest) in elvenMasteryAdded {
+                guard next[key]?.semanticDigest == digest, prior[key] == nil else {
+                    throw ProgressionDomainError.invalidRecord(
+                        "catalog-v3-elven-mastery-added-key"
+                    )
+                }
+            }
+        }
         for value in stored where removed[value.stableKey] == nil &&
             changedPrior[value.stableKey] == nil
         {
@@ -241,6 +267,21 @@ enum ProgressionCatalogCompatibility {
             }
         }
     }
+
+    private static let elvenMasteryV3AddedFingerprintDigests: [String: String] = [
+        "content:title.gloamthorn.mastery": "7dd81dfcee4195faf62b30906f200b8c",
+        "content:title.moonleaf.mastery": "4f06f1c85fe23bdf16175c5ca30c8087",
+        "content:title.sunspire.mastery": "648d15c70634ad1165e76f3104dbc65f",
+        "content:title.wildwood.mastery": "c4d5e77a6aa2d51895b477c0b388f4f6",
+        "grant-item:grant-group.codex.gloamthorn.mastery:title.gloamthorn.mastery":
+            "9663671f40fe6ca1de092681f7ab10a7",
+        "grant-item:grant-group.codex.moonleaf.mastery:title.moonleaf.mastery":
+            "9663671f40fe6ca1de092681f7ab10a7",
+        "grant-item:grant-group.codex.sunspire.mastery:title.sunspire.mastery":
+            "9663671f40fe6ca1de092681f7ab10a7",
+        "grant-item:grant-group.codex.wildwood.mastery:title.wildwood.mastery":
+            "9663671f40fe6ca1de092681f7ab10a7",
+    ]
 
     private static let norseV1RemovedFingerprintDigests: [String: String] = [
         "content:crest.norse.forge-master": "860280c20229d45f0cfd1981fb4d3a60",

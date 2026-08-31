@@ -423,6 +423,8 @@ public enum WildwoodThemeDescriptorFactory {
                   }
                 ],
                 "maximumGlyphLines": 5,
+                "catalogSpecimenRows": 2,
+                "catalogSpecimenColumns": 8,
                 "minimumGlyphScale": 0.72,
                 "overflowBehavior": "standardAlternate",
                 "attributionRegion": {
@@ -522,6 +524,8 @@ public enum WildwoodThemeDescriptorFactory {
                   }
                 ],
                 "maximumGlyphLines": 4,
+                "catalogSpecimenRows": 2,
+                "catalogSpecimenColumns": 7,
                 "minimumGlyphScale": 0.72,
                 "overflowBehavior": "standardAlternate",
                 "attributionRegion": {
@@ -668,6 +672,7 @@ public enum WildwoodThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.wildwood.rooted.tree.svg"
             },
             "vectorResourceID": "resource.seal.wildwood.rooted-tree.output.seal-vector-master",
+            "colorResourceID": "resource.seal.wildwood.rooted-tree.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.wildwood.rooted-tree.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.wildwood.rooted-tree.output.seal-thumbnail",
             "allowedScale": {
@@ -708,6 +713,7 @@ public enum WildwoodThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.wildwood.lantern.moth.svg"
             },
             "vectorResourceID": "resource.seal.wildwood.lantern-moth.output.seal-vector-master",
+            "colorResourceID": "resource.seal.wildwood.lantern-moth.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.wildwood.lantern-moth.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.wildwood.lantern-moth.output.seal-thumbnail",
             "allowedScale": {
@@ -748,6 +754,7 @@ public enum WildwoodThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.wildwood.acorn.knot.svg"
             },
             "vectorResourceID": "resource.seal.wildwood.acorn-knot.output.seal-vector-master",
+            "colorResourceID": "resource.seal.wildwood.acorn-knot.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.wildwood.acorn-knot.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.wildwood.acorn-knot.output.seal-thumbnail",
             "allowedScale": {
@@ -788,6 +795,7 @@ public enum WildwoodThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.wildwood.fern.spiral.svg"
             },
             "vectorResourceID": "resource.seal.wildwood.fern-spiral.output.seal-vector-master",
+            "colorResourceID": "resource.seal.wildwood.fern-spiral.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.wildwood.fern-spiral.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.wildwood.fern-spiral.output.seal-thumbnail",
             "allowedScale": {
@@ -828,6 +836,7 @@ public enum WildwoodThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.wildwood.wild.fox.svg"
             },
             "vectorResourceID": "resource.seal.wildwood.wild-fox.output.seal-vector-master",
+            "colorResourceID": "resource.seal.wildwood.wild-fox.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.wildwood.wild-fox.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.wildwood.wild-fox.output.seal-thumbnail",
             "allowedScale": {
@@ -868,6 +877,7 @@ public enum WildwoodThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.wildwood.echo.seed.svg"
             },
             "vectorResourceID": "resource.seal.wildwood.echo-seed.output.seal-vector-master",
+            "colorResourceID": "resource.seal.wildwood.echo-seed.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.wildwood.echo-seed.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.wildwood.echo-seed.output.seal-thumbnail",
             "allowedScale": {
@@ -1028,6 +1038,16 @@ public enum WildwoodThemeDescriptorFactory {
           "sourceReference": "owner-approved production design and manifest direction",
           "exportSettings": "{\"deterministic\":true,\"pipeline\":\"scripts/build-elven-production-assets.py\",\"pipelineSHA256\":\"3dd388a70763603b2f90e04ecf7de7115e050ba3bb4da69a96b35fcf727e2307\",\"toolVersions\":{\"fontTools\":\"4.60.2\",\"pillow\":\"11.3.0\",\"python\":\"3.9.6\",\"sips\":\"sips-316\"}}",
           "licenseNotice": "Owner-supplied proprietary source and approved recovery authority"
+        },
+        {
+          "id": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+          "creatorTool": "Pinned deterministic v4.3 asset builder",
+          "creationDate": "2026-08-27",
+          "origin": "derived",
+          "rightsOwner": "Raven Forge Software",
+          "sourceReference": "docs/verification/theme-fidelity-v4-3/inventory/recipes/Wildwood-Accepted-Source-Master-Recipe-v4.3.json",
+          "exportSettings": "{\"deterministic\":true,\"ownerReview\":\"PENDING\",\"pipeline\":\"scripts/build-sunspire-wildwood-gloamthorn-v43-assets.py\"}",
+          "licenseNotice": "Project-local proprietary production masters; owner visual review remains pending"
         },
         {
           "id": "prov.Production.Sources.wildwood.wildwood.vault.recipe.json",

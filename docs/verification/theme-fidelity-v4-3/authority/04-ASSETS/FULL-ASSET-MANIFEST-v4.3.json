@@ -1,0 +1,2400 @@
+{
+  "schemaVersion": "4.3",
+  "assetCount": 171,
+  "assets": [
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Gloamthorn/gloamthorn-codex-catalog-final.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Gloamthorn",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2349000,
+      "sha256": "f121a4dad91b65741321ca014bc2650a6913afadc91e19348aa9bbf375037ac0",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-final-alt.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 1972527,
+      "sha256": "0a3fb35ab47efb272dab404a081a5d4d603fef91ec9d4093a917bf77311f66a1",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-final.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2068067,
+      "sha256": "72ef342adec3f194318c0af3e19b2b4dac40f23de160f31f2c22c5ae12a7c368",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-series.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 1972527,
+      "sha256": "0a3fb35ab47efb272dab404a081a5d4d603fef91ec9d4093a917bf77311f66a1",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-compose-a.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2088108,
+      "sha256": "b02a1fee731eeaae5846f29a2d1e4621e2c98fb8b47a962ca64efa4fe64f1467",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-compose-final-a.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2088108,
+      "sha256": "b02a1fee731eeaae5846f29a2d1e4621e2c98fb8b47a962ca64efa4fe64f1467",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-compose-final-b.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 1802374,
+      "sha256": "c30b5df472b19abd4241afe77e20516e29a34ba3fd55f2404307b0a5ecf50fde",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-high-fidelity-style-board.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2797874,
+      "sha256": "b79e29845ab6f6f04ea2a24afc8b62ff239dba9e3d2cab51da245227b4ff1eff",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-inscription-preview-final.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2127300,
+      "sha256": "a19fdfeb693f50bb2cdf17a851cf19a911ea4c87e9db19d1889dfae7a23c9626",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-a.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2112267,
+      "sha256": "23b96619f911ffc58be81e95869ea16b39b2e689a6b6164be77829d8e2a85b67",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-b.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2069747,
+      "sha256": "79446a4e03976835f5727b3e9285f00e004602cba8c9496122bed115b0657db4",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-a.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2112267,
+      "sha256": "23b96619f911ffc58be81e95869ea16b39b2e689a6b6164be77829d8e2a85b67",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-b.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2069747,
+      "sha256": "79446a4e03976835f5727b3e9285f00e004602cba8c9496122bed115b0657db4",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-tablet-detail-a.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2146122,
+      "sha256": "fc6ba65b4683815366b14c30b3178f67f89e085b226a07a82f5b820034eabc1b",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-tablet-detail-final.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Moonleaf",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2146122,
+      "sha256": "fc6ba65b4683815366b14c30b3178f67f89e085b226a07a82f5b820034eabc1b",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Norse/norse-codex-controlling-board.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Norse",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 2705645,
+      "sha256": "e9c1f4a00ebbd7666d409193dc39222494e2414b48d9b42bbfacfb14cd087bd6",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Norse/norse-codex-owner-supplied-original.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Norse",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 2705645,
+      "sha256": "e9c1f4a00ebbd7666d409193dc39222494e2414b48d9b42bbfacfb14cd087bd6",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Sunspire/sunspire-codex-catalog-final.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Sunspire",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2375470,
+      "sha256": "a99ecdcaa15f9a3233ea7515c991e02c789303d6113ca514c19c94b1ea72bc67",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Sunspire/sunspire-high-fidelity-style-board.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Sunspire",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2857741,
+      "sha256": "dcd7024da9b2d93913d0c375318f2f77b0b00881eedcd781eb02d7f762a03ecf",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Wildwood/wildwood-codex-catalog-final.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Wildwood",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2527117,
+      "sha256": "1f004173f5b876da5858c4accfbb96172c2a74a7ca92f009a3a9849553e18bd7",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/Wildwood/wildwood-high-fidelity-style-board.png",
+      "authority": "authoritative-full-golden",
+      "theme": "Wildwood",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2739126,
+      "sha256": "cff3e991e450de7ca92cc176eb5be3c48c5c6698787250ee5e6cdf23a6a87a05",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/cross-theme-production-overview.png",
+      "authority": "authoritative-full-golden",
+      "theme": null,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2511567,
+      "sha256": "9d61a2ae8c2dc39d6a571abf2953cad1621d871bc92b60ca15c3294090394d83",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/00-CONTROLLING-GOLDENS/vault-elven-codex-unlock-progress.png",
+      "authority": "authoritative-full-golden",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2005543,
+      "sha256": "818dbd5057589d2095cc6b3c5e32a8d7072523a0093ef9317dce24b37ce995e1",
+      "usage": "controlling visual composition and material authority"
+    },
+    {
+      "path": "04-ASSETS/01-SUPPORTING-MOCKUPS/crystal-moon-secondary-style-reference-alt.png",
+      "authority": "supporting",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2810896,
+      "sha256": "18db0828f260fbabd4d777acbbf878c4a968fa7993f009fe2bf7efc42af8c62f",
+      "usage": "supporting visual context; cannot override a controlling golden"
+    },
+    {
+      "path": "04-ASSETS/01-SUPPORTING-MOCKUPS/crystal-moon-secondary-style-reference.png",
+      "authority": "supporting",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2810896,
+      "sha256": "18db0828f260fbabd4d777acbbf878c4a968fa7993f009fe2bf7efc42af8c62f",
+      "usage": "supporting visual context; cannot override a controlling golden"
+    },
+    {
+      "path": "04-ASSETS/01-SUPPORTING-MOCKUPS/gloamthorn-codex-catalog-early.png",
+      "authority": "supporting",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2349000,
+      "sha256": "f121a4dad91b65741321ca014bc2650a6913afadc91e19348aa9bbf375037ac0",
+      "usage": "supporting visual context; cannot override a controlling golden"
+    },
+    {
+      "path": "04-ASSETS/01-SUPPORTING-MOCKUPS/moonleaf-codex-catalog-early.png",
+      "authority": "supporting",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2068067,
+      "sha256": "72ef342adec3f194318c0af3e19b2b4dac40f23de160f31f2c22c5ae12a7c368",
+      "usage": "supporting visual context; cannot override a controlling golden"
+    },
+    {
+      "path": "04-ASSETS/01-SUPPORTING-MOCKUPS/moonleaf-high-fidelity-style-board-alt.png",
+      "authority": "supporting",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2797874,
+      "sha256": "b79e29845ab6f6f04ea2a24afc8b62ff239dba9e3d2cab51da245227b4ff1eff",
+      "usage": "supporting visual context; cannot override a controlling golden"
+    },
+    {
+      "path": "04-ASSETS/01-SUPPORTING-MOCKUPS/norse-approved-board-archive-a.png",
+      "authority": "supporting",
+      "theme": null,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2413846,
+      "sha256": "da29ac43be29085fd31746a76091c60da7440cd970a2f39c576cd9a9faf484fc",
+      "usage": "supporting visual context; cannot override a controlling golden"
+    },
+    {
+      "path": "04-ASSETS/01-SUPPORTING-MOCKUPS/norse-approved-board-archive-b.png",
+      "authority": "supporting",
+      "theme": null,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2568319,
+      "sha256": "8ad16d4da4038cf7ef6e228390d2cd0ef4c41ea3f4c759c705de65e5a33cf5b6",
+      "usage": "supporting visual context; cannot override a controlling golden"
+    },
+    {
+      "path": "04-ASSETS/01-SUPPORTING-MOCKUPS/sunspire-codex-catalog-early.png",
+      "authority": "supporting",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2375470,
+      "sha256": "a99ecdcaa15f9a3233ea7515c991e02c789303d6113ca514c19c94b1ea72bc67",
+      "usage": "supporting visual context; cannot override a controlling golden"
+    },
+    {
+      "path": "04-ASSETS/01-SUPPORTING-MOCKUPS/wildwood-codex-catalog-early.png",
+      "authority": "supporting",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2527117,
+      "sha256": "1f004173f5b876da5858c4accfbb96172c2a74a7ca92f009a3a9849553e18bd7",
+      "usage": "supporting visual context; cannot override a controlling golden"
+    },
+    {
+      "path": "04-ASSETS/01-SUPPORTING-MOCKUPS/wildwood-high-fidelity-style-board-alt.png",
+      "authority": "supporting",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2739126,
+      "sha256": "cff3e991e450de7ca92cc176eb5be3c48c5c6698787250ee5e6cdf23a6a87a05",
+      "usage": "supporting visual context; cannot override a controlling golden"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Gloamthorn/relic-duskbriar-stele-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Gloamthorn",
+      "dimensions": [
+        295,
+        365
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 185115,
+      "sha256": "b248c0b8cf86aa6dcf33a9a7057b7d55f4bf7657a484bd6afb0aa01edb775584",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Gloamthorn/relic-duskbriar-stele-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Gloamthorn",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 373635,
+      "sha256": "838e562473c285d661cbd6c9592bb9c15304fbfb9947d61876089557068d1c88",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Gloamthorn/relic-nightthorn-tablet-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Gloamthorn",
+      "dimensions": [
+        535,
+        520
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 545959,
+      "sha256": "d697177200a2ec0990590270ef2354acbb48f09af0a0a00770afd1d1d42efe39",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Gloamthorn/relic-nightthorn-tablet-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Gloamthorn",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 559749,
+      "sha256": "6fa95a31dee76417be0eaede02324acdc645425312044725f23786145c3399c9",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Gloamthorn/relic-umbral-plaque-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Gloamthorn",
+      "dimensions": [
+        295,
+        270
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 142131,
+      "sha256": "5b8fc04d7f1730189db4b941b43f4fb1a540c4d2b4a1fb3b6e2aac3dd5cfd8b1",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Gloamthorn/relic-umbral-plaque-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Gloamthorn",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 380526,
+      "sha256": "de12b219bc0321f7737778e403da37590254afd1755f45b6f0b0906f4e359cd8",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/motif-central-relic-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        580,
+        860
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 1055042,
+      "sha256": "513afa1abb23dac099cbe6788f13867227ab3d5886634d9291226bdbbe73c041",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/motif-central-relic-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 441788,
+      "sha256": "d56ae495585f9bea407ae1533521eb3193be5e505bdb001c891ce8d0f8e05294",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/relic-ivybound-plaque-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        290,
+        270
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 152926,
+      "sha256": "c3e8009bfe6cf4436b44ed406a690c3d57438120de7b412480bdf7219207024a",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/relic-ivybound-plaque-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 427726,
+      "sha256": "30b63cdc5aa798a80c24fabaebf02f3400d7ff12fb4b173648b00d9f8c7bc22e",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/relic-moonleaf-tablet-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        525,
+        535
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 443978,
+      "sha256": "06e58cc199113d2533d694db44f605be508f85e6be33b1076570d5a018f8f91f",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/relic-moonleaf-tablet-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 463029,
+      "sha256": "6ad4c3c92eb5d868605cdd455c19b4df82dd82d730c667845502ff6749665b3d",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/relic-whisperbark-stele-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        295,
+        365
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 163892,
+      "sha256": "80e7aa747cf2b250004f3b9e248523be887569b75e0b8af1a2250f3ab3b2b997",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/relic-whisperbark-stele-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 325797,
+      "sha256": "10569caf50877f7de0d9048cc64e8eb4694dcc71f8946fcd8ef1a707b673f2b8",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/script-specimen-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        1035,
+        285
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 457075,
+      "sha256": "438f8fb82262e16abfd246ceca08e24c9cccdd141be6f6d22fed32a71546e90d",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/script-specimen-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 131589,
+      "sha256": "35fe20a7dbb1667ea086df162deaf0c414c49f8973615ee2926700043726f098",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/seal-crescentleaf-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        365,
+        445
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 299183,
+      "sha256": "f328c3f3ea9ff14616e71517faca85fe10d4da716cf2b2bcc4b84d6e88c3f0c0",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/seal-crescentleaf-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 425892,
+      "sha256": "486d50fe2aeb821d806efdd4e7af8c82d0cdc07d1c9f2d880f179292efeea648",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/seal-woodland-stag-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        365,
+        405
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 279247,
+      "sha256": "cd069361a104a2a0967eed5ddb5540e95e20e4d0c7e943164484cc2faedc242e",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/seal-woodland-stag-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Moonleaf",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 464914,
+      "sha256": "4a5b4b585764231cd2ba300edb964909ec936e07f8eee22feb56a205a841a7a0",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/00-approved-board.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 2705645,
+      "sha256": "e9c1f4a00ebbd7666d409193dc39222494e2414b48d9b42bbfacfb14cd087bd6",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/01-script-panel.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        572,
+        730
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 502548,
+      "sha256": "8e04534d85e5c5685f14523d68212e0b1645b718e8ab483ade826bd928499b4d",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/02-relic-catalog.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        1002,
+        730
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 926371,
+      "sha256": "a30d3d6ac5112da8c1606008b307678e27611c4455c82e45b43bf0f5bb41fcf3",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/03-seal-catalog.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        806,
+        730
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 728233,
+      "sha256": "58494460016fbb9a8e944604d36cfb5ed266554fb63fcfccf78e6f585b2b5a53",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/04-compose-workspace.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        700,
+        648
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 575029,
+      "sha256": "619a137fbcc760b60b28f1a1569cf289922fc37e39102040435782de17f7c2d6",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/05-short-message.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        398,
+        700
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 355601,
+      "sha256": "aae1f3bf5cff4b94fbc2ca6eb86eedbeb2cabb8281588c53aef5d6d13e9efbe7",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/06-long-message.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        464,
+        700
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 486630,
+      "sha256": "49860b3f30e633dda4c15186d6d40f80a34192265c048bf20c9dfdcf774a12a1",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/07-received-cipher.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        496,
+        700
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 414084,
+      "sha256": "3f840710d4e1b3637d3f2abbfbdb59cbac174502485b824aca53797740d6224f",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/08-share-preview.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        506,
+        700
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 458634,
+      "sha256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/09-vault-cards.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        518,
+        778
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 433774,
+      "sha256": "d6789ddc7137cc5e197f2830ca81a72b5ddffec0f865cbe3c769a54db75d7004",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/10-background-treatment.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        910,
+        460
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 542851,
+      "sha256": "78fa42c5712c796f43efea41bab7dc8249fa076265b6903dc33d70f39756a810",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/11-mastery-rewards.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        792,
+        460
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 424747,
+      "sha256": "12cd6180852261263b8e6b8d119dc6d7f33da6431f9e0ac7e0a6b4e2649eeb26",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/12-accessibility-variants.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        858,
+        460
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 514951,
+      "sha256": "a074a682c4a28abf7a9a80cea7577af4824b346e2672c6f7cb938f9547887cff",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/background-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        454,
+        225
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 183037,
+      "sha256": "200ac342465eddb2a7d5861cef3b8357d0c89be513e2a237d9845af84c741d73",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/background-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 228839,
+      "sha256": "03b80efe5ac7c1afdec406cfd4e029120a8e25a11ccdd099420cfa0de5b44e03",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/mastery-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        402,
+        225
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 151487,
+      "sha256": "53e6ee4d30d1f3be91c7afe91aa93b975b0d6e6617222ac7a1687fd4377994c2",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/mastery-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 233447,
+      "sha256": "aa32d2a755ad46032248aecc354948f693d650ed94f70101e5f6416a10e984d8",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-dragonwood-plaque-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        172,
+        307
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 100496,
+      "sha256": "0ad79d60ba52118e11e9ef68a4fd2895d0db6d2870f430f703e34a7c8a803ccf",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-dragonwood-plaque-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 238878,
+      "sha256": "4c9e3bf1bd03c3b9be7e8212e0fc7b033f798ff4fe8827559b812cdf0be20ebb",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-runestone-tablet-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        172,
+        307
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 108523,
+      "sha256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-runestone-tablet-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 259413,
+      "sha256": "fcfb5d84dfac7d93c6f4a294a4d86d64e7094f4917e82d370e41671e87bcfe14",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-stormforged-stele-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        165,
+        307
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 92426,
+      "sha256": "de8845428e1c8e937448c1fd34c1a0f6137a6623e0f26611ff969758d3646fe7",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-stormforged-stele-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 218135,
+      "sha256": "c701c51d493cb79b25d8e929d1ff989bcebf5043bedee7f55b116df9ab46e323",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/vault-card-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        270,
+        386
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 160137,
+      "sha256": "9a056285ad7a17a58966da921936b38622818f886fed8112772ad959d0771463",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Norse/vault-card-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 262440,
+      "sha256": "8192660326c4f3549f9b14334de276a7f9fa6ad41f8b75b2a331de22cdec2d70",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/motif-scroll-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        560,
+        875
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 948959,
+      "sha256": "896d2aaf8a3c75242160511441a914a2150f543e8d4e4d2618045e26682a1776",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/motif-scroll-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 392993,
+      "sha256": "be1e71853e952d20ed6212e3d6c5a9fc74286f2a8dd320a4f87b787563e99bc9",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/relic-auric-stele-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        295,
+        365
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 169983,
+      "sha256": "ac627d94ce1c3c2e67aa96ba073619c6d72548b1319e88c345a711ef46a20fab",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/relic-auric-stele-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 342365,
+      "sha256": "79d046fe8440adcb602e5a350a99335d8b4e250eafcce7313984cb57459eaeb9",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/relic-dawnfire-tablet-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        525,
+        530
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 542780,
+      "sha256": "e1e7c42e94f285381bf175be618b102bc0dfa8dd5fc36fa43270adfcbf64f4d4",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/relic-dawnfire-tablet-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 576035,
+      "sha256": "4511ae0df20472851fb470c5fed1232bf7e1ec583688de2f33daa4be62ed99f0",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/relic-solvine-plaque-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        295,
+        270
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 154034,
+      "sha256": "20aa5f2ac850b2175974c7cf5514c2dce7ed0736dd63868dda85165ca08934cb",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/relic-solvine-plaque-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 425900,
+      "sha256": "298928fc38455aae549aa705363d2d5fe79f68cf5557cdeae6ad548ae0ffd096",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/script-specimen-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        1080,
+        215
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 364509,
+      "sha256": "efd2109345b71793918c4e8f1407d2c283f0e651231da7ade1a93ea1e44f26c3",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/script-specimen-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 101340,
+      "sha256": "086975e758457c4bb300c855785fae7cd1f7f0ecb689d60e649013b4ab73dfc4",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/seal-golden-lark-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        280,
+        400
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 225731,
+      "sha256": "2f9cade52e1b9d7292056f5052077f7c08be81c24fed39ad708ff861dbd10a4f",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/seal-golden-lark-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 392710,
+      "sha256": "bfc426c57a553b83160a2739bdf10f91656360461ce5ec97b35b1c5291c15a9e",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/seal-sunleaf-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        275,
+        410
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 226398,
+      "sha256": "0c22590da2e087abd69649e3599f75812d5e3dd2297b94d03376c9006e75f094",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/seal-sunleaf-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Sunspire",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 377649,
+      "sha256": "25aaa877fe51c2219a5a7ef9b47636c0c242fd7d4697960c17bd9e64ecd1e40b",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/motif-codex-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        600,
+        880
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 1048264,
+      "sha256": "a8eaaf0b891609a2eb736c981d9c9aec430510678bf011a9335c08521b76039e",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/motif-codex-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 415751,
+      "sha256": "2228ca72661588e0c529437eb8a0c49bd9c131f2545d97b713a0a04a1ad31f4b",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/relic-elderbark-stele-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        295,
+        365
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 199145,
+      "sha256": "7882cb87d6e80841285abfe962cf06075b64922e65ca94310709ba3006e67b8a",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/relic-elderbark-stele-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 395004,
+      "sha256": "ef538b9f81df131424b4959324c2577f1eb1e42f1a25119195ef5322e2c528e9",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/relic-mossbound-plaque-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        295,
+        270
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 169939,
+      "sha256": "4d6ef1a7f8e7b8c8cf5e99c223f3e9aaac85f14e4c76f9501440d7dffc1c58d2",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/relic-mossbound-plaque-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 463608,
+      "sha256": "221c56c579b29899e456d4a7a205c0a4188226e1517ada989420ed691747df37",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/relic-rootsong-tablet-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        530,
+        525
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 579329,
+      "sha256": "366ca15971f02813323e8d5484230e48f422c50bec13c1deff2f4218eba86838",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/relic-rootsong-tablet-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 614043,
+      "sha256": "8d55ce1fa0aeafc0d96fee39db823c75ef98870067b201dfa19ebe93d1a4cc82",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/script-specimen-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        1040,
+        190
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 319178,
+      "sha256": "61801b1d1196d538f43da4e57ca5ac7cd21e34ff6934d4541ad2a89648610b38",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/script-specimen-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 92592,
+      "sha256": "1c5e58612bc1112c0a3bc9a03ffafbc5f41b6249e5e29fb8b3eb0aa36ddc10cf",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/seal-lantern-moth-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        350,
+        455
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 284188,
+      "sha256": "2a9c37ff18fe521868a48754985eb7e9960ae4ce5f1830d93a7b72f5fa3da8dd",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/seal-lantern-moth-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 396739,
+      "sha256": "2bd1aa7e16908f935623f7260a1d3fe89e0b4324913d6ad89bf73f0bde8d7462",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/seal-rooted-tree-reference.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        350,
+        420
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 278146,
+      "sha256": "b7f3040eb49ce3e84e99eeb0d28d5f821587c7dbfe864b940a519abf3207de82",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/seal-rooted-tree-reference.thumbnail.png",
+      "authority": "authoritative-focal-reference",
+      "theme": "Wildwood",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 442587,
+      "sha256": "4751e9593b83744a9971e42a0cc717d79c152bb556cb465de9d829511e4ee7ff",
+      "usage": "canonical focal/component comparison and production extraction source"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.berserk.monochrome.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1024,
+        981
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 645400,
+      "sha256": "3b67068ae6be712d0d516e6f1fdca2cb7e4d9d913de80bd3c0bd352f96320ec0",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.berserk.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1024,
+        981
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 763686,
+      "sha256": "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.berserk.thumbnail.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 259117,
+      "sha256": "70733bcc64d087cfcbc5cfb58b0bca2601b10bba22a4f69c67b9bd817a538b47",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.mjolnir.monochrome.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1003,
+        1024
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 705242,
+      "sha256": "7d3644fafcc95e635ffaa8881a7734da0a05f17affb2604c4a26314d74f4551e",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.mjolnir.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1003,
+        1024
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 849370,
+      "sha256": "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.mjolnir.thumbnail.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 295111,
+      "sha256": "bbf9273e15da472ec04fdc5514bd4faccba9322afcc9df8452ecee7e9a07d419",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.ravenshield.monochrome.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1024,
+        1015
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 730467,
+      "sha256": "3585d4963ffd43b5c27f2e9c8ae809ccf646a13306e5c6b2b3cc32a1b66babd7",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.ravenshield.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1024,
+        1015
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 905500,
+      "sha256": "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.ravenshield.thumbnail.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 308236,
+      "sha256": "09322298c8bd5b3f68d48e924767467dfccee175e0d44e87110977cd6f2a0900",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.valknut.monochrome.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1015,
+        1024
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 762653,
+      "sha256": "7fb26639ad65986fcb52e4b31bc4280e27890e4345e4de74dc6b5957482a2027",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.valknut.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1015,
+        1024
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 940081,
+      "sha256": "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.valknut.thumbnail.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 322621,
+      "sha256": "35c5f281b6ad405b6a3cb5084edc864b05546deab10ca93ca5d45767334c8431",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.wolkin.monochrome.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1013,
+        1024
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 693545,
+      "sha256": "bbb12a59b76b91ab2aaaa8eca3c53a88a2fe0a06beb5c4b9867a7f0784e9fc16",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.wolkin.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1013,
+        1024
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 824491,
+      "sha256": "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.wolkin.thumbnail.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 283338,
+      "sha256": "993359c98592c586a47cf06a2129c01c6dd92a474c64b481f34dbd6a83e8d885",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.yggdrasil.monochrome.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1024,
+        991
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 690512,
+      "sha256": "d296cea98b7283f67b9cb1b9e50547e16299dc8dcbf45872ed0701b746266907",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.yggdrasil.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        1024,
+        991
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 833872,
+      "sha256": "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.yggdrasil.thumbnail.png",
+      "authority": "approved-production-candidate",
+      "theme": "Norse",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "hasAlpha": true,
+      "byteCount": 283830,
+      "sha256": "718f6a33bca1ab684e434e482808572a6b06d3fdb0a790212ed048423ad00226",
+      "usage": "may ship after exact descriptor/resource integration and qualification"
+    },
+    {
+      "path": "04-ASSETS/90-REJECTED-BASELINES/rejected-first-dispatch-raven-medallion.png",
+      "authority": "rejected-negative-control",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 139355,
+      "sha256": "0d7331c62933a6902d5ebc02a2f5cdf61e50f98e8189cd96a9611a6691c60592",
+      "usage": "must not be used as current production visual"
+    },
+    {
+      "path": "04-ASSETS/90-REJECTED-BASELINES/rejected-norse-codex-seals-screen.png",
+      "authority": "rejected-negative-control",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 486159,
+      "sha256": "0d0c9343a0b5b24368c506abccbbc22ea2874dc8d70ada13ca37757bd340f27c",
+      "usage": "must not be used as current production visual"
+    },
+    {
+      "path": "04-ASSETS/90-REJECTED-BASELINES/rejected-norse-compose-screen.png",
+      "authority": "rejected-negative-control",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 619890,
+      "sha256": "473057e44045037aa697dbabdc24a47c5241056bb4610ac629c372fdfbe1bd07",
+      "usage": "must not be used as current production visual"
+    },
+    {
+      "path": "04-ASSETS/90-REJECTED-BASELINES/rejected-norse-inscription-preview.png",
+      "authority": "rejected-negative-control",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2127300,
+      "sha256": "a19fdfeb693f50bb2cdf17a851cf19a911ea4c87e9db19d1889dfae7a23c9626",
+      "usage": "must not be used as current production visual"
+    },
+    {
+      "path": "04-ASSETS/90-REJECTED-BASELINES/rejected-norse-seals-screen.png",
+      "authority": "rejected-negative-control",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 210799,
+      "sha256": "e58aceef7614dc93e074ca1bf3d62f4dc4bdbc5ad52d4d267045b30b56117daf",
+      "usage": "must not be used as current production visual"
+    },
+    {
+      "path": "04-ASSETS/96-REJECTED-CURRENT-IMPLEMENTATION/rejected-old-knotwork-seal.png",
+      "authority": "rejected-negative-control",
+      "theme": null,
+      "dimensions": [
+        2134,
+        2134
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 267799,
+      "sha256": "b493998a1f77ef72ebbc4e3b4bbeccf16baf6e4065618553ecfa561e7d69af2d",
+      "usage": "must not be used as current production visual"
+    },
+    {
+      "path": "04-ASSETS/97-CONTACT-SHEETS/authority-assets-sheet-1.jpg",
+      "authority": "index-only",
+      "theme": null,
+      "dimensions": [
+        1040,
+        2160
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 464379,
+      "sha256": "54e08a40cf39cb029b13f419638de51f6027b3aacc92d0785786d00141d2c159",
+      "usage": "human navigation only; not a comparison reference or production asset"
+    },
+    {
+      "path": "04-ASSETS/97-CONTACT-SHEETS/authority-assets-sheet-2.jpg",
+      "authority": "index-only",
+      "theme": null,
+      "dimensions": [
+        1040,
+        2160
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 494386,
+      "sha256": "21eaa9d3f53f0c56bc832721b18a6681971b418c537dc2b66f223fdea6e17d7a",
+      "usage": "human navigation only; not a comparison reference or production asset"
+    },
+    {
+      "path": "04-ASSETS/97-CONTACT-SHEETS/authority-assets-sheet-3.jpg",
+      "authority": "index-only",
+      "theme": null,
+      "dimensions": [
+        1040,
+        960
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 224746,
+      "sha256": "ae56438f3fe7e66c03df8d1bffae64b05aac135b30bc753675bcaedec885769f",
+      "usage": "human navigation only; not a comparison reference or production asset"
+    },
+    {
+      "path": "04-ASSETS/97-CONTACT-SHEETS/owner-full-resolution-sources.jpg",
+      "authority": "index-only",
+      "theme": null,
+      "dimensions": [
+        1040,
+        2160
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 403079,
+      "sha256": "5ab33358ea37e47532a0f4db7878076e950d6169ccb7708eec1c9f7e625758b8",
+      "usage": "human navigation only; not a comparison reference or production asset"
+    },
+    {
+      "path": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "authority": "hash-locked-comparison-mask",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "L",
+      "hasAlpha": false,
+      "byteCount": 4737,
+      "sha256": "b64242abdeb32f8f2c8343dc6e730f9f231a01aa351807e2bc32fdb5d2fd7c05",
+      "usage": "canonical screen comparison only"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-001-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2189580,
+      "sha256": "720fa98f53dd0e6335ce466c3735f446b422b44c91debad1de654a48947b70f1",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-002-1122x1402.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2839674,
+      "sha256": "2d1696abd8a7ddbfe81b89c2eb84933a516ba5a4bf8eaa2dae0edcbb3d3758ef",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-003-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2018723,
+      "sha256": "76ba4b2886349f6e92873ec5f5f4b732465c23b9b1ac0587b442fc2c5e0d2906",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-004-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2410503,
+      "sha256": "6186c6ecd82e25409904daa2460b3fc1953d7a8209a5f224649285f7de8d696f",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-005-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2057268,
+      "sha256": "311a56d0d65cfee32f76e0e2ca7b9495a923fac7a0553f957f4088e88cb754dd",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-006-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2564225,
+      "sha256": "cb56d7415fdebae60d2bef7141001d7de3539732e16d1df71db5765a4810a792",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-007-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2126318,
+      "sha256": "cd25b1917511291081e3333ee7083b2be091cc590f215891c5510c77a2ad5713",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-008-1122x1402.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2777986,
+      "sha256": "d3e77551f5698ec82bc492001a3e478bcda81b76f721e171f2417dea1e1952b5",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-009-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2110088,
+      "sha256": "3b2720262795e86840b38d7bac8da702f16d4290a2f3e8e395e0ed198b33890e",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-010-1122x1402.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2839674,
+      "sha256": "2d1696abd8a7ddbfe81b89c2eb84933a516ba5a4bf8eaa2dae0edcbb3d3758ef",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-011-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2564225,
+      "sha256": "cb56d7415fdebae60d2bef7141001d7de3539732e16d1df71db5765a4810a792",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-012-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2018723,
+      "sha256": "76ba4b2886349f6e92873ec5f5f4b732465c23b9b1ac0587b442fc2c5e0d2906",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-013-1122x1402.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2887784,
+      "sha256": "ea52db7c2f8a89354069b6f64a4751cb62ea439a968c6c1ba8309f8ac3145f5d",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-014-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2110088,
+      "sha256": "3b2720262795e86840b38d7bac8da702f16d4290a2f3e8e395e0ed198b33890e",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-015-1536x1024.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2624892,
+      "sha256": "e6f74be45f2b17657f70d1e48e73158d60bb4c3894f0455608cbefa0b9412020",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-016-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2163395,
+      "sha256": "2c3c6ee95e0ea5d79a2116224a91dc2d8da1e2e3c0e535ea14864e69eec232fb",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-017-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2395941,
+      "sha256": "804a3142fc740cd152325f026be84e7c04704487671a1d2f989db4ed2d4cbcb3",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-018-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2163395,
+      "sha256": "2c3c6ee95e0ea5d79a2116224a91dc2d8da1e2e3c0e535ea14864e69eec232fb",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-019-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 223996,
+      "sha256": "a04c5e39b25ab14e29c42f26943b3d3dd3b2e906663d566893b153b40ab93cb4",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-020-1536x1024.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2566933,
+      "sha256": "317f7fa87a2a83db3c2e19217cc0d60cfea7eaeea452d2f1f37b09ee13246aee",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-021-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 637748,
+      "sha256": "e920f9dbad9aae4f2933b30609c9b59bb9f19e598c8fea2d514a704a3d043eb2",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-022-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2119727,
+      "sha256": "cb49801223d93c34a3927a1a67a0b7c5428d28b1b55f6e1a1d737a2ecce33827",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-023-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 156397,
+      "sha256": "1509f15a712cc109d6ddf2c0d05dde5da0659300353e671427ffe16b192496e7",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-024-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2189580,
+      "sha256": "720fa98f53dd0e6335ce466c3735f446b422b44c91debad1de654a48947b70f1",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-025-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2126318,
+      "sha256": "cd25b1917511291081e3333ee7083b2be091cc590f215891c5510c77a2ad5713",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-026-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 492275,
+      "sha256": "f7bc08466f9093df7726930cd3dee6e6831d985b96a302ff21c314fba3cb97e2",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-027-1122x1402.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2849958,
+      "sha256": "33fcaedc059728c6b0439e16f2673878c1cfe1dde5bc17eecf6ee48f6dd8b091",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-028-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 1859273,
+      "sha256": "2799c67a2c962ad92e0fb09c674d97a08f44001f0d026f4b6eaea8c81674110c",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-029-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2148141,
+      "sha256": "d7266005ded25354980969d37c67be24efc00c491a080a19d6adc88f840d8e63",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-030-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2119727,
+      "sha256": "cb49801223d93c34a3927a1a67a0b7c5428d28b1b55f6e1a1d737a2ecce33827",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-031-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2395941,
+      "sha256": "804a3142fc740cd152325f026be84e7c04704487671a1d2f989db4ed2d4cbcb3",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-032-1122x1402.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2777986,
+      "sha256": "d3e77551f5698ec82bc492001a3e478bcda81b76f721e171f2417dea1e1952b5",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-033-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2148141,
+      "sha256": "d7266005ded25354980969d37c67be24efc00c491a080a19d6adc88f840d8e63",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-034-1122x1402.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2849958,
+      "sha256": "33fcaedc059728c6b0439e16f2673878c1cfe1dde5bc17eecf6ee48f6dd8b091",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-035-1536x1024.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2469927,
+      "sha256": "13f1854dc64f7f70b7d54742d4b99aa6e15638b6c7262e380b455192ddabefb2",
+      "usage": "high-resolution production extraction/reconstruction source"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-036-941x1672.png",
+      "authority": "owner-supplied-full-resolution-source",
+      "theme": null,
+      "dimensions": [
+        941,
+        1672
+      ],
+      "mode": "RGB",
+      "hasAlpha": false,
+      "byteCount": 2410503,
+      "sha256": "6186c6ecd82e25409904daa2460b3fc1953d7a8209a5f224649285f7de8d696f",
+      "usage": "high-resolution production extraction/reconstruction source"
+    }
+  ]
+}

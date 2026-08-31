@@ -61,6 +61,30 @@ final class ReceivedPresentationAvailabilityBindingTests: XCTestCase {
         }
     }
 
+    func testPreparationFailureDowngradePreservesIncomingObservation() throws {
+        let retained = try presentation(
+            availability: .available,
+            safePreviewStatus: .valid,
+            provenanceStatus: .verified
+        )
+
+        let downgraded = ReceivedPresentationAvailabilityBinding.downgrade(
+            retained,
+            to: .corrupt
+        )
+
+        XCTAssertEqual(downgraded.requestedSelection, retained.requestedSelection)
+        XCTAssertEqual(downgraded.providerAvailability, .corrupt)
+        XCTAssertEqual(downgraded.renderMode, .norseInteractiveFallback)
+        XCTAssertEqual(downgraded.effectiveCodexID, RuneScribeCodexIDs.norse)
+        XCTAssertEqual(downgraded.safePreviewStatus, retained.safePreviewStatus)
+        XCTAssertEqual(downgraded.provenanceStatus, retained.provenanceStatus)
+        XCTAssertEqual(
+            downgraded.encounterRecordingStatus,
+            retained.encounterRecordingStatus
+        )
+    }
+
     func testUnsupportedPresentationVersionRemainsIncompatibleWithAvailableProvider() throws {
         let retained = try presentation(
             presentationVersion: 2,
@@ -132,6 +156,7 @@ final class ReceivedPresentationAvailabilityBindingTests: XCTestCase {
         )
         let received = try ReceivedMessageDTO(
             id: MessageID(rawValue: UUID()),
+            receivedAt: Date(timeIntervalSince1970: 1_000),
             plaintext: "Readable message",
             senderName: "Sender",
             cipherID: CipherID(rawValue: UUID()),

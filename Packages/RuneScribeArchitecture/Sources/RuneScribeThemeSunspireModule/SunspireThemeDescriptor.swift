@@ -423,6 +423,8 @@ public enum SunspireThemeDescriptorFactory {
                   }
                 ],
                 "maximumGlyphLines": 6,
+                "catalogSpecimenRows": 3,
+                "catalogSpecimenColumns": 6,
                 "minimumGlyphScale": 0.72,
                 "overflowBehavior": "standardAlternate",
                 "attributionRegion": {
@@ -668,6 +670,7 @@ public enum SunspireThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.sunspire.sunleaf.crest.svg"
             },
             "vectorResourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-vector-master",
+            "colorResourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-thumbnail",
             "allowedScale": {
@@ -708,6 +711,7 @@ public enum SunspireThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.sunspire.golden.lark.svg"
             },
             "vectorResourceID": "resource.seal.sunspire.golden-lark.output.seal-vector-master",
+            "colorResourceID": "resource.seal.sunspire.golden-lark.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.sunspire.golden-lark.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.sunspire.golden-lark.output.seal-thumbnail",
             "allowedScale": {
@@ -748,6 +752,7 @@ public enum SunspireThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.sunspire.dawnflower.svg"
             },
             "vectorResourceID": "resource.seal.sunspire.dawnflower.output.seal-vector-master",
+            "colorResourceID": "resource.seal.sunspire.dawnflower.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.sunspire.dawnflower.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.sunspire.dawnflower.output.seal-thumbnail",
             "allowedScale": {
@@ -788,6 +793,7 @@ public enum SunspireThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.sunspire.sunwheel.svg"
             },
             "vectorResourceID": "resource.seal.sunspire.sunwheel.output.seal-vector-master",
+            "colorResourceID": "resource.seal.sunspire.sunwheel.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.sunspire.sunwheel.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.sunspire.sunwheel.output.seal-thumbnail",
             "allowedScale": {
@@ -828,6 +834,7 @@ public enum SunspireThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.sunspire.radiant.spire.svg"
             },
             "vectorResourceID": "resource.seal.sunspire.radiant-spire.output.seal-vector-master",
+            "colorResourceID": "resource.seal.sunspire.radiant-spire.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.sunspire.radiant-spire.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.sunspire.radiant-spire.output.seal-thumbnail",
             "allowedScale": {
@@ -868,6 +875,7 @@ public enum SunspireThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.sunspire.echo.ember.svg"
             },
             "vectorResourceID": "resource.seal.sunspire.echo-ember.output.seal-vector-master",
+            "colorResourceID": "resource.seal.sunspire.echo-ember.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.sunspire.echo-ember.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.sunspire.echo-ember.output.seal-thumbnail",
             "allowedScale": {
@@ -1028,6 +1036,16 @@ public enum SunspireThemeDescriptorFactory {
           "sourceReference": "owner-approved production design and manifest direction",
           "exportSettings": "{\"deterministic\":true,\"pipeline\":\"scripts/build-elven-production-assets.py\",\"pipelineSHA256\":\"3dd388a70763603b2f90e04ecf7de7115e050ba3bb4da69a96b35fcf727e2307\",\"toolVersions\":{\"fontTools\":\"4.60.2\",\"pillow\":\"11.3.0\",\"python\":\"3.9.6\",\"sips\":\"sips-316\"}}",
           "licenseNotice": "Owner-supplied proprietary source and approved recovery authority"
+        },
+        {
+          "id": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+          "creatorTool": "Pinned deterministic v4.3 asset builder",
+          "creationDate": "2026-08-27",
+          "origin": "derived",
+          "rightsOwner": "Raven Forge Software",
+          "sourceReference": "docs/verification/theme-fidelity-v4-3/inventory/recipes/Sunspire-Accepted-Source-Master-Recipe-v4.3.json",
+          "exportSettings": "{\"deterministic\":true,\"ownerReview\":\"PENDING\",\"pipeline\":\"scripts/build-sunspire-wildwood-gloamthorn-v43-assets.py\"}",
+          "licenseNotice": "Project-local proprietary production masters; owner visual review remains pending"
         },
         {
           "id": "prov.Production.Sources.sunspire.sunspire.vault.recipe.json",

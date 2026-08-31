@@ -16,6 +16,26 @@ enum ThemeFidelityQualificationRouteError: Error, Equatable, Sendable {
     case safePreviewUnavailable
 }
 
+struct ThemeFidelityQualificationCatalogBinding: Equatable, Sendable {
+    let initialTab: CodexCatalogTab
+    let variant: CodexCatalogVariant
+
+    static func resolve(
+        surface: ThemeFidelityQualificationLaunch.Surface
+    ) -> Self? {
+        switch surface {
+        case .relicPicker:
+            Self(initialTab: .relics, variant: .featuredSelected)
+        case .sealPicker:
+            Self(initialTab: .seals, variant: .featuredSelected)
+        case .vaultEncountered, .vaultOwned:
+            Self(initialTab: .relics, variant: .acquisition)
+        default:
+            nil
+        }
+    }
+}
+
 struct ThemeFidelityQualificationHostView: View {
     let launch: ThemeFidelityQualificationLaunch
     @ObservedObject var session: RuneScribeUISession
@@ -154,21 +174,19 @@ enum ThemeFidelityQualificationRoute {
         )
     }
 
-    private static func requiredSurfaceResourceIDs(
+    static func requiredSurfaceResourceIDs(
         surface: ThemeFidelityQualificationLaunch.Surface,
         descriptor: ThemeDescriptor
     ) -> Set<ThemeResourceID> {
         switch surface {
-        case .relicPicker:
-            return Set(descriptor.codex.relics.compactMap {
-                $0.metadata.availability == .reservedInactive
-                    ? nil : $0.thumbnailResourceID
-            })
-        case .sealPicker:
-            return Set(descriptor.codex.seals.compactMap {
-                $0.metadata.availability == .reservedInactive
-                    ? nil : $0.thumbnailResourceID
-            })
+        case .relicPicker, .sealPicker, .vaultEncountered, .vaultOwned:
+            return catalogResourceIDs(descriptor: descriptor)
+        case .receivedCipher:
+            return ReceivedCipherPresentationResourcePlan(descriptor)?
+                .resourceIDs(for: .primary) ?? []
+        case .shareBuilder, .staticShare:
+            return ReceivedCipherPresentationResourcePlan(descriptor)?
+                .resourceIDs(for: .shareCard) ?? []
         case .mastery:
             return Set(
                 descriptor.codex.frames.prefix(1).map(\.staticFallbackResourceID)
@@ -179,6 +197,25 @@ enum ThemeFidelityQualificationRoute {
         default:
             return []
         }
+    }
+
+    fileprivate static func catalogResourceIDs(
+        descriptor: ThemeDescriptor
+    ) -> Set<ThemeResourceID> {
+        var resourceIDs = Set(descriptor.codex.relics.compactMap {
+            $0.metadata.availability == .reservedInactive
+                ? nil : $0.thumbnailResourceID
+        })
+        resourceIDs.formUnion(descriptor.codex.seals.compactMap {
+            $0.metadata.availability == .reservedInactive
+                ? nil : $0.thumbnailResourceID
+        })
+        if let defaultRelic = descriptor.codex.relics.first(where: {
+            $0.metadata.id == descriptor.codex.defaultRelicID
+        }) {
+            resourceIDs.insert(defaultRelic.staticFallbackResourceID)
+        }
+        return resourceIDs
     }
 
     private static func content(
@@ -216,16 +253,22 @@ enum ThemeFidelityQualificationRoute {
                 qualificationViewportWidth: workspaceViewportWidth
             ))
         case .inscriptionPreview:
-            return AnyView(ContentView(
-                initialSettledArtifact: ContentViewSettledArtifactSeed(
-                    composition: model.previewPlan,
-                    presentation: model.presentation
-                ),
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: workspaceViewportWidth
+            return AnyView(ThemeInscriptionPreviewView(
+                descriptor: model.descriptor,
+                plan: model.inscriptionPlan,
+                selectedLayout: .long,
+                image: model.requiredImage
             ))
         case .receivedCipher:
-            return AnyView(ReceivedMessageView(pending: try receivedMessage(model: model)))
+            return AnyView(ReceivedCipherPresentationView(
+                state: .primary,
+                pending: try receivedMessage(model: model),
+                receivedAt: receivedPresentationDate,
+                relativeDate: receivedPresentationRelativeDate,
+                descriptor: model.descriptor,
+                plan: model.receivedPlan,
+                image: model.requiredImage
+            ))
         case .shareBuilder:
             guard let cipher = session.activeCipher else {
                 throw ThemeFidelityQualificationRouteError.runtimeDidNotSettle
@@ -264,44 +307,17 @@ enum ThemeFidelityQualificationRoute {
                         showsSelectedArtifacts: false
                     )
             ))
-        case .vaultEncountered:
-            if model.descriptor.criticality == .requiredBase {
-                return AnyView(VaultProgressView(
-                    initialSection: .vault,
-                    initialViewport: .artifact(try focusedVaultArtifactID(
-                        surface: launch.surface,
-                        model: model
-                    )),
-                    initialCodexCardFixture: VaultProgressCodexCardFixture(
-                        visualState: .selected,
-                        providerIsAvailable: true,
-                        ownership: .selected,
-                        isSelectable: false,
-                        showsSelectedArtifacts: false
-                    )
-                ))
-            }
-            return AnyView(VaultProgressView(
-                initialSection: .vault,
-                initialCodexCardFixture: VaultProgressCodexCardFixture(
-                    visualState: .encountered,
-                    providerIsAvailable: false,
-                    ownership: .unowned,
-                    isSelectable: false,
-                    showsSelectedArtifacts: false
-                )
-            ))
-        case .vaultOwned:
-            return AnyView(VaultProgressView(
-                initialSection: .vault,
-                initialCodexCardFixture: VaultProgressCodexCardFixture(
-                    visualState: .owned,
-                    providerIsAvailable: true,
-                    ownership: .owned,
-                    isSelectable: true,
-                    showsSelectedArtifacts: false
-                )
-            ))
+        case .vaultEncountered, .vaultOwned:
+            guard let binding = ThemeFidelityQualificationCatalogBinding.resolve(
+                surface: launch.surface
+            ) else { throw ThemeFidelityQualificationRouteError.invalidDescriptor }
+            return codexCatalog(
+                initialTab: binding.initialTab,
+                variant: binding.variant,
+                launch: launch,
+                model: model,
+                session: session
+            )
         case .vaultSelected:
             return AnyView(VaultProgressView(
                 initialSection: .vault,
@@ -319,9 +335,27 @@ enum ThemeFidelityQualificationRoute {
                 initialViewport: .journey(launch.codexID)
             ))
         case .relicPicker:
-            return AnyView(artifactBrowser(kind: .relic, model: model))
+            guard let binding = ThemeFidelityQualificationCatalogBinding.resolve(
+                surface: launch.surface
+            ) else { throw ThemeFidelityQualificationRouteError.invalidDescriptor }
+            return codexCatalog(
+                initialTab: binding.initialTab,
+                variant: binding.variant,
+                launch: launch,
+                model: model,
+                session: session
+            )
         case .sealPicker:
-            return AnyView(artifactBrowser(kind: .seal, model: model))
+            guard let binding = ThemeFidelityQualificationCatalogBinding.resolve(
+                surface: launch.surface
+            ) else { throw ThemeFidelityQualificationRouteError.invalidDescriptor }
+            return codexCatalog(
+                initialTab: binding.initialTab,
+                variant: binding.variant,
+                launch: launch,
+                model: model,
+                session: session
+            )
         case .mastery:
             let reveal = try masteryReveal(
                 model: model,
@@ -365,6 +399,7 @@ enum ThemeFidelityQualificationRoute {
                     composition: model.shortPlan,
                     presentation: model.presentation
                 ),
+                initialViewport: .resultActions,
                 forcesScrollableWorkspaceLayout: true,
                 qualificationViewportWidth: workspaceViewportWidth
             ))
@@ -388,7 +423,13 @@ enum ThemeFidelityQualificationRoute {
     private static let receivedCipherID = UUID(
         uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"
     )!
-    private static let receivedCipherName = "Cedar Key"
+    private static let receivedCipherName = "Moonrise Meeting"
+    private static let receivedPresentationDate = Date(
+        timeIntervalSinceReferenceDate: 809_299_200
+    )
+    private static let receivedPresentationRelativeDate = Date(
+        timeIntervalSinceReferenceDate: 809_299_500
+    )
     private static func applicationStateSettled(
         _ session: RuneScribeUISession
     ) async -> Bool {
@@ -432,8 +473,9 @@ enum ThemeFidelityQualificationRoute {
             id: MessageID(rawValue: UUID(
                 uuidString: "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC"
             )!),
-            plaintext: model.previewText,
-            senderName: "Freya",
+            receivedAt: Date(timeIntervalSinceReferenceDate: 809_299_200),
+            plaintext: "Meet beneath the silver bough at moonrise.",
+            senderName: "Lunawen",
             cipherID: CipherID(rawValue: receivedCipherID),
             cipherName: receivedCipherName,
             senderIdentityStatus: .trustedLocalCipher,
@@ -442,86 +484,38 @@ enum ThemeFidelityQualificationRoute {
         ))
     }
 
-    private static func artifactBrowser(
-        kind: ThemeVisualArtifactKind,
-        model: ThemeFidelityQualificationRenderModel
-    ) -> some View {
-        let captureKind: ThemeCaptureIdentifier.PickerKind = kind == .relic
-            ? .relic : .seal
-        let items: [ThemeArtifactBrowserItem] = switch kind {
-        case .relic:
-            model.descriptor.codex.relics.compactMap {
-                guard $0.metadata.availability != .reservedInactive else { return nil }
-                return browserItem(
-                    metadata: $0.metadata,
-                    resourceID: $0.thumbnailResourceID,
-                    kind: .relic,
-                    selectedID: model.selection.relicID
-                )
-            }
-        case .seal:
-            model.descriptor.codex.seals.compactMap {
-                guard $0.metadata.availability != .reservedInactive else { return nil }
-                return browserItem(
-                    metadata: $0.metadata,
-                    resourceID: $0.thumbnailResourceID,
-                    kind: .seal,
-                    selectedID: model.selection.sealID
-                )
-            }
-        case .frame, .crest:
-            []
-        }
-        return NavigationStack {
-            ThemeArtifactBrowserView(
-                title: kind == .relic ? "Choose Relic" : "Choose Seal",
-                items: items,
-                includesNone: false,
-                canSelectNone: false,
-                captureIdentifier: ThemeCaptureIdentifier.artifactPicker(
-                    kind: captureKind,
-                    codexID: model.descriptor.codex.id
-                ),
-                selectNone: {},
-                select: { _ in }
-            ) { item in
-                model.requiredImage(item.resourceID)
-                    .resizable()
-                    .scaledToFill()
-            }
-        }
-        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.artifactPickerScreen(
-            kind: captureKind,
-            codexID: model.descriptor.codex.id
-        ))
-    }
-
-    private static func browserItem(
-        metadata: ThemeArtifactMetadata,
-        resourceID: ThemeResourceID,
-        kind: ThemeVisualArtifactKind,
-        selectedID: ArtifactID?
-    ) -> ThemeArtifactBrowserItem {
-        let state: ThemeVisualContentState = if metadata.id == selectedID {
-            .selected
-        } else if metadata.availability == .included {
-            .owned
-        } else {
-            .locked
-        }
-        return ThemeArtifactBrowserItem(
-            id: metadata.id,
-            resourceID: resourceID,
-            name: metadata.displayName.fallbackValue,
-            description: metadata.description.fallbackValue,
-            kind: kind,
-            rarity: metadata.rarity,
-            state: state,
-            accessibilityLabel: metadata.accessibility.label.fallbackValue,
-            accessibilityHint: metadata.accessibility.hint?.fallbackValue,
-            provenance: nil,
-            isSelectable: state == .owned || state == .selected
+    private static func codexCatalog(
+        initialTab: CodexCatalogTab,
+        variant: CodexCatalogVariant,
+        launch: ThemeFidelityQualificationLaunch,
+        model: ThemeFidelityQualificationRenderModel,
+        session: RuneScribeUISession
+    ) -> AnyView {
+        let root = CodexCatalogRoot(
+            descriptor: model.descriptor,
+            presentation: model.presentation,
+            initialTab: initialTab,
+            variant: variant,
+            runtimeState: session.activeThemeArtifactCatalogRuntimeState
         )
+        switch launch.surface {
+        case .relicPicker:
+            return AnyView(root.themeCaptureViewportIdentifier(
+                ThemeCaptureIdentifier.artifactPickerScreen(
+                    kind: .relic,
+                    codexID: model.descriptor.codex.id
+                )
+            ))
+        case .sealPicker:
+            return AnyView(root.themeCaptureViewportIdentifier(
+                ThemeCaptureIdentifier.artifactPickerScreen(
+                    kind: .seal,
+                    codexID: model.descriptor.codex.id
+                )
+            ))
+        default:
+            return AnyView(root)
+        }
     }
 
     private static func configureProgression(
@@ -778,16 +772,8 @@ enum ThemeFidelityQualificationRoute {
             })
         })
         let pickerArtworkResourceIDs: Set<ThemeResourceID> = switch launch.surface {
-        case .relicPicker:
-            Set(model.descriptor.codex.relics.compactMap {
-                $0.metadata.availability == .reservedInactive
-                    ? nil : $0.thumbnailResourceID
-            })
-        case .sealPicker:
-            Set(model.descriptor.codex.seals.compactMap {
-                $0.metadata.availability == .reservedInactive
-                    ? nil : $0.thumbnailResourceID
-            })
+        case .relicPicker, .sealPicker, .vaultEncountered, .vaultOwned:
+            catalogResourceIDs(descriptor: model.descriptor)
         default:
             []
         }
@@ -870,17 +856,9 @@ enum ThemeFidelityQualificationRoute {
         if launch.surface == .settingsCodexCard {
             identifiers.insert(model.descriptor.codex.vault.selectedResourceID)
         }
-        if launch.surface == .relicPicker {
-            identifiers.formUnion(model.descriptor.codex.relics.compactMap {
-                $0.metadata.availability == .reservedInactive
-                    ? nil : $0.thumbnailResourceID
-            })
-        }
-        if launch.surface == .sealPicker {
-            identifiers.formUnion(model.descriptor.codex.seals.compactMap {
-                $0.metadata.availability == .reservedInactive
-                    ? nil : $0.thumbnailResourceID
-            })
+        if [.relicPicker, .sealPicker, .vaultEncountered, .vaultOwned]
+            .contains(launch.surface) {
+            identifiers.formUnion(catalogResourceIDs(descriptor: model.descriptor))
         }
         if launch.surface == .mastery {
             identifiers.formUnion(
@@ -1074,6 +1052,8 @@ private struct ThemeFidelityQualificationRenderModel {
     let shortPlan: ThemeArtifactCompositionPlan
     let longPlan: ThemeArtifactCompositionPlan
     let previewPlan: ThemeArtifactCompositionPlan
+    let inscriptionPlan: ThemeArtifactCompositionPlan
+    let receivedPlan: ThemeArtifactCompositionPlan
     let highContrastPlan: ThemeArtifactCompositionPlan
     let reduceMotionPlan: ThemeArtifactCompositionPlan
     let presentation: ActiveThemeVisualPresentation
@@ -1094,6 +1074,10 @@ private struct ThemeFidelityQualificationRenderModel {
             highContrastPlan
         case .reduceMotion:
             reduceMotionPlan
+        case .inscriptionPreview:
+            inscriptionPlan
+        case .receivedCipher:
+            receivedPlan
         default:
             previewPlan
         }
@@ -1124,10 +1108,23 @@ private struct ThemeFidelityQualificationRenderModel {
             $0.id == descriptor.codex.primaryScriptID
         }) else { throw ThemeFidelityQualificationRouteError.invalidDescriptor }
         let glyphTokens = script.glyphs.prefix(14).map(\.textToken)
-        let specimen = glyphTokens.joined()
-        let short = specimen.isEmpty ? "RUNESCRIBE" : specimen
-        let long = Array(repeating: short, count: 18).joined(separator: " ")
-        let preview = Array(repeating: short, count: 4).joined(separator: " ")
+        let availableGlyphs = glyphTokens.isEmpty ? ["RUNESCRIBE"] : glyphTokens
+
+        func specimen(rows: Int, columns: Int) -> String {
+            (0 ..< rows).map { row in
+                (0 ..< columns).map { column in
+                    availableGlyphs[(row * columns + column) % availableGlyphs.count]
+                }
+                .joined(separator: " ")
+            }
+            .joined(separator: "\n")
+        }
+
+        let short = specimen(rows: 2, columns: 5)
+        let long = specimen(rows: 6, columns: 9)
+        let preview = specimen(rows: 2, columns: 5)
+        let inscription = specimen(rows: 4, columns: 10)
+        let received = specimen(rows: 1, columns: 10)
 
         func plan(
             inscription: String = preview,
@@ -1148,6 +1145,8 @@ private struct ThemeFidelityQualificationRenderModel {
         let shortPlan = try plan(inscription: short)
         let longPlan = try plan(inscription: long)
         let previewPlan = try plan()
+        let inscriptionPlan = try plan(inscription: inscription)
+        let receivedPlan = try plan(inscription: received)
         let highContrastPlan = try plan(mode: .highContrast)
         let reduceMotionPlan = try plan(reduceMotion: true)
         let masteryTitlePresentation = session.progressionSnapshot?.titles.first(where: {
@@ -1156,7 +1155,15 @@ private struct ThemeFidelityQualificationRenderModel {
         try validateImages(
             surface: launch.surface,
             descriptor: descriptor,
-            plans: [shortPlan, longPlan, previewPlan, highContrastPlan, reduceMotionPlan],
+            plans: [
+                shortPlan,
+                longPlan,
+                previewPlan,
+                inscriptionPlan,
+                receivedPlan,
+                highContrastPlan,
+                reduceMotionPlan,
+            ],
             presentation: presentation
         )
         if launch.surface.requiresCodexCardImages {
@@ -1194,6 +1201,8 @@ private struct ThemeFidelityQualificationRenderModel {
             shortPlan: shortPlan,
             longPlan: longPlan,
             previewPlan: previewPlan,
+            inscriptionPlan: inscriptionPlan,
+            receivedPlan: receivedPlan,
             highContrastPlan: highContrastPlan,
             reduceMotionPlan: reduceMotionPlan,
             presentation: presentation,
@@ -1217,18 +1226,17 @@ private struct ThemeFidelityQualificationRenderModel {
         plans: [ThemeArtifactCompositionPlan],
         presentation: ActiveThemeVisualPresentation
     ) throws {
-        var resourceIDs = Set<ThemeResourceID>()
-        if surface == .relicPicker {
-            resourceIDs.formUnion(descriptor.codex.relics.compactMap {
-                $0.metadata.availability == .reservedInactive
-                    ? nil : $0.thumbnailResourceID
-            })
-        }
-        if surface == .sealPicker {
-            resourceIDs.formUnion(descriptor.codex.seals.compactMap {
-                $0.metadata.availability == .reservedInactive
-                    ? nil : $0.thumbnailResourceID
-            })
+        var resourceIDs = ThemeFidelityQualificationRoute.requiredSurfaceResourceIDs(
+            surface: surface,
+            descriptor: descriptor
+        )
+        if [.relicPicker, .sealPicker, .vaultEncountered, .vaultOwned]
+            .contains(surface) {
+            resourceIDs.formUnion(
+                ThemeFidelityQualificationRoute.catalogResourceIDs(
+                    descriptor: descriptor
+                )
+            )
         }
         if surface == .mastery {
             resourceIDs.formUnion(
@@ -1259,9 +1267,7 @@ private extension ThemeFidelityQualificationLaunch.Surface {
         switch self {
         case .settingsCodexCard,
              .settingsDefaultsPreview,
-             .vaultEncountered,
              .vaultLocked,
-             .vaultOwned,
              .vaultProgress,
              .vaultSelected:
             return true

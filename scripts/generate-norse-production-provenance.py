@@ -31,13 +31,22 @@ PROVENANCE_RELATIVE = (
 )
 DESCRIPTOR_RELATIVE = MODULE_RELATIVE / "NorseBaseThemeDescriptor.swift"
 DERIVATION_RELATIVE = Path(
-    "docs/verification/theme-fidelity-v4/generated/norse/Metadata/"
-    "Norse-Production-Asset-Derivation-v4.0.json"
+    "docs/verification/theme-fidelity-v4-3/generated/norse/Metadata/"
+    "Norse-Production-Asset-Derivation-v4.3.json"
 )
-SOURCE_MASTERS_RELATIVE = Path(
+LEGACY_SOURCE_MASTERS_RELATIVE = Path(
     "docs/verification/theme-fidelity-v4/source-masters/norse"
 )
+V43_SOURCE_MASTERS_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4-3/source-masters/norse"
+)
 GENERATOR_RELATIVE = Path("scripts/generate-norse-production-provenance.py")
+RUNESTONE_CATALOG_EXTRACTOR_RELATIVE = Path(
+    "scripts/extract-norse-runestone-catalog-source.py"
+)
+RUNESTONE_MESSAGE_EXTRACTOR_RELATIVE = Path(
+    "scripts/extract-norse-runestone-message-source.py"
+)
 BASE_OWNERSHIP_RELATIVE = Path("EULA.md")
 FONT_LICENSE_RELATIVE = Path("RuneScrib/Resources/Fonts/OFL.txt")
 
@@ -149,7 +158,7 @@ def fallback_map() -> dict[str, list[str]]:
             f"resource.relic.norse.{slug}.static-share-fallback",
         ]
     for slug in ("valknut", "ravenshield", "mjolnir", "wolkin", "yggdrasil", "berserk"):
-        values[f"resource.seal.norse.{slug}.vector-master"] = [
+        values[f"resource.seal.norse.{slug}.color-master"] = [
             f"resource.seal.norse.{slug}.monochrome-fallback",
             f"resource.seal.norse.{slug}.thumbnail",
         ]
@@ -196,13 +205,19 @@ def generator_inputs(root: Path) -> list[dict[str, str]]:
         DERIVATION_RELATIVE,
         BASE_OWNERSHIP_RELATIVE,
         FONT_LICENSE_RELATIVE,
+        RUNESTONE_CATALOG_EXTRACTOR_RELATIVE,
+        RUNESTONE_MESSAGE_EXTRACTOR_RELATIVE,
     ]
-    source_root = root / SOURCE_MASTERS_RELATIVE
-    values.extend(
-        path.relative_to(root)
-        for path in sorted(source_root.rglob("*"))
-        if path.is_file() and not path.is_symlink()
-    )
+    for source_root_relative in (
+        LEGACY_SOURCE_MASTERS_RELATIVE,
+        V43_SOURCE_MASTERS_RELATIVE,
+    ):
+        source_root = root / source_root_relative
+        values.extend(
+            path.relative_to(root)
+            for path in sorted(source_root.rglob("*"))
+            if path.is_file() and not path.is_symlink()
+        )
     return [
         {"path": value.as_posix(), "sha256": sha256_file(root / value)}
         for value in values
@@ -298,9 +313,9 @@ def build_document(root: Path) -> dict[str, Any]:
     return {
         "aggregateSHA256": aggregate_sha256(resources),
         "authority": {
-            "package": "Rune-Scribe-Theme-Fidelity-Remediation-v4.0",
+            "package": "Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
             "publicDistributionAuthorized": False,
-            "scope": "Norse v2 local implementation and qualification only",
+            "scope": "Norse v2 production resources under v4.3 local qualification",
         },
         "generator": {
             "inputAggregateSHA256": input_digest.hexdigest(),

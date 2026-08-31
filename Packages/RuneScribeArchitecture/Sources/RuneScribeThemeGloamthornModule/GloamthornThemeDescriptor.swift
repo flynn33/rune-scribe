@@ -361,6 +361,16 @@ public enum GloamthornThemeDescriptorFactory {
                 "key": "relic.gloamthorn.nightthorn-tablet.description",
                 "fallbackValue": "A dark but highly legible default Relic that presents Gloamthorn as luxurious and ceremonial."
               },
+              "facets": [
+                {
+                  "key": "relic.gloamthorn.nightthorn-tablet.facet.shadowbound",
+                  "fallbackValue": "Shadowbound"
+                },
+                {
+                  "key": "relic.gloamthorn.nightthorn-tablet.facet.thornscript",
+                  "fallbackValue": "Thornscript"
+                }
+              ],
               "rarity": "forged",
               "availability": "included",
               "accessibility": {
@@ -423,6 +433,8 @@ public enum GloamthornThemeDescriptorFactory {
                   }
                 ],
                 "maximumGlyphLines": 5,
+                "catalogSpecimenRows": 3,
+                "catalogSpecimenColumns": 9,
                 "minimumGlyphScale": 0.72,
                 "overflowBehavior": "standardAlternate",
                 "attributionRegion": {
@@ -460,6 +472,16 @@ public enum GloamthornThemeDescriptorFactory {
                 "key": "relic.gloamthorn.umbral-plaque.description",
                 "fallbackValue": "A compact dark-court plaque with dense material detail and clear short-message presentation."
               },
+              "facets": [
+                {
+                  "key": "relic.gloamthorn.umbral-plaque.facet.shadowleaf",
+                  "fallbackValue": "Shadowleaf"
+                },
+                {
+                  "key": "relic.gloamthorn.umbral-plaque.facet.twilightforged",
+                  "fallbackValue": "Twilightforged"
+                }
+              ],
               "rarity": "inscribed",
               "availability": "earned",
               "accessibility": {
@@ -559,6 +581,16 @@ public enum GloamthornThemeDescriptorFactory {
                 "key": "relic.gloamthorn.duskbriar-stele.description",
                 "fallbackValue": "A prestige Relic for formal long inscriptions, designed to feel aristocratic rather than hostile."
               },
+              "facets": [
+                {
+                  "key": "relic.gloamthorn.duskbriar-stele.facet.aristocratic",
+                  "fallbackValue": "Aristocratic"
+                },
+                {
+                  "key": "relic.gloamthorn.duskbriar-stele.facet.pactbound",
+                  "fallbackValue": "Pactbound"
+                }
+              ],
               "rarity": "rare",
               "availability": "earned",
               "accessibility": {
@@ -668,6 +700,7 @@ public enum GloamthornThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.gloamthorn.thornmoon.svg"
             },
             "vectorResourceID": "resource.seal.gloamthorn.thornmoon.output.seal-vector-master",
+            "colorResourceID": "resource.seal.gloamthorn.thornmoon.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.gloamthorn.thornmoon.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.gloamthorn.thornmoon.output.seal-thumbnail",
             "allowedScale": {
@@ -708,6 +741,7 @@ public enum GloamthornThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.gloamthorn.nightglass.moth.svg"
             },
             "vectorResourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-vector-master",
+            "colorResourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-thumbnail",
             "allowedScale": {
@@ -748,6 +782,7 @@ public enum GloamthornThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.gloamthorn.eclipse.bloom.svg"
             },
             "vectorResourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-vector-master",
+            "colorResourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-thumbnail",
             "allowedScale": {
@@ -788,6 +823,7 @@ public enum GloamthornThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.gloamthorn.veiled.serpent.svg"
             },
             "vectorResourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-vector-master",
+            "colorResourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-thumbnail",
             "allowedScale": {
@@ -828,6 +864,7 @@ public enum GloamthornThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.gloamthorn.pact.crown.svg"
             },
             "vectorResourceID": "resource.seal.gloamthorn.pact-crown.output.seal-vector-master",
+            "colorResourceID": "resource.seal.gloamthorn.pact-crown.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.gloamthorn.pact-crown.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.gloamthorn.pact-crown.output.seal-thumbnail",
             "allowedScale": {
@@ -868,6 +905,7 @@ public enum GloamthornThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.gloamthorn.echo.wisp.svg"
             },
             "vectorResourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-vector-master",
+            "colorResourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-thumbnail",
             "allowedScale": {
@@ -1028,6 +1066,16 @@ public enum GloamthornThemeDescriptorFactory {
           "sourceReference": "owner-approved production design and manifest direction",
           "exportSettings": "{\"deterministic\":true,\"pipeline\":\"scripts/build-elven-production-assets.py\",\"pipelineSHA256\":\"3dd388a70763603b2f90e04ecf7de7115e050ba3bb4da69a96b35fcf727e2307\",\"toolVersions\":{\"fontTools\":\"4.60.2\",\"pillow\":\"11.3.0\",\"python\":\"3.9.6\",\"sips\":\"sips-316\"}}",
           "licenseNotice": "Owner-supplied proprietary source and approved recovery authority"
+        },
+        {
+          "id": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+          "creatorTool": "Pinned deterministic v4.3 asset builder",
+          "creationDate": "2026-08-27",
+          "origin": "derived",
+          "rightsOwner": "Raven Forge Software",
+          "sourceReference": "docs/verification/theme-fidelity-v4-3/inventory/recipes/Gloamthorn-Accepted-Source-Master-Recipe-v4.3.json",
+          "exportSettings": "{\"deterministic\":true,\"ownerReview\":\"PENDING\",\"pipeline\":\"scripts/build-sunspire-wildwood-gloamthorn-v43-assets.py\"}",
+          "licenseNotice": "Project-local proprietary production masters; owner visual review remains pending"
         },
         {
           "id": "prov.Production.Sources.gloamthorn.gloamthorn.vault.recipe.json",

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0",
+  "rules": [
+    "Controlling goldens are reference-only unless explicitly promoted as a production resource after validation.",
+    "Reference slices identify focal regions and extraction sources; they must not be stretched into complete UI.",
+    "Rejected baselines must never appear in shipping products or accepted final screenshots.",
+    "Production candidates require source-to-output visual comparison before integration.",
+    "All shipping assets require descriptor, manifest, digest, dimensions, owner module, and surface coverage."
+  ],
+  "themeFolders": {
+    "Norse": "04-ASSETS/00-CONTROLLING-GOLDENS/Norse",
+    "Moonleaf": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf",
+    "Sunspire": "04-ASSETS/00-CONTROLLING-GOLDENS/Sunspire",
+    "Wildwood": "04-ASSETS/00-CONTROLLING-GOLDENS/Wildwood",
+    "Gloamthorn": "04-ASSETS/00-CONTROLLING-GOLDENS/Gloamthorn"
+  }
+}

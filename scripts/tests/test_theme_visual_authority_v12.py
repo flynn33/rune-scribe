@@ -26,6 +26,9 @@ from theme_fidelity_authority_v12 import (  # noqa: E402
     payload_aggregate_sha256,
     sha256_file,
 )
+from theme_fidelity_authority_v13 import (  # noqa: E402
+    DEFAULT_IMPORT_MANIFEST as ACTIVE_V13_IMPORT_MANIFEST,
+)
 
 
 CHECKER = SCRIPTS_ROOT / "check-theme-visual-authority.py"
@@ -106,10 +109,9 @@ class AuthorityFixture:
 
 class ActiveAuthorityTests(unittest.TestCase):
     def test_repository_bundle_passes_all_declared_counts(self) -> None:
-        result = AuthorityV12Checker(
-            REPOSITORY_ROOT,
-            REPOSITORY_ROOT / DEFAULT_IMPORT_MANIFEST,
-        ).run()
+        fixture = AuthorityFixture()
+        self.addCleanup(fixture.close)
+        result = fixture.run()
 
         self.assertEqual(result["result"], "PASS", result["findings"])
         self.assertEqual(result["authorityStatus"], "active-acceptance-authority")
@@ -134,11 +136,11 @@ class ActiveAuthorityTests(unittest.TestCase):
 
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertEqual(result["result"], "PASS", result["findings"])
-        self.assertEqual(result["schemaVersion"], "1.2")
-        self.assertEqual(result["authorityVersion"], "4.2")
+        self.assertEqual(result["schemaVersion"], "1.3")
+        self.assertEqual(result["authorityVersion"], "4.3")
         self.assertEqual(
             result["manifest"],
-            DEFAULT_IMPORT_MANIFEST.as_posix(),
+            ACTIVE_V13_IMPORT_MANIFEST.as_posix(),
         )
 
     def test_active_checker_preserves_historical_authority_directory(self) -> None:

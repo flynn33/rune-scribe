@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.0",
+  "authorityContract": "theme-fidelity-v4.3",
+  "sourceClass": "reference-grounded-production-master",
+  "ownerReview": "PENDING",
+  "runtimeAuthority": false,
+  "records": [
+    {
+      "id": "frame.wildwood.living-root",
+      "role": "Frame",
+      "output": "wildwood/ornament/wildwood-living-root-frame-production-master-v4.3.png",
+      "sha256": "41005f47b1ae190337f01b77f22220458d51bd7ef5251e1429b0e3dbb948a0aa",
+      "dimensions": [1448, 1086],
+      "hasAlpha": true,
+      "reference": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-008-1122x1402.png",
+      "referenceUse": "style-grounding-only",
+      "prompt": "Create one independent Wildwood production Frame asset grounded in the approved Wildwood style board: a complete 4:3 rectangular border of coherent interwoven ancient roots and slim branches, dark walnut wood, restrained emerald moss, small natural leaves, and subtle tarnished-bronze highlights. Fully design all four corners and edge runs with protected corner ornament for true nine-slice resizing. Use a frontal orthographic presentation with even border thickness, a fully visible uncropped silhouette, and transparent center and exterior. Exclude every tablet, plaque, relic, crest, medallion, tree emblem, seal, text, glyph, rune, symbol, scene, card, panel fill, and interface element.",
+      "postprocess": "Restore true transparency with a deterministic near-white background key at similarity 0.20 and blend 0.05; preserve the rendered frame geometry without raster stretching.",
+      "acceptance": "Independent continuous 4:3 frame with protected corners, transparent opening and exterior, and no source-Relic crop or precomposed interface."
+    },
+    {
+      "id": "crest.wildwood.heartwood-crown",
+      "role": "Crest",
+      "output": "wildwood/ornament/wildwood-heartwood-crown-crest-production-master-v4.3.png",
+      "sha256": "6203b8d5adcd326f91fadf17c96e2e7147aef9992338e31fa8c316c702453a42",
+      "dimensions": [1254, 1254],
+      "hasAlpha": true,
+      "reference": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-008-1122x1402.png",
+      "referenceUse": "style-grounding-only",
+      "prompt": "Create one independent Wildwood Heartwood Crown Crest grounded in the approved Wildwood style board: one centered circular heraldic medallion with an ancient tree's branching crown and exposed roots in warm tarnished bronze over deep forest-green enamel, encircled by a slim living-root wreath with restrained moss and leaves. Use a frontal orthographic presentation, strong compact silhouette, complete uncropped rim, true transparent exterior, and detail readable at 48 to 64 pixels. Exclude rectangular backing, scene, tablet, frame, card, text, glyph, rune, extra symbol, and interface element.",
+      "postprocess": "Preserve the source alpha channel and image dimensions without compositing or stretching.",
+      "acceptance": "Independent complete Crest with true transparent exterior and a clearly readable tree-and-roots identity at target scale."
+    },
+    {
+      "id": "frame.gloamthorn.briar-court",
+      "role": "Frame",
+      "output": "gloamthorn/ornament/gloamthorn-briar-court-frame-production-master-v4.3.png",
+      "sha256": "65c9c0eea4b9891a718075aa34ec340db3d174b04dc6a355d293d6c3b7df53e7",
+      "dimensions": [1448, 1086],
+      "hasAlpha": true,
+      "reference": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-017-941x1672.png",
+      "referenceUse": "style-grounding-only-complete-reference-never-copied",
+      "prompt": "Create one independent Gloamthorn Briar Court Frame using the approved screen only for material language: a true 4:3 landscape border of elegant blackened-silver thorn branches over restrained obsidian supports, with small deep-violet crystal accents at protected corners and edge midpoints. Rebuild full-length top and bottom edge runs so the frame itself and its hollow opening are 4:3; use even border thickness, continuous protected corners, frontal orthographic presentation, and transparent center and exterior. Exclude every screenshot composition, tablet, relic, medallion, crest, seal, text, glyph, rune, symbol, scene, card, panel fill, and interface element.",
+      "postprocess": "Reject the initial square-silhouette candidate. Restore true transparency on the accepted 4:3 candidate with a deterministic near-white background key at similarity 0.20 and blend 0.05; preserve its rendered geometry without raster stretching.",
+      "acceptance": "Accepted only after the frame itself became 4:3; independent continuous border with transparent opening and exterior and no copied screenshot region."
+    },
+    {
+      "id": "crest.gloamthorn.gloam-sovereign",
+      "role": "Crest",
+      "output": "gloamthorn/ornament/gloamthorn-gloam-sovereign-crest-production-master-v4.3.png",
+      "sha256": "19acfb86790a6c2fe983c740d143bc439ff5ba46bf20942d2dee5a2f6ee84789",
+      "dimensions": [1254, 1254],
+      "hasAlpha": true,
+      "reference": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-017-941x1672.png",
+      "referenceUse": "style-grounding-only-complete-reference-never-copied",
+      "prompt": "Create one independent Gloamthorn Gloam Sovereign Crest using the approved screen only for material language: a centered heraldic crest with a narrow elegant blackened-silver thorn crown over a dark eclipse ring and exactly one central deep-amethyst crystal point. Use regal precise metalwork, frontal orthographic presentation, a compact readable silhouette at 48 to 64 pixels, a fully visible uncropped form, and true transparent exterior. Exclude every rectangular backing, scene, tablet, frame, card, text, glyph, rune, extra symbol, screenshot composition, and interface element.",
+      "postprocess": "Restore true transparency with a deterministic near-white background key at similarity 0.16 and blend 0.05; preserve the rendered crest geometry without raster stretching.",
+      "acceptance": "Independent complete Crest with transparent exterior and the descriptor-required thorn crown, eclipse ring, and single amethyst point."
+    }
+  ]
+}

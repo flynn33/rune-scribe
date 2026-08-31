@@ -8,14 +8,26 @@ typealias ThemeCoordinatorEventPublisher = @Sendable (
 ) async throws -> Void
 
 typealias ThemeCoordinatorReconcileCommitHook = @Sendable (UInt64) async -> Void
+typealias ThemeCoordinatorSelectionDidWriteHook = @Sendable (CodexID) async -> Void
 
 actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
+    private struct ProviderResourceValidationKey: Hashable, Sendable {
+        let codexID: CodexID
+        let ownerModuleID: ModuleIdentifier
+        let moduleGeneration: UInt64
+        let runtimeGeneration: UInt64
+        let contributionRevision: UInt64
+        let resources: [OpaqueResourceMetadata]
+    }
+
     private struct ProviderRecord: Sendable {
         let descriptor: ThemeDescriptor
         let ownerModuleID: ModuleIdentifier
         let state: ThemeProviderState
         let isOwned: Bool
         let diagnosticCode: ThemeProviderDiagnosticCode
+        let resourceValidationKey: ProviderResourceValidationKey?
+        let supportsReceivedPresentationResolution: Bool
 
         var isSelectable: Bool {
             state == .available && isOwned
@@ -42,6 +54,7 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
     private let now: @Sendable () -> Date
     private let publishEvent: ThemeCoordinatorEventPublisher
     private let reconcileWillCommit: ThemeCoordinatorReconcileCommitHook
+    private let selectionDidWrite: ThemeCoordinatorSelectionDidWriteHook
 
     private var revision: UInt64 = 0
     private var reconcileGeneration: UInt64 = 0
@@ -49,6 +62,12 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
     private var latestContent: SnapshotContent?
     private var latestDiagnostics: ThemeCoordinatorDiagnosticsDTO?
     private var providersByCodexID: [CodexID: ProviderRecord] = [:]
+    private var resourceValidationResults: [
+        ProviderResourceValidationKey: ThemeProviderDiagnosticCode
+    ] = [:]
+    private var requiredBaseValidationFailures: [
+        ProviderResourceValidationKey: RequiredThemeResourceFailureDTO
+    ] = [:]
     private var settingsRecordRevision: UInt64 = 0
     private var activeReconcileTask: Task<Void, Error>?
     private var reconcileRequested = false
@@ -67,7 +86,8 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         operatingSystemVersion: RuntimeOperatingSystemVersion,
         now: @escaping @Sendable () -> Date,
         publishEvent: @escaping ThemeCoordinatorEventPublisher,
-        reconcileWillCommit: @escaping ThemeCoordinatorReconcileCommitHook
+        reconcileWillCommit: @escaping ThemeCoordinatorReconcileCommitHook,
+        selectionDidWrite: @escaping ThemeCoordinatorSelectionDidWriteHook
     ) {
         self.contributionReader = contributionReader
         self.resourceResolver = resourceResolver
@@ -78,6 +98,7 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         self.now = now
         self.publishEvent = publishEvent
         self.reconcileWillCommit = reconcileWillCommit
+        self.selectionDidWrite = selectionDidWrite
     }
 
     static func bootstrap(
@@ -89,7 +110,8 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         operatingSystemVersion: RuntimeOperatingSystemVersion,
         now: @escaping @Sendable () -> Date,
         publishEvent: @escaping ThemeCoordinatorEventPublisher,
-        reconcileWillCommit: @escaping ThemeCoordinatorReconcileCommitHook = { _ in }
+        reconcileWillCommit: @escaping ThemeCoordinatorReconcileCommitHook = { _ in },
+        selectionDidWrite: @escaping ThemeCoordinatorSelectionDidWriteHook = { _ in }
     ) async throws -> ThemeCoordinatorService {
         let service = ThemeCoordinatorService(
             contributionReader: contributionReader,
@@ -100,7 +122,8 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             operatingSystemVersion: operatingSystemVersion,
             now: now,
             publishEvent: publishEvent,
-            reconcileWillCommit: reconcileWillCommit
+            reconcileWillCommit: reconcileWillCommit,
+            selectionDidWrite: selectionDidWrite
         )
         try await service.reconcile()
         try await service.startObserving()
@@ -145,18 +168,64 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
                 actual: snapshot.revision
             )
         }
-        guard snapshot.providers.contains(where: {
-            $0.codexID == command.codexID && $0.isSelectable
-        }) else {
+        guard let provider = providersByCodexID[command.codexID],
+              provider.isSelectable,
+              let validationKey = provider.resourceValidationKey
+        else {
+            throw ThemeCoordinatorModuleError.codexNotSelectable(command.codexID)
+        }
+        let resourceCode = try await validateProviderResources(
+            provider.descriptor,
+            ownerModuleID: provider.ownerModuleID,
+            validationKey: validationKey,
+            reuseAcceptedResult: false
+        )
+        guard resourceCode == .accepted else {
+            resourceValidationResults[validationKey] = resourceCode
+            try await reconcile()
+            throw ThemeCoordinatorModuleError.codexNotSelectable(command.codexID)
+        }
+        resourceValidationResults[validationKey] = .accepted
+        try await reconcile()
+        guard let refreshedSnapshot = latestSnapshot else {
+            throw ThemeCoordinatorModuleError.baseProviderUnavailable
+        }
+        if let expected = command.expectedSnapshotRevision,
+           expected != refreshedSnapshot.revision
+        {
+            throw ThemeCoordinatorModuleError.revisionConflict(
+                expected: expected,
+                actual: refreshedSnapshot.revision
+            )
+        }
+        guard let refreshedProvider = providersByCodexID[command.codexID],
+              refreshedProvider.isSelectable,
+              refreshedProvider.resourceValidationKey == validationKey
+        else {
             throw ThemeCoordinatorModuleError.codexNotSelectable(command.codexID)
         }
         _ = try await settings.setSelectedCodex(
             command.codexID,
             expectedRevision: settingsRecordRevision
         )
+        await selectionDidWrite(command.codexID)
         try await reconcile()
         guard let updated = latestSnapshot else {
             throw ThemeCoordinatorModuleError.baseProviderUnavailable
+        }
+        guard updated.preferredCodexID == command.codexID,
+              updated.effectiveCodexID == command.codexID,
+              updated.fallbackReason == .none,
+              let updatedProvider = providersByCodexID[command.codexID],
+              updatedProvider.isSelectable,
+              updated.providers.contains(where: {
+                  $0.codexID == command.codexID
+                      && $0.state == .available
+                      && $0.isSelectable
+                      && $0.isSelected
+              })
+        else {
+            throw ThemeCoordinatorModuleError.codexNotSelectable(command.codexID)
         }
         return updated
     }
@@ -166,10 +235,18 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         metadata _: RuntimeOperationMetadata
     ) async throws -> ThemeDescriptor {
         try await reconcile()
-        guard let provider = providersByCodexID[request.codexID],
-              provider.state == .available,
-              provider.isOwned || provider.descriptor.criticality == .requiredBase
-        else {
+        guard let provider = providersByCodexID[request.codexID] else {
+            throw ThemeCoordinatorModuleError.codexNotSelectable(request.codexID)
+        }
+        let isAuthorized = switch request.purpose {
+        case .selection:
+            provider.state == .available
+                && (provider.isOwned
+                    || provider.descriptor.criticality == .requiredBase)
+        case .receivedPresentation:
+            provider.supportsReceivedPresentationResolution
+        }
+        guard isAuthorized else {
             throw ThemeCoordinatorModuleError.codexNotSelectable(request.codexID)
         }
         return provider.descriptor
@@ -180,40 +257,88 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         metadata _: RuntimeOperationMetadata
     ) async throws -> ResolvedThemeResourceDTO {
         try await reconcile()
-        guard let provider = providersByCodexID[request.codexID],
+        guard let snapshot = latestSnapshot,
+              let provider = providersByCodexID[request.codexID],
               let reference = provider.descriptor.resources.first(where: {
                   $0.id == request.resourceID
               }),
               Self.canResolve(
                   reference,
                   from: provider,
-                  purpose: request.purpose
+                  purpose: request.purpose,
+                  effectiveCodexID: snapshot.effectiveCodexID
+              ),
+              Self.isPermittedResourceRequest(
+                  request,
+                  reference: reference,
+                  descriptor: provider.descriptor
               )
         else {
             throw ThemeCoordinatorModuleError.resourceUnavailable(request)
         }
-        let resolved = try await resourceResolver.resolve(
-            OpaqueResourceHandle(
-                namespace: RuntimeThemeContributionCatalog.resourceNamespace(
-                    for: request.codexID
-                ),
-                resourceID: OpaqueResourceID(rawValue: request.resourceID.rawValue)
-            )
+        let handle = OpaqueResourceHandle(
+            namespace: RuntimeThemeContributionCatalog.resourceNamespace(
+                for: request.codexID
+            ),
+            resourceID: OpaqueResourceID(rawValue: request.resourceID.rawValue)
         )
+        let resolved: ResolvedOpaqueResource
+        do {
+            resolved = try await resourceResolver.resolve(handle)
+        } catch {
+            if !Self.isPermittedOptionalAbsence(error, reference: reference) {
+                if let failure = error as? RequiredThemeResourceFailureDTO,
+                   reference.requirement == .required,
+                   provider.descriptor.codex.id == RuneScribeCodexIDs.norse,
+                   provider.ownerModuleID == RuneScribeModuleIDs.norseTheme,
+                   let validationKey = provider.resourceValidationKey
+                {
+                    requiredBaseValidationFailures[validationKey] = failure
+                }
+                await invalidateProviderResources(
+                    provider,
+                    code: Self.resourceDiagnosticCode(for: error)
+                )
+            }
+            throw ThemeCoordinatorModuleError.resourceUnavailable(request)
+        }
+        try await reconcile()
+        guard let currentSnapshot = latestSnapshot,
+              let currentProvider = providersByCodexID[request.codexID],
+              currentProvider.resourceValidationKey == provider.resourceValidationKey,
+              let currentReference = currentProvider.descriptor.resources.first(where: {
+                  $0.id == request.resourceID
+              }),
+              currentReference == reference,
+              Self.canResolve(
+                  currentReference,
+                  from: currentProvider,
+                  purpose: request.purpose,
+                  effectiveCodexID: currentSnapshot.effectiveCodexID
+              ),
+              Self.isPermittedResourceRequest(
+                  request,
+                  reference: currentReference,
+                  descriptor: currentProvider.descriptor
+              )
+        else {
+            throw ThemeCoordinatorModuleError.resourceUnavailable(request)
+        }
         guard Self.matches(
             resolved.metadata,
-            reference: reference,
+            reference: currentReference,
             codexID: request.codexID,
-            ownerModuleID: provider.ownerModuleID
+            ownerModuleID: currentProvider.ownerModuleID
         ) else {
+            await invalidateProviderResources(currentProvider, code: .resourceMismatch)
             throw ThemeCoordinatorModuleError.resourceUnavailable(request)
         }
         return try ResolvedThemeResourceDTO(
             codexID: request.codexID,
             resourceID: request.resourceID,
-            role: reference.role,
-            mediaType: reference.mediaType,
-            integrity: reference.integrity,
+            role: currentReference.role,
+            mediaType: currentReference.mediaType,
+            integrity: currentReference.integrity,
             verifiedSHA256: ThemeSHA256Digest(
                 rawValue: RuntimeIntegrityDigest.sha256Hex(resolved.data)
             )!,
@@ -242,6 +367,8 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         continuations.removeAll()
         activeContinuations.forEach { $0.finish() }
         providersByCodexID.removeAll()
+        resourceValidationResults.removeAll()
+        requiredBaseValidationFailures.removeAll()
         latestSnapshot = nil
         latestContent = nil
         latestDiagnostics = nil
@@ -331,8 +458,10 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         let settingsSnapshot = try? await settings.snapshot()
         let entitlements = availabilitySnapshot?.entitlementSnapshot.allUnlockIDs
             ?? [RuneScribeUnlockIDs.norseCodex]
+        let preference = Self.preference(from: settingsSnapshot)
         var diagnostics: [ThemeProviderDiagnosticDTO] = []
         var records: [CodexID: ProviderRecord] = [:]
+        var currentValidationKeys = Set<ProviderResourceValidationKey>()
         var contributionsByCodex: [
             CodexID: [RuntimeContributionSnapshotEntry<ThemeDescriptor>]
         ] = [:]
@@ -367,6 +496,16 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             let liveEntry = matchingContributions.count == 1
                 ? matchingContributions[0]
                 : nil
+            let validationKey = liveEntry.map {
+                Self.resourceValidationKey(
+                    descriptor: descriptor,
+                    contribution: $0,
+                    resources: resources
+                )
+            }
+            if let validationKey {
+                currentValidationKeys.insert(validationKey)
+            }
             let state: ThemeProviderState
             let diagnosticCode: ThemeProviderDiagnosticCode
             if collidingCodices.contains(codexID) {
@@ -393,11 +532,31 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
                 state = .unavailable
                 diagnosticCode = .descriptorMismatch
             } else {
-                let resourceCode = Self.validateResources(
+                var resourceCode = Self.validateResources(
                     for: descriptor,
                     ownerModuleID: owner,
                     snapshot: resources
                 )
+                if resourceCode == .accepted,
+                   let validationKey,
+                   let priorPayloadCode = resourceValidationResults[validationKey]
+                {
+                    resourceCode = priorPayloadCode
+                }
+                let shouldValidatePayloads = isBase
+                    || preference.codexID == codexID
+                if resourceCode == .accepted,
+                   shouldValidatePayloads,
+                   let validationKey,
+                   resourceValidationResults[validationKey] == nil
+                {
+                    resourceCode = try await validateProviderResources(
+                        descriptor,
+                        ownerModuleID: owner,
+                        validationKey: validationKey
+                    )
+                    resourceValidationResults[validationKey] = resourceCode
+                }
                 if resourceCode == .accepted {
                     state = .available
                     diagnosticCode = .accepted
@@ -406,12 +565,34 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
                     diagnosticCode = resourceCode
                 }
             }
+            let hasCurrentRegisteredProvider = installed.lifecycleState == .active
+                && liveEntry?.owner.moduleID == owner
+                && liveEntry?.key
+                    == RuntimeThemeContributionCatalog.key(for: codexID)
+                && liveEntry?.value == descriptor
+                && validationKey != nil
+                && Self.validateResources(
+                    for: descriptor,
+                    ownerModuleID: owner,
+                    snapshot: resources
+                ) == .accepted
+            let hasNoKnownPayloadFailure = validationKey.map {
+                resourceValidationResults[$0] == nil
+                    || resourceValidationResults[$0] == .accepted
+            } ?? false
+            let supportsReceivedPresentationResolution =
+                (state == .available || state == .locked)
+                    && hasCurrentRegisteredProvider
+                    && hasNoKnownPayloadFailure
             records[codexID] = ProviderRecord(
                 descriptor: descriptor,
                 ownerModuleID: owner,
                 state: state,
                 isOwned: owned,
-                diagnosticCode: diagnosticCode
+                diagnosticCode: diagnosticCode,
+                resourceValidationKey: validationKey,
+                supportsReceivedPresentationResolution:
+                    supportsReceivedPresentationResolution
             )
             diagnostics.append(
                 ThemeProviderDiagnosticDTO(
@@ -443,13 +624,23 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             throw ThemeCoordinatorModuleError.baseProviderUnavailable
         }
 
-        let preference = Self.preference(from: settingsSnapshot)
         let reconciledSettingsRecordRevision = settingsSnapshot?.settings.first(where: {
             $0.settingID == RuneScribeRuntimeSettings.selectedCodex
         })?.revision ?? 0
         let isEmergencyPresentation = base.state == .invalidResources
-        let requiredBaseResourceFailures = Self.requiredBaseResourceFailures(
+        var requiredBaseResourceFailures = Self.requiredBaseResourceFailures(
             from: requiredBaseFailureContributions
+        )
+        requiredBaseResourceFailures.append(
+            contentsOf: Self.requiredBaseResourceFailures(from: resources)
+        )
+        if let validationKey = base.resourceValidationKey,
+           let validationFailure = requiredBaseValidationFailures[validationKey]
+        {
+            requiredBaseResourceFailures.append(validationFailure)
+        }
+        requiredBaseResourceFailures = Self.normalizedRequiredBaseResourceFailures(
+            requiredBaseResourceFailures
         )
         let selection: (
             effectiveCodexID: CodexID,
@@ -523,6 +714,12 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         }
         settingsRecordRevision = reconciledSettingsRecordRevision
         providersByCodexID = records
+        resourceValidationResults = resourceValidationResults.filter {
+            currentValidationKeys.contains($0.key)
+        }
+        requiredBaseValidationFailures = requiredBaseValidationFailures.filter {
+            currentValidationKeys.contains($0.key)
+        }
         latestDiagnostics = reconciledDiagnostics
 
         if let committedRevision {
@@ -694,12 +891,46 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             else { return nil }
             return entry.value
         }
-        return Array(Set(values)).sorted {
+        return normalizedRequiredBaseResourceFailures(values)
+    }
+
+    private static func requiredBaseResourceFailures(
+        from snapshot: OpaqueResourceSnapshot
+    ) -> [RequiredThemeResourceFailureDTO] {
+        let namespace = RuntimeThemeContributionCatalog.resourceNamespace(
+            for: RuneScribeCodexIDs.norse
+        )
+        let metadataByHandle = Dictionary(
+            uniqueKeysWithValues: snapshot.resources.map { ($0.handle, $0) }
+        )
+        let values: [RequiredThemeResourceFailureDTO] = snapshot.validationFaults.compactMap {
+            fault -> RequiredThemeResourceFailureDTO? in
+            guard fault.ownerModuleID == RuneScribeModuleIDs.norseTheme,
+                  fault.handle.namespace == namespace,
+                  metadataByHandle[fault.handle]?.registrationID == fault.registrationID,
+                  let failure = fault.requiredBaseFailure,
+                  failure.moduleID == RuneScribeModuleIDs.norseTheme,
+                  failure.codexID == RuneScribeCodexIDs.norse
+            else { return nil }
+            return failure
+        }
+        return normalizedRequiredBaseResourceFailures(values)
+    }
+
+    private static func normalizedRequiredBaseResourceFailures(
+        _ values: [RequiredThemeResourceFailureDTO]
+    ) -> [RequiredThemeResourceFailureDTO] {
+        let sorted = Array(Set(values)).sorted {
             requiredBaseResourceFailureOrderingKey($0)
                 .lexicographicallyPrecedes(
                     requiredBaseResourceFailureOrderingKey($1)
                 )
         }
+        return Array(
+            sorted.prefix(
+                ThemeCoordinatorDiagnosticsDTO.maximumRequiredBaseResourceFailureCount
+            )
+        )
     }
 
     private static func requiredBaseResourceFailureOrderingKey(
@@ -739,6 +970,123 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             return operatingSystemVersion.minor > required.1
         }
         return operatingSystemVersion.patch >= required.2
+    }
+
+    private static func resourceValidationKey(
+        descriptor: ThemeDescriptor,
+        contribution: RuntimeContributionSnapshotEntry<ThemeDescriptor>,
+        resources: OpaqueResourceSnapshot
+    ) -> ProviderResourceValidationKey {
+        ProviderResourceValidationKey(
+            codexID: descriptor.codex.id,
+            ownerModuleID: contribution.owner.moduleID,
+            moduleGeneration: contribution.owner.moduleGeneration,
+            runtimeGeneration: contribution.owner.runtimeGeneration,
+            contributionRevision: contribution.publishedRevision,
+            resources: resources.resources
+                .filter { $0.ownerModuleID == contribution.owner.moduleID }
+                .sorted { $0.handle < $1.handle }
+        )
+    }
+
+    private func validateProviderResources(
+        _ descriptor: ThemeDescriptor,
+        ownerModuleID: ModuleIdentifier,
+        validationKey: ProviderResourceValidationKey,
+        reuseAcceptedResult: Bool = true
+    ) async throws -> ThemeProviderDiagnosticCode {
+        if let cached = resourceValidationResults[validationKey],
+           cached != .accepted || reuseAcceptedResult
+        {
+            return cached
+        }
+        let namespace = RuntimeThemeContributionCatalog.resourceNamespace(
+            for: descriptor.codex.id
+        )
+        for reference in descriptor.resources.sorted(by: { $0.id < $1.id }) {
+            try Task.checkCancellation()
+            do {
+                let resolved = try await resourceResolver.resolve(
+                    OpaqueResourceHandle(
+                        namespace: namespace,
+                        resourceID: OpaqueResourceID(
+                            rawValue: reference.id.rawValue
+                        )
+                    )
+                )
+                guard Self.matches(
+                    resolved.metadata,
+                    reference: reference,
+                    codexID: descriptor.codex.id,
+                    ownerModuleID: ownerModuleID
+                ) else {
+                    return .resourceMismatch
+                }
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch let failure as RequiredThemeResourceFailureDTO {
+                if descriptor.codex.id == RuneScribeCodexIDs.norse {
+                    requiredBaseValidationFailures[validationKey] = failure
+                }
+                return Self.resourceDiagnosticCode(for: failure)
+            } catch {
+                if Self.isPermittedOptionalAbsence(error, reference: reference) {
+                    continue
+                }
+                return Self.resourceDiagnosticCode(for: error)
+            }
+        }
+        requiredBaseValidationFailures.removeValue(forKey: validationKey)
+        return .accepted
+    }
+
+    private func invalidateProviderResources(
+        _ provider: ProviderRecord,
+        code: ThemeProviderDiagnosticCode
+    ) async {
+        guard code != .accepted,
+              let validationKey = provider.resourceValidationKey
+        else { return }
+        resourceValidationResults[validationKey] = code
+        try? await reconcile()
+    }
+
+    private static func isPermittedOptionalAbsence(
+        _ error: Error,
+        reference: ThemeResourceReference
+    ) -> Bool {
+        guard reference.requirement == .optional,
+              let error = error as? RuntimeOpaqueResourceError
+        else { return false }
+        if case .resourceUnavailable = error {
+            return true
+        }
+        return false
+    }
+
+    private static func resourceDiagnosticCode(
+        for error: Error
+    ) -> ThemeProviderDiagnosticCode {
+        if let failure = error as? RequiredThemeResourceFailureDTO {
+            return failure.errorCode == .resourceUnavailable
+                ? .missingResource
+                : .resourceMismatch
+        }
+        if let failure = error as? RuntimeVerifiedApplicationResourceFailure {
+            if case .resourceUnavailable = failure {
+                return .missingResource
+            }
+            return .resourceMismatch
+        }
+        guard let error = error as? RuntimeOpaqueResourceError else {
+            return .resourceMismatch
+        }
+        switch error {
+        case .missingRequiredResource, .namespaceUnavailable, .resourceUnavailable:
+            return .missingResource
+        default:
+            return .resourceMismatch
+        }
     }
 
     private static func validateResources(
@@ -784,24 +1132,223 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
                 return .resourceMismatch
             }
         }
+        let metadataByHandle = Dictionary(
+            uniqueKeysWithValues: ownedResources.map { ($0.handle, $0) }
+        )
+        let currentFaults = snapshot.validationFaults.filter { fault in
+            fault.ownerModuleID == ownerModuleID
+                && fault.handle.namespace == namespace
+                && metadataByHandle[fault.handle]?.registrationID == fault.registrationID
+        }
+        if currentFaults.contains(where: { $0.code == .resourceMismatch }) {
+            return .resourceMismatch
+        }
+        if currentFaults.contains(where: { $0.code == .missingRequiredResource }) {
+            return .missingResource
+        }
         return .accepted
     }
 
     private static func canResolve(
         _ reference: ThemeResourceReference,
         from provider: ProviderRecord,
-        purpose: ThemeResourceResolutionPurpose
+        purpose: ThemeResourceResolutionPurpose,
+        effectiveCodexID: CodexID
     ) -> Bool {
         switch purpose {
         case .activePresentation:
             return provider.state == .available
+                && provider.descriptor.codex.id == effectiveCodexID
         case .catalogPreview:
             return (provider.state == .available || provider.state == .locked)
                 && isCatalogPreviewResource(
                     reference,
                     descriptor: provider.descriptor
                 )
+        case .receivedPresentation:
+            return provider.supportsReceivedPresentationResolution
+        case .shareRendering:
+            return provider.state == .available
+                && provider.isOwned
+                && isShareRenderingResource(
+                    reference,
+                    descriptor: provider.descriptor
+                )
         }
+    }
+
+    private static func isPermittedResourceRequest(
+        _ request: ResolveThemeResourceRequestDTO,
+        reference: ThemeResourceReference,
+        descriptor: ThemeDescriptor
+    ) -> Bool {
+        switch request.purpose {
+        case .receivedPresentation:
+            guard let selection = request.receivedPresentationSelection else {
+                return false
+            }
+            return isReceivedPresentationResource(
+                reference,
+                descriptor: descriptor,
+                selection: selection
+            )
+        case .activePresentation, .catalogPreview, .shareRendering:
+            return request.receivedPresentationSelection == nil
+        }
+    }
+
+    static func isReceivedPresentationResource(
+        _ reference: ThemeResourceReference,
+        descriptor: ThemeDescriptor,
+        selection: SharePresentationSelection
+    ) -> Bool {
+        guard descriptor.resources.contains(reference),
+              selection.presentationVersion
+                == SharePresentationSelection.supportedPresentationVersion,
+              let selection = SharePresentationProviderCompatibilityResolver
+                .effectiveSelection(for: selection),
+              selection.codexID == descriptor.codex.id,
+              selection.scriptID == descriptor.codex.primaryScriptID,
+              let script = descriptor.codex.scripts.first(where: {
+                  $0.id == selection.scriptID
+              }),
+              let relic = descriptor.codex.relics.first(where: {
+                  $0.metadata.id == selection.relicID
+                      && $0.metadata.availability != .reservedInactive
+              }),
+              let received = descriptor.codex.receivedPresentation
+        else { return false }
+
+        let seal: ThemeSealDescriptor?
+        if let sealID = selection.sealID {
+            guard let selected = descriptor.codex.seals.first(where: {
+                $0.metadata.id == sealID
+                    && $0.metadata.availability != .reservedInactive
+            }) else { return false }
+            seal = selected
+        } else {
+            seal = nil
+        }
+
+        let frame: ThemeFrameDescriptor?
+        if let frameID = selection.frameID {
+            guard let selected = descriptor.codex.frames.first(where: {
+                $0.metadata.id == frameID
+                    && $0.metadata.availability != .reservedInactive
+                    && $0.allowsStaticShare
+                    && $0.compatibleRelicIDs.contains(relic.metadata.id)
+            }) else { return false }
+            frame = selected
+        } else {
+            frame = nil
+        }
+
+        let background = descriptor.codex.background
+        if reference.id == script.fontResourceID {
+            return reference.role == ThemeResourceRoles.scriptFont
+        }
+        if reference.id == background.staticBaseResourceID {
+            return reference.role == ThemeResourceRoles.backgroundStaticBase
+        }
+        if reference.id == background.reduceMotionResourceID {
+            return [
+                ThemeResourceRoles.backgroundReduceMotion,
+                ThemeResourceRoles.backgroundStaticBase,
+            ].contains(reference.role)
+        }
+        if reference.id == relic.staticFallbackResourceID {
+            return reference.role == ThemeResourceRoles.relicStaticShareFallback
+        }
+        if let seal {
+            if reference.id == seal.standardResourceID {
+                return reference.role == (seal.colorResourceID == reference.id
+                    ? ThemeResourceRoles.sealColorMaster
+                    : ThemeResourceRoles.sealVectorMaster)
+            }
+        }
+        if let frame, reference.id == frame.staticFallbackResourceID {
+            return reference.role == ThemeResourceRoles.frameStaticFallback
+        }
+
+        let receivedResources: [ThemeResourceID: ThemeResourceRoleID] = [
+            received.primarySenderAvatarResourceID:
+                ThemeResourceRoles.receivedPrimarySenderAvatar,
+            received.shareSenderAvatarResourceID:
+                ThemeResourceRoles.receivedShareSenderAvatar,
+            received.shareCodexBadgeResourceID:
+                ThemeResourceRoles.receivedShareCodexBadge,
+            received.primaryMedallion.resourceID:
+                ThemeResourceRoles.receivedPrimaryMedallion,
+            received.shareMedallion.resourceID:
+                ThemeResourceRoles.receivedShareMedallion,
+        ]
+        return receivedResources[reference.id] == reference.role
+    }
+
+    static func isShareRenderingResource(
+        _ reference: ThemeResourceReference,
+        descriptor: ThemeDescriptor
+    ) -> Bool {
+        let codex = descriptor.codex
+        let background = codex.background
+        if reference.id == background.staticBaseResourceID {
+            return reference.role == ThemeResourceRoles.backgroundStaticBase
+        }
+        if reference.id == background.reduceMotionResourceID {
+            return [
+                ThemeResourceRoles.backgroundReduceMotion,
+                ThemeResourceRoles.backgroundStaticBase,
+            ].contains(reference.role)
+        }
+        if reference.id == background.highContrastResourceID {
+            return reference.role == ThemeResourceRoles.backgroundHighContrast
+        }
+
+        for script in codex.scripts where script.id == codex.primaryScriptID {
+            if let fontResourceID = script.fontResourceID,
+               reference.id == fontResourceID
+            {
+                return reference.role == ThemeResourceRoles.scriptFont
+            }
+        }
+        for relic in codex.relics
+            where relic.metadata.availability != .reservedInactive
+        {
+            if reference.id == relic.staticFallbackResourceID {
+                return reference.role == ThemeResourceRoles.relicStaticShareFallback
+            }
+            if reference.id == relic.highContrastResourceID {
+                return [
+                    ThemeResourceRoles.relicHighContrast,
+                    ThemeResourceRoles.relicStaticShareFallback,
+                ].contains(reference.role)
+            }
+        }
+        for seal in codex.seals
+            where seal.metadata.availability != .reservedInactive
+        {
+            if let colorResourceID = seal.colorResourceID,
+               reference.id == colorResourceID
+            {
+                return reference.role == ThemeResourceRoles.sealColorMaster
+            }
+            if let vectorResourceID = seal.vectorResourceID,
+               reference.id == vectorResourceID
+            {
+                return reference.role == ThemeResourceRoles.sealVectorMaster
+            }
+            if reference.id == seal.monochromeFallbackResourceID {
+                return reference.role == ThemeResourceRoles.sealMonochromeFallback
+            }
+        }
+        for frame in codex.frames
+            where frame.metadata.availability != .reservedInactive
+        {
+            if reference.id == frame.staticFallbackResourceID {
+                return reference.role == ThemeResourceRoles.frameStaticFallback
+            }
+        }
+        return false
     }
 
     private static func isCatalogPreviewResource(
@@ -822,6 +1369,7 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             where relic.metadata.availability != .reservedInactive
         {
             declaredPreviewResourceIDs.formUnion([
+                relic.primaryResourceID,
                 relic.thumbnailResourceID,
                 relic.staticFallbackResourceID,
                 relic.highContrastResourceID,
@@ -831,10 +1379,15 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             where seal.metadata.availability != .reservedInactive
         {
             declaredPreviewResourceIDs.formUnion([
-                seal.vectorResourceID,
                 seal.monochromeFallbackResourceID,
                 seal.thumbnailResourceID,
             ])
+            if let vectorResourceID = seal.vectorResourceID {
+                declaredPreviewResourceIDs.insert(vectorResourceID)
+            }
+            if let colorResourceID = seal.colorResourceID {
+                declaredPreviewResourceIDs.insert(colorResourceID)
+            }
         }
         for frame in codex.frames
             where frame.metadata.availability != .reservedInactive
@@ -858,9 +1411,12 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             ThemeResourceRoles.vaultLockedSilhouette,
             ThemeResourceRoles.vaultEncountered,
             ThemeResourceRoles.vaultSelected,
+            ThemeResourceRoles.vaultUnavailable,
+            ThemeResourceRoles.relicMaster,
             ThemeResourceRoles.relicThumbnail,
             ThemeResourceRoles.relicStaticShareFallback,
             ThemeResourceRoles.relicHighContrast,
+            ThemeResourceRoles.sealColorMaster,
             ThemeResourceRoles.sealVectorMaster,
             ThemeResourceRoles.sealMonochromeFallback,
             ThemeResourceRoles.sealThumbnail,

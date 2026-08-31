@@ -1,0 +1,1146 @@
+{
+  "crestLayouts": {
+    "staticFallback": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "outputPixels": [
+        1024,
+        1024
+      ],
+      "renderedPixels": [
+        1024,
+        1024
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1254,
+        1254
+      ],
+      "uniformScale": 0.8165869218500797
+    },
+    "thumbnail": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "outputPixels": [
+        512,
+        512
+      ],
+      "renderedPixels": [
+        512,
+        512
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1254,
+        1254
+      ],
+      "uniformScale": 0.4082934609250399
+    }
+  },
+  "frameLayouts": {
+    "staticFallback": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "outputPixels": [
+        2048,
+        1536
+      ],
+      "renderedPixels": [
+        2048,
+        1536
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1448,
+        1086
+      ],
+      "uniformScale": 1.4143646408839778
+    },
+    "thumbnail": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "outputPixels": [
+        512,
+        384
+      ],
+      "renderedPixels": [
+        512,
+        384
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1448,
+        1086
+      ],
+      "uniformScale": 0.35359116022099446
+    }
+  },
+  "generatedAtUTC": "2026-08-27T00:00:00Z",
+  "id": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+  "licenseNotice": "Project-local proprietary production masters; owner visual review remains pending",
+  "outputs": [
+    {
+      "bytes": 1956007,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/crest/wildwood-heartwood-crown-static-fallback.png",
+      "resourceID": "resource.crest.wildwood.heartwood-crown.output.crest-static-fallback",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "crest.static-fallback",
+      "sha256": "f1ca042118eff6025417d57b672d86e5783d251fd644cdddef3388204134dbfd"
+    },
+    {
+      "bytes": 512512,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/crest/wildwood-heartwood-crown-thumbnail.png",
+      "resourceID": "resource.crest.wildwood.heartwood-crown.output.crest-thumbnail",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "crest.thumbnail",
+      "sha256": "578a69a6e12b80a949faf5e6c91aa509cea176725c45c2ad8388a211ef469b66"
+    },
+    {
+      "bytes": 2319804,
+      "dimensions": [
+        2048,
+        1536
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/frame/wildwood-living-root-static-fallback.png",
+      "resourceID": "resource.frame.wildwood.living-root.output.frame-static-fallback",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "frame.static-fallback",
+      "sha256": "e7f2ddd227cbd0495d0c890ebae5f6d28add64e087eeb70f5b94ff8e353f841a"
+    },
+    {
+      "bytes": 195870,
+      "dimensions": [
+        512,
+        384
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/frame/wildwood-living-root-thumbnail.png",
+      "resourceID": "resource.frame.wildwood.living-root.output.frame-thumbnail",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "frame.thumbnail",
+      "sha256": "2105ac57d708a47b4371d7739eaa88d0bfb8dde27843f65bddff544059acb18c"
+    },
+    {
+      "bytes": 671631,
+      "dimensions": [
+        1600,
+        1000
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/wildwood-card-border.png",
+      "resourceID": "resource.panel.wildwood.card-border",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "panel.card-border",
+      "sha256": "65fe7c4d5753b1cef0f604b181f63104487478d504eda77331be90607863fc35"
+    },
+    {
+      "bytes": 310783,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/wildwood-corner-ornament.png",
+      "resourceID": "resource.panel.wildwood.corner-ornament",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "panel.corner-ornament",
+      "sha256": "0e255ed9ec18e93e5b29c72f0d78e4442317ee76b0a3bdd4036602cc0207de73"
+    },
+    {
+      "bytes": 112914,
+      "dimensions": [
+        1600,
+        128
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/wildwood-divider.png",
+      "resourceID": "resource.panel.wildwood.divider",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "panel.divider",
+      "sha256": "2c189e9fa553b20edf484921e6c918759ba607c97ce8130f79f275af89bcf2f4"
+    },
+    {
+      "bytes": 282819,
+      "dimensions": [
+        1200,
+        320
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/wildwood-primary-button.png",
+      "resourceID": "resource.panel.wildwood.primary-button",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "panel.primary-button",
+      "sha256": "7ba6d5bff8e01c71cf2d471d5a795863fb36f97043831a3884a7de49523efe43"
+    },
+    {
+      "bytes": 173022,
+      "dimensions": [
+        1000,
+        240
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/wildwood-tab-selector.png",
+      "resourceID": "resource.panel.wildwood.tab-selector",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "panel.tab-selector",
+      "sha256": "72d17abef73b47dbe032fae8c5f171b9f750ae061a863d65a7fec235629ce522"
+    },
+    {
+      "bytes": 2616100,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/wildwood-mossbound-plaque-high-contrast.png",
+      "resourceID": "resource.relic.wildwood.mossbound-plaque.output.relic-high-contrast",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "relic.high-contrast",
+      "sha256": "82093665401bfff860ab4d16bcb1c2291b6354f8421d8032069ccbb539261a97"
+    },
+    {
+      "bytes": 2492517,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/wildwood-mossbound-plaque-master.png",
+      "resourceID": "resource.relic.wildwood.mossbound-plaque.output.relic-master",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "relic.master",
+      "sha256": "d599ff51f2d7a43c123c4541b64e2870a26dd57a3dd0bba0579c5ed60672465d"
+    },
+    {
+      "bytes": 2492517,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/wildwood-mossbound-plaque-static-share-fallback.png",
+      "resourceID": "resource.relic.wildwood.mossbound-plaque.output.relic-static-share-fallback",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "relic.static-share-fallback",
+      "sha256": "d599ff51f2d7a43c123c4541b64e2870a26dd57a3dd0bba0579c5ed60672465d"
+    },
+    {
+      "bytes": 306864,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/wildwood-mossbound-plaque-thumbnail.png",
+      "resourceID": "resource.relic.wildwood.mossbound-plaque.output.relic-thumbnail",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "relic.thumbnail",
+      "sha256": "7a51ff93da8f04465ac78465ec1bdbd1d681ccd24855f46c4709591edfab3ae3"
+    },
+    {
+      "bytes": 2831604,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/wildwood-rootsong-tablet-high-contrast.png",
+      "resourceID": "resource.relic.wildwood.rootsong-tablet.output.relic-high-contrast",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "relic.high-contrast",
+      "sha256": "fdeb4d3d0e8fe41ba475c1bb52c9b48e3afe213d2fd561627c7ba69db86cac6f"
+    },
+    {
+      "bytes": 2715762,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/wildwood-rootsong-tablet-master.png",
+      "resourceID": "resource.relic.wildwood.rootsong-tablet.output.relic-master",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "relic.master",
+      "sha256": "c36bbb1aff2685502081e441da0ab0bffea3651a67774093ef86c646cdf532e5"
+    },
+    {
+      "bytes": 2715762,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/wildwood-rootsong-tablet-static-share-fallback.png",
+      "resourceID": "resource.relic.wildwood.rootsong-tablet.output.relic-static-share-fallback",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "relic.static-share-fallback",
+      "sha256": "c36bbb1aff2685502081e441da0ab0bffea3651a67774093ef86c646cdf532e5"
+    },
+    {
+      "bytes": 334673,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/wildwood-rootsong-tablet-thumbnail.png",
+      "resourceID": "resource.relic.wildwood.rootsong-tablet.output.relic-thumbnail",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "relic.thumbnail",
+      "sha256": "3cbd1ffa83aee55d727350158a7112ffc6d2bfdbb97e8666017af09f57a89c39"
+    },
+    {
+      "bytes": 2155495,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-acorn-knot-color-master.png",
+      "resourceID": "resource.seal.wildwood.acorn-knot.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "dcb848e4962d883c5a3324090d0cfad9fdd1359e6674b0cf5c74064b1e68d653"
+    },
+    {
+      "bytes": 1300032,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-acorn-knot-monochrome-fallback.png",
+      "resourceID": "resource.seal.wildwood.acorn-knot.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "ae3d82bdd51e59c6785257295b3d9afd3916cd0cb569cafe7c76782cd014353f"
+    },
+    {
+      "bytes": 495836,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-acorn-knot-thumbnail.png",
+      "resourceID": "resource.seal.wildwood.acorn-knot.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "a9d2a7232d15d66f3d3121e273a08db2993cd3a16edbff9cf1085854441d7f0e"
+    },
+    {
+      "bytes": 6448,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/wildwood-acorn-knot-vector-master.pdf",
+      "resourceID": "resource.seal.wildwood.acorn-knot.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.wildwood.acorn.knot.svg",
+      "role": "seal.vector-master",
+      "sha256": "2c00802d6b018153a06f8f7b5273a991a912aaa362ac8303f3a0ebc4de59520b"
+    },
+    {
+      "bytes": 2096444,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-echo-seed-color-master.png",
+      "resourceID": "resource.seal.wildwood.echo-seed.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "9bc2c8baed8549e9de23478cf07ce41c12f7628dd3c0434a847f549796cb5357"
+    },
+    {
+      "bytes": 1200621,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-echo-seed-monochrome-fallback.png",
+      "resourceID": "resource.seal.wildwood.echo-seed.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "9bc1698b0e4b95bacc43d71a6e59d33aff246bbb0cc87f1220c92f287abb5934"
+    },
+    {
+      "bytes": 502532,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-echo-seed-thumbnail.png",
+      "resourceID": "resource.seal.wildwood.echo-seed.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "d7ad1da7ab145575089cc0a0c5c923dc39d637db2cfff71a8e68370382391dc2"
+    },
+    {
+      "bytes": 5675,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/wildwood-echo-seed-vector-master.pdf",
+      "resourceID": "resource.seal.wildwood.echo-seed.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.wildwood.echo.seed.svg",
+      "role": "seal.vector-master",
+      "sha256": "a00778bdf7230d0cc0512cd7c8d60e999382b4f77cd0a381295de2ec045147fa"
+    },
+    {
+      "bytes": 1954743,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-fern-spiral-color-master.png",
+      "resourceID": "resource.seal.wildwood.fern-spiral.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "49d8763babb6b8fd6fdea9a110f972a84828b772cf794ba2e390e246ba8b4417"
+    },
+    {
+      "bytes": 1093581,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-fern-spiral-monochrome-fallback.png",
+      "resourceID": "resource.seal.wildwood.fern-spiral.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "85ad8f2ce960ece2a7da84ee2f6a6a15e4db63e69f0294858d4f50cea75716f4"
+    },
+    {
+      "bytes": 468288,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-fern-spiral-thumbnail.png",
+      "resourceID": "resource.seal.wildwood.fern-spiral.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "a60227307b3b0da731e4ea276edb7c546909039703e2ed141aaadaf1a5d2a7ae"
+    },
+    {
+      "bytes": 10408,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/wildwood-fern-spiral-vector-master.pdf",
+      "resourceID": "resource.seal.wildwood.fern-spiral.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.wildwood.fern.spiral.svg",
+      "role": "seal.vector-master",
+      "sha256": "931549c42be88961f731c827213d71735008e0138cde3a4369382378f071ed46"
+    },
+    {
+      "bytes": 2261207,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-wild-fox-color-master.png",
+      "resourceID": "resource.seal.wildwood.wild-fox.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "4fe51ee6086016f6115d21ed623cd62cdae25771919e096ed75f217f00e62e35"
+    },
+    {
+      "bytes": 1388302,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-wild-fox-monochrome-fallback.png",
+      "resourceID": "resource.seal.wildwood.wild-fox.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "98979462e86510f68db1a61a2edced5ec9de63096045179b339e067623cbe2f9"
+    },
+    {
+      "bytes": 547771,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/wildwood-wild-fox-thumbnail.png",
+      "resourceID": "resource.seal.wildwood.wild-fox.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "1f97a63b06075003f36db3b120264dd40ee6c9d95e17a48a36ff0b3897f4f83e"
+    },
+    {
+      "bytes": 6642,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/wildwood-wild-fox-vector-master.pdf",
+      "resourceID": "resource.seal.wildwood.wild-fox.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.wildwood.wild.fox.svg",
+      "role": "seal.vector-master",
+      "sha256": "f8e1a38ae394b60c1915c935af415b14c1b15ae303d6319e874361a1da2ec8b9"
+    },
+    {
+      "bytes": 2447132,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/wildwood-vault-card.png",
+      "resourceID": "resource.vault.wildwood.codex.output.vault-card",
+      "rightsID": "prov.Production.Sources.wildwood.wildwood.vault.recipe.json",
+      "role": "vault.card",
+      "sha256": "372f9ea2eb936ec2981d8cb8d691f986c6e495debb74b1766f69992f91bd9f41"
+    },
+    {
+      "bytes": 2438390,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/wildwood-vault-encountered.png",
+      "resourceID": "resource.vault.wildwood.codex.output.vault-encountered",
+      "rightsID": "prov.Production.Sources.wildwood.wildwood.vault.recipe.json",
+      "role": "vault.encountered",
+      "sha256": "72dde62a96a39efd8e45a13a768f5ce42dafa9097da90696b285f99ecf1232a2"
+    },
+    {
+      "bytes": 1238931,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/wildwood-vault-locked.png",
+      "resourceID": "resource.vault.wildwood.codex.output.vault-locked-silhouette",
+      "rightsID": "prov.Production.Sources.wildwood.wildwood.vault.recipe.json",
+      "role": "vault.locked-silhouette",
+      "sha256": "42eb44749b307e33747af71348dd7a9bf4c3c43865d17648b2d56427b7b14c94"
+    },
+    {
+      "bytes": 2355323,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/wildwood-vault-selected.png",
+      "resourceID": "resource.vault.wildwood.codex.output.vault-selected",
+      "rightsID": "prov.Production.Sources.wildwood.wildwood.vault.recipe.json",
+      "role": "vault.selected",
+      "sha256": "af8645ee5bbf17f8e4a59f2f238704fa40b1871b1e48645191eaed2f70d984f0"
+    },
+    {
+      "bytes": 1747199,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/wildwood-vault-unavailable.png",
+      "resourceID": "resource.vault.wildwood.codex.output.vault-unavailable",
+      "rightsID": "prov.Production.Sources.wildwood.wildwood.vault.recipe.json",
+      "role": "vault.unavailable",
+      "sha256": "97bf905bd58758c638ea7972d873bae7cc7feb466e70a22d19135b9e2b8747b8"
+    }
+  ],
+  "ownerReview": "PENDING",
+  "panelNineSlicePolicy": {
+    "composition": "independent uniformly scaled protected corners plus the four contiguous between-corner edge intervals; transparent center; no whole-frame nonuniform resize",
+    "edgePreparation": "one shared uniform scale for every corner and edge cross-axis, followed by running-axis-only edge stretch",
+    "edgeResampling": "LANCZOS one-axis edge stretch",
+    "horizontalEdgeInterval": [
+      320,
+      1128
+    ],
+    "joinPolicy": "each edge begins at the source pixel adjacent to its protected corner, uses the same cross-axis scale as that corner, and underlaps the corner by two target pixels",
+    "protectedContentScale": "minimum target-to-source cap ratio shared by all four sides",
+    "sourceCapInsets": {
+      "bottom": 280,
+      "left": 320,
+      "right": 320,
+      "top": 280
+    },
+    "targetOutputs": {
+      "card-border": {
+        "capInsets": {
+          "bottom": 150,
+          "left": 170,
+          "right": 170,
+          "top": 150
+        },
+        "dimensions": [
+          1600,
+          1000
+        ]
+      },
+      "corner-ornament": {
+        "capInsets": null,
+        "dimensions": [
+          512,
+          512
+        ]
+      },
+      "divider": {
+        "capInsets": {
+          "bottom": 48,
+          "left": 360,
+          "right": 360,
+          "top": 48
+        },
+        "dimensions": [
+          1600,
+          128
+        ]
+      },
+      "primary-button": {
+        "capInsets": {
+          "bottom": 104,
+          "left": 190,
+          "right": 190,
+          "top": 104
+        },
+        "dimensions": [
+          1200,
+          320
+        ]
+      },
+      "tab-selector": {
+        "capInsets": {
+          "bottom": 76,
+          "left": 170,
+          "right": 170,
+          "top": 76
+        },
+        "dimensions": [
+          1000,
+          240
+        ]
+      }
+    },
+    "verticalEdgeInterval": [
+      280,
+      806
+    ]
+  },
+  "pipeline": "scripts/build-sunspire-wildwood-gloamthorn-v43-assets.py",
+  "pipelineSHA256": "0c297e03ac703ee1d786fe9aa1d6fd8a003452824447ca109876e474784a578f",
+  "relicLayouts": {
+    "mossbound-plaque": {
+      "master": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          1600,
+          1200
+        ],
+        "renderedPixels": [
+          1600,
+          1200
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1600,
+          1200
+        ],
+        "uniformScale": 1.0
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          64
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          384
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1600,
+          1200
+        ],
+        "uniformScale": 0.32
+      }
+    },
+    "rootsong-tablet": {
+      "master": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          1600,
+          1200
+        ],
+        "renderedPixels": [
+          1600,
+          1200
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1600,
+          1200
+        ],
+        "uniformScale": 1.0
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          64
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          384
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1600,
+          1200
+        ],
+        "uniformScale": 0.32
+      }
+    }
+  },
+  "rightsOwner": "Raven Forge Software",
+  "schemaVersion": "1.0",
+  "sealLayouts": {
+    "acorn-knot": {
+      "colorMaster": {
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ]
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "echo-seed": {
+      "colorMaster": {
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ]
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "fern-spiral": {
+      "colorMaster": {
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ]
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "wild-fox": {
+      "colorMaster": {
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ]
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    }
+  },
+  "sourceMasters": [
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood-gloamthorn-ornament-master-record-v4.3.json",
+        "sha256": "50f3fac8dba3b920499ed0fabba4d59dbdfcea8b573bbe2f10abaf86a1edab8a"
+      },
+      "assetID": "frame.wildwood.living-root",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/ornament/wildwood-living-root-frame-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "Frame",
+      "runtimeBundled": false,
+      "sha256": "41005f47b1ae190337f01b77f22220458d51bd7ef5251e1429b0e3dbb948a0aa"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood-gloamthorn-ornament-master-record-v4.3.json",
+        "sha256": "50f3fac8dba3b920499ed0fabba4d59dbdfcea8b573bbe2f10abaf86a1edab8a"
+      },
+      "assetID": "crest.wildwood.heartwood-crown",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/ornament/wildwood-heartwood-crown-crest-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "Crest",
+      "runtimeBundled": false,
+      "sha256": "6203b8d5adcd326f91fadf17c96e2e7147aef9992338e31fa8c316c702453a42"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/environment-and-relic-master-record-v4.3.json",
+        "sha256": "5cd76eacc482a65fdaffa8d4ec69731a1db51f0e2a133938ed30c1cbbd89e72c"
+      },
+      "assetID": "wildwood.rootsong-tablet.clean-master",
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/wildwood-rootsong-tablet-clean-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "Relic",
+      "runtimeBundled": false,
+      "sha256": "c36bbb1aff2685502081e441da0ab0bffea3651a67774093ef86c646cdf532e5"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/environment-and-relic-master-record-v4.3.json",
+        "sha256": "5cd76eacc482a65fdaffa8d4ec69731a1db51f0e2a133938ed30c1cbbd89e72c"
+      },
+      "assetID": "wildwood.mossbound-plaque.clean-master",
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/wildwood-mossbound-plaque-clean-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "Relic",
+      "runtimeBundled": false,
+      "sha256": "d599ff51f2d7a43c123c4541b64e2870a26dd57a3dd0bba0579c5ed60672465d"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/Wildwood-Seal-Source-Masters-v4.3.json",
+        "sha256": "2fd436ee68c78ccd438288eacaf616273285fb8a65bb9c9406a3396385cdc2fc"
+      },
+      "assetID": "seal.wildwood.acorn-knot",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/wildwood-acorn-knot-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "27e2a8a92dc286754cc5d8a51fbab471add997a38c2ffc6e5f1ce20cc2301136",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/Wildwood-Seal-Source-Masters-v4.3.json",
+        "sha256": "2fd436ee68c78ccd438288eacaf616273285fb8a65bb9c9406a3396385cdc2fc"
+      },
+      "assetID": "seal.wildwood.fern-spiral",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/wildwood-fern-spiral-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "cffc7bf657fb96f4c0c71e338ec7f40ec4a068c62fee3a7ba2d37ebea717a3ec",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/Wildwood-Seal-Source-Masters-v4.3.json",
+        "sha256": "2fd436ee68c78ccd438288eacaf616273285fb8a65bb9c9406a3396385cdc2fc"
+      },
+      "assetID": "seal.wildwood.wild-fox",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/wildwood-wild-fox-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "f7978d0a2fcfff65f9a23ce799fef2e66f93c8003e343e76523b6ca3440c4c32",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/Wildwood-Seal-Source-Masters-v4.3.json",
+        "sha256": "2fd436ee68c78ccd438288eacaf616273285fb8a65bb9c9406a3396385cdc2fc"
+      },
+      "assetID": "seal.wildwood.echo-seed",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/wildwood-echo-seed-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "0315bf69e15472ad106fd0ea66da3795828beea99dc4f0df161f85c5db166580",
+      "targetScaleReview": "PASS_AT_64_PX"
+    }
+  ],
+  "sourceRecords": [
+    {
+      "ownerReview": "PENDING",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/environment-and-relic-master-record-v4.3.json",
+      "sha256": "5cd76eacc482a65fdaffa8d4ec69731a1db51f0e2a133938ed30c1cbbd89e72c"
+    },
+    {
+      "ownerReview": "PENDING",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood-gloamthorn-ornament-master-record-v4.3.json",
+      "sha256": "50f3fac8dba3b920499ed0fabba4d59dbdfcea8b573bbe2f10abaf86a1edab8a"
+    },
+    {
+      "ownerReview": "PENDING",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/seals/Wildwood-Seal-Source-Masters-v4.3.json",
+      "sha256": "2fd436ee68c78ccd438288eacaf616273285fb8a65bb9c9406a3396385cdc2fc"
+    }
+  ],
+  "theme": "Wildwood",
+  "transformationPolicy": [
+    "verify each repository-local accepted source master and its acceptance record against pinned SHA-256 values",
+    "render Frame and Crest fallbacks with one uniform aspect-fit scale and transparent letterboxing when required",
+    "render accepted Relic variants from the complete clean master without inscription reconstruction, blur slabs, patches, or source-screen compositing",
+    "compose Panel assets from four independent uniformly scaled protected corners and the contiguous between-corner edge intervals; never resize the complete frame nonuniformly",
+    "preserve every accepted Seal color master as an exact decoded RGBA pixel copy and derive only alpha-preserving monochrome and thumbnail variants",
+    "derive deterministic High Contrast and thumbnail variants and encode lossless PNG outputs"
+  ]
+}

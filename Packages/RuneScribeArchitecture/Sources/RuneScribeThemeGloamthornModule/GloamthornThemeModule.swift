@@ -32,7 +32,7 @@ public enum RuneScribeThemeGloamthornModuleBootstrap {
     )
 
     public static let manifestResource = GloamthornThemeBundledResourceCatalog.moduleManifest
-    public static let manifestExpectedSHA256Hex = "e24f9109149813b44b1af01f8fc29f953a7acc73cf26c2c2bf124c14651ebac5"
+    public static let manifestExpectedSHA256Hex = GloamthornV43ResourcePins.moduleManifestSHA256Hex
     public static var manifestExpectedSHA256: Data {
         Data(hexadecimal: manifestExpectedSHA256Hex)
     }
@@ -66,10 +66,17 @@ public struct RuneScribeThemeGloamthornModule: RuntimeConstructibleModule {
 
     public func start(context: ModuleContext) async throws {
         let runtimeIO = try await context.runtimeIOClient()
-        let theme = try await GloamthornThemeResources.loadValidated(using: runtimeIO)
+        let descriptor = try await GloamthornThemeResources.loadDescriptorValidated(
+            using: runtimeIO
+        )
         try await context.publishTheme(
-            descriptor: theme.descriptor,
-            resourcePayloads: theme.resourcePayloads
+            descriptor: descriptor,
+            resourceLoader: { resourceID in
+                try await GloamthornThemeResources.loadValidatedResource(
+                    id: resourceID,
+                    using: runtimeIO
+                )
+            }
         )
     }
 

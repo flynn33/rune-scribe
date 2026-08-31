@@ -127,6 +127,10 @@ public extension ModuleContext {
         )
     }
 
+    /// Test-only eager publication used by synthetic conformance fixtures.
+    /// Shipping Theme providers must use the deferred loader overload so the
+    /// registry never retains an entire encoded theme catalog.
+    @_spi(RuntimeTesting)
     func publishTheme(
         descriptor: ThemeDescriptor,
         resourcePayloads: [ThemeResourceID: Data]
@@ -164,11 +168,60 @@ public extension ModuleContext {
                         isRequired: resource.requirement == .required
                     )
                 },
-                payloads: resourcePayloads.map { resourceID, data in
-                    OpaqueResourcePayload(
-                        resourceID: OpaqueResourceID(rawValue: resourceID.rawValue),
-                        data: data
+                resourceLoader: { opaqueResourceID in
+                    guard let resourceID = ThemeResourceID(
+                        rawValue: opaqueResourceID.rawValue
+                    ) else { return nil }
+                    return resourcePayloads[resourceID]
+                }
+            )
+        )
+        do {
+            _ = try await publishThemeDescriptor(descriptor)
+        } catch {
+            try? await provider.unregister(namespace)
+            throw error
+        }
+    }
+
+    func publishTheme(
+        descriptor: ThemeDescriptor,
+        resourceLoader: @escaping @Sendable (ThemeResourceID) async throws -> Data?
+    ) async throws {
+        guard descriptor.moduleID.rawValue == moduleID.rawValue,
+              descriptor.moduleRole.rawValue == role.rawValue,
+              descriptor.policyClass.rawValue == policyClass.rawValue
+        else {
+            throw RuntimeThemeContributionError.identityMismatch
+        }
+        let provider = try await opaqueResourceProviderClient()
+        let namespace = RuntimeThemeContributionCatalog.resourceNamespace(
+            for: descriptor.codex.id
+        )
+        try await provider.register(
+            OpaqueResourceNamespaceRegistration(
+                namespace: namespace,
+                declarations: descriptor.resources.map { resource in
+                    OpaqueResourceDeclaration(
+                        resourceID: OpaqueResourceID(rawValue: resource.id.rawValue),
+                        semanticRole: resource.role.rawValue,
+                        mediaType: resource.mediaType.opaqueMediaType,
+                        byteCount: Int(resource.integrity.byteLength),
+                        sha256: resource.integrity.sha256.rawValue,
+                        pixelSize: resource.integrity.pixelSize.map {
+                            OpaqueResourcePixelSize(
+                                width: Int($0.width),
+                                height: Int($0.height)
+                            )
+                        },
+                        isRequired: resource.requirement == .required
                     )
+                },
+                resourceLoader: { opaqueResourceID in
+                    guard let resourceID = ThemeResourceID(
+                        rawValue: opaqueResourceID.rawValue
+                    ) else { return nil }
+                    return try await resourceLoader(resourceID)
                 }
             )
         )

@@ -41,7 +41,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
+      shouldUseLaunchSchemeArgsEnv = "NO"
       onlyGenerateCoverageForSpecifiedTargets = "NO">
       <MacroExpansion>
          <BuildableReference
@@ -67,6 +67,23 @@
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "RUNESCRIBE_THEME_FIDELITY_CANONICAL_CANDIDATE"
+            value = "$(RUNESCRIBE_THEME_FIDELITY_CANONICAL_CANDIDATE)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "RUNESCRIBE_THEME_FIDELITY_CANONICAL_ROOT"
+            value = "$(RUNESCRIBE_THEME_FIDELITY_CANONICAL_ROOT)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA"
+            value = "$(RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA)"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

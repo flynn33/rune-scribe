@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "1.0",
+  "coordinateSystem": "left,top,right,bottom pixels in the canonical source",
+  "slices": [
+    {
+      "theme": "Norse",
+      "source": "04-ASSETS/00-CONTROLLING-GOLDENS/Norse/norse-codex-controlling-board.png",
+      "output": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-runestone-tablet-reference.png",
+      "box": [
+        640,
+        56,
+        812,
+        363
+      ]
+    },
+    {
+      "theme": "Norse",
+      "source": "04-ASSETS/00-CONTROLLING-GOLDENS/Norse/norse-codex-controlling-board.png",
+      "output": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-dragonwood-plaque-reference.png",
+      "box": [
+        806,
+        56,
+        978,
+        363
+      ]
+    },
+    {
+      "theme": "Norse",
+      "source": "04-ASSETS/00-CONTROLLING-GOLDENS/Norse/norse-codex-controlling-board.png",
+      "output": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-stormforged-stele-reference.png",
+      "box": [
+        968,
+        56,
+        1133,
+        363
+      ]
+    },
+    {
+      "theme": "Moonleaf",
+      "source": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-high-fidelity-style-board.png",
+      "output": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/seal-crescentleaf-reference.png",
+      "box": [
+        705,
+        185,
+        1070,
+        630
+      ]
+    },
+    {
+      "theme": "Moonleaf",
+      "source": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-high-fidelity-style-board.png",
+      "output": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/seal-woodland-stag-reference.png",
+      "box": [
+        705,
+        630,
+        1070,
+        1035
+      ]
+    },
+    {
+      "theme": "Sunspire",
+      "source": "04-ASSETS/00-CONTROLLING-GOLDENS/Sunspire/sunspire-high-fidelity-style-board.png",
+      "output": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/seal-sunleaf-reference.png",
+      "box": [
+        15,
+        590,
+        290,
+        1000
+      ]
+    },
+    {
+      "theme": "Sunspire",
+      "source": "04-ASSETS/00-CONTROLLING-GOLDENS/Sunspire/sunspire-high-fidelity-style-board.png",
+      "output": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/seal-golden-lark-reference.png",
+      "box": [
+        825,
+        600,
+        1105,
+        1000
+      ]
+    },
+    {
+      "theme": "Wildwood",
+      "source": "04-ASSETS/00-CONTROLLING-GOLDENS/Wildwood/wildwood-high-fidelity-style-board.png",
+      "output": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/seal-rooted-tree-reference.png",
+      "box": [
+        725,
+        105,
+        1075,
+        525
+      ]
+    },
+    {
+      "theme": "Wildwood",
+      "source": "04-ASSETS/00-CONTROLLING-GOLDENS/Wildwood/wildwood-high-fidelity-style-board.png",
+      "output": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/seal-lantern-moth-reference.png",
+      "box": [
+        725,
+        530,
+        1075,
+        985
+      ]
+    }
+  ]
+}

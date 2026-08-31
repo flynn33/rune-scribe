@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "recordedAt": "2026-08-27T19:10:00-05:00",
+  "repository": "flynn33/rune-scribe",
+  "originMainSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+  "requiredImplementationSHA": "250f666ec6e7da2d76df7abdcffc595996ad49ae",
+  "requiredImplementationIsAncestor": true,
+  "priorPullRequest": {
+    "number": 52,
+    "state": "MERGED",
+    "mergeCommitSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+    "headBranch": "fix/theme-fidelity-remediation-v4",
+    "baseBranch": "main",
+    "url": "https://github.com/flynn33/rune-scribe/pull/52"
+  },
+  "continuation": {
+    "branch": "fix/theme-fidelity-remediation-v4-3",
+    "worktree": "/Users/jimdaley/GitHub/Rune-Scribe-Theme-Fidelity-v4-3",
+    "baselineSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+    "baselineWasClean": true
+  },
+  "package": {
+    "path": "/Users/jimdaley/Projects/RuneScribe/Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+    "packageID": "rune-scribe-theme-fidelity-v4.3",
+    "packageVersion": "4.3",
+    "payloadTreeSHA256": "f5afb18cac3ff92680aced4346e1fa8c50ceeda5e6264d6cecf50c753092a8b0",
+    "packageManifestSHA256": "e5fea0a6f7d3f6301ee2ac59973ffccda4a4627f542fd9d1aab139afba2c3039",
+    "sha256SumsSHA256": "bae8f9524c318c230a1d6638ad38b593e84f89b35317988165cc0630e0d1d51a",
+    "preflightResult": "PASS"
+  },
+  "authority": {
+    "comparisonAuthoritySHA256": "2762104ea48819888c96937800d903b9163cb13879ab24c663adf10101abfb2e",
+    "canonicalRenderCatalogSHA256": "da599d438dfcad6792e9d472fadf30eebfcdeb7904e267e174add8208b974c8e",
+    "gateCatalogSHA256": "5761076edf7b55043401e94dec516c822fe40aec696862e375e34d07857e9dca",
+    "responsiveEntryCount": 400,
+    "canonicalCandidateCount": 50,
+    "mappingInstanceCount": 1104,
+    "runtimeProbeInstanceCount": 576,
+    "blockingGateCount": 40,
+    "conflictingCandidateReferenceBindingCount": 0
+  },
+  "result": "PASS"
+}

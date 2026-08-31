@@ -210,7 +210,7 @@ final class SemanticThemePresentationTests: XCTestCase {
         XCTAssertEqual(plan.selectedFrame?.id, frame.metadata.id)
         XCTAssertEqual(plan.selectedFrame?.primary.id, frame.vectorResourceID)
         XCTAssertEqual(plan.selectedFrame?.standard.id, frame.staticFallbackResourceID)
-        XCTAssertEqual(plan.selectedSeal?.highContrast.id, seal.vectorResourceID)
+        XCTAssertEqual(plan.selectedSeal?.highContrast.id, seal.standardResourceID)
         XCTAssertEqual(plan.chrome.images.count, 5)
         XCTAssertEqual(
             plan.chrome.panelBorder?.id.rawValue,
@@ -276,6 +276,9 @@ final class SemanticThemePresentationTests: XCTestCase {
             contentsOf: views.appendingPathComponent("SettingsView.swift"),
             encoding: .utf8
         )
+        let normalizedSettingsSource = settingsSource
+            .split(whereSeparator: \.isWhitespace)
+            .joined(separator: " ")
         let vaultSource = try String(
             contentsOf: views.appendingPathComponent("VaultProgressView.swift"),
             encoding: .utf8
@@ -298,17 +301,48 @@ final class SemanticThemePresentationTests: XCTestCase {
         )
         XCTAssertFalse(componentSource.contains("if maximumCanvasWidth != nil"))
         XCTAssertTrue(
-            settingsSource.contains(
-                ".themeCaptureViewportIdentifier(\n"
-                    + "                    ThemeCaptureIdentifier.workspacePrimarySurface"
+            normalizedSettingsSource.contains(
+                ".themeCaptureViewportIdentifier( "
+                    + "ThemeCaptureIdentifier.workspacePrimarySurface )"
             )
         )
         XCTAssertTrue(componentSource.contains("ThemeChromeImage(slot: .panelBorder)"))
         XCTAssertTrue(componentSource.contains("ThemeChromeImage(slot: .tabSelector)"))
+        let catalogCardStart = try XCTUnwrap(
+            componentSource.range(of: "private var catalogCard: some View")
+        )
+        let catalogHeadingStart = try XCTUnwrap(
+            componentSource.range(
+                of: "private var catalogHeading: String",
+                range: catalogCardStart.upperBound..<componentSource.endIndex
+            )
+        )
+        let catalogCardSource = String(
+            componentSource[catalogCardStart.lowerBound..<catalogHeadingStart.lowerBound]
+        )
+        XCTAssertTrue(catalogCardSource.contains("ThemeChromeProtectedContentLayout("))
+        XCTAssertTrue(catalogCardSource.contains("panelPixelSize: panelBorderPixelSize"))
+        XCTAssertTrue(catalogCardSource.contains("GeometryReader { geometry in"))
+        XCTAssertTrue(catalogCardSource.contains("Color.runeNavy.opacity(0.97)"))
+        XCTAssertTrue(catalogCardSource.contains("ThemeChromeImage(slot: .panelBorder)"))
         XCTAssertTrue(settingsSource.contains("ThemeCodexCardView("))
         XCTAssertTrue(vaultSource.contains("identifierPrefix: \"theme.vault\""))
         XCTAssertTrue(vaultSource.contains("identifierPrefix: \"theme.vault-artifact\""))
         XCTAssertTrue(vaultSource.contains("GridItem(.adaptive"))
+    }
+
+    func testArtifactPreviewPageCursorResetsWhenContentChanges() {
+        var cursor = ThemeArtifactPreviewPageCursor()
+        cursor.moveNext(pageCount: 3)
+        cursor.moveNext(pageCount: 3)
+
+        XCTAssertEqual(cursor.index, 2)
+        XCTAssertEqual(cursor.page(in: ["first", "second", "third"]), "third")
+
+        cursor.reset()
+
+        XCTAssertEqual(cursor.index, 0)
+        XCTAssertEqual(cursor.page(in: ["replacement-first", "replacement-second"]), "replacement-first")
     }
 
     func testVaultCatalogUsesDescriptorVisualsWithoutInventingEncounterState() throws {
@@ -606,7 +640,7 @@ final class SemanticThemePresentationTests: XCTestCase {
     func testVectorPresentationRendersARealProviderPDFGlyph() throws {
         let url = try XCTUnwrap(
             RuneScribeNorseThemeModuleBootstrap.resourceBundle.url(
-                forResource: "seal.norse.ravenshield.vector-master",
+                forResource: "frame.norse.carved-knotwork.vector-master",
                 withExtension: "pdf"
             )
         )

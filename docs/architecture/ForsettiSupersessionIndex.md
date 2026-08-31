@@ -17,8 +17,8 @@ The [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md) is the sole cu
 The historical planning bodies remain byte-preserved at their canonical hashes. Their
 current disposition is recorded only in the separate amendment and current indexes.
 No statement inside either historical body constitutes current permission for an
-external dependency, hardware gate, or override of the controlling policy. Any content
-change to a locked v1.0 file requires a fresh conflict audit.
+external dependency, hardware gate, or override of the controlling policy.
+Any content change invalidates this exception and requires a fresh conflict audit.
 
 ## Historical architecture and compliance evidence
 
@@ -45,7 +45,7 @@ Where these records describe lookup-time authorization as runtime mediation, all
 
 ## Retained product decisions
 
-ADR-RS-002 through ADR-RS-012 remain effective only where they do not conflict with the
+ADR-RS-002 through ADR-RS-013 remain effective only where they do not conflict with the
 controlling policy. Compatibility identifiers, wire formats, resource budgets,
 persistence decisions, and privacy limits remain in force. Hardware-only observations
 are owner-operated optional validation outside Agent Coding scope and have no gating

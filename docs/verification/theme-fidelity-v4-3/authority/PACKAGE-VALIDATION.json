@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "1.0",
+  "packageID": "rune-scribe-theme-fidelity-v4.3",
+  "packageVersion": "4.3",
+  "validationDate": "2026-08-27",
+  "result": "PASS",
+  "packageManifest": {
+    "fileCount": 264,
+    "totalPayloadBytes": 210301763,
+    "payloadTreeSHA256": "f5afb18cac3ff92680aced4346e1fa8c50ceeda5e6264d6cecf50c753092a8b0",
+    "manifestSHA256": "e5fea0a6f7d3f6301ee2ac59973ffccda4a4627f542fd9d1aab139afba2c3039",
+    "sha256SumsSHA256": "bae8f9524c318c230a1d6638ad38b593e84f89b35317988165cc0630e0d1d51a"
+  },
+  "authority": {
+    "result": "PASS",
+    "entries": 400,
+    "mappings": 1104,
+    "canonicalImageMappings": 400,
+    "responsiveStructuralMappings": 700,
+    "negativeInvariantMappings": 4,
+    "canonicalCandidates": 50,
+    "conflictingCandidateReferenceBindings": 0,
+    "deterministicSeeds": 100,
+    "runtimeProbeDefinitions": 50,
+    "resolvedV4_2ConflictingEntries": 21,
+    "runtimeProbeInstances": 576,
+    "uniqueReferenceIdentities": 49
+  },
+  "toolingSmokeTest": {
+    "schemaVersion": "1.0",
+    "result": "PASS",
+    "checkCount": 6,
+    "checks": [
+      {
+        "id": "identical-full-screen",
+        "expected": "PASS",
+        "result": "PASS"
+      },
+      {
+        "id": "identical-component",
+        "expected": "PASS",
+        "result": "PASS"
+      },
+      {
+        "id": "identical-exact-resource",
+        "expected": "PASS",
+        "result": "PASS"
+      },
+      {
+        "id": "changed-component",
+        "expected": "FAIL",
+        "result": "FAIL"
+      },
+      {
+        "id": "wrong-dimensions",
+        "expected": "FAIL",
+        "result": "FAIL"
+      },
+      {
+        "id": "altered-exact-resource",
+        "expected": "FAIL",
+        "result": "FAIL"
+      }
+    ]
+  },
+  "evidenceValidatorSmokeTest": {
+    "schemaVersion": "1.0",
+    "result": "PASS",
+    "checkCount": 3,
+    "checks": [
+      {
+        "id": "complete-fixture",
+        "expected": "PASS",
+        "result": "PASS"
+      },
+      {
+        "id": "missing-mapping",
+        "expected": "FAIL",
+        "result": "FAIL"
+      },
+      {
+        "id": "wrong-cardinality",
+        "expected": "FAIL",
+        "result": "FAIL"
+      }
+    ]
+  },
+  "assetAudit": {
+    "result": "PASS",
+    "assetCount": 171,
+    "errorCount": 0
+  },
+  "contentScan": {
+    "schemaVersion": "1.0",
+    "result": "PASS",
+    "textFilesScanned": 92,
+    "imagesScanned": 171,
+    "findingCount": 0,
+    "findings": []
+  },
+  "jsonFilesParsed": 40,
+  "ownerSourceCoverage": {
+    "sourceImages": 64,
+    "uniqueImagesIncluded": 36,
+    "coveragePercent": 100.0
+  },
+  "knownRepositoryState": {
+    "mainSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+    "containsV4_2ImplementationSHA": "250f666ec6e7da2d76df7abdcffc595996ad49ae",
+    "mustBeFetchedAndReverified": true
+  },
+  "claimsBoundary": "This validates the handoff package, its authority, assets, and tooling. It does not claim the Rune Scribe application has passed v4.3 qualification."
+}

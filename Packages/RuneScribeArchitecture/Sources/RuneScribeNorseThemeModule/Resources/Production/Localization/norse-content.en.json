@@ -5,22 +5,22 @@
   "codex": {
     "codex.norse": {
       "name": "Norse Codex",
-      "tagline": "The Founding Codex",
+      "tagline": "The Raven Forge",
       "shortDescription": "Weathered stone, carved dark wood, forged iron, restrained knotwork, and the permanent Base Rune Script.",
       "longDescription": "The permanent founding Codex of Rune Scribe. Norse is always installed, always owned, and always available as the secure presentation fallback."
     }
   },
   "script": {"script.base-runes": {"name": "Base Rune Script", "description": "Rune Scribe’s original 32-symbol Unicode-portable visual alphabet."}},
   "relics": {
-    "relic.norse.runestone-tablet": {"name": "Runestone Tablet", "description": "A broad weathered stone tablet with a dimensional iron-and-knotwork border and paired raven crest."},
-    "relic.norse.dragonwood-plaque": {"name": "Dragonwood Plaque", "description": "A tall plaque of dark carved wood enclosed by forged iron and crowned by a sculpted dragon."},
-    "relic.norse.stormforged-stele": {"name": "Stormforged Stele", "description": "A tall war-stele of weathered stone and blackened iron beneath a carved hammer crest."}
+    "relic.norse.runestone-tablet": {"name": "Runestone Tablet", "description": "Weathered stone with carved runes and iron knotwork. The canonical Norse canvas."},
+    "relic.norse.dragonwood-plaque": {"name": "Dragonwood Plaque", "description": "Dark dragonwood framed in forged iron. Ancient and resilient."},
+    "relic.norse.stormforged-stele": {"name": "Stormforged Stele", "description": "Tall war-stele of stone and iron. Marked by storms and victories."}
   },
   "seals": {
     "seal.norse.valknut": {"name": "Valknut Seal", "description": "An aged bronze medallion bearing a sculpted interlocked Valknut."},
     "seal.norse.ravenshield": {"name": "Ravenshield Seal", "description": "A forged shield medallion bearing a sculpted raven."},
     "seal.norse.mjolnir": {"name": "Mjolnir Seal", "description": "A relief medallion bearing the hammer Mjolnir."},
-    "seal.norse.wolkin": {"name": "Wolkin Seal", "description": "An aged medallion bearing a longship beneath the northern sky."},
+    "seal.norse.wolkin": {"name": "Wolkin Seal", "description": "An aged medallion bearing a sculpted wolf beneath the northern sky."},
     "seal.norse.yggdrasil": {"name": "Yggdrasil Seal", "description": "A sculpted medallion bearing the world tree Yggdrasil."},
     "seal.norse.berserk": {"name": "Berserk Seal", "description": "A dark forged medallion bearing a battle-worn warrior mark."}
   },
@@ -45,17 +45,17 @@
   "strings": {
     "series.founding-codex.name": "Founding Codex",
     "codex.norse.name": "Norse Codex",
-    "codex.norse.tagline": "The Founding Codex",
+    "codex.norse.tagline": "The Raven Forge",
     "codex.norse.short-description": "Weathered stone, carved dark wood, forged iron, restrained knotwork, and the permanent Base Rune Script.",
     "codex.norse.long-description": "The permanent founding Codex of Rune Scribe. Norse is always installed, always owned, and always available as the secure presentation fallback.",
     "script.base-runes.name": "Base Rune Script",
     "script.base-runes.description": "Rune Scribe’s original 32-symbol Unicode-portable visual alphabet.",
     "relic.norse.runestone-tablet.name": "Runestone Tablet",
-    "relic.norse.runestone-tablet.description": "A broad weathered stone tablet with a dimensional iron-and-knotwork border and paired raven crest.",
+    "relic.norse.runestone-tablet.description": "Weathered stone with carved runes and iron knotwork. The canonical Norse canvas.",
     "relic.norse.dragonwood-plaque.name": "Dragonwood Plaque",
-    "relic.norse.dragonwood-plaque.description": "A tall plaque of dark carved wood enclosed by forged iron and crowned by a sculpted dragon.",
+    "relic.norse.dragonwood-plaque.description": "Dark dragonwood framed in forged iron. Ancient and resilient.",
     "relic.norse.stormforged-stele.name": "Stormforged Stele",
-    "relic.norse.stormforged-stele.description": "A tall war-stele of weathered stone and blackened iron beneath a carved hammer crest.",
+    "relic.norse.stormforged-stele.description": "Tall war-stele of stone and iron. Marked by storms and victories.",
     "seal.norse.valknut.name": "Valknut Seal",
     "seal.norse.valknut.description": "An aged bronze medallion bearing a sculpted interlocked Valknut.",
     "seal.norse.ravenshield.name": "Ravenshield Seal",
@@ -63,7 +63,7 @@
     "seal.norse.mjolnir.name": "Mjolnir Seal",
     "seal.norse.mjolnir.description": "A relief medallion bearing the hammer Mjolnir.",
     "seal.norse.wolkin.name": "Wolkin Seal",
-    "seal.norse.wolkin.description": "An aged medallion bearing a longship beneath the northern sky.",
+    "seal.norse.wolkin.description": "An aged medallion bearing a sculpted wolf beneath the northern sky.",
     "seal.norse.yggdrasil.name": "Yggdrasil Seal",
     "seal.norse.yggdrasil.description": "A sculpted medallion bearing the world tree Yggdrasil.",
     "seal.norse.berserk.name": "Berserk Seal",

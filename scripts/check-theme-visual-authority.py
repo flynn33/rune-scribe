@@ -22,6 +22,9 @@ DEFAULT_MANIFEST = Path(
 ACTIVE_V12_IMPORT_MANIFEST = Path(
     "docs/verification/theme-fidelity-v4/authority/v4.2/IMPORT-MANIFEST.json"
 )
+ACTIVE_V13_IMPORT_MANIFEST = Path(
+    "docs/verification/theme-fidelity-v4-3/authority/IMPORT-MANIFEST-v4.3.json"
+)
 IMAGE_EXTENSIONS = {
     ".bmp",
     ".gif",
@@ -978,11 +981,16 @@ def parse_arguments(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parse_arguments(argv)
     root = args.root.resolve()
-    active_manifest = root / ACTIVE_V12_IMPORT_MANIFEST
+    active_manifest = root / ACTIVE_V13_IMPORT_MANIFEST
     if active_manifest.is_file():
-        from theme_fidelity_authority_v12 import AuthorityV12Checker
+        from theme_fidelity_authority_v13 import AuthorityV13Checker
 
         manifest = active_manifest
+        checker = AuthorityV13Checker(root, manifest)
+    elif (root / ACTIVE_V12_IMPORT_MANIFEST).is_file():
+        from theme_fidelity_authority_v12 import AuthorityV12Checker
+
+        manifest = root / ACTIVE_V12_IMPORT_MANIFEST
         checker = AuthorityV12Checker(root, manifest)
     else:
         manifest = root / DEFAULT_MANIFEST
