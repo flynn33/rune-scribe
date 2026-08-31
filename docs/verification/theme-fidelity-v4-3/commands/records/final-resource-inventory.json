@@ -1,0 +1,51 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "scripts/inventory-theme-resources.py",
+    "--root",
+    "/tmp/runescribe-v43-acceptance.aQQkxe/source",
+    "--phase",
+    "final",
+    "--output",
+    "/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/20-resource-inventory-final-recorded.json"
+  ],
+  "category": "assets",
+  "command": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 scripts/inventory-theme-resources.py --root /tmp/runescribe-v43-acceptance.aQQkxe/source --phase final --output /tmp/runescribe-v43-c9f45-acceptance.NI49Xn/20-resource-inventory-final-recorded.json",
+  "commandID": "final-resource-inventory",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:26:47.594Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 236,
+    "path": "commands/logs/final-resource-inventory.log",
+    "sha256": "f85c71d8cc5761bef8c44bd8fabf3c9c207a482ca3f8cbe730773635aa41872e"
+  },
+  "outputs": [
+    {
+      "bytes": 352098,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/20-resource-inventory-final-recorded.json",
+      "sha256": "52cd2eefbdf91cb2e496757b4a08f1218d226bd8bb201f08f1fcb6e920188e2f"
+    }
+  ],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 53,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:26:40.494Z"
+}

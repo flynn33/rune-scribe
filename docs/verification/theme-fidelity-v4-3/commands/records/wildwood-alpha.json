@@ -1,0 +1,41 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "scripts/remediate-wildwood-relic-alpha.py",
+    "--repo-root",
+    "/tmp/runescribe-v43-acceptance.aQQkxe/source",
+    "--check"
+  ],
+  "category": "assets",
+  "command": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 scripts/remediate-wildwood-relic-alpha.py --repo-root /tmp/runescribe-v43-acceptance.aQQkxe/source --check",
+  "commandID": "wildwood-alpha",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:12:04.277Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 995,
+    "path": "commands/logs/wildwood-alpha.log",
+    "sha256": "35658544b5709fcab60afe9cc1d95453f0604bcc8f40fa17c31a3c2d48f81f8a"
+  },
+  "outputs": [],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 31,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:12:02.962Z"
+}

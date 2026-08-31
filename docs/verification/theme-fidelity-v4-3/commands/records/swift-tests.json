@@ -1,0 +1,42 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/swift",
+    "test",
+    "--package-path",
+    "Packages/RuneScribeArchitecture",
+    "--scratch-path",
+    "/tmp/runescribe-v43-c9f45a-acceptance.JMD9BU/swift-scratch",
+    "-Xswiftc",
+    "-warnings-as-errors"
+  ],
+  "category": "tests",
+  "command": "/usr/bin/swift test --package-path Packages/RuneScribeArchitecture --scratch-path /tmp/runescribe-v43-c9f45a-acceptance.JMD9BU/swift-scratch -Xswiftc -warnings-as-errors",
+  "commandID": "swift-tests",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:17:44.606Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 398782,
+    "path": "commands/logs/swift-tests.log",
+    "sha256": "86cfb7d26612ea6a3f8f6b93e4e7323d2920719c50b1700433b0ef9d6c553f50"
+  },
+  "outputs": [],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 41,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:14:56.840Z"
+}

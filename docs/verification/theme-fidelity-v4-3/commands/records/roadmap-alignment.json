@@ -1,0 +1,36 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/bin/bash",
+    "scripts/check-roadmap-alignment.sh"
+  ],
+  "category": "architecture",
+  "command": "/bin/bash scripts/check-roadmap-alignment.sh",
+  "commandID": "roadmap-alignment",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:09:59.042Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 299,
+    "path": "commands/logs/roadmap-alignment.log",
+    "sha256": "891a88763234994bafddc3858505058501338179dfc946665f9c0171041609ea"
+  },
+  "outputs": [],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 9,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:09:57.994Z"
+}

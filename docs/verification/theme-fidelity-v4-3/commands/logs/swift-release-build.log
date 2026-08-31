@@ -1,0 +1,22 @@
+[0/1] Planning build
+Building for production...
+[0/1] Write swift-version--58304C5D6DBC2206.txt
+[2/2] Compiling RuneScribeContracts ApplicationContracts.swift
+[3/7] Compiling RuneScribeUIPresentationContracts RuntimeRootPresentationPort.swift
+[4/7] Compiling RuneScribeTestSupport InMemoryModuleStateStore.swift
+[5/7] Compiling RuneScribeGameCenterModule GameCenterAchievementCatalog.swift
+[6/7] Compiling RuneScribePlatform SystemClipboardService.swift
+[7/7] Compiling RuneScribeProgressionSyncDomain CloudProgressionCodec.swift
+[8/8] Compiling RuneScribeCloudSyncModule CloudSyncPolicy.swift
+[9/9] Compiling RuneScribeRuntimeCore Events.swift
+[10/18] Compiling RuneScribeThemeSunspireModule SunspireThemeDescriptor.swift
+[11/18] Compiling RuneScribeThemeGloamthornModule GloamthornThemeDescriptor.swift
+[12/18] Compiling RuneScribeThemeWildwoodModule WildwoodThemeDescriptor.swift
+[13/18] Compiling RuneScribeThemeMoonleafModule MoonleafThemeDescriptor.swift
+[14/18] Compiling RuneScribeNorseThemeModule NorseBaseThemeDescriptor.swift
+[15/18] Compiling RuneScribeUIRuntime RootViewPresentation.swift
+[16/19] Compiling RuneScribeThemeCoordinatorModule ThemeCoordinatorModule.swift
+[17/19] Compiling RuneScribeCoreModule P4BIntegration.swift
+[18/19] Compiling RuneScribeUIModule RuneScribeCommands.swift
+[19/19] Compiling RuneScribeProgressionModule ProgressionCatalogCompatibility.swift
+Build complete! (85.88s)

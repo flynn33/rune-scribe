@@ -1,0 +1,16 @@
+{
+  "blocking": true,
+  "detail": "The scanner executed successfully with 20 rules, but the result is not a compliance pass: 5 pass, 12 violation, 1 pending enforcement, and 2 not evaluated. FG-020 passes. This record does not relabel the narrower v4.3 provider-neutral architecture gate, whose dedicated guards pass.",
+  "evidencePaths": [
+    "docs/verification/theme-fidelity-v4-3/commands/records/forsetti-report-only.json"
+  ],
+  "evidenceType": "qualification-failure",
+  "failureID": "forsetti-report-only-violations",
+  "gateIDs": [],
+  "openedAt": "2026-08-31T22:31:51.634Z",
+  "resolvedAt": null,
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "status": "OPEN",
+  "summary": "Forsetti remains report-only with twelve rule-level violations"
+}

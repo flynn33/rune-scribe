@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "assetCount": 5,
+  "sourceCount": 2,
+  "pipelineSHA256": "a0926182c694db1e3692ed63da15b721a4d897cf67ca2b81ea98427377a1b00b",
+  "provenanceSHA256": "99619674150946bfa3b397a1a68feb0a0866d031eeea206cd444c3ab9f3412b8",
+  "outputs": [
+    {
+      "key": "primary-sender-avatar",
+      "sha256": "3b262beebdfb316511d6fce7064e660403c37226ff9ab2f57fdb75eaf454621c",
+      "dimensions": [
+        107,
+        107
+      ]
+    },
+    {
+      "key": "share-sender-avatar",
+      "sha256": "95754977ca429d79def1b0fe8aa84d845949e707f9379330bb4ae7041eb42d13",
+      "dimensions": [
+        99,
+        99
+      ]
+    },
+    {
+      "key": "share-codex-badge",
+      "sha256": "8d4a7c7375b292bcd7da239b8175a56cf7890491361aaf2f4babfd2a5f1acce1",
+      "dimensions": [
+        43,
+        43
+      ]
+    },
+    {
+      "key": "primary-medallion",
+      "sha256": "1e6a5ea56453d5206469d9bcb05c15ddbe1dfe663a43610b649741ef8750c78a",
+      "dimensions": [
+        193,
+        193
+      ]
+    },
+    {
+      "key": "share-medallion",
+      "sha256": "bb0d0c8da37d1b105343abe5533a48d4774fbfe83db2a3ef2dc0944930f86a48",
+      "dimensions": [
+        141,
+        141
+      ]
+    }
+  ]
+}

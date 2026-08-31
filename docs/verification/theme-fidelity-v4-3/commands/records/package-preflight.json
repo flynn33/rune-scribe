@@ -1,0 +1,36 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/bin/bash",
+    "05-AUTOMATION/run-v4.3-preflight.sh"
+  ],
+  "category": "preflight",
+  "command": "/bin/bash 05-AUTOMATION/run-v4.3-preflight.sh",
+  "commandID": "package-preflight",
+  "cwd": "/Users/jimdaley/Projects/RuneScribe/Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:09:35.283Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 66296,
+    "path": "commands/logs/package-preflight.log",
+    "sha256": "3fae2e0ee7fc8a226d6e43e00ca588ae9ee1dde8df5531d033787fbd5a5ef977"
+  },
+  "outputs": [],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 3,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:09:24.599Z"
+}

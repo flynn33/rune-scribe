@@ -1,0 +1,70 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/python3",
+    "-c",
+    "import json,sys; d=json.load(open(sys.argv[1])); assert d.get(\"sourceSHA\")==sys.argv[2]; assert d.get(\"result\")==\"PASS\"; assert d.get(\"acceptanceEvidence\") is True; assert d.get(\"executedMutationCount\")==47; assert d.get(\"passedMutationCount\")==47; assert d.get(\"failedMutationCount\")==0; assert d.get(\"allMutationsRejected\") is True; assert d.get(\"allOriginalBytesRestored\") is True; assert d.get(\"positiveRevalidationComplete\") is True",
+    "/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/00-v43-mutations.json",
+    "c9f45a81809f1edadc5178fd9abf3f3d983567ef"
+  ],
+  "category": "mutations",
+  "command": "/usr/bin/python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d.get(\"sourceSHA\")==sys.argv[2]; assert d.get(\"result\")==\"PASS\"; assert d.get(\"acceptanceEvidence\") is True; assert d.get(\"executedMutationCount\")==47; assert d.get(\"passedMutationCount\")==47; assert d.get(\"failedMutationCount\")==0; assert d.get(\"allMutationsRejected\") is True; assert d.get(\"allOriginalBytesRestored\") is True; assert d.get(\"positiveRevalidationComplete\") is True' /tmp/runescribe-v43-c9f45-acceptance.NI49Xn/00-v43-mutations.json c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "commandID": "v43-negative-mutations",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:30:31.154Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 0,
+    "path": "commands/logs/v43-negative-mutations.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outputs": [
+    {
+      "bytes": 297354,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/00-v43-mutations.json",
+      "sha256": "0f3631743f123c49fc8db00a552330a94bf1d37a816c765845d339c3da216b08"
+    },
+    {
+      "bytes": 297354,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/00-v43-mutations.log",
+      "sha256": "0f3631743f123c49fc8db00a552330a94bf1d37a816c765845d339c3da216b08"
+    },
+    {
+      "bytes": 5959,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/COMMANDS.txt",
+      "sha256": "a0b956be0e0e2f2c25c68b152d2dc5e9642e3a193fa8bf22d5293b6a192f584e"
+    },
+    {
+      "bytes": 3788,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/RESULTS.md",
+      "sha256": "a20b0c621b4239c61f912535646c326c309d9a0e872ef520676452652df4ae74"
+    },
+    {
+      "bytes": 8377,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/SHA256SUMS.txt",
+      "sha256": "984a272573da5abae3d2195972d3dfc7b33011659f6f9c38a9ea74ca14206cc0"
+    }
+  ],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 58,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:30:31.131Z"
+}

@@ -1,0 +1,63 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/python3",
+    "-c",
+    "import json,sys; d=json.load(open(sys.argv[1])); assert d.get(\"result\")==\"PASS\"; assert d.get(\"requiredCaseCount\")==18; assert d.get(\"passedCaseCount\")==18; assert d.get(\"failedCaseCount\")==0; assert d.get(\"allTemporaryCopiesRestored\") is True; assert d.get(\"sourceMutationsConfinedToTemporaryCopies\") is True",
+    "/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/01-legacy-mutations.json"
+  ],
+  "category": "mutations",
+  "command": "/usr/bin/python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d.get(\"result\")==\"PASS\"; assert d.get(\"requiredCaseCount\")==18; assert d.get(\"passedCaseCount\")==18; assert d.get(\"failedCaseCount\")==0; assert d.get(\"allTemporaryCopiesRestored\") is True; assert d.get(\"sourceMutationsConfinedToTemporaryCopies\") is True' /tmp/runescribe-v43-c9f45-acceptance.NI49Xn/01-legacy-mutations.json",
+  "commandID": "legacy-negative-mutations",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:30:31.177Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 0,
+    "path": "commands/logs/legacy-negative-mutations.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outputs": [
+    {
+      "bytes": 6864,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/01-legacy-mutations.json",
+      "sha256": "0044a0e033729314d89f056fcea25c661c81c86620dafbb8dc463eb3081d3032"
+    },
+    {
+      "bytes": 0,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/01-legacy-mutations.stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/02-git-clean-before.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 102,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/25-git-clean-after.log",
+      "sha256": "fd7bf932158c107588ff36ba5b50d78cd74446d6af462972412946a20b94704b"
+    }
+  ],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 59,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:30:31.156Z"
+}

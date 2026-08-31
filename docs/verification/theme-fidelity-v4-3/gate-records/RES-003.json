@@ -1,0 +1,38 @@
+{
+  "acceptanceEvidence": true,
+  "assessedAt": "2026-08-31T22:33:42.368Z",
+  "commandIDs": [
+    "final-resource-inventory",
+    "production-reference-boundary"
+  ],
+  "evidence": [
+    {
+      "bytes": 1902,
+      "location": "repository",
+      "path": "docs/verification/theme-fidelity-v4-3/commands/records/final-resource-inventory.json",
+      "sha256": "c061f46c4b802dc5aa47c8a659cf0b96deb64005eb32eee668861116106656a0"
+    },
+    {
+      "bytes": 2487,
+      "location": "repository",
+      "path": "docs/verification/theme-fidelity-v4-3/commands/records/production-reference-boundary.json",
+      "sha256": "4222d6ddf6e50d3aee83eb63dc9f5463fdb943e858dc4f5250425a5a6af404fb"
+    }
+  ],
+  "evidenceType": "gate-assessment",
+  "failures": [],
+  "gateID": "RES-003",
+  "gateTitle": "Resource consumption coverage",
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 76,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  }
+}

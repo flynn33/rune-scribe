@@ -1,0 +1,70 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "scripts/check-shipping-products.sh",
+    "--macos-app",
+    "/tmp/runescribe-v43-c9f45-release.Ingxs2/signed-products/macos/RuneScrib.app",
+    "--ios-app",
+    "/tmp/runescribe-v43-c9f45-release.Ingxs2/DerivedData-iOS-Release/Build/Products/Release-iphonesimulator/RuneScrib.app"
+  ],
+  "category": "build",
+  "command": "scripts/check-shipping-products.sh --macos-app /tmp/runescribe-v43-c9f45-release.Ingxs2/signed-products/macos/RuneScrib.app --ios-app /tmp/runescribe-v43-c9f45-release.Ingxs2/DerivedData-iOS-Release/Build/Products/Release-iphonesimulator/RuneScrib.app",
+  "commandID": "shipping-products",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:23:49.661Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 6832,
+    "path": "commands/logs/shipping-products.log",
+    "sha256": "b22d0356d1320c43d45502fd47e12193df3a2831e2e08d957198797d12cf65aa"
+  },
+  "outputs": [
+    {
+      "bytes": 1917,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-release.Ingxs2/artifact-hashes.log",
+      "sha256": "8c72229fbc8fe8607e0d9f331e46dbe8d05bc0ea1a0b118d5741c41be088ae3b"
+    },
+    {
+      "bytes": 274,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-release.Ingxs2/check-shipping-products.command.log",
+      "sha256": "18dfb5ba513ac01215fc77034055a561607b004274978ceb60cdb2131318fdc1"
+    },
+    {
+      "bytes": 7586,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-release.Ingxs2/check-shipping-products.log",
+      "sha256": "7b9462326d7f2914d1c14f1a993ed80310db0b137082272f00cfd01eb2c73105"
+    },
+    {
+      "bytes": 601,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-release.Ingxs2/product-metadata.log",
+      "sha256": "1e8549397bf682e2b746d711120ddc5a0afc7926b0230e5b438409b1e06b1c69"
+    },
+    {
+      "bytes": 4349,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-release.Ingxs2/signing-readback.log",
+      "sha256": "8dc3e38cf6e05c26f26aa5c2e6fb5c55c9112e9ef8faf2137dce6ac16e626d6c"
+    }
+  ],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 45,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:23:38.651Z"
+}

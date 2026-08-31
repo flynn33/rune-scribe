@@ -1,0 +1,42 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "scripts/theme_fidelity_authority_v13.py",
+    "--root",
+    "/tmp/runescribe-v43-acceptance.aQQkxe/source",
+    "--manifest",
+    "docs/verification/theme-fidelity-v4-3/authority/IMPORT-MANIFEST-v4.3.json"
+  ],
+  "category": "authority",
+  "command": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 scripts/theme_fidelity_authority_v13.py --root /tmp/runescribe-v43-acceptance.aQQkxe/source --manifest docs/verification/theme-fidelity-v4-3/authority/IMPORT-MANIFEST-v4.3.json",
+  "commandID": "authority-v43",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:09:58.138Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 552,
+    "path": "commands/logs/authority-v43.log",
+    "sha256": "4ca6cfe339b39e0af04dfd46f223f42bc40df8ff4ff5fd42e9679ab5bf230133"
+  },
+  "outputs": [],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 5,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:09:58.049Z"
+}

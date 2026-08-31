@@ -1,0 +1,59 @@
+{
+  "acceptanceEvidence": true,
+  "assessedAt": "2026-08-31T22:33:42.425Z",
+  "commandIDs": [
+    "norse-catalog-extractor",
+    "norse-message-extractor",
+    "norse-provenance",
+    "norse-remediation",
+    "shipping-products"
+  ],
+  "evidence": [
+    {
+      "bytes": 1442,
+      "location": "repository",
+      "path": "docs/verification/theme-fidelity-v4-3/commands/records/norse-catalog-extractor.json",
+      "sha256": "2a31dbb46cfb4410df88e6989f49c537a6d4ea4a9e36935d1c31a1dcdd1e3517"
+    },
+    {
+      "bytes": 1440,
+      "location": "repository",
+      "path": "docs/verification/theme-fidelity-v4-3/commands/records/norse-message-extractor.json",
+      "sha256": "6d4fdbec37b421804179df4c2825b187eab6329fab328bbd9e014d958130e272"
+    },
+    {
+      "bytes": 1385,
+      "location": "repository",
+      "path": "docs/verification/theme-fidelity-v4-3/commands/records/norse-provenance.json",
+      "sha256": "221d98f7327432f220a4444a7e2932e272782382de3025a24ed75fa57c31fe9e"
+    },
+    {
+      "bytes": 1507,
+      "location": "repository",
+      "path": "docs/verification/theme-fidelity-v4-3/commands/records/norse-remediation.json",
+      "sha256": "f0143480024f42a2b80f59998409624fea91f736b64f70f47568538a2903269f"
+    },
+    {
+      "bytes": 2814,
+      "location": "repository",
+      "path": "docs/verification/theme-fidelity-v4-3/commands/records/shipping-products.json",
+      "sha256": "2fab586218f6e887fe26c18f9163a585289c6fddfce6ef0b1d1bdbb8593b5349"
+    }
+  ],
+  "evidenceType": "gate-assessment",
+  "failures": [],
+  "gateID": "NOR-001",
+  "gateTitle": "Approved Norse catalog",
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 78,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "allowedEvidenceRoot": "docs/verification/theme-fidelity-v4-3/",
+  "applicationSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "changedPaths": [],
+  "evidenceHeadSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "failures": [
+    "docs/verification/theme-fidelity-v4-3/final-qualification.json does not self-bind to the evidence head SHA",
+    "docs/verification/theme-fidelity-v4-3/SourceBoundary.json does not self-bind to the evidence head SHA"
+  ],
+  "pathsOutsideAllowedEvidenceRoot": [],
+  "result": "FAIL"
+}

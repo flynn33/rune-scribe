@@ -1,0 +1,56 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/bin/zsh",
+    "-lc",
+    "set -o pipefail; /usr/bin/xcodebuild -quiet -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -configuration Release -destination \"generic/platform=iOS Simulator\" -derivedDataPath /tmp/runescribe-v43-c9f45-release.Ingxs2/DerivedData-iOS-Release -resultBundlePath /tmp/runescribe-v43-c9f45-release.Ingxs2/RuneScrib-iOS-Release-recorded-2.xcresult -disableAutomaticPackageResolution build ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=YES CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=9AQ2C2838M PROVISIONING_PROFILE_SPECIFIER= SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES COMPILER_INDEX_STORE_ENABLE=NO 2>&1 | /usr/bin/awk \"NF {print}\""
+  ],
+  "category": "build",
+  "command": "/bin/zsh -lc 'set -o pipefail; /usr/bin/xcodebuild -quiet -project RuneScrib.xcodeproj -scheme RuneScrib-iOS -configuration Release -destination \"generic/platform=iOS Simulator\" -derivedDataPath /tmp/runescribe-v43-c9f45-release.Ingxs2/DerivedData-iOS-Release -resultBundlePath /tmp/runescribe-v43-c9f45-release.Ingxs2/RuneScrib-iOS-Release-recorded-2.xcresult -disableAutomaticPackageResolution build ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=YES CODE_SIGNING_REQUIRED=YES CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=9AQ2C2838M PROVISIONING_PROFILE_SPECIFIER= SWIFT_TREAT_WARNINGS_AS_ERRORS=YES GCC_TREAT_WARNINGS_AS_ERRORS=YES COMPILER_INDEX_STORE_ENABLE=NO 2>&1 | /usr/bin/awk \"NF {print}\"'",
+  "commandID": "ios-simulator-release-build",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:39:22.821Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 115,
+    "path": "commands/logs/ios-simulator-release-build.log",
+    "sha256": "f469dac41e5641b3500a411146d3ef93e8efb0cb4fdb57b4aba50353792df71e"
+  },
+  "outputs": [
+    {
+      "bytes": 574,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-release.Ingxs2/ios-build-results.json",
+      "sha256": "e5bd4860b1c4e121e6ba7d0a48c54551fb72fb714d7be8399d36be32b1a03cbb"
+    },
+    {
+      "bytes": 666,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-release.Ingxs2/ios-release.command.log",
+      "sha256": "68355d1ad9c69a436da46602c8a52ee2a1069134ad792d352f69d66622fa6728"
+    },
+    {
+      "bytes": 860,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-release.Ingxs2/ios-release.log",
+      "sha256": "b1a934da87303ae317e3efb55da9175f262b3467e59c4a674c146c68cd2a0a0d"
+    }
+  ],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 104,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:39:19.224Z"
+}

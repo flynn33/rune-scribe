@@ -1,0 +1,17 @@
+{
+  "authorityStatus": "active-acceptance-authority",
+  "authorityVersion": "4.3",
+  "canonicalCandidateCount": 50,
+  "findings": [],
+  "gateCount": 40,
+  "manifest": "docs/verification/theme-fidelity-v4-3/authority/IMPORT-MANIFEST-v4.3.json",
+  "manifestSHA256": "a43be8c331fbb133c7d8a583f84b2f8a88670da32cc2a66682a53c298c3b9f2f",
+  "mappingCount": 1104,
+  "responsiveCandidateCount": 188,
+  "responsiveEntryCount": 400,
+  "result": "PASS",
+  "runtimeProbeCount": 50,
+  "runtimeProbeInstanceCount": 576,
+  "schemaVersion": "1.3",
+  "seedCount": 100
+}

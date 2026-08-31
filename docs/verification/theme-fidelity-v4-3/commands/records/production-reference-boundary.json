@@ -1,0 +1,55 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "scripts/check-production-reference-boundary.py",
+    "--repository-root",
+    "/tmp/runescribe-v43-acceptance.aQQkxe/source",
+    "--package-root",
+    "/Users/jimdaley/Projects/RuneScribe/Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+    "--asset-manifest",
+    "04-ASSETS/FULL-ASSET-MANIFEST-v4.3.json",
+    "--exact-candidate-catalog",
+    "03-COMPARISON-AUTHORITY/Canonical-Render-Catalog-v1.3.json",
+    "--output",
+    "/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/13-production-reference-boundary-recorded.json"
+  ],
+  "category": "assets",
+  "command": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 scripts/check-production-reference-boundary.py --repository-root /tmp/runescribe-v43-acceptance.aQQkxe/source --package-root /Users/jimdaley/Projects/RuneScribe/Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation --asset-manifest 04-ASSETS/FULL-ASSET-MANIFEST-v4.3.json --exact-candidate-catalog 03-COMPARISON-AUTHORITY/Canonical-Render-Catalog-v1.3.json --output /tmp/runescribe-v43-c9f45-acceptance.NI49Xn/13-production-reference-boundary-recorded.json",
+  "commandID": "production-reference-boundary",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:29:44.844Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 0,
+    "path": "commands/logs/production-reference-boundary.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "outputs": [
+    {
+      "bytes": 8026,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-acceptance.NI49Xn/13-production-reference-boundary-recorded.json",
+      "sha256": "abe553cf91e5fdf86a116716cf3153898733eb6cdc835fd1c4d5829db34b4cd9"
+    }
+  ],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 55,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:26:40.477Z"
+}

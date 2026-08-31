@@ -1,0 +1,399 @@
+{
+  "acceptanceEvidence": false,
+  "evidenceType": "failure-ledger",
+  "failureCount": 28,
+  "failures": [
+    {
+      "blocking": true,
+      "detail": "The package requires the PR head commit SHA inside files contained by that same commit. Writing the SHA changes the Git tree and therefore the commit SHA.",
+      "evidencePaths": [],
+      "failureID": "EVIDENCE-HEAD-SELF-REFERENCE",
+      "gateIDs": [
+        "SRC-001",
+        "EVID-001",
+        "PUB-001",
+        "AUDIT-001"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "The in-tree evidence head cannot cryptographically name itself"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-ACCESS-001",
+      "gateIDs": [
+        "ACCESS-001"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "ACCESS-001 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-ACCESS-002",
+      "gateIDs": [
+        "ACCESS-002"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "ACCESS-002 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-ACCESS-003",
+      "gateIDs": [
+        "ACCESS-003"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "ACCESS-003 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-ACCESS-004",
+      "gateIDs": [
+        "ACCESS-004"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "ACCESS-004 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists; Publication-dependent gate remains unresolved in pre-publication mode",
+      "evidencePaths": [],
+      "failureID": "GATE-AUDIT-001",
+      "gateIDs": [
+        "AUDIT-001"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "AUDIT-001 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-BUILD-002",
+      "gateIDs": [
+        "BUILD-002"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "BUILD-002 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-BUILD-003",
+      "gateIDs": [
+        "BUILD-003"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "BUILD-003 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists; Publication-dependent gate remains unresolved in pre-publication mode",
+      "evidencePaths": [],
+      "failureID": "GATE-EVID-001",
+      "gateIDs": [
+        "EVID-001"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "EVID-001 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-NOR-003",
+      "gateIDs": [
+        "NOR-003"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "NOR-003 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-PROG-002",
+      "gateIDs": [
+        "PROG-002"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "PROG-002 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists; Publication-dependent gate remains unresolved in pre-publication mode",
+      "evidencePaths": [],
+      "failureID": "GATE-PUB-001",
+      "gateIDs": [
+        "PUB-001"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "PUB-001 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-RES-002",
+      "gateIDs": [
+        "RES-002"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "RES-002 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-SHARE-002",
+      "gateIDs": [
+        "SHARE-002"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "SHARE-002 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists; Publication-dependent gate remains unresolved in pre-publication mode",
+      "evidencePaths": [],
+      "failureID": "GATE-SRC-001",
+      "gateIDs": [
+        "SRC-001"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "SRC-001 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-THEME-001",
+      "gateIDs": [
+        "THEME-001"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "THEME-001 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-UI-001",
+      "gateIDs": [
+        "UI-001"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "UI-001 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-UI-002",
+      "gateIDs": [
+        "UI-002"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "UI-002 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-UI-003",
+      "gateIDs": [
+        "UI-003"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "UI-003 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-VIS-001",
+      "gateIDs": [
+        "VIS-001"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "VIS-001 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-VIS-002",
+      "gateIDs": [
+        "VIS-002"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "VIS-002 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-VIS-003",
+      "gateIDs": [
+        "VIS-003"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "VIS-003 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "No explicit gate assessment record exists",
+      "evidencePaths": [],
+      "failureID": "GATE-VIS-004",
+      "gateIDs": [
+        "VIS-004"
+      ],
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "VIS-004 has not passed"
+    },
+    {
+      "blocking": true,
+      "detail": "final-qualification.json and SourceBoundary.json must contain the SHA of the commit that contains those same files. Updating either value changes that commit SHA, so no truthful fixed point exists under the current contract.",
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/EVIDENCE-SCAFFOLDING.md"
+      ],
+      "evidenceType": "qualification-failure",
+      "failureID": "evidence-head-contract-cycle",
+      "gateIDs": [
+        "AUDIT-001",
+        "EVID-001",
+        "SRC-001"
+      ],
+      "openedAt": "2026-08-31T22:31:51.660Z",
+      "resolvedAt": null,
+      "schemaVersion": "1.3",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "The evidence head attestation is self-referential"
+    },
+    {
+      "blocking": true,
+      "detail": "The scanner executed successfully with 20 rules, but the result is not a compliance pass: 5 pass, 12 violation, 1 pending enforcement, and 2 not evaluated. FG-020 passes. This record does not relabel the narrower v4.3 provider-neutral architecture gate, whose dedicated guards pass.",
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/forsetti-report-only.json"
+      ],
+      "evidenceType": "qualification-failure",
+      "failureID": "forsetti-report-only-violations",
+      "gateIDs": [],
+      "openedAt": "2026-08-31T22:31:51.634Z",
+      "resolvedAt": null,
+      "schemaVersion": "1.3",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "Forsetti remains report-only with twelve rule-level violations"
+    },
+    {
+      "blocking": true,
+      "detail": "The deterministic extraction and shipping assets pass, but the required source-bound runtime companion has not been produced. The Moonleaf asset builder remains fail-closed at PENDING_PROVIDER_BINDING.",
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/moonleaf-asset-builder.json"
+      ],
+      "evidenceType": "qualification-failure",
+      "failureID": "moonleaf-target-runtime",
+      "gateIDs": [
+        "RES-002",
+        "VIS-004"
+      ],
+      "openedAt": "2026-08-31T22:31:51.582Z",
+      "resolvedAt": null,
+      "schemaVersion": "1.3",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "Moonleaf received identity target runtime witness is absent"
+    },
+    {
+      "blocking": true,
+      "detail": "PUB-001 requires a pushed branch and open review pull request, while Phase 12 forbids push and pull-request creation until every gate, including PUB-001, already passes.",
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/EVIDENCE-SCAFFOLDING.md"
+      ],
+      "evidenceType": "qualification-failure",
+      "failureID": "publication-order-contract-cycle",
+      "gateIDs": [
+        "AUDIT-001",
+        "PUB-001"
+      ],
+      "openedAt": "2026-08-31T22:31:51.603Z",
+      "resolvedAt": null,
+      "schemaVersion": "1.3",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "PUB-001 is required before the publication that it proves"
+    },
+    {
+      "blocking": true,
+      "detail": "The package requires 50 canonical candidates, 400 responsive entries, 576 runtime probes, and 1,104 mapping results. Producing the missing evidence requires controlled iPhone, iPad, and macOS UI execution plus same-state same-viewport comparison; no synthetic result is accepted.",
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/SourceManifest.after.json"
+      ],
+      "evidenceType": "qualification-failure",
+      "failureID": "runtime-visual-matrix",
+      "gateIDs": [
+        "ACCESS-001",
+        "ACCESS-002",
+        "ACCESS-003",
+        "ACCESS-004",
+        "BUILD-002",
+        "BUILD-003",
+        "SHARE-001",
+        "SHARE-002",
+        "UI-001",
+        "UI-002",
+        "UI-003",
+        "VIS-001",
+        "VIS-002",
+        "VIS-003",
+        "VIS-004"
+      ],
+      "openedAt": "2026-08-31T22:31:51.559Z",
+      "resolvedAt": null,
+      "schemaVersion": "1.3",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "status": "OPEN",
+      "summary": "Canonical responsive mapping and runtime-probe evidence is not materialized"
+    }
+  ],
+  "generatedAt": "2026-08-31T22:39:27.467Z",
+  "publicationState": "PREPUBLICATION",
+  "result": "FAIL",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "unresolvedBlockingFailureCount": 28,
+  "unresolvedFailureCount": 28
+}

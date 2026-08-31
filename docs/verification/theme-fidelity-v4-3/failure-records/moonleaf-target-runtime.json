@@ -1,0 +1,19 @@
+{
+  "blocking": true,
+  "detail": "The deterministic extraction and shipping assets pass, but the required source-bound runtime companion has not been produced. The Moonleaf asset builder remains fail-closed at PENDING_PROVIDER_BINDING.",
+  "evidencePaths": [
+    "docs/verification/theme-fidelity-v4-3/commands/records/moonleaf-asset-builder.json"
+  ],
+  "evidenceType": "qualification-failure",
+  "failureID": "moonleaf-target-runtime",
+  "gateIDs": [
+    "RES-002",
+    "VIS-004"
+  ],
+  "openedAt": "2026-08-31T22:31:51.582Z",
+  "resolvedAt": null,
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "status": "OPEN",
+  "summary": "Moonleaf received identity target runtime witness is absent"
+}

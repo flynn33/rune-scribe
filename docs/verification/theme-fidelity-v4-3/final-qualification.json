@@ -7,7 +7,7 @@
       "passingCount": 0,
       "path": "canonical-results.json",
       "present": true,
-      "sha256": "a1b6437179cc6025ddc5cc1d6db242aa8ca8f1724f0dfdb2cbcea2ff5ce9e2a0",
+      "sha256": "edb1e0ffa32723c82ab89678cf49451c460d0c7aa8421c16369489d396ff507b",
       "sourceBound": true
     },
     "mapping-results.json": {
@@ -16,7 +16,7 @@
       "passingCount": 0,
       "path": "mapping-results.json",
       "present": true,
-      "sha256": "a1b6437179cc6025ddc5cc1d6db242aa8ca8f1724f0dfdb2cbcea2ff5ce9e2a0",
+      "sha256": "edb1e0ffa32723c82ab89678cf49451c460d0c7aa8421c16369489d396ff507b",
       "sourceBound": true
     },
     "responsive-results.json": {
@@ -25,7 +25,7 @@
       "passingCount": 0,
       "path": "responsive-results.json",
       "present": true,
-      "sha256": "4b09fc9f44bf2579da00c1180fb49dabfbb23821b6e96835ac8c62a06adbd6ad",
+      "sha256": "72894b1841440ede3c85443f6e61755656df8bff8c094b2234723f7e3854eea8",
       "sourceBound": true
     },
     "runtime-probe-results.json": {
@@ -34,7 +34,7 @@
       "passingCount": 0,
       "path": "runtime-probe-results.json",
       "present": true,
-      "sha256": "a1b6437179cc6025ddc5cc1d6db242aa8ca8f1724f0dfdb2cbcea2ff5ce9e2a0",
+      "sha256": "edb1e0ffa32723c82ab89678cf49451c460d0c7aa8421c16369489d396ff507b",
       "sourceBound": true
     }
   },
@@ -47,7 +47,7 @@
     "responsiveEntries": 0,
     "runtimeProbeInstances": 0
   },
-  "evidenceHeadSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+  "evidenceHeadSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
   "evidenceHeadVerified": false,
   "evidenceType": "final-qualification",
   "failures": [
@@ -57,10 +57,10 @@
     "Observed responsiveEntries count 0 does not equal required 400",
     "Observed runtimeProbeInstances count 0 does not equal required 576",
     "Observed mappingResults count 0 does not equal required 1104",
-    "Only 0 of 40 gates pass"
+    "Only 18 of 40 gates pass"
   ],
   "gateCatalogSHA256": "5761076edf7b55043401e94dec516c822fe40aec696862e375e34d07857e9dca",
-  "generatedAt": "2026-08-28T05:26:13.923Z",
+  "generatedAt": "2026-08-31T22:39:27.467Z",
   "observedCounts": {
     "canonicalCandidates": 0,
     "gates": 40,
@@ -78,42 +78,42 @@
   },
   "result": "FAIL",
   "schemaVersion": "1.3",
-  "sourceSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
   "supportingEvidence": {
     "commandIndex": {
-      "bytes": 493,
+      "bytes": 12089,
       "path": "CommandIndex.json",
-      "sha256": "10a5605c6301d4e32e6cecf7e33ec95a16818405038659655a119b611b9e2efb"
+      "sha256": "c42d612a9e7132852273842a203480d0f82d950370807b51b77fd791ab52a61a"
     },
     "failureLedger": {
-      "bytes": 56569,
+      "bytes": 13068,
       "path": "FailureLedger.json",
-      "sha256": "cae310d3c73556405698a9ead927822a7b35eb162aafbb81d6f7879ad83b7f6e"
+      "sha256": "9444acf4a4f6660492b3b255b1c07d165fe50a1a877109382af551d79585fa20"
     },
     "finalSelfAudit": {
-      "bytes": 3812,
+      "bytes": 3633,
       "path": "FinalSelfAudit.md",
-      "sha256": "b284d387fc11f0d3ea921ad1204aa08f046ffc3dadd620c43367c3582056bb29"
+      "sha256": "24a029692a36fbfd8ca36b629702d46d1c568fb2ecf5cea8ab75758501948436"
     },
     "sourceBoundary": {
       "bytes": 930,
       "path": "SourceBoundary.json",
-      "sha256": "2f8222022bdcefda51afaec4e52f63a80d010df9ec3a8ba344732ca4c157be04"
+      "sha256": "6b758dedf3276cd53d933035a8362b449cf222819410991cd46e4a3a6b4becb5"
     },
     "sourceManifestAfter": {
-      "bytes": 564546,
+      "bytes": 599911,
       "path": "SourceManifest.after.json",
-      "sha256": "37eacae04d8ef97e416c518c91dfdd6965980e27533bbec3e8507a15d1915296"
+      "sha256": "f599cb45f95f75e7158fa21f09884739d1a76186f88155a0f74a7aa635ba9aa9"
     },
     "sourceManifestBefore": {
-      "bytes": 564547,
+      "bytes": 599912,
       "path": "SourceManifest.before.json",
-      "sha256": "37fec6bc1b8f254a577d1aeac69840a29720ec8690c272b38c04210b13d02693"
+      "sha256": "6dea8c6112fd42f2df89d588444a62c53e2eb91c5b88880c07df43d691b9ade4"
     },
     "toolchain": {
-      "bytes": 889,
+      "bytes": 890,
       "path": "Toolchain.json",
-      "sha256": "e8ed6780833f4a0848f9fedd3fc729f3fe9522a05b3a55d07f4e00a84f8aea70"
+      "sha256": "4c7a083d266e4f14693cf75c123244983a927869243af4c776933c9983b86380"
     }
   },
   "templateOnly": false

@@ -1,0 +1,23 @@
+REPORT ONLY — NOT A COMPLIANCE PASS
+Mode: report-only
+Rules: 20; pass=5; violation=12; pending-enforcement=1; not-evaluated=2
+FG-001 pass project.yml:1
+FG-002 pass Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json:8
+FG-003 pass Packages/RuneScribeArchitecture/Package.swift:1
+FG-004 violation Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeContributionRegistry.swift:330
+FG-005 pass Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift:173
+FG-006 violation Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift:1
+FG-007 violation Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift:2875
+FG-008 not-evaluated Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/CipherLibraryView.swift:1
+FG-009 violation Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift:84
+FG-010 violation Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Module.swift:53
+FG-011 violation Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift:270
+FG-012 violation RuneScrib/AppHost/RuneScribeRuntimeComposition.swift:66
+FG-013 violation Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift:697
+FG-014 violation Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift:906
+FG-015 not-evaluated Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeContributionRegistry.swift:348
+FG-016 violation Packages/RuneScribeArchitecture/Sources/RuneScribeGameCenterModule/GameCenterAchievementCatalog.swift:307
+FG-017 violation Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Commands.swift:295
+FG-018 violation Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Events.swift:10
+FG-019 pending-enforcement scripts/forsetti-compliance-rules.json:236
+FG-020 pass .github/PULL_REQUEST_TEMPLATE.md:1

@@ -1,0 +1,44 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "scripts/check-norse-visual-remediation.py",
+    "--repo-root",
+    "/tmp/runescribe-v43-acceptance.aQQkxe/source",
+    "--profile",
+    "implementation",
+    "--format",
+    "json"
+  ],
+  "category": "static-analysis",
+  "command": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 scripts/check-norse-visual-remediation.py --repo-root /tmp/runescribe-v43-acceptance.aQQkxe/source --profile implementation --format json",
+  "commandID": "norse-remediation",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:10:52.497Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 2443,
+    "path": "commands/logs/norse-remediation.log",
+    "sha256": "f5248d11d521de93999018f68f5eff49cf3a0fa2d598897092759e51c0be0d23"
+  },
+  "outputs": [],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 17,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:10:50.469Z"
+}

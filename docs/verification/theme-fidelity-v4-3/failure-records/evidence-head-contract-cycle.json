@@ -1,0 +1,20 @@
+{
+  "blocking": true,
+  "detail": "final-qualification.json and SourceBoundary.json must contain the SHA of the commit that contains those same files. Updating either value changes that commit SHA, so no truthful fixed point exists under the current contract.",
+  "evidencePaths": [
+    "docs/verification/theme-fidelity-v4-3/EVIDENCE-SCAFFOLDING.md"
+  ],
+  "evidenceType": "qualification-failure",
+  "failureID": "evidence-head-contract-cycle",
+  "gateIDs": [
+    "AUDIT-001",
+    "EVID-001",
+    "SRC-001"
+  ],
+  "openedAt": "2026-08-31T22:31:51.660Z",
+  "resolvedAt": null,
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "status": "OPEN",
+  "summary": "The evidence head attestation is self-referential"
+}

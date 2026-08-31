@@ -1,0 +1,19 @@
+{
+  "blocking": true,
+  "detail": "PUB-001 requires a pushed branch and open review pull request, while Phase 12 forbids push and pull-request creation until every gate, including PUB-001, already passes.",
+  "evidencePaths": [
+    "docs/verification/theme-fidelity-v4-3/EVIDENCE-SCAFFOLDING.md"
+  ],
+  "evidenceType": "qualification-failure",
+  "failureID": "publication-order-contract-cycle",
+  "gateIDs": [
+    "AUDIT-001",
+    "PUB-001"
+  ],
+  "openedAt": "2026-08-31T22:31:51.603Z",
+  "resolvedAt": null,
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "status": "OPEN",
+  "summary": "PUB-001 is required before the publication that it proves"
+}
