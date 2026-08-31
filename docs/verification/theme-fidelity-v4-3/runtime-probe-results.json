@@ -1,0 +1,11 @@
+{
+  "acceptanceEvidence": false,
+  "failures": [
+    "No qualification result records have been assembled"
+  ],
+  "result": "FAIL",
+  "results": [],
+  "schemaVersion": "1.3",
+  "sourceSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+  "templateOnly": true
+}

@@ -1,0 +1,22 @@
+{
+  "acceptanceEvidence": false,
+  "allowedEvidenceRoot": "docs/verification/theme-fidelity-v4-3/",
+  "applicationSourceSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+  "changedPathCount": 0,
+  "changedPaths": [],
+  "evidenceHeadSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+  "evidenceHeadStatus": "PREPUBLICATION_CURRENT_HEAD_NOT_FINAL",
+  "evidenceType": "application-source-to-evidence-head-boundary",
+  "failures": [
+    "No final immutable evidence-head commit exists in pre-publication mode",
+    "The requested PR-head SHA cannot be written into files contained by that same commit without changing the SHA"
+  ],
+  "generatedAt": "2026-08-28T05:26:13.923Z",
+  "onlyEvidencePathsAfterApplicationSource": false,
+  "pathsOutsideAllowedEvidenceRoot": [],
+  "publicationState": "PREPUBLICATION",
+  "result": "FAIL",
+  "schemaVersion": "1.3",
+  "selfBindingVerified": false,
+  "worktreeCleanAtApplicationSource": false
+}

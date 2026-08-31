@@ -1,0 +1,120 @@
+{
+  "acceptanceEvidence": false,
+  "aggregateStatus": {
+    "canonical-results.json": {
+      "acceptanceEvidence": false,
+      "count": 0,
+      "passingCount": 0,
+      "path": "canonical-results.json",
+      "present": true,
+      "sha256": "a1b6437179cc6025ddc5cc1d6db242aa8ca8f1724f0dfdb2cbcea2ff5ce9e2a0",
+      "sourceBound": true
+    },
+    "mapping-results.json": {
+      "acceptanceEvidence": false,
+      "count": 0,
+      "passingCount": 0,
+      "path": "mapping-results.json",
+      "present": true,
+      "sha256": "a1b6437179cc6025ddc5cc1d6db242aa8ca8f1724f0dfdb2cbcea2ff5ce9e2a0",
+      "sourceBound": true
+    },
+    "responsive-results.json": {
+      "acceptanceEvidence": false,
+      "count": 0,
+      "passingCount": 0,
+      "path": "responsive-results.json",
+      "present": true,
+      "sha256": "4b09fc9f44bf2579da00c1180fb49dabfbb23821b6e96835ac8c62a06adbd6ad",
+      "sourceBound": true
+    },
+    "runtime-probe-results.json": {
+      "acceptanceEvidence": false,
+      "count": 0,
+      "passingCount": 0,
+      "path": "runtime-probe-results.json",
+      "present": true,
+      "sha256": "a1b6437179cc6025ddc5cc1d6db242aa8ca8f1724f0dfdb2cbcea2ff5ce9e2a0",
+      "sourceBound": true
+    }
+  },
+  "authoritySHA256": "2762104ea48819888c96937800d903b9163cb13879ab24c663adf10101abfb2e",
+  "canonicalCatalogSHA256": "da599d438dfcad6792e9d472fadf30eebfcdeb7904e267e174add8208b974c8e",
+  "counts": {
+    "canonicalCandidates": 0,
+    "gates": 40,
+    "mappingResults": 0,
+    "responsiveEntries": 0,
+    "runtimeProbeInstances": 0
+  },
+  "evidenceHeadSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+  "evidenceHeadVerified": false,
+  "evidenceType": "final-qualification",
+  "failures": [
+    "Pre-publication scaffolding is not acceptance evidence",
+    "No self-bound final evidence-head commit exists",
+    "Observed canonicalCandidates count 0 does not equal required 50",
+    "Observed responsiveEntries count 0 does not equal required 400",
+    "Observed runtimeProbeInstances count 0 does not equal required 576",
+    "Observed mappingResults count 0 does not equal required 1104",
+    "Only 0 of 40 gates pass"
+  ],
+  "gateCatalogSHA256": "5761076edf7b55043401e94dec516c822fe40aec696862e375e34d07857e9dca",
+  "generatedAt": "2026-08-28T05:26:13.923Z",
+  "observedCounts": {
+    "canonicalCandidates": 0,
+    "gates": 40,
+    "mappingResults": 0,
+    "responsiveEntries": 0,
+    "runtimeProbeInstances": 0
+  },
+  "publicationState": "PREPUBLICATION",
+  "requiredCounts": {
+    "canonicalCandidates": 50,
+    "gates": 40,
+    "mappingResults": 1104,
+    "responsiveEntries": 400,
+    "runtimeProbeInstances": 576
+  },
+  "result": "FAIL",
+  "schemaVersion": "1.3",
+  "sourceSHA": "77d19cef83688ab369bd45e49b43e2c40eecea26",
+  "supportingEvidence": {
+    "commandIndex": {
+      "bytes": 493,
+      "path": "CommandIndex.json",
+      "sha256": "10a5605c6301d4e32e6cecf7e33ec95a16818405038659655a119b611b9e2efb"
+    },
+    "failureLedger": {
+      "bytes": 56569,
+      "path": "FailureLedger.json",
+      "sha256": "cae310d3c73556405698a9ead927822a7b35eb162aafbb81d6f7879ad83b7f6e"
+    },
+    "finalSelfAudit": {
+      "bytes": 3812,
+      "path": "FinalSelfAudit.md",
+      "sha256": "b284d387fc11f0d3ea921ad1204aa08f046ffc3dadd620c43367c3582056bb29"
+    },
+    "sourceBoundary": {
+      "bytes": 930,
+      "path": "SourceBoundary.json",
+      "sha256": "2f8222022bdcefda51afaec4e52f63a80d010df9ec3a8ba344732ca4c157be04"
+    },
+    "sourceManifestAfter": {
+      "bytes": 564546,
+      "path": "SourceManifest.after.json",
+      "sha256": "37eacae04d8ef97e416c518c91dfdd6965980e27533bbec3e8507a15d1915296"
+    },
+    "sourceManifestBefore": {
+      "bytes": 564547,
+      "path": "SourceManifest.before.json",
+      "sha256": "37fec6bc1b8f254a577d1aeac69840a29720ec8690c272b38c04210b13d02693"
+    },
+    "toolchain": {
+      "bytes": 889,
+      "path": "Toolchain.json",
+      "sha256": "e8ed6780833f4a0848f9fedd3fc729f3fe9522a05b3a55d07f4e00a84f8aea70"
+    }
+  },
+  "templateOnly": false
+}
