@@ -758,7 +758,7 @@ actor RuntimeOpaqueResourceRegistry {
         )
         let matches = resources.values.filter {
             $0.metadata.handle.namespace == namespace
-                && $0.metadata.semanticRole == "unlock-sound-cue"
+                && $0.metadata.semanticRole == ThemeResourceRoles.unlockSound.rawValue
                 && $0.metadata.handle.resourceID.rawValue.hasSuffix(expectedSuffix)
         }
         guard matches.count == 1 else { return nil }

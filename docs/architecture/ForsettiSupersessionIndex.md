@@ -47,9 +47,10 @@ Where these records describe lookup-time authorization as runtime mediation, all
 
 ADR-RS-002 through ADR-RS-013 remain effective only where they do not conflict with the
 controlling policy. Compatibility identifiers, wire formats, resource budgets,
-persistence decisions, and privacy limits remain in force. Hardware-only observations
-are owner-operated optional validation outside Agent Coding scope and have no gating
-effect.
+persistence decisions, and privacy limits remain in force. Repository-controlled
+Simulator, hosted, and deterministic equivalents supersede historical device-observation
+requirements and have no gating effect. Legacy package-audit mechanics remain
+noncontrolling verification history and do not define product release qualification.
 
 ## No paper compliance
 

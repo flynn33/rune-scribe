@@ -935,6 +935,7 @@ public enum MoonleafThemeDescriptorFactory {
             },
             "vectorResourceID": "resource.frame.moonleaf.silvervine.output.frame-vector-master",
             "staticFallbackResourceID": "resource.frame.moonleaf.silvervine.output.frame-static-fallback",
+            "thumbnailResourceID": "resource.frame.moonleaf.silvervine.output.frame-thumbnail",
             "compatibleRelicIDs": [
               "relic.moonleaf.tablet",
               "relic.moonleaf.ivybound-plaque",

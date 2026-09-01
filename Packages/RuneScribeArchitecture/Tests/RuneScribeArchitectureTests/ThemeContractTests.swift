@@ -818,6 +818,7 @@ final class ThemeContractTests: XCTestCase {
             ("resource.relic.primary", ThemeResourceMediaType.json.rawValue),
             ("resource.seal.vector", ThemeResourceMediaType.json.rawValue),
             ("resource.frame.vector", ThemeResourceMediaType.json.rawValue),
+            ("resource.frame.thumbnail", ThemeResourceMediaType.json.rawValue),
             ("resource.crest.vector", ThemeResourceMediaType.json.rawValue),
             ("resource.background.static", ThemeResourceMediaType.mp4.rawValue),
             ("resource.vault.card", ThemeResourceMediaType.json.rawValue),
@@ -847,6 +848,35 @@ final class ThemeContractTests: XCTestCase {
                 object["resources"] = resources
             }
         )
+
+        XCTAssertThrowsError(
+            try decodeDescriptor { object in
+                var resources = object["resources"] as! [[String: Any]]
+                let index = resources.firstIndex {
+                    $0["id"] as? String == "resource.frame.thumbnail"
+                }!
+                resources[index]["role"] = ThemeResourceRoles.frameStaticFallback.rawValue
+                object["resources"] = resources
+            }
+        )
+    }
+
+    func testFrameThumbnailRemainsBackwardCompatibleForOlderDescriptors() throws {
+        let descriptor = try decodeDescriptor { object in
+            var codex = object["codex"] as! [String: Any]
+            var frames = codex["frames"] as! [[String: Any]]
+            frames[0].removeValue(forKey: "thumbnailResourceID")
+            codex["frames"] = frames
+            object["codex"] = codex
+
+            var resources = object["resources"] as! [[String: Any]]
+            resources.removeAll {
+                $0["id"] as? String == "resource.frame.thumbnail"
+            }
+            object["resources"] = resources
+        }
+
+        XCTAssertNil(descriptor.codex.frames.first?.thumbnailResourceID)
     }
 
     func testRasterFirstSealOmitsVectorAndUsesColorAsStandardResource() throws {
@@ -1127,6 +1157,7 @@ final class ThemeContractTests: XCTestCase {
             ),
             vectorResourceID: resourceID("frame.vector"),
             staticFallbackResourceID: resourceID("frame.static"),
+            thumbnailResourceID: resourceID("frame.thumbnail"),
             compatibleRelicIDs: [relicID],
             allowsStaticShare: true
         )
@@ -1189,7 +1220,7 @@ final class ThemeContractTests: XCTestCase {
             "script.font", "script.static",
             "relic.primary", "relic.thumbnail", "relic.static", "relic.contrast",
             "seal.vector", "seal.monochrome", "seal.thumbnail",
-            "frame.vector", "frame.static", "crest.vector", "crest.static",
+            "frame.vector", "frame.static", "frame.thumbnail", "crest.vector", "crest.static",
             "background.static", "background.reduce", "background.contrast",
             "vault.card", "vault.locked", "vault.encountered", "vault.selected",
             "localization.en-us",
@@ -1278,6 +1309,7 @@ final class ThemeContractTests: XCTestCase {
         case "seal.thumbnail": ThemeResourceRoles.sealThumbnail
         case "frame.vector": ThemeResourceRoles.frameVectorMaster
         case "frame.static": ThemeResourceRoles.frameStaticFallback
+        case "frame.thumbnail": ThemeResourceRoles.frameThumbnail
         case "crest.vector": ThemeResourceRoles.crestVectorMaster
         case "crest.static": ThemeResourceRoles.crestStaticFallback
         case "background.static": ThemeResourceRoles.backgroundStaticBase

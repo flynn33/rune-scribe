@@ -921,6 +921,7 @@ public enum WildwoodThemeDescriptorFactory {
             },
             "vectorResourceID": "resource.frame.wildwood.living-root.output.frame-vector-master",
             "staticFallbackResourceID": "resource.frame.wildwood.living-root.output.frame-static-fallback",
+            "thumbnailResourceID": "resource.frame.wildwood.living-root.output.frame-thumbnail",
             "compatibleRelicIDs": [
               "relic.wildwood.rootsong-tablet",
               "relic.wildwood.mossbound-plaque",

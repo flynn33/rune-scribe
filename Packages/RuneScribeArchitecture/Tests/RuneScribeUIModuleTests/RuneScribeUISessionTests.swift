@@ -991,6 +991,44 @@ final class RuneScribeUISessionTests: XCTestCase {
         await runtime.stop()
     }
 
+    func testShareBuilderLoadsDedicatedOptionalFrameThumbnail() async throws {
+        let (session, runtime) = try await makeThemeVisualSession(
+            includeMoonleafProvider: true
+        )
+        defer { Task { await runtime.stop() } }
+
+        try await session.prepareInitialTheme()
+        try session.start()
+        try await runtime.reconcileEntitlements(
+            ProgressionEntitlementSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 10_000),
+                includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                earnedUnlockIDs: [RuneScribeThemeMoonleafModuleBootstrap.unlockID]
+            )
+        )
+        let providerAvailable = await eventually(attempts: 2_000) {
+            session.themeSnapshot?.providers.contains(where: {
+                $0.codexID == RuneScribeThemeMoonleafModuleBootstrap.codexID
+                    && $0.state == .available
+                    && $0.isOwned
+            }) == true
+        }
+        XCTAssertTrue(providerAvailable)
+
+        let catalog = try await session.loadShareBuilderCatalog(
+            codexID: RuneScribeThemeMoonleafModuleBootstrap.codexID
+        )
+        let frame = try XCTUnwrap(catalog.descriptor.codex.frames.first)
+        let thumbnailResourceID = try XCTUnwrap(frame.thumbnailResourceID)
+        let artwork = await session.loadShareBuilderArtwork(for: catalog)
+        let reference = try XCTUnwrap(artwork[frame.metadata.id])
+
+        XCTAssertEqual(reference.resourceID, thumbnailResourceID)
+        XCTAssertEqual(reference.role, ThemeResourceRoles.frameThumbnail)
+        XCTAssertNotEqual(reference.resourceID, frame.staticFallbackResourceID)
+    }
+
     func testReceivedCipherBindsIncomingCodexWithoutChangingGlobalSelection()
         async throws
     {
@@ -1330,7 +1368,7 @@ final class RuneScribeUISessionTests: XCTestCase {
             preparedMessageArtifact: quickShareArtifact
         )
         let runtime = RuneScribeRuntime(
-            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 39),
+            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 40),
             platform: .macOS
         )
         let norseFontURL = try XCTUnwrap(
@@ -1400,8 +1438,8 @@ final class RuneScribeUISessionTests: XCTestCase {
                 metalLibrary: nil
             ),
             productMetadata: RuneScribeUIProductMetadata(
-                version: "1.0.39",
-                buildNumber: "39"
+                version: "1.0.40",
+                buildNumber: "40"
             )
         )
         try await session.prepareInitialTheme()
@@ -3492,7 +3530,7 @@ final class RuneScribeUISessionTests: XCTestCase {
                 )
             )
         let runtime = RuneScribeRuntime(
-            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 39),
+            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 40),
             platform: .macOS
         )
         let norseFontURL = try XCTUnwrap(
@@ -3575,8 +3613,8 @@ final class RuneScribeUISessionTests: XCTestCase {
                     metalLibrary: nil
                 ),
                 productMetadata: RuneScribeUIProductMetadata(
-                    version: "1.0.39",
-                    buildNumber: "39"
+                    version: "1.0.40",
+                    buildNumber: "40"
                 )
             ),
             runtime

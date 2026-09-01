@@ -41,7 +41,7 @@ SIMULATOR_REPLACEMENT_TASKS = %w[BAS-006 SHR-001 SHR-015].freeze
 NON_GATING_EXTERNAL_TASKS = %w[REL-011].freeze
 EXPECTED_SOURCE_PRIORITY = [
   "active operator instructions",
-  "active implementation package and machine-readable controls",
+  "operator-approved product-release scope and repository-controlled release gates",
   "actual local repository behavior and compatibility identifiers",
   "Forsetti Compliance Audit v2.0 factual findings",
   "locked product decisions not superseded by later operator clarification",
@@ -183,8 +183,8 @@ def validate(document, root)
 
   application_version = document["applicationVersion"]
   if exact_keys(application_version, EXPECTED_APPLICATION_VERSION_KEYS, "applicationVersion", errors)
-    errors << "applicationVersion.marketing must be 1.0.39" unless application_version["marketing"] == "1.0.39"
-    errors << "applicationVersion.build must be 39" unless application_version["build"] == "39"
+    errors << "applicationVersion.marketing must be 1.0.40" unless application_version["marketing"] == "1.0.40"
+    errors << "applicationVersion.build must be 40" unless application_version["build"] == "40"
   end
 
   authority = document["authority"]

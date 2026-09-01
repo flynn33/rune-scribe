@@ -587,6 +587,7 @@ public enum ThemeResourceRoles {
     public static let sealThumbnail = make("seal.thumbnail")
     public static let frameVectorMaster = make("frame.vector-master")
     public static let frameStaticFallback = make("frame.static-fallback")
+    public static let frameThumbnail = make("frame.thumbnail")
     public static let crestVectorMaster = make("crest.vector-master")
     public static let crestStaticFallback = make("crest.static-fallback")
     public static let crestThumbnail = make("crest.thumbnail")
@@ -612,6 +613,7 @@ public enum ThemeResourceRoles {
     public static let receivedPrimaryMedallion = make("received.primary.medallion")
     public static let receivedShareMedallion = make("received.share.medallion")
     public static let localizationStrings = make("localization.strings")
+    public static let unlockSound = make("unlock-sound")
 
     private static func make(_ rawValue: String) -> ThemeResourceRoleID {
         ThemeResourceRoleID(rawValue: rawValue)!
@@ -1238,6 +1240,7 @@ public struct ThemeFrameDescriptor: Codable, Hashable, Sendable {
     public let metadata: ThemeArtifactMetadata
     public let vectorResourceID: ThemeResourceID
     public let staticFallbackResourceID: ThemeResourceID
+    public let thumbnailResourceID: ThemeResourceID?
     public let compatibleRelicIDs: [ArtifactID]
     public let allowsStaticShare: Bool
 
@@ -1245,6 +1248,7 @@ public struct ThemeFrameDescriptor: Codable, Hashable, Sendable {
         metadata: ThemeArtifactMetadata,
         vectorResourceID: ThemeResourceID,
         staticFallbackResourceID: ThemeResourceID,
+        thumbnailResourceID: ThemeResourceID? = nil,
         compatibleRelicIDs: [ArtifactID],
         allowsStaticShare: Bool
     ) throws {
@@ -1254,6 +1258,7 @@ public struct ThemeFrameDescriptor: Codable, Hashable, Sendable {
         self.metadata = metadata
         self.vectorResourceID = vectorResourceID
         self.staticFallbackResourceID = staticFallbackResourceID
+        self.thumbnailResourceID = thumbnailResourceID
         self.compatibleRelicIDs = compatibleRelicIDs
         self.allowsStaticShare = allowsStaticShare
         try validate()
@@ -1267,7 +1272,10 @@ public struct ThemeFrameDescriptor: Codable, Hashable, Sendable {
     }
 
     fileprivate var requiredResourceIDs: Set<ThemeResourceID> {
-        [vectorResourceID, staticFallbackResourceID]
+        Set(
+            [vectorResourceID, staticFallbackResourceID]
+                + [thumbnailResourceID].compactMap { $0 }
+        )
     }
 }
 
@@ -2078,6 +2086,13 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
                 role: ThemeResourceRoles.frameStaticFallback,
                 media: stillMedia
             )
+            if let thumbnailResourceID = frame.thumbnailResourceID {
+                try require(
+                    thumbnailResourceID,
+                    role: ThemeResourceRoles.frameThumbnail,
+                    media: thumbnailMedia
+                )
+            }
         }
         for crest in codex.crests {
             try require(

@@ -919,6 +919,7 @@ public enum SunspireThemeDescriptorFactory {
             },
             "vectorResourceID": "resource.frame.sunspire.laurel-of-dawn.output.frame-vector-master",
             "staticFallbackResourceID": "resource.frame.sunspire.laurel-of-dawn.output.frame-static-fallback",
+            "thumbnailResourceID": "resource.frame.sunspire.laurel-of-dawn.output.frame-thumbnail",
             "compatibleRelicIDs": [
               "relic.sunspire.dawnfire-tablet",
               "relic.sunspire.solvine-plaque",

@@ -196,7 +196,7 @@ enum VaultProgressPresentation {
             return catalogItem(
                 frame.metadata,
                 kind: .frame,
-                resourceID: frame.staticFallbackResourceID,
+                resourceID: frame.thumbnailResourceID ?? frame.staticFallbackResourceID,
                 ownershipByID: ownershipByID,
                 rightsByID: rightsByID,
                 providerAvailable: providerAvailable,

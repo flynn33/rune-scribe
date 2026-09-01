@@ -3,11 +3,12 @@
 Ready-to-paste material for App Store Connect (iOS App Store and Mac App Store).
 Keep this file in sync when shipping a new marketing version.
 
-**Last prepared for:** 1.0.39 (build 39) — 2026-08-23
+**Last prepared for:** 1.0.40 (build 40) — 2026-08-31
 
-> **No-ship boundary:** this repository update prepares source-controlled copy only.
-> It does not create or change App Store Connect records, archive/export either app,
-> sign for distribution, notarize, upload, release, or begin rollout.
+> **Publication boundary:** version 1.0.40 build 40 is a repository-qualified release
+> candidate and is not shipped. Both supported headless UI runs pass. Four distribution-
+> signing and entitlement checks await a matching profile and identity; archive, export,
+> notarization, upload, and rollout remain external publication actions.
 
 ---
 
@@ -15,8 +16,8 @@ Keep this file in sync when shipping a new marketing version.
 
 | Field | Value |
 |--------|--------|
-| **Version** | `1.0.39` |
-| **Build** | `39` |
+| **Version** | `1.0.40` |
+| **Build** | `40` |
 | **Bundle ID** | `com.runescribe.app` |
 | **Display name** | Rune Scribe |
 | **Category** | Lifestyle (`public.app-category.lifestyle`) |
@@ -36,19 +37,20 @@ Sources of truth in the repo:
 ### Short
 
 ```
-• Adds Share Builder and one-action Quick Share appearance controls
-• Makes typed themed Artifacts the primary cipher-sharing format
-• Improves verified appearance fallback and accessibility
+• Refreshes all five Codices with production theme resources
+• Improves responsive Codex, Vault, message, and sharing layouts
+• Hardens themed sharing, safe receiving, and accessibility treatments
 ```
 
 ### Full
 
 ```
-This update completes the Codex remediation release candidate while preserving local encryption and offline use:
+This update advances Rune Scribe's five Codices while preserving local encryption and offline use:
 
-• Use Share Builder for messages and cipher invitations, or Quick Share with validated defaults.
-• Choose owned Relics, optional Seals and Frames, and Full, Reduced, or Off effects policy.
-• Share ciphers primarily as typed themed .runescribe Artifacts; link, QR, and Export remain explicit fallbacks.
+• Explore refreshed Norse, Moonleaf, Sunspire, Wildwood, and Gloamthorn presentation resources.
+• Use responsive Codex, Vault, message, and sharing layouts across iPhone, iPad, and Mac.
+• Choose owned Relics, optional Seals and Frames, and Full, Reduced, or Off effects policy in Share Builder.
+• Share ciphers as typed themed .runescribe Artifacts; link, QR, and Export remain explicit fallbacks.
 • Receive themed files safely even when their Codex is locked or unavailable.
 • Continue using encode, decode, import, and messages under a visible emergency Base appearance when required appearance resources fail.
 • Cipher keys, contacts, plaintext, and full messages stay out of iCloud and Game Center.
@@ -85,7 +87,7 @@ HOW TO DEMO
 
 ENCRYPTION
 • AES-256-GCM (CryptoKit) for messages and for the on-device cipher library.
-• Keys stored in Keychain (This Device Only; no iCloud Keychain sync).
+• Keys stored in the Data Protection Keychain (This Device Only; no iCloud Keychain sync).
 • Peer-to-peer key handoff only (link / QR / file). No end-to-end messaging network.
 
 URL SCHEME
@@ -138,8 +140,9 @@ before upload; this file does not submit those answers.
 
 **Privacy policy source:** publish [PRIVACY.md](PRIVACY.md) unchanged at the dedicated
 Raven Forge privacy URL before upload, then enter that live URL in App Store Connect.
-The source policy is complete; publication and App Store entry remain owner-only and
-not performed by this work.
+The source policy is complete. Publication and App Store entry require external access
+and are not performed by this work; their absence does not determine product
+shippability.
 
 ---
 
@@ -207,9 +210,9 @@ Info.plist highlights (`Config/RuneScrib-*-Info.plist` / `project.yml`):
 
 ## Archive & upload checklist
 
-This is an owner-operated future checklist. No item in the archive, export, signing,
-notarization, upload, record-creation, or rollout sequence was executed by the
-roadmap-completion work.
+This is an external publication checklist for use when the required credentials and
+services are available. No item in the archive, export, signing, notarization, upload,
+record-creation, or rollout sequence is implied by product release qualification.
 
 ### iOS
 
@@ -227,7 +230,17 @@ roadmap-completion work.
 
 ### Before upload
 
-- [ ] Version and build match App Store Connect (`1.0.39` / `39` for this packet)
+- [ ] Version and build match App Store Connect (`1.0.40` / `40` for this packet)
+- [x] Core user flows and clean automated tests pass against the final source
+- [x] iOS Simulator and arm64-only unsigned macOS Release builds pass
+- [x] iPhone 17 Pro headless UI qualification passes on iOS 26.5
+- [x] iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5
+- [x] Deterministic accessibility, privacy, security, and completeness checks pass
+- [x] Both final app bundles contain the exact reviewed `PrivacyInfo.xcprivacy`
+  required-reason declarations
+- [ ] Distribution signing and entitlement inspection passes with a matching profile and
+  identity; content, resource, and privacy inspection currently passes 97/101 checks
+- [x] No known release-blocking defects remain
 - [ ] Release notes pasted (What’s New)
 - [ ] Review notes pasted
 - [ ] Privacy answers set
@@ -240,19 +253,21 @@ roadmap-completion work.
   accessibility, and feedback settings
 - [x] Deterministic adapters verify private-sync merge/offline/account/corruption policy
 - [x] Deterministic adapters verify Game Center mapping/opt-in/outbox/retry policy
-- [ ] Owner configures the iCloud container and validates private-database account changes
-- [ ] Owner creates/groups Game Center records, uploads approved images/localizations,
-  and validates sandbox behavior on both platforms
+- [ ] When credentials are available, configure the iCloud container and App Store records
+- [ ] When services are available, create/group Game Center records and upload approved
+  images/localizations
 
-Hardware-only observations are owner-operated optional validation outside Agent Coding
-scope. They do not affect acceptance, completion, blocker status, residual work,
-PASS/FAIL, upload readiness, or pull-request readiness.
+Manual hardware observations are superseded by repository-controlled Simulator, hosted,
+and deterministic equivalents and are not a product-shippability requirement. Legacy
+package audit and self-binding mechanics are noncontrolling verification history. The
+source is repository-qualified, and both supported headless UI runs pass. Distribution
+signing, archive, export, notarization, upload, and rollout remain external.
 
 ---
 
-## Source-complete 1.0.39 candidate
+## Version 1.0.40 repository-qualified release candidate
 
-Internal source-complete summary; this is **not a shipment claim**:
+Internal release summary; this is **not a shipment claim**:
 
 1. Optional on-device Progression with approved achievements, milestones, durable records, and privacy-safe existing-user migration
 2. Vault/Progress, Collection, Archive, and accessible queued unlock reveals
@@ -260,7 +275,18 @@ Internal source-complete summary; this is **not a shipment claim**:
 4. Themed typed-package sharing/receiving, static preview, Encounter and provenance state
 5. Local-first private progression synchronization and optional Game Center policy
 6. Core, runtime, providers, Progression, Cloud, Game Center, and UI boundaries guarded
-7. Marketing version **1.0.39**, build **39**, with discretionary owner validation before distribution and no upload performed
+7. Final-source checks pass: 1,231/1,231 Swift tests, 255/255 Python tests, 60 Norse
+   semantic rules, 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping
+   negative mutations, and 27/27 evidence-hardening tests
+8. The iOS Release and arm64-only unsigned macOS Release builds pass; built-product
+   content, resource, and privacy inspection passes 97/101 checks, with four
+   distribution-signing and entitlement checks pending external credentials
+9. The iPhone 17 Pro iOS 26.5 UI run passes 7, skips 1 iPad-only test, and fails 0; the
+   iPad Pro 13-inch (M5) iOS 26.5 UI run has 5 passed, 3 phone-specific skipped by
+   design, and 0 failed
+10. The superseded v4.3 package audit is retained as noncontrolling verification history
+11. Marketing version **1.0.40**, build **40** is repository-qualified and not shipped;
+    distribution signing, archive, export, notarization, upload, and rollout remain external
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)
 

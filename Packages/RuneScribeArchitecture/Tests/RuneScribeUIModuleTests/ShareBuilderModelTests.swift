@@ -398,6 +398,7 @@ final class ShareBuilderModelTests: XCTestCase {
             metadata: originalFrame.metadata,
             vectorResourceID: originalFrame.vectorResourceID,
             staticFallbackResourceID: originalFrame.staticFallbackResourceID,
+            thumbnailResourceID: originalFrame.thumbnailResourceID,
             compatibleRelicIDs: [defaultRelicID],
             allowsStaticShare: true
         )

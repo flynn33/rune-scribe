@@ -205,6 +205,10 @@ final class WildwoodThemeProviderTests: XCTestCase {
         XCTAssertEqual(descriptor.codex.relics.count, 3)
         XCTAssertEqual(descriptor.codex.seals.count, 6)
         XCTAssertEqual(descriptor.codex.frames.count, 1)
+        XCTAssertEqual(
+            descriptor.codex.frames.only?.thumbnailResourceID?.rawValue,
+            "resource.frame.wildwood.living-root.output.frame-thumbnail"
+        )
         XCTAssertEqual(descriptor.codex.crests.count, 1)
         XCTAssertEqual(descriptor.codex.relics.filter { $0.isDefault }.count, 1)
         XCTAssertNil(descriptor.codex.background.optionalMotionResourceID)

@@ -205,6 +205,46 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
         XCTAssertEqual(validatedProviderCount, 4)
     }
 
+    func testElvenFrameSharePlansUseFullSizeFallbackInsteadOfCatalogThumbnail()
+        throws
+    {
+        for provider in providers {
+            let descriptor = provider.descriptor
+            let frame = try XCTUnwrap(descriptor.codex.frames.first)
+            let thumbnailResourceID = try XCTUnwrap(frame.thumbnailResourceID)
+            let relicID = try XCTUnwrap(frame.compatibleRelicIDs.first)
+            let selection = try ShareBuilderPolicy.selection(
+                descriptor: descriptor,
+                codexOwned: true,
+                providerAvailable: true,
+                ownedArtifactIDs: [frame.metadata.id],
+                relicID: relicID,
+                sealID: nil,
+                frameID: frame.metadata.id
+            )
+            let request = try ShareArtifactRenderRequest(
+                selection: selection,
+                inscription: "ELVEN FRAME \(provider.name.uppercased())",
+                operationID: RuntimeOperationID(
+                    "operation.elven.frame.\(provider.name)"
+                ),
+                capturedAt: fixedDate,
+                localeIdentifier: fixedLocale,
+                scale: fixedScale,
+                accessibilityLabel: "A framed \(provider.name) Artifact preview."
+            )
+            let plan = try ShareArtifactRenderPolicy.plan(
+                request: request,
+                descriptor: descriptor
+            )
+            let resourceIDs = Set(plan.resourceMetadata.map(\.resourceID))
+
+            XCTAssertEqual(plan.frameResourceID, frame.staticFallbackResourceID)
+            XCTAssertTrue(resourceIDs.contains(frame.staticFallbackResourceID))
+            XCTAssertFalse(resourceIDs.contains(thumbnailResourceID))
+        }
+    }
+
     func testEveryElvenProviderRendersExactBundleResourcesAcrossAccessibilityVariants()
         throws
     {

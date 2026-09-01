@@ -712,6 +712,24 @@ final class NorseBaseThemeModuleTests: XCTestCase {
         )
     }
 
+    func testUnlockSoundsUseTheRuntimeSemanticRoleContract() {
+        let sounds = NorseBaseThemeResourceCatalog.definitions.filter {
+            $0.mediaType == .wav
+        }
+
+        XCTAssertEqual(sounds.count, 4)
+        XCTAssertEqual(Set(sounds.map(\.role)), [ThemeResourceRoles.unlockSound])
+        XCTAssertEqual(
+            Set(sounds.map { $0.id.rawValue }),
+            [
+                "resource.sound.norse.unlock-minor",
+                "resource.sound.norse.unlock-relic",
+                "resource.sound.norse.unlock-codex",
+                "resource.sound.norse.unlock-mastery",
+            ]
+        )
+    }
+
     func testCancellationFromManifestOrRequiredResourceReadPropagates() async throws {
         enum Scenario: CaseIterable, Equatable { case manifest, requiredResource }
 

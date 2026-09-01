@@ -331,6 +331,21 @@ struct ContentView: View {
             }
         }
         .runeRootFrame()
+        #if os(iOS)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if inputIsFocused {
+                HStack {
+                    Spacer()
+                    Button("Done") { inputIsFocused = false }
+                        .buttonStyle(.borderedProminent)
+                        .accessibilityIdentifier("workspace.keyboard.done")
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(.bar)
+            }
+        }
+        #endif
         .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenWorkspace)
         .background { automaticMessageShareLauncher }
         .preferredColorScheme(.dark)
@@ -613,13 +628,6 @@ struct ContentView: View {
                                 )
                                 #if os(iOS)
                                 .focused($inputIsFocused)
-                                .toolbar {
-                                    ToolbarItemGroup(placement: .keyboard) {
-                                        Spacer()
-                                        Button("Done") { inputIsFocused = false }
-                                            .accessibilityIdentifier("workspace.keyboard.done")
-                                    }
-                                }
                                 #endif
 
                             if inputText.isEmpty {

@@ -42,6 +42,35 @@ final class CodexCatalogRootTests: XCTestCase {
         }
     }
 
+    func testOptionalThemeFrameSelectionsUseDedicatedThumbnails() throws {
+        for descriptor in descriptors {
+            XCTAssertEqual(descriptor.codex.frames.count, 1)
+            let frame = try XCTUnwrap(descriptor.codex.frames.first)
+            let thumbnailResourceID = try XCTUnwrap(frame.thumbnailResourceID)
+            let defaultSeal = try XCTUnwrap(descriptor.codex.seals.first(where: {
+                $0.metadata.availability == .included
+            }))
+            let selection = try ShareBuilderPolicy.selection(
+                descriptor: descriptor,
+                codexOwned: true,
+                providerAvailable: true,
+                ownedArtifactIDs: [frame.metadata.id],
+                relicID: descriptor.codex.defaultRelicID,
+                sealID: defaultSeal.metadata.id,
+                frameID: frame.metadata.id
+            )
+            let plan = try ActiveThemeVisualResourcePlan(
+                descriptor: descriptor,
+                revision: 1,
+                selection: selection
+            )
+
+            XCTAssertEqual(plan.selectedFrame?.thumbnail.id, thumbnailResourceID)
+            XCTAssertEqual(plan.selectedFrame?.thumbnail.role, ThemeResourceRoles.frameThumbnail)
+            XCTAssertNotEqual(thumbnailResourceID, frame.staticFallbackResourceID)
+        }
+    }
+
     func testEncounteredAndOwnedSeedsResolveToOneAcquisitionPresentation() {
         let encountered = ThemeFidelityQualificationCatalogBinding.resolve(
             surface: .vaultEncountered

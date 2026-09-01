@@ -44,8 +44,21 @@ invitation rail. Themed cipher files use the typed package rail.
 Private iCloud progression sync and Game Center reporting are optional on both
 platforms. They are not required on first run and do not carry cipher keys, contacts,
 plaintext, full messages, QR content, or package bytes. Source entitlements are present,
-but live container, account, record, and sandbox qualification remains in the owner
-pre-ship checklist.
+and repository-controlled deterministic equivalents cover unavailable, account-change,
+retry, corruption, and reporting behavior. Live container, account, record, and sandbox
+configuration is a separate external-service action when credentials are available; it
+does not determine product shippability.
+
+Manual hardware observations are superseded by repository-controlled macOS hosted,
+iPhone Simulator, iPad Simulator, and deterministic evidence. Version 1.0.40 build 40 is
+a repository-qualified release candidate and is not shipped. The iOS Release build and
+arm64-only unsigned macOS Release build pass, as does the iPhone 17 Pro headless UI run
+on iOS 26.5 with 7 passed, 1 iPad-only skipped, and 0 failed. The iPad Pro 13-inch (M5)
+headless UI run on iOS 26.5 passes with 5 passed, 3 phone-specific skipped by design, and
+0 failed. Built-product content, resource, and privacy inspection passes 97/101 checks;
+the remaining four distribution-signing and entitlement checks await a matching profile
+and identity as external publication work. The separate v4.3 package audit is incomplete
+but noncontrolling.
 
 The same privacy rule applies on both platforms: a `.runescribe` file or import link
 carries the actual cipher key. Share it only through a private channel.

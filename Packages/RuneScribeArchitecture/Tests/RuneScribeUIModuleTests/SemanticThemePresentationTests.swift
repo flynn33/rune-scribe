@@ -4,6 +4,7 @@ import AppKit
 #endif
 import RuneScribeContracts
 import RuneScribeNorseThemeModule
+import RuneScribeThemeMoonleafModule
 import RuneScribeUIRuntime
 import SwiftUI
 @testable import RuneScribeUIModule
@@ -377,6 +378,20 @@ final class SemanticThemePresentationTests: XCTestCase {
                 encounteredSeal.thumbnailResourceID
             )
         }
+
+        let optionalDescriptor = RuneScribeThemeMoonleafModuleBootstrap.discoveryDescriptor
+        let optionalFrame = try XCTUnwrap(optionalDescriptor.codex.frames.first)
+        let optionalFrameThumbnail = try XCTUnwrap(optionalFrame.thumbnailResourceID)
+        let optionalCatalog = VaultProgressPresentation.themeCatalog(
+            descriptor: optionalDescriptor,
+            ownership: []
+        )
+        XCTAssertEqual(
+            optionalCatalog.first(where: {
+                $0.artifactID == optionalFrame.metadata.id
+            })?.resourceID,
+            optionalFrameThumbnail
+        )
     }
 
     func testNorseUnlockAnimationParametersDriveAllRevealTierDurations() throws {

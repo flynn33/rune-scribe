@@ -119,6 +119,8 @@ fi
 
 macos_info="$macos_app/Contents/Info.plist"
 ios_info="$ios_app/Info.plist"
+macos_privacy="$macos_app/Contents/Resources/PrivacyInfo.xcprivacy"
+ios_privacy="$ios_app/PrivacyInfo.xcprivacy"
 
 if ! plutil -lint "$macos_info" >/dev/null 2>&1; then
   echo "ERROR: macOS product has no valid Contents/Info.plist" >&2
@@ -154,15 +156,44 @@ fi
 plutil -convert json -o "$temporary_directory/macos-info.json" "$macos_info"
 plutil -convert json -o "$temporary_directory/ios-info.json" "$ios_info"
 
-if ruby -rjson - "$temporary_directory/macos-info.json" "$temporary_directory/ios-info.json" \
-    >"$temporary_directory/info-errors" <<'RUBY'
+configuration_inputs_valid=true
+: >"$temporary_directory/info-errors"
+if ! plutil -convert json -o "$temporary_directory/macos-privacy.json" \
+    "$macos_privacy" >/dev/null 2>&1; then
+  printf '%s\n' "macOS PrivacyInfo.xcprivacy is missing or invalid" \
+    >>"$temporary_directory/info-errors"
+  configuration_inputs_valid=false
+fi
+if ! plutil -convert json -o "$temporary_directory/ios-privacy.json" \
+    "$ios_privacy" >/dev/null 2>&1; then
+  printf '%s\n' "iOS PrivacyInfo.xcprivacy is missing or invalid" \
+    >>"$temporary_directory/info-errors"
+  configuration_inputs_valid=false
+fi
+
+if [ "$configuration_inputs_valid" = true ] && \
+    ruby -rjson - \
+      "$temporary_directory/macos-info.json" \
+      "$temporary_directory/ios-info.json" \
+      "$temporary_directory/macos-privacy.json" \
+      "$temporary_directory/ios-privacy.json" \
+      >>"$temporary_directory/info-errors" <<'RUBY'
 macos = JSON.parse(File.read(ARGV.fetch(0)))
 ios = JSON.parse(File.read(ARGV.fetch(1)))
+macos_privacy = JSON.parse(File.read(ARGV.fetch(2)))
+ios_privacy = JSON.parse(File.read(ARGV.fetch(3)))
 errors = []
 
 CONTACTS_USAGE = "Rune Scribe can organize your ciphers by contact. Contacts stay on your device, encrypted, and are never uploaded."
 CAMERA_USAGE = "Rune Scribe uses the camera to scan a cipher QR code so you can import it. Frames are processed on-device and never saved or sent anywhere."
 EXPECTED_UTI = "com.runescribe.runescribe"
+EXPECTED_PRIVACY_KEYS = [
+  "NSPrivacyAccessedAPITypes",
+  "NSPrivacyCollectedDataTypes",
+  "NSPrivacyTracking",
+  "NSPrivacyTrackingDomains",
+].freeze
+EXPECTED_FILE_TIMESTAMP_REASONS = ["3B52.1", "C617.1"].freeze
 
 def expect_equal(errors, actual, expected, label)
   errors << "#{label} is not the preserved value" unless actual == expected
@@ -239,8 +270,49 @@ def validate_common(errors, info, platform)
   errors << "#{platform} Info.plist contains unresolved build variables" unless unresolved.empty?
 end
 
+def validate_privacy(errors, manifest, platform)
+  unless manifest.is_a?(Hash) && manifest.keys.sort == EXPECTED_PRIVACY_KEYS
+    errors << "#{platform} privacy manifest key set differs"
+    return
+  end
+  expect_false(errors, manifest["NSPrivacyTracking"], "#{platform} privacy tracking")
+  expect_equal(errors, manifest["NSPrivacyTrackingDomains"], [], "#{platform} tracking domains")
+  expect_equal(errors, manifest["NSPrivacyCollectedDataTypes"], [], "#{platform} collected data types")
+
+  accessed = manifest["NSPrivacyAccessedAPITypes"]
+  unless accessed.is_a?(Array) && accessed.length == 1 && accessed.first.is_a?(Hash)
+    errors << "#{platform} required-reason API declarations differ"
+    return
+  end
+  declaration = accessed.first
+  unless declaration.keys.sort == [
+      "NSPrivacyAccessedAPIType",
+      "NSPrivacyAccessedAPITypeReasons",
+    ]
+    errors << "#{platform} file-timestamp declaration key set differs"
+    return
+  end
+  expect_equal(
+    errors,
+    declaration["NSPrivacyAccessedAPIType"],
+    "NSPrivacyAccessedAPICategoryFileTimestamp",
+    "#{platform} required-reason API category"
+  )
+  reasons = declaration["NSPrivacyAccessedAPITypeReasons"]
+  reasons = reasons.sort if reasons.is_a?(Array)
+  expect_equal(
+    errors,
+    reasons,
+    EXPECTED_FILE_TIMESTAMP_REASONS,
+    "#{platform} file-timestamp reasons"
+  )
+end
+
 validate_common(errors, macos, "macOS")
 validate_common(errors, ios, "iOS")
+validate_privacy(errors, macos_privacy, "macOS")
+validate_privacy(errors, ios_privacy, "iOS")
+errors << "privacy manifests differ between platforms" unless macos_privacy == ios_privacy
 
 expect_equal(errors, macos["CFBundleSupportedPlatforms"], ["MacOSX"], "macOS supported platform")
 expect_equal(errors, macos["LSMinimumSystemVersion"], "15.0", "macOS deployment target")
@@ -276,14 +348,14 @@ errors << "platform marketing versions differ" unless marketing_versions.uniq.le
 errors << "platform build numbers differ" unless build_versions.uniq.length == 1
 errors << "marketing version is malformed" unless marketing_versions.first.to_s.match?(/\A\d+(?:\.\d+){1,2}\z/)
 errors << "build number is malformed" unless build_versions.first.to_s.match?(/\A\d+\z/)
-errors << "built marketing version differs from frozen 1.0.39" unless marketing_versions == ["1.0.39", "1.0.39"]
-errors << "built build number differs from frozen 39" unless build_versions == ["39", "39"]
+errors << "built marketing version differs from frozen 1.0.40" unless marketing_versions == ["1.0.40", "1.0.40"]
+errors << "built build number differs from frozen 40" unless build_versions == ["40", "40"]
 
 puts errors
 exit(errors.empty? ? 0 : 1)
 RUBY
 then
-  pass_check "built Info.plists preserve identifiers, URL/UTI registration, privacy strings, versions, and platform settings"
+  pass_check "built Info.plists and privacy manifests preserve identifiers, declarations, versions, and platform settings"
 else
   validation_detail=false
   while IFS= read -r error; do
@@ -870,7 +942,7 @@ expected = {
   ],
   "module-manifest.json" => [
     2494,
-    "b448bfdc77e990359df5b31bdce329d195f60a28c2f496faf6a86d26ba23197f"
+    "565c942da781bbfd868a6c2f1e2fc904b5cadfc70eb9c0a04efe9b5ef0501af6"
   ]
 }
 
@@ -1166,7 +1238,7 @@ non_theme_resource_contracts = {
     files: {
       "module-manifest.json" => [
         3_084,
-        "0401ca85bd4edc005f80d6c4960be2cf47e2ae9b26c7943dc7387162ae857df8"
+        "5d52a770e501dc1539080d4039bcd6aba2c974cb739b172aa8583558adc0a073"
       ]
     }
   }
@@ -2044,9 +2116,9 @@ errors << "project.yml package declarations differ" unless project.fetch("packag
 
 base_settings = project.dig("settings", "base")
 unless base_settings.is_a?(Hash) &&
-    base_settings["MARKETING_VERSION"] == "1.0.39" &&
-    base_settings["CURRENT_PROJECT_VERSION"] == "39"
-  errors << "project.yml version/build differ from frozen 1.0.39 (39)"
+    base_settings["MARKETING_VERSION"] == "1.0.40" &&
+    base_settings["CURRENT_PROJECT_VERSION"] == "40"
+  errors << "project.yml version/build differ from frozen 1.0.40 (40)"
 end
 
 expected_macos_entitlements = {
@@ -2503,9 +2575,9 @@ end
 
 configurations_for(objects, project_object, "generated project", errors).each do |configuration|
   settings = configuration.fetch("buildSettings", {})
-  unless settings["MARKETING_VERSION"] == "1.0.39" &&
-      settings["CURRENT_PROJECT_VERSION"] == "39"
-    errors << "generated project #{configuration['name']} version/build differ from frozen 1.0.39 (39)"
+  unless settings["MARKETING_VERSION"] == "1.0.40" &&
+      settings["CURRENT_PROJECT_VERSION"] == "40"
+    errors << "generated project #{configuration['name']} version/build differ from frozen 1.0.40 (40)"
   end
   forbidden_build_settings.each do |setting|
     errors << "generated project #{configuration['name']} injects #{setting}" if settings.key?(setting)

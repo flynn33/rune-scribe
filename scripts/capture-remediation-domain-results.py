@@ -21,8 +21,8 @@ import zipfile
 
 
 SCHEMA_VERSION = "1.0"
-VERSION = "1.0.39"
-BUILD = "39"
+VERSION = "1.0.40"
+BUILD = "40"
 EXPECTED_BUNDLE_IDENTIFIER = "com.runescribe.app"
 EXPECTED_CLOUD_CONTAINER = "iCloud.com.runescribe.app"
 PACKAGE_PATH = "Packages/RuneScribeArchitecture"
@@ -37,7 +37,7 @@ BUILT_PRODUCT_INSPECTION = (
 )
 SHIPPING_CHECKER_PATH = "scripts/check-shipping-products.sh"
 EXPECTED_SHIPPING_CHECKER_SHA256 = (
-    "8d3b18cf7f47ec91a27b5d2a0ad456fd0bb1f78cfca20ba8efb11e3f868a29c0"
+    "23e7900963a7bc2cf0e2fd505eaea095961d023c40b4bb4fa03a5264b80c675e"
 )
 EXPECTED_SHIPPING_CHECK_COUNT = 101
 SHIPPING_VALIDATION_LOG = (

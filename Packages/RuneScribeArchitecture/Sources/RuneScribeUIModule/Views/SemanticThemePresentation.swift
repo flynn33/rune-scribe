@@ -360,7 +360,7 @@ struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
                 frame.metadata,
                 kind: .frame,
                 primaryID: frame.vectorResourceID,
-                thumbnailID: frame.staticFallbackResourceID,
+                thumbnailID: frame.thumbnailResourceID ?? frame.staticFallbackResourceID,
                 standardID: frame.staticFallbackResourceID,
                 highContrastID: frame.staticFallbackResourceID,
                 compatibleRelicIDs: Set(frame.compatibleRelicIDs),

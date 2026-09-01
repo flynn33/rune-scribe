@@ -574,6 +574,7 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
                 "thumbnails",
                 codex.relics.map(\.thumbnailResourceID)
                     + codex.seals.map(\.thumbnailResourceID)
+                    + codex.frames.compactMap(\.thumbnailResourceID)
             ),
             (
                 "vault",
@@ -674,6 +675,25 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
                 reference.id.rawValue
             )
         }
+    }
+
+    func testCatalogPreviewAllowsFrameThumbnailButShareRenderingDoesNot() throws {
+        let descriptor = RuneScribeThemeMoonleafModuleBootstrap.discoveryDescriptor
+        let frame = try XCTUnwrap(descriptor.codex.frames.first)
+        let thumbnailResourceID = try XCTUnwrap(frame.thumbnailResourceID)
+        let reference = try XCTUnwrap(descriptor.resources.first(where: {
+            $0.id == thumbnailResourceID
+        }))
+
+        XCTAssertEqual(reference.role, ThemeResourceRoles.frameThumbnail)
+        XCTAssertTrue(ThemeCoordinatorService.isCatalogPreviewResource(
+            reference,
+            descriptor: descriptor
+        ))
+        XCTAssertFalse(ThemeCoordinatorService.isShareRenderingResource(
+            reference,
+            descriptor: descriptor
+        ))
     }
 
     func testReceivedPresentationPurposeDoesNotBypassNonOwnedProviderRuntimeGate()

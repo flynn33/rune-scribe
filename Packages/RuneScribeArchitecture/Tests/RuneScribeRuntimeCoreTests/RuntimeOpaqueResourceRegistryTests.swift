@@ -242,7 +242,7 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
         let corruptSound = Data(sound.dropLast())
         let declaration = makeDeclaration(
             id: "resource.sound.norse.unlock-relic",
-            role: "unlock-sound-cue",
+            role: ThemeResourceRoles.unlockSound.rawValue,
             mediaType: .wav,
             data: sound
         )
@@ -950,7 +950,7 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
         let sound = try Data(contentsOf: soundURL)
         let declaration = makeDeclaration(
             id: "resource.sound.norse.unlock-relic",
-            role: "unlock-sound-cue",
+            role: ThemeResourceRoles.unlockSound.rawValue,
             mediaType: .wav,
             data: sound
         )

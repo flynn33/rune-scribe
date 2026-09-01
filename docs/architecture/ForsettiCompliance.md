@@ -16,14 +16,13 @@ source, binary, package, submodule, build-time, or runtime dependency. That app-
 model is permanent. Required entitlement, reconciliation, contribution, resource, and
 service behavior must be implemented inside Rune Scribe without external Forsetti code.
 
-This historical architecture status is separate from the current Agent Coding boundary.
+This historical architecture status is separate from the current release boundary.
 The committed ledgers record the supported automated evidence, while the seven
-hardware-only classifications in
+device-observation classifications in
 [`feature-parity-matrix.json`](../verification/feature-parity-matrix.json) remain a
-historical snapshot. Under the current controlling policy, those observations are
-owner-operated optional validation outside Agent Coding scope and do not affect
-acceptance, completion, blocker status, residual work, PASS/FAIL, or pull-request
-readiness.
+historical snapshot. Repository-controlled Simulator, hosted, and deterministic
+equivalents supersede those observations, which have no effect on acceptance,
+completion, blocker status, residual work, PASS/FAIL, or pull-request readiness.
 
 ## Pattern B implementation
 
@@ -95,7 +94,7 @@ At the recorded snapshot, both declared schema `1.0`, policy profile
 `forsetti-pattern-b-standalone`, minimum runtime `1.0.0`, module version `1.0.34`, iOS
 17/macOS 15 support, no entitlement requirement, and production diagnostics disabled.
 The runtime compared each decoded manifest with its compiled `ModuleDescriptor` before
-a factory could be used. Current Core, Progression, and UI module version `1.0.39` is
+a factory could be used. Current Core, Progression, and UI module version `1.0.40` is
 recorded in their compiled descriptors and manifests. Current activation and mediation
 authority is the controlling policy and live source, not this historical snapshot.
 

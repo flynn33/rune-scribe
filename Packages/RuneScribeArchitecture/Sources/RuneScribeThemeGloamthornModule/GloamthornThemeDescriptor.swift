@@ -949,6 +949,7 @@ public enum GloamthornThemeDescriptorFactory {
             },
             "vectorResourceID": "resource.frame.gloamthorn.briar-court.output.frame-vector-master",
             "staticFallbackResourceID": "resource.frame.gloamthorn.briar-court.output.frame-static-fallback",
+            "thumbnailResourceID": "resource.frame.gloamthorn.briar-court.output.frame-thumbnail",
             "compatibleRelicIDs": [
               "relic.gloamthorn.nightthorn-tablet",
               "relic.gloamthorn.umbral-plaque",

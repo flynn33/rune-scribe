@@ -82,7 +82,9 @@ extension RuneScribeUISession {
         let requested: [(ArtifactID, ThemeResourceID)] =
             codex.relics.map { ($0.metadata.id, $0.thumbnailResourceID) }
                 + codex.seals.map { ($0.metadata.id, $0.thumbnailResourceID) }
-                + codex.frames.map { ($0.metadata.id, $0.staticFallbackResourceID) }
+                + codex.frames.map {
+                    ($0.metadata.id, $0.thumbnailResourceID ?? $0.staticFallbackResourceID)
+                }
         var result: [ArtifactID: RuntimeThemeImageReference] = [:]
         for (artifactID, resourceID) in requested {
             guard let expected = catalog.descriptor.resources.first(where: {

@@ -1351,7 +1351,7 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
         return false
     }
 
-    private static func isCatalogPreviewResource(
+    static func isCatalogPreviewResource(
         _ reference: ThemeResourceReference,
         descriptor: ThemeDescriptor
     ) -> Bool {
@@ -1396,6 +1396,9 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
                 frame.vectorResourceID,
                 frame.staticFallbackResourceID,
             ])
+            if let thumbnailResourceID = frame.thumbnailResourceID {
+                declaredPreviewResourceIDs.insert(thumbnailResourceID)
+            }
         }
         for crest in codex.crests
             where crest.metadata.availability != .reservedInactive
@@ -1422,6 +1425,7 @@ actor ThemeCoordinatorService: RuneScribeThemeCoordinatorService {
             ThemeResourceRoles.sealThumbnail,
             ThemeResourceRoles.frameVectorMaster,
             ThemeResourceRoles.frameStaticFallback,
+            ThemeResourceRoles.frameThumbnail,
             ThemeResourceRoles.crestVectorMaster,
             ThemeResourceRoles.crestStaticFallback,
         ]

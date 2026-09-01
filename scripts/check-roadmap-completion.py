@@ -561,9 +561,9 @@ def validate_sharing_boundary() -> None:
 
 def validate_version() -> None:
     project = (ROOT / "project.yml").read_text(encoding="utf-8")
-    if 'MARKETING_VERSION: "1.0.39"' not in project:
+    if 'MARKETING_VERSION: "1.0.40"' not in project:
         error("marketing version changed")
-    if 'CURRENT_PROJECT_VERSION: "39"' not in project:
+    if 'CURRENT_PROJECT_VERSION: "40"' not in project:
         error("build number changed")
 
 

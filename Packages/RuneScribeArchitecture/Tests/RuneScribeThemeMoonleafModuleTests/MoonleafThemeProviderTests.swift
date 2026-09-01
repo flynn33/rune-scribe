@@ -263,6 +263,10 @@ final class MoonleafThemeProviderTests: XCTestCase {
         XCTAssertEqual(descriptor.codex.relics.count, 3)
         XCTAssertEqual(descriptor.codex.seals.count, 6)
         XCTAssertEqual(descriptor.codex.frames.count, 1)
+        XCTAssertEqual(
+            descriptor.codex.frames.only?.thumbnailResourceID?.rawValue,
+            "resource.frame.moonleaf.silvervine.output.frame-thumbnail"
+        )
         XCTAssertEqual(descriptor.codex.crests.count, 1)
         XCTAssertEqual(descriptor.contentVersion, 2)
         XCTAssertEqual(descriptor.codex.relics.filter { $0.isDefault }.count, 1)

@@ -773,8 +773,8 @@ def app_zip(platform: str) -> bytes:
         "CFBundleExecutable": "RuneScrib",
         "CFBundleIdentifier": "com.runescribe.app",
         "CFBundlePackageType": "APPL",
-        "CFBundleShortVersionString": "1.0.39",
-        "CFBundleVersion": "39",
+        "CFBundleShortVersionString": "1.0.40",
+        "CFBundleVersion": "40",
         "GKGameCenter": True,
         "NSUbiquitousContainers": {
             "iCloud.com.runescribe.app": {
