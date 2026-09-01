@@ -62,7 +62,7 @@ struct ReceivedMessageView: View {
                 dismiss()
                 onOpenCodex?()
             },
-            saveAction: { dismiss() },
+            doneAction: { dismiss() },
             replyAction: {
                 onReply?(pending)
                 dismiss()

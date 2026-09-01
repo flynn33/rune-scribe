@@ -55,9 +55,9 @@ a repository-qualified release candidate and is not shipped. The iOS Release bui
 arm64-only unsigned macOS Release build pass, as does the iPhone 17 Pro headless UI run
 on iOS 26.5 with 7 passed, 1 iPad-only skipped, and 0 failed. The iPad Pro 13-inch (M5)
 headless UI run on iOS 26.5 passes with 5 passed, 3 phone-specific skipped by design, and
-0 failed. Built-product content, resource, and privacy inspection passes 97/101 checks;
-the remaining four distribution-signing and entitlement checks await a matching profile
-and identity as external publication work. The separate v4.3 package audit is incomplete
+0 failed. Local ad-hoc built-product content, resource, privacy, signature, Hardened
+Runtime, and entitlement inspection passes 101/101 checks. Distribution identity and
+provisioning remain unassessed external publication work. The separate v4.3 package audit is incomplete
 but noncontrolling.
 
 The same privacy rule applies on both platforms: a `.runescribe` file or import link

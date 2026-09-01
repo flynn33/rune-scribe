@@ -4,6 +4,42 @@ import RuneScribeContracts
 import XCTest
 
 final class MessageAttachmentPolicyTests: XCTestCase {
+    func testKeyDeliveryDisclosureUpdatesWhenEncodedCipherIsLinked() {
+        let cipherID = UUID()
+        let encodeTimeRequiresKeyDelivery = false
+        let linkedCipher = cipher(
+            id: cipherID,
+            contactID: UUID(),
+            delivered: false
+        )
+
+        XCTAssertTrue(
+            MessageKeyDeliveryDisclosurePolicy.requiresKeyDelivery(
+                cipherID: cipherID,
+                ciphers: [linkedCipher],
+                encodeTimeFallback: encodeTimeRequiresKeyDelivery
+            )
+        )
+    }
+
+    func testKeyDeliveryDisclosureUpdatesWhenEncodedCipherIsUnlinked() {
+        let cipherID = UUID()
+        let encodeTimeRequiresKeyDelivery = true
+        let unlinkedCipher = cipher(
+            id: cipherID,
+            contactID: nil,
+            delivered: false
+        )
+
+        XCTAssertFalse(
+            MessageKeyDeliveryDisclosurePolicy.requiresKeyDelivery(
+                cipherID: cipherID,
+                ciphers: [unlinkedCipher],
+                encodeTimeFallback: encodeTimeRequiresKeyDelivery
+            )
+        )
+    }
+
     func testShareBuilderTerminalDispositionDistinguishesCompletionCancellationAndFailure() {
         XCTAssertEqual(
             ShareBuilderTerminalDisposition(routeResult: .completedBySystem),
@@ -181,6 +217,26 @@ final class MessageAttachmentPolicyTests: XCTestCase {
                 requiredAttachmentWasPresent: true,
                 requiredAttachmentAccepted: false
             )
+        )
+    }
+
+    private func cipher(
+        id: UUID,
+        contactID: UUID?,
+        delivered: Bool
+    ) -> CipherViewState {
+        CipherViewState(
+            id: id,
+            label: "Disclosure Fixture",
+            origin: .generated,
+            createdAt: Date(timeIntervalSince1970: 1_700_000_000),
+            isActive: true,
+            contactID: contactID,
+            delivered: delivered,
+            publicIdentifier: id.uuidString.replacingOccurrences(of: "-", with: ""),
+            fontName: "Noto Sans Runic",
+            fontSource: .bundled,
+            fontIsRegistered: true
         )
     }
 }

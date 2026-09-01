@@ -38,16 +38,17 @@ effective only where they do not conflict with that authority.
 ## Current result
 
 Version 1.0.40 build 40 carries the source-complete authorized roadmap baseline and the
-Theme Fidelity source remediation. Final-source qualification passes 1,235/1,235 Swift
+Theme Fidelity source remediation. Final-source qualification passes 1,238/1,238 Swift
 tests, 255/255 Python tests, architecture, roadmap, documentation, resource, mutation,
-completeness, and security gates. The iOS Release build and arm64-only unsigned macOS
-Release build pass. Built-product content, resource, and privacy inspection passes 97/101
-checks; the remaining four require distribution-signing and entitlement credentials.
+named source and mutation gates. The iOS Release build and arm64-only unsigned macOS
+Release build pass. Local ad-hoc built-product content, resource, privacy, signature,
+Hardened Runtime, and entitlement inspection passes 101/101 checks; distribution identity
+and provisioning are explicitly unassessed.
 The candidate is a **repository-qualified release candidate** and is deliberately **not
 shipped**. All repository-controlled release gates pass. The repository now contains:
 
-- complete app-owned runtime mediation, bounded contracts, capability policy, thin
-  hosts, serialized ingress, runtime Settings, and permanent dependency guards;
+- app-owned runtime composition, bounded contracts, capability policy, thin hosts,
+  serialized ingress, and permanent dependency guards;
 - exact legacy Cipher and Message readers plus a fail-before-allocation typed-container
   parser and complete old/new destination matrix;
 - the required Norse provider and four optional production Elven providers—Moonleaf,
@@ -66,8 +67,8 @@ shipped**. All repository-controlled release gates pass. The repository now cont
   catalog, monotonic outbox, runtime-owned GameKit I/O, and no local grant authority.
 
 The repository-controlled release bar passes core user flows, clean tests, iOS/macOS
-Release builds, deterministic UI coverage, accessibility, privacy, security, and the
-final completeness sweep with no known release-blocking defects. The iPhone 17 Pro
+Release builds, deterministic UI coverage, accessibility, privacy, exact assets, negative
+mutations, and built-product inspection with no known release-blocking defects. The iPhone 17 Pro
 headless UI run on iOS 26.5 passes 7 tests, skips 1 iPad-only test, and fails 0. The iPad
 Pro 13-inch (M5) headless UI run on iOS 26.5 passes 5 tests, skips 3 phone-specific tests
 by design, and fails 0. Manual hardware observations are superseded by supported
@@ -98,14 +99,19 @@ upload, rollout, and release are
 separate external actions performed only when their credentials and services are
 available; their absence does not determine product shippability.
 
-## App-owned Forsetti completion gate
+## App-owned runtime and Forsetti scope
 
-`RuneScribeRuntimeCore` is the permanent control plane. It owns lifecycle, capability
-checks, cross-module calls, operational I/O, persistent Settings, state orchestration,
-Theme selection, platform presentation sessions, CloudKit calls, and GameKit calls.
-The UI owns views and submits typed intent. Core owns cryptographic and message-domain
-authority. Theme, Progression, Cloud, and Game Center policy products do not call one
-another or own platform side effects.
+`RuneScribeRuntimeCore` is the permanent app-owned composition and lifecycle control
+plane. The UI owns views, Core owns cryptographic and message-domain authority, and
+dedicated Platform/UIRuntime products contain Apple-system adapters. The executable
+17-ratchet architecture guard enforces the shipping target graph, implementation import
+boundaries, thin hosts, provider manifests, resource ownership, and TestSupport exclusion.
+
+The stricter P11 Forsetti scanner is deliberately report-only. Its current result is not
+a compliance pass and remains architecture backlog; under the operator-approved
+product-focused scope, it is not a standalone release gate unless a finding produces a
+concrete product, security, data-loss, or shipping-guard failure. This distinction avoids
+claiming per-call runtime mediation that the report-only scanner has not proven.
 
 External Forsetti packages, binaries, source copies, submodules, fetch scripts, and
 machine-local checkout paths remain prohibited. The executable architecture guard

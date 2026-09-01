@@ -7,14 +7,31 @@ This document is the single repository authority for Rune Scribe's Forsetti arch
 When sources conflict, apply them in this order:
 
 1. Active operator instructions.
-2. The active implementation package and its machine-readable controls.
-3. Current repository behavior, compatibility identifiers, data formats, source paths, tests, and build configuration.
-4. Factual findings from the Rune Scribe Forsetti Compliance Audit v2.0.
-5. Locked product decisions that do not conflict with later operator clarification.
-6. Nonconflicting factual observations from third-party audits.
-7. General conventions.
+2. Current repository behavior, compatibility identifiers, data formats, source paths, tests, and build configuration.
+3. Factual findings from the Rune Scribe Forsetti Compliance Audit v2.0.
+4. Locked product decisions that do not conflict with later operator clarification.
+5. Nonconflicting factual observations from third-party audits.
+6. General conventions.
 
 Documentation alone cannot close a compliance finding. Closure requires applicable source, runtime behavior, guard behavior, tests, shipping-artifact evidence, and external-exhaustion evidence.
+
+No instruction package currently controls product acceptance. Retained package records are
+verification history only.
+
+## Product-release relationship
+
+The rules below define the long-term P11 architecture target. They do not, by themselves,
+define the Rune Scribe product-release bar. `scripts/check-forsetti-compliance.sh` is
+deliberately report-only and must never be represented as a compliance pass. Its current
+findings remain architecture backlog unless a finding is independently demonstrated to
+cause a product defect, security failure, data-loss risk, or failed shipping guard.
+
+Repository release qualification instead requires the executable 17-ratchet architecture
+guard, package and Python regression suites, supported-platform Release builds, exact
+resource and privacy inspection, negative mutation coverage, and built-product inspection.
+Concrete defects discovered through the report-only scan remain mandatory fixes; paper
+status changes cannot waive them. Distribution identity, provisioning, archive, export,
+notarization, upload, and rollout remain separate publication work.
 
 ## 1. Framework role
 

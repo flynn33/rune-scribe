@@ -1,3 +1,4 @@
+import Foundation
 import RuneScribeContracts
 
 enum RuneScribeShare {
@@ -21,6 +22,19 @@ enum MessageResultActionPolicy {
         hasPendingArtifact: Bool
     ) -> Bool {
         !artifactPreparationInFlight && !hasPendingArtifact
+    }
+}
+
+enum MessageKeyDeliveryDisclosurePolicy {
+    static func requiresKeyDelivery(
+        cipherID: UUID,
+        ciphers: [CipherViewState],
+        encodeTimeFallback: Bool
+    ) -> Bool {
+        guard let cipher = ciphers.first(where: { $0.id == cipherID }) else {
+            return encodeTimeFallback
+        }
+        return cipher.contactID != nil && !cipher.delivered
     }
 }
 

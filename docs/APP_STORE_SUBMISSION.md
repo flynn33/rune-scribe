@@ -6,9 +6,9 @@ Keep this file in sync when shipping a new marketing version.
 **Last prepared for:** 1.0.40 (build 40) — 2026-08-31
 
 > **Publication boundary:** version 1.0.40 build 40 is a repository-qualified release
-> candidate and is not shipped. Both supported headless UI runs pass. Four distribution-
-> signing and entitlement checks await a matching profile and identity; archive, export,
-> notarization, upload, and rollout remain external publication actions.
+> candidate and is not shipped. Both supported headless UI runs pass. Distribution
+> signing and archive-entitlement inspection require a matching profile and identity;
+> archive, export, notarization, upload, and rollout remain external publication actions.
 
 ---
 
@@ -235,11 +235,14 @@ record-creation, or rollout sequence is implied by product release qualification
 - [x] iOS Simulator and arm64-only unsigned macOS Release builds pass
 - [x] iPhone 17 Pro headless UI qualification passes on iOS 26.5
 - [x] iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5
-- [x] Deterministic accessibility, privacy, security, and completeness checks pass
+- [x] Deterministic accessibility and privacy checks, source validators, and negative
+  mutation suites pass
 - [x] Both final app bundles contain the exact reviewed `PrivacyInfo.xcprivacy`
   required-reason declarations
-- [ ] Distribution signing and entitlement inspection passes with a matching profile and
-  identity; content, resource, and privacy inspection currently passes 97/101 checks
+- [x] Local ad-hoc content, resource, privacy, signature, Hardened Runtime, and
+  entitlement inspection passes 101/101 checks
+- [ ] Distribution signing and archive entitlement inspection passes with a matching
+  profile and identity
 - [x] No known release-blocking defects remain
 - [ ] Release notes pasted (What’s New)
 - [ ] Review notes pasted
@@ -275,12 +278,12 @@ Internal release summary; this is **not a shipment claim**:
 4. Themed typed-package sharing/receiving, static preview, Encounter and provenance state
 5. Local-first private progression synchronization and optional Game Center policy
 6. Core, runtime, providers, Progression, Cloud, Game Center, and UI boundaries guarded
-7. Final-source checks pass: 1,235/1,235 Swift tests, 255/255 Python tests, 60 Norse
+7. Final-source checks pass: 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse
    semantic rules, 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping
    negative mutations, and 27/27 evidence-hardening tests
-8. The iOS Release and arm64-only unsigned macOS Release builds pass; built-product
-   content, resource, and privacy inspection passes 97/101 checks, with four
-   distribution-signing and entitlement checks pending external credentials
+8. The iOS Release and arm64-only unsigned macOS Release builds pass; local ad-hoc
+   built-product content, resource, privacy, signature, Hardened Runtime, and entitlement
+   inspection passes 101/101 checks. Distribution identity and provisioning are unassessed
 9. The iPhone 17 Pro iOS 26.5 UI run passes 7, skips 1 iPad-only test, and fails 0; the
    iPad Pro 13-inch (M5) iOS 26.5 UI run has 5 passed, 3 phone-specific skipped by
    design, and 0 failed

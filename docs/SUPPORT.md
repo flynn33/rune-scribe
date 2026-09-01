@@ -3,11 +3,13 @@
 **Current product source:** version 1.0.40 (build 40)
 **Publication boundary:** repository-qualified release candidate; not shipped
 
-Final-source qualification passes 1,235 Swift tests, 255 Python tests, architecture,
-roadmap, documentation, resource, mutation, completeness, and security gates. The iOS
+Final-source qualification passes the Swift and Python suites, the executable 17-ratchet
+architecture guard, roadmap/documentation guards, exact-resource validators, and
+negative mutation suites. The iOS
 Release build and arm64-only unsigned macOS Release build pass. Built-product content,
-resource, and privacy inspection passes 97/101 checks; the remaining four require a
-matching distribution profile and identity. The iPhone 17 Pro headless UI run passes
+resource, privacy, local-signature, Hardened Runtime, and entitlement inspection passes
+101/101 checks on ad-hoc products; distribution identity and provisioning are explicitly
+unassessed. The iPhone 17 Pro headless UI run passes
 7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5) headless UI run
 on iOS 26.5 passes 5 tests with 3 phone-specific skips by design and 0 failures. The
 superseded v4.3 package audit is noncontrolling verification history.

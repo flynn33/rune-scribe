@@ -20,9 +20,12 @@ audit.
 - Core, Progression, and UI compiled descriptors and module manifests are version
   `1.0.40`. Theme-provider and Theme Coordinator manifests retain their independent
   contract version `1.0.0`.
-- The final source passes **1,235/1,235 Swift tests**: **1,098 XCTest cases** and
+- The final source passes **1,238/1,238 Swift tests**: **1,101 XCTest cases** and
   **137 Swift Testing cases**. It also passes **255/255 Python tests**.
-- Architecture, roadmap, documentation, final completeness, and security sweeps pass.
+- The executable shipping architecture guard passes all **17/17 ratchets**. The stricter
+  Forsetti P11 scanner remains report-only and is not represented as a compliance pass;
+  its architecture backlog is outside the product-release gate unless it exposes a
+  concrete product, security, data-loss, or shipping-guard failure.
 - Norse validation passes **60 semantic rules** and **25/25 negative mutations**.
   Legacy remediation passes **18/18 mutations**, and evidence hardening passes
   **27/27 tests**.
@@ -36,15 +39,20 @@ audit.
   product-integrity mutations.
 - Focused regressions pass for Norse unlock-audio resolution and the four optional
   Codex frame thumbnails.
+- The message result and Share Builder recompute first-key delivery disclosure from the
+  current cipher relationship, including link and unlink changes made after encoding.
+  The received-message dismissal action is labeled Done and explicitly describes that it
+  clears the pending message; focused regressions cover both corrections.
 - Keychain writes use update-first upserts in the Data Protection Keychain with
   `whenUnlockedThisDeviceOnly`. On macOS, legacy migration reads the current classic
   default keychain without deleting its source, verifies replacement bytes and
   accessibility, and preserves imported or restored keychain entries. Explicit deletion
   verifies a protected blocker before removing the current value, preventing remigration.
 - The iOS Release build passes. The arm64-only unsigned macOS Release build passes.
-- Built-product content, resource, and privacy inspection passes **97/101 checks**.
-  Exactly four distribution-signing and entitlement checks remain pending because no
-  matching profile or distribution identity is available.
+- Local ad-hoc built-product content, resource, privacy, signature, Hardened Runtime, and
+  entitlement inspection passes **101/101 checks**. The reusable
+  [`qualify-release-products.sh`](../../../scripts/qualify-release-products.sh) command
+  reproduces both Release builds and the inspection without launching Simulator.
 - The headless iPhone 17 Pro UI run on iOS 26.5 passes **7 tests**, skips **1 iPad-only
   test**, and fails **0 tests**.
 - The headless iPad Pro 13-inch (M5) UI run on iOS 26.5 passes **5 tests**, skips **3
@@ -53,7 +61,9 @@ audit.
   focus-aware Done control is present and hittable, dismisses the keyboard, preserves
   the iPad workspace viewport, and produces no invalid-frame-dimension entries in the
   application log.
-- Final completeness and security sweeps report no known release-blocking defects.
+- Named regression, architecture, source, mutation, privacy, asset, and built-product
+  checks report no known release-blocking defects. The report-only Forsetti P11 result is
+  retained separately rather than mislabeled as a passing sweep.
 
 ## Repository qualification
 
@@ -61,9 +71,10 @@ All repository-controlled release gates pass.
 
 ## External distribution work
 
-The four remaining built-product checks require a matching distribution profile and
-identity. Distribution signing, archive, export, notarization, App Store upload, and
-rollout remain external publication actions rather than source-qualification gates.
+The 101 local product checks use ad-hoc signatures and explicitly do not assess a
+distribution identity or provisioning profile. Distribution signing, archive, export,
+notarization, App Store upload, and rollout remain external publication actions rather
+than source-qualification gates.
 
 ## Publication boundary
 

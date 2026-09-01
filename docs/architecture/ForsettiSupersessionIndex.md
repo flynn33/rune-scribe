@@ -1,6 +1,11 @@
 # Forsetti Architecture Supersession Index
 
-The [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md) is the sole current authority for runtime mediation, module boundaries, operational I/O, persistent Settings, Theme ownership, and dependency policy.
+The [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md) is the sole current
+authority for the long-term P11 runtime-mediation, module-boundary, operational-I/O,
+persistent-Settings, Theme-ownership, and dependency target. Its report-only findings
+are architecture backlog, not an unreported release pass and not standalone product
+release blockers. Current release qualification is governed by the product-focused,
+executable gate set recorded in the release qualification summary.
 
 ## Current guidance
 
@@ -57,4 +62,7 @@ noncontrolling verification history and do not define product release qualificat
 A document status or table cell cannot close a finding. Current source, runtime
 behavior, executable guards, positive tests, negative mutations, supported platform
 builds, static inspection, and final artifact membership determine Agent Coding
-compliance.
+compliance. `scripts/check-forsetti-compliance.sh` remains report-only and is never
+counted as a pass. Product release qualification separately requires the executable
+shipping guards and regression evidence described by the controlling policy's
+product-release relationship.

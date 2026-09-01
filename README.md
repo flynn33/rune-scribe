@@ -13,7 +13,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Version](https://img.shields.io/badge/version-1.0.40%20build%2040-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-1235%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-1238%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -275,14 +275,17 @@ flowchart TD
 ```
 
 The macOS and iOS hosts are composition roots. Product behavior lives in
-`RuneScribeCoreModule`; exactly one UI Module owns the SwiftUI view tree. The controlling
-target makes `RuneScribeRuntimeCore` the continuing app-owned control plane: every
-cross-module call remains runtime-mediated, and the runtime owns operational I/O,
-persistent Settings, lifecycle, resources, and system-presentation sessions.
-`RuneScribeUIRuntime` contains the narrow Apple presentation bridges, while the UI
-module retains product views and normalized state only. Policy and provider modules do
-not communicate directly; runtime-mediated contracts are the only cross-boundary rail.
-Test support is excluded from shipping products.
+`RuneScribeCoreModule`; exactly one UI Module owns the SwiftUI view tree.
+`RuneScribeRuntimeCore` is the continuing app-owned composition and lifecycle control
+plane, while `RuneScribePlatform` and `RuneScribeUIRuntime` contain the Apple-system
+adapters. Compile-time boundaries, typed contracts, and the executable 17-ratchet
+architecture guard prohibit implementation import edges, external Forsetti code, and
+TestSupport in shipping products.
+
+The stricter P11 Forsetti scanner remains report-only and is not represented as a
+compliance pass. It tracks further per-call mediation and ownership hardening as
+architecture backlog; the product-release bar remains the concrete regression, source,
+mutation, Release-build, asset, privacy, and built-product gates.
 
 The current application targets link Contracts, Runtime Core, UI Runtime, Platform,
 Core, Progression, Theme Coordinator, Norse Base, four Elven providers, Cloud policy,
@@ -305,12 +308,13 @@ the current boundary and dependency rules.
 The previously authorized version 1.0.39 build 39 roadmap-completion baseline remains a
 historical source-complete snapshot that was not shipped. Version 1.0.40 build 40 is the
 repository-qualified release candidate for the Theme Fidelity continuation. Final-source
-evidence passes 1,235/1,235 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
+evidence passes 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations, and
 27/27 evidence-hardening tests. The iOS Release build and arm64-only unsigned macOS
-Release build pass; built-product content, resource, and privacy inspection passes 97/101
-checks, with exactly four distribution-signing and entitlement checks pending external
-credentials. Final completeness and security sweeps pass. Headless iPhone 17 Pro UI
+Release build pass; local ad-hoc built-product content, resource, privacy, signature,
+Hardened Runtime, and entitlement inspection passes 101/101 checks. This verifies the
+repository-controlled product contract but does not assess a distribution identity or
+profile. Named source, mutation, and product guards pass. Headless iPhone 17 Pro UI
 qualification on iOS 26.5 passes 7 tests, skips 1 iPad-only test, and fails 0. Headless
 iPad Pro 13-inch (M5) qualification on iOS 26.5 passes 5 tests, skips 3 phone-specific
 tests by design, and fails 0. The candidate is **repository-qualified and not shipped**.
@@ -447,7 +451,7 @@ Packages/RuneScribeArchitecture/
 │   ├── RuneScribeGameCenterModule/ Frozen catalog, mapping and outbox policy
 │   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        1235 Swift package tests
+└── Tests/                        1238 Swift package tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -484,6 +488,9 @@ xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-macOS \
 xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-iOS \
   -configuration Debug -destination 'generic/platform=iOS Simulator' \
   CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= build
+
+# Reproduce both local Release builds and the 101-check product inspection
+scripts/qualify-release-products.sh
 ```
 
 Two app targets — **RuneScrib-macOS** (macOS 15) and **RuneScrib-iOS** (iOS 17) —
@@ -491,6 +498,9 @@ share the thin host sources and link the same local package products, built in *
 6** language mode. The macOS target ships with App Sandbox + Hardened Runtime enabled
 for Mac App Store distribution. Debug and Simulator qualification use ad-hoc signing so
 automated checks do not require a login-Keychain password.
+The Release-product qualifier retains its logs and local app bundles under a unique
+temporary evidence directory; its 101 checks do not assess distribution identity,
+provisioning, archive, notarization, or upload.
 
 Both targets register the **`runescribe://`** URL scheme and a single exported
 **`com.runescribe.runescribe`** document type — the `.runescribe` cipher/message file,
@@ -504,7 +514,7 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package passes **1235 package tests** (1098 XCTest cases and
+The local Swift package passes **1238 package tests** (1101 XCTest cases and
 137 Swift Testing cases), supplemented by repository architecture guards, hosted
 macOS/iOS tests, iPhone/iPad UI parity, and an
 isolated macOS parity host. The package suite uses deterministic in-memory adapters and
@@ -524,8 +534,8 @@ does not access the operator's login Keychain.
 Direct-device observations are superseded by repository-controlled Simulator, hosted,
 and deterministic equivalents and are not pending release gates. The
 legacy package's larger visual-evidence and self-binding matrix remains noncontrolling.
-Final-source completeness and security sweeps pass, and the iPhone 17 Pro headless UI
-run passes 7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5)
+Named final-source, mutation, and built-product guards pass, and the iPhone 17 Pro
+headless UI run passes 7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5)
 headless UI run on iOS 26.5 passes 5 tests with 3 phone-specific skips by design and 0
 failures. Distribution signing and publication remain external. Every result stays
 labeled by the environment in which it was observed.

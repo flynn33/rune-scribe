@@ -1673,7 +1673,13 @@ struct ContentView: View {
     @ViewBuilder
     private func keyIndicator(for cipher: CipherViewState?) -> some View {
         if cipher != nil {
-            let included = messageSharePreparation?.requiresKeyDelivery == true
+            let included = messageSharePreparation.map { preparation in
+                MessageKeyDeliveryDisclosurePolicy.requiresKeyDelivery(
+                    cipherID: preparation.cipherID,
+                    ciphers: session.ciphers,
+                    encodeTimeFallback: preparation.requiresKeyDelivery
+                )
+            } ?? false
             HStack(spacing: 6) {
                 Image(systemName: included ? "key.fill" : "lock.fill")
                     .font(.system(size: 10))
@@ -1736,10 +1742,11 @@ struct ContentView: View {
             senderName: preparation.senderName,
             cipherID: preparation.cipherID,
             messageHandle: preparation.shareHandle,
-            requiresKeyDelivery: session.ciphers.first(where: {
-                $0.id == preparation.cipherID
-            }).map { $0.contactID != nil && !$0.delivered }
-                ?? preparation.requiresKeyDelivery
+            requiresKeyDelivery: MessageKeyDeliveryDisclosurePolicy.requiresKeyDelivery(
+                cipherID: preparation.cipherID,
+                ciphers: session.ciphers,
+                encodeTimeFallback: preparation.requiresKeyDelivery
+            )
         )
         shareBuilderSource = source
     }

@@ -297,16 +297,16 @@ require(
     in readme_roadmap,
     "README Wave 6 roadmap scope differs",
 )
-require("tests-1235%20package" in readme, "README package-test badge is stale")
+require("tests-1238%20package" in readme, "README package-test badge is stale")
 require(
-    "**1235 package tests** (1098 XCTest cases and 137 Swift Testing cases)"
+    "**1238 package tests** (1101 XCTest cases and 137 Swift Testing cases)"
     in normalized_readme,
     "README package-test inventory is stale",
 )
 require(
-    "1,235/1,235 Swift tests" in normalized_readme_roadmap
+    "1,238/1,238 Swift tests" in normalized_readme_roadmap
     and "255/255 Python tests" in normalized_readme_roadmap
-    and "97/101" in normalized_readme_roadmap
+    and "101/101" in normalized_readme_roadmap
     and "iPad Pro 13-inch (M5) qualification on iOS 26.5 passes 5 tests" in normalized_readme_roadmap
     and "skips 3 phone-specific tests by design, and fails 0" in normalized_readme_roadmap,
     "README lacks the final-source qualification result or completed iPad evidence",
@@ -354,7 +354,7 @@ require(
 )
 require(
     "repository-qualified release candidate" in submission
-    and "97/101" in submission
+    and "101/101" in submission
     and "- [x] iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5"
     in submission,
     "App Store packet lacks the repository-qualified, built-product, or completed iPad result",
@@ -439,9 +439,9 @@ require(
     "release qualification summary has a stale status",
 )
 require(
-    "**1,235/1,235 Swift tests**" in qualification_summary
+    "**1,238/1,238 Swift tests**" in qualification_summary
     and "**255/255 Python tests**" in qualification_summary
-    and "**97/101 checks**" in qualification_summary
+    and "**101/101 checks**" in qualification_summary
     and "passes **7 tests**" in qualification_summary
     and "passes **5 tests**" in qualification_summary
     and "skips **3\n  phone-specific tests by design**" in qualification_summary
@@ -466,11 +466,11 @@ current_release_documents = {
     ),
     "docs/verification/release-1.0.40/QualificationSummary.md": qualification_summary,
 }
-stale_shipping_claim = f"{101}/{101}"
+stale_shipping_claim = "97/101"
 for relative, content in current_release_documents.items():
     normalized_content = re.sub(r"\s+", " ", content).lower()
     require(
-        stale_shipping_claim not in content and "97/101" in content,
+        stale_shipping_claim not in content and "101/101" in content,
         f"{relative} has a stale or missing built-product qualification result",
     )
     require(
@@ -554,6 +554,7 @@ require(
     "roadmap remediation amendment has an invalid release boundary",
 )
 
+forsetti_policy = read("docs/architecture/FORSETTI_CONTROLLING_POLICY.md")
 supersession_index = read("docs/architecture/ForsettiSupersessionIndex.md")
 normalized_supersession_index = re.sub(r"\s+", " ", supersession_index)
 decision_index = read("docs/architecture/decisions/README.md")
@@ -578,6 +579,22 @@ require(
 require(
     "physical-device decision gates remain in force" not in supersession_index,
     "Forsetti supersession index retains a hardware decision gate",
+)
+require(
+    "No instruction package currently controls product acceptance" in forsetti_policy
+    and "The rules below define the long-term P11 architecture target" in forsetti_policy
+    and "must never be represented as a compliance pass" in forsetti_policy,
+    "Forsetti policy lacks the operator-approved product-release relationship",
+)
+require(
+    "report-only findings are architecture backlog" in normalized_supersession_index
+    and "not standalone product release blockers" in normalized_supersession_index,
+    "Forsetti supersession index lacks the report-only product-release boundary",
+)
+require(
+    "The stricter P11 Forsetti scanner remains report-only" in readme
+    and "The stricter P11 Forsetti scanner is deliberately report-only" in roadmap,
+    "current product documents misstate the report-only Forsetti boundary",
 )
 require(
     "physical-device evidence for supported destinations" not in forward_compatibility,

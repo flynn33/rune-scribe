@@ -3327,10 +3327,10 @@ final class RuneScribeUISessionTests: XCTestCase {
         for requiredStatement in [
             "pendingMessageArtifact == nil",
             "messageArtifactPreparationTask == nil",
-            "session.ciphers.first(where:",
-            "$0.id == preparation.cipherID",
-            "$0.contactID != nil && !$0.delivered",
-            "?? preparation.requiresKeyDelivery",
+            "MessageKeyDeliveryDisclosurePolicy.requiresKeyDelivery(",
+            "cipherID: preparation.cipherID",
+            "ciphers: session.ciphers",
+            "encodeTimeFallback: preparation.requiresKeyDelivery",
             "shareBuilderSource = source",
             "handleMessageShareBuilderLifecycleEnded()",
         ] {

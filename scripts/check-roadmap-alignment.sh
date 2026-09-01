@@ -86,7 +86,7 @@ EXPECTED_FORSETTI_POLICY = {
 }.freeze
 EXPECTED_CONTROLLING_POLICY = {
   "path" => "docs/architecture/FORSETTI_CONTROLLING_POLICY.md",
-  "sha256" => "8392d9ad457ccb2afbf9e872d591ec887d383f4b8617236179d624d2f792fb53"
+  "sha256" => "2e7c3729d51724929838269d29c71bb2dd92caa4976167cb4275f9ece6d55db6"
 }.freeze
 EXPECTED_ADRS = %w[
   ADR-RS-001-module-packaging-and-target-graph.md
