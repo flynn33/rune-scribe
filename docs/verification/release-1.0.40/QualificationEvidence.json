@@ -1,0 +1,172 @@
+{
+  "schemaVersion": "1.0",
+  "recordedAt": "2026-09-01T11:48:11Z",
+  "release": {
+    "marketingVersion": "1.0.40",
+    "build": "40",
+    "status": "repository-qualified-release-candidate",
+    "shipped": false
+  },
+  "qualifiedCandidateRevision": "d1754b250429c17d885401388cb17ec32f1bde59",
+  "toolchain": {
+    "macOS": "26.6.2 (25G83)",
+    "xcode": "26.6 (17F113)",
+    "swift": "6.3.3 (swiftlang-6.3.3.1.3 clang-2100.1.1.101)",
+    "python": "3.9.6"
+  },
+  "versionAlignment": {
+    "projectYML": "1.0.40 (40)",
+    "generatedXcodeProject": "1.0.40 (40)",
+    "macOSReleaseProduct": "1.0.40 (40)",
+    "iOSSimulatorReleaseProduct": "1.0.40 (40)",
+    "projectPBXProjSHA256": "5373650bab4d5f98f4470ab7abc93b252b2f2f65d0970320ecdaaab4d3308956"
+  },
+  "regressionSuites": {
+    "swiftPackage": {
+      "result": "PASS",
+      "total": 1238,
+      "xctest": 1101,
+      "swiftTesting": 137,
+      "failures": 0,
+      "command": "swift test --package-path Packages/RuneScribeArchitecture --skip-build",
+      "logSHA256": "34305a62e2bbeb1d79fd25322719d2ac0a05cad752ccea15dd0263b97a197cc2"
+    },
+    "python": {
+      "result": "PASS",
+      "total": 255,
+      "failures": 0,
+      "command": "python3 -m unittest discover -s scripts/tests -p 'test_*.py'",
+      "logSHA256": "fd9064490fc50a9a875b98a0c2853640064e6a70615d5e13339588b5fb9d8506"
+    }
+  },
+  "repositoryGuards": {
+    "architectureRatchets": {
+      "result": "PASS",
+      "passed": 17,
+      "required": 17
+    },
+    "roadmapAlignment": {
+      "result": "PASS",
+      "tasks": 124,
+      "decisions": 13
+    },
+    "documentationAlignment": "PASS",
+    "remediationSource": {
+      "result": "PASS",
+      "findings": 0
+    },
+    "themeVisualAuthority": {
+      "result": "PASS",
+      "authorityVersion": "4.3",
+      "gates": 40,
+      "canonicalCandidates": 50,
+      "responsiveCandidates": 188,
+      "responsiveEntries": 400,
+      "runtimeProbes": 50,
+      "runtimeProbeInstances": 576,
+      "mappings": 1104
+    },
+    "norseImplementationSemantics": {
+      "result": "PASS",
+      "rules": 60
+    },
+    "attributionScan": {
+      "result": "PASS",
+      "textFiles": 1304,
+      "mediaFiles": 384
+    }
+  },
+  "productionAssets": {
+    "result": "PASS",
+    "total": 315,
+    "norse": 70,
+    "moonleaf": 65,
+    "sunspire": 60,
+    "wildwood": 60,
+    "gloamthorn": 60,
+    "themeProviderOutputs": 245
+  },
+  "negativeMutations": {
+    "testedSourceRevision": "13f240eef49a2dd530d6f0e2162311905b723b91",
+    "candidateDifference": [
+      "scripts/qualify-release-products.sh"
+    ],
+    "candidateDifferenceScope": "The later candidate changes only repair local Release-product qualification signing; application, asset, entitlement-source, project, package, and product-checker inputs are byte-identical.",
+    "norse": {
+      "result": "PASS",
+      "passed": 25,
+      "required": 25,
+      "sourceRestored": true,
+      "logSHA256": "ca7a3fc99b08b8149c6f8d223b5edd529cdd0d0e0cc2bc0f4231cc5d40859f67"
+    },
+    "legacyRemediation": {
+      "result": "PASS",
+      "passed": 18,
+      "required": 18,
+      "sourceRestored": true,
+      "logSHA256": "67162d7187efa57820c054592d145090175b4bd22d7e4b4752bf663650ebcf5b"
+    },
+    "shippingProducts": {
+      "result": "PASS",
+      "passed": 28,
+      "required": 28,
+      "logSHA256": "9539a70d970c30ac4e63ef5e9c9fe6fe4bea79ca508b3b9a1b7292efac54d38e"
+    }
+  },
+  "releaseProducts": {
+    "result": "PASS",
+    "command": "scripts/qualify-release-products.sh",
+    "sourceRevision": "d1754b250429c17d885401388cb17ec32f1bde59",
+    "macOSReleaseBuild": "PASS",
+    "iOSSimulatorReleaseBuild": "PASS",
+    "inspectionPassed": 101,
+    "inspectionRequired": 101,
+    "inspectionFailures": 0,
+    "macOSHardenedRuntime": true,
+    "signatureMode": "local-ad-hoc",
+    "macOSBuildLogSHA256": "04cfada6ab5123940a7b5d5c8ee47aafde96606f535dc38830ece26eef9bfc38",
+    "iOSBuildLogSHA256": "6a06d9e72e6ae7462f37072cb6cac952e1c9dfd07d8cc0bd2e7f9c0aa6110e8d",
+    "inspectionLogSHA256": "35490a2a19e2934f176a41d2f695bfa4c78ee6702fe22e05dc66dd937cee9846"
+  },
+  "uiEvidence": {
+    "status": "retained-prior-pass",
+    "recordedInRevision": "bd28940cdbdeb404c7e8b50a73eb8bc9d3df4d8d",
+    "testedSourceRevision": "not-retained-in-repository-evidence",
+    "resultArtifactHashes": [],
+    "iPhone17ProIOS26_5": {
+      "passed": 7,
+      "skipped": 1,
+      "failed": 0
+    },
+    "iPadPro13M5IOS26_5": {
+      "passed": 5,
+      "skipped": 3,
+      "failed": 0
+    },
+    "currentCandidateSimulatorLaunch": false,
+    "qualificationUse": "Retained regression context only; not current-candidate source binding.",
+    "currentDeltaCoverage": "Focused UI policy/integration tests, the complete Swift regression suite, and both Release builds pass. No Simulator or desktop UI was launched during this qualification."
+  },
+  "forsettiP11": {
+    "mode": "report-only",
+    "compliancePassClaimed": false,
+    "rules": 20,
+    "pass": 4,
+    "violation": 13,
+    "pendingEnforcement": 1,
+    "notEvaluated": 2,
+    "logSHA256": "fc5e997eec117d74dfcc5541347c3c2116e9a90fcf5d491e01b36cc91dd9b5a9"
+  },
+  "externalDistribution": {
+    "status": "UNASSESSED",
+    "items": [
+      "distribution identity",
+      "provisioning profile",
+      "archive",
+      "export",
+      "notarization",
+      "App Store upload",
+      "rollout"
+    ]
+  }
+}

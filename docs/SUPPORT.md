@@ -3,13 +3,16 @@
 **Current product source:** version 1.0.40 (build 40)
 **Publication boundary:** repository-qualified release candidate; not shipped
 
-Final-source qualification passes 1,235 Swift tests, 255 Python tests, architecture,
-roadmap, documentation, resource, mutation, completeness, and security gates. The iOS
+Final-source qualification passes the Swift and Python suites, the executable 17-ratchet
+architecture guard, roadmap/documentation guards, exact-resource validators, and
+negative mutation suites. The iOS
 Release build and arm64-only unsigned macOS Release build pass. Built-product content,
-resource, and privacy inspection passes 97/101 checks; the remaining four require a
-matching distribution profile and identity. The iPhone 17 Pro headless UI run passes
+resource, privacy, local-signature, Hardened Runtime, and entitlement inspection passes
+101/101 checks on ad-hoc products; distribution identity and provisioning are explicitly
+unassessed. Retained prior iPhone 17 Pro headless UI evidence records
 7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5) headless UI run
-on iOS 26.5 passes 5 tests with 3 phone-specific skips by design and 0 failures. The
+on iOS 26.5 records 5 passed, 3 phone-specific skipped by design, and 0 failed. Those
+runs are not represented as current-candidate source-bound evidence. The
 superseded v4.3 package audit is noncontrolling verification history.
 
 ## Import and sharing
@@ -78,9 +81,10 @@ UI supports Dynamic Type, VoiceOver labels, keyboard and pointer focus, High Con
 Reduce Motion, monochrome presentation, and non-audio unlock feedback. Manual hardware
 observations are superseded by repository-controlled Simulator, hosted, and deterministic
 equivalents and are not a pending shippability boundary. The current source is a
-repository-qualified release candidate with no known release-blocking defects. Both
-supported headless UI runs pass. Distribution signing, archive, export, notarization,
-upload, and rollout remain external publication work.
+repository-qualified release candidate with no known release-blocking defects. Retained
+prior headless UI results remain regression context rather than current-candidate
+source-bound evidence. Distribution signing, archive, export, notarization, upload, and
+rollout remain external publication work.
 
 For help, use the contact channel published at
 [Raven Forge Software](https://ravenforgesoftware.com/). Include the app version, build,

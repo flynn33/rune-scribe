@@ -391,6 +391,54 @@ final class ThemePresentationScreenTests: XCTestCase {
         )
     }
 
+    func testReceivedCompletionActionTruthfullyReportsDismissalSemantics() throws {
+        XCTAssertEqual(ReceivedCipherCompletionActionPolicy.title, "Done")
+        XCTAssertEqual(
+            ReceivedCipherCompletionActionPolicy.systemImage,
+            "checkmark"
+        )
+        XCTAssertEqual(
+            ReceivedCipherCompletionActionPolicy.accessibilityHint,
+            "Closes this message and clears it from pending messages."
+        )
+
+        let sourceURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Sources/RuneScribeUIModule/Views/ThemePresentationScreens.swift")
+        let source = try String(contentsOf: sourceURL, encoding: .utf8)
+        let start = try XCTUnwrap(source.range(of: "private func doneButton("))
+        let end = try XCTUnwrap(
+            source.range(
+                of: "private func replyButton(",
+                range: start.upperBound..<source.endIndex
+            )
+        )
+        let doneButton = String(source[start.lowerBound..<end.lowerBound])
+
+        XCTAssertTrue(
+            doneButton.contains("title: ReceivedCipherCompletionActionPolicy.title")
+        )
+        XCTAssertTrue(doneButton.contains("action: doneAction"))
+        XCTAssertTrue(
+            doneButton.contains(
+                ".accessibilityHint(ReceivedCipherCompletionActionPolicy.accessibilityHint)"
+            )
+        )
+        XCTAssertFalse(doneButton.contains("Save"))
+
+        let receivedMessageSourceURL = sourceURL
+            .deletingLastPathComponent()
+            .appendingPathComponent("ReceivedMessageView.swift")
+        let receivedMessageSource = try String(
+            contentsOf: receivedMessageSourceURL,
+            encoding: .utf8
+        )
+        XCTAssertTrue(receivedMessageSource.contains("doneAction: { dismiss() }"))
+        XCTAssertFalse(receivedMessageSource.contains("saveAction:"))
+    }
+
     func testAccessibilityReceivedPlaintextReflowsOutsideTheFixedCanvas() throws {
         let sourceURL = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()

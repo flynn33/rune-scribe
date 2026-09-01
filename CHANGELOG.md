@@ -32,21 +32,30 @@ release work and reviewed against the project version before merge. The format f
 - Replace the SwiftUI keyboard-toolbar dismissal control with a focus-aware safe-area
   control that remains tappable on iPhone and iPad and avoids the framework's invalid
   frame-dimension runtime fault.
-- Qualify the final source with 1,235/1,235 Swift tests, 255/255 Python tests, 60 Norse
+- Keep the first-delivery key disclosure synchronized when the encoded cipher is linked
+  or unlinked, and rename the received-message dismissal action from Save to Done so its
+  label and accessibility hint match its behavior.
+- Qualify the final source with 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse
   semantic rules, 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative
   mutations, and 27/27 evidence-hardening tests.
-- Pass the iOS Release build, the arm64-only unsigned macOS Release build, and 97/101
-  built-product content, resource, privacy, signing, and entitlement checks. The four
-  remaining checks require a matching distribution profile and identity.
-- Pass the iPhone 17 Pro headless UI run on iOS 26.5 with 7 passed, 1 iPad-only skipped,
-  and 0 failed, and the iPad Pro 13-inch (M5) headless UI run on iOS 26.5 with 5 passed,
-  3 phone-specific skipped by design, and 0 failed.
+- Pass the iOS Release build, the arm64-only unsigned macOS Release build, and 101/101
+  local ad-hoc built-product content, resource, privacy, signing, Hardened Runtime, and
+  entitlement checks. Distribution identity and provisioning remain unassessed external
+  publication work.
+- Add a path-independent, noninteractive Release-product qualification command that
+  preserves build logs and qualified local app bundles without launching Simulator.
+- Retain the prior iPhone 17 Pro headless UI result on iOS 26.5 with 7 passed, 1
+  iPad-only skipped, and 0 failed, and the prior iPad Pro 13-inch (M5) result on iOS
+  26.5 with 5 passed, 3 phone-specific skipped by design, and 0 failed. Current-candidate
+  qualification does not relabel those retained runs as source-bound evidence.
 - Retain the superseded v4.3 package audit as noncontrolling verification history;
   manual-evidence and package self-binding mechanics do not define product release
   readiness.
-- Record passing final completeness and security sweeps and establish version 1.0.40
-  build 40 as a repository-qualified release candidate. Distribution signing, archive,
-  export, notarization, upload, and shipment remain external and have not occurred.
+- Record passing named regression, architecture, source, asset, mutation, privacy, and
+  built-product checks and establish version 1.0.40 build 40 as a repository-qualified
+  release candidate. The stricter P11 Forsetti scanner remains report-only rather than a
+  claimed pass. Distribution signing, archive, export, notarization, upload, and shipment
+  remain external and have not occurred.
 
 ## [1.0.39] - 2026-08-23
 

@@ -840,6 +840,13 @@ enum ReceivedCipherDecodeActionPolicy {
     static let accessibilityHint = "No further decoding is needed."
 }
 
+enum ReceivedCipherCompletionActionPolicy {
+    static let title = "Done"
+    static let systemImage = "checkmark"
+    static let accessibilityHint =
+        "Closes this message and clears it from pending messages."
+}
+
 struct ReceivedCipherPresentationView: View {
     let state: ReceivedCipherPresentationState
     let pending: PendingMessageViewState
@@ -850,7 +857,7 @@ struct ReceivedCipherPresentationView: View {
     let image: (ThemeResourceID) -> Image
     var backAction: () -> Void = {}
     var libraryAction: () -> Void = {}
-    var saveAction: () -> Void = {}
+    var doneAction: () -> Void = {}
     var replyAction: () -> Void = {}
 
     @ScaledMetric(relativeTo: .body) private var dynamicTypeScale: CGFloat = 1
@@ -1359,7 +1366,7 @@ struct ReceivedCipherPresentationView: View {
             VStack(spacing: metrics.receivedActionSpacing) {
                 decodeButton(metrics: metrics)
                     .frame(height: actionHeight)
-                saveButton(metrics: metrics)
+                doneButton(metrics: metrics)
                     .frame(height: actionHeight)
                 replyButton(metrics: metrics)
                     .frame(height: actionHeight)
@@ -1368,7 +1375,7 @@ struct ReceivedCipherPresentationView: View {
         } else {
             HStack(spacing: metrics.receivedActionSpacing) {
                 decodeButton(metrics: metrics)
-                saveButton(metrics: metrics)
+                doneButton(metrics: metrics)
                     .frame(width: max(
                         ThemePresentationScreenMetrics.minimumInteractiveDimension,
                         340 * metrics.scale
@@ -1391,13 +1398,16 @@ struct ReceivedCipherPresentationView: View {
         )
     }
 
-    private func saveButton(metrics: ThemePresentationScreenMetrics) -> some View {
+    private func doneButton(metrics: ThemePresentationScreenMetrics) -> some View {
         ThemePresentationPrimaryButton(
-            title: "Save",
-            systemImage: "leaf",
+            title: ReceivedCipherCompletionActionPolicy.title,
+            systemImage: ReceivedCipherCompletionActionPolicy.systemImage,
             metrics: metrics,
-            action: saveAction
+            action: doneAction
         )
+        .accessibilityLabel(ReceivedCipherCompletionActionPolicy.title)
+        .accessibilityHint(ReceivedCipherCompletionActionPolicy.accessibilityHint)
+        .accessibilityIdentifier("received-cipher.action.done")
     }
 
     private func replyButton(metrics: ThemePresentationScreenMetrics) -> some View {
