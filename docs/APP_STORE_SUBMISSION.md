@@ -6,9 +6,10 @@ Keep this file in sync when shipping a new marketing version.
 **Last prepared for:** 1.0.40 (build 40) — 2026-08-31
 
 > **Publication boundary:** version 1.0.40 build 40 is a repository-qualified release
-> candidate and is not shipped. Both supported headless UI runs pass. Distribution
-> signing and archive-entitlement inspection require a matching profile and identity;
-> archive, export, notarization, upload, and rollout remain external publication actions.
+> candidate and is not shipped. Retained prior headless UI results remain regression
+> context rather than current-candidate source-bound evidence. Distribution signing and
+> archive-entitlement inspection require a matching profile and identity; archive,
+> export, notarization, upload, and rollout remain external publication actions.
 
 ---
 
@@ -233,8 +234,8 @@ record-creation, or rollout sequence is implied by product release qualification
 - [ ] Version and build match App Store Connect (`1.0.40` / `40` for this packet)
 - [x] Core user flows and clean automated tests pass against the final source
 - [x] iOS Simulator and arm64-only unsigned macOS Release builds pass
-- [x] iPhone 17 Pro headless UI qualification passes on iOS 26.5
-- [x] iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5
+- [x] Retained prior iPhone 17 Pro headless UI qualification passes on iOS 26.5
+- [x] Retained prior iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5
 - [x] Deterministic accessibility and privacy checks, source validators, and negative
   mutation suites pass
 - [x] Both final app bundles contain the exact reviewed `PrivacyInfo.xcprivacy`
@@ -263,8 +264,9 @@ record-creation, or rollout sequence is implied by product release qualification
 Manual hardware observations are superseded by repository-controlled Simulator, hosted,
 and deterministic equivalents and are not a product-shippability requirement. Legacy
 package audit and self-binding mechanics are noncontrolling verification history. The
-source is repository-qualified, and both supported headless UI runs pass. Distribution
-signing, archive, export, notarization, upload, and rollout remain external.
+source is repository-qualified. Retained prior headless UI results are not represented
+as current-candidate source-bound evidence. Distribution signing, archive, export,
+notarization, upload, and rollout remain external.
 
 ---
 
@@ -284,9 +286,10 @@ Internal release summary; this is **not a shipment claim**:
 8. The iOS Release and arm64-only unsigned macOS Release builds pass; local ad-hoc
    built-product content, resource, privacy, signature, Hardened Runtime, and entitlement
    inspection passes 101/101 checks. Distribution identity and provisioning are unassessed
-9. The iPhone 17 Pro iOS 26.5 UI run passes 7, skips 1 iPad-only test, and fails 0; the
-   iPad Pro 13-inch (M5) iOS 26.5 UI run has 5 passed, 3 phone-specific skipped by
-   design, and 0 failed
+9. Retained prior evidence records the iPhone 17 Pro iOS 26.5 UI run with 7 passed, 1
+   iPad-only skipped, and 0 failed, and the iPad Pro 13-inch (M5) iOS 26.5 UI run with 5
+   passed, 3 phone-specific skipped by design, and 0 failed. These runs are not
+   current-candidate source-bound evidence
 10. The superseded v4.3 package audit is retained as noncontrolling verification history
 11. Marketing version **1.0.40**, build **40** is repository-qualified and not shipped;
     distribution signing, archive, export, notarization, upload, and rollout remain external

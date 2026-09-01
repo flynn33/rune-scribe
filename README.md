@@ -314,7 +314,7 @@ evidence passes 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse semantic
 Release build pass; local ad-hoc built-product content, resource, privacy, signature,
 Hardened Runtime, and entitlement inspection passes 101/101 checks. This verifies the
 repository-controlled product contract but does not assess a distribution identity or
-profile. Named source, mutation, and product guards pass. Headless iPhone 17 Pro UI
+profile. Named source, mutation, and product guards pass. Retained prior headless iPhone 17 Pro UI
 qualification on iOS 26.5 passes 7 tests, skips 1 iPad-only test, and fails 0. Headless
 iPad Pro 13-inch (M5) qualification on iOS 26.5 passes 5 tests, skips 3 phone-specific
 tests by design, and fails 0. The candidate is **repository-qualified and not shipped**.
@@ -534,11 +534,12 @@ does not access the operator's login Keychain.
 Direct-device observations are superseded by repository-controlled Simulator, hosted,
 and deterministic equivalents and are not pending release gates. The
 legacy package's larger visual-evidence and self-binding matrix remains noncontrolling.
-Named final-source, mutation, and built-product guards pass, and the iPhone 17 Pro
+Named final-source, mutation, and built-product guards pass. Retained prior iPhone 17 Pro
 headless UI run passes 7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5)
 headless UI run on iOS 26.5 passes 5 tests with 3 phone-specific skips by design and 0
-failures. Distribution signing and publication remain external. Every result stays
-labeled by the environment in which it was observed.
+failures. Those UI runs are not represented as current-candidate source-bound evidence.
+Distribution signing and publication remain external. Every result stays labeled by the
+environment in which it was observed.
 
 ---
 

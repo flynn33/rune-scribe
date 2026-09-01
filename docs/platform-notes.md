@@ -52,10 +52,11 @@ does not determine product shippability.
 Manual hardware observations are superseded by repository-controlled macOS hosted,
 iPhone Simulator, iPad Simulator, and deterministic evidence. Version 1.0.40 build 40 is
 a repository-qualified release candidate and is not shipped. The iOS Release build and
-arm64-only unsigned macOS Release build pass, as does the iPhone 17 Pro headless UI run
-on iOS 26.5 with 7 passed, 1 iPad-only skipped, and 0 failed. The iPad Pro 13-inch (M5)
-headless UI run on iOS 26.5 passes with 5 passed, 3 phone-specific skipped by design, and
-0 failed. Local ad-hoc built-product content, resource, privacy, signature, Hardened
+arm64-only unsigned macOS Release build pass. Retained prior evidence records the iPhone
+17 Pro headless UI run on iOS 26.5 with 7 passed, 1 iPad-only skipped, and 0 failed and
+the iPad Pro 13-inch (M5) run with 5 passed, 3 phone-specific skipped by design, and 0
+failed; those runs are not current-candidate source-bound evidence. Local ad-hoc
+built-product content, resource, privacy, signature, Hardened
 Runtime, and entitlement inspection passes 101/101 checks. Distribution identity and
 provisioning remain unassessed external publication work. The separate v4.3 package audit is incomplete
 but noncontrolling.

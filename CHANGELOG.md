@@ -44,9 +44,10 @@ release work and reviewed against the project version before merge. The format f
   publication work.
 - Add a path-independent, noninteractive Release-product qualification command that
   preserves build logs and qualified local app bundles without launching Simulator.
-- Pass the iPhone 17 Pro headless UI run on iOS 26.5 with 7 passed, 1 iPad-only skipped,
-  and 0 failed, and the iPad Pro 13-inch (M5) headless UI run on iOS 26.5 with 5 passed,
-  3 phone-specific skipped by design, and 0 failed.
+- Retain the prior iPhone 17 Pro headless UI result on iOS 26.5 with 7 passed, 1
+  iPad-only skipped, and 0 failed, and the prior iPad Pro 13-inch (M5) result on iOS
+  26.5 with 5 passed, 3 phone-specific skipped by design, and 0 failed. Current-candidate
+  qualification does not relabel those retained runs as source-bound evidence.
 - Retain the superseded v4.3 package audit as noncontrolling verification history;
   manual-evidence and package self-binding mechanics do not define product release
   readiness.

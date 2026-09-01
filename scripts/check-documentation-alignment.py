@@ -307,9 +307,10 @@ require(
     "1,238/1,238 Swift tests" in normalized_readme_roadmap
     and "255/255 Python tests" in normalized_readme_roadmap
     and "101/101" in normalized_readme_roadmap
+    and "Retained prior headless iPhone 17 Pro UI qualification" in normalized_readme_roadmap
     and "iPad Pro 13-inch (M5) qualification on iOS 26.5 passes 5 tests" in normalized_readme_roadmap
     and "skips 3 phone-specific tests by design, and fails 0" in normalized_readme_roadmap,
-    "README lacks the final-source qualification result or completed iPad evidence",
+    "README lacks the final-source qualification result or retained iPad evidence",
 )
 require(
     "| P12 | Full Xcode, parity, device" not in readme_roadmap,
@@ -355,9 +356,9 @@ require(
 require(
     "repository-qualified release candidate" in submission
     and "101/101" in submission
-    and "- [x] iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5"
+    and "- [x] Retained prior iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5"
     in submission,
-    "App Store packet lacks the repository-qualified, built-product, or completed iPad result",
+    "App Store packet lacks the repository-qualified, built-product, or retained iPad result",
 )
 privacy = read("docs/PRIVACY.md")
 support = read("docs/SUPPORT.md")
@@ -445,10 +446,10 @@ require(
     "**1,238/1,238 Swift tests**" in qualification_summary
     and "**255/255 Python tests**" in qualification_summary
     and "**101/101 checks**" in qualification_summary
-    and "passes **7 tests**" in qualification_summary
-    and "passes **5 tests**" in qualification_summary
-    and "skips **3\n  phone-specific tests by design**" in qualification_summary
-    and qualification_summary.count("fails **0 tests**") == 2,
+    and "Retained prior evidence records the headless iPhone 17 Pro UI run" in qualification_summary
+    and "Retained prior evidence records the headless iPad Pro 13-inch (M5) UI run" in qualification_summary
+    and "Neither retained run is represented as current-candidate source-bound evidence"
+    in qualification_summary,
     "release qualification summary lacks final-source evidence",
 )
 require(
@@ -501,9 +502,10 @@ for relative, content in current_release_documents.items():
     require(
         "repository-qualified" in normalized_content
         and "ipad pro 13-inch (m5)" in normalized_content
+        and "source-bound evidence" in normalized_content
         and "final ipad ui run remains pending" not in normalized_content
         and "ipad ui qualification pending" not in normalized_content,
-        f"{relative} lacks the repository-qualified or completed iPad boundary",
+        f"{relative} lacks the repository-qualified or retained-UI boundary",
     )
 
 content_view = read(
@@ -1259,5 +1261,5 @@ if ERRORS:
 print(
     f"Documentation alignment passed: version {marketing} build {build}, "
     "recovery closed, Phase C history retained, roadmap baseline source-complete, "
-    "repository-qualified release candidate recorded, supported UI runs pass, not shipped."
+    "repository-qualified release candidate recorded, retained UI evidence labeled, not shipped."
 )

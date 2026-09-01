@@ -68,10 +68,11 @@ shipped**. All repository-controlled release gates pass. The repository now cont
 
 The repository-controlled release bar passes core user flows, clean tests, iOS/macOS
 Release builds, deterministic UI coverage, accessibility, privacy, exact assets, negative
-mutations, and built-product inspection with no known release-blocking defects. The iPhone 17 Pro
-headless UI run on iOS 26.5 passes 7 tests, skips 1 iPad-only test, and fails 0. The iPad
-Pro 13-inch (M5) headless UI run on iOS 26.5 passes 5 tests, skips 3 phone-specific tests
-by design, and fails 0. Manual hardware observations are superseded by supported
+mutations, and built-product inspection with no known release-blocking defects. Retained
+prior evidence records the iPhone 17 Pro headless UI run on iOS 26.5 with 7 passed, 1
+iPad-only skipped, and 0 failed and the iPad Pro 13-inch (M5) run with 5 passed, 3
+phone-specific skipped by design, and 0 failed. Those results are regression context,
+not current-candidate source-bound evidence. Manual hardware observations are superseded by supported
 Simulator, hosted, and deterministic equivalents. Distribution signing and entitlement
 inspection remain external because no matching profile or distribution identity is
 available.

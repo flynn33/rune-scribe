@@ -130,6 +130,9 @@
   },
   "uiEvidence": {
     "status": "retained-prior-pass",
+    "recordedInRevision": "bd28940cdbdeb404c7e8b50a73eb8bc9d3df4d8d",
+    "testedSourceRevision": "not-retained-in-repository-evidence",
+    "resultArtifactHashes": [],
     "iPhone17ProIOS26_5": {
       "passed": 7,
       "skipped": 1,
@@ -141,6 +144,7 @@
       "failed": 0
     },
     "currentCandidateSimulatorLaunch": false,
+    "qualificationUse": "Retained regression context only; not current-candidate source binding.",
     "currentDeltaCoverage": "Focused UI policy/integration tests, the complete Swift regression suite, and both Release builds pass. No Simulator or desktop UI was launched during this qualification."
   },
   "forsettiP11": {

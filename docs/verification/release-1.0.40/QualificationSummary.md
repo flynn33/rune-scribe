@@ -58,11 +58,13 @@ architecture findings, and external publication work explicitly separated.
   entitlement inspection passes **101/101 checks**. The reusable
   [`qualify-release-products.sh`](../../../scripts/qualify-release-products.sh) command
   reproduces both Release builds and the inspection without launching Simulator.
-- The headless iPhone 17 Pro UI run on iOS 26.5 passes **7 tests**, skips **1 iPad-only
-  test**, and fails **0 tests**.
-- The headless iPad Pro 13-inch (M5) UI run on iOS 26.5 passes **5 tests**, skips **3
-  phone-specific tests by design**, and fails **0 tests**.
-- Post-remediation keyboard regressions pass on clean iPhone and iPad simulators: the
+- Retained prior evidence records the headless iPhone 17 Pro UI run on iOS 26.5 with **7
+  tests passed**, **1 iPad-only test skipped**, and **0 tests failed**.
+- Retained prior evidence records the headless iPad Pro 13-inch (M5) UI run on iOS 26.5
+  with **5 tests passed**, **3 phone-specific tests skipped by design**, and **0 tests
+  failed**. Neither retained run is represented as current-candidate source-bound evidence.
+- Retained prior post-remediation keyboard evidence records clean iPhone and iPad
+  Simulator results: the
   focus-aware Done control is present and hittable, dismisses the keyboard, preserves
   the iPad workspace viewport, and produces no invalid-frame-dimension entries in the
   application log.
