@@ -1,0 +1,126 @@
+{
+  "schemaVersion": "1.0",
+  "authorityContract": "theme-fidelity-v4.3",
+  "ownerReview": "PENDING",
+  "runtimeAuthority": false,
+  "records": [
+    {
+      "id": "moonleaf.environment",
+      "role": "Background",
+      "output": "moonleaf/moonleaf-environment-production-master-v4.3.png",
+      "sha256": "c159a92c2a65b70e2df6e2ce88ebe0c18230b0c88ab93ada381841c7b51d7373",
+      "dimensions": [1672, 941],
+      "hasAlpha": false,
+      "reference": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-002-1122x1402.png",
+      "referenceUse": "style-grounding-only",
+      "recipe": "Create one continuous wide moonlit Elven woodland environment with a portrait-safe calm center and detailed outer thirds. Exclude every interface, frame, object, glyph, rune, symbol, and text element.",
+      "acceptance": "Continuous edge-to-edge scene; no embedded interface, text, symbol, seam, or repeated patch detected."
+    },
+    {
+      "id": "sunspire.environment",
+      "role": "Background",
+      "output": "sunspire/sunspire-environment-production-master-v4.3.png",
+      "sha256": "1bc17b1ebb451caf8e0704f7f567cd4fa1ab3ca2939c0ca8ec01ff7218e80966",
+      "dimensions": [1672, 941],
+      "hasAlpha": false,
+      "reference": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-013-1122x1402.png",
+      "referenceUse": "style-grounding-only",
+      "recipe": "Create one continuous wide ivory-stone and golden-morning Elven sun-court environment with a portrait-safe calm center and detailed outer thirds. Exclude every interface, frame, object, glyph, rune, symbol, and text element.",
+      "acceptance": "Continuous edge-to-edge scene; no embedded interface, text, glyph, seam, or repeated patch detected."
+    },
+    {
+      "id": "wildwood.environment",
+      "role": "Background",
+      "output": "wildwood/wildwood-environment-production-master-v4.3.png",
+      "sha256": "3aa724df0aa33106a16be9316e2e6cc8df3fd6b091c0e25eaa2bf166143b4be3",
+      "dimensions": [1672, 941],
+      "hasAlpha": false,
+      "reference": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-008-1122x1402.png",
+      "referenceUse": "style-grounding-only",
+      "recipe": "Create one continuous wide living-tree archive environment with a portrait-safe calm center. Remove all decorative floor markings from the initial candidate and retain only unmarked natural textile, timber, and stone surfaces.",
+      "acceptance": "Corrected candidate accepted after removal of the initial rune-like floor pattern; no embedded interface, text, glyph, seam, or repeated patch detected."
+    },
+    {
+      "id": "gloamthorn.environment",
+      "role": "Background",
+      "output": "gloamthorn/gloamthorn-environment-production-master-v4.3.png",
+      "sha256": "46ddc0e5b3e535e6f5886d4b4815c10d5b707017d574011d98dc400fa47911bc",
+      "dimensions": [1672, 941],
+      "hasAlpha": false,
+      "reference": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-017-941x1672.png",
+      "referenceUse": "style-grounding-only-complete-reference-never-copied",
+      "recipe": "Create one continuous wide nocturnal thornwood environment with charcoal stone, sparse violet crystal accents, and a portrait-safe calm center. Do not retain any composition, object, card, typography, or interface element from the reference.",
+      "acceptance": "Continuous independent environment; no embedded interface, reference composition, text, glyph, seam, or repeated patch detected."
+    },
+    {
+      "id": "sunspire.dawnfire-tablet.clean-master",
+      "role": "Relic",
+      "output": "sunspire/sunspire-dawnfire-tablet-clean-production-master-v4.3.png",
+      "sha256": "19322a7f35deda05349807bd315f1e9abee6a082ba9f9557423653b54396b9c9",
+      "dimensions": [1200, 1600],
+      "hasAlpha": true,
+      "reference": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/relic/sunspire-dawnfire-tablet-master.png",
+      "referenceUse": "object-restoration-source",
+      "recipe": "Reconstruct the full interior field as continuous warm ivory parchment while preserving the tablet silhouette and ornament. Remove every inscription and rectangular patch artifact. Resize accepted content with Lanczos to 1200x1600 and restore the reference object's alpha channel.",
+      "alphaMaskSourceSHA256": "928cd1a404cc96fc0729076b20a41820ca5b2718c07cbda00941644a0b7b7868",
+      "acceptance": "Clean continuous writing field; no baked Script glyph, blur slab, seam, or opaque exterior detected."
+    },
+    {
+      "id": "wildwood.rootsong-tablet.clean-master",
+      "role": "Relic",
+      "output": "wildwood/wildwood-rootsong-tablet-clean-production-master-v4.3.png",
+      "sha256": "c36bbb1aff2685502081e441da0ab0bffea3651a67774093ef86c646cdf532e5",
+      "dimensions": [1600, 1200],
+      "hasAlpha": true,
+      "reference": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeWildwoodModule/Resources/Production/relic/wildwood-rootsong-tablet-master.png",
+      "referenceUse": "object-restoration-source",
+      "recipe": "Preserve every opaque source RGB object pixel. Segment only the connected exterior checker field with the pinned deterministic GrabCut mask, retain the center-connected object component and adjacent fine detail, derive a 0.65-sigma antialiased alpha edge, replace partial-edge RGB from the nearest retained object pixel, and zero RGB under fully transparent pixels.",
+      "alphaRemediation": {
+        "pipeline": "scripts/remediate-wildwood-relic-alpha.py",
+        "inputSHA256": "b911efa5aefa223973163ecc7fc10ff4632922142bedf5d8b29d0905be9f6625",
+        "contentBounds": [229, 41, 1431, 1125],
+        "opaquePixels": 1104113,
+        "partialAlphaPixels": 18133,
+        "transparentPixels": 797754,
+        "opaqueObjectRGBPreserved": true,
+        "darkAndLightCompositeReview": "PASS"
+      },
+      "acceptance": "Clean continuous writing field and genuine transparent exterior; no baked Script glyph, blur slab, seam, checker square, color-key remnant, or opaque exterior detected."
+    },
+    {
+      "id": "wildwood.mossbound-plaque.clean-master",
+      "role": "Relic",
+      "output": "wildwood/wildwood-mossbound-plaque-clean-production-master-v4.3.png",
+      "sha256": "d599ff51f2d7a43c123c4541b64e2870a26dd57a3dd0bba0579c5ed60672465d",
+      "dimensions": [1600, 1200],
+      "hasAlpha": true,
+      "reference": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeWildwoodModule/Resources/Production/relic/wildwood-mossbound-plaque-master.png",
+      "referenceUse": "object-restoration-source",
+      "recipe": "Preserve every opaque source RGB object pixel. Segment only the connected exterior checker field with the pinned deterministic GrabCut mask, retain the center-connected object component and adjacent fine detail, derive a 0.65-sigma antialiased alpha edge, replace partial-edge RGB from the nearest retained object pixel, and zero RGB under fully transparent pixels.",
+      "alphaRemediation": {
+        "pipeline": "scripts/remediate-wildwood-relic-alpha.py",
+        "inputSHA256": "57d4606967361c2833c9ca17761998db740cd6ca2ab8ddd3e4f78682cf35736c",
+        "contentBounds": [230, 51, 1368, 1100],
+        "opaquePixels": 1029859,
+        "partialAlphaPixels": 13955,
+        "transparentPixels": 876186,
+        "opaqueObjectRGBPreserved": true,
+        "darkAndLightCompositeReview": "PASS"
+      },
+      "acceptance": "Clean continuous writing field and genuine transparent exterior; no baked Script glyph, blur slab, seam, checker square, color-key remnant, or opaque exterior detected."
+    },
+    {
+      "id": "gloamthorn.nightthorn-tablet.clean-master",
+      "role": "Relic",
+      "output": "gloamthorn/gloamthorn-nightthorn-tablet-clean-production-master-v4.3.png",
+      "sha256": "f5b024959ef7146102064cb0a3222291ccb378729dbc83b89949a1329ffda795",
+      "dimensions": [1600, 1200],
+      "hasAlpha": true,
+      "reference": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeGloamthornModule/Resources/Production/relic/gloamthorn-nightthorn-tablet-master.png",
+      "referenceUse": "object-restoration-source",
+      "recipe": "Reconstruct the full interior field as continuous charcoal-black stone while preserving the thorn-bound tablet silhouette and ornament. Remove every inscription and rectangular patch artifact. Resize accepted content with Lanczos to 1600x1200 and restore the reference object's alpha channel.",
+      "alphaMaskSourceSHA256": "f0c3d37d6022d674863182d25633509eb91cf0c26dd7457e57df1cbece83435c",
+      "acceptance": "Clean continuous writing field; no baked Script glyph, blur slab, seam, or opaque exterior detected."
+    }
+  ]
+}

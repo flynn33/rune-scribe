@@ -1,0 +1,164 @@
+{
+  "asset": "background.sunspire.hall-of-first-light",
+  "generatedAtUTC": "2026-08-27T00:00:00Z",
+  "id": "prov.Production.Sources.sunspire.sunspire.background.recipe.json",
+  "licenseNotice": "Project-local proprietary production master; owner visual review remains pending",
+  "outputLayouts": {
+    "macOSWide": {
+      "canvas": [
+        3200,
+        1800
+      ],
+      "cropBoxSourcePixels": [
+        0.0,
+        0.25,
+        1672.0,
+        940.75
+      ],
+      "focalPoint": [
+        0.5,
+        0.5
+      ],
+      "resampling": "bilinear",
+      "scale": 1.913875598,
+      "sourceCropAspectRatio": 1.777777778,
+      "transformation": "single continuous-master aspect-fill crop with one uniform scale"
+    },
+    "phonePortrait": {
+      "canvas": [
+        2048,
+        2732
+      ],
+      "cropBoxSourcePixels": [
+        483.297218,
+        0.0,
+        1188.702782,
+        941.0
+      ],
+      "focalPoint": [
+        0.5,
+        0.5
+      ],
+      "resampling": "bicubic",
+      "scale": 2.903294368,
+      "sourceCropAspectRatio": 0.749633968,
+      "transformation": "single continuous-master aspect-fill crop with one uniform scale"
+    }
+  },
+  "outputs": [
+    {
+      "bytes": 7454831,
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/sunspire-background-high-contrast.png",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-high-contrast",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.background.recipe.json",
+      "role": "background.high-contrast",
+      "sha256": "9f574bd9bbcc4c94a3eaff2e27f87f8391c50e124b472b836e13dbceab14fd6d"
+    },
+    {
+      "bytes": 7628479,
+      "dimensions": [
+        3200,
+        1800
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/sunspire-background-macos-wide.png",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-macos-wide-crop",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.background.recipe.json",
+      "role": "background.macos-wide-crop",
+      "sha256": "1fcb25cbc3353aee289b06b8331299254910cf3cdf8b66c6e6ca697105becee0"
+    },
+    {
+      "bytes": 6566158,
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/sunspire-background-reduce-motion.png",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-reduce-motion",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.background.recipe.json",
+      "role": "background.reduce-motion",
+      "sha256": "8b069745ad2b6bed27877537a00bed40ce475fac91c4b4ec1b18241d9d871181"
+    },
+    {
+      "bytes": 6746648,
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/sunspire-background-static.png",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-static-base",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.background.recipe.json",
+      "role": "background.static-base",
+      "sha256": "f4f6f3ffa5837ec6a7283f49e50a3af78642f7959235efa93ffa071ad3c1c260"
+    }
+  ],
+  "ownerReview": "PENDING",
+  "pipeline": "scripts/build-sunspire-wildwood-gloamthorn-v43-assets.py",
+  "pipelineSHA256": "0c297e03ac703ee1d786fe9aa1d6fd8a003452824447ca109876e474784a578f",
+  "productionSourceMaster": {
+    "contentClass": "continuous-art-directed-environment",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "focalPoint": [
+      0.5,
+      0.5
+    ],
+    "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-environment-production-master-v4.3.png",
+    "runtimeBundled": false,
+    "sha256": "1bc17b1ebb451caf8e0704f7f567cd4fa1ab3ca2939c0ca8ec01ff7218e80966"
+  },
+  "renderer": "scripts/theme_v43_background_master.py",
+  "rendererSHA256": "f613b3a61ea5ec29ef455f96128ff98eab8911eafb02ee4f0daf34e4dad20b64",
+  "rightsOwner": "Raven Forge Software",
+  "schemaVersion": "1.0",
+  "theme": "Sunspire",
+  "transformationSteps": [
+    "verify the repository-local continuous environment source master against its pinned SHA-256",
+    "compute a theme-focal aspect-fill crop in source coordinates for each output canvas",
+    "sample the single crop with one uniform source-to-output scale and no nonuniform stretch",
+    "prebuild deterministic standard, Reduce Motion, and High Contrast variants",
+    "encode lossless PNG outputs without tiling, seams, reference-screen compositing, or completed-image blur"
+  ],
+  "variantAdjustments": {
+    "highContrast": {
+      "brightness": 0.92,
+      "color": 0.88,
+      "contrast": 1.3,
+      "sharpness": 1.14
+    },
+    "reduceMotion": {
+      "brightness": 0.96,
+      "color": 0.9,
+      "contrast": 0.96,
+      "sharpness": 1.0
+    },
+    "standard": {
+      "brightness": 1.0,
+      "color": 1.0,
+      "contrast": 1.0,
+      "sharpness": 1.0
+    }
+  },
+  "visualAuthorityReference": {
+    "dimensions": [
+      1122,
+      1402
+    ],
+    "label": "style-board",
+    "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-013-1122x1402.png",
+    "sha256": "ea52db7c2f8a89354069b6f64a4751cb62ea439a968c6c1ba8309f8ac3145f5d"
+  }
+}

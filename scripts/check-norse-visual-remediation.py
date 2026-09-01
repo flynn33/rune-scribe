@@ -15,12 +15,12 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Optional, Sequence, Union
 
 
-EXPECTED_VERSION = "1.0.39"
-EXPECTED_BUILD = "39"
+EXPECTED_VERSION = "1.0.40"
+EXPECTED_BUILD = "40"
 EXPECTED_V2_RESOURCE_COUNT = 70
 EXPECTED_NEGATIVE_MUTATION_COUNT = 25
 EXPECTED_V2_GENERATOR_SHA256 = (
-    "09c0ff40fefc5f9bd1c9500693fef9cac47c0b6a30346674b8b73db156d65cd3"
+    "527bd3b9e11603207362ad33f9fe06a078eb919ee355e25960883a26a5e48227"
 )
 EXPECTED_FONT_SHA256 = (
     "615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b"
@@ -1155,10 +1155,24 @@ class Validator:
             "ReceivedPresentationAvailabilityBinding.swift"
         )
         fallback = self.read(fallback_relative, "NRV-014", "optional-provider-fallback")
+        downgrade_body = swift_function_body(fallback, "downgrade")
+        resolve_body = swift_function_body(fallback, "resolve")
+        compact_downgrade = re.sub(r"\s+", "", downgrade_body or "")
+        compact_resolve = re.sub(r"\s+", "", resolve_body or "")
         self.require(
-            "usesRequestedCodex" in fallback
-            and ": RuneScribeCodexIDs.norse" in fallback
-            and ".norseInteractiveFallback" in fallback,
+            "effectiveCodexID:RuneScribeCodexIDs.norse" in compact_downgrade
+            and "renderMode:.norseInteractiveFallback" in compact_downgrade
+            and "letusesRequestedCodex=availability==.available" in compact_resolve
+            and (
+                "effectiveCodexID:usesRequestedCodex"
+                "?presentation.requestedSelection.codexID"
+                ":RuneScribeCodexIDs.norse"
+            ) in compact_resolve
+            and (
+                "renderMode:usesRequestedCodex"
+                "?.requestedCodex"
+                ":.norseInteractiveFallback"
+            ) in compact_resolve,
             "NRV-014",
             "optional-provider-fallback",
             "optional-provider failure does not deterministically fall back to Norse",

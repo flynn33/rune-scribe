@@ -1,0 +1,558 @@
+{
+  "schemaVersion": "1.0",
+  "sourceCount": 36,
+  "matchedCount": 36,
+  "records": [
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-001-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "8e18af39d732eea9117cd82874ed8887661105be173a135e7fd28bc431614bb9",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-tablet-detail-a.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-tablet-detail-final.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-002-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "pixelSHA256RGBA": "358a123594762b4c82b3477d53993356d3711115753fd9727fedd915f48e509f",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-high-fidelity-style-board.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/moonleaf-high-fidelity-style-board-alt.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-003-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "00ae4cb8a941547589af86a8c22ac626cc0e1648225f295ecadd97d3526680a4",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-final-alt.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-series.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-004-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "6562490ba00105bcf6400414da3d02fde0c41dca746a3772848184f633237807",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Sunspire/sunspire-codex-catalog-final.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/sunspire-codex-catalog-early.png"
+      ],
+      "themeHints": [
+        "Sunspire"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-005-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "0aae5d07d1acc4ddace449ca5ed0248599a9d5bd70c232d8b43815560a17039d",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/vault-elven-codex-unlock-progress.png"
+      ],
+      "themeHints": [],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-006-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "84ab1e857c7ccab363a92395baaf7eabbbafaf8519c44833c0b164c1641ec327",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Wildwood/wildwood-codex-catalog-final.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/wildwood-codex-catalog-early.png"
+      ],
+      "themeHints": [
+        "Wildwood"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-007-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "ecd3960f1fa67dd52a41c8161241e53ed6ee7372c96ddbb75102760495df4b9a",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-compose-a.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-compose-final-a.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-008-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "pixelSHA256RGBA": "de6038a37c710e1410202e3fc78348b806345f9980cd2bc62ff16987a47c65f7",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Wildwood/wildwood-high-fidelity-style-board.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/wildwood-high-fidelity-style-board-alt.png"
+      ],
+      "themeHints": [
+        "Wildwood"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-009-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "dfb2fb1f16d9b0e9302208cf6d21d57c3debcbb8f5fdbcc3f7ba8fdfb88ea20f",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-b.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-b.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-010-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "pixelSHA256RGBA": "358a123594762b4c82b3477d53993356d3711115753fd9727fedd915f48e509f",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-high-fidelity-style-board.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/moonleaf-high-fidelity-style-board-alt.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-011-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "84ab1e857c7ccab363a92395baaf7eabbbafaf8519c44833c0b164c1641ec327",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Wildwood/wildwood-codex-catalog-final.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/wildwood-codex-catalog-early.png"
+      ],
+      "themeHints": [
+        "Wildwood"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-012-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "00ae4cb8a941547589af86a8c22ac626cc0e1648225f295ecadd97d3526680a4",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-final-alt.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-series.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-013-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "pixelSHA256RGBA": "4d4a80ec64bf43689fc53545324fb10cdba16e966bae5d44b1e69a446bbadc3a",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Sunspire/sunspire-high-fidelity-style-board.png"
+      ],
+      "themeHints": [
+        "Sunspire"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-014-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "dfb2fb1f16d9b0e9302208cf6d21d57c3debcbb8f5fdbcc3f7ba8fdfb88ea20f",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-b.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-b.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-015-1536x1024.png",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "pixelSHA256RGBA": "cf65390562e14c58f0e374c55ffd6d3cc7776be499179b0d4d7548155ddbb394",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/norse-approved-board-archive-b.png"
+      ],
+      "themeHints": [],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-016-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "25bbbacfd0638e1198d9c3ef42f355d108f3d4365ff5a327994d44c4c959d23b",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-inscription-preview-final.png",
+        "04-ASSETS/90-REJECTED-BASELINES/rejected-norse-inscription-preview.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-017-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "d2c2c448626294b9a9c01661943098503d493d824f27b790e7a2614980fdd27d",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Gloamthorn/gloamthorn-codex-catalog-final.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/gloamthorn-codex-catalog-early.png"
+      ],
+      "themeHints": [
+        "Gloamthorn"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-018-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "25bbbacfd0638e1198d9c3ef42f355d108f3d4365ff5a327994d44c4c959d23b",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-inscription-preview-final.png",
+        "04-ASSETS/90-REJECTED-BASELINES/rejected-norse-inscription-preview.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-019-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "86cf97a62ef39ae6f588ab096b6b3e77d84c996bc7106bc0aee338aefe7bb200",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/90-REJECTED-BASELINES/rejected-norse-seals-screen.png"
+      ],
+      "themeHints": [],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-020-1536x1024.png",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "pixelSHA256RGBA": "5f6e075a5537942697bfc52246185478490dc890a3810e40b5c0954bb6d45a6c",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/cross-theme-production-overview.png"
+      ],
+      "themeHints": [],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-021-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "471be31293fbd6e8919280346a36ce40cb152cbe6b8c43abe7df508a7fef56d7",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/90-REJECTED-BASELINES/rejected-norse-compose-screen.png"
+      ],
+      "themeHints": [],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-022-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "7606523dac2ff17b92d9a3193764b14eb4c256182e1920e9fb49789047c708b5",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-final.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/moonleaf-codex-catalog-early.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-023-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "e993174bb8a1a80f528947d5bfa65a9a99c6898fb237a14715d71b95ad7dab72",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/90-REJECTED-BASELINES/rejected-first-dispatch-raven-medallion.png"
+      ],
+      "themeHints": [],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-024-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "8e18af39d732eea9117cd82874ed8887661105be173a135e7fd28bc431614bb9",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-tablet-detail-a.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-tablet-detail-final.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-025-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "ecd3960f1fa67dd52a41c8161241e53ed6ee7372c96ddbb75102760495df4b9a",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-compose-a.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-compose-final-a.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-026-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "979dde03419f66ca51ac82b256c385a5d2aa28156dc3a8c5fb8b41aaf69f7c5a",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/90-REJECTED-BASELINES/rejected-norse-codex-seals-screen.png"
+      ],
+      "themeHints": [],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-027-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "pixelSHA256RGBA": "a062aff628798aa9b6cc72b2b41d12a11f664ed4c5805bfcb5d0e952762932b8",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/crystal-moon-secondary-style-reference-alt.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/crystal-moon-secondary-style-reference.png"
+      ],
+      "themeHints": [],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-028-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "44b9415175e8011859d614e69e3da64a249e787a0e0e6452d0fbef1a40e9bc5e",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-compose-final-b.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-029-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "3dc24ec9a26f3b2df4f5d226bfaeecb643b08e1fc1903e3a9cd2d3fc4d5f77d0",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-a.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-a.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-030-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "7606523dac2ff17b92d9a3193764b14eb4c256182e1920e9fb49789047c708b5",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-final.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/moonleaf-codex-catalog-early.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-031-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "d2c2c448626294b9a9c01661943098503d493d824f27b790e7a2614980fdd27d",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Gloamthorn/gloamthorn-codex-catalog-final.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/gloamthorn-codex-catalog-early.png"
+      ],
+      "themeHints": [
+        "Gloamthorn"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-032-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "pixelSHA256RGBA": "de6038a37c710e1410202e3fc78348b806345f9980cd2bc62ff16987a47c65f7",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Wildwood/wildwood-high-fidelity-style-board.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/wildwood-high-fidelity-style-board-alt.png"
+      ],
+      "themeHints": [
+        "Wildwood"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-033-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "3dc24ec9a26f3b2df4f5d226bfaeecb643b08e1fc1903e3a9cd2d3fc4d5f77d0",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-a.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-a.png"
+      ],
+      "themeHints": [
+        "Moonleaf"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-034-1122x1402.png",
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "pixelSHA256RGBA": "a062aff628798aa9b6cc72b2b41d12a11f664ed4c5805bfcb5d0e952762932b8",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/crystal-moon-secondary-style-reference-alt.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/crystal-moon-secondary-style-reference.png"
+      ],
+      "themeHints": [],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-035-1536x1024.png",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "pixelSHA256RGBA": "04d083c7d80cd4acb9c75818dc9c7b328beda6e4cce593ce8cee511c683bcdf1",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Norse/norse-codex-controlling-board.png",
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Norse/norse-codex-owner-supplied-original.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/norse-approved-board-archive-a.png",
+        "04-ASSETS/02-REFERENCE-SLICES/Norse/00-approved-board.png"
+      ],
+      "themeHints": [
+        "Norse"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    },
+    {
+      "sourcePath": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-036-941x1672.png",
+      "dimensions": [
+        941,
+        1672
+      ],
+      "pixelSHA256RGBA": "6562490ba00105bcf6400414da3d02fde0c41dca746a3772848184f633237807",
+      "identicalPackageAssetPaths": [
+        "04-ASSETS/00-CONTROLLING-GOLDENS/Sunspire/sunspire-codex-catalog-final.png",
+        "04-ASSETS/01-SUPPORTING-MOCKUPS/sunspire-codex-catalog-early.png"
+      ],
+      "themeHints": [
+        "Sunspire"
+      ],
+      "mappingStatus": "MATCHED_IDENTICAL_PIXELS"
+    }
+  ]
+}

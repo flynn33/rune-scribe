@@ -177,16 +177,24 @@ final class WildwoodThemeProviderTests: XCTestCase {
         })
 
         let acceptedLayouts = descriptor.codex.relics.flatMap(\.layouts)
-        XCTAssertEqual(try canonicalSHA256(acceptedLayouts), "f8655a25003b3fa6404aa1c0c4c1d3d50513075e67cd9c444836a9bebd839096")
-        XCTAssertEqual(try canonicalSHA256(descriptor.rights), "28a9512f8217d88988b96ac46a816d7272004996563c0b0c9c74c04c7a8fdb67")
-        XCTAssertEqual(descriptor.rights.count, 14)
-        XCTAssertTrue(descriptor.rights.allSatisfy {
+        XCTAssertEqual(try canonicalSHA256(acceptedLayouts), "70bc7f08db68f15d444983e6a8f2244505608e66e8d3ddf08be87ce037940e7e")
+        XCTAssertEqual(try canonicalSHA256(descriptor.rights), "20db4632926c43f563f1aab9682b45fe7fc44a475aeab1ff4db9c1fa793bb8f7")
+        XCTAssertEqual(descriptor.rights.count, 15)
+        let acceptedMasterRightsID = ThemeProvenanceID(
+            rawValue: "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json"
+        )!
+        XCTAssertTrue(descriptor.rights.filter { $0.id != acceptedMasterRightsID }.allSatisfy {
             $0.creationDate == "2026-08-21"
                 && $0.origin == .derived
                 && $0.rightsOwner == "Raven Forge Software"
                 && $0.licenseNotice
                     == "Owner-supplied proprietary source and approved recovery authority"
         })
+        let acceptedMasterRights = try XCTUnwrap(
+            descriptor.rights.first { $0.id == acceptedMasterRightsID }
+        )
+        XCTAssertEqual(acceptedMasterRights.creationDate, "2026-08-27")
+        XCTAssertTrue(acceptedMasterRights.exportSettings.contains("\"ownerReview\":\"PENDING\""))
         let scriptRights = try XCTUnwrap(descriptor.rights.first { $0.id == script.rightsID })
         XCTAssertEqual(scriptRights.id.rawValue, "prov.Source.Masters.Glyphs.wildwood.glyph.master.json")
         XCTAssertNotEqual(scriptRights.id.rawValue, scriptRights.id.rawValue.lowercased())
@@ -197,12 +205,20 @@ final class WildwoodThemeProviderTests: XCTestCase {
         XCTAssertEqual(descriptor.codex.relics.count, 3)
         XCTAssertEqual(descriptor.codex.seals.count, 6)
         XCTAssertEqual(descriptor.codex.frames.count, 1)
+        XCTAssertEqual(
+            descriptor.codex.frames.only?.thumbnailResourceID?.rawValue,
+            "resource.frame.wildwood.living-root.output.frame-thumbnail"
+        )
         XCTAssertEqual(descriptor.codex.crests.count, 1)
         XCTAssertEqual(descriptor.codex.relics.filter { $0.isDefault }.count, 1)
         XCTAssertNil(descriptor.codex.background.optionalMotionResourceID)
         XCTAssertFalse(descriptor.codex.background.parallaxAllowed)
-        XCTAssertEqual(WildwoodThemeResourceCatalog.productionDefinitions.count, 46)
-        XCTAssertEqual(descriptor.resources.count, 47)
+        XCTAssertEqual(WildwoodThemeResourceCatalog.productionDefinitions.count, 60)
+        XCTAssertEqual(descriptor.resources.count, 61)
+        XCTAssertEqual(descriptor.codex.seals.compactMap(\.colorResourceID).count, 6)
+        XCTAssertTrue(descriptor.codex.seals.allSatisfy {
+            $0.colorResourceID == Optional($0.standardResourceID)
+        })
         XCTAssertTrue(descriptor.resources.allSatisfy { $0.requirement == .required })
         let localization = try XCTUnwrap(
             JSONSerialization.jsonObject(
@@ -249,7 +265,7 @@ final class WildwoodThemeProviderTests: XCTestCase {
 
         let integrityURL = try XCTUnwrap(bundle.url(forResource: "Resource-Integrity-Manifest-v1.0", withExtension: "json"))
         let integrityData = try Data(contentsOf: integrityURL)
-        XCTAssertEqual(sha256Hex(integrityData), "f41665d69e3034bd8df8cf60954a5e7fa338a144384116fac2a4ca8b71b6c8f8")
+        XCTAssertEqual(sha256Hex(integrityData), WildwoodV43ResourcePins.integrityManifestSHA256Hex)
         XCTAssertTrue(WildwoodThemeResourceCatalog.validateIntegrityManifest(integrityData))
 
         var shippingBytes = 0
@@ -265,7 +281,39 @@ final class WildwoodThemeProviderTests: XCTestCase {
             XCTAssertLessThanOrEqual(data.count, definition.maximumByteCount)
             XCTAssertEqual(sha256Hex(data), definition.sha256Hex)
         }
-        XCTAssertEqual(shippingBytes, 697897)
+        XCTAssertEqual(shippingBytes, WildwoodV43ResourcePins.productionShippingByteCount)
+    }
+
+    func testV43RoleCoverageAndExternalProvenance() throws {
+        let definitions = WildwoodThemeResourceCatalog.productionDefinitions
+        let roles = Set(definitions.map { $0.role.rawValue })
+        XCTAssertTrue(Set([
+            "background.macos-wide-crop", "panel.card-border", "panel.corner-ornament",
+            "panel.divider", "panel.primary-button", "panel.tab-selector",
+            "script.specimen-high-contrast", "vault.unavailable",
+        ]).isSubset(of: roles))
+        XCTAssertEqual(definitions.filter { $0.role.rawValue == "relic.master" }.count, 3)
+        XCTAssertTrue(definitions.filter { $0.role.rawValue == "relic.master" }.allSatisfy {
+            max($0.pixelWidth ?? 0, $0.pixelHeight ?? 0) >= 1_600 && $0.mediaType == .png
+        })
+        XCTAssertTrue(definitions.filter { $0.role.rawValue == "seal.thumbnail" }.allSatisfy {
+            $0.pixelWidth == 512 && $0.pixelHeight == 512 && $0.mediaType == .png
+        })
+        XCTAssertFalse(definitions.contains { $0.mediaType == .heif })
+
+        let packageRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        let provenanceURL = packageRoot.deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("docs/verification/theme-fidelity-v4-3/inventory/Wildwood-Production-Asset-Provenance-v4.3.json")
+        let provenance = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: provenanceURL)) as? [String: Any]
+        )
+        XCTAssertEqual(provenance["theme"] as? String, "Wildwood")
+        XCTAssertEqual((provenance["outputs"] as? [[String: Any]])?.count, definitions.count)
+        XCTAssertEqual(
+            (provenance["targetScaleReview"] as? [String: Any])?["ownerReview"] as? String,
+            "PENDING"
+        )
     }
 
     func testLockedDiscoveryPublishesPreviewResourcesAndRestartsSafely() async throws {
@@ -326,23 +374,60 @@ final class WildwoodThemeProviderTests: XCTestCase {
         await runtime.stop()
     }
 
-    func testResourceFailuresRemainIsolatedFromTheRequiredUI() async throws {
-        let first = try XCTUnwrap(WildwoodThemeResourceCatalog.productionDefinitions.first)
+    func testDeferredResourceFailuresRemainIsolatedFromTheRequiredUI() async throws {
+        let target = try XCTUnwrap(WildwoodThemeResourceCatalog.productionDefinitions.first)
+        let handle = OpaqueResourceHandle(
+            namespace: RuntimeThemeContributionCatalog.resourceNamespace(
+                for: RuneScribeThemeWildwoodModuleBootstrap.codexID
+            ),
+            resourceID: OpaqueResourceID(rawValue: target.id.rawValue)
+        )
         for mode in WildwoodThemeBundleLocator.Mode.failureModes {
-            let runtime = try await makeRuntime(locator: WildwoodThemeBundleLocator(mode: mode, target: first.resource, targetMaximumBytes: first.maximumByteCount))
+            let probe = WildwoodThemeReaderProbe()
+            let runtime = try await makeRuntime(locator: WildwoodThemeBundleLocator(
+                mode: mode,
+                target: target.resource,
+                targetMaximumBytes: target.maximumByteCount
+            ))
             try await RuneScribeThemeWildwoodModuleBootstrap.register(with: runtime)
-            try await registerUI(with: runtime, suffix: mode.rawValue)
+            try await registerReaderAndUI(with: runtime, probe: probe)
             try await runtime.start()
             try await runtime.reconcileEntitlements(try entitlementSnapshot())
-            let snapshot = await runtime.snapshot()
+            var snapshot = await runtime.snapshot()
             XCTAssertEqual(snapshot.status, .running, "mode=\(mode.rawValue)")
-            XCTAssertEqual(snapshot.moduleStates[RuneScribeThemeWildwoodModuleBootstrap.moduleID], .failed, "mode=\(mode.rawValue)")
-            XCTAssertEqual(snapshot.moduleStates[uiModuleID(suffix: mode.rawValue)], .active, "mode=\(mode.rawValue)")
+            XCTAssertEqual(snapshot.moduleStates[RuneScribeThemeWildwoodModuleBootstrap.moduleID], .active, "mode=\(mode.rawValue)")
+            XCTAssertEqual(snapshot.moduleStates[uiModuleID(suffix: "publication")], .active, "mode=\(mode.rawValue)")
+            let deferredResources = try await probe.resourceSnapshot()
+            XCTAssertTrue(
+                deferredResources.resources.contains { $0.handle == handle },
+                "mode=\(mode.rawValue)"
+            )
+
+            do {
+                _ = try await probe.resolve(handle)
+                XCTFail("Deferred required resource must fail closed for mode=\(mode.rawValue)")
+            } catch let failure as RuntimeVerifiedApplicationResourceFailure {
+                switch (mode, failure) {
+                case (.missing, .resourceUnavailable), (.overBudget, .contentTooLarge):
+                    break
+                case (.corrupt, .integrityMismatch(_, let actualByteCount)):
+                    XCTAssertEqual(actualByteCount, 1)
+                case (.wrongHash, .integrityMismatch(_, let actualByteCount)):
+                    XCTAssertEqual(actualByteCount, target.byteCount)
+                default:
+                    XCTFail("Unexpected deferred failure \(failure) for mode=\(mode.rawValue)")
+                }
+            }
+
+            snapshot = await runtime.snapshot()
+            XCTAssertEqual(snapshot.status, .running, "mode=\(mode.rawValue)")
+            XCTAssertEqual(snapshot.moduleStates[RuneScribeThemeWildwoodModuleBootstrap.moduleID], .active, "mode=\(mode.rawValue)")
+            XCTAssertEqual(snapshot.moduleStates[uiModuleID(suffix: "publication")], .active, "mode=\(mode.rawValue)")
             await runtime.stop()
         }
     }
 
-    func testThemeCoordinatorActivatesLiveAndPreservesOwnedPreferenceDuringProviderFailure()
+    func testThemeCoordinatorRestoresOwnedPreferenceAndDeferredCorruptionFailsClosed()
         async throws
     {
         let store = InMemoryModuleStateStore(
@@ -419,17 +504,37 @@ final class WildwoodThemeProviderTests: XCTestCase {
                     $0.codexID == RuneScribeThemeWildwoodModuleBootstrap.codexID
                         && $0.isOwned
                         && !$0.isSelectable
+                        && $0.state == .invalidResources
                 }
         }
-        XCTAssertEqual(fallback.fallbackReason, .unavailable)
+        XCTAssertEqual(fallback.fallbackReason, .invalidResources)
         XCTAssertEqual(fallback.effectiveTheme.codex.id, RuneScribeCodexIDs.norse)
         let failedSnapshot = await failedRuntime.snapshot()
         XCTAssertEqual(
             failedSnapshot.moduleStates[RuneScribeThemeWildwoodModuleBootstrap.moduleID],
-            .failed
+            .active
         )
         XCTAssertEqual(failedSnapshot.moduleStates[RuneScribeModuleIDs.norseTheme], .active)
         XCTAssertEqual(failedSnapshot.moduleStates[RuneScribeModuleIDs.themeCoordinator], .active)
+
+        let failedRequest = ResolveThemeResourceRequestDTO(
+            codexID: RuneScribeThemeWildwoodModuleBootstrap.codexID,
+            resourceID: target.id
+        )
+        do {
+            _ = try await failedProbe.resolve(failedRequest)
+            XCTFail("Deferred corrupt resource must not be returned by the coordinator.")
+        } catch let failure as ThemeCoordinatorModuleError {
+            XCTAssertEqual(failure, .resourceUnavailable(failedRequest))
+        }
+
+        let afterFailure = try await failedProbe.snapshot()
+        XCTAssertEqual(
+            afterFailure.preferredCodexID,
+            RuneScribeThemeWildwoodModuleBootstrap.codexID
+        )
+        XCTAssertEqual(afterFailure.effectiveCodexID, RuneScribeCodexIDs.norse)
+        XCTAssertEqual(afterFailure.fallbackReason, .invalidResources)
         await failedRuntime.stop()
     }
 
@@ -444,7 +549,7 @@ final class WildwoodThemeProviderTests: XCTestCase {
             at: sourceDirectory,
             includingPropertiesForKeys: nil
         ).filter { $0.pathExtension == "swift" }
-        XCTAssertEqual(sourceURLs.count, 3)
+        XCTAssertEqual(sourceURLs.count, 4)
         for sourceURL in sourceURLs {
             let source = try String(contentsOf: sourceURL, encoding: .utf8)
             XCTAssertFalse(source.contains("Progression"), sourceURL.lastPathComponent)
@@ -771,6 +876,11 @@ private actor WildwoodThemeCoordinatorProbe {
     func resolve(_ request: ResolveThemeResourceRequestDTO) async throws -> ResolvedThemeResourceDTO {
         guard let client else { throw WildwoodThemeTestError.missingProbeClient }
         return try await client.resolveResource(request)
+    }
+
+    func snapshot() async throws -> ThemeCoordinatorSnapshotDTO {
+        guard let client else { throw WildwoodThemeTestError.missingProbeClient }
+        return try await client.snapshot()
     }
 
     func waitForSnapshot(

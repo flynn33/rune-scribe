@@ -5,6 +5,7 @@ import Foundation
 @_spi(RuntimeOperationAuthority) import RuneScribeContracts
 import RuneScribeNorseThemeModule
 import RuneScribeThemeGloamthornModule
+import RuneScribeThemeMoonleafModule
 @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
 import RuneScribeThemeCoordinatorModule
@@ -990,6 +991,365 @@ final class RuneScribeUISessionTests: XCTestCase {
         await runtime.stop()
     }
 
+    func testShareBuilderLoadsDedicatedOptionalFrameThumbnail() async throws {
+        let (session, runtime) = try await makeThemeVisualSession(
+            includeMoonleafProvider: true
+        )
+        defer { Task { await runtime.stop() } }
+
+        try await session.prepareInitialTheme()
+        try session.start()
+        try await runtime.reconcileEntitlements(
+            ProgressionEntitlementSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 10_000),
+                includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                earnedUnlockIDs: [RuneScribeThemeMoonleafModuleBootstrap.unlockID]
+            )
+        )
+        let providerAvailable = await eventually(attempts: 2_000) {
+            session.themeSnapshot?.providers.contains(where: {
+                $0.codexID == RuneScribeThemeMoonleafModuleBootstrap.codexID
+                    && $0.state == .available
+                    && $0.isOwned
+            }) == true
+        }
+        XCTAssertTrue(providerAvailable)
+
+        let catalog = try await session.loadShareBuilderCatalog(
+            codexID: RuneScribeThemeMoonleafModuleBootstrap.codexID
+        )
+        let frame = try XCTUnwrap(catalog.descriptor.codex.frames.first)
+        let thumbnailResourceID = try XCTUnwrap(frame.thumbnailResourceID)
+        let artwork = await session.loadShareBuilderArtwork(for: catalog)
+        let reference = try XCTUnwrap(artwork[frame.metadata.id])
+
+        XCTAssertEqual(reference.resourceID, thumbnailResourceID)
+        XCTAssertEqual(reference.role, ThemeResourceRoles.frameThumbnail)
+        XCTAssertNotEqual(reference.resourceID, frame.staticFallbackResourceID)
+    }
+
+    func testReceivedCipherBindsIncomingCodexWithoutChangingGlobalSelection()
+        async throws
+    {
+        let (session, runtime) = try await makeThemeVisualSession(
+            includeMoonleafProvider: true
+        )
+        defer { Task { await runtime.stop() } }
+
+        try await session.prepareInitialTheme()
+        try session.start()
+        try await runtime.reconcileEntitlements(
+            ProgressionEntitlementSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 10_000),
+                includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                earnedUnlockIDs: [RuneScribeThemeMoonleafModuleBootstrap.unlockID]
+            )
+        )
+        let providerAvailable = await eventually(attempts: 2_000) {
+            session.themeSnapshot?.providers.contains(where: {
+                $0.codexID == RuneScribeThemeMoonleafModuleBootstrap.codexID
+                    && $0.state == .available
+                    && $0.isOwned
+                    && !$0.isSelected
+            }) == true
+        }
+        XCTAssertTrue(providerAvailable)
+
+        let globalSnapshot = try XCTUnwrap(session.themeSnapshot)
+        let globalPresentation = try XCTUnwrap(session.activeThemeVisualPresentation)
+        XCTAssertEqual(globalSnapshot.effectiveCodexID, RuneScribeCodexIDs.norse)
+        XCTAssertEqual(globalPresentation.plan.codexID, RuneScribeCodexIDs.norse)
+
+        let descriptor = RuneScribeThemeMoonleafModuleBootstrap.discoveryDescriptor
+        let selection = try SharePresentationSelection(
+            codexID: descriptor.codex.id,
+            scriptID: descriptor.codex.primaryScriptID,
+            relicID: descriptor.codex.defaultRelicID,
+            sealID: descriptor.codex.seals.first(where: {
+                $0.metadata.availability != .reservedInactive
+            })?.metadata.id
+        )
+        let receivedPresentation = try ReceivedSharePresentation(
+            requestedSelection: selection,
+            effectiveCodexID: descriptor.codex.id,
+            providerAvailability: .available,
+            renderMode: .requestedCodex,
+            safePreviewStatus: .absent,
+            provenanceStatus: .verified,
+            encounterRecordingStatus: .recorded
+        )
+        let pending = PendingMessageViewState(
+            try ReceivedMessageDTO(
+                id: MessageID(rawValue: UUID()),
+                receivedAt: Date(timeIntervalSince1970: 1_000),
+                plaintext: "Meet beneath the silver bough at moonrise.",
+                senderName: "Lunawen",
+                cipherID: CipherID(rawValue: UUID()),
+                cipherName: "Moonrise Meeting",
+                presentation: receivedPresentation,
+                safePreviewData: nil
+            ),
+            themeSnapshot: globalSnapshot
+        )
+        XCTAssertEqual(pending.presentation?.providerAvailability, .available)
+
+        try await session.prepareActiveReceivedCipherPresentation(
+            pending: pending,
+            state: .primary,
+            reduceMotion: false
+        )
+        let binding = try XCTUnwrap(
+            session.activeReceivedCipherPresentationBinding(
+                pending: pending,
+                state: .primary,
+                relativeDate: Date(timeIntervalSince1970: 10_100),
+                reduceMotion: false
+            )
+        )
+
+        XCTAssertEqual(binding.content.descriptor.codex.id, descriptor.codex.id)
+        XCTAssertEqual(binding.receivedAt, pending.receivedAt)
+        XCTAssertEqual(binding.content.plan.selection, selection)
+        XCTAssertEqual(binding.presentation.plan.codexID, descriptor.codex.id)
+        XCTAssertTrue(binding.content.requiredImageResourceIDs.allSatisfy {
+            binding.presentation.image(for: $0) != nil
+        })
+        XCTAssertEqual(session.themeSnapshot?.effectiveCodexID, RuneScribeCodexIDs.norse)
+        XCTAssertEqual(session.themeSnapshot?.revision, globalSnapshot.revision)
+        XCTAssertEqual(
+            session.activeThemeVisualPresentation?.revision,
+            globalPresentation.revision
+        )
+        XCTAssertEqual(
+            session.activeThemeVisualPresentation?.plan,
+            globalPresentation.plan
+        )
+
+        let changedPlaintext = "Meet beneath the amber bough at sunrise."
+        let changedPending = PendingMessageViewState(
+            try ReceivedMessageDTO(
+                id: pending.id,
+                receivedAt: pending.receivedAt,
+                plaintext: changedPlaintext,
+                senderName: pending.senderName,
+                cipherID: CipherID(rawValue: pending.cipherID),
+                cipherName: pending.cipherName,
+                senderIdentityStatus: .confirmedCipher,
+                presentation: receivedPresentation,
+                safePreviewData: nil
+            ),
+            themeSnapshot: globalSnapshot
+        )
+        XCTAssertNil(session.activeReceivedCipherPresentationBinding(
+            pending: changedPending,
+            state: .primary,
+            relativeDate: Date(timeIntervalSince1970: 10_100),
+            reduceMotion: false
+        ))
+        try await session.prepareActiveReceivedCipherPresentation(
+            pending: changedPending,
+            state: .primary,
+            reduceMotion: false
+        )
+        let changedBinding = try XCTUnwrap(
+            session.activeReceivedCipherPresentationBinding(
+                pending: changedPending,
+                state: .primary,
+                relativeDate: Date(timeIntervalSince1970: 10_100),
+                reduceMotion: false
+            )
+        )
+        XCTAssertEqual(
+            changedBinding.content.plan.pages.first?.inscription
+                .replacingOccurrences(of: "\n", with: ""),
+            changedPlaintext
+        )
+        XCTAssertNil(session.activeReceivedCipherPresentationBinding(
+            pending: changedPending,
+            state: .primary,
+            relativeDate: Date(timeIntervalSince1970: 10_100),
+            reduceMotion: true
+        ))
+        try await session.prepareActiveReceivedCipherPresentation(
+            pending: changedPending,
+            state: .primary,
+            reduceMotion: true
+        )
+        XCTAssertNotNil(session.activeReceivedCipherPresentationBinding(
+            pending: changedPending,
+            state: .primary,
+            relativeDate: Date(timeIntervalSince1970: 10_100),
+            reduceMotion: true
+        ))
+
+        await session.stop()
+        await runtime.stop()
+    }
+
+    func testReceivedCipherTruthfullyDowngradesUnavailableProviderPresentation()
+        async throws
+    {
+        let (session, runtime) = try await makeThemeVisualSession()
+        defer { Task { await runtime.stop() } }
+
+        try await session.prepareInitialTheme()
+        try session.start()
+        try await runtime.reconcileEntitlements(
+            ProgressionEntitlementSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 10_000),
+                includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                earnedUnlockIDs: [RuneScribeThemeGloamthornModuleBootstrap.unlockID]
+            )
+        )
+        let providerAvailable = await eventually(attempts: 2_000) {
+            session.themeSnapshot?.providers.contains(where: {
+                $0.codexID == RuneScribeThemeGloamthornModuleBootstrap.codexID
+                    && $0.state == .available
+                    && !$0.isSelected
+            }) == true
+        }
+        XCTAssertTrue(providerAvailable)
+
+        let descriptor = RuneScribeThemeGloamthornModuleBootstrap.discoveryDescriptor
+        XCTAssertNil(descriptor.codex.receivedPresentation)
+        let selection = try SharePresentationSelection(
+            codexID: descriptor.codex.id,
+            scriptID: descriptor.codex.primaryScriptID,
+            relicID: descriptor.codex.defaultRelicID
+        )
+        let receivedPresentation = try ReceivedSharePresentation(
+            requestedSelection: selection,
+            effectiveCodexID: descriptor.codex.id,
+            providerAvailability: .available,
+            renderMode: .requestedCodex,
+            safePreviewStatus: .valid,
+            provenanceStatus: .verified,
+            encounterRecordingStatus: .recorded
+        )
+        let message = try ReceivedMessageDTO(
+            id: MessageID(rawValue: UUID()),
+            receivedAt: Date(timeIntervalSince1970: 1_000),
+            plaintext: "The dusk path is clear.",
+            senderName: "Thornwarden",
+            cipherID: CipherID(rawValue: UUID()),
+            cipherName: "Dusk Path",
+            presentation: receivedPresentation,
+            safePreviewData: Data([0x89, 0x50, 0x4e, 0x47])
+        )
+        let pending = PendingMessageViewState(
+            message,
+            themeSnapshot: try XCTUnwrap(session.themeSnapshot)
+        )
+
+        do {
+            try await session.prepareActiveReceivedCipherPresentation(
+                pending: pending,
+                state: .primary,
+                reduceMotion: false
+            )
+            XCTFail("A provider without received-presentation authority must downgrade")
+        } catch {
+            XCTAssertEqual(error as? ThemePresentationResourceError, .identityMismatch)
+        }
+        guard case .downgraded(let downgrade) =
+            session.receivedCipherPresentationLoadState
+        else {
+            return XCTFail("Expected a received presentation downgrade")
+        }
+        XCTAssertEqual(downgrade.providerAvailability, .corrupt)
+        let downgradedPending = session.receivedCipherPendingMessage(message)
+        XCTAssertEqual(
+            downgradedPending.presentation?.providerAvailability,
+            .corrupt
+        )
+        XCTAssertEqual(
+            downgradedPending.presentation?.renderMode,
+            .norseInteractiveFallback
+        )
+        XCTAssertNil(
+            session.activeReceivedCipherPresentationBinding(
+                pending: downgradedPending,
+                state: .primary,
+                relativeDate: Date(timeIntervalSince1970: 10_100),
+                reduceMotion: false
+            )
+        )
+        XCTAssertEqual(session.themeSnapshot?.effectiveCodexID, RuneScribeCodexIDs.norse)
+
+        await session.stop()
+        await runtime.stop()
+    }
+
+    func testThemeSwitchReloadsSettingsCodexPreviewsWithoutReappearance() async throws {
+        let (session, runtime) = try await makeThemeVisualSession()
+        defer { Task { await runtime.stop() } }
+
+        try await session.prepareInitialTheme()
+        try session.start()
+        try await runtime.reconcileEntitlements(
+            ProgressionEntitlementSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 10_000),
+                includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                earnedUnlockIDs: [RuneScribeThemeGloamthornModuleBootstrap.unlockID]
+            )
+        )
+        let providerAvailable = await eventually(attempts: 2_000) {
+            session.themeSnapshot?.providers.contains(where: {
+                $0.codexID == RuneScribeThemeGloamthornModuleBootstrap.codexID
+                    && $0.state == .available
+                    && $0.isOwned
+                    && $0.isSelectable
+            }) == true
+        }
+        XCTAssertTrue(providerAvailable)
+
+        await session.selectCodex(RuneScribeThemeGloamthornModuleBootstrap.codexID)
+        let switchedPreviewsLoaded = await eventually(attempts: 2_000) {
+            guard session.themeSnapshot?.effectiveCodexID
+                    == RuneScribeThemeGloamthornModuleBootstrap.codexID,
+                  let presentation = session.activeThemeVisualPresentation,
+                  presentation.plan.codexID
+                    == RuneScribeThemeGloamthornModuleBootstrap.codexID,
+                  let selected = session.themeCodexCardImageReferences[
+                    RuneScribeThemeGloamthornModuleBootstrap.codexID
+                  ],
+                  let inactive = session.themeCodexCardImageReferences[
+                    RuneScribeCodexIDs.norse
+                  ]
+            else { return false }
+            return selected.role == presentation.plan.codex.selected.role
+                && inactive.role == ThemeResourceRoles.vaultCard
+                && selected.contentRevision == presentation.revision
+                && inactive.contentRevision == presentation.revision
+        }
+        XCTAssertTrue(
+            switchedPreviewsLoaded,
+            "Switching providers must refresh every Settings Codex card without reopening Settings."
+        )
+
+        await session.stop()
+        await runtime.stop()
+    }
+
+    func testOutboundShareResourcePurposeTracksActiveVisualAuthority() {
+        XCTAssertEqual(
+            RuneScribeUISession.outboundShareResourceResolutionPurpose(
+                usesActiveVisualAuthority: true
+            ),
+            .activePresentation
+        )
+        XCTAssertEqual(
+            RuneScribeUISession.outboundShareResourceResolutionPurpose(
+                usesActiveVisualAuthority: false
+            ),
+            .shareRendering
+        )
+    }
+
     func testThemeVisualAdoptionIsAtomicAcrossArtifactAndProviderChanges() async throws {
         let capture = ThemeVisualSessionClientCapture()
         let quickShareArtifactID = ShareArtifactID(
@@ -1008,7 +1368,7 @@ final class RuneScribeUISessionTests: XCTestCase {
             preparedMessageArtifact: quickShareArtifact
         )
         let runtime = RuneScribeRuntime(
-            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 39),
+            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 40),
             platform: .macOS
         )
         let norseFontURL = try XCTUnwrap(
@@ -1023,7 +1383,6 @@ final class RuneScribeUISessionTests: XCTestCase {
                 withExtension: "ttf"
             )
         )
-
         try await runtime.installPlatformAdapter(
             ThemeVisualApplicationResources(),
             for: RuneScribeServiceKeys.applicationResourceLocator
@@ -1079,8 +1438,8 @@ final class RuneScribeUISessionTests: XCTestCase {
                 metalLibrary: nil
             ),
             productMetadata: RuneScribeUIProductMetadata(
-                version: "1.0.39",
-                buildNumber: "39"
+                version: "1.0.40",
+                buildNumber: "40"
             )
         )
         try await session.prepareInitialTheme()
@@ -1121,6 +1480,17 @@ final class RuneScribeUISessionTests: XCTestCase {
         ]
         for imagePlan in eagerImagePlans {
             XCTAssertNotNil(initial.imageReference(for: imagePlan), imagePlan.id.rawValue)
+        }
+        for deferredCodexState in [
+            initial.plan.codex.card,
+            initial.plan.codex.locked,
+            initial.plan.codex.encountered,
+            initial.plan.codex.unavailable,
+        ] {
+            XCTAssertNil(
+                initial.imageReference(for: deferredCodexState),
+                deferredCodexState.id.rawValue
+            )
         }
         XCTAssertEqual(Set(initial.plan.script.images.map(\.id.rawValue)), [
             "resource.script.norse.specimen.standard",
@@ -1314,7 +1684,10 @@ final class RuneScribeUISessionTests: XCTestCase {
                         && $0.contentRevision == presentation.revision
                 }
         }
-        XCTAssertTrue(alternateProviderAdopted)
+        XCTAssertTrue(
+            alternateProviderAdopted,
+            session.themeSelectionError ?? "Alternate provider adoption did not settle."
+        )
 
         var latestDefaults = try session.makeShareBuilderCatalog()
         try latestDefaults.selectSeal(nil)
@@ -1948,8 +2321,20 @@ final class RuneScribeUISessionTests: XCTestCase {
             to: "    @ViewBuilder\n    private var automaticShareLauncher: some View {"
         )
         XCTAssertTrue(action.contains("beginSharePreparation()"))
+        XCTAssertTrue(action.contains(".disabled(!isShareReady"))
         XCTAssertFalse(action.contains("prepareMessageShare"))
         XCTAssertFalse(action.contains("prepareCipherShare"))
+
+        let readiness = try sourceSection(
+            viewSource,
+            from: "    private var isShareReady: Bool {",
+            to: "    private var shareColorMode: ShareArtifactColorMode {"
+        )
+        XCTAssertTrue(readiness.contains("renderedPreviewImage != nil"))
+        XCTAssertTrue(readiness.contains("renderedPreview.matches("))
+        XCTAssertTrue(readiness.contains("themeRevision: themeRevision"))
+        XCTAssertTrue(readiness.contains("colorMode: shareColorMode"))
+        XCTAssertTrue(readiness.contains("systemReduceMotion: effectiveReduceMotion"))
 
         let preparation = try sourceSection(
             viewSource,
@@ -1985,15 +2370,210 @@ final class RuneScribeUISessionTests: XCTestCase {
                 to: createsLaunchToken.lowerBound
             )
         )
+        XCTAssertGreaterThanOrEqual(
+            preparation.components(
+                separatedBy: "sharePreparationGeneration.accepts(generation)"
+            ).count - 1,
+            4,
+            "Every post-suspension success and error path must reject stale preparation state"
+        )
 
         let launcher = try sourceSection(
             viewSource,
             from: "    @ViewBuilder\n    private var automaticShareLauncher: some View {",
-            to: "    private func markSharePresented() {"
+            to: "    private func markSharePresented("
         )
         XCTAssertTrue(launcher.contains("case .file:"))
         XCTAssertTrue(launcher.contains("RuneScribePreparedFileShareLauncher("))
         XCTAssertTrue(launcher.contains("transfer: preparedShare.transfer"))
+        XCTAssertTrue(launcher.contains("isPreparedShareAuthorized("))
+        XCTAssertTrue(launcher.contains("artifactID: preparedShare.artifact.id"))
+
+        let artifactMenu = try sourceSection(
+            viewSource,
+            from: "    private func artifactMenu(",
+            to: "    private func artifactThumbnail("
+        )
+        XCTAssertTrue(artifactMenu.contains(".disabled(isShareSelectionLocked)"))
+        XCTAssertTrue(viewSource.contains(".disabled(isShareSelectionLocked)\n"))
+        let catalogMutation = try sourceSection(
+            viewSource,
+            from: "    private func mutateCatalog(",
+            to: "    private func refreshPreview()"
+        )
+        XCTAssertTrue(
+            catalogMutation.contains(
+                "guard !isShareSelectionLocked, var updated = catalog else { return }"
+            )
+        )
+
+        let initialCatalogLoad = try sourceSection(
+            viewSource,
+            from: "    private func beginInitialCatalogLoad() {",
+            to: "    private func beginCodexSelection("
+        )
+        XCTAssertTrue(initialCatalogLoad.contains("ShareBuilderCatalogLoadToken"))
+        XCTAssertTrue(initialCatalogLoad.contains("catalogLoadTask = Task { @MainActor in"))
+        XCTAssertTrue(initialCatalogLoad.contains("await loadInitialCatalog(token: token)"))
+        XCTAssertGreaterThanOrEqual(
+            initialCatalogLoad.components(separatedBy: "acceptsCatalogLoad(token)").count - 1,
+            4
+        )
+        XCTAssertGreaterThanOrEqual(
+            initialCatalogLoad.components(separatedBy: "try Task.checkCancellation()").count - 1,
+            2
+        )
+        XCTAssertTrue(
+            initialCatalogLoad.contains(
+                "initialAuthority.coordinatorRevision == token.themeRevision"
+            )
+        )
+        XCTAssertTrue(
+            initialCatalogLoad.contains(
+                "session.shareBuilderThemeAuthorityRevision(for: loaded)"
+            )
+        )
+
+        let catalogLoad = try sourceSection(
+            viewSource,
+            from: "    private func beginCodexSelection(",
+            to: "    private func beginThemeSnapshotReconciliation("
+        )
+        XCTAssertTrue(catalogLoad.contains("ShareBuilderCatalogLoadToken"))
+        XCTAssertTrue(catalogLoad.contains("catalogLoadGeneration.accepts("))
+        XCTAssertGreaterThanOrEqual(
+            catalogLoad.components(separatedBy: "acceptsCatalogLoad(token)").count - 1,
+            3
+        )
+        XCTAssertGreaterThanOrEqual(
+            catalogLoad.components(separatedBy: "try Task.checkCancellation()").count - 1,
+            2
+        )
+
+        let reconciliation = try sourceSection(
+            viewSource,
+            from: "    private func beginThemeSnapshotReconciliation(",
+            to: "    private func reconcileThemeSnapshotChange("
+        )
+        XCTAssertTrue(
+            reconciliation.contains("invalidatePreparedShareForPresentationChange()")
+        )
+        XCTAssertTrue(reconciliation.contains("invalidateCatalogLoad()"))
+        XCTAssertTrue(reconciliation.contains("beginInitialCatalogLoad()"))
+        let invalidation = try sourceSection(
+            viewSource,
+            from: "    private func invalidatePreparedShareForPresentationChange() {",
+            to: "    private var shareColorMode: ShareArtifactColorMode {"
+        )
+        for statement in [
+            "invalidatedShareGeneration.invalidate()",
+            "inFlightPreparation?.cancel()",
+            "preparedShare = nil",
+            "shareLaunchID = nil",
+            "await inFlightPreparation?.value",
+            "await prepared.transfer.close()",
+            "await session.releaseShareArtifact(id: prepared.artifact.id)",
+        ] {
+            XCTAssertTrue(invalidation.contains(statement), statement)
+        }
+        let selectionLock = try sourceSection(
+            viewSource,
+            from: "    private var isShareSelectionLocked: Bool {",
+            to: "    private var shareActionTitle: String {"
+        )
+        XCTAssertTrue(selectionLock.contains("isSaving"))
+        XCTAssertTrue(selectionLock.contains("isPreparingShare"))
+        XCTAssertTrue(selectionLock.contains("preparedShare != nil"))
+        XCTAssertTrue(selectionLock.contains("shareTerminalGeneration.isActive"))
+
+        let saveFlow = try sourceSection(
+            viewSource,
+            from: "    private func beginSaveDefaults() {",
+            to: "    private func beginSharePreparation() {"
+        )
+        XCTAssertTrue(saveFlow.contains("saveGeneration.accepts(generation)"))
+        XCTAssertTrue(saveFlow.contains("try Task.checkCancellation()"))
+        XCTAssertTrue(saveFlow.contains("self.catalog?.draft == catalog.draft"))
+
+        let completionFlow = try sourceSection(
+            viewSource,
+            from: "    private func handleShareCompletion(",
+            to: "    private func endLifecycle() {"
+        )
+        XCTAssertTrue(completionFlow.contains("updatedTerminalGeneration.begin()"))
+        XCTAssertTrue(completionFlow.contains("finishShareBuilderArtifact("))
+        XCTAssertTrue(completionFlow.contains("complete(generation)"))
+        XCTAssertTrue(completionFlow.contains("guard isViewActive else { return }"))
+
+        let lifecycleEnd = try sourceSection(
+            viewSource,
+            from: "    private func endLifecycle() {",
+            to: "    private var isShareReady: Bool {"
+        )
+        XCTAssertTrue(lifecycleEnd.contains("await terminalCompletion?.value"))
+        XCTAssertTrue(lifecycleEnd.contains("await inFlightCatalogLoad?.value"))
+
+        let canonicalCatalogLoad = try sourceSection(
+            sessionSource,
+            from: "    func loadShareBuilderCatalog(",
+            to: "    func loadShareBuilderArtwork("
+        )
+        let providerDescriptorLoad = try XCTUnwrap(
+            canonicalCatalogLoad.range(of: "providerDescriptor(for: codexID)")
+        )
+        let revisionRecheck = try XCTUnwrap(
+            canonicalCatalogLoad.range(of: "themeSnapshot?.revision == snapshot.revision")
+        )
+        XCTAssertLessThan(
+            canonicalCatalogLoad.distance(
+                from: canonicalCatalogLoad.startIndex,
+                to: providerDescriptorLoad.lowerBound
+            ),
+            canonicalCatalogLoad.distance(
+                from: canonicalCatalogLoad.startIndex,
+                to: revisionRecheck.lowerBound
+            )
+        )
+        XCTAssertTrue(canonicalCatalogLoad.contains("try Task.checkCancellation()"))
+
+        let preparedAuthorization = try sourceSection(
+            viewSource,
+            from: "    private func isPreparedShareAuthorized(",
+            to: "    private func invalidatePreparedShareForPresentationChange() {"
+        )
+        XCTAssertTrue(
+            preparedAuthorization.contains(
+                "ShareBuilderPreparedPresentationPolicy.isAuthorized("
+            )
+        )
+        XCTAssertTrue(preparedAuthorization.contains("prepared.themeRevision"))
+        XCTAssertTrue(preparedAuthorization.contains("prepared.colorMode"))
+        XCTAssertTrue(
+            preparedAuthorization.contains(
+                "prepared.systemReduceMotion"
+            )
+        )
+        XCTAssertTrue(preparedAuthorization.contains("currentColorMode: shareColorMode"))
+        XCTAssertTrue(
+            preparedAuthorization.contains(
+                "currentSystemReduceMotion: effectiveReduceMotion"
+            )
+        )
+        for preference in [
+            "colorSchemeContrast",
+            "accessibilityReduceMotion",
+            "accessibilityPreferences",
+        ] {
+            let changeHandler = try sourceSection(
+                viewSource,
+                from: ".onChange(of: \(preference))",
+                to: "refreshPreview()\n        }"
+            )
+            XCTAssertTrue(
+                changeHandler.contains("invalidatePreparedShareForPresentationChange()"),
+                preference
+            )
+        }
 
         let canonicalPreparation = try sourceSection(
             sessionSource,
@@ -2002,7 +2582,34 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
         XCTAssertTrue(canonicalPreparation.contains("artifact = try await prepareMessageShare("))
         XCTAssertTrue(canonicalPreparation.contains("artifact = try await prepareCipherShare("))
+        XCTAssertTrue(
+            canonicalPreparation.contains(
+                "renderedPresentation: renderedPreview.presentation"
+            )
+        )
         XCTAssertTrue(canonicalPreparation.contains("transfer = try await shareTransfer("))
+        let transferAcquisition = try XCTUnwrap(
+            canonicalPreparation.range(of: "transfer = try await shareTransfer(")
+        )
+        let finalAuthorityCheck = try XCTUnwrap(
+            canonicalPreparation.range(
+                of: "guard let currentThemeRevision = try? shareBuilderThemeAuthorityRevision(",
+                range: transferAcquisition.lowerBound..<canonicalPreparation.endIndex
+            )
+        )
+        let returnsPreparedArtifact = try XCTUnwrap(
+            canonicalPreparation.range(of: "return PreparedShareBuilderArtifact(")
+        )
+        XCTAssertLessThan(
+            canonicalPreparation.distance(
+                from: canonicalPreparation.startIndex,
+                to: finalAuthorityCheck.lowerBound
+            ),
+            canonicalPreparation.distance(
+                from: canonicalPreparation.startIndex,
+                to: returnsPreparedArtifact.lowerBound
+            )
+        )
 
         XCTAssertTrue(
             runtimeSource.contains(
@@ -2078,22 +2685,8 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertFalse(rootModifiers.contains(".accessibilityIdentifier("))
     }
 
-    func testBuilderPreviewFailureStillPreparesCanonicalCorePackage() async throws {
-        let artifactID = ShareArtifactID(
-            rawValue: UUID(uuidString: "86050000-0000-0000-0000-000000000001")!
-        )
-        let expectedArtifact = ShareArtifactDTO(
-            id: artifactID,
-            reference: .file(artifactID),
-            displayName: "Rune Scribe Message",
-            contentType: RuneScribeWireFormat.contentType,
-            fileExtension: RuneScribeWireFormat.fileExtension,
-            lifetime: .singleUse,
-            requiresKeyDelivery: false
-        )
-        let service = ControllableApplicationService(
-            preparedMessageArtifact: expectedArtifact
-        )
+    func testBuilderPreviewFailureDoesNotPrepareCorePackage() async throws {
+        let service = ControllableApplicationService()
         let fixture = try await makeSession(applicationService: service)
         let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
         let provider = ThemeProviderSummaryDTO(
@@ -2129,29 +2722,108 @@ final class RuneScribeUISessionTests: XCTestCase {
                 source: source,
                 catalog: catalog
             )
-            XCTFail("A session without a Theme Coordinator must use the fallback preview state")
+            XCTFail("A session without a Theme Coordinator must reject preview rendering")
         } catch {
             XCTAssertEqual(error as? ShareArtifactRenderError, .unavailableSelection)
         }
 
-        let prepared = try await fixture.session.prepareShareBuilderArtifact(
+        let commands = await service.recordedPrepareMessageShareCommands()
+        XCTAssertTrue(commands.isEmpty)
+        XCTAssertEqual(fixture.session.outboundSharePresentationStatus, .idle)
+
+        await fixture.session.stop()
+        await fixture.runtime.stop()
+    }
+
+    func testShareBuilderPreparationRevokesArtifactWhenThemeChangesDuringTransferAcquisition()
+        async throws
+    {
+        let artifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "86050000-0000-0000-0000-000000000004")!
+        )
+        let service = ControllableApplicationService(
+            preparedMessageArtifact: ShareArtifactDTO(
+                id: artifactID,
+                reference: .file(artifactID),
+                displayName: "Theme-bound Share.runescribe",
+                contentType: RuneScribeWireFormat.contentType,
+                fileExtension: RuneScribeWireFormat.fileExtension,
+                lifetime: .singleUse,
+                requiresKeyDelivery: false
+            )
+        )
+        let acquisitionGate = SharePresentationAcquisitionGate()
+        let fixture = try await makeThemeVisualSession(
+            applicationService: service,
+            sharePresentation: GatedSharePresentationProbe(gate: acquisitionGate)
+        )
+        defer { Task { await fixture.runtime.stop() } }
+
+        try await fixture.session.prepareInitialTheme()
+        try fixture.session.start()
+        try await fixture.runtime.reconcileEntitlements(
+            ProgressionEntitlementSnapshotDTO(
+                revision: 1,
+                capturedAt: Date(timeIntervalSince1970: 10_000),
+                includedUnlockIDs: [RuneScribeUnlockIDs.norseCodex],
+                earnedUnlockIDs: [RuneScribeThemeGloamthornModuleBootstrap.unlockID]
+            )
+        )
+        let alternateProviderAvailable = await eventually(attempts: 2_000) {
+            fixture.session.themeSnapshot?.providers.contains(where: {
+                $0.codexID == RuneScribeThemeGloamthornModuleBootstrap.codexID
+                    && $0.state == .available
+                    && $0.isOwned
+                    && $0.isSelectable
+            }) == true
+        }
+        XCTAssertTrue(alternateProviderAvailable)
+        let catalog = try fixture.session.makeShareBuilderCatalog()
+        let source = ShareBuilderSource.encryptedMessage(
+            runes: "ᚱᚢᚾᛖ",
+            senderName: "Freya",
+            cipherID: UUID(uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA")!,
+            messageHandle: EncodedMessageHandle(
+                rawValue: UUID(uuidString: "86050000-0000-0000-0000-000000000005")!
+            ),
+            requiresKeyDelivery: false
+        )
+        let renderedPreview = try await fixture.session.renderShareBuilderPreview(
             source: source,
             catalog: catalog
         )
-        XCTAssertEqual(prepared.artifact, expectedArtifact)
-        let commands = await service.recordedPrepareMessageShareCommands()
-        let command = try XCTUnwrap(commands.first)
-        XCTAssertEqual(commands.count, 1)
-        XCTAssertEqual(command.cipherID, CipherID(rawValue: cipherID))
-        XCTAssertEqual(command.shareHandle, handle)
-        XCTAssertNil(command.presentation)
-        XCTAssertEqual(
-            fixture.session.outboundSharePresentationStatus,
-            .legacyFallback(.themeUnavailable)
-        )
+        let capturedRevision = renderedPreview.themeRevision
 
-        await prepared.transfer.close()
-        await fixture.session.releaseShareArtifact(id: prepared.artifact.id)
+        let preparation = Task { @MainActor in
+            try await fixture.session.prepareShareBuilderArtifact(
+                source: source,
+                catalog: catalog,
+                renderedPreview: renderedPreview
+            )
+        }
+        await acquisitionGate.waitUntilSuspended()
+
+        await fixture.session.selectCodex(
+            RuneScribeThemeGloamthornModuleBootstrap.codexID
+        )
+        let authorityChanged = await eventually(attempts: 2_000) {
+            fixture.session.themeSnapshot?.effectiveCodexID
+                == RuneScribeThemeGloamthornModuleBootstrap.codexID
+                && (try? fixture.session.shareBuilderThemeAuthorityRevision(for: catalog))
+                    != capturedRevision
+        }
+        XCTAssertTrue(authorityChanged)
+        await acquisitionGate.release()
+
+        do {
+            _ = try await preparation.value
+            XCTFail("A share prepared under superseded Theme authority must be revoked")
+        } catch {
+            XCTAssertEqual(error as? ShareArtifactRenderError, .unavailableSelection)
+        }
+        let releasedArtifactIDs = await service.recordedReleasedShareArtifactIDs()
+        XCTAssertEqual(releasedArtifactIDs, [artifactID])
+
         await fixture.session.stop()
         await fixture.runtime.stop()
     }
@@ -2191,7 +2863,13 @@ final class RuneScribeUISessionTests: XCTestCase {
             let returnedResult = try await fixture.session.finishShareBuilderArtifact(
                 PreparedShareBuilderArtifact(
                     artifact: artifact,
-                    transfer: transfer
+                    transfer: transfer,
+                    themeRevision: ShareBuilderThemeAuthorityRevision(
+                        coordinatorRevision: 1,
+                        providerContentRevision: 1
+                    ),
+                    colorMode: .standard,
+                    systemReduceMotion: false
                 ),
                 completion: .success(evidence)
             )
@@ -2202,6 +2880,71 @@ final class RuneScribeUISessionTests: XCTestCase {
         let releasedArtifactIDs = await service.recordedReleasedShareArtifactIDs()
         XCTAssertEqual(releasedArtifactIDs.count, artifactIDs.count)
         XCTAssertEqual(Set(releasedArtifactIDs), Set(artifactIDs))
+
+        await fixture.session.stop()
+        await fixture.runtime.stop()
+    }
+
+    func testShareBuilderTerminalGatePreventsReplacementWhileCompletionIsSuspended()
+        async throws
+    {
+        let completionGate = InboundReceiveGate()
+        let service = ControllableApplicationService(
+            shareCompletionGate: completionGate,
+            shareCompletionResult: .released
+        )
+        let fixture = try await makeSession(applicationService: service)
+        let artifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "86050000-0000-0000-0000-000000000006")!
+        )
+        let artifact = ShareArtifactDTO(
+            id: artifactID,
+            reference: .file(artifactID),
+            displayName: "Terminal Gate.runescribe",
+            contentType: RuneScribeWireFormat.contentType,
+            fileExtension: RuneScribeWireFormat.fileExtension,
+            lifetime: .singleUse,
+            requiresKeyDelivery: false
+        )
+        let transfer = try await fixture.session.shareTransfer(for: artifactID)
+        let evidence = try await transfer.finish(
+            try SharePresentationReportDTO(
+                routeClass: .shareSheet,
+                result: .completedBySystem
+            )
+        )
+        let prepared = PreparedShareBuilderArtifact(
+            artifact: artifact,
+            transfer: transfer,
+            themeRevision: ShareBuilderThemeAuthorityRevision(
+                coordinatorRevision: 1,
+                providerContentRevision: 1
+            ),
+            colorMode: .standard,
+            systemReduceMotion: false
+        )
+
+        var terminalGeneration = ShareBuilderTerminalGenerationGate()
+        let generation = try XCTUnwrap(terminalGeneration.begin())
+        let completion = Task { @MainActor in
+            try await fixture.session.finishShareBuilderArtifact(
+                prepared,
+                completion: .success(evidence)
+            )
+        }
+        await completionGate.waitUntilSuspended()
+
+        XCTAssertTrue(terminalGeneration.isActive)
+        XCTAssertTrue(terminalGeneration.accepts(generation))
+        XCTAssertNil(terminalGeneration.begin())
+
+        await completionGate.release()
+        let completionResult = try await completion.value
+        XCTAssertEqual(completionResult, .completedBySystem)
+        XCTAssertTrue(terminalGeneration.complete(generation))
+        XCTAssertFalse(terminalGeneration.isActive)
+        let releasedArtifactIDs = await service.recordedReleasedShareArtifactIDs()
+        XCTAssertEqual(releasedArtifactIDs, [artifactID])
 
         await fixture.session.stop()
         await fixture.runtime.stop()
@@ -2610,7 +3353,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         let lifecycleEnd = try sourceSection(
             shareBuilderSource,
             from: "    private func endLifecycle() {",
-            to: "    private var previewImage: Image?"
+            to: "    private var isShareReady: Bool {"
         )
         let waitsForPreparation = try XCTUnwrap(
             lifecycleEnd.range(of: "await inFlightPreparation?.value")
@@ -2762,7 +3505,11 @@ final class RuneScribeUISessionTests: XCTestCase {
         return (session, harness.runtime)
     }
 
-    private func makeThemeVisualSession() async throws -> (
+    private func makeThemeVisualSession(
+        applicationService suppliedApplicationService: ControllableApplicationService? = nil,
+        sharePresentation: any SharePresentationProviding = SharePresentationProbe(),
+        includeMoonleafProvider: Bool = false
+    ) async throws -> (
         session: RuneScribeUISession,
         runtime: RuneScribeRuntime
     ) {
@@ -2770,8 +3517,9 @@ final class RuneScribeUISessionTests: XCTestCase {
         let quickShareArtifactID = ShareArtifactID(
             rawValue: UUID(uuidString: "85A00000-0000-0000-0000-000000000002")!
         )
-        let applicationService = ControllableApplicationService(
-            preparedMessageArtifact: ShareArtifactDTO(
+        let applicationService = suppliedApplicationService
+            ?? ControllableApplicationService(
+                preparedMessageArtifact: ShareArtifactDTO(
                 id: quickShareArtifactID,
                 reference: .file(quickShareArtifactID),
                 displayName: "Initial Theme Visuals.runescribe",
@@ -2779,10 +3527,10 @@ final class RuneScribeUISessionTests: XCTestCase {
                 fileExtension: RuneScribeWireFormat.fileExtension,
                 lifetime: .singleUse,
                 requiresKeyDelivery: false
+                )
             )
-        )
         let runtime = RuneScribeRuntime(
-            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 39),
+            runtimeVersion: try SemanticVersion(major: 1, minor: 0, patch: 40),
             platform: .macOS
         )
         let norseFontURL = try XCTUnwrap(
@@ -2797,6 +3545,12 @@ final class RuneScribeUISessionTests: XCTestCase {
                 withExtension: "ttf"
             )
         )
+        let moonleafFontURL = try XCTUnwrap(
+            RuneScribeThemeMoonleafModuleBootstrap.resourceBundle.url(
+                forResource: "moonleaf-script-primary",
+                withExtension: "ttf"
+            )
+        )
 
         try await runtime.installPlatformAdapter(
             ThemeVisualApplicationResources(),
@@ -2807,6 +3561,8 @@ final class RuneScribeUISessionTests: XCTestCase {
                 try Data(contentsOf: norseFontURL): "NotoSansRunic-Regular",
                 try Data(contentsOf: gloamthornFontURL):
                     "RavenForgeGloamthornScript-Regular",
+                try Data(contentsOf: moonleafFontURL):
+                    "RavenForgeMoonleafScript-Regular",
             ]),
             for: RuneScribeServiceKeys.systemFontRegistrar
         )
@@ -2823,7 +3579,7 @@ final class RuneScribeUISessionTests: XCTestCase {
             for: RuneScribeServiceKeys.inboundFileReader
         )
         try await runtime.installPlatformAdapter(
-            SharePresentationProbe(),
+            sharePresentation,
             for: RuneScribeServiceKeys.sharePresentation
         )
         try await runtime.register(
@@ -2832,6 +3588,9 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
         try await RuneScribeNorseThemeModuleBootstrap.register(with: runtime)
         try await RuneScribeThemeGloamthornModuleBootstrap.register(with: runtime)
+        if includeMoonleafProvider {
+            try await RuneScribeThemeMoonleafModuleBootstrap.register(with: runtime)
+        }
         try await runtime.register(
             manifest: RuneScribeThemeCoordinatorModuleBootstrap.manifest(),
             factory: RuneScribeThemeCoordinatorModuleBootstrap.factory()
@@ -2854,8 +3613,8 @@ final class RuneScribeUISessionTests: XCTestCase {
                     metalLibrary: nil
                 ),
                 productMetadata: RuneScribeUIProductMetadata(
-                    version: "1.0.39",
-                    buildNumber: "39"
+                    version: "1.0.40",
+                    buildNumber: "40"
                 )
             ),
             runtime
@@ -3006,6 +3765,7 @@ final class RuneScribeUISessionTests: XCTestCase {
                 id: MessageID(
                     rawValue: UUID(uuidString: "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC")!
                 ),
+                receivedAt: Date(timeIntervalSince1970: 1_000),
                 plaintext: $0,
                 senderName: "Freya",
                 cipherID: cipherID,
@@ -3104,6 +3864,52 @@ private actor SharePresentationProbe: SharePresentationProviding {
 
     func requests() -> [ShareArtifactID] {
         requestedArtifactIDs
+    }
+}
+
+private actor SharePresentationAcquisitionGate {
+    private var isSuspended = false
+    private var isReleased = false
+    private var suspensionWaiters: [CheckedContinuation<Void, Never>] = []
+    private var releaseWaiter: CheckedContinuation<Void, Never>?
+
+    func suspendUntilReleased() async {
+        isSuspended = true
+        let waiters = suspensionWaiters
+        suspensionWaiters.removeAll()
+        waiters.forEach { $0.resume() }
+        guard !isReleased else { return }
+        await withCheckedContinuation { releaseWaiter = $0 }
+    }
+
+    func waitUntilSuspended() async {
+        guard !isSuspended else { return }
+        await withCheckedContinuation { suspensionWaiters.append($0) }
+    }
+
+    func release() {
+        isReleased = true
+        releaseWaiter?.resume()
+        releaseWaiter = nil
+    }
+}
+
+private actor GatedSharePresentationProbe: SharePresentationProviding {
+    private let gate: SharePresentationAcquisitionGate
+    private let url: URL
+
+    init(
+        gate: SharePresentationAcquisitionGate,
+        url: URL = URL(fileURLWithPath: "/fixture/gated-share.runescribe")
+    ) {
+        self.gate = gate
+        self.url = url
+    }
+
+    func presentationURL(for artifactID: ShareArtifactID) async throws -> URL {
+        _ = artifactID
+        await gate.suspendUntilReleased()
+        return url
     }
 }
 
@@ -3206,6 +4012,7 @@ private actor ControllableApplicationService:
     private let createdCipher: CipherSummary?
     private let systemContacts: [SystemContactDTO]?
     private let inboundGate: InboundReceiveGate?
+    private let shareCompletionGate: InboundReceiveGate?
     private let shareCompletionResult: ShareArtifactCompletionResultDTO?
     private let preparedCipherArtifact: ShareArtifactDTO?
     private let preparedMessageArtifact: ShareArtifactDTO?
@@ -3223,6 +4030,7 @@ private actor ControllableApplicationService:
         createdCipher: CipherSummary? = nil,
         systemContacts: [SystemContactDTO]? = nil,
         inboundGate: InboundReceiveGate? = nil,
+        shareCompletionGate: InboundReceiveGate? = nil,
         shareCompletionResult: ShareArtifactCompletionResultDTO? = nil,
         preparedCipherArtifact: ShareArtifactDTO? = nil,
         preparedMessageArtifact: ShareArtifactDTO? = nil
@@ -3230,6 +4038,7 @@ private actor ControllableApplicationService:
         self.createdCipher = createdCipher
         self.systemContacts = systemContacts
         self.inboundGate = inboundGate
+        self.shareCompletionGate = shareCompletionGate
         self.shareCompletionResult = shareCompletionResult
         self.preparedCipherArtifact = preparedCipherArtifact
         self.preparedMessageArtifact = preparedMessageArtifact
@@ -3349,6 +4158,7 @@ private actor ControllableApplicationService:
         } else {
             logicalShareCompletionEvidence[evidence.artifactID] = evidence
         }
+        await shareCompletionGate?.suspendIfNeeded()
         if let shareCompletionResult { return shareCompletionResult }
         throw StubError.unexpectedCommand
     }
@@ -3471,6 +4281,8 @@ private struct ThemeVisualApplicationResources: ApplicationResourceLocator {
             bundle = RuneScribeNorseThemeModuleBootstrap.resourceBundle
         case RuneScribeThemeGloamthornModuleBootstrap.moduleID:
             bundle = RuneScribeThemeGloamthornModuleBootstrap.resourceBundle
+        case RuneScribeThemeMoonleafModuleBootstrap.moduleID:
+            bundle = RuneScribeThemeMoonleafModuleBootstrap.resourceBundle
         default:
             throw MissingResourceError.unavailable
         }

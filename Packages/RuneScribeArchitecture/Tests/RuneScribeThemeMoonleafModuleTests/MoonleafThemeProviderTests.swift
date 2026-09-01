@@ -36,6 +36,15 @@ final class MoonleafThemeProviderTests: XCTestCase {
         XCTAssertEqual(script.fontReferenceID?.rawValue, "rs-moonleaf")
         XCTAssertEqual(script.fontVersion, 1)
         XCTAssertEqual(script.fontPostScriptName?.rawValue, "RavenForgeMoonleafScript-Regular")
+        XCTAssertEqual(script.recommendedPointSizes.maximum, 96)
+        XCTAssertEqual(
+            script.standardSpecimenResourceID?.rawValue,
+            "resource.script.moonleaf.output.script-specimen-standard"
+        )
+        XCTAssertEqual(
+            script.highContrastSpecimenResourceID?.rawValue,
+            "resource.script.moonleaf.output.script-specimen-high-contrast"
+        )
         XCTAssertEqual(
             script.rightsID.rawValue,
             "prov.Source.Masters.Glyphs.moonleaf.glyph.master.json"
@@ -177,32 +186,120 @@ final class MoonleafThemeProviderTests: XCTestCase {
         })
 
         let acceptedLayouts = descriptor.codex.relics.flatMap(\.layouts)
-        XCTAssertEqual(try canonicalSHA256(acceptedLayouts), "6756791f21060d0ce0af53340a795ce7a7ea43d1334d2bd3f600610f0f086038")
-        XCTAssertEqual(try canonicalSHA256(descriptor.rights), "fd7ec9de7c554cb7c9ab8c57ab0607dc7c60534e5f768636aaa48081fb89f21f")
-        XCTAssertEqual(descriptor.rights.count, 14)
-        XCTAssertTrue(descriptor.rights.allSatisfy {
+        XCTAssertEqual(try canonicalSHA256(acceptedLayouts), "099de96c04f178e69f00ad4af110c1e13ced3d3cf8f31064498ec9efd69ee151")
+        XCTAssertEqual(try canonicalSHA256(descriptor.rights), "3b392baea1484da2ee3d5674125d6f003f6db59f237d6cd28b897befaead9f0f")
+        XCTAssertEqual(descriptor.rights.count, 16)
+        let acceptedMasterRightsID = ThemeProvenanceID(
+            rawValue: "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+        )!
+        XCTAssertTrue(descriptor.rights.filter { $0.id != acceptedMasterRightsID }.dropLast().allSatisfy {
             $0.creationDate == "2026-08-21"
                 && $0.origin == .derived
                 && $0.rightsOwner == "Raven Forge Software"
                 && $0.licenseNotice
                     == "Owner-supplied proprietary source and approved recovery authority"
         })
+        let acceptedMasterRights = try XCTUnwrap(
+            descriptor.rights.first { $0.id == acceptedMasterRightsID }
+        )
+        XCTAssertEqual(acceptedMasterRights.creationDate, "2026-08-27")
+        XCTAssertEqual(
+            acceptedMasterRights.sourceReference,
+            "docs/verification/theme-fidelity-v4-3/inventory/recipes/Moonleaf-Accepted-Source-Master-Recipe-v4.3.json"
+        )
+        XCTAssertTrue(acceptedMasterRights.exportSettings.contains("\"ownerReview\":\"PENDING\""))
         let scriptRights = try XCTUnwrap(descriptor.rights.first { $0.id == script.rightsID })
         XCTAssertEqual(scriptRights.id.rawValue, "prov.Source.Masters.Glyphs.moonleaf.glyph.master.json")
         XCTAssertNotEqual(scriptRights.id.rawValue, scriptRights.id.rawValue.lowercased())
         XCTAssertEqual(scriptRights.creatorTool, "macOS byte-preserving canonicalization with Python 3.9.6 hashing")
         XCTAssertEqual(scriptRights.sourceReference, "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-master.json")
         XCTAssertEqual(scriptRights.exportSettings, "{\"deterministic\":true,\"pipeline\":\"scripts/build-elven-production-assets.py\",\"pipelineSHA256\":\"3dd388a70763603b2f90e04ecf7de7115e050ba3bb4da69a96b35fcf727e2307\",\"toolVersions\":{\"fontTools\":\"4.60.2\",\"pillow\":\"11.3.0\",\"python\":\"3.9.6\",\"sips\":\"sips-316\"}}")
+        let receivedRights = try XCTUnwrap(descriptor.rights.last)
+        XCTAssertEqual(
+            receivedRights.id.rawValue,
+            "prov.Theme.Fidelity.v4.3.Source.Masters.moonleaf.Moonleaf.Received.Identity.Extraction.v4.3.json"
+        )
+        XCTAssertEqual(receivedRights.creationDate, "2026-08-27")
+        XCTAssertEqual(receivedRights.origin, .derived)
+        XCTAssertEqual(receivedRights.rightsOwner, "Raven Forge Software")
+        XCTAssertEqual(
+            receivedRights.sourceReference,
+            "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/Moonleaf-Received-Identity-Extraction-v4.3.json"
+        )
+        XCTAssertEqual(
+            receivedRights.licenseNotice,
+            "Owner-supplied proprietary source and canonical v4.3 received-state authority"
+        )
+
+        let receivedPresentation = try XCTUnwrap(descriptor.codex.receivedPresentation)
+        XCTAssertEqual(receivedPresentation.familyDisplayName.fallbackValue, "Elven Codex")
+        XCTAssertEqual(
+            receivedPresentation.primarySenderAvatarResourceID.rawValue,
+            "resource.received.moonleaf.primary.sender-avatar"
+        )
+        XCTAssertEqual(
+            receivedPresentation.shareSenderAvatarResourceID.rawValue,
+            "resource.received.moonleaf.share.sender-avatar"
+        )
+        XCTAssertEqual(
+            receivedPresentation.shareCodexBadgeResourceID.rawValue,
+            "resource.received.moonleaf.share.codex-badge"
+        )
+        XCTAssertEqual(
+            receivedPresentation.primaryMedallion.resourceID.rawValue,
+            "resource.received.moonleaf.primary.medallion"
+        )
+        XCTAssertEqual(receivedPresentation.primaryMedallion.anchor.x, 0.834)
+        XCTAssertEqual(receivedPresentation.primaryMedallion.anchor.y, 0.84)
+        XCTAssertEqual(receivedPresentation.primaryMedallion.scale, 0.205)
+        XCTAssertEqual(
+            receivedPresentation.shareMedallion.resourceID.rawValue,
+            "resource.received.moonleaf.share.medallion"
+        )
+        XCTAssertEqual(receivedPresentation.shareMedallion.anchor.x, 0.757)
+        XCTAssertEqual(receivedPresentation.shareMedallion.anchor.y, 0.84)
+        XCTAssertEqual(receivedPresentation.shareMedallion.scale, 0.161)
 
         XCTAssertEqual(descriptor.codex.relics.count, 3)
         XCTAssertEqual(descriptor.codex.seals.count, 6)
         XCTAssertEqual(descriptor.codex.frames.count, 1)
+        XCTAssertEqual(
+            descriptor.codex.frames.only?.thumbnailResourceID?.rawValue,
+            "resource.frame.moonleaf.silvervine.output.frame-thumbnail"
+        )
         XCTAssertEqual(descriptor.codex.crests.count, 1)
+        XCTAssertEqual(descriptor.contentVersion, 2)
         XCTAssertEqual(descriptor.codex.relics.filter { $0.isDefault }.count, 1)
         XCTAssertNil(descriptor.codex.background.optionalMotionResourceID)
+        XCTAssertEqual(
+            descriptor.codex.background.macOSWideResourceID?.rawValue,
+            "resource.background.moonleaf.moonlit-canopy.output.background-macos-wide-crop"
+        )
+        XCTAssertEqual(
+            descriptor.codex.vault.unavailableResourceID?.rawValue,
+            "resource.vault.moonleaf.codex.output.vault-unavailable"
+        )
+        XCTAssertEqual(
+            descriptor.codex.crests.only?.thumbnailResourceID?.rawValue,
+            "resource.crest.moonleaf.moonbloom.output.crest-thumbnail"
+        )
+        XCTAssertEqual(
+            descriptor.codex.seals.compactMap(\.colorResourceID).map(\.rawValue),
+            [
+                "resource.seal.moonleaf.crescentleaf.output.seal-color-master",
+                "resource.seal.moonleaf.woodland-stag.output.seal-color-master",
+                "resource.seal.moonleaf.night-owl.output.seal-color-master",
+                "resource.seal.moonleaf.moonwell.output.seal-color-master",
+                "resource.seal.moonleaf.starflower.output.seal-color-master",
+                "resource.seal.moonleaf.echo-firefly.output.seal-color-master",
+            ]
+        )
+        XCTAssertTrue(descriptor.codex.seals.allSatisfy {
+            $0.colorResourceID == Optional($0.standardResourceID)
+        })
         XCTAssertFalse(descriptor.codex.background.parallaxAllowed)
-        XCTAssertEqual(MoonleafThemeResourceCatalog.productionDefinitions.count, 46)
-        XCTAssertEqual(descriptor.resources.count, 47)
+        XCTAssertEqual(MoonleafThemeResourceCatalog.productionDefinitions.count, 65)
+        XCTAssertEqual(descriptor.resources.count, 66)
         XCTAssertTrue(descriptor.resources.allSatisfy { $0.requirement == .required })
         let localization = try XCTUnwrap(
             JSONSerialization.jsonObject(
@@ -221,6 +318,81 @@ final class MoonleafThemeProviderTests: XCTestCase {
             XCTAssertEqual(reference.integrity.sha256.rawValue, definition.sha256Hex)
             XCTAssertEqual(reference.rightsID, definition.rightsID)
         }
+        let production = MoonleafThemeResourceCatalog.productionDefinitions
+        XCTAssertEqual(production.filter { $0.role == ThemeResourceRoles.relicMaster }.count, 3)
+        XCTAssertEqual(production.filter { $0.role == ThemeResourceRoles.relicThumbnail }.count, 3)
+        XCTAssertTrue(
+            production.filter {
+                [
+                    ThemeResourceRoles.relicMaster,
+                    ThemeResourceRoles.relicThumbnail,
+                    ThemeResourceRoles.relicStaticShareFallback,
+                    ThemeResourceRoles.relicHighContrast,
+                ].contains($0.role)
+            }.allSatisfy { $0.mediaType == .png }
+        )
+        XCTAssertTrue(
+            production.filter { $0.role == ThemeResourceRoles.relicThumbnail }
+                .allSatisfy { $0.pixelWidth == 512 && $0.pixelHeight == 512 }
+        )
+        XCTAssertEqual(production.filter { $0.role == ThemeResourceRoles.sealColorMaster }.count, 6)
+        XCTAssertEqual(production.filter { $0.role == ThemeResourceRoles.sealThumbnail }.count, 6)
+        XCTAssertTrue(
+            production.filter { $0.role == ThemeResourceRoles.sealThumbnail }
+                .allSatisfy { $0.pixelWidth == 512 && $0.pixelHeight == 512 }
+        )
+        XCTAssertEqual(
+            Set(production.filter { $0.role.rawValue.hasPrefix("vault.") }.map(\.role)),
+            Set([
+                ThemeResourceRoles.vaultCard,
+                ThemeResourceRoles.vaultLockedSilhouette,
+                ThemeResourceRoles.vaultEncountered,
+                ThemeResourceRoles.vaultSelected,
+                ThemeResourceRoles.vaultUnavailable,
+            ])
+        )
+        XCTAssertTrue(
+            production.filter { $0.role.rawValue.hasPrefix("vault.") }
+                .allSatisfy { $0.pixelWidth == 1600 && $0.pixelHeight == 900 }
+        )
+        XCTAssertEqual(
+            Set(production.filter { $0.role.rawValue.hasPrefix("panel.") }.map(\.role)),
+            Set([
+                ThemeResourceRoles.panelCardBorder,
+                ThemeResourceRoles.panelCornerOrnament,
+                ThemeResourceRoles.panelDivider,
+                ThemeResourceRoles.panelPrimaryButton,
+                ThemeResourceRoles.panelTabSelector,
+            ])
+        )
+        let receivedDefinitions = production.filter {
+            $0.role.rawValue.hasPrefix("received.")
+        }
+        XCTAssertEqual(
+            Set(receivedDefinitions.map(\.role)),
+            Set([
+                ThemeResourceRoles.receivedPrimarySenderAvatar,
+                ThemeResourceRoles.receivedShareSenderAvatar,
+                ThemeResourceRoles.receivedShareCodexBadge,
+                ThemeResourceRoles.receivedPrimaryMedallion,
+                ThemeResourceRoles.receivedShareMedallion,
+            ])
+        )
+        XCTAssertEqual(
+            Dictionary(uniqueKeysWithValues: receivedDefinitions.map {
+                ($0.id.rawValue, [$0.pixelWidth, $0.pixelHeight])
+            }),
+            [
+                "resource.received.moonleaf.primary.sender-avatar": [107, 107],
+                "resource.received.moonleaf.share.sender-avatar": [99, 99],
+                "resource.received.moonleaf.share.codex-badge": [43, 43],
+                "resource.received.moonleaf.primary.medallion": [193, 193],
+                "resource.received.moonleaf.share.medallion": [141, 141],
+            ]
+        )
+        XCTAssertTrue(receivedDefinitions.allSatisfy {
+            $0.mediaType == .png && $0.rightsID == receivedRights.id
+        })
         for relic in descriptor.codex.relics {
             XCTAssertTrue(relic.layouts.allSatisfy { layout in
                 layout.relicBounds.contains(layout.contentSafeRegion)
@@ -249,7 +421,7 @@ final class MoonleafThemeProviderTests: XCTestCase {
 
         let integrityURL = try XCTUnwrap(bundle.url(forResource: "Resource-Integrity-Manifest-v1.0", withExtension: "json"))
         let integrityData = try Data(contentsOf: integrityURL)
-        XCTAssertEqual(sha256Hex(integrityData), "e7222671993ad13ff4f3c72dd048f31f49295a1412e1f365d9fd904ef0b4c633")
+        XCTAssertEqual(sha256Hex(integrityData), MoonleafV43ResourcePins.integrityManifestSHA256Hex)
         XCTAssertTrue(MoonleafThemeResourceCatalog.validateIntegrityManifest(integrityData))
 
         var shippingBytes = 0
@@ -265,7 +437,7 @@ final class MoonleafThemeProviderTests: XCTestCase {
             XCTAssertLessThanOrEqual(data.count, definition.maximumByteCount)
             XCTAssertEqual(sha256Hex(data), definition.sha256Hex)
         }
-        XCTAssertEqual(shippingBytes, 678743)
+        XCTAssertEqual(shippingBytes, MoonleafV43ResourcePins.productionShippingByteCount)
     }
 
     func testLockedDiscoveryPublishesPreviewResourcesAndRestartsSafely() async throws {
@@ -326,23 +498,60 @@ final class MoonleafThemeProviderTests: XCTestCase {
         await runtime.stop()
     }
 
-    func testResourceFailuresRemainIsolatedFromTheRequiredUI() async throws {
-        let first = try XCTUnwrap(MoonleafThemeResourceCatalog.productionDefinitions.first)
+    func testDeferredResourceFailuresRemainIsolatedFromTheRequiredUI() async throws {
+        let target = try XCTUnwrap(MoonleafThemeResourceCatalog.productionDefinitions.first)
+        let handle = OpaqueResourceHandle(
+            namespace: RuntimeThemeContributionCatalog.resourceNamespace(
+                for: RuneScribeThemeMoonleafModuleBootstrap.codexID
+            ),
+            resourceID: OpaqueResourceID(rawValue: target.id.rawValue)
+        )
         for mode in MoonleafThemeBundleLocator.Mode.failureModes {
-            let runtime = try await makeRuntime(locator: MoonleafThemeBundleLocator(mode: mode, target: first.resource, targetMaximumBytes: first.maximumByteCount))
+            let probe = MoonleafThemeReaderProbe()
+            let runtime = try await makeRuntime(locator: MoonleafThemeBundleLocator(
+                mode: mode,
+                target: target.resource,
+                targetMaximumBytes: target.maximumByteCount
+            ))
             try await RuneScribeThemeMoonleafModuleBootstrap.register(with: runtime)
-            try await registerUI(with: runtime, suffix: mode.rawValue)
+            try await registerReaderAndUI(with: runtime, probe: probe)
             try await runtime.start()
             try await runtime.reconcileEntitlements(try entitlementSnapshot())
-            let snapshot = await runtime.snapshot()
+            var snapshot = await runtime.snapshot()
             XCTAssertEqual(snapshot.status, .running, "mode=\(mode.rawValue)")
-            XCTAssertEqual(snapshot.moduleStates[RuneScribeThemeMoonleafModuleBootstrap.moduleID], .failed, "mode=\(mode.rawValue)")
-            XCTAssertEqual(snapshot.moduleStates[uiModuleID(suffix: mode.rawValue)], .active, "mode=\(mode.rawValue)")
+            XCTAssertEqual(snapshot.moduleStates[RuneScribeThemeMoonleafModuleBootstrap.moduleID], .active, "mode=\(mode.rawValue)")
+            XCTAssertEqual(snapshot.moduleStates[uiModuleID(suffix: "publication")], .active, "mode=\(mode.rawValue)")
+            let deferredResources = try await probe.resourceSnapshot()
+            XCTAssertTrue(
+                deferredResources.resources.contains { $0.handle == handle },
+                "mode=\(mode.rawValue)"
+            )
+
+            do {
+                _ = try await probe.resolve(handle)
+                XCTFail("Deferred required resource must fail closed for mode=\(mode.rawValue)")
+            } catch let failure as RuntimeVerifiedApplicationResourceFailure {
+                switch (mode, failure) {
+                case (.missing, .resourceUnavailable), (.overBudget, .contentTooLarge):
+                    break
+                case (.corrupt, .integrityMismatch(_, let actualByteCount)):
+                    XCTAssertEqual(actualByteCount, 1)
+                case (.wrongHash, .integrityMismatch(_, let actualByteCount)):
+                    XCTAssertEqual(actualByteCount, target.byteCount)
+                default:
+                    XCTFail("Unexpected deferred failure \(failure) for mode=\(mode.rawValue)")
+                }
+            }
+
+            snapshot = await runtime.snapshot()
+            XCTAssertEqual(snapshot.status, .running, "mode=\(mode.rawValue)")
+            XCTAssertEqual(snapshot.moduleStates[RuneScribeThemeMoonleafModuleBootstrap.moduleID], .active, "mode=\(mode.rawValue)")
+            XCTAssertEqual(snapshot.moduleStates[uiModuleID(suffix: "publication")], .active, "mode=\(mode.rawValue)")
             await runtime.stop()
         }
     }
 
-    func testThemeCoordinatorActivatesLiveAndPreservesOwnedPreferenceDuringProviderFailure()
+    func testThemeCoordinatorRestoresOwnedPreferenceAndDeferredCorruptionFailsClosed()
         async throws
     {
         let store = InMemoryModuleStateStore(
@@ -419,17 +628,42 @@ final class MoonleafThemeProviderTests: XCTestCase {
                     $0.codexID == RuneScribeThemeMoonleafModuleBootstrap.codexID
                         && $0.isOwned
                         && !$0.isSelectable
+                        && $0.state == .invalidResources
                 }
         }
-        XCTAssertEqual(fallback.fallbackReason, .unavailable)
+        XCTAssertEqual(fallback.fallbackReason, .invalidResources)
         XCTAssertEqual(fallback.effectiveTheme.codex.id, RuneScribeCodexIDs.norse)
         let failedSnapshot = await failedRuntime.snapshot()
         XCTAssertEqual(
             failedSnapshot.moduleStates[RuneScribeThemeMoonleafModuleBootstrap.moduleID],
-            .failed
+            .active
         )
         XCTAssertEqual(failedSnapshot.moduleStates[RuneScribeModuleIDs.norseTheme], .active)
         XCTAssertEqual(failedSnapshot.moduleStates[RuneScribeModuleIDs.themeCoordinator], .active)
+
+        let failedRequest = ResolveThemeResourceRequestDTO(
+            codexID: RuneScribeThemeMoonleafModuleBootstrap.codexID,
+            resourceID: target.id
+        )
+        do {
+            _ = try await failedProbe.resolve(
+                failedRequest
+            )
+            XCTFail("Deferred corrupt resource must not be returned by the coordinator.")
+        } catch let failure as ThemeCoordinatorModuleError {
+            XCTAssertEqual(failure, .resourceUnavailable(failedRequest))
+        }
+
+        let afterFailure = try await failedProbe.snapshot()
+        XCTAssertEqual(
+            afterFailure.preferredCodexID,
+            RuneScribeThemeMoonleafModuleBootstrap.codexID
+        )
+        XCTAssertEqual(
+            afterFailure.effectiveCodexID,
+            RuneScribeCodexIDs.norse
+        )
+        XCTAssertEqual(afterFailure.fallbackReason, .invalidResources)
         await failedRuntime.stop()
     }
 
@@ -444,7 +678,7 @@ final class MoonleafThemeProviderTests: XCTestCase {
             at: sourceDirectory,
             includingPropertiesForKeys: nil
         ).filter { $0.pathExtension == "swift" }
-        XCTAssertEqual(sourceURLs.count, 3)
+        XCTAssertEqual(sourceURLs.count, 4)
         for sourceURL in sourceURLs {
             let source = try String(contentsOf: sourceURL, encoding: .utf8)
             XCTAssertFalse(source.contains("Progression"), sourceURL.lastPathComponent)
@@ -771,6 +1005,11 @@ private actor MoonleafThemeCoordinatorProbe {
     func resolve(_ request: ResolveThemeResourceRequestDTO) async throws -> ResolvedThemeResourceDTO {
         guard let client else { throw MoonleafThemeTestError.missingProbeClient }
         return try await client.resolveResource(request)
+    }
+
+    func snapshot() async throws -> ThemeCoordinatorSnapshotDTO {
+        guard let client else { throw MoonleafThemeTestError.missingProbeClient }
+        return try await client.snapshot()
     }
 
     func waitForSnapshot(

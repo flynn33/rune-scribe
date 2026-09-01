@@ -32,7 +32,7 @@ public enum RuneScribeThemeMoonleafModuleBootstrap {
     )
 
     public static let manifestResource = MoonleafThemeBundledResourceCatalog.moduleManifest
-    public static let manifestExpectedSHA256Hex = "58f89c9a55c0e4866a18ce817d1ca4a417f2e240fadd07cb8ca6bd32793ff5ea"
+    public static let manifestExpectedSHA256Hex = MoonleafV43ResourcePins.moduleManifestSHA256Hex
     public static var manifestExpectedSHA256: Data {
         Data(hexadecimal: manifestExpectedSHA256Hex)
     }
@@ -66,10 +66,17 @@ public struct RuneScribeThemeMoonleafModule: RuntimeConstructibleModule {
 
     public func start(context: ModuleContext) async throws {
         let runtimeIO = try await context.runtimeIOClient()
-        let theme = try await MoonleafThemeResources.loadValidated(using: runtimeIO)
+        let descriptor = try await MoonleafThemeResources.loadDescriptorValidated(
+            using: runtimeIO
+        )
         try await context.publishTheme(
-            descriptor: theme.descriptor,
-            resourcePayloads: theme.resourcePayloads
+            descriptor: descriptor,
+            resourceLoader: { resourceID in
+                try await MoonleafThemeResources.loadValidatedResource(
+                    id: resourceID,
+                    using: runtimeIO
+                )
+            }
         )
     }
 

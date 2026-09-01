@@ -154,6 +154,7 @@ struct ThemeArtifactVisualPlan: Identifiable, Equatable, Sendable {
     let kind: ThemeVisualArtifactKind
     let displayName: String
     let description: String
+    let facets: [String]
     let rarity: ThemeRarityToken
     let availability: ThemeArtifactAvailability
     let accessibilityLabel: String
@@ -170,6 +171,7 @@ struct ThemeArtifactVisualPlan: Identifiable, Equatable, Sendable {
     let sealAllowedAnchors: [ThemeSealAnchorCategory]
     let compatibleRelicIDs: Set<ArtifactID>
     let allowsStaticShare: Bool
+
 }
 
 /// The complete descriptor-derived image inventory needed by the active UI.
@@ -267,6 +269,7 @@ struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
                 kind: kind,
                 displayName: metadata.displayName.fallbackValue,
                 description: metadata.description.fallbackValue,
+                facets: metadata.facets?.map(\.fallbackValue) ?? [],
                 rarity: metadata.rarity,
                 availability: metadata.availability,
                 accessibilityLabel: metadata.accessibility.label.fallbackValue,
@@ -342,10 +345,10 @@ struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
             return try artifact(
                 seal.metadata,
                 kind: .seal,
-                primaryID: seal.vectorResourceID,
+                primaryID: seal.standardResourceID,
                 thumbnailID: seal.thumbnailResourceID,
-                standardID: seal.vectorResourceID,
-                highContrastID: seal.vectorResourceID,
+                standardID: seal.standardResourceID,
+                highContrastID: seal.standardResourceID,
                 sealAllowedScale: seal.allowedScale,
                 sealScaleReference: seal.scaleReference,
                 sealAllowedAnchors: seal.allowedAnchors
@@ -357,7 +360,7 @@ struct ActiveThemeVisualResourcePlan: Equatable, Sendable {
                 frame.metadata,
                 kind: .frame,
                 primaryID: frame.vectorResourceID,
-                thumbnailID: frame.staticFallbackResourceID,
+                thumbnailID: frame.thumbnailResourceID ?? frame.staticFallbackResourceID,
                 standardID: frame.staticFallbackResourceID,
                 highContrastID: frame.staticFallbackResourceID,
                 compatibleRelicIDs: Set(frame.compatibleRelicIDs),

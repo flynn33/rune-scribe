@@ -1,0 +1,57 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/swift",
+    "build",
+    "--package-path",
+    "Packages/RuneScribeArchitecture",
+    "--configuration",
+    "release",
+    "--scratch-path",
+    "/tmp/runescribe-v43-c9f45-release.Ingxs2/swiftpm-scratch",
+    "-Xswiftc",
+    "-warnings-as-errors"
+  ],
+  "category": "build",
+  "command": "/usr/bin/swift build --package-path Packages/RuneScribeArchitecture --configuration release --scratch-path /tmp/runescribe-v43-c9f45-release.Ingxs2/swiftpm-scratch -Xswiftc -warnings-as-errors",
+  "commandID": "swift-release-build",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:25:04.812Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 1413,
+    "path": "commands/logs/swift-release-build.log",
+    "sha256": "5240155866d13681f4495cdece41291d98d1388930026aa211af3dccd77e1de6"
+  },
+  "outputs": [
+    {
+      "bytes": 206,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-release.Ingxs2/swift-build-release.command.log",
+      "sha256": "c636b4859f8b851bdf39c461f6ec57517091db9f601a732a1344bba72a5f79b6"
+    },
+    {
+      "bytes": 20649,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-c9f45-release.Ingxs2/swift-build-release.log",
+      "sha256": "ea291c6babd94f2156dd39a73c4a6dde50e51dab68986e4eb1c7f171decd78e9"
+    }
+  ],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 47,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:23:38.631Z"
+}

@@ -1,0 +1,43 @@
+{
+  "acceptanceEvidence": false,
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "scripts/build-moonleaf-v43-assets.py",
+    "--repo-root",
+    "/tmp/runescribe-v43-acceptance.aQQkxe/source",
+    "--authority-root",
+    "/Users/jimdaley/Projects/RuneScribe/Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+    "--check"
+  ],
+  "category": "assets",
+  "command": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 scripts/build-moonleaf-v43-assets.py --repo-root /tmp/runescribe-v43-acceptance.aQQkxe/source --authority-root /Users/jimdaley/Projects/RuneScribe/Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation --check",
+  "commandID": "moonleaf-asset-builder",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:12:05.555Z",
+  "evidenceType": "command-execution",
+  "exitCode": 1,
+  "expectedExitCode": 1,
+  "failures": [],
+  "log": {
+    "bytes": 140,
+    "path": "commands/logs/moonleaf-asset-builder.log",
+    "sha256": "b844a56304fc8d138e09bf0f2ee742f4c3d886b6f0b1293e8f8ecd9208aa3cf0"
+  },
+  "outputs": [],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 33,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:12:03.071Z"
+}

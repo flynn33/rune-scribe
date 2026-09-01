@@ -1,0 +1,43 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "scripts/build-sunspire-wildwood-gloamthorn-v43-assets.py",
+    "--repo-root",
+    "/tmp/runescribe-v43-acceptance.aQQkxe/source",
+    "--authority-root",
+    "/Users/jimdaley/Projects/RuneScribe/Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+    "--check"
+  ],
+  "category": "assets",
+  "command": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 scripts/build-sunspire-wildwood-gloamthorn-v43-assets.py --repo-root /tmp/runescribe-v43-acceptance.aQQkxe/source --authority-root /Users/jimdaley/Projects/RuneScribe/Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation --check",
+  "commandID": "elven-asset-builders",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:12:08.880Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 1298,
+    "path": "commands/logs/elven-asset-builders.log",
+    "sha256": "fcf95eb97481b785791a548af6bfbcb22b61d0ff0a4bed542fbf1ef931890aa4"
+  },
+  "outputs": [],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 35,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:12:03.011Z"
+}

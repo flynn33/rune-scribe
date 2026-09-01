@@ -145,10 +145,14 @@ public struct OpaqueResourcePayload: Sendable {
     }
 }
 
+public typealias OpaqueResourceDataLoader =
+    @Sendable (OpaqueResourceID) async throws -> Data?
+
 public struct OpaqueResourceNamespaceRegistration: Sendable {
     public let namespace: OpaqueResourceNamespaceID
     public let declarations: [OpaqueResourceDeclaration]
     public let payloads: [OpaqueResourcePayload]
+    public let resourceLoader: OpaqueResourceDataLoader?
 
     public init(
         namespace: OpaqueResourceNamespaceID,
@@ -158,12 +162,25 @@ public struct OpaqueResourceNamespaceRegistration: Sendable {
         self.namespace = namespace
         self.declarations = declarations
         self.payloads = payloads
+        resourceLoader = nil
+    }
+
+    public init(
+        namespace: OpaqueResourceNamespaceID,
+        declarations: [OpaqueResourceDeclaration],
+        resourceLoader: @escaping OpaqueResourceDataLoader
+    ) {
+        self.namespace = namespace
+        self.declarations = declarations
+        payloads = []
+        self.resourceLoader = resourceLoader
     }
 }
 
 public struct OpaqueResourceMetadata: Codable, Equatable, Hashable, Sendable {
     public let handle: OpaqueResourceHandle
     public let ownerModuleID: ModuleIdentifier
+    public let registrationID: UInt64
     public let semanticRole: String
     public let mediaType: OpaqueResourceMediaType
     public let category: OpaqueResourceCategory
@@ -174,6 +191,7 @@ public struct OpaqueResourceMetadata: Codable, Equatable, Hashable, Sendable {
     public init(
         handle: OpaqueResourceHandle,
         ownerModuleID: ModuleIdentifier,
+        registrationID: UInt64 = 0,
         semanticRole: String,
         mediaType: OpaqueResourceMediaType,
         category: OpaqueResourceCategory,
@@ -183,12 +201,57 @@ public struct OpaqueResourceMetadata: Codable, Equatable, Hashable, Sendable {
     ) {
         self.handle = handle
         self.ownerModuleID = ownerModuleID
+        self.registrationID = registrationID
         self.semanticRole = semanticRole
         self.mediaType = mediaType
         self.category = category
         self.byteCount = byteCount
         self.sha256 = sha256
         self.pixelSize = pixelSize
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case handle
+        case ownerModuleID
+        case registrationID
+        case semanticRole
+        case mediaType
+        case category
+        case byteCount
+        case sha256
+        case pixelSize
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        handle = try container.decode(OpaqueResourceHandle.self, forKey: .handle)
+        ownerModuleID = try container.decode(ModuleIdentifier.self, forKey: .ownerModuleID)
+        registrationID = try container.decodeIfPresent(
+            UInt64.self,
+            forKey: .registrationID
+        ) ?? 0
+        semanticRole = try container.decode(String.self, forKey: .semanticRole)
+        mediaType = try container.decode(OpaqueResourceMediaType.self, forKey: .mediaType)
+        category = try container.decode(OpaqueResourceCategory.self, forKey: .category)
+        byteCount = try container.decode(Int.self, forKey: .byteCount)
+        sha256 = try container.decode(String.self, forKey: .sha256)
+        pixelSize = try container.decodeIfPresent(
+            OpaqueResourcePixelSize.self,
+            forKey: .pixelSize
+        )
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(handle, forKey: .handle)
+        try container.encode(ownerModuleID, forKey: .ownerModuleID)
+        try container.encode(registrationID, forKey: .registrationID)
+        try container.encode(semanticRole, forKey: .semanticRole)
+        try container.encode(mediaType, forKey: .mediaType)
+        try container.encode(category, forKey: .category)
+        try container.encode(byteCount, forKey: .byteCount)
+        try container.encode(sha256, forKey: .sha256)
+        try container.encodeIfPresent(pixelSize, forKey: .pixelSize)
     }
 }
 
@@ -202,13 +265,46 @@ public struct ResolvedOpaqueResource: Sendable {
     }
 }
 
+public enum OpaqueResourceValidationFaultCode: String, Codable, Hashable, Sendable {
+    case missingRequiredResource = "missing-required-resource"
+    case resourceMismatch = "resource-mismatch"
+}
+
+public struct OpaqueResourceValidationFault: Codable, Equatable, Hashable, Sendable {
+    public let handle: OpaqueResourceHandle
+    public let ownerModuleID: ModuleIdentifier
+    public let registrationID: UInt64
+    public let code: OpaqueResourceValidationFaultCode
+    public let requiredBaseFailure: RequiredThemeResourceFailureDTO?
+
+    public init(
+        handle: OpaqueResourceHandle,
+        ownerModuleID: ModuleIdentifier,
+        registrationID: UInt64,
+        code: OpaqueResourceValidationFaultCode,
+        requiredBaseFailure: RequiredThemeResourceFailureDTO? = nil
+    ) {
+        self.handle = handle
+        self.ownerModuleID = ownerModuleID
+        self.registrationID = registrationID
+        self.code = code
+        self.requiredBaseFailure = requiredBaseFailure
+    }
+}
+
 public struct OpaqueResourceSnapshot: Sendable {
     public let revision: UInt64
     public let resources: [OpaqueResourceMetadata]
+    public let validationFaults: [OpaqueResourceValidationFault]
 
-    public init(revision: UInt64, resources: [OpaqueResourceMetadata]) {
+    public init(
+        revision: UInt64,
+        resources: [OpaqueResourceMetadata],
+        validationFaults: [OpaqueResourceValidationFault] = []
+    ) {
         self.revision = revision
         self.resources = resources
+        self.validationFaults = validationFaults
     }
 }
 
@@ -267,6 +363,7 @@ public enum RuntimeOpaqueResourceError: Error, Equatable, Sendable {
     case invalidResourceID(OpaqueResourceID)
     case invalidSemanticRole(String)
     case duplicateNamespace(OpaqueResourceNamespaceID)
+    case payloadBackedThemeProviderRegistrationDenied(OpaqueResourceNamespaceID)
     case duplicateResourceID(OpaqueResourceID)
     case duplicatePayload(OpaqueResourceID)
     case missingRequiredResource(OpaqueResourceID)
@@ -352,12 +449,20 @@ actor RuntimeOpaqueResourceRegistry {
     private struct NamespaceOwner: Sendable {
         let moduleID: ModuleIdentifier
         let generation: UInt64
+        let registrationID: UInt64
     }
 
     private struct StoredResource: Sendable {
+        enum Storage: Sendable {
+            case inline(Data)
+            case deferred(OpaqueResourceDataLoader)
+        }
+
         let metadata: OpaqueResourceMetadata
-        let data: Data
+        let declaration: OpaqueResourceDeclaration
+        let storage: Storage
         let ownerGeneration: UInt64
+        let registrationID: UInt64
     }
 
     private struct Observer: Sendable {
@@ -369,8 +474,10 @@ actor RuntimeOpaqueResourceRegistry {
     private var activeModules: [ModuleIdentifier: ActiveModule] = [:]
     private var namespaceOwners: [OpaqueResourceNamespaceID: NamespaceOwner] = [:]
     private var resources: [OpaqueResourceHandle: StoredResource] = [:]
+    private var validationFaults: [OpaqueResourceHandle: OpaqueResourceValidationFault] = [:]
     private var runtimeGeneration: UInt64 = 0
     private var revision: UInt64 = 0
+    private var nextRegistrationID: UInt64 = 0
     private var isRuntimeActive = false
     private var nextObserverID: UInt64 = 0
     private var observers: [UInt64: Observer] = [:]
@@ -387,6 +494,7 @@ actor RuntimeOpaqueResourceRegistry {
         activeModules.removeAll(keepingCapacity: true)
         namespaceOwners.removeAll(keepingCapacity: true)
         resources.removeAll(keepingCapacity: true)
+        validationFaults.removeAll(keepingCapacity: true)
         isRuntimeActive = true
         return runtimeGeneration
     }
@@ -396,6 +504,7 @@ actor RuntimeOpaqueResourceRegistry {
         activeModules.removeAll(keepingCapacity: false)
         namespaceOwners.removeAll(keepingCapacity: false)
         resources.removeAll(keepingCapacity: false)
+        validationFaults.removeAll(keepingCapacity: false)
         isRuntimeActive = false
         finishObservers()
     }
@@ -442,6 +551,9 @@ actor RuntimeOpaqueResourceRegistry {
         }
         let namespaceSet = Set(namespaces)
         resources = resources.filter { !namespaceSet.contains($0.key.namespace) }
+        validationFaults = validationFaults.filter {
+            !namespaceSet.contains($0.key.namespace)
+        }
         revision &+= 1
         notifyObservers()
     }
@@ -492,45 +604,80 @@ actor RuntimeOpaqueResourceRegistry {
         _ registration: OpaqueResourceNamespaceRegistration,
         for lease: RuntimeOpaqueResourceLease
     ) throws {
-        _ = try validate(lease)
+        let module = try validate(lease)
         try Self.validateIdentifier(registration.namespace.rawValue)
             .orThrow(.invalidNamespace(registration.namespace))
         guard namespaceOwners[registration.namespace] == nil else {
             throw RuntimeOpaqueResourceError.duplicateNamespace(registration.namespace)
         }
+        if module.descriptor.policyClass == RuneScribePolicyClasses.themeProvider,
+           registration.resourceLoader == nil
+        {
+            throw RuntimeOpaqueResourceError
+                .payloadBackedThemeProviderRegistrationDenied(registration.namespace)
+        }
+        precondition(
+            nextRegistrationID < UInt64.max,
+            "Opaque resource registration identity exhausted."
+        )
+        nextRegistrationID += 1
+        let registrationID = nextRegistrationID
 
         let declarations = try Self.uniqueDeclarations(registration.declarations)
-        let payloads = try Self.uniquePayloads(registration.payloads)
-        let declarationIDs = Set(declarations.keys)
-        if let undeclared = payloads.keys.first(where: { !declarationIDs.contains($0) }) {
-            throw RuntimeOpaqueResourceError.undeclaredResource(undeclared)
-        }
-        if let missing = declarations.values.first(where: {
-            $0.isRequired && payloads[$0.resourceID] == nil
-        }) {
-            throw RuntimeOpaqueResourceError.missingRequiredResource(missing.resourceID)
-        }
-
         var validated: [StoredResource] = []
-        for resourceID in declarations.keys.sorted() {
-            guard let payload = payloads[resourceID] else { continue }
-            let declaration = declarations[resourceID]!
-            validated.append(
-                try validateResource(
-                    namespace: registration.namespace,
-                    declaration: declaration,
-                    data: payload,
-                    ownerModuleID: lease.sourceModuleID,
-                    ownerGeneration: lease.sourceModuleGeneration
+        if let resourceLoader = registration.resourceLoader {
+            for resourceID in declarations.keys.sorted() {
+                let declaration = declarations[resourceID]!
+                validated.append(
+                    try validateDeclaration(
+                        namespace: registration.namespace,
+                        declaration: declaration,
+                        storage: .deferred(resourceLoader),
+                        ownerModuleID: lease.sourceModuleID,
+                        ownerGeneration: lease.sourceModuleGeneration,
+                        registrationID: registrationID
+                    )
                 )
-            )
+            }
+        } else {
+            let payloads = try Self.uniquePayloads(registration.payloads)
+            let declarationIDs = Set(declarations.keys)
+            if let undeclared = payloads.keys.first(where: {
+                !declarationIDs.contains($0)
+            }) {
+                throw RuntimeOpaqueResourceError.undeclaredResource(undeclared)
+            }
+            if let missing = declarations.values.first(where: {
+                $0.isRequired && payloads[$0.resourceID] == nil
+            }) {
+                throw RuntimeOpaqueResourceError.missingRequiredResource(missing.resourceID)
+            }
+            for resourceID in declarations.keys.sorted() {
+                guard let payload = payloads[resourceID] else { continue }
+                let declaration = declarations[resourceID]!
+                validated.append(
+                    try validateResource(
+                        namespace: registration.namespace,
+                        declaration: declaration,
+                        data: payload,
+                        storage: .inline(payload),
+                        ownerModuleID: lease.sourceModuleID,
+                        ownerGeneration: lease.sourceModuleGeneration,
+                        registrationID: registrationID
+                    )
+                )
+            }
         }
         try validateBudgets(validated)
 
         namespaceOwners[registration.namespace] = NamespaceOwner(
             moduleID: lease.sourceModuleID,
-            generation: lease.sourceModuleGeneration
+            generation: lease.sourceModuleGeneration,
+            registrationID: registrationID
         )
+        validationFaults = validationFaults.filter {
+            $0.key.namespace != registration.namespace
+        }
         for resource in validated {
             resources[resource.metadata.handle] = resource
         }
@@ -544,7 +691,11 @@ actor RuntimeOpaqueResourceRegistry {
         _ = try validate(lease)
         return OpaqueResourceSnapshot(
             revision: revision,
-            resources: resources.values.map(\.metadata).sorted { $0.handle < $1.handle }
+            resources: resources.values.map(\.metadata).sorted { $0.handle < $1.handle },
+            validationFaults: validationFaults.values.sorted {
+                if $0.handle != $1.handle { return $0.handle < $1.handle }
+                return $0.registrationID < $1.registrationID
+            }
         )
     }
 
@@ -561,6 +712,7 @@ actor RuntimeOpaqueResourceRegistry {
         }
         namespaceOwners.removeValue(forKey: namespace)
         resources = resources.filter { $0.key.namespace != namespace }
+        validationFaults = validationFaults.filter { $0.key.namespace != namespace }
         revision &+= 1
         notifyObservers()
     }
@@ -568,21 +720,32 @@ actor RuntimeOpaqueResourceRegistry {
     fileprivate func resolve(
         _ handle: OpaqueResourceHandle,
         for lease: RuntimeOpaqueResourceLease
-    ) throws -> ResolvedOpaqueResource {
+    ) async throws -> ResolvedOpaqueResource {
         _ = try validate(lease)
-        guard namespaceOwners[handle.namespace] != nil else {
+        guard let owner = namespaceOwners[handle.namespace] else {
             throw RuntimeOpaqueResourceError.namespaceUnavailable(handle.namespace)
         }
-        guard let resource = resources[handle] else {
+        guard let resource = resources[handle],
+              resource.registrationID == owner.registrationID
+        else {
             throw RuntimeOpaqueResourceError.resourceUnavailable(handle)
         }
-        return ResolvedOpaqueResource(metadata: resource.metadata, data: resource.data)
+        let data = try await loadAndValidateData(for: resource)
+        _ = try validate(lease)
+        guard let current = resources[handle],
+              let currentOwner = namespaceOwners[handle.namespace],
+              currentOwner.registrationID == resource.registrationID,
+              current.registrationID == resource.registrationID,
+              current.metadata.registrationID == resource.registrationID,
+              current.ownerGeneration == resource.ownerGeneration
+        else { throw RuntimeOpaqueResourceError.resourceUnavailable(handle) }
+        return ResolvedOpaqueResource(metadata: current.metadata, data: data)
     }
 
     func unlockFeedbackSoundData(
         codexID: CodexID,
         semanticID: UnlockFeedbackSoundSemanticID
-    ) -> Data? {
+    ) async -> Data? {
         guard isRuntimeActive else { return nil }
         let expectedSuffix: String = switch semanticID {
         case .micro: "unlock-minor"
@@ -595,11 +758,142 @@ actor RuntimeOpaqueResourceRegistry {
         )
         let matches = resources.values.filter {
             $0.metadata.handle.namespace == namespace
-                && $0.metadata.semanticRole == "unlock-sound-cue"
+                && $0.metadata.semanticRole == ThemeResourceRoles.unlockSound.rawValue
                 && $0.metadata.handle.resourceID.rawValue.hasSuffix(expectedSuffix)
         }
         guard matches.count == 1 else { return nil }
-        return matches[0].data
+        return try? await loadAndValidateData(for: matches[0])
+    }
+
+    private func loadAndValidateData(for resource: StoredResource) async throws -> Data {
+        let expectedRuntimeGeneration = runtimeGeneration
+        do {
+            let data: Data
+            switch resource.storage {
+            case .inline(let inlineData):
+                data = inlineData
+            case .deferred(let resourceLoader):
+                guard let loaded = try await resourceLoader(
+                    resource.declaration.resourceID
+                ) else {
+                    if resource.declaration.isRequired {
+                        throw RuntimeOpaqueResourceError.missingRequiredResource(
+                            resource.declaration.resourceID
+                        )
+                    }
+                    throw RuntimeOpaqueResourceError.resourceUnavailable(
+                        resource.metadata.handle
+                    )
+                }
+                data = loaded
+            }
+            guard isCurrentRegistration(
+                resource,
+                expectedRuntimeGeneration: expectedRuntimeGeneration
+            ), let current = resources[resource.metadata.handle]
+            else {
+                throw RuntimeOpaqueResourceError.resourceUnavailable(
+                    resource.metadata.handle
+                )
+            }
+            _ = try validateResource(
+                namespace: resource.metadata.handle.namespace,
+                declaration: resource.declaration,
+                data: data,
+                storage: current.storage,
+                ownerModuleID: resource.metadata.ownerModuleID,
+                ownerGeneration: resource.ownerGeneration,
+                registrationID: resource.registrationID
+            )
+            return data
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            guard isCurrentRegistration(
+                resource,
+                expectedRuntimeGeneration: expectedRuntimeGeneration
+            ) else {
+                throw RuntimeOpaqueResourceError.resourceUnavailable(
+                    resource.metadata.handle
+                )
+            }
+            recordValidationFaultIfNeeded(for: resource, error: error)
+            throw error
+        }
+    }
+
+    private func isCurrentRegistration(
+        _ resource: StoredResource,
+        expectedRuntimeGeneration: UInt64
+    ) -> Bool {
+        guard isRuntimeActive,
+              runtimeGeneration == expectedRuntimeGeneration,
+              let current = resources[resource.metadata.handle],
+              current.ownerGeneration == resource.ownerGeneration,
+              current.registrationID == resource.registrationID,
+              current.metadata.registrationID == resource.registrationID,
+              current.declaration == resource.declaration,
+              let owner = namespaceOwners[resource.metadata.handle.namespace],
+              owner.moduleID == resource.metadata.ownerModuleID,
+              owner.generation == resource.ownerGeneration,
+              owner.registrationID == resource.registrationID
+        else { return false }
+        return true
+    }
+
+    private func recordValidationFaultIfNeeded(
+        for resource: StoredResource,
+        error: Error
+    ) {
+        guard resource.declaration.isRequired,
+              !Self.isStaleOrCancellationFailure(error),
+              validationFaults[resource.metadata.handle]?.registrationID
+                != resource.registrationID
+        else { return }
+        validationFaults[resource.metadata.handle] = OpaqueResourceValidationFault(
+            handle: resource.metadata.handle,
+            ownerModuleID: resource.metadata.ownerModuleID,
+            registrationID: resource.registrationID,
+            code: Self.validationFaultCode(for: error),
+            requiredBaseFailure: error as? RequiredThemeResourceFailureDTO
+        )
+        revision &+= 1
+        notifyObservers()
+    }
+
+    private static func isStaleOrCancellationFailure(_ error: Error) -> Bool {
+        if error is CancellationError { return true }
+        guard let runtimeError = error as? RuneScribeRuntimeError else { return false }
+        switch runtimeError {
+        case .runtimeNotRunning, .moduleNotActive, .staleClient, .contextInactive,
+             .operationCancelled:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private static func validationFaultCode(
+        for error: Error
+    ) -> OpaqueResourceValidationFaultCode {
+        if let failure = error as? RequiredThemeResourceFailureDTO {
+            return failure.errorCode == .resourceUnavailable
+                ? .missingRequiredResource
+                : .resourceMismatch
+        }
+        if let failure = error as? RuntimeVerifiedApplicationResourceFailure {
+            if case .resourceUnavailable = failure { return .missingRequiredResource }
+            return .resourceMismatch
+        }
+        guard let resourceError = error as? RuntimeOpaqueResourceError else {
+            return .resourceMismatch
+        }
+        switch resourceError {
+        case .missingRequiredResource, .namespaceUnavailable, .resourceUnavailable:
+            return .missingRequiredResource
+        default:
+            return .resourceMismatch
+        }
     }
 
     fileprivate func changes(
@@ -649,8 +943,42 @@ actor RuntimeOpaqueResourceRegistry {
         namespace: OpaqueResourceNamespaceID,
         declaration: OpaqueResourceDeclaration,
         data: Data,
+        storage: StoredResource.Storage,
         ownerModuleID: ModuleIdentifier,
-        ownerGeneration: UInt64
+        ownerGeneration: UInt64,
+        registrationID: UInt64
+    ) throws -> StoredResource {
+        let resource = try validateDeclaration(
+            namespace: namespace,
+            declaration: declaration,
+            storage: storage,
+            ownerModuleID: ownerModuleID,
+            ownerGeneration: ownerGeneration,
+            registrationID: registrationID
+        )
+        guard declaration.byteCount == data.count else {
+            throw RuntimeOpaqueResourceError.byteCountMismatch(declaration.resourceID)
+        }
+        let digest = RuntimeIntegrityDigest.sha256Hex(data)
+        guard digest == declaration.sha256 else {
+            throw RuntimeOpaqueResourceError.hashMismatch(declaration.resourceID)
+        }
+        try Self.validateMediaContent(declaration, data: data)
+        try validatePixelSize(
+            declaration,
+            data: data,
+            category: resource.metadata.category
+        )
+        return resource
+    }
+
+    private func validateDeclaration(
+        namespace: OpaqueResourceNamespaceID,
+        declaration: OpaqueResourceDeclaration,
+        storage: StoredResource.Storage,
+        ownerModuleID: ModuleIdentifier,
+        ownerGeneration: UInt64,
+        registrationID: UInt64
     ) throws -> StoredResource {
         guard Self.validateIdentifier(declaration.resourceID.rawValue) else {
             throw RuntimeOpaqueResourceError.invalidResourceID(declaration.resourceID)
@@ -661,24 +989,16 @@ actor RuntimeOpaqueResourceRegistry {
         guard declaration.byteCount >= 0 else {
             throw RuntimeOpaqueResourceError.invalidByteCount(declaration.resourceID)
         }
-        guard declaration.byteCount == data.count else {
-            throw RuntimeOpaqueResourceError.byteCountMismatch(declaration.resourceID)
-        }
         guard declaration.sha256.range(
             of: #"^[0-9a-f]{64}$"#,
             options: .regularExpression
         ) != nil else {
             throw RuntimeOpaqueResourceError.invalidSHA256(declaration.resourceID)
         }
-        let digest = RuntimeIntegrityDigest.sha256Hex(data)
-        guard digest == declaration.sha256 else {
-            throw RuntimeOpaqueResourceError.hashMismatch(declaration.resourceID)
-        }
 
         let category = try Self.category(for: declaration.mediaType)
-        try Self.validateMediaContent(declaration, data: data)
         try validatePerResourceBudget(declaration, category: category)
-        try validatePixelSize(declaration, data: data, category: category)
+        try validateDeclaredPixelSize(declaration, category: category)
         let handle = OpaqueResourceHandle(
             namespace: namespace,
             resourceID: declaration.resourceID
@@ -687,6 +1007,7 @@ actor RuntimeOpaqueResourceRegistry {
             metadata: OpaqueResourceMetadata(
                 handle: handle,
                 ownerModuleID: ownerModuleID,
+                registrationID: registrationID,
                 semanticRole: declaration.semanticRole,
                 mediaType: declaration.mediaType,
                 category: category,
@@ -694,9 +1015,37 @@ actor RuntimeOpaqueResourceRegistry {
                 sha256: declaration.sha256,
                 pixelSize: declaration.pixelSize
             ),
-            data: data,
-            ownerGeneration: ownerGeneration
+            declaration: declaration,
+            storage: storage,
+            ownerGeneration: ownerGeneration,
+            registrationID: registrationID
         )
+    }
+
+    private func validateDeclaredPixelSize(
+        _ declaration: OpaqueResourceDeclaration,
+        category: OpaqueResourceCategory
+    ) throws {
+        guard category == .image else {
+            guard declaration.pixelSize == nil else {
+                throw RuntimeOpaqueResourceError.pixelSizeMismatch(declaration.resourceID)
+            }
+            return
+        }
+        if declaration.mediaType == .pdf, declaration.pixelSize == nil {
+            return
+        }
+        guard let expected = declaration.pixelSize,
+              expected.width > 0,
+              expected.height > 0
+        else {
+            throw RuntimeOpaqueResourceError.pixelSizeRequired(declaration.resourceID)
+        }
+        guard expected.width <= budget.maximumImageDimension,
+              expected.height <= budget.maximumImageDimension
+        else {
+            throw RuntimeOpaqueResourceError.imageDimensionExceeded(declaration.resourceID)
+        }
     }
 
     private func validatePerResourceBudget(

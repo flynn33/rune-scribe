@@ -5340,12 +5340,35 @@ private func scan(_ sources: [ParsedSource]) -> Set<Finding> {
     let bootstrapPath = "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift"
     let bootstrapMembers: Set<String> = ["factory", "manifest", "manifestData"]
     for source in sources where isConsumerPath(source.relativePath) {
-        for node in source.nodes {
-            let variableTypes = lexicalVariableTypes(
+        var lexicalTypesByFunctionID: [SyntaxIdentifier: [String: Set<String>]] = [:]
+        var topLevelLexicalTypes: [String: Set<String>]?
+
+        func cachedLexicalVariableTypes(at node: Syntax) -> [String: Set<String>] {
+            if let functionID = enclosingFunction(node)?.id {
+                if let cached = lexicalTypesByFunctionID[functionID] {
+                    return cached
+                }
+                let resolved = lexicalVariableTypes(
+                    at: node,
+                    in: source,
+                    functionReturns: receiverFunctionReturnTypes
+                )
+                lexicalTypesByFunctionID[functionID] = resolved
+                return resolved
+            }
+            if let topLevelLexicalTypes {
+                return topLevelLexicalTypes
+            }
+            let resolved = lexicalVariableTypes(
                 at: node,
                 in: source,
                 functionReturns: receiverFunctionReturnTypes
             )
+            topLevelLexicalTypes = resolved
+            return resolved
+        }
+
+        for node in source.nodes {
             if let declaration = node.as(ImportDeclSyntax.self),
                declaration.path.trimmedDescription == "RuneScribeCoreModule",
                source.relativePath != bootstrapPath
@@ -5423,6 +5446,7 @@ private func scan(_ sources: [ParsedSource]) -> Set<Finding> {
             }
 
             if let call = node.as(FunctionCallExprSyntax.self) {
+                let variableTypes = cachedLexicalVariableTypes(at: node)
                 var callableTypes = expandedAliasTargets(
                     inferredExpressionTypes(
                         call.calledExpression,
@@ -5476,6 +5500,7 @@ private func scan(_ sources: [ParsedSource]) -> Set<Finding> {
             }
 
             if let subscriptCall = node.as(SubscriptCallExprSyntax.self) {
+                let variableTypes = cachedLexicalVariableTypes(at: node)
                 let callLabels = subscriptCall.arguments.map { $0.label?.text ?? "_" }
                 let receiverTypes = inferredExpressionTypes(
                     subscriptCall.calledExpression,
@@ -5565,6 +5590,7 @@ private func scan(_ sources: [ParsedSource]) -> Set<Finding> {
             }
 
             guard let member = node.as(MemberAccessExprSyntax.self) else { continue }
+            let variableTypes = cachedLexicalVariableTypes(at: node)
             let memberName = member.declName.baseName.text
             let baseName = directExpressionName(member.base)
             let receiverTypes = inferredExpressionTypes(

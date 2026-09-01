@@ -81,7 +81,7 @@ public enum NorseBaseThemeDescriptorFactory {
             id: codexID,
             entitlementID: RuneScribeUnlockIDs.norseCodex,
             displayName: localized("codex.norse.name", "Norse Codex"),
-            shortDescription: localized("codex.norse.tagline", "The Founding Codex."),
+            shortDescription: localized("codex.norse.tagline", "The Raven Forge"),
             longDescription: localized(
                 "codex.norse.description",
                 "The permanent Rune Scribe Base Codex, shaped from weathered stone, carved dark wood, forged iron, and restrained knotwork."
@@ -161,9 +161,9 @@ public enum NorseBaseThemeDescriptorFactory {
         rightsID: ThemeProvenanceID
     ) throws -> [ThemeRelicDescriptor] {
         let definitions: [RelicDefinition] = [
-            RelicDefinition(id: "relic.norse.runestone-tablet", name: "Runestone Tablet", description: "A broad weathered stone tablet with a dimensional iron-and-knotwork border and paired raven crest.", rarity: .forged, availability: .included, isDefault: true, width: 4, height: 3, safeArea: (0.23, 0.30, 0.54, 0.45), anchors: [(0.23, 0.78, .lowerLeft), (0.77, 0.78, .lowerRight)], maximumLines: 7),
-            RelicDefinition(id: "relic.norse.dragonwood-plaque", name: "Dragonwood Plaque", description: "A tall plaque of dark carved wood enclosed by forged iron and crowned by a sculpted dragon.", rarity: .inscribed, availability: .earned, width: 3, height: 4, safeArea: (0.27, 0.31, 0.46, 0.42), anchors: [(0.30, 0.78, .lowerLeft), (0.70, 0.78, .lowerRight)], maximumLines: 6),
-            RelicDefinition(id: "relic.norse.stormforged-stele", name: "Stormforged Stele", description: "A tall war-stele of weathered stone and blackened iron beneath a carved hammer crest.", rarity: .rare, availability: .earned, width: 3, height: 4, safeArea: (0.27, 0.36, 0.46, 0.40), anchors: [(0.30, 0.81, .lowerLeft), (0.70, 0.81, .lowerRight)], maximumLines: 6),
+            RelicDefinition(id: "relic.norse.runestone-tablet", name: "Runestone Tablet", description: "Weathered stone with carved runes and iron knotwork. The canonical Norse canvas.", rarity: .forged, availability: .included, isDefault: true, width: 4, height: 3, safeArea: (0.23, 0.30, 0.54, 0.45), anchors: [(0.23, 0.78, .lowerLeft), (0.77, 0.78, .lowerRight)], maximumLines: 7),
+            RelicDefinition(id: "relic.norse.dragonwood-plaque", name: "Dragonwood Plaque", description: "Dark dragonwood framed in forged iron. Ancient and resilient.", rarity: .inscribed, availability: .earned, width: 3, height: 4, safeArea: (0.27, 0.31, 0.46, 0.42), anchors: [(0.30, 0.78, .lowerLeft), (0.70, 0.78, .lowerRight)], maximumLines: 6),
+            RelicDefinition(id: "relic.norse.stormforged-stele", name: "Stormforged Stele", description: "Tall war-stele of stone and iron. Marked by storms and victories.", rarity: .rare, availability: .earned, width: 3, height: 4, safeArea: (0.27, 0.36, 0.46, 0.40), anchors: [(0.30, 0.81, .lowerLeft), (0.70, 0.81, .lowerRight)], maximumLines: 6),
         ]
 
         return try definitions.map { definition in
@@ -197,7 +197,7 @@ public enum NorseBaseThemeDescriptorFactory {
             ("seal.norse.valknut", "Valknut Seal", "An aged bronze medallion bearing a sculpted interlocked Valknut.", .forged, .included),
             ("seal.norse.ravenshield", "Ravenshield Seal", "A forged shield medallion bearing a sculpted raven.", .forged, .included),
             ("seal.norse.mjolnir", "Mjolnir Seal", "A relief medallion bearing the hammer Mjolnir.", .inscribed, .earned),
-            ("seal.norse.wolkin", "Wolkin Seal", "An aged medallion bearing a longship beneath the northern sky.", .inscribed, .earned),
+            ("seal.norse.wolkin", "Wolkin Seal", "An aged medallion bearing a sculpted wolf beneath the northern sky.", .inscribed, .earned),
             ("seal.norse.yggdrasil", "Yggdrasil Seal", "A sculpted medallion bearing the world tree Yggdrasil.", .inscribed, .earned),
             ("seal.norse.berserk", "Berserk Seal", "A dark forged medallion bearing a battle-worn warrior mark.", .rare, .earned),
         ]
@@ -206,7 +206,7 @@ public enum NorseBaseThemeDescriptorFactory {
             let resources = NorseBaseThemeResourceIDs.sealResourceIDs[id]!
             return try ThemeSealDescriptor(
                 metadata: artifact(id: id, codexID: codexID, name: name, description: description, rarity: rarity, availability: availability, accessibilityHint: "Places the \(name) at an approved anchor without covering the inscription.", rightsID: rightsID),
-                vectorResourceID: resources.vector,
+                colorResourceID: resources.color,
                 monochromeFallbackResourceID: resources.monochrome,
                 thumbnailResourceID: resources.thumbnail,
                 allowedScale: ThemeScalarRange(minimum: 0.12, maximum: 0.24),
@@ -287,7 +287,7 @@ public enum NorseBaseThemeDescriptorFactory {
     private static func palette() throws -> ThemeSemanticPalette {
         let color: (String) -> ThemeSemanticColor = { ThemeSemanticColor(rawValue: $0)! }
         return try ThemeSemanticPalette(
-            backgroundPrimary: color("#080A1E"), backgroundSecondary: color("#14082E"),
+            backgroundPrimary: color("#051320"), backgroundSecondary: color("#14082E"),
             surfacePrimary: color("#1A1E30"), surfaceElevated: color("#252A3C"),
             textPrimary: color("#F4EFE5"), textSecondary: color("#A0A8B8"),
             textInverse: color("#080A1E"), accentPrimary: color("#D4971A"),

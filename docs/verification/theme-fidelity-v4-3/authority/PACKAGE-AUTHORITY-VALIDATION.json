@@ -1,0 +1,15 @@
+{
+  "result": "PASS",
+  "entries": 400,
+  "mappings": 1104,
+  "canonicalImageMappings": 400,
+  "responsiveStructuralMappings": 700,
+  "negativeInvariantMappings": 4,
+  "canonicalCandidates": 50,
+  "conflictingCandidateReferenceBindings": 0,
+  "deterministicSeeds": 100,
+  "runtimeProbeDefinitions": 50,
+  "resolvedV4_2ConflictingEntries": 21,
+  "runtimeProbeInstances": 576,
+  "uniqueReferenceIdentities": 49
+}

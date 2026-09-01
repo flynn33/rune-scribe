@@ -1,0 +1,1262 @@
+{
+  "crestLayouts": {
+    "staticFallback": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "outputPixels": [
+        1024,
+        1024
+      ],
+      "renderedPixels": [
+        1024,
+        1024
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1254,
+        1254
+      ],
+      "uniformScale": 0.8165869218500797
+    },
+    "thumbnail": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "outputPixels": [
+        512,
+        512
+      ],
+      "renderedPixels": [
+        512,
+        512
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1254,
+        1254
+      ],
+      "uniformScale": 0.4082934609250399
+    }
+  },
+  "frameLayouts": {
+    "staticFallback": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "outputPixels": [
+        2048,
+        1536
+      ],
+      "renderedPixels": [
+        2048,
+        1536
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1448,
+        1086
+      ],
+      "uniformScale": 1.4143646408839778
+    },
+    "thumbnail": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        0,
+        0
+      ],
+      "outputPixels": [
+        512,
+        384
+      ],
+      "renderedPixels": [
+        512,
+        384
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1448,
+        1086
+      ],
+      "uniformScale": 0.35359116022099446
+    }
+  },
+  "generatedAtUTC": "2026-08-27T00:00:00Z",
+  "id": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+  "licenseNotice": "Project-local proprietary production masters; owner visual review remains pending",
+  "outputs": [
+    {
+      "bytes": 979120,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/crest/gloamthorn-gloam-sovereign-static-fallback.png",
+      "resourceID": "resource.crest.gloamthorn.gloam-sovereign.output.crest-static-fallback",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "crest.static-fallback",
+      "sha256": "9a0176b1c869a9d8db124f3c681f23e0a556c844fdc47973f6c9952d33bb5769"
+    },
+    {
+      "bytes": 278857,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/crest/gloamthorn-gloam-sovereign-thumbnail.png",
+      "resourceID": "resource.crest.gloamthorn.gloam-sovereign.output.crest-thumbnail",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "crest.thumbnail",
+      "sha256": "9c0cd583b85dcf419b1e50fd8251961c9d829072d6f851eee1abe9e878ffd685"
+    },
+    {
+      "bytes": 1747864,
+      "dimensions": [
+        2048,
+        1536
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/frame/gloamthorn-briar-court-static-fallback.png",
+      "resourceID": "resource.frame.gloamthorn.briar-court.output.frame-static-fallback",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "frame.static-fallback",
+      "sha256": "89b7d1404bf998ce83b84b6a02a68fbf7cc0e8c8f2e83b546e1823fd9884332e"
+    },
+    {
+      "bytes": 155746,
+      "dimensions": [
+        512,
+        384
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/frame/gloamthorn-briar-court-thumbnail.png",
+      "resourceID": "resource.frame.gloamthorn.briar-court.output.frame-thumbnail",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "frame.thumbnail",
+      "sha256": "7e2b6c8c9046e23585c62e2f4a5fcfb6e21b36140042ae153bbe421b52351899"
+    },
+    {
+      "bytes": 477397,
+      "dimensions": [
+        1600,
+        1000
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/gloamthorn-card-border.png",
+      "resourceID": "resource.panel.gloamthorn.card-border",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "panel.card-border",
+      "sha256": "fa50d02e40573fa4f3bd9e31ea0cdfe91d07480beb08ba06611bc126f23f8666"
+    },
+    {
+      "bytes": 284807,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/gloamthorn-corner-ornament.png",
+      "resourceID": "resource.panel.gloamthorn.corner-ornament",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "panel.corner-ornament",
+      "sha256": "dea68075096fe607e91d4f45ce0c1695c8c0dbcea95ab6884ef0065b6f54817a"
+    },
+    {
+      "bytes": 79618,
+      "dimensions": [
+        1600,
+        128
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/gloamthorn-divider.png",
+      "resourceID": "resource.panel.gloamthorn.divider",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "panel.divider",
+      "sha256": "2a059e41a790d3788cd079eea47a9b89c838f97d5c8beca359fd6cca7ad77791"
+    },
+    {
+      "bytes": 203533,
+      "dimensions": [
+        1200,
+        320
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/gloamthorn-primary-button.png",
+      "resourceID": "resource.panel.gloamthorn.primary-button",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "panel.primary-button",
+      "sha256": "2fdfbb922e928e8763654c356dd79fc6aff651384a0b0db6875896cf04746f7c"
+    },
+    {
+      "bytes": 124525,
+      "dimensions": [
+        1000,
+        240
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/gloamthorn-tab-selector.png",
+      "resourceID": "resource.panel.gloamthorn.tab-selector",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "panel.tab-selector",
+      "sha256": "44672129a794b943c17f11428a1ae0c732561b3a9ac7d9f48a69a266a43637bb"
+    },
+    {
+      "bytes": 2401997,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/gloamthorn-nightthorn-tablet-high-contrast.png",
+      "resourceID": "resource.relic.gloamthorn.nightthorn-tablet.output.relic-high-contrast",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "relic.high-contrast",
+      "sha256": "beffa00d9b899058e1c4b1a51ca38217812e4a6d1b5545fb4e395a57838a7a3e"
+    },
+    {
+      "bytes": 2200759,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/gloamthorn-nightthorn-tablet-master.png",
+      "resourceID": "resource.relic.gloamthorn.nightthorn-tablet.output.relic-master",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "relic.master",
+      "sha256": "d346873fe85a64d87e601d2dfbf0f0036a23dd940078105d855982eb6a9fa78d"
+    },
+    {
+      "bytes": 2200759,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/gloamthorn-nightthorn-tablet-static-share-fallback.png",
+      "resourceID": "resource.relic.gloamthorn.nightthorn-tablet.output.relic-static-share-fallback",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "relic.static-share-fallback",
+      "sha256": "d346873fe85a64d87e601d2dfbf0f0036a23dd940078105d855982eb6a9fa78d"
+    },
+    {
+      "bytes": 280663,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/gloamthorn-nightthorn-tablet-thumbnail.png",
+      "resourceID": "resource.relic.gloamthorn.nightthorn-tablet.output.relic-thumbnail",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "relic.thumbnail",
+      "sha256": "8c74f9ac7d8698d303386aab34b98c9726a200356193a7c665ce57fdfdecd46f"
+    },
+    {
+      "bytes": 1412895,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-echo-wisp-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "5c06834ee48dd48ed8c54a85b27c2b35c8290daebe929b069e837cc7f34890cb"
+    },
+    {
+      "bytes": 1044189,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-echo-wisp-monochrome-fallback.png",
+      "resourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "a16376ab9aa482ee3f4969d90a7312bbe894f9bcc9f664de12be808695dfeb6f"
+    },
+    {
+      "bytes": 375539,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-echo-wisp-thumbnail.png",
+      "resourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "1795caabe8bab0cc0e7f3f3b307e13541b9cf50d64c2d764f3fc0fb9fd0d4566"
+    },
+    {
+      "bytes": 5193,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/gloamthorn-echo-wisp-vector-master.pdf",
+      "resourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.gloamthorn.echo.wisp.svg",
+      "role": "seal.vector-master",
+      "sha256": "1b12e7f7b305a1102a3c0390c7693c56f5390571103ff1bf36456124273af28d"
+    },
+    {
+      "bytes": 1438181,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-eclipse-bloom-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "434ea3463d51be7cbea4b9f02e04ff4e2a7cae632be3be395837d3b7da5f7098"
+    },
+    {
+      "bytes": 1026915,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-eclipse-bloom-monochrome-fallback.png",
+      "resourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "cc07b3880cfb9172da51245ab0cf1101ec0df314c0a1af1d1e4f12646b68e071"
+    },
+    {
+      "bytes": 386680,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-eclipse-bloom-thumbnail.png",
+      "resourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "4e1379b94a5b8586d1b65489ceea6d4a368bcc7dcd616215834bbec1cbc6b5a5"
+    },
+    {
+      "bytes": 9138,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/gloamthorn-eclipse-bloom-vector-master.pdf",
+      "resourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.gloamthorn.eclipse.bloom.svg",
+      "role": "seal.vector-master",
+      "sha256": "792eb0965a77cdf3fe2b376bf51de9747f0296fc28cbb37bb1cd83f344d32f60"
+    },
+    {
+      "bytes": 1664134,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-nightglass-moth-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "5e7995658b9a5b2e7c091c136642c4e589185d06f2d98d406257eb27907a6e7b"
+    },
+    {
+      "bytes": 1223515,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-nightglass-moth-monochrome-fallback.png",
+      "resourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "58c8115771484d95e298f09410e46b07d2c4c3b24dcb4b7a041064d4003408b1"
+    },
+    {
+      "bytes": 446642,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-nightglass-moth-thumbnail.png",
+      "resourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "96344b56db0c7fddf7828e254165f9bea4300caca60e1bda60e5c48c17841d21"
+    },
+    {
+      "bytes": 5262,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/gloamthorn-nightglass-moth-vector-master.pdf",
+      "resourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.gloamthorn.nightglass.moth.svg",
+      "role": "seal.vector-master",
+      "sha256": "074f56f5c24cccf0bf2e3578304dd79b4e5cbfb3e87b193fb5508a84a1a9211a"
+    },
+    {
+      "bytes": 1594839,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-pact-crown-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.pact-crown.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "60a00cae9959662255cf36f2a903b24ab8a6dd73203b76dfd9f1dd7e7b7e99de"
+    },
+    {
+      "bytes": 1146123,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-pact-crown-monochrome-fallback.png",
+      "resourceID": "resource.seal.gloamthorn.pact-crown.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "2943c82f39e64d6a2df5d848e3e05c882b52e9b1a95e0f250f022b8b17ae044a"
+    },
+    {
+      "bytes": 429146,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-pact-crown-thumbnail.png",
+      "resourceID": "resource.seal.gloamthorn.pact-crown.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "04a2fd6cfdd3eff11a55e043a615631d2f9af1d0d370736e02415f4ba191e1b3"
+    },
+    {
+      "bytes": 2674,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/gloamthorn-pact-crown-vector-master.pdf",
+      "resourceID": "resource.seal.gloamthorn.pact-crown.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.gloamthorn.pact.crown.svg",
+      "role": "seal.vector-master",
+      "sha256": "45613ebfd4471e719cb9cfa1d16ffc95601b7cb68ba65ca9027cc5f00c42d01e"
+    },
+    {
+      "bytes": 1528843,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-thornmoon-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.thornmoon.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "5c0eaf3029d47c8e66d660f901282ac956bd93f74d9fa03f25e8c8038fa24dcb"
+    },
+    {
+      "bytes": 1097261,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-thornmoon-monochrome-fallback.png",
+      "resourceID": "resource.seal.gloamthorn.thornmoon.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "69fbacdf67ecb602ae1443e935227d1aa69fb2b0344882fc58396534bf000911"
+    },
+    {
+      "bytes": 407708,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-thornmoon-thumbnail.png",
+      "resourceID": "resource.seal.gloamthorn.thornmoon.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "59b3e36f483e4eba3b0558d9ed912d992594274ded26c61d1463514d10787498"
+    },
+    {
+      "bytes": 4741,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/gloamthorn-thornmoon-vector-master.pdf",
+      "resourceID": "resource.seal.gloamthorn.thornmoon.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.gloamthorn.thornmoon.svg",
+      "role": "seal.vector-master",
+      "sha256": "98eb2245f23d9064c3814f0e1d76ce933ef71fbc1fcd25b0e6a3664d7a95ff68"
+    },
+    {
+      "bytes": 1728682,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-veiled-serpent-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "1f5acacce87d66fdb74885f6b19d93b739bcb8f9934d2dcebae98d40aa9d37c3"
+    },
+    {
+      "bytes": 1287783,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-veiled-serpent-monochrome-fallback.png",
+      "resourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "bd98c74570d249cf1f7d05472f1d9bdb9b13ec1aec2fcca174292e628ee8cbd3"
+    },
+    {
+      "bytes": 448264,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/gloamthorn-veiled-serpent-thumbnail.png",
+      "resourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "c2fabb7861284bc553de2925fbea9cf4934e8a20aea42275eb95a3d20b1cbc20"
+    },
+    {
+      "bytes": 6686,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/gloamthorn-veiled-serpent-vector-master.pdf",
+      "resourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.gloamthorn.veiled.serpent.svg",
+      "role": "seal.vector-master",
+      "sha256": "bdb15ec2ae7f1a037c368bba24613b89337af38ef89e8ca50dd4d841e2a754ca"
+    },
+    {
+      "bytes": 2015167,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/gloamthorn-vault-card.png",
+      "resourceID": "resource.vault.gloamthorn.codex.output.vault-card",
+      "rightsID": "prov.Production.Sources.gloamthorn.gloamthorn.vault.recipe.json",
+      "role": "vault.card",
+      "sha256": "2f48978d1c150a737564050fe45ff88f12a3e5845a1ef8b1885e98e3903053cf"
+    },
+    {
+      "bytes": 1906138,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/gloamthorn-vault-encountered.png",
+      "resourceID": "resource.vault.gloamthorn.codex.output.vault-encountered",
+      "rightsID": "prov.Production.Sources.gloamthorn.gloamthorn.vault.recipe.json",
+      "role": "vault.encountered",
+      "sha256": "a5480aa4d1e722c26adf390f39e4a87a4ee95f77851e436ab6d2272de73b1407"
+    },
+    {
+      "bytes": 974128,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/gloamthorn-vault-locked.png",
+      "resourceID": "resource.vault.gloamthorn.codex.output.vault-locked-silhouette",
+      "rightsID": "prov.Production.Sources.gloamthorn.gloamthorn.vault.recipe.json",
+      "role": "vault.locked-silhouette",
+      "sha256": "b674a5011644eaee9aaddbd18641fcfcadc6539d2a8aebdc0293d8bbb4762bef"
+    },
+    {
+      "bytes": 1982527,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/gloamthorn-vault-selected.png",
+      "resourceID": "resource.vault.gloamthorn.codex.output.vault-selected",
+      "rightsID": "prov.Production.Sources.gloamthorn.gloamthorn.vault.recipe.json",
+      "role": "vault.selected",
+      "sha256": "8e76b085fa2335c65c9411f5265979c684ae1957866145e9e46dd2b0fd97d424"
+    },
+    {
+      "bytes": 1301040,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/gloamthorn-vault-unavailable.png",
+      "resourceID": "resource.vault.gloamthorn.codex.output.vault-unavailable",
+      "rightsID": "prov.Production.Sources.gloamthorn.gloamthorn.vault.recipe.json",
+      "role": "vault.unavailable",
+      "sha256": "a57dea2adeb2b9f665c2a673925d95fb9eaeda323a958fadca9b06edf26a5240"
+    }
+  ],
+  "ownerReview": "PENDING",
+  "panelNineSlicePolicy": {
+    "composition": "independent uniformly scaled protected corners plus the four contiguous between-corner edge intervals; transparent center; no whole-frame nonuniform resize",
+    "edgePreparation": "one shared uniform scale for every corner and edge cross-axis, followed by running-axis-only edge stretch",
+    "edgeResampling": "LANCZOS one-axis edge stretch",
+    "horizontalEdgeInterval": [
+      320,
+      1128
+    ],
+    "joinPolicy": "each edge begins at the source pixel adjacent to its protected corner, uses the same cross-axis scale as that corner, and underlaps the corner by two target pixels",
+    "protectedContentScale": "minimum target-to-source cap ratio shared by all four sides",
+    "sourceCapInsets": {
+      "bottom": 300,
+      "left": 320,
+      "right": 320,
+      "top": 300
+    },
+    "targetOutputs": {
+      "card-border": {
+        "capInsets": {
+          "bottom": 150,
+          "left": 170,
+          "right": 170,
+          "top": 150
+        },
+        "dimensions": [
+          1600,
+          1000
+        ]
+      },
+      "corner-ornament": {
+        "capInsets": null,
+        "dimensions": [
+          512,
+          512
+        ]
+      },
+      "divider": {
+        "capInsets": {
+          "bottom": 48,
+          "left": 360,
+          "right": 360,
+          "top": 48
+        },
+        "dimensions": [
+          1600,
+          128
+        ]
+      },
+      "primary-button": {
+        "capInsets": {
+          "bottom": 104,
+          "left": 190,
+          "right": 190,
+          "top": 104
+        },
+        "dimensions": [
+          1200,
+          320
+        ]
+      },
+      "tab-selector": {
+        "capInsets": {
+          "bottom": 76,
+          "left": 170,
+          "right": 170,
+          "top": 76
+        },
+        "dimensions": [
+          1000,
+          240
+        ]
+      }
+    },
+    "verticalEdgeInterval": [
+      300,
+      786
+    ]
+  },
+  "pipeline": "scripts/build-sunspire-wildwood-gloamthorn-v43-assets.py",
+  "pipelineSHA256": "0c297e03ac703ee1d786fe9aa1d6fd8a003452824447ca109876e474784a578f",
+  "relicLayouts": {
+    "nightthorn-tablet": {
+      "master": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          1600,
+          1200
+        ],
+        "renderedPixels": [
+          1600,
+          1200
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1600,
+          1200
+        ],
+        "uniformScale": 1.0
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          64
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          384
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1600,
+          1200
+        ],
+        "uniformScale": 0.32
+      }
+    }
+  },
+  "rightsOwner": "Raven Forge Software",
+  "schemaVersion": "1.0",
+  "sealLayouts": {
+    "echo-wisp": {
+      "colorMaster": {
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ]
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "eclipse-bloom": {
+      "colorMaster": {
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ]
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "nightglass-moth": {
+      "colorMaster": {
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ]
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "pact-crown": {
+      "colorMaster": {
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ]
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "thornmoon": {
+      "colorMaster": {
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ]
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "veiled-serpent": {
+      "colorMaster": {
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ]
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    }
+  },
+  "sourceMasters": [
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood-gloamthorn-ornament-master-record-v4.3.json",
+        "sha256": "50f3fac8dba3b920499ed0fabba4d59dbdfcea8b573bbe2f10abaf86a1edab8a"
+      },
+      "assetID": "frame.gloamthorn.briar-court",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/ornament/gloamthorn-briar-court-frame-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "Frame",
+      "runtimeBundled": false,
+      "sha256": "65c9c0eea4b9891a718075aa34ec340db3d174b04dc6a355d293d6c3b7df53e7"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood-gloamthorn-ornament-master-record-v4.3.json",
+        "sha256": "50f3fac8dba3b920499ed0fabba4d59dbdfcea8b573bbe2f10abaf86a1edab8a"
+      },
+      "assetID": "crest.gloamthorn.gloam-sovereign",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/ornament/gloamthorn-gloam-sovereign-crest-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "Crest",
+      "runtimeBundled": false,
+      "sha256": "19acfb86790a6c2fe983c740d143bc439ff5ba46bf20942d2dee5a2f6ee84789"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/environment-and-relic-master-record-v4.3.json",
+        "sha256": "5cd76eacc482a65fdaffa8d4ec69731a1db51f0e2a133938ed30c1cbbd89e72c"
+      },
+      "assetID": "gloamthorn.nightthorn-tablet.clean-master",
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/gloamthorn-nightthorn-tablet-clean-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "Relic",
+      "runtimeBundled": false,
+      "sha256": "f5b024959ef7146102064cb0a3222291ccb378729dbc83b89949a1329ffda795"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/Gloamthorn-Seal-Source-Masters-v4.3.json",
+        "sha256": "ffa14ced33e7f46f78966e23b8d1c583015d16bddbe7e45fcc33bcb94c8e4a03"
+      },
+      "assetID": "seal.gloamthorn.echo-wisp",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/gloamthorn-echo-wisp-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "db3afe786cb5c27ddb1a0f670e2ff1c9593346247e841d82a8d58f6150613ee3",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/Gloamthorn-Seal-Source-Masters-v4.3.json",
+        "sha256": "ffa14ced33e7f46f78966e23b8d1c583015d16bddbe7e45fcc33bcb94c8e4a03"
+      },
+      "assetID": "seal.gloamthorn.eclipse-bloom",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/gloamthorn-eclipse-bloom-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "76ea85b7df541bd4f7576b3ae8b6be732aca25e655127d1f100b3e9fd43cef61",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/Gloamthorn-Seal-Source-Masters-v4.3.json",
+        "sha256": "ffa14ced33e7f46f78966e23b8d1c583015d16bddbe7e45fcc33bcb94c8e4a03"
+      },
+      "assetID": "seal.gloamthorn.nightglass-moth",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/gloamthorn-nightglass-moth-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "a2d4373d24d2f3b50e1d2b8daf7a8d3de63445bd5b1315828cb30deedc036cc7",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/Gloamthorn-Seal-Source-Masters-v4.3.json",
+        "sha256": "ffa14ced33e7f46f78966e23b8d1c583015d16bddbe7e45fcc33bcb94c8e4a03"
+      },
+      "assetID": "seal.gloamthorn.pact-crown",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/gloamthorn-pact-crown-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "b352c3166ed39c4a85d2665c6f54feb10a153cdcb405e60599d887bd5a265ea2",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/Gloamthorn-Seal-Source-Masters-v4.3.json",
+        "sha256": "ffa14ced33e7f46f78966e23b8d1c583015d16bddbe7e45fcc33bcb94c8e4a03"
+      },
+      "assetID": "seal.gloamthorn.thornmoon",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/gloamthorn-thornmoon-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "2b3c2f258444946f4babeedbbbf9ea2c3300e6c4fceb1017c3291f22a820cd1a",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/Gloamthorn-Seal-Source-Masters-v4.3.json",
+        "sha256": "ffa14ced33e7f46f78966e23b8d1c583015d16bddbe7e45fcc33bcb94c8e4a03"
+      },
+      "assetID": "seal.gloamthorn.veiled-serpent",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/gloamthorn-veiled-serpent-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.gloamthorn.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "fdf1911e20e9567dfc7737e191c52376815dbdcea07e0ece0de40e91d7899c54",
+      "targetScaleReview": "PASS_AT_64_PX"
+    }
+  ],
+  "sourceRecords": [
+    {
+      "ownerReview": "PENDING",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/environment-and-relic-master-record-v4.3.json",
+      "sha256": "5cd76eacc482a65fdaffa8d4ec69731a1db51f0e2a133938ed30c1cbbd89e72c"
+    },
+    {
+      "ownerReview": "PENDING",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/gloamthorn/seals/Gloamthorn-Seal-Source-Masters-v4.3.json",
+      "sha256": "ffa14ced33e7f46f78966e23b8d1c583015d16bddbe7e45fcc33bcb94c8e4a03"
+    },
+    {
+      "ownerReview": "PENDING",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood-gloamthorn-ornament-master-record-v4.3.json",
+      "sha256": "50f3fac8dba3b920499ed0fabba4d59dbdfcea8b573bbe2f10abaf86a1edab8a"
+    }
+  ],
+  "theme": "Gloamthorn",
+  "transformationPolicy": [
+    "verify each repository-local accepted source master and its acceptance record against pinned SHA-256 values",
+    "render Frame and Crest fallbacks with one uniform aspect-fit scale and transparent letterboxing when required",
+    "render accepted Relic variants from the complete clean master without inscription reconstruction, blur slabs, patches, or source-screen compositing",
+    "compose Panel assets from four independent uniformly scaled protected corners and the contiguous between-corner edge intervals; never resize the complete frame nonuniformly",
+    "preserve every accepted Seal color master as an exact decoded RGBA pixel copy and derive only alpha-preserving monochrome and thumbnail variants",
+    "derive deterministic High Contrast and thumbnail variants and encode lossless PNG outputs"
+  ]
+}

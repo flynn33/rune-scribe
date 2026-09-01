@@ -25,11 +25,11 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "--source-manifest",
         type=Path,
-        default=Path("docs/verification/remediation-v1/SOURCE-MANIFEST.json"),
+        default=None,
         help=(
-            "Source manifest to verify. The default preserves the historical "
-            "remediation-v1 behavior; v4.2 callers pass the capture runner's "
-            "source-only manifest explicitly."
+            "Optional current source manifest to verify. Evidence-producing callers "
+            "pass their source-only manifest explicitly; a normal repository check "
+            "validates the live Git worktree without binding to historical evidence."
         ),
     )
     parser.add_argument(
@@ -44,11 +44,13 @@ def parse_arguments() -> argparse.Namespace:
 
 
 ARGUMENTS = parse_arguments()
-SOURCE_MANIFEST = (
-    ARGUMENTS.source_manifest.resolve()
-    if ARGUMENTS.source_manifest.is_absolute()
-    else (ROOT / ARGUMENTS.source_manifest).resolve()
-)
+SOURCE_MANIFEST = None
+if ARGUMENTS.source_manifest is not None:
+    SOURCE_MANIFEST = (
+        ARGUMENTS.source_manifest.resolve()
+        if ARGUMENTS.source_manifest.is_absolute()
+        else (ROOT / ARGUMENTS.source_manifest).resolve()
+    )
 SOURCE_EXCLUSIONS = [
     path.resolve() if path.is_absolute() else (ROOT / path).resolve()
     for path in ARGUMENTS.source_exclusion
@@ -139,6 +141,12 @@ def load_current_manifest_checker():
 
 
 def validate_source_manifest(has_git: bool) -> dict[str, object]:
+    if SOURCE_MANIFEST is None:
+        if not has_git:
+            ERRORS.append(
+                "Git metadata is absent and no current source manifest was supplied"
+            )
+        return {}
     if not SOURCE_MANIFEST.is_file():
         if not has_git:
             ERRORS.append(
@@ -256,7 +264,10 @@ require(
     f"version-{marketing}%20build%20{build}" in readme,
     "README version badge differs from project version",
 )
-require("All nine Elven Series recovery findings pass simultaneously" in readme, "README lacks current recovery result")
+require(
+    "All nine Elven Series recovery findings pass simultaneously" in normalized_readme,
+    "README lacks current recovery result",
+)
 require(f"Recovery is {RECOVERY_STATUS}" in readme, "README lacks the closed recovery result")
 require(
     re.search(
@@ -268,20 +279,37 @@ require(
 )
 require("Phase C is PASS / MERGED TO MAIN" in readme, "README lacks current Phase C result")
 require(
-    "roadmap-completion program is source-complete" in readme
-    and "and not shipped" in readme,
-    "README lacks the roadmap-completion no-ship result",
+    "previously authorized version 1.0.39 build 39 roadmap-completion baseline"
+    in normalized_readme
+    and "historical source-complete snapshot that was not shipped" in normalized_readme,
+    "README lacks the historical roadmap baseline disposition",
 )
 require("## 🗺 Implementation roadmap" in readme, "README lacks the implementation roadmap")
 readme_roadmap = readme.split("## 🗺 Implementation roadmap", 1)[-1].split("## 🔐 Security & privacy", 1)[0]
+normalized_readme_roadmap = re.sub(r"\s+", " ", readme_roadmap)
 require(
-    f"version {marketing} build {build} roadmap-completion program" in readme_roadmap,
+    f"Version {marketing} build {build} is the repository-qualified release candidate"
+    in normalized_readme_roadmap,
     "README roadmap version differs from the project version",
 )
 require(
-    "| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Complete; physical-device qualification owner-only |"
+    "| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Repository-qualified release candidate; not shipped |"
     in readme_roadmap,
     "README Wave 6 roadmap scope differs",
+)
+require("tests-1231%20package" in readme, "README package-test badge is stale")
+require(
+    "**1231 package tests** (1094 XCTest cases and 137 Swift Testing cases)"
+    in normalized_readme,
+    "README package-test inventory is stale",
+)
+require(
+    "1,231/1,231 Swift tests" in normalized_readme_roadmap
+    and "255/255 Python tests" in normalized_readme_roadmap
+    and "97/101" in normalized_readme_roadmap
+    and "iPad Pro 13-inch (M5) qualification on iOS 26.5 passes 5 tests" in normalized_readme_roadmap
+    and "skips 3 phone-specific tests by design, and fails 0" in normalized_readme_roadmap,
+    "README lacks the final-source qualification result or completed iPad evidence",
 )
 require(
     "| P12 | Full Xcode, parity, device" not in readme_roadmap,
@@ -314,16 +342,26 @@ require(
     "App Store packet lacks supported-environment progression validation",
 )
 require(
-    "Hardware-only observations are owner-operated optional validation outside Agent Coding"
-    in submission,
-    "App Store packet lacks the owner-operated hardware boundary",
+    "Manual hardware observations are superseded by repository-controlled Simulator, hosted,"
+    in submission
+    and "not a product-shippability requirement" in submission,
+    "App Store packet lacks the supported automated hardware-replacement boundary",
 )
 require(
-    "PASS/FAIL, upload readiness, or pull-request readiness" in submission,
-    "App Store packet lacks the non-gating upload and pull-request boundary",
+    "package audit and self-binding mechanics are noncontrolling verification history"
+    in submission,
+    "App Store packet lacks the noncontrolling legacy-package boundary",
+)
+require(
+    "repository-qualified release candidate" in submission
+    and "97/101" in submission
+    and "- [x] iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5"
+    in submission,
+    "App Store packet lacks the repository-qualified, built-product, or completed iPad result",
 )
 privacy = read("docs/PRIVACY.md")
 support = read("docs/SUPPORT.md")
+normalized_support = re.sub(r"\s+", " ", support).lower()
 documentation_support_checklist = read(
     "docs/verification/roadmap-completion/DocumentationSupportChecklist.md"
 )
@@ -352,9 +390,10 @@ require(
     "support guide makes owner testing a publication-readiness gate",
 )
 require(
-    "discretionary before distribution" in support.lower()
-    and "pull-request readiness" in support.lower(),
-    "support guide lacks the discretionary, non-gating owner-test boundary",
+    "manual hardware observations are superseded by repository-controlled simulator, hosted,"
+    in normalized_support
+    and "not a pending shippability boundary" in normalized_support,
+    "support guide lacks the supported automated hardware-replacement boundary",
 )
 require(
     f"Rune Scribe {HISTORICAL_APPLICATION_VERSION} "
@@ -379,9 +418,12 @@ require(
 )
 require("Phase C is PASS / MERGED TO MAIN" in roadmap, "roadmap lacks the merged Phase C result")
 require(
-    "is source-complete for the authorized roadmap-completion" in roadmap
-    and "deliberately **not shipped**" in roadmap,
-    "roadmap lacks the source-complete no-ship result",
+    f"Version {marketing} build {build} carries the source-complete authorized roadmap baseline"
+    in roadmap
+    and "repository-qualified release candidate" in roadmap
+    and "**NOT SHIPPED**" in roadmap
+    and "**IPAD HEADLESS UI QUALIFICATION PASS**" in roadmap,
+    "roadmap lacks the current source-complete qualification and shipment boundary",
 )
 require("validated Elven Series recovery boundary" in roadmap, "roadmap lacks recovery result")
 require(RECOVERY_STATUS in roadmap, "roadmap lacks the closed recovery result")
@@ -390,6 +432,54 @@ require(
     "roadmap lacks the accepted corrected v3.1 package result",
 )
 require("Keep Elven Series Phase C blocked" not in roadmap, "roadmap retains superseded Phase C blocker")
+
+qualification_summary = read("docs/verification/release-1.0.40/QualificationSummary.md")
+require(
+    "**Status:** Repository-qualified release candidate — not shipped" in qualification_summary,
+    "release qualification summary has a stale status",
+)
+require(
+    "**1,231/1,231 Swift tests**" in qualification_summary
+    and "**255/255 Python tests**" in qualification_summary
+    and "**97/101 checks**" in qualification_summary
+    and "passes **7 tests**" in qualification_summary
+    and "passes **5 tests**" in qualification_summary
+    and "skips **3\n  phone-specific tests by design**" in qualification_summary
+    and qualification_summary.count("fails **0 tests**") == 2,
+    "release qualification summary lacks final-source evidence",
+)
+require(
+    "- [ ]" not in qualification_summary
+    and "## Repository qualification" in qualification_summary
+    and "All repository-controlled release gates pass." in qualification_summary,
+    "release qualification summary lacks the completed repository gate result",
+)
+current_release_documents = {
+    "README.md": readme,
+    "CHANGELOG.md": changelog,
+    "docs/SUPPORT.md": support,
+    "docs/platform-notes.md": read("docs/platform-notes.md"),
+    "docs/APP_STORE_SUBMISSION.md": submission,
+    "docs/architecture/RoadmapAlignment.md": roadmap,
+    "docs/verification/roadmap-alignment.json": read(
+        "docs/verification/roadmap-alignment.json"
+    ),
+    "docs/verification/release-1.0.40/QualificationSummary.md": qualification_summary,
+}
+stale_shipping_claim = f"{101}/{101}"
+for relative, content in current_release_documents.items():
+    normalized_content = re.sub(r"\s+", " ", content).lower()
+    require(
+        stale_shipping_claim not in content and "97/101" in content,
+        f"{relative} has a stale or missing built-product qualification result",
+    )
+    require(
+        "repository-qualified" in normalized_content
+        and "ipad pro 13-inch (m5)" in normalized_content
+        and "final ipad ui run remains pending" not in normalized_content
+        and "ipad ui qualification pending" not in normalized_content,
+        f"{relative} lacks the repository-qualified or completed iPad boundary",
+    )
 
 content_view = read(
     "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/ContentView.swift"
@@ -465,6 +555,7 @@ require(
 )
 
 supersession_index = read("docs/architecture/ForsettiSupersessionIndex.md")
+normalized_supersession_index = re.sub(r"\s+", " ", supersession_index)
 decision_index = read("docs/architecture/decisions/README.md")
 forward_compatibility = read("docs/architecture/decisions/ADR-RS-005-forward-compatibility.md")
 invitation_presentation = read("docs/architecture/decisions/ADR-RS-012-cipher-invitation-presentation.md")
@@ -479,12 +570,10 @@ for relative, content in (
         f"{relative} does not index the roadmap remediation amendment",
     )
 require(
-    re.search(
-        r"Hardware-only observations\s+are owner-operated optional validation outside Agent Coding scope",
-        supersession_index,
-    )
-    is not None,
-    "Forsetti supersession index lacks the owner-operated hardware boundary",
+    "Repository-controlled Simulator, hosted, and deterministic equivalents supersede "
+    "historical device-observation requirements and have no gating effect."
+    in normalized_supersession_index,
+    "Forsetti supersession index lacks the supported automated hardware-replacement boundary",
 )
 require(
     "physical-device decision gates remain in force" not in supersession_index,
@@ -1060,11 +1149,13 @@ else:
         for record in SOURCE_MANIFEST_DOCUMENT.get("files", [])
         if isinstance(record, dict) and isinstance(record.get("path"), str)
     }
-    evidence_paths = {
-        path.relative_to(ROOT).as_posix()
-        for path in SOURCE_MANIFEST.parent.rglob("*")
-        if path.is_file()
-    }
+    evidence_paths = set()
+    if SOURCE_MANIFEST is not None:
+        evidence_paths = {
+            path.relative_to(ROOT).as_posix()
+            for path in SOURCE_MANIFEST.parent.rglob("*")
+            if path.is_file()
+        }
     tracked = sorted(manifest_paths | evidence_paths)
 text_suffixes = {".md", ".json", ".swift", ".sh", ".py", ".rb", ".yml", ".yaml", ".plist", ".pbxproj"}
 for relative in filter(None, tracked):
@@ -1097,7 +1188,7 @@ END_TIMESTAMP = datetime.now(timezone.utc).isoformat(timespec="seconds").replace
 RESULT_DOCUMENT = {
     "schemaVersion": "1.0",
     "sourceSHA": SOURCE_MANIFEST_DOCUMENT.get("sourceSHA"),
-    "sourceManifest": str(SOURCE_MANIFEST),
+    "sourceManifest": str(SOURCE_MANIFEST) if SOURCE_MANIFEST is not None else None,
     "sourceExclusions": [str(path) for path in SOURCE_EXCLUSIONS],
     "command": [sys.executable, str(Path(__file__).resolve()), *sys.argv[1:]],
     "startTimestamp": START_TIMESTAMP,
@@ -1125,6 +1216,6 @@ if ERRORS:
 
 print(
     f"Documentation alignment passed: version {marketing} build {build}, "
-    "recovery closed, Phase C history retained, roadmap source-complete, "
-    "owner testing discretionary before distribution, not shipped."
+    "recovery closed, Phase C history retained, roadmap baseline source-complete, "
+    "repository-qualified release candidate recorded, supported UI runs pass, not shipped."
 )

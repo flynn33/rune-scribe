@@ -1,0 +1,41 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/usr/bin/env",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "/usr/bin/python3",
+    "scripts/generate-norse-production-provenance.py",
+    "--root",
+    "/tmp/runescribe-v43-acceptance.aQQkxe/source",
+    "--check"
+  ],
+  "category": "assets",
+  "command": "/usr/bin/env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 scripts/generate-norse-production-provenance.py --root /tmp/runescribe-v43-acceptance.aQQkxe/source --check",
+  "commandID": "norse-provenance-generation",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:11:35.955Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 107,
+    "path": "commands/logs/norse-provenance-generation.log",
+    "sha256": "2959f4a651b1d4e8962505eb5d44af559137b7d8c165d378a6fb5a01141c1ce9"
+  },
+  "outputs": [],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 21,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:11:35.832Z"
+}

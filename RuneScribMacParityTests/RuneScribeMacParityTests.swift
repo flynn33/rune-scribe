@@ -209,6 +209,7 @@ final class RuneScribeMacParityTests: XCTestCase {
                         }
                     }
                     .background(Color.runeNavy)
+                    .environmentObject(harness.session)
                 ),
                 size: CGSize(width: 820, height: 760)
             )
@@ -244,6 +245,7 @@ final class RuneScribeMacParityTests: XCTestCase {
                     }
                     .padding(24)
                     .background(Color.runeNavy)
+                    .environmentObject(harness.session)
                 ),
                 size: CGSize(width: 360, height: 540)
             )
@@ -424,7 +426,7 @@ final class RuneScribeMacParityTests: XCTestCase {
                 reduceMotionComposition.backgroundResourceID,
                 presentation.plan.backgroundReduceMotion.id
             )
-            XCTAssertEqual(
+            XCTAssertNotEqual(
                 reduceMotionComposition.backgroundResourceID,
                 composition.backgroundResourceID
             )
@@ -876,6 +878,7 @@ final class RuneScribeMacParityTests: XCTestCase {
                             )
                         }
                     )
+                    .environmentObject(harness.session)
                 ),
                 size: CGSize(width: 600, height: 720)
             )
@@ -1253,10 +1256,16 @@ final class RuneScribeMacParityTests: XCTestCase {
     {
         try await withHarness { harness in
             let presentationReady = await eventually {
-                harness.session.runtimeSettingsSnapshot != nil
-                    && harness.session.activeThemeVisualPresentation != nil
+                harness.session.runtimePresentationSettingsReady
+                    && harness.session.runtimeSettingsSnapshot != nil
+                    && harness.session.activeThemeVisualPresentation?.plan.codexID
+                        == harness.session.themeSnapshot?.effectiveCodexID
+                    && harness.session.activeThemeVisualPresentation?.revision
+                        == harness.session.activeThemeVisualPresentation?.plan.revision
             }
             XCTAssertTrue(presentationReady)
+            await harness.session.loadActiveThemeCatalogVisuals()
+            await harness.session.loadThemeCodexCardPreviews()
 
             let activeCipher = try XCTUnwrap(harness.session.activeCipher)
             let encoded = try await harness.session.encode(
@@ -1376,9 +1385,15 @@ final class RuneScribeMacParityTests: XCTestCase {
             attachPNG(highContrastData, name: "macos-share-builder-high-contrast-preview")
 
             for source in [cases[0].source, cases[2].source] {
+                let renderedPreview = try await harness.session.renderShareBuilderPreview(
+                    source: source,
+                    catalog: catalog,
+                    colorMode: .highContrast
+                )
                 let prepared = try await harness.session.prepareShareBuilderArtifact(
                     source: source,
                     catalog: catalog,
+                    renderedPreview: renderedPreview,
                     colorMode: .highContrast
                 )
                 let fileURL = try await harness.shareURL(for: prepared.artifact.id)
@@ -1399,6 +1414,11 @@ final class RuneScribeMacParityTests: XCTestCase {
                     $0.resourceID
                         == catalog.descriptor.codex.background.highContrastResourceID
                 }))
+                XCTAssertEqual(
+                    presentation?.safePreviewData,
+                    renderedPreview.safePreviewData,
+                    "The packaged preview must be the exact bytes displayed by Share Builder."
+                )
                 await prepared.transfer.close()
                 await harness.session.releaseShareArtifact(id: prepared.artifact.id)
             }
@@ -1913,11 +1933,13 @@ final class RuneScribeMacParityTests: XCTestCase {
     }
 
     private func eventually(
-        _ predicate: @escaping @MainActor () -> Bool
+        _ predicate: @escaping @MainActor () -> Bool,
+        timeout: TimeInterval = 8
     ) async -> Bool {
-        for _ in 0 ..< 2_000 {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
             if predicate() { return true }
-            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(50))
         }
         return predicate()
     }

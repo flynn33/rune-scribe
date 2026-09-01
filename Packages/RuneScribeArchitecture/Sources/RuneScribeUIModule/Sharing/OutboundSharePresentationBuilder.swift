@@ -203,7 +203,10 @@ extension RuneScribeUISession {
                 resolved = try await themeCoordinatorClientHandle.resolveResource(
                     ResolveThemeResourceRequestDTO(
                         codexID: descriptor.codex.id,
-                        resourceID: resource.resourceID
+                        resourceID: resource.resourceID,
+                        purpose: Self.outboundShareResourceResolutionPurpose(
+                            usesActiveVisualAuthority: usesActiveVisualAuthority
+                        )
                     )
                 )
             } catch {
@@ -344,6 +347,12 @@ extension RuneScribeUISession {
         underlying _: Error
     ) -> ShareArtifactRenderError {
         .missingResource(resourceID)
+    }
+
+    static func outboundShareResourceResolutionPurpose(
+        usesActiveVisualAuthority: Bool
+    ) -> ThemeResourceResolutionPurpose {
+        usesActiveVisualAuthority ? .activePresentation : .shareRendering
     }
 
     static func validateOutboundShareResolvedResource(

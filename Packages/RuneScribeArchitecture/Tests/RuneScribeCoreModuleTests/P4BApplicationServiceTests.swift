@@ -138,6 +138,10 @@ final class P4BApplicationServiceTests: XCTestCase {
         let receivedMessage = try XCTUnwrap(
             receivedSnapshot.messageState.pendingMessage
         )
+        XCTAssertEqual(
+            receivedMessage.receivedAt,
+            Date(timeIntervalSince1970: 1_750_000_000)
+        )
         XCTAssertEqual(receivedMessage.presentation?.requestedSelection, selection)
         XCTAssertEqual(
             receivedMessage.presentation?.effectiveCodexID,

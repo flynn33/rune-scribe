@@ -1493,6 +1493,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             let result = try await ingestFileData(
                 data,
                 dedupeKey: dedupeKey,
+                receivedAt: input.metadata.receivedAt,
                 source: .file,
                 progressionRoute: Self.progressionRoute(
                     for: input.metadata.source
@@ -2477,6 +2478,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
     private func ingestFileData(
         _ data: Data,
         dedupeKey: Data,
+        receivedAt: Date,
         source: ImportSourceDTO,
         progressionRoute: DomainEventRouteClass,
         progressionContext: RuntimePersistableOperationContext?
@@ -2569,6 +2571,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                 }
                 let mutation = try await MessageImportUseCase.ingest(
                     payload: payload,
+                    receivedAt: receivedAt,
                     fontBytes: fontBytes,
                     repository: repository,
                     messageService: messageService,
@@ -2666,6 +2669,7 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
         else { return }
         let confirmed = try ReceivedMessageDTO(
             id: message.id,
+            receivedAt: message.receivedAt,
             plaintext: message.plaintext,
             senderName: summary.name,
             cipherID: summary.id,

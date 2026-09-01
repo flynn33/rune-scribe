@@ -226,6 +226,11 @@ struct ShareArtifactRenderPage: Equatable, Hashable, Sendable {
 /// Provider-neutral composition shared by the interactive workspace preview
 /// and deterministic static sharing. It is deliberately pure: image bytes and
 /// platform image objects remain in their respective runtime/rendering rails.
+struct ThemeArtifactGlyphStyle: Equatable, Sendable {
+    let pointSize: Double
+    let color: ThemeSemanticColor
+}
+
 struct ThemeArtifactCompositionPlan: Equatable, Sendable {
     let selection: SharePresentationSelection
     let inscription: String
@@ -240,6 +245,7 @@ struct ThemeArtifactCompositionPlan: Equatable, Sendable {
     let sealScale: Double
     let fontPostScriptName: String
     let fontResourceID: ThemeResourceID?
+    let glyphStyle: ThemeArtifactGlyphStyle
     let usesExternalFontOverride: Bool
     let colorMode: ShareArtifactColorMode
     let accessibilityLabel: String
@@ -262,6 +268,7 @@ struct ShareArtifactRenderPlan: Equatable, Sendable {
     let sealScale: Double
     let fontPostScriptName: String
     let fontResourceID: ThemeResourceID?
+    let glyphStyle: ThemeArtifactGlyphStyle
     let resourceMetadata: [SharePresentationResourceMetadata]
 
     var composition: ThemeArtifactCompositionPlan {
@@ -279,6 +286,7 @@ struct ShareArtifactRenderPlan: Equatable, Sendable {
             sealScale: sealScale,
             fontPostScriptName: fontPostScriptName,
             fontResourceID: fontResourceID,
+            glyphStyle: glyphStyle,
             usesExternalFontOverride: request.fontPostScriptNameOverride != nil,
             colorMode: request.colorMode,
             accessibilityLabel: request.accessibilityLabel,
@@ -294,7 +302,7 @@ enum ThemeArtifactCompositionPolicy {
     static func plan(
         request: ShareArtifactRenderRequest,
         descriptor: ThemeDescriptor,
-        preferredSealAnchor: ThemeSealAnchorCategory? = nil
+        preferredSealAnchor: ThemeSealAnchorCategory? = .lowerRight
     ) throws -> ThemeArtifactCompositionPlan {
         try compose(
             selection: request.selection,
@@ -318,7 +326,7 @@ enum ThemeArtifactCompositionPolicy {
         accessibilityLabel: String,
         provenanceLabel: String? = nil,
         fontPostScriptNameOverride: ThemeFontPostScriptName? = nil,
-        preferredSealAnchor: ThemeSealAnchorCategory? = nil
+        preferredSealAnchor: ThemeSealAnchorCategory? = .lowerRight
     ) throws -> ThemeArtifactCompositionPlan {
         guard !inscription.isEmpty,
               inscription.count <= ShareArtifactRenderRequest.maximumInscriptionCharacters,
@@ -412,7 +420,7 @@ enum ThemeArtifactCompositionPolicy {
         let sealResourceID: ThemeResourceID? = seal.map {
             switch colorMode {
             case .standard, .highContrast:
-                $0.vectorResourceID
+                $0.standardResourceID
             case .monochrome:
                 $0.monochromeFallbackResourceID
             }
@@ -444,6 +452,10 @@ enum ThemeArtifactCompositionPolicy {
                 ?? "NotoSansRunic-Regular",
             fontResourceID: fontPostScriptNameOverride == nil
                 ? script.fontResourceID : nil,
+            glyphStyle: ThemeArtifactGlyphStyle(
+                pointSize: script.recommendedPointSizes.maximum,
+                color: descriptor.codex.palette.textInverse
+            ),
             usesExternalFontOverride: fontPostScriptNameOverride != nil,
             colorMode: colorMode,
             accessibilityLabel: accessibilityLabel,
@@ -455,24 +467,43 @@ enum ThemeArtifactCompositionPolicy {
         _ inscription: String,
         maximumLines: Int
     ) throws -> [ShareArtifactRenderPage] {
-        let characters = Array(inscription)
-        let pageCapacity = maximumLines * glyphsPerLine
-        guard pageCapacity > 0 else { throw ShareArtifactRenderError.invalidRequest }
-        let pageCount = max(1, Int(ceil(Double(characters.count) / Double(pageCapacity))))
+        guard maximumLines > 0 else { throw ShareArtifactRenderError.invalidRequest }
+
+        let hardLines = inscription.split(
+            separator: "\n",
+            omittingEmptySubsequences: false
+        )
+        var renderedLines: [String] = []
+        renderedLines.reserveCapacity(hardLines.count)
+        for hardLine in hardLines {
+            let characters = Array(hardLine)
+            if characters.isEmpty {
+                renderedLines.append("")
+                continue
+            }
+            renderedLines.append(contentsOf: stride(
+                from: 0,
+                to: characters.count,
+                by: glyphsPerLine
+            ).map { start in
+                String(characters[start..<min(characters.count, start + glyphsPerLine)])
+            })
+        }
+
+        let pageCount = max(
+            1,
+            Int(ceil(Double(renderedLines.count) / Double(maximumLines)))
+        )
         guard pageCount <= maximumPageCount else {
             throw ShareArtifactRenderError.inscriptionTooLong
         }
         return (0..<pageCount).map { pageIndex in
-            let pageStart = pageIndex * pageCapacity
-            let pageEnd = min(characters.count, pageStart + pageCapacity)
-            let pageCharacters = Array(characters[pageStart..<pageEnd])
-            let lines = stride(from: 0, to: pageCharacters.count, by: glyphsPerLine).map {
-                String(pageCharacters[$0..<min(pageCharacters.count, $0 + glyphsPerLine)])
-            }
+            let pageStart = pageIndex * maximumLines
+            let pageEnd = min(renderedLines.count, pageStart + maximumLines)
             return ShareArtifactRenderPage(
                 index: pageIndex,
                 count: pageCount,
-                inscription: lines.joined(separator: "\n")
+                inscription: renderedLines[pageStart..<pageEnd].joined(separator: "\n")
             )
         }
     }
@@ -534,6 +565,7 @@ enum ShareArtifactRenderPolicy {
             sealScale: composition.sealScale,
             fontPostScriptName: composition.fontPostScriptName,
             fontResourceID: composition.fontResourceID,
+            glyphStyle: composition.glyphStyle,
             resourceMetadata: metadata
         )
     }
@@ -729,7 +761,59 @@ enum ShareArtifactStaticRenderer {
 
 enum ThemeArtifactCanvasContext: Equatable, Sendable {
     case interactivePreview
+    case receivedPreview
     case staticShare
+
+    var showsSeal: Bool {
+        switch self {
+        case .interactivePreview, .receivedPreview, .staticShare:
+            true
+        }
+    }
+
+    var showsAttribution: Bool {
+        self == .staticShare
+    }
+
+    func glyphRegion(
+        for layout: ThemeShareLayoutPreset
+    ) -> ThemeArtifactGlyphRegion {
+        switch self {
+        case .interactivePreview, .staticShare:
+            return ThemeArtifactGlyphRegion(layout.glyphSafeRegion)
+        case .receivedPreview:
+            let content = layout.contentSafeRegion
+            return ThemeArtifactGlyphRegion(
+                x: content.x,
+                y: content.y + content.height * 0.68,
+                width: content.width,
+                height: content.height * 0.22
+            )
+        }
+    }
+}
+
+struct ThemeArtifactGlyphRegion: Equatable, Sendable {
+    let x: Double
+    let y: Double
+    let width: Double
+    let height: Double
+
+    init(_ region: ThemeNormalizedRegion) {
+        self.init(
+            x: region.x,
+            y: region.y,
+            width: region.width,
+            height: region.height
+        )
+    }
+
+    init(x: Double, y: Double, width: Double, height: Double) {
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+    }
 }
 
 /// One composition implementation for both interactive and static output.
@@ -741,6 +825,9 @@ struct ThemeArtifactCanvas: View {
     let page: ShareArtifactRenderPage
     let context: ThemeArtifactCanvasContext
     let maximumWidth: CGFloat?
+    let sealResourceIDOverride: ThemeResourceID?
+    let sealAnchorOverride: ThemeNormalizedPoint?
+    let sealScaleOverride: Double?
     let image: (ThemeResourceID) -> Image
 
     init(
@@ -748,17 +835,36 @@ struct ThemeArtifactCanvas: View {
         page: ShareArtifactRenderPage,
         context: ThemeArtifactCanvasContext,
         maximumWidth: CGFloat? = nil,
+        sealResourceIDOverride: ThemeResourceID? = nil,
+        sealAnchorOverride: ThemeNormalizedPoint? = nil,
+        sealScaleOverride: Double? = nil,
         image: @escaping (ThemeResourceID) -> Image
     ) {
         self.plan = plan
         self.page = page
         self.context = context
         self.maximumWidth = maximumWidth
+        self.sealResourceIDOverride = sealResourceIDOverride
+        self.sealAnchorOverride = sealAnchorOverride
+        self.sealScaleOverride = sealScaleOverride
         self.image = image
+    }
+
+    var presentedSealResourceID: ThemeResourceID? {
+        sealResourceIDOverride ?? plan.sealResourceID
+    }
+
+    var presentedSealAnchor: ThemeNormalizedPoint? {
+        sealAnchorOverride ?? plan.sealAnchor
+    }
+
+    var presentedSealScale: Double {
+        sealScaleOverride ?? plan.sealScale
     }
 
     var body: some View {
         GeometryReader { geometry in
+            let glyphRegion = context.glyphRegion(for: plan.layout)
             ZStack {
                 color(plan.palette.backgroundPrimary)
                 image(plan.backgroundResourceID)
@@ -784,30 +890,32 @@ struct ThemeArtifactCanvas: View {
                     .font(
                         .custom(
                             plan.fontPostScriptName,
-                            size: 54 * typographyScale(in: geometry.size)
+                            size: CGFloat(plan.glyphStyle.pointSize)
+                                * typographyScale(in: geometry.size)
                         )
                     )
                     .minimumScaleFactor(CGFloat(plan.layout.minimumGlyphScale))
                     .multilineTextAlignment(.center)
-                    .foregroundStyle(color(plan.palette.textPrimary))
+                    .foregroundStyle(color(plan.glyphStyle.color))
                     .frame(
-                        width: geometry.size.width * CGFloat(plan.layout.glyphSafeRegion.width),
-                        height: geometry.size.height * CGFloat(plan.layout.glyphSafeRegion.height)
+                        width: geometry.size.width * CGFloat(glyphRegion.width),
+                        height: geometry.size.height * CGFloat(glyphRegion.height)
                     )
-                    .position(point(for: plan.layout.glyphSafeRegion, in: geometry.size))
+                    .position(point(for: glyphRegion, in: geometry.size))
                     .accessibilityHidden(true)
                     .onAppear {
                         reportGlyphTextResourceUse()
                     }
 
-                if let sealResourceID = plan.sealResourceID,
-                   let anchor = plan.sealAnchor {
+                if context.showsSeal,
+                   let sealResourceID = presentedSealResourceID,
+                   let anchor = presentedSealAnchor {
                     image(sealResourceID)
                         .resizable()
                         .scaledToFit()
                         .frame(
-                            width: geometry.size.width * CGFloat(plan.sealScale),
-                            height: geometry.size.height * CGFloat(plan.sealScale)
+                            width: geometry.size.width * CGFloat(presentedSealScale),
+                            height: geometry.size.height * CGFloat(presentedSealScale)
                         )
                         .position(
                             x: geometry.size.width * CGFloat(anchor.x),
@@ -815,42 +923,44 @@ struct ThemeArtifactCanvas: View {
                         )
                 }
 
-                Text(page.count == 1 ? "Rune Scribe" : "Rune Scribe · \(page.index + 1)/\(page.count)")
-                    .font(
-                        .system(
-                            size: 18 * typographyScale(in: geometry.size),
-                            weight: .semibold,
-                            design: .rounded
-                        )
-                    )
-                    .foregroundStyle(color(plan.palette.textSecondary))
-                    .frame(
-                        width: geometry.size.width
-                            * CGFloat(plan.layout.attributionRegion.width),
-                        height: geometry.size.height
-                            * CGFloat(plan.layout.attributionRegion.height)
-                    )
-                    .position(point(for: plan.layout.attributionRegion, in: geometry.size))
-                    .accessibilityHidden(true)
-
-                if let provenanceLabel = plan.provenanceLabel,
-                   let region = plan.layout.provenanceRegion {
-                    Text(provenanceLabel)
+                if context.showsAttribution {
+                    Text(page.count == 1 ? "Rune Scribe" : "Rune Scribe · \(page.index + 1)/\(page.count)")
                         .font(
                             .system(
-                                size: 13 * typographyScale(in: geometry.size),
-                                weight: .medium,
+                                size: 18 * typographyScale(in: geometry.size),
+                                weight: .semibold,
                                 design: .rounded
                             )
                         )
                         .foregroundStyle(color(plan.palette.textSecondary))
-                        .lineLimit(1)
                         .frame(
-                            width: geometry.size.width * CGFloat(region.width),
-                            height: geometry.size.height * CGFloat(region.height)
+                            width: geometry.size.width
+                                * CGFloat(plan.layout.attributionRegion.width),
+                            height: geometry.size.height
+                                * CGFloat(plan.layout.attributionRegion.height)
                         )
-                        .position(point(for: region, in: geometry.size))
+                        .position(point(for: plan.layout.attributionRegion, in: geometry.size))
                         .accessibilityHidden(true)
+
+                    if let provenanceLabel = plan.provenanceLabel,
+                       let region = plan.layout.provenanceRegion {
+                        Text(provenanceLabel)
+                            .font(
+                                .system(
+                                    size: 13 * typographyScale(in: geometry.size),
+                                    weight: .medium,
+                                    design: .rounded
+                                )
+                            )
+                            .foregroundStyle(color(plan.palette.textSecondary))
+                            .lineLimit(1)
+                            .frame(
+                                width: geometry.size.width * CGFloat(region.width),
+                                height: geometry.size.height * CGFloat(region.height)
+                            )
+                            .position(point(for: region, in: geometry.size))
+                            .accessibilityHidden(true)
+                    }
                 }
             }
             // The canvas is a deterministic visual artifact, not flowing UI text.
@@ -888,6 +998,13 @@ struct ThemeArtifactCanvas: View {
     }
 
     private func point(for region: ThemeNormalizedRegion, in size: CGSize) -> CGPoint {
+        CGPoint(
+            x: size.width * CGFloat(region.x + region.width / 2),
+            y: size.height * CGFloat(region.y + region.height / 2)
+        )
+    }
+
+    private func point(for region: ThemeArtifactGlyphRegion, in size: CGSize) -> CGPoint {
         CGPoint(
             x: size.width * CGFloat(region.x + region.width / 2),
             y: size.height * CGFloat(region.y + region.height / 2)
@@ -935,7 +1052,7 @@ private struct ThemeArtifactCanvasSizing: ViewModifier {
     @ViewBuilder
     func body(content: Content) -> some View {
         switch context {
-        case .interactivePreview:
+        case .interactivePreview, .receivedPreview:
             content.aspectRatio(
                 CGFloat(ShareArtifactRenderPlan.outputWidth)
                     / CGFloat(ShareArtifactRenderPlan.outputHeight),

@@ -21,6 +21,9 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
             let descriptor = provider.descriptor
             let relics = descriptor.codex.relics
             let seals = descriptor.codex.seals
+            let primaryScript = try XCTUnwrap(descriptor.codex.scripts.first(where: {
+                $0.id == descriptor.codex.primaryScriptID
+            }))
             let ownedArtifactIDs = Set(
                 relics.map(\.metadata.id)
                     + seals.map(\.metadata.id)
@@ -110,6 +113,11 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
                     XCTAssertEqual(plan.request.selection.sealID, seal.metadata.id)
                     XCTAssertEqual(plan.layout, defaultLayout)
                     XCTAssertEqual(plan.sealAnchor, approvedAnchor.point)
+                    XCTAssertEqual(
+                        plan.glyphStyle.pointSize,
+                        primaryScript.recommendedPointSizes.maximum
+                    )
+                    XCTAssertEqual(plan.glyphStyle.color, descriptor.codex.palette.textInverse)
                     XCTAssertTrue(defaultLayout.relicBounds.contains(approvedAnchor.point))
                     XCTAssertFalse(defaultLayout.glyphSafeRegion.contains(approvedAnchor.point))
                     XCTAssertEqual(plan.pages.count, expectedPageCount)
@@ -197,6 +205,46 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
         XCTAssertEqual(validatedProviderCount, 4)
     }
 
+    func testElvenFrameSharePlansUseFullSizeFallbackInsteadOfCatalogThumbnail()
+        throws
+    {
+        for provider in providers {
+            let descriptor = provider.descriptor
+            let frame = try XCTUnwrap(descriptor.codex.frames.first)
+            let thumbnailResourceID = try XCTUnwrap(frame.thumbnailResourceID)
+            let relicID = try XCTUnwrap(frame.compatibleRelicIDs.first)
+            let selection = try ShareBuilderPolicy.selection(
+                descriptor: descriptor,
+                codexOwned: true,
+                providerAvailable: true,
+                ownedArtifactIDs: [frame.metadata.id],
+                relicID: relicID,
+                sealID: nil,
+                frameID: frame.metadata.id
+            )
+            let request = try ShareArtifactRenderRequest(
+                selection: selection,
+                inscription: "ELVEN FRAME \(provider.name.uppercased())",
+                operationID: RuntimeOperationID(
+                    "operation.elven.frame.\(provider.name)"
+                ),
+                capturedAt: fixedDate,
+                localeIdentifier: fixedLocale,
+                scale: fixedScale,
+                accessibilityLabel: "A framed \(provider.name) Artifact preview."
+            )
+            let plan = try ShareArtifactRenderPolicy.plan(
+                request: request,
+                descriptor: descriptor
+            )
+            let resourceIDs = Set(plan.resourceMetadata.map(\.resourceID))
+
+            XCTAssertEqual(plan.frameResourceID, frame.staticFallbackResourceID)
+            XCTAssertTrue(resourceIDs.contains(frame.staticFallbackResourceID))
+            XCTAssertFalse(resourceIDs.contains(thumbnailResourceID))
+        }
+    }
+
     func testEveryElvenProviderRendersExactBundleResourcesAcrossAccessibilityVariants()
         throws
     {
@@ -213,8 +261,18 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
             XCTAssertEqual(manifest.schemaVersion, "1.0", provider.name)
             XCTAssertEqual(manifest.codexID, provider.descriptor.codex.id.rawValue)
             XCTAssertEqual(manifest.moduleID, provider.descriptor.moduleID.rawValue)
-            XCTAssertEqual(manifest.acceptedPackageVersion, "3.1.0", provider.name)
-            XCTAssertEqual(manifest.files.count, 46, provider.name)
+            XCTAssertEqual(manifest.acceptedPackageVersion, "4.3.0", provider.name)
+            let expectedResourceCount = switch provider.name {
+            case "gloamthorn": 60
+            case "moonleaf": 65
+            case "sunspire": 60
+            default: 60
+            }
+            XCTAssertEqual(
+                manifest.files.count,
+                expectedResourceCount,
+                provider.name
+            )
             let entriesByID = try Dictionary(uniqueKeysWithValues: manifest.files.map { entry in
                 (try XCTUnwrap(ThemeResourceID(rawValue: entry.resourceID)), entry)
             })
@@ -280,7 +338,7 @@ final class ElvenShareArtifactRendererIntegrationTests: XCTestCase {
                     plan.sealResourceID,
                     variant.colorMode == .monochrome
                         ? seal.monochromeFallbackResourceID
-                        : seal.vectorResourceID
+                        : seal.standardResourceID
                 )
 
                 let resourceData = try loadPlanResources(

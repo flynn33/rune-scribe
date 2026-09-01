@@ -11,7 +11,7 @@ enum ProgressionCatalogSemanticValidator {
         guard catalog.catalogID.rawValue == "runescribe.progression.catalog" else {
             return try invalid("$catalog.catalogID", "Unexpected catalog identifier.")
         }
-        guard catalog.catalogVersion.rawValue == 2 else {
+        guard catalog.catalogVersion.rawValue == 3 else {
             return try invalid("$catalog.catalogVersion", "Unexpected catalog version.")
         }
         guard catalog.packageVersion.description == "1.0.0" else {
@@ -41,7 +41,7 @@ enum ProgressionCatalogSemanticValidator {
     }
 
     private static func validateContent(_ catalog: ProgressionCatalog) throws {
-        try Support.requireCount(catalog.content, 80, name: "content")
+        try Support.requireCount(catalog.content, 84, name: "content")
         try Support.requireUnique(
             catalog.content.map(\.contentID),
             kind: "contentID",
@@ -50,22 +50,22 @@ enum ProgressionCatalogSemanticValidator {
 
         let expectedKinds: [ProgressionCatalogContentKind: Int] = [
             .codex: 5, .crest: 5, .entitlement: 5, .frame: 7,
-            .relic: 16, .script: 5, .seal: 32, .title: 5,
+            .relic: 16, .script: 5, .seal: 32, .title: 9,
         ]
         let actualKinds = Dictionary(grouping: catalog.content, by: \.kind).mapValues(\.count)
         guard actualKinds == expectedKinds else {
-            return try invalid("$catalog.content", "Content kind inventory does not match v2.")
+            return try invalid("$catalog.content", "Content kind inventory does not match v3.")
         }
         let expectedAvailability: [ProgressionContentAvailability: Int] = [
             .earned: 12, .included: 6, .permanent: 52,
-            .permanentMastery: 10,
+            .permanentMastery: 14,
         ]
         let actualAvailability = Dictionary(
             grouping: catalog.content,
             by: \.availability
         ).mapValues(\.count)
         guard actualAvailability == expectedAvailability else {
-            return try invalid("$catalog.content", "Availability inventory does not match v2.")
+            return try invalid("$catalog.content", "Availability inventory does not match v3.")
         }
 
         let codexContent = Set(
@@ -74,10 +74,10 @@ enum ProgressionCatalogSemanticValidator {
         let expectedCodexCounts = [
             "<none>": 9,
             "codex.norse": 15,
-            "codex.moonleaf": 14,
-            "codex.sunspire": 14,
-            "codex.wildwood": 14,
-            "codex.gloamthorn": 14,
+            "codex.moonleaf": 15,
+            "codex.sunspire": 15,
+            "codex.wildwood": 15,
+            "codex.gloamthorn": 15,
         ]
         let codexCounts = Dictionary(
             grouping: catalog.content,
@@ -126,9 +126,47 @@ enum ProgressionCatalogSemanticValidator {
         }
 
         guard catalog.content.allSatisfy({ $0.availability != .seasonalDeferred }) else {
-            return try invalid("$catalog.content", "Catalog v2 has no seasonal content item.")
+            return try invalid("$catalog.content", "Catalog v3 has no seasonal content item.")
         }
         try validateNorseV2Content(catalog)
+        try validateElvenMasteryTitles(catalog)
+    }
+
+    private static func validateElvenMasteryTitles(_ catalog: ProgressionCatalog) throws {
+        struct Expected {
+            let displayName: String
+            let codexID: String
+        }
+        let expected: [String: Expected] = [
+            "title.gloamthorn.mastery": .init(
+                displayName: "Sovereign of the Gloam", codexID: "codex.gloamthorn"
+            ),
+            "title.moonleaf.mastery": .init(
+                displayName: "Moonleaf Master", codexID: "codex.moonleaf"
+            ),
+            "title.sunspire.mastery": .init(
+                displayName: "Bearer of First Light", codexID: "codex.sunspire"
+            ),
+            "title.wildwood.mastery": .init(
+                displayName: "Keeper of the Heartwood", codexID: "codex.wildwood"
+            ),
+        ]
+        for (contentID, value) in expected {
+            guard let id = ProgressionContentID(rawValue: contentID),
+                  let item = catalog.content(id: id),
+                  item.kind == .title,
+                  item.displayName == value.displayName,
+                  item.countsAsArtifact == false,
+                  item.availability == .permanentMastery,
+                  item.rarity == .mythic,
+                  item.codexID?.rawValue == value.codexID
+            else {
+                return try invalid(
+                    "$catalog.content.\(contentID)",
+                    "Elven mastery title metadata is invalid."
+                )
+            }
+        }
     }
 
     private static func validateNorseV2Content(_ catalog: ProgressionCatalog) throws {
@@ -1073,9 +1111,9 @@ enum ProgressionCatalogSemanticValidator {
             }
             if let notes = group.notes { try Support.requireText(notes, path: "\(path).notes") }
         }
-        try Support.requireCount(granted, 81, name: "grant items")
+        try Support.requireCount(granted, 85, name: "grant items")
         guard Set(granted) == contentIDs else {
-            return try invalid("$catalog.grantGroups", "Every v2 content item must be granted.")
+            return try invalid("$catalog.grantGroups", "Every v3 content item must be granted.")
         }
         let duplicates = Dictionary(grouping: granted, by: { $0 }).filter { $0.value.count > 1 }
         let yggdrasil = ProgressionContentID(rawValue: "seal.norse.yggdrasil")!
@@ -1100,6 +1138,7 @@ enum ProgressionCatalogSemanticValidator {
             return try invalid("$catalog.grantGroups", "Base Norse grant is invalid.")
         }
         try validateNorseV2GrantGroups(catalog)
+        try validateElvenMasteryGrantGroups(catalog)
         let includedContent = Set(
             catalog.content.filter { $0.availability == .included }.map(\.contentID)
         )
@@ -1150,6 +1189,47 @@ enum ProgressionCatalogSemanticValidator {
                 return try invalid(
                     "$catalog.grantGroups",
                     "Grant completion-source cardinality is invalid."
+                )
+            }
+        }
+    }
+
+    private static func validateElvenMasteryGrantGroups(
+        _ catalog: ProgressionCatalog
+    ) throws {
+        let expected: [String: [String]] = [
+            "grant-group.codex.gloamthorn.mastery": [
+                "frame.gloamthorn.briar-court",
+                "crest.gloamthorn.gloam-sovereign",
+                "title.gloamthorn.mastery",
+            ],
+            "grant-group.codex.moonleaf.mastery": [
+                "frame.moonleaf.silvervine",
+                "crest.moonleaf.moonbloom",
+                "title.moonleaf.mastery",
+            ],
+            "grant-group.codex.sunspire.mastery": [
+                "frame.sunspire.laurel-of-dawn",
+                "crest.sunspire.first-light",
+                "title.sunspire.mastery",
+            ],
+            "grant-group.codex.wildwood.mastery": [
+                "frame.wildwood.living-root",
+                "crest.wildwood.heartwood-crown",
+                "title.wildwood.mastery",
+            ],
+        ]
+        for (grantGroupID, items) in expected {
+            guard let id = GrantGroupID(rawValue: grantGroupID),
+                  let group = catalog.grantGroup(id: id),
+                  group.items.map({ $0.contentID.rawValue }) == items,
+                  group.items.allSatisfy({ $0.grantKind == .permanent }),
+                  group.revealTier == .mastery,
+                  group.primaryContentID.rawValue == items[1]
+            else {
+                return try invalid(
+                    "$catalog.grantGroups.\(grantGroupID)",
+                    "Elven mastery reward route is invalid."
                 )
             }
         }

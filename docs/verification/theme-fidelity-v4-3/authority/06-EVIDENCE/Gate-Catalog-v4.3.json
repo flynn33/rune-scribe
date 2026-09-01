@@ -1,0 +1,327 @@
+{
+  "schemaVersion": "4.3",
+  "catalogID": "runescribe.theme-fidelity.v4.3.gates",
+  "gateCount": 40,
+  "gates": [
+    {
+      "id": "PRE-001",
+      "order": 1,
+      "title": "Package integrity and authority preflight",
+      "blocking": true,
+      "passCriteria": "Package manifest, all asset hashes, 400 entries, 50 canonical candidates, 1,104 mappings, 100 seeds, and 50 probe definitions validate.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "REPO-001",
+      "order": 2,
+      "title": "Repository state reconciliation",
+      "blocking": true,
+      "passCriteria": "The implementation begins from a clean source state that contains commit 250f666ec6e7da2d76df7abdcffc595996ad49ae or proves that commit is an ancestor of the selected origin/main baseline.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "SRC-001",
+      "order": 3,
+      "title": "Source-bound manifest",
+      "blocking": true,
+      "passCriteria": "A clean application-source commit is frozen before execution; every result binds to that SHA; later commits change only docs/verification/theme-fidelity-v4-3/ and SourceBoundary.json proves the evidence-only diff through the PR evidence head.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "ARCH-001",
+      "order": 4,
+      "title": "Forsetti architecture boundary",
+      "blocking": true,
+      "passCriteria": "Production UI remains provider-neutral; runtime owns resource resolution and cross-module operations; no Theme provider is imported by production UI.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "BUILD-001",
+      "order": 5,
+      "title": "Swift package build and tests",
+      "blocking": true,
+      "passCriteria": "The complete Swift package builds with zero warnings and all tests pass.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "BUILD-002",
+      "order": 6,
+      "title": "macOS Release qualification",
+      "blocking": true,
+      "passCriteria": "macOS Release build, hosted tests, and required parity tests pass.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "BUILD-003",
+      "order": 7,
+      "title": "iOS and iPad Simulator Release qualification",
+      "blocking": true,
+      "passCriteria": "iPhone and iPad Simulator Release builds, hosted tests, and parity tests pass without physical-device gating.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "TEST-001",
+      "order": 8,
+      "title": "Focused visual tooling tests",
+      "blocking": true,
+      "passCriteria": "All canonical renderer, comparison, evidence, mask, and authority tooling tests pass.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "TEST-002",
+      "order": 9,
+      "title": "Regression suite",
+      "blocking": true,
+      "passCriteria": "Cryptographic, import, decode, share, persistence, migration, and progression regression tests pass.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "RES-001",
+      "order": 10,
+      "title": "Complete asset inventory",
+      "blocking": true,
+      "passCriteria": "All five Theme descriptors and every declared visual resource are inventoried with path, ID, role, dimensions, alpha, byte count, and digest.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "RES-002",
+      "order": 11,
+      "title": "Resource integrity",
+      "blocking": true,
+      "passCriteria": "Every shipping Theme resource resolves through runtime-owned I/O and matches its declared hash, media metadata, dimensions, and byte budget.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "RES-003",
+      "order": 12,
+      "title": "Resource consumption coverage",
+      "blocking": true,
+      "passCriteria": "Every declared production visual resource is consumed by at least one production surface or explicitly classified as a fallback/test-conformance resource.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "RES-004",
+      "order": 13,
+      "title": "No placeholders or cheap substitutes",
+      "blocking": true,
+      "passCriteria": "No required surface uses system symbols, generic gradients, plain rounded rectangles, flat substitute vectors, blank art, or obsolete rejected resources in place of approved Theme art.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "NOR-001",
+      "order": 14,
+      "title": "Approved Norse catalog",
+      "blocking": true,
+      "passCriteria": "Norse presents exactly the approved Runestone Tablet, Dragonwood Plaque, Stormforged Stele, Valknut, Ravenshield, Mj\u00f6lnir, Wolkin, Yggdrasil, Berserk, cold-sea background, Vault card, and mastery treatment.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "NOR-002",
+      "order": 15,
+      "title": "Norse permanent Base provider",
+      "blocking": true,
+      "passCriteria": "Norse is installed, owned, selectable, active as fallback, and cannot be revoked or made unavailable by optional-provider failure.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "NOR-003",
+      "order": 16,
+      "title": "Norse locked-state negative invariant",
+      "blocking": true,
+      "passCriteria": "All four destination probes prove zero reachable locked Norse cards while the optional-Codex locked renderer remains covered.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "MIG-001",
+      "order": 17,
+      "title": "Legacy Norse migration",
+      "blocking": true,
+      "passCriteria": "Legacy Norse IDs, ownership, selections, grants, and incoming package references migrate deterministically without data loss or decode failure.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "PROG-001",
+      "order": 18,
+      "title": "Progression catalog integrity",
+      "blocking": true,
+      "passCriteria": "The approved progression catalog, rules, grant groups, ownership, Encounter, and mastery relationships validate exactly.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "PROG-002",
+      "order": 19,
+      "title": "Unlock-state presentation",
+      "blocking": true,
+      "passCriteria": "Locked, progress, encountered, owned, selected, unavailable, and mastery states are truthful and never grant ownership from preview permission.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "THEME-001",
+      "order": 20,
+      "title": "Five production Theme providers",
+      "blocking": true,
+      "passCriteria": "Norse, Moonleaf, Sunspire, Wildwood, and Gloamthorn load, validate, activate, and render through the same provider-neutral production path.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "THEME-002",
+      "order": 21,
+      "title": "Optional-provider failure isolation",
+      "blocking": true,
+      "passCriteria": "Each optional Theme can be missing, invalid, or failed without blocking launch, encoding, decoding, Norse fallback, or persisted ownership truth.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "UI-001",
+      "order": 22,
+      "title": "Shared UI scaffold fidelity",
+      "blocking": true,
+      "passCriteria": "Workspace, compose, result, receive, share, Settings, Vault, pickers, and mastery use the approved hierarchy and Theme slots rather than provider-specific duplicate screens.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "UI-002",
+      "order": 23,
+      "title": "Responsive capture matrix",
+      "blocking": true,
+      "passCriteria": "All 400 destination state captures are produced from real application surfaces and are nonblank, correctly seeded, and source-bound.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "UI-003",
+      "order": 24,
+      "title": "Responsive structural authority",
+      "blocking": true,
+      "passCriteria": "All 700 structural mappings and every entry-level assertion pass, including visibility, containment, hierarchy, hit regions, no overflow, and no placeholder art.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "VIS-001",
+      "order": 25,
+      "title": "Canonical visual candidates",
+      "blocking": true,
+      "passCriteria": "All 50 named canonical production candidates are generated at exact reference dimensions using production components and resources; no candidate is bound to incompatible reference identities.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "VIS-002",
+      "order": 26,
+      "title": "Canonical mapping authority",
+      "blocking": true,
+      "passCriteria": "All 400 image-metric mapping instances pass through the 50 nonconflicting canonical candidates, with no candidate mapped to more than one reference hash or geometry.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "VIS-003",
+      "order": 27,
+      "title": "Approved full-screen states",
+      "blocking": true,
+      "passCriteria": "Every canonical full-screen Compose, inscription, receive, Vault, and catalog reference passes the canonical-screen profile with only the package-supplied system-chrome mask.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "VIS-004",
+      "order": 28,
+      "title": "Approved component and panel states",
+      "blocking": true,
+      "passCriteria": "Every canonical panel, Relic, Seal, background, Vault, and mastery reference passes the canonical-component profile.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "VIS-005",
+      "order": 29,
+      "title": "Exact production candidates",
+      "blocking": true,
+      "passCriteria": "The six supplied Norse Seal production candidates are exported through runtime resolution with exact byte and SHA-256 identity.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "SHARE-001",
+      "order": 30,
+      "title": "Interactive/static composition parity",
+      "blocking": true,
+      "passCriteria": "Interactive preview and static sharing use one production composition policy, safe regions, glyph layout, Seal anchor, Frame geometry, and background policy.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "SHARE-002",
+      "order": 31,
+      "title": "Static-share output",
+      "blocking": true,
+      "passCriteria": "Deterministic static-share output is nonblank, complete, legible, correctly themed, and does not reuse an incompatible portrait screen candidate.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "ACCESS-001",
+      "order": 32,
+      "title": "High Contrast",
+      "blocking": true,
+      "passCriteria": "All five Themes provide and render approved high-contrast resources and state cues without color-only meaning.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "ACCESS-002",
+      "order": 33,
+      "title": "Reduce Motion",
+      "blocking": true,
+      "passCriteria": "All 20 Reduce Motion entries pass exact resource/mode probes, zero active Theme animations, preview visibility/containment, and temporal stability of at least 0.995.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "ACCESS-003",
+      "order": 34,
+      "title": "Large text and Dynamic Type",
+      "blocking": true,
+      "passCriteria": "All 20 large-text entries preserve readable content, controls, artifact previews, and navigation without clipping or horizontal overflow.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "ACCESS-004",
+      "order": 35,
+      "title": "Accessibility semantics and controls",
+      "blocking": true,
+      "passCriteria": "VoiceOver labels, values, hints, keyboard focus, control sizes, and noncolor state indicators pass on all required surfaces.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "NEG-001",
+      "order": 36,
+      "title": "Negative mutation suite",
+      "blocking": true,
+      "passCriteria": "Every package-declared source, authority, resource, rendering, progression, and evidence mutation is rejected and the clean tree is restored and revalidated.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "EVID-001",
+      "order": 37,
+      "title": "Complete source-bound evidence",
+      "blocking": true,
+      "passCriteria": "Canonical, responsive, runtime-probe, mapping, test, build, mutation, inventory, gate, source-boundary, and support evidence is complete; all results bind to the frozen application source SHA and validate at the evidence head.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "EVID-002",
+      "order": 38,
+      "title": "Historical evidence immutability",
+      "blocking": true,
+      "passCriteria": "Earlier evidence directories remain unchanged; all v4.3 results are written only under docs/verification/theme-fidelity-v4-3/.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "PUB-001",
+      "order": 39,
+      "title": "Publication boundary",
+      "blocking": true,
+      "passCriteria": "A clean branch is pushed and one unmerged review PR is opened or updated; no merge, tag, archive, notarization, upload, release, or distribution occurs.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    },
+    {
+      "id": "AUDIT-001",
+      "order": 40,
+      "title": "Autonomous final self-audit",
+      "blocking": true,
+      "passCriteria": "The agent rereads every controlling instruction, audits each deliverable and gate, fixes every omission or defect, and repeats until all 40 gates pass.",
+      "failureAction": "Record the exact failure, repair the production source or evidence generator, rerun the narrow gate, then rerun every transitively affected gate. Do not waive, skip, relabel, or lower the authority."
+    }
+  ]
+}

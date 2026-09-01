@@ -15,6 +15,9 @@ from PIL import Image, UnidentifiedImageError
 
 
 SCHEMA_VERSION = "1.0"
+CONTRACT_V42 = "v4.2"
+CONTRACT_V43 = "v4.3"
+SUPPORTED_CONTRACTS = frozenset({CONTRACT_V42, CONTRACT_V43})
 UI_TEST_TARGET_KIND = "com.apple.product-type.bundle.ui-testing"
 HOSTED_TEST_IDENTIFIER = "ThemeFidelityMatrixTests/testCaptureThemeFidelityMatrix()"
 XCUI_TEST_IDENTIFIER = (
@@ -45,6 +48,42 @@ CANDIDATE_CATALOG_RELATIVE = Path(
     "docs/verification/theme-fidelity-v4/authority/v4.2/"
     "02-COMPARISON-AUTHORITY/Candidate-Capture-Catalog-v1.2.json"
 )
+V43_AUTHORITY_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4-3/authority/"
+    "03-COMPARISON-AUTHORITY/Comparison-Authority-v1.3.json"
+)
+V43_PROBE_CATALOG_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4-3/authority/"
+    "03-COMPARISON-AUTHORITY/Runtime-Probe-Catalog-v1.3.json"
+)
+V43_SEED_CATALOG_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4-3/authority/"
+    "03-COMPARISON-AUTHORITY/Deterministic-Seed-Catalog-v1.3.json"
+)
+V43_CANDIDATE_CATALOG_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4-3/authority/"
+    "03-COMPARISON-AUTHORITY/Responsive-Candidate-Catalog-v1.3.json"
+)
+CONTRACT_PATHS = {
+    CONTRACT_V42: {
+        "schemaVersion": "1.2",
+        "authority": AUTHORITY_RELATIVE,
+        "probes": PROBE_CATALOG_RELATIVE,
+        "seeds": SEED_CATALOG_RELATIVE,
+        "candidates": CANDIDATE_CATALOG_RELATIVE,
+    },
+    CONTRACT_V43: {
+        "schemaVersion": "1.3",
+        "authority": V43_AUTHORITY_RELATIVE,
+        "probes": V43_PROBE_CATALOG_RELATIVE,
+        "seeds": V43_SEED_CATALOG_RELATIVE,
+        "candidates": V43_CANDIDATE_CATALOG_RELATIVE,
+    },
+}
+CONTRACT_INVENTORY_COUNTS = {
+    CONTRACT_V42: (380, 672, 4, 1056),
+    CONTRACT_V43: (325, 341, 4, 670),
+}
 SHA256_PATTERN = re.compile(r"[0-9a-f]{64}\Z")
 CANDIDATE_ID_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*\Z")
 STEM_PATTERN = (
@@ -324,10 +363,12 @@ def _validate_seed_shape(seed: Any, label: str) -> dict[str, Any]:
     return seed
 
 
-def index_seeds(document: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+def index_seeds(
+    document: Mapping[str, Any], schema_version: str = "1.2"
+) -> dict[str, dict[str, Any]]:
     records = document.get("seeds")
     if (
-        document.get("schemaVersion") != "1.2"
+        document.get("schemaVersion") != schema_version
         or not isinstance(records, list)
         or len(records) != 100
         or document.get("seedCount") != len(records)
@@ -358,10 +399,12 @@ def index_entries(document: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
     return indexed
 
 
-def index_candidates(document: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+def index_candidates(
+    document: Mapping[str, Any], schema_version: str = "1.2"
+) -> dict[str, dict[str, Any]]:
     records = document.get("candidates")
     if (
-        document.get("schemaVersion") != "1.2"
+        document.get("schemaVersion") != schema_version
         or document.get("candidateCount") != 188
         or not isinstance(records, list)
         or len(records) != 188
@@ -594,11 +637,61 @@ class ExpectedInventory:
         return self.sidecars | self.candidate_pngs | self.query_pngs
 
 
+def contract_specification(contract_version: str) -> Mapping[str, Any]:
+    specification = CONTRACT_PATHS.get(contract_version)
+    if specification is None:
+        raise XCUIEvidenceError(
+            f"unsupported Theme-fidelity evidence contract: {contract_version!r}"
+        )
+    return specification
+
+
+def capture_candidate_ids_for_entry(
+    entry: Mapping[str, Any],
+    probes: Mapping[str, Mapping[str, Any]],
+    candidates: Mapping[str, Mapping[str, Any]],
+    contract_version: str,
+) -> list[str]:
+    """Return mapped candidates plus any authority-required probe-only capture."""
+    contract_specification(contract_version)
+    identifiers = set(candidate_ids_for_entry(entry))
+    if contract_version == CONTRACT_V43:
+        probe_ids = xcui_probe_ids_for_entry(entry, probes)
+        if any(probe_id.startswith("probe.motion.preview-") for probe_id in probe_ids):
+            codex_id = entry.get("codexID")
+            if not isinstance(codex_id, str) or not codex_id.startswith("codex."):
+                raise XCUIEvidenceError(
+                    f"v4.3 preview probe Codex identity is invalid: {entry.get('id')}"
+                )
+            prefix = (
+                "theme.artifact-preview.relic."
+                + codex_id.removeprefix("codex.")
+                + "."
+            )
+            matches = sorted(
+                candidate_id
+                for candidate_id in candidates
+                if candidate_id.startswith(prefix)
+            )
+            if len(matches) != 1:
+                raise XCUIEvidenceError(
+                    f"v4.3 preview probe candidate is not unique: {entry.get('id')}"
+                )
+            identifiers.add(matches[0])
+    return sorted(identifiers)
+
+
 def expected_inventory(
     authority: Mapping[str, Any],
     probes: Mapping[str, Mapping[str, Any]],
     destinations: set[str] | None = None,
+    *,
+    candidates: Mapping[str, Mapping[str, Any]] | None = None,
+    contract_version: str = CONTRACT_V42,
 ) -> ExpectedInventory:
+    contract_specification(contract_version)
+    if contract_version == CONTRACT_V43 and candidates is None:
+        raise XCUIEvidenceError("v4.3 XCUI inventory requires the responsive candidate catalog")
     entries = index_entries(authority)
     sidecars: set[str] = set()
     candidate_pngs: set[str] = set()
@@ -607,26 +700,37 @@ def expected_inventory(
         destination = entry.get("destination")
         if destinations is not None and destination not in destinations:
             continue
-        candidates = candidate_ids_for_entry(entry)
+        capture_candidates = capture_candidate_ids_for_entry(
+            entry,
+            probes,
+            candidates or {},
+            contract_version,
+        )
         xcui_probes = xcui_probe_ids_for_entry(entry, probes)
-        if candidates or xcui_probes:
+        if capture_candidates or xcui_probes:
             sidecars.add(sidecar_name(entry))
         candidate_pngs.update(
             candidate_attachment_name(entry, candidate_id)
-            for candidate_id in candidates
+            for candidate_id in capture_candidates
         )
         if "probe.norse.vault.locked-element-count" in xcui_probes:
             query_pngs.add(query_attachment_name(entry))
     inventory = ExpectedInventory(
         frozenset(sidecars), frozenset(candidate_pngs), frozenset(query_pngs)
     )
-    if destinations is None and (
-        len(inventory.sidecars) != 380
-        or len(inventory.candidate_pngs) != 672
-        or len(inventory.query_pngs) != 4
-        or len(inventory.attachments) != 1056
-    ):
-        raise XCUIEvidenceError("authority-derived XCUI attachment counts differ from 380/672/4")
+    if destinations is None:
+        actual = (
+            len(inventory.sidecars),
+            len(inventory.candidate_pngs),
+            len(inventory.query_pngs),
+            len(inventory.attachments),
+        )
+        expected = CONTRACT_INVENTORY_COUNTS[contract_version]
+        if actual != expected:
+            raise XCUIEvidenceError(
+                f"{contract_version} authority-derived XCUI attachment counts differ: "
+                f"actual={actual}, expected={expected}"
+            )
     return inventory
 
 
@@ -634,6 +738,9 @@ def expected_inventory_for_role(
     authority: Mapping[str, Any],
     probes: Mapping[str, Mapping[str, Any]],
     role: str,
+    *,
+    candidates: Mapping[str, Mapping[str, Any]] | None = None,
+    contract_version: str = CONTRACT_V42,
 ) -> ExpectedInventory:
     destinations = {
         "iphone-xcui": {"iphone-portrait"},
@@ -642,7 +749,13 @@ def expected_inventory_for_role(
     }.get(role)
     if destinations is None:
         raise XCUIEvidenceError(f"unknown XCUI result-bundle role: {role}")
-    return expected_inventory(authority, probes, destinations)
+    return expected_inventory(
+        authority,
+        probes,
+        destinations,
+        candidates=candidates,
+        contract_version=contract_version,
+    )
 
 
 def resolve_attachment(root: Path, name: Any, label: str) -> Path:
@@ -919,6 +1032,8 @@ def validate_sidecar(
     candidates: Mapping[str, Mapping[str, Any]],
     capture_root: Path,
     attachment_records: Mapping[str, Mapping[str, Any]] | None = None,
+    *,
+    contract_version: str = CONTRACT_V42,
 ) -> ValidatedSidecar:
     document = load_json(path, "XCUI evidence sidecar")
     if set(document) != SIDECAR_KEYS:
@@ -974,7 +1089,12 @@ def validate_sidecar(
         raise XCUIEvidenceError(f"XCUI sidecar sourceTest is not an independent UI test: {path.name}")
     _validate_attachment_metadata(path.name, source_test, attachment_records)
 
-    expected_candidates = candidate_ids_for_entry(entry)
+    expected_candidates = capture_candidate_ids_for_entry(
+        entry,
+        probes,
+        candidates,
+        contract_version,
+    )
     raw_candidates = document.get("candidateElementCaptures")
     if not isinstance(raw_candidates, list):
         raise XCUIEvidenceError(f"candidateElementCaptures must be an array: {path.name}")
@@ -1101,7 +1221,17 @@ def validate_sidecar(
             if element is not None:
                 raise XCUIEvidenceError("locked-element query cannot declare an element frame")
         else:
-            expected_candidate = expected_preview_candidate(entry)
+            preview_candidates = [
+                candidate_id
+                for candidate_id in expected_candidates
+                if candidate_id.startswith("theme.artifact-preview.")
+            ]
+            if len(preview_candidates) != 1:
+                raise XCUIEvidenceError(
+                    f"XCUI preview evidence lacks one exact artifact-preview candidate: "
+                    f"{entry.get('id')}"
+                )
+            expected_candidate = preview_candidates[0]
             expected_attachment = candidate_attachment_name(entry, expected_candidate)
             expected_predicate = f"identifier == '{expected_candidate}'"
             if element is None:
@@ -1151,19 +1281,31 @@ def validate_sidecar(
 
 def load_repository_authority(
     root: Path,
+    contract_version: str = CONTRACT_V42,
 ) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
-    authority = load_json(root / AUTHORITY_RELATIVE, "comparison authority")
-    probe_document = load_json(root / PROBE_CATALOG_RELATIVE, "runtime probe catalog")
+    specification = contract_specification(contract_version)
+    authority = load_json(root / specification["authority"], "comparison authority")
+    probe_document = load_json(root / specification["probes"], "runtime probe catalog")
+    if authority.get("schemaVersion") != specification["schemaVersion"]:
+        raise XCUIEvidenceError("comparison authority schema version differs from its contract")
+    if probe_document.get("schemaVersion") != specification["schemaVersion"]:
+        raise XCUIEvidenceError("runtime probe catalog schema version differs from its contract")
     return authority, index_probes(probe_document)
 
 
-def load_repository_seeds(root: Path) -> dict[str, dict[str, Any]]:
-    seed_document = load_json(root / SEED_CATALOG_RELATIVE, "deterministic seed catalog")
-    return index_seeds(seed_document)
+def load_repository_seeds(
+    root: Path, contract_version: str = CONTRACT_V42
+) -> dict[str, dict[str, Any]]:
+    specification = contract_specification(contract_version)
+    seed_document = load_json(root / specification["seeds"], "deterministic seed catalog")
+    return index_seeds(seed_document, str(specification["schemaVersion"]))
 
 
-def load_repository_candidates(root: Path) -> dict[str, dict[str, Any]]:
+def load_repository_candidates(
+    root: Path, contract_version: str = CONTRACT_V42
+) -> dict[str, dict[str, Any]]:
+    specification = contract_specification(contract_version)
     candidate_document = load_json(
-        root / CANDIDATE_CATALOG_RELATIVE, "candidate capture catalog"
+        root / specification["candidates"], "candidate capture catalog"
     )
-    return index_candidates(candidate_document)
+    return index_candidates(candidate_document, str(specification["schemaVersion"]))

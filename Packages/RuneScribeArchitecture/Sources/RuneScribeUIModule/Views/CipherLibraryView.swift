@@ -833,9 +833,16 @@ struct CipherLibraryView: View {
                     cipherID: cipher.id,
                     displayName: cipher.label
                 )
+                let renderedPreview = try await session.renderShareBuilderPreview(
+                    source: source,
+                    catalog: catalog,
+                    colorMode: shareColorMode,
+                    systemReduceMotion: effectiveReduceMotion
+                )
                 let prepared = try await session.prepareShareBuilderArtifact(
                     source: source,
                     catalog: catalog,
+                    renderedPreview: renderedPreview,
                     colorMode: shareColorMode,
                     systemReduceMotion: effectiveReduceMotion
                 )

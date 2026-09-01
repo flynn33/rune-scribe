@@ -44,6 +44,87 @@ struct ContentViewSettledArtifactSeed {
     }
 }
 
+enum ContentViewInitialViewport: String, Sendable {
+    case resultActions = "workspace.result-actions"
+}
+
+@MainActor
+private struct ContentViewInscriptionPreviewSource: Identifiable {
+    let id = UUID()
+    let descriptor: ThemeDescriptor
+    let plan: ThemeArtifactCompositionPlan
+    let presentation: ActiveThemeVisualPresentation
+    let selectedLayout: ThemeInscriptionLayoutChoice
+
+    init?(
+        descriptor: ThemeDescriptor,
+        plan: ThemeArtifactCompositionPlan,
+        presentation: ActiveThemeVisualPresentation
+    ) {
+        let optionalImageIDs: [ThemeResourceID?] = [
+            plan.relicResourceID,
+            plan.sealResourceID,
+            plan.frameResourceID,
+            plan.backgroundResourceID,
+        ]
+        let requiredImageIDs = optionalImageIDs.compactMap { $0 }
+        guard descriptor.codex.id == plan.selection.codexID,
+              presentation.plan.codexID == plan.selection.codexID,
+              presentation.revision == presentation.plan.revision,
+              requiredImageIDs.allSatisfy({ presentation.image(for: $0) != nil })
+        else { return nil }
+        self.descriptor = descriptor
+        self.plan = plan
+        self.presentation = presentation
+        selectedLayout = ThemeInscriptionLayoutChoice.recommended(for: plan)
+    }
+}
+
+@MainActor
+private struct ActiveThemeCodexCatalogSheet: View {
+    @ObservedObject var session: RuneScribeUISession
+    @Environment(\.dismiss) private var dismiss
+
+    let initialTab: CodexCatalogTab
+
+    var body: some View {
+        Group {
+            if let descriptor = session.themeSnapshot?.effectiveTheme,
+               let presentation = session.activeThemeVisualPresentation,
+               descriptor.codex.id == presentation.plan.codexID,
+               descriptor.codex.id == session.themeSnapshot?.effectiveCodexID {
+                CodexCatalogRoot(
+                    descriptor: descriptor,
+                    presentation: presentation,
+                    initialTab: initialTab,
+                    runtimeState: session.activeThemeArtifactCatalogRuntimeState,
+                    onDismiss: { dismiss() },
+                    onSelectRelic: { select($0, kind: .relic) },
+                    onSelectSeal: { select($0, kind: .seal) },
+                    onClearSeal: clearSeal,
+                    onPrimaryAction: { dismiss() }
+                )
+            } else {
+                ProgressView("Loading Codex…")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .runeSemanticPresentationSurface()
+        .preferredColorScheme(.dark)
+        .task { await session.loadActiveThemeCatalogVisuals() }
+    }
+
+    private func select(_ artifactID: ArtifactID, kind: ThemeArtifactSelectionKind) {
+        dismiss()
+        Task { await session.selectThemeArtifact(artifactID, kind: kind) }
+    }
+
+    private func clearSeal() {
+        dismiss()
+        Task { await session.clearThemeSeal() }
+    }
+}
+
 struct ContentView: View {
 
     // MARK: - Environment
@@ -129,6 +210,7 @@ struct ContentView: View {
     @State private var artifactBrowser: ArtifactBrowser?
     @State private var resultArtifactComposition: ThemeArtifactCompositionPlan?
     @State private var resultThemeVisualPresentation: ActiveThemeVisualPresentation?
+    @State private var inscriptionPreviewSource: ContentViewInscriptionPreviewSource?
     @State private var decodeError: String?
     @State private var showMessageCompose = false
     /// Scoped Core artifact for the canonical themed attachment. UI receives only the
@@ -140,6 +222,7 @@ struct ContentView: View {
     @State private var messageShareLaunchID: UUID?
     @State private var messageArtifactCompletionGate = MessageArtifactCompletionGate()
     @State private var shareBuilderSource: ShareBuilderSource?
+    @State private var initialScrollTarget: String?
 
     // Linking the active cipher to a recipient so its first message carries the key.
     @State private var showNewContact = false
@@ -158,6 +241,7 @@ struct ContentView: View {
     init(
         initialInputText: String = "",
         initialSettledArtifact: ContentViewSettledArtifactSeed? = nil,
+        initialViewport: ContentViewInitialViewport? = nil,
         initialViewportProbeID: String = "workspace.text-frame",
         initialComposeCaptureLength: ThemeCaptureIdentifier.ComposeLength? = nil,
         forcesScrollableWorkspaceLayout: Bool = false,
@@ -168,6 +252,7 @@ struct ContentView: View {
         self.forcesScrollableWorkspaceLayout = forcesScrollableWorkspaceLayout
         self.qualificationViewportWidth = qualificationViewportWidth
         _inputText = State(initialValue: initialInputText)
+        _initialScrollTarget = State(initialValue: initialViewport?.rawValue)
         guard let initialSettledArtifact else { return }
         _boxPhase = State(initialValue: .result)
         _targetSnapshot = State(
@@ -194,6 +279,7 @@ struct ContentView: View {
             || showSettings
             || showVaultProgress
             || artifactBrowser != nil
+            || inscriptionPreviewSource != nil
             || showMessageCompose
             || shareBuilderSource != nil
             || showNewContact
@@ -245,6 +331,21 @@ struct ContentView: View {
             }
         }
         .runeRootFrame()
+        #if os(iOS)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if inputIsFocused {
+                HStack {
+                    Spacer()
+                    Button("Done") { inputIsFocused = false }
+                        .buttonStyle(.borderedProminent)
+                        .accessibilityIdentifier("workspace.keyboard.done")
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(.bar)
+            }
+        }
+        #endif
         .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenWorkspace)
         .background { automaticMessageShareLauncher }
         .preferredColorScheme(.dark)
@@ -259,6 +360,23 @@ struct ContentView: View {
         }
         .sheet(item: $artifactBrowser) { browser in
             artifactBrowserSheet(browser)
+        }
+        .sheet(item: $inscriptionPreviewSource) { source in
+            ThemeInscriptionPreviewView(
+                descriptor: source.descriptor,
+                plan: source.plan,
+                selectedLayout: source.selectedLayout,
+                image: { resourceID in
+                    source.presentation.image(for: resourceID)
+                        ?? Image(systemName: "exclamationmark.triangle.fill")
+                },
+                controls: .settledResult,
+                backAction: { inscriptionPreviewSource = nil },
+                libraryAction: openCodexFromInscriptionPreview,
+                applyLayout: { inscriptionPreviewSource = nil }
+            )
+            .runeSemanticPresentationSurface()
+            .preferredColorScheme(.dark)
         }
         .sheet(item: $shareBuilderSource) { source in
             ShareBuilderView(
@@ -333,6 +451,7 @@ struct ContentView: View {
                     workspaceBody(maximumCanvasWidth: maximumCanvasWidth)
                         .frame(minHeight: proxy.size.height, alignment: .top)
                 }
+                .scrollPosition(id: $initialScrollTarget, anchor: .bottom)
                 .scrollDismissesKeyboard(.immediately)
                 .scrollBounceBehavior(.basedOnSize)
             }
@@ -360,6 +479,17 @@ struct ContentView: View {
         return previewPadding + fitMargin + pagerChrome
     }
 
+    nonisolated static func workspaceTextFrameMinimumHeight(
+        maximumCanvasWidth: CGFloat?,
+        pageCount: Int?
+    ) -> CGFloat? {
+        guard let maximumCanvasWidth else { return nil }
+        let canvasHeight = max(1, maximumCanvasWidth)
+            * CGFloat(ShareArtifactRenderPlan.outputHeight)
+            / CGFloat(ShareArtifactRenderPlan.outputWidth)
+        return canvasHeight + workspaceCanvasVerticalInset(pageCount: pageCount)
+    }
+
     private func workspaceBody(maximumCanvasWidth: CGFloat?) -> some View {
         // Fixed layout — only the content inside `textFrame` changes when
         // converting. Nothing here appears, disappears, or resizes.
@@ -383,7 +513,13 @@ struct ContentView: View {
             .labelsHidden()
 
             textFrame(maximumCanvasWidth: maximumCanvasWidth)
-                .frame(maxHeight: .infinity)
+                .frame(
+                    minHeight: Self.workspaceTextFrameMinimumHeight(
+                        maximumCanvasWidth: maximumCanvasWidth,
+                        pageCount: resultArtifactComposition?.pages.count
+                    ),
+                    maxHeight: .infinity
+                )
 
             // At least the 46pt button-row height. The transforming-phase
             // placeholder is pinned to exactly 46pt so the parchment text frame
@@ -391,8 +527,10 @@ struct ContentView: View {
             // .result row (Share/iMessage + key indicator) is allowed to grow.
             actionArea
                 .frame(minHeight: 46)
+                .id(ContentViewInitialViewport.resultActions.rawValue)
         }
         .padding(RuneMetrics.pad)
+        .scrollTargetLayout()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
@@ -405,6 +543,15 @@ struct ContentView: View {
         }
         let screenCaptureIdentifier = browser.captureKind.flatMap { kind in
             codexID.map { ThemeCaptureIdentifier.artifactPickerScreen(kind: kind, codexID: $0) }
+        }
+        if browser != .frame {
+            return AnyView(
+                ActiveThemeCodexCatalogSheet(
+                    session: session,
+                    initialTab: browser == .seal ? .seals : .relics
+                )
+                .themeCaptureViewportIdentifier(screenCaptureIdentifier)
+            )
         }
         return AnyView(NavigationStack {
             ThemeArtifactBrowserView(
@@ -432,7 +579,13 @@ struct ContentView: View {
                         )
                     }
                 },
-                artwork: { item in artifactArtwork(for: item.id, kind: item.kind) }
+                artwork: { item in
+                    artifactArtwork(
+                        for: item.id,
+                        kind: item.kind,
+                        showsScriptSpecimen: true
+                    )
+                }
             )
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -449,95 +602,208 @@ struct ContentView: View {
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
                 .fill(Color.runeParchment)
 
-            switch boxPhase {
-            case .editing:
-                TextEditor(text: $inputText)
-                    .font(.system(size: glyphSize, design: .monospaced))
-                    .foregroundColor(.runeTextPrimary)
-                    .scrollContentBackground(.hidden)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 10)
-                    .accessibilityLabel(
-                        mode == .encode ? "Message to encode" : "Runes to decode"
+            GeometryReader { geometry in
+                ThemeChromeProtectedContentLayout(
+                    panelPixelSize: panelBorderPixelSize,
+                    minimumInsets: EdgeInsets(
+                        top: 0,
+                        leading: 0,
+                        bottom: 0,
+                        trailing: 0
                     )
-                    #if os(iOS)
-                    .focused($inputIsFocused)
-                    .toolbar {
-                        ToolbarItemGroup(placement: .keyboard) {
-                            Spacer()
-                            Button("Done") { inputIsFocused = false }
-                                .accessibilityIdentifier("workspace.keyboard.done")
-                        }
-                    }
-                    #endif
+                ) {
+                    ZStack(alignment: .topLeading) {
+                        switch boxPhase {
+                        case .editing:
+                            TextEditor(text: $inputText)
+                                .font(.system(size: glyphSize, design: .monospaced))
+                                .foregroundColor(.runeTextPrimary)
+                                .scrollContentBackground(.hidden)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 10)
+                                .accessibilityLabel(
+                                    mode == .encode
+                                        ? "Message to encode"
+                                        : "Runes to decode"
+                                )
+                                #if os(iOS)
+                                .focused($inputIsFocused)
+                                #endif
 
-                if inputText.isEmpty {
-                    Text(mode == .encode ? "Type or paste your message here…"
-                                         : "Paste runes to decode…")
-                        .font(.system(size: glyphSize, design: .monospaced))
-                        .foregroundColor(.runeSilver.opacity(0.45))
-                        .padding(.horizontal, 15)
-                        .padding(.vertical, 18)
-                        .allowsHitTesting(false)
-                }
+                            if inputText.isEmpty {
+                                Text(
+                                    mode == .encode
+                                        ? "Type or paste your message here…"
+                                        : "Paste runes to decode…"
+                                )
+                                .font(.system(size: glyphSize, design: .monospaced))
+                                .foregroundColor(.runeSilver.opacity(0.45))
+                                .padding(.horizontal, 15)
+                                .padding(.vertical, 18)
+                                .allowsHitTesting(false)
+                            }
 
-            case .transforming:
-                ScrollView {
-                    RuneInscriptionText(source: sourceSnapshot,
+                        case .transforming:
+                            ScrollView {
+                                RuneInscriptionText(
+                                    source: sourceSnapshot,
+                                    target: targetSnapshot,
+                                    start: transformStart,
+                                    direction: transformDirection,
+                                    fontSize: glyphSize,
+                                    fontName: session.inscriptionFontPostScriptName,
+                                    fontResourceID: session.inscriptionFontResourceID,
+                                    vectorDataByToken:
+                                        session.inscriptionVectorDataByToken,
+                                    vectorResourceIDByToken:
+                                        session.inscriptionVectorResourceIDByToken,
+                                    settled: boxPhase == .result
+                                )
+                                .padding(.horizontal, 15)
+                                .padding(.vertical, 15)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                        case .result:
+                            if transformDirection == .encode,
+                               let resultArtifactComposition,
+                               let presentation = resultThemeVisualPresentation,
+                               presentation.revision == presentation.plan.revision {
+                                productionMessagePresentation(
+                                    composition: resultArtifactComposition,
+                                    presentation: presentation,
+                                    maximumCanvasWidth: maximumCanvasWidth
+                                )
+                            } else {
+                                ScrollView {
+                                    RuneInscriptionText(
+                                        source: sourceSnapshot,
                                         target: targetSnapshot,
                                         start: transformStart,
                                         direction: transformDirection,
                                         fontSize: glyphSize,
                                         fontName: session.inscriptionFontPostScriptName,
                                         fontResourceID: session.inscriptionFontResourceID,
-                                        vectorDataByToken: session.inscriptionVectorDataByToken,
+                                        vectorDataByToken:
+                                            session.inscriptionVectorDataByToken,
                                         vectorResourceIDByToken:
                                             session.inscriptionVectorResourceIDByToken,
-                                        settled: boxPhase == .result)
-                        .padding(.horizontal, 15)
-                        .padding(.vertical, 15)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            case .result:
-                if transformDirection == .encode,
-                   let resultArtifactComposition,
-                   let presentation = resultThemeVisualPresentation,
-                   presentation.revision == presentation.plan.revision {
-                    ThemeArtifactPreview(
-                        plan: resultArtifactComposition,
-                        maximumCanvasWidth: maximumCanvasWidth,
-                        image: { presentation.image(for: $0) }
-                    )
-                    .padding(10)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else {
-                    ScrollView {
-                        RuneInscriptionText(source: sourceSnapshot,
-                                            target: targetSnapshot,
-                                            start: transformStart,
-                                            direction: transformDirection,
-                                            fontSize: glyphSize,
-                                            fontName: session.inscriptionFontPostScriptName,
-                                            fontResourceID: session.inscriptionFontResourceID,
-                                            vectorDataByToken: session.inscriptionVectorDataByToken,
-                                            vectorResourceIDByToken:
-                                                session.inscriptionVectorResourceIDByToken,
-                                            settled: true)
-                            .padding(.horizontal, 15)
-                            .padding(.vertical, 15)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                                        settled: true
+                                    )
+                                    .padding(.horizontal, 15)
+                                    .padding(.vertical, 15)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                }
+                            }
+                        }
                     }
+                    .frame(
+                        maxWidth: .infinity,
+                        maxHeight: .infinity,
+                        alignment: .topLeading
+                    )
                 }
+                .frame(
+                    width: geometry.size.width,
+                    height: geometry.size.height,
+                    alignment: .topLeading
+                )
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .clipShape(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                .strokeBorder(Color.runeBlue.opacity(0.35), lineWidth: 1)
-        )
+        .overlay {
+            ThemeChromeImage(slot: .panelBorder)
+                .allowsHitTesting(false)
+        }
         .runtimeViewportFrameProbe(initialViewportProbeID)
         .themeCaptureViewportIdentifier(composeCaptureIdentifier)
+    }
+
+    private var panelBorderPixelSize: ThemePixelSize? {
+        session.activeThemeVisualPresentation?
+            .chromeImageReference(for: .panelBorder)?
+            .integrity.pixelSize
+    }
+
+    @ViewBuilder
+    private func productionMessagePresentation(
+        composition: ThemeArtifactCompositionPlan,
+        presentation: ActiveThemeVisualPresentation,
+        maximumCanvasWidth: CGFloat?
+    ) -> some View {
+        if composition.requiredImageResourceIDs.allSatisfy({
+            presentation.image(for: $0) != nil
+        }) {
+            ViewThatFits(in: .horizontal) {
+                CodexComposeWorkspacePanel(
+                    model: CodexComposeWorkspacePanelModel(
+                        composition: composition,
+                        cipherName: session.activeCipher?.label ?? "Cipher",
+                        relicName: presentation.plan.selectedRelic?.displayName
+                            ?? "Relic",
+                        sealName: presentation.plan.selectedSeal?.displayName
+                            ?? "None",
+                        primaryActionTitle: "Preview Message"
+                    ),
+                    image: { requiredProductionImage($0, from: presentation) },
+                    navigate: navigateFromComposePanel,
+                    selectCipher: { showLibrary = true },
+                    selectRelic: { artifactBrowser = .relic },
+                    selectSeal: { artifactBrowser = .seal },
+                    performPrimaryAction: openInscriptionPreview
+                )
+                .frame(minWidth: 560)
+
+                CodexMessagePanel(
+                    model: CodexMessagePanelModel(
+                        format: messagePanelFormat(composition),
+                        composition: composition
+                    ),
+                    image: { requiredProductionImage($0, from: presentation) }
+                )
+            }
+            .padding(10)
+            .frame(maxWidth: maximumCanvasWidth ?? .infinity, maxHeight: .infinity)
+        } else {
+            ThemeArtifactPreview(
+                plan: composition,
+                maximumCanvasWidth: maximumCanvasWidth,
+                image: { presentation.image(for: $0) }
+            )
+            .padding(10)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    private func navigateFromComposePanel(_ destination: CodexComposeNavigationItem) {
+        switch destination {
+        case .compose:
+            break
+        case .cipher:
+            showLibrary = true
+        case .vault:
+            showVaultProgress = true
+        case .settings:
+            showSettings = true
+        }
+    }
+
+    private func messagePanelFormat(
+        _ composition: ThemeArtifactCompositionPlan
+    ) -> CodexMessagePanelFormat {
+        let hardLineCount = composition.pages.first?.inscription
+            .components(separatedBy: "\n").count ?? 1
+        return hardLineCount > 2 ? .long : .short
+    }
+
+    private func requiredProductionImage(
+        _ resourceID: ThemeResourceID,
+        from presentation: ActiveThemeVisualPresentation
+    ) -> Image {
+        guard let image = presentation.image(for: resourceID) else {
+            preconditionFailure("Missing admitted production image: \(resourceID.rawValue)")
+        }
+        return image
     }
 
     private var composeCaptureIdentifier: String? {
@@ -599,6 +865,12 @@ struct ContentView: View {
             VStack(spacing: 8) {
                 resultEditCopyActions
 
+                if transformDirection == .encode,
+                   resultArtifactComposition != nil,
+                   resultThemeVisualPresentation != nil {
+                    inscriptionPreviewButton
+                }
+
                 if transformDirection == .encode, let cipher = resultCipher {
                     #if os(iOS)
                     resultShareActions
@@ -637,6 +909,17 @@ struct ContentView: View {
                 resultCopyButton(resistsCompression: false)
             }
         }
+    }
+
+    private var inscriptionPreviewButton: some View {
+        Button(action: openInscriptionPreview) {
+            Label("Full Inscription Preview", systemImage: "rectangle.inset.filled")
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(RuneSecondaryButtonStyle())
+        .accessibilityIdentifier("workspace.result.inscription-preview")
+        .runtimeViewportFrameProbe("workspace.result.inscription-preview")
     }
 
     private func resultEditButton(resistsCompression: Bool) -> some View {
@@ -801,8 +1084,10 @@ struct ContentView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 0)
         .background(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous).fill(Color.runeParchment))
-        .overlay(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-            .strokeBorder(Color.runeGold.opacity(0.22), lineWidth: 1))
+        .overlay {
+            ThemeChromeImage(slot: .tabSelector)
+                .allowsHitTesting(false)
+        }
     }
 
     private var artifactSelectionBar: some View {
@@ -853,10 +1138,10 @@ struct ContentView: View {
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
                 .fill(Color.runeParchment)
         )
-        .overlay(
-            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                .strokeBorder(Color.runeBlue.opacity(0.22), lineWidth: 1)
-        )
+        .overlay {
+            ThemeChromeImage(slot: .tabSelector)
+                .allowsHitTesting(false)
+        }
         .disabled(actionTask != nil || boxPhase != .editing)
     }
 
@@ -889,10 +1174,8 @@ struct ContentView: View {
         _ item: ThemeArtifactPickerItem?,
         browser: ArtifactBrowser
     ) -> ThemeVisualContentState {
-        guard session.activeThemeProviderIsAvailable else { return .unavailable }
         guard let item else { return browser == .relic ? .unavailable : .selected }
-        guard item.isOwned else { return .locked }
-        return item.isSelected ? .selected : .owned
+        return item.visualState
     }
 
     private func artifactBrowserItems(_ browser: ArtifactBrowser) -> [ThemeArtifactBrowserItem] {
@@ -901,51 +1184,105 @@ struct ContentView: View {
         case .seal: session.themeSealItems
         case .frame: session.themeFrameItems
         }
-        return items.compactMap { item in
+        return items.enumerated().compactMap { index, item in
             guard let visual = session.activeThemeVisualPresentation?.plan.catalog.first(where: {
                 $0.id == item.id && $0.kind == browser.visualKind
             }) else { return nil }
-            let state: ThemeVisualContentState = if !session.activeThemeProviderIsAvailable {
-                .unavailable
-            } else if item.isSelected {
-                .selected
-            } else if item.isOwned {
-                .owned
-            } else {
-                .locked
-            }
             return ThemeArtifactBrowserItem(
                 id: item.id,
                 resourceID: visual.thumbnail.id,
                 name: item.name,
                 description: item.description,
+                facets: visual.facets,
                 kind: browser.visualKind,
                 rarity: item.rarity,
-                state: state,
+                state: item.visualState,
                 accessibilityLabel: visual.accessibilityLabel,
                 accessibilityHint: visual.accessibilityHint,
                 provenance: nil,
-                isSelectable: item.isSelectable
+                isSelectable: item.isSelectable,
+                ordinal: index + 1,
+                availability: visual.availability
             )
         }
     }
 
     private func artifactArtwork(
         for artifactID: ArtifactID,
-        kind: ThemeVisualArtifactKind
+        kind: ThemeVisualArtifactKind,
+        showsScriptSpecimen: Bool = false
     ) -> AnyView {
         guard let presentation = session.activeThemeVisualPresentation,
               let visual = presentation.plan.catalog.first(where: {
                   $0.id == artifactID && $0.kind == kind
-              }),
-              let image = presentation.imageReference(for: visual.thumbnail)?.image
+              })
         else {
             return AnyView(ThemeVisualPlaceholder(
                 systemImage: kind.systemImage,
                 label: "\(kind.rawValue) artwork unavailable"
             ))
         }
-        return AnyView(image.resizable().scaledToFill())
+        guard let image = presentation.imageReference(for: visual.thumbnail)?.image else {
+            return AnyView(ThemeVisualPlaceholder(
+                systemImage: kind.systemImage,
+                label: "\(kind.rawValue) artwork unavailable"
+            ))
+        }
+        if showsScriptSpecimen,
+           kind == .relic,
+           let descriptor = session.themeSnapshot?.effectiveTheme,
+           let relic = descriptor.codex.relics.first(where: {
+               $0.metadata.id == artifactID
+           }),
+           let layout = relic.layouts.first(where: { $0.id == relic.defaultLayoutID }),
+           let script = descriptor.codex.scripts.first(where: {
+               $0.id == descriptor.codex.primaryScriptID
+           }) {
+            let pixelSize = visual.thumbnail.pixelSize
+            let artworkAspectRatio = pixelSize.map {
+                Double($0.width) / Double($0.height)
+            } ?? (Double(layout.aspectRatio.width) / Double(layout.aspectRatio.height))
+            let accessibilityDescription = [
+                relic.metadata.accessibility.label.fallbackValue,
+                relic.metadata.accessibility.hint?.fallbackValue ?? "",
+            ].joined(separator: " ").lowercased()
+            return AnyView(ThemeRelicSpecimenArtwork(
+                image: image,
+                plan: ThemeRelicSpecimenPlan(
+                    inscription: catalogSpecimenInscription(
+                        script: script,
+                        layout: layout,
+                        isRequiredBase: descriptor.criticality == .requiredBase,
+                        enabled: descriptor.criticality == .requiredBase
+                            || artifactID == descriptor.codex.defaultRelicID
+                    ),
+                    fontPostScriptName: script.fontPostScriptName?.rawValue
+                        ?? RuneThemePaletteInterpreter.fontPostScriptName,
+                    glyphSafeRegion: layout.glyphSafeRegion,
+                    artworkAspectRatio: artworkAspectRatio,
+                    minimumGlyphScale: layout.minimumGlyphScale,
+                    usesPrimaryTextColor: accessibilityDescription.contains("dark")
+                        || accessibilityDescription.contains("charcoal")
+                        || accessibilityDescription.contains("obsidian")
+                )
+            ))
+        }
+        return AnyView(image.resizable().scaledToFit())
+    }
+
+    private func catalogSpecimenInscription(
+        script: ThemeScriptDescriptor,
+        layout: ThemeShareLayoutPreset,
+        isRequiredBase: Bool,
+        enabled: Bool
+    ) -> String {
+        guard enabled else { return "" }
+        let rows = Int(layout.catalogSpecimenRows ?? 3)
+        let columns = Int(layout.catalogSpecimenColumns ?? (isRequiredBase ? 5 : 8))
+        let tokens = Array(script.glyphs.prefix(rows * columns).map(\.textToken))
+        return stride(from: 0, to: tokens.count, by: columns).map { start in
+            tokens[start ..< min(start + columns, tokens.count)].joined(separator: " ")
+        }.joined(separator: "\n")
     }
 
     private func interactiveComposition(
@@ -1132,10 +1469,35 @@ struct ContentView: View {
     private func returnToEditing() {
         settleTask?.cancel()
         releaseMessageArtifact()
+        inscriptionPreviewSource = nil
         resultArtifactComposition = nil
         resultThemeVisualPresentation = nil
         copyConfirmed = false
         boxPhase = .editing
+    }
+
+    private func openInscriptionPreview() {
+        guard let descriptor = session.themeSnapshot?.effectiveTheme,
+              let plan = resultArtifactComposition,
+              let presentation = resultThemeVisualPresentation,
+              let source = ContentViewInscriptionPreviewSource(
+                  descriptor: descriptor,
+                  plan: plan,
+                  presentation: presentation
+              )
+        else {
+            decodeError = "The current inscription preview is unavailable."
+            return
+        }
+        inscriptionPreviewSource = source
+    }
+
+    private func openCodexFromInscriptionPreview() {
+        inscriptionPreviewSource = nil
+        Task { @MainActor in
+            await Task.yield()
+            artifactBrowser = .relic
+        }
     }
 
     private func handleEditingContextChange() {
@@ -1153,6 +1515,7 @@ struct ContentView: View {
         inputText = ""
         sourceSnapshot = ""
         targetSnapshot = ""
+        inscriptionPreviewSource = nil
         resultArtifactComposition = nil
         resultThemeVisualPresentation = nil
         releaseMessageArtifact()
@@ -1246,6 +1609,7 @@ struct ContentView: View {
         inputText = ""
         sourceSnapshot = ""
         targetSnapshot = ""
+        inscriptionPreviewSource = nil
         resultArtifactComposition = nil
         resultThemeVisualPresentation = nil
         decodeError = nil

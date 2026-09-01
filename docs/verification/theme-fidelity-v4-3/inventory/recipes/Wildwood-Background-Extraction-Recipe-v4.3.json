@@ -1,0 +1,164 @@
+{
+  "asset": "background.wildwood.oldgrowth-hollow",
+  "generatedAtUTC": "2026-08-27T00:00:00Z",
+  "id": "prov.Production.Sources.wildwood.wildwood.background.recipe.json",
+  "licenseNotice": "Project-local proprietary production master; owner visual review remains pending",
+  "outputLayouts": {
+    "macOSWide": {
+      "canvas": [
+        3200,
+        1800
+      ],
+      "cropBoxSourcePixels": [
+        0.0,
+        0.25,
+        1672.0,
+        940.75
+      ],
+      "focalPoint": [
+        0.5,
+        0.5
+      ],
+      "resampling": "bilinear",
+      "scale": 1.913875598,
+      "sourceCropAspectRatio": 1.777777778,
+      "transformation": "single continuous-master aspect-fill crop with one uniform scale"
+    },
+    "phonePortrait": {
+      "canvas": [
+        2048,
+        2732
+      ],
+      "cropBoxSourcePixels": [
+        483.297218,
+        0.0,
+        1188.702782,
+        941.0
+      ],
+      "focalPoint": [
+        0.5,
+        0.5
+      ],
+      "resampling": "bicubic",
+      "scale": 2.903294368,
+      "sourceCropAspectRatio": 0.749633968,
+      "transformation": "single continuous-master aspect-fill crop with one uniform scale"
+    }
+  },
+  "outputs": [
+    {
+      "bytes": 6812337,
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/wildwood-background-high-contrast.png",
+      "resourceID": "resource.background.wildwood.oldgrowth-hollow.output.background-high-contrast",
+      "rightsID": "prov.Production.Sources.wildwood.wildwood.background.recipe.json",
+      "role": "background.high-contrast",
+      "sha256": "e1af65227fd4a67cb8b0d1a18db5bfa93514f01fd129488e41681ea8fd8c2b35"
+    },
+    {
+      "bytes": 6178782,
+      "dimensions": [
+        3200,
+        1800
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/wildwood-background-macos-wide.png",
+      "resourceID": "resource.background.wildwood.oldgrowth-hollow.output.background-macos-wide-crop",
+      "rightsID": "prov.Production.Sources.wildwood.wildwood.background.recipe.json",
+      "role": "background.macos-wide-crop",
+      "sha256": "36890871a39fb780c8d5a532b1f2dee71b5d0bc3bdff693fcc16eeb9bad6d5b4"
+    },
+    {
+      "bytes": 5884378,
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/wildwood-background-reduce-motion.png",
+      "resourceID": "resource.background.wildwood.oldgrowth-hollow.output.background-reduce-motion",
+      "rightsID": "prov.Production.Sources.wildwood.wildwood.background.recipe.json",
+      "role": "background.reduce-motion",
+      "sha256": "ca60ec757bae6d996301516062d9ac48e7257728b0838228ca4bbade3e6833d8"
+    },
+    {
+      "bytes": 6036840,
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/wildwood-background-static.png",
+      "resourceID": "resource.background.wildwood.oldgrowth-hollow.output.background-static-base",
+      "rightsID": "prov.Production.Sources.wildwood.wildwood.background.recipe.json",
+      "role": "background.static-base",
+      "sha256": "d90ac13c7702dead30542a38f8686abfe6dcd9dba528567da3505b51335d5fc9"
+    }
+  ],
+  "ownerReview": "PENDING",
+  "pipeline": "scripts/build-sunspire-wildwood-gloamthorn-v43-assets.py",
+  "pipelineSHA256": "0c297e03ac703ee1d786fe9aa1d6fd8a003452824447ca109876e474784a578f",
+  "productionSourceMaster": {
+    "contentClass": "continuous-art-directed-environment",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "focalPoint": [
+      0.5,
+      0.5
+    ],
+    "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/wildwood-environment-production-master-v4.3.png",
+    "runtimeBundled": false,
+    "sha256": "3aa724df0aa33106a16be9316e2e6cc8df3fd6b091c0e25eaa2bf166143b4be3"
+  },
+  "renderer": "scripts/theme_v43_background_master.py",
+  "rendererSHA256": "f613b3a61ea5ec29ef455f96128ff98eab8911eafb02ee4f0daf34e4dad20b64",
+  "rightsOwner": "Raven Forge Software",
+  "schemaVersion": "1.0",
+  "theme": "Wildwood",
+  "transformationSteps": [
+    "verify the repository-local continuous environment source master against its pinned SHA-256",
+    "compute a theme-focal aspect-fill crop in source coordinates for each output canvas",
+    "sample the single crop with one uniform source-to-output scale and no nonuniform stretch",
+    "prebuild deterministic standard, Reduce Motion, and High Contrast variants",
+    "encode lossless PNG outputs without tiling, seams, reference-screen compositing, or completed-image blur"
+  ],
+  "variantAdjustments": {
+    "highContrast": {
+      "brightness": 0.92,
+      "color": 0.88,
+      "contrast": 1.3,
+      "sharpness": 1.14
+    },
+    "reduceMotion": {
+      "brightness": 0.96,
+      "color": 0.9,
+      "contrast": 0.96,
+      "sharpness": 1.0
+    },
+    "standard": {
+      "brightness": 1.0,
+      "color": 1.0,
+      "contrast": 1.0,
+      "sharpness": 1.0
+    }
+  },
+  "visualAuthorityReference": {
+    "dimensions": [
+      1122,
+      1402
+    ],
+    "label": "style-board",
+    "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-008-1122x1402.png",
+    "sha256": "d3e77551f5698ec82bc492001a3e478bcda81b76f721e171f2417dea1e1952b5"
+  }
+}

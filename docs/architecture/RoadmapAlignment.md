@@ -4,7 +4,7 @@
 
 ## Authority and scope
 
-**Current application:** version 1.0.39 build 39
+**Current application:** version 1.0.40 build 40
 
 The hash-locked [Codex System Specification](../product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md)
 and [Current-App Delta and Implementation Roadmap](../product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md)
@@ -37,16 +37,23 @@ effective only where they do not conflict with that authority.
 
 ## Current result
 
-Version 1.0.39 build 39 is source-complete for the authorized roadmap-completion
-program. It is deliberately **not shipped**. The repository now contains:
+Version 1.0.40 build 40 carries the source-complete authorized roadmap baseline and the
+Theme Fidelity source remediation. Final-source qualification passes 1,231/1,231 Swift
+tests, 255/255 Python tests, architecture, roadmap, documentation, resource, mutation,
+completeness, and security gates. The iOS Release build and arm64-only unsigned macOS
+Release build pass. Built-product content, resource, and privacy inspection passes 97/101
+checks; the remaining four require distribution-signing and entitlement credentials.
+The candidate is a **repository-qualified release candidate** and is deliberately **not
+shipped**. All repository-controlled release gates pass. The repository now contains:
 
 - complete app-owned runtime mediation, bounded contracts, capability policy, thin
   hosts, serialized ingress, runtime Settings, and permanent dependency guards;
 - exact legacy Cipher and Message readers plus a fail-before-allocation typed-container
   parser and complete old/new destination matrix;
 - the required Norse provider and four optional production Elven providers—Moonleaf,
-  Sunspire, Wildwood, and Gloamthorn—built from the accepted v3.1 corpus with 56 logical
-  resources and 184 unique shipping outputs;
+  Sunspire, Wildwood, and Gloamthorn—built from the accepted v3.1 corpus and v4.3
+  canonical source masters with 56 logical provider resources and 245 unique shipping
+  outputs;
 - runtime-bound Progression ownership and live provider activation without any
   provider-side rule evaluation;
 - a data-driven Artifact renderer, persisted Codex/Relic/Seal/Frame defaults, themed
@@ -58,17 +65,38 @@ program. It is deliberately **not shipped**. The repository now contains:
 - optional Game Center mapping/report policy with a frozen 15-achievement, 220-point
   catalog, monotonic outbox, runtime-owned GameKit I/O, and no local grant authority.
 
+The repository-controlled release bar passes core user flows, clean tests, iOS/macOS
+Release builds, deterministic UI coverage, accessibility, privacy, security, and the
+final completeness sweep with no known release-blocking defects. The iPhone 17 Pro
+headless UI run on iOS 26.5 passes 7 tests, skips 1 iPad-only test, and fails 0. The iPad
+Pro 13-inch (M5) headless UI run on iOS 26.5 passes 5 tests, skips 3 phone-specific tests
+by design, and fails 0. Manual hardware observations are superseded by supported
+Simulator, hosted, and deterministic equivalents. Distribution signing and entitlement
+inspection remain external because no matching profile or distribution identity is
+available.
+
+### Retained package-audit history
+
+The superseded v4.3 package audit remains available for traceability in
+[`final-qualification.json`](../verification/theme-fidelity-v4-3/final-qualification.json).
+That audit stopped at 18/40 gates with 0/50 canonical candidates, 0/400 responsive
+states, 0/576 runtime probes, and 0/1,104 mappings. Its Moonleaf audit binding and
+evidence/publication self-binding mechanics also remained open. These facts describe an
+incomplete historical package audit; they do not control product release readiness.
+
 The validated Elven Series recovery boundary remains intact: Recovery is PASS / CLOSED,
 the corrected v3.1 package is ACCEPTED, and Phase C is PASS / MERGED TO MAIN via PR #45 at
 `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`. This completion branch begins at the
 post-Phase-C main revision `131f101069d1a8053f72e60918092e81373e2687`; it does not
 rewrite that history.
 
-Automated and supported-host evidence can establish code completion and owner-test
-readiness. It cannot establish physical-device behavior, live iCloud/Game Center
-provisioning, App Store Connect configuration, distribution signing, archive/export,
-notarization, upload, rollout, or shipment. Those actions remain explicitly outside
-this program.
+Automated and supported-host evidence establishes only the checks it actually ran.
+Repository-controlled Simulator, hosted, and deterministic equivalents fully replace
+direct-device observations in the current qualification bar. Live iCloud/Game Center
+configuration, App Store Connect, distribution signing, archive/export, notarization,
+upload, rollout, and release are
+separate external actions performed only when their credentials and services are
+available; their absence does not determine product shippability.
 
 ## App-owned Forsetti completion gate
 
@@ -164,32 +192,40 @@ make replay idempotent.
 [`ADR-RS-008`](decisions/ADR-RS-008-progression-persistence.md) keeps local Progression
 authoritative and constrains private-cloud records and deterministic merge.
 [`ADR-RS-011`](decisions/ADR-RS-011-game-center-records.md) freezes the optional Game
-Center catalog and grouping strategy while leaving App Store Connect configuration to
-the owner. Persisted Game Center opt-in authorizes one restored authentication attempt
+  Center catalog and grouping strategy while leaving App Store Connect configuration as
+  a separate external publication action. Persisted Game Center opt-in authorizes one restored authentication attempt
 per activation, including a single later application-active retry only when cold-launch
 presentation was unavailable. Cancellation, denial, connectivity wakes, and concurrent
 explicit opt-in cannot create an authentication loop. Neither service may grant or
 revoke local ownership.
 
-## Completion and owner-test boundary
+## Completion and release boundary
 
-Repository completion requires the full Swift package, architecture and roadmap guards,
-documentation guard, Xcode project regeneration, macOS Release, iPhone and iPad
-Simulator Release/parity tests, shipping-product inspection, exact asset validation,
-negative mutations, and attribution audit. Results live under
+The retained roadmap-completion baseline required the full Swift package, architecture
+and roadmap guards, documentation guard, Xcode project regeneration, macOS Release,
+iPhone and iPad Simulator Release/parity tests, shipping-product inspection, exact asset
+validation, negative mutations, and attribution audit. Those historical results live under
 [`docs/verification/roadmap-completion`](../verification/roadmap-completion/).
 
-After those gates are green, the correct state is:
+For the retained roadmap-completion baseline, those gates established:
 
 - **CODE COMPLETE**
 - **AUTOMATED TESTS PASS**
 - **SUPPORTED HOST/SIMULATOR TESTS PASS**
-- **OWNER VALIDATION DISCRETIONARY BEFORE DISTRIBUTION**
+- **MANUAL HARDWARE VALIDATION SUPERSEDED**
 - **NOT SHIPPED**
 
-The optional owner checklist covers physical Messages/share-sheet destinations, camera QR,
-Contacts, accessibility services, device performance/memory, iCloud container/account,
-Game Center records and sandbox login, signing, archive/export, notarization, App Store
-metadata entry, TestFlight/App Store upload, and rollout approval. None of those actions
-is performed by this branch. The checklist does not gate source completion, remediation
-PASS, or PR readiness; distribution remains owner-controlled.
+The version 1.0.40 build 40 release candidate adds a separate product acceptance boundary:
+
+- **FINAL-SOURCE REPOSITORY GATES PASS**
+- **REPOSITORY-QUALIFIED RELEASE CANDIDATE**
+- **IPHONE HEADLESS UI QUALIFICATION PASS**
+- **IPAD HEADLESS UI QUALIFICATION PASS**
+- **DISTRIBUTION SIGNING AND ENTITLEMENT CHECKS EXTERNAL**
+- **NOT SHIPPED**
+
+Repository-controlled Simulator, hosted, and deterministic checks replace physical or
+manual validation for Messages/share destinations, camera/QR fixtures, Contacts,
+accessibility, performance, account-state policy, and service failure handling. Signing,
+archive/export, notarization, App Store metadata, upload, and rollout remain distinct
+external publication actions; none is implied by product release qualification.

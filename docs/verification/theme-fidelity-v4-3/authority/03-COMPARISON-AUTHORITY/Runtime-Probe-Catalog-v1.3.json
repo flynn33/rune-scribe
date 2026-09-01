@@ -1,0 +1,407 @@
+{
+  "schemaVersion": "1.3",
+  "catalogID": "runescribe.theme-fidelity.runtime-probe-catalog.v4.3",
+  "probeCount": 50,
+  "probes": [
+    {
+      "id": "probe.motion.active-animation-count.theme.gloamthorn.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "less-than-or-equal",
+      "expected": 0,
+      "description": "No active Theme animation under Reduce Motion.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.active-animation-count.theme.gloamthorn.production.json"
+    },
+    {
+      "id": "probe.motion.active-animation-count.theme.moonleaf.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "less-than-or-equal",
+      "expected": 0,
+      "description": "No active Theme animation under Reduce Motion.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.active-animation-count.theme.moonleaf.production.json"
+    },
+    {
+      "id": "probe.motion.active-animation-count.theme.norse.base",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "less-than-or-equal",
+      "expected": 0,
+      "description": "No active Theme animation under Reduce Motion.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.active-animation-count.theme.norse.base.json"
+    },
+    {
+      "id": "probe.motion.active-animation-count.theme.sunspire.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "less-than-or-equal",
+      "expected": 0,
+      "description": "No active Theme animation under Reduce Motion.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.active-animation-count.theme.sunspire.production.json"
+    },
+    {
+      "id": "probe.motion.active-animation-count.theme.wildwood.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "less-than-or-equal",
+      "expected": 0,
+      "description": "No active Theme animation under Reduce Motion.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.active-animation-count.theme.wildwood.production.json"
+    },
+    {
+      "id": "probe.motion.background-resource.theme.gloamthorn.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals-declared-reduce-motion-resource",
+      "expected": true,
+      "description": "Effective background resource is the descriptor-declared Reduce Motion resource.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.background-resource.theme.gloamthorn.production.json"
+    },
+    {
+      "id": "probe.motion.background-resource.theme.moonleaf.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals-declared-reduce-motion-resource",
+      "expected": true,
+      "description": "Effective background resource is the descriptor-declared Reduce Motion resource.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.background-resource.theme.moonleaf.production.json"
+    },
+    {
+      "id": "probe.motion.background-resource.theme.norse.base",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals-declared-reduce-motion-resource",
+      "expected": true,
+      "description": "Effective background resource is the descriptor-declared Reduce Motion resource.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.background-resource.theme.norse.base.json"
+    },
+    {
+      "id": "probe.motion.background-resource.theme.sunspire.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals-declared-reduce-motion-resource",
+      "expected": true,
+      "description": "Effective background resource is the descriptor-declared Reduce Motion resource.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.background-resource.theme.sunspire.production.json"
+    },
+    {
+      "id": "probe.motion.background-resource.theme.wildwood.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals-declared-reduce-motion-resource",
+      "expected": true,
+      "description": "Effective background resource is the descriptor-declared Reduce Motion resource.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.background-resource.theme.wildwood.production.json"
+    },
+    {
+      "id": "probe.motion.frame-stability.theme.gloamthorn.production",
+      "source": "visual-runner",
+      "operator": "greater-than-or-equal",
+      "expected": 0.995,
+      "description": "Luminance SSIM between captures separated by at least 1.5 seconds.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.frame-stability.theme.gloamthorn.production.json"
+    },
+    {
+      "id": "probe.motion.frame-stability.theme.moonleaf.production",
+      "source": "visual-runner",
+      "operator": "greater-than-or-equal",
+      "expected": 0.995,
+      "description": "Luminance SSIM between captures separated by at least 1.5 seconds.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.frame-stability.theme.moonleaf.production.json"
+    },
+    {
+      "id": "probe.motion.frame-stability.theme.norse.base",
+      "source": "visual-runner",
+      "operator": "greater-than-or-equal",
+      "expected": 0.995,
+      "description": "Luminance SSIM between captures separated by at least 1.5 seconds.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.frame-stability.theme.norse.base.json"
+    },
+    {
+      "id": "probe.motion.frame-stability.theme.sunspire.production",
+      "source": "visual-runner",
+      "operator": "greater-than-or-equal",
+      "expected": 0.995,
+      "description": "Luminance SSIM between captures separated by at least 1.5 seconds.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.frame-stability.theme.sunspire.production.json"
+    },
+    {
+      "id": "probe.motion.frame-stability.theme.wildwood.production",
+      "source": "visual-runner",
+      "operator": "greater-than-or-equal",
+      "expected": 0.995,
+      "description": "Luminance SSIM between captures separated by at least 1.5 seconds.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.frame-stability.theme.wildwood.production.json"
+    },
+    {
+      "id": "probe.motion.mode.theme.gloamthorn.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals",
+      "expected": "reduce-motion",
+      "description": "Effective motion mode.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.mode.theme.gloamthorn.production.json"
+    },
+    {
+      "id": "probe.motion.mode.theme.moonleaf.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals",
+      "expected": "reduce-motion",
+      "description": "Effective motion mode.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.mode.theme.moonleaf.production.json"
+    },
+    {
+      "id": "probe.motion.mode.theme.norse.base",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals",
+      "expected": "reduce-motion",
+      "description": "Effective motion mode.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.mode.theme.norse.base.json"
+    },
+    {
+      "id": "probe.motion.mode.theme.sunspire.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals",
+      "expected": "reduce-motion",
+      "description": "Effective motion mode.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.mode.theme.sunspire.production.json"
+    },
+    {
+      "id": "probe.motion.mode.theme.wildwood.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals",
+      "expected": "reduce-motion",
+      "description": "Effective motion mode.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.mode.theme.wildwood.production.json"
+    },
+    {
+      "id": "probe.motion.preview-contained.theme.gloamthorn.production",
+      "source": "xcui-geometry-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview is fully viewport-contained.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-contained.theme.gloamthorn.production.json"
+    },
+    {
+      "id": "probe.motion.preview-contained.theme.moonleaf.production",
+      "source": "xcui-geometry-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview is fully viewport-contained.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-contained.theme.moonleaf.production.json"
+    },
+    {
+      "id": "probe.motion.preview-contained.theme.norse.base",
+      "source": "xcui-geometry-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview is fully viewport-contained.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-contained.theme.norse.base.json"
+    },
+    {
+      "id": "probe.motion.preview-contained.theme.sunspire.production",
+      "source": "xcui-geometry-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview is fully viewport-contained.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-contained.theme.sunspire.production.json"
+    },
+    {
+      "id": "probe.motion.preview-contained.theme.wildwood.production",
+      "source": "xcui-geometry-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview is fully viewport-contained.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-contained.theme.wildwood.production.json"
+    },
+    {
+      "id": "probe.motion.preview-exists.theme.gloamthorn.production",
+      "source": "xcui-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview exists.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-exists.theme.gloamthorn.production.json"
+    },
+    {
+      "id": "probe.motion.preview-exists.theme.moonleaf.production",
+      "source": "xcui-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview exists.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-exists.theme.moonleaf.production.json"
+    },
+    {
+      "id": "probe.motion.preview-exists.theme.norse.base",
+      "source": "xcui-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview exists.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-exists.theme.norse.base.json"
+    },
+    {
+      "id": "probe.motion.preview-exists.theme.sunspire.production",
+      "source": "xcui-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview exists.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-exists.theme.sunspire.production.json"
+    },
+    {
+      "id": "probe.motion.preview-exists.theme.wildwood.production",
+      "source": "xcui-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview exists.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-exists.theme.wildwood.production.json"
+    },
+    {
+      "id": "probe.motion.preview-visible.theme.gloamthorn.production",
+      "source": "xcui-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview is visible.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-visible.theme.gloamthorn.production.json"
+    },
+    {
+      "id": "probe.motion.preview-visible.theme.moonleaf.production",
+      "source": "xcui-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview is visible.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-visible.theme.moonleaf.production.json"
+    },
+    {
+      "id": "probe.motion.preview-visible.theme.norse.base",
+      "source": "xcui-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview is visible.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-visible.theme.norse.base.json"
+    },
+    {
+      "id": "probe.motion.preview-visible.theme.sunspire.production",
+      "source": "xcui-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview is visible.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-visible.theme.sunspire.production.json"
+    },
+    {
+      "id": "probe.motion.preview-visible.theme.wildwood.production",
+      "source": "xcui-assertion",
+      "operator": "equals",
+      "expected": true,
+      "description": "Artifact preview is visible.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.preview-visible.theme.wildwood.production.json"
+    },
+    {
+      "id": "probe.motion.visual-plan-revision.theme.gloamthorn.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "greater-than",
+      "expected": 0,
+      "description": "Committed visual-plan revision is nonzero.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.visual-plan-revision.theme.gloamthorn.production.json"
+    },
+    {
+      "id": "probe.motion.visual-plan-revision.theme.moonleaf.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "greater-than",
+      "expected": 0,
+      "description": "Committed visual-plan revision is nonzero.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.visual-plan-revision.theme.moonleaf.production.json"
+    },
+    {
+      "id": "probe.motion.visual-plan-revision.theme.norse.base",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "greater-than",
+      "expected": 0,
+      "description": "Committed visual-plan revision is nonzero.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.visual-plan-revision.theme.norse.base.json"
+    },
+    {
+      "id": "probe.motion.visual-plan-revision.theme.sunspire.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "greater-than",
+      "expected": 0,
+      "description": "Committed visual-plan revision is nonzero.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.visual-plan-revision.theme.sunspire.production.json"
+    },
+    {
+      "id": "probe.motion.visual-plan-revision.theme.wildwood.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "greater-than",
+      "expected": 0,
+      "description": "Committed visual-plan revision is nonzero.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.motion.visual-plan-revision.theme.wildwood.production.json"
+    },
+    {
+      "id": "probe.norse.base-owned",
+      "source": "hosted-progression-diagnostic",
+      "operator": "equals",
+      "expected": true,
+      "description": "Norse Codex is always owned.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.norse.base-owned.json"
+    },
+    {
+      "id": "probe.norse.base-selectable",
+      "source": "hosted-theme-diagnostic",
+      "operator": "equals",
+      "expected": true,
+      "description": "Norse Codex is selectable.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.norse.base-selectable.json"
+    },
+    {
+      "id": "probe.norse.fallback-available",
+      "source": "hosted-theme-diagnostic",
+      "operator": "equals",
+      "expected": true,
+      "description": "Norse is the available universal fallback.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.norse.fallback-available.json"
+    },
+    {
+      "id": "probe.norse.vault.locked-element-count",
+      "source": "xcui-query",
+      "operator": "equals",
+      "expected": 0,
+      "description": "No production element presents Norse as locked.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.norse.vault.locked-element-count.json"
+    },
+    {
+      "id": "probe.optional-codex.locked-renderer-covered",
+      "source": "hosted-ui-fixture",
+      "operator": "equals",
+      "expected": true,
+      "description": "An optional Codex exercises the shared locked renderer in a deterministic nonshipping fixture.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.optional-codex.locked-renderer-covered.json"
+    },
+    {
+      "id": "probe.theme.active.theme.gloamthorn.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals",
+      "expected": "theme.gloamthorn.production",
+      "description": "Effective active Theme identity.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.theme.active.theme.gloamthorn.production.json"
+    },
+    {
+      "id": "probe.theme.active.theme.moonleaf.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals",
+      "expected": "theme.moonleaf.production",
+      "description": "Effective active Theme identity.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.theme.active.theme.moonleaf.production.json"
+    },
+    {
+      "id": "probe.theme.active.theme.norse.base",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals",
+      "expected": "theme.norse.base",
+      "description": "Effective active Theme identity.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.theme.active.theme.norse.base.json"
+    },
+    {
+      "id": "probe.theme.active.theme.sunspire.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals",
+      "expected": "theme.sunspire.production",
+      "description": "Effective active Theme identity.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.theme.active.theme.sunspire.production.json"
+    },
+    {
+      "id": "probe.theme.active.theme.wildwood.production",
+      "source": "hosted-runtime-diagnostic",
+      "operator": "equals",
+      "expected": "theme.wildwood.production",
+      "description": "Effective active Theme identity.",
+      "evidencePath": "docs/verification/theme-fidelity-v4-3/runtime-probes/probe.theme.active.theme.wildwood.production.json"
+    }
+  ]
+}

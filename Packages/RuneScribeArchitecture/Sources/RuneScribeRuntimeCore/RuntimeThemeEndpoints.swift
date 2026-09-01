@@ -226,10 +226,14 @@ public struct RuntimeThemeCoordinatorClient: Sendable {
     }
 
     public func providerDescriptor(
-        for codexID: CodexID
+        for codexID: CodexID,
+        purpose: ThemeProviderDescriptorPurpose = .selection
     ) async throws -> ThemeDescriptor {
         try await query.fetch(
-            ThemeProviderDescriptorRequestDTO(codexID: codexID),
+            ThemeProviderDescriptorRequestDTO(
+                codexID: codexID,
+                purpose: purpose
+            ),
             from: RuntimeThemeEndpointCatalog.providerDescriptor
         )
     }

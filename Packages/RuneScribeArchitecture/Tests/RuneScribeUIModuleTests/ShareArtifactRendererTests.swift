@@ -11,6 +11,16 @@ import XCTest
 
 @MainActor
 final class ShareArtifactRendererTests: XCTestCase {
+    func testInteractivePreviewSharesStaticSealPolicyWithoutStaticAttribution() {
+        XCTAssertTrue(ThemeArtifactCanvasContext.interactivePreview.showsSeal)
+        XCTAssertEqual(
+            ThemeArtifactCanvasContext.interactivePreview.showsSeal,
+            ThemeArtifactCanvasContext.staticShare.showsSeal
+        )
+        XCTAssertFalse(ThemeArtifactCanvasContext.interactivePreview.showsAttribution)
+        XCTAssertTrue(ThemeArtifactCanvasContext.staticShare.showsAttribution)
+    }
+
     func testBuilderShowsLockedContentButCannotSelectIt() throws {
         let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
         let items = ShareBuilderPolicy.seals(
@@ -82,11 +92,15 @@ final class ShareArtifactRendererTests: XCTestCase {
             descriptor.codex.background.highContrastResourceID
         )
         XCTAssertNotNil(first.sealAnchor)
-        let fontResourceID = try XCTUnwrap(descriptor.codex.scripts.first(where: {
+        let script = try XCTUnwrap(descriptor.codex.scripts.first(where: {
             $0.id == selection.scriptID
-        })?.fontResourceID)
+        }))
+        let fontResourceID = try XCTUnwrap(script.fontResourceID)
         XCTAssertEqual(first.fontResourceID, fontResourceID)
         XCTAssertEqual(first.composition.fontResourceID, fontResourceID)
+        XCTAssertEqual(first.glyphStyle.pointSize, script.recommendedPointSizes.maximum)
+        XCTAssertEqual(first.glyphStyle.color, descriptor.codex.palette.textInverse)
+        XCTAssertEqual(first.composition.glyphStyle, first.glyphStyle)
         XCTAssertEqual(
             first.pages.map(\.inscription).joined().replacingOccurrences(of: "\n", with: ""),
             request.inscription
@@ -104,13 +118,46 @@ final class ShareArtifactRendererTests: XCTestCase {
         XCTAssertEqual(first.composition, interactive)
         XCTAssertEqual(
             interactive.sealResourceID,
-            includedSeal.vectorResourceID
+            includedSeal.standardResourceID
+        )
+        XCTAssertEqual(interactive.glyphStyle, first.glyphStyle)
+
+        XCTAssertTrue(ThemeArtifactCanvasContext.receivedPreview.showsSeal)
+        XCTAssertFalse(ThemeArtifactCanvasContext.receivedPreview.showsAttribution)
+        XCTAssertEqual(
+            ThemeArtifactCanvasContext.interactivePreview.glyphRegion(for: first.layout),
+            ThemeArtifactGlyphRegion(first.layout.glyphSafeRegion)
+        )
+        XCTAssertEqual(
+            ThemeArtifactCanvasContext.interactivePreview.glyphRegion(for: first.layout),
+            ThemeArtifactCanvasContext.staticShare.glyphRegion(for: first.layout)
+        )
+        let receivedRegion = ThemeArtifactCanvasContext.receivedPreview.glyphRegion(
+            for: first.layout
+        )
+        XCTAssertEqual(receivedRegion.x, first.layout.contentSafeRegion.x, accuracy: 0.000_001)
+        XCTAssertEqual(receivedRegion.width, first.layout.contentSafeRegion.width, accuracy: 0.000_001)
+        XCTAssertEqual(
+            receivedRegion.y,
+            first.layout.contentSafeRegion.y + first.layout.contentSafeRegion.height * 0.68,
+            accuracy: 0.000_001
+        )
+        XCTAssertEqual(
+            receivedRegion.height,
+            first.layout.contentSafeRegion.height * 0.22,
+            accuracy: 0.000_001
         )
 
         let canvas = ThemeArtifactCanvas(
             plan: first.composition,
             page: try XCTUnwrap(first.pages.first),
             context: .interactivePreview,
+            image: { _ in Image(systemName: "photo") }
+        )
+        let staticCanvas = ThemeArtifactCanvas(
+            plan: first.composition,
+            page: try XCTUnwrap(first.pages.first),
+            context: .staticShare,
             image: { _ in Image(systemName: "photo") }
         )
         RuntimeThemeSemanticResourceUseObservation.end()
@@ -120,6 +167,33 @@ final class ShareArtifactRendererTests: XCTestCase {
         defer { RuntimeThemeSemanticResourceUseObservation.end() }
         XCTAssertTrue(canvas.reportGlyphTextResourceUse())
         XCTAssertEqual(observed, [fontResourceID])
+
+        let presentationResourceID = ThemeResourceID(
+            rawValue: "resource.received.test.primary.medallion"
+        )!
+        let presentationAnchor = try ThemeNormalizedPoint(x: 0.82, y: 0.76)
+        let presentationCanvas = ThemeArtifactCanvas(
+            plan: first.composition,
+            page: try XCTUnwrap(first.pages.first),
+            context: .receivedPreview,
+            sealResourceIDOverride: presentationResourceID,
+            sealAnchorOverride: presentationAnchor,
+            sealScaleOverride: 0.21,
+            image: { _ in Image(systemName: "photo") }
+        )
+        XCTAssertEqual(presentationCanvas.presentedSealResourceID, presentationResourceID)
+        XCTAssertEqual(presentationCanvas.presentedSealAnchor, presentationAnchor)
+        XCTAssertEqual(presentationCanvas.presentedSealScale, 0.21, accuracy: 0.000_001)
+        XCTAssertEqual(canvas.presentedSealResourceID, first.composition.sealResourceID)
+        XCTAssertEqual(canvas.presentedSealAnchor, first.composition.sealAnchor)
+        XCTAssertEqual(canvas.presentedSealScale, first.composition.sealScale, accuracy: 0.000_001)
+        XCTAssertEqual(canvas.presentedSealResourceID, staticCanvas.presentedSealResourceID)
+        XCTAssertEqual(canvas.presentedSealAnchor, staticCanvas.presentedSealAnchor)
+        XCTAssertEqual(
+            canvas.presentedSealScale,
+            staticCanvas.presentedSealScale,
+            accuracy: 0.000_001
+        )
     }
 
     func testRenderPlanCoversShortMediumLongPaginatedAndOverflowInscriptions() throws {
@@ -179,6 +253,21 @@ final class ShareArtifactRendererTests: XCTestCase {
             }, label)
             XCTAssertTrue(plan.pages.allSatisfy { $0.count == plan.pages.count }, label)
         }
+
+        let hardLineInscription = "AAAA\nBBBB\nCC"
+        let hardLines = try ShareArtifactRenderPolicy.plan(
+            request: ShareArtifactRenderRequest(
+                selection: selection,
+                inscription: hardLineInscription,
+                operationID: RuntimeOperationID(rawValue: "operation.inscription.hard-lines"),
+                capturedAt: Date(timeIntervalSince1970: 1_800_000_100),
+                reduceMotion: true,
+                accessibilityLabel: "An encoded inscription with intentional line breaks."
+            ),
+            descriptor: descriptor
+        )
+        XCTAssertEqual(hardLines.pages.count, 1)
+        XCTAssertEqual(hardLines.pages.first?.inscription, hardLineInscription)
 
         let overflowCount = pageCapacity * ShareArtifactRenderPolicy.maximumPageCount + 1
         XCTAssertLessThanOrEqual(
@@ -351,6 +440,7 @@ final class ShareArtifactRendererTests: XCTestCase {
         let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
         let relic = try XCTUnwrap(descriptor.codex.relics.first)
         let layout = try XCTUnwrap(relic.layouts.first)
+        let script = try XCTUnwrap(descriptor.codex.scripts.first)
         let request = try ShareArtifactRenderRequest(
             selection: SharePresentationSelection(
                 codexID: descriptor.codex.id,
@@ -378,6 +468,10 @@ final class ShareArtifactRendererTests: XCTestCase {
             sealScale: 0.18,
             fontPostScriptName: "Helvetica",
             fontResourceID: nil,
+            glyphStyle: ThemeArtifactGlyphStyle(
+                pointSize: script.recommendedPointSizes.maximum,
+                color: descriptor.codex.palette.textInverse
+            ),
             resourceMetadata: metadata
         )
 
@@ -522,6 +616,7 @@ final class ShareArtifactRendererTests: XCTestCase {
                 sealScale: plan.sealScale,
                 fontPostScriptName: plan.fontPostScriptName,
                 fontResourceID: plan.fontResourceID,
+                glyphStyle: plan.glyphStyle,
                 resourceMetadata: plan.resourceMetadata
             )
             let variant = try ShareArtifactStaticRenderer.render(
@@ -746,6 +841,7 @@ final class ShareArtifactRendererTests: XCTestCase {
         let preview = Data([0x01, 0x02, 0x03])
         let received = try ReceivedMessageDTO(
             id: MessageID(rawValue: UUID()),
+            receivedAt: Date(timeIntervalSince1970: 1_000),
             plaintext: "Still readable",
             senderName: "Sender",
             cipherID: CipherID(rawValue: UUID()),

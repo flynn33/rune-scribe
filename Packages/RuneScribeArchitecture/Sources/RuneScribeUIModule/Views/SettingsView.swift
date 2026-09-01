@@ -16,6 +16,50 @@ enum SettingsInitialViewport: String, Sendable {
     }
 }
 
+enum SettingsThemeProviderPresentationPolicy {
+    static func status(_ provider: ThemeProviderSummaryDTO) -> String {
+        switch provider.state {
+        case .available:
+            return provider.isOwned ? "Available" : "Not owned"
+        case .locked:
+            return "Locked"
+        case .unavailable:
+            return "Temporarily unavailable"
+        case .incompatible:
+            return "Requires a newer app or system"
+        case .invalidResources:
+            return "Unavailable because required resources could not be verified"
+        }
+    }
+
+    static func visualState(
+        _ provider: ThemeProviderSummaryDTO
+    ) -> ThemeVisualContentState {
+        switch provider.state {
+        case .available:
+            if provider.isSelected { return .selected }
+            return provider.isOwned ? .owned : .locked
+        case .locked:
+            return .locked
+        case .unavailable, .incompatible, .invalidResources:
+            return .unavailable
+        }
+    }
+
+    static func icon(_ provider: ThemeProviderSummaryDTO) -> String {
+        switch provider.state {
+        case .available:
+            return provider.isSelected ? "checkmark.circle.fill" : "circle"
+        case .locked:
+            return "lock.fill"
+        case .unavailable, .invalidResources:
+            return "exclamationmark.circle"
+        case .incompatible:
+            return "arrow.up.circle"
+        }
+    }
+}
+
 /// App settings: the 4-digit app-lock PIN, an About section attributing the app
 /// to Raven Forge Software, and access to the End-User License Agreement.
 struct SettingsView: View {
@@ -243,6 +287,7 @@ struct SettingsView: View {
             Text(appearanceEffectsDetail)
                 .font(.footnote)
                 .foregroundColor(.runeSilver)
+                .fixedSize(horizontal: false, vertical: true)
 
             appearanceDefaultsPreview
                 .id(SettingsInitialViewport.defaultsPreview.rawValue)
@@ -303,16 +348,24 @@ struct SettingsView: View {
                     Text(selected?.name ?? "None")
                         .font(.body.weight(.semibold))
                         .foregroundColor(.runeTextPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.vertical, 2)
+                        .layoutPriority(1)
                 }
+                .layoutPriority(1)
                 Spacer()
                 Image(systemName: "chevron.up.chevron.down")
                     .foregroundColor(.runeSilver)
             }
             .frame(minHeight: 52)
             .contentShape(Rectangle())
+            .accessibilityHidden(true)
         }
         .menuIndicator(.hidden)
-        .accessibilityLabel("Default \(title): \(selected?.name ?? "None")")
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Default \(title)")
+        .accessibilityValue(selected?.name ?? "None")
+        .accessibilityHint("Choose the default \(title.lowercased())")
         .accessibilityIdentifier("appearance.default-\(title.lowercased())")
     }
 
@@ -320,32 +373,39 @@ struct SettingsView: View {
     private var appearanceDefaultsPreview: some View {
         if let plan = appearancePreviewPlan,
            let presentation = session.activeThemeVisualPresentation {
-            ZStack {
-                RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                    .fill(Color.runeParchment)
-                    .aspectRatio(4.0 / 3.0, contentMode: .fit)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Preview of the selected Codex defaults")
-                    .accessibilityValue(plan.accessibilityLabel)
-                    .accessibilityIdentifier("appearance.defaults-preview")
-                    .runtimeViewportFrameProbe("appearance.defaults-preview")
+            VStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                        .fill(Color.runeParchment)
+                        .aspectRatio(4.0 / 3.0, contentMode: .fit)
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Preview of the selected Codex defaults")
+                        .accessibilityValue(plan.accessibilityLabel)
+                        .accessibilityIdentifier("appearance.defaults-preview")
+                        .runtimeViewportFrameProbe("appearance.defaults-preview")
 
-                ThemeArtifactPreview(
-                    plan: plan,
-                    image: { presentation.image(for: $0) }
+                    ThemeArtifactPreview(
+                        plan: plan,
+                        image: { presentation.image(for: $0) }
+                    )
+                    .aspectRatio(4.0 / 3.0, contentMode: .fit)
+                    .themeCaptureAccessibilityHiddenWhenDisabled()
+                    .themeCaptureViewportIdentifier(
+                        ThemeCaptureIdentifier.workspacePrimarySurface
+                    )
+                }
+                .clipShape(RoundedRectangle(
+                    cornerRadius: RuneMetrics.corner,
+                    style: .continuous
+                ))
+                .themeCaptureIdentifier(
+                    ThemeCaptureIdentifier.settingsDefaultsPreview(
+                        codexID: plan.selection.codexID
+                    )
                 )
-                .aspectRatio(4.0 / 3.0, contentMode: .fit)
-                .themeCaptureAccessibilityHiddenWhenDisabled()
-                .themeCaptureViewportIdentifier(
-                    ThemeCaptureIdentifier.workspacePrimarySurface
-                )
+
+                appearanceBackgroundPreview(presentation: presentation)
             }
-            .clipShape(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous))
-            .themeCaptureIdentifier(
-                ThemeCaptureIdentifier.settingsDefaultsPreview(
-                    codexID: plan.selection.codexID
-                )
-            )
         } else {
             Color.clear
             .aspectRatio(4.0 / 3.0, contentMode: .fit)
@@ -356,6 +416,44 @@ struct SettingsView: View {
                 )
             }
         }
+    }
+
+    @ViewBuilder
+    private func appearanceBackgroundPreview(
+        presentation: ActiveThemeVisualPresentation
+    ) -> some View {
+        let imagePlan = appearanceBackgroundImagePlan(presentation)
+        if presentation.image(for: imagePlan.id) != nil,
+           let descriptor = session.themeSnapshot?.effectiveTheme {
+            CodexBackgroundTreatmentPanel(
+                model: CodexBackgroundTreatmentPanelModel(
+                    title: descriptor.codex.background.displayName.fallbackValue,
+                    summary: descriptor.codex.background.accessibility.label.fallbackValue,
+                    backgroundResourceID: imagePlan.id
+                ),
+                image: { requiredProductionImage($0, from: presentation) }
+            )
+            .aspectRatio(910.0 / 460.0, contentMode: .fit)
+            .accessibilityIdentifier("appearance.background-preview")
+        }
+    }
+
+    private func appearanceBackgroundImagePlan(
+        _ presentation: ActiveThemeVisualPresentation
+    ) -> ThemeVisualImagePlan {
+        if usesIncreasedContrast { return presentation.plan.backgroundHighContrast }
+        if effectiveReduceMotion { return presentation.plan.backgroundReduceMotion }
+        return presentation.plan.backgroundStatic
+    }
+
+    private func requiredProductionImage(
+        _ resourceID: ThemeResourceID,
+        from presentation: ActiveThemeVisualPresentation
+    ) -> Image {
+        guard let image = presentation.image(for: resourceID) else {
+            preconditionFailure("Missing admitted production image: \(resourceID.rawValue)")
+        }
+        return image
     }
 
     private var appearancePreviewPlan: ThemeArtifactCompositionPlan? {
@@ -403,7 +501,7 @@ struct SettingsView: View {
                 label: artifactID == nil ? "No artifact selected" : "Artwork unavailable"
             ))
         }
-        return AnyView(image.resizable().scaledToFill())
+        return AnyView(image.resizable().scaledToFit())
     }
 
     private var appearanceEffectsDetail: String {
@@ -442,19 +540,7 @@ struct SettingsView: View {
     }
 
     private func providerStatus(_ provider: ThemeProviderSummaryDTO) -> String {
-        if provider.isSelected { return "Available" }
-        switch provider.state {
-        case .available:
-            return provider.isOwned ? "Available" : "Not owned"
-        case .locked:
-            return "Locked"
-        case .unavailable:
-            return "Temporarily unavailable"
-        case .incompatible:
-            return "Requires a newer app or system"
-        case .invalidResources:
-            return "Unavailable because required resources could not be verified"
-        }
+        SettingsThemeProviderPresentationPolicy.status(provider)
     }
 
     private func themeFailureDetails(
@@ -494,17 +580,12 @@ struct SettingsView: View {
     private func providerVisualState(
         _ provider: ThemeProviderSummaryDTO
     ) -> ThemeVisualContentState {
-        if provider.isSelected { return .selected }
-        switch provider.state {
-        case .available: return provider.isOwned ? .owned : .locked
-        case .locked: return .locked
-        case .unavailable, .incompatible, .invalidResources: return .unavailable
-        }
+        SettingsThemeProviderPresentationPolicy.visualState(provider)
     }
 
     private func providerArtwork(_ provider: ThemeProviderSummaryDTO) -> AnyView {
         if let image = session.themeCodexCardImageReferences[provider.codexID]?.image {
-            return AnyView(image.resizable().scaledToFill())
+            return AnyView(image.resizable().scaledToFit())
         }
         return AnyView(ThemeVisualPlaceholder(
             systemImage: providerIcon(provider),
@@ -513,13 +594,7 @@ struct SettingsView: View {
     }
 
     private func providerIcon(_ provider: ThemeProviderSummaryDTO) -> String {
-        if provider.isSelected { return "checkmark.circle.fill" }
-        switch provider.state {
-        case .available: return "circle"
-        case .locked: return "lock.fill"
-        case .unavailable, .invalidResources: return "exclamationmark.circle"
-        case .incompatible: return "arrow.up.circle"
-        }
+        SettingsThemeProviderPresentationPolicy.icon(provider)
     }
 
     // MARK: - Progress and Feedback

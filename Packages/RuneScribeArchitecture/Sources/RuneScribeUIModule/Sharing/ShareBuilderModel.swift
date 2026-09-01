@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import RuneScribeContracts
 
@@ -65,6 +66,88 @@ struct ShareBuilderSource: Identifiable, Equatable, Sendable {
             cipherID: cipherID,
             messageHandle: nil
         )
+    }
+}
+
+struct ShareBuilderThemeAuthorityRevision: Equatable, Sendable {
+    let coordinatorRevision: UInt64
+    let providerContentRevision: UInt64
+}
+
+struct RenderedShareBuilderPreview: Equatable, Sendable {
+    let source: ShareBuilderSource
+    let descriptor: ThemeDescriptor
+    let draft: ShareBuilderDraft
+    let themeRevision: ShareBuilderThemeAuthorityRevision
+    let colorMode: ShareArtifactColorMode
+    let systemReduceMotion: Bool
+    let presentation: OutboundSharePresentationDTO
+
+    init(
+        source: ShareBuilderSource,
+        catalog: ShareBuilderCatalog,
+        themeRevision: ShareBuilderThemeAuthorityRevision,
+        colorMode: ShareArtifactColorMode,
+        systemReduceMotion: Bool,
+        presentation: OutboundSharePresentationDTO
+    ) throws {
+        let selection = try catalog.validatedSelection()
+        guard let safePreviewData = presentation.safePreviewData,
+              let safePreview = presentation.metadata.safePreview,
+              UInt64(safePreviewData.count) == UInt64(safePreview.byteLength),
+              ThemeSHA256Digest(
+                  rawValue: SHA256.hash(data: safePreviewData).map {
+                      String(format: "%02x", $0)
+                  }.joined()
+              ) == safePreview.sha256,
+              presentation.metadata.selection == selection
+        else { throw ShareArtifactRenderError.renderingFailed }
+        self.source = source
+        descriptor = catalog.descriptor
+        draft = catalog.draft
+        self.themeRevision = themeRevision
+        self.colorMode = colorMode
+        self.systemReduceMotion = systemReduceMotion
+        self.presentation = presentation
+    }
+
+    var metadata: SharePresentationMetadata { presentation.metadata }
+    var safePreviewData: Data? { presentation.safePreviewData }
+
+    func matches(
+        source: ShareBuilderSource,
+        catalog: ShareBuilderCatalog,
+        themeRevision: ShareBuilderThemeAuthorityRevision,
+        colorMode: ShareArtifactColorMode,
+        systemReduceMotion: Bool
+    ) -> Bool {
+        guard let selection = try? catalog.validatedSelection() else { return false }
+        return self.source == source
+            && descriptor == catalog.descriptor
+            && draft == catalog.draft
+            && self.themeRevision == themeRevision
+            && self.colorMode == colorMode
+            && self.systemReduceMotion == systemReduceMotion
+            && presentation.safePreviewData != nil
+            && presentation.metadata.safePreview != nil
+            && presentation.metadata.selection == selection
+    }
+}
+
+enum ShareBuilderProviderPresentationPolicy {
+    static func state(
+        for provider: ThemeProviderSummaryDTO,
+        selectedCodexID: CodexID
+    ) -> ThemeVisualContentState {
+        switch provider.state {
+        case .available:
+            guard provider.isOwned else { return .locked }
+            return provider.codexID == selectedCodexID ? .selected : .owned
+        case .locked:
+            return .locked
+        case .unavailable, .incompatible, .invalidResources:
+            return .unavailable
+        }
     }
 }
 
@@ -383,6 +466,96 @@ struct ShareBuilderPreviewGenerationGate: Equatable, Sendable {
 
     func accepts(_ generation: UInt64) -> Bool {
         generation == current
+    }
+}
+
+struct ShareBuilderPreparationGenerationGate: Equatable, Sendable {
+    private(set) var current: UInt64 = 0
+
+    mutating func begin() -> UInt64 {
+        current &+= 1
+        return current
+    }
+
+    mutating func invalidate() {
+        current &+= 1
+    }
+
+    func accepts(_ generation: UInt64) -> Bool {
+        generation == current
+    }
+}
+
+struct ShareBuilderCatalogLoadToken: Equatable, Sendable {
+    let generation: UInt64
+    let themeRevision: UInt64
+}
+
+struct ShareBuilderCatalogLoadGenerationGate: Equatable, Sendable {
+    private(set) var current: UInt64 = 0
+
+    mutating func begin(themeRevision: UInt64) -> ShareBuilderCatalogLoadToken {
+        current &+= 1
+        return ShareBuilderCatalogLoadToken(
+            generation: current,
+            themeRevision: themeRevision
+        )
+    }
+
+    mutating func invalidate() {
+        current &+= 1
+    }
+
+    func accepts(
+        _ token: ShareBuilderCatalogLoadToken,
+        currentThemeRevision: UInt64?
+    ) -> Bool {
+        token.generation == current
+            && token.themeRevision == currentThemeRevision
+    }
+}
+
+struct ShareBuilderTerminalGenerationGate: Equatable, Sendable {
+    private(set) var current: UInt64 = 0
+    private(set) var active: UInt64?
+
+    var isActive: Bool { active != nil }
+
+    mutating func begin() -> UInt64? {
+        guard active == nil else { return nil }
+        current &+= 1
+        active = current
+        return current
+    }
+
+    mutating func complete(_ generation: UInt64) -> Bool {
+        guard active == generation else { return false }
+        active = nil
+        return true
+    }
+
+    mutating func invalidate() {
+        current &+= 1
+        active = nil
+    }
+
+    func accepts(_ generation: UInt64) -> Bool {
+        active == generation
+    }
+}
+
+enum ShareBuilderPreparedPresentationPolicy {
+    static func isAuthorized(
+        capturedThemeRevision: ShareBuilderThemeAuthorityRevision,
+        capturedColorMode: ShareArtifactColorMode,
+        capturedSystemReduceMotion: Bool,
+        currentThemeRevision: ShareBuilderThemeAuthorityRevision?,
+        currentColorMode: ShareArtifactColorMode,
+        currentSystemReduceMotion: Bool
+    ) -> Bool {
+        capturedThemeRevision == currentThemeRevision
+            && capturedColorMode == currentColorMode
+            && capturedSystemReduceMotion == currentSystemReduceMotion
     }
 }
 

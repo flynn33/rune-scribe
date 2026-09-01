@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "1.0",
+  "themeID": "theme.moonleaf.production",
+  "sourceClass": "reference-grounded-production-master",
+  "ownerReview": "PENDING",
+  "repositoryRoot": ".",
+  "referencePackageIdentity": "Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+  "referenceRoot": ".",
+  "commonReferences": [
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-002-1122x1402.png",
+      "pathBase": "referenceRoot",
+      "role": "controlling Moonleaf material, palette, botanical filigree, and finish",
+      "sha256": "2d1696abd8a7ddbfe81b89c2eb84933a516ba5a4bf8eaa2dae0edcbb3d3758ef"
+    },
+    {
+      "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/seal/moonleaf-crescentleaf-color-master.png",
+      "pathBase": "repositoryRoot",
+      "role": "accepted detailed Moonleaf Seal family quality and scale",
+      "sha256": "dbb9799cd47b0905bb285d47f57b17d94768176a9d3d45a57bf86359c67767f8"
+    },
+    {
+      "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/seal/moonleaf-woodland-stag-color-master.png",
+      "pathBase": "repositoryRoot",
+      "role": "accepted detailed Moonleaf Seal family quality, relief, and rim treatment",
+      "sha256": "b039a8e48038534e199b3e59794e44172d9132300cb21af14909189db68e3e4a"
+    }
+  ],
+  "assets": [
+    {
+      "sealID": "seal.moonleaf.night-owl",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/moonleaf-night-owl-production-master-v4.3.png",
+      "semanticReference": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/seal/moonleaf-night-owl-thumbnail.png",
+      "prompt": "Use case: stylized-concept\nAsset type: Rune Scribe Moonleaf production Seal color master\nPrimary request: Create one independent Night Owl medallion matching the approved Moonleaf craftsmanship. It must depict a front-facing silver owl as a quiet nocturnal watcher beneath a small luminous crescent moon.\nInput images: Image 1 is the controlling Moonleaf style board for palette, metalwork, material, botanical filigree, and finish. Images 2 and 3 are accepted detailed Moonleaf Seal color masters and define the exact family quality, relief, rim treatment, scale, and rendering density. Image 4 is the current simplified Night Owl glyph; use it only for semantic identity and centered silhouette, never for visual quality.\nScene/backdrop: genuinely transparent exterior around the isolated emblem; no scene, no panel, no card, no background plate beyond the medallion itself.\nSubject: a distinct centered round-to-slightly-oval deep forest-green enamel medallion with a strong silver rim; a readable silver owl with large eyes and folded wings; one small crescent moon clearly above the owl; restrained leaf accents integrated into the rim.\nStyle/medium: high-fidelity dimensional fantasy metalwork, carved silver and ivory relief, dark green enamel, cool blue-white highlights, subtle internal shadow, consistent with the accepted Crescentleaf and Woodland Stag masters.\nComposition/framing: centered, symmetric, isolated, 1:1 canvas, generous transparent margin, complete silhouette fully visible, no cropping. Keep the owl, crescent, and outer rim bold enough to remain recognizable at 48–64 px.\nLighting/mood: quiet moonlit glow, serene, premium, no harsh bloom.\nColor palette: silver, ivory, deep forest green, restrained cool blue-white.\nMaterials/textures: embossed silver relief, engraved rim, enamel field, crisp antler-thin filigree only where it survives downscaling.\nConstraints: actual alpha transparency outside the emblem; exactly one independent emblem; preserve crisp edges, internal shadow, relief, and complete rim.\nAvoid: all text, letterforms, glyphs, runes, numbers, logos, UI, buttons, cards, frames, screenshots, scenery, rectangular backdrops, extra animals, multiple emblems, flat line-icon styling, neon mint outlines, watermark.",
+      "sourceOutputSHA256": "2ec573d4b254616a8b8d9ad10047f7a2a1d535b672de364b3532a2be1263d321",
+      "dimensions": [1024, 1024],
+      "alpha": {
+        "present": true,
+        "exteriorTransparent": true,
+        "nonzeroBoundingBox": [128, 28, 768, 950],
+        "transparentPixelCount": 471407,
+        "opaquePixelCount": 516531
+      },
+      "sha256": "d19520baa7371d7ef5db39943324ab168395a248c35a477d8a8e8b1be1fa6393",
+      "alphaRestoration": {
+        "applied": true,
+        "method": "ffmpeg alpha merge using the accepted Woodland Stag Seal alpha silhouette",
+        "maskSource": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/seal/moonleaf-woodland-stag-color-master.png",
+        "maskRecipe": "alphaextract,crop=756:934:135:45,scale=768:950:flags=lanczos,pad=1024:1024:128:28:color=black; base scale=1024:1024:flags=lanczos; alphamerge; format=rgba"
+      },
+      "review": {
+        "selection": "ACCEPTED_FOR_IMPLEMENTATION_INPUT",
+        "rejected": false,
+        "targetScale": "PASS_AT_64_PX",
+        "notes": "Distinct owl silhouette, crescent, full rim, and Moonleaf material identity remain readable at compact size; owner review remains pending."
+      }
+    },
+    {
+      "sealID": "seal.moonleaf.moonwell",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/moonleaf-moonwell-production-master-v4.3.png",
+      "semanticReference": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/seal/moonleaf-moonwell-thumbnail.png",
+      "prompt": "Use case: stylized-concept\nAsset type: Rune Scribe Moonleaf production Seal color master\nPrimary request: Create one independent Moonwell medallion matching the approved Moonleaf craftsmanship. It must clearly depict a luminous silver crescent moon reflected in a round moonlit pool with exactly three broad, readable concentric ripples.\nInput images: Image 1 is the controlling Moonleaf style board for palette, metalwork, material, botanical filigree, and finish. Images 2 and 3 are accepted detailed Moonleaf Seal color masters and define the exact family quality, relief, rim treatment, scale, and rendering density. Image 4 is the current simplified Moonwell glyph; use it only for semantic identity and centered silhouette, never for visual quality.\nScene/backdrop: genuinely transparent exterior around the isolated emblem; no scene, no panel, no card, no background plate beyond the medallion itself.\nSubject: a distinct centered round-to-slightly-oval deep forest-green enamel medallion with a strong silver rim; an unmistakable crescent over a circular moonwell basin; three bright ripples widening below; restrained silver leaf accents integrated into the rim.\nStyle/medium: high-fidelity dimensional fantasy metalwork, carved silver and ivory relief, dark green enamel, cool blue-white highlights, subtle internal shadow, consistent with the accepted Crescentleaf and Woodland Stag masters.\nComposition/framing: centered, symmetric, isolated, 1:1 canvas, generous transparent margin, complete silhouette fully visible, no cropping. Keep crescent, well, ripples, and rim bold enough to remain recognizable at 48–64 px.\nLighting/mood: tranquil moonlit reflection, serene, premium, restrained glow.\nColor palette: silver, ivory, deep forest green, cool blue-white reflected light.\nMaterials/textures: embossed silver relief, engraved rim, enamel field, polished stone or silver pool.\nConstraints: actual alpha transparency outside the emblem; exactly one independent emblem; exactly one crescent and exactly three clearly separated ripples; preserve crisp edges, internal shadow, relief, and complete rim.\nAvoid: all text, letterforms, glyphs, runes, numbers, logos, UI, buttons, cards, frames, screenshots, scenery, rectangular backdrops, animals, flowers, multiple emblems, flat line-icon styling, neon mint outlines, watermark.",
+      "sourceOutputSHA256": "6e8539f3c80c9ded8fc212865427b0cd430b56b1a1015d7177301d938ebf32e2",
+      "dimensions": [1024, 1024],
+      "alpha": {
+        "present": true,
+        "exteriorTransparent": true,
+        "nonzeroBoundingBox": [83, 68, 858, 875],
+        "transparentPixelCount": 454687,
+        "opaquePixelCount": 531445
+      },
+      "sha256": "2e4f51c1f3837ecf6f04ec656253a6b9982494ca9f562ac23e2a3b46a94d7bf5",
+      "alphaRestoration": {
+        "applied": true,
+        "method": "ffmpeg alpha merge using the accepted Woodland Stag Seal alpha silhouette",
+        "maskSource": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/seal/moonleaf-woodland-stag-color-master.png",
+        "maskRecipe": "alphaextract,crop=756:934:135:45,scale=858:875:flags=lanczos,pad=1024:1024:83:68:color=black; base scale=1024:1024:flags=lanczos; alphamerge; format=rgba"
+      },
+      "review": {
+        "selection": "ACCEPTED_FOR_IMPLEMENTATION_INPUT",
+        "rejected": false,
+        "targetScale": "PASS_AT_64_PX",
+        "notes": "Crescent, moonwell basin, three ripple bands, and complete rim remain distinct at compact size; owner review remains pending."
+      }
+    },
+    {
+      "sealID": "seal.moonleaf.starflower",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/moonleaf-starflower-production-master-v4.3.png",
+      "semanticReference": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/seal/moonleaf-starflower-thumbnail.png",
+      "prompt": "Use case: stylized-concept\nAsset type: Rune Scribe Moonleaf production Seal color master\nPrimary request: Create one independent Starflower medallion matching the approved Moonleaf craftsmanship. It must clearly depict a luminous pale flower with exactly six broad petals and one crisp six-point star at its center.\nInput images: Image 1 is the controlling Moonleaf style board for palette, metalwork, material, botanical filigree, and finish. Images 2 and 3 are accepted detailed Moonleaf Seal color masters and define the exact family quality, relief, rim treatment, scale, and rendering density. Image 4 is the current simplified Starflower glyph; use it only for semantic identity and centered silhouette, never for visual quality.\nScene/backdrop: genuinely transparent exterior around the isolated emblem; no scene, no panel, no card, no background plate beyond the medallion itself.\nSubject: a distinct centered round-to-slightly-oval deep forest-green enamel medallion with a strong silver rim; one large ivory-silver six-petal flower; one bright six-point star nested in its center; restrained tiny leaves or buds integrated into the rim without competing with the flower.\nStyle/medium: high-fidelity dimensional fantasy metalwork, carved silver and ivory relief, dark green enamel, cool blue-white highlights, subtle internal shadow, consistent with the accepted Crescentleaf and Woodland Stag masters.\nComposition/framing: centered, radial, isolated, 1:1 canvas, generous transparent margin, complete silhouette fully visible, no cropping. Keep the six petals, central star, and rim bold enough to remain recognizable at 48–64 px.\nLighting/mood: serene celestial bloom, premium, restrained moonlit luminosity.\nColor palette: silver, ivory, deep forest green, cool blue-white.\nMaterials/textures: embossed silver relief, pearlescent ivory petals, engraved rim, enamel field.\nConstraints: actual alpha transparency outside the emblem; exactly one independent emblem; exactly six broad petals and exactly one central six-point star; preserve crisp edges, internal shadow, relief, and complete rim.\nAvoid: all text, letterforms, glyphs, runes, numbers, logos, UI, buttons, cards, frames, screenshots, scenery, crescent moons, animals, insects, multiple flowers, multiple emblems, flat line-icon styling, neon mint outlines, watermark.",
+      "sourceOutputSHA256": "53eef8f67afd2aa3d1803db17cfc6dffcd1511ac61bdcfcadccdb97d00f2da97",
+      "dimensions": [1024, 1024],
+      "alpha": {
+        "present": true,
+        "exteriorTransparent": true,
+        "nonzeroBoundingBox": [50, 8, 923, 964],
+        "transparentPixelCount": 375766,
+        "opaquePixelCount": 764
+      },
+      "sha256": "7efa6463069e83bd56031d7751f3812a56d62cb21cae8d8b5a406ff39f1086a3",
+      "alphaRestoration": {
+        "applied": false,
+        "method": "source alpha preserved during Lanczos PNG scaling"
+      },
+      "review": {
+        "selection": "ACCEPTED_FOR_IMPLEMENTATION_INPUT",
+        "rejected": false,
+        "targetScale": "PASS_AT_64_PX",
+        "notes": "Six broad petals, central six-point star, and complete botanical rim remain distinct at compact size; owner review remains pending."
+      }
+    },
+    {
+      "sealID": "seal.moonleaf.echo-firefly",
+      "outputPath": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/moonleaf-echo-firefly-production-master-v4.3.png",
+      "semanticReference": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/Resources/Production/seal/moonleaf-echo-firefly-thumbnail.png",
+      "prompt": "Use case: stylized-concept\nAsset type: Rune Scribe Moonleaf production Seal color master\nPrimary request: Create one independent Echo Firefly medallion matching the approved Moonleaf craftsmanship. It must clearly depict one small elegant silver firefly with two luminous echo rings surrounding its glowing abdomen.\nInput images: Image 1 is the controlling Moonleaf style board for palette, metalwork, material, botanical filigree, and finish. Images 2 and 3 are accepted detailed Moonleaf Seal color masters and define the exact family quality, relief, rim treatment, scale, and rendering density. Image 4 is the current simplified Echo Firefly glyph; use it only for semantic identity and centered silhouette, never for visual quality.\nScene/backdrop: genuinely transparent exterior around the isolated emblem; no scene, no panel, no card, no background plate beyond the medallion itself.\nSubject: a distinct centered round-to-slightly-oval deep forest-green enamel medallion with a strong silver rim; one readable firefly with two wings, small body, and luminous abdomen; exactly two clean concentric echo rings; restrained silver leaf accents integrated into the rim.\nStyle/medium: high-fidelity dimensional fantasy metalwork, carved silver and ivory relief, dark green enamel, cool blue-white and very restrained pale verdant glow, subtle internal shadow, consistent with the accepted Crescentleaf and Woodland Stag masters.\nComposition/framing: centered, symmetric, isolated, 1:1 canvas, generous transparent margin, complete silhouette fully visible, no cropping. Keep the insect silhouette, two echo rings, and rim bold enough to remain recognizable at 48–64 px.\nLighting/mood: quiet enchanted encounter, premium, restrained bioluminescence.\nColor palette: silver, ivory, deep forest green, cool blue-white, a faint pale verdant glow only at the abdomen.\nMaterials/textures: embossed silver relief, engraved rim, enamel field, translucent wing highlights.\nConstraints: actual alpha transparency outside the emblem; exactly one independent emblem; exactly one firefly and exactly two complete echo rings; preserve crisp edges, internal shadow, relief, and complete rim.\nAvoid: all text, letterforms, glyphs, runes, numbers, logos, UI, buttons, cards, frames, screenshots, scenery, moons, flowers, extra insects, extra rings, multiple emblems, flat line-icon styling, neon mint outlines, watermark.",
+      "sourceOutputSHA256": "4f6885469e963824d707e3b83a55483016046fa0f078e7d19c507bac2b1be22c",
+      "dimensions": [1024, 1024],
+      "alpha": {
+        "present": true,
+        "exteriorTransparent": true,
+        "nonzeroBoundingBox": [71, 9, 886, 950],
+        "transparentPixelCount": 433084,
+        "opaquePixelCount": 1020
+      },
+      "sha256": "29fede6ac2b69dc7f93cd505b0e3d67bcce7bfdd7fefda413a129609e3806c51",
+      "alphaRestoration": {
+        "applied": false,
+        "method": "source alpha preserved during Lanczos PNG scaling"
+      },
+      "review": {
+        "selection": "ACCEPTED_FOR_IMPLEMENTATION_INPUT",
+        "rejected": false,
+        "targetScale": "PASS_AT_64_PX",
+        "notes": "Single firefly silhouette, luminous abdomen, two echo rings, and complete rim remain distinct at compact size; owner review remains pending."
+      }
+    }
+  ]
+}

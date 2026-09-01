@@ -90,7 +90,7 @@ def resource_specs() -> tuple[ResourceSpec, ...]:
         prefix = f"resource.seal.norse.{slug}"
         values.extend(
             (
-                spec(prefix + ".vector-master", "seal.vector-master", f"Production/Seals/seal.norse.{slug}.vector-master.pdf"),
+                spec(prefix + ".color-master", "seal.color-master", f"Production/Seals/seal.norse.{slug}.png"),
                 spec(prefix + ".monochrome-fallback", "seal.monochrome-fallback", f"Production/Seals/seal.norse.{slug}.monochrome.png"),
                 spec(prefix + ".thumbnail", "seal.thumbnail", f"Production/Seals/seal.norse.{slug}.thumbnail.png"),
             )
@@ -250,7 +250,7 @@ def manifest_document(resources: list[dict[str, Any]]) -> dict[str, Any]:
         "formatPolicy": {
             "colorSpace": "sRGB",
             "raster": "lossless PNG",
-            "vectorContract": "lossless raster PDF wrapper where a faithful vector source is unavailable",
+            "vectorContract": "raster-first Seals omit vector resources; Frame and Crest retain their declared PDF resources",
             "metadata": "nonessential authoring metadata stripped",
         },
         "sourceOnlyExclusions": [

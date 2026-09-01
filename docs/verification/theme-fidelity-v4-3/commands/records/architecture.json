@@ -1,0 +1,36 @@
+{
+  "acceptanceEvidence": true,
+  "argv": [
+    "/bin/bash",
+    "scripts/check-architecture.sh"
+  ],
+  "category": "architecture",
+  "command": "/bin/bash scripts/check-architecture.sh",
+  "commandID": "architecture",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:09:59.187Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 866,
+    "path": "commands/logs/architecture.log",
+    "sha256": "598d84ec5cff295c6a5d54968bff5af547601f972f2ebe6032a39db2b0a7e591"
+  },
+  "outputs": [],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 11,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:09:57.968Z"
+}

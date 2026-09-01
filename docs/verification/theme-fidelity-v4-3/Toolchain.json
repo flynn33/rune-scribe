@@ -1,0 +1,31 @@
+{
+  "acceptanceEvidence": false,
+  "evidenceType": "toolchain-inventory",
+  "failures": [],
+  "generatedAt": "2026-08-31T22:39:27.467Z",
+  "host": {
+    "machine": "arm64",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "pythonExecutable": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+    "pythonImplementation": "CPython",
+    "pythonVersion": "3.9.6"
+  },
+  "publicationState": "PREPUBLICATION",
+  "pythonPackages": {
+    "NumPy": "2.0.2",
+    "OpenCV": "4.13.0.92",
+    "OpenCVHeadless": null,
+    "Pillow": "11.3.0",
+    "jsonschema": "4.25.1",
+    "scikit-image": "0.24.0"
+  },
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "xcode": {
+    "build": "17F113",
+    "collectedWithoutLaunchingXcode": true,
+    "developerDirectory": "/Applications/Xcode.app/Contents/Developer",
+    "version": "26.6"
+  }
+}

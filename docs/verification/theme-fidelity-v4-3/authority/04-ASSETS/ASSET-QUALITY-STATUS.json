@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0",
+  "controllingGoldens": {
+    "status": "complete for supplied mockups",
+    "use": "immutable visual authority and regression input"
+  },
+  "referenceSlices": {
+    "status": "provided",
+    "use": "focal comparison, masking, and source extraction guidance"
+  },
+  "norseSealCandidates": {
+    "status": "provided-candidate",
+    "acceptance": "must pass source-region comparison and edge review before shipping"
+  },
+  "elvenProductionResources": {
+    "status": "repository resources require audit and replacement where mismatched",
+    "acceptance": "all role requirements and full visual gates must pass"
+  },
+  "norseOtherProductionResources": {
+    "status": "must be produced from controlling source and repository pipeline during implementation",
+    "acceptance": "all role requirements and Norse visual gates must pass"
+  },
+  "fonts": {
+    "status": "not redistributed",
+    "instruction": "use and, when required, repair the existing licensed repository-owned Script font pipeline"
+  }
+}

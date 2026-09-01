@@ -1,9 +1,16 @@
 # Rune Scribe Support
 
-**Current product source:** version 1.0.39 (build 39)
-**Publication boundary:** owner validation is discretionary before distribution; not shipped
+**Current product source:** version 1.0.40 (build 40)
+**Publication boundary:** repository-qualified release candidate; not shipped
 
-Optional owner validation does not gate remediation PASS or pull-request readiness.
+Final-source qualification passes 1,231 Swift tests, 255 Python tests, architecture,
+roadmap, documentation, resource, mutation, completeness, and security gates. The iOS
+Release build and arm64-only unsigned macOS Release build pass. Built-product content,
+resource, and privacy inspection passes 97/101 checks; the remaining four require a
+matching distribution profile and identity. The iPhone 17 Pro headless UI run passes
+7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5) headless UI run
+on iOS 26.5 passes 5 tests with 3 phone-specific skips by design and 0 failures. The
+superseded v4.3 package audit is noncontrolling verification history.
 
 ## Import and sharing
 
@@ -46,9 +53,12 @@ Rune Scribe's local Vault works without either Apple service.
   queued reports. Cancellation or denial does not repeatedly prompt; queued reports
   remain durable until a permitted later attempt succeeds or mirroring is disabled.
 
-Live iCloud-container provisioning and Game Center record configuration are release
-owner tasks. A missing or unavailable service must not block encryption, decryption,
-imports, sharing, appearance fallback, or local progression.
+Live iCloud-container provisioning and Game Center record configuration require the
+corresponding external services and credentials. Repository-controlled deterministic
+equivalents qualify product behavior when those services are unavailable; service
+configuration and publication remain separate external actions. A missing or unavailable
+service must not block encryption, decryption, imports, sharing, appearance fallback,
+local progression, or product shippability.
 
 ## App Lock and recovery
 
@@ -65,8 +75,12 @@ error; do not send cipher keys or decrypted text in a support request.
 
 The supported deployment targets are iOS 17 or later and macOS 15 or later. Surrounding
 UI supports Dynamic Type, VoiceOver labels, keyboard and pointer focus, High Contrast,
-Reduce Motion, monochrome presentation, and non-audio unlock feedback. Hardware-only
-and live-service qualification remains part of the release owner's pre-ship checklist.
+Reduce Motion, monochrome presentation, and non-audio unlock feedback. Manual hardware
+observations are superseded by repository-controlled Simulator, hosted, and deterministic
+equivalents and are not a pending shippability boundary. The current source is a
+repository-qualified release candidate with no known release-blocking defects. Both
+supported headless UI runs pass. Distribution signing, archive, export, notarization,
+upload, and rollout remain external publication work.
 
 For help, use the contact channel published at
 [Raven Forge Software](https://ravenforgesoftware.com/). Include the app version, build,

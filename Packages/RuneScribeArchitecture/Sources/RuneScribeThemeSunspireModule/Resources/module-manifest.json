@@ -1,335 +1,413 @@
 {
-  "schemaVersion": "1.0",
-  "policyProfile": "forsetti-pattern-b-standalone",
-  "runtimeVersion": "1.0.0",
-  "moduleID": "com.runescribe.module.theme.sunspire",
-  "displayName": "Rune Scribe Sunspire Codex Theme",
-  "moduleVersion": "1.0.0",
-  "moduleType": "service",
-  "criticality": "optional",
-  "supportedPlatforms": [
-    "iOS",
-    "macOS"
-  ],
-  "minimumOS": {
-    "iOS": "17.0",
-    "macOS": "15.0"
-  },
   "capabilitiesRequested": [
     "resources.read",
     "runtime.contributions.publish",
     "runtime.resources.opaque.publish"
   ],
+  "consumedEndpoints": [],
+  "criticality": "optional",
+  "defaultRole": "runescribe.theme.sunspire",
+  "diagnosticsVisibleInProduction": false,
+  "displayName": "Rune Scribe Sunspire Codex Theme",
+  "entitlementRequirement": {
+    "identifier": "unlock.codex.sunspire",
+    "kind": "earned"
+  },
   "entryPoint": "RuneScribeThemeSunspireModule",
+  "minimumOS": {
+    "iOS": "17.0",
+    "macOS": "15.0"
+  },
+  "moduleID": "com.runescribe.module.theme.sunspire",
+  "moduleType": "service",
+  "moduleVersion": "1.0.0",
+  "policyClass": "policy.theme-provider",
+  "policyProfile": "forsetti-pattern-b-standalone",
+  "publishedEndpoints": [],
   "runtimeRequirements": {
-    "requiredServices": [
-      "ApplicationResourceLocator"
-    ],
+    "requiredModuleRoles": [],
     "requiredResources": [
       {
+        "fileExtension": "json",
         "name": "module-manifest",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "json",
         "name": "Resource-Integrity-Manifest-v1.0",
-        "fileExtension": "json",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-background-high-contrast",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
+        "name": "sunspire-background-macos-wide",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
         "name": "sunspire-background-reduce-motion",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-background-static",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-first-light-static-fallback",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-first-light-thumbnail",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "pdf",
         "name": "sunspire-first-light-vector",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-laurel-of-dawn-static-fallback",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-laurel-of-dawn-thumbnail",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "pdf",
         "name": "sunspire-laurel-of-dawn-vector",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
+        "name": "sunspire-card-border",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
+        "name": "sunspire-corner-ornament",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
+        "name": "sunspire-divider",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
+        "name": "sunspire-primary-button",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
+        "name": "sunspire-tab-selector",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
         "name": "sunspire-auric-stele-high-contrast",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-auric-stele-master",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-auric-stele-static-share-fallback",
-        "fileExtension": "heif",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-auric-stele-thumbnail",
-        "fileExtension": "heif",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-dawnfire-tablet-high-contrast",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-dawnfire-tablet-master",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-dawnfire-tablet-static-share-fallback",
-        "fileExtension": "heif",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-dawnfire-tablet-thumbnail",
-        "fileExtension": "heif",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-solvine-plaque-high-contrast",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-solvine-plaque-master",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-solvine-plaque-static-share-fallback",
-        "fileExtension": "heif",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-solvine-plaque-thumbnail",
-        "fileExtension": "heif",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
-        "name": "sunspire-script-primary",
         "fileExtension": "ttf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "name": "sunspire-script-primary",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
+        "name": "sunspire-script-specimen-high-contrast",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
         "name": "sunspire-script-specimen",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-script-static-fallback",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
+        "name": "sunspire-dawnflower-color-master",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
         "name": "sunspire-dawnflower-monochrome-fallback",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-dawnflower-thumbnail",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "pdf",
         "name": "sunspire-dawnflower-vector-master",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
+        "name": "sunspire-echo-ember-color-master",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
         "name": "sunspire-echo-ember-monochrome-fallback",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-echo-ember-thumbnail",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "pdf",
         "name": "sunspire-echo-ember-vector-master",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
+        "name": "sunspire-golden-lark-color-master",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
         "name": "sunspire-golden-lark-monochrome-fallback",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-golden-lark-thumbnail",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "pdf",
         "name": "sunspire-golden-lark-vector-master",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
+        "name": "sunspire-radiant-spire-color-master",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
         "name": "sunspire-radiant-spire-monochrome-fallback",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-radiant-spire-thumbnail",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "pdf",
         "name": "sunspire-radiant-spire-vector-master",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
+        "name": "sunspire-sunleaf-crest-color-master",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
         "name": "sunspire-sunleaf-crest-monochrome-fallback",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-sunleaf-crest-thumbnail",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "pdf",
         "name": "sunspire-sunleaf-crest-vector-master",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
+        "name": "sunspire-sunwheel-color-master",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
         "name": "sunspire-sunwheel-monochrome-fallback",
-        "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-sunwheel-thumbnail",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
-        "name": "sunspire-sunwheel-vector-master",
         "fileExtension": "pdf",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "name": "sunspire-sunwheel-vector-master",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-vault-card",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-vault-encountered",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
+        "fileExtension": "png",
         "name": "sunspire-vault-locked",
-        "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       },
       {
-        "name": "sunspire-vault-selected",
         "fileExtension": "png",
-        "subdirectory": null,
-        "ownerModuleID": "com.runescribe.module.theme.sunspire"
+        "name": "sunspire-vault-selected",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
+      },
+      {
+        "fileExtension": "png",
+        "name": "sunspire-vault-unavailable",
+        "ownerModuleID": "com.runescribe.module.theme.sunspire",
+        "subdirectory": null
       }
     ],
-    "requiredModuleRoles": [
-
+    "requiredServices": [
+      "ApplicationResourceLocator"
     ]
   },
-  "defaultRole": "runescribe.theme.sunspire",
-  "policyClass": "policy.theme-provider",
-  "consumedEndpoints": [
-
-  ],
-  "publishedEndpoints": [
-
-  ],
-  "entitlementRequirement": {
-    "kind": "earned",
-    "identifier": "unlock.codex.sunspire"
-  },
-  "diagnosticsVisibleInProduction": false
+  "runtimeVersion": "1.0.0",
+  "schemaVersion": "1.0",
+  "supportedPlatforms": [
+    "iOS",
+    "macOS"
+  ]
 }

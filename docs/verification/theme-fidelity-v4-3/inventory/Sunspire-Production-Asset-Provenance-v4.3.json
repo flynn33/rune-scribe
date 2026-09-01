@@ -1,0 +1,1671 @@
+{
+  "acceptedSourceMasterRecipe": {
+    "path": "docs/verification/theme-fidelity-v4-3/inventory/recipes/Sunspire-Accepted-Source-Master-Recipe-v4.3.json",
+    "sha256": "01c58fc866d4ab8b1e40512eedd40fad295968c77cc7cd50fe2eca6f72fe4517"
+  },
+  "authorityInputs": [
+    {
+      "dimensions": [
+        941,
+        1672
+      ],
+      "label": "catalog",
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-004-941x1672.png",
+      "sha256": "6186c6ecd82e25409904daa2460b3fc1953d7a8209a5f224649285f7de8d696f"
+    },
+    {
+      "dimensions": [
+        1122,
+        1402
+      ],
+      "label": "style-board",
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-013-1122x1402.png",
+      "sha256": "ea52db7c2f8a89354069b6f64a4751cb62ea439a968c6c1ba8309f8ac3145f5d"
+    }
+  ],
+  "authorityPolicy": "offline owner-archive extraction and repository-local production source masters only; authoring inputs are not bundled or read at runtime",
+  "backgroundRecipe": {
+    "path": "docs/verification/theme-fidelity-v4-3/inventory/recipes/Sunspire-Background-Extraction-Recipe-v4.3.json",
+    "sha256": "c1681a75672e1980cc3aaa6fe96271cbc1b0170fcb774a73fa4f723312b32446"
+  },
+  "backgroundRenderer": {
+    "path": "scripts/theme_v43_background_master.py",
+    "sha256": "f613b3a61ea5ec29ef455f96128ff98eab8911eafb02ee4f0daf34e4dad20b64"
+  },
+  "backgroundSourceMaster": {
+    "contentClass": "continuous-art-directed-environment",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "focalPoint": [
+      0.5,
+      0.5
+    ],
+    "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-environment-production-master-v4.3.png",
+    "runtimeBundled": false,
+    "sha256": "1bc17b1ebb451caf8e0704f7f567cd4fa1ab3ca2939c0ca8ec01ff7218e80966"
+  },
+  "blockers": [],
+  "codexID": "codex.sunspire",
+  "crestSourceMaster": {
+    "acceptanceRecord": {
+      "ownerReview": "PENDING",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf-sunspire-frame-crest-master-record-v4.3.json",
+      "sha256": "0e0bbf1581ac99538aa68989e9079c77e90b061d72298aacca037f6516a54ef3"
+    },
+    "assetID": "sunspire-first-light-crest",
+    "dimensions": [
+      1280,
+      1920
+    ],
+    "hasAlpha": true,
+    "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-first-light-crest-production-master-v4.3.png",
+    "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+    "role": "Crest",
+    "runtimeBundled": false,
+    "sha256": "3a89b411b58f017bcb8f41b9581425baf3dd8c7b4e324b0f20a3a75e2172c70e"
+  },
+  "extractionRecipes": [
+    {
+      "asset": "relic.sunspire.solvine-plaque",
+      "crop": [
+        54,
+        932,
+        354,
+        1183
+      ],
+      "source": "catalog",
+      "transformation": "owner-source object isolation, source-pixel inscription-field reconstruction when specified, alpha normalization, and lossless aspect-fit resampling"
+    },
+    {
+      "asset": "relic.sunspire.auric-stele",
+      "crop": [
+        67,
+        1192,
+        355,
+        1462
+      ],
+      "source": "catalog",
+      "transformation": "owner-source object isolation, source-pixel inscription-field reconstruction when specified, alpha normalization, and lossless aspect-fit resampling"
+    },
+    {
+      "asset": "seal.sunspire.sunleaf-crest",
+      "crop": [
+        40,
+        646,
+        270,
+        933
+      ],
+      "source": "style-board",
+      "transformation": "owner-source medallion isolation, alpha normalization, and lossless aspect-fit resampling"
+    },
+    {
+      "asset": "seal.sunspire.golden-lark",
+      "crop": [
+        873,
+        722,
+        1057,
+        918
+      ],
+      "source": "style-board",
+      "transformation": "owner-source medallion isolation, alpha normalization, and lossless aspect-fit resampling"
+    },
+    {
+      "asset": "background.sunspire.hall-of-first-light",
+      "layouts": {
+        "macOSWide": {
+          "canvas": [
+            3200,
+            1800
+          ],
+          "cropBoxSourcePixels": [
+            0.0,
+            0.25,
+            1672.0,
+            940.75
+          ],
+          "focalPoint": [
+            0.5,
+            0.5
+          ],
+          "resampling": "bilinear",
+          "scale": 1.913875598,
+          "sourceCropAspectRatio": 1.777777778,
+          "transformation": "single continuous-master aspect-fill crop with one uniform scale"
+        },
+        "phonePortrait": {
+          "canvas": [
+            2048,
+            2732
+          ],
+          "cropBoxSourcePixels": [
+            483.297218,
+            0.0,
+            1188.702782,
+            941.0
+          ],
+          "focalPoint": [
+            0.5,
+            0.5
+          ],
+          "resampling": "bicubic",
+          "scale": 2.903294368,
+          "sourceCropAspectRatio": 0.749633968,
+          "transformation": "single continuous-master aspect-fill crop with one uniform scale"
+        }
+      },
+      "source": {
+        "contentClass": "continuous-art-directed-environment",
+        "dimensions": [
+          1672,
+          941
+        ],
+        "focalPoint": [
+          0.5,
+          0.5
+        ],
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-environment-production-master-v4.3.png",
+        "runtimeBundled": false,
+        "sha256": "1bc17b1ebb451caf8e0704f7f567cd4fa1ab3ca2939c0ca8ec01ff7218e80966"
+      },
+      "transformation": "continuous-master focal aspect-fill, one uniform scale per output, and prebuilt deterministic accessibility variants; no tiling, patch compositing, seams, nonuniform stretch, or completed-image blur"
+    },
+    {
+      "asset": "frame.sunspire.laurel-of-dawn",
+      "source": {
+        "acceptanceRecord": {
+          "ownerReview": "PENDING",
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf-sunspire-frame-crest-master-record-v4.3.json",
+          "sha256": "0e0bbf1581ac99538aa68989e9079c77e90b061d72298aacca037f6516a54ef3"
+        },
+        "assetID": "sunspire-laurel-of-dawn-frame",
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "hasAlpha": true,
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-laurel-of-dawn-frame-production-master-v4.3.png",
+        "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+        "role": "Frame",
+        "runtimeBundled": false,
+        "sha256": "0194d53a9c29d866eaeda63e5ef08837d2a6b0b5a69d96e146f4b38a77e3dba3"
+      },
+      "transformation": "pinned accepted transparent master loaded unchanged, then rendered by deterministic uniform aspect-fit for static fallback and thumbnail"
+    },
+    {
+      "asset": "crest.sunspire.first-light",
+      "source": {
+        "acceptanceRecord": {
+          "ownerReview": "PENDING",
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf-sunspire-frame-crest-master-record-v4.3.json",
+          "sha256": "0e0bbf1581ac99538aa68989e9079c77e90b061d72298aacca037f6516a54ef3"
+        },
+        "assetID": "sunspire-first-light-crest",
+        "dimensions": [
+          1280,
+          1920
+        ],
+        "hasAlpha": true,
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-first-light-crest-production-master-v4.3.png",
+        "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+        "role": "Crest",
+        "runtimeBundled": false,
+        "sha256": "3a89b411b58f017bcb8f41b9581425baf3dd8c7b4e324b0f20a3a75e2172c70e"
+      },
+      "transformation": "pinned accepted transparent master loaded unchanged, then rendered by deterministic uniform aspect-fit for static fallback and thumbnail"
+    },
+    {
+      "asset": "panel.sunspire.chrome-set",
+      "policy": {
+        "composition": "independent uniformly scaled protected corners plus the four contiguous between-corner edge intervals; transparent center; no whole-frame nonuniform resize",
+        "edgePreparation": "one shared uniform scale for every corner and edge cross-axis, followed by running-axis-only edge stretch",
+        "edgeResampling": "LANCZOS one-axis edge stretch",
+        "horizontalEdgeInterval": [
+          360,
+          1176
+        ],
+        "joinPolicy": "each edge begins at the source pixel adjacent to its protected corner, uses the same cross-axis scale as that corner, and underlaps the corner by two target pixels",
+        "protectedContentScale": "minimum target-to-source cap ratio shared by all four sides",
+        "sourceCapInsets": {
+          "bottom": 280,
+          "left": 360,
+          "right": 360,
+          "top": 280
+        },
+        "targetOutputs": {
+          "card-border": {
+            "capInsets": {
+              "bottom": 150,
+              "left": 170,
+              "right": 170,
+              "top": 150
+            },
+            "dimensions": [
+              1600,
+              1000
+            ]
+          },
+          "corner-ornament": {
+            "capInsets": null,
+            "dimensions": [
+              512,
+              512
+            ]
+          },
+          "divider": {
+            "capInsets": {
+              "bottom": 48,
+              "left": 360,
+              "right": 360,
+              "top": 48
+            },
+            "dimensions": [
+              1600,
+              128
+            ]
+          },
+          "primary-button": {
+            "capInsets": {
+              "bottom": 104,
+              "left": 190,
+              "right": 190,
+              "top": 104
+            },
+            "dimensions": [
+              1200,
+              320
+            ]
+          },
+          "tab-selector": {
+            "capInsets": {
+              "bottom": 76,
+              "left": 170,
+              "right": 170,
+              "top": 76
+            },
+            "dimensions": [
+              1000,
+              240
+            ]
+          }
+        },
+        "verticalEdgeInterval": [
+          280,
+          744
+        ]
+      },
+      "source": {
+        "acceptanceRecord": {
+          "ownerReview": "PENDING",
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf-sunspire-frame-crest-master-record-v4.3.json",
+          "sha256": "0e0bbf1581ac99538aa68989e9079c77e90b061d72298aacca037f6516a54ef3"
+        },
+        "assetID": "sunspire-laurel-of-dawn-frame",
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "hasAlpha": true,
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-laurel-of-dawn-frame-production-master-v4.3.png",
+        "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+        "role": "Frame",
+        "runtimeBundled": false,
+        "sha256": "0194d53a9c29d866eaeda63e5ef08837d2a6b0b5a69d96e146f4b38a77e3dba3"
+      },
+      "transformation": "protected-corner and contiguous-edge nine-slice composition with one shared cross-axis scale; transparent center; no complete-frame nonuniform resize"
+    },
+    {
+      "asset": "relic.sunspire.dawnfire-tablet",
+      "source": {
+        "acceptanceRecord": {
+          "ownerReview": "PENDING",
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/environment-and-relic-master-record-v4.3.json",
+          "sha256": "5cd76eacc482a65fdaffa8d4ec69731a1db51f0e2a133938ed30c1cbbd89e72c"
+        },
+        "assetID": "sunspire.dawnfire-tablet.clean-master",
+        "dimensions": [
+          1200,
+          1600
+        ],
+        "hasAlpha": true,
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-dawnfire-tablet-clean-production-master-v4.3.png",
+        "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+        "role": "Relic",
+        "runtimeBundled": false,
+        "sha256": "19322a7f35deda05349807bd315f1e9abee6a082ba9f9557423653b54396b9c9"
+      },
+      "transformation": "pinned complete clean master with identity-size uniform aspect-fit; deterministic thumbnail and High Contrast derivation; no reconstruction blur, patch, or inscription slab"
+    },
+    {
+      "asset": "seal.sunspire.dawnflower",
+      "recipe": {
+        "colorMaster": {
+          "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+          "method": "decoded-RGBA-pixel-identity-copy",
+          "outputPixels": [
+            1254,
+            1254
+          ],
+          "sourcePixels": [
+            1254,
+            1254
+          ]
+        },
+        "monochromeFallback": {
+          "method": "luminance conversion with 1.20 contrast and exact source alpha",
+          "outputPixels": [
+            1254,
+            1254
+          ]
+        },
+        "thumbnail": {
+          "method": "uniform-aspect-fit",
+          "offsetPixels": [
+            0,
+            0
+          ],
+          "outputPixels": [
+            512,
+            512
+          ],
+          "renderedPixels": [
+            512,
+            512
+          ],
+          "resampling": "LANCZOS",
+          "sourcePixels": [
+            1254,
+            1254
+          ],
+          "uniformScale": 0.4082934609250399
+        }
+      },
+      "source": {
+        "acceptanceRecord": {
+          "ownerReview": "PENDING",
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-seal-source-master-record-v4-3.json",
+          "sha256": "fe9811d706daa558e0f82866f16741a55e89d8fb0a10a0f059de64e7569add7d"
+        },
+        "assetID": "seal.sunspire.dawnflower",
+        "dimensions": [
+          1254,
+          1254
+        ],
+        "hasAlpha": true,
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-dawnflower-color-master-v4-3.png",
+        "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+        "role": "Seal",
+        "runtimeBundled": false,
+        "sha256": "c5eefb8c0c2a56f97109ac582a08db7262856bfddeb199e09b1fc4e428f3ad15",
+        "targetScaleReview": "PASS_AT_64_PX"
+      },
+      "transformation": "decoded RGBA pixels preserved exactly for the color master; explicit alpha-preserving monochrome fallback and uniform aspect-fit thumbnail derived deterministically"
+    },
+    {
+      "asset": "seal.sunspire.sunwheel",
+      "recipe": {
+        "colorMaster": {
+          "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+          "method": "decoded-RGBA-pixel-identity-copy",
+          "outputPixels": [
+            1254,
+            1254
+          ],
+          "sourcePixels": [
+            1254,
+            1254
+          ]
+        },
+        "monochromeFallback": {
+          "method": "luminance conversion with 1.20 contrast and exact source alpha",
+          "outputPixels": [
+            1254,
+            1254
+          ]
+        },
+        "thumbnail": {
+          "method": "uniform-aspect-fit",
+          "offsetPixels": [
+            0,
+            0
+          ],
+          "outputPixels": [
+            512,
+            512
+          ],
+          "renderedPixels": [
+            512,
+            512
+          ],
+          "resampling": "LANCZOS",
+          "sourcePixels": [
+            1254,
+            1254
+          ],
+          "uniformScale": 0.4082934609250399
+        }
+      },
+      "source": {
+        "acceptanceRecord": {
+          "ownerReview": "PENDING",
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-seal-source-master-record-v4-3.json",
+          "sha256": "fe9811d706daa558e0f82866f16741a55e89d8fb0a10a0f059de64e7569add7d"
+        },
+        "assetID": "seal.sunspire.sunwheel",
+        "dimensions": [
+          1254,
+          1254
+        ],
+        "hasAlpha": true,
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-sunwheel-color-master-v4-3.png",
+        "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+        "role": "Seal",
+        "runtimeBundled": false,
+        "sha256": "bde40aeeaea0e81ebedd4f17836510e44dd072b23dc9c83e53bcac591c561d32",
+        "targetScaleReview": "PASS_AT_64_PX"
+      },
+      "transformation": "decoded RGBA pixels preserved exactly for the color master; explicit alpha-preserving monochrome fallback and uniform aspect-fit thumbnail derived deterministically"
+    },
+    {
+      "asset": "seal.sunspire.radiant-spire",
+      "recipe": {
+        "colorMaster": {
+          "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+          "method": "decoded-RGBA-pixel-identity-copy",
+          "outputPixels": [
+            1254,
+            1254
+          ],
+          "sourcePixels": [
+            1254,
+            1254
+          ]
+        },
+        "monochromeFallback": {
+          "method": "luminance conversion with 1.20 contrast and exact source alpha",
+          "outputPixels": [
+            1254,
+            1254
+          ]
+        },
+        "thumbnail": {
+          "method": "uniform-aspect-fit",
+          "offsetPixels": [
+            0,
+            0
+          ],
+          "outputPixels": [
+            512,
+            512
+          ],
+          "renderedPixels": [
+            512,
+            512
+          ],
+          "resampling": "LANCZOS",
+          "sourcePixels": [
+            1254,
+            1254
+          ],
+          "uniformScale": 0.4082934609250399
+        }
+      },
+      "source": {
+        "acceptanceRecord": {
+          "ownerReview": "PENDING",
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-seal-source-master-record-v4-3.json",
+          "sha256": "fe9811d706daa558e0f82866f16741a55e89d8fb0a10a0f059de64e7569add7d"
+        },
+        "assetID": "seal.sunspire.radiant-spire",
+        "dimensions": [
+          1254,
+          1254
+        ],
+        "hasAlpha": true,
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-radiant-spire-color-master-v4-3.png",
+        "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+        "role": "Seal",
+        "runtimeBundled": false,
+        "sha256": "8a4ad746476c82448b451f038c726491ae2fabd91f5c13f2536643736048ec0f",
+        "targetScaleReview": "PASS_AT_64_PX"
+      },
+      "transformation": "decoded RGBA pixels preserved exactly for the color master; explicit alpha-preserving monochrome fallback and uniform aspect-fit thumbnail derived deterministically"
+    },
+    {
+      "asset": "seal.sunspire.echo-ember",
+      "recipe": {
+        "colorMaster": {
+          "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata",
+          "method": "decoded-RGBA-pixel-identity-copy",
+          "outputPixels": [
+            1254,
+            1254
+          ],
+          "sourcePixels": [
+            1254,
+            1254
+          ]
+        },
+        "monochromeFallback": {
+          "method": "luminance conversion with 1.20 contrast and exact source alpha",
+          "outputPixels": [
+            1254,
+            1254
+          ]
+        },
+        "thumbnail": {
+          "method": "uniform-aspect-fit",
+          "offsetPixels": [
+            0,
+            0
+          ],
+          "outputPixels": [
+            512,
+            512
+          ],
+          "renderedPixels": [
+            512,
+            512
+          ],
+          "resampling": "LANCZOS",
+          "sourcePixels": [
+            1254,
+            1254
+          ],
+          "uniformScale": 0.4082934609250399
+        }
+      },
+      "source": {
+        "acceptanceRecord": {
+          "ownerReview": "PENDING",
+          "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-seal-source-master-record-v4-3.json",
+          "sha256": "fe9811d706daa558e0f82866f16741a55e89d8fb0a10a0f059de64e7569add7d"
+        },
+        "assetID": "seal.sunspire.echo-ember",
+        "dimensions": [
+          1254,
+          1254
+        ],
+        "hasAlpha": true,
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-echo-ember-color-master-v4-3.png",
+        "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+        "role": "Seal",
+        "runtimeBundled": false,
+        "sha256": "3094e3821982d952fda520476adc2df2d7dd430d574dd324cc5ee096ccdf537b",
+        "targetScaleReview": "PASS_AT_64_PX"
+      },
+      "transformation": "decoded RGBA pixels preserved exactly for the color master; explicit alpha-preserving monochrome fallback and uniform aspect-fit thumbnail derived deterministically"
+    }
+  ],
+  "frameSourceMaster": {
+    "acceptanceRecord": {
+      "ownerReview": "PENDING",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf-sunspire-frame-crest-master-record-v4.3.json",
+      "sha256": "0e0bbf1581ac99538aa68989e9079c77e90b061d72298aacca037f6516a54ef3"
+    },
+    "assetID": "sunspire-laurel-of-dawn-frame",
+    "dimensions": [
+      1536,
+      1024
+    ],
+    "hasAlpha": true,
+    "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-laurel-of-dawn-frame-production-master-v4.3.png",
+    "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+    "role": "Frame",
+    "runtimeBundled": false,
+    "sha256": "0194d53a9c29d866eaeda63e5ef08837d2a6b0b5a69d96e146f4b38a77e3dba3"
+  },
+  "generatedAtUTC": "2026-08-27T00:00:00Z",
+  "outputs": [
+    {
+      "bytes": 7454831,
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/sunspire-background-high-contrast.png",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-high-contrast",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.background.recipe.json",
+      "role": "background.high-contrast",
+      "sha256": "9f574bd9bbcc4c94a3eaff2e27f87f8391c50e124b472b836e13dbceab14fd6d"
+    },
+    {
+      "bytes": 7628479,
+      "dimensions": [
+        3200,
+        1800
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/sunspire-background-macos-wide.png",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-macos-wide-crop",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.background.recipe.json",
+      "role": "background.macos-wide-crop",
+      "sha256": "1fcb25cbc3353aee289b06b8331299254910cf3cdf8b66c6e6ca697105becee0"
+    },
+    {
+      "bytes": 6566158,
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/sunspire-background-reduce-motion.png",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-reduce-motion",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.background.recipe.json",
+      "role": "background.reduce-motion",
+      "sha256": "8b069745ad2b6bed27877537a00bed40ce475fac91c4b4ec1b18241d9d871181"
+    },
+    {
+      "bytes": 6746648,
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/background/sunspire-background-static.png",
+      "resourceID": "resource.background.sunspire.hall-of-first-light.output.background-static-base",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.background.recipe.json",
+      "role": "background.static-base",
+      "sha256": "f4f6f3ffa5837ec6a7283f49e50a3af78642f7959235efa93ffa071ad3c1c260"
+    },
+    {
+      "bytes": 661451,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/crest/sunspire-first-light-static-fallback.png",
+      "resourceID": "resource.crest.sunspire.first-light.output.crest-static-fallback",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "crest.static-fallback",
+      "sha256": "96f0f5458ad459f3e3ed75a69d401ba7b66a17d7e455cb2a3ced9d5b4cb635eb"
+    },
+    {
+      "bytes": 184272,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/crest/sunspire-first-light-thumbnail.png",
+      "resourceID": "resource.crest.sunspire.first-light.output.crest-thumbnail",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "crest.thumbnail",
+      "sha256": "3572fb697c8f732ad3649ad33084881ffe4112c0783b26c43ebe13f96488410d"
+    },
+    {
+      "bytes": 4932,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/crest/sunspire-first-light-vector.pdf",
+      "resourceID": "resource.crest.sunspire.first-light.output.crest-vector-master",
+      "rightsID": "prov.Source.Masters.Crests.sunspire.first.light.svg",
+      "role": "crest.vector-master",
+      "sha256": "828a00733938d87859636681234499872e8f9c119ce39aa88def6fa2807e78bb"
+    },
+    {
+      "bytes": 1188071,
+      "dimensions": [
+        2048,
+        1536
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/frame/sunspire-laurel-of-dawn-static-fallback.png",
+      "resourceID": "resource.frame.sunspire.laurel-of-dawn.output.frame-static-fallback",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "frame.static-fallback",
+      "sha256": "d9751ba7a7ae901740bd4a65b5c09c73970a4a29970e593c2b3c3adf74c8aa43"
+    },
+    {
+      "bytes": 96255,
+      "dimensions": [
+        512,
+        384
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/frame/sunspire-laurel-of-dawn-thumbnail.png",
+      "resourceID": "resource.frame.sunspire.laurel-of-dawn.output.frame-thumbnail",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "frame.thumbnail",
+      "sha256": "db30012df78403d04fa87d84ad9b8453e0f162f45609ec0c3b1119242d32e4d7"
+    },
+    {
+      "bytes": 15895,
+      "dimensions": [
+        2048,
+        1536
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/frame/sunspire-laurel-of-dawn-vector.pdf",
+      "resourceID": "resource.frame.sunspire.laurel-of-dawn.output.frame-vector-master",
+      "rightsID": "prov.Source.Masters.Frames.sunspire.laurel.of.dawn.svg",
+      "role": "frame.vector-master",
+      "sha256": "415baac64db3e7e3697194a71d09bf9d6c2ad6a213125285095c2a191672ba5e"
+    },
+    {
+      "bytes": 266037,
+      "dimensions": [
+        1600,
+        1000
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/sunspire-card-border.png",
+      "resourceID": "resource.panel.sunspire.card-border",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "panel.card-border",
+      "sha256": "2946a7cdc9cff28f36102135263b7465e392c87b3f1925d87e61c71ae09de51f"
+    },
+    {
+      "bytes": 195323,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/sunspire-corner-ornament.png",
+      "resourceID": "resource.panel.sunspire.corner-ornament",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "panel.corner-ornament",
+      "sha256": "c958d0a68795472eef6c1df70c5a4bd4ecf2de8a309c419e512442fa24c99c67"
+    },
+    {
+      "bytes": 44046,
+      "dimensions": [
+        1600,
+        128
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/sunspire-divider.png",
+      "resourceID": "resource.panel.sunspire.divider",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "panel.divider",
+      "sha256": "95df956388b97e2dcfabeaa27d735c1199dc7b8be402665a6f611ad37d6965d3"
+    },
+    {
+      "bytes": 137339,
+      "dimensions": [
+        1200,
+        320
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/sunspire-primary-button.png",
+      "resourceID": "resource.panel.sunspire.primary-button",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "panel.primary-button",
+      "sha256": "434fe63ad04f61610ee082ea76457ee4a4444a943c31925c188b9592bd48a89c"
+    },
+    {
+      "bytes": 80810,
+      "dimensions": [
+        1000,
+        240
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/panel/sunspire-tab-selector.png",
+      "resourceID": "resource.panel.sunspire.tab-selector",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "panel.tab-selector",
+      "sha256": "0ca0fe217c7b2c84bc39a3bdee2bfecebc449f7130c64d7ebee8b3bd16f42e20"
+    },
+    {
+      "bytes": 1562148,
+      "dimensions": [
+        1200,
+        1600
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-auric-stele-high-contrast.png",
+      "resourceID": "resource.relic.sunspire.auric-stele.output.relic-high-contrast",
+      "rightsID": "prov.Source.Masters.Relic.Geometry.sunspire.auric.stele.geometry.svg",
+      "role": "relic.high-contrast",
+      "sha256": "85689171c5c01a33238116b9ce9926e8f0d1ba6e30c5ce66d9f1ba22a38fe96b"
+    },
+    {
+      "bytes": 1329297,
+      "dimensions": [
+        1200,
+        1600
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-auric-stele-master.png",
+      "resourceID": "resource.relic.sunspire.auric-stele.output.relic-master",
+      "rightsID": "prov.Source.Masters.Relic.Geometry.sunspire.auric.stele.geometry.svg",
+      "role": "relic.master",
+      "sha256": "848613ad9e52c44eeb00a631b8fe7b51a976e0bf16f8d2ad51f87a7335401e12"
+    },
+    {
+      "bytes": 1329297,
+      "dimensions": [
+        1200,
+        1600
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-auric-stele-static-share-fallback.png",
+      "resourceID": "resource.relic.sunspire.auric-stele.output.relic-static-share-fallback",
+      "rightsID": "prov.Source.Masters.Relic.Geometry.sunspire.auric.stele.geometry.svg",
+      "role": "relic.static-share-fallback",
+      "sha256": "848613ad9e52c44eeb00a631b8fe7b51a976e0bf16f8d2ad51f87a7335401e12"
+    },
+    {
+      "bytes": 385596,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-auric-stele-thumbnail.png",
+      "resourceID": "resource.relic.sunspire.auric-stele.output.relic-thumbnail",
+      "rightsID": "prov.Source.Masters.Relic.Geometry.sunspire.auric.stele.geometry.svg",
+      "role": "relic.thumbnail",
+      "sha256": "1ed363f3b6cab77ef55e67613f48ec84189d5de1b37035dc086498546a2fd8c8"
+    },
+    {
+      "bytes": 2291644,
+      "dimensions": [
+        1200,
+        1600
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-dawnfire-tablet-high-contrast.png",
+      "resourceID": "resource.relic.sunspire.dawnfire-tablet.output.relic-high-contrast",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "relic.high-contrast",
+      "sha256": "992b57a9f0d6a30fd30113f2190a06f936905494ed199d434c76c20078a40505"
+    },
+    {
+      "bytes": 2307448,
+      "dimensions": [
+        1200,
+        1600
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-dawnfire-tablet-master.png",
+      "resourceID": "resource.relic.sunspire.dawnfire-tablet.output.relic-master",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "relic.master",
+      "sha256": "d6ce31bbb6ffd59d0ef8ec4ffe286cfca2b57419bfa8f2a1e4d632e9c3c2bf33"
+    },
+    {
+      "bytes": 2307448,
+      "dimensions": [
+        1200,
+        1600
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-dawnfire-tablet-static-share-fallback.png",
+      "resourceID": "resource.relic.sunspire.dawnfire-tablet.output.relic-static-share-fallback",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "relic.static-share-fallback",
+      "sha256": "d6ce31bbb6ffd59d0ef8ec4ffe286cfca2b57419bfa8f2a1e4d632e9c3c2bf33"
+    },
+    {
+      "bytes": 286402,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-dawnfire-tablet-thumbnail.png",
+      "resourceID": "resource.relic.sunspire.dawnfire-tablet.output.relic-thumbnail",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "relic.thumbnail",
+      "sha256": "9d60d7d86bef8634ebed9c917b8a49c6c7d56398dfd356c39cb0505867776847"
+    },
+    {
+      "bytes": 2012409,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-solvine-plaque-high-contrast.png",
+      "resourceID": "resource.relic.sunspire.solvine-plaque.output.relic-high-contrast",
+      "rightsID": "prov.Source.Masters.Relic.Geometry.sunspire.solvine.plaque.geometry.svg",
+      "role": "relic.high-contrast",
+      "sha256": "e03334a76d27feaaf8c7cb11c9e341e3f509da2ccfeca99446bb299453b8a97f"
+    },
+    {
+      "bytes": 1792183,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-solvine-plaque-master.png",
+      "resourceID": "resource.relic.sunspire.solvine-plaque.output.relic-master",
+      "rightsID": "prov.Source.Masters.Relic.Geometry.sunspire.solvine.plaque.geometry.svg",
+      "role": "relic.master",
+      "sha256": "8f00166ae1ac6fd06ff23fae2844e3af9c8446d1c0f1f96e9feae091e767f6cb"
+    },
+    {
+      "bytes": 1792183,
+      "dimensions": [
+        1600,
+        1200
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-solvine-plaque-static-share-fallback.png",
+      "resourceID": "resource.relic.sunspire.solvine-plaque.output.relic-static-share-fallback",
+      "rightsID": "prov.Source.Masters.Relic.Geometry.sunspire.solvine.plaque.geometry.svg",
+      "role": "relic.static-share-fallback",
+      "sha256": "8f00166ae1ac6fd06ff23fae2844e3af9c8446d1c0f1f96e9feae091e767f6cb"
+    },
+    {
+      "bytes": 390207,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/relic/sunspire-solvine-plaque-thumbnail.png",
+      "resourceID": "resource.relic.sunspire.solvine-plaque.output.relic-thumbnail",
+      "rightsID": "prov.Source.Masters.Relic.Geometry.sunspire.solvine.plaque.geometry.svg",
+      "role": "relic.thumbnail",
+      "sha256": "4b92ccbdbeadd34328cd9fa57e48c6496e1739ef34c0ad17ecbc3fbdc23d8401"
+    },
+    {
+      "bytes": 96648,
+      "dimensions": null,
+      "hasAlpha": null,
+      "mediaType": "font/ttf",
+      "path": "Production/script/sunspire-script-primary.ttf",
+      "resourceID": "resource.script.sunspire.output.script-font",
+      "rightsID": "prov.Source.Masters.Glyphs.sunspire.glyph.master.json",
+      "role": "script.font",
+      "sha256": "af4394a11b37bbd0a7cfa276e727a26a505a2712a6a54847488a38f2f4ca79ab"
+    },
+    {
+      "bytes": 113338,
+      "dimensions": [
+        1600,
+        600
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/script/sunspire-script-specimen-high-contrast.png",
+      "resourceID": "resource.script.sunspire.output.script-specimen-high-contrast",
+      "rightsID": "prov.Source.Masters.Glyphs.sunspire.glyph.master.json",
+      "role": "script.specimen-high-contrast",
+      "sha256": "2cd4d6cdcff2b09ea5942e13eb9ed72e903006e64761579fd833f10535fc435a"
+    },
+    {
+      "bytes": 106351,
+      "dimensions": [
+        1600,
+        600
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/script/sunspire-script-specimen.png",
+      "resourceID": "resource.script.sunspire.output.script-specimen-standard",
+      "rightsID": "prov.Source.Masters.Glyphs.sunspire.glyph.master.json",
+      "role": "script.specimen-standard",
+      "sha256": "face0b05e48e8cf560b44d06ea6f64b07386e57ebe954f6d6a181e6937237822"
+    },
+    {
+      "bytes": 106351,
+      "dimensions": [
+        1600,
+        600
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/script/sunspire-script-static-fallback.png",
+      "resourceID": "resource.script.sunspire.output.script-static-fallback",
+      "rightsID": "prov.Source.Masters.Glyphs.sunspire.glyph.master.json",
+      "role": "script.static-fallback",
+      "sha256": "face0b05e48e8cf560b44d06ea6f64b07386e57ebe954f6d6a181e6937237822"
+    },
+    {
+      "bytes": 2373362,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-dawnflower-color-master.png",
+      "resourceID": "resource.seal.sunspire.dawnflower.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "5ce23cdd9c5ebcc7d40d07b29492f896277edd57162223d1535c431d4e05e66e"
+    },
+    {
+      "bytes": 1230884,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-dawnflower-monochrome-fallback.png",
+      "resourceID": "resource.seal.sunspire.dawnflower.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "b3409ef4ba81d1135f1aab185d95df9ca61b93ec149ae61755006bf18bed4cb9"
+    },
+    {
+      "bytes": 364498,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-dawnflower-thumbnail.png",
+      "resourceID": "resource.seal.sunspire.dawnflower.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "4e060d59d204aac92ec39dabccfa127ce5a4e16d919d59aa190255b5f11068cb"
+    },
+    {
+      "bytes": 7535,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/sunspire-dawnflower-vector-master.pdf",
+      "resourceID": "resource.seal.sunspire.dawnflower.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.dawnflower.svg",
+      "role": "seal.vector-master",
+      "sha256": "d23a638f0109e909e51e2ac15450b03b7c64ffa1e033dd99382dee3f26932ab1"
+    },
+    {
+      "bytes": 1838840,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-echo-ember-color-master.png",
+      "resourceID": "resource.seal.sunspire.echo-ember.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "93d46735eca53781393590f62ad60e8d7f394f5ac0d8ad1b9f281bf1f5fd1a50"
+    },
+    {
+      "bytes": 897758,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-echo-ember-monochrome-fallback.png",
+      "resourceID": "resource.seal.sunspire.echo-ember.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "82d878801d0a184649f6bc7e5af56f5e367ddbc8eacf24d0e56bf150246ad162"
+    },
+    {
+      "bytes": 289725,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-echo-ember-thumbnail.png",
+      "resourceID": "resource.seal.sunspire.echo-ember.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "9e07f96edbdb5f5bc9fb0485e3b0c2daa78ee218ba5533d9ebaca4dab07cfb28"
+    },
+    {
+      "bytes": 5998,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/sunspire-echo-ember-vector-master.pdf",
+      "resourceID": "resource.seal.sunspire.echo-ember.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.echo.ember.svg",
+      "role": "seal.vector-master",
+      "sha256": "08df4ce70b0db83a7bbfce91dc31af206967a6e8d530aa36f869992bcbe077c5"
+    },
+    {
+      "bytes": 1096373,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-golden-lark-color-master.png",
+      "resourceID": "resource.seal.sunspire.golden-lark.output.seal-color-master",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.golden.lark.svg",
+      "role": "seal.color-master",
+      "sha256": "06bc7ec9611fa71f5b102f73ae9040d638e6b7a976121bb55e0a34d1a2998f49"
+    },
+    {
+      "bytes": 606756,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-golden-lark-monochrome-fallback.png",
+      "resourceID": "resource.seal.sunspire.golden-lark.output.seal-monochrome-fallback",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.golden.lark.svg",
+      "role": "seal.monochrome-fallback",
+      "sha256": "732dd02cdf6f422463b70c09899d16cd13d8fbd888c0a1aade23442a0fad8a1e"
+    },
+    {
+      "bytes": 386432,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-golden-lark-thumbnail.png",
+      "resourceID": "resource.seal.sunspire.golden-lark.output.seal-thumbnail",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.golden.lark.svg",
+      "role": "seal.thumbnail",
+      "sha256": "0300e1859847256bb2ebcbdf4c479285a8dad2229667447d4892e948ece129e2"
+    },
+    {
+      "bytes": 6765,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/sunspire-golden-lark-vector-master.pdf",
+      "resourceID": "resource.seal.sunspire.golden-lark.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.golden.lark.svg",
+      "role": "seal.vector-master",
+      "sha256": "d2626f3d78f6ba4bac30c18d8786f018c2b61d8e12f16b208ee2ec9617bcd86d"
+    },
+    {
+      "bytes": 2180865,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-radiant-spire-color-master.png",
+      "resourceID": "resource.seal.sunspire.radiant-spire.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "820fe85b2e98069902b479b816d797515add42aa7fc969698edf89a7c9bc9b3a"
+    },
+    {
+      "bytes": 1217509,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-radiant-spire-monochrome-fallback.png",
+      "resourceID": "resource.seal.sunspire.radiant-spire.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "d60f0505fc9c487a1870d3bff0bf0cf0bc906830465df95437c46d9be69a7755"
+    },
+    {
+      "bytes": 287384,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-radiant-spire-thumbnail.png",
+      "resourceID": "resource.seal.sunspire.radiant-spire.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "99c75936fcbcf7c0cb7715ea2eb6f3265eba14f9b23046ae23b704917d711b68"
+    },
+    {
+      "bytes": 2654,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/sunspire-radiant-spire-vector-master.pdf",
+      "resourceID": "resource.seal.sunspire.radiant-spire.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.radiant.spire.svg",
+      "role": "seal.vector-master",
+      "sha256": "3b5d9acd94acaa0ed9505a576285bdafde2128499362a72d987a70f29eb34d42"
+    },
+    {
+      "bytes": 965420,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-sunleaf-crest-color-master.png",
+      "resourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-color-master",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.sunleaf.crest.svg",
+      "role": "seal.color-master",
+      "sha256": "0107afaff89431437365a56ce97760ba916a8ea7958f4277c64808b8dcb17594"
+    },
+    {
+      "bytes": 560250,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-sunleaf-crest-monochrome-fallback.png",
+      "resourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-monochrome-fallback",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.sunleaf.crest.svg",
+      "role": "seal.monochrome-fallback",
+      "sha256": "24a7ec4ebca4f45c1f8ffa1a1d64bda8345062a78e524d6796a381e2b77639fe"
+    },
+    {
+      "bytes": 330745,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-sunleaf-crest-thumbnail.png",
+      "resourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-thumbnail",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.sunleaf.crest.svg",
+      "role": "seal.thumbnail",
+      "sha256": "186fb251a66374a748f289a9e1714b568105847e08d5b8b006fbd770defc38a3"
+    },
+    {
+      "bytes": 8968,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/sunspire-sunleaf-crest-vector-master.pdf",
+      "resourceID": "resource.seal.sunspire.sunleaf-crest.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.sunleaf.crest.svg",
+      "role": "seal.vector-master",
+      "sha256": "994a9466b01ae555e3ad7d53a1244de3aa02c74b0316b08cf82428633782d86d"
+    },
+    {
+      "bytes": 1952509,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-sunwheel-color-master.png",
+      "resourceID": "resource.seal.sunspire.sunwheel.output.seal-color-master",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.color-master",
+      "sha256": "9c1de9b848adc3ae4a8b6958dabdc3d63491eb1d35c4e95987da20386ced8ac0"
+    },
+    {
+      "bytes": 1057240,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-sunwheel-monochrome-fallback.png",
+      "resourceID": "resource.seal.sunspire.sunwheel.output.seal-monochrome-fallback",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.monochrome-fallback",
+      "sha256": "1fb0677f2149defc0fb6d706f0ce2599ed547c8d116e4182996e3c29a76ac57d"
+    },
+    {
+      "bytes": 275470,
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "mediaType": "image/png",
+      "path": "Production/seal/sunspire-sunwheel-thumbnail.png",
+      "resourceID": "resource.seal.sunspire.sunwheel.output.seal-thumbnail",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "seal.thumbnail",
+      "sha256": "bbd9309b6d3cc184a67bd0deacb9220ffe28dc4d1bf53af4f939d874aee4030b"
+    },
+    {
+      "bytes": 9942,
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "mediaType": "application/pdf",
+      "path": "Production/seal/sunspire-sunwheel-vector-master.pdf",
+      "resourceID": "resource.seal.sunspire.sunwheel.output.seal-vector-master",
+      "rightsID": "prov.Source.Masters.Seals.sunspire.sunwheel.svg",
+      "role": "seal.vector-master",
+      "sha256": "2047ac32e8e22c4b68faa5f07fb4eb6524056fa2bac7be21a32074c1e6d814a3"
+    },
+    {
+      "bytes": 1981485,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/sunspire-vault-card.png",
+      "resourceID": "resource.vault.sunspire.codex.output.vault-card",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.vault.recipe.json",
+      "role": "vault.card",
+      "sha256": "6a66f24a50ddb47710163f25a203b00e9416e84bac26a1b1111de2774a27f242"
+    },
+    {
+      "bytes": 2078490,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/sunspire-vault-encountered.png",
+      "resourceID": "resource.vault.sunspire.codex.output.vault-encountered",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.vault.recipe.json",
+      "role": "vault.encountered",
+      "sha256": "d6e777385c79daff2da0c553ca39590da0c2d47d5609cd2744a4d2051accfc94"
+    },
+    {
+      "bytes": 1068220,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/sunspire-vault-locked.png",
+      "resourceID": "resource.vault.sunspire.codex.output.vault-locked-silhouette",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.vault.recipe.json",
+      "role": "vault.locked-silhouette",
+      "sha256": "54937b5a658f2628c5457482dbf185963cfdf5455db1363b54fc7a18375c9f79"
+    },
+    {
+      "bytes": 2054621,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/sunspire-vault-selected.png",
+      "resourceID": "resource.vault.sunspire.codex.output.vault-selected",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.vault.recipe.json",
+      "role": "vault.selected",
+      "sha256": "abf4a89d6a183f6cef1233877f1002f0cf5dfcec02599d561b67c3bf1679457f"
+    },
+    {
+      "bytes": 1560372,
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "mediaType": "image/png",
+      "path": "Production/vault/sunspire-vault-unavailable.png",
+      "resourceID": "resource.vault.sunspire.codex.output.vault-unavailable",
+      "rightsID": "prov.Production.Sources.sunspire.sunspire.vault.recipe.json",
+      "role": "vault.unavailable",
+      "sha256": "2cce3dead726d1f7fac0a0f7d03d8c7f72906c9569dab5658bca1d96a5aab588"
+    }
+  ],
+  "panelCapInsets": {
+    "resource.panel.sunspire.card-border": {
+      "bottom": 150,
+      "left": 170,
+      "right": 170,
+      "top": 150
+    },
+    "resource.panel.sunspire.corner-ornament": null,
+    "resource.panel.sunspire.divider": {
+      "bottom": 48,
+      "left": 360,
+      "right": 360,
+      "top": 48
+    },
+    "resource.panel.sunspire.primary-button": {
+      "bottom": 104,
+      "left": 190,
+      "right": 190,
+      "top": 104
+    },
+    "resource.panel.sunspire.tab-selector": {
+      "bottom": 76,
+      "left": 170,
+      "right": 170,
+      "top": 76
+    }
+  },
+  "panelNineSlicePolicy": {
+    "composition": "independent uniformly scaled protected corners plus the four contiguous between-corner edge intervals; transparent center; no whole-frame nonuniform resize",
+    "edgePreparation": "one shared uniform scale for every corner and edge cross-axis, followed by running-axis-only edge stretch",
+    "edgeResampling": "LANCZOS one-axis edge stretch",
+    "horizontalEdgeInterval": [
+      360,
+      1176
+    ],
+    "joinPolicy": "each edge begins at the source pixel adjacent to its protected corner, uses the same cross-axis scale as that corner, and underlaps the corner by two target pixels",
+    "protectedContentScale": "minimum target-to-source cap ratio shared by all four sides",
+    "sourceCapInsets": {
+      "bottom": 280,
+      "left": 360,
+      "right": 360,
+      "top": 280
+    },
+    "targetOutputs": {
+      "card-border": {
+        "capInsets": {
+          "bottom": 150,
+          "left": 170,
+          "right": 170,
+          "top": 150
+        },
+        "dimensions": [
+          1600,
+          1000
+        ]
+      },
+      "corner-ornament": {
+        "capInsets": null,
+        "dimensions": [
+          512,
+          512
+        ]
+      },
+      "divider": {
+        "capInsets": {
+          "bottom": 48,
+          "left": 360,
+          "right": 360,
+          "top": 48
+        },
+        "dimensions": [
+          1600,
+          128
+        ]
+      },
+      "primary-button": {
+        "capInsets": {
+          "bottom": 104,
+          "left": 190,
+          "right": 190,
+          "top": 104
+        },
+        "dimensions": [
+          1200,
+          320
+        ]
+      },
+      "tab-selector": {
+        "capInsets": {
+          "bottom": 76,
+          "left": 170,
+          "right": 170,
+          "top": 76
+        },
+        "dimensions": [
+          1000,
+          240
+        ]
+      }
+    },
+    "verticalEdgeInterval": [
+      280,
+      744
+    ]
+  },
+  "pipeline": "scripts/build-sunspire-wildwood-gloamthorn-v43-assets.py",
+  "pipelineSHA256": "0c297e03ac703ee1d786fe9aa1d6fd8a003452824447ca109876e474784a578f",
+  "relicSourceMasters": {
+    "dawnfire-tablet": {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/environment-and-relic-master-record-v4.3.json",
+        "sha256": "5cd76eacc482a65fdaffa8d4ec69731a1db51f0e2a133938ed30c1cbbd89e72c"
+      },
+      "assetID": "sunspire.dawnfire-tablet.clean-master",
+      "dimensions": [
+        1200,
+        1600
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/sunspire-dawnfire-tablet-clean-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "Relic",
+      "runtimeBundled": false,
+      "sha256": "19322a7f35deda05349807bd315f1e9abee6a082ba9f9557423653b54396b9c9"
+    }
+  },
+  "schemaVersion": "1.0",
+  "sealSourceMasters": {
+    "dawnflower": {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-seal-source-master-record-v4-3.json",
+        "sha256": "fe9811d706daa558e0f82866f16741a55e89d8fb0a10a0f059de64e7569add7d"
+      },
+      "assetID": "seal.sunspire.dawnflower",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-dawnflower-color-master-v4-3.png",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "c5eefb8c0c2a56f97109ac582a08db7262856bfddeb199e09b1fc4e428f3ad15",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    "echo-ember": {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-seal-source-master-record-v4-3.json",
+        "sha256": "fe9811d706daa558e0f82866f16741a55e89d8fb0a10a0f059de64e7569add7d"
+      },
+      "assetID": "seal.sunspire.echo-ember",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-echo-ember-color-master-v4-3.png",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "3094e3821982d952fda520476adc2df2d7dd430d574dd324cc5ee096ccdf537b",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    "radiant-spire": {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-seal-source-master-record-v4-3.json",
+        "sha256": "fe9811d706daa558e0f82866f16741a55e89d8fb0a10a0f059de64e7569add7d"
+      },
+      "assetID": "seal.sunspire.radiant-spire",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-radiant-spire-color-master-v4-3.png",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "8a4ad746476c82448b451f038c726491ae2fabd91f5c13f2536643736048ec0f",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    "sunwheel": {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-seal-source-master-record-v4-3.json",
+        "sha256": "fe9811d706daa558e0f82866f16741a55e89d8fb0a10a0f059de64e7569add7d"
+      },
+      "assetID": "seal.sunspire.sunwheel",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-sunwheel-color-master-v4-3.png",
+      "rightsID": "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "bde40aeeaea0e81ebedd4f17836510e44dd072b23dc9c83e53bcac591c561d32",
+      "targetScaleReview": "PASS_AT_64_PX"
+    }
+  },
+  "targetScaleReview": {
+    "implementationReview": "PASS",
+    "ownerReview": "PENDING",
+    "reason": "The continuous environment and accepted Frame, Crest, clean Relic, and detailed Seal masters use pinned deterministic aspect-fill, aspect-fit, RGBA-preserving, and protected nine-slice recipes; owner visual review remains pending."
+  },
+  "theme": "Sunspire"
+}

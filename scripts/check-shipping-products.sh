@@ -119,6 +119,8 @@ fi
 
 macos_info="$macos_app/Contents/Info.plist"
 ios_info="$ios_app/Info.plist"
+macos_privacy="$macos_app/Contents/Resources/PrivacyInfo.xcprivacy"
+ios_privacy="$ios_app/PrivacyInfo.xcprivacy"
 
 if ! plutil -lint "$macos_info" >/dev/null 2>&1; then
   echo "ERROR: macOS product has no valid Contents/Info.plist" >&2
@@ -154,15 +156,44 @@ fi
 plutil -convert json -o "$temporary_directory/macos-info.json" "$macos_info"
 plutil -convert json -o "$temporary_directory/ios-info.json" "$ios_info"
 
-if ruby -rjson - "$temporary_directory/macos-info.json" "$temporary_directory/ios-info.json" \
-    >"$temporary_directory/info-errors" <<'RUBY'
+configuration_inputs_valid=true
+: >"$temporary_directory/info-errors"
+if ! plutil -convert json -o "$temporary_directory/macos-privacy.json" \
+    "$macos_privacy" >/dev/null 2>&1; then
+  printf '%s\n' "macOS PrivacyInfo.xcprivacy is missing or invalid" \
+    >>"$temporary_directory/info-errors"
+  configuration_inputs_valid=false
+fi
+if ! plutil -convert json -o "$temporary_directory/ios-privacy.json" \
+    "$ios_privacy" >/dev/null 2>&1; then
+  printf '%s\n' "iOS PrivacyInfo.xcprivacy is missing or invalid" \
+    >>"$temporary_directory/info-errors"
+  configuration_inputs_valid=false
+fi
+
+if [ "$configuration_inputs_valid" = true ] && \
+    ruby -rjson - \
+      "$temporary_directory/macos-info.json" \
+      "$temporary_directory/ios-info.json" \
+      "$temporary_directory/macos-privacy.json" \
+      "$temporary_directory/ios-privacy.json" \
+      >>"$temporary_directory/info-errors" <<'RUBY'
 macos = JSON.parse(File.read(ARGV.fetch(0)))
 ios = JSON.parse(File.read(ARGV.fetch(1)))
+macos_privacy = JSON.parse(File.read(ARGV.fetch(2)))
+ios_privacy = JSON.parse(File.read(ARGV.fetch(3)))
 errors = []
 
 CONTACTS_USAGE = "Rune Scribe can organize your ciphers by contact. Contacts stay on your device, encrypted, and are never uploaded."
 CAMERA_USAGE = "Rune Scribe uses the camera to scan a cipher QR code so you can import it. Frames are processed on-device and never saved or sent anywhere."
 EXPECTED_UTI = "com.runescribe.runescribe"
+EXPECTED_PRIVACY_KEYS = [
+  "NSPrivacyAccessedAPITypes",
+  "NSPrivacyCollectedDataTypes",
+  "NSPrivacyTracking",
+  "NSPrivacyTrackingDomains",
+].freeze
+EXPECTED_FILE_TIMESTAMP_REASONS = ["3B52.1", "C617.1"].freeze
 
 def expect_equal(errors, actual, expected, label)
   errors << "#{label} is not the preserved value" unless actual == expected
@@ -239,8 +270,49 @@ def validate_common(errors, info, platform)
   errors << "#{platform} Info.plist contains unresolved build variables" unless unresolved.empty?
 end
 
+def validate_privacy(errors, manifest, platform)
+  unless manifest.is_a?(Hash) && manifest.keys.sort == EXPECTED_PRIVACY_KEYS
+    errors << "#{platform} privacy manifest key set differs"
+    return
+  end
+  expect_false(errors, manifest["NSPrivacyTracking"], "#{platform} privacy tracking")
+  expect_equal(errors, manifest["NSPrivacyTrackingDomains"], [], "#{platform} tracking domains")
+  expect_equal(errors, manifest["NSPrivacyCollectedDataTypes"], [], "#{platform} collected data types")
+
+  accessed = manifest["NSPrivacyAccessedAPITypes"]
+  unless accessed.is_a?(Array) && accessed.length == 1 && accessed.first.is_a?(Hash)
+    errors << "#{platform} required-reason API declarations differ"
+    return
+  end
+  declaration = accessed.first
+  unless declaration.keys.sort == [
+      "NSPrivacyAccessedAPIType",
+      "NSPrivacyAccessedAPITypeReasons",
+    ]
+    errors << "#{platform} file-timestamp declaration key set differs"
+    return
+  end
+  expect_equal(
+    errors,
+    declaration["NSPrivacyAccessedAPIType"],
+    "NSPrivacyAccessedAPICategoryFileTimestamp",
+    "#{platform} required-reason API category"
+  )
+  reasons = declaration["NSPrivacyAccessedAPITypeReasons"]
+  reasons = reasons.sort if reasons.is_a?(Array)
+  expect_equal(
+    errors,
+    reasons,
+    EXPECTED_FILE_TIMESTAMP_REASONS,
+    "#{platform} file-timestamp reasons"
+  )
+end
+
 validate_common(errors, macos, "macOS")
 validate_common(errors, ios, "iOS")
+validate_privacy(errors, macos_privacy, "macOS")
+validate_privacy(errors, ios_privacy, "iOS")
+errors << "privacy manifests differ between platforms" unless macos_privacy == ios_privacy
 
 expect_equal(errors, macos["CFBundleSupportedPlatforms"], ["MacOSX"], "macOS supported platform")
 expect_equal(errors, macos["LSMinimumSystemVersion"], "15.0", "macOS deployment target")
@@ -276,14 +348,14 @@ errors << "platform marketing versions differ" unless marketing_versions.uniq.le
 errors << "platform build numbers differ" unless build_versions.uniq.length == 1
 errors << "marketing version is malformed" unless marketing_versions.first.to_s.match?(/\A\d+(?:\.\d+){1,2}\z/)
 errors << "build number is malformed" unless build_versions.first.to_s.match?(/\A\d+\z/)
-errors << "built marketing version differs from frozen 1.0.39" unless marketing_versions == ["1.0.39", "1.0.39"]
-errors << "built build number differs from frozen 39" unless build_versions == ["39", "39"]
+errors << "built marketing version differs from frozen 1.0.40" unless marketing_versions == ["1.0.40", "1.0.40"]
+errors << "built build number differs from frozen 40" unless build_versions == ["40", "40"]
 
 puts errors
 exit(errors.empty? ? 0 : 1)
 RUBY
 then
-  pass_check "built Info.plists preserve identifiers, URL/UTI registration, privacy strings, versions, and platform settings"
+  pass_check "built Info.plists and privacy manifests preserve identifiers, declarations, versions, and platform settings"
 else
   validation_detail=false
   while IFS= read -r error; do
@@ -850,15 +922,15 @@ errors = []
 expected = {
   "PACKAGE-MANIFEST.json" => [
     2064,
-    "869b63e892da5f597cc3abce5a6d2c5eb420bd582084c06df9ac770aa31293b9"
+    "a4fa1932d7be56980891efa6a841b8af03712f4a3155ca7cdbd439465fd9e0e8"
   ],
   "Rune-Scribe-Progression-Catalog-Schema-v1.0.json" => [
     3108,
     "4c0d538229877a035ad9444d4e89a6ae13ae46cb190f9677761b945c173ed6dd"
   ],
   "Rune-Scribe-Progression-Catalog-v1.0.json" => [
-    100646,
-    "b0e824154dc282f222f179c85fe16b20973d46af94d61058f3d35af28a450c74"
+    102121,
+    "4a35fe2cff63731c47b8bf586b3be010ebc194ec48e56e81e235cb5ff671c68d"
   ],
   "Rune-Scribe-Progression-Event-Catalog-v1.0.json" => [
     8950,
@@ -870,7 +942,7 @@ expected = {
   ],
   "module-manifest.json" => [
     2494,
-    "b448bfdc77e990359df5b31bdce329d195f60a28c2f496faf6a86d26ba23197f"
+    "565c942da781bbfd868a6c2f1e2fc904b5cadfc70eb9c0a04efe9b5ef0501af6"
   ]
 }
 
@@ -955,18 +1027,18 @@ expected_by_module = {
 
 norse_integrity_name = "Norse-Resource-Integrity-Manifest-v2.0.json"
 norse_integrity_contract = [
-  36_084,
-  "ec7c34baf2fb43bfc77f6c07e6a8e875ec02098bdb0879ee618ecac1c99105dc"
+  36_730,
+  "d6ea940bb3edf6b72e632127fd87b6cc06d808ce5539ca6a9f38155c9da33dcb"
 ]
 norse_fixed_resources = {
   "module-manifest.json" => [
-    14_833,
-    "9cc17fb4504eb975972b521237c4c80566a0b1a13fd71b8dd885e69ff3a86a5d"
+    14_749,
+    "0c5f4d6f743f90c8bdede5ab6c63503a2de34df5758f1cc0b01d3066b8800b0e"
   ],
   norse_integrity_name => norse_integrity_contract,
   "Norse-Production-Asset-Provenance-v2.0.json" => [
-    80_939,
-    "5efb78a1c309719717b2a9adbbc875f9fc5c7c37b5e1b84f574e7a1ff0835a64"
+    82_579,
+    "810126e4109dc5686cf0dd9b1c38d9cc13bf6f76c5e0eceb108db2d6e9ed3175"
   ]
 }
 
@@ -1066,11 +1138,12 @@ providers = {
     codex_id: "codex.moonleaf",
     unlock_id: "unlock.codex.moonleaf",
     entry_point: "RuneScribeThemeMoonleafModule",
-    output_bytes: 678_743,
-    manifest_bytes: 14_425,
-    manifest_sha256: "e7222671993ad13ff4f3c72dd048f31f49295a1412e1f365d9fd904ef0b4c633",
-    module_manifest_bytes: 10_411,
-    module_manifest_sha256: "58f89c9a55c0e4866a18ce817d1ca4a417f2e240fadd07cb8ca6bd32793ff5ea"
+    output_count: 65,
+    output_bytes: 70_713_288,
+    manifest_bytes: 20_221,
+    manifest_sha256: "a7bfe8e9aa0e0a86e2d40ede5ef306b08be79c27612ec76d1364636f887d311e",
+    module_manifest_bytes: 14_061,
+    module_manifest_sha256: "8d205be32b619678c2c514a5fc17d87b8bf06e39b30149b8ef13d3329c82fd4d"
   },
   "sunspire" => {
     bundle: "RuneScribeArchitecture_RuneScribeThemeSunspireModule.bundle",
@@ -1079,11 +1152,12 @@ providers = {
     codex_id: "codex.sunspire",
     unlock_id: "unlock.codex.sunspire",
     entry_point: "RuneScribeThemeSunspireModule",
-    output_bytes: 666_458,
-    manifest_bytes: 14_495,
-    manifest_sha256: "da391cc35e89ad0606099e50e98bb2e28591420f68ec745efc2878411e9b1edc",
-    module_manifest_bytes: 10_440,
-    module_manifest_sha256: "2f08f4b620b6ac061d6a1f653e0636d910b0527de699e0dd695c9bf817951c4c"
+    output_count: 60,
+    output_bytes: 76_176_567,
+    manifest_bytes: 18_753,
+    manifest_sha256: "c749b9eb4c441622199f30a5cad9d649cf5722374782df7dec2d474a61ba9863",
+    module_manifest_bytes: 13_097,
+    module_manifest_sha256: "9f95540db36d5e432716c528398db66f9da5da96ad1f1f2fec89a73df7d22136"
   },
   "wildwood" => {
     bundle: "RuneScribeArchitecture_RuneScribeThemeWildwoodModule.bundle",
@@ -1092,11 +1166,12 @@ providers = {
     codex_id: "codex.wildwood",
     unlock_id: "unlock.codex.wildwood",
     entry_point: "RuneScribeThemeWildwoodModule",
-    output_bytes: 697_897,
-    manifest_bytes: 14_519,
-    manifest_sha256: "f41665d69e3034bd8df8cf60954a5e7fa338a144384116fac2a4ca8b71b6c8f8",
-    module_manifest_bytes: 10_455,
-    module_manifest_sha256: "df2bd0dd5048b726c53406bab6c0c211be453c70e115c6354e62a12af9bd70db"
+    output_count: 60,
+    output_bytes: 85_363_508,
+    manifest_bytes: 18_769,
+    manifest_sha256: "dccfc480cbcb64e7159c45fa5309cfc8890b4d276226c12716334870bbdcffc2",
+    module_manifest_bytes: 13_108,
+    module_manifest_sha256: "7c615de5ca324236c64dfb0c2f78c7f89dbbf389896264976c268f19e4a03e02"
   },
   "gloamthorn" => {
     bundle: "RuneScribeArchitecture_RuneScribeThemeGloamthornModule.bundle",
@@ -1105,11 +1180,12 @@ providers = {
     codex_id: "codex.gloamthorn",
     unlock_id: "unlock.codex.gloamthorn",
     entry_point: "RuneScribeThemeGloamthornModule",
-    output_bytes: 609_418,
-    manifest_bytes: 14_743,
-    manifest_sha256: "1808d845cbcf30ae21ae87cd1ec8e3db549ab493a652de420de7d8868466c6d9",
-    module_manifest_bytes: 10_676,
-    module_manifest_sha256: "e24f9109149813b44b1af01f8fc29f953a7acc73cf26c2c2bf124c14651ebac5"
+    output_count: 60,
+    output_bytes: 68_428_342,
+    manifest_bytes: 19_067,
+    manifest_sha256: "403ec2e256f9d9f253558081ae5e5b9ace53a79d86ac3ff04707fd57c2c38ad3",
+    module_manifest_bytes: 13_394,
+    module_manifest_sha256: "fdd254f26561b18803d3de6949e705abf5f2b23b7467dc250ba2c2b8bbd9930d"
   }
 }
 
@@ -1162,7 +1238,7 @@ non_theme_resource_contracts = {
     files: {
       "module-manifest.json" => [
         3_084,
-        "0401ca85bd4edc005f80d6c4960be2cf47e2ae9b26c7943dc7387162ae857df8"
+        "5d52a770e501dc1539080d4039bcd6aba2c974cb739b172aa8583558adc0a073"
       ]
     }
   }
@@ -1236,7 +1312,7 @@ resource_roots.each do |platform, product_resource_root|
       provider.fetch(:manifest_bytes),
       provider.fetch(:manifest_sha256)
     )
-    errors << "#{platform} #{provider_name} accepted v3.1 integrity manifest differs" unless integrity_exact
+    errors << "#{platform} #{provider_name} accepted v4.3 integrity manifest differs" unless integrity_exact
     module_manifest_exact = exact_file?(
       module_manifest_path,
       provider.fetch(:module_manifest_bytes),
@@ -1256,23 +1332,24 @@ resource_roots.each do |platform, product_resource_root|
     end
 
     unless integrity["schemaVersion"] == "1.0" &&
-        integrity["acceptedPackageVersion"] == "3.1.0" &&
+        integrity["acceptedPackageVersion"] == "4.3.0" &&
         integrity["codexID"] == provider.fetch(:codex_id) &&
         integrity["moduleID"] == provider.fetch(:module_id)
       errors << "#{platform} #{provider_name} integrity-manifest identity differs"
     end
 
     files = integrity["files"]
-    unless files.is_a?(Array) && files.length == 46
-      errors << "#{platform} #{provider_name} integrity manifest does not declare exactly 46 outputs"
+    output_count = provider.fetch(:output_count)
+    unless files.is_a?(Array) && files.length == output_count
+      errors << "#{platform} #{provider_name} integrity manifest does not declare exactly #{output_count} outputs"
       next
     end
     paths = files.map { |file| file["path"] }
     basenames = paths.map { |path| File.basename(path.to_s) }
     resource_ids = files.map { |file| file["resourceID"] }
-    errors << "#{platform} #{provider_name} output paths are duplicated" unless paths.uniq.length == 46
-    errors << "#{platform} #{provider_name} output basenames collide" unless basenames.uniq.length == 46
-    errors << "#{platform} #{provider_name} output resource IDs are duplicated" unless resource_ids.uniq.length == 46
+    errors << "#{platform} #{provider_name} output paths are duplicated" unless paths.uniq.length == output_count
+    errors << "#{platform} #{provider_name} output basenames collide" unless basenames.uniq.length == output_count
+    errors << "#{platform} #{provider_name} output resource IDs are duplicated" unless resource_ids.uniq.length == output_count
     unless paths.all? do |path|
       path.is_a?(String) && path.start_with?("Production/") &&
         !path.start_with?("/") && !path.split("/").include?("..")
@@ -1314,8 +1391,8 @@ resource_roots.each do |platform, product_resource_root|
       path = File.join(root, name)
       regular_file?(path) ? File.size(path) : 0
     end
-    if complete_resource_bytes > 64 * 1024 * 1024
-      errors << "#{platform} #{provider_name} resource bundle exceeds the 64 MiB budget"
+    if complete_resource_bytes > 112 * 1024 * 1024
+      errors << "#{platform} #{provider_name} resource bundle exceeds the 112 MiB budget"
     end
 
     expected_required_resources = expected_inventory.map do |name|
@@ -1401,7 +1478,8 @@ resource_roots.each_key do |platform|
       0
     end
   end
-  errors << "#{platform} Elven shipping output count is #{output_count}, expected 184" unless output_count == 184
+  expected_output_count = providers.values.sum { |provider| provider.fetch(:output_count) }
+  errors << "#{platform} Elven shipping output count is #{output_count}, expected #{expected_output_count}" unless output_count == expected_output_count
 end
 
 providers.each_key do |provider_name|
@@ -1547,7 +1625,7 @@ exit(errors.empty? ? 0 : 1)
 ELVEN_SHIPPING_RUBY
 then
   pass_check "both products preserve the exact canonical SwiftPM resource-bundle census"
-  pass_check "both products contain exactly four canonical Elven providers and all 184 accepted v3.1 outputs"
+  pass_check "both products contain exactly four canonical Elven providers and all 245 accepted v4.3 outputs"
   pass_check "Elven provider resources preserve exact hashes, sizes, budgets, declarations, and cross-platform parity"
   pass_check "Game Center, Platform, and UI resource bundles preserve exact hashes, inventories, and cross-platform parity"
   pass_check "shipping products exclude misplaced Theme resources, placeholders, Source-Masters, debug/test catalogs, and prohibited attribution"
@@ -1561,7 +1639,7 @@ else
   done <"$temporary_directory/elven-product-errors"
   [ "$validation_detail" = true ] || printf 'DETAIL: Elven shipping-product validator did not return diagnostics.\n' >&2
   fail_check "shipping products do not preserve the exact canonical SwiftPM resource-bundle census"
-  fail_check "Elven providers or accepted v3.1 shipping resources differ"
+  fail_check "Elven providers or accepted v4.3 shipping resources differ"
   fail_check "Elven provider resource budgets, declarations, or cross-platform parity differ"
   fail_check "Game Center, Platform, or UI resource hashes, inventories, or cross-platform parity differ"
   fail_check "shipping products contain misplaced Theme resources or prohibited provider, source, catalog, or attribution content"
@@ -2038,9 +2116,9 @@ errors << "project.yml package declarations differ" unless project.fetch("packag
 
 base_settings = project.dig("settings", "base")
 unless base_settings.is_a?(Hash) &&
-    base_settings["MARKETING_VERSION"] == "1.0.39" &&
-    base_settings["CURRENT_PROJECT_VERSION"] == "39"
-  errors << "project.yml version/build differ from frozen 1.0.39 (39)"
+    base_settings["MARKETING_VERSION"] == "1.0.40" &&
+    base_settings["CURRENT_PROJECT_VERSION"] == "40"
+  errors << "project.yml version/build differ from frozen 1.0.40 (40)"
 end
 
 expected_macos_entitlements = {
@@ -2497,9 +2575,9 @@ end
 
 configurations_for(objects, project_object, "generated project", errors).each do |configuration|
   settings = configuration.fetch("buildSettings", {})
-  unless settings["MARKETING_VERSION"] == "1.0.39" &&
-      settings["CURRENT_PROJECT_VERSION"] == "39"
-    errors << "generated project #{configuration['name']} version/build differ from frozen 1.0.39 (39)"
+  unless settings["MARKETING_VERSION"] == "1.0.40" &&
+      settings["CURRENT_PROJECT_VERSION"] == "40"
+    errors << "generated project #{configuration['name']} version/build differ from frozen 1.0.40 (40)"
   end
   forbidden_build_settings.each do |setting|
     errors << "generated project #{configuration['name']} injects #{setting}" if settings.key?(setting)

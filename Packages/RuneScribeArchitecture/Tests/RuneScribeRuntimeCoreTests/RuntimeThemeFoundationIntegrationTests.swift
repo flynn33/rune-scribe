@@ -243,26 +243,27 @@ final class RuntimeThemeFoundationIntegrationTests: XCTestCase {
         namespace: "theme.synthetic",
         resourceID: "descriptor.synthetic"
     )
-    private static let resourceRegistration = OpaqueResourceNamespaceRegistration(
-        namespace: resourceHandle.namespace,
-        declarations: [
-            OpaqueResourceDeclaration(
-                resourceID: resourceHandle.resourceID,
-                semanticRole: "theme.descriptor",
-                mediaType: .json,
-                byteCount: resourceData.count,
-                sha256: SHA256.hash(data: resourceData).map {
-                    String(format: "%02x", $0)
-                }.joined()
-            ),
-        ],
-        payloads: [
-            OpaqueResourcePayload(
-                resourceID: resourceHandle.resourceID,
-                data: resourceData
-            ),
-        ]
-    )
+    private static var resourceRegistration: OpaqueResourceNamespaceRegistration {
+        OpaqueResourceNamespaceRegistration(
+            namespace: resourceHandle.namespace,
+            declarations: [
+                OpaqueResourceDeclaration(
+                    resourceID: resourceHandle.resourceID,
+                    semanticRole: "theme.descriptor",
+                    mediaType: .json,
+                    byteCount: resourceData.count,
+                    sha256: SHA256.hash(data: resourceData).map {
+                        String(format: "%02x", $0)
+                    }.joined()
+                ),
+            ],
+            resourceLoader: { resourceID in
+                resourceID == Self.resourceHandle.resourceID
+                    ? Self.resourceData
+                    : nil
+            }
+        )
+    }
 }
 
 private struct SyntheticThemeContribution: Equatable, Sendable {

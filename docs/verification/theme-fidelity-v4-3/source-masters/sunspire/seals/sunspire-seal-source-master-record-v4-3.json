@@ -1,0 +1,196 @@
+{
+  "schemaVersion": "1.0",
+  "themeID": "theme.sunspire",
+  "assetRole": "seal-color-source-master",
+  "ownerReview": "PENDING",
+  "packageIdentity": "Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
+  "packageRoot": ".",
+  "repositoryRoot": ".",
+  "sharedReferences": [
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-013-1122x1402.png",
+      "pathBase": "packageRoot",
+      "role": "approved Sunspire craftsmanship, palette, material, and ornament board",
+      "sha256": "ea52db7c2f8a89354069b6f64a4751cb62ea439a968c6c1ba8309f8ac3145f5d"
+    },
+    {
+      "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-004-941x1672.png",
+      "pathBase": "packageRoot",
+      "role": "approved Sunspire catalog material and contrast reference",
+      "sha256": "6186c6ecd82e25409904daa2460b3fc1953d7a8209a5f224649285f7de8d696f"
+    },
+    {
+      "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/seal/sunspire-sunleaf-crest-color-master.png",
+      "pathBase": "repositoryRoot",
+      "role": "approved detailed Seal quality and scale reference",
+      "sha256": "0107afaff89431437365a56ce97760ba916a8ea7958f4277c64808b8dcb17594"
+    },
+    {
+      "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/seal/sunspire-golden-lark-color-master.png",
+      "pathBase": "repositoryRoot",
+      "role": "approved detailed Seal quality and scale reference",
+      "sha256": "06bc7ec9611fa71f5b102f73ae9040d638e6b7a976121bb55e0a34d1a2998f49"
+    }
+  ],
+  "alphaRestoration": {
+    "sourceExterior": "#FF00FF",
+    "filter": "colorkey=0xff00ff:0.35:0.02,format=rgba",
+    "policy": "Only the uniform exterior and antialiased exterior transition were converted to alpha.",
+    "edgeReview": "Accepted on #15201F and #F6F0DD composites at 224 px; no visible magenta fringe and no removed gold or ivory highlights."
+  },
+  "assets": [
+    {
+      "sealID": "seal.sunspire.dawnflower",
+      "displayName": "Dawnflower",
+      "descriptorMeaning": "A five-petal flower opening around a small sun.",
+      "motifReference": {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/seal/sunspire-dawnflower-vector-master.pdf",
+        "sha256": "d23a638f0109e909e51e2ac15450b03b7c64ffa1e033dd99382dee3f26932ab1"
+      },
+      "creationPrompt": "Create one independent Sunspire Dawnflower medallion: a centered five-petal flower opening around a compact radiant sun, unmistakable at 48-64 px. Match the approved heirloom ivory enamel, warm brushed gold filigree, muted teal enamel, relief depth, and detail density. Use a square 1:1 canvas, keep the complete emblem near 82 percent of the canvas with clear exterior margin, and preserve a bold silhouette. One isolated object only. No text, letters, glyphs, runes, numerals, watermark, UI, card, panel, canvas border, relic, scroll, scenery, bird, or second emblem. Use genuine exterior transparency; if unavailable, use one uniform #FF00FF exterior with no texture, lighting, shadow, reflection, or vignette.",
+      "correctionPrompt": "Preserve the accepted five-petal emblem, materials, color, geometry, scale, centering, relief, lighting, and every edge. Change only the background to one perfectly uniform flat #FF00FF exterior for deterministic alpha restoration. Do not redesign, crop, rotate, relight, recolor, add, or remove emblem content.",
+      "candidateReview": [
+        {
+          "sha256": "2c3ba372492152f6f35c06ab377761a0f4cc19ce7831e3fecce8cc9ee3232a67",
+          "status": "REJECTED",
+          "reasons": [
+            "RGB output had no alpha channel.",
+            "Exterior contained a rendered checkerboard."
+          ]
+        },
+        {
+          "sha256": "8500e6be189d0a7dea7c6ba643acd1fc6d78ad0268a630d55b0528eadad1fb75",
+          "status": "ACCEPTED_AS_CONTENT_SOURCE",
+          "notes": [
+            "Five petals and compact solar center are distinct at 64 px.",
+            "Uniform exterior permitted deterministic alpha restoration."
+          ]
+        }
+      ],
+      "output": {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-dawnflower-color-master-v4-3.png",
+        "sha256": "c5eefb8c0c2a56f97109ac582a08db7262856bfddeb199e09b1fc4e428f3ad15",
+        "dimensions": [1254, 1254],
+        "pixelFormat": "RGBA",
+        "bytes": 2511214,
+        "cornerAlpha": 0,
+        "nonzeroAlphaBounds": {"x": 67, "y": 26, "width": 1118, "height": 1183},
+        "acceptance": "ACCEPTED_AS_SOURCE_MASTER_CANDIDATE",
+        "smallScaleReview": "Five-petal flower and solar center remain recognizable at 64 px."
+      }
+    },
+    {
+      "sealID": "seal.sunspire.sunwheel",
+      "displayName": "Sunwheel",
+      "descriptorMeaning": "An eight-spoke sun wheel with leaves at the ends.",
+      "motifReference": {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/seal/sunspire-sunwheel-vector-master.pdf",
+        "sha256": "2047ac32e8e22c4b68faa5f07fb4eb6524056fa2bac7be21a32074c1e6d814a3"
+      },
+      "creationPrompt": "Create one independent Sunspire Sunwheel medallion: a centered radially symmetric sun wheel with eight sturdy gold spokes, eight clearly readable leaf-shaped terminals, and a solid teal-enamel circular hub, unmistakable at 48-64 px. Match the approved heirloom ivory enamel, warm brushed gold filigree, muted teal enamel, relief depth, and detail density. Use a square 1:1 canvas, keep the complete emblem near 80 percent of the canvas with clear exterior margin, and preserve bold primary shapes. One isolated object only. No text, letters, glyphs, runes, numerals, watermark, UI, card, panel, canvas border, relic, scroll, scenery, flower, bird, spire, or second emblem. Use genuine exterior transparency; if unavailable, use one uniform #FF00FF exterior with no texture, lighting, shadow, reflection, or vignette.",
+      "correctionPrompt": "Preserve the accepted eight spokes, eight leaf terminals, ivory outer ring, gold filigree, teal hub, scale, centering, relief, lighting, and every physical edge. Change only the exterior and every open space between spokes to one perfectly uniform flat #FF00FF field for deterministic alpha restoration. Do not redesign, crop, rotate, relight, recolor, add, or remove emblem content.",
+      "candidateReview": [
+        {
+          "sha256": "4d63585a55a7580fd01591d291099ef5626d906aef8de838922ce5815e77417a",
+          "status": "REJECTED",
+          "reasons": [
+            "RGB output had no alpha channel.",
+            "Exterior was opaque white instead of transparent."
+          ]
+        },
+        {
+          "sha256": "7d7f460cb1637f57d1ad277e9a95d133068951541e86797b61181cf1bb5638a8",
+          "status": "ACCEPTED_AS_CONTENT_SOURCE",
+          "notes": [
+            "Eight spokes, eight leaf terminals, and teal hub remain distinct at 64 px.",
+            "Uniform exterior permitted deterministic alpha restoration."
+          ]
+        }
+      ],
+      "output": {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-sunwheel-color-master-v4-3.png",
+        "sha256": "bde40aeeaea0e81ebedd4f17836510e44dd072b23dc9c83e53bcac591c561d32",
+        "dimensions": [1254, 1254],
+        "pixelFormat": "RGBA",
+        "bytes": 2126446,
+        "cornerAlpha": 0,
+        "nonzeroAlphaBounds": {"x": 48, "y": 66, "width": 1149, "height": 1123},
+        "acceptance": "ACCEPTED_AS_SOURCE_MASTER_CANDIDATE",
+        "smallScaleReview": "Eight-spoke wheel, leaf terminals, and teal hub remain recognizable at 64 px."
+      }
+    },
+    {
+      "sealID": "seal.sunspire.radiant-spire",
+      "displayName": "Radiant Spire",
+      "descriptorMeaning": "A slender golden spire with three sun rays rising behind it.",
+      "motifReference": {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/seal/sunspire-radiant-spire-vector-master.pdf",
+        "sha256": "3b5d9acd94acaa0ed9505a576285bdafde2128499362a72d987a70f29eb34d42"
+      },
+      "creationPrompt": "Create one independent Sunspire Radiant Spire medallion: a centered slender ivory-and-gold ceremonial tower with exactly three broad gold sun rays rising behind it, unmistakable at 48-64 px. Match the approved heirloom ivory enamel, warm brushed gold filigree, muted teal enamel, relief depth, and detail density. Use a compact oval or softly pointed medallion on a square 1:1 canvas, keep the complete emblem near 78 percent of the canvas with clear exterior margin, and preserve a strong tower silhouette. One isolated object only. No text, letters, glyphs, runes, numerals, watermark, UI, card, panel, canvas border, relic, scroll, scenery, flower, bird, wheel, or second emblem. Use genuine exterior transparency; if unavailable, use one uniform #FF00FF exterior with no texture, lighting, shadow, reflection, or vignette.",
+      "correctionPrompt": "Preserve the accepted oval medallion, slender ivory-and-gold tower, teal field, border, lower foliage, bottom jewel, pointed silhouette, scale, centering, relief, lighting, and every physical edge. Correct the sunrise to exactly three broad gold rays total: one centered behind the spire and one symmetric ray on each side, with no fourth ray or extra raylets. Change the exterior to one perfectly uniform flat #FF00FF field for deterministic alpha restoration. Do not otherwise redesign, crop, rotate, relight, or recolor the emblem.",
+      "candidateReview": [
+        {
+          "sha256": "2a26e101ad5f309322b61c116471b05692ca6dfc3d71d8e76ac53e7dbb2e9add",
+          "status": "REJECTED",
+          "reasons": [
+            "RGB output had no alpha channel.",
+            "Exterior contained a rendered checkerboard.",
+            "The initial sunrise fan had an ambiguous ray count."
+          ]
+        },
+        {
+          "sha256": "ebfd31b325e10c925c872f3b3350b50dd50a412c2f9caf6126bedc03e429236a",
+          "status": "ACCEPTED_AS_CONTENT_SOURCE",
+          "notes": [
+            "Tower silhouette and three-ray sunrise remain distinct at 64 px.",
+            "Uniform exterior permitted deterministic alpha restoration."
+          ]
+        }
+      ],
+      "output": {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-radiant-spire-color-master-v4-3.png",
+        "sha256": "8a4ad746476c82448b451f038c726491ae2fabd91f5c13f2536643736048ec0f",
+        "dimensions": [1254, 1254],
+        "pixelFormat": "RGBA",
+        "bytes": 2330052,
+        "cornerAlpha": 0,
+        "nonzeroAlphaBounds": {"x": 201, "y": 29, "width": 846, "height": 1192},
+        "acceptance": "ACCEPTED_AS_SOURCE_MASTER_CANDIDATE",
+        "smallScaleReview": "Slender spire and three-ray sunrise remain recognizable at 64 px."
+      }
+    },
+    {
+      "sealID": "seal.sunspire.echo-ember",
+      "displayName": "Echo Ember",
+      "descriptorMeaning": "A glowing ember inside two circular rings.",
+      "motifReference": {
+        "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeSunspireModule/Resources/Production/seal/sunspire-echo-ember-vector-master.pdf",
+        "sha256": "08df4ce70b0db83a7bbfce91dc31af206967a6e8d530aa36f869992bcbe077c5"
+      },
+      "creationPrompt": "Create one independent Sunspire Echo Ember medallion: a centered bright ivory-gold ember held inside exactly two sturdy concentric gold rings, with a restrained muted-teal enamel echo accent, unmistakable at 48-64 px. Match the approved heirloom ivory enamel, warm brushed gold filigree, muted teal enamel, relief depth, and detail density. Use a square 1:1 canvas, keep the complete emblem near 78 percent of the canvas with clear exterior margin, and contain all glow within the physical object. One isolated object only. No text, letters, glyphs, runes, numerals, watermark, UI, card, panel, canvas border, relic, scroll, scenery, flower, bird, spire, wheel spokes, or second emblem. Use genuine exterior transparency; if unavailable, use one uniform #FF00FF exterior with no texture, lighting, shadow, reflection, or vignette.",
+      "correctionPrompt": null,
+      "candidateReview": [
+        {
+          "sha256": "01b83f6d157979e521a9b51fe1f81b7c7dc646117426af5ca0cec058d0467c4c",
+          "status": "ACCEPTED_AS_CONTENT_SOURCE",
+          "notes": [
+            "Ember and two concentric rings remain distinct at 64 px.",
+            "Uniform exterior permitted deterministic alpha restoration without a correction pass."
+          ]
+        }
+      ],
+      "output": {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/sunspire/seals/sunspire-echo-ember-color-master-v4-3.png",
+        "sha256": "3094e3821982d952fda520476adc2df2d7dd430d574dd324cc5ee096ccdf537b",
+        "dimensions": [1254, 1254],
+        "pixelFormat": "RGBA",
+        "bytes": 2015089,
+        "cornerAlpha": 0,
+        "nonzeroAlphaBounds": {"x": 101, "y": 91, "width": 1053, "height": 1070},
+        "acceptance": "ACCEPTED_AS_SOURCE_MASTER_CANDIDATE",
+        "smallScaleReview": "Glowing ember and paired circular rings remain recognizable at 64 px."
+      }
+    }
+  ]
+}

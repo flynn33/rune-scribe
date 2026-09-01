@@ -18,24 +18,10 @@ struct RuneScribButtonStyle: ButtonStyle {
             .background(
                 ZStack {
                     RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                        .fill(
-                            isEnabled
-                            ? LinearGradient(colors: [.runeGoldBright, .runeGold],
-                                             startPoint: .top, endPoint: .bottom)
-                            : LinearGradient(colors: [Color.runeUnavailable.opacity(0.35), Color.runeUnavailable.opacity(0.30)],
-                                             startPoint: .top, endPoint: .bottom)
-                        )
+                        .fill(isEnabled ? Color.runeGold : Color.runeUnavailable.opacity(0.32))
                     ThemeChromeImage(slot: .primaryButton)
-                        .opacity(isEnabled ? 0.20 : 0.10)
-                        .clipShape(RoundedRectangle(
-                            cornerRadius: RuneMetrics.corner,
-                            style: .continuous
-                        ))
+                        .opacity(isEnabled ? 0.92 : 0.30)
                 }
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                    .strokeBorder(Color.runeGoldBright.opacity(isEnabled ? 0.9 : 0), lineWidth: 1)
             )
             .shadow(color: Color.runeGold.opacity(isEnabled ? 0.35 : 0), radius: 10, y: 3)
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
@@ -56,12 +42,12 @@ struct RuneSecondaryButtonStyle: ButtonStyle {
             .padding(.horizontal, 18)
             .frame(minHeight: 46)
             .background(
-                RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                    .fill(Color.runeSilver.opacity(0.06))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                    .strokeBorder(Color.runeSilver.opacity(isEnabled ? 0.45 : 0.2), lineWidth: 1)
+                ZStack {
+                    RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                        .fill(Color.runeSilver.opacity(isEnabled ? 0.06 : 0.03))
+                    ThemeChromeImage(slot: .tabSelector)
+                        .opacity(isEnabled ? 0.80 : 0.28)
+                }
             )
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .opacity(isEnabled ? 1.0 : 0.6)

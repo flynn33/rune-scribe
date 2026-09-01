@@ -4,6 +4,7 @@ import RuneScribeContracts
 @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
 @testable import RuneScribeThemeCoordinatorModule
+import RuneScribeThemeMoonleafModule
 import XCTest
 
 final class ThemeCoordinatorConformanceTests: XCTestCase {
@@ -265,6 +266,25 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
             try XCTUnwrap(provider(in: fontAvailable, codexID: fontTheme.codexID))
                 .isSelectable
         )
+        do {
+            _ = try await harness.probe.resolve(
+                ResolveThemeResourceRequestDTO(
+                    codexID: fontTheme.codexID,
+                    resourceID: lockedCardResourceID
+                )
+            )
+            XCTFail("An unselected provider must not resolve active presentation bytes")
+        } catch {
+            XCTAssertEqual(
+                error as? ThemeCoordinatorModuleError,
+                .resourceUnavailable(
+                    ResolveThemeResourceRequestDTO(
+                        codexID: fontTheme.codexID,
+                        resourceID: lockedCardResourceID
+                    )
+                )
+            )
+        }
         XCTAssertEqual(
             provider(in: fontAvailable, codexID: vectorTheme.codexID)?.state,
             .locked
@@ -391,6 +411,447 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
         } catch {
             XCTAssertNotNil(error as? RuneScribeRuntimeError)
         }
+    }
+
+    func testShareRenderingRequiresOwnedAvailableProviderButNotActiveSelection()
+        async throws
+    {
+        let definition = try SyntheticThemeDefinition.make(
+            slug: "sharewood",
+            portability: .fontDependent,
+            displayName: "Sharewood Test Codex"
+        )
+        let control = SyntheticThemeProviderControl()
+        let harness = try await makeHarness(
+            providers: [
+                ProviderRegistration(
+                    definition: definition,
+                    mode: .normal,
+                    control: control
+                ),
+            ]
+        )
+        defer { Task { await harness.runtime.stop() } }
+
+        let resourceID = try XCTUnwrap(
+            definition.descriptor.codex.relics.first(where: {
+                $0.metadata.availability != .reservedInactive
+            })?.staticFallbackResourceID
+        )
+        let shareRequest = ResolveThemeResourceRequestDTO(
+            codexID: definition.codexID,
+            resourceID: resourceID,
+            purpose: .shareRendering
+        )
+        let initiallyLocked = try await harness.probe.waitForSnapshot { snapshot in
+            provider(in: snapshot, codexID: definition.codexID)?.state == .locked
+        }
+        XCTAssertFalse(
+            try XCTUnwrap(provider(in: initiallyLocked, codexID: definition.codexID))
+                .isOwned
+        )
+
+        func assertDenied(
+            _ request: ResolveThemeResourceRequestDTO,
+            _ reason: String,
+            file: StaticString = #filePath,
+            line: UInt = #line
+        ) async {
+            do {
+                _ = try await harness.probe.resolve(request)
+                XCTFail(reason, file: file, line: line)
+            } catch {
+                XCTAssertEqual(
+                    error as? ThemeCoordinatorModuleError,
+                    .resourceUnavailable(request),
+                    file: file,
+                    line: line
+                )
+            }
+        }
+
+        await assertDenied(
+            shareRequest,
+            "Locked, unowned providers must not expose share-rendering resources"
+        )
+
+        try await harness.runtime.reconcileEntitlements(
+            try entitlementSnapshot(revision: 1, earned: [definition.unlockID])
+        )
+        let available = try await harness.probe.waitForSnapshot { snapshot in
+            provider(in: snapshot, codexID: definition.codexID)?.state == .available
+        }
+        XCTAssertEqual(available.effectiveCodexID, RuneScribeCodexIDs.norse)
+        XCTAssertTrue(
+            try XCTUnwrap(provider(in: available, codexID: definition.codexID)).isOwned
+        )
+        let activeRequest = ResolveThemeResourceRequestDTO(
+            codexID: definition.codexID,
+            resourceID: resourceID,
+            purpose: .activePresentation
+        )
+        await assertDenied(
+            activeRequest,
+            "Active presentation must remain limited to the effective provider"
+        )
+        let resolved = try await harness.probe.resolve(shareRequest)
+        XCTAssertEqual(resolved.resourceID, resourceID)
+
+        try await control.revoke()
+        _ = try await harness.probe.waitForSnapshot { snapshot in
+            provider(in: snapshot, codexID: definition.codexID)?.state == .unavailable
+        }
+        await assertDenied(
+            shareRequest,
+            "Unavailable providers must not expose share-rendering resources"
+        )
+
+        await harness.runtime.stop()
+    }
+
+    func testShareRenderingAllowsOnlyDeclaredStaticCompositionResources() throws {
+        let definition = try SyntheticThemeDefinition.make(
+            slug: "sharepolicy",
+            portability: .fontDependent,
+            displayName: "Share Policy Test Codex"
+        )
+        let descriptor = definition.descriptor
+        let codex = descriptor.codex
+        let primaryScript = try XCTUnwrap(
+            codex.scripts.first(where: { $0.id == codex.primaryScriptID })
+        )
+        var allowedResourceIDs = Set([
+            codex.background.staticBaseResourceID,
+            codex.background.reduceMotionResourceID,
+            codex.background.highContrastResourceID,
+        ])
+        if let fontResourceID = primaryScript.fontResourceID {
+            allowedResourceIDs.insert(fontResourceID)
+        }
+        for relic in codex.relics
+            where relic.metadata.availability != .reservedInactive
+        {
+            allowedResourceIDs.formUnion([
+                relic.staticFallbackResourceID,
+                relic.highContrastResourceID,
+            ])
+        }
+        for seal in codex.seals
+            where seal.metadata.availability != .reservedInactive
+        {
+            allowedResourceIDs.insert(seal.monochromeFallbackResourceID)
+            allowedResourceIDs.formUnion(
+                [seal.colorResourceID, seal.vectorResourceID].compactMap { $0 }
+            )
+        }
+        for frame in codex.frames
+            where frame.metadata.availability != .reservedInactive
+        {
+            allowedResourceIDs.insert(frame.staticFallbackResourceID)
+        }
+
+        for reference in descriptor.resources {
+            XCTAssertEqual(
+                ThemeCoordinatorService.isShareRenderingResource(
+                    reference,
+                    descriptor: descriptor
+                ),
+                allowedResourceIDs.contains(reference.id),
+                reference.id.rawValue
+            )
+        }
+
+        let deniedGroups: [(String, [ThemeResourceID])] = [
+            (
+                "reserved-inactive",
+                codex.relics.filter {
+                    $0.metadata.availability == .reservedInactive
+                }.flatMap {
+                    [$0.staticFallbackResourceID, $0.highContrastResourceID]
+                }
+            ),
+            (
+                "thumbnails",
+                codex.relics.map(\.thumbnailResourceID)
+                    + codex.seals.map(\.thumbnailResourceID)
+                    + codex.frames.compactMap(\.thumbnailResourceID)
+            ),
+            (
+                "vault",
+                [
+                    codex.vault.cardResourceID,
+                    codex.vault.lockedSilhouetteResourceID,
+                    codex.vault.encounteredResourceID,
+                    codex.vault.selectedResourceID,
+                ] + [codex.vault.unavailableResourceID].compactMap { $0 }
+            ),
+            (
+                "crest",
+                codex.crests.flatMap {
+                    [$0.vectorResourceID, $0.staticFallbackResourceID]
+                        + [$0.thumbnailResourceID].compactMap { $0 }
+                }
+            ),
+            (
+                "audio",
+                descriptor.resources.filter {
+                    [.m4a, .caf, .wav].contains($0.mediaType)
+                }.map(\.id)
+            ),
+        ]
+        for (name, resourceIDs) in deniedGroups {
+            XCTAssertFalse(resourceIDs.isEmpty, name)
+            for resourceID in resourceIDs {
+                let reference = try XCTUnwrap(
+                    descriptor.resources.first(where: { $0.id == resourceID })
+                )
+                XCTAssertFalse(
+                    ThemeCoordinatorService.isShareRenderingResource(
+                        reference,
+                        descriptor: descriptor
+                    ),
+                    "\(name):\(resourceID.rawValue)"
+                )
+            }
+        }
+
+        let backgroundReference = try XCTUnwrap(
+            descriptor.resources.first(where: {
+                $0.id == codex.background.staticBaseResourceID
+            })
+        )
+        let spoofedRole = try ThemeResourceReference(
+            id: backgroundReference.id,
+            role: ThemeResourceRoles.vaultCard,
+            mediaType: backgroundReference.mediaType,
+            requirement: backgroundReference.requirement,
+            integrity: backgroundReference.integrity,
+            rightsID: backgroundReference.rightsID
+        )
+        XCTAssertFalse(
+            ThemeCoordinatorService.isShareRenderingResource(
+                spoofedRole,
+                descriptor: descriptor
+            )
+        )
+        let motionVideo = try ThemeResourceReference(
+            id: ThemeResourceID(rawValue: "resource.sharepolicy.motion-video")!,
+            role: ThemeResourceRoles.backgroundMotion,
+            mediaType: .mp4,
+            requirement: .optional,
+            integrity: backgroundReference.integrity,
+            rightsID: backgroundReference.rightsID
+        )
+        XCTAssertFalse(
+            ThemeCoordinatorService.isShareRenderingResource(
+                motionVideo,
+                descriptor: descriptor
+            )
+        )
+
+        let receivedRoles = [
+            ThemeResourceRoles.receivedPrimarySenderAvatar,
+            ThemeResourceRoles.receivedShareSenderAvatar,
+            ThemeResourceRoles.receivedShareCodexBadge,
+            ThemeResourceRoles.receivedPrimaryMedallion,
+            ThemeResourceRoles.receivedShareMedallion,
+        ]
+        for (index, role) in receivedRoles.enumerated() {
+            let reference = try ThemeResourceReference(
+                id: ThemeResourceID(
+                    rawValue: "resource.sharepolicy.received-identity.\(index)"
+                )!,
+                role: role,
+                mediaType: .png,
+                requirement: .required,
+                integrity: backgroundReference.integrity,
+                rightsID: backgroundReference.rightsID
+            )
+            XCTAssertFalse(
+                ThemeCoordinatorService.isShareRenderingResource(
+                    reference,
+                    descriptor: descriptor
+                ),
+                reference.id.rawValue
+            )
+        }
+    }
+
+    func testCatalogPreviewAllowsFrameThumbnailButShareRenderingDoesNot() throws {
+        let descriptor = RuneScribeThemeMoonleafModuleBootstrap.discoveryDescriptor
+        let frame = try XCTUnwrap(descriptor.codex.frames.first)
+        let thumbnailResourceID = try XCTUnwrap(frame.thumbnailResourceID)
+        let reference = try XCTUnwrap(descriptor.resources.first(where: {
+            $0.id == thumbnailResourceID
+        }))
+
+        XCTAssertEqual(reference.role, ThemeResourceRoles.frameThumbnail)
+        XCTAssertTrue(ThemeCoordinatorService.isCatalogPreviewResource(
+            reference,
+            descriptor: descriptor
+        ))
+        XCTAssertFalse(ThemeCoordinatorService.isShareRenderingResource(
+            reference,
+            descriptor: descriptor
+        ))
+    }
+
+    func testReceivedPresentationPurposeDoesNotBypassNonOwnedProviderRuntimeGate()
+        async throws
+    {
+        let definition = try SyntheticThemeDefinition.make(
+            slug: "receivedpolicy",
+            portability: .fontDependent,
+            displayName: "Received Policy Test Codex",
+            includesReceivedPresentation: true
+        )
+        let harness = try await makeHarness(
+            providers: [ProviderRegistration(definition: definition, mode: .normal)]
+        )
+        defer { Task { await harness.runtime.stop() } }
+
+        let snapshot = try await harness.probe.waitForSnapshot { snapshot in
+            provider(in: snapshot, codexID: definition.codexID)?.state == .locked
+        }
+        let providerSummary = try XCTUnwrap(
+            provider(in: snapshot, codexID: definition.codexID)
+        )
+        XCTAssertFalse(providerSummary.isOwned)
+        XCTAssertFalse(providerSummary.isSelectable)
+        XCTAssertFalse(providerSummary.isSelected)
+        XCTAssertEqual(snapshot.effectiveCodexID, RuneScribeCodexIDs.norse)
+
+        do {
+            _ = try await harness.probe.descriptor(
+                codexID: definition.codexID,
+                purpose: .selection
+            )
+            XCTFail("A received encounter must not grant selection authority")
+        } catch {
+            XCTAssertEqual(
+                error as? ThemeCoordinatorModuleError,
+                .codexNotSelectable(definition.codexID)
+            )
+        }
+        do {
+            _ = try await harness.probe.descriptor(
+                codexID: definition.codexID,
+                purpose: .receivedPresentation
+            )
+            XCTFail("A provider whose module is entitlement-gated is not runtime-available")
+        } catch {
+            XCTAssertEqual(
+                error as? ThemeCoordinatorModuleError,
+                .codexNotSelectable(definition.codexID)
+            )
+        }
+
+        let descriptor = definition.descriptor
+        let received = try XCTUnwrap(descriptor.codex.receivedPresentation)
+        let selection = try SharePresentationSelection(
+            codexID: descriptor.codex.id,
+            scriptID: descriptor.codex.primaryScriptID,
+            relicID: descriptor.codex.defaultRelicID
+        )
+        let receivedRequest = ResolveThemeResourceRequestDTO(
+            codexID: descriptor.codex.id,
+            resourceID: received.primarySenderAvatarResourceID,
+            purpose: .receivedPresentation,
+            receivedPresentationSelection: selection
+        )
+        do {
+            _ = try await harness.probe.resolve(receivedRequest)
+            XCTFail("Received presentation reads must require a running provider")
+        } catch {
+            XCTAssertEqual(
+                error as? ThemeCoordinatorModuleError,
+                .resourceUnavailable(receivedRequest)
+            )
+        }
+
+        await harness.runtime.stop()
+    }
+
+    func testReceivedPresentationAllowsOnlySelectedCompositionAndDeclaredIdentityResources()
+        throws
+    {
+        let descriptor = RuneScribeThemeMoonleafModuleBootstrap.discoveryDescriptor
+        let codex = descriptor.codex
+        let seal = try XCTUnwrap(
+            codex.seals.first(where: {
+                $0.metadata.availability != .reservedInactive
+            })
+        )
+        let relic = try XCTUnwrap(
+            codex.relics.first(where: {
+                $0.metadata.id == codex.defaultRelicID
+            })
+        )
+        let received = try XCTUnwrap(codex.receivedPresentation)
+        let selection = try SharePresentationSelection(
+            codexID: codex.id,
+            scriptID: codex.primaryScriptID,
+            relicID: relic.metadata.id,
+            sealID: seal.metadata.id
+        )
+        var allowedResourceIDs = Set([
+            codex.background.staticBaseResourceID,
+            codex.background.reduceMotionResourceID,
+            relic.staticFallbackResourceID,
+            seal.standardResourceID,
+            received.primarySenderAvatarResourceID,
+            received.shareSenderAvatarResourceID,
+            received.shareCodexBadgeResourceID,
+            received.primaryMedallion.resourceID,
+            received.shareMedallion.resourceID,
+        ])
+        let primaryScript = try XCTUnwrap(
+            codex.scripts.first(where: { $0.id == codex.primaryScriptID })
+        )
+        if let fontResourceID = primaryScript.fontResourceID {
+            allowedResourceIDs.insert(fontResourceID)
+        }
+
+        for reference in descriptor.resources {
+            XCTAssertEqual(
+                ThemeCoordinatorService.isReceivedPresentationResource(
+                    reference,
+                    descriptor: descriptor,
+                    selection: selection
+                ),
+                allowedResourceIDs.contains(reference.id),
+                reference.id.rawValue
+            )
+        }
+
+        let otherRelic = try XCTUnwrap(codex.relics.first(where: {
+            $0.metadata.id != relic.metadata.id
+                && $0.metadata.availability != .reservedInactive
+        }))
+        let otherRelicReference = try XCTUnwrap(
+            descriptor.resources.first(where: {
+                $0.id == otherRelic.staticFallbackResourceID
+            })
+        )
+        XCTAssertFalse(
+            ThemeCoordinatorService.isReceivedPresentationResource(
+                otherRelicReference,
+                descriptor: descriptor,
+                selection: selection
+            )
+        )
+        let vaultReference = try XCTUnwrap(
+            descriptor.resources.first(where: {
+                $0.id == codex.vault.selectedResourceID
+            })
+        )
+        XCTAssertFalse(
+            ThemeCoordinatorService.isReceivedPresentationResource(
+                vaultReference,
+                descriptor: descriptor,
+                selection: selection
+            )
+        )
     }
 
     func testFaultsInvalidResourcesAndStableIDCollisionsRemainIsolatedFromBase()
@@ -591,12 +1052,221 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
         await harness.runtime.stop()
     }
 
+    func testSuspendedActiveResolutionCannotReturnAfterSelectionChanges()
+        async throws
+    {
+        let theme = try SyntheticThemeDefinition.make(
+            slug: "resolutionrace",
+            portability: .fontDependent,
+            displayName: "Resolution Race Test Codex"
+        )
+        let resourceGate = SyntheticThemeResourceLoadGate()
+        let harness = try await makeHarness(
+            providers: [
+                ProviderRegistration(
+                    definition: theme,
+                    mode: .normal,
+                    resourceGate: resourceGate
+                ),
+            ]
+        )
+        defer { Task { await harness.runtime.stop() } }
+
+        try await harness.runtime.reconcileEntitlements(
+            try entitlementSnapshot(revision: 1, earned: [theme.unlockID])
+        )
+        let available = try await harness.probe.waitForSnapshot { snapshot in
+            provider(in: snapshot, codexID: theme.codexID)?.state == .available
+        }
+        let selected = try await harness.probe.select(
+            SelectThemeCodexCommand(
+                codexID: theme.codexID,
+                expectedSnapshotRevision: available.revision
+            )
+        )
+        XCTAssertEqual(selected.effectiveCodexID, theme.codexID)
+
+        let resourceID = theme.descriptor.codex.vault.cardResourceID
+        let request = ResolveThemeResourceRequestDTO(
+            codexID: theme.codexID,
+            resourceID: resourceID
+        )
+        await resourceGate.arm(resourceID: resourceID)
+        let resolution = Task { try await harness.probe.resolve(request) }
+        await resourceGate.waitUntilSuspended()
+
+        do {
+            let baseSelected = try await harness.probe.select(
+                SelectThemeCodexCommand(codexID: RuneScribeCodexIDs.norse)
+            )
+            XCTAssertEqual(baseSelected.effectiveCodexID, RuneScribeCodexIDs.norse)
+            await resourceGate.release()
+        } catch {
+            await resourceGate.release()
+            throw error
+        }
+
+        do {
+            _ = try await resolution.value
+            XCTFail("A stale active-presentation resolution must not return bytes")
+        } catch {
+            XCTAssertEqual(
+                error as? ThemeCoordinatorModuleError,
+                .resourceUnavailable(request)
+            )
+        }
+    }
+
+    func testSelectionDoesNotReportSuccessWhenProviderRevokedAfterSettingsWrite()
+        async throws
+    {
+        let theme = try SyntheticThemeDefinition.make(
+            slug: "selectionrace",
+            portability: .fontDependent,
+            displayName: "Selection Race Test Codex"
+        )
+        let providerControl = SyntheticThemeProviderControl()
+        let selectionGate = SelectionPostWriteGate()
+        let harness = try await makeHarness(
+            providers: [
+                ProviderRegistration(
+                    definition: theme,
+                    mode: .normal,
+                    control: providerControl
+                ),
+            ],
+            selectionDidWrite: { codexID in
+                await selectionGate.suspendIfArmed(codexID: codexID)
+            }
+        )
+        defer { Task { await harness.runtime.stop() } }
+
+        try await harness.runtime.reconcileEntitlements(
+            try entitlementSnapshot(revision: 1, earned: [theme.unlockID])
+        )
+        let available = try await harness.probe.waitForSnapshot { snapshot in
+            provider(in: snapshot, codexID: theme.codexID)?.state == .available
+        }
+        await selectionGate.arm(codexID: theme.codexID)
+        let selection = Task {
+            try await harness.probe.select(
+                SelectThemeCodexCommand(
+                    codexID: theme.codexID,
+                    expectedSnapshotRevision: available.revision
+                )
+            )
+        }
+        await selectionGate.waitUntilSuspended()
+
+        do {
+            try await providerControl.revoke()
+            _ = try await harness.probe.waitForSnapshot { snapshot in
+                snapshot.preferredCodexID == theme.codexID
+                    && snapshot.effectiveCodexID == RuneScribeCodexIDs.norse
+                    && provider(in: snapshot, codexID: theme.codexID)?.state
+                        == .unavailable
+            }
+            await selectionGate.release()
+        } catch {
+            await selectionGate.release()
+            throw error
+        }
+
+        do {
+            _ = try await selection.value
+            XCTFail("Selection must not report success after the provider is revoked")
+        } catch {
+            XCTAssertEqual(
+                error as? ThemeCoordinatorModuleError,
+                .codexNotSelectable(theme.codexID)
+            )
+        }
+    }
+
+    func testSelectionRevalidatesCachedAcceptanceBeforeWritingSettings()
+        async throws
+    {
+        let theme = try SyntheticThemeDefinition.make(
+            slug: "selectionpayload",
+            portability: .fontDependent,
+            displayName: "Selection Payload Test Codex"
+        )
+        let resourceID = try XCTUnwrap(
+            theme.descriptor.resources
+                .filter { $0.requirement == .required }
+                .sorted { $0.id < $1.id }
+                .first?.id
+        )
+        let payloadControl = SyntheticThemePayloadMutationControl(
+            corruptOnLoad: 2,
+            resourceID: resourceID
+        )
+        let writeProbe = ThemeSelectionWriteProbe()
+        let harness = try await makeHarness(
+            providers: [
+                ProviderRegistration(
+                    definition: theme,
+                    mode: .normal,
+                    payloadControl: payloadControl
+                ),
+            ],
+            selectionDidWrite: { codexID in
+                await writeProbe.record(codexID)
+            }
+        )
+        defer { Task { await harness.runtime.stop() } }
+
+        try await harness.runtime.reconcileEntitlements(
+            try entitlementSnapshot(revision: 1, earned: [theme.unlockID])
+        )
+        let available = try await harness.probe.waitForSnapshot { snapshot in
+            provider(in: snapshot, codexID: theme.codexID)?.state == .available
+        }
+        let firstSelection = try await harness.probe.select(
+            SelectThemeCodexCommand(
+                codexID: theme.codexID,
+                expectedSnapshotRevision: available.revision
+            )
+        )
+        XCTAssertEqual(firstSelection.effectiveCodexID, theme.codexID)
+        let firstLoadCount = await payloadControl.targetLoadCount()
+        XCTAssertEqual(firstLoadCount, 1)
+
+        let baseSelection = try await harness.probe.select(
+            SelectThemeCodexCommand(codexID: RuneScribeCodexIDs.norse)
+        )
+        XCTAssertEqual(baseSelection.effectiveCodexID, RuneScribeCodexIDs.norse)
+        let writesBeforeRejectedSelection = await writeProbe.recordedCodexIDs()
+        XCTAssertEqual(
+            writesBeforeRejectedSelection,
+            [theme.codexID, RuneScribeCodexIDs.norse]
+        )
+
+        do {
+            _ = try await harness.probe.select(
+                SelectThemeCodexCommand(codexID: theme.codexID)
+            )
+            XCTFail("Selection must revalidate deferred bytes before writing settings")
+        } catch {
+            XCTAssertEqual(
+                error as? ThemeCoordinatorModuleError,
+                .codexNotSelectable(theme.codexID)
+            )
+        }
+
+        let finalLoadCount = await payloadControl.targetLoadCount()
+        XCTAssertEqual(finalLoadCount, 2)
+        let writesAfterRejectedSelection = await writeProbe.recordedCodexIDs()
+        XCTAssertEqual(writesAfterRejectedSelection, writesBeforeRejectedSelection)
+    }
+
     private func makeHarness(
         providers: [ProviderRegistration],
         permitsDiagnostics: Bool = false,
         includeDiagnosticsClient: Bool = false,
         serviceCapture: ThemeCoordinatorServiceCapture? = nil,
-        unavailableBaseResource: ApplicationResource? = nil
+        unavailableBaseResource: ApplicationResource? = nil,
+        selectionDidWrite: ThemeCoordinatorSelectionDidWriteHook? = nil
     ) async throws -> CoordinatorHarness {
         let syntheticPayloadSource = SyntheticThemePayloadSource()
         let runtime = RuneScribeRuntime(
@@ -648,12 +1318,21 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
         }
 
         let coordinatorFactory: AnyModuleFactory
+        let coordinatorServiceCapture: ThemeCoordinatorServiceCapture?
         if let serviceCapture {
+            coordinatorServiceCapture = serviceCapture
+        } else if selectionDidWrite != nil {
+            coordinatorServiceCapture = ThemeCoordinatorServiceCapture()
+        } else {
+            coordinatorServiceCapture = nil
+        }
+        if let coordinatorServiceCapture {
             coordinatorFactory = AnyModuleFactory(
                 descriptor: RuneScribeThemeCoordinatorModuleBootstrap.descriptor
             ) {
                 SuspensibleThemeCoordinatorModule(
-                    serviceCapture: serviceCapture
+                    serviceCapture: coordinatorServiceCapture,
+                    selectionDidWrite: selectionDidWrite ?? { _ in }
                 )
             }
         } else {
@@ -796,7 +1475,18 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
             case .normal, .throwAfterPublish:
                 try await context.publishTheme(
                     descriptor: registration.definition.descriptor,
-                    resourcePayloads: payloads
+                    resourceLoader: { resourceID in
+                        if let resourceGate = registration.resourceGate {
+                            await resourceGate.suspendIfArmed(resourceID: resourceID)
+                        }
+                        if let payloadControl = registration.payloadControl {
+                            return await payloadControl.payload(
+                                for: resourceID,
+                                validPayload: payloads[resourceID]
+                            )
+                        }
+                        return payloads[resourceID]
+                    }
                 )
             case .descriptorOnly:
                 _ = try await context.publishThemeDescriptor(
@@ -831,11 +1521,11 @@ final class ThemeCoordinatorConformanceTests: XCTestCase {
                                 isRequired: reference.requirement == .required
                             )
                         },
-                        payloads: payloads.map {
-                            OpaqueResourcePayload(
-                                resourceID: OpaqueResourceID(rawValue: $0.key.rawValue),
-                                data: $0.value
-                            )
+                        resourceLoader: { opaqueResourceID in
+                            guard let resourceID = ThemeResourceID(
+                                rawValue: opaqueResourceID.rawValue
+                            ) else { return nil }
+                            return payloads[resourceID]
                         }
                     )
                 )
@@ -989,6 +1679,120 @@ private actor ReconcileCommitGate {
     }
 }
 
+private actor SyntheticThemeResourceLoadGate {
+    private var armedResourceID: ThemeResourceID?
+    private var suspendedResourceID: ThemeResourceID?
+    private var releaseContinuation: CheckedContinuation<Void, Never>?
+    private var suspensionWaiters: [CheckedContinuation<Void, Never>] = []
+
+    func arm(resourceID: ThemeResourceID) {
+        armedResourceID = resourceID
+    }
+
+    func suspendIfArmed(resourceID: ThemeResourceID) async {
+        guard armedResourceID == resourceID else { return }
+        armedResourceID = nil
+        suspendedResourceID = resourceID
+        let waiters = suspensionWaiters
+        suspensionWaiters.removeAll()
+        waiters.forEach { $0.resume() }
+        await withCheckedContinuation { continuation in
+            releaseContinuation = continuation
+        }
+    }
+
+    func waitUntilSuspended() async {
+        if suspendedResourceID != nil { return }
+        await withCheckedContinuation { continuation in
+            suspensionWaiters.append(continuation)
+        }
+    }
+
+    func release() {
+        suspendedResourceID = nil
+        let continuation = releaseContinuation
+        releaseContinuation = nil
+        continuation?.resume()
+    }
+}
+
+private actor SyntheticThemePayloadMutationControl {
+    private let corruptOnLoad: Int
+    private let resourceID: ThemeResourceID
+    private var loadCount = 0
+
+    init(corruptOnLoad: Int, resourceID: ThemeResourceID) {
+        self.corruptOnLoad = corruptOnLoad
+        self.resourceID = resourceID
+    }
+
+    func payload(
+        for resourceID: ThemeResourceID,
+        validPayload: Data?
+    ) -> Data? {
+        guard resourceID == self.resourceID else { return validPayload }
+        loadCount += 1
+        guard loadCount >= corruptOnLoad, var validPayload else {
+            return validPayload
+        }
+        validPayload.append(0)
+        return validPayload
+    }
+
+    func targetLoadCount() -> Int {
+        loadCount
+    }
+}
+
+private actor ThemeSelectionWriteProbe {
+    private var codexIDs: [CodexID] = []
+
+    func record(_ codexID: CodexID) {
+        codexIDs.append(codexID)
+    }
+
+    func recordedCodexIDs() -> [CodexID] {
+        codexIDs
+    }
+}
+
+private actor SelectionPostWriteGate {
+    private var armedCodexID: CodexID?
+    private var suspendedCodexID: CodexID?
+    private var releaseContinuation: CheckedContinuation<Void, Never>?
+    private var suspensionWaiters: [CheckedContinuation<Void, Never>] = []
+
+    func arm(codexID: CodexID) {
+        armedCodexID = codexID
+    }
+
+    func suspendIfArmed(codexID: CodexID) async {
+        guard armedCodexID == codexID else { return }
+        armedCodexID = nil
+        suspendedCodexID = codexID
+        let waiters = suspensionWaiters
+        suspensionWaiters.removeAll()
+        waiters.forEach { $0.resume() }
+        await withCheckedContinuation { continuation in
+            releaseContinuation = continuation
+        }
+    }
+
+    func waitUntilSuspended() async {
+        if suspendedCodexID != nil { return }
+        await withCheckedContinuation { continuation in
+            suspensionWaiters.append(continuation)
+        }
+    }
+
+    func release() {
+        suspendedCodexID = nil
+        let continuation = releaseContinuation
+        releaseContinuation = nil
+        continuation?.resume()
+    }
+}
+
 private actor ThemeCoordinatorServiceCapture {
     private var service: ThemeCoordinatorService?
     private var waiters: [CheckedContinuation<ThemeCoordinatorService, Never>] = []
@@ -1017,6 +1821,7 @@ private actor ThemeCoordinatorServiceCapture {
 private struct SuspensibleThemeCoordinatorModule: RuneScribeModule {
     let descriptor = RuneScribeThemeCoordinatorModuleBootstrap.descriptor
     let serviceCapture: ThemeCoordinatorServiceCapture
+    let selectionDidWrite: ThemeCoordinatorSelectionDidWriteHook
 
     func start(context: ModuleContext) async throws {
         let service = try await ThemeCoordinatorService.bootstrap(
@@ -1029,7 +1834,8 @@ private struct SuspensibleThemeCoordinatorModule: RuneScribeModule {
             now: { context.runtimeTimestamp() },
             publishEvent: { type, payload in
                 _ = try await context.publishEvent(type, payload: payload)
-            }
+            },
+            selectionDidWrite: selectionDidWrite
         )
         do {
             try await context.registerThemeCoordinatorEndpoints(service)
@@ -1056,15 +1862,21 @@ private struct ProviderRegistration: Sendable {
     let definition: SyntheticThemeDefinition
     let mode: SyntheticProviderMode
     let control: SyntheticThemeProviderControl?
+    let resourceGate: SyntheticThemeResourceLoadGate?
+    let payloadControl: SyntheticThemePayloadMutationControl?
 
     init(
         definition: SyntheticThemeDefinition,
         mode: SyntheticProviderMode,
-        control: SyntheticThemeProviderControl? = nil
+        control: SyntheticThemeProviderControl? = nil,
+        resourceGate: SyntheticThemeResourceLoadGate? = nil,
+        payloadControl: SyntheticThemePayloadMutationControl? = nil
     ) {
         self.definition = definition
         self.mode = mode
         self.control = control
+        self.resourceGate = resourceGate
+        self.payloadControl = payloadControl
     }
 
     var descriptor: ModuleDescriptor {
@@ -1105,7 +1917,8 @@ private struct SyntheticThemeDefinition: Sendable {
         slug: String,
         portability: ThemeScriptPortability,
         displayName: String,
-        sharedRightsID: String? = nil
+        sharedRightsID: String? = nil,
+        includesReceivedPresentation: Bool = false
     ) throws -> Self {
         let base = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
         let encoded = try JSONEncoder().encode(base)
@@ -1170,7 +1983,7 @@ private struct SyntheticThemeDefinition: Sendable {
             codex["relics"] = relics
         }
 
-        var additionalSource: (ThemeResourceID, ThemeResourceID)?
+        var additionalSources: [(ThemeResourceID, ThemeResourceID)] = []
         if portability == .vectorRendered {
             guard let sourceIndex = base.resources.firstIndex(where: {
                 $0.mediaType == .pdf
@@ -1195,7 +2008,61 @@ private struct SyntheticThemeDefinition: Sendable {
                 glyphs[index]["vectorResourceID"] = vectorID.rawValue
             }
             scripts[0]["glyphs"] = glyphs
-            additionalSource = (vectorID, sourceID)
+            additionalSources.append((vectorID, sourceID))
+        }
+
+        if includesReceivedPresentation {
+            let roles: [(String, ThemeResourceRoleID)] = [
+                ("primary.sender-avatar", ThemeResourceRoles.receivedPrimarySenderAvatar),
+                ("share.sender-avatar", ThemeResourceRoles.receivedShareSenderAvatar),
+                ("share.codex-badge", ThemeResourceRoles.receivedShareCodexBadge),
+                ("primary.medallion", ThemeResourceRoles.receivedPrimaryMedallion),
+                ("share.medallion", ThemeResourceRoles.receivedShareMedallion),
+            ]
+            let sourceReferences = base.resources.filter {
+                $0.mediaType == .png
+            }
+            guard sourceReferences.count >= roles.count else {
+                throw CoordinatorTestError.invalidSyntheticDescriptor
+            }
+            var receivedIDs: [String: ThemeResourceID] = [:]
+            for (index, entry) in roles.enumerated() {
+                let source = sourceReferences[index]
+                guard let sourceIndex = base.resources.firstIndex(where: {
+                    $0.id == source.id
+                }), var resource = resources[safe: sourceIndex]
+                else { throw CoordinatorTestError.invalidSyntheticDescriptor }
+                let resourceID = ThemeResourceID(
+                    rawValue: "resource.received.\(slug).\(entry.0)"
+                )!
+                resource["id"] = resourceID.rawValue
+                resource["role"] = entry.1.rawValue
+                resources.append(resource)
+                receivedIDs[entry.0] = resourceID
+                additionalSources.append((resourceID, source.id))
+            }
+            codex["receivedPresentation"] = [
+                "familyDisplayName": [
+                    "key": "codex.\(slug).received-family.name",
+                    "fallbackValue": "\(displayName) Received",
+                ],
+                "primarySenderAvatarResourceID":
+                    receivedIDs["primary.sender-avatar"]!.rawValue,
+                "shareSenderAvatarResourceID":
+                    receivedIDs["share.sender-avatar"]!.rawValue,
+                "shareCodexBadgeResourceID":
+                    receivedIDs["share.codex-badge"]!.rawValue,
+                "primaryMedallion": [
+                    "resourceID": receivedIDs["primary.medallion"]!.rawValue,
+                    "anchor": ["x": 0.8, "y": 0.8],
+                    "scale": 0.2,
+                ],
+                "shareMedallion": [
+                    "resourceID": receivedIDs["share.medallion"]!.rawValue,
+                    "anchor": ["x": 0.75, "y": 0.8],
+                    "scale": 0.16,
+                ],
+            ]
         }
 
         codex["scripts"] = scripts
@@ -1230,7 +2097,7 @@ private struct SyntheticThemeDefinition: Sendable {
             let transformed = ThemeResourceID(rawValue: transformedRawValue)!
             return (transformed, source.id)
         })
-        if let additionalSource {
+        for additionalSource in additionalSources {
             mapping[additionalSource.0] = additionalSource.1
         }
         return Self(
@@ -1344,6 +2211,17 @@ private actor ThemeCoordinatorClientProbe {
     ) async throws -> ResolvedThemeResourceDTO {
         guard let client else { throw CoordinatorTestError.clientUnavailable }
         return try await client.resolveResource(request)
+    }
+
+    func descriptor(
+        codexID: CodexID,
+        purpose: ThemeProviderDescriptorPurpose
+    ) async throws -> ThemeDescriptor {
+        guard let client else { throw CoordinatorTestError.clientUnavailable }
+        return try await client.providerDescriptor(
+            for: codexID,
+            purpose: purpose
+        )
     }
 
     func resolveCatalogPreview(

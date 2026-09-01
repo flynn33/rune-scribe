@@ -1,28 +1,28 @@
 {
-  "aggregateSHA256": "904cd7c7ffd85e2b3dc2143c622da01bae092efe15a870319c839a9d89fe7a4f",
+  "aggregateSHA256": "9a1e19a2eff9b9de7104d1a5762791ee0c638eea2b5518db4141e62d421f180d",
   "authority": {
-    "package": "Rune-Scribe-Theme-Fidelity-Remediation-v4.0",
+    "package": "Rune-Scribe-Theme-Fidelity-v4.3-Canonical-Authority-and-Remediation",
     "publicDistributionAuthorized": false,
-    "scope": "Norse v2 local implementation and qualification only"
+    "scope": "Norse v2 production resources under v4.3 local qualification"
   },
   "generator": {
-    "inputAggregateSHA256": "e89e47784060d6958fdb6e339d67c72116438f12c890a84203ee85c078993942",
+    "inputAggregateSHA256": "ed0ddfcffefa36fc2a8114bec63393ac422c894ba155715d1a85271aeaebc392",
     "inputs": [
       {
         "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/NorseApplicationResourceCatalog.swift",
-        "sha256": "508da364798d9f7b2bd92aff8070713bd1822bcd30fe1b89469cfe688823f3ac"
+        "sha256": "f6958b32d4c47c02d226e230f406f4b87c7b5295a50d9686f7f807e38d28d9b7"
       },
       {
         "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/NorseBaseThemeDescriptor.swift",
-        "sha256": "2d65cf77e46ac06a22e272261ed491578cba014bdb6396f916fe9ae3da7e1345"
+        "sha256": "81338fd1a3a4a3c53703235df9f5063bc973a6e770ee599bc8c00afcb2551b59"
       },
       {
         "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Metadata/Norse-Resource-Integrity-Manifest-v2.0.json",
-        "sha256": "ec7c34baf2fb43bfc77f6c07e6a8e875ec02098bdb0879ee618ecac1c99105dc"
+        "sha256": "d6ea940bb3edf6b72e632127fd87b6cc06d808ce5539ca6a9f38155c9da33dcb"
       },
       {
-        "path": "docs/verification/theme-fidelity-v4/generated/norse/Metadata/Norse-Production-Asset-Derivation-v4.0.json",
-        "sha256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1"
+        "path": "docs/verification/theme-fidelity-v4-3/generated/norse/Metadata/Norse-Production-Asset-Derivation-v4.3.json",
+        "sha256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534"
       },
       {
         "path": "EULA.md",
@@ -31,6 +31,14 @@
       {
         "path": "RuneScrib/Resources/Fonts/OFL.txt",
         "sha256": "b0fbcb9eaf0f5f415358bfefa5999ee75e18cde4a275b78285b2140a9e381865"
+      },
+      {
+        "path": "scripts/extract-norse-runestone-catalog-source.py",
+        "sha256": "bd9775b8d6db65ed6b9d085595d45498addde3ae75021d71475470546de171aa"
+      },
+      {
+        "path": "scripts/extract-norse-runestone-message-source.py",
+        "sha256": "047240965dba82e89309be42654e54dc84873da3953bc2a6edd5d6e5ff9a1bd8"
       },
       {
         "path": "docs/verification/theme-fidelity-v4/source-masters/norse/codex-card-authoring.png",
@@ -131,10 +139,30 @@
       {
         "path": "docs/verification/theme-fidelity-v4/source-masters/norse/stormforged-stele-authoring.png",
         "sha256": "189e4956cfa547da2b044404ea7d34c6f7f1cef5d2909f68e725da1caf58eb0d"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-catalog-authoring.png",
+        "sha256": "e03573c99335fa553b71e2e49a1011d1d10ca1d4270501c6fd4cc88b3f9669b2"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-catalog-extraction.json",
+        "sha256": "6a0ad0e2f050d6563e36c5a2680adff40d26fe90eb84ba35340cf4e5c8e57ca6"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-catalog-owner-region.png",
+        "sha256": "57d4d5f00b5cb213a987eeb7ff56cb56d9d3da07e96bf054fce0fbca5c738409"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-message-owner-region.png",
+        "sha256": "75648b01d5caad185182aa5f78d73b078b2e7886b044b612092a8eb56eafe1ee"
+      },
+      {
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-message-static-extraction.json",
+        "sha256": "ef91f06a9290c6691802c6fee0d5bdb6421dc5a7c8c8da364e33653c7b88c0b9"
       }
     ],
     "path": "scripts/generate-norse-production-provenance.py",
-    "sha256": "368a9939c28ea31ffcdc1916d1f418d571d13ea106294292d496672d42b0a65a"
+    "sha256": "7cc303813b83a1bf3edbd2a36d4fb8bb9a5f8389806cdc1be18a4f799ac68519"
   },
   "moduleID": "com.runescribe.module.theme.norse",
   "recordID": "production-asset-provenance.norse.v2",
@@ -143,7 +171,7 @@
     {
       "accessibilityDescriptionKey": "codex.norse.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 2599,
+      "byteCount": 2604,
       "derivationRecordSHA256": null,
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [],
@@ -156,14 +184,14 @@
       "resourceID": "resource.accessibility.norse.en",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "accessibility-localization",
-      "sha256": "45a305302f353fa4382692d835dd7bab98cf12730655badc2fabc3e274b0981a",
+      "sha256": "8b2947000091e17b7295da24d5ef0be19787f5903844a480d4c7b933a53e62c8",
       "sourceClassification": "metadata"
     },
     {
       "accessibilityDescriptionKey": "background.norse.cold-sea-hall.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 7462801,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.background.norse.cold-sea-hall.standard"
       ],
@@ -187,7 +215,7 @@
       "accessibilityDescriptionKey": "background.norse.cold-sea-hall.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 6405013,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.background.norse.cold-sea-hall.standard"
       ],
@@ -211,7 +239,7 @@
       "accessibilityDescriptionKey": "background.norse.cold-sea-hall.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 6727206,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.background.norse.cold-sea-hall.standard"
       ],
@@ -228,14 +256,14 @@
       "resourceID": "resource.background.norse.cold-sea-hall.reduce-motion",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "background.reduce-motion",
-      "sha256": "e3e6684f3c24d3eccbeafbf47aec443a5bfe5b049277f7b2e6539451e1d83110",
+      "sha256": "21d6e66a585d698c5d20d17357417aaa574333b2d626645df10e9c940713a94d",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "background.norse.cold-sea-hall.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 6727206,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [
         "resource.background.norse.cold-sea-hall.high-contrast",
@@ -254,14 +282,14 @@
       "resourceID": "resource.background.norse.cold-sea-hall.standard",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "background.static-base",
-      "sha256": "e3e6684f3c24d3eccbeafbf47aec443a5bfe5b049277f7b2e6539451e1d83110",
+      "sha256": "21d6e66a585d698c5d20d17357417aaa574333b2d626645df10e9c940713a94d",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "vault.norse.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 1467808,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.codex-card.norse.owned"
       ],
@@ -278,14 +306,14 @@
       "resourceID": "resource.codex-card.norse.encountered",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "vault.encountered",
-      "sha256": "907f12884fc0474a9b6d165838b91516c895cd539e1f49af29e942152f25de50",
+      "sha256": "fca22a971c525b772056ce98288525f8e52965e9ea534b95f018c31420780b50",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "vault.norse.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 628752,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.codex-card.norse.owned"
       ],
@@ -309,7 +337,7 @@
       "accessibilityDescriptionKey": "vault.norse.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 1703464,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [
         "resource.codex-card.norse.encountered",
@@ -336,7 +364,7 @@
       "accessibilityDescriptionKey": "vault.norse.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 1852180,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.codex-card.norse.owned"
       ],
@@ -360,7 +388,7 @@
       "accessibilityDescriptionKey": "vault.norse.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 438670,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.codex-card.norse.owned"
       ],
@@ -384,7 +412,7 @@
       "accessibilityDescriptionKey": "crest.norse.raven-mastery.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 1472195,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.crest.norse.raven-mastery.vector-master"
       ],
@@ -408,7 +436,7 @@
       "accessibilityDescriptionKey": "crest.norse.raven-mastery.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 377397,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.crest.norse.raven-mastery.vector-master"
       ],
@@ -432,7 +460,7 @@
       "accessibilityDescriptionKey": "crest.norse.raven-mastery.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 5498088,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [
         "resource.crest.norse.raven-mastery.static-fallback",
@@ -549,7 +577,7 @@
       "accessibilityDescriptionKey": "frame.norse.carved-knotwork.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 1702455,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.frame.norse.carved-knotwork.vector-master"
       ],
@@ -573,7 +601,7 @@
       "accessibilityDescriptionKey": "frame.norse.carved-knotwork.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 2964853,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [
         "resource.frame.norse.carved-knotwork.static-fallback"
@@ -612,7 +640,7 @@
     {
       "accessibilityDescriptionKey": "codex.norse.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 7731,
+      "byteCount": 7599,
       "derivationRecordSHA256": null,
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [],
@@ -625,7 +653,7 @@
       "resourceID": "resource.localization.norse.en",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "localization.strings",
-      "sha256": "22cc8513a17af26cfd65efaf3ba31bc16eb7d1c755665f547768814e3a8d989c",
+      "sha256": "e520bfb9e31ec2ca9966b3e73261c9abc123d7e7c776925f74c4b64db15a95b1",
       "sourceClassification": "metadata"
     },
     {
@@ -644,14 +672,14 @@
       "resourceID": "resource.palette.norse.semantic",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "semantic-palette",
-      "sha256": "33403c431735ae92c81816667e3c4040f16da3ff1b0846533a539d024a48652c",
+      "sha256": "7d93ef368c1b93a631e887fe0b3cba1b05917c1f556fe85022f8a178f7496a66",
       "sourceClassification": "metadata"
     },
     {
       "accessibilityDescriptionKey": "codex.norse.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 811914,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -673,7 +701,7 @@
       "accessibilityDescriptionKey": "codex.norse.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 265867,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -695,7 +723,7 @@
       "accessibilityDescriptionKey": "codex.norse.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 441844,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -717,7 +745,7 @@
       "accessibilityDescriptionKey": "codex.norse.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 628386,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -739,7 +767,7 @@
       "accessibilityDescriptionKey": "codex.norse.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 408083,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -799,7 +827,7 @@
       "accessibilityDescriptionKey": "relic.norse.dragonwood-plaque.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 1881997,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.relic.norse.dragonwood-plaque.master"
       ],
@@ -823,7 +851,7 @@
       "accessibilityDescriptionKey": "relic.norse.dragonwood-plaque.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 3241745,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [
         "resource.relic.norse.dragonwood-plaque.high-contrast",
@@ -849,7 +877,7 @@
       "accessibilityDescriptionKey": "relic.norse.dragonwood-plaque.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 1329172,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.relic.norse.dragonwood-plaque.master"
       ],
@@ -873,7 +901,7 @@
       "accessibilityDescriptionKey": "relic.norse.dragonwood-plaque.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 254354,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.relic.norse.dragonwood-plaque.master"
       ],
@@ -916,7 +944,7 @@
       "accessibilityDescriptionKey": "relic.norse.runestone-tablet.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 2885150,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.relic.norse.runestone-tablet.master"
       ],
@@ -940,7 +968,7 @@
       "accessibilityDescriptionKey": "relic.norse.runestone-tablet.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 4448361,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [
         "resource.relic.norse.runestone-tablet.high-contrast",
@@ -965,8 +993,8 @@
     {
       "accessibilityDescriptionKey": "relic.norse.runestone-tablet.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 2960942,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 2839504,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.relic.norse.runestone-tablet.master"
       ],
@@ -975,7 +1003,7 @@
       "mediaType": "image/png",
       "normalizedProductionPath": "Production/ShareFallbacks/share-fallback.norse.runestone-tablet.png",
       "pixelDimensions": {
-        "height": 1200,
+        "height": 1600,
         "width": 1600
       },
       "qualificationStatus": "local-qualification-candidate",
@@ -983,14 +1011,14 @@
       "resourceID": "resource.relic.norse.runestone-tablet.static-share-fallback",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "relic.static-share-fallback",
-      "sha256": "86fe4a0412589af58c98d6c7b1d206163aa40d398b77d8038d61507070c9ed02",
+      "sha256": "0f13268da38ea4edaff2ce626222f3fdc9bc89d0b01d9c61eac76fe425ddb902",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "relic.norse.runestone-tablet.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 325877,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 331634,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.relic.norse.runestone-tablet.master"
       ],
@@ -1007,7 +1035,7 @@
       "resourceID": "resource.relic.norse.runestone-tablet.thumbnail",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "relic.thumbnail",
-      "sha256": "0c8e46139a12cb97a32a8159282fb3977f4818aedaec9314cac8b774fc01438a",
+      "sha256": "f8dfac0dff37334737e3019e39f88924a9a85f636f4a57f82b3bb5007a905d31",
       "sourceClassification": "generated-derivative"
     },
     {
@@ -1033,7 +1061,7 @@
       "accessibilityDescriptionKey": "relic.norse.stormforged-stele.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 2403574,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.relic.norse.stormforged-stele.master"
       ],
@@ -1057,7 +1085,7 @@
       "accessibilityDescriptionKey": "relic.norse.stormforged-stele.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 4222923,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [
         "resource.relic.norse.stormforged-stele.high-contrast",
@@ -1083,7 +1111,7 @@
       "accessibilityDescriptionKey": "relic.norse.stormforged-stele.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 1669381,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.relic.norse.stormforged-stele.master"
       ],
@@ -1107,7 +1135,7 @@
       "accessibilityDescriptionKey": "relic.norse.stormforged-stele.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 298539,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.relic.norse.stormforged-stele.master"
       ],
@@ -1150,7 +1178,7 @@
       "accessibilityDescriptionKey": "script.base-runes.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 31985,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.script.norse.specimen.standard"
       ],
@@ -1174,7 +1202,7 @@
       "accessibilityDescriptionKey": "script.base-runes.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 34899,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [],
       "fallbackResourceIDs": [
         "resource.script.norse.specimen.high-contrast",
@@ -1199,7 +1227,7 @@
       "accessibilityDescriptionKey": "script.base-runes.accessibility-label",
       "activeInCurrentCatalog": true,
       "byteCount": 35163,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
         "resource.script.norse.specimen.standard"
       ],
@@ -1222,17 +1250,42 @@
     {
       "accessibilityDescriptionKey": "seal.norse.berserk.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 615248,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 763686,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.berserk.monochrome-fallback",
+        "resource.seal.norse.berserk.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.berserk.png",
+      "pixelDimensions": {
+        "height": 981,
+        "width": 1024
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.berserk.color-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.color-master",
+      "sha256": "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.berserk.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 645400,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.berserk.vector-master"
+        "resource.seal.norse.berserk.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
       "mediaType": "image/png",
       "normalizedProductionPath": "Production/Seals/seal.norse.berserk.monochrome.png",
       "pixelDimensions": {
-        "height": 1024,
+        "height": 981,
         "width": 1024
       },
       "qualificationStatus": "local-qualification-candidate",
@@ -1240,16 +1293,16 @@
       "resourceID": "resource.seal.norse.berserk.monochrome-fallback",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.monochrome-fallback",
-      "sha256": "5fb57230f481cd4a745931ffac4fc1214d013c1337e1008fa294afe39b5ed083",
+      "sha256": "3b67068ae6be712d0d516e6f1fdca2cb7e4d9d913de80bd3c0bd352f96320ec0",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.berserk.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 252810,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 259117,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.berserk.vector-master"
+        "resource.seal.norse.berserk.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -1264,38 +1317,41 @@
       "resourceID": "resource.seal.norse.berserk.thumbnail",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.thumbnail",
-      "sha256": "e0f99b2608c7bb6c28d2c72c0ab66f367c39d83774bc612502a283666aed5e72",
-      "sourceClassification": "generated-derivative"
-    },
-    {
-      "accessibilityDescriptionKey": "seal.norse.berserk.accessibility-label",
-      "activeInCurrentCatalog": true,
-      "byteCount": 1261278,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
-      "fallbackForResourceIDs": [],
-      "fallbackResourceIDs": [
-        "resource.seal.norse.berserk.monochrome-fallback",
-        "resource.seal.norse.berserk.thumbnail"
-      ],
-      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
-      "mediaType": "application/pdf",
-      "normalizedProductionPath": "Production/Seals/seal.norse.berserk.vector-master.pdf",
-      "pixelDimensions": null,
-      "qualificationStatus": "local-qualification-candidate",
-      "requiredForActiveContent": true,
-      "resourceID": "resource.seal.norse.berserk.vector-master",
-      "rightsProvenanceID": "rights.norse.base",
-      "semanticRole": "seal.vector-master",
-      "sha256": "b25e1b3238fac4f70de17a5b2d4e2dcdbc0a4332a2bd9572e043ffb0d2463b22",
+      "sha256": "70733bcc64d087cfcbc5cfb58b0bca2601b10bba22a4f69c67b9bd817a538b47",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.mjolnir.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 736867,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 849370,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.mjolnir.monochrome-fallback",
+        "resource.seal.norse.mjolnir.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.mjolnir.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1003
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.mjolnir.color-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.color-master",
+      "sha256": "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.mjolnir.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 705242,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.mjolnir.vector-master"
+        "resource.seal.norse.mjolnir.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -1303,23 +1359,23 @@
       "normalizedProductionPath": "Production/Seals/seal.norse.mjolnir.monochrome.png",
       "pixelDimensions": {
         "height": 1024,
-        "width": 1024
+        "width": 1003
       },
       "qualificationStatus": "local-qualification-candidate",
       "requiredForActiveContent": true,
       "resourceID": "resource.seal.norse.mjolnir.monochrome-fallback",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.monochrome-fallback",
-      "sha256": "4fc3dff392954cadf08b94a326bd51e3757288dc885b56a0fe20270d90bb6aa2",
+      "sha256": "7d3644fafcc95e635ffaa8881a7734da0a05f17affb2604c4a26314d74f4551e",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.mjolnir.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 276287,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 295111,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.mjolnir.vector-master"
+        "resource.seal.norse.mjolnir.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -1334,45 +1390,48 @@
       "resourceID": "resource.seal.norse.mjolnir.thumbnail",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.thumbnail",
-      "sha256": "d63e544734eb3d79288db86caffe3980585d37c5e0f6a4dd775c56550b3e4490",
-      "sourceClassification": "generated-derivative"
-    },
-    {
-      "accessibilityDescriptionKey": "seal.norse.mjolnir.accessibility-label",
-      "activeInCurrentCatalog": true,
-      "byteCount": 1363466,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
-      "fallbackForResourceIDs": [],
-      "fallbackResourceIDs": [
-        "resource.seal.norse.mjolnir.monochrome-fallback",
-        "resource.seal.norse.mjolnir.thumbnail"
-      ],
-      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
-      "mediaType": "application/pdf",
-      "normalizedProductionPath": "Production/Seals/seal.norse.mjolnir.vector-master.pdf",
-      "pixelDimensions": null,
-      "qualificationStatus": "local-qualification-candidate",
-      "requiredForActiveContent": true,
-      "resourceID": "resource.seal.norse.mjolnir.vector-master",
-      "rightsProvenanceID": "rights.norse.base",
-      "semanticRole": "seal.vector-master",
-      "sha256": "3936b37e8cf7d5ecbb659193b4a8492b4c196b05bbf5b23e37b369aefc5efb65",
+      "sha256": "bbf9273e15da472ec04fdc5514bd4faccba9322afcc9df8452ecee7e9a07d419",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.ravenshield.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 696677,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 905500,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.ravenshield.monochrome-fallback",
+        "resource.seal.norse.ravenshield.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.ravenshield.png",
+      "pixelDimensions": {
+        "height": 1015,
+        "width": 1024
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.ravenshield.color-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.color-master",
+      "sha256": "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.ravenshield.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 730467,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.ravenshield.vector-master"
+        "resource.seal.norse.ravenshield.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
       "mediaType": "image/png",
       "normalizedProductionPath": "Production/Seals/seal.norse.ravenshield.monochrome.png",
       "pixelDimensions": {
-        "height": 1024,
+        "height": 1015,
         "width": 1024
       },
       "qualificationStatus": "local-qualification-candidate",
@@ -1380,16 +1439,16 @@
       "resourceID": "resource.seal.norse.ravenshield.monochrome-fallback",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.monochrome-fallback",
-      "sha256": "f35057515cdf8f5eea53f2874e2599d86ebe991b4a37ef9acd1ea2bd48b2d82a",
+      "sha256": "3585d4963ffd43b5c27f2e9c8ae809ccf646a13306e5c6b2b3cc32a1b66babd7",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.ravenshield.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 300788,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 308236,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.ravenshield.vector-master"
+        "resource.seal.norse.ravenshield.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -1404,38 +1463,41 @@
       "resourceID": "resource.seal.norse.ravenshield.thumbnail",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.thumbnail",
-      "sha256": "ed148a3323576acea5a2a38151aa9b4a15938c246d04ac2f671e49aac9076098",
-      "sourceClassification": "generated-derivative"
-    },
-    {
-      "accessibilityDescriptionKey": "seal.norse.ravenshield.accessibility-label",
-      "activeInCurrentCatalog": true,
-      "byteCount": 1412426,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
-      "fallbackForResourceIDs": [],
-      "fallbackResourceIDs": [
-        "resource.seal.norse.ravenshield.monochrome-fallback",
-        "resource.seal.norse.ravenshield.thumbnail"
-      ],
-      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
-      "mediaType": "application/pdf",
-      "normalizedProductionPath": "Production/Seals/seal.norse.ravenshield.vector-master.pdf",
-      "pixelDimensions": null,
-      "qualificationStatus": "local-qualification-candidate",
-      "requiredForActiveContent": true,
-      "resourceID": "resource.seal.norse.ravenshield.vector-master",
-      "rightsProvenanceID": "rights.norse.base",
-      "semanticRole": "seal.vector-master",
-      "sha256": "a7fc80977e3119ab9f03f7e9ed381ca4c658008f18516f3826a3ff01b2691db5",
+      "sha256": "09322298c8bd5b3f68d48e924767467dfccee175e0d44e87110977cd6f2a0900",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.valknut.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 728781,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 940081,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.valknut.monochrome-fallback",
+        "resource.seal.norse.valknut.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.valknut.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1015
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.valknut.color-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.color-master",
+      "sha256": "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.valknut.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 762653,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.valknut.vector-master"
+        "resource.seal.norse.valknut.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -1443,23 +1505,23 @@
       "normalizedProductionPath": "Production/Seals/seal.norse.valknut.monochrome.png",
       "pixelDimensions": {
         "height": 1024,
-        "width": 1024
+        "width": 1015
       },
       "qualificationStatus": "local-qualification-candidate",
       "requiredForActiveContent": true,
       "resourceID": "resource.seal.norse.valknut.monochrome-fallback",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.monochrome-fallback",
-      "sha256": "0e29c109e3e2c336feb9144525c798641017d4834d0585650a459ecd895b8609",
+      "sha256": "7fb26639ad65986fcb52e4b31bc4280e27890e4345e4de74dc6b5957482a2027",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.valknut.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 316346,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 322621,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.valknut.vector-master"
+        "resource.seal.norse.valknut.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -1474,38 +1536,41 @@
       "resourceID": "resource.seal.norse.valknut.thumbnail",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.thumbnail",
-      "sha256": "ef000b901cb8b1c030c0130771a371b8212377925ad63aa93f1a9ece34dcd270",
-      "sourceClassification": "generated-derivative"
-    },
-    {
-      "accessibilityDescriptionKey": "seal.norse.valknut.accessibility-label",
-      "activeInCurrentCatalog": true,
-      "byteCount": 1548479,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
-      "fallbackForResourceIDs": [],
-      "fallbackResourceIDs": [
-        "resource.seal.norse.valknut.monochrome-fallback",
-        "resource.seal.norse.valknut.thumbnail"
-      ],
-      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
-      "mediaType": "application/pdf",
-      "normalizedProductionPath": "Production/Seals/seal.norse.valknut.vector-master.pdf",
-      "pixelDimensions": null,
-      "qualificationStatus": "local-qualification-candidate",
-      "requiredForActiveContent": true,
-      "resourceID": "resource.seal.norse.valknut.vector-master",
-      "rightsProvenanceID": "rights.norse.base",
-      "semanticRole": "seal.vector-master",
-      "sha256": "b4aaf0fbbf7be11638dcfe4ff0a2f144f00d45d01dd045786fbfa684b5be184b",
+      "sha256": "35c5f281b6ad405b6a3cb5084edc864b05546deab10ca93ca5d45767334c8431",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.wolkin.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 663971,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 824491,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.wolkin.monochrome-fallback",
+        "resource.seal.norse.wolkin.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.wolkin.png",
+      "pixelDimensions": {
+        "height": 1024,
+        "width": 1013
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.wolkin.color-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.color-master",
+      "sha256": "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.wolkin.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 693545,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.wolkin.vector-master"
+        "resource.seal.norse.wolkin.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -1513,23 +1578,23 @@
       "normalizedProductionPath": "Production/Seals/seal.norse.wolkin.monochrome.png",
       "pixelDimensions": {
         "height": 1024,
-        "width": 1024
+        "width": 1013
       },
       "qualificationStatus": "local-qualification-candidate",
       "requiredForActiveContent": true,
       "resourceID": "resource.seal.norse.wolkin.monochrome-fallback",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.monochrome-fallback",
-      "sha256": "7cc7c8b566f61324bb7abda0feecce296fd1f6bfde9ff3dd33cdee77593ee90e",
+      "sha256": "bbb12a59b76b91ab2aaaa8eca3c53a88a2fe0a06beb5c4b9867a7f0784e9fc16",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.wolkin.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 277177,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 283338,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.wolkin.vector-master"
+        "resource.seal.norse.wolkin.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -1544,45 +1609,48 @@
       "resourceID": "resource.seal.norse.wolkin.thumbnail",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.thumbnail",
-      "sha256": "83865f5861beb360f0cb8c4d88e8774cfd6eb902234e4b13decf63de92be9acf",
-      "sourceClassification": "generated-derivative"
-    },
-    {
-      "accessibilityDescriptionKey": "seal.norse.wolkin.accessibility-label",
-      "activeInCurrentCatalog": true,
-      "byteCount": 1397335,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
-      "fallbackForResourceIDs": [],
-      "fallbackResourceIDs": [
-        "resource.seal.norse.wolkin.monochrome-fallback",
-        "resource.seal.norse.wolkin.thumbnail"
-      ],
-      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
-      "mediaType": "application/pdf",
-      "normalizedProductionPath": "Production/Seals/seal.norse.wolkin.vector-master.pdf",
-      "pixelDimensions": null,
-      "qualificationStatus": "local-qualification-candidate",
-      "requiredForActiveContent": true,
-      "resourceID": "resource.seal.norse.wolkin.vector-master",
-      "rightsProvenanceID": "rights.norse.base",
-      "semanticRole": "seal.vector-master",
-      "sha256": "d7658b59fa392db89a88a0b029053916a051c04ca45e39c8897b907088f62780",
+      "sha256": "993359c98592c586a47cf06a2129c01c6dd92a474c64b481f34dbd6a83e8d885",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.yggdrasil.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 660650,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 833872,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
+      "fallbackForResourceIDs": [],
+      "fallbackResourceIDs": [
+        "resource.seal.norse.yggdrasil.monochrome-fallback",
+        "resource.seal.norse.yggdrasil.thumbnail"
+      ],
+      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
+      "mediaType": "image/png",
+      "normalizedProductionPath": "Production/Seals/seal.norse.yggdrasil.png",
+      "pixelDimensions": {
+        "height": 991,
+        "width": 1024
+      },
+      "qualificationStatus": "local-qualification-candidate",
+      "requiredForActiveContent": true,
+      "resourceID": "resource.seal.norse.yggdrasil.color-master",
+      "rightsProvenanceID": "rights.norse.base",
+      "semanticRole": "seal.color-master",
+      "sha256": "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b",
+      "sourceClassification": "generated-derivative"
+    },
+    {
+      "accessibilityDescriptionKey": "seal.norse.yggdrasil.accessibility-label",
+      "activeInCurrentCatalog": true,
+      "byteCount": 690512,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.yggdrasil.vector-master"
+        "resource.seal.norse.yggdrasil.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
       "mediaType": "image/png",
       "normalizedProductionPath": "Production/Seals/seal.norse.yggdrasil.monochrome.png",
       "pixelDimensions": {
-        "height": 1024,
+        "height": 991,
         "width": 1024
       },
       "qualificationStatus": "local-qualification-candidate",
@@ -1590,16 +1658,16 @@
       "resourceID": "resource.seal.norse.yggdrasil.monochrome-fallback",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.monochrome-fallback",
-      "sha256": "9c2a96295fe0857ea7e98214f042accdebe8e18c2e93293c7ad02944ed7d466f",
+      "sha256": "d296cea98b7283f67b9cb1b9e50547e16299dc8dcbf45872ed0701b746266907",
       "sourceClassification": "generated-derivative"
     },
     {
       "accessibilityDescriptionKey": "seal.norse.yggdrasil.accessibility-label",
       "activeInCurrentCatalog": true,
-      "byteCount": 277970,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
+      "byteCount": 283830,
+      "derivationRecordSHA256": "969c86838def67f6019d13d4d991c461ffbbe2ee757b5e5c6ba67759525b1534",
       "fallbackForResourceIDs": [
-        "resource.seal.norse.yggdrasil.vector-master"
+        "resource.seal.norse.yggdrasil.color-master"
       ],
       "fallbackResourceIDs": [],
       "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
@@ -1614,29 +1682,7 @@
       "resourceID": "resource.seal.norse.yggdrasil.thumbnail",
       "rightsProvenanceID": "rights.norse.base",
       "semanticRole": "seal.thumbnail",
-      "sha256": "4edf20db47e214d6f86f80cd45353fa0b861f810e9918affba878669a40fd105",
-      "sourceClassification": "generated-derivative"
-    },
-    {
-      "accessibilityDescriptionKey": "seal.norse.yggdrasil.accessibility-label",
-      "activeInCurrentCatalog": true,
-      "byteCount": 1378247,
-      "derivationRecordSHA256": "1fba43c4a4089bfeb25450ab77b51124919e65621a437104cac0b37b7e9f10e1",
-      "fallbackForResourceIDs": [],
-      "fallbackResourceIDs": [
-        "resource.seal.norse.yggdrasil.monochrome-fallback",
-        "resource.seal.norse.yggdrasil.thumbnail"
-      ],
-      "licenseOrOwnershipStatementReference": "EULA.md#4-ownership-and-intellectual-property",
-      "mediaType": "application/pdf",
-      "normalizedProductionPath": "Production/Seals/seal.norse.yggdrasil.vector-master.pdf",
-      "pixelDimensions": null,
-      "qualificationStatus": "local-qualification-candidate",
-      "requiredForActiveContent": true,
-      "resourceID": "resource.seal.norse.yggdrasil.vector-master",
-      "rightsProvenanceID": "rights.norse.base",
-      "semanticRole": "seal.vector-master",
-      "sha256": "831093e7e0a98bd7b081ddb52016be89354ee463d6d937e56830f679139ceea9",
+      "sha256": "718f6a33bca1ab684e434e482808572a6b06d3fdb0a790212ed048423ad00226",
       "sourceClassification": "generated-derivative"
     },
     {

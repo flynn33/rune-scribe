@@ -146,8 +146,8 @@ write_built_info_plists() {
   plutil -replace CFBundleExecutable -string RuneScrib "$macos_info"
   plutil -replace CFBundleIdentifier -string com.runescribe.app "$macos_info"
   plutil -replace CFBundleName -string RuneScrib "$macos_info"
-  plutil -replace CFBundleShortVersionString -string 1.0.39 "$macos_info"
-  plutil -replace CFBundleVersion -string 39 "$macos_info"
+  plutil -replace CFBundleShortVersionString -string 1.0.40 "$macos_info"
+  plutil -replace CFBundleVersion -string 40 "$macos_info"
   plutil -insert CFBundleSupportedPlatforms -json '["MacOSX"]' "$macos_info"
   plutil -insert LSMinimumSystemVersion -string 15.0 "$macos_info"
 
@@ -155,8 +155,8 @@ write_built_info_plists() {
   plutil -replace CFBundleExecutable -string RuneScrib "$ios_info"
   plutil -replace CFBundleIdentifier -string com.runescribe.app "$ios_info"
   plutil -replace CFBundleName -string RuneScrib "$ios_info"
-  plutil -replace CFBundleShortVersionString -string 1.0.39 "$ios_info"
-  plutil -replace CFBundleVersion -string 39 "$ios_info"
+  plutil -replace CFBundleShortVersionString -string 1.0.40 "$ios_info"
+  plutil -replace CFBundleVersion -string 40 "$ios_info"
   plutil -insert CFBundleSupportedPlatforms -json '["iPhoneOS"]' "$ios_info"
   plutil -insert MinimumOSVersion -string 17.0 "$ios_info"
   plutil -insert UIDeviceFamily -json '[1,2]' "$ios_info"
@@ -202,6 +202,10 @@ build_fixture() {
   swiftc "$main_source" -o "$macos_app/Contents/MacOS/RuneScrib"
   cp "$macos_app/Contents/MacOS/RuneScrib" "$ios_app/RuneScrib"
   write_built_info_plists "$macos_app" "$ios_app"
+  cp "$repository_root/RuneScrib/Resources/PrivacyInfo.xcprivacy" \
+    "$macos_resources/PrivacyInfo.xcprivacy"
+  cp "$repository_root/RuneScrib/Resources/PrivacyInfo.xcprivacy" \
+    "$ios_resources/PrivacyInfo.xcprivacy"
 
   printf 'assets\n' >"$macos_resources/Assets.car"
   printf 'icon\n' >"$macos_resources/AppIcon.icns"
@@ -361,7 +365,7 @@ RUBY
 }
 
 mutate_theme_budget() {
-  mkfile 65m "$(macos_resources "$1")/RuneScribeArchitecture_RuneScribeThemeMoonleafModule.bundle/oversize.dat"
+  mkfile 113m "$(macos_resources "$1")/RuneScribeArchitecture_RuneScribeThemeMoonleafModule.bundle/oversize.dat"
 }
 
 mutate_norse_required() {
@@ -426,6 +430,11 @@ mutate_built_version() {
   plutil -replace CFBundleShortVersionString -string 9.9.9 "$1/ios/RuneScrib.app/Info.plist"
 }
 
+mutate_privacy_manifest() {
+  plutil -replace NSPrivacyTracking -bool true \
+    "$(macos_resources "$1")/PrivacyInfo.xcprivacy"
+}
+
 assert_rejected missing-provider \
   "macOS moonleaf provider bundle is not exactly once at its canonical direct path" \
   mutate_missing_provider
@@ -444,7 +453,7 @@ assert_rejected provider-manifest-identity \
 assert_rejected duplicate-provider-resource-id \
   "macOS moonleaf output resource IDs are duplicated" mutate_duplicate_resource_id
 assert_rejected theme-module-budget \
-  "macOS moonleaf resource bundle exceeds the 64 MiB budget" mutate_theme_budget
+  "macOS moonleaf resource bundle exceeds the 112 MiB budget" mutate_theme_budget
 assert_rejected norse-required-base \
   "macOS Norse Theme criticality differs" mutate_norse_required
 assert_rejected placeholder-content \
@@ -472,7 +481,9 @@ assert_rejected missing-game-center-catalog \
 assert_rejected wrong-platform-audio \
   "macOS Platform resource bytes or SHA-256 differ" mutate_platform_audio
 assert_rejected changed-built-version \
-  "built marketing version differs from frozen 1.0.39" mutate_built_version
+  "built marketing version differs from frozen 1.0.40" mutate_built_version
+assert_rejected privacy-manifest-tracking \
+  "macOS privacy tracking is not false" mutate_privacy_manifest
 
 mutate_platform_graph() {
   ruby - "$graph_repository/Packages/RuneScribeArchitecture/Package.swift" <<'RUBY'
@@ -488,7 +499,7 @@ mutate_source_version() {
   ruby - "$graph_repository/project.yml" <<'RUBY'
 path = ARGV.fetch(0)
 source = File.read(path)
-anchor = "    MARKETING_VERSION: \"1.0.39\"\n"
+anchor = "    MARKETING_VERSION: \"1.0.40\"\n"
 abort "version anchor missing" unless source.scan(anchor).length == 1
 File.write(path, source.sub(anchor, "    MARKETING_VERSION: \"9.9.9\"\n"))
 RUBY
@@ -517,7 +528,7 @@ assert_rejected platform-source-exclusion \
 rsync -a --delete --exclude '.git/' --exclude '.build/' "$repository_root/" "$graph_repository/"
 (CDPATH= cd -- "$graph_repository" && xcodegen generate >/dev/null)
 assert_rejected frozen-source-version \
-  "project.yml version/build differ from frozen 1.0.39 (39)" \
+  "project.yml version/build differ from frozen 1.0.40 (40)" \
   mutate_source_version "$graph_checker"
 
 rsync -a --delete --exclude '.git/' --exclude '.build/' "$repository_root/" "$graph_repository/"

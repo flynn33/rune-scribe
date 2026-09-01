@@ -1097,14 +1097,14 @@ func catalogUpgradePreservesMigrationSeedsWithoutReapplyingInitialMigration() as
     )
     await versionTwo.shutdown()
 
-    let versionThreeBundle = fixture.additiveVersionThreeBundle()
-    let versionThree = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
-        catalogBundle: versionThreeBundle,
+    let nextVersionBundle = fixture.additiveNextVersionBundle()
+    let nextVersion = try await RuneScribeProgressionServiceActor.bootstrapForTesting(
+        catalogBundle: nextVersionBundle,
         stateClient: fixture.client,
         requiresExistingUserMigration: true
     )
-    let upgraded = try await fixture.snapshot(from: versionThree, suffix: "migration-upgrade-v3")
-    #expect(upgraded.catalogVersion?.rawValue == 3)
+    let upgraded = try await fixture.snapshot(from: nextVersion, suffix: "migration-upgrade-next")
+    #expect(upgraded.catalogVersion?.rawValue == 4)
     #expect(upgraded.pendingRevealCount == 0)
     #expect(upgraded.statistics.first {
         $0.statisticID.rawValue == "stat.cipher.created-or-imported.unique" &&
@@ -1121,14 +1121,14 @@ func catalogUpgradePreservesMigrationSeedsWithoutReapplyingInitialMigration() as
     #expect(try await repository.existingUserMigrationSeeds(
         generation: metadata.activeGeneration
     ).count == 20)
-    #expect(try await versionThree.applyExistingUserMigration(
+    #expect(try await nextVersion.applyExistingUserMigration(
         delivery,
         metadata: fixture.metadata(
             operation: "progression.migration.existing-user.apply",
             suffix: "migration-upgrade-retry"
         )
     ) == .duplicate)
-    await versionThree.shutdown()
+    await nextVersion.shutdown()
 }
 
 @Test

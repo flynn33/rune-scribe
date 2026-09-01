@@ -55,6 +55,10 @@ public enum RuntimeThemeImageReferenceError: Error, Equatable, Sendable {
     case cacheCapacityExceeded
 }
 
+public enum RuntimeThemeResourceGenerationError: Error, Equatable, Sendable {
+    case invalidGeneration
+}
+
 public enum RuntimeThemeImageKind: String, Equatable, Hashable, Sendable {
     case raster
     case vectorPDF = "vector-pdf"
@@ -134,6 +138,10 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         decodedEntries.values.lazy.filter { $0.image != nil }.count
     }
 
+    var configuredEncodedByteLimit: Int { encodedByteLimit }
+
+    var configuredDecodedByteLimit: Int { decodedByteLimit }
+
     init(
         maximumTotalEncodedImageByteCount: Int = RuntimeThemeDecodedResourceCache
             .maximumTotalEncodedImageByteCount,
@@ -159,6 +167,14 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         }
         source.activate()
         memoryPressureSource = source
+    }
+
+    fileprivate func makeEmptyGenerationCache() -> RuntimeThemeDecodedResourceCache {
+        RuntimeThemeDecodedResourceCache(
+            maximumTotalEncodedImageByteCount: encodedByteLimit,
+            maximumDecodedByteCount: decodedByteLimit,
+            maximumEntryCount: entryLimit
+        )
     }
 
     deinit {
@@ -289,15 +305,19 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
 
     func image(
         for handle: RuntimeThemeDecodedImageHandle,
+        pixelsPerPoint: CGFloat = 1,
         recordsRenderedResource: Bool = true
     ) -> Image? {
+        guard pixelsPerPoint.isFinite, pixelsPerPoint > 0 else { return nil }
         guard var encodedEntry = encodedEntries[handle.key] else { return nil }
         encodedEntry.accessOrder = nextAccessOrder()
         encodedEntries[handle.key] = encodedEntry
         if var entry = decodedEntries[handle.key] {
             entry.accessOrder = nextAccessOrder()
             decodedEntries[handle.key] = entry
-            guard let image = entry.image.map(Self.swiftUIImage) else { return nil }
+            guard let image = entry.image.map({
+                Self.swiftUIImage($0, pixelsPerPoint: pixelsPerPoint)
+            }) else { return nil }
             if recordsRenderedResource {
                 recordRenderedResource(for: handle)
             }
@@ -326,7 +346,10 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         )
         totalDecodedByteCount += actualByteCount
         decodedImageCreationCount += 1
-        let image = Self.swiftUIImage(decodedImage)
+        let image = Self.swiftUIImage(
+            decodedImage,
+            pixelsPerPoint: pixelsPerPoint
+        )
         if recordsRenderedResource {
             recordRenderedResource(for: handle)
         }
@@ -582,8 +605,15 @@ final class RuntimeThemeDecodedResourceCache: ObservableObject {
         return overflow ? nil : byteCount
     }
 
-    private static func swiftUIImage(_ image: CGImage) -> Image {
-        Image(decorative: image, scale: 1, orientation: .up)
+    private static func swiftUIImage(
+        _ image: CGImage,
+        pixelsPerPoint: CGFloat = 1
+    ) -> Image {
+        Image(
+            decorative: image,
+            scale: pixelsPerPoint,
+            orientation: .up
+        )
     }
 
     private func evictDecodedToFit(decodedByteCount: Int) {
@@ -719,12 +749,34 @@ public final class RuntimeThemeImageReference: ObservableObject {
         cache.image(for: handle)
     }
 
+    public func image(pixelsPerPoint: CGFloat) -> Image? {
+        cache.image(for: handle, pixelsPerPoint: pixelsPerPoint)
+    }
+
     deinit {
         let cache = cache
         let handle = handle
         Task { @MainActor in
             cache.release([handle])
         }
+    }
+}
+
+/// An isolated cache generation used to stage one complete visual revision.
+/// The presentation promotes it only after every required image and the
+/// background configuration have been validated.
+@MainActor
+public final class RuntimeThemeResourceGeneration {
+    fileprivate let ownerID: ObjectIdentifier
+    fileprivate let cache: RuntimeThemeDecodedResourceCache
+    fileprivate var isCommitted = false
+
+    fileprivate init(
+        ownerID: ObjectIdentifier,
+        cache: RuntimeThemeDecodedResourceCache
+    ) {
+        self.ownerID = ownerID
+        self.cache = cache
     }
 }
 
@@ -1077,7 +1129,7 @@ enum RuntimeThemeBackgroundPresentationVariant: Equatable, Sendable {
 public final class RuntimeApplicationResourcePresentation: ObservableObject {
     private let splashVideoSession: RuntimeApplicationResourceSession?
     private let metalLibrarySession: RuntimeApplicationResourceSession?
-    private let decodedResourceCache: RuntimeThemeDecodedResourceCache
+    private var decodedResourceCache: RuntimeThemeDecodedResourceCache
 
     @Published internal private(set) var splashPlayer: AVPlayer?
     @Published internal private(set) var metalResource: RuntimeMetalResource?
@@ -1093,6 +1145,9 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
     private var splashEndObserver: RuntimeNotificationObserver?
     private var splashFinishCallback: (@MainActor () -> Void)?
     private var themeBackgroundConfiguration: RuntimeThemeBackgroundConfiguration?
+    private var themeBackgroundCache: RuntimeThemeDecodedResourceCache?
+    private var renderedResourceObserver:
+        ((RuntimeThemeRenderedResourceIdentity) -> Void)?
     private var activeThemeAnimationIdentities = Set<RuntimeMetalSurfaceIdentity>()
     private var splashIsStarting = false
     private var metalIsStarting = false
@@ -1153,11 +1208,27 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
     func beginRenderedResourceObservation(
         _ observer: @escaping (RuntimeThemeRenderedResourceIdentity) -> Void
     ) {
+        renderedResourceObserver = observer
         decodedResourceCache.beginRenderedResourceObservation(observer)
     }
 
     func endRenderedResourceObservation() {
+        renderedResourceObserver = nil
         decodedResourceCache.endRenderedResourceObservation()
+    }
+
+    /// Starts an isolated image-cache generation for an atomic visual-plan
+    /// transition. The active generation remains renderable until promotion.
+    public func beginThemeResourceGeneration() throws
+        -> RuntimeThemeResourceGeneration
+    {
+        guard !isClosed else {
+            throw RuntimeThemeImageReferenceError.presentationClosed
+        }
+        return RuntimeThemeResourceGeneration(
+            ownerID: ObjectIdentifier(self),
+            cache: decodedResourceCache.makeEmptyGenerationCache()
+        )
     }
 
     public func makeThemeImageReference(
@@ -1172,7 +1243,29 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
                 reference: expectedReference
             ),
             expectedCodexID: expectedCodexID,
-            contentRevision: contentRevision
+            contentRevision: contentRevision,
+            cache: decodedResourceCache,
+            cachesDecodedImage: true
+        )
+    }
+
+    public func makeThemeImageReference(
+        resolvedResource: ResolvedThemeResourceDTO,
+        expectedReference: ThemeResourceReference,
+        expectedCodexID: CodexID,
+        contentRevision: UInt64,
+        generation: RuntimeThemeResourceGeneration
+    ) throws -> RuntimeThemeImageReference {
+        let cache = try cache(for: generation)
+        return try makeThemeImageReference(
+            resolvedResource: resolvedResource,
+            expected: RuntimeThemeExpectedImageIdentity(
+                reference: expectedReference
+            ),
+            expectedCodexID: expectedCodexID,
+            contentRevision: contentRevision,
+            cache: cache,
+            cachesDecodedImage: false
         )
     }
 
@@ -1195,7 +1288,9 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
             resolvedResource: resolvedResource,
             expected: expected,
             expectedCodexID: expectedCodexID,
-            contentRevision: contentRevision
+            contentRevision: contentRevision,
+            cache: decodedResourceCache,
+            cachesDecodedImage: true
         )
     }
 
@@ -1203,7 +1298,9 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         resolvedResource: ResolvedThemeResourceDTO,
         expected: RuntimeThemeExpectedImageIdentity,
         expectedCodexID: CodexID,
-        contentRevision: UInt64
+        contentRevision: UInt64,
+        cache: RuntimeThemeDecodedResourceCache,
+        cachesDecodedImage: Bool
     ) throws -> RuntimeThemeImageReference {
         guard !isClosed else {
             throw RuntimeThemeImageReferenceError.presentationClosed
@@ -1232,7 +1329,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
 
         let handle: RuntimeThemeDecodedImageHandle
         do {
-            handle = try decodedResourceCache.prepareImage(
+            handle = try cache.prepareImage(
                 data: resolvedResource.data,
                 codexID: expectedCodexID,
                 resourceID: expected.resourceID,
@@ -1252,14 +1349,17 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
            (handle.pixelWidth != Int(expectedPixelSize.width)
                || handle.pixelHeight != Int(expectedPixelSize.height))
         {
-            decodedResourceCache.discardIfUnretained([handle])
+            cache.discardIfUnretained([handle])
             throw RuntimeThemeImageReferenceError.pixelDimensionsMismatch
         }
-        guard decodedResourceCache.image(
-            for: handle,
-            recordsRenderedResource: false
-        ) != nil else {
-            decodedResourceCache.discardIfUnretained([handle])
+        let isValidImage = cachesDecodedImage
+            ? cache.image(
+                for: handle,
+                recordsRenderedResource: false
+            ) != nil
+            : cache.validateImage(handle)
+        guard isValidImage else {
+            cache.discardIfUnretained([handle])
             throw RuntimeThemeImageReferenceError.cacheCapacityExceeded
         }
         return RuntimeThemeImageReference(
@@ -1270,7 +1370,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
             integrity: expected.integrity,
             contentRevision: contentRevision,
             handle: handle,
-            cache: decodedResourceCache
+            cache: cache
         )
     }
 
@@ -1359,12 +1459,49 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         macOSWide: RuntimeThemeImageReference? = nil,
         rendererParametersData: Data?
     ) throws -> RuntimePreparedThemeBackground {
+        try prepareThemeBackground(
+            staticBase: staticBase,
+            reduceMotion: reduceMotion,
+            highContrast: highContrast,
+            macOSWide: macOSWide,
+            rendererParametersData: rendererParametersData,
+            cache: decodedResourceCache
+        )
+    }
+
+    public func prepareThemeBackground(
+        staticBase: RuntimeThemeImageReference,
+        reduceMotion: RuntimeThemeImageReference,
+        highContrast: RuntimeThemeImageReference,
+        macOSWide: RuntimeThemeImageReference? = nil,
+        rendererParametersData: Data?,
+        generation: RuntimeThemeResourceGeneration
+    ) throws -> RuntimePreparedThemeBackground {
+        let cache = try cache(for: generation)
+        return try prepareThemeBackground(
+            staticBase: staticBase,
+            reduceMotion: reduceMotion,
+            highContrast: highContrast,
+            macOSWide: macOSWide,
+            rendererParametersData: rendererParametersData,
+            cache: cache
+        )
+    }
+
+    private func prepareThemeBackground(
+        staticBase: RuntimeThemeImageReference,
+        reduceMotion: RuntimeThemeImageReference,
+        highContrast: RuntimeThemeImageReference,
+        macOSWide: RuntimeThemeImageReference?,
+        rendererParametersData: Data?,
+        cache: RuntimeThemeDecodedResourceCache
+    ) throws -> RuntimePreparedThemeBackground {
         guard !isClosed else {
             throw RuntimeThemeBackgroundInstallationError.presentationClosed
         }
         let references = [staticBase, reduceMotion, highContrast]
             + (macOSWide.map { [$0] } ?? [])
-        guard references.allSatisfy({ $0.cache === decodedResourceCache }),
+        guard references.allSatisfy({ $0.cache === cache }),
               Set(references.map(\.codexID)).count == 1,
               Set(references.map(\.contentRevision)).count == 1,
               staticBase.role == ThemeResourceRoles.backgroundStaticBase,
@@ -1397,7 +1534,7 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
                 },
                 parameters: parameters
             ),
-            cache: decodedResourceCache
+            cache: cache
         )
     }
 
@@ -1407,18 +1544,66 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
         guard !isClosed else {
             throw RuntimeThemeBackgroundInstallationError.presentationClosed
         }
+        guard prepared.cache === decodedResourceCache else {
+            throw RuntimeThemeResourceGenerationError.invalidGeneration
+        }
         let configuration = try prepared.take(for: ObjectIdentifier(self))
         installThemeBackgroundConfiguration(
             configuration,
+            cache: decodedResourceCache,
             alreadyRetained: true
         )
     }
 
+    /// Promotes one completely staged visual generation and its background in
+    /// a single main-actor transaction. References from the prior generation
+    /// can remain alive without consuming the promoted generation's budget.
+    public func commitThemeResourceGeneration(
+        _ generation: RuntimeThemeResourceGeneration,
+        background prepared: RuntimePreparedThemeBackground
+    ) throws {
+        guard !isClosed else {
+            throw RuntimeThemeBackgroundInstallationError.presentationClosed
+        }
+        let ownerID = ObjectIdentifier(self)
+        guard generation.ownerID == ownerID,
+              !generation.isCommitted,
+              prepared.ownerID == ownerID,
+              !prepared.isCommitted,
+              prepared.cache === generation.cache
+        else {
+            throw RuntimeThemeResourceGenerationError.invalidGeneration
+        }
+
+        let priorCache = decodedResourceCache
+        let configuration = try prepared.take(for: ownerID)
+        generation.isCommitted = true
+        if priorCache !== generation.cache {
+            priorCache.endRenderedResourceObservation()
+            decodedResourceCache = generation.cache
+            if let renderedResourceObserver {
+                decodedResourceCache.beginRenderedResourceObservation(
+                    renderedResourceObserver
+                )
+            }
+        }
+        installThemeBackgroundConfiguration(
+            configuration,
+            cache: generation.cache,
+            alreadyRetained: true
+        )
+        if priorCache !== generation.cache {
+            priorCache.purge()
+        }
+    }
+
     public func clearThemeBackground() {
         let releasedHandles = themeBackgroundConfiguration?.imageHandles ?? []
+        let releasedCache = themeBackgroundCache
         themeBackgroundConfiguration = nil
+        themeBackgroundCache = nil
         themeBackgroundRevision &+= 1
-        decodedResourceCache.release(releasedHandles)
+        releasedCache?.release(releasedHandles)
         activeThemeAnimationIdentities.removeAll()
         activeThemeAnimationCount = 0
         stopMetal()
@@ -1427,11 +1612,14 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
     public func close() async {
         guard !isClosed else { return }
         isClosed = true
+        renderedResourceObserver = nil
         decodedResourceCache.endRenderedResourceObservation()
         let releasedHandles = themeBackgroundConfiguration?.imageHandles ?? []
+        let releasedCache = themeBackgroundCache
         themeBackgroundConfiguration = nil
+        themeBackgroundCache = nil
         themeBackgroundRevision &+= 1
-        decodedResourceCache.release(releasedHandles)
+        releasedCache?.release(releasedHandles)
         activeThemeAnimationIdentities.removeAll()
         activeThemeAnimationCount = 0
         let splashLease = clearSplashPresentation()
@@ -1510,24 +1698,38 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
     }
 
     var staticThemeBackgroundImage: Image? {
-        themeBackgroundConfiguration?.staticBase.image(using: decodedResourceCache)
+        guard let themeBackgroundConfiguration,
+              let themeBackgroundCache
+        else { return nil }
+        return themeBackgroundConfiguration.staticBase.image(
+            using: themeBackgroundCache
+        )
     }
 
     var reduceMotionThemeBackgroundImage: Image? {
-        themeBackgroundConfiguration?.reduceMotion.image(
-            using: decodedResourceCache
+        guard let themeBackgroundConfiguration,
+              let themeBackgroundCache
+        else { return nil }
+        return themeBackgroundConfiguration.reduceMotion.image(
+            using: themeBackgroundCache
         )
     }
 
     var highContrastThemeBackgroundImage: Image? {
-        themeBackgroundConfiguration?.highContrast.image(
-            using: decodedResourceCache
+        guard let themeBackgroundConfiguration,
+              let themeBackgroundCache
+        else { return nil }
+        return themeBackgroundConfiguration.highContrast.image(
+            using: themeBackgroundCache
         )
     }
 
     var macOSWideThemeBackgroundImage: Image? {
-        themeBackgroundConfiguration?.macOSWide?.image(
-            using: decodedResourceCache
+        guard let themeBackgroundConfiguration,
+              let themeBackgroundCache
+        else { return nil }
+        return themeBackgroundConfiguration.macOSWide?.image(
+            using: themeBackgroundCache
         )
     }
 
@@ -1658,18 +1860,32 @@ public final class RuntimeApplicationResourcePresentation: ObservableObject {
 
     private func installThemeBackgroundConfiguration(
         _ configuration: RuntimeThemeBackgroundConfiguration,
+        cache: RuntimeThemeDecodedResourceCache,
         alreadyRetained: Bool = false
     ) {
         let replacedHandles = themeBackgroundConfiguration?.imageHandles ?? []
+        let replacedCache = themeBackgroundCache
         if !alreadyRetained {
-            decodedResourceCache.retain(configuration.imageHandles)
+            cache.retain(configuration.imageHandles)
         }
         themeBackgroundConfiguration = configuration
+        themeBackgroundCache = cache
         themeBackgroundRevision &+= 1
-        decodedResourceCache.release(replacedHandles)
+        replacedCache?.release(replacedHandles)
         if configuration.parameters == nil {
             stopMetal()
         }
+    }
+
+    private func cache(
+        for generation: RuntimeThemeResourceGeneration
+    ) throws -> RuntimeThemeDecodedResourceCache {
+        guard generation.ownerID == ObjectIdentifier(self),
+              !generation.isCommitted
+        else {
+            throw RuntimeThemeResourceGenerationError.invalidGeneration
+        }
+        return generation.cache
     }
 
     private func stopMetal() {

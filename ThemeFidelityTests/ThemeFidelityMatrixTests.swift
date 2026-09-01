@@ -2,7 +2,7 @@ import CoreGraphics
 import CryptoKit
 import Foundation
 import ImageIO
-import RuneScribeContracts
+@_spi(ThemeFidelityQualification) import RuneScribeContracts
 @testable import RuneScribeCoreModule
 import RuneScribeNorseThemeModule
 import RuneScribePlatform
@@ -26,6 +26,437 @@ import UIKit
 
 @MainActor
 final class ThemeFidelityMatrixTests: XCTestCase {
+    func testViewportRevealPrefersOutermostClippedRequiredElement() {
+        let viewport = CGRect(x: 0, y: 0, width: 980, height: 720)
+        let composeID = "theme.compose.short.codex.norse"
+        let previewID = "theme.artifact-preview.relic.norse.runestone-tablet"
+        let frames = [
+            composeID: CGRect(x: 24, y: 150, width: 932, height: 612),
+            previewID: CGRect(x: 230, y: 400, width: 504, height: 378),
+        ]
+
+        XCTAssertEqual(
+            ThemeFidelityViewportRevealPolicy.targetID(
+                viewportBounds: viewport,
+                frames: frames,
+                requiredElementIDs: [previewID, composeID],
+                coveringElementIDs: []
+            ),
+            composeID
+        )
+    }
+
+    func testExportCanonicalNorseSealResources() async throws {
+        continueAfterFailure = false
+
+        let bundle = Bundle(for: Self.self)
+        let registry = try ThemeCanonicalRenderRegistry.load(bundle: bundle)
+        let seedRegistry = try ThemeCanonicalSeedRegistry.load(bundle: bundle)
+        let candidates = registry.catalog.candidates.filter {
+            $0.renderMode == .resolvedResourceExport
+        }.sorted { $0.id < $1.id }
+        XCTAssertEqual(candidates.count, 6)
+        var requestsByID: [String: ThemeCanonicalRenderRequest] = [:]
+        for candidate in candidates {
+            requestsByID[candidate.id] = try registry.request(
+                candidateID: candidate.id,
+                seedRegistry: seedRegistry
+            )
+        }
+        XCTAssertEqual(requestsByID.count, 6)
+
+        func resolveAll() async throws -> (
+            outputs: [String: Data],
+            resourceIDs: [String: String],
+            visualPlanRevision: UInt64
+        ) {
+            let fixture = try await ThemeFidelityRuntimeFixture.start()
+            do {
+                let firstCandidate = try XCTUnwrap(candidates.first)
+                let firstRequest = try XCTUnwrap(requestsByID[firstCandidate.id])
+                let firstSeedState = try ThemeCanonicalResolvedSeedState(
+                    candidate: firstCandidate,
+                    request: firstRequest,
+                    registry: seedRegistry
+                )
+                try await fixture.select(firstSeedState.primary)
+                let descriptor = try await fixture.themeClient.providerDescriptor(
+                    for: firstSeedState.primary.codexID
+                )
+                XCTAssertEqual(descriptor.id.rawValue, firstRequest.themeID)
+                let boundSealIDs = try Set(candidates.map {
+                    try registry.resolvedResourceArtifactID(candidateID: $0.id)
+                })
+                XCTAssertEqual(
+                    boundSealIDs,
+                    Set(descriptor.codex.seals.map { $0.metadata.id.rawValue })
+                )
+                guard let revision = fixture.session.activeThemeVisualPresentation?.revision
+                else { throw ThemeFidelityCaptureError.runtimeDidNotSettle }
+                var outputs: [String: Data] = [:]
+                var resourceIDs: [String: String] = [:]
+                for candidate in candidates {
+                    let request = try XCTUnwrap(requestsByID[candidate.id])
+                    let seedState = try ThemeCanonicalResolvedSeedState(
+                        candidate: candidate,
+                        request: request,
+                        registry: seedRegistry
+                    )
+                    guard seedState.primary == firstSeedState.primary,
+                          let sealID = ArtifactID(rawValue:
+                              try registry.resolvedResourceArtifactID(
+                                  candidateID: candidate.id
+                              ))
+                    else { throw ThemeFidelityCaptureError.invalidDescriptor }
+                    guard let seal = descriptor.codex.seals.first(where: {
+                        $0.metadata.id == sealID
+                    }) else { throw ThemeFidelityCaptureError.invalidDescriptor }
+                    let resourceID = seal.standardResourceID
+                    let resolved = try await fixture.themeClient.resolveCatalogPreviewResource(
+                        codexID: descriptor.codex.id,
+                        resourceID: resourceID
+                    )
+                    let data = try ThemeCanonicalResolvedResourceValidator.validate(
+                        .resolvedProductionResource(resolved.data),
+                        candidateID: candidate.id,
+                        expectedByteCount: candidate.referenceByteCount,
+                        expectedSHA256: candidate.referenceSHA256
+                    )
+                    try verifyResolvedResourceWrapper(
+                        data: data,
+                        request: request
+                    )
+                    let digest = SHA256.hash(data: data).map {
+                        String(format: "%02x", $0)
+                    }.joined()
+                    let dimensions = try ThemeFidelityEvidence.pngDimensions(data)
+                    XCTAssertEqual(data.count, candidate.referenceByteCount)
+                    XCTAssertEqual(digest, candidate.referenceSHA256)
+                    XCTAssertEqual(dimensions.width, request.width)
+                    XCTAssertEqual(dimensions.height, request.height)
+                    outputs[candidate.id] = data
+                    resourceIDs[candidate.id] = resourceID.rawValue
+                }
+                await fixture.stop()
+                return (outputs, resourceIDs, revision)
+            } catch {
+                await fixture.stop()
+                throw error
+            }
+        }
+
+        let first = try await resolveAll()
+        let second = try await resolveAll()
+        XCTAssertEqual(first.outputs.keys.sorted(), candidates.map(\.id))
+        XCTAssertEqual(first.resourceIDs, second.resourceIDs)
+        for candidate in candidates {
+            let firstData = try XCTUnwrap(first.outputs[candidate.id])
+            let secondData = try XCTUnwrap(second.outputs[candidate.id])
+            XCTAssertEqual(firstData, secondData, candidate.id)
+        }
+
+        guard let outputRootValue = ProcessInfo.processInfo.environment[
+            "RUNESCRIBE_THEME_FIDELITY_CANONICAL_ROOT"
+        ], !outputRootValue.isEmpty else { return }
+        let sourceSHA = try XCTUnwrap(
+            ProcessInfo.processInfo.environment["RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA"]
+        )
+        XCTAssertFalse(sourceSHA.isEmpty)
+        let outputRoot = URL(fileURLWithPath: outputRootValue, isDirectory: true)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+        encoder.dateEncodingStrategy = .iso8601
+        for candidate in candidates {
+            let request = try XCTUnwrap(requestsByID[candidate.id])
+            let data = try XCTUnwrap(first.outputs[candidate.id])
+            let outputURL = outputRoot.appendingPathComponent(request.outputPath)
+            try FileManager.default.createDirectory(
+                at: outputURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try data.write(to: outputURL, options: .atomic)
+            let sidecar = ThemeFidelityCanonicalResourceSidecar(
+                schemaVersion: "1.0",
+                candidateID: candidate.id,
+                wrapperID: request.wrapperID,
+                sourceSHA: sourceSHA,
+                seedID: request.seedID,
+                renderMode: "resolved-resource-export",
+                resourceID: try XCTUnwrap(first.resourceIDs[candidate.id]),
+                visualPlanRevisions: [
+                    first.visualPlanRevision,
+                    second.visualPlanRevision,
+                ],
+                width: request.width,
+                height: request.height,
+                byteCount: data.count,
+                sha256: candidate.referenceSHA256,
+                determinism: first.outputs[candidate.id] == second.outputs[candidate.id],
+                outputPath: request.outputPath
+            )
+            let sidecarURL = outputURL
+                .deletingPathExtension()
+                .appendingPathExtension("sidecar.json")
+            try encoder.encode(sidecar).write(to: sidecarURL, options: .atomic)
+        }
+    }
+
+    private func verifyResolvedResourceWrapper(
+        data: Data,
+        request: ThemeCanonicalRenderRequest
+    ) throws {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil)
+        else { throw ThemeFidelityCaptureError.renderFailed }
+        let content = try ThemeCanonicalQualificationHost().content(
+            AnyView(
+                Image(decorative: image, scale: 1)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            ),
+            request: request
+        )
+        let destination = ThemeFidelityDestination(
+            name: "Canonical resolved resource wrapper",
+            slug: "canonical-resolved-resource-wrapper",
+            pointSize: CGSize(width: request.width, height: request.height),
+            scale: 1
+        )
+        let renderer = ThemeFidelityPersistentRenderer(ignoresSafeAreaInsets: true)
+        defer { renderer.close() }
+        let rendered = try renderer.render(
+            content,
+            identity: request.wrapperID,
+            destination: destination,
+            requiredElementIDs: request.requiredCaptureElementIDs,
+            coveringElementIDs: [],
+            warmup: 0
+        )
+        XCTAssertEqual(
+            rendered.viewportAssertions.requiredElementIDs,
+            [request.wrapperID]
+        )
+        XCTAssertTrue(rendered.viewportAssertions.clippedElementIDs.isEmpty)
+    }
+
+    func testExportCanonicalProductionRenders() async throws {
+        #if os(iOS)
+        guard let outputRootValue = ProcessInfo.processInfo.environment[
+            "RUNESCRIBE_THEME_FIDELITY_CANONICAL_ROOT"
+        ], !outputRootValue.isEmpty else { return }
+        let sourceSHA = try XCTUnwrap(
+            ProcessInfo.processInfo.environment["RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA"]
+        )
+        XCTAssertFalse(sourceSHA.isEmpty)
+
+        let registry = try ThemeCanonicalRenderRegistry.load(bundle: Bundle(for: Self.self))
+        let seedRegistry = try ThemeCanonicalSeedRegistry.load(bundle: Bundle(for: Self.self))
+        let requestedCandidateID = ProcessInfo.processInfo.environment[
+            "RUNESCRIBE_THEME_FIDELITY_CANONICAL_CANDIDATE"
+        ].flatMap { $0.isEmpty ? nil : $0 }
+        let candidates = registry.catalog.candidates.filter { candidate in
+            candidate.renderMode != .resolvedResourceExport
+                && (requestedCandidateID == nil || requestedCandidateID == candidate.id)
+        }
+        XCTAssertFalse(candidates.isEmpty)
+        let outputRoot = URL(fileURLWithPath: outputRootValue, isDirectory: true)
+
+        for candidate in candidates {
+            let request = try registry.request(
+                candidateID: candidate.id,
+                seedRegistry: seedRegistry
+            )
+            let binding = try registry.productionBinding(candidateID: candidate.id)
+            let first = try await canonicalProductionRender(
+                candidate: candidate,
+                request: request,
+                binding: binding
+            )
+            let second = try await canonicalProductionRender(
+                candidate: candidate,
+                request: request,
+                binding: binding
+            )
+            XCTAssertEqual(first.resourceIDs, second.resourceIDs, candidate.id)
+            XCTAssertEqual(first.visualPlanRevision, second.visualPlanRevision, candidate.id)
+            _ = try ThemeCanonicalOutputRecorder.record(
+                request: ThemeCanonicalRenderRequest(
+                    candidateID: request.candidateID,
+                    wrapperID: request.wrapperID,
+                    themeName: request.themeName,
+                    themeID: request.themeID,
+                    codexID: request.codexID,
+                    seedID: request.seedID,
+                    seedIDs: request.seedIDs,
+                    recipe: request.recipe,
+                    renderMode: request.renderMode,
+                    width: request.width,
+                    height: request.height,
+                    locale: request.locale,
+                    timeZone: request.timeZone,
+                    colorScheme: request.colorScheme,
+                    dynamicType: request.dynamicType,
+                    contrastMode: request.contrastMode,
+                    reduceMotion: request.reduceMotion,
+                    animationsEnabled: request.animationsEnabled,
+                    testClock: request.testClock,
+                    expectedProductionResourceIDs: first.resourceIDs,
+                    outputPath: request.outputPath
+                ),
+                first: first.data,
+                second: second.data,
+                sourceSHA: sourceSHA,
+                visualPlanRevision: first.visualPlanRevision,
+                runtimeState: first.runtimeState,
+                outputRoot: outputRoot
+            )
+        }
+        #endif
+    }
+
+    #if os(iOS)
+    private func canonicalProductionRender(
+        candidate: ThemeCanonicalCatalog.Candidate,
+        request: ThemeCanonicalRenderRequest,
+        binding: ThemeCanonicalProductionBinding
+    ) async throws -> ThemeCanonicalQualificationHost.RenderedOutput {
+        guard let theme = ThemeFidelityTheme.allCases.first(where: {
+            $0.slug == request.themeName
+        }) else { throw ThemeFidelityCaptureError.invalidDescriptor }
+
+        let seedRegistry = try ThemeCanonicalSeedRegistry.load(bundle: Bundle(for: Self.self))
+        let seedState = try ThemeCanonicalResolvedSeedState(
+            candidate: candidate,
+            request: request,
+            registry: seedRegistry
+        )
+        guard seedState.primary.codexID == theme.codexID else {
+            throw ThemeFidelityCaptureError.invalidDescriptor
+        }
+
+        let fixture = try await ThemeFidelityRuntimeFixture.start()
+        let renderer = ThemeFidelityPersistentRenderer(
+            ignoresSafeAreaInsets: request.renderMode != .fullProductionScreen
+        )
+        do {
+            try await fixture.select(seedState.primary)
+            let descriptor = try await fixture.themeClient.providerDescriptor(
+                for: theme.codexID
+            )
+            let route: ThemeFidelityCanonicalProductionRoute.Route
+            switch binding {
+            case .fullScreen:
+                var content = try await ThemeFidelityQualificationRoute.make(
+                    launch: seedState.primary,
+                    session: fixture.session
+                )
+                if candidate.recipeClass == .fullScreenReceivedShareCard {
+                    let model = try await ThemeFidelityRenderModel.load(
+                        theme: theme,
+                        descriptor: descriptor,
+                        session: fixture.session
+                    )
+                    content = try ThemeFidelityCanonicalProductionRoute.receivedShareCard(
+                        model: model,
+                        session: fixture.session
+                    )
+                }
+                route = try ThemeFidelityCanonicalProductionRoute.fullScreenRoute(
+                    candidate: candidate,
+                    content: content,
+                    seedState: seedState,
+                    session: fixture.session
+                )
+            case .resolvedResource, .artifactSpecimen, .productionComponent:
+                let resourceIDs = try ThemeFidelityCanonicalProductionRoute.requiredResourceIDs(
+                    candidate: candidate,
+                    binding: binding,
+                    descriptor: descriptor
+                )
+                let imageResourceIDs = Set(resourceIDs.filter { resourceID in
+                    guard let reference = descriptor.resources.first(where: {
+                        $0.id == resourceID
+                    }) else { return false }
+                    return reference.mediaType == .png
+                        || reference.mediaType == .heif
+                        || reference.mediaType == .pdf
+                })
+                try await fixture.session.loadThemeFidelityQualificationVisuals(
+                    codexID: descriptor.codex.id,
+                    resourceIDs: imageResourceIDs
+                )
+                let model = try await ThemeFidelityRenderModel.load(
+                    theme: theme,
+                    descriptor: descriptor,
+                    session: fixture.session
+                )
+                route = try ThemeFidelityCanonicalProductionRoute.make(
+                    candidate: candidate,
+                    binding: binding,
+                    model: model,
+                    session: fixture.session,
+                    resourceIDs: resourceIDs,
+                    seedState: seedState
+                )
+            }
+            let destination = ThemeFidelityDestination(
+                name: "Canonical production host",
+                slug: "canonical-production-host",
+                pointSize: CGSize(width: request.width, height: request.height),
+                scale: 1
+            )
+            let canonicalView = try ThemeCanonicalQualificationHost().content(
+                route.view,
+                request: request
+            )
+            var observedResourceIDs = Set<ThemeResourceID>()
+            fixture.session.resourcePresentation.beginRenderedResourceObservation {
+                observedResourceIDs.insert($0.resourceID)
+            }
+            RuntimeThemeSemanticResourceUseObservation.begin {
+                observedResourceIDs.insert($0)
+            }
+            let rendered: ThemeFidelityRenderedPNG
+            do {
+                rendered = try renderer.render(
+                    canonicalView,
+                    identity: request.wrapperID,
+                    destination: destination,
+                    requiredElementIDs: request.requiredCaptureElementIDs,
+                    coveringElementIDs: [],
+                    warmup: route.warmup
+                )
+            } catch {
+                RuntimeThemeSemanticResourceUseObservation.end()
+                fixture.session.resourcePresentation.endRenderedResourceObservation()
+                throw error
+            }
+            RuntimeThemeSemanticResourceUseObservation.end()
+            fixture.session.resourcePresentation.endRenderedResourceObservation()
+            let finalResourceIDs = Set(route.resourceIDs).union(
+                observedResourceIDs.map(\.rawValue)
+            ).sorted()
+            guard let visualPlanRevision = fixture.session.activeThemeVisualPresentation?
+                .revision
+            else { throw ThemeFidelityCaptureError.runtimeDidNotSettle }
+            renderer.close()
+            await fixture.stop()
+            return ThemeCanonicalQualificationHost.RenderedOutput(
+                data: rendered.data,
+                width: rendered.width,
+                height: rendered.height,
+                resourceIDs: finalResourceIDs,
+                visualPlanRevision: visualPlanRevision,
+                runtimeState: route.runtimeState
+            )
+        } catch {
+            renderer.close()
+            await fixture.stop()
+            throw error
+        }
+    }
+    #endif
+
     func testCaptureThemeFidelityMatrix() async throws {
         try await capture(
             themes: ThemeFidelityTheme.allCases,
@@ -164,7 +595,8 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                     let route = try ThemeFidelityRoute.make(
                         surface: surface,
                         model: model,
-                        session: fixture.session
+                        session: fixture.session,
+                        qualificationViewportWidth: destination.pointSize.width
                     )
                     let contentSeed = ThemeFidelityContentSeed.make(
                         surface: surface,
@@ -504,6 +936,737 @@ final class ThemeFidelityMatrixTests: XCTestCase {
 
     private static func sha256(_ data: Data) -> String {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+private struct ThemeFidelityCanonicalResourceSidecar: Encodable {
+    let schemaVersion: String
+    let candidateID: String
+    let wrapperID: String
+    let sourceSHA: String
+    let seedID: String
+    let renderMode: String
+    let resourceID: String
+    let visualPlanRevisions: [UInt64]
+    let width: Int
+    let height: Int
+    let byteCount: Int
+    let sha256: String
+    let determinism: Bool
+    let outputPath: String
+}
+
+@MainActor
+private struct ThemeCanonicalResolvedSeedState {
+    let primary: ThemeFidelityQualificationLaunch
+    let launches: [ThemeFidelityQualificationLaunch]
+    let seedIDs: [String]
+
+    init(
+        candidate: ThemeCanonicalCatalog.Candidate,
+        request: ThemeCanonicalRenderRequest,
+        registry: ThemeCanonicalSeedRegistry
+    ) throws {
+        let preferredSurface = candidate.recipeClass.preferredSurface
+        guard candidate.surfaces.contains(preferredSurface) else {
+            throw ThemeCanonicalRegistryError.invalidCatalog(candidate.id)
+        }
+
+        var resolved: [(id: String, launch: ThemeFidelityQualificationLaunch)] = []
+        let destination: ThemeFidelityQualificationLaunch.Destination
+        #if os(macOS)
+        destination = .macOSStandard
+        #elseif os(iOS)
+        destination = UIDevice.current.userInterfaceIdiom == .pad
+            ? .iPadPortrait : .iPhonePortrait
+        #endif
+        for seedID in candidate.seedIDs {
+            let seed = try registry.seed(id: seedID)
+            let environment = try registry.environment(
+                seedID: seedID,
+                destination: destination.rawValue
+            )
+            guard case let .validated(launch) = ThemeFidelityQualificationLaunch.resolve(
+                environment: environment,
+                hostAuthorizationOverride: true
+            ) else { throw ThemeCanonicalRegistryError.invalidCatalog(seedID) }
+            guard launch.destination == destination else {
+                throw ThemeCanonicalRegistryError.invalidCatalog(seedID)
+            }
+            guard seed.surface == launch.surface.rawValue else {
+                throw ThemeCanonicalRegistryError.invalidCatalog(seedID)
+            }
+            resolved.append((seedID, launch))
+        }
+        guard request.candidateID == candidate.id,
+              request.seedIDs == candidate.seedIDs,
+              let selected = resolved.first(where: { $0.id == request.seedID }),
+              selected.launch.surface.rawValue == preferredSurface,
+              selected.launch.themeID.rawValue == request.themeID,
+              selected.launch.codexID.rawValue == request.codexID,
+              request.contrastMode == (
+                  selected.launch.appearance == .highContrast ? .increased : .standard
+              ),
+              request.reduceMotion == (selected.launch.appearance == .reduceMotion),
+              let authority = resolved.first?.launch,
+        resolved.allSatisfy({
+            $0.launch.themeID == authority.themeID
+                && $0.launch.codexID == authority.codexID
+                && $0.launch.defaultRelicID == authority.defaultRelicID
+                && $0.launch.defaultSealID == authority.defaultSealID
+        }) else { throw ThemeCanonicalRegistryError.invalidCatalog(candidate.id) }
+
+        primary = selected.launch
+        launches = resolved.map(\.launch)
+        seedIDs = resolved.map(\.id)
+    }
+
+    func runtimeState(
+        candidate: ThemeCanonicalCatalog.Candidate,
+        visualPlanRevision: UInt64
+    ) throws -> String {
+        let state: [String: Any] = [
+            "candidateID": candidate.id,
+            "codexID": primary.codexID.rawValue,
+            "themeID": primary.themeID.rawValue,
+            "recipe": candidate.recipeClass.rawValue,
+            "primarySurface": primary.surface.rawValue,
+            "seedIDs": seedIDs,
+            "seedSurfaces": launches.map { $0.surface.rawValue },
+            "visualPlanRevision": String(visualPlanRevision),
+        ]
+        let data = try JSONSerialization.data(
+            withJSONObject: state,
+            options: [.sortedKeys, .withoutEscapingSlashes]
+        )
+        guard let value = String(data: data, encoding: .utf8) else {
+            throw ThemeFidelityCaptureError.renderFailed
+        }
+        return value
+    }
+}
+
+@MainActor
+private enum ThemeFidelityCanonicalProductionRoute {
+    struct Route {
+        let view: AnyView
+        let resourceIDs: [String]
+        let visualPlanRevision: UInt64
+        let runtimeState: String
+        let warmup: TimeInterval
+    }
+
+    static func requiredResourceIDs(
+        candidate: ThemeCanonicalCatalog.Candidate,
+        binding: ThemeCanonicalProductionBinding,
+        descriptor: ThemeDescriptor
+    ) throws -> Set<ThemeResourceID> {
+        var result = Set<ThemeResourceID>()
+        switch binding {
+        case let .artifactSpecimen(kind, artifactID):
+            result.insert(descriptor.codex.background.staticBaseResourceID)
+            guard let id = ArtifactID(rawValue: artifactID) else {
+                throw ThemeFidelityCaptureError.invalidDescriptor
+            }
+            if kind == "relic" {
+                guard let relic = descriptor.codex.relics.first(where: {
+                    $0.metadata.id == id
+                }) else { throw ThemeFidelityCaptureError.invalidDescriptor }
+                result.insert(
+                    descriptor.criticality == .requiredBase
+                        ? relic.thumbnailResourceID : relic.primaryResourceID
+                )
+                if let script = descriptor.codex.scripts.first(where: {
+                    $0.id == descriptor.codex.primaryScriptID
+                }), let fontResourceID = script.fontResourceID {
+                    result.insert(fontResourceID)
+                }
+            } else {
+                guard let seal = descriptor.codex.seals.first(where: {
+                    $0.metadata.id == id
+                }) else { throw ThemeFidelityCaptureError.invalidDescriptor }
+                result.insert(seal.standardResourceID)
+            }
+        case let .productionComponent(recipe):
+            if recipe == .masteryOverviewPanel || recipe == .masteryDetailPanel {
+                result.formUnion(
+                    descriptor.codex.frames.prefix(1).map(\.staticFallbackResourceID)
+                )
+                result.formUnion(descriptor.codex.crests.prefix(1).map {
+                    $0.thumbnailResourceID ?? $0.staticFallbackResourceID
+                })
+            }
+        case .fullScreen, .resolvedResource:
+            break
+        }
+        return result
+    }
+
+    static func make(
+        candidate: ThemeCanonicalCatalog.Candidate,
+        binding: ThemeCanonicalProductionBinding,
+        model: ThemeFidelityRenderModel,
+        session: RuneScribeUISession,
+        resourceIDs: Set<ThemeResourceID>,
+        seedState: ThemeCanonicalResolvedSeedState
+    ) throws -> Route {
+        let content: AnyView
+        let warmup: TimeInterval
+        switch binding {
+        case let .fullScreen(surfaceName):
+            guard let surface = ThemeFidelitySurface(rawValue: surfaceName) else {
+                throw ThemeFidelityCaptureError.invalidDescriptor
+            }
+            let route = try ThemeFidelityRoute.make(
+                surface: surface,
+                model: model,
+                session: session,
+                qualificationViewportWidth: CGFloat(
+                    candidate.requiredOutputDimensions[0]
+                )
+            )
+            content = route.view
+            warmup = route.warmup
+        case .resolvedResource:
+            throw ThemeFidelityCaptureError.invalidDescriptor
+        case let .artifactSpecimen(kind, artifactID):
+            content = try artifactSpecimen(
+                candidate: candidate,
+                kind: kind,
+                artifactID: artifactID,
+                model: model,
+                session: session
+            )
+            warmup = 0.25
+        case let .productionComponent(recipe):
+            let route = try productionComponent(
+                recipe: recipe,
+                model: model,
+                session: session,
+                seedState: seedState
+            )
+            content = route.view
+            warmup = route.warmup
+        }
+
+        let runtimeState = try seedState.runtimeState(
+            candidate: candidate,
+            visualPlanRevision: model.visualPlanRevision
+        )
+        return Route(
+            view: content,
+            resourceIDs: resourceIDs.map(\.rawValue).sorted(),
+            visualPlanRevision: model.visualPlanRevision,
+            runtimeState: runtimeState,
+            warmup: warmup
+        )
+    }
+
+    static func fullScreenRoute(
+        candidate: ThemeCanonicalCatalog.Candidate,
+        content: AnyView,
+        seedState: ThemeCanonicalResolvedSeedState,
+        session: RuneScribeUISession
+    ) throws -> Route {
+        guard let revision = session.activeThemeVisualPresentation?.revision else {
+            throw ThemeFidelityCaptureError.runtimeDidNotSettle
+        }
+        return Route(
+            view: content,
+            resourceIDs: [],
+            visualPlanRevision: revision,
+            runtimeState: try seedState.runtimeState(
+                candidate: candidate,
+                visualPlanRevision: revision
+            ),
+            warmup: 0.8
+        )
+    }
+
+    static func receivedShareCard(
+        model: ThemeFidelityRenderModel,
+        session: RuneScribeUISession
+    ) throws -> AnyView {
+        let presentation = try ReceivedSharePresentation(
+            requestedSelection: model.selection,
+            effectiveCodexID: model.descriptor.codex.id,
+            providerAvailability: .available,
+            renderMode: .requestedCodex,
+            safePreviewStatus: model.safePreviewStatus,
+            provenanceStatus: .verified,
+            encounterRecordingStatus: .recorded,
+            resourceMetadata: model.safePreviewResourceMetadata
+        )
+        let pending = PendingMessageViewState(try ReceivedMessageDTO(
+            id: MessageID(rawValue: UUID(
+                uuidString: "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC"
+            )!),
+            receivedAt: Date(timeIntervalSinceReferenceDate: 809_299_200),
+            plaintext: "Meet at moonrise by the old oak.",
+            senderName: "Lunawen",
+            cipherID: CipherID(rawValue: UUID(
+                uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA"
+            )!),
+            cipherName: "Moonrise Meeting",
+            senderIdentityStatus: .trustedLocalCipher,
+            presentation: presentation,
+            safePreviewData: model.safePreviewData
+        ))
+        return hostedFullScreen(
+            ReceivedCipherPresentationView(
+                state: .shareCard,
+                pending: pending,
+                receivedAt: Date(timeIntervalSinceReferenceDate: 809_299_200),
+                relativeDate: Date(timeIntervalSinceReferenceDate: 809_299_500),
+                descriptor: model.descriptor,
+                plan: model.receivedPlan,
+                image: { resourceID in
+                    guard let image = model.presentation.image(for: resourceID) else {
+                        preconditionFailure(
+                            "Required received Theme resource was not prepared."
+                        )
+                    }
+                    return image
+                }
+            ),
+            session: session
+        )
+    }
+
+    private static func productionComponent(
+        recipe: ThemeCanonicalRecipe,
+        model: ThemeFidelityRenderModel,
+        session: RuneScribeUISession,
+        seedState: ThemeCanonicalResolvedSeedState
+    ) throws -> (view: AnyView, warmup: TimeInterval) {
+        switch recipe {
+        case .relicCatalogPanel:
+            return (
+                hosted(
+                    CodexCatalogRoot(
+                        descriptor: model.descriptor,
+                        presentation: model.presentation,
+                        initialTab: .relics
+                    ),
+                    session: session
+                ),
+                0.25
+            )
+        case .sealCatalogPanel:
+            return (
+                hosted(
+                    CodexCatalogRoot(
+                        descriptor: model.descriptor,
+                        presentation: model.presentation,
+                        initialTab: .seals
+                    ),
+                    session: session
+                ),
+                0.25
+            )
+        case .norseComposeWorkspacePanel:
+            let cipherName = session.activeCipher?.label ?? "Cipher"
+            return (
+                hosted(
+                    CodexComposeWorkspacePanel(
+                        model: CodexComposeWorkspacePanelModel(
+                            composition: model.shortPlan,
+                            cipherName: cipherName,
+                            relicName: artifactName(
+                                id: model.selection.relicID,
+                                descriptor: model.descriptor
+                            ),
+                            sealName: model.selection.sealID.map {
+                                artifactName(id: $0, descriptor: model.descriptor)
+                            } ?? "None",
+                            primaryActionTitle: "Preview Message"
+                        ),
+                        image: { requiredImage($0, model: model) }
+                    ),
+                    session: session
+                ),
+                0.25
+            )
+        case .shortMessagePanel:
+            return (
+                hosted(
+                    CodexMessagePanel(
+                        model: CodexMessagePanelModel(
+                            format: .short,
+                            composition: model.shortPlan
+                        ),
+                        image: { requiredImage($0, model: model) }
+                    ),
+                    session: session
+                ),
+                0.25
+            )
+        case .longMessagePanel:
+            return (
+                hosted(
+                    CodexMessagePanel(
+                        model: CodexMessagePanelModel(
+                            format: .long,
+                            composition: model.longPlan
+                        ),
+                        image: { requiredImage($0, model: model) }
+                    ),
+                    session: session
+                ),
+                0.25
+            )
+        case .receivedCipherPanel:
+            let route = try ThemeFidelityRoute.make(
+                surface: .receivedCipher,
+                model: model,
+                session: session
+            )
+            return (route.view, route.warmup)
+        case .sharePreviewCard:
+            return (
+                hosted(
+                    CodexSharePreviewCard(
+                        model: CodexSharePreviewCardModel(
+                            heading: "Share Preview",
+                            productName: "Rune Scribe Cipher",
+                            attribution: "Sent with Rune Scribe",
+                            deepLinkLabel: "runescribe://message",
+                            composition: model.previewPlan
+                        ),
+                        image: { requiredImage($0, model: model) }
+                    ),
+                    session: session
+                ),
+                0.25
+            )
+        case .themeBackgroundPanel:
+            return (
+                hosted(
+                    CodexBackgroundTreatmentPanel(
+                        model: CodexBackgroundTreatmentPanelModel(
+                            title: "Background Treatment",
+                            summary: "Cold seas, ancient halls, iron and stone. Subtle motion in firelight and mist.",
+                            backgroundResourceID: model.descriptor.codex.background
+                                .staticBaseResourceID
+                        ),
+                        image: { requiredImage($0, model: model) }
+                    ),
+                    session: session
+                ),
+                0.25
+            )
+        case .masteryOverviewPanel, .masteryDetailPanel:
+            guard let frame = model.descriptor.codex.frames.first,
+                  let crest = model.descriptor.codex.crests.first
+            else { throw ThemeFidelityCaptureError.invalidDescriptor }
+            let titleName = session.progressionSnapshot?.titles.first(where: {
+                $0.titleID == model.theme.masteryTitleID
+            })?.presentation.displayName
+                ?? seedState.primary.masteryTitlePresentation.displayName
+            let masteryModel = CodexMasteryRewardsPanelModel(
+                heading: "Mastery Rewards",
+                frameName: frame.metadata.displayName.fallbackValue,
+                crestName: crest.metadata.displayName.fallbackValue,
+                titleName: titleName,
+                titleInscription: titleName.uppercased(),
+                titleGlyphInscription: model.glyphTokens.prefix(7).joined(separator: " "),
+                accomplishment: "Awarded for completing \(model.descriptor.codex.displayName.fallbackValue) Mastery.",
+                frameResourceID: frame.staticFallbackResourceID,
+                crestResourceID: crest.thumbnailResourceID ?? crest.staticFallbackResourceID
+            )
+            return (
+                hosted(
+                    CodexMasteryRewardsPanel(
+                        model: masteryModel,
+                        style: recipe == .masteryOverviewPanel ? .overview : .detail,
+                        image: { requiredImage($0, model: model) }
+                    ),
+                    session: session
+                ),
+                0.25
+            )
+        case .vaultCardStateStack:
+            let vault = model.descriptor.codex.vault
+            return (
+                hosted(
+                    CodexVaultCardStateStack(
+                        model: CodexVaultCardStateStackModel(
+                            heading: "Vault Codex Card",
+                            codexName: model.descriptor.codex.displayName.fallbackValue,
+                            codexSubtitle: model.descriptor.codex.shortDescription.fallbackValue,
+                            cards: [
+                                CodexVaultCardStateModel(
+                                    state: .owned,
+                                    heading: "Owned (Base Theme)",
+                                    detail: "Selected",
+                                    resourceID: vault.cardResourceID,
+                                    isApplicable: true
+                                ),
+                                CodexVaultCardStateModel(
+                                    state: .encountered,
+                                    heading: "Encountered",
+                                    detail: "Encountered",
+                                    resourceID: vault.encounteredResourceID,
+                                    isApplicable: true
+                                ),
+                                CodexVaultCardStateModel(
+                                    state: .locked,
+                                    heading: "Locked State (Not Applicable)",
+                                    detail: "Always available",
+                                    resourceID: vault.lockedSilhouetteResourceID,
+                                    isApplicable: false
+                                ),
+                            ]
+                        ),
+                        image: { requiredImage($0, model: model) }
+                    ),
+                    session: session
+                ),
+                0.25
+            )
+        default:
+            throw ThemeFidelityCaptureError.invalidDescriptor
+        }
+    }
+
+    private static func artifactSpecimen(
+        candidate: ThemeCanonicalCatalog.Candidate,
+        kind: String,
+        artifactID: String,
+        model: ThemeFidelityRenderModel,
+        session: RuneScribeUISession
+    ) throws -> AnyView {
+        guard let id = ArtifactID(rawValue: artifactID) else {
+            throw ThemeFidelityCaptureError.invalidDescriptor
+        }
+        if kind == "relic" {
+            guard let relic = model.descriptor.codex.relics.first(where: {
+                $0.metadata.id == id
+            }) else { throw ThemeFidelityCaptureError.invalidDescriptor }
+            guard let ordinalIndex = model.descriptor.codex.relics.firstIndex(where: {
+                $0.metadata.id == id
+            }),
+            let layout = relic.layouts.first(where: { $0.id == relic.defaultLayoutID }),
+            let script = model.descriptor.codex.scripts.first(where: {
+                $0.id == model.descriptor.codex.primaryScriptID
+            }) else { throw ThemeFidelityCaptureError.invalidDescriptor }
+            let resourceID = model.descriptor.criticality == .requiredBase
+                ? relic.thumbnailResourceID : relic.primaryResourceID
+            guard let reference = model.descriptor.resources.first(where: {
+                $0.id == resourceID
+            }) else { throw ThemeFidelityCaptureError.invalidDescriptor }
+            let pixelSize = reference.integrity.pixelSize
+            let artworkAspectRatio = pixelSize.map {
+                Double($0.width) / Double($0.height)
+            } ?? (Double(layout.aspectRatio.width) / Double(layout.aspectRatio.height))
+            let specimenRows = Int(
+                layout.catalogSpecimenRows
+                    ?? (model.descriptor.criticality == .requiredBase ? 3 : 0)
+            )
+            let specimenColumns = Int(
+                layout.catalogSpecimenColumns
+                    ?? (model.descriptor.criticality == .requiredBase ? 5 : 0)
+            )
+            let inscription = specimenInscription(
+                script: script,
+                rows: specimenRows,
+                columns: specimenColumns,
+                enabled: specimenRows > 0 && specimenColumns > 0
+            )
+            let accessibilityDescription = [
+                relic.metadata.accessibility.label.fallbackValue,
+                relic.metadata.accessibility.hint?.fallbackValue ?? "",
+            ].joined(separator: " ").lowercased()
+            let item = browserItem(
+                metadata: relic.metadata,
+                resourceID: resourceID,
+                kind: .relic,
+                selectedID: model.selection.relicID,
+                ordinal: ordinalIndex + 1
+            )
+            return hosted(
+                CodexArtifactSpecimenCard(
+                    item: item,
+                    relicLayout: layout,
+                    artworkAspectRatio: artworkAspectRatio,
+                    backgroundImage: requiredImage(
+                        model.descriptor.codex.background.staticBaseResourceID,
+                        model: model
+                    )
+                ) {
+                    ThemeRelicSpecimenArtwork(
+                        image: requiredImage(resourceID, model: model),
+                        plan: ThemeRelicSpecimenPlan(
+                            inscription: inscription,
+                            fontPostScriptName: script.fontPostScriptName?.rawValue
+                                ?? RuneThemePaletteInterpreter.fontPostScriptName,
+                            glyphSafeRegion: layout.glyphSafeRegion,
+                            artworkAspectRatio: artworkAspectRatio,
+                            minimumGlyphScale: layout.minimumGlyphScale,
+                            usesPrimaryTextColor: accessibilityDescription.contains("dark")
+                                || accessibilityDescription.contains("charcoal")
+                                || accessibilityDescription.contains("obsidian")
+                        )
+                    )
+                },
+                session: session
+            )
+        }
+        guard kind == "seal",
+              let seal = model.descriptor.codex.seals.first(where: {
+                  $0.metadata.id == id
+              })
+        else { throw ThemeFidelityCaptureError.invalidDescriptor }
+        let resourceID = seal.standardResourceID
+        guard
+              let reference = model.descriptor.resources.first(where: {
+                  $0.id == resourceID
+              })
+        else { throw ThemeFidelityCaptureError.invalidDescriptor }
+        let artworkAspectRatio = reference.integrity.pixelSize.map {
+            Double($0.width) / Double($0.height)
+        } ?? 1
+        let item = browserItem(
+            metadata: seal.metadata,
+            resourceID: resourceID,
+            kind: .seal,
+            selectedID: model.selection.sealID
+        )
+        return hosted(
+            CodexArtifactSpecimenCard(
+                item: item,
+                artworkAspectRatio: artworkAspectRatio,
+                backgroundImage: requiredImage(
+                    model.descriptor.codex.background.staticBaseResourceID,
+                    model: model
+                )
+            ) {
+                requiredImage(resourceID, model: model)
+                    .resizable()
+                    .scaledToFit()
+            },
+            session: session
+        )
+    }
+
+    private static func hostedPreview(
+        plan: ThemeArtifactCompositionPlan,
+        model: ThemeFidelityRenderModel,
+        session: RuneScribeUISession
+    ) -> AnyView {
+        hosted(
+            ThemeArtifactPreview(
+                plan: plan,
+                maximumCanvasWidth: nil,
+                image: { model.presentation.image(for: $0) }
+            ),
+            session: session
+        )
+    }
+
+    private static func hosted<Content: View>(
+        _ content: Content,
+        session: RuneScribeUISession
+    ) -> AnyView {
+        AnyView(
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .environmentObject(session)
+            .environment(
+                \.runtimeApplicationResourcePresentation,
+                session.resourcePresentation
+            )
+            .environment(
+                \.runtimeAccessibilityPreferences,
+                RuntimeAccessibilityPreferences()
+            )
+            .environment(\.themeCaptureIdentifiersEnabled, true)
+            .preferredColorScheme(.dark)
+        )
+    }
+
+    private static func hostedFullScreen<Content: View>(
+        _ content: Content,
+        session: RuneScribeUISession
+    ) -> AnyView {
+        hosted(
+            ZStack {
+                RuntimeMetalBackground()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea()
+                    .clipped()
+                content
+            },
+            session: session
+        )
+    }
+
+    private static func requiredImage(
+        _ resourceID: ThemeResourceID,
+        model: ThemeFidelityRenderModel
+    ) -> Image {
+        guard let image = model.presentation.image(for: resourceID) else {
+            preconditionFailure("Required canonical production resource was not prepared.")
+        }
+        return image
+    }
+
+    private static func artifactName(
+        id: ArtifactID,
+        descriptor: ThemeDescriptor
+    ) -> String {
+        if let relic = descriptor.codex.relics.first(where: { $0.metadata.id == id }) {
+            return relic.metadata.displayName.fallbackValue
+        }
+        if let seal = descriptor.codex.seals.first(where: { $0.metadata.id == id }) {
+            return seal.metadata.displayName.fallbackValue
+        }
+        return id.rawValue
+    }
+
+    private static func browserItem(
+        metadata: ThemeArtifactMetadata,
+        resourceID: ThemeResourceID,
+        kind: ThemeVisualArtifactKind,
+        selectedID: ArtifactID?,
+        ordinal: Int? = nil
+    ) -> ThemeArtifactBrowserItem {
+        let state: ThemeVisualContentState = if metadata.id == selectedID {
+            .selected
+        } else if metadata.availability == .included {
+            .owned
+        } else {
+            .locked
+        }
+        return ThemeArtifactBrowserItem(
+            id: metadata.id,
+            resourceID: resourceID,
+            name: metadata.displayName.fallbackValue,
+            description: metadata.description.fallbackValue,
+            facets: metadata.facets?.map(\.fallbackValue) ?? [],
+            kind: kind,
+            rarity: metadata.rarity,
+            state: state,
+            accessibilityLabel: metadata.accessibility.label.fallbackValue,
+            accessibilityHint: metadata.accessibility.hint?.fallbackValue,
+            provenance: nil,
+            isSelectable: state == .owned || state == .selected,
+            ordinal: ordinal,
+            availability: metadata.availability
+        )
+    }
+
+    private static func specimenInscription(
+        script: ThemeScriptDescriptor,
+        rows: Int,
+        columns: Int,
+        enabled: Bool
+    ) -> String {
+        guard enabled, rows > 0, columns > 0 else { return "" }
+        let tokens = Array(script.glyphs.prefix(rows * columns).map(\.textToken))
+        return stride(from: 0, to: tokens.count, by: columns).map { start in
+            tokens[start ..< min(start + columns, tokens.count)].joined(separator: " ")
+        }.joined(separator: "\n")
     }
 }
 
@@ -1613,6 +2776,25 @@ private final class ThemeFidelityRuntimeFixture {
         await session.loadThemeCodexCardPreviews()
     }
 
+    func select(_ launch: ThemeFidelityQualificationLaunch) async throws {
+        try await session.prepareQualificationTheme(codexID: launch.codexID)
+        let snapshot = try await themeClient.snapshot()
+        guard snapshot.effectiveCodexID == launch.codexID,
+              await Self.eventually({
+                  self.session.themeSnapshot?.effectiveCodexID == launch.codexID
+                      && self.session.themeSnapshot?.effectiveTheme.id == launch.themeID
+                      && self.session.selectedThemeRelicID == launch.defaultRelicID
+                      && self.session.selectedThemeSealID == launch.defaultSealID
+                      && self.session.activeThemeVisualPresentation?.plan.codexID
+                          == launch.codexID
+                      && self.session.activeThemeVisualPresentation?.revision
+                          == self.session.activeThemeVisualPresentation?.plan.revision
+              })
+        else { throw ThemeFidelityCaptureError.runtimeDidNotSettle }
+        await session.loadActiveThemeCatalogVisuals()
+        await session.loadThemeCodexCardPreviews()
+    }
+
     func makeOptionalLockedCodexFixture() async throws -> ThemeFidelityLockedCodexFixture {
         let descriptor = try await themeClient.providerDescriptor(
             for: ThemeFidelityTheme.moonleaf.codexID
@@ -1842,6 +3024,7 @@ private struct ThemeFidelityRenderModel {
     let shortPlan: ThemeArtifactCompositionPlan
     let longPlan: ThemeArtifactCompositionPlan
     let previewPlan: ThemeArtifactCompositionPlan
+    let receivedPlan: ThemeArtifactCompositionPlan
     let highContrastPlan: ThemeArtifactCompositionPlan
     let reduceMotionPlan: ThemeArtifactCompositionPlan
     let presentation: ActiveThemeVisualPresentation
@@ -1873,10 +3056,22 @@ private struct ThemeFidelityRenderModel {
             $0.id == descriptor.codex.primaryScriptID
         }) else { throw ThemeFidelityCaptureError.invalidDescriptor }
         let glyphTokens = script.glyphs.prefix(14).map(\.textToken)
-        let specimen = glyphTokens.joined()
-        let short = specimen.isEmpty ? "RUNESCRIBE" : specimen
-        let long = Array(repeating: short, count: 18).joined(separator: " ")
-        let preview = Array(repeating: short, count: 4).joined(separator: " ")
+        let availableGlyphs = glyphTokens.isEmpty ? ["RUNESCRIBE"] : glyphTokens
+
+        func specimen(rows: Int, columns: Int) -> String {
+            (0 ..< rows).map { row in
+                (0 ..< columns).map { column in
+                    availableGlyphs[(row * columns + column) % availableGlyphs.count]
+                }
+                .joined(separator: " ")
+            }
+            .joined(separator: "\n")
+        }
+
+        let short = specimen(rows: 2, columns: 5)
+        let long = specimen(rows: 6, columns: 9)
+        let preview = specimen(rows: 2, columns: 5)
+        let received = specimen(rows: 1, columns: 10)
 
         func plan(
             inscription: String = preview,
@@ -1895,6 +3090,7 @@ private struct ThemeFidelityRenderModel {
         }
 
         let previewPlan = try plan()
+        let receivedPlan = try plan(inscription: received)
         let safePreview = try await prepareSafePreview(
             inscription: preview,
             selection: selection,
@@ -1912,6 +3108,7 @@ private struct ThemeFidelityRenderModel {
             shortPlan: plan(inscription: short),
             longPlan: plan(inscription: long),
             previewPlan: previewPlan,
+            receivedPlan: receivedPlan,
             highContrastPlan: plan(mode: .highContrast),
             reduceMotionPlan: plan(reduceMotion: true),
             presentation: presentation,
@@ -2008,7 +3205,8 @@ private struct ThemeFidelityRoute {
     static func make(
         surface: ThemeFidelitySurface,
         model: ThemeFidelityRenderModel,
-        session: RuneScribeUISession
+        session: RuneScribeUISession,
+        qualificationViewportWidth: CGFloat? = nil
     ) throws -> Self {
         try configureProgression(surface: surface, model: model, session: session)
         let rootID = ThemeFidelityViewport.rootID
@@ -2036,7 +3234,8 @@ private struct ThemeFidelityRoute {
                 ),
                 initialViewportProbeID: "workspace.input.compose-short",
                 initialComposeCaptureLength: .short,
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: qualificationViewportWidth
             ))
             let identifiers = [
                 ThemeCaptureIdentifier.screenWorkspace,
@@ -2058,7 +3257,8 @@ private struct ThemeFidelityRoute {
                 ),
                 initialViewportProbeID: "workspace.input.compose-long",
                 initialComposeCaptureLength: .long,
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: qualificationViewportWidth
             ))
             let identifiers = [
                 ThemeCaptureIdentifier.screenWorkspace,
@@ -2073,15 +3273,20 @@ private struct ThemeFidelityRoute {
             requiredIDs.append(contentsOf: identifiers)
             authorityIDs.append(contentsOf: identifiers)
         case .inscriptionPreview:
-            content = AnyView(ContentView(
-                initialSettledArtifact: ContentViewSettledArtifactSeed(
-                    composition: model.previewPlan,
-                    presentation: model.presentation
-                ),
-                forcesScrollableWorkspaceLayout: true
+            content = AnyView(ThemeInscriptionPreviewView(
+                descriptor: model.descriptor,
+                plan: model.previewPlan,
+                selectedLayout: .long,
+                image: { resourceID in
+                    guard let image = model.presentation.image(for: resourceID) else {
+                        preconditionFailure(
+                            "Missing admitted production image: \(resourceID.rawValue)"
+                        )
+                    }
+                    return image
+                }
             ))
             let identifiers = [
-                ThemeCaptureIdentifier.screenWorkspace,
                 ThemeCaptureIdentifier.artifactPreview(
                     relicID: model.selection.relicID
                 ),
@@ -2271,7 +3476,17 @@ private struct ThemeFidelityRoute {
             let reveal = try masteryReveal(model: model)
             session.revealQueue.adopt(head: reveal, canPresent: true)
             session.setRevealBlocker(.rootPresentation, active: false)
-            content = AnyView(UnlockRevealView(reveal: reveal))
+            content = AnyView(UnlockRevealView(
+                reveal: reveal,
+                initialPlan: UnlockRevealPresentationPlan(
+                    revealID: reveal.revealID,
+                    sequenceDurationSeconds: 0,
+                    visualMode: .none,
+                    announcement: nil,
+                    isStatic: true
+                ),
+                initialThemeVisualPresentation: model.presentation
+            ))
             requiredIDs.append("progression.unlock-reveal")
             let identifiers = [
                 ThemeCaptureIdentifier.mastery(codexID: model.descriptor.codex.id),
@@ -2292,7 +3507,8 @@ private struct ThemeFidelityRoute {
                     composition: model.highContrastPlan,
                     presentation: model.presentation
                 ),
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: qualificationViewportWidth
             ))
             let identifiers = [
                 ThemeCaptureIdentifier.screenWorkspace,
@@ -2308,7 +3524,8 @@ private struct ThemeFidelityRoute {
                     composition: model.reduceMotionPlan,
                     presentation: model.presentation
                 ),
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: qualificationViewportWidth
             ))
             let identifiers = [
                 ThemeCaptureIdentifier.screenWorkspace,
@@ -2324,8 +3541,10 @@ private struct ThemeFidelityRoute {
                     composition: model.shortPlan,
                     presentation: model.presentation
                 ),
+                initialViewport: .resultActions,
                 initialViewportProbeID: "workspace.input.large-text",
-                forcesScrollableWorkspaceLayout: true
+                forcesScrollableWorkspaceLayout: true,
+                qualificationViewportWidth: qualificationViewportWidth
             )
                 .environment(\.dynamicTypeSize, .accessibility5))
             let identifiers = [
@@ -2335,6 +3554,7 @@ private struct ThemeFidelityRoute {
                 ),
             ]
             requiredIDs.append(contentsOf: identifiers)
+            requiredIDs.append(contentsOf: ThemeFidelityEvidence.largeTextControlIDs)
             authorityIDs.append(contentsOf: identifiers)
         }
 
@@ -2412,6 +3632,7 @@ private struct ThemeFidelityRoute {
         )
         return PendingMessageViewState(try ReceivedMessageDTO(
             id: MessageID(rawValue: UUID(uuidString: "CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC")!),
+            receivedAt: Date(timeIntervalSinceReferenceDate: 809_299_200),
             plaintext: model.previewText,
             senderName: receivedSenderName,
             cipherID: CipherID(rawValue: receivedCipherID),
@@ -2493,6 +3714,7 @@ private struct ThemeFidelityRoute {
             resourceID: resourceID,
             name: metadata.displayName.fallbackValue,
             description: metadata.description.fallbackValue,
+            facets: metadata.facets?.map(\.fallbackValue) ?? [],
             kind: kind,
             rarity: metadata.rarity,
             state: state,
@@ -3334,7 +4556,7 @@ private enum ThemeFidelityEvidence {
         }
     }
 
-    private static var largeTextControlIDs: [String] {
+    fileprivate static var largeTextControlIDs: [String] {
         var identifiers = [
             "workspace.result.edit",
             "workspace.result.copy",
@@ -3552,6 +4774,42 @@ private final class ThemeFidelityViewportProbeStore {
     }
 }
 
+private enum ThemeFidelityViewportRevealPolicy {
+    static func targetID(
+        viewportBounds: CGRect,
+        frames: [String: CGRect],
+        requiredElementIDs: [String],
+        coveringElementIDs: Set<String>
+    ) -> String? {
+        let candidates = Array(Set(requiredElementIDs)).filter {
+            !coveringElementIDs.contains($0) && $0 != ThemeFidelityViewport.rootID
+        }
+        let clippedFrames = candidates.compactMap { identifier -> (String, CGRect)? in
+            guard let frame = frames[identifier],
+                  !frame.isNull,
+                  !frame.isEmpty,
+                  !viewportBounds.contains(frame)
+            else { return nil }
+            return (identifier, frame.standardized)
+        }
+        if let outermost = clippedFrames.sorted(by: { lhs, rhs in
+            let lhsContains = lhs.1.contains(rhs.1)
+            let rhsContains = rhs.1.contains(lhs.1)
+            if lhsContains != rhsContains { return lhsContains }
+            let lhsArea = lhs.1.width * lhs.1.height
+            let rhsArea = rhs.1.width * rhs.1.height
+            if lhsArea != rhsArea { return lhsArea > rhsArea }
+            return lhs.0 < rhs.0
+        }).first {
+            return outermost.0
+        }
+        return candidates.filter { identifier in
+            guard let frame = frames[identifier] else { return true }
+            return frame.isNull || frame.isEmpty
+        }.sorted().first
+    }
+}
+
 #if os(macOS)
 @MainActor
 private struct ThemeFidelityNativeViewportProbe: NSViewRepresentable {
@@ -3622,6 +4880,7 @@ private struct ThemeFidelityNativeViewportProbe: UIViewRepresentable {
 
 @MainActor
 private final class ThemeFidelityPersistentRenderer {
+    private let ignoresSafeAreaInsets: Bool
     #if os(macOS)
     private let hostingView: NSHostingView<AnyView>
     private let window: NSWindow
@@ -3630,7 +4889,8 @@ private final class ThemeFidelityPersistentRenderer {
     private let window: UIWindow
     #endif
 
-    init() {
+    init(ignoresSafeAreaInsets: Bool = false) {
+        self.ignoresSafeAreaInsets = ignoresSafeAreaInsets
         #if os(macOS)
         _ = NSApplication.shared
         hostingView = NSHostingView(rootView: AnyView(EmptyView()))
@@ -3640,6 +4900,8 @@ private final class ThemeFidelityPersistentRenderer {
             backing: .buffered,
             defer: false
         )
+        window.animationBehavior = .none
+        window.isReleasedWhenClosed = false
         window.contentView = hostingView
         window.orderBack(nil)
         #elseif os(iOS)
@@ -3731,6 +4993,17 @@ private final class ThemeFidelityPersistentRenderer {
         controller.view.frame = bounds
         controller.view.setNeedsLayout()
         controller.view.layoutIfNeeded()
+        if ignoresSafeAreaInsets {
+            let insets = controller.view.safeAreaInsets
+            controller.additionalSafeAreaInsets = UIEdgeInsets(
+                top: controller.additionalSafeAreaInsets.top - insets.top,
+                left: controller.additionalSafeAreaInsets.left - insets.left,
+                bottom: controller.additionalSafeAreaInsets.bottom - insets.bottom,
+                right: controller.additionalSafeAreaInsets.right - insets.right
+            )
+            controller.view.setNeedsLayout()
+            controller.view.layoutIfNeeded()
+        }
         RunLoop.main.run(until: Date(timeIntervalSinceNow: warmup))
         controller.view.layoutIfNeeded()
         let format = UIGraphicsImageRendererFormat()
@@ -3891,13 +5164,12 @@ private final class ThemeFidelityPersistentRenderer {
         refreshProbes: () -> Void
     ) {
         let viewportBounds = root.bounds.insetBy(dx: -0.5, dy: -0.5)
-        guard let targetID = requiredElementIDs.first(where: { identifier in
-            guard !coveringElementIDs.contains(identifier),
-                  identifier != ThemeFidelityViewport.rootID
-            else { return false }
-            guard let frame = store.frames[identifier] else { return true }
-            return frame.isNull || frame.isEmpty || !viewportBounds.contains(frame)
-        }) else { return }
+        guard let targetID = ThemeFidelityViewportRevealPolicy.targetID(
+            viewportBounds: viewportBounds,
+            frames: store.frames,
+            requiredElementIDs: requiredElementIDs,
+            coveringElementIDs: coveringElementIDs
+        ) else { return }
 
         let scrollViews = descendants(of: root).compactMap { $0 as? NSScrollView }
         guard let scrollView = scrollViews.max(by: {
@@ -3980,13 +5252,12 @@ private final class ThemeFidelityPersistentRenderer {
         refreshProbes: () -> Void
     ) {
         let viewportBounds = root.bounds.insetBy(dx: -0.5, dy: -0.5)
-        guard let targetID = requiredElementIDs.first(where: { identifier in
-            guard !coveringElementIDs.contains(identifier),
-                  identifier != ThemeFidelityViewport.rootID
-            else { return false }
-            guard let frame = store.frames[identifier] else { return true }
-            return frame.isNull || frame.isEmpty || !viewportBounds.contains(frame)
-        }) else { return }
+        guard let targetID = ThemeFidelityViewportRevealPolicy.targetID(
+            viewportBounds: viewportBounds,
+            frames: store.frames,
+            requiredElementIDs: requiredElementIDs,
+            coveringElementIDs: coveringElementIDs
+        ) else { return }
 
         let scrollViews = descendants(of: root).compactMap { $0 as? UIScrollView }
             .filter { $0.isScrollEnabled && $0.contentSize.height > $0.bounds.height + 1 }

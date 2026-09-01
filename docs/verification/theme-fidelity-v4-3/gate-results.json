@@ -1,0 +1,535 @@
+{
+  "acceptanceEvidence": false,
+  "evidenceType": "blocking-gate-results",
+  "failingGateCount": 22,
+  "gateCount": 40,
+  "generatedAt": "2026-08-31T22:39:27.467Z",
+  "passingGateCount": 18,
+  "publicationState": "PREPUBLICATION",
+  "result": "FAIL",
+  "results": [
+    {
+      "commandIDs": [
+        "authority-v43",
+        "package-preflight"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/authority-v43.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/package-preflight.json"
+      ],
+      "failures": [],
+      "gateID": "PRE-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Package integrity and authority preflight"
+    },
+    {
+      "commandIDs": [
+        "repository-reconciliation"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/repository-reconciliation.json"
+      ],
+      "failures": [],
+      "gateID": "REPO-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Repository state reconciliation"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists",
+        "Publication-dependent gate remains unresolved in pre-publication mode"
+      ],
+      "gateID": "SRC-001",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Source-bound manifest"
+    },
+    {
+      "commandIDs": [
+        "architecture",
+        "remediation-source"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/architecture.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/remediation-source.json"
+      ],
+      "failures": [],
+      "gateID": "ARCH-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Forsetti architecture boundary"
+    },
+    {
+      "commandIDs": [
+        "swift-release-build",
+        "swift-tests"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/swift-release-build.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/swift-tests.json"
+      ],
+      "failures": [],
+      "gateID": "BUILD-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Swift package build and tests"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "BUILD-002",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "macOS Release qualification"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "BUILD-003",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "iOS and iPad Simulator Release qualification"
+    },
+    {
+      "commandIDs": [
+        "python-tests"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/python-tests.json"
+      ],
+      "failures": [],
+      "gateID": "TEST-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Focused visual tooling tests"
+    },
+    {
+      "commandIDs": [
+        "python-tests",
+        "swift-tests"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/python-tests.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/swift-tests.json"
+      ],
+      "failures": [],
+      "gateID": "TEST-002",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Regression suite"
+    },
+    {
+      "commandIDs": [
+        "authority-v43",
+        "final-resource-inventory"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/authority-v43.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/final-resource-inventory.json"
+      ],
+      "failures": [],
+      "gateID": "RES-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Complete asset inventory"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "RES-002",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Resource integrity"
+    },
+    {
+      "commandIDs": [
+        "final-resource-inventory",
+        "production-reference-boundary"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/final-resource-inventory.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/production-reference-boundary.json"
+      ],
+      "failures": [],
+      "gateID": "RES-003",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Resource consumption coverage"
+    },
+    {
+      "commandIDs": [
+        "production-reference-boundary",
+        "remediation-source",
+        "visual-authority"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/production-reference-boundary.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/remediation-source.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/visual-authority.json"
+      ],
+      "failures": [],
+      "gateID": "RES-004",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "No placeholders or cheap substitutes"
+    },
+    {
+      "commandIDs": [
+        "norse-catalog-extractor",
+        "norse-message-extractor",
+        "norse-provenance",
+        "norse-remediation",
+        "shipping-products"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/norse-catalog-extractor.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/norse-message-extractor.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/norse-provenance.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/norse-remediation.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/shipping-products.json"
+      ],
+      "failures": [],
+      "gateID": "NOR-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Approved Norse catalog"
+    },
+    {
+      "commandIDs": [
+        "architecture",
+        "shipping-products",
+        "swift-tests"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/architecture.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/shipping-products.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/swift-tests.json"
+      ],
+      "failures": [],
+      "gateID": "NOR-002",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Norse permanent Base provider"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "NOR-003",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Norse locked-state negative invariant"
+    },
+    {
+      "commandIDs": [
+        "legacy-negative-mutations",
+        "swift-tests"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/legacy-negative-mutations.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/swift-tests.json"
+      ],
+      "failures": [],
+      "gateID": "MIG-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Legacy Norse migration"
+    },
+    {
+      "commandIDs": [
+        "roadmap-alignment",
+        "swift-tests"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/roadmap-alignment.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/swift-tests.json"
+      ],
+      "failures": [],
+      "gateID": "PROG-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Progression catalog integrity"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "PROG-002",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Unlock-state presentation"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "THEME-001",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Five production Theme providers"
+    },
+    {
+      "commandIDs": [
+        "legacy-negative-mutations",
+        "swift-tests"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/legacy-negative-mutations.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/swift-tests.json"
+      ],
+      "failures": [],
+      "gateID": "THEME-002",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Optional-provider failure isolation"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "UI-001",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Shared UI scaffold fidelity"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "UI-002",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Responsive capture matrix"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "UI-003",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Responsive structural authority"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "VIS-001",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Canonical visual candidates"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "VIS-002",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Canonical mapping authority"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "VIS-003",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Approved full-screen states"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "VIS-004",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Approved component and panel states"
+    },
+    {
+      "commandIDs": [
+        "production-reference-boundary",
+        "shipping-products"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/production-reference-boundary.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/shipping-products.json"
+      ],
+      "failures": [],
+      "gateID": "VIS-005",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Exact production candidates"
+    },
+    {
+      "commandIDs": [
+        "remediation-source",
+        "swift-tests"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/remediation-source.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/swift-tests.json"
+      ],
+      "failures": [],
+      "gateID": "SHARE-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Interactive/static composition parity"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "SHARE-002",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Static-share output"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "ACCESS-001",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "High Contrast"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "ACCESS-002",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Reduce Motion"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "ACCESS-003",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Large text and Dynamic Type"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists"
+      ],
+      "gateID": "ACCESS-004",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Accessibility semantics and controls"
+    },
+    {
+      "commandIDs": [
+        "legacy-negative-mutations",
+        "v43-negative-mutations"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/legacy-negative-mutations.json",
+        "docs/verification/theme-fidelity-v4-3/commands/records/v43-negative-mutations.json"
+      ],
+      "failures": [],
+      "gateID": "NEG-001",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Negative mutation suite"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists",
+        "Publication-dependent gate remains unresolved in pre-publication mode"
+      ],
+      "gateID": "EVID-001",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Complete source-bound evidence"
+    },
+    {
+      "commandIDs": [
+        "historical-evidence-immutability"
+      ],
+      "evidencePaths": [
+        "docs/verification/theme-fidelity-v4-3/commands/records/historical-evidence-immutability.json"
+      ],
+      "failures": [],
+      "gateID": "EVID-002",
+      "result": "PASS",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Historical evidence immutability"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists",
+        "Publication-dependent gate remains unresolved in pre-publication mode"
+      ],
+      "gateID": "PUB-001",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Publication boundary"
+    },
+    {
+      "commandIDs": [],
+      "evidencePaths": [],
+      "failures": [
+        "No explicit gate assessment record exists",
+        "Publication-dependent gate remains unresolved in pre-publication mode"
+      ],
+      "gateID": "AUDIT-001",
+      "result": "FAIL",
+      "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+      "title": "Autonomous final self-audit"
+    }
+  ],
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "templateOnly": false
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run hosted Theme fidelity captures and produce source-bound evidence."""
+"""Run sequential Theme-fidelity captures and produce source-bound evidence."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 import platform
 import plistlib
+import re
 import subprocess
 import sys
 from typing import Any
@@ -32,12 +33,54 @@ except ModuleNotFoundError:
 
 
 MATRIX_SHA256 = "bf49d24a1ac9ef881c25504a17ceeea4befe9d685fe46fd469f99b43f4ae833c"
+DEFAULT_MATRIX = Path(
+    "docs/verification/theme-fidelity-v4/Golden-Screenshot-Matrix.json"
+)
 DEFAULT_AUTHORITY_MANIFEST = Path(
     "docs/verification/theme-fidelity-v4/authority/asset-manifest.json"
 )
 V12_IMPORT_MANIFEST = Path(
     "docs/verification/theme-fidelity-v4/authority/v4.2/IMPORT-MANIFEST.json"
 )
+V43_IMPORT_MANIFEST = Path(
+    "docs/verification/theme-fidelity-v4-3/authority/IMPORT-MANIFEST-v4.3.json"
+)
+V43_RESPONSIVE_MATRIX = Path(
+    "docs/verification/theme-fidelity-v4-3/authority/"
+    "03-COMPARISON-AUTHORITY/Responsive-Surface-Matrix-v1.3.json"
+)
+AUTHORITY_CONTRACT_LEGACY = "legacy"
+AUTHORITY_CONTRACT_V43 = "v4.3"
+SOURCE_SHA_PATTERN = re.compile(r"[0-9a-f]{40}\Z")
+V43_CAPTURE_JOB_ORDER = (
+    "iphone",
+    "ipad",
+    "macos",
+    "iphone-xcui",
+    "ipad-xcui",
+    "macos-xcui",
+)
+V43_EXTRACTION_COUNTS = {
+    "pngCount": 400,
+    "auxiliaryPNGCount": 44,
+    "recordCount": 400,
+    "candidatePNGCount": 341,
+    "xcuiQueryPNGCount": 4,
+    "xcuiSidecarCount": 325,
+    "attachmentCount": 1514,
+}
+V43_XCUI_RESOURCE_RELATIVES = (
+    "docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/"
+    "Comparison-Authority-v1.3.json",
+    "docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/"
+    "Responsive-Candidate-Catalog-v1.3.json",
+    "docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/"
+    "Deterministic-Seed-Catalog-v1.3.json",
+    "docs/verification/theme-fidelity-v4-3/authority/03-COMPARISON-AUTHORITY/"
+    "Runtime-Probe-Catalog-v1.3.json",
+)
+V43_XCUI_RESOURCE_NAMES = tuple(Path(path).name for path in V43_XCUI_RESOURCE_RELATIVES)
+V43_XCUI_TARGETS = ("RuneScribIOSUITests", "RuneScribMacParityUITests")
 
 
 class CaptureError(ValueError):
@@ -106,16 +149,283 @@ def executable_record(path: Path) -> dict[str, str]:
     return {"path": str(resolved), "sha256": sha256_file(resolved)}
 
 
-def resolve_authority_manifest(root: Path, requested: Path) -> Path:
-    resolved = (root / requested).resolve() if not requested.is_absolute() else requested.resolve()
-    canonical = (root / DEFAULT_AUTHORITY_MANIFEST).resolve()
+def resolve_contract_source_sha(
+    authority_contract: str,
+    source_sha: str | None,
+    phase: str,
+) -> str | None:
+    if authority_contract == AUTHORITY_CONTRACT_V43:
+        if phase != "final":
+            raise CaptureError("v4.3 responsive qualification requires --phase final")
+        if source_sha is None or SOURCE_SHA_PATTERN.fullmatch(source_sha) is None:
+            raise CaptureError(
+                "v4.3 responsive qualification requires --source-sha as exactly "
+                "40 lowercase hex characters"
+            )
+        return source_sha
+    if authority_contract != AUTHORITY_CONTRACT_LEGACY:
+        raise CaptureError(f"unsupported authority contract: {authority_contract!r}")
+    if source_sha is not None:
+        raise CaptureError("--source-sha is only valid with --authority-contract v4.3")
+    return None
+
+
+def resolve_matrix(
+    root: Path,
+    requested: Path | None,
+    authority_contract: str,
+) -> Path:
+    default = (
+        V43_RESPONSIVE_MATRIX
+        if authority_contract == AUTHORITY_CONTRACT_V43
+        else DEFAULT_MATRIX
+    )
+    selected = requested or default
+    resolved = (root / selected).resolve() if not selected.is_absolute() else selected.resolve()
+    if authority_contract == AUTHORITY_CONTRACT_V43:
+        canonical = (root / V43_RESPONSIVE_MATRIX).resolve()
+        if resolved != canonical:
+            raise CaptureError(
+                "v4.3 responsive matrix must be the canonical imported repository authority"
+            )
+        if not resolved.is_file() or resolved.is_symlink():
+            raise CaptureError(f"v4.3 responsive matrix is missing or linked: {resolved}")
+        return resolved
+    if not resolved.is_file() or sha256_file(resolved) != MATRIX_SHA256:
+        raise CaptureError("repository Golden Screenshot Matrix differs from the controlling matrix")
+    return resolved
+
+
+def resolve_authority_manifest(
+    root: Path,
+    requested: Path | None,
+    authority_contract: str = AUTHORITY_CONTRACT_LEGACY,
+) -> Path:
+    default = (
+        V43_IMPORT_MANIFEST
+        if authority_contract == AUTHORITY_CONTRACT_V43
+        else DEFAULT_AUTHORITY_MANIFEST
+    )
+    selected = requested or default
+    resolved = (root / selected).resolve() if not selected.is_absolute() else selected.resolve()
+    canonical = (root / default).resolve()
     if resolved != canonical:
         raise CaptureError(
-            "authority manifest must be the canonical repository manifest used by the comparator"
+            "authority manifest must be the canonical repository manifest for the contract"
         )
-    if not resolved.is_file():
+    if not resolved.is_file() or (
+        authority_contract == AUTHORITY_CONTRACT_V43 and resolved.is_symlink()
+    ):
         raise CaptureError(f"authority manifest is missing: {resolved}")
     return resolved
+
+
+def validate_frozen_source_manifest(
+    manifest: dict[str, Any],
+    source_sha: str,
+) -> None:
+    if manifest.get("sourceSHA") != source_sha:
+        raise CaptureError(
+            "requested source SHA differs from the checked-out frozen source: "
+            f"requested={source_sha} actual={manifest.get('sourceSHA')!r}"
+        )
+
+
+def v43_authority_validation_command(
+    root: Path,
+    manifest: Path,
+    output: Path,
+) -> list[str]:
+    return [
+        sys.executable,
+        str(root / "scripts/theme_fidelity_authority_v13.py"),
+        "--root",
+        str(root),
+        "--manifest",
+        str(manifest),
+        "--output",
+        str(output),
+    ]
+
+
+def validate_v43_authority_report(report: Path, manifest: Path) -> dict[str, Any]:
+    try:
+        document = json.loads(report.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise CaptureError(f"v4.3 authority validation report is invalid: {error}") from error
+    if (
+        not isinstance(document, dict)
+        or document.get("schemaVersion") != "1.3"
+        or document.get("authorityVersion") != "4.3"
+        or document.get("result") != "PASS"
+        or document.get("findings") != []
+        or document.get("manifestSHA256") != sha256_file(manifest)
+    ):
+        raise CaptureError("v4.3 imported authority validation did not pass exactly")
+    return document
+
+
+def validate_v43_extraction_report(
+    report: Path,
+    source_sha: str,
+    authority_manifest: Path,
+) -> dict[str, Any]:
+    try:
+        document = json.loads(report.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise CaptureError(f"v4.3 extraction report is invalid: {error}") from error
+    if not isinstance(document, dict):
+        raise CaptureError("v4.3 extraction report is not a JSON object")
+    validation = document.get("authorityValidation")
+    result_bundles = document.get("resultBundles")
+    roles = (
+        tuple(item.get("role") for item in result_bundles)
+        if isinstance(result_bundles, list)
+        and all(isinstance(item, dict) for item in result_bundles)
+        else ()
+    )
+    if (
+        document.get("schemaVersion") != "1.3"
+        or document.get("result") not in {"pass", "PASS"}
+        or document.get("sourceSHA") != source_sha
+        or document.get("authorityContract") != AUTHORITY_CONTRACT_V43
+        or document.get("sourceXCUIContract") != AUTHORITY_CONTRACT_V43
+        or roles != V43_CAPTURE_JOB_ORDER
+        or any(document.get(key) != value for key, value in V43_EXTRACTION_COUNTS.items())
+        or not isinstance(validation, dict)
+        or validation.get("result") != "PASS"
+        or validation.get("findings") != []
+        or validation.get("manifestSHA256") != sha256_file(authority_manifest)
+    ):
+        raise CaptureError("v4.3 extraction report does not bind the exact authority run")
+    return document
+
+
+def _project_target_block(project_source: str, target_name: str) -> list[str]:
+    lines = project_source.splitlines()
+    header = f"  {target_name}:"
+    try:
+        start = lines.index(header) + 1
+    except ValueError as error:
+        raise CaptureError(f"project.yml target is missing: {target_name}") from error
+    end = len(lines)
+    for index in range(start, len(lines)):
+        line = lines[index]
+        if line.startswith("  ") and not line.startswith("    ") and line.endswith(":"):
+            end = index
+            break
+    return lines[start:end]
+
+
+def _declared_resource_paths(project_source: str, target_name: str) -> set[str]:
+    block = _project_target_block(project_source, target_name)
+    resources: set[str] = set()
+    for index, line in enumerate(block):
+        prefix = "      - path: "
+        if not line.startswith(prefix):
+            continue
+        path = line.removeprefix(prefix)
+        next_line = block[index + 1].strip() if index + 1 < len(block) else ""
+        if next_line == "buildPhase: resources":
+            resources.add(path)
+    return resources
+
+
+def _generated_target_resources(project_path: Path, target_name: str) -> set[str]:
+    converted = subprocess.run(
+        ["plutil", "-convert", "json", "-o", "-", str(project_path)],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if converted.returncode != 0:
+        detail = converted.stderr.strip() or converted.stdout.strip()
+        raise CaptureError(f"generated Xcode project is unreadable: {detail}")
+    try:
+        document = json.loads(converted.stdout)
+        objects = document["objects"]
+    except (json.JSONDecodeError, KeyError, TypeError) as error:
+        raise CaptureError(f"generated Xcode project structure is invalid: {error}") from error
+    targets = [
+        item
+        for item in objects.values()
+        if isinstance(item, dict)
+        and item.get("isa") == "PBXNativeTarget"
+        and item.get("name") == target_name
+    ]
+    if len(targets) != 1:
+        raise CaptureError(f"generated Xcode target is not unique: {target_name}")
+    phases = [
+        objects.get(identifier)
+        for identifier in targets[0].get("buildPhases", [])
+        if isinstance(objects.get(identifier), dict)
+        and objects[identifier].get("isa") == "PBXResourcesBuildPhase"
+    ]
+    if len(phases) != 1:
+        raise CaptureError(f"generated Xcode resource phase is not unique: {target_name}")
+    names: set[str] = set()
+    for build_identifier in phases[0].get("files", []):
+        build_file = objects.get(build_identifier)
+        file_reference = (
+            objects.get(build_file.get("fileRef"))
+            if isinstance(build_file, dict)
+            else None
+        )
+        path = file_reference.get("path") if isinstance(file_reference, dict) else None
+        if not isinstance(path, str) or not path:
+            raise CaptureError(f"generated Xcode resource reference is invalid: {target_name}")
+        names.add(Path(path).name)
+    return names
+
+
+def validate_v43_xcui_source_binding(root: Path) -> None:
+    swift_path = root / "ThemeFidelityXCUITests/ThemeFidelityAuthorityUITests.swift"
+    project_source_path = root / "project.yml"
+    generated_project_path = root / "RuneScrib.xcodeproj/project.pbxproj"
+    for label, path in (
+        ("XCUI authority source", swift_path),
+        ("XcodeGen project source", project_source_path),
+        ("generated Xcode project", generated_project_path),
+    ):
+        if not path.is_file() or path.is_symlink():
+            raise CaptureError(f"{label} is missing or linked: {path}")
+
+    swift_source = swift_path.read_text(encoding="utf-8")
+    loaded = re.findall(
+        r"try\s+decodeResource\(\s*named:\s*\"([^\"]+)\"",
+        swift_source,
+        flags=re.MULTILINE,
+    )
+    expected_stems = {Path(name).stem for name in V43_XCUI_RESOURCE_NAMES}
+    if len(loaded) != 4 or set(loaded) != expected_stems:
+        raise CaptureError("XCUI source does not load the exact four v1.3 catalogs")
+    required_snippets = (
+        "captureCandidateIDs(",
+        'hasPrefix("probe.motion.preview-")',
+        "CaptureInventory(sidecars: 70, candidates: 74, queries: 1)",
+        "CaptureInventory(sidecars: 85, candidates: 89, queries: 1)",
+        "CaptureInventory(sidecars: 325, candidates: 341, queries: 4)",
+    )
+    if any(snippet not in swift_source for snippet in required_snippets):
+        raise CaptureError("XCUI source lacks the direct v4.3 capture contract")
+    if re.search(r"(?:Authority|Catalog)-v1\.2", swift_source):
+        raise CaptureError("XCUI source still references a v1.2 authority resource")
+
+    project_source = project_source_path.read_text(encoding="utf-8")
+    expected_paths = set(V43_XCUI_RESOURCE_RELATIVES)
+    expected_names = set(V43_XCUI_RESOURCE_NAMES)
+    for target_name in V43_XCUI_TARGETS:
+        declared = _declared_resource_paths(project_source, target_name)
+        if declared != expected_paths:
+            raise CaptureError(
+                f"project.yml {target_name} resources differ from direct v4.3 authority"
+            )
+        generated = _generated_target_resources(generated_project_path, target_name)
+        if generated != expected_names:
+            raise CaptureError(
+                f"generated {target_name} resources differ from direct v4.3 authority"
+            )
 
 
 def toolchain_document(root: Path) -> dict[str, Any]:
@@ -313,6 +623,7 @@ def hosted_capture_jobs(
     ipad_id: str,
     derived: Path,
     results: Path,
+    source_sha: str | None = None,
 ) -> list[tuple[str, list[str]]]:
     if phase not in {"baseline", "final"}:
         raise CaptureError(f"invalid hosted capture phase: {phase}")
@@ -328,6 +639,11 @@ def hosted_capture_jobs(
         f"RUNESCRIBE_THEME_FIDELITY_PHASE={phase}",
         "ENABLE_TESTABILITY=YES",
     ]
+    if source_sha is not None:
+        if SOURCE_SHA_PATTERN.fullmatch(source_sha) is None:
+            raise CaptureError("hosted capture source SHA is invalid")
+        common.insert(2, "-disableAutomaticPackageResolution")
+        common.append(f"RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA={source_sha}")
     return [
         (
             "iphone",
@@ -383,6 +699,7 @@ def xcui_capture_jobs(
     ipad_id: str,
     derived: Path,
     results: Path,
+    source_sha: str | None = None,
 ) -> list[tuple[str, list[str]]]:
     if phase not in {"baseline", "final"}:
         raise CaptureError(f"invalid XCUI capture phase: {phase}")
@@ -397,6 +714,11 @@ def xcui_capture_jobs(
         "NO",
         f"RUNESCRIBE_THEME_FIDELITY_PHASE={phase}",
     ]
+    if source_sha is not None:
+        if SOURCE_SHA_PATTERN.fullmatch(source_sha) is None:
+            raise CaptureError("XCUI capture source SHA is invalid")
+        common.insert(2, "-disableAutomaticPackageResolution")
+        common.append(f"RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA={source_sha}")
     return [
         (
             "iphone-xcui",
@@ -444,6 +766,120 @@ def xcui_capture_jobs(
             ],
         ),
     ]
+
+
+def capture_jobs_for_contract(
+    root: Path,
+    authority_contract: str,
+    phase: str,
+    iphone_id: str,
+    ipad_id: str,
+    derived: Path,
+    results: Path,
+    source_sha: str | None,
+) -> list[tuple[str, list[str]]]:
+    source_sha = resolve_contract_source_sha(authority_contract, source_sha, phase)
+    jobs = hosted_capture_jobs(
+        phase,
+        iphone_id,
+        ipad_id,
+        derived,
+        results,
+        source_sha=source_sha,
+    )
+    if authority_contract == AUTHORITY_CONTRACT_V43:
+        validate_v43_xcui_source_binding(root)
+        jobs.extend(
+            xcui_capture_jobs(
+                phase,
+                iphone_id,
+                ipad_id,
+                derived,
+                results,
+                source_sha=source_sha,
+            )
+        )
+        if tuple(label for label, _ in jobs) != V43_CAPTURE_JOB_ORDER:
+            raise CaptureError("v4.3 capture job order differs from the six-job contract")
+        return jobs
+    if authority_contract != AUTHORITY_CONTRACT_LEGACY:
+        raise CaptureError(f"unsupported authority contract: {authority_contract!r}")
+    if (root / V12_IMPORT_MANIFEST).is_file():
+        jobs.extend(
+            xcui_capture_jobs(
+                phase,
+                iphone_id,
+                ipad_id,
+                derived,
+                results,
+            )
+        )
+    return jobs
+
+
+def extraction_command(
+    root: Path,
+    result_bundles: dict[str, Path],
+    iphone: dict[str, Any],
+    ipad: dict[str, Any],
+    simulator_selections: Path,
+    captures: Path,
+    report: Path,
+    authority_contract: str,
+    source_sha: str | None,
+) -> list[str]:
+    if authority_contract not in {
+        AUTHORITY_CONTRACT_LEGACY,
+        AUTHORITY_CONTRACT_V43,
+    }:
+        raise CaptureError(f"unsupported authority contract: {authority_contract!r}")
+    required_roles = (
+        V43_CAPTURE_JOB_ORDER
+        if authority_contract == AUTHORITY_CONTRACT_V43
+        else ("iphone", "ipad", "macos")
+    )
+    missing = [role for role in required_roles if role not in result_bundles]
+    if missing:
+        raise CaptureError(
+            "capture result bundles are incomplete: " + ", ".join(missing)
+        )
+    command = [
+        sys.executable,
+        str(root / "scripts/extract-theme-fidelity-captures.py"),
+    ]
+    for role in required_roles:
+        command.extend(["--result-bundle", f"{role}={result_bundles[role]}"])
+    if authority_contract == AUTHORITY_CONTRACT_LEGACY:
+        for role in ("iphone-xcui", "ipad-xcui", "macos-xcui"):
+            if role in result_bundles:
+                command.extend(["--result-bundle", f"{role}={result_bundles[role]}"])
+    command.extend(
+        [
+            "--expected-device",
+            f"iphone={iphone['udid']}",
+            "--expected-device",
+            f"ipad={ipad['udid']}",
+            "--expected-model",
+            f"iphone={iphone['expectedModelName']}",
+            "--expected-model",
+            f"ipad={ipad['expectedModelName']}",
+            "--simulator-selections",
+            str(simulator_selections),
+        ]
+    )
+    if authority_contract == AUTHORITY_CONTRACT_V43:
+        if source_sha is None or SOURCE_SHA_PATTERN.fullmatch(source_sha) is None:
+            raise CaptureError("v4.3 extraction command has no valid source SHA")
+        command.extend(
+            [
+                "--authority-contract",
+                AUTHORITY_CONTRACT_V43,
+                "--source-sha",
+                source_sha,
+            ]
+        )
+    command.extend(["--output", str(captures), "--report", str(report)])
+    return command
 
 
 def generate_comparison_index(
@@ -659,20 +1095,30 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--iphone-id")
     parser.add_argument("--ipad-id")
     parser.add_argument(
+        "--authority-contract",
+        choices=(AUTHORITY_CONTRACT_LEGACY, AUTHORITY_CONTRACT_V43),
+        default=AUTHORITY_CONTRACT_LEGACY,
+        help="Use legacy v4/v4.2 behavior or the source-bound v4.3 qualification lane.",
+    )
+    parser.add_argument(
+        "--source-sha",
+        help="Exact frozen source SHA; required by --authority-contract v4.3.",
+    )
+    parser.add_argument(
         "--matrix",
         type=Path,
-        default=Path("docs/verification/theme-fidelity-v4/Golden-Screenshot-Matrix.json"),
+        help="Override the legacy matrix; v4.3 requires its canonical imported matrix.",
     )
     parser.add_argument(
         "--authority-manifest",
         type=Path,
-        default=DEFAULT_AUTHORITY_MANIFEST,
+        help="Override the legacy manifest; v4.3 requires its canonical import manifest.",
     )
     return parser.parse_args(argv)
 
 
-def main() -> int:
-    arguments = parse_arguments()
+def main(argv: list[str] | None = None) -> int:
+    arguments = parse_arguments(argv)
 
     root = arguments.root.resolve()
     phase_root = (arguments.output_root / arguments.phase).resolve()
@@ -681,11 +1127,23 @@ def main() -> int:
     started = timestamp()
     command_results: list[dict[str, Any]] = []
     comparison_run: dict[str, Any] | None = None
+    comparison_index: Path | None = None
+    capture_index: Path | None = None
+    authority_validation_path: Path | None = None
+    source_sha: str | None = None
+    authority_contract = arguments.authority_contract
     try:
-        matrix = (root / arguments.matrix).resolve() if not arguments.matrix.is_absolute() else arguments.matrix.resolve()
-        if not matrix.is_file() or sha256_file(matrix) != MATRIX_SHA256:
-            raise CaptureError("repository Golden Screenshot Matrix differs from the controlling matrix")
-        authority_manifest = resolve_authority_manifest(root, arguments.authority_manifest)
+        source_sha = resolve_contract_source_sha(
+            authority_contract,
+            arguments.source_sha,
+            arguments.phase,
+        )
+        matrix = resolve_matrix(root, arguments.matrix, authority_contract)
+        authority_manifest = resolve_authority_manifest(
+            root,
+            arguments.authority_manifest,
+            authority_contract,
+        )
         ensure_empty_output(phase_root)
         logs = phase_root / "logs"
         results = phase_root / "results"
@@ -695,6 +1153,14 @@ def main() -> int:
             directory.mkdir(parents=True, exist_ok=True)
 
         indexer = load_indexer(root)
+        source_before_path = evidence / f"{arguments.phase}-source-before.json"
+        source_after_path = evidence / f"{arguments.phase}-source-after.json"
+        source_before = indexer.source_manifest(root, [phase_root])
+        indexer.validate_source_manifest_pair(source_before, source_before)
+        if source_sha is not None:
+            validate_frozen_source_manifest(source_before, source_sha)
+        write_json(source_before_path, source_before)
+
         iphone = choose_simulator(root, arguments.iphone_id, "iphone")
         ipad = choose_simulator(root, arguments.ipad_id, "ipad")
         simulator_selections_path = evidence / "simulator-destinations.json"
@@ -707,31 +1173,57 @@ def main() -> int:
         )
         toolchain_path = evidence / "toolchain.json"
         write_json(toolchain_path, toolchain_document(root))
-        source_before_path = evidence / f"{arguments.phase}-source-before.json"
-        source_after_path = evidence / f"{arguments.phase}-source-after.json"
-        source_before = indexer.source_manifest(root, [phase_root])
-        indexer.validate_source_manifest_pair(source_before, source_before)
-        write_json(source_before_path, source_before)
         started = timestamp()
-        jobs = hosted_capture_jobs(
+
+        if authority_contract == AUTHORITY_CONTRACT_V43:
+            authority_validation_path = evidence / "authority-validation-v1.3.json"
+            authority_command = v43_authority_validation_command(
+                root,
+                authority_manifest,
+                authority_validation_path,
+            )
+            authority_result = run_command(
+                authority_command,
+                root,
+                logs / "authority-validation-v1.3.log",
+            )
+            authority_result.update(
+                {
+                    "authorityContract": AUTHORITY_CONTRACT_V43,
+                    "operation": "authority-validation",
+                    "sourceSHA": source_sha,
+                }
+            )
+            command_results.append(authority_result)
+            if authority_result["exitCode"] != 0:
+                raise CaptureError("v4.3 imported authority validation failed")
+            validate_v43_authority_report(
+                authority_validation_path,
+                authority_manifest,
+            )
+
+        jobs = capture_jobs_for_contract(
+            root,
+            authority_contract,
             arguments.phase,
             iphone["udid"],
             ipad["udid"],
             derived,
             results,
+            source_sha,
         )
-        if (root / V12_IMPORT_MANIFEST).is_file():
-            jobs.extend(
-                xcui_capture_jobs(
-                    arguments.phase,
-                    iphone["udid"],
-                    ipad["udid"],
-                    derived,
-                    results,
-                )
-            )
-        for label, command in jobs:
+        for ordinal, (label, command) in enumerate(jobs, start=1):
             command_result = run_command(command, root, logs / f"{label}.log")
+            if authority_contract == AUTHORITY_CONTRACT_V43:
+                command_result.update(
+                    {
+                        "authorityContract": AUTHORITY_CONTRACT_V43,
+                        "captureJobOrdinal": ordinal,
+                        "destinationRole": label,
+                        "parallelTestingEnabled": False,
+                        "sourceSHA": source_sha,
+                    }
+                )
             command_results.append(command_result)
             if command_result["exitCode"] != 0:
                 raise CaptureError(f"capture command failed; see {command_result['log']}")
@@ -740,41 +1232,46 @@ def main() -> int:
             label: results / f"{label}.xcresult" for label, _ in jobs
         }
 
-        extraction_command = [
-            sys.executable,
-            str(root / "scripts/extract-theme-fidelity-captures.py"),
-            "--result-bundle",
-            f"iphone={result_bundles['iphone']}",
-            "--result-bundle",
-            f"ipad={result_bundles['ipad']}",
-            "--result-bundle",
-            f"macos={result_bundles['macos']}",
-            "--expected-device",
-            f"iphone={iphone['udid']}",
-            "--expected-device",
-            f"ipad={ipad['udid']}",
-            "--expected-model",
-            f"iphone={iphone['expectedModelName']}",
-            "--expected-model",
-            f"ipad={ipad['expectedModelName']}",
-            "--simulator-selections",
-            str(simulator_selections_path),
-            "--output",
-            str(captures),
-            "--report",
-            str(evidence / "extraction.json"),
-        ]
-        for role in ("iphone-xcui", "ipad-xcui", "macos-xcui"):
-            if role in result_bundles:
-                extraction_command.extend(
-                    ["--result-bundle", f"{role}={result_bundles[role]}"]
-                )
-        extraction_result = run_command(extraction_command, root, logs / "extraction.log")
+        extraction_report = evidence / "extraction.json"
+        extraction_argv = extraction_command(
+            root,
+            result_bundles,
+            iphone,
+            ipad,
+            simulator_selections_path,
+            captures,
+            extraction_report,
+            authority_contract,
+            source_sha,
+        )
+        extraction_result = run_command(
+            extraction_argv,
+            root,
+            logs / "extraction.log",
+        )
+        if authority_contract == AUTHORITY_CONTRACT_V43:
+            extraction_result.update(
+                {
+                    "authorityContract": AUTHORITY_CONTRACT_V43,
+                    "operation": "six-bundle-direct-v4.3-extraction",
+                    "sourceSHA": source_sha,
+                }
+            )
         command_results.append(extraction_result)
         if extraction_result["exitCode"] != 0:
             raise CaptureError("attachment extraction failed")
+        if authority_contract == AUTHORITY_CONTRACT_V43:
+            assert source_sha is not None
+            validate_v43_extraction_report(
+                extraction_report,
+                source_sha,
+                authority_manifest,
+            )
 
-        if arguments.phase == "final":
+        if (
+            authority_contract == AUTHORITY_CONTRACT_LEGACY
+            and arguments.phase == "final"
+        ):
             if (root / V12_IMPORT_MANIFEST).is_file():
                 comparison_index, comparison_run = generate_v12_comparison_index(
                     root,
@@ -811,53 +1308,64 @@ def main() -> int:
                     != canonical_json_sha256(comparison_run["invocations"])
                 ):
                     raise CaptureError("final comparison run lacks 400 bound invocations")
-        else:
-            comparison_index = None
 
         source_after = indexer.source_manifest(root, [phase_root])
         indexer.validate_source_manifest_pair(source_before, source_after)
+        if source_sha is not None:
+            validate_frozen_source_manifest(source_after, source_sha)
         write_json(source_after_path, source_after)
 
-        index_command = [
-            sys.executable,
-            str(root / "scripts/index-theme-fidelity-captures.py"),
-            "--root",
-            str(root),
-            "--matrix",
-            str(matrix),
-            "--captures",
-            str(captures),
-            "--phase",
-            arguments.phase,
-            "--output",
-            str(evidence / f"{arguments.phase}-capture-index.json"),
-            "--source-manifest-before",
-            str(source_before_path),
-            "--source-manifest-after",
-            str(source_after_path),
-            "--source-exclusion",
-            str(phase_root),
-            "--extraction-report",
-            str(evidence / "extraction.json"),
-            "--toolchain-report",
-            str(toolchain_path),
-            "--authority-manifest",
-            str(authority_manifest),
-            "--started-at",
-            started,
-            "--ended-at",
-            build_ended,
-            *sum((["--command", json.dumps(command)] for _, command in jobs), []),
-            "--command",
-            json.dumps(extraction_command),
-            *sum((["--command-log", str(logs / f"{label}.log")] for label, _ in jobs), []),
-        ]
-        if comparison_index is not None:
-            index_command.extend(["--comparison-index", str(comparison_index)])
-        index_result = run_command(index_command, root, logs / "index.log")
-        command_results.append(index_result)
-        if index_result["exitCode"] != 0:
-            raise CaptureError("capture indexing failed")
+        if authority_contract == AUTHORITY_CONTRACT_LEGACY:
+            capture_index = evidence / f"{arguments.phase}-capture-index.json"
+            index_command = [
+                sys.executable,
+                str(root / "scripts/index-theme-fidelity-captures.py"),
+                "--root",
+                str(root),
+                "--matrix",
+                str(matrix),
+                "--captures",
+                str(captures),
+                "--phase",
+                arguments.phase,
+                "--output",
+                str(capture_index),
+                "--source-manifest-before",
+                str(source_before_path),
+                "--source-manifest-after",
+                str(source_after_path),
+                "--source-exclusion",
+                str(phase_root),
+                "--extraction-report",
+                str(extraction_report),
+                "--toolchain-report",
+                str(toolchain_path),
+                "--authority-manifest",
+                str(authority_manifest),
+                "--started-at",
+                started,
+                "--ended-at",
+                build_ended,
+                *sum(
+                    (["--command", json.dumps(command)] for _, command in jobs),
+                    [],
+                ),
+                "--command",
+                json.dumps(extraction_argv),
+                *sum(
+                    (
+                        ["--command-log", str(logs / f"{label}.log")]
+                        for label, _ in jobs
+                    ),
+                    [],
+                ),
+            ]
+            if comparison_index is not None:
+                index_command.extend(["--comparison-index", str(comparison_index)])
+            index_result = run_command(index_command, root, logs / "index.log")
+            command_results.append(index_result)
+            if index_result["exitCode"] != 0:
+                raise CaptureError("capture indexing failed")
 
         ended = timestamp()
         run_report = {
@@ -891,12 +1399,14 @@ def main() -> int:
             "comparisonRun": comparison_run,
             "outputPaths": {
                 "captures": str(captures),
-                "extraction": str(evidence / "extraction.json"),
-                "extractionSHA256": sha256_file(evidence / "extraction.json"),
+                "extraction": str(extraction_report),
+                "extractionSHA256": sha256_file(extraction_report),
                 "simulatorDestinations": str(simulator_selections_path),
                 "simulatorDestinationsSHA256": sha256_file(simulator_selections_path),
-                "index": str(evidence / f"{arguments.phase}-capture-index.json"),
-                "indexSHA256": sha256_file(evidence / f"{arguments.phase}-capture-index.json"),
+                "index": str(capture_index) if capture_index is not None else None,
+                "indexSHA256": (
+                    sha256_file(capture_index) if capture_index is not None else None
+                ),
                 "sourceManifestBefore": str(source_before_path),
                 "sourceManifestAfter": str(source_after_path),
                 "comparisonIndex": str(comparison_index) if comparison_index is not None else None,
@@ -905,12 +1415,37 @@ def main() -> int:
                 ),
             },
         }
+        if authority_contract == AUTHORITY_CONTRACT_V43:
+            assert source_sha is not None and authority_validation_path is not None
+            run_report.update(
+                {
+                    "authorityContract": AUTHORITY_CONTRACT_V43,
+                    "authorityBinding": {
+                        "importManifest": str(authority_manifest),
+                        "importManifestSHA256": sha256_file(authority_manifest),
+                        "responsiveMatrix": str(matrix),
+                        "responsiveMatrixSHA256": sha256_file(matrix),
+                        "validationReport": str(authority_validation_path),
+                        "validationReportSHA256": sha256_file(
+                            authority_validation_path
+                        ),
+                    },
+                    "captureExecution": {
+                        "jobOrder": list(V43_CAPTURE_JOB_ORDER),
+                        "sequential": True,
+                        "parallelTestingEnabled": False,
+                        "sourceSHA": source_sha,
+                    },
+                }
+            )
         write_json(report_path, run_report)
-    except (CaptureError, json.JSONDecodeError, OSError) as error:
+    except (ValueError, json.JSONDecodeError, OSError) as error:
         if evidence.is_dir():
             failure = {
                 "schemaVersion": "1.0",
                 "phase": arguments.phase,
+                "authorityContract": authority_contract,
+                "sourceSHA": source_sha,
                 "startTimestamp": started,
                 "endTimestamp": timestamp(),
                 "result": "fail",
@@ -922,7 +1457,10 @@ def main() -> int:
         print(f"FAIL: {error}", file=sys.stderr)
         return 1
 
-    print("PASS: captured and indexed the 400-entry matrix")
+    if authority_contract == AUTHORITY_CONTRACT_V43:
+        print("PASS: captured and source-bound the v4.3 responsive authority")
+    else:
+        print("PASS: captured and indexed the 400-entry matrix")
     print(f"REPORT: {report_path}")
     return 0
 

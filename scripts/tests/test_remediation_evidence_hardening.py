@@ -183,8 +183,8 @@ class EvidenceHardeningTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             archive_path = Path(temporary) / "InfoOnly.app.zip"
             plist = plistlib.dumps({
-                "CFBundleShortVersionString": "1.0.39",
-                "CFBundleVersion": "39",
+                "CFBundleShortVersionString": "1.0.40",
+                "CFBundleVersion": "40",
                 "CFBundleIdentifier": "com.runescribe.app",
                 "CFBundlePackageType": "APPL",
                 "CFBundleExecutable": "RuneScrib",
@@ -286,8 +286,8 @@ class EvidenceHardeningTests(unittest.TestCase):
             "status": "PASS",
             "sourceManifestSHA256": "b" * 64,
             "sourceRevision": None,
-            "version": "1.0.39",
-            "build": "39",
+            "version": "1.0.40",
+            "build": "40",
             "simulator": {"name": "iPad Pro", "udid": udid, "runtime": "iOS 26.0"},
             "iOSProduct": {
                 "path": "artifacts/remediation-v1/RuneScrib-iPhoneSimulator-Release.app.zip",
@@ -373,8 +373,8 @@ class EvidenceHardeningTests(unittest.TestCase):
                 "schemaVersion": "1.0",
                 "sourceManifestSHA256": "a" * 64,
                 "sourceRevision": None,
-                "version": "1.0.39",
-                "build": "39",
+                "version": "1.0.40",
+                "build": "40",
                 "findings": findings,
             })
             errors = checker.validate_defect_closure(
@@ -394,8 +394,8 @@ class EvidenceHardeningTests(unittest.TestCase):
                 "schemaVersion": "1.0",
                 "sourceManifestSHA256": "a" * 64,
                 "sourceRevision": None,
-                "version": "1.0.39",
-                "build": "39",
+                "version": "1.0.40",
+                "build": "40",
                 "findings": findings,
             })
             malformed_errors = checker.validate_defect_closure(
@@ -420,7 +420,7 @@ class EvidenceHardeningTests(unittest.TestCase):
             record = {
                 "schemaVersion": "1.0", "status": "PASS",
                 "sourceManifestSHA256": "a" * 64, "sourceRevision": None,
-                "version": "1.0.39", "build": "39",
+                "version": "1.0.40", "build": "40",
                 "command": "inspect publication state", "log": log,
                 "checkedAt": "2026-08-23T00:00:00Z", "branch": None,
                 "defaultBranch": "main", "remoteInspectionPerformed": False,
@@ -473,7 +473,7 @@ class EvidenceHardeningTests(unittest.TestCase):
                 "schemaVersion": "1.0", "status": "PASS",
                 "sourceManifestSHA256": "a" * 64,
                 "sourceRevision": revision,
-                "version": "1.0.39", "build": "39",
+                "version": "1.0.40", "build": "40",
                 "command": command, "log": log,
                 "checkedAt": "2026-08-23T00:00:00Z", "branch": branch,
                 "defaultBranch": "main", "remoteInspectionPerformed": True,
@@ -741,8 +741,8 @@ class EvidenceHardeningTests(unittest.TestCase):
                 "recordID": "full-regression",
                 "gateIDs": ["RC-005"],
                 "sourceManifestSHA256": "a" * 64,
-                "version": "1.0.39",
-                "build": "39",
+                "version": "1.0.40",
+                "build": "40",
                 "result": "PASS",
                 "commands": ["python3 scripts/check-remediation-completion.py"],
                 "environment": {
@@ -1101,8 +1101,8 @@ class EvidenceHardeningTests(unittest.TestCase):
                 "CFBundleExecutable": "RuneScrib",
                 "CFBundleIdentifier": "com.runescribe.app",
                 "CFBundlePackageType": "APPL",
-                "CFBundleShortVersionString": "1.0.39",
-                "CFBundleVersion": "39",
+                "CFBundleShortVersionString": "1.0.40",
+                "CFBundleVersion": "40",
                 "CFBundleSupportedPlatforms": ["iPhoneSimulator"],
             })
             sidecar = plistlib.dumps({

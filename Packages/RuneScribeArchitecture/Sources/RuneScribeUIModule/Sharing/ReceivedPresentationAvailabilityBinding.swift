@@ -1,6 +1,23 @@
 import RuneScribeContracts
 
 enum ReceivedPresentationAvailabilityBinding {
+    static func downgrade(
+        _ presentation: ReceivedSharePresentation,
+        to availability: ShareProviderAvailability
+    ) -> ReceivedSharePresentation {
+        guard availability != .available else { return presentation }
+        return (try? ReceivedSharePresentation(
+            requestedSelection: presentation.requestedSelection,
+            effectiveCodexID: RuneScribeCodexIDs.norse,
+            providerAvailability: availability,
+            renderMode: .norseInteractiveFallback,
+            safePreviewStatus: presentation.safePreviewStatus,
+            provenanceStatus: presentation.provenanceStatus,
+            encounterRecordingStatus: presentation.encounterRecordingStatus,
+            resourceMetadata: presentation.resourceMetadata
+        )) ?? presentation
+    }
+
     static func resolve(
         _ presentation: ReceivedSharePresentation,
         against snapshot: ThemeCoordinatorSnapshotDTO?

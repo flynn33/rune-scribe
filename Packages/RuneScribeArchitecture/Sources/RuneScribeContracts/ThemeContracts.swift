@@ -581,11 +581,13 @@ public enum ThemeResourceRoles {
     public static let relicThumbnail = make("relic.thumbnail")
     public static let relicStaticShareFallback = make("relic.static-share-fallback")
     public static let relicHighContrast = make("relic.high-contrast")
+    public static let sealColorMaster = make("seal.color-master")
     public static let sealVectorMaster = make("seal.vector-master")
     public static let sealMonochromeFallback = make("seal.monochrome-fallback")
     public static let sealThumbnail = make("seal.thumbnail")
     public static let frameVectorMaster = make("frame.vector-master")
     public static let frameStaticFallback = make("frame.static-fallback")
+    public static let frameThumbnail = make("frame.thumbnail")
     public static let crestVectorMaster = make("crest.vector-master")
     public static let crestStaticFallback = make("crest.static-fallback")
     public static let crestThumbnail = make("crest.thumbnail")
@@ -605,7 +607,13 @@ public enum ThemeResourceRoles {
     public static let panelDivider = make("panel.divider")
     public static let panelPrimaryButton = make("panel.primary-button")
     public static let panelTabSelector = make("panel.tab-selector")
+    public static let receivedPrimarySenderAvatar = make("received.primary.sender-avatar")
+    public static let receivedShareSenderAvatar = make("received.share.sender-avatar")
+    public static let receivedShareCodexBadge = make("received.share.codex-badge")
+    public static let receivedPrimaryMedallion = make("received.primary.medallion")
+    public static let receivedShareMedallion = make("received.share.medallion")
     public static let localizationStrings = make("localization.strings")
+    public static let unlockSound = make("unlock-sound")
 
     private static func make(_ rawValue: String) -> ThemeResourceRoleID {
         ThemeResourceRoleID(rawValue: rawValue)!
@@ -978,6 +986,11 @@ public struct ThemeShareLayoutPreset: Codable, Hashable, Sendable {
     public let glyphSafeRegion: ThemeNormalizedRegion
     public let sealAnchors: [ThemeSealAnchor]
     public let maximumGlyphLines: UInt8
+    /// Provider-declared catalog specimen geometry. These values describe the
+    /// representative inscription shown with a Relic in catalog art; they do
+    /// not constrain message pagination.
+    public let catalogSpecimenRows: UInt8?
+    public let catalogSpecimenColumns: UInt8?
     public let minimumGlyphScale: Double
     public let overflowBehavior: ThemeLayoutOverflowBehavior
     public let attributionRegion: ThemeNormalizedRegion
@@ -994,6 +1007,8 @@ public struct ThemeShareLayoutPreset: Codable, Hashable, Sendable {
         glyphSafeRegion: ThemeNormalizedRegion,
         sealAnchors: [ThemeSealAnchor],
         maximumGlyphLines: UInt8,
+        catalogSpecimenRows: UInt8? = nil,
+        catalogSpecimenColumns: UInt8? = nil,
         minimumGlyphScale: Double,
         overflowBehavior: ThemeLayoutOverflowBehavior,
         attributionRegion: ThemeNormalizedRegion,
@@ -1009,6 +1024,8 @@ public struct ThemeShareLayoutPreset: Codable, Hashable, Sendable {
         self.glyphSafeRegion = glyphSafeRegion
         self.sealAnchors = sealAnchors
         self.maximumGlyphLines = maximumGlyphLines
+        self.catalogSpecimenRows = catalogSpecimenRows
+        self.catalogSpecimenColumns = catalogSpecimenColumns
         self.minimumGlyphScale = minimumGlyphScale
         self.overflowBehavior = overflowBehavior
         self.attributionRegion = attributionRegion
@@ -1031,8 +1048,21 @@ public struct ThemeShareLayoutPreset: Codable, Hashable, Sendable {
         try thumbnailCrop.validate()
         try sealAnchors.forEach { try $0.point.validate() }
         let categories = sealAnchors.map(\.category)
+        let validCatalogSpecimen: Bool
+        switch (catalogSpecimenRows, catalogSpecimenColumns) {
+        case (nil, nil):
+            validCatalogSpecimen = true
+        case let (rows?, columns?):
+            validCatalogSpecimen = rows > 0
+                && rows <= maximumGlyphLines
+                && columns > 0
+                && columns <= 32
+        default:
+            validCatalogSpecimen = false
+        }
         guard maximumGlyphLines > 0,
               maximumGlyphLines <= 32,
+              validCatalogSpecimen,
               minimumGlyphScale.isFinite,
               minimumGlyphScale > 0,
               minimumGlyphScale <= 1,
@@ -1052,6 +1082,8 @@ public struct ThemeArtifactMetadata: Codable, Hashable, Sendable {
     public let codexID: CodexID
     public let displayName: ThemeLocalizedText
     public let description: ThemeLocalizedText
+    /// Optional provider-authored semantic facets used by Codex catalog cards.
+    public let facets: [ThemeLocalizedText]?
     public let rarity: ThemeRarityToken
     public let availability: ThemeArtifactAvailability
     public let accessibility: ThemeAccessibilityMetadata
@@ -1062,6 +1094,7 @@ public struct ThemeArtifactMetadata: Codable, Hashable, Sendable {
         codexID: CodexID,
         displayName: ThemeLocalizedText,
         description: ThemeLocalizedText,
+        facets: [ThemeLocalizedText]? = nil,
         rarity: ThemeRarityToken,
         availability: ThemeArtifactAvailability,
         accessibility: ThemeAccessibilityMetadata,
@@ -1071,6 +1104,7 @@ public struct ThemeArtifactMetadata: Codable, Hashable, Sendable {
         self.codexID = codexID
         self.displayName = displayName
         self.description = description
+        self.facets = facets
         self.rarity = rarity
         self.availability = availability
         self.accessibility = accessibility
@@ -1081,6 +1115,7 @@ public struct ThemeArtifactMetadata: Codable, Hashable, Sendable {
     fileprivate func validate() throws {
         try displayName.validate()
         try description.validate()
+        try facets?.forEach { try $0.validate() }
         try accessibility.validate()
     }
 }
@@ -1141,7 +1176,8 @@ public enum ThemeSealScaleReference: String, Codable, Hashable, Sendable {
 
 public struct ThemeSealDescriptor: Codable, Hashable, Sendable {
     public let metadata: ThemeArtifactMetadata
-    public let vectorResourceID: ThemeResourceID
+    public let vectorResourceID: ThemeResourceID?
+    public let colorResourceID: ThemeResourceID?
     public let monochromeFallbackResourceID: ThemeResourceID
     public let thumbnailResourceID: ThemeResourceID
     public let allowedScale: ThemeScalarRange
@@ -1150,7 +1186,8 @@ public struct ThemeSealDescriptor: Codable, Hashable, Sendable {
 
     public init(
         metadata: ThemeArtifactMetadata,
-        vectorResourceID: ThemeResourceID,
+        vectorResourceID: ThemeResourceID? = nil,
+        colorResourceID: ThemeResourceID? = nil,
         monochromeFallbackResourceID: ThemeResourceID,
         thumbnailResourceID: ThemeResourceID,
         allowedScale: ThemeScalarRange,
@@ -1159,6 +1196,7 @@ public struct ThemeSealDescriptor: Codable, Hashable, Sendable {
     ) throws {
         self.metadata = metadata
         self.vectorResourceID = vectorResourceID
+        self.colorResourceID = colorResourceID
         self.monochromeFallbackResourceID = monochromeFallbackResourceID
         self.thumbnailResourceID = thumbnailResourceID
         self.allowedScale = allowedScale
@@ -1170,13 +1208,31 @@ public struct ThemeSealDescriptor: Codable, Hashable, Sendable {
     fileprivate func validate() throws {
         try metadata.validate()
         try allowedScale.validate()
-        guard !allowedAnchors.isEmpty, unique(allowedAnchors), allowedScale.maximum <= 1 else {
+        guard colorResourceID != nil || vectorResourceID != nil else {
+            throw ThemeDescriptorValidationError.invalidValue(
+                "seal-standard-resource:\(metadata.id.rawValue)"
+            )
+        }
+        guard !allowedAnchors.isEmpty,
+              unique(allowedAnchors),
+              allowedScale.maximum <= 1
+        else {
             throw ThemeDescriptorValidationError.invalidValue("seal-placement:\(metadata.id.rawValue)")
         }
     }
 
     fileprivate var requiredResourceIDs: Set<ThemeResourceID> {
-        [vectorResourceID, monochromeFallbackResourceID, thumbnailResourceID]
+        Set(
+            [monochromeFallbackResourceID, thumbnailResourceID]
+                + [colorResourceID, vectorResourceID].compactMap { $0 }
+        )
+    }
+
+    public var standardResourceID: ThemeResourceID {
+        guard let resourceID = colorResourceID ?? vectorResourceID else {
+            preconditionFailure("Validated Seal descriptors require a standard resource")
+        }
+        return resourceID
     }
 }
 
@@ -1184,6 +1240,7 @@ public struct ThemeFrameDescriptor: Codable, Hashable, Sendable {
     public let metadata: ThemeArtifactMetadata
     public let vectorResourceID: ThemeResourceID
     public let staticFallbackResourceID: ThemeResourceID
+    public let thumbnailResourceID: ThemeResourceID?
     public let compatibleRelicIDs: [ArtifactID]
     public let allowsStaticShare: Bool
 
@@ -1191,6 +1248,7 @@ public struct ThemeFrameDescriptor: Codable, Hashable, Sendable {
         metadata: ThemeArtifactMetadata,
         vectorResourceID: ThemeResourceID,
         staticFallbackResourceID: ThemeResourceID,
+        thumbnailResourceID: ThemeResourceID? = nil,
         compatibleRelicIDs: [ArtifactID],
         allowsStaticShare: Bool
     ) throws {
@@ -1200,6 +1258,7 @@ public struct ThemeFrameDescriptor: Codable, Hashable, Sendable {
         self.metadata = metadata
         self.vectorResourceID = vectorResourceID
         self.staticFallbackResourceID = staticFallbackResourceID
+        self.thumbnailResourceID = thumbnailResourceID
         self.compatibleRelicIDs = compatibleRelicIDs
         self.allowsStaticShare = allowsStaticShare
         try validate()
@@ -1213,7 +1272,10 @@ public struct ThemeFrameDescriptor: Codable, Hashable, Sendable {
     }
 
     fileprivate var requiredResourceIDs: Set<ThemeResourceID> {
-        [vectorResourceID, staticFallbackResourceID]
+        Set(
+            [vectorResourceID, staticFallbackResourceID]
+                + [thumbnailResourceID].compactMap { $0 }
+        )
     }
 }
 
@@ -1402,6 +1464,151 @@ public struct ThemeLocalizationDescriptor: Codable, Hashable, Sendable {
     }
 }
 
+public struct ThemeReceivedMedallionDescriptor: Codable, Hashable, Sendable {
+    public let resourceID: ThemeResourceID
+    public let anchor: ThemeNormalizedPoint
+    public let scale: Double
+
+    public init(
+        resourceID: ThemeResourceID,
+        anchor: ThemeNormalizedPoint,
+        scale: Double
+    ) throws {
+        guard scale.isFinite, scale > 0, scale <= 1 else {
+            throw ThemeDescriptorValidationError.invalidValue("received-medallion-scale")
+        }
+        self.resourceID = resourceID
+        self.anchor = anchor
+        self.scale = scale
+        try validate()
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        do {
+            try self.init(
+                resourceID: container.decode(ThemeResourceID.self, forKey: .resourceID),
+                anchor: container.decode(ThemeNormalizedPoint.self, forKey: .anchor),
+                scale: container.decode(Double.self, forKey: .scale)
+            )
+        } catch let error as DecodingError {
+            throw error
+        } catch {
+            throw DecodingError.dataCorrupted(
+                .init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Invalid received medallion descriptor: \(error)"
+                )
+            )
+        }
+    }
+
+    fileprivate func validate() throws {
+        try anchor.validate()
+        guard scale.isFinite, scale > 0, scale <= 1 else {
+            throw ThemeDescriptorValidationError.invalidValue("received-medallion-scale")
+        }
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case resourceID
+        case anchor
+        case scale
+    }
+}
+
+public struct ThemeReceivedPresentationDescriptor: Codable, Hashable, Sendable {
+    public let familyDisplayName: ThemeLocalizedText
+    public let primarySenderAvatarResourceID: ThemeResourceID
+    public let shareSenderAvatarResourceID: ThemeResourceID
+    public let shareCodexBadgeResourceID: ThemeResourceID
+    public let primaryMedallion: ThemeReceivedMedallionDescriptor
+    public let shareMedallion: ThemeReceivedMedallionDescriptor
+
+    public init(
+        familyDisplayName: ThemeLocalizedText,
+        primarySenderAvatarResourceID: ThemeResourceID,
+        shareSenderAvatarResourceID: ThemeResourceID,
+        shareCodexBadgeResourceID: ThemeResourceID,
+        primaryMedallion: ThemeReceivedMedallionDescriptor,
+        shareMedallion: ThemeReceivedMedallionDescriptor
+    ) throws {
+        self.familyDisplayName = familyDisplayName
+        self.primarySenderAvatarResourceID = primarySenderAvatarResourceID
+        self.shareSenderAvatarResourceID = shareSenderAvatarResourceID
+        self.shareCodexBadgeResourceID = shareCodexBadgeResourceID
+        self.primaryMedallion = primaryMedallion
+        self.shareMedallion = shareMedallion
+        try validate()
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        do {
+            try self.init(
+                familyDisplayName: container.decode(
+                    ThemeLocalizedText.self,
+                    forKey: .familyDisplayName
+                ),
+                primarySenderAvatarResourceID: container.decode(
+                    ThemeResourceID.self,
+                    forKey: .primarySenderAvatarResourceID
+                ),
+                shareSenderAvatarResourceID: container.decode(
+                    ThemeResourceID.self,
+                    forKey: .shareSenderAvatarResourceID
+                ),
+                shareCodexBadgeResourceID: container.decode(
+                    ThemeResourceID.self,
+                    forKey: .shareCodexBadgeResourceID
+                ),
+                primaryMedallion: container.decode(
+                    ThemeReceivedMedallionDescriptor.self,
+                    forKey: .primaryMedallion
+                ),
+                shareMedallion: container.decode(
+                    ThemeReceivedMedallionDescriptor.self,
+                    forKey: .shareMedallion
+                )
+            )
+        } catch let error as DecodingError {
+            throw error
+        } catch {
+            throw DecodingError.dataCorrupted(
+                .init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Invalid received presentation descriptor: \(error)"
+                )
+            )
+        }
+    }
+
+    fileprivate func validate() throws {
+        try familyDisplayName.validate()
+        try primaryMedallion.validate()
+        try shareMedallion.validate()
+    }
+
+    fileprivate var requiredResourceIDs: Set<ThemeResourceID> {
+        Set([
+            primarySenderAvatarResourceID,
+            shareSenderAvatarResourceID,
+            shareCodexBadgeResourceID,
+            primaryMedallion.resourceID,
+            shareMedallion.resourceID,
+        ])
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case familyDisplayName
+        case primarySenderAvatarResourceID
+        case shareSenderAvatarResourceID
+        case shareCodexBadgeResourceID
+        case primaryMedallion
+        case shareMedallion
+    }
+}
+
 public struct ThemeCodexDescriptor: Codable, Hashable, Sendable {
     public let id: CodexID
     public let entitlementID: UnlockID
@@ -1420,6 +1627,7 @@ public struct ThemeCodexDescriptor: Codable, Hashable, Sendable {
     public let crests: [ThemeCrestDescriptor]
     public let background: ThemeBackgroundDescriptor
     public let vault: ThemeVaultDescriptor
+    public let receivedPresentation: ThemeReceivedPresentationDescriptor?
     public let rightsID: ThemeProvenanceID
 
     public init(
@@ -1440,6 +1648,7 @@ public struct ThemeCodexDescriptor: Codable, Hashable, Sendable {
         crests: [ThemeCrestDescriptor],
         background: ThemeBackgroundDescriptor,
         vault: ThemeVaultDescriptor,
+        receivedPresentation: ThemeReceivedPresentationDescriptor? = nil,
         rightsID: ThemeProvenanceID
     ) throws {
         self.id = id
@@ -1459,6 +1668,7 @@ public struct ThemeCodexDescriptor: Codable, Hashable, Sendable {
         self.crests = crests
         self.background = background
         self.vault = vault
+        self.receivedPresentation = receivedPresentation
         self.rightsID = rightsID
         try validate()
     }
@@ -1488,6 +1698,7 @@ public struct ThemeCodexDescriptor: Codable, Hashable, Sendable {
         try crests.forEach { try $0.validate() }
         try background.validate()
         try vault.validate()
+        try receivedPresentation?.validate()
 
         let allArtifacts = relics.map(\.metadata) + seals.map(\.metadata)
             + frames.map(\.metadata) + crests.map(\.metadata)
@@ -1518,6 +1729,9 @@ public struct ThemeCodexDescriptor: Codable, Hashable, Sendable {
         crests.forEach { result.formUnion($0.requiredResourceIDs) }
         result.formUnion(background.requiredResourceIDs)
         result.formUnion(vault.requiredResourceIDs)
+        if let receivedPresentation {
+            result.formUnion(receivedPresentation.requiredResourceIDs)
+        }
         return result
     }
 
@@ -1833,11 +2047,20 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
             )
         }
         for seal in codex.seals {
-            try require(
-                seal.vectorResourceID,
-                role: ThemeResourceRoles.sealVectorMaster,
-                media: vectorMedia
-            )
+            if let vectorResourceID = seal.vectorResourceID {
+                try require(
+                    vectorResourceID,
+                    role: ThemeResourceRoles.sealVectorMaster,
+                    media: vectorMedia
+                )
+            }
+            if let colorResourceID = seal.colorResourceID {
+                try require(
+                    colorResourceID,
+                    role: ThemeResourceRoles.sealColorMaster,
+                    media: stillMedia
+                )
+            }
             try require(
                 seal.monochromeFallbackResourceID,
                 roles: [
@@ -1863,6 +2086,13 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
                 role: ThemeResourceRoles.frameStaticFallback,
                 media: stillMedia
             )
+            if let thumbnailResourceID = frame.thumbnailResourceID {
+                try require(
+                    thumbnailResourceID,
+                    role: ThemeResourceRoles.frameThumbnail,
+                    media: thumbnailMedia
+                )
+            }
         }
         for crest in codex.crests {
             try require(
@@ -1939,6 +2169,33 @@ public struct ThemeDescriptor: Codable, Hashable, Sendable {
                 unavailableResourceID,
                 role: ThemeResourceRoles.vaultUnavailable,
                 media: stillMedia
+            )
+        }
+        if let receivedPresentation = codex.receivedPresentation {
+            try require(
+                receivedPresentation.primarySenderAvatarResourceID,
+                role: ThemeResourceRoles.receivedPrimarySenderAvatar,
+                media: thumbnailMedia
+            )
+            try require(
+                receivedPresentation.shareSenderAvatarResourceID,
+                role: ThemeResourceRoles.receivedShareSenderAvatar,
+                media: thumbnailMedia
+            )
+            try require(
+                receivedPresentation.shareCodexBadgeResourceID,
+                role: ThemeResourceRoles.receivedShareCodexBadge,
+                media: thumbnailMedia
+            )
+            try require(
+                receivedPresentation.primaryMedallion.resourceID,
+                role: ThemeResourceRoles.receivedPrimaryMedallion,
+                media: thumbnailMedia
+            )
+            try require(
+                receivedPresentation.shareMedallion.resourceID,
+                role: ThemeResourceRoles.receivedShareMedallion,
+                media: thumbnailMedia
             )
         }
         for localization in localizations {

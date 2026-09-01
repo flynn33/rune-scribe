@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -15,14 +16,19 @@ import zlib
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 
 
-SOURCE_ROOT_RELATIVE = Path("docs/verification/theme-fidelity-v4/source-masters/norse")
-OUTPUT_ROOT_RELATIVE = Path("docs/verification/theme-fidelity-v4/generated/norse")
+LEGACY_SOURCE_ROOT_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4/source-masters/norse"
+)
+V43_SOURCE_ROOT_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4-3/source-masters/norse"
+)
+OUTPUT_ROOT_RELATIVE = Path("docs/verification/theme-fidelity-v4-3/generated/norse")
 TARGET_ROOT_RELATIVE = Path(
     "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
     "Resources/Production"
 )
 BUILDER_RELATIVE = Path("scripts/build-norse-production-assets.py")
-DERIVATION_RELATIVE = Path("Metadata/Norse-Production-Asset-Derivation-v4.0.json")
+DERIVATION_RELATIVE = Path("Metadata/Norse-Production-Asset-Derivation-v4.3.json")
 FONT_RELATIVE = Path(
     "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
     "Resources/NotoSansRunic-Regular.ttf"
@@ -30,6 +36,22 @@ FONT_RELATIVE = Path(
 SCRIPT_MAPPING_RELATIVE = Path(
     "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/"
     "Resources/Production/Metadata/Norse-Script-Mapping-v1.0.json"
+)
+CATALOG_PORTRAIT_SOURCE = "runestone-tablet-catalog-authoring.png"
+CATALOG_OWNER_REGION_SOURCE = "runestone-tablet-catalog-owner-region.png"
+RUNESTONE_MESSAGE_EXTRACTOR_RELATIVE = Path(
+    "scripts/extract-norse-runestone-message-source.py"
+)
+RUNESTONE_MESSAGE_OWNER_REGION_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4-3/source-masters/norse/"
+    "runestone-tablet-message-owner-region.png"
+)
+RUNESTONE_MESSAGE_BLANK_STONE_RELATIVE = Path(
+    "docs/verification/theme-fidelity-v4/source-masters/norse/"
+    "runestone-tablet-authoring.png"
+)
+V43_SOURCE_FILES = frozenset(
+    {CATALOG_PORTRAIT_SOURCE, CATALOG_OWNER_REGION_SOURCE}
 )
 
 RESAMPLING = Image.Resampling.LANCZOS
@@ -48,6 +70,14 @@ SEALS = (
     "yggdrasil",
     "berserk",
 )
+SEAL_MASTER_SIZES = {
+    "valknut": (1015, 1024),
+    "ravenshield": (1024, 1015),
+    "mjolnir": (1003, 1024),
+    "wolkin": (1013, 1024),
+    "yggdrasil": (1024, 991),
+    "berserk": (1024, 981),
+}
 CARD_STATES = ("owned", "locked", "encountered", "selected", "unavailable")
 
 RECIPE_DEFINITIONS: dict[str, dict[str, Any]] = {
@@ -78,6 +108,49 @@ RECIPE_DEFINITIONS: dict[str, dict[str, Any]] = {
         ],
         "parameters": {"alignment": "center", "cropping": False},
     },
+    "owner-board-portrait-catalog-thumbnail-v1": {
+        "operations": [
+            "validate-owner-region-digest-and-bounds",
+            "apply-fixed-reviewed-silhouette-mask",
+            "replace-complete-glyph-bearing-field-from-accepted-blank-stone-source",
+            "preserve-portrait-frame-crest-and-shadow",
+            "lanczos-aspect-fit-transparent-pad",
+        ],
+        "parameters": {
+            "ownerSourceSHA256": "e9c1f4a00ebbd7666d409193dc39222494e2414b48d9b42bbfacfb14cd087bd6",
+            "ownerSourceDimensions": [1536, 1024],
+            "extractionBounds": {"x": 655, "y": 104, "width": 142, "height": 185},
+            "storedOwnerRegionSHA256": "57d4d5f00b5cb213a987eeb7ff56cb56d9d3da07e96bf054fce0fbca5c738409",
+            "glyphFreeAuthoringSHA256": "e03573c99335fa553b71e2e49a1011d1d10ca1d4270501c6fd4cc88b3f9669b2",
+            "authoringDimensions": [768, 1024],
+            "outputDimensions": [512, 512],
+            "alignment": "center",
+            "cropping": False,
+            "runtimeGlyphSource": "production Script renderer",
+        },
+    },
+    "owner-board-near-square-message-static-fallback-v1": {
+        "operations": [
+            "validate-pinned-owner-region-and-blank-stone-digests",
+            "apply-fixed-reviewed-silhouette-mask",
+            "reflect-unobscured-owner-frame-quadrant-into-seal-occlusion",
+            "replace-complete-glyph-bearing-field-from-accepted-blank-stone-source",
+            "preserve-raven-crest",
+            "lanczos-uniform-scale",
+            "transparent-center-pad",
+        ],
+        "parameters": {
+            "extractorPath": RUNESTONE_MESSAGE_EXTRACTOR_RELATIVE.as_posix(),
+            "ownerRegionSHA256": "75648b01d5caad185182aa5f78d73b078b2e7886b044b612092a8eb56eafe1ee",
+            "blankStoneSHA256": "dd8369aa680633db99f5bdeb32e1c046d6f26802ad8e8a90d533e3077898911d",
+            "outputDimensions": [1600, 1600],
+            "alignment": "center",
+            "cropping": False,
+            "nonUniformScaling": False,
+            "runtimeGlyphSource": "production Script renderer",
+            "runtimeSealSource": "user-selected production Seal",
+        },
+    },
     "magenta-matte-high-contrast-v1": {
         "operations": [
             "soft-magenta-matte",
@@ -96,20 +169,16 @@ RECIPE_DEFINITIONS: dict[str, dict[str, Any]] = {
             "innerFaceFeatherRatio": 0.008,
         },
     },
-    "alpha-pad-without-cropping-v1": {
-        "operations": ["mode-normalization", "transparent-center-pad"],
-        "parameters": {"alignment": "center", "cropping": False, "resizing": False},
-    },
-    "alpha-reconstruct-edge-padding-v1": {
+    "authority-exact-byte-copy-v1": {
         "operations": [
-            "mode-normalization",
-            "lanczos-whole-canvas-scale",
-            "transparent-center-pad",
+            "validate-source-png",
+            "copy-authority-bytes-without-transformation",
         ],
         "parameters": {
-            "alignment": "center",
             "cropping": False,
-            "minimumEdgePaddingRatio": 0.0234375,
+            "resizing": False,
+            "reencoding": False,
+            "byteIdentity": True,
         },
     },
     "lossless-alpha-pdf-wrapper-v1": {
@@ -651,6 +720,48 @@ def planned_outputs() -> list[dict[str, Any]]:
     outputs: list[dict[str, Any]] = []
     for slug, source, master_size in RELICS:
         resource_id = f"relic.norse.{slug}"
+        thumbnail_source = CATALOG_PORTRAIT_SOURCE if slug == "runestone-tablet" else source
+        thumbnail_recipe = (
+            "owner-board-portrait-catalog-thumbnail-v1"
+            if slug == "runestone-tablet"
+            else "magenta-matte-contain-v1"
+        )
+        thumbnail_kind = (
+            "relic-catalog-thumbnail"
+            if slug == "runestone-tablet"
+            else "relic-thumbnail"
+        )
+        thumbnail_additional_sources = (
+            [CATALOG_OWNER_REGION_SOURCE, source]
+            if slug == "runestone-tablet"
+            else []
+        )
+        static_share_source = (
+            f"@repo/{RUNESTONE_MESSAGE_OWNER_REGION_RELATIVE}"
+            if slug == "runestone-tablet"
+            else source
+        )
+        static_share_additional_sources = (
+            [
+                f"@repo/{RUNESTONE_MESSAGE_BLANK_STONE_RELATIVE}",
+                f"@repo/{RUNESTONE_MESSAGE_EXTRACTOR_RELATIVE}",
+            ]
+            if slug == "runestone-tablet"
+            else []
+        )
+        static_share_recipe = (
+            "owner-board-near-square-message-static-fallback-v1"
+            if slug == "runestone-tablet"
+            else "magenta-matte-contain-v1"
+        )
+        static_share_size = (
+            (1600, 1600) if slug == "runestone-tablet" else (1600, 1200)
+        )
+        static_share_kind = (
+            "relic-message-static-share"
+            if slug == "runestone-tablet"
+            else "relic-static-share"
+        )
         outputs.extend(
             (
                 {
@@ -665,23 +776,25 @@ def planned_outputs() -> list[dict[str, Any]]:
                 },
                 {
                     "path": f"Relics/{resource_id}.thumbnail.png",
-                    "source": source,
+                    "source": thumbnail_source,
+                    "additionalSources": thumbnail_additional_sources,
                     "targetPath": f"Relics/{resource_id}.thumbnail.png",
                     "resourceID": resource_id,
                     "variant": "thumbnail-512",
-                    "recipeID": "magenta-matte-contain-v1",
+                    "recipeID": thumbnail_recipe,
                     "size": (512, 512),
-                    "kind": "relic-thumbnail",
+                    "kind": thumbnail_kind,
                 },
                 {
                     "path": f"ShareFallbacks/share-fallback.norse.{slug}.png",
-                    "source": source,
+                    "source": static_share_source,
+                    "additionalSources": static_share_additional_sources,
                     "targetPath": f"ShareFallbacks/share-fallback.norse.{slug}.png",
                     "resourceID": resource_id,
                     "variant": "static-share-fallback",
-                    "recipeID": "magenta-matte-contain-v1",
-                    "size": (1600, 1200),
-                    "kind": "relic-static-share",
+                    "recipeID": static_share_recipe,
+                    "size": static_share_size,
+                    "kind": static_share_kind,
                 },
                 {
                     "path": f"Relics/{resource_id}.high-contrast.png",
@@ -699,42 +812,23 @@ def planned_outputs() -> list[dict[str, Any]]:
     for slug in SEALS:
         resource_id = f"seal.norse.{slug}"
         color_source = f"seals/{resource_id}.png"
-        reconstruction = slug == "mjolnir"
-        pad_recipe = (
-            "alpha-reconstruct-edge-padding-v1"
-            if reconstruction
-            else "alpha-pad-without-cropping-v1"
-        )
-        pad_kind = "seal-margin" if reconstruction else "seal-pad"
         outputs.extend(
             (
                 {
-                    "path": f"Intermediates/Seals/{resource_id}.standard.png",
+                    "path": f"Seals/{resource_id}.png",
                     "source": color_source,
-                    "targetPath": None,
-                    "promotionStatus": "derivation-only",
+                    "targetPath": f"Seals/{resource_id}.png",
                     "resourceID": resource_id,
-                    "variant": "standard-raster-intermediate",
-                    "recipeID": pad_recipe,
-                    "size": (1024, 1024),
-                    "kind": pad_kind,
-                },
-                {
-                    "path": f"Seals/{resource_id}.vector-master.pdf",
-                    "source": color_source,
-                    "targetPath": f"Seals/{resource_id}.vector-master.pdf",
-                    "resourceID": resource_id,
-                    "variant": "standard",
-                    "recipeID": "lossless-alpha-pdf-wrapper-v1",
-                    "inputPreparationRecipeID": pad_recipe,
-                    "size": (1024, 1024),
-                    "kind": pad_kind,
-                    "format": "pdf",
+                    "variant": "color-master",
+                    "recipeID": "authority-exact-byte-copy-v1",
+                    "size": SEAL_MASTER_SIZES[slug],
+                    "kind": "seal-exact",
+                    "byteIdentitySource": True,
                 },
             )
         )
         for source_suffix, output_suffix, variant, size in (
-            (".monochrome.png", ".monochrome.png", "monochrome", (1024, 1024)),
+            (".monochrome.png", ".monochrome.png", "monochrome", SEAL_MASTER_SIZES[slug]),
             (".thumbnail.png", ".thumbnail.png", "thumbnail-512", (512, 512)),
         ):
             filename = f"{resource_id}{output_suffix}"
@@ -745,9 +839,10 @@ def planned_outputs() -> list[dict[str, Any]]:
                     "targetPath": f"Seals/{filename}",
                     "resourceID": resource_id,
                     "variant": variant,
-                    "recipeID": pad_recipe,
+                    "recipeID": "authority-exact-byte-copy-v1",
                     "size": size,
-                    "kind": pad_kind,
+                    "kind": "seal-exact",
+                    "byteIdentitySource": True,
                 }
             )
 
@@ -898,9 +993,9 @@ def planned_outputs() -> list[dict[str, Any]]:
         ("tab-selector", (1200, 240)),
     ):
         spec = {
-            "path": f"PanelOrnaments/panel.norse.{variant}.png",
+            "path": f"Panel/panel.norse.{variant}.png",
             "source": "mastery-frame-authoring.png",
-            "targetPath": f"PanelOrnaments/panel.norse.{variant}.png",
+            "targetPath": f"Panel/panel.norse.{variant}.png",
             "resourceID": f"panel.norse.{variant}",
             "variant": variant,
             "recipeID": f"panel-{variant}-v1",
@@ -957,13 +1052,26 @@ def _is_magenta_key_pixel(pixel: tuple[int, int, int]) -> bool:
     return _key_strength(*pixel) >= 0.9
 
 
-def validate_sources(source_root: Path) -> None:
+def _source_path(
+    legacy_source_root: Path,
+    v43_source_root: Path,
+    relative: str,
+) -> Path:
+    root = v43_source_root if relative in V43_SOURCE_FILES else legacy_source_root
+    return root / relative
+
+
+def validate_sources(
+    legacy_source_root: Path,
+    v43_source_root: Path | None = None,
+) -> None:
+    v43_source_root = legacy_source_root if v43_source_root is None else v43_source_root
     failures: list[str] = []
     keyed_sources = {
         source for _, source, _ in RELICS
     } | {"mastery-frame-authoring.png", "raven-mastery-crest-authoring.png"}
     for relative in required_sources():
-        path = source_root / relative
+        path = _source_path(legacy_source_root, v43_source_root, relative)
         if not path.is_file() or path.is_symlink():
             failures.append(f"missing regular source: {relative}")
             continue
@@ -986,6 +1094,26 @@ def validate_sources(source_root: Path) -> None:
                     )
                     if sum(_is_magenta_key_pixel(pixel) for pixel in corners) < 3:
                         failures.append(f"source lacks the expected magenta authoring matte: {relative}")
+                if relative == CATALOG_PORTRAIT_SOURCE:
+                    if image.mode != "RGBA" or image.size != (768, 1024):
+                        failures.append(
+                            "Runestone catalog authoring source must be 768x1024 RGBA"
+                        )
+                    elif image.getchannel("A").getextrema() != (0, 255):
+                        failures.append(
+                            "Runestone catalog authoring source must contain true alpha"
+                        )
+                    elif sha256_file(path) != RECIPE_DEFINITIONS[
+                        "owner-board-portrait-catalog-thumbnail-v1"
+                    ]["parameters"]["glyphFreeAuthoringSHA256"]:
+                        failures.append("Runestone catalog authoring source digest differs")
+                if relative == CATALOG_OWNER_REGION_SOURCE:
+                    if image.size != (142, 185):
+                        failures.append("Runestone catalog owner region dimensions differ")
+                    elif sha256_file(path) != RECIPE_DEFINITIONS[
+                        "owner-board-portrait-catalog-thumbnail-v1"
+                    ]["parameters"]["storedOwnerRegionSHA256"]:
+                        failures.append("Runestone catalog owner region digest differs")
                 if relative.startswith("seals/"):
                     if image.mode != "RGBA" or image.getchannel("A").getextrema() != (0, 255):
                         failures.append(f"Seal source must contain true alpha: {relative}")
@@ -1000,19 +1128,32 @@ def validate_sources(source_root: Path) -> None:
         raise ValueError("; ".join(failures))
 
 
-def _load_normalized(source_root: Path, relative: str) -> Image.Image:
-    with Image.open(source_root / relative) as image:
-        if relative.startswith("seals/"):
+def _load_normalized(
+    legacy_source_root: Path,
+    v43_source_root: Path,
+    relative: str,
+) -> Image.Image:
+    with Image.open(_source_path(legacy_source_root, v43_source_root, relative)) as image:
+        if relative.startswith("seals/") or relative == CATALOG_PORTRAIT_SOURCE:
             return image.convert("RGBA")
         return image.convert("RGB")
 
 
-def _source_record(source_root: Path, relative: str) -> dict[str, Any]:
-    path = source_root / relative
+def _source_record(
+    legacy_source_root: Path,
+    v43_source_root: Path,
+    relative: str,
+) -> dict[str, Any]:
+    path = _source_path(legacy_source_root, v43_source_root, relative)
+    recorded_root = (
+        V43_SOURCE_ROOT_RELATIVE
+        if relative in V43_SOURCE_FILES
+        else LEGACY_SOURCE_ROOT_RELATIVE
+    )
     with Image.open(path) as image:
         alpha = image.getchannel("A") if "A" in image.getbands() else None
         return {
-            "path": str(SOURCE_ROOT_RELATIVE / relative),
+            "path": str(recorded_root / relative),
             "sha256": sha256_file(path),
             "pixelDimensions": {"width": image.width, "height": image.height},
             "mode": image.mode,
@@ -1098,23 +1239,49 @@ def _output_record(
 def render_output(
     spec: dict[str, Any],
     repo_root: Path,
-    source_root: Path,
+    legacy_source_root: Path,
     source_cache: dict[str, Image.Image],
     keyed_cache: dict[str, Image.Image],
     base_cache: dict[str, Image.Image],
+    v43_source_root: Path | None = None,
 ) -> Image.Image:
+    v43_source_root = (
+        legacy_source_root if v43_source_root is None else v43_source_root
+    )
     source_name = str(spec["source"])
     kind = str(spec["kind"])
     size = tuple(spec["size"])
 
     if kind == "script-specimen":
         return script_specimen(repo_root, str(spec["variant"]))
+    if kind == "relic-message-static-share":
+        extractor_path = repo_root / RUNESTONE_MESSAGE_EXTRACTOR_RELATIVE
+        module_spec = importlib.util.spec_from_file_location(
+            "norse_runestone_message_extractor_for_asset_builder",
+            extractor_path,
+        )
+        if module_spec is None or module_spec.loader is None:
+            raise ValueError(f"unable to load Runestone message extractor: {extractor_path}")
+        extractor = importlib.util.module_from_spec(module_spec)
+        sys.modules[module_spec.name] = extractor
+        module_spec.loader.exec_module(extractor)
+        owner_region, blank_stone = extractor.validate_stored_sources(repo_root)
+        rendered = extractor.render_static_fallback(owner_region, blank_stone)
+        if rendered.size != size or rendered.mode != "RGBA":
+            raise ValueError("Runestone message fallback contract differs")
+        return rendered
     if source_name.startswith("@repo/"):
         raise ValueError(f"non-image source used for image recipe: {source_name}")
     if source_name not in source_cache:
-        source_cache[source_name] = _load_normalized(source_root, source_name)
+        source_cache[source_name] = _load_normalized(
+            legacy_source_root,
+            v43_source_root,
+            source_name,
+        )
     source = source_cache[source_name]
 
+    if kind == "relic-catalog-thumbnail":
+        return contain_rgba(source, size)
     if kind.startswith("relic-"):
         original_size = next(target for _, name, target in RELICS if name == source_name)
         master_key = f"{source_name}:{original_size[0]}x{original_size[1]}"
@@ -1131,6 +1298,8 @@ def render_output(
         if kind == "relic-high-contrast":
             return high_contrast_rgba(master)
 
+    if kind == "seal-exact":
+        return source.copy()
     if kind == "keyed-exact":
         if source_name not in keyed_cache:
             keyed_cache[source_name] = chroma_key_magenta(source)
@@ -1162,7 +1331,11 @@ def render_output(
     if kind == "panel-ornament":
         card_name = "codex-card-authoring.png"
         if card_name not in source_cache:
-            source_cache[card_name] = _load_normalized(source_root, card_name)
+            source_cache[card_name] = _load_normalized(
+                legacy_source_root,
+                v43_source_root,
+                card_name,
+            )
         if source_name not in keyed_cache:
             keyed_cache[source_name] = chroma_key_magenta(source)
         return panel_ornament(
@@ -1179,6 +1352,16 @@ def save_png(image: Image.Image, path: Path) -> None:
     try:
         image.save(temporary, format="PNG", **PNG_SAVE_OPTIONS)
         os.replace(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def copy_exact_bytes(source: Path, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_name(f".{destination.name}.tmp")
+    try:
+        temporary.write_bytes(source.read_bytes())
+        os.replace(temporary, destination)
     finally:
         temporary.unlink(missing_ok=True)
 
@@ -1214,17 +1397,31 @@ def _ensure_output_scope(output_root: Path, allowed: Iterable[str]) -> None:
         raise ValueError("staging directory contains unexpected files: " + ", ".join(unexpected))
 
 
-def build(repo_root: Path, source_root: Path, output_root: Path) -> Path:
+def build(
+    repo_root: Path,
+    legacy_source_root: Path,
+    output_root: Path,
+    v43_source_root: Path | None = None,
+) -> Path:
     repo_root = repo_root.resolve()
-    source_root = source_root.resolve()
+    legacy_source_root = legacy_source_root.resolve()
+    v43_source_root = (
+        (repo_root / V43_SOURCE_ROOT_RELATIVE).resolve()
+        if v43_source_root is None
+        else v43_source_root.resolve()
+    )
     output_root = output_root.resolve()
     if (
-        source_root == output_root
-        or source_root in output_root.parents
-        or output_root in source_root.parents
+        legacy_source_root == v43_source_root
+        or legacy_source_root == output_root
+        or v43_source_root == output_root
+        or legacy_source_root in output_root.parents
+        or output_root in legacy_source_root.parents
+        or v43_source_root in output_root.parents
+        or output_root in v43_source_root.parents
     ):
         raise ValueError("source and output roots must be separate, non-nested directories")
-    validate_sources(source_root)
+    validate_sources(legacy_source_root, v43_source_root)
     load_script_contract(repo_root)
     plan = planned_outputs()
     _ensure_output_scope(output_root, (str(spec["path"]) for spec in plan))
@@ -1234,7 +1431,7 @@ def build(repo_root: Path, source_root: Path, output_root: Path) -> Path:
         sources[reference] = (
             _repository_source_record(repo_root, reference)
             if reference.startswith("@repo/")
-            else _source_record(source_root, reference)
+            else _source_record(legacy_source_root, v43_source_root, reference)
         )
     source_cache: dict[str, Image.Image] = {}
     keyed_cache: dict[str, Image.Image] = {}
@@ -1248,17 +1445,29 @@ def build(repo_root: Path, source_root: Path, output_root: Path) -> Path:
         rendered = render_output(
             spec,
             repo_root,
-            source_root,
+            legacy_source_root,
             source_cache,
             keyed_cache,
             base_cache,
+            v43_source_root=v43_source_root,
         )
         expected_size = tuple(spec["size"])
         if rendered.size != expected_size:
             raise ValueError(
                 f"rendered dimensions differ for {relative}: {rendered.size} != {expected_size}"
             )
-        if spec.get("format", "png") == "pdf":
+        if spec.get("byteIdentitySource") is True:
+            source_reference = str(spec["source"])
+            if source_reference.startswith("@repo/"):
+                exact_source = repo_root / source_reference.removeprefix("@repo/")
+            else:
+                exact_source = _source_path(
+                    legacy_source_root,
+                    v43_source_root,
+                    source_reference,
+                )
+            copy_exact_bytes(exact_source, destination)
+        elif spec.get("format", "png") == "pdf":
             save_lossless_pdf(rendered, destination)
         else:
             save_png(rendered, destination)
@@ -1278,8 +1487,11 @@ def build(repo_root: Path, source_root: Path, output_root: Path) -> Path:
     builder_path = repo_root / BUILDER_RELATIVE
     document = {
         "schemaVersion": "1.0",
-        "collectionID": "norse.production-asset-candidates.v4",
-        "sourceRoot": str(SOURCE_ROOT_RELATIVE),
+        "collectionID": "norse.production-asset-candidates.v4.3",
+        "sourceRoots": {
+            "legacyV4": str(LEGACY_SOURCE_ROOT_RELATIVE),
+            "v4_3": str(V43_SOURCE_ROOT_RELATIVE),
+        },
         "stagingRoot": str(OUTPUT_ROOT_RELATIVE),
         "targetRoot": str(TARGET_ROOT_RELATIVE),
         "derivation": {
@@ -1305,6 +1517,7 @@ def parse_arguments(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=repo_root)
     parser.add_argument("--source-root", type=Path)
+    parser.add_argument("--v4-3-source-root", type=Path)
     parser.add_argument("--output-root", type=Path)
     return parser.parse_args(argv)
 
@@ -1312,10 +1525,15 @@ def parse_arguments(argv: list[str]) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     arguments = parse_arguments(sys.argv[1:] if argv is None else argv)
     repo_root = arguments.repo_root.resolve()
-    source_root = (
+    legacy_source_root = (
         arguments.source_root.resolve()
         if arguments.source_root is not None
-        else repo_root / SOURCE_ROOT_RELATIVE
+        else repo_root / LEGACY_SOURCE_ROOT_RELATIVE
+    )
+    v43_source_root = (
+        arguments.v4_3_source_root.resolve()
+        if arguments.v4_3_source_root is not None
+        else repo_root / V43_SOURCE_ROOT_RELATIVE
     )
     output_root = (
         arguments.output_root.resolve()
@@ -1323,7 +1541,12 @@ def main(argv: list[str] | None = None) -> int:
         else repo_root / OUTPUT_ROOT_RELATIVE
     )
     try:
-        derivation_path = build(repo_root, source_root, output_root)
+        derivation_path = build(
+            repo_root,
+            legacy_source_root,
+            output_root,
+            v43_source_root,
+        )
     except (OSError, ValueError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1

@@ -135,14 +135,31 @@ func norseV1AliasesAndGrantRoutesMapToTheExactV2Catalog() throws {
 }
 
 @Test
-func exactNorseV1FingerprintsUpgradeToV2WhileUnknownVariantsFailClosed() throws {
+func exactNorseV1FingerprintsComposeThroughV2AndV3WhileUnknownVariantsFailClosed() throws {
     let fixture = try ProgressionDurableFixture()
     let legacy = try exactNorseV1Bundle(from: fixture.bundle)
+    let versionTwo = try exactNorseV2Bundle(from: fixture.bundle)
     let prior = try ProgressionCatalogCompatibility.fingerprints(for: legacy)
+    let versionTwoFingerprints = try ProgressionCatalogCompatibility.fingerprints(
+        for: versionTwo
+    )
     let current = try ProgressionCatalogCompatibility.fingerprints(for: fixture.bundle)
 
     #expect(prior.count == 312)
-    #expect(current.count == 310)
+    #expect(versionTwoFingerprints.count == 310)
+    #expect(current.count == 318)
+    try ProgressionCatalogCompatibility.validateUpgrade(
+        from: prior,
+        to: versionTwoFingerprints,
+        fromVersion: legacy.catalog.catalogVersion,
+        toVersion: versionTwo.catalog.catalogVersion
+    )
+    try ProgressionCatalogCompatibility.validateUpgrade(
+        from: versionTwoFingerprints,
+        to: current,
+        fromVersion: versionTwo.catalog.catalogVersion,
+        toVersion: fixture.bundle.catalog.catalogVersion
+    )
     try ProgressionCatalogCompatibility.validateUpgrade(
         from: prior,
         to: current,
@@ -150,7 +167,7 @@ func exactNorseV1FingerprintsUpgradeToV2WhileUnknownVariantsFailClosed() throws 
         toVersion: fixture.bundle.catalog.catalogVersion
     )
 
-    let unknown = try currentBundleWithUnknownNorseContent(from: fixture.bundle)
+    let unknown = try versionTwoBundleWithUnknownNorseContent(from: fixture.bundle)
     do {
         try ProgressionCatalogCompatibility.validateUpgrade(
             from: prior,
@@ -159,18 +176,6 @@ func exactNorseV1FingerprintsUpgradeToV2WhileUnknownVariantsFailClosed() throws 
             toVersion: unknown.catalog.catalogVersion
         )
         Issue.record("A v1 to v2 catalog carrying unknown future Norse content was accepted.")
-    } catch {
-        #expect(error is ProgressionDomainError)
-    }
-
-    do {
-        try ProgressionCatalogCompatibility.validateUpgrade(
-            from: prior,
-            to: current,
-            fromVersion: legacy.catalog.catalogVersion,
-            toVersion: ProgressionCatalogVersion(rawValue: 3)!
-        )
-        Issue.record("The special v1 to v2 rewrite was accepted as an unknown future upgrade.")
     } catch {
         #expect(error is ProgressionDomainError)
     }
@@ -588,7 +593,7 @@ func interruptedNorseV1UpgradeResumesWithoutRepeatingHistoricalYggdrasilReveal()
         stateClient: fixture.client
     )
     let upgraded = try await fixture.snapshot(from: resumed, suffix: "norse-v2-resumed")
-    #expect(upgraded.catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+    #expect(upgraded.catalogVersion == fixture.bundle.catalog.catalogVersion)
     #expect(upgraded.pendingRevealCount == 0)
     #expect(fixture.ownership(
         .artifact(ArtifactID(rawValue: "seal.norse.yggdrasil")!),
@@ -697,7 +702,7 @@ func norseV1ArchivistMigrationUpgradePreservesSeedsAndSuppressesItsHistoricalRev
         from: upgradedService,
         suffix: "norse-v2-archivist-upgraded"
     )
-    #expect(upgraded.catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+    #expect(upgraded.catalogVersion == fixture.bundle.catalog.catalogVersion)
     #expect(upgraded.pendingRevealCount == 0)
     #expect(fixture.ownership(
         .artifact(ArtifactID(rawValue: "frame.norse.carved-knotwork")!),
@@ -793,7 +798,7 @@ func exactNorseV1LegacyOutgoingShareHistoryUpgradesToCanonicalV2Ledger() async t
         from: upgraded,
         suffix: "norse-v2-legacy-outgoing-upgraded"
     )
-    #expect(upgradedSnapshot.catalogVersion == ProgressionCatalogVersion(rawValue: 2))
+    #expect(upgradedSnapshot.catalogVersion == fixture.bundle.catalog.catalogVersion)
 
     let repository = ProgressionRepository(client: fixture.client)
     let stored = try await repository.loadExisting(bundle: fixture.bundle)
@@ -1014,10 +1019,17 @@ private let currentNorseReplacementIDs = Set([
     "title.norse.master-of-runes",
 ])
 
+private let elvenMasteryV3ContentIDs = Set([
+    "title.gloamthorn.mastery",
+    "title.moonleaf.mastery",
+    "title.sunspire.mastery",
+    "title.wildwood.mastery",
+])
+
 private func exactNorseV1Bundle(
     from current: ValidatedProgressionCatalogBundle
 ) throws -> ValidatedProgressionCatalogBundle {
-    var root = try progressionCatalogJSONObject()
+    var root = try progressionCatalogJSONObjectRemovingElvenMasteryV3Additions()
     root["catalogVersion"] = 1
 
     guard var content = root["content"] as? [[String: Any]],
@@ -1153,10 +1165,25 @@ private func exactNorseV1Bundle(
     )
 }
 
-private func currentBundleWithUnknownNorseContent(
+private func exactNorseV2Bundle(
     from current: ValidatedProgressionCatalogBundle
 ) throws -> ValidatedProgressionCatalogBundle {
-    var root = try progressionCatalogJSONObject()
+    var root = try progressionCatalogJSONObjectRemovingElvenMasteryV3Additions()
+    root["catalogVersion"] = 2
+    return ValidatedProgressionCatalogBundle(
+        catalog: try decodeCatalog(root),
+        eventCatalog: current.eventCatalog,
+        futureThemeBindings: current.futureThemeBindings,
+        dependencyAnalysis: current.dependencyAnalysis,
+        integrityMetadata: current.integrityMetadata
+    )
+}
+
+private func versionTwoBundleWithUnknownNorseContent(
+    from current: ValidatedProgressionCatalogBundle
+) throws -> ValidatedProgressionCatalogBundle {
+    var root = try progressionCatalogJSONObjectRemovingElvenMasteryV3Additions()
+    root["catalogVersion"] = 2
     guard var content = root["content"] as? [[String: Any]] else {
         throw NorseV1FixtureError.malformedCatalog
     }
@@ -1190,6 +1217,36 @@ private func progressionCatalogJSONObject() throws -> [String: Any] {
         with: Data(contentsOf: url)
     ) as? [String: Any]
     else { throw NorseV1FixtureError.malformedCatalog }
+    return root
+}
+
+private func progressionCatalogJSONObjectRemovingElvenMasteryV3Additions() throws
+    -> [String: Any]
+{
+    var root = try progressionCatalogJSONObject()
+    guard let content = root["content"] as? [[String: Any]],
+          let groups = root["grantGroups"] as? [[String: Any]]
+    else { throw NorseV1FixtureError.malformedCatalog }
+
+    root["content"] = try content.filter { definition in
+        guard let identifier = definition["contentID"] as? String else {
+            throw NorseV1FixtureError.malformedCatalog
+        }
+        return !elvenMasteryV3ContentIDs.contains(identifier)
+    }
+    root["grantGroups"] = try groups.map { group in
+        guard let items = group["items"] as? [[String: Any]] else {
+            throw NorseV1FixtureError.malformedCatalog
+        }
+        var prior = group
+        prior["items"] = try items.filter { item in
+            guard let identifier = item["contentID"] as? String else {
+                throw NorseV1FixtureError.malformedCatalog
+            }
+            return !elvenMasteryV3ContentIDs.contains(identifier)
+        }
+        return prior
+    }
     return root
 }
 

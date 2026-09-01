@@ -1,0 +1,39 @@
+{
+  "outputs": [
+    {
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "contentBounds": [
+        229,
+        41,
+        1431,
+        1125
+      ],
+      "opaquePixels": 1104113,
+      "partialAlphaPixels": 18133,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/wildwood-rootsong-tablet-clean-production-master-v4.3.png",
+      "sha256": "c36bbb1aff2685502081e441da0ab0bffea3651a67774093ef86c646cdf532e5",
+      "transparentPixels": 797754
+    },
+    {
+      "alphaExtrema": [
+        0,
+        255
+      ],
+      "contentBounds": [
+        230,
+        51,
+        1368,
+        1100
+      ],
+      "opaquePixels": 1029859,
+      "partialAlphaPixels": 13955,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/wildwood/wildwood-mossbound-plaque-clean-production-master-v4.3.png",
+      "sha256": "d599ff51f2d7a43c123c4541b64e2870a26dd57a3dd0bba0579c5ed60672465d",
+      "transparentPixels": 876186
+    }
+  ],
+  "status": "PASS"
+}

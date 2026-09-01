@@ -1,0 +1,49 @@
+{
+  "acceptanceEvidence": false,
+  "argv": [
+    "/bin/bash",
+    "scripts/check-forsetti-compliance.sh",
+    "--scan-root",
+    ".",
+    "--rules",
+    "scripts/forsetti-compliance-rules.json",
+    "--output",
+    "/tmp/runescribe-v43-acceptance.aQQkxe/forsetti-c9f45"
+  ],
+  "category": "architecture",
+  "command": "/bin/bash scripts/check-forsetti-compliance.sh --scan-root . --rules scripts/forsetti-compliance-rules.json --output /tmp/runescribe-v43-acceptance.aQQkxe/forsetti-c9f45",
+  "commandID": "forsetti-report-only",
+  "cwd": "/private/tmp/runescribe-v43-acceptance.aQQkxe/source",
+  "destination": "local-cli",
+  "endTimestamp": "2026-08-31T22:13:40.606Z",
+  "evidenceType": "command-execution",
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "failures": [],
+  "log": {
+    "bytes": 2005,
+    "path": "commands/logs/forsetti-report-only.log",
+    "sha256": "394ac9c36989ec6b98a93bdaba108fe83a611ae091aa6aa1076c08224b290c4a"
+  },
+  "outputs": [
+    {
+      "bytes": 115950,
+      "location": "external-absolute",
+      "path": "/private/tmp/runescribe-v43-acceptance.aQQkxe/forsetti-c9f45/forsetti-compliance-report.json",
+      "sha256": "4d7f5a1344d6523061a934d271afbd82a7e7cee7aee6dbb69ec760ee46288ae6"
+    }
+  ],
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+  "sourceState": {
+    "acceptanceEligible": true,
+    "headMatchesSource": true,
+    "headSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "requestedSourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef",
+    "worktreeChangeCount": 39,
+    "worktreeChangesOutsideEvidenceRoot": [],
+    "worktreeCleanOutsideEvidenceRoot": true
+  },
+  "startTimestamp": "2026-08-31T22:12:56.699Z"
+}

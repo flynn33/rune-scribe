@@ -11,6 +11,57 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
     private let providerRole: ModuleRole = "test.resource.provider"
     private let readerRole: ModuleRole = "test.resource.reader"
 
+    func testOpaqueResourceMetadataCodablePreservesRegistrationAndDefaultsLegacyPayload()
+        throws
+    {
+        let metadata = OpaqueResourceMetadata(
+            handle: .init(
+                namespace: "namespace.metadata-codec",
+                resourceID: "resource.metadata-codec"
+            ),
+            ownerModuleID: "com.runescribe.test.metadata-codec",
+            registrationID: 73,
+            semanticRole: "codex.card",
+            mediaType: .png,
+            category: .image,
+            byteCount: 256,
+            sha256: String(repeating: "a", count: 64),
+            pixelSize: .init(width: 16, height: 9)
+        )
+
+        let encoded = try JSONEncoder().encode(metadata)
+        XCTAssertEqual(try JSONDecoder().decode(OpaqueResourceMetadata.self, from: encoded), metadata)
+
+        var legacyDocument = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+        )
+        XCTAssertEqual(
+            (legacyDocument["registrationID"] as? NSNumber)?.uint64Value,
+            metadata.registrationID
+        )
+        legacyDocument.removeValue(forKey: "registrationID")
+        let legacyData = try JSONSerialization.data(withJSONObject: legacyDocument)
+        let legacyMetadata = try JSONDecoder().decode(
+            OpaqueResourceMetadata.self,
+            from: legacyData
+        )
+
+        XCTAssertEqual(legacyMetadata.registrationID, 0)
+        XCTAssertEqual(
+            legacyMetadata,
+            OpaqueResourceMetadata(
+                handle: metadata.handle,
+                ownerModuleID: metadata.ownerModuleID,
+                semanticRole: metadata.semanticRole,
+                mediaType: metadata.mediaType,
+                category: metadata.category,
+                byteCount: metadata.byteCount,
+                sha256: metadata.sha256,
+                pixelSize: metadata.pixelSize
+            )
+        )
+    }
+
     func testProviderRegistersValidatedNamespaceAndResolverReceivesOpaqueData() async throws {
         let fixture = try await makeFixture()
         let data = try XCTUnwrap(Data(base64Encoded: Self.onePixelPNGBase64))
@@ -44,6 +95,249 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
         let snapshot = try await fixture.resolver.snapshot()
         XCTAssertEqual(snapshot.resources.map(\.handle), [handle])
         XCTAssertGreaterThan(snapshot.revision, 0)
+    }
+
+    func testDeferredResourcesLoadOnDemandWithoutRegistryRetention() async throws {
+        let fixture = try await makeFixture()
+        let data = Data("{\"theme\":\"deferred\"}".utf8)
+        let declaration = makeDeclaration(
+            id: "descriptor.deferred",
+            role: "descriptor",
+            mediaType: .json,
+            data: data
+        )
+        let probe = DeferredResourceLoaderProbe(data: data)
+        try await fixture.provider.register(
+            .init(
+                namespace: "namespace.deferred",
+                declarations: [declaration],
+                resourceLoader: { resourceID in
+                    await probe.load(resourceID)
+                }
+            )
+        )
+
+        let callCountBeforeResolution = await probe.callCount()
+        XCTAssertEqual(callCountBeforeResolution, 0)
+        let handle = OpaqueResourceHandle(
+            namespace: "namespace.deferred",
+            resourceID: declaration.resourceID
+        )
+        let firstResolution = try await fixture.resolver.resolve(handle)
+        let secondResolution = try await fixture.resolver.resolve(handle)
+        XCTAssertEqual(firstResolution.data, data)
+        XCTAssertEqual(secondResolution.data, data)
+        let loadedResourceIDs = await probe.loadedResourceIDs()
+        XCTAssertEqual(
+            loadedResourceIDs,
+            [declaration.resourceID, declaration.resourceID],
+            "Each resolution must reload verified bytes instead of retaining the full catalog."
+        )
+    }
+
+    func testDeferredRequiredResourceFailsClosedWhenLoaderReturnsNoBytes() async throws {
+        let fixture = try await makeFixture()
+        let expected = Data("{}".utf8)
+        let declaration = makeDeclaration(
+            id: "descriptor.deferred-missing",
+            role: "descriptor",
+            mediaType: .json,
+            data: expected
+        )
+        try await fixture.provider.register(
+            .init(
+                namespace: "namespace.deferred-missing",
+                declarations: [declaration],
+                resourceLoader: { _ in nil }
+            )
+        )
+
+        do {
+            _ = try await fixture.resolver.resolve(
+                .init(
+                    namespace: "namespace.deferred-missing",
+                    resourceID: declaration.resourceID
+                )
+            )
+            XCTFail("A missing deferred required resource must fail resolution")
+        } catch {
+            XCTAssertEqual(
+                error as? RuntimeOpaqueResourceError,
+                .missingRequiredResource(declaration.resourceID)
+            )
+        }
+    }
+
+    func testSuspendedDeferredResolutionCannotCrossNamespaceReregistration()
+        async throws
+    {
+        let fixture = try await makeFixture()
+        let data = Data("{\"theme\":\"registration\"}".utf8)
+        let declaration = makeDeclaration(
+            id: "descriptor.registration-race",
+            role: "descriptor",
+            mediaType: .json,
+            data: data
+        )
+        let namespace: OpaqueResourceNamespaceID = "namespace.registration-race"
+        let handle = OpaqueResourceHandle(
+            namespace: namespace,
+            resourceID: declaration.resourceID
+        )
+        let gate = SuspendedDeferredResourceLoader(data: data)
+        try await fixture.provider.register(
+            .init(
+                namespace: namespace,
+                declarations: [declaration],
+                resourceLoader: { resourceID in
+                    await gate.load(resourceID)
+                }
+            )
+        )
+        let oldSnapshot = try await fixture.resolver.snapshot()
+        let oldMetadata = try XCTUnwrap(oldSnapshot.resources.first)
+
+        let oldResolution = Task {
+            try await fixture.resolver.resolve(handle)
+        }
+        await gate.waitUntilEntered()
+        try await fixture.provider.unregister(namespace)
+        try await fixture.provider.register(
+            .init(
+                namespace: namespace,
+                declarations: [declaration],
+                resourceLoader: { _ in data }
+            )
+        )
+        let currentSnapshot = try await fixture.resolver.snapshot()
+        let currentMetadata = try XCTUnwrap(currentSnapshot.resources.first)
+        XCTAssertGreaterThan(currentMetadata.registrationID, oldMetadata.registrationID)
+
+        await gate.release()
+        do {
+            _ = try await oldResolution.value
+            XCTFail("An old suspended loader must not cross namespace reregistration.")
+        } catch {
+            XCTAssertEqual(
+                error as? RuntimeOpaqueResourceError,
+                .resourceUnavailable(handle)
+            )
+        }
+        let currentResolution = try await fixture.resolver.resolve(handle)
+        XCTAssertEqual(currentResolution.data, data)
+        let finalSnapshot = try await fixture.resolver.snapshot()
+        XCTAssertTrue(finalSnapshot.validationFaults.isEmpty)
+    }
+
+    func testCorruptRequiredUnlockSoundRecordsOneFaultAndReregistrationClearsIt()
+        async throws
+    {
+        let fixture = try await makeFixture()
+        var repositoryRoot = URL(fileURLWithPath: #filePath)
+        for _ in 0..<5 { repositoryRoot.deleteLastPathComponent() }
+        let soundURL = repositoryRoot.appendingPathComponent(
+            "Packages/RuneScribeArchitecture/Sources/RuneScribeNorseThemeModule/Resources/Production/Audio/sound.norse.unlock-relic.wav"
+        )
+        let sound = try Data(contentsOf: soundURL)
+        let corruptSound = Data(sound.dropLast())
+        let declaration = makeDeclaration(
+            id: "resource.sound.norse.unlock-relic",
+            role: ThemeResourceRoles.unlockSound.rawValue,
+            mediaType: .wav,
+            data: sound
+        )
+        let namespace = RuntimeThemeContributionCatalog.resourceNamespace(
+            for: RuneScribeCodexIDs.norse
+        )
+        try await fixture.provider.register(
+            .init(
+                namespace: namespace,
+                declarations: [declaration],
+                resourceLoader: { _ in corruptSound }
+            )
+        )
+        let registeredSnapshot = try await fixture.resolver.snapshot()
+        let registrationID = try XCTUnwrap(
+            registeredSnapshot.resources.first?.registrationID
+        )
+
+        let firstUnlockSound = await fixture.registry.unlockFeedbackSoundData(
+            codexID: RuneScribeCodexIDs.norse,
+            semanticID: .artifact
+        )
+        XCTAssertNil(firstUnlockSound)
+        let faultedSnapshot = try await fixture.resolver.snapshot()
+        XCTAssertGreaterThan(faultedSnapshot.revision, registeredSnapshot.revision)
+        let fault = try XCTUnwrap(faultedSnapshot.validationFaults.first)
+        XCTAssertEqual(fault.handle.resourceID, declaration.resourceID)
+        XCTAssertEqual(fault.registrationID, registrationID)
+        XCTAssertEqual(fault.code, .resourceMismatch)
+        XCTAssertNil(fault.requiredBaseFailure)
+
+        let repeatedUnlockSound = await fixture.registry.unlockFeedbackSoundData(
+            codexID: RuneScribeCodexIDs.norse,
+            semanticID: .artifact
+        )
+        XCTAssertNil(repeatedUnlockSound)
+        let repeatedSnapshot = try await fixture.resolver.snapshot()
+        XCTAssertEqual(repeatedSnapshot.revision, faultedSnapshot.revision)
+        XCTAssertEqual(repeatedSnapshot.validationFaults, faultedSnapshot.validationFaults)
+
+        try await fixture.provider.unregister(namespace)
+        try await fixture.provider.register(
+            .init(
+                namespace: namespace,
+                declarations: [declaration],
+                resourceLoader: { _ in sound }
+            )
+        )
+        let freshSnapshot = try await fixture.resolver.snapshot()
+        XCTAssertTrue(freshSnapshot.validationFaults.isEmpty)
+        XCTAssertGreaterThan(
+            try XCTUnwrap(freshSnapshot.resources.first?.registrationID),
+            registrationID
+        )
+    }
+
+    func testThemeProviderPolicyRejectsPayloadBackedNamespaceRegistration()
+        async throws
+    {
+        let fixture = try await makeFixture(
+            providerPolicyClass: RuneScribePolicyClasses.themeProvider
+        )
+        let data = Data("{}".utf8)
+        let declaration = makeDeclaration(
+            id: "descriptor.theme-provider-eager",
+            role: "descriptor",
+            mediaType: .json,
+            data: data
+        )
+        let namespace: OpaqueResourceNamespaceID = "namespace.theme-provider-eager"
+        do {
+            try await fixture.provider.register(
+                .init(
+                    namespace: namespace,
+                    declarations: [declaration],
+                    payloads: [.init(resourceID: declaration.resourceID, data: data)]
+                )
+            )
+            XCTFail("Theme-provider policy must reject payload-backed registration.")
+        } catch {
+            XCTAssertEqual(
+                error as? RuntimeOpaqueResourceError,
+                .payloadBackedThemeProviderRegistrationDenied(namespace)
+            )
+        }
+
+        try await fixture.provider.register(
+            .init(
+                namespace: namespace,
+                declarations: [declaration],
+                resourceLoader: { _ in data }
+            )
+        )
+        let snapshot = try await fixture.resolver.snapshot()
+        XCTAssertEqual(snapshot.resources.count, 1)
     }
 
     func testRegistrationRejectsMissingRequiredAndUndeclaredPayloadsAtomically() async throws {
@@ -656,7 +950,7 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
         let sound = try Data(contentsOf: soundURL)
         let declaration = makeDeclaration(
             id: "resource.sound.norse.unlock-relic",
-            role: "unlock-sound-cue",
+            role: ThemeResourceRoles.unlockSound.rawValue,
             mediaType: .wav,
             data: sound
         )
@@ -758,14 +1052,16 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
     }
 
     private func makeFixture(
-        budget: OpaqueResourceBudget = .themeScaffold
+        budget: OpaqueResourceBudget = .themeScaffold,
+        providerPolicyClass: ModulePolicyClass? = nil
     ) async throws -> Fixture {
         let registry = RuntimeOpaqueResourceRegistry(budget: budget)
         let runtimeGeneration = await registry.activateRuntime()
         let providerDescriptor = makeDescriptor(
             id: "com.runescribe.test.resource-provider",
             role: providerRole,
-            capabilities: [publishCapability]
+            capabilities: [publishCapability],
+            policyClass: providerPolicyClass
         )
         let readerDescriptor = makeDescriptor(
             id: "com.runescribe.test.resource-reader",
@@ -800,7 +1096,8 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
     private func makeDescriptor(
         id: ModuleIdentifier,
         role: ModuleRole,
-        capabilities: Set<CapabilityIdentifier>
+        capabilities: Set<CapabilityIdentifier>,
+        policyClass: ModulePolicyClass? = nil
     ) -> ModuleDescriptor {
         ModuleDescriptor(
             moduleID: id,
@@ -808,6 +1105,7 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
             kind: .service,
             entryPoint: id.rawValue.replacingOccurrences(of: ".", with: "_"),
             role: role,
+            policyClass: policyClass,
             requestedCapabilities: capabilities
         )
     }
@@ -820,6 +1118,8 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
             capabilities: CapabilityPolicy(allowedRolesByCapability: [
                 publishCapability: [providerRole],
                 resolveCapability: [readerRole],
+            ], additionalPolicyClassesByCapability: [
+                publishCapability: [RuneScribePolicyClasses.themeProvider],
             ]),
             services: ServiceAccessPolicy(rules: [])
         )
@@ -913,4 +1213,56 @@ final class RuntimeOpaqueResourceRegistryTests: XCTestCase {
 
     private static let onePixelPNGBase64 =
         "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+}
+
+private actor DeferredResourceLoaderProbe {
+    private let data: Data?
+    private var resourceIDs: [OpaqueResourceID] = []
+
+    init(data: Data?) {
+        self.data = data
+    }
+
+    func load(_ resourceID: OpaqueResourceID) -> Data? {
+        resourceIDs.append(resourceID)
+        return data
+    }
+
+    func callCount() -> Int { resourceIDs.count }
+    func loadedResourceIDs() -> [OpaqueResourceID] { resourceIDs }
+}
+
+private actor SuspendedDeferredResourceLoader {
+    private let data: Data
+    private var entered = false
+    private var entryWaiters: [CheckedContinuation<Void, Never>] = []
+    private var releaseContinuation: CheckedContinuation<Void, Never>?
+
+    init(data: Data) {
+        self.data = data
+    }
+
+    func load(_ resourceID: OpaqueResourceID) async -> Data? {
+        _ = resourceID
+        entered = true
+        let waiters = entryWaiters
+        entryWaiters.removeAll()
+        for waiter in waiters { waiter.resume() }
+        await withCheckedContinuation { continuation in
+            releaseContinuation = continuation
+        }
+        return data
+    }
+
+    func waitUntilEntered() async {
+        guard !entered else { return }
+        await withCheckedContinuation { continuation in
+            entryWaiters.append(continuation)
+        }
+    }
+
+    func release() {
+        releaseContinuation?.resume()
+        releaseContinuation = nil
+    }
 }

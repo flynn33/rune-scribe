@@ -1,330 +1,428 @@
 {
-  "schemaVersion": "1.0",
+  "acceptedPackageVersion": "4.3.0",
   "codexID": "codex.gloamthorn",
-  "moduleID": "com.runescribe.module.theme.gloamthorn",
-  "acceptedPackageVersion": "3.1.0",
   "files": [
     {
+      "bytes": 4928748,
       "path": "Production/background/gloamthorn-background-high-contrast.png",
-      "bytes": 15112,
-      "sha256": "b89c76557b73373ed2b14c7faa398c0cc9bfe8ed5150e084511b6d91c3d28d2c",
       "resourceID": "resource.background.gloamthorn.twilight-briar.output.background-high-contrast",
-      "role": "background.high-contrast"
+      "role": "background.high-contrast",
+      "sha256": "1e004c3f46b90c029a545633d4870d8ec28b40a0ae6367fb41330124048a2da8"
     },
     {
+      "bytes": 4415242,
+      "path": "Production/background/gloamthorn-background-macos-wide.png",
+      "resourceID": "resource.background.gloamthorn.twilight-briar.output.background-macos-wide-crop",
+      "role": "background.macos-wide-crop",
+      "sha256": "6b4af5cc094660e14838dff6aff4406eb0987c4d3bff1fc737404401dcfde303"
+    },
+    {
+      "bytes": 3930685,
       "path": "Production/background/gloamthorn-background-reduce-motion.png",
-      "bytes": 16736,
-      "sha256": "b0e34c2b202b73af6e844d76e9579f40b63ad803bd0e8809e61e34da06f8a5a2",
       "resourceID": "resource.background.gloamthorn.twilight-briar.output.background-reduce-motion",
-      "role": "background.reduce-motion"
+      "role": "background.reduce-motion",
+      "sha256": "0817eb1a34604ce1c5729fd580fdf136746d15edd474b8cd7eda7be94fcd8fb4"
     },
     {
+      "bytes": 4102653,
       "path": "Production/background/gloamthorn-background-static.png",
-      "bytes": 17088,
-      "sha256": "e43f33634ec59dcb72a85bf216eb99336a5d5a08793684e9898073cc699b1830",
       "resourceID": "resource.background.gloamthorn.twilight-briar.output.background-static-base",
-      "role": "background.static-base"
+      "role": "background.static-base",
+      "sha256": "7b658a84524e3ac3a0b89d15b6080c449a8b863779a80bfce37ab37757ab4944"
     },
     {
+      "bytes": 979120,
       "path": "Production/crest/gloamthorn-gloam-sovereign-static-fallback.png",
-      "bytes": 13505,
-      "sha256": "09b0828666c9ffcb20774062e1121d08771aaaa8878396cd2269f5569ab53c7f",
       "resourceID": "resource.crest.gloamthorn.gloam-sovereign.output.crest-static-fallback",
-      "role": "crest.static-fallback"
+      "role": "crest.static-fallback",
+      "sha256": "9a0176b1c869a9d8db124f3c681f23e0a556c844fdc47973f6c9952d33bb5769"
     },
     {
+      "bytes": 278857,
       "path": "Production/crest/gloamthorn-gloam-sovereign-thumbnail.png",
-      "bytes": 51976,
-      "sha256": "f468d674c57388e9fc4533f4c8dbe78a8cfae3b7da038c325ae8895775e63569",
       "resourceID": "resource.crest.gloamthorn.gloam-sovereign.output.crest-thumbnail",
-      "role": "crest.thumbnail"
+      "role": "crest.thumbnail",
+      "sha256": "9c0cd583b85dcf419b1e50fd8251961c9d829072d6f851eee1abe9e878ffd685"
     },
     {
-      "path": "Production/crest/gloamthorn-gloam-sovereign-vector.pdf",
       "bytes": 3661,
-      "sha256": "50c8781c15ec8c2422ca99f792874fc0db710b87e80f3dc1623cda6986c7aec8",
+      "path": "Production/crest/gloamthorn-gloam-sovereign-vector.pdf",
       "resourceID": "resource.crest.gloamthorn.gloam-sovereign.output.crest-vector-master",
-      "role": "crest.vector-master"
+      "role": "crest.vector-master",
+      "sha256": "50c8781c15ec8c2422ca99f792874fc0db710b87e80f3dc1623cda6986c7aec8"
     },
     {
+      "bytes": 1747864,
       "path": "Production/frame/gloamthorn-briar-court-static-fallback.png",
-      "bytes": 13165,
-      "sha256": "66882d7c3901ec72f345264c06f662ef53296bdfeef0d741983e848dafe3efdb",
       "resourceID": "resource.frame.gloamthorn.briar-court.output.frame-static-fallback",
-      "role": "frame.static-fallback"
+      "role": "frame.static-fallback",
+      "sha256": "89b7d1404bf998ce83b84b6a02a68fbf7cc0e8c8f2e83b546e1823fd9884332e"
     },
     {
+      "bytes": 155746,
       "path": "Production/frame/gloamthorn-briar-court-thumbnail.png",
-      "bytes": 20302,
-      "sha256": "ce384663dfe73ac798719f4e360c9a970af45db8d0aec1e2160c76ad716f5b83",
       "resourceID": "resource.frame.gloamthorn.briar-court.output.frame-thumbnail",
-      "role": "frame.thumbnail"
+      "role": "frame.thumbnail",
+      "sha256": "7e2b6c8c9046e23585c62e2f4a5fcfb6e21b36140042ae153bbe421b52351899"
     },
     {
+      "bytes": 1828,
       "path": "Production/frame/gloamthorn-briar-court-vector.pdf",
-      "bytes": 1803,
-      "sha256": "048d120d0d5d430522cf9a9a0480abd4c7411bbcae490604498bc06dedc79aff",
       "resourceID": "resource.frame.gloamthorn.briar-court.output.frame-vector-master",
-      "role": "frame.vector-master"
+      "role": "frame.vector-master",
+      "sha256": "e91c0b6a4e8c23d5d4876fbead496aa940cb805a02fdc1401e2bd47fccb9fcc5"
     },
     {
+      "bytes": 477397,
+      "path": "Production/panel/gloamthorn-card-border.png",
+      "resourceID": "resource.panel.gloamthorn.card-border",
+      "role": "panel.card-border",
+      "sha256": "fa50d02e40573fa4f3bd9e31ea0cdfe91d07480beb08ba06611bc126f23f8666"
+    },
+    {
+      "bytes": 284807,
+      "path": "Production/panel/gloamthorn-corner-ornament.png",
+      "resourceID": "resource.panel.gloamthorn.corner-ornament",
+      "role": "panel.corner-ornament",
+      "sha256": "dea68075096fe607e91d4f45ce0c1695c8c0dbcea95ab6884ef0065b6f54817a"
+    },
+    {
+      "bytes": 79618,
+      "path": "Production/panel/gloamthorn-divider.png",
+      "resourceID": "resource.panel.gloamthorn.divider",
+      "role": "panel.divider",
+      "sha256": "2a059e41a790d3788cd079eea47a9b89c838f97d5c8beca359fd6cca7ad77791"
+    },
+    {
+      "bytes": 203533,
+      "path": "Production/panel/gloamthorn-primary-button.png",
+      "resourceID": "resource.panel.gloamthorn.primary-button",
+      "role": "panel.primary-button",
+      "sha256": "2fdfbb922e928e8763654c356dd79fc6aff651384a0b0db6875896cf04746f7c"
+    },
+    {
+      "bytes": 124525,
+      "path": "Production/panel/gloamthorn-tab-selector.png",
+      "resourceID": "resource.panel.gloamthorn.tab-selector",
+      "role": "panel.tab-selector",
+      "sha256": "44672129a794b943c17f11428a1ae0c732561b3a9ac7d9f48a69a266a43637bb"
+    },
+    {
+      "bytes": 2156528,
       "path": "Production/relic/gloamthorn-duskbriar-stele-high-contrast.png",
-      "bytes": 13142,
-      "sha256": "6b203ae4c6861b06b1e93a838fc19cdbf96dff455a5187b6d67d493ea8d6ba3a",
       "resourceID": "resource.relic.gloamthorn.duskbriar-stele.output.relic-high-contrast",
-      "role": "relic.high-contrast"
+      "role": "relic.high-contrast",
+      "sha256": "837a00f4319860ae30bb0dca04835c738bcc009b84abe64b93d0900b03f32ea5"
     },
     {
+      "bytes": 1839771,
       "path": "Production/relic/gloamthorn-duskbriar-stele-master.png",
-      "bytes": 16096,
-      "sha256": "e6633bc20729dc1f6bae60503e823673109ab0501b49343e4651fee2ede0652c",
       "resourceID": "resource.relic.gloamthorn.duskbriar-stele.output.relic-master",
-      "role": "relic.master"
+      "role": "relic.master",
+      "sha256": "3c43948b0f10009149986c0a829a78c9ee6909b94f9bb7a59680213dfee7ffce"
     },
     {
-      "path": "Production/relic/gloamthorn-duskbriar-stele-static-share-fallback.heif",
-      "bytes": 11712,
-      "sha256": "59aa8e355187988adae1ddaff4bcd01fa1cbee7feb9c8dd9253927d2d370b2bb",
+      "bytes": 1839771,
+      "path": "Production/relic/gloamthorn-duskbriar-stele-static-share-fallback.png",
       "resourceID": "resource.relic.gloamthorn.duskbriar-stele.output.relic-static-share-fallback",
-      "role": "relic.static-share-fallback"
+      "role": "relic.static-share-fallback",
+      "sha256": "3c43948b0f10009149986c0a829a78c9ee6909b94f9bb7a59680213dfee7ffce"
     },
     {
-      "path": "Production/relic/gloamthorn-duskbriar-stele-thumbnail.heif",
-      "bytes": 9148,
-      "sha256": "4aef66418a094bb7886b377247dddd660e7293fb8ccfe4eb4fb668c9e196f2cf",
+      "bytes": 384888,
+      "path": "Production/relic/gloamthorn-duskbriar-stele-thumbnail.png",
       "resourceID": "resource.relic.gloamthorn.duskbriar-stele.output.relic-thumbnail",
-      "role": "relic.thumbnail"
+      "role": "relic.thumbnail",
+      "sha256": "e8d4ed3048a0a1aa2d0e29fb27cab8c332257101d90a133762ab5ca90078e94f"
     },
     {
+      "bytes": 2401997,
       "path": "Production/relic/gloamthorn-nightthorn-tablet-high-contrast.png",
-      "bytes": 10987,
-      "sha256": "813e21998c3b954a4b2c7997b00b6a1a4aefbc4dc3591f1b6f69a98743f685ab",
       "resourceID": "resource.relic.gloamthorn.nightthorn-tablet.output.relic-high-contrast",
-      "role": "relic.high-contrast"
+      "role": "relic.high-contrast",
+      "sha256": "beffa00d9b899058e1c4b1a51ca38217812e4a6d1b5545fb4e395a57838a7a3e"
     },
     {
+      "bytes": 2200759,
       "path": "Production/relic/gloamthorn-nightthorn-tablet-master.png",
-      "bytes": 16844,
-      "sha256": "0701c379f9a3e3a24fde187bdfa1315d65449bbf1a9a45dc37c2a43f21da1bdd",
       "resourceID": "resource.relic.gloamthorn.nightthorn-tablet.output.relic-master",
-      "role": "relic.master"
+      "role": "relic.master",
+      "sha256": "d346873fe85a64d87e601d2dfbf0f0036a23dd940078105d855982eb6a9fa78d"
     },
     {
-      "path": "Production/relic/gloamthorn-nightthorn-tablet-static-share-fallback.heif",
-      "bytes": 19240,
-      "sha256": "dbfe396cce48a24e8a9e8778b773cb9d927fcdba919dbeadf732b62604a29ce9",
+      "bytes": 2200759,
+      "path": "Production/relic/gloamthorn-nightthorn-tablet-static-share-fallback.png",
       "resourceID": "resource.relic.gloamthorn.nightthorn-tablet.output.relic-static-share-fallback",
-      "role": "relic.static-share-fallback"
+      "role": "relic.static-share-fallback",
+      "sha256": "d346873fe85a64d87e601d2dfbf0f0036a23dd940078105d855982eb6a9fa78d"
     },
     {
-      "path": "Production/relic/gloamthorn-nightthorn-tablet-thumbnail.heif",
-      "bytes": 7830,
-      "sha256": "acbe38e9bf460b167c193f814d3d0a028d5115a0741ccde4d35753fcdb405e60",
+      "bytes": 280663,
+      "path": "Production/relic/gloamthorn-nightthorn-tablet-thumbnail.png",
       "resourceID": "resource.relic.gloamthorn.nightthorn-tablet.output.relic-thumbnail",
-      "role": "relic.thumbnail"
+      "role": "relic.thumbnail",
+      "sha256": "8c74f9ac7d8698d303386aab34b98c9726a200356193a7c665ce57fdfdecd46f"
     },
     {
+      "bytes": 2172643,
       "path": "Production/relic/gloamthorn-umbral-plaque-high-contrast.png",
-      "bytes": 12021,
-      "sha256": "e9949cf29f15dff7ae01ba496cf1d5722ea73b9632ee60877d81278167c0ff8a",
       "resourceID": "resource.relic.gloamthorn.umbral-plaque.output.relic-high-contrast",
-      "role": "relic.high-contrast"
+      "role": "relic.high-contrast",
+      "sha256": "1c000d3543360c4a7aa6c3842171249425b4e81a5f4bc53c520023d57faedf54"
     },
     {
+      "bytes": 1796774,
       "path": "Production/relic/gloamthorn-umbral-plaque-master.png",
-      "bytes": 16353,
-      "sha256": "db54c2ceb5e4dad8961920c411d47214a3c9443f77c3cdd43eef8be398957dcb",
       "resourceID": "resource.relic.gloamthorn.umbral-plaque.output.relic-master",
-      "role": "relic.master"
+      "role": "relic.master",
+      "sha256": "86ec68dd4518517fbb9a744af1cfdf4d6188017adedcb1e2897241e93e51ab3c"
     },
     {
-      "path": "Production/relic/gloamthorn-umbral-plaque-static-share-fallback.heif",
-      "bytes": 18508,
-      "sha256": "e50cc6c861da2f632ec2af0e3778ffe4d6c79ce83841ca40105529f59afe1e6a",
+      "bytes": 1796774,
+      "path": "Production/relic/gloamthorn-umbral-plaque-static-share-fallback.png",
       "resourceID": "resource.relic.gloamthorn.umbral-plaque.output.relic-static-share-fallback",
-      "role": "relic.static-share-fallback"
+      "role": "relic.static-share-fallback",
+      "sha256": "86ec68dd4518517fbb9a744af1cfdf4d6188017adedcb1e2897241e93e51ab3c"
     },
     {
-      "path": "Production/relic/gloamthorn-umbral-plaque-thumbnail.heif",
-      "bytes": 12742,
-      "sha256": "f4618c89d8c6f76c0876f1ef58191e645245e955fcafc38d9ada32fc22ed2515",
+      "bytes": 367178,
+      "path": "Production/relic/gloamthorn-umbral-plaque-thumbnail.png",
       "resourceID": "resource.relic.gloamthorn.umbral-plaque.output.relic-thumbnail",
-      "role": "relic.thumbnail"
+      "role": "relic.thumbnail",
+      "sha256": "26c7ab95c9f206ebe71ee1bd2034f9adccff180cd2adbc2d7cfdad5f3a83b5bc"
     },
     {
-      "path": "Production/script/gloamthorn-script-primary.ttf",
       "bytes": 44108,
-      "sha256": "a2cf3dd18a4e1bbf4a11b3995307873820c8715a17f4e745cd61fae6f92a65b3",
+      "path": "Production/script/gloamthorn-script-primary.ttf",
       "resourceID": "resource.script.gloamthorn.output.script-font",
-      "role": "script.font"
+      "role": "script.font",
+      "sha256": "a2cf3dd18a4e1bbf4a11b3995307873820c8715a17f4e745cd61fae6f92a65b3"
     },
     {
+      "bytes": 112192,
+      "path": "Production/script/gloamthorn-script-specimen-high-contrast.png",
+      "resourceID": "resource.script.gloamthorn.output.script-specimen-high-contrast",
+      "role": "script.specimen-high-contrast",
+      "sha256": "ec67c56f07bac6e374c3a245d0a357d8cb95939b45ff70d30cf340e70265828a"
+    },
+    {
+      "bytes": 109610,
       "path": "Production/script/gloamthorn-script-specimen.png",
-      "bytes": 26659,
-      "sha256": "216f9b64ac93ec10dd2a1f3af7d6cc708197c8319aa57fb6799c7ed5439c3975",
-      "resourceID": "resource.script.gloamthorn.output.script-specimen-preview",
-      "role": "script.specimen-preview"
+      "resourceID": "resource.script.gloamthorn.output.script-specimen-standard",
+      "role": "script.specimen-standard",
+      "sha256": "6a6ddcf5621652d6b316120c5abccfee49cdf839273951e7f5561fe2af4c8f3f"
     },
     {
+      "bytes": 109610,
       "path": "Production/script/gloamthorn-script-static-fallback.png",
-      "bytes": 20985,
-      "sha256": "2cf5bd8006079eaed36020fb5c2bdee6b5e85a2063d53a964330b84a6f035d78",
       "resourceID": "resource.script.gloamthorn.output.script-static-fallback",
-      "role": "script.static-fallback"
+      "role": "script.static-fallback",
+      "sha256": "6a6ddcf5621652d6b316120c5abccfee49cdf839273951e7f5561fe2af4c8f3f"
     },
     {
-      "path": "Production/seal/gloamthorn-echo-wisp-monochrome-fallback.pdf",
-      "bytes": 5055,
-      "sha256": "40ee5a49390db358a0ecc5cc40b2d7c89273bcdbbe34592d95307ed7b4aedd57",
+      "bytes": 1412895,
+      "path": "Production/seal/gloamthorn-echo-wisp-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-color-master",
+      "role": "seal.color-master",
+      "sha256": "5c06834ee48dd48ed8c54a85b27c2b35c8290daebe929b069e837cc7f34890cb"
+    },
+    {
+      "bytes": 1044189,
+      "path": "Production/seal/gloamthorn-echo-wisp-monochrome-fallback.png",
       "resourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-monochrome-fallback",
-      "role": "seal.monochrome-fallback"
+      "role": "seal.monochrome-fallback",
+      "sha256": "a16376ab9aa482ee3f4969d90a7312bbe894f9bcc9f664de12be808695dfeb6f"
     },
     {
+      "bytes": 375539,
       "path": "Production/seal/gloamthorn-echo-wisp-thumbnail.png",
-      "bytes": 3144,
-      "sha256": "702adfae279b442206fb1f81f62b0512cbd4fcb042f9f6f4ed2462f8313d2103",
       "resourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-thumbnail",
-      "role": "seal.thumbnail"
+      "role": "seal.thumbnail",
+      "sha256": "1795caabe8bab0cc0e7f3f3b307e13541b9cf50d64c2d764f3fc0fb9fd0d4566"
     },
     {
-      "path": "Production/seal/gloamthorn-echo-wisp-vector-master.pdf",
       "bytes": 5193,
-      "sha256": "1b12e7f7b305a1102a3c0390c7693c56f5390571103ff1bf36456124273af28d",
+      "path": "Production/seal/gloamthorn-echo-wisp-vector-master.pdf",
       "resourceID": "resource.seal.gloamthorn.echo-wisp.output.seal-vector-master",
-      "role": "seal.vector-master"
+      "role": "seal.vector-master",
+      "sha256": "1b12e7f7b305a1102a3c0390c7693c56f5390571103ff1bf36456124273af28d"
     },
     {
-      "path": "Production/seal/gloamthorn-eclipse-bloom-monochrome-fallback.pdf",
-      "bytes": 8862,
-      "sha256": "1278a84db313ed923e54cf85ba6b3dfda5dca3283443f7940bc6c2bfe8b39740",
+      "bytes": 1438181,
+      "path": "Production/seal/gloamthorn-eclipse-bloom-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-color-master",
+      "role": "seal.color-master",
+      "sha256": "434ea3463d51be7cbea4b9f02e04ff4e2a7cae632be3be395837d3b7da5f7098"
+    },
+    {
+      "bytes": 1026915,
+      "path": "Production/seal/gloamthorn-eclipse-bloom-monochrome-fallback.png",
       "resourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-monochrome-fallback",
-      "role": "seal.monochrome-fallback"
+      "role": "seal.monochrome-fallback",
+      "sha256": "cc07b3880cfb9172da51245ab0cf1101ec0df314c0a1af1d1e4f12646b68e071"
     },
     {
+      "bytes": 386680,
       "path": "Production/seal/gloamthorn-eclipse-bloom-thumbnail.png",
-      "bytes": 3069,
-      "sha256": "f437f0c0499a44fa1cfe757c1cf6d2a5c2a95dcfc25df122b3d8c02c0b680f68",
       "resourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-thumbnail",
-      "role": "seal.thumbnail"
+      "role": "seal.thumbnail",
+      "sha256": "4e1379b94a5b8586d1b65489ceea6d4a368bcc7dcd616215834bbec1cbc6b5a5"
     },
     {
-      "path": "Production/seal/gloamthorn-eclipse-bloom-vector-master.pdf",
       "bytes": 9138,
-      "sha256": "792eb0965a77cdf3fe2b376bf51de9747f0296fc28cbb37bb1cd83f344d32f60",
+      "path": "Production/seal/gloamthorn-eclipse-bloom-vector-master.pdf",
       "resourceID": "resource.seal.gloamthorn.eclipse-bloom.output.seal-vector-master",
-      "role": "seal.vector-master"
+      "role": "seal.vector-master",
+      "sha256": "792eb0965a77cdf3fe2b376bf51de9747f0296fc28cbb37bb1cd83f344d32f60"
     },
     {
-      "path": "Production/seal/gloamthorn-nightglass-moth-monochrome-fallback.pdf",
-      "bytes": 5078,
-      "sha256": "829b3b0af2ab9d93aa871251244e91780eaf32ef3a74307f4f8578ce6887ad12",
+      "bytes": 1664134,
+      "path": "Production/seal/gloamthorn-nightglass-moth-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-color-master",
+      "role": "seal.color-master",
+      "sha256": "5e7995658b9a5b2e7c091c136642c4e589185d06f2d98d406257eb27907a6e7b"
+    },
+    {
+      "bytes": 1223515,
+      "path": "Production/seal/gloamthorn-nightglass-moth-monochrome-fallback.png",
       "resourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-monochrome-fallback",
-      "role": "seal.monochrome-fallback"
+      "role": "seal.monochrome-fallback",
+      "sha256": "58c8115771484d95e298f09410e46b07d2c4c3b24dcb4b7a041064d4003408b1"
     },
     {
+      "bytes": 446642,
       "path": "Production/seal/gloamthorn-nightglass-moth-thumbnail.png",
-      "bytes": 3377,
-      "sha256": "329a43484dfcdd3be34404309807b7a73137c039c9cfc6e25701d64e51d7b26e",
       "resourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-thumbnail",
-      "role": "seal.thumbnail"
+      "role": "seal.thumbnail",
+      "sha256": "96344b56db0c7fddf7828e254165f9bea4300caca60e1bda60e5c48c17841d21"
     },
     {
-      "path": "Production/seal/gloamthorn-nightglass-moth-vector-master.pdf",
       "bytes": 5262,
-      "sha256": "074f56f5c24cccf0bf2e3578304dd79b4e5cbfb3e87b193fb5508a84a1a9211a",
+      "path": "Production/seal/gloamthorn-nightglass-moth-vector-master.pdf",
       "resourceID": "resource.seal.gloamthorn.nightglass-moth.output.seal-vector-master",
-      "role": "seal.vector-master"
+      "role": "seal.vector-master",
+      "sha256": "074f56f5c24cccf0bf2e3578304dd79b4e5cbfb3e87b193fb5508a84a1a9211a"
     },
     {
-      "path": "Production/seal/gloamthorn-pact-crown-monochrome-fallback.pdf",
-      "bytes": 2490,
-      "sha256": "8159565e06b9342750ccf5f47e3b8992bea56c22099b236e506e496295f238c2",
+      "bytes": 1594839,
+      "path": "Production/seal/gloamthorn-pact-crown-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.pact-crown.output.seal-color-master",
+      "role": "seal.color-master",
+      "sha256": "60a00cae9959662255cf36f2a903b24ab8a6dd73203b76dfd9f1dd7e7b7e99de"
+    },
+    {
+      "bytes": 1146123,
+      "path": "Production/seal/gloamthorn-pact-crown-monochrome-fallback.png",
       "resourceID": "resource.seal.gloamthorn.pact-crown.output.seal-monochrome-fallback",
-      "role": "seal.monochrome-fallback"
+      "role": "seal.monochrome-fallback",
+      "sha256": "2943c82f39e64d6a2df5d848e3e05c882b52e9b1a95e0f250f022b8b17ae044a"
     },
     {
+      "bytes": 429146,
       "path": "Production/seal/gloamthorn-pact-crown-thumbnail.png",
-      "bytes": 2779,
-      "sha256": "79e3784c2ea421e00bfef6f307a1faf034ad2c8af537692fc7e4e06829a92956",
       "resourceID": "resource.seal.gloamthorn.pact-crown.output.seal-thumbnail",
-      "role": "seal.thumbnail"
+      "role": "seal.thumbnail",
+      "sha256": "04a2fd6cfdd3eff11a55e043a615631d2f9af1d0d370736e02415f4ba191e1b3"
     },
     {
-      "path": "Production/seal/gloamthorn-pact-crown-vector-master.pdf",
       "bytes": 2674,
-      "sha256": "45613ebfd4471e719cb9cfa1d16ffc95601b7cb68ba65ca9027cc5f00c42d01e",
+      "path": "Production/seal/gloamthorn-pact-crown-vector-master.pdf",
       "resourceID": "resource.seal.gloamthorn.pact-crown.output.seal-vector-master",
-      "role": "seal.vector-master"
+      "role": "seal.vector-master",
+      "sha256": "45613ebfd4471e719cb9cfa1d16ffc95601b7cb68ba65ca9027cc5f00c42d01e"
     },
     {
-      "path": "Production/seal/gloamthorn-thornmoon-monochrome-fallback.pdf",
-      "bytes": 4465,
-      "sha256": "0e37f0eb7a13d3d157aa44089aa96a94789f6cd693215221c70eae8f8f30aada",
+      "bytes": 1528843,
+      "path": "Production/seal/gloamthorn-thornmoon-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.thornmoon.output.seal-color-master",
+      "role": "seal.color-master",
+      "sha256": "5c0eaf3029d47c8e66d660f901282ac956bd93f74d9fa03f25e8c8038fa24dcb"
+    },
+    {
+      "bytes": 1097261,
+      "path": "Production/seal/gloamthorn-thornmoon-monochrome-fallback.png",
       "resourceID": "resource.seal.gloamthorn.thornmoon.output.seal-monochrome-fallback",
-      "role": "seal.monochrome-fallback"
+      "role": "seal.monochrome-fallback",
+      "sha256": "69fbacdf67ecb602ae1443e935227d1aa69fb2b0344882fc58396534bf000911"
     },
     {
+      "bytes": 407708,
       "path": "Production/seal/gloamthorn-thornmoon-thumbnail.png",
-      "bytes": 3696,
-      "sha256": "836586c3163990026babd2458c065d99fd369fdcaa924466450a77b2432ac91f",
       "resourceID": "resource.seal.gloamthorn.thornmoon.output.seal-thumbnail",
-      "role": "seal.thumbnail"
+      "role": "seal.thumbnail",
+      "sha256": "59b3e36f483e4eba3b0558d9ed912d992594274ded26c61d1463514d10787498"
     },
     {
-      "path": "Production/seal/gloamthorn-thornmoon-vector-master.pdf",
       "bytes": 4741,
-      "sha256": "98eb2245f23d9064c3814f0e1d76ce933ef71fbc1fcd25b0e6a3664d7a95ff68",
+      "path": "Production/seal/gloamthorn-thornmoon-vector-master.pdf",
       "resourceID": "resource.seal.gloamthorn.thornmoon.output.seal-vector-master",
-      "role": "seal.vector-master"
+      "role": "seal.vector-master",
+      "sha256": "98eb2245f23d9064c3814f0e1d76ce933ef71fbc1fcd25b0e6a3664d7a95ff68"
     },
     {
-      "path": "Production/seal/gloamthorn-veiled-serpent-monochrome-fallback.pdf",
-      "bytes": 6525,
-      "sha256": "6e0b41d9a1e26c86ed85f43e2cb90c50e72ffc125e1ef56afab2a0f694ef10e6",
+      "bytes": 1728682,
+      "path": "Production/seal/gloamthorn-veiled-serpent-color-master.png",
+      "resourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-color-master",
+      "role": "seal.color-master",
+      "sha256": "1f5acacce87d66fdb74885f6b19d93b739bcb8f9934d2dcebae98d40aa9d37c3"
+    },
+    {
+      "bytes": 1287783,
+      "path": "Production/seal/gloamthorn-veiled-serpent-monochrome-fallback.png",
       "resourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-monochrome-fallback",
-      "role": "seal.monochrome-fallback"
+      "role": "seal.monochrome-fallback",
+      "sha256": "bd98c74570d249cf1f7d05472f1d9bdb9b13ec1aec2fcca174292e628ee8cbd3"
     },
     {
+      "bytes": 448264,
       "path": "Production/seal/gloamthorn-veiled-serpent-thumbnail.png",
-      "bytes": 2952,
-      "sha256": "085068273481b7d8d6f64bc6910cea54bb1280b7785f5d7086212afee86673f8",
       "resourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-thumbnail",
-      "role": "seal.thumbnail"
+      "role": "seal.thumbnail",
+      "sha256": "c2fabb7861284bc553de2925fbea9cf4934e8a20aea42275eb95a3d20b1cbc20"
     },
     {
-      "path": "Production/seal/gloamthorn-veiled-serpent-vector-master.pdf",
       "bytes": 6686,
-      "sha256": "bdb15ec2ae7f1a037c368bba24613b89337af38ef89e8ca50dd4d841e2a754ca",
+      "path": "Production/seal/gloamthorn-veiled-serpent-vector-master.pdf",
       "resourceID": "resource.seal.gloamthorn.veiled-serpent.output.seal-vector-master",
-      "role": "seal.vector-master"
+      "role": "seal.vector-master",
+      "sha256": "bdb15ec2ae7f1a037c368bba24613b89337af38ef89e8ca50dd4d841e2a754ca"
     },
     {
+      "bytes": 2015167,
       "path": "Production/vault/gloamthorn-vault-card.png",
-      "bytes": 28720,
-      "sha256": "28ce38649aac54894d86e8a651aecddf3a01350c51421f6ecf6d866357c3dba1",
       "resourceID": "resource.vault.gloamthorn.codex.output.vault-card",
-      "role": "vault.card"
+      "role": "vault.card",
+      "sha256": "2f48978d1c150a737564050fe45ff88f12a3e5845a1ef8b1885e98e3903053cf"
     },
     {
+      "bytes": 1906138,
       "path": "Production/vault/gloamthorn-vault-encountered.png",
-      "bytes": 27496,
-      "sha256": "cbb158d7fedc6e3e7d82aec05ba80d08dd78341cb7141f1fd72ed51fc313ecbf",
       "resourceID": "resource.vault.gloamthorn.codex.output.vault-encountered",
-      "role": "vault.encountered"
+      "role": "vault.encountered",
+      "sha256": "a5480aa4d1e722c26adf390f39e4a87a4ee95f77851e436ab6d2272de73b1407"
     },
     {
+      "bytes": 974128,
       "path": "Production/vault/gloamthorn-vault-locked.png",
-      "bytes": 26825,
-      "sha256": "7f6a4cf0909cc5bd409c9d3a59d9f744bb13e29ea5dc900091163d013d5e34a2",
       "resourceID": "resource.vault.gloamthorn.codex.output.vault-locked-silhouette",
-      "role": "vault.locked-silhouette"
+      "role": "vault.locked-silhouette",
+      "sha256": "b674a5011644eaee9aaddbd18641fcfcadc6539d2a8aebdc0293d8bbb4762bef"
     },
     {
+      "bytes": 1982527,
       "path": "Production/vault/gloamthorn-vault-selected.png",
-      "bytes": 31468,
-      "sha256": "6352141ea272dc4be13639c1a29ab4b5494292ab076037b96047e5a9894f2051",
       "resourceID": "resource.vault.gloamthorn.codex.output.vault-selected",
-      "role": "vault.selected"
+      "role": "vault.selected",
+      "sha256": "8e76b085fa2335c65c9411f5265979c684ae1957866145e9e46dd2b0fd97d424"
+    },
+    {
+      "bytes": 1301040,
+      "path": "Production/vault/gloamthorn-vault-unavailable.png",
+      "resourceID": "resource.vault.gloamthorn.codex.output.vault-unavailable",
+      "role": "vault.unavailable",
+      "sha256": "a57dea2adeb2b9f665c2a673925d95fb9eaeda323a958fadca9b06edf26a5240"
     }
-  ]
+  ],
+  "moduleID": "com.runescribe.module.theme.gloamthorn",
+  "schemaVersion": "1.0"
 }

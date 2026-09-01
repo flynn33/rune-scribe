@@ -71,10 +71,19 @@ extension RuneScribeUISession {
         descriptor: ThemeDescriptor? = nil,
         effects: RuntimeEffectsPreference? = nil,
         colorMode: ShareArtifactColorMode = .standard,
-        systemReduceMotion: Bool = false
+        systemReduceMotion: Bool = false,
+        renderedPresentation: OutboundSharePresentationDTO? = nil
     ) async throws -> ShareArtifactDTO {
         let presentationPreparation: OutboundSharePresentationPreparation
-        if representation == .file {
+        if let renderedPresentation {
+            guard representation == .file else {
+                throw OpaqueSharePresentationError.unavailable
+            }
+            presentationPreparation = OutboundSharePresentationPreparation(
+                presentation: renderedPresentation,
+                status: .themed
+            )
+        } else if representation == .file {
             presentationPreparation = await makeOutboundSharePresentationWithLegacyFallback(
                 inscription: displayName ?? "Rune Scribe cipher invitation",
                 accessibilityLabel: "Rune Scribe themed cipher invitation",
@@ -117,21 +126,30 @@ extension RuneScribeUISession {
         descriptor: ThemeDescriptor? = nil,
         effects: RuntimeEffectsPreference? = nil,
         colorMode: ShareArtifactColorMode = .standard,
-        systemReduceMotion: Bool = false
+        systemReduceMotion: Bool = false,
+        renderedPresentation: OutboundSharePresentationDTO? = nil
     ) async throws -> ShareArtifactDTO {
-        let presentationPreparation = await makeOutboundSharePresentationWithLegacyFallback(
-            inscription: runes,
-            accessibilityLabel: "Rune Scribe themed encrypted message",
-            operationID: RuntimeOperationID(
-                rawValue: "share.render.message.\(shareHandle.rawValue.uuidString.lowercased())"
-            ),
-            cipherID: cipherID,
-            selection: selection,
-            descriptor: descriptor,
-            effects: effects,
-            colorMode: colorMode,
-            systemReduceMotion: systemReduceMotion
-        )
+        let presentationPreparation: OutboundSharePresentationPreparation
+        if let renderedPresentation {
+            presentationPreparation = OutboundSharePresentationPreparation(
+                presentation: renderedPresentation,
+                status: .themed
+            )
+        } else {
+            presentationPreparation = await makeOutboundSharePresentationWithLegacyFallback(
+                inscription: runes,
+                accessibilityLabel: "Rune Scribe themed encrypted message",
+                operationID: RuntimeOperationID(
+                    rawValue: "share.render.message.\(shareHandle.rawValue.uuidString.lowercased())"
+                ),
+                cipherID: cipherID,
+                selection: selection,
+                descriptor: descriptor,
+                effects: effects,
+                colorMode: colorMode,
+                systemReduceMotion: systemReduceMotion
+            )
+        }
         let artifact = try await perform {
             try await requireApplicationClient().prepareMessageShare(
                 PrepareMessageShareCommand(

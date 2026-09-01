@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import shutil
 import tempfile
 import unittest
 from unittest import mock
@@ -284,6 +285,395 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
                 Path("/tmp/derived"),
                 Path("/tmp/results"),
             )
+
+    def test_v43_contract_requires_final_phase_and_exact_frozen_source_sha(self) -> None:
+        source_sha = "a" * 40
+        self.assertEqual(
+            capture_runner.resolve_contract_source_sha(
+                capture_runner.AUTHORITY_CONTRACT_V43,
+                source_sha,
+                "final",
+            ),
+            source_sha,
+        )
+        for invalid in (None, "a" * 39, "A" * 40, "g" * 40):
+            with self.subTest(source_sha=invalid):
+                with self.assertRaisesRegex(capture_runner.CaptureError, "source-sha"):
+                    capture_runner.resolve_contract_source_sha(
+                        capture_runner.AUTHORITY_CONTRACT_V43,
+                        invalid,
+                        "final",
+                    )
+        with self.assertRaisesRegex(capture_runner.CaptureError, "phase final"):
+            capture_runner.resolve_contract_source_sha(
+                capture_runner.AUTHORITY_CONTRACT_V43,
+                source_sha,
+                "baseline",
+            )
+        with self.assertRaisesRegex(capture_runner.CaptureError, "only valid"):
+            capture_runner.resolve_contract_source_sha(
+                capture_runner.AUTHORITY_CONTRACT_LEGACY,
+                source_sha,
+                "final",
+            )
+        capture_runner.validate_frozen_source_manifest(
+            {"sourceSHA": source_sha}, source_sha
+        )
+        with self.assertRaisesRegex(capture_runner.CaptureError, "differs"):
+            capture_runner.validate_frozen_source_manifest(
+                {"sourceSHA": "b" * 40}, source_sha
+            )
+
+    def test_v43_contract_uses_canonical_imported_authority(self) -> None:
+        self.assertEqual(
+            capture_runner.resolve_matrix(
+                ROOT,
+                None,
+                capture_runner.AUTHORITY_CONTRACT_V43,
+            ),
+            (ROOT / capture_runner.V43_RESPONSIVE_MATRIX).resolve(),
+        )
+        self.assertEqual(
+            capture_runner.resolve_authority_manifest(
+                ROOT,
+                None,
+                capture_runner.AUTHORITY_CONTRACT_V43,
+            ),
+            (ROOT / capture_runner.V43_IMPORT_MANIFEST).resolve(),
+        )
+        with self.assertRaisesRegex(capture_runner.CaptureError, "canonical imported"):
+            capture_runner.resolve_matrix(
+                ROOT,
+                capture_runner.DEFAULT_MATRIX,
+                capture_runner.AUTHORITY_CONTRACT_V43,
+            )
+        with self.assertRaisesRegex(capture_runner.CaptureError, "canonical"):
+            capture_runner.resolve_authority_manifest(
+                ROOT,
+                capture_runner.DEFAULT_AUTHORITY_MANIFEST,
+                capture_runner.AUTHORITY_CONTRACT_V43,
+            )
+
+    def test_v43_xcui_source_binding_is_exact_and_rejects_drift(self) -> None:
+        capture_runner.validate_v43_xcui_source_binding(ROOT)
+        mutations = {
+            "loader": (
+                Path("ThemeFidelityXCUITests/ThemeFidelityAuthorityUITests.swift"),
+                'named: "Runtime-Probe-Catalog-v1.3"',
+                'named: "Runtime-Probe-Catalog-v1.2"',
+            ),
+            "project source": (
+                Path("project.yml"),
+                capture_runner.V43_XCUI_RESOURCE_RELATIVES[1],
+                "docs/verification/theme-fidelity-v4/authority/v4.2/"
+                "02-COMPARISON-AUTHORITY/Candidate-Capture-Catalog-v1.2.json",
+            ),
+            "generated project": (
+                Path("RuneScrib.xcodeproj/project.pbxproj"),
+                'path = "Runtime-Probe-Catalog-v1.3.json";',
+                'path = "Runtime-Probe-Catalog-v1.2.json";',
+            ),
+        }
+        for label, (relative, original, mutated) in mutations.items():
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temporary:
+                fixture = Path(temporary)
+                for source_relative in (
+                    Path("ThemeFidelityXCUITests/ThemeFidelityAuthorityUITests.swift"),
+                    Path("project.yml"),
+                    Path("RuneScrib.xcodeproj/project.pbxproj"),
+                ):
+                    destination = fixture / source_relative
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(ROOT / source_relative, destination)
+                path = fixture / relative
+                source = path.read_text(encoding="utf-8")
+                self.assertIn(original, source)
+                path.write_text(source.replace(original, mutated, 1), encoding="utf-8")
+                with self.assertRaises(capture_runner.CaptureError):
+                    capture_runner.validate_v43_xcui_source_binding(fixture)
+
+    def test_v43_contract_builds_six_sequential_source_bound_jobs(self) -> None:
+        source_sha = "a" * 40
+        jobs = capture_runner.capture_jobs_for_contract(
+            ROOT,
+            capture_runner.AUTHORITY_CONTRACT_V43,
+            "final",
+            "iphone-id",
+            "ipad-id",
+            Path("/tmp/derived"),
+            Path("/tmp/results"),
+            source_sha,
+        )
+        self.assertEqual(
+            tuple(label for label, _ in jobs),
+            capture_runner.V43_CAPTURE_JOB_ORDER,
+        )
+        result_paths = []
+        derived_paths = []
+        for label, command in jobs:
+            with self.subTest(job=label):
+                self.assertEqual(command[:2], ["xcodebuild", "test"])
+                self.assertEqual(
+                    command.count("-disableAutomaticPackageResolution"), 1
+                )
+                parallel_index = command.index("-parallel-testing-enabled")
+                self.assertEqual(command[parallel_index + 1], "NO")
+                self.assertEqual(
+                    command.count(
+                        f"RUNESCRIBE_THEME_FIDELITY_SOURCE_SHA={source_sha}"
+                    ),
+                    1,
+                )
+                self.assertIn("RUNESCRIBE_THEME_FIDELITY_PHASE=final", command)
+                destination = command[command.index("-destination") + 1]
+                self.assertTrue(destination.startswith("platform="))
+                result_paths.append(command[command.index("-resultBundlePath") + 1])
+                derived_paths.append(command[command.index("-derivedDataPath") + 1])
+        self.assertEqual(len(set(result_paths)), 6)
+        self.assertEqual(len(set(derived_paths)), 6)
+
+    def test_v43_extraction_argv_binds_six_bundles_authority_and_source(self) -> None:
+        source_sha = "a" * 40
+        results = Path("/tmp/results")
+        result_bundles = {
+            role: results / f"{role}.xcresult"
+            for role in capture_runner.V43_CAPTURE_JOB_ORDER
+        }
+        command = capture_runner.extraction_command(
+            ROOT,
+            result_bundles,
+            {"udid": "iphone-id", "expectedModelName": "iPhone 17 Pro"},
+            {
+                "udid": "ipad-id",
+                "expectedModelName": "iPad Pro 13-inch (M5) (12GB)",
+            },
+            Path("/tmp/evidence/simulator-destinations.json"),
+            Path("/tmp/captures"),
+            Path("/tmp/evidence/extraction.json"),
+            capture_runner.AUTHORITY_CONTRACT_V43,
+            source_sha,
+        )
+        bundle_roles = [
+            command[index + 1].partition("=")[0]
+            for index, value in enumerate(command)
+            if value == "--result-bundle"
+        ]
+        self.assertEqual(tuple(bundle_roles), capture_runner.V43_CAPTURE_JOB_ORDER)
+        self.assertEqual(
+            command[command.index("--authority-contract") + 1], "v4.3"
+        )
+        self.assertEqual(command[command.index("--source-sha") + 1], source_sha)
+        self.assertEqual(command[command.index("--output") + 1], "/tmp/captures")
+        self.assertEqual(
+            command[command.index("--report") + 1],
+            "/tmp/evidence/extraction.json",
+        )
+
+    def test_v43_main_writes_materializer_compatible_source_bound_run_report(self) -> None:
+        source_sha = "a" * 40
+        empty_digest = hashlib.sha256(b"").hexdigest()
+        source_manifest = {
+            "schemaVersion": "1.0",
+            "sourceSHA": source_sha,
+            "fileCount": 0,
+            "aggregateSHA256": empty_digest,
+            "gitStatusSHA256": empty_digest,
+            "isClean": True,
+            "files": [],
+        }
+
+        class FakeIndexer:
+            @staticmethod
+            def source_manifest(root: Path, excluded: list[Path]) -> dict:
+                return json.loads(json.dumps(source_manifest))
+
+            validate_source_manifest_pair = staticmethod(
+                indexer.validate_source_manifest_pair
+            )
+
+        iphone = {
+            "udid": "iphone-id",
+            "expectedModelName": "iPhone 17 Pro",
+        }
+        ipad = {
+            "udid": "ipad-id",
+            "expectedModelName": "iPad Pro 13-inch (M5) (12GB)",
+        }
+
+        with tempfile.TemporaryDirectory() as temporary:
+            output_root = Path(temporary) / "responsive"
+
+            def fake_run(command: list[str], root: Path, log: Path) -> dict:
+                if command[1].endswith("theme_fidelity_authority_v13.py"):
+                    manifest = Path(command[command.index("--manifest") + 1])
+                    output = Path(command[command.index("--output") + 1])
+                    capture_runner.write_json(
+                        output,
+                        {
+                            "schemaVersion": "1.3",
+                            "authorityVersion": "4.3",
+                            "result": "PASS",
+                            "manifestSHA256": capture_runner.sha256_file(manifest),
+                            "findings": [],
+                        },
+                    )
+                elif command[1].endswith("extract-theme-fidelity-captures.py"):
+                    manifest = ROOT / capture_runner.V43_IMPORT_MANIFEST
+                    capture_runner.write_json(
+                        Path(command[command.index("--report") + 1]),
+                        {
+                            "schemaVersion": "1.3",
+                            "result": "pass",
+                            "sourceSHA": source_sha,
+                            "authorityContract": "v4.3",
+                            "sourceXCUIContract": "v4.3",
+                            "authorityValidation": {
+                                "result": "PASS",
+                                "findings": [],
+                                "manifestSHA256": capture_runner.sha256_file(
+                                    manifest
+                                ),
+                            },
+                            "resultBundles": [
+                                {"role": role}
+                                for role in capture_runner.V43_CAPTURE_JOB_ORDER
+                            ],
+                            **capture_runner.V43_EXTRACTION_COUNTS,
+                        },
+                    )
+                return {
+                    "command": list(command),
+                    "startTimestamp": "2026-08-28T00:00:00Z",
+                    "endTimestamp": "2026-08-28T00:00:01Z",
+                    "exitCode": 0,
+                    "result": "pass",
+                    "log": str(log),
+                }
+
+            with mock.patch.object(
+                capture_runner, "load_indexer", return_value=FakeIndexer
+            ), mock.patch.object(
+                capture_runner,
+                "choose_simulator",
+                side_effect=[iphone, ipad],
+            ), mock.patch.object(
+                capture_runner,
+                "toolchain_document",
+                return_value={"schemaVersion": "1.0"},
+            ), mock.patch.object(
+                capture_runner, "run_command", side_effect=fake_run
+            ):
+                result = capture_runner.main(
+                    [
+                        "--root",
+                        str(ROOT),
+                        "--phase",
+                        "final",
+                        "--output-root",
+                        str(output_root),
+                        "--authority-contract",
+                        "v4.3",
+                        "--source-sha",
+                        source_sha,
+                        "--iphone-id",
+                        "iphone-id",
+                        "--ipad-id",
+                        "ipad-id",
+                    ]
+                )
+
+            self.assertEqual(result, 0)
+            report_path = output_root / "final/evidence/final-capture-run.json"
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            self.assertEqual(report["schemaVersion"], "1.0")
+            self.assertEqual(report["phase"], "final")
+            self.assertEqual(report["sourceSHA"], source_sha)
+            self.assertEqual(report["result"], "pass")
+            self.assertEqual(report["failures"], [])
+            self.assertEqual(len(report["commands"]), 8)
+            self.assertTrue(
+                all(
+                    command["exitCode"] == 0 and command["result"] == "pass"
+                    for command in report["commands"]
+                )
+            )
+            self.assertEqual(
+                {command["sourceSHA"] for command in report["commands"]},
+                {source_sha},
+            )
+            self.assertEqual(
+                [
+                    command["captureJobOrdinal"]
+                    for command in report["commands"]
+                    if "captureJobOrdinal" in command
+                ],
+                list(range(1, 7)),
+            )
+            self.assertEqual(
+                report["captureExecution"],
+                {
+                    "jobOrder": list(capture_runner.V43_CAPTURE_JOB_ORDER),
+                    "parallelTestingEnabled": False,
+                    "sequential": True,
+                    "sourceSHA": source_sha,
+                },
+            )
+            self.assertEqual(report["authorityContract"], "v4.3")
+            self.assertTrue(report["sourceBinding"]["prePostEqual"])
+            self.assertEqual(
+                report["sourceBinding"]["aggregateSHA256"], empty_digest
+            )
+            self.assertIsNone(report["outputPaths"]["index"])
+            self.assertIsNone(report["outputPaths"]["comparisonIndex"])
+            extraction = report["commands"][-1]["command"]
+            self.assertEqual(
+                extraction[extraction.index("--authority-contract") + 1], "v4.3"
+            )
+            self.assertEqual(
+                extraction[extraction.index("--source-sha") + 1], source_sha
+            )
+
+    def test_v43_extraction_report_requires_exact_counts_and_bundle_order(self) -> None:
+        source_sha = "a" * 40
+        manifest = ROOT / capture_runner.V43_IMPORT_MANIFEST
+        document = {
+            "schemaVersion": "1.3",
+            "result": "pass",
+            "sourceSHA": source_sha,
+            "authorityContract": "v4.3",
+            "sourceXCUIContract": "v4.3",
+            "authorityValidation": {
+                "result": "PASS",
+                "findings": [],
+                "manifestSHA256": capture_runner.sha256_file(manifest),
+            },
+            "resultBundles": [
+                {"role": role} for role in capture_runner.V43_CAPTURE_JOB_ORDER
+            ],
+            **capture_runner.V43_EXTRACTION_COUNTS,
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            report = Path(temporary) / "extraction.json"
+            capture_runner.write_json(report, document)
+            capture_runner.validate_v43_extraction_report(
+                report, source_sha, manifest
+            )
+
+            mutated = json.loads(json.dumps(document))
+            mutated["attachmentCount"] -= 1
+            capture_runner.write_json(report, mutated)
+            with self.assertRaisesRegex(capture_runner.CaptureError, "exact authority"):
+                capture_runner.validate_v43_extraction_report(
+                    report, source_sha, manifest
+                )
+
+            mutated = json.loads(json.dumps(document))
+            mutated["resultBundles"].reverse()
+            capture_runner.write_json(report, mutated)
+            with self.assertRaisesRegex(capture_runner.CaptureError, "exact authority"):
+                capture_runner.validate_v43_extraction_report(
+                    report, source_sha, manifest
+                )
 
     def test_simulator_selection_prefers_target_class_and_records_substitution(self) -> None:
         exact_id = "exact-phone"
@@ -890,6 +1280,61 @@ class ThemeFidelityCaptureHarnessTests(unittest.TestCase):
         self.assertEqual(len(extractor.expected_attachment_names("iphone")), 211)
         self.assertEqual(len(extractor.expected_attachment_names("ipad")), 211)
         self.assertEqual(len(extractor.expected_attachment_names("macos")), 422)
+
+    def test_extractor_v43_contract_selects_exact_1514_attachments(self) -> None:
+        expected = {
+            "iphone-xcui": 145,
+            "ipad-xcui": 175,
+            "macos-xcui": 350,
+        }
+        selected = {
+            role: extractor.expected_attachment_names(
+                role, extractor.CONTRACT_V43
+            )
+            for role in expected
+        }
+        self.assertEqual(
+            {role: len(names) for role, names in selected.items()}, expected
+        )
+        self.assertEqual(211 + 211 + 422 + sum(expected.values()), 1514)
+        self.assertIn(
+            (
+                "norse--reduce-motion--iphone-portrait--candidate-element--"
+                "theme.artifact-preview.relic.norse.runestone-tablet.png"
+            ),
+            selected["iphone-xcui"],
+        )
+        self.assertEqual(
+            len(extractor.expected_attachment_names("iphone-xcui")), 264
+        )
+
+    def test_extractor_v43_contract_requires_a_lowercase_source_sha(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary) / "captures"
+            for value in (None, "a" * 39, "A" * 40, "g" * 40):
+                with self.subTest(source_sha=value):
+                    with self.assertRaisesRegex(
+                        extractor.ExtractionError, "requires --source-sha"
+                    ):
+                        extractor.extract(
+                            [],
+                            output,
+                            authority_contract=extractor.CONTRACT_V43,
+                            source_sha=value,
+                        )
+            with self.assertRaisesRegex(
+                extractor.ExtractionError, "roles must be exactly once each"
+            ):
+                extractor.extract(
+                    [],
+                    output,
+                    authority_contract=extractor.CONTRACT_V43,
+                    source_sha="a" * 40,
+                )
+            with self.assertRaisesRegex(
+                extractor.ExtractionError, "only valid with"
+            ):
+                extractor.extract([], output, source_sha="a" * 40)
 
     def test_xcui_extractor_binds_test_identifier_url_to_exact_target(self) -> None:
         role = "iphone-xcui"

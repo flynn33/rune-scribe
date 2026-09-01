@@ -10,10 +10,10 @@ as a string of Unicode runes. Send a friend your cipher — by QR, iMessage, lin
 or file — and they can read it; without it, the runes are just runes.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.0.39%20build%2039-3A7FD5?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.40%20build%2040-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-1088%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-1231%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -52,11 +52,12 @@ A product of **Raven Forge Software**.
 - **🪄 Living transformation** — pressing **Rune Scribe** inscribes the text in
   place, rune by rune, each glyph flaring as it lands. No popups, no spinners —
   the text frame itself transforms.
-- **🎨 Crafted interface** — a Metal-rendered Norse background, a bundled
-  **Noto Sans Runic** font so every rune renders sharply, and one cohesive design
-  system across both platforms. Appearance is now driven by the runtime Theme
-  coordinator, the required Norse Base provider, and optional Moonleaf, Sunspire,
-  Wildwood, and Gloamthorn production providers with runtime-owned unlock selection.
+- **🎨 Five distinct Codices, one shared interface** — a provider-neutral SwiftUI
+  composition system renders the required Norse Base Codex and optional Moonleaf,
+  Sunspire, Wildwood, and Gloamthorn resource-and-data providers. Each provider supplies
+  its own background, Script, Relics, Seals, Frame/Crest, panel chrome, Vault states,
+  and accessibility/static-share treatments; runtime-owned progression controls
+  availability and selection.
 - **🏆 Local Journey** — optional Achievements, Codex gates, and the Vault/Progress
   view stay on-device. Unlock reveals are queued accessibly, and encode/decode
   still work if Progression is unavailable.
@@ -254,7 +255,7 @@ flowchart TD
     Runtime --> Progression[RuneScribeProgressionModule<br/>optional local journey · records · grants]
     Runtime --> ThemeCoordinator[RuneScribeThemeCoordinatorModule<br/>selection · availability · fallback]
     Runtime --> NorseTheme[RuneScribeNorseThemeModule<br/>required Base provider]
-    Runtime --> ElvenThemes[Four Elven Theme providers<br/>optional · data only]
+    Runtime --> ElvenThemes[Four Elven Theme providers<br/>optional · resources + data]
     Runtime --> CloudPolicy[RuneScribeCloudSyncModule<br/>schema · merge · retry policy]
     Runtime --> GCPolicy[RuneScribeGameCenterModule<br/>catalog · mapping · outbox]
     UI --> UIRuntime[RuneScribeUIRuntime<br/>native system presentation]
@@ -283,7 +284,7 @@ module retains product views and normalized state only. Policy and provider modu
 not communicate directly; runtime-mediated contracts are the only cross-boundary rail.
 Test support is excluded from shipping products.
 
-The source-complete applications link Contracts, Runtime Core, UI Runtime, Platform,
+The current application targets link Contracts, Runtime Core, UI Runtime, Platform,
 Core, Progression, Theme Coordinator, Norse Base, four Elven providers, Cloud policy,
 Game Center policy, and the sole UI Module. Norse remains the required fallback;
 optional provider, Progression, cloud, and Game Center failures cannot block cipher
@@ -301,8 +302,18 @@ the current boundary and dependency rules.
 
 ## 🗺 Implementation roadmap
 
-The authorized version 1.0.39 build 39 roadmap-completion program is source-complete
-and not shipped:
+The previously authorized version 1.0.39 build 39 roadmap-completion baseline remains a
+historical source-complete snapshot that was not shipped. Version 1.0.40 build 40 is the
+repository-qualified release candidate for the Theme Fidelity continuation. Final-source
+evidence passes 1,231/1,231 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
+25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations, and
+27/27 evidence-hardening tests. The iOS Release build and arm64-only unsigned macOS
+Release build pass; built-product content, resource, and privacy inspection passes 97/101
+checks, with exactly four distribution-signing and entitlement checks pending external
+credentials. Final completeness and security sweeps pass. Headless iPhone 17 Pro UI
+qualification on iOS 26.5 passes 7 tests, skips 1 iPad-only test, and fails 0. Headless
+iPad Pro 13-inch (M5) qualification on iOS 26.5 passes 5 tests, skips 3 phone-specific
+tests by design, and fails 0. The candidate is **repository-qualified and not shipped**.
 
 | Wave | Scope | Source status |
 |---|---|---|
@@ -310,13 +321,27 @@ and not shipped:
 | 2 | Semantic Theme system and required Norse Base | Complete |
 | 3 | Local Progression, Vault, grants, migration, recovery | Complete |
 | 4 | Themed Artifact sharing, receiving, Encounters, provenance | Complete |
-| 5A | Local-first private iCloud progression synchronization | Complete; live account/provisioning owner-only |
-| 5B | Optional Game Center catalog, mapping, outbox, status | Complete; records/sandbox login owner-only |
-| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Complete; physical-device qualification owner-only |
+| 5A | Local-first private iCloud progression synchronization | Complete; live provisioning is a separate external-service action |
+| 5B | Optional Game Center catalog, mapping, outbox, status | Complete; live records and sandbox access are separate external-service actions |
+| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Repository-qualified release candidate; not shipped |
 | 7 | Limited/singular collectible program | Deferred separate program |
 
-The four production providers use the accepted corrected Elven v3.1 corpus: 56 logical
-resources, 184 shipping outputs, complete provenance, and deterministic regeneration.
+The corrected Elven v3.1 corpus (56 logical resources and 184 shipping outputs) remains
+the accepted historical Phase C baseline. The v4.3 continuation updates production
+resources and evidence without rewriting that record. The superseded v4.3 package audit
+is retained under [`docs/verification`](docs/verification/theme-fidelity-v4-3/) as
+noncontrolling history. Its manual-evidence and self-binding mechanics do not determine
+product release readiness.
+
+The controlling automated release bar is narrower and product-focused: core user flows,
+clean tests, iPhone/iPad/macOS Release builds, deterministic UI smoke coverage,
+accessibility/privacy/security checks, signing and entitlements, and no known
+release-blocking defects. Manual hardware observations and package self-binding
+bookkeeping are superseded and nonblocking. The repository-controlled final-source gates
+and supported UI runs pass with no known release-blocking defects. Distribution signing,
+archive, export, notarization, upload, and rollout are external publication work rather
+than source-qualification gates.
+
 All nine Elven Series recovery findings pass simultaneously. Recovery is PASS / CLOSED,
 the corrected v3.1 package is ACCEPTED, and Phase C is PASS / MERGED TO MAIN via PR #45 at
 `e9e0e0c8814aaa107d7480e070f14a6fe9b09975`. Phase D provider targets, live entitlement
@@ -357,9 +382,13 @@ nonshipment variances; the former external-framework direction is superseded.
   server or proprietary account. Optional private CloudKit sync carries only bounded
   progression facts, and optional Game Center receives monotonic trophy progress.
 - **Keys at rest.** Each cipher's key lives inside the cipher library, which is
-  itself **AES-256-GCM encrypted** with a symmetric key held in the **Keychain**
+  itself **AES-256-GCM encrypted** with a symmetric key held in the **Data Protection Keychain**
   (`WhenUnlockedThisDeviceOnly`, no iCloud sync). Contacts are encrypted with the
   same key and written to an on-disk file (with complete file protection on iOS).
+  Existing Keychain items are updated in place, so a failed replacement cannot erase
+  the previous cipher library, PIN, or persisted lockout state. On macOS, an older
+  login-Keychain item is deleted only after an exact Data Protection Keychain copy and
+  its accessibility class have been read back and verified.
 - **Local sharing surfaces.** Sending a cipher or message hands a link, QR, or file
   to the OS share sheet; Rune Scribe does not operate a message relay. Inbound links and
   scanned QR codes are validated entirely on-device (correct version, length,
@@ -376,6 +405,10 @@ nonshipment variances; the former external-framework direction is superseded.
   compared in constant time. A persistent, escalating lockout (15s → 30s → 60s →
   120s → 300s after five wrong guesses) blunts brute-force attempts even across
   relaunches.
+- **Declared platform access.** Both app bundles include the same privacy manifest:
+  tracking is disabled, no developer-collected data is declared, and file-timestamp
+  access is limited to protected app-container files and files the user chooses to
+  import.
 - **Honest scope.** Rune Scribe is a personal-privacy tool: strong, standard
   encryption with a **manual, peer-to-peer key hand-off** and a fun Norse aesthetic.
   It is *not* a vetted secure messenger — there's no forward secrecy, no server-side
@@ -394,7 +427,7 @@ fallback behavior, and current compatibility boundary.
 RuneScrib/
 ├── AppHost/      SwiftUI entry, delegates, composition, lifecycle and input forwarding
 ├── Metal/        Shipping Metal shader
-└── Resources/    Assets, Noto Sans Runic font, splash video and licenses
+└── Resources/    Assets, privacy manifest, Noto Sans Runic font, splash video and licenses
 Packages/RuneScribeArchitecture/
 ├── Sources/
 │   ├── RuneScribeContracts/      Neutral IDs, DTOs and service protocols
@@ -411,7 +444,7 @@ Packages/RuneScribeArchitecture/
 │   ├── RuneScribeGameCenterModule/ Frozen catalog, mapping and outbox policy
 │   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        1088 Swift package tests
+└── Tests/                        1231 Swift package tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -468,8 +501,8 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package currently contains **1088 package tests** (959 XCTest cases and
-129 Swift Testing cases), supplemented by repository architecture guards, hosted
+The local Swift package passes **1231 package tests** (1094 XCTest cases and
+137 Swift Testing cases), supplemented by repository architecture guards, hosted
 macOS/iOS tests, iPhone/iPad UI parity, and an
 isolated macOS parity host. The package suite uses deterministic in-memory adapters and
 does not access the operator's login Keychain.
@@ -480,15 +513,19 @@ does not access the operator's login Keychain.
 | Core domain | AES-GCM, rune codec, ciphers, encrypted repositories, contacts, imports, fonts, PIN lock, privacy-safe progression evidence and share lifetime |
 | Compatibility | Exact cipher v3/message v1 fixtures, encrypted existing-install fixtures, links, routes and no-rewrite migration |
 | Progression | Exact catalog/rule boundaries, atomic grants, deduplication, scalable migration, quarantine, rebuild, catalog upgrade and fault injection |
-| Theme | Versioned contracts, coordinator selection/fallback, Norse Base resources, and synthetic provider conformance |
+| Theme | Versioned contracts, coordinator selection/fallback, all five production providers, resource identity/budgets/provenance, canonical wrappers, responsive probes, static-share parity, and fallback/failure isolation |
 | UI Module | Session projection, sensitive-state cleanup, routing, attachment policy, sharing, Vault snapshots and durable accessible reveals |
 | Platform adapters | Keychain contract, protected files and SQLite state, scoped inbound reads, Contacts, fonts, resources, feedback, clipboard and share artifacts |
 | Hosted and parity tests | Composition, isolated Simulator Keychain migration, native share outcomes, accessibility, iPhone/iPad and macOS product flows |
 
-The retained hardware-only matrix is owner-operated optional release validation outside
-Agent Coding scope. It is not an acceptance criterion, completion gate, blocker,
-residual-work item, PASS/FAIL input, or pull-request readiness criterion. Simulator and
-hosted evidence remains labeled by the environment in which it was observed.
+Direct-device observations are superseded by repository-controlled Simulator, hosted,
+and deterministic equivalents and are not pending release gates. The
+legacy package's larger visual-evidence and self-binding matrix remains noncontrolling.
+Final-source completeness and security sweeps pass, and the iPhone 17 Pro headless UI
+run passes 7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5)
+headless UI run on iOS 26.5 passes 5 tests with 3 phone-specific skips by design and 0
+failures. Distribution signing and publication remain external. Every result stays
+labeled by the environment in which it was observed.
 
 ---
 

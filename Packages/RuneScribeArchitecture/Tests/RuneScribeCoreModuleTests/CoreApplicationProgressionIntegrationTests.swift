@@ -2816,6 +2816,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         )
         return try await MessageImportUseCase.ingest(
             payload: payload,
+            receivedAt: Date(timeIntervalSince1970: 1_000),
             fontBytes: fontBytes,
             repository: repository,
             messageService: MessageService(),

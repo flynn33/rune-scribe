@@ -32,7 +32,8 @@ class NorseV2ResourceCatalogGeneratorTests(unittest.TestCase):
         )
         handles = {value.handle for value in values}
         self.assertIn("resource.relic.norse.runestone-tablet.master", handles)
-        self.assertIn("resource.seal.norse.berserk.vector-master", handles)
+        self.assertIn("resource.seal.norse.berserk.color-master", handles)
+        self.assertNotIn("resource.seal.norse.berserk.vector-master", handles)
         self.assertIn("resource.codex-card.norse.unavailable", handles)
         self.assertIn("resource.panel.norse.tab-selector", handles)
         self.assertNotIn("resource.relic.norse.runestone.weathered.art", handles)

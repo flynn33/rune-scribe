@@ -1,0 +1,902 @@
+{
+  "schemaVersion": "1.0",
+  "id": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json",
+  "theme": "Moonleaf",
+  "generatedAtUTC": "2026-08-27T00:00:00Z",
+  "ownerReview": "PENDING",
+  "pipeline": "scripts/build-moonleaf-v43-assets.py",
+  "pipelineSHA256": "e2e8af0251722e1fd76e00fb67bf7164d10903e955fad39ab06eb882c5300fd3",
+  "sourceMasters": [
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf-sunspire-frame-crest-master-record-v4.3.json",
+        "sha256": "0e0bbf1581ac99538aa68989e9079c77e90b061d72298aacca037f6516a54ef3"
+      },
+      "assetID": "moonleaf-silvervine-frame",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/moonleaf-silvervine-frame-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json",
+      "role": "Frame",
+      "runtimeBundled": false,
+      "sha256": "0ea0fb618d19523b357225a2453f39fe0bac25a4dc5155168bc51ef51abd6b28"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf-sunspire-frame-crest-master-record-v4.3.json",
+        "sha256": "0e0bbf1581ac99538aa68989e9079c77e90b061d72298aacca037f6516a54ef3"
+      },
+      "assetID": "moonleaf-moonbloom-crest",
+      "dimensions": [
+        1280,
+        1920
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/moonleaf-moonbloom-crest-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json",
+      "role": "Crest",
+      "runtimeBundled": false,
+      "sha256": "0fd535931d1d439a5c5fbe0908b3966d877a7a450f0da6ca11f5f11db36f9771"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/Moonleaf-Seal-Source-Masters-v4.3.json",
+        "sha256": "904fb9b845f7bfd58c0b68ac4c37ea45ad284afd1110e6e2a8af48e697f91741"
+      },
+      "assetID": "seal.moonleaf.echo-firefly",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/moonleaf-echo-firefly-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "29fede6ac2b69dc7f93cd505b0e3d67bcce7bfdd7fefda413a129609e3806c51",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/Moonleaf-Seal-Source-Masters-v4.3.json",
+        "sha256": "904fb9b845f7bfd58c0b68ac4c37ea45ad284afd1110e6e2a8af48e697f91741"
+      },
+      "assetID": "seal.moonleaf.moonwell",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/moonleaf-moonwell-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "2e4f51c1f3837ecf6f04ec656253a6b9982494ca9f562ac23e2a3b46a94d7bf5",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/Moonleaf-Seal-Source-Masters-v4.3.json",
+        "sha256": "904fb9b845f7bfd58c0b68ac4c37ea45ad284afd1110e6e2a8af48e697f91741"
+      },
+      "assetID": "seal.moonleaf.night-owl",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/moonleaf-night-owl-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "d19520baa7371d7ef5db39943324ab168395a248c35a477d8a8e8b1be1fa6393",
+      "targetScaleReview": "PASS_AT_64_PX"
+    },
+    {
+      "acceptanceRecord": {
+        "ownerReview": "PENDING",
+        "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/Moonleaf-Seal-Source-Masters-v4.3.json",
+        "sha256": "904fb9b845f7bfd58c0b68ac4c37ea45ad284afd1110e6e2a8af48e697f91741"
+      },
+      "assetID": "seal.moonleaf.starflower",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/moonleaf-starflower-production-master-v4.3.png",
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json",
+      "role": "Seal",
+      "runtimeBundled": false,
+      "sha256": "7efa6463069e83bd56031d7751f3812a56d62cb21cae8d8b5a406ff39f1086a3",
+      "targetScaleReview": "PASS_AT_64_PX"
+    }
+  ],
+  "sourceRecords": [
+    {
+      "ownerReview": "PENDING",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf-sunspire-frame-crest-master-record-v4.3.json",
+      "sha256": "0e0bbf1581ac99538aa68989e9079c77e90b061d72298aacca037f6516a54ef3"
+    },
+    {
+      "ownerReview": "PENDING",
+      "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/seals/Moonleaf-Seal-Source-Masters-v4.3.json",
+      "sha256": "904fb9b845f7bfd58c0b68ac4c37ea45ad284afd1110e6e2a8af48e697f91741"
+    }
+  ],
+  "frameLayouts": {
+    "staticFallback": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        0,
+        85
+      ],
+      "outputPixels": [
+        2048,
+        1536
+      ],
+      "renderedPixels": [
+        2048,
+        1365
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1536,
+        1024
+      ],
+      "uniformScale": 1.3333333333333333
+    },
+    "thumbnail": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        0,
+        21
+      ],
+      "outputPixels": [
+        512,
+        384
+      ],
+      "renderedPixels": [
+        512,
+        341
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1536,
+        1024
+      ],
+      "uniformScale": 0.3333333333333333
+    }
+  },
+  "crestLayouts": {
+    "staticFallback": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        170,
+        0
+      ],
+      "outputPixels": [
+        1024,
+        1024
+      ],
+      "renderedPixels": [
+        683,
+        1024
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1280,
+        1920
+      ],
+      "uniformScale": 0.5333333333333333
+    },
+    "thumbnail": {
+      "method": "uniform-aspect-fit",
+      "offsetPixels": [
+        85,
+        0
+      ],
+      "outputPixels": [
+        512,
+        512
+      ],
+      "renderedPixels": [
+        341,
+        512
+      ],
+      "resampling": "LANCZOS",
+      "sourcePixels": [
+        1280,
+        1920
+      ],
+      "uniformScale": 0.26666666666666666
+    }
+  },
+  "sealLayouts": {
+    "echo-firefly": {
+      "colorMaster": {
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata"
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "moonwell": {
+      "colorMaster": {
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata"
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "night-owl": {
+      "colorMaster": {
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata"
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    },
+    "starflower": {
+      "colorMaster": {
+        "method": "decoded-RGBA-pixel-identity-copy",
+        "outputPixels": [
+          1024,
+          1024
+        ],
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "metadataPolicy": "deterministic PNG encoding with no inherited ancillary metadata"
+      },
+      "monochromeFallback": {
+        "method": "luminance conversion with 1.20 contrast and exact source alpha",
+        "outputPixels": [
+          1024,
+          1024
+        ]
+      },
+      "thumbnail": {
+        "method": "uniform-aspect-fit",
+        "offsetPixels": [
+          0,
+          0
+        ],
+        "outputPixels": [
+          512,
+          512
+        ],
+        "renderedPixels": [
+          512,
+          512
+        ],
+        "resampling": "LANCZOS",
+        "sourcePixels": [
+          1024,
+          1024
+        ],
+        "uniformScale": 0.5
+      }
+    }
+  },
+  "panelNineSlicePolicy": {
+    "composition": "independent uniformly scaled protected corners plus the four contiguous between-corner edge intervals; transparent center; no whole-frame nonuniform resize",
+    "edgePreparation": "one shared uniform scale for every corner and edge cross-axis, followed by running-axis-only edge stretch",
+    "edgeResampling": "LANCZOS one-axis edge stretch",
+    "joinPolicy": "each edge begins at the source pixel adjacent to its protected corner, uses the same cross-axis scale as that corner, and underlaps the corner by two target pixels",
+    "horizontalEdgeInterval": [
+      360,
+      1176
+    ],
+    "protectedContentScale": "minimum target-to-source cap ratio shared by all four sides",
+    "sourceCapInsets": {
+      "bottom": 280,
+      "left": 360,
+      "right": 360,
+      "top": 280
+    },
+    "targetOutputs": {
+      "card-border": {
+        "capInsets": {
+          "bottom": 150,
+          "left": 170,
+          "right": 170,
+          "top": 150
+        },
+        "dimensions": [
+          1600,
+          1000
+        ]
+      },
+      "corner-ornament": {
+        "capInsets": null,
+        "dimensions": [
+          512,
+          512
+        ]
+      },
+      "divider": {
+        "capInsets": {
+          "bottom": 48,
+          "left": 360,
+          "right": 360,
+          "top": 48
+        },
+        "dimensions": [
+          1600,
+          128
+        ]
+      },
+      "primary-button": {
+        "capInsets": {
+          "bottom": 104,
+          "left": 190,
+          "right": 190,
+          "top": 104
+        },
+        "dimensions": [
+          1200,
+          320
+        ]
+      },
+      "tab-selector": {
+        "capInsets": {
+          "bottom": 76,
+          "left": 170,
+          "right": 170,
+          "top": 76
+        },
+        "dimensions": [
+          1000,
+          240
+        ]
+      }
+    },
+    "verticalEdgeInterval": [
+      280,
+      744
+    ]
+  },
+  "transformationPolicy": [
+    "verify each repository-local accepted source master and its acceptance record against pinned SHA-256 values",
+    "render Frame and Crest fallbacks with one uniform aspect-fit scale and transparent letterboxing when required",
+    "compose Panel assets from four independent uniformly scaled protected corners and the contiguous between-corner edge intervals; never resize the complete frame nonuniformly",
+    "preserve every accepted Seal color master as an exact decoded RGBA pixel copy and derive only alpha-preserving monochrome and thumbnail variants",
+    "encode deterministic lossless PNG outputs without source-screen compositing"
+  ],
+  "outputs": [
+    {
+      "path": "Production/crest/moonleaf-moonbloom-static-fallback.png",
+      "bytes": 739571,
+      "sha256": "dd978b4d4e882fe76e15ef926a702d6c928ac64065e050879efc792bcb9f729a",
+      "resourceID": "resource.crest.moonleaf.moonbloom.output.crest-static-fallback",
+      "role": "crest.static-fallback",
+      "mediaType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/crest/moonleaf-moonbloom-thumbnail.png",
+      "bytes": 202694,
+      "sha256": "6ddc1ed10f7dccb84cf3c782f9047eb6b4d5dc672645f8b650d4dddbae2596ac",
+      "resourceID": "resource.crest.moonleaf.moonbloom.output.crest-thumbnail",
+      "role": "crest.thumbnail",
+      "mediaType": "image/png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/frame/moonleaf-silvervine-static-fallback.png",
+      "bytes": 1241984,
+      "sha256": "4102d37a59155c353e1f1f412a54797910d636d0f455be078fa01bda792951e7",
+      "resourceID": "resource.frame.moonleaf.silvervine.output.frame-static-fallback",
+      "role": "frame.static-fallback",
+      "mediaType": "image/png",
+      "dimensions": [
+        2048,
+        1536
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/frame/moonleaf-silvervine-thumbnail.png",
+      "bytes": 103912,
+      "sha256": "8244beb36a70315e4a66d3b8efe6e34b39e153efa3c26d96d65ad7d9208662d5",
+      "resourceID": "resource.frame.moonleaf.silvervine.output.frame-thumbnail",
+      "role": "frame.thumbnail",
+      "mediaType": "image/png",
+      "dimensions": [
+        512,
+        384
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/panel/moonleaf-card-border.png",
+      "bytes": 284822,
+      "sha256": "c9c1f17b7ee8ffe45a88282d4bf790f6664fcf9ce011930e5ae359c7a1f5ba1e",
+      "resourceID": "resource.panel.moonleaf.card-border",
+      "role": "panel.card-border",
+      "mediaType": "image/png",
+      "dimensions": [
+        1600,
+        1000
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/panel/moonleaf-corner-ornament.png",
+      "bytes": 220278,
+      "sha256": "25d3177665e8ad8ab48947b99fa248491e89172e32efb17c3fbc49dba1cc01ea",
+      "resourceID": "resource.panel.moonleaf.corner-ornament",
+      "role": "panel.corner-ornament",
+      "mediaType": "image/png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/panel/moonleaf-divider.png",
+      "bytes": 47318,
+      "sha256": "a48b519468da601eb42952729f64acf13012d25da0a3b1704ef9879fcb6f1903",
+      "resourceID": "resource.panel.moonleaf.divider",
+      "role": "panel.divider",
+      "mediaType": "image/png",
+      "dimensions": [
+        1600,
+        128
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/panel/moonleaf-primary-button.png",
+      "bytes": 144306,
+      "sha256": "365684f5faac774202a399c4ae2c861206c4b30f81f9fab690a763e2e974d664",
+      "resourceID": "resource.panel.moonleaf.primary-button",
+      "role": "panel.primary-button",
+      "mediaType": "image/png",
+      "dimensions": [
+        1200,
+        320
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/panel/moonleaf-tab-selector.png",
+      "bytes": 86276,
+      "sha256": "9aba8e1225adf1c50e1b31fc2339500e16273140d19ffe2dec6f2d780730b385",
+      "resourceID": "resource.panel.moonleaf.tab-selector",
+      "role": "panel.tab-selector",
+      "mediaType": "image/png",
+      "dimensions": [
+        1000,
+        240
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-echo-firefly-color-master.png",
+      "bytes": 1634105,
+      "sha256": "1503488ea4dd701dc2be0e6cb3c444cb79cb93bc025416ae5aa295efd95964d9",
+      "resourceID": "resource.seal.moonleaf.echo-firefly.output.seal-color-master",
+      "role": "seal.color-master",
+      "mediaType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-echo-firefly-monochrome-fallback.png",
+      "bytes": 1133413,
+      "sha256": "28c7d09ed84955144aeaef1c74a8dc531231b2a1003253ed1c35c0b3e490b98b",
+      "resourceID": "resource.seal.moonleaf.echo-firefly.output.seal-monochrome-fallback",
+      "role": "seal.monochrome-fallback",
+      "mediaType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-echo-firefly-thumbnail.png",
+      "bytes": 432040,
+      "sha256": "509ab8e382838ff1ba07560c004975656fa04a4e3085b90fcab86e4faccc2d05",
+      "resourceID": "resource.seal.moonleaf.echo-firefly.output.seal-thumbnail",
+      "role": "seal.thumbnail",
+      "mediaType": "image/png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-echo-firefly-vector-master.pdf",
+      "bytes": 10917,
+      "sha256": "fa7edb733a98cfa27d15c0d896aaa43ef50fbf1b3cd27a01f63c278d087d0a45",
+      "resourceID": "resource.seal.moonleaf.echo-firefly.output.seal-vector-master",
+      "role": "seal.vector-master",
+      "mediaType": "application/pdf",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "rightsID": "prov.Source.Masters.Seals.moonleaf.echo.firefly.svg"
+    },
+    {
+      "path": "Production/seal/moonleaf-moonwell-color-master.png",
+      "bytes": 1539731,
+      "sha256": "aa6e4f7e99f918c2f8bc1b704246355f44aebfbc36cb79ad06919a0287af35f3",
+      "resourceID": "resource.seal.moonleaf.moonwell.output.seal-color-master",
+      "role": "seal.color-master",
+      "mediaType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-moonwell-monochrome-fallback.png",
+      "bytes": 802767,
+      "sha256": "120c8e28f20d8c49a2225ce5d71d6b4e0e0f7c152e89c249a07cfc49feedf79e",
+      "resourceID": "resource.seal.moonleaf.moonwell.output.seal-monochrome-fallback",
+      "role": "seal.monochrome-fallback",
+      "mediaType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-moonwell-thumbnail.png",
+      "bytes": 382258,
+      "sha256": "fa0bfc9c4e9dfb29f053f981dc4d0da2da90a0fbf1e36ae7388985dd949bacde",
+      "resourceID": "resource.seal.moonleaf.moonwell.output.seal-thumbnail",
+      "role": "seal.thumbnail",
+      "mediaType": "image/png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-moonwell-vector-master.pdf",
+      "bytes": 4775,
+      "sha256": "3730e5bfbb1d6326e11e1788a98269c39dcdad899df0ac9ed18caa4b4125d053",
+      "resourceID": "resource.seal.moonleaf.moonwell.output.seal-vector-master",
+      "role": "seal.vector-master",
+      "mediaType": "application/pdf",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "rightsID": "prov.Source.Masters.Seals.moonleaf.moonwell.svg"
+    },
+    {
+      "path": "Production/seal/moonleaf-night-owl-color-master.png",
+      "bytes": 1649588,
+      "sha256": "61c6e4466aae441bfb78594d68866681342789e91ed3b7a08fb55b6154665354",
+      "resourceID": "resource.seal.moonleaf.night-owl.output.seal-color-master",
+      "role": "seal.color-master",
+      "mediaType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-night-owl-monochrome-fallback.png",
+      "bytes": 881479,
+      "sha256": "abb9e7b192f0fc989b99f9c3f701be86edfb71a2dbf175d7a3f9ba375381a32f",
+      "resourceID": "resource.seal.moonleaf.night-owl.output.seal-monochrome-fallback",
+      "role": "seal.monochrome-fallback",
+      "mediaType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-night-owl-thumbnail.png",
+      "bytes": 391595,
+      "sha256": "a22bd14449679d865eb250d25d5768ce735f815dfe4ba630ce4ff9223fc689ee",
+      "resourceID": "resource.seal.moonleaf.night-owl.output.seal-thumbnail",
+      "role": "seal.thumbnail",
+      "mediaType": "image/png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-night-owl-vector-master.pdf",
+      "bytes": 10267,
+      "sha256": "c5b01595d6dca521167834956567734e6a610ba35b5f8d71692766dbda72bfd0",
+      "resourceID": "resource.seal.moonleaf.night-owl.output.seal-vector-master",
+      "role": "seal.vector-master",
+      "mediaType": "application/pdf",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "rightsID": "prov.Source.Masters.Seals.moonleaf.night.owl.svg"
+    },
+    {
+      "path": "Production/seal/moonleaf-starflower-color-master.png",
+      "bytes": 1866361,
+      "sha256": "60f8e293e58e37bc599654ea711513e9772310a32adcfea2a3754ba3a7993239",
+      "resourceID": "resource.seal.moonleaf.starflower.output.seal-color-master",
+      "role": "seal.color-master",
+      "mediaType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-starflower-monochrome-fallback.png",
+      "bytes": 1310652,
+      "sha256": "0bcb967181cc5fa4660bfa03631422f5a31b4d6026ad900f1f5b2f4d3ca01d12",
+      "resourceID": "resource.seal.moonleaf.starflower.output.seal-monochrome-fallback",
+      "role": "seal.monochrome-fallback",
+      "mediaType": "image/png",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-starflower-thumbnail.png",
+      "bytes": 486255,
+      "sha256": "624fda8f36f447e689dc22479f420bfdd5e997b92ba998ce24dc17a192a000a8",
+      "resourceID": "resource.seal.moonleaf.starflower.output.seal-thumbnail",
+      "role": "seal.thumbnail",
+      "mediaType": "image/png",
+      "dimensions": [
+        512,
+        512
+      ],
+      "hasAlpha": true,
+      "rightsID": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
+    },
+    {
+      "path": "Production/seal/moonleaf-starflower-vector-master.pdf",
+      "bytes": 7450,
+      "sha256": "2f9c49a0ebb174dd5eb55297f2ff113ea3d436e599a7ffccbdc0bcfeb9d17025",
+      "resourceID": "resource.seal.moonleaf.starflower.output.seal-vector-master",
+      "role": "seal.vector-master",
+      "mediaType": "application/pdf",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "hasAlpha": null,
+      "rightsID": "prov.Source.Masters.Seals.moonleaf.starflower.svg"
+    },
+    {
+      "path": "Production/vault/moonleaf-vault-card.png",
+      "bytes": 1873902,
+      "sha256": "ed53f3921cceeb4eed91a1d4c83173fc6ebaa3d82d49124f9ca6dbcbb977a9e0",
+      "resourceID": "resource.vault.moonleaf.codex.output.vault-card",
+      "role": "vault.card",
+      "mediaType": "image/png",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "rightsID": "prov.Production.Sources.moonleaf.moonleaf.vault.recipe.json"
+    },
+    {
+      "path": "Production/vault/moonleaf-vault-encountered.png",
+      "bytes": 1861629,
+      "sha256": "da1088494b0217c63ee3e513b15b4fc9c66d24a878a27bd0ab268d3759dafcd9",
+      "resourceID": "resource.vault.moonleaf.codex.output.vault-encountered",
+      "role": "vault.encountered",
+      "mediaType": "image/png",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "rightsID": "prov.Production.Sources.moonleaf.moonleaf.vault.recipe.json"
+    },
+    {
+      "path": "Production/vault/moonleaf-vault-locked.png",
+      "bytes": 1412831,
+      "sha256": "80871dcd3b9e408d1c1c708cdc2ef47e1f188877e72483546c55a1438f21f137",
+      "resourceID": "resource.vault.moonleaf.codex.output.vault-locked-silhouette",
+      "role": "vault.locked-silhouette",
+      "mediaType": "image/png",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "rightsID": "prov.Production.Sources.moonleaf.moonleaf.vault.recipe.json"
+    },
+    {
+      "path": "Production/vault/moonleaf-vault-selected.png",
+      "bytes": 1745534,
+      "sha256": "2f362ca5a453f781320b6df8bdc5504cbfcaea39b5a1ee697f65004d3168d190",
+      "resourceID": "resource.vault.moonleaf.codex.output.vault-selected",
+      "role": "vault.selected",
+      "mediaType": "image/png",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "rightsID": "prov.Production.Sources.moonleaf.moonleaf.vault.recipe.json"
+    },
+    {
+      "path": "Production/vault/moonleaf-vault-unavailable.png",
+      "bytes": 1398768,
+      "sha256": "bd3d77f1f739aa0c87f78ede131d8afcb6c7fe7dfdd2eac333a1c6d5c31349e1",
+      "resourceID": "resource.vault.moonleaf.codex.output.vault-unavailable",
+      "role": "vault.unavailable",
+      "mediaType": "image/png",
+      "dimensions": [
+        1600,
+        900
+      ],
+      "hasAlpha": false,
+      "rightsID": "prov.Production.Sources.moonleaf.moonleaf.vault.recipe.json"
+    }
+  ],
+  "rightsOwner": "Raven Forge Software",
+  "licenseNotice": "Project-local proprietary production masters; owner visual review remains pending"
+}

@@ -1,0 +1,3892 @@
+{
+  "schemaVersion": "1.3",
+  "catalogID": "runescribe.theme-fidelity.v4.3.canonical-render-catalog",
+  "candidateCount": 50,
+  "candidates": [
+    {
+      "id": "canonical.gloamthorn.gloamthorn-codex-catalog-final.f121a4dad9",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Gloamthorn/gloamthorn-codex-catalog-final.png",
+      "referenceSHA256": "f121a4dad91b65741321ca014bc2650a6913afadc91e19348aa9bbf375037ac0",
+      "referenceByteCount": 2349000,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-codex-catalog",
+      "recipeNotes": "Render the actual production Codex catalog root at 941\u00d71672 using the authority seed.",
+      "surfaces": [
+        "relic-picker",
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.gloamthorn.relic-picker",
+        "seed.gloamthorn.seal-picker"
+      ],
+      "entryIDs": [
+        "Gloamthorn|relic-picker|iphone-portrait",
+        "Gloamthorn|seal-picker|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/gloamthorn/gloamthorn-codex-catalog-final-f121a4dad9.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.gloamthorn.gloamthorn-codex-catalog-final.f121a4dad9.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.artifact-picker.relic.codex.gloamthorn",
+        "screen.artifact-picker.seal.codex.gloamthorn"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.moonleaf-codex-catalog-final-alt.0a3fb35ab4",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-final-alt.png",
+      "referenceSHA256": "0a3fb35ab47efb272dab404a081a5d4d603fef91ec9d4093a917bf77311f66a1",
+      "referenceByteCount": 1972527,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-codex-catalog-alt",
+      "recipeNotes": "Render the actual production Codex catalog alternate state at 941\u00d71672.",
+      "surfaces": [
+        "vault-encountered"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.vault-encountered"
+      ],
+      "entryIDs": [
+        "Moonleaf|vault-encountered|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/moonleaf-codex-catalog-final-alt-0a3fb35ab4.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.moonleaf-codex-catalog-final-alt.0a3fb35ab4.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.vault-progress"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.moonleaf-codex-catalog-final.72ef342ade",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-final.png",
+      "referenceSHA256": "72ef342adec3f194318c0af3e19b2b4dac40f23de160f31f2c22c5ae12a7c368",
+      "referenceByteCount": 2068067,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-codex-catalog",
+      "recipeNotes": "Render the actual production Codex catalog root at 941\u00d71672 using the authority seed.",
+      "surfaces": [
+        "relic-picker",
+        "seal-picker",
+        "vault-selected"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.relic-picker",
+        "seed.moonleaf.seal-picker",
+        "seed.moonleaf.vault-selected"
+      ],
+      "entryIDs": [
+        "Moonleaf|relic-picker|iphone-portrait",
+        "Moonleaf|seal-picker|iphone-portrait",
+        "Moonleaf|vault-selected|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/moonleaf-codex-catalog-final-72ef342ade.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.moonleaf-codex-catalog-final.72ef342ade.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.artifact-picker.relic.codex.moonleaf",
+        "screen.artifact-picker.seal.codex.moonleaf",
+        "screen.vault-progress"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.moonleaf-codex-catalog-series.0a3fb35ab4",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-codex-catalog-series.png",
+      "referenceSHA256": "0a3fb35ab47efb272dab404a081a5d4d603fef91ec9d4093a917bf77311f66a1",
+      "referenceByteCount": 1972527,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-codex-catalog-series",
+      "recipeNotes": "Render the actual production Codex series/owned state at 941\u00d71672.",
+      "surfaces": [
+        "vault-owned"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.vault-owned"
+      ],
+      "entryIDs": [
+        "Moonleaf|vault-owned|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/moonleaf-codex-catalog-series-0a3fb35ab4.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.moonleaf-codex-catalog-series.0a3fb35ab4.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.vault-progress"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.moonleaf-compose-final-a.b02a1fee73",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-compose-final-a.png",
+      "referenceSHA256": "b02a1fee731eeaae5846f29a2d1e4621e2c98fb8b47a962ca64efa4fe64f1467",
+      "referenceByteCount": 2088108,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-compose-default",
+      "recipeNotes": "Render the actual production Compose root at 941\u00d71672 using the deterministic default Moonleaf seed. The system-chrome mask is package-supplied and hash locked.",
+      "surfaces": [
+        "compose-short",
+        "workspace-empty"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.compose-short",
+        "seed.moonleaf.workspace-empty"
+      ],
+      "entryIDs": [
+        "Moonleaf|compose-short|iphone-portrait",
+        "Moonleaf|workspace-empty|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/moonleaf-compose-final-a-b02a1fee73.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.moonleaf-compose-final-a.b02a1fee73.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.workspace"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.moonleaf-compose-final-b.c30b5df472",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-compose-final-b.png",
+      "referenceSHA256": "c30b5df472b19abd4241afe77e20516e29a34ba3fd55f2404307b0a5ecf50fde",
+      "referenceByteCount": 1802374,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-compose-long",
+      "recipeNotes": "Render the actual production Compose root at 941\u00d71672 using the deterministic long-message Moonleaf seed.",
+      "surfaces": [
+        "compose-long"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.compose-long"
+      ],
+      "entryIDs": [
+        "Moonleaf|compose-long|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/moonleaf-compose-final-b-c30b5df472.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.moonleaf-compose-final-b.c30b5df472.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.workspace"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.moonleaf-inscription-preview-final.a19fdfeb69",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-inscription-preview-final.png",
+      "referenceSHA256": "a19fdfeb693f50bb2cdf17a851cf19a911ea4c87e9db19d1889dfae7a23c9626",
+      "referenceByteCount": 2127300,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-inscription-preview",
+      "recipeNotes": "Render the actual production inscription-result screen at 941\u00d71672 using the deterministic Moonleaf result seed.",
+      "surfaces": [
+        "inscription-preview"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.inscription-preview"
+      ],
+      "entryIDs": [
+        "Moonleaf|inscription-preview|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/moonleaf-inscription-preview-final-a19fdfeb69.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.moonleaf-inscription-preview-final.a19fdfeb69.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.workspace"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.moonleaf-received-cipher-final-a.23b96619f9",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-a.png",
+      "referenceSHA256": "23b96619f911ffc58be81e95869ea16b39b2e689a6b6164be77829d8e2a85b67",
+      "referenceByteCount": 2112267,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-received-primary",
+      "recipeNotes": "Render the actual production Received Cipher root at 941\u00d71672 using the deterministic Moonleaf primary received seed.",
+      "surfaces": [
+        "received-cipher"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.received-cipher"
+      ],
+      "entryIDs": [
+        "Moonleaf|received-cipher|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/moonleaf-received-cipher-final-a-23b96619f9.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.moonleaf-received-cipher-final-a.23b96619f9.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.received-cipher"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.moonleaf-received-cipher-final-b.79446a4e03",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Moonleaf/moonleaf-received-cipher-final-b.png",
+      "referenceSHA256": "79446a4e03976835f5727b3e9285f00e004602cba8c9496122bed115b0657db4",
+      "referenceByteCount": 2069747,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-received-share-card",
+      "recipeNotes": "Render the actual production Received Cipher/share-card state at 941\u00d71672. It must not be bound to the raw static-share renderer.",
+      "surfaces": [
+        "share-builder",
+        "static-share"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.share-builder",
+        "seed.moonleaf.static-share"
+      ],
+      "entryIDs": [
+        "Moonleaf|share-builder|iphone-portrait",
+        "Moonleaf|static-share|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/moonleaf-received-cipher-final-b-79446a4e03.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.moonleaf-received-cipher-final-b.79446a4e03.wrapper",
+      "v42FormerCandidateBindings": [
+        "renderer.static-share.codex.moonleaf.relic.moonleaf.tablet.seal.moonleaf.crescentleaf.standard",
+        "screen.share-builder"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element",
+        "renderer-output"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.sunspire.sunspire-codex-catalog-final.a99ecdcaa1",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Sunspire/sunspire-codex-catalog-final.png",
+      "referenceSHA256": "a99ecdcaa15f9a3233ea7515c991e02c789303d6113ca514c19c94b1ea72bc67",
+      "referenceByteCount": 2375470,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-codex-catalog",
+      "recipeNotes": "Render the actual production Codex catalog root at 941\u00d71672 using the authority seed.",
+      "surfaces": [
+        "relic-picker",
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.sunspire.relic-picker",
+        "seed.sunspire.seal-picker"
+      ],
+      "entryIDs": [
+        "Sunspire|relic-picker|iphone-portrait",
+        "Sunspire|seal-picker|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/sunspire/sunspire-codex-catalog-final-a99ecdcaa1.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.sunspire.sunspire-codex-catalog-final.a99ecdcaa1.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.artifact-picker.relic.codex.sunspire",
+        "screen.artifact-picker.seal.codex.sunspire"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.wildwood.wildwood-codex-catalog-final.1f004173f5",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/Wildwood/wildwood-codex-catalog-final.png",
+      "referenceSHA256": "1f004173f5b876da5858c4accfbb96172c2a74a7ca92f009a3a9849553e18bd7",
+      "referenceByteCount": 2527117,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-codex-catalog",
+      "recipeNotes": "Render the actual production Codex catalog root at 941\u00d71672 using the authority seed.",
+      "surfaces": [
+        "relic-picker",
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.wildwood.relic-picker",
+        "seed.wildwood.seal-picker"
+      ],
+      "entryIDs": [
+        "Wildwood|relic-picker|iphone-portrait",
+        "Wildwood|seal-picker|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/wildwood/wildwood-codex-catalog-final-1f004173f5.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.wildwood.wildwood-codex-catalog-final.1f004173f5.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.artifact-picker.relic.codex.wildwood",
+        "screen.artifact-picker.seal.codex.wildwood"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.vault-elven-codex-unlock-progress.818dbd5057",
+      "referenceAsset": "04-ASSETS/00-CONTROLLING-GOLDENS/vault-elven-codex-unlock-progress.png",
+      "referenceSHA256": "818dbd5057589d2095cc6b3c5e32a8d7072523a0093ef9317dce24b37ce995e1",
+      "referenceByteCount": 2005543,
+      "referenceDimensions": [
+        941,
+        1672
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-screen-v1",
+      "renderMode": "full-production-screen",
+      "recipeClass": "full-screen-vault-unlock-progress",
+      "recipeNotes": "Render the actual production Vault progress state at 941\u00d71672 using the exact locked/progress seed.",
+      "surfaces": [
+        "vault-locked",
+        "vault-progress"
+      ],
+      "destinationsUsingResult": [
+        "iphone-portrait"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.vault-locked",
+        "seed.moonleaf.vault-progress"
+      ],
+      "entryIDs": [
+        "Moonleaf|vault-locked|iphone-portrait",
+        "Moonleaf|vault-progress|iphone-portrait"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/vault-elven-codex-unlock-progress-818dbd5057.png",
+      "requiredOutputDimensions": [
+        941,
+        1672
+      ],
+      "comparisonMask": "04-ASSETS/98-CANONICAL-MASKS/iphone-941x1672-system-chrome-mask.png",
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.vault-elven-codex-unlock-progress.818dbd5057.wrapper",
+      "v42FormerCandidateBindings": [
+        "screen.vault-progress"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.seal-norse-berserk.9594aeec80",
+      "referenceAsset": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.berserk.png",
+      "referenceSHA256": "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996",
+      "referenceByteCount": 763686,
+      "referenceDimensions": [
+        1024,
+        981
+      ],
+      "evaluationKind": "resource-byte-identity",
+      "thresholdProfile": "exact-resource-v1",
+      "renderMode": "resolved-resource-export",
+      "recipeClass": "canonical-production-component",
+      "recipeNotes": "Render the exact production component named by the binding IDs in a fixed reference-sized host.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.seal-picker"
+      ],
+      "entryIDs": [
+        "Norse|seal-picker|ipad-portrait",
+        "Norse|seal-picker|iphone-portrait",
+        "Norse|seal-picker|macos-resized",
+        "Norse|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/seal-norse-berserk-9594aeec80.png",
+      "requiredOutputDimensions": [
+        1024,
+        981
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.seal-norse-berserk.9594aeec80.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.norse.berserk"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.seal-norse-mjolnir.db76bb110f",
+      "referenceAsset": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.mjolnir.png",
+      "referenceSHA256": "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de",
+      "referenceByteCount": 849370,
+      "referenceDimensions": [
+        1003,
+        1024
+      ],
+      "evaluationKind": "resource-byte-identity",
+      "thresholdProfile": "exact-resource-v1",
+      "renderMode": "resolved-resource-export",
+      "recipeClass": "canonical-production-component",
+      "recipeNotes": "Render the exact production component named by the binding IDs in a fixed reference-sized host.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.seal-picker"
+      ],
+      "entryIDs": [
+        "Norse|seal-picker|ipad-portrait",
+        "Norse|seal-picker|iphone-portrait",
+        "Norse|seal-picker|macos-resized",
+        "Norse|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/seal-norse-mjolnir-db76bb110f.png",
+      "requiredOutputDimensions": [
+        1003,
+        1024
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.seal-norse-mjolnir.db76bb110f.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.norse.mjolnir"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.seal-norse-ravenshield.59dd542f4e",
+      "referenceAsset": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.ravenshield.png",
+      "referenceSHA256": "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292",
+      "referenceByteCount": 905500,
+      "referenceDimensions": [
+        1024,
+        1015
+      ],
+      "evaluationKind": "resource-byte-identity",
+      "thresholdProfile": "exact-resource-v1",
+      "renderMode": "resolved-resource-export",
+      "recipeClass": "canonical-production-component",
+      "recipeNotes": "Render the exact production component named by the binding IDs in a fixed reference-sized host.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.seal-picker"
+      ],
+      "entryIDs": [
+        "Norse|seal-picker|ipad-portrait",
+        "Norse|seal-picker|iphone-portrait",
+        "Norse|seal-picker|macos-resized",
+        "Norse|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/seal-norse-ravenshield-59dd542f4e.png",
+      "requiredOutputDimensions": [
+        1024,
+        1015
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.seal-norse-ravenshield.59dd542f4e.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.norse.ravenshield"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.seal-norse-valknut.5e6c584ed9",
+      "referenceAsset": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.valknut.png",
+      "referenceSHA256": "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30",
+      "referenceByteCount": 940081,
+      "referenceDimensions": [
+        1015,
+        1024
+      ],
+      "evaluationKind": "resource-byte-identity",
+      "thresholdProfile": "exact-resource-v1",
+      "renderMode": "resolved-resource-export",
+      "recipeClass": "canonical-production-component",
+      "recipeNotes": "Render the exact production component named by the binding IDs in a fixed reference-sized host.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.seal-picker"
+      ],
+      "entryIDs": [
+        "Norse|seal-picker|ipad-portrait",
+        "Norse|seal-picker|iphone-portrait",
+        "Norse|seal-picker|macos-resized",
+        "Norse|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/seal-norse-valknut-5e6c584ed9.png",
+      "requiredOutputDimensions": [
+        1015,
+        1024
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.seal-norse-valknut.5e6c584ed9.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.norse.valknut"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.seal-norse-wolkin.61acc4bf6b",
+      "referenceAsset": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.wolkin.png",
+      "referenceSHA256": "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e",
+      "referenceByteCount": 824491,
+      "referenceDimensions": [
+        1013,
+        1024
+      ],
+      "evaluationKind": "resource-byte-identity",
+      "thresholdProfile": "exact-resource-v1",
+      "renderMode": "resolved-resource-export",
+      "recipeClass": "canonical-production-component",
+      "recipeNotes": "Render the exact production component named by the binding IDs in a fixed reference-sized host.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.seal-picker"
+      ],
+      "entryIDs": [
+        "Norse|seal-picker|ipad-portrait",
+        "Norse|seal-picker|iphone-portrait",
+        "Norse|seal-picker|macos-resized",
+        "Norse|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/seal-norse-wolkin-61acc4bf6b.png",
+      "requiredOutputDimensions": [
+        1013,
+        1024
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.seal-norse-wolkin.61acc4bf6b.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.norse.wolkin"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.seal-norse-yggdrasil.2f8593cd6b",
+      "referenceAsset": "04-ASSETS/03-PRODUCTION-CANDIDATES/Norse/Seals/seal.norse.yggdrasil.png",
+      "referenceSHA256": "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b",
+      "referenceByteCount": 833872,
+      "referenceDimensions": [
+        1024,
+        991
+      ],
+      "evaluationKind": "resource-byte-identity",
+      "thresholdProfile": "exact-resource-v1",
+      "renderMode": "resolved-resource-export",
+      "recipeClass": "canonical-production-component",
+      "recipeNotes": "Render the exact production component named by the binding IDs in a fixed reference-sized host.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.seal-picker"
+      ],
+      "entryIDs": [
+        "Norse|seal-picker|ipad-portrait",
+        "Norse|seal-picker|iphone-portrait",
+        "Norse|seal-picker|macos-resized",
+        "Norse|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/seal-norse-yggdrasil-2f8593cd6b.png",
+      "requiredOutputDimensions": [
+        1024,
+        991
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.seal-norse-yggdrasil.2f8593cd6b.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.norse.yggdrasil"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.gloamthorn.relic-duskbriar-stele-reference.b248c0b8cf",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Gloamthorn/relic-duskbriar-stele-reference.png",
+      "referenceSHA256": "b248c0b8cf86aa6dcf33a9a7057b7d55f4bf7657a484bd6afb0aa01edb775584",
+      "referenceByteCount": 185115,
+      "referenceDimensions": [
+        295,
+        365
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.gloamthorn.relic-picker"
+      ],
+      "entryIDs": [
+        "Gloamthorn|relic-picker|ipad-portrait",
+        "Gloamthorn|relic-picker|iphone-portrait",
+        "Gloamthorn|relic-picker|macos-resized",
+        "Gloamthorn|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/gloamthorn/relic-duskbriar-stele-reference-b248c0b8cf.png",
+      "requiredOutputDimensions": [
+        295,
+        365
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.gloamthorn.relic-duskbriar-stele-reference.b248c0b8cf.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.gloamthorn.duskbriar-stele"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.gloamthorn.relic-nightthorn-tablet-reference.d697177200",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Gloamthorn/relic-nightthorn-tablet-reference.png",
+      "referenceSHA256": "d697177200a2ec0990590270ef2354acbb48f09af0a0a00770afd1d1d42efe39",
+      "referenceByteCount": 545959,
+      "referenceDimensions": [
+        535,
+        520
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "compose-long",
+        "compose-short",
+        "high-contrast",
+        "inscription-preview",
+        "large-text",
+        "received-cipher",
+        "reduce-motion",
+        "relic-picker",
+        "settings-defaults-preview",
+        "share-builder",
+        "static-share"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.gloamthorn.compose-long",
+        "seed.gloamthorn.compose-short",
+        "seed.gloamthorn.high-contrast",
+        "seed.gloamthorn.inscription-preview",
+        "seed.gloamthorn.large-text",
+        "seed.gloamthorn.received-cipher",
+        "seed.gloamthorn.reduce-motion",
+        "seed.gloamthorn.relic-picker",
+        "seed.gloamthorn.settings-defaults-preview",
+        "seed.gloamthorn.share-builder",
+        "seed.gloamthorn.static-share"
+      ],
+      "entryIDs": [
+        "Gloamthorn|compose-long|ipad-portrait",
+        "Gloamthorn|compose-long|iphone-portrait",
+        "Gloamthorn|compose-long|macos-resized",
+        "Gloamthorn|compose-long|macos-standard",
+        "Gloamthorn|compose-short|ipad-portrait",
+        "Gloamthorn|compose-short|iphone-portrait",
+        "Gloamthorn|compose-short|macos-resized",
+        "Gloamthorn|compose-short|macos-standard",
+        "Gloamthorn|high-contrast|ipad-portrait",
+        "Gloamthorn|high-contrast|iphone-portrait",
+        "Gloamthorn|high-contrast|macos-resized",
+        "Gloamthorn|high-contrast|macos-standard",
+        "Gloamthorn|inscription-preview|ipad-portrait",
+        "Gloamthorn|inscription-preview|iphone-portrait",
+        "Gloamthorn|inscription-preview|macos-resized",
+        "Gloamthorn|inscription-preview|macos-standard",
+        "Gloamthorn|large-text|ipad-portrait",
+        "Gloamthorn|large-text|iphone-portrait",
+        "Gloamthorn|large-text|macos-resized",
+        "Gloamthorn|large-text|macos-standard",
+        "Gloamthorn|received-cipher|ipad-portrait",
+        "Gloamthorn|received-cipher|iphone-portrait",
+        "Gloamthorn|received-cipher|macos-resized",
+        "Gloamthorn|received-cipher|macos-standard",
+        "Gloamthorn|reduce-motion|ipad-portrait",
+        "Gloamthorn|reduce-motion|iphone-portrait",
+        "Gloamthorn|reduce-motion|macos-resized",
+        "Gloamthorn|reduce-motion|macos-standard",
+        "Gloamthorn|relic-picker|ipad-portrait",
+        "Gloamthorn|relic-picker|iphone-portrait",
+        "Gloamthorn|relic-picker|macos-resized",
+        "Gloamthorn|relic-picker|macos-standard",
+        "Gloamthorn|settings-defaults-preview|ipad-portrait",
+        "Gloamthorn|settings-defaults-preview|iphone-portrait",
+        "Gloamthorn|settings-defaults-preview|macos-resized",
+        "Gloamthorn|settings-defaults-preview|macos-standard",
+        "Gloamthorn|share-builder|ipad-portrait",
+        "Gloamthorn|share-builder|iphone-portrait",
+        "Gloamthorn|share-builder|macos-resized",
+        "Gloamthorn|share-builder|macos-standard",
+        "Gloamthorn|static-share|ipad-portrait",
+        "Gloamthorn|static-share|iphone-portrait",
+        "Gloamthorn|static-share|macos-resized",
+        "Gloamthorn|static-share|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/gloamthorn/relic-nightthorn-tablet-reference-d697177200.png",
+      "requiredOutputDimensions": [
+        535,
+        520
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.gloamthorn.relic-nightthorn-tablet-reference.d697177200.wrapper",
+      "v42FormerCandidateBindings": [
+        "renderer.static-share.codex.gloamthorn.relic.gloamthorn.nightthorn-tablet.seal.gloamthorn.thornmoon.standard",
+        "share-builder.preview.codex.gloamthorn",
+        "theme.artifact-picker.relic.gloamthorn.nightthorn-tablet",
+        "theme.artifact-preview.relic.gloamthorn.nightthorn-tablet",
+        "theme.received.artifact-preview.relic.gloamthorn.nightthorn-tablet"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element",
+        "renderer-output"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.gloamthorn.relic-umbral-plaque-reference.5b8fc04d7f",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Gloamthorn/relic-umbral-plaque-reference.png",
+      "referenceSHA256": "5b8fc04d7f1730189db4b941b43f4fb1a540c4d2b4a1fb3b6e2aac3dd5cfd8b1",
+      "referenceByteCount": 142131,
+      "referenceDimensions": [
+        295,
+        270
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.gloamthorn.relic-picker"
+      ],
+      "entryIDs": [
+        "Gloamthorn|relic-picker|ipad-portrait",
+        "Gloamthorn|relic-picker|iphone-portrait",
+        "Gloamthorn|relic-picker|macos-resized",
+        "Gloamthorn|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/gloamthorn/relic-umbral-plaque-reference-5b8fc04d7f.png",
+      "requiredOutputDimensions": [
+        295,
+        270
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.gloamthorn.relic-umbral-plaque-reference.5b8fc04d7f.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.gloamthorn.umbral-plaque"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.relic-ivybound-plaque-reference.c3e8009bfe",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/relic-ivybound-plaque-reference.png",
+      "referenceSHA256": "c3e8009bfe6cf4436b44ed406a690c3d57438120de7b412480bdf7219207024a",
+      "referenceByteCount": 152926,
+      "referenceDimensions": [
+        290,
+        270
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.relic-picker"
+      ],
+      "entryIDs": [
+        "Moonleaf|relic-picker|ipad-portrait",
+        "Moonleaf|relic-picker|iphone-portrait",
+        "Moonleaf|relic-picker|macos-resized",
+        "Moonleaf|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/relic-ivybound-plaque-reference-c3e8009bfe.png",
+      "requiredOutputDimensions": [
+        290,
+        270
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.relic-ivybound-plaque-reference.c3e8009bfe.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.moonleaf.ivybound-plaque"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.relic-moonleaf-tablet-reference.06e58cc199",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/relic-moonleaf-tablet-reference.png",
+      "referenceSHA256": "06e58cc199113d2533d694db44f605be508f85e6be33b1076570d5a018f8f91f",
+      "referenceByteCount": 443978,
+      "referenceDimensions": [
+        525,
+        535
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "compose-long",
+        "compose-short",
+        "high-contrast",
+        "inscription-preview",
+        "large-text",
+        "received-cipher",
+        "reduce-motion",
+        "relic-picker",
+        "settings-defaults-preview",
+        "share-builder",
+        "static-share"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.compose-long",
+        "seed.moonleaf.compose-short",
+        "seed.moonleaf.high-contrast",
+        "seed.moonleaf.inscription-preview",
+        "seed.moonleaf.large-text",
+        "seed.moonleaf.received-cipher",
+        "seed.moonleaf.reduce-motion",
+        "seed.moonleaf.relic-picker",
+        "seed.moonleaf.settings-defaults-preview",
+        "seed.moonleaf.share-builder",
+        "seed.moonleaf.static-share"
+      ],
+      "entryIDs": [
+        "Moonleaf|compose-long|ipad-portrait",
+        "Moonleaf|compose-long|iphone-portrait",
+        "Moonleaf|compose-long|macos-resized",
+        "Moonleaf|compose-long|macos-standard",
+        "Moonleaf|compose-short|ipad-portrait",
+        "Moonleaf|compose-short|iphone-portrait",
+        "Moonleaf|compose-short|macos-resized",
+        "Moonleaf|compose-short|macos-standard",
+        "Moonleaf|high-contrast|ipad-portrait",
+        "Moonleaf|high-contrast|iphone-portrait",
+        "Moonleaf|high-contrast|macos-resized",
+        "Moonleaf|high-contrast|macos-standard",
+        "Moonleaf|inscription-preview|ipad-portrait",
+        "Moonleaf|inscription-preview|iphone-portrait",
+        "Moonleaf|inscription-preview|macos-resized",
+        "Moonleaf|inscription-preview|macos-standard",
+        "Moonleaf|large-text|ipad-portrait",
+        "Moonleaf|large-text|iphone-portrait",
+        "Moonleaf|large-text|macos-resized",
+        "Moonleaf|large-text|macos-standard",
+        "Moonleaf|received-cipher|ipad-portrait",
+        "Moonleaf|received-cipher|iphone-portrait",
+        "Moonleaf|received-cipher|macos-resized",
+        "Moonleaf|received-cipher|macos-standard",
+        "Moonleaf|reduce-motion|ipad-portrait",
+        "Moonleaf|reduce-motion|iphone-portrait",
+        "Moonleaf|reduce-motion|macos-resized",
+        "Moonleaf|reduce-motion|macos-standard",
+        "Moonleaf|relic-picker|ipad-portrait",
+        "Moonleaf|relic-picker|iphone-portrait",
+        "Moonleaf|relic-picker|macos-resized",
+        "Moonleaf|relic-picker|macos-standard",
+        "Moonleaf|settings-defaults-preview|ipad-portrait",
+        "Moonleaf|settings-defaults-preview|iphone-portrait",
+        "Moonleaf|settings-defaults-preview|macos-resized",
+        "Moonleaf|settings-defaults-preview|macos-standard",
+        "Moonleaf|share-builder|ipad-portrait",
+        "Moonleaf|share-builder|iphone-portrait",
+        "Moonleaf|share-builder|macos-resized",
+        "Moonleaf|share-builder|macos-standard",
+        "Moonleaf|static-share|ipad-portrait",
+        "Moonleaf|static-share|iphone-portrait",
+        "Moonleaf|static-share|macos-resized",
+        "Moonleaf|static-share|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/relic-moonleaf-tablet-reference-06e58cc199.png",
+      "requiredOutputDimensions": [
+        525,
+        535
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.relic-moonleaf-tablet-reference.06e58cc199.wrapper",
+      "v42FormerCandidateBindings": [
+        "renderer.static-share.codex.moonleaf.relic.moonleaf.tablet.seal.moonleaf.crescentleaf.standard",
+        "share-builder.preview.codex.moonleaf",
+        "theme.artifact-picker.relic.moonleaf.tablet",
+        "theme.artifact-preview.relic.moonleaf.tablet",
+        "theme.received.artifact-preview.relic.moonleaf.tablet"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element",
+        "renderer-output"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.relic-whisperbark-stele-reference.80e7aa747c",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/relic-whisperbark-stele-reference.png",
+      "referenceSHA256": "80e7aa747cf2b250004f3b9e248523be887569b75e0b8af1a2250f3ab3b2b997",
+      "referenceByteCount": 163892,
+      "referenceDimensions": [
+        295,
+        365
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.relic-picker"
+      ],
+      "entryIDs": [
+        "Moonleaf|relic-picker|ipad-portrait",
+        "Moonleaf|relic-picker|iphone-portrait",
+        "Moonleaf|relic-picker|macos-resized",
+        "Moonleaf|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/relic-whisperbark-stele-reference-80e7aa747c.png",
+      "requiredOutputDimensions": [
+        295,
+        365
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.relic-whisperbark-stele-reference.80e7aa747c.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.moonleaf.whisperbark-stele"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.seal-crescentleaf-reference.f328c3f3ea",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/seal-crescentleaf-reference.png",
+      "referenceSHA256": "f328c3f3ea9ff14616e71517faca85fe10d4da716cf2b2bcc4b84d6e88c3f0c0",
+      "referenceByteCount": 299183,
+      "referenceDimensions": [
+        365,
+        445
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "seal-specimen-card",
+      "recipeNotes": "Render the approved Seal using production resource resolution and the authority card/panel treatment. Preserve relief, rim, shadow, and material detail.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.seal-picker"
+      ],
+      "entryIDs": [
+        "Moonleaf|seal-picker|ipad-portrait",
+        "Moonleaf|seal-picker|iphone-portrait",
+        "Moonleaf|seal-picker|macos-resized",
+        "Moonleaf|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/seal-crescentleaf-reference-f328c3f3ea.png",
+      "requiredOutputDimensions": [
+        365,
+        445
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.seal-crescentleaf-reference.f328c3f3ea.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.moonleaf.crescentleaf"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.moonleaf.seal-woodland-stag-reference.cd069361a1",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Moonleaf/seal-woodland-stag-reference.png",
+      "referenceSHA256": "cd069361a104a2a0967eed5ddb5540e95e20e4d0c7e943164484cc2faedc242e",
+      "referenceByteCount": 279247,
+      "referenceDimensions": [
+        365,
+        405
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "seal-specimen-card",
+      "recipeNotes": "Render the approved Seal using production resource resolution and the authority card/panel treatment. Preserve relief, rim, shadow, and material detail.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.moonleaf.seal-picker"
+      ],
+      "entryIDs": [
+        "Moonleaf|seal-picker|ipad-portrait",
+        "Moonleaf|seal-picker|iphone-portrait",
+        "Moonleaf|seal-picker|macos-resized",
+        "Moonleaf|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/moonleaf/seal-woodland-stag-reference-cd069361a1.png",
+      "requiredOutputDimensions": [
+        365,
+        405
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.moonleaf.seal-woodland-stag-reference.cd069361a1.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.moonleaf.woodland-stag"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.02-relic-catalog.a30d3d6ac5",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/02-relic-catalog.png",
+      "referenceSHA256": "a30d3d6ac5112da8c1606008b307678e27611c4455c82e45b43bf0f5bb41fcf3",
+      "referenceByteCount": 926371,
+      "referenceDimensions": [
+        1002,
+        730
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-catalog-panel",
+      "recipeNotes": "Render the production Relic catalog/picker group with all three approved Norse Relics, labels, state text, and panel chrome.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.relic-picker"
+      ],
+      "entryIDs": [
+        "Norse|relic-picker|ipad-portrait",
+        "Norse|relic-picker|iphone-portrait",
+        "Norse|relic-picker|macos-resized",
+        "Norse|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/02-relic-catalog-a30d3d6ac5.png",
+      "requiredOutputDimensions": [
+        1002,
+        730
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.02-relic-catalog.a30d3d6ac5.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.codex.norse"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.03-seal-catalog.5849446001",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/03-seal-catalog.png",
+      "referenceSHA256": "58494460016fbb9a8e944604d36cfb5ed266554fb63fcfccf78e6f585b2b5a53",
+      "referenceByteCount": 728233,
+      "referenceDimensions": [
+        806,
+        730
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "seal-catalog-panel",
+      "recipeNotes": "Render the production Seal catalog/picker group with all six approved Norse Seals, labels, state text, and panel chrome.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.seal-picker"
+      ],
+      "entryIDs": [
+        "Norse|seal-picker|ipad-portrait",
+        "Norse|seal-picker|iphone-portrait",
+        "Norse|seal-picker|macos-resized",
+        "Norse|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/03-seal-catalog-5849446001.png",
+      "requiredOutputDimensions": [
+        806,
+        730
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.03-seal-catalog.5849446001.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.codex.norse"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.04-compose-workspace.619a137fbc",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/04-compose-workspace.png",
+      "referenceSHA256": "619a137fbcc760b60b28f1a1569cf289922fc37e39102040435782de17f7c2d6",
+      "referenceByteCount": 575029,
+      "referenceDimensions": [
+        700,
+        648
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "norse-compose-workspace-panel",
+      "recipeNotes": "Render the production Compose workspace group with the approved left navigation, artifact canvas, selector rows, and primary action. Do not substitute a whole-window screenshot or a relic-only tile.",
+      "surfaces": [
+        "settings-defaults-preview",
+        "share-builder",
+        "workspace-empty"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.settings-defaults-preview",
+        "seed.norse.share-builder",
+        "seed.norse.workspace-empty"
+      ],
+      "entryIDs": [
+        "Norse|settings-defaults-preview|ipad-portrait",
+        "Norse|settings-defaults-preview|iphone-portrait",
+        "Norse|settings-defaults-preview|macos-resized",
+        "Norse|settings-defaults-preview|macos-standard",
+        "Norse|share-builder|ipad-portrait",
+        "Norse|share-builder|iphone-portrait",
+        "Norse|share-builder|macos-resized",
+        "Norse|share-builder|macos-standard",
+        "Norse|workspace-empty|ipad-portrait",
+        "Norse|workspace-empty|iphone-portrait",
+        "Norse|workspace-empty|macos-resized",
+        "Norse|workspace-empty|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/04-compose-workspace-619a137fbc.png",
+      "requiredOutputDimensions": [
+        700,
+        648
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.04-compose-workspace.619a137fbc.wrapper",
+      "v42FormerCandidateBindings": [
+        "share-builder.preview.codex.norse",
+        "workspace.primary-surface"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.05-short-message.aae1f3bf5c",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/05-short-message.png",
+      "referenceSHA256": "aae1f3bf5cff4b94fbc2ca6eb86eedbeb2cabb8281588c53aef5d6d13e9efbe7",
+      "referenceByteCount": 355601,
+      "referenceDimensions": [
+        398,
+        700
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "short-message-panel",
+      "recipeNotes": "Render the production short-message presentation, including its heading, exact two-line glyph layout, Relic, selected Seal, and surrounding Theme panel chrome.",
+      "surfaces": [
+        "compose-short",
+        "inscription-preview"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.compose-short",
+        "seed.norse.inscription-preview"
+      ],
+      "entryIDs": [
+        "Norse|compose-short|ipad-portrait",
+        "Norse|compose-short|iphone-portrait",
+        "Norse|compose-short|macos-resized",
+        "Norse|compose-short|macos-standard",
+        "Norse|inscription-preview|ipad-portrait",
+        "Norse|inscription-preview|iphone-portrait",
+        "Norse|inscription-preview|macos-resized",
+        "Norse|inscription-preview|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/05-short-message-aae1f3bf5c.png",
+      "requiredOutputDimensions": [
+        398,
+        700
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.05-short-message.aae1f3bf5c.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-preview.relic.norse.runestone-tablet",
+        "theme.compose.short.codex.norse"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.06-long-message.49860b3f30",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/06-long-message.png",
+      "referenceSHA256": "49860b3f30e633dda4c15186d6d40f80a34192265c048bf20c9dfdcf774a12a1",
+      "referenceByteCount": 486630,
+      "referenceDimensions": [
+        464,
+        700
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "long-message-panel",
+      "recipeNotes": "Render the production long-message presentation, including its heading, exact six-line glyph layout, Relic, selected Seal, and surrounding Theme panel chrome.",
+      "surfaces": [
+        "compose-long"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.compose-long"
+      ],
+      "entryIDs": [
+        "Norse|compose-long|ipad-portrait",
+        "Norse|compose-long|iphone-portrait",
+        "Norse|compose-long|macos-resized",
+        "Norse|compose-long|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/06-long-message-49860b3f30.png",
+      "requiredOutputDimensions": [
+        464,
+        700
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.06-long-message.49860b3f30.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.compose.long.codex.norse"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.07-received-cipher.3f840710d4",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/07-received-cipher.png",
+      "referenceSHA256": "3f840710d4e1b3637d3f2abbfbdb59cbac174502485b824aca53797740d6224f",
+      "referenceByteCount": 414084,
+      "referenceDimensions": [
+        496,
+        700
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "received-cipher-panel",
+      "recipeNotes": "Render the production Received Cipher presentation, including artifact preview and the production metadata block shown in the authority.",
+      "surfaces": [
+        "received-cipher"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.received-cipher"
+      ],
+      "entryIDs": [
+        "Norse|received-cipher|ipad-portrait",
+        "Norse|received-cipher|iphone-portrait",
+        "Norse|received-cipher|macos-resized",
+        "Norse|received-cipher|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/07-received-cipher-3f840710d4.png",
+      "requiredOutputDimensions": [
+        496,
+        700
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.07-received-cipher.3f840710d4.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.received.artifact-preview.relic.norse.runestone-tablet"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.08-share-preview.17232537b1",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/08-share-preview.png",
+      "referenceSHA256": "17232537b11d19ea192127b887fcf6474ee32e2471e1d8a9ff1eefc49ac56767",
+      "referenceByteCount": 458634,
+      "referenceDimensions": [
+        506,
+        700
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "share-preview-card",
+      "recipeNotes": "Render the production share-preview card with the exact Theme background, Relic, Script, Seal, attribution, and card chrome. This is not the raw landscape renderer output.",
+      "surfaces": [
+        "share-builder",
+        "static-share"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.share-builder",
+        "seed.norse.static-share"
+      ],
+      "entryIDs": [
+        "Norse|share-builder|ipad-portrait",
+        "Norse|share-builder|iphone-portrait",
+        "Norse|share-builder|macos-resized",
+        "Norse|share-builder|macos-standard",
+        "Norse|static-share|ipad-portrait",
+        "Norse|static-share|iphone-portrait",
+        "Norse|static-share|macos-resized",
+        "Norse|static-share|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/08-share-preview-17232537b1.png",
+      "requiredOutputDimensions": [
+        506,
+        700
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.08-share-preview.17232537b1.wrapper",
+      "v42FormerCandidateBindings": [
+        "renderer.static-share.codex.norse.relic.norse.runestone-tablet.seal.norse.valknut.standard",
+        "share-builder.preview.codex.norse"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element",
+        "renderer-output"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.10-background-treatment.78fa42c571",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/10-background-treatment.png",
+      "referenceSHA256": "78fa42c5712c796f43efea41bab7dc8249fa076265b6903dc33d70f39756a810",
+      "referenceByteCount": 542851,
+      "referenceDimensions": [
+        910,
+        460
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "theme-background-panel",
+      "recipeNotes": "Render the active descriptor-declared background in a fixed host using the production background resolver, approved crop focal point, production scrim, and production accessibility mode. No generic gradient.",
+      "surfaces": [
+        "reduce-motion",
+        "workspace-empty"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.reduce-motion",
+        "seed.norse.workspace-empty"
+      ],
+      "entryIDs": [
+        "Norse|reduce-motion|ipad-portrait",
+        "Norse|reduce-motion|iphone-portrait",
+        "Norse|reduce-motion|macos-resized",
+        "Norse|reduce-motion|macos-standard",
+        "Norse|workspace-empty|ipad-portrait",
+        "Norse|workspace-empty|iphone-portrait",
+        "Norse|workspace-empty|macos-resized",
+        "Norse|workspace-empty|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/10-background-treatment-78fa42c571.png",
+      "requiredOutputDimensions": [
+        910,
+        460
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.10-background-treatment.78fa42c571.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.background.theme.norse.base.reduce-motion",
+        "theme.background.theme.norse.base.standard"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.11-mastery-rewards.12cd618085",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/11-mastery-rewards.png",
+      "referenceSHA256": "12cd6180852261263b8e6b8d119dc6d7f33da6431f9e0ac7e0a6b4e2649eeb26",
+      "referenceByteCount": 424747,
+      "referenceDimensions": [
+        792,
+        460
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "mastery-overview-panel",
+      "recipeNotes": "Render the complete production mastery overview containing the Frame, Crest, and Title as separate items.",
+      "surfaces": [
+        "mastery"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.mastery"
+      ],
+      "entryIDs": [
+        "Norse|mastery|ipad-portrait",
+        "Norse|mastery|iphone-portrait",
+        "Norse|mastery|macos-resized",
+        "Norse|mastery|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/11-mastery-rewards-12cd618085.png",
+      "requiredOutputDimensions": [
+        792,
+        460
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.11-mastery-rewards.12cd618085.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.mastery.codex.norse"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.mastery-reference.53e6ee4d30",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/mastery-reference.png",
+      "referenceSHA256": "53e6ee4d30d1f3be91c7afe91aa93b975b0d6e6617222ac7a1687fd4377994c2",
+      "referenceByteCount": 151487,
+      "referenceDimensions": [
+        402,
+        225
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "mastery-detail-panel",
+      "recipeNotes": "Render the production mastery detail presentation at the authority geometry; do not reuse the overview candidate.",
+      "surfaces": [
+        "mastery"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.mastery"
+      ],
+      "entryIDs": [
+        "Norse|mastery|ipad-portrait",
+        "Norse|mastery|iphone-portrait",
+        "Norse|mastery|macos-resized",
+        "Norse|mastery|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/mastery-reference-53e6ee4d30.png",
+      "requiredOutputDimensions": [
+        402,
+        225
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.mastery-reference.53e6ee4d30.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.mastery.codex.norse"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.relic-dragonwood-plaque-reference.0ad79d60ba",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-dragonwood-plaque-reference.png",
+      "referenceSHA256": "0ad79d60ba52118e11e9ef68a4fd2895d0db6d2870f430f703e34a7c8a803ccf",
+      "referenceByteCount": 100496,
+      "referenceDimensions": [
+        172,
+        307
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.relic-picker"
+      ],
+      "entryIDs": [
+        "Norse|relic-picker|ipad-portrait",
+        "Norse|relic-picker|iphone-portrait",
+        "Norse|relic-picker|macos-resized",
+        "Norse|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/relic-dragonwood-plaque-reference-0ad79d60ba.png",
+      "requiredOutputDimensions": [
+        172,
+        307
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.relic-dragonwood-plaque-reference.0ad79d60ba.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.norse.dragonwood-plaque"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-runestone-tablet-reference.png",
+      "referenceSHA256": "2bc66b3956cece74b27f0f2c94717cef7db097b9fbd0fbc599d632a112379b6c",
+      "referenceByteCount": 108523,
+      "referenceDimensions": [
+        172,
+        307
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "compose-long",
+        "compose-short",
+        "high-contrast",
+        "inscription-preview",
+        "large-text",
+        "received-cipher",
+        "reduce-motion",
+        "relic-picker",
+        "settings-defaults-preview",
+        "share-builder",
+        "static-share"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.compose-long",
+        "seed.norse.compose-short",
+        "seed.norse.high-contrast",
+        "seed.norse.inscription-preview",
+        "seed.norse.large-text",
+        "seed.norse.received-cipher",
+        "seed.norse.reduce-motion",
+        "seed.norse.relic-picker",
+        "seed.norse.settings-defaults-preview",
+        "seed.norse.share-builder",
+        "seed.norse.static-share"
+      ],
+      "entryIDs": [
+        "Norse|compose-long|ipad-portrait",
+        "Norse|compose-long|iphone-portrait",
+        "Norse|compose-long|macos-resized",
+        "Norse|compose-long|macos-standard",
+        "Norse|compose-short|ipad-portrait",
+        "Norse|compose-short|iphone-portrait",
+        "Norse|compose-short|macos-resized",
+        "Norse|compose-short|macos-standard",
+        "Norse|high-contrast|ipad-portrait",
+        "Norse|high-contrast|iphone-portrait",
+        "Norse|high-contrast|macos-resized",
+        "Norse|high-contrast|macos-standard",
+        "Norse|inscription-preview|ipad-portrait",
+        "Norse|inscription-preview|iphone-portrait",
+        "Norse|inscription-preview|macos-resized",
+        "Norse|inscription-preview|macos-standard",
+        "Norse|large-text|ipad-portrait",
+        "Norse|large-text|iphone-portrait",
+        "Norse|large-text|macos-resized",
+        "Norse|large-text|macos-standard",
+        "Norse|received-cipher|ipad-portrait",
+        "Norse|received-cipher|iphone-portrait",
+        "Norse|received-cipher|macos-resized",
+        "Norse|received-cipher|macos-standard",
+        "Norse|reduce-motion|ipad-portrait",
+        "Norse|reduce-motion|iphone-portrait",
+        "Norse|reduce-motion|macos-resized",
+        "Norse|reduce-motion|macos-standard",
+        "Norse|relic-picker|ipad-portrait",
+        "Norse|relic-picker|iphone-portrait",
+        "Norse|relic-picker|macos-resized",
+        "Norse|relic-picker|macos-standard",
+        "Norse|settings-defaults-preview|ipad-portrait",
+        "Norse|settings-defaults-preview|iphone-portrait",
+        "Norse|settings-defaults-preview|macos-resized",
+        "Norse|settings-defaults-preview|macos-standard",
+        "Norse|share-builder|ipad-portrait",
+        "Norse|share-builder|iphone-portrait",
+        "Norse|share-builder|macos-resized",
+        "Norse|share-builder|macos-standard",
+        "Norse|static-share|ipad-portrait",
+        "Norse|static-share|iphone-portrait",
+        "Norse|static-share|macos-resized",
+        "Norse|static-share|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/relic-runestone-tablet-reference-2bc66b3956.png",
+      "requiredOutputDimensions": [
+        172,
+        307
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.relic-runestone-tablet-reference.2bc66b3956.wrapper",
+      "v42FormerCandidateBindings": [
+        "renderer.static-share.codex.norse.relic.norse.runestone-tablet.seal.norse.valknut.standard",
+        "share-builder.preview.codex.norse",
+        "theme.artifact-picker.relic.norse.runestone-tablet",
+        "theme.artifact-preview.relic.norse.runestone-tablet",
+        "theme.received.artifact-preview.relic.norse.runestone-tablet"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element",
+        "renderer-output"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.relic-stormforged-stele-reference.de8845428e",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/relic-stormforged-stele-reference.png",
+      "referenceSHA256": "de8845428e1c8e937448c1fd34c1a0f6137a6623e0f26611ff969758d3646fe7",
+      "referenceByteCount": 92426,
+      "referenceDimensions": [
+        165,
+        307
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.relic-picker"
+      ],
+      "entryIDs": [
+        "Norse|relic-picker|ipad-portrait",
+        "Norse|relic-picker|iphone-portrait",
+        "Norse|relic-picker|macos-resized",
+        "Norse|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/relic-stormforged-stele-reference-de8845428e.png",
+      "requiredOutputDimensions": [
+        165,
+        307
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.relic-stormforged-stele-reference.de8845428e.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.norse.stormforged-stele"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.norse.vault-card-reference.9a056285ad",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Norse/vault-card-reference.png",
+      "referenceSHA256": "9a056285ad7a17a58966da921936b38622818f886fed8112772ad959d0771463",
+      "referenceByteCount": 160137,
+      "referenceDimensions": [
+        270,
+        386
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "vault-card-state-stack",
+      "recipeNotes": "Render the production Vault Codex card states requested by the seed using the descriptor-declared card resources and production state overlays.",
+      "surfaces": [
+        "settings-codex-card",
+        "vault-owned",
+        "vault-selected"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.norse.settings-codex-card",
+        "seed.norse.vault-owned",
+        "seed.norse.vault-selected"
+      ],
+      "entryIDs": [
+        "Norse|settings-codex-card|ipad-portrait",
+        "Norse|settings-codex-card|iphone-portrait",
+        "Norse|settings-codex-card|macos-resized",
+        "Norse|settings-codex-card|macos-standard",
+        "Norse|vault-owned|ipad-portrait",
+        "Norse|vault-owned|iphone-portrait",
+        "Norse|vault-owned|macos-resized",
+        "Norse|vault-owned|macos-standard",
+        "Norse|vault-selected|ipad-portrait",
+        "Norse|vault-selected|iphone-portrait",
+        "Norse|vault-selected|macos-resized",
+        "Norse|vault-selected|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/norse/vault-card-reference-9a056285ad.png",
+      "requiredOutputDimensions": [
+        270,
+        386
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.norse.vault-card-reference.9a056285ad.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.codex-card.codex.norse",
+        "theme.vault.codex.norse.owned",
+        "theme.vault.codex.norse.selected"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.sunspire.relic-auric-stele-reference.ac627d94ce",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/relic-auric-stele-reference.png",
+      "referenceSHA256": "ac627d94ce1c3c2e67aa96ba073619c6d72548b1319e88c345a711ef46a20fab",
+      "referenceByteCount": 169983,
+      "referenceDimensions": [
+        295,
+        365
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.sunspire.relic-picker"
+      ],
+      "entryIDs": [
+        "Sunspire|relic-picker|ipad-portrait",
+        "Sunspire|relic-picker|iphone-portrait",
+        "Sunspire|relic-picker|macos-resized",
+        "Sunspire|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/sunspire/relic-auric-stele-reference-ac627d94ce.png",
+      "requiredOutputDimensions": [
+        295,
+        365
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.sunspire.relic-auric-stele-reference.ac627d94ce.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.sunspire.auric-stele"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.sunspire.relic-dawnfire-tablet-reference.e1e7c42e94",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/relic-dawnfire-tablet-reference.png",
+      "referenceSHA256": "e1e7c42e94f285381bf175be618b102bc0dfa8dd5fc36fa43270adfcbf64f4d4",
+      "referenceByteCount": 542780,
+      "referenceDimensions": [
+        525,
+        530
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "compose-long",
+        "compose-short",
+        "high-contrast",
+        "inscription-preview",
+        "large-text",
+        "received-cipher",
+        "reduce-motion",
+        "relic-picker",
+        "settings-defaults-preview",
+        "share-builder",
+        "static-share"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.sunspire.compose-long",
+        "seed.sunspire.compose-short",
+        "seed.sunspire.high-contrast",
+        "seed.sunspire.inscription-preview",
+        "seed.sunspire.large-text",
+        "seed.sunspire.received-cipher",
+        "seed.sunspire.reduce-motion",
+        "seed.sunspire.relic-picker",
+        "seed.sunspire.settings-defaults-preview",
+        "seed.sunspire.share-builder",
+        "seed.sunspire.static-share"
+      ],
+      "entryIDs": [
+        "Sunspire|compose-long|ipad-portrait",
+        "Sunspire|compose-long|iphone-portrait",
+        "Sunspire|compose-long|macos-resized",
+        "Sunspire|compose-long|macos-standard",
+        "Sunspire|compose-short|ipad-portrait",
+        "Sunspire|compose-short|iphone-portrait",
+        "Sunspire|compose-short|macos-resized",
+        "Sunspire|compose-short|macos-standard",
+        "Sunspire|high-contrast|ipad-portrait",
+        "Sunspire|high-contrast|iphone-portrait",
+        "Sunspire|high-contrast|macos-resized",
+        "Sunspire|high-contrast|macos-standard",
+        "Sunspire|inscription-preview|ipad-portrait",
+        "Sunspire|inscription-preview|iphone-portrait",
+        "Sunspire|inscription-preview|macos-resized",
+        "Sunspire|inscription-preview|macos-standard",
+        "Sunspire|large-text|ipad-portrait",
+        "Sunspire|large-text|iphone-portrait",
+        "Sunspire|large-text|macos-resized",
+        "Sunspire|large-text|macos-standard",
+        "Sunspire|received-cipher|ipad-portrait",
+        "Sunspire|received-cipher|iphone-portrait",
+        "Sunspire|received-cipher|macos-resized",
+        "Sunspire|received-cipher|macos-standard",
+        "Sunspire|reduce-motion|ipad-portrait",
+        "Sunspire|reduce-motion|iphone-portrait",
+        "Sunspire|reduce-motion|macos-resized",
+        "Sunspire|reduce-motion|macos-standard",
+        "Sunspire|relic-picker|ipad-portrait",
+        "Sunspire|relic-picker|iphone-portrait",
+        "Sunspire|relic-picker|macos-resized",
+        "Sunspire|relic-picker|macos-standard",
+        "Sunspire|settings-defaults-preview|ipad-portrait",
+        "Sunspire|settings-defaults-preview|iphone-portrait",
+        "Sunspire|settings-defaults-preview|macos-resized",
+        "Sunspire|settings-defaults-preview|macos-standard",
+        "Sunspire|share-builder|ipad-portrait",
+        "Sunspire|share-builder|iphone-portrait",
+        "Sunspire|share-builder|macos-resized",
+        "Sunspire|share-builder|macos-standard",
+        "Sunspire|static-share|ipad-portrait",
+        "Sunspire|static-share|iphone-portrait",
+        "Sunspire|static-share|macos-resized",
+        "Sunspire|static-share|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/sunspire/relic-dawnfire-tablet-reference-e1e7c42e94.png",
+      "requiredOutputDimensions": [
+        525,
+        530
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.sunspire.relic-dawnfire-tablet-reference.e1e7c42e94.wrapper",
+      "v42FormerCandidateBindings": [
+        "renderer.static-share.codex.sunspire.relic.sunspire.dawnfire-tablet.seal.sunspire.sunleaf-crest.standard",
+        "share-builder.preview.codex.sunspire",
+        "theme.artifact-picker.relic.sunspire.dawnfire-tablet",
+        "theme.artifact-preview.relic.sunspire.dawnfire-tablet",
+        "theme.received.artifact-preview.relic.sunspire.dawnfire-tablet"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element",
+        "renderer-output"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.sunspire.relic-solvine-plaque-reference.20aa5f2ac8",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/relic-solvine-plaque-reference.png",
+      "referenceSHA256": "20aa5f2ac850b2175974c7cf5514c2dce7ed0736dd63868dda85165ca08934cb",
+      "referenceByteCount": 154034,
+      "referenceDimensions": [
+        295,
+        270
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.sunspire.relic-picker"
+      ],
+      "entryIDs": [
+        "Sunspire|relic-picker|ipad-portrait",
+        "Sunspire|relic-picker|iphone-portrait",
+        "Sunspire|relic-picker|macos-resized",
+        "Sunspire|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/sunspire/relic-solvine-plaque-reference-20aa5f2ac8.png",
+      "requiredOutputDimensions": [
+        295,
+        270
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.sunspire.relic-solvine-plaque-reference.20aa5f2ac8.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.sunspire.solvine-plaque"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.sunspire.seal-golden-lark-reference.2f9cade52e",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/seal-golden-lark-reference.png",
+      "referenceSHA256": "2f9cade52e1b9d7292056f5052077f7c08be81c24fed39ad708ff861dbd10a4f",
+      "referenceByteCount": 225731,
+      "referenceDimensions": [
+        280,
+        400
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "seal-specimen-card",
+      "recipeNotes": "Render the approved Seal using production resource resolution and the authority card/panel treatment. Preserve relief, rim, shadow, and material detail.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.sunspire.seal-picker"
+      ],
+      "entryIDs": [
+        "Sunspire|seal-picker|ipad-portrait",
+        "Sunspire|seal-picker|iphone-portrait",
+        "Sunspire|seal-picker|macos-resized",
+        "Sunspire|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/sunspire/seal-golden-lark-reference-2f9cade52e.png",
+      "requiredOutputDimensions": [
+        280,
+        400
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.sunspire.seal-golden-lark-reference.2f9cade52e.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.sunspire.golden-lark"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.sunspire.seal-sunleaf-reference.0c22590da2",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Sunspire/seal-sunleaf-reference.png",
+      "referenceSHA256": "0c22590da2e087abd69649e3599f75812d5e3dd2297b94d03376c9006e75f094",
+      "referenceByteCount": 226398,
+      "referenceDimensions": [
+        275,
+        410
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "seal-specimen-card",
+      "recipeNotes": "Render the approved Seal using production resource resolution and the authority card/panel treatment. Preserve relief, rim, shadow, and material detail.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.sunspire.seal-picker"
+      ],
+      "entryIDs": [
+        "Sunspire|seal-picker|ipad-portrait",
+        "Sunspire|seal-picker|iphone-portrait",
+        "Sunspire|seal-picker|macos-resized",
+        "Sunspire|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/sunspire/seal-sunleaf-reference-0c22590da2.png",
+      "requiredOutputDimensions": [
+        275,
+        410
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.sunspire.seal-sunleaf-reference.0c22590da2.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.sunspire.sunleaf-crest"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.wildwood.relic-elderbark-stele-reference.7882cb87d6",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/relic-elderbark-stele-reference.png",
+      "referenceSHA256": "7882cb87d6e80841285abfe962cf06075b64922e65ca94310709ba3006e67b8a",
+      "referenceByteCount": 199145,
+      "referenceDimensions": [
+        295,
+        365
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.wildwood.relic-picker"
+      ],
+      "entryIDs": [
+        "Wildwood|relic-picker|ipad-portrait",
+        "Wildwood|relic-picker|iphone-portrait",
+        "Wildwood|relic-picker|macos-resized",
+        "Wildwood|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/wildwood/relic-elderbark-stele-reference-7882cb87d6.png",
+      "requiredOutputDimensions": [
+        295,
+        365
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.wildwood.relic-elderbark-stele-reference.7882cb87d6.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.wildwood.elderbark-stele"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.wildwood.relic-mossbound-plaque-reference.4d6ef1a7f8",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/relic-mossbound-plaque-reference.png",
+      "referenceSHA256": "4d6ef1a7f8e7b8c8cf5e99c223f3e9aaac85f14e4c76f9501440d7dffc1c58d2",
+      "referenceByteCount": 169939,
+      "referenceDimensions": [
+        295,
+        270
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "relic-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.wildwood.relic-picker"
+      ],
+      "entryIDs": [
+        "Wildwood|relic-picker|ipad-portrait",
+        "Wildwood|relic-picker|iphone-portrait",
+        "Wildwood|relic-picker|macos-resized",
+        "Wildwood|relic-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/wildwood/relic-mossbound-plaque-reference-4d6ef1a7f8.png",
+      "requiredOutputDimensions": [
+        295,
+        270
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.wildwood.relic-mossbound-plaque-reference.4d6ef1a7f8.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.relic.wildwood.mossbound-plaque"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.wildwood.relic-rootsong-tablet-reference.366ca15971",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/relic-rootsong-tablet-reference.png",
+      "referenceSHA256": "366ca15971f02813323e8d5484230e48f422c50bec13c1deff2f4218eba86838",
+      "referenceByteCount": 579329,
+      "referenceDimensions": [
+        530,
+        525
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "relic-specimen-card",
+      "recipeNotes": "Render the approved Relic using production resource resolution, production Script layout where present, exact card/panel background, and the authority metadata treatment. Do not reuse an inscription-preview candidate.",
+      "surfaces": [
+        "compose-long",
+        "compose-short",
+        "high-contrast",
+        "inscription-preview",
+        "large-text",
+        "received-cipher",
+        "reduce-motion",
+        "relic-picker",
+        "settings-defaults-preview",
+        "share-builder",
+        "static-share"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.wildwood.compose-long",
+        "seed.wildwood.compose-short",
+        "seed.wildwood.high-contrast",
+        "seed.wildwood.inscription-preview",
+        "seed.wildwood.large-text",
+        "seed.wildwood.received-cipher",
+        "seed.wildwood.reduce-motion",
+        "seed.wildwood.relic-picker",
+        "seed.wildwood.settings-defaults-preview",
+        "seed.wildwood.share-builder",
+        "seed.wildwood.static-share"
+      ],
+      "entryIDs": [
+        "Wildwood|compose-long|ipad-portrait",
+        "Wildwood|compose-long|iphone-portrait",
+        "Wildwood|compose-long|macos-resized",
+        "Wildwood|compose-long|macos-standard",
+        "Wildwood|compose-short|ipad-portrait",
+        "Wildwood|compose-short|iphone-portrait",
+        "Wildwood|compose-short|macos-resized",
+        "Wildwood|compose-short|macos-standard",
+        "Wildwood|high-contrast|ipad-portrait",
+        "Wildwood|high-contrast|iphone-portrait",
+        "Wildwood|high-contrast|macos-resized",
+        "Wildwood|high-contrast|macos-standard",
+        "Wildwood|inscription-preview|ipad-portrait",
+        "Wildwood|inscription-preview|iphone-portrait",
+        "Wildwood|inscription-preview|macos-resized",
+        "Wildwood|inscription-preview|macos-standard",
+        "Wildwood|large-text|ipad-portrait",
+        "Wildwood|large-text|iphone-portrait",
+        "Wildwood|large-text|macos-resized",
+        "Wildwood|large-text|macos-standard",
+        "Wildwood|received-cipher|ipad-portrait",
+        "Wildwood|received-cipher|iphone-portrait",
+        "Wildwood|received-cipher|macos-resized",
+        "Wildwood|received-cipher|macos-standard",
+        "Wildwood|reduce-motion|ipad-portrait",
+        "Wildwood|reduce-motion|iphone-portrait",
+        "Wildwood|reduce-motion|macos-resized",
+        "Wildwood|reduce-motion|macos-standard",
+        "Wildwood|relic-picker|ipad-portrait",
+        "Wildwood|relic-picker|iphone-portrait",
+        "Wildwood|relic-picker|macos-resized",
+        "Wildwood|relic-picker|macos-standard",
+        "Wildwood|settings-defaults-preview|ipad-portrait",
+        "Wildwood|settings-defaults-preview|iphone-portrait",
+        "Wildwood|settings-defaults-preview|macos-resized",
+        "Wildwood|settings-defaults-preview|macos-standard",
+        "Wildwood|share-builder|ipad-portrait",
+        "Wildwood|share-builder|iphone-portrait",
+        "Wildwood|share-builder|macos-resized",
+        "Wildwood|share-builder|macos-standard",
+        "Wildwood|static-share|ipad-portrait",
+        "Wildwood|static-share|iphone-portrait",
+        "Wildwood|static-share|macos-resized",
+        "Wildwood|static-share|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/wildwood/relic-rootsong-tablet-reference-366ca15971.png",
+      "requiredOutputDimensions": [
+        530,
+        525
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.wildwood.relic-rootsong-tablet-reference.366ca15971.wrapper",
+      "v42FormerCandidateBindings": [
+        "renderer.static-share.codex.wildwood.relic.wildwood.rootsong-tablet.seal.wildwood.rooted-tree.standard",
+        "share-builder.preview.codex.wildwood",
+        "theme.artifact-picker.relic.wildwood.rootsong-tablet",
+        "theme.artifact-preview.relic.wildwood.rootsong-tablet",
+        "theme.received.artifact-preview.relic.wildwood.rootsong-tablet"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element",
+        "renderer-output"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.wildwood.seal-lantern-moth-reference.2a9c37ff18",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/seal-lantern-moth-reference.png",
+      "referenceSHA256": "2a9c37ff18fe521868a48754985eb7e9960ae4ce5f1830d93a7b72f5fa3da8dd",
+      "referenceByteCount": 284188,
+      "referenceDimensions": [
+        350,
+        455
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "seal-specimen-card",
+      "recipeNotes": "Render the approved Seal using production resource resolution and the authority card/panel treatment. Preserve relief, rim, shadow, and material detail.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.wildwood.seal-picker"
+      ],
+      "entryIDs": [
+        "Wildwood|seal-picker|ipad-portrait",
+        "Wildwood|seal-picker|iphone-portrait",
+        "Wildwood|seal-picker|macos-resized",
+        "Wildwood|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/wildwood/seal-lantern-moth-reference-2a9c37ff18.png",
+      "requiredOutputDimensions": [
+        350,
+        455
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.wildwood.seal-lantern-moth-reference.2a9c37ff18.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.wildwood.lantern-moth"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    },
+    {
+      "id": "canonical.wildwood.seal-rooted-tree-reference.b7f3040eb4",
+      "referenceAsset": "04-ASSETS/02-REFERENCE-SLICES/Wildwood/seal-rooted-tree-reference.png",
+      "referenceSHA256": "b7f3040eb49ce3e84e99eeb0d28d5f821587c7dbfe864b940a519abf3207de82",
+      "referenceByteCount": 278146,
+      "referenceDimensions": [
+        350,
+        420
+      ],
+      "evaluationKind": "visual-metric",
+      "thresholdProfile": "canonical-component-v1",
+      "renderMode": "canonical-production-component",
+      "recipeClass": "seal-specimen-card",
+      "recipeNotes": "Render the approved Seal using production resource resolution and the authority card/panel treatment. Preserve relief, rim, shadow, and material detail.",
+      "surfaces": [
+        "seal-picker"
+      ],
+      "destinationsUsingResult": [
+        "ipad-portrait",
+        "iphone-portrait",
+        "macos-resized",
+        "macos-standard"
+      ],
+      "seedIDs": [
+        "seed.wildwood.seal-picker"
+      ],
+      "entryIDs": [
+        "Wildwood|seal-picker|ipad-portrait",
+        "Wildwood|seal-picker|iphone-portrait",
+        "Wildwood|seal-picker|macos-resized",
+        "Wildwood|seal-picker|macos-standard"
+      ],
+      "outputPath": "docs/verification/theme-fidelity-v4-3/canonical/wildwood/seal-rooted-tree-reference-b7f3040eb4.png",
+      "requiredOutputDimensions": [
+        350,
+        420
+      ],
+      "comparisonMask": null,
+      "host": {
+        "locale": "en-US",
+        "calendar": "gregorian",
+        "timeZone": "UTC",
+        "colorScheme": "dark",
+        "dynamicType": "large",
+        "displayScale": 1.0,
+        "animationsEnabled": false,
+        "safeAreaPolicy": "production-safe-area",
+        "backgroundPolicy": "production-theme-background-or-authority-panel",
+        "paddingPolicy": "recipe-defined-production-padding"
+      },
+      "implementationConstraints": [
+        "Instantiate production views and production composition policy; do not duplicate production drawing in the test target.",
+        "Resolve production resources through the runtime-owned resource path.",
+        "Do not read, bundle, decode, or draw the authority reference asset at render time.",
+        "Do not resize, crop, rotate, letterbox, or pad the candidate after capture.",
+        "If the production binding is missing, add the exact provider-neutral binding and continue."
+      ],
+      "requiredCanonicalWrapperID": "canonical.wildwood.seal-rooted-tree-reference.b7f3040eb4.wrapper",
+      "v42FormerCandidateBindings": [
+        "theme.artifact-picker.seal.wildwood.rooted-tree"
+      ],
+      "v42FormerBindingKinds": [
+        "accessibility-element"
+      ],
+      "productionSourceRequirements": [
+        "Use the real production Theme descriptor and runtime-resolved resource payloads.",
+        "Use the real production view/component or shared composition policy associated with the reference recipe.",
+        "The canonical wrapper may set only fixed host geometry, locale, accessibility environment, and the package-declared state seed.",
+        "The canonical wrapper may not draw substitute ornament, bake reference pixels, or use a parallel renderer."
+      ]
+    }
+  ],
+  "reuseRule": "A candidate output may be reused by multiple mapping instances only when every instance has the same reference SHA-256 and dimensions.",
+  "requiresFurtherOwnerInput": false
+}

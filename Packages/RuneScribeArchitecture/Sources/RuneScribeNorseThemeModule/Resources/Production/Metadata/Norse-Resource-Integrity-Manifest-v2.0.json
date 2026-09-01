@@ -6,7 +6,7 @@
   "formatPolicy": {
     "colorSpace": "sRGB",
     "raster": "lossless PNG",
-    "vectorContract": "lossless raster PDF wrapper where a faithful vector source is unavailable",
+    "vectorContract": "raster-first Seals omit vector resources; Frame and Crest retain their declared PDF resources",
     "metadata": "nonessential authoring metadata stripped"
   },
   "sourceOnlyExclusions": [
@@ -15,8 +15,8 @@
     "docs/verification/theme-fidelity-v4/generated"
   ],
   "budgetSummary": {
-    "uniquePhysicalBytes": 89592539,
-    "staticImageBytes": 88173047,
+    "uniquePhysicalBytes": 86409000,
+    "staticImageBytes": 84989635,
     "fontBytes": 55800,
     "animationBytes": 3279,
     "soundBytes": 1334576,
@@ -28,8 +28,8 @@
       "path": "Production/Localization/norse-accessibility.en.json",
       "semanticRole": "accessibility-localization",
       "mediaType": "application/json",
-      "byteLength": 2599,
-      "sha256": "45a305302f353fa4382692d835dd7bab98cf12730655badc2fabc3e274b0981a",
+      "byteLength": 2604,
+      "sha256": "8b2947000091e17b7295da24d5ef0be19787f5903844a480d4c7b933a53e62c8",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true
     },
@@ -71,7 +71,7 @@
       "semanticRole": "background.reduce-motion",
       "mediaType": "image/png",
       "byteLength": 6727206,
-      "sha256": "e3e6684f3c24d3eccbeafbf47aec443a5bfe5b049277f7b2e6539451e1d83110",
+      "sha256": "21d6e66a585d698c5d20d17357417aaa574333b2d626645df10e9c940713a94d",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
@@ -87,7 +87,7 @@
       "semanticRole": "background.static-base",
       "mediaType": "image/png",
       "byteLength": 6727206,
-      "sha256": "e3e6684f3c24d3eccbeafbf47aec443a5bfe5b049277f7b2e6539451e1d83110",
+      "sha256": "21d6e66a585d698c5d20d17357417aaa574333b2d626645df10e9c940713a94d",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
@@ -103,7 +103,7 @@
       "semanticRole": "vault.encountered",
       "mediaType": "image/png",
       "byteLength": 1467808,
-      "sha256": "907f12884fc0474a9b6d165838b91516c895cd539e1f49af29e942152f25de50",
+      "sha256": "fca22a971c525b772056ce98288525f8e52965e9ea534b95f018c31420780b50",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
@@ -310,8 +310,8 @@
       "path": "Production/Localization/norse-content.en.json",
       "semanticRole": "localization.strings",
       "mediaType": "application/json",
-      "byteLength": 7731,
-      "sha256": "22cc8513a17af26cfd65efaf3ba31bc16eb7d1c755665f547768814e3a8d989c",
+      "byteLength": 7599,
+      "sha256": "e520bfb9e31ec2ca9966b3e73261c9abc123d7e7c776925f74c4b64db15a95b1",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true
     },
@@ -321,7 +321,7 @@
       "semanticRole": "semantic-palette",
       "mediaType": "application/json",
       "byteLength": 2556,
-      "sha256": "33403c431735ae92c81816667e3c4040f16da3ff1b0846533a539d024a48652c",
+      "sha256": "7d93ef368c1b93a631e887fe0b3cba1b05917c1f556fe85022f8a178f7496a66",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true
     },
@@ -536,13 +536,13 @@
       "path": "Production/ShareFallbacks/share-fallback.norse.runestone-tablet.png",
       "semanticRole": "relic.static-share-fallback",
       "mediaType": "image/png",
-      "byteLength": 2960942,
-      "sha256": "86fe4a0412589af58c98d6c7b1d206163aa40d398b77d8038d61507070c9ed02",
+      "byteLength": 2839504,
+      "sha256": "0f13268da38ea4edaff2ce626222f3fdc9bc89d0b01d9c61eac76fe425ddb902",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
         "width": 1600,
-        "height": 1200
+        "height": 1600
       },
       "colorMode": "RGBA",
       "hasAlpha": true
@@ -552,8 +552,8 @@
       "path": "Production/Relics/relic.norse.runestone-tablet.thumbnail.png",
       "semanticRole": "relic.thumbnail",
       "mediaType": "image/png",
-      "byteLength": 325877,
-      "sha256": "0c8e46139a12cb97a32a8159282fb3977f4818aedaec9314cac8b774fc01438a",
+      "byteLength": 331634,
+      "sha256": "f8dfac0dff37334737e3019e39f88924a9a85f636f4a57f82b3bb5007a905d31",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
@@ -696,17 +696,33 @@
       "hasAlpha": false
     },
     {
-      "resourceHandle": "resource.seal.norse.berserk.monochrome-fallback",
-      "path": "Production/Seals/seal.norse.berserk.monochrome.png",
-      "semanticRole": "seal.monochrome-fallback",
+      "resourceHandle": "resource.seal.norse.berserk.color-master",
+      "path": "Production/Seals/seal.norse.berserk.png",
+      "semanticRole": "seal.color-master",
       "mediaType": "image/png",
-      "byteLength": 615248,
-      "sha256": "5fb57230f481cd4a745931ffac4fc1214d013c1337e1008fa294afe39b5ed083",
+      "byteLength": 763686,
+      "sha256": "9594aeec80db4e554461374690365bf0d932b251873aacf055072bb18992c996",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
         "width": 1024,
-        "height": 1024
+        "height": 981
+      },
+      "colorMode": "RGBA",
+      "hasAlpha": true
+    },
+    {
+      "resourceHandle": "resource.seal.norse.berserk.monochrome-fallback",
+      "path": "Production/Seals/seal.norse.berserk.monochrome.png",
+      "semanticRole": "seal.monochrome-fallback",
+      "mediaType": "image/png",
+      "byteLength": 645400,
+      "sha256": "3b67068ae6be712d0d516e6f1fdca2cb7e4d9d913de80bd3c0bd352f96320ec0",
+      "requiredForActiveContent": true,
+      "activeInCurrentCatalog": true,
+      "dimensions": {
+        "width": 1024,
+        "height": 981
       },
       "colorMode": "RGBA",
       "hasAlpha": true
@@ -716,8 +732,8 @@
       "path": "Production/Seals/seal.norse.berserk.thumbnail.png",
       "semanticRole": "seal.thumbnail",
       "mediaType": "image/png",
-      "byteLength": 252810,
-      "sha256": "e0f99b2608c7bb6c28d2c72c0ab66f367c39d83774bc612502a283666aed5e72",
+      "byteLength": 259117,
+      "sha256": "70733bcc64d087cfcbc5cfb58b0bca2601b10bba22a4f69c67b9bd817a538b47",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
@@ -728,26 +744,32 @@
       "hasAlpha": true
     },
     {
-      "resourceHandle": "resource.seal.norse.berserk.vector-master",
-      "path": "Production/Seals/seal.norse.berserk.vector-master.pdf",
-      "semanticRole": "seal.vector-master",
-      "mediaType": "application/pdf",
-      "byteLength": 1261278,
-      "sha256": "b25e1b3238fac4f70de17a5b2d4e2dcdbc0a4332a2bd9572e043ffb0d2463b22",
+      "resourceHandle": "resource.seal.norse.mjolnir.color-master",
+      "path": "Production/Seals/seal.norse.mjolnir.png",
+      "semanticRole": "seal.color-master",
+      "mediaType": "image/png",
+      "byteLength": 849370,
+      "sha256": "db76bb110f59353341e698b55a7c4884c9ead1ad091751f7e89b7970356324de",
       "requiredForActiveContent": true,
-      "activeInCurrentCatalog": true
+      "activeInCurrentCatalog": true,
+      "dimensions": {
+        "width": 1003,
+        "height": 1024
+      },
+      "colorMode": "RGBA",
+      "hasAlpha": true
     },
     {
       "resourceHandle": "resource.seal.norse.mjolnir.monochrome-fallback",
       "path": "Production/Seals/seal.norse.mjolnir.monochrome.png",
       "semanticRole": "seal.monochrome-fallback",
       "mediaType": "image/png",
-      "byteLength": 736867,
-      "sha256": "4fc3dff392954cadf08b94a326bd51e3757288dc885b56a0fe20270d90bb6aa2",
+      "byteLength": 705242,
+      "sha256": "7d3644fafcc95e635ffaa8881a7734da0a05f17affb2604c4a26314d74f4551e",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
-        "width": 1024,
+        "width": 1003,
         "height": 1024
       },
       "colorMode": "RGBA",
@@ -758,8 +780,8 @@
       "path": "Production/Seals/seal.norse.mjolnir.thumbnail.png",
       "semanticRole": "seal.thumbnail",
       "mediaType": "image/png",
-      "byteLength": 276287,
-      "sha256": "d63e544734eb3d79288db86caffe3980585d37c5e0f6a4dd775c56550b3e4490",
+      "byteLength": 295111,
+      "sha256": "bbf9273e15da472ec04fdc5514bd4faccba9322afcc9df8452ecee7e9a07d419",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
@@ -770,27 +792,33 @@
       "hasAlpha": true
     },
     {
-      "resourceHandle": "resource.seal.norse.mjolnir.vector-master",
-      "path": "Production/Seals/seal.norse.mjolnir.vector-master.pdf",
-      "semanticRole": "seal.vector-master",
-      "mediaType": "application/pdf",
-      "byteLength": 1363466,
-      "sha256": "3936b37e8cf7d5ecbb659193b4a8492b4c196b05bbf5b23e37b369aefc5efb65",
+      "resourceHandle": "resource.seal.norse.ravenshield.color-master",
+      "path": "Production/Seals/seal.norse.ravenshield.png",
+      "semanticRole": "seal.color-master",
+      "mediaType": "image/png",
+      "byteLength": 905500,
+      "sha256": "59dd542f4e79854e3d979ae002a04f422844db385812ae52e4ca28d66d9e5292",
       "requiredForActiveContent": true,
-      "activeInCurrentCatalog": true
+      "activeInCurrentCatalog": true,
+      "dimensions": {
+        "width": 1024,
+        "height": 1015
+      },
+      "colorMode": "RGBA",
+      "hasAlpha": true
     },
     {
       "resourceHandle": "resource.seal.norse.ravenshield.monochrome-fallback",
       "path": "Production/Seals/seal.norse.ravenshield.monochrome.png",
       "semanticRole": "seal.monochrome-fallback",
       "mediaType": "image/png",
-      "byteLength": 696677,
-      "sha256": "f35057515cdf8f5eea53f2874e2599d86ebe991b4a37ef9acd1ea2bd48b2d82a",
+      "byteLength": 730467,
+      "sha256": "3585d4963ffd43b5c27f2e9c8ae809ccf646a13306e5c6b2b3cc32a1b66babd7",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
         "width": 1024,
-        "height": 1024
+        "height": 1015
       },
       "colorMode": "RGBA",
       "hasAlpha": true
@@ -800,8 +828,8 @@
       "path": "Production/Seals/seal.norse.ravenshield.thumbnail.png",
       "semanticRole": "seal.thumbnail",
       "mediaType": "image/png",
-      "byteLength": 300788,
-      "sha256": "ed148a3323576acea5a2a38151aa9b4a15938c246d04ac2f671e49aac9076098",
+      "byteLength": 308236,
+      "sha256": "09322298c8bd5b3f68d48e924767467dfccee175e0d44e87110977cd6f2a0900",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
@@ -812,26 +840,32 @@
       "hasAlpha": true
     },
     {
-      "resourceHandle": "resource.seal.norse.ravenshield.vector-master",
-      "path": "Production/Seals/seal.norse.ravenshield.vector-master.pdf",
-      "semanticRole": "seal.vector-master",
-      "mediaType": "application/pdf",
-      "byteLength": 1412426,
-      "sha256": "a7fc80977e3119ab9f03f7e9ed381ca4c658008f18516f3826a3ff01b2691db5",
+      "resourceHandle": "resource.seal.norse.valknut.color-master",
+      "path": "Production/Seals/seal.norse.valknut.png",
+      "semanticRole": "seal.color-master",
+      "mediaType": "image/png",
+      "byteLength": 940081,
+      "sha256": "5e6c584ed9825316f964e87277fa02f9e493ca6201e17a5278952a4f5c4f7e30",
       "requiredForActiveContent": true,
-      "activeInCurrentCatalog": true
+      "activeInCurrentCatalog": true,
+      "dimensions": {
+        "width": 1015,
+        "height": 1024
+      },
+      "colorMode": "RGBA",
+      "hasAlpha": true
     },
     {
       "resourceHandle": "resource.seal.norse.valknut.monochrome-fallback",
       "path": "Production/Seals/seal.norse.valknut.monochrome.png",
       "semanticRole": "seal.monochrome-fallback",
       "mediaType": "image/png",
-      "byteLength": 728781,
-      "sha256": "0e29c109e3e2c336feb9144525c798641017d4834d0585650a459ecd895b8609",
+      "byteLength": 762653,
+      "sha256": "7fb26639ad65986fcb52e4b31bc4280e27890e4345e4de74dc6b5957482a2027",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
-        "width": 1024,
+        "width": 1015,
         "height": 1024
       },
       "colorMode": "RGBA",
@@ -842,8 +876,8 @@
       "path": "Production/Seals/seal.norse.valknut.thumbnail.png",
       "semanticRole": "seal.thumbnail",
       "mediaType": "image/png",
-      "byteLength": 316346,
-      "sha256": "ef000b901cb8b1c030c0130771a371b8212377925ad63aa93f1a9ece34dcd270",
+      "byteLength": 322621,
+      "sha256": "35c5f281b6ad405b6a3cb5084edc864b05546deab10ca93ca5d45767334c8431",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
@@ -854,26 +888,32 @@
       "hasAlpha": true
     },
     {
-      "resourceHandle": "resource.seal.norse.valknut.vector-master",
-      "path": "Production/Seals/seal.norse.valknut.vector-master.pdf",
-      "semanticRole": "seal.vector-master",
-      "mediaType": "application/pdf",
-      "byteLength": 1548479,
-      "sha256": "b4aaf0fbbf7be11638dcfe4ff0a2f144f00d45d01dd045786fbfa684b5be184b",
+      "resourceHandle": "resource.seal.norse.wolkin.color-master",
+      "path": "Production/Seals/seal.norse.wolkin.png",
+      "semanticRole": "seal.color-master",
+      "mediaType": "image/png",
+      "byteLength": 824491,
+      "sha256": "61acc4bf6bb77396f3dde400f0b55518e946454f0f1df3717ecc435530e6d87e",
       "requiredForActiveContent": true,
-      "activeInCurrentCatalog": true
+      "activeInCurrentCatalog": true,
+      "dimensions": {
+        "width": 1013,
+        "height": 1024
+      },
+      "colorMode": "RGBA",
+      "hasAlpha": true
     },
     {
       "resourceHandle": "resource.seal.norse.wolkin.monochrome-fallback",
       "path": "Production/Seals/seal.norse.wolkin.monochrome.png",
       "semanticRole": "seal.monochrome-fallback",
       "mediaType": "image/png",
-      "byteLength": 663971,
-      "sha256": "7cc7c8b566f61324bb7abda0feecce296fd1f6bfde9ff3dd33cdee77593ee90e",
+      "byteLength": 693545,
+      "sha256": "bbb12a59b76b91ab2aaaa8eca3c53a88a2fe0a06beb5c4b9867a7f0784e9fc16",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
-        "width": 1024,
+        "width": 1013,
         "height": 1024
       },
       "colorMode": "RGBA",
@@ -884,8 +924,8 @@
       "path": "Production/Seals/seal.norse.wolkin.thumbnail.png",
       "semanticRole": "seal.thumbnail",
       "mediaType": "image/png",
-      "byteLength": 277177,
-      "sha256": "83865f5861beb360f0cb8c4d88e8774cfd6eb902234e4b13decf63de92be9acf",
+      "byteLength": 283338,
+      "sha256": "993359c98592c586a47cf06a2129c01c6dd92a474c64b481f34dbd6a83e8d885",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
@@ -896,27 +936,33 @@
       "hasAlpha": true
     },
     {
-      "resourceHandle": "resource.seal.norse.wolkin.vector-master",
-      "path": "Production/Seals/seal.norse.wolkin.vector-master.pdf",
-      "semanticRole": "seal.vector-master",
-      "mediaType": "application/pdf",
-      "byteLength": 1397335,
-      "sha256": "d7658b59fa392db89a88a0b029053916a051c04ca45e39c8897b907088f62780",
+      "resourceHandle": "resource.seal.norse.yggdrasil.color-master",
+      "path": "Production/Seals/seal.norse.yggdrasil.png",
+      "semanticRole": "seal.color-master",
+      "mediaType": "image/png",
+      "byteLength": 833872,
+      "sha256": "2f8593cd6b23d18f92666a2abd7c707ec045116efc99fafbb5d8dff0205e094b",
       "requiredForActiveContent": true,
-      "activeInCurrentCatalog": true
+      "activeInCurrentCatalog": true,
+      "dimensions": {
+        "width": 1024,
+        "height": 991
+      },
+      "colorMode": "RGBA",
+      "hasAlpha": true
     },
     {
       "resourceHandle": "resource.seal.norse.yggdrasil.monochrome-fallback",
       "path": "Production/Seals/seal.norse.yggdrasil.monochrome.png",
       "semanticRole": "seal.monochrome-fallback",
       "mediaType": "image/png",
-      "byteLength": 660650,
-      "sha256": "9c2a96295fe0857ea7e98214f042accdebe8e18c2e93293c7ad02944ed7d466f",
+      "byteLength": 690512,
+      "sha256": "d296cea98b7283f67b9cb1b9e50547e16299dc8dcbf45872ed0701b746266907",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
         "width": 1024,
-        "height": 1024
+        "height": 991
       },
       "colorMode": "RGBA",
       "hasAlpha": true
@@ -926,8 +972,8 @@
       "path": "Production/Seals/seal.norse.yggdrasil.thumbnail.png",
       "semanticRole": "seal.thumbnail",
       "mediaType": "image/png",
-      "byteLength": 277970,
-      "sha256": "4edf20db47e214d6f86f80cd45353fa0b861f810e9918affba878669a40fd105",
+      "byteLength": 283830,
+      "sha256": "718f6a33bca1ab684e434e482808572a6b06d3fdb0a790212ed048423ad00226",
       "requiredForActiveContent": true,
       "activeInCurrentCatalog": true,
       "dimensions": {
@@ -936,16 +982,6 @@
       },
       "colorMode": "RGBA",
       "hasAlpha": true
-    },
-    {
-      "resourceHandle": "resource.seal.norse.yggdrasil.vector-master",
-      "path": "Production/Seals/seal.norse.yggdrasil.vector-master.pdf",
-      "semanticRole": "seal.vector-master",
-      "mediaType": "application/pdf",
-      "byteLength": 1378247,
-      "sha256": "831093e7e0a98bd7b081ddb52016be89354ee463d6d937e56830f679139ceea9",
-      "requiredForActiveContent": true,
-      "activeInCurrentCatalog": true
     },
     {
       "resourceHandle": "resource.sound.norse.unlock-codex",

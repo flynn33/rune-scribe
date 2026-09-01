@@ -45,6 +45,12 @@
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
+        "name": "moonleaf-background-macos-wide",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
         "name": "moonleaf-background-reduce-motion",
         "fileExtension": "png",
         "subdirectory": null,
@@ -93,6 +99,66 @@
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
+        "name": "moonleaf-card-border",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-corner-ornament",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-divider",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-primary-button",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-tab-selector",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-received-primary-medallion",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-received-primary-sender-avatar",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-received-share-codex-badge",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-received-share-medallion",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-received-share-sender-avatar",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
         "name": "moonleaf-ivybound-plaque-high-contrast",
         "fileExtension": "png",
         "subdirectory": null,
@@ -106,13 +172,13 @@
       },
       {
         "name": "moonleaf-ivybound-plaque-static-share-fallback",
-        "fileExtension": "heif",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
         "name": "moonleaf-ivybound-plaque-thumbnail",
-        "fileExtension": "heif",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
@@ -130,13 +196,13 @@
       },
       {
         "name": "moonleaf-tablet-static-share-fallback",
-        "fileExtension": "heif",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
         "name": "moonleaf-tablet-thumbnail",
-        "fileExtension": "heif",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
@@ -154,19 +220,25 @@
       },
       {
         "name": "moonleaf-whisperbark-stele-static-share-fallback",
-        "fileExtension": "heif",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
         "name": "moonleaf-whisperbark-stele-thumbnail",
-        "fileExtension": "heif",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
         "name": "moonleaf-script-primary",
         "fileExtension": "ttf",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-script-specimen-high-contrast",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
@@ -183,8 +255,14 @@
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
+        "name": "moonleaf-crescentleaf-color-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
         "name": "moonleaf-crescentleaf-monochrome-fallback",
-        "fileExtension": "pdf",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
@@ -201,8 +279,14 @@
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
+        "name": "moonleaf-echo-firefly-color-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
         "name": "moonleaf-echo-firefly-monochrome-fallback",
-        "fileExtension": "pdf",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
@@ -219,8 +303,14 @@
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
+        "name": "moonleaf-moonwell-color-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
         "name": "moonleaf-moonwell-monochrome-fallback",
-        "fileExtension": "pdf",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
@@ -237,8 +327,14 @@
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
+        "name": "moonleaf-night-owl-color-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
         "name": "moonleaf-night-owl-monochrome-fallback",
-        "fileExtension": "pdf",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
@@ -255,8 +351,14 @@
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
+        "name": "moonleaf-starflower-color-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
         "name": "moonleaf-starflower-monochrome-fallback",
-        "fileExtension": "pdf",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
@@ -273,8 +375,14 @@
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
       {
+        "name": "moonleaf-woodland-stag-color-master",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
         "name": "moonleaf-woodland-stag-monochrome-fallback",
-        "fileExtension": "pdf",
+        "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       },
@@ -313,20 +421,20 @@
         "fileExtension": "png",
         "subdirectory": null,
         "ownerModuleID": "com.runescribe.module.theme.moonleaf"
+      },
+      {
+        "name": "moonleaf-vault-unavailable",
+        "fileExtension": "png",
+        "subdirectory": null,
+        "ownerModuleID": "com.runescribe.module.theme.moonleaf"
       }
     ],
-    "requiredModuleRoles": [
-
-    ]
+    "requiredModuleRoles": []
   },
   "defaultRole": "runescribe.theme.moonleaf",
   "policyClass": "policy.theme-provider",
-  "consumedEndpoints": [
-
-  ],
-  "publishedEndpoints": [
-
-  ],
+  "consumedEndpoints": [],
+  "publishedEndpoints": [],
   "entitlementRequirement": {
     "kind": "earned",
     "identifier": "unlock.codex.moonleaf"

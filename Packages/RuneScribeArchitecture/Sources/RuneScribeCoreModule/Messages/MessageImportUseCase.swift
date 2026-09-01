@@ -15,6 +15,7 @@ enum MessageImportError: Error, Equatable, Sendable {
 enum MessageImportUseCase {
     static func ingest(
         payload: MessageSharePayload,
+        receivedAt: Date,
         fontBytes _: Data?,
         repository: CipherRepository,
         messageService: MessageService,
@@ -62,6 +63,7 @@ enum MessageImportUseCase {
         if !usesProgressionEvidence {
             return try await commitLegacyImport(
                 payload: payload,
+                receivedAt: receivedAt,
                 decoded: decoded,
                 initialLibrary: initialLibrary,
                 runtimeIO: runtimeIO,
@@ -72,6 +74,7 @@ enum MessageImportUseCase {
 
         return try await commitProgressionImport(
             payload: payload,
+            receivedAt: receivedAt,
             decoded: decoded,
             initialLibrary: initialLibrary,
             repository: repository,
@@ -86,6 +89,7 @@ enum MessageImportUseCase {
 
     private static func commitLegacyImport(
         payload: MessageSharePayload,
+        receivedAt: Date,
         decoded: (plaintext: String, cipher: Cipher),
         initialLibrary: CipherLibrary,
         runtimeIO: RuntimeIOClient,
@@ -97,6 +101,7 @@ enum MessageImportUseCase {
         return MessageImportMutation(
             message: try await receivedMessage(
                 payload: payload,
+                receivedAt: receivedAt,
                 decoded: decoded,
                 cipher: durableCipher,
                 runtimeIO: runtimeIO,
@@ -115,6 +120,7 @@ enum MessageImportUseCase {
 
     private static func commitProgressionImport(
         payload: MessageSharePayload,
+        receivedAt: Date,
         decoded: (plaintext: String, cipher: Cipher),
         initialLibrary: CipherLibrary,
         repository: CipherRepository,
@@ -210,6 +216,7 @@ enum MessageImportUseCase {
             return MessageImportMutation(
                 message: try await receivedMessage(
                     payload: payload,
+                    receivedAt: receivedAt,
                     decoded: decoded,
                     cipher: decoded.cipher,
                     runtimeIO: runtimeIO,
@@ -273,6 +280,7 @@ enum MessageImportUseCase {
         return MessageImportMutation(
             message: try await receivedMessage(
                 payload: payload,
+                receivedAt: receivedAt,
                 decoded: decoded,
                 cipher: committedCipher,
                 runtimeIO: runtimeIO,
@@ -290,6 +298,7 @@ enum MessageImportUseCase {
 
     private static func receivedMessage(
         payload: MessageSharePayload,
+        receivedAt: Date,
         decoded: (plaintext: String, cipher: Cipher),
         cipher: Cipher,
         runtimeIO: RuntimeIOClient,
@@ -312,6 +321,7 @@ enum MessageImportUseCase {
         }
         return try ReceivedMessageDTO(
             id: MessageID(rawValue: try await runtimeIO.nextUUID()),
+            receivedAt: receivedAt,
             plaintext: decoded.plaintext,
             senderName: senderIdentityStatus == .awaitingCipherConfirmation
                 ? payload.senderName

@@ -6,17 +6,71 @@ import SwiftUI
 /// Universal Link, or clipboard). It distinguishes a locally known cipher from
 /// an unverified first-delivery label before offering a reply.
 ///
-/// Presentation-agnostic: it dismisses itself and reports a reply request via
-/// `onReply`, so it can be hosted app-wide (RootView) without coupling to a
+/// Presentation-agnostic: it dismisses itself and reports navigation requests
+/// via callbacks, so it can be hosted app-wide (RootView) without coupling to a
 /// particular presenter — the same contract `ImportConfirmView` uses.
 struct ReceivedMessageView: View {
 
     @Environment(\.dismiss) private var dismiss
 
     let pending: PendingMessageViewState
-    var onReply: ((PendingMessageViewState) -> Void)? = nil
+    let presentationBinding: ReceivedCipherPresentationBinding?
+    var onOpenCodex: (() -> Void)?
+    var onReply: ((PendingMessageViewState) -> Void)?
+
+    init(
+        pending: PendingMessageViewState,
+        presentationBinding: ReceivedCipherPresentationBinding? = nil,
+        onOpenCodex: (() -> Void)? = nil,
+        onReply: ((PendingMessageViewState) -> Void)? = nil
+    ) {
+        self.pending = pending
+        self.presentationBinding = presentationBinding
+        self.onOpenCodex = onOpenCodex
+        self.onReply = onReply
+    }
 
     var body: some View {
+        Group {
+            if let presentationBinding {
+                themedPresentation(presentationBinding)
+            } else {
+                fallbackPresentation
+                    .themeCaptureViewportIdentifier(
+                        ThemeCaptureIdentifier.screenReceivedCipher
+                    )
+            }
+        }
+        .runeSheetFrame()
+        .runeSemanticPresentationSurface()
+        .preferredColorScheme(.dark)
+    }
+
+    private func themedPresentation(
+        _ binding: ReceivedCipherPresentationBinding
+    ) -> some View {
+        ReceivedCipherPresentationView(
+            state: binding.content.state,
+            pending: pending,
+            receivedAt: binding.receivedAt,
+            relativeDate: binding.relativeDate,
+            descriptor: binding.content.descriptor,
+            plan: binding.content.plan,
+            image: binding.requiredImage,
+            backAction: { dismiss() },
+            libraryAction: {
+                dismiss()
+                onOpenCodex?()
+            },
+            saveAction: { dismiss() },
+            replyAction: {
+                onReply?(pending)
+                dismiss()
+            }
+        )
+    }
+
+    private var fallbackPresentation: some View {
         VStack(spacing: 0) {
             RuneHeader(
                 slot: .receivedMessage,
@@ -101,10 +155,6 @@ struct ReceivedMessageView: View {
             }
             .padding(RuneMetrics.pad)
         }
-        .runeSheetFrame()
-        .runeSemanticPresentationSurface()
-        .preferredColorScheme(.dark)
-        .themeCaptureViewportIdentifier(ThemeCaptureIdentifier.screenReceivedCipher)
     }
 
     private var identityTitle: String {

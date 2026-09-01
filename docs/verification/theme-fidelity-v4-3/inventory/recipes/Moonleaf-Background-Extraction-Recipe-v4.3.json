@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "1.0",
+  "id": "prov.Production.Sources.moonleaf.moonleaf.background.recipe.json",
+  "theme": "Moonleaf",
+  "asset": "background.moonleaf.moonlit-canopy",
+  "generatedAtUTC": "2026-08-27T00:00:00Z",
+  "pipeline": "scripts/build-moonleaf-v43-assets.py",
+  "pipelineSHA256": "e2e8af0251722e1fd76e00fb67bf7164d10903e955fad39ab06eb882c5300fd3",
+  "renderer": "scripts/theme_v43_background_master.py",
+  "rendererSHA256": "f613b3a61ea5ec29ef455f96128ff98eab8911eafb02ee4f0daf34e4dad20b64",
+  "productionSourceMaster": {
+    "contentClass": "continuous-art-directed-environment",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "focalPoint": [
+      0.5,
+      0.5
+    ],
+    "path": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/moonleaf-environment-production-master-v4.3.png",
+    "runtimeBundled": false,
+    "sha256": "c159a92c2a65b70e2df6e2ce88ebe0c18230b0c88ab93ada381841c7b51d7373"
+  },
+  "visualAuthorityReference": {
+    "label": "style-board",
+    "path": "04-ASSETS/99-ORIGINAL-FULL-RES-SOURCES/approved-source-full-002-1122x1402.png",
+    "sha256": "2d1696abd8a7ddbfe81b89c2eb84933a516ba5a4bf8eaa2dae0edcbb3d3758ef",
+    "dimensions": [
+      1122,
+      1402
+    ]
+  },
+  "outputLayouts": {
+    "phonePortrait": {
+      "canvas": [
+        2048,
+        2732
+      ],
+      "cropBoxSourcePixels": [
+        483.297218,
+        0.0,
+        1188.702782,
+        941.0
+      ],
+      "focalPoint": [
+        0.5,
+        0.5
+      ],
+      "resampling": "bicubic",
+      "scale": 2.903294368,
+      "sourceCropAspectRatio": 0.749633968,
+      "transformation": "single continuous-master aspect-fill crop with one uniform scale"
+    },
+    "macOSWide": {
+      "canvas": [
+        3200,
+        1800
+      ],
+      "cropBoxSourcePixels": [
+        0.0,
+        0.25,
+        1672.0,
+        940.75
+      ],
+      "focalPoint": [
+        0.5,
+        0.5
+      ],
+      "resampling": "bilinear",
+      "scale": 1.913875598,
+      "sourceCropAspectRatio": 1.777777778,
+      "transformation": "single continuous-master aspect-fill crop with one uniform scale"
+    }
+  },
+  "variantAdjustments": {
+    "standard": {
+      "brightness": 1.0,
+      "color": 1.0,
+      "contrast": 1.0,
+      "sharpness": 1.0
+    },
+    "reduceMotion": {
+      "brightness": 0.96,
+      "color": 0.9,
+      "contrast": 0.96,
+      "sharpness": 1.0
+    },
+    "highContrast": {
+      "brightness": 0.92,
+      "color": 0.88,
+      "contrast": 1.3,
+      "sharpness": 1.14
+    }
+  },
+  "transformationSteps": [
+    "verify the repository-local continuous environment source master against its pinned SHA-256",
+    "compute a theme-focal aspect-fill crop in source coordinates for each output canvas",
+    "sample the single crop with one uniform source-to-output scale and no nonuniform stretch",
+    "prebuild deterministic standard, Reduce Motion, and High Contrast variants",
+    "encode lossless PNG outputs without tiling, seams, reference-screen compositing, or completed-image blur"
+  ],
+  "outputs": [
+    {
+      "path": "Production/background/moonleaf-background-high-contrast.png",
+      "bytes": 7315952,
+      "sha256": "46cbbc9845c0d3b229f586a3095a1533182873368f5be84af10d7624a7095108",
+      "resourceID": "resource.background.moonleaf.moonlit-canopy.output.background-high-contrast",
+      "role": "background.high-contrast",
+      "mediaType": "image/png",
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "rightsID": "prov.Production.Sources.moonleaf.moonleaf.background.recipe.json"
+    },
+    {
+      "path": "Production/background/moonleaf-background-macos-wide.png",
+      "bytes": 6815473,
+      "sha256": "f147e20151e2b8cce1a53514bd74df2a62f47bd7752054b973ca53af6ee72456",
+      "resourceID": "resource.background.moonleaf.moonlit-canopy.output.background-macos-wide-crop",
+      "role": "background.macos-wide-crop",
+      "mediaType": "image/png",
+      "dimensions": [
+        3200,
+        1800
+      ],
+      "hasAlpha": false,
+      "rightsID": "prov.Production.Sources.moonleaf.moonleaf.background.recipe.json"
+    },
+    {
+      "path": "Production/background/moonleaf-background-reduce-motion.png",
+      "bytes": 6367685,
+      "sha256": "66b9d10c03a896251e0b83660f0fca73a7c7e97a7db39ed208c745f4b229cf26",
+      "resourceID": "resource.background.moonleaf.moonlit-canopy.output.background-reduce-motion",
+      "role": "background.reduce-motion",
+      "mediaType": "image/png",
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "rightsID": "prov.Production.Sources.moonleaf.moonleaf.background.recipe.json"
+    },
+    {
+      "path": "Production/background/moonleaf-background-static.png",
+      "bytes": 6486722,
+      "sha256": "40fb5075f60a3dd6fecb4c2dd3e8d0b9c5b8e9a324eac3c83f1b312883a05f9d",
+      "resourceID": "resource.background.moonleaf.moonlit-canopy.output.background-static-base",
+      "role": "background.static-base",
+      "mediaType": "image/png",
+      "dimensions": [
+        2048,
+        2732
+      ],
+      "hasAlpha": false,
+      "rightsID": "prov.Production.Sources.moonleaf.moonleaf.background.recipe.json"
+    }
+  ],
+  "rightsOwner": "Raven Forge Software",
+  "licenseNotice": "Project-local proprietary production master; owner visual review remains pending",
+  "ownerReview": "PENDING"
+}

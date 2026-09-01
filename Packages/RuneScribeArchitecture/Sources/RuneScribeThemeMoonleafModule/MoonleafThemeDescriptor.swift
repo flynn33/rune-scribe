@@ -33,7 +33,7 @@ public enum MoonleafThemeDescriptorFactory {
         "major": 1,
         "minor": 0
       },
-      "contentVersion": 1,
+      "contentVersion": 2,
       "minimumUIContractVersion": {
         "major": 1,
         "minor": 0
@@ -330,10 +330,12 @@ public enum MoonleafThemeDescriptorFactory {
             "fontVersion": 1,
             "fontPostScriptName": "RavenForgeMoonleafScript-Regular",
             "staticFallbackResourceID": "resource.script.moonleaf.output.script-static-fallback",
+            "standardSpecimenResourceID": "resource.script.moonleaf.output.script-specimen-standard",
+            "highContrastSpecimenResourceID": "resource.script.moonleaf.output.script-specimen-high-contrast",
             "fallbackScriptID": "script.base-runes",
             "recommendedPointSizes": {
               "minimum": 12.0,
-              "maximum": 64.0
+              "maximum": 96.0
             },
             "accessibility": {
               "label": {
@@ -361,6 +363,20 @@ public enum MoonleafThemeDescriptorFactory {
                 "key": "relic.moonleaf.tablet.description",
                 "fallbackValue": "A broad, serene inscription surface designed for the widest range of message lengths."
               },
+              "facets": [
+                {
+                  "key": "relic.moonleaf.tablet.facet.moonlit",
+                  "fallbackValue": "Moonlit"
+                },
+                {
+                  "key": "relic.moonleaf.tablet.facet.verdant",
+                  "fallbackValue": "Verdant"
+                },
+                {
+                  "key": "relic.moonleaf.tablet.facet.eternal",
+                  "fallbackValue": "Eternal"
+                }
+              ],
               "rarity": "forged",
               "availability": "included",
               "accessibility": {
@@ -423,6 +439,8 @@ public enum MoonleafThemeDescriptorFactory {
                   }
                 ],
                 "maximumGlyphLines": 5,
+                "catalogSpecimenRows": 2,
+                "catalogSpecimenColumns": 9,
                 "minimumGlyphScale": 0.72,
                 "overflowBehavior": "standardAlternate",
                 "attributionRegion": {
@@ -668,6 +686,7 @@ public enum MoonleafThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.moonleaf.crescentleaf.svg"
             },
             "vectorResourceID": "resource.seal.moonleaf.crescentleaf.output.seal-vector-master",
+            "colorResourceID": "resource.seal.moonleaf.crescentleaf.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.moonleaf.crescentleaf.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.moonleaf.crescentleaf.output.seal-thumbnail",
             "allowedScale": {
@@ -708,6 +727,7 @@ public enum MoonleafThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.moonleaf.woodland.stag.svg"
             },
             "vectorResourceID": "resource.seal.moonleaf.woodland-stag.output.seal-vector-master",
+            "colorResourceID": "resource.seal.moonleaf.woodland-stag.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.moonleaf.woodland-stag.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.moonleaf.woodland-stag.output.seal-thumbnail",
             "allowedScale": {
@@ -748,6 +768,7 @@ public enum MoonleafThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.moonleaf.night.owl.svg"
             },
             "vectorResourceID": "resource.seal.moonleaf.night-owl.output.seal-vector-master",
+            "colorResourceID": "resource.seal.moonleaf.night-owl.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.moonleaf.night-owl.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.moonleaf.night-owl.output.seal-thumbnail",
             "allowedScale": {
@@ -788,6 +809,7 @@ public enum MoonleafThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.moonleaf.moonwell.svg"
             },
             "vectorResourceID": "resource.seal.moonleaf.moonwell.output.seal-vector-master",
+            "colorResourceID": "resource.seal.moonleaf.moonwell.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.moonleaf.moonwell.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.moonleaf.moonwell.output.seal-thumbnail",
             "allowedScale": {
@@ -828,6 +850,7 @@ public enum MoonleafThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.moonleaf.starflower.svg"
             },
             "vectorResourceID": "resource.seal.moonleaf.starflower.output.seal-vector-master",
+            "colorResourceID": "resource.seal.moonleaf.starflower.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.moonleaf.starflower.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.moonleaf.starflower.output.seal-thumbnail",
             "allowedScale": {
@@ -868,6 +891,7 @@ public enum MoonleafThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Seals.moonleaf.echo.firefly.svg"
             },
             "vectorResourceID": "resource.seal.moonleaf.echo-firefly.output.seal-vector-master",
+            "colorResourceID": "resource.seal.moonleaf.echo-firefly.output.seal-color-master",
             "monochromeFallbackResourceID": "resource.seal.moonleaf.echo-firefly.output.seal-monochrome-fallback",
             "thumbnailResourceID": "resource.seal.moonleaf.echo-firefly.output.seal-thumbnail",
             "allowedScale": {
@@ -911,6 +935,7 @@ public enum MoonleafThemeDescriptorFactory {
             },
             "vectorResourceID": "resource.frame.moonleaf.silvervine.output.frame-vector-master",
             "staticFallbackResourceID": "resource.frame.moonleaf.silvervine.output.frame-static-fallback",
+            "thumbnailResourceID": "resource.frame.moonleaf.silvervine.output.frame-thumbnail",
             "compatibleRelicIDs": [
               "relic.moonleaf.tablet",
               "relic.moonleaf.ivybound-plaque",
@@ -947,7 +972,8 @@ public enum MoonleafThemeDescriptorFactory {
               "rightsID": "prov.Source.Masters.Crests.moonleaf.moonbloom.svg"
             },
             "vectorResourceID": "resource.crest.moonleaf.moonbloom.output.crest-vector-master",
-            "staticFallbackResourceID": "resource.crest.moonleaf.moonbloom.output.crest-static-fallback"
+            "staticFallbackResourceID": "resource.crest.moonleaf.moonbloom.output.crest-static-fallback",
+            "thumbnailResourceID": "resource.crest.moonleaf.moonbloom.output.crest-thumbnail"
           }
         ],
         "background": {
@@ -959,6 +985,7 @@ public enum MoonleafThemeDescriptorFactory {
           "staticBaseResourceID": "resource.background.moonleaf.moonlit-canopy.output.background-static-base",
           "reduceMotionResourceID": "resource.background.moonleaf.moonlit-canopy.output.background-reduce-motion",
           "highContrastResourceID": "resource.background.moonleaf.moonlit-canopy.output.background-high-contrast",
+          "macOSWideResourceID": "resource.background.moonleaf.moonlit-canopy.output.background-macos-wide-crop",
           "optionalMotionResourceID": null,
           "rendererParametersResourceID": null,
           "motionIntensity": "none",
@@ -986,6 +1013,7 @@ public enum MoonleafThemeDescriptorFactory {
           "lockedSilhouetteResourceID": "resource.vault.moonleaf.codex.output.vault-locked-silhouette",
           "encounteredResourceID": "resource.vault.moonleaf.codex.output.vault-encountered",
           "selectedResourceID": "resource.vault.moonleaf.codex.output.vault-selected",
+          "unavailableResourceID": "resource.vault.moonleaf.codex.output.vault-unavailable",
           "accessibility": {
             "label": {
               "key": "resource.vault.moonleaf.codex.accessibility.label",
@@ -997,6 +1025,31 @@ public enum MoonleafThemeDescriptorFactory {
             "dynamicTypeSafe": true
           },
           "rightsID": "prov.Production.Sources.moonleaf.moonleaf.vault.recipe.json"
+        },
+        "receivedPresentation": {
+          "familyDisplayName": {
+            "key": "codex.moonleaf.received-family.name",
+            "fallbackValue": "Elven Codex"
+          },
+          "primarySenderAvatarResourceID": "resource.received.moonleaf.primary.sender-avatar",
+          "shareSenderAvatarResourceID": "resource.received.moonleaf.share.sender-avatar",
+          "shareCodexBadgeResourceID": "resource.received.moonleaf.share.codex-badge",
+          "primaryMedallion": {
+            "resourceID": "resource.received.moonleaf.primary.medallion",
+            "anchor": {
+              "x": 0.834,
+              "y": 0.84
+            },
+            "scale": 0.205
+          },
+          "shareMedallion": {
+            "resourceID": "resource.received.moonleaf.share.medallion",
+            "anchor": {
+              "x": 0.757,
+              "y": 0.84
+            },
+            "scale": 0.161
+          }
         },
         "rightsID": "prov.Production.Sources.moonleaf.moonleaf.background.recipe.json"
       },
@@ -1028,6 +1081,16 @@ public enum MoonleafThemeDescriptorFactory {
           "sourceReference": "owner-approved production design and manifest direction",
           "exportSettings": "{\"deterministic\":true,\"pipeline\":\"scripts/build-elven-production-assets.py\",\"pipelineSHA256\":\"3dd388a70763603b2f90e04ecf7de7115e050ba3bb4da69a96b35fcf727e2307\",\"toolVersions\":{\"fontTools\":\"4.60.2\",\"pillow\":\"11.3.0\",\"python\":\"3.9.6\",\"sips\":\"sips-316\"}}",
           "licenseNotice": "Owner-supplied proprietary source and approved recovery authority"
+        },
+        {
+          "id": "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json",
+          "creatorTool": "Pinned deterministic v4.3 asset builder",
+          "creationDate": "2026-08-27",
+          "origin": "derived",
+          "rightsOwner": "Raven Forge Software",
+          "sourceReference": "docs/verification/theme-fidelity-v4-3/inventory/recipes/Moonleaf-Accepted-Source-Master-Recipe-v4.3.json",
+          "exportSettings": "{\"deterministic\":true,\"ownerReview\":\"PENDING\",\"pipeline\":\"scripts/build-moonleaf-v43-assets.py\"}",
+          "licenseNotice": "Project-local proprietary production masters; owner visual review remains pending"
         },
         {
           "id": "prov.Production.Sources.moonleaf.moonleaf.vault.recipe.json",
@@ -1148,6 +1211,16 @@ public enum MoonleafThemeDescriptorFactory {
           "sourceReference": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Seals/moonleaf/echo-firefly.svg",
           "exportSettings": "{\"deterministic\":true,\"pipeline\":\"scripts/build-elven-production-assets.py\",\"pipelineSHA256\":\"3dd388a70763603b2f90e04ecf7de7115e050ba3bb4da69a96b35fcf727e2307\",\"toolVersions\":{\"fontTools\":\"4.60.2\",\"pillow\":\"11.3.0\",\"python\":\"3.9.6\",\"sips\":\"sips-316\"}}",
           "licenseNotice": "Owner-supplied proprietary source and approved recovery authority"
+        },
+        {
+          "id": "prov.Theme.Fidelity.v4.3.Source.Masters.moonleaf.Moonleaf.Received.Identity.Extraction.v4.3.json",
+          "creatorTool": "Python 3.9.6 with Pillow 11.3.0 exact source-pixel extraction",
+          "creationDate": "2026-08-27",
+          "origin": "derived",
+          "rightsOwner": "Raven Forge Software",
+          "sourceReference": "docs/verification/theme-fidelity-v4-3/source-masters/moonleaf/Moonleaf-Received-Identity-Extraction-v4.3.json",
+          "exportSettings": "{\"deterministic\":true,\"pipeline\":\"scripts/extract-moonleaf-received-identity-v43.py\",\"pipelineSHA256\":\"a0926182c694db1e3692ed63da15b721a4d897cf67ca2b81ea98427377a1b00b\",\"resampling\":\"none\",\"sourceRegionRoundTripMaximumChannelDifference\":0}",
+          "licenseNotice": "Owner-supplied proprietary source and canonical v4.3 received-state authority"
         }
       ]
     }

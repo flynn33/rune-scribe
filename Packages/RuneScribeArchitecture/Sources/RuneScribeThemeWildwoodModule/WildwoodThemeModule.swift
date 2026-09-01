@@ -32,7 +32,7 @@ public enum RuneScribeThemeWildwoodModuleBootstrap {
     )
 
     public static let manifestResource = WildwoodThemeBundledResourceCatalog.moduleManifest
-    public static let manifestExpectedSHA256Hex = "df2bd0dd5048b726c53406bab6c0c211be453c70e115c6354e62a12af9bd70db"
+    public static let manifestExpectedSHA256Hex = WildwoodV43ResourcePins.moduleManifestSHA256Hex
     public static var manifestExpectedSHA256: Data {
         Data(hexadecimal: manifestExpectedSHA256Hex)
     }
@@ -66,10 +66,17 @@ public struct RuneScribeThemeWildwoodModule: RuntimeConstructibleModule {
 
     public func start(context: ModuleContext) async throws {
         let runtimeIO = try await context.runtimeIOClient()
-        let theme = try await WildwoodThemeResources.loadValidated(using: runtimeIO)
+        let descriptor = try await WildwoodThemeResources.loadDescriptorValidated(
+            using: runtimeIO
+        )
         try await context.publishTheme(
-            descriptor: theme.descriptor,
-            resourcePayloads: theme.resourcePayloads
+            descriptor: descriptor,
+            resourceLoader: { resourceID in
+                try await WildwoodThemeResources.loadValidatedResource(
+                    id: resourceID,
+                    using: runtimeIO
+                )
+            }
         )
     }
 

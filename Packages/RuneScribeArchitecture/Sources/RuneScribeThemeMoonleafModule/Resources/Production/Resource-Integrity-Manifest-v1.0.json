@@ -2,40 +2,47 @@
   "schemaVersion": "1.0",
   "codexID": "codex.moonleaf",
   "moduleID": "com.runescribe.module.theme.moonleaf",
-  "acceptedPackageVersion": "3.1.0",
+  "acceptedPackageVersion": "4.3.0",
   "files": [
     {
       "path": "Production/background/moonleaf-background-high-contrast.png",
-      "bytes": 15129,
-      "sha256": "2b14cf46a557aed8be18ae5c38ca3a2b9cb50d56708599a56f17e6494e0a046c",
+      "bytes": 7315952,
+      "sha256": "46cbbc9845c0d3b229f586a3095a1533182873368f5be84af10d7624a7095108",
       "resourceID": "resource.background.moonleaf.moonlit-canopy.output.background-high-contrast",
       "role": "background.high-contrast"
     },
     {
+      "path": "Production/background/moonleaf-background-macos-wide.png",
+      "bytes": 6815473,
+      "sha256": "f147e20151e2b8cce1a53514bd74df2a62f47bd7752054b973ca53af6ee72456",
+      "resourceID": "resource.background.moonleaf.moonlit-canopy.output.background-macos-wide-crop",
+      "role": "background.macos-wide-crop"
+    },
+    {
       "path": "Production/background/moonleaf-background-reduce-motion.png",
-      "bytes": 16334,
-      "sha256": "8e0912d1567b90e710e08a1a25098a41722bcee49e0e38da250c07d51256a190",
+      "bytes": 6367685,
+      "sha256": "66b9d10c03a896251e0b83660f0fca73a7c7e97a7db39ed208c745f4b229cf26",
       "resourceID": "resource.background.moonleaf.moonlit-canopy.output.background-reduce-motion",
       "role": "background.reduce-motion"
     },
     {
       "path": "Production/background/moonleaf-background-static.png",
-      "bytes": 16733,
-      "sha256": "a9cb7df4865a82bff66cb2bcfa646d2919596e55ff6c13993a1a0fd1f2fe74da",
+      "bytes": 6486722,
+      "sha256": "40fb5075f60a3dd6fecb4c2dd3e8d0b9c5b8e9a324eac3c83f1b312883a05f9d",
       "resourceID": "resource.background.moonleaf.moonlit-canopy.output.background-static-base",
       "role": "background.static-base"
     },
     {
       "path": "Production/crest/moonleaf-moonbloom-static-fallback.png",
-      "bytes": 13357,
-      "sha256": "77e57c8459c7fcb409c673663ba67c4a42ce2b38abf0b6c81c8f1d487f79face",
+      "bytes": 739571,
+      "sha256": "dd978b4d4e882fe76e15ef926a702d6c928ac64065e050879efc792bcb9f729a",
       "resourceID": "resource.crest.moonleaf.moonbloom.output.crest-static-fallback",
       "role": "crest.static-fallback"
     },
     {
       "path": "Production/crest/moonleaf-moonbloom-thumbnail.png",
-      "bytes": 54637,
-      "sha256": "213dae530c2fefbd1fc7343eb430af4bec9bd037f2c8211c43c358ad91150d2f",
+      "bytes": 202694,
+      "sha256": "6ddc1ed10f7dccb84cf3c782f9047eb6b4d5dc672645f8b650d4dddbae2596ac",
       "resourceID": "resource.crest.moonleaf.moonbloom.output.crest-thumbnail",
       "role": "crest.thumbnail"
     },
@@ -48,15 +55,15 @@
     },
     {
       "path": "Production/frame/moonleaf-silvervine-static-fallback.png",
-      "bytes": 12891,
-      "sha256": "de9a692eb385179c32a3aa757a90c56603de9ee2bae9d83b4813f03e83b4e03c",
+      "bytes": 1241984,
+      "sha256": "4102d37a59155c353e1f1f412a54797910d636d0f455be078fa01bda792951e7",
       "resourceID": "resource.frame.moonleaf.silvervine.output.frame-static-fallback",
       "role": "frame.static-fallback"
     },
     {
       "path": "Production/frame/moonleaf-silvervine-thumbnail.png",
-      "bytes": 18450,
-      "sha256": "a2bbaf76faf2263c380893b621374ef1260a8ce2d9aa71a4b2c46a8c60df915c",
+      "bytes": 103912,
+      "sha256": "8244beb36a70315e4a66d3b8efe6e34b39e153efa3c26d96d65ad7d9208662d5",
       "resourceID": "resource.frame.moonleaf.silvervine.output.frame-thumbnail",
       "role": "frame.thumbnail"
     },
@@ -68,86 +75,156 @@
       "role": "frame.vector-master"
     },
     {
+      "path": "Production/panel/moonleaf-card-border.png",
+      "bytes": 284822,
+      "sha256": "c9c1f17b7ee8ffe45a88282d4bf790f6664fcf9ce011930e5ae359c7a1f5ba1e",
+      "resourceID": "resource.panel.moonleaf.card-border",
+      "role": "panel.card-border"
+    },
+    {
+      "path": "Production/panel/moonleaf-corner-ornament.png",
+      "bytes": 220278,
+      "sha256": "25d3177665e8ad8ab48947b99fa248491e89172e32efb17c3fbc49dba1cc01ea",
+      "resourceID": "resource.panel.moonleaf.corner-ornament",
+      "role": "panel.corner-ornament"
+    },
+    {
+      "path": "Production/panel/moonleaf-divider.png",
+      "bytes": 47318,
+      "sha256": "a48b519468da601eb42952729f64acf13012d25da0a3b1704ef9879fcb6f1903",
+      "resourceID": "resource.panel.moonleaf.divider",
+      "role": "panel.divider"
+    },
+    {
+      "path": "Production/panel/moonleaf-primary-button.png",
+      "bytes": 144306,
+      "sha256": "365684f5faac774202a399c4ae2c861206c4b30f81f9fab690a763e2e974d664",
+      "resourceID": "resource.panel.moonleaf.primary-button",
+      "role": "panel.primary-button"
+    },
+    {
+      "path": "Production/panel/moonleaf-tab-selector.png",
+      "bytes": 86276,
+      "sha256": "9aba8e1225adf1c50e1b31fc2339500e16273140d19ffe2dec6f2d780730b385",
+      "resourceID": "resource.panel.moonleaf.tab-selector",
+      "role": "panel.tab-selector"
+    },
+    {
+      "path": "Production/received/moonleaf-received-primary-medallion.png",
+      "bytes": 83253,
+      "sha256": "1e6a5ea56453d5206469d9bcb05c15ddbe1dfe663a43610b649741ef8750c78a",
+      "resourceID": "resource.received.moonleaf.primary.medallion",
+      "role": "received.primary.medallion"
+    },
+    {
+      "path": "Production/received/moonleaf-received-primary-sender-avatar.png",
+      "bytes": 24958,
+      "sha256": "3b262beebdfb316511d6fce7064e660403c37226ff9ab2f57fdb75eaf454621c",
+      "resourceID": "resource.received.moonleaf.primary.sender-avatar",
+      "role": "received.primary.sender-avatar"
+    },
+    {
+      "path": "Production/received/moonleaf-received-share-codex-badge.png",
+      "bytes": 5179,
+      "sha256": "8d4a7c7375b292bcd7da239b8175a56cf7890491361aaf2f4babfd2a5f1acce1",
+      "resourceID": "resource.received.moonleaf.share.codex-badge",
+      "role": "received.share.codex-badge"
+    },
+    {
+      "path": "Production/received/moonleaf-received-share-medallion.png",
+      "bytes": 49437,
+      "sha256": "bb0d0c8da37d1b105343abe5533a48d4774fbfe83db2a3ef2dc0944930f86a48",
+      "resourceID": "resource.received.moonleaf.share.medallion",
+      "role": "received.share.medallion"
+    },
+    {
+      "path": "Production/received/moonleaf-received-share-sender-avatar.png",
+      "bytes": 24037,
+      "sha256": "95754977ca429d79def1b0fe8aa84d845949e707f9379330bb4ae7041eb42d13",
+      "resourceID": "resource.received.moonleaf.share.sender-avatar",
+      "role": "received.share.sender-avatar"
+    },
+    {
       "path": "Production/relic/moonleaf-ivybound-plaque-high-contrast.png",
-      "bytes": 12456,
-      "sha256": "b0091d9d04e0d76de31d978806bc4267331f1728fc275b221362761d2dbd03e9",
+      "bytes": 1709889,
+      "sha256": "7aebb07f72e0186eadfc955ac195d3bc3c7498cf5b776c43895b9068eb72c4b2",
       "resourceID": "resource.relic.moonleaf.ivybound-plaque.output.relic-high-contrast",
       "role": "relic.high-contrast"
     },
     {
       "path": "Production/relic/moonleaf-ivybound-plaque-master.png",
-      "bytes": 17091,
-      "sha256": "1c98bb7c732cd82f015b0e5589fda6ddd207ede43fc95521ce9f821f5b0cc484",
+      "bytes": 1484166,
+      "sha256": "3084507b4bb4e247d0f52d961d0eb90ccff9bb2cac4b31df6cfcbd2b928cef8d",
       "resourceID": "resource.relic.moonleaf.ivybound-plaque.output.relic-master",
       "role": "relic.master"
     },
     {
-      "path": "Production/relic/moonleaf-ivybound-plaque-static-share-fallback.heif",
-      "bytes": 15009,
-      "sha256": "62b1fc6c0ebb4deab92b5a4bff5052c9802f30bd0de1e86d47c257f1570d3191",
+      "path": "Production/relic/moonleaf-ivybound-plaque-static-share-fallback.png",
+      "bytes": 1484166,
+      "sha256": "3084507b4bb4e247d0f52d961d0eb90ccff9bb2cac4b31df6cfcbd2b928cef8d",
       "resourceID": "resource.relic.moonleaf.ivybound-plaque.output.relic-static-share-fallback",
       "role": "relic.static-share-fallback"
     },
     {
-      "path": "Production/relic/moonleaf-ivybound-plaque-thumbnail.heif",
-      "bytes": 10214,
-      "sha256": "093a1913e18dae8b7a370c4071369bbfa86f1d1ac7ab4740a9619c2ef679c30c",
+      "path": "Production/relic/moonleaf-ivybound-plaque-thumbnail.png",
+      "bytes": 388402,
+      "sha256": "6713b1cee79c3af9df7121d5f2bdedb893737c984f3eea5c9b9550b119422f60",
       "resourceID": "resource.relic.moonleaf.ivybound-plaque.output.relic-thumbnail",
       "role": "relic.thumbnail"
     },
     {
       "path": "Production/relic/moonleaf-tablet-high-contrast.png",
-      "bytes": 10800,
-      "sha256": "05e4d78439353087a5974db09fe85aa686773f6e28314bbb25c280733b11afcb",
+      "bytes": 1897962,
+      "sha256": "d9f980504c91228594e8cc84a882d66786669cafd9088b492a1bbaf5b8395647",
       "resourceID": "resource.relic.moonleaf.tablet.output.relic-high-contrast",
       "role": "relic.high-contrast"
     },
     {
       "path": "Production/relic/moonleaf-tablet-master.png",
-      "bytes": 16518,
-      "sha256": "b08058f7becb462212faa3753a96fc93b15fb30bcf1d87742b6275cb218c18b7",
+      "bytes": 1502162,
+      "sha256": "39a72f168029a4a8fae747be1aa9040053d3616747c77c28bed979941ad74e8d",
       "resourceID": "resource.relic.moonleaf.tablet.output.relic-master",
       "role": "relic.master"
     },
     {
-      "path": "Production/relic/moonleaf-tablet-static-share-fallback.heif",
-      "bytes": 12530,
-      "sha256": "c7145e03afd7b8d7ec5825d63c24392c7633081e926881e55c08db0e19ef5b50",
+      "path": "Production/relic/moonleaf-tablet-static-share-fallback.png",
+      "bytes": 1502162,
+      "sha256": "39a72f168029a4a8fae747be1aa9040053d3616747c77c28bed979941ad74e8d",
       "resourceID": "resource.relic.moonleaf.tablet.output.relic-static-share-fallback",
       "role": "relic.static-share-fallback"
     },
     {
-      "path": "Production/relic/moonleaf-tablet-thumbnail.heif",
-      "bytes": 4315,
-      "sha256": "76028fcf8e80762b00831e261032a51770479d84e0a699227b13bb3a47517cda",
+      "path": "Production/relic/moonleaf-tablet-thumbnail.png",
+      "bytes": 279025,
+      "sha256": "9d37fce31914eed37180eb7ba8850c04d5fe6c69f3e584e10eb166e9b1afd56c",
       "resourceID": "resource.relic.moonleaf.tablet.output.relic-thumbnail",
       "role": "relic.thumbnail"
     },
     {
       "path": "Production/relic/moonleaf-whisperbark-stele-high-contrast.png",
-      "bytes": 12085,
-      "sha256": "09c33cfedd8424ada7d746ae376a8fc5dad40563768ba8c87ea027f3e9440fca",
+      "bytes": 1723979,
+      "sha256": "01aa3f390e0d2562620e40b4aa052fbe455c46f09648760c9b7aa359f8317c87",
       "resourceID": "resource.relic.moonleaf.whisperbark-stele.output.relic-high-contrast",
       "role": "relic.high-contrast"
     },
     {
       "path": "Production/relic/moonleaf-whisperbark-stele-master.png",
-      "bytes": 14769,
-      "sha256": "4332eac874cbe8bd8c448918c4e68e543fccdf0a24668455d4b4bf9e8c77c59a",
+      "bytes": 1487143,
+      "sha256": "e0ea14db3ea3b107119276082bfb6ad98b21ba5e06495016e307d2e03da347d3",
       "resourceID": "resource.relic.moonleaf.whisperbark-stele.output.relic-master",
       "role": "relic.master"
     },
     {
-      "path": "Production/relic/moonleaf-whisperbark-stele-static-share-fallback.heif",
-      "bytes": 8752,
-      "sha256": "167c2b75c7de4b2dd824bd9d70b810584ada9a455b32e7dab3aaf0e19958fc04",
+      "path": "Production/relic/moonleaf-whisperbark-stele-static-share-fallback.png",
+      "bytes": 1487143,
+      "sha256": "e0ea14db3ea3b107119276082bfb6ad98b21ba5e06495016e307d2e03da347d3",
       "resourceID": "resource.relic.moonleaf.whisperbark-stele.output.relic-static-share-fallback",
       "role": "relic.static-share-fallback"
     },
     {
-      "path": "Production/relic/moonleaf-whisperbark-stele-thumbnail.heif",
-      "bytes": 6686,
-      "sha256": "660855bc0c979033347d7df253d196a9c51af86a20d6c0d6e2c4c7016004a35a",
+      "path": "Production/relic/moonleaf-whisperbark-stele-thumbnail.png",
+      "bytes": 251271,
+      "sha256": "a474cd7d48b6cf00591ae44435bc8f61f4ab6e2efbbf3802092411a1dc9535ba",
       "resourceID": "resource.relic.moonleaf.whisperbark-stele.output.relic-thumbnail",
       "role": "relic.thumbnail"
     },
@@ -159,30 +236,44 @@
       "role": "script.font"
     },
     {
+      "path": "Production/script/moonleaf-script-specimen-high-contrast.png",
+      "bytes": 98130,
+      "sha256": "6c53a2990afccdfabd4bd643add2ae87864efbaaee1c41cfb65046b56fb1c58c",
+      "resourceID": "resource.script.moonleaf.output.script-specimen-high-contrast",
+      "role": "script.specimen-high-contrast"
+    },
+    {
       "path": "Production/script/moonleaf-script-specimen.png",
-      "bytes": 25929,
-      "sha256": "4cb11f18b9e5a53194491e3739c218c71ef0486f42188b6808e4cfb6435af535",
-      "resourceID": "resource.script.moonleaf.output.script-specimen-preview",
-      "role": "script.specimen-preview"
+      "bytes": 101288,
+      "sha256": "3e18db8ca4a6da82c1c921bd89bda65b8b75afef843b544913f9f20d5166dddd",
+      "resourceID": "resource.script.moonleaf.output.script-specimen-standard",
+      "role": "script.specimen-standard"
     },
     {
       "path": "Production/script/moonleaf-script-static-fallback.png",
-      "bytes": 20870,
-      "sha256": "8bd515c4e5056343bb89472bda3dee0c770db7ce55fe00aaecbd67999f383f8b",
+      "bytes": 101288,
+      "sha256": "3e18db8ca4a6da82c1c921bd89bda65b8b75afef843b544913f9f20d5166dddd",
       "resourceID": "resource.script.moonleaf.output.script-static-fallback",
       "role": "script.static-fallback"
     },
     {
-      "path": "Production/seal/moonleaf-crescentleaf-monochrome-fallback.pdf",
-      "bytes": 5491,
-      "sha256": "a9fd076062c75c42abeaf0078bfa1f5ce591d3e8f819c57eff6d0a32c990961d",
+      "path": "Production/seal/moonleaf-crescentleaf-color-master.png",
+      "bytes": 1036110,
+      "sha256": "dbb9799cd47b0905bb285d47f57b17d94768176a9d3d45a57bf86359c67767f8",
+      "resourceID": "resource.seal.moonleaf.crescentleaf.output.seal-color-master",
+      "role": "seal.color-master"
+    },
+    {
+      "path": "Production/seal/moonleaf-crescentleaf-monochrome-fallback.png",
+      "bytes": 689679,
+      "sha256": "bef332d39e7198551fd2d05828d9b53905fc5ad0d10c2c90cafeb1f8558c842a",
       "resourceID": "resource.seal.moonleaf.crescentleaf.output.seal-monochrome-fallback",
       "role": "seal.monochrome-fallback"
     },
     {
       "path": "Production/seal/moonleaf-crescentleaf-thumbnail.png",
-      "bytes": 3061,
-      "sha256": "4f936a87ae6d2633c570b66e0703ccc572d10d450fdde04ed1be914d851f1e5a",
+      "bytes": 353560,
+      "sha256": "d6bc897c7a28254d15c496b6e111ae7231d6bfc0fcda1cde8b87f03edfffe7e8",
       "resourceID": "resource.seal.moonleaf.crescentleaf.output.seal-thumbnail",
       "role": "seal.thumbnail"
     },
@@ -194,16 +285,23 @@
       "role": "seal.vector-master"
     },
     {
-      "path": "Production/seal/moonleaf-echo-firefly-monochrome-fallback.pdf",
-      "bytes": 10618,
-      "sha256": "4fd60589ba7f1d5f54151be6e980f3f282dafddb8850b2c1a719ec20a66dcd81",
+      "path": "Production/seal/moonleaf-echo-firefly-color-master.png",
+      "bytes": 1634105,
+      "sha256": "1503488ea4dd701dc2be0e6cb3c444cb79cb93bc025416ae5aa295efd95964d9",
+      "resourceID": "resource.seal.moonleaf.echo-firefly.output.seal-color-master",
+      "role": "seal.color-master"
+    },
+    {
+      "path": "Production/seal/moonleaf-echo-firefly-monochrome-fallback.png",
+      "bytes": 1133413,
+      "sha256": "28c7d09ed84955144aeaef1c74a8dc531231b2a1003253ed1c35c0b3e490b98b",
       "resourceID": "resource.seal.moonleaf.echo-firefly.output.seal-monochrome-fallback",
       "role": "seal.monochrome-fallback"
     },
     {
       "path": "Production/seal/moonleaf-echo-firefly-thumbnail.png",
-      "bytes": 4494,
-      "sha256": "4610758e71cb2ba0853cdb68d5f544974bd0f4ef2002b296e822cf2e99e487c8",
+      "bytes": 432040,
+      "sha256": "509ab8e382838ff1ba07560c004975656fa04a4e3085b90fcab86e4faccc2d05",
       "resourceID": "resource.seal.moonleaf.echo-firefly.output.seal-thumbnail",
       "role": "seal.thumbnail"
     },
@@ -215,16 +313,23 @@
       "role": "seal.vector-master"
     },
     {
-      "path": "Production/seal/moonleaf-moonwell-monochrome-fallback.pdf",
-      "bytes": 4637,
-      "sha256": "5809b4e1e74ddfa3373161e8711ace591000ac3bf1e2e9527639abe8a7754ee6",
+      "path": "Production/seal/moonleaf-moonwell-color-master.png",
+      "bytes": 1539731,
+      "sha256": "aa6e4f7e99f918c2f8bc1b704246355f44aebfbc36cb79ad06919a0287af35f3",
+      "resourceID": "resource.seal.moonleaf.moonwell.output.seal-color-master",
+      "role": "seal.color-master"
+    },
+    {
+      "path": "Production/seal/moonleaf-moonwell-monochrome-fallback.png",
+      "bytes": 802767,
+      "sha256": "120c8e28f20d8c49a2225ce5d71d6b4e0e0f7c152e89c249a07cfc49feedf79e",
       "resourceID": "resource.seal.moonleaf.moonwell.output.seal-monochrome-fallback",
       "role": "seal.monochrome-fallback"
     },
     {
       "path": "Production/seal/moonleaf-moonwell-thumbnail.png",
-      "bytes": 3061,
-      "sha256": "28799c6b433e3a3e4584dcb509e01390b62c151978b9432f1864701f86e0fac4",
+      "bytes": 382258,
+      "sha256": "fa0bfc9c4e9dfb29f053f981dc4d0da2da90a0fbf1e36ae7388985dd949bacde",
       "resourceID": "resource.seal.moonleaf.moonwell.output.seal-thumbnail",
       "role": "seal.thumbnail"
     },
@@ -236,16 +341,23 @@
       "role": "seal.vector-master"
     },
     {
-      "path": "Production/seal/moonleaf-night-owl-monochrome-fallback.pdf",
-      "bytes": 9967,
-      "sha256": "2b2a2fd8ea3d314171294c1383d599c6f6b2730533f14d5d0da78f56082bddee",
+      "path": "Production/seal/moonleaf-night-owl-color-master.png",
+      "bytes": 1649588,
+      "sha256": "61c6e4466aae441bfb78594d68866681342789e91ed3b7a08fb55b6154665354",
+      "resourceID": "resource.seal.moonleaf.night-owl.output.seal-color-master",
+      "role": "seal.color-master"
+    },
+    {
+      "path": "Production/seal/moonleaf-night-owl-monochrome-fallback.png",
+      "bytes": 881479,
+      "sha256": "abb9e7b192f0fc989b99f9c3f701be86edfb71a2dbf175d7a3f9ba375381a32f",
       "resourceID": "resource.seal.moonleaf.night-owl.output.seal-monochrome-fallback",
       "role": "seal.monochrome-fallback"
     },
     {
       "path": "Production/seal/moonleaf-night-owl-thumbnail.png",
-      "bytes": 3966,
-      "sha256": "01e3c1e9f5610b453013aa6853a2f9f2b78b595df8cdfdd5d744f5dc0aa38ee1",
+      "bytes": 391595,
+      "sha256": "a22bd14449679d865eb250d25d5768ce735f815dfe4ba630ce4ff9223fc689ee",
       "resourceID": "resource.seal.moonleaf.night-owl.output.seal-thumbnail",
       "role": "seal.thumbnail"
     },
@@ -257,16 +369,23 @@
       "role": "seal.vector-master"
     },
     {
-      "path": "Production/seal/moonleaf-starflower-monochrome-fallback.pdf",
-      "bytes": 7151,
-      "sha256": "3610e631476ffcde48b4300c386d0a80cd6a797cdf2e0bac7e1be191857b6a0c",
+      "path": "Production/seal/moonleaf-starflower-color-master.png",
+      "bytes": 1866361,
+      "sha256": "60f8e293e58e37bc599654ea711513e9772310a32adcfea2a3754ba3a7993239",
+      "resourceID": "resource.seal.moonleaf.starflower.output.seal-color-master",
+      "role": "seal.color-master"
+    },
+    {
+      "path": "Production/seal/moonleaf-starflower-monochrome-fallback.png",
+      "bytes": 1310652,
+      "sha256": "0bcb967181cc5fa4660bfa03631422f5a31b4d6026ad900f1f5b2f4d3ca01d12",
       "resourceID": "resource.seal.moonleaf.starflower.output.seal-monochrome-fallback",
       "role": "seal.monochrome-fallback"
     },
     {
       "path": "Production/seal/moonleaf-starflower-thumbnail.png",
-      "bytes": 2863,
-      "sha256": "e1027e732995b59c9e4de24c0ec5b278864a62594da6484e3165eef87da03049",
+      "bytes": 486255,
+      "sha256": "624fda8f36f447e689dc22479f420bfdd5e997b92ba998ce24dc17a192a000a8",
       "resourceID": "resource.seal.moonleaf.starflower.output.seal-thumbnail",
       "role": "seal.thumbnail"
     },
@@ -278,16 +397,23 @@
       "role": "seal.vector-master"
     },
     {
-      "path": "Production/seal/moonleaf-woodland-stag-monochrome-fallback.pdf",
-      "bytes": 7891,
-      "sha256": "37830d44a69eb4e2892cc99f0a2695651fa429eb63cd79880cf1c0a1584ca19b",
+      "path": "Production/seal/moonleaf-woodland-stag-color-master.png",
+      "bytes": 967004,
+      "sha256": "b039a8e48038534e199b3e59794e44172d9132300cb21af14909189db68e3e4a",
+      "resourceID": "resource.seal.moonleaf.woodland-stag.output.seal-color-master",
+      "role": "seal.color-master"
+    },
+    {
+      "path": "Production/seal/moonleaf-woodland-stag-monochrome-fallback.png",
+      "bytes": 615422,
+      "sha256": "165a0f3b720895661a032411f6380f274aa9d7cab41c85487458afaab205e43e",
       "resourceID": "resource.seal.moonleaf.woodland-stag.output.seal-monochrome-fallback",
       "role": "seal.monochrome-fallback"
     },
     {
       "path": "Production/seal/moonleaf-woodland-stag-thumbnail.png",
-      "bytes": 3156,
-      "sha256": "af461c6544ba21e6d38861ef8088cd2edba31f09fc8a8ebd6bf3f074880aae52",
+      "bytes": 331639,
+      "sha256": "6ec4252f7bbdd5db3cbb1c80d206fd15389272259268e178552b668ecc9dd319",
       "resourceID": "resource.seal.moonleaf.woodland-stag.output.seal-thumbnail",
       "role": "seal.thumbnail"
     },
@@ -300,31 +426,38 @@
     },
     {
       "path": "Production/vault/moonleaf-vault-card.png",
-      "bytes": 25986,
-      "sha256": "5531e21cdadfdd76780f96844daf86aa62858d813fad402d363e3ece91bb64b9",
+      "bytes": 1873902,
+      "sha256": "ed53f3921cceeb4eed91a1d4c83173fc6ebaa3d82d49124f9ca6dbcbb977a9e0",
       "resourceID": "resource.vault.moonleaf.codex.output.vault-card",
       "role": "vault.card"
     },
     {
       "path": "Production/vault/moonleaf-vault-encountered.png",
-      "bytes": 23738,
-      "sha256": "85f06aecbc0e07e555de3e968ae1497ec65c6c9f7c7f765585557be7cce0a2b7",
+      "bytes": 1861629,
+      "sha256": "da1088494b0217c63ee3e513b15b4fc9c66d24a878a27bd0ab268d3759dafcd9",
       "resourceID": "resource.vault.moonleaf.codex.output.vault-encountered",
       "role": "vault.encountered"
     },
     {
       "path": "Production/vault/moonleaf-vault-locked.png",
-      "bytes": 22858,
-      "sha256": "a47fc521c19a7b6a97e77939d89bc2870e8f2cf4f4fb574c3eac6ece2e5a4a34",
+      "bytes": 1412831,
+      "sha256": "80871dcd3b9e408d1c1c708cdc2ef47e1f188877e72483546c55a1438f21f137",
       "resourceID": "resource.vault.moonleaf.codex.output.vault-locked-silhouette",
       "role": "vault.locked-silhouette"
     },
     {
       "path": "Production/vault/moonleaf-vault-selected.png",
-      "bytes": 29317,
-      "sha256": "36aaa625951f2a6b4eab571afd39d85f27dad09aa41230b1da78258b0ac99890",
+      "bytes": 1745534,
+      "sha256": "2f362ca5a453f781320b6df8bdc5504cbfcaea39b5a1ee697f65004d3168d190",
       "resourceID": "resource.vault.moonleaf.codex.output.vault-selected",
       "role": "vault.selected"
+    },
+    {
+      "path": "Production/vault/moonleaf-vault-unavailable.png",
+      "bytes": 1398768,
+      "sha256": "bd3d77f1f739aa0c87f78ede131d8afcb6c7fe7dfdd2eac333a1c6d5c31349e1",
+      "resourceID": "resource.vault.moonleaf.codex.output.vault-unavailable",
+      "role": "vault.unavailable"
     }
   ]
 }

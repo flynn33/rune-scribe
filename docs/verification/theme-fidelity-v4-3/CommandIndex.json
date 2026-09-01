@@ -1,0 +1,390 @@
+{
+  "acceptanceCommandCount": 30,
+  "acceptanceEvidence": false,
+  "commandCount": 34,
+  "commands": [
+    {
+      "acceptanceEvidence": true,
+      "category": "architecture",
+      "commandID": "architecture",
+      "record": {
+        "bytes": 1129,
+        "path": "commands/records/architecture.json",
+        "sha256": "0a17133e5e82d3a29e9e181989925f9c282cf34c45a7fbd6abac767b13416933"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "attribution",
+      "commandID": "attribution-scan",
+      "record": {
+        "bytes": 1770,
+        "path": "commands/records/attribution-scan.json",
+        "sha256": "e9eed7c663d30fa54dd5d60bd35a922811574a3bacab947d80046591c0a57a26"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "authority",
+      "commandID": "authority-v43",
+      "record": {
+        "bytes": 1555,
+        "path": "commands/records/authority-v43.json",
+        "sha256": "81cadb09402696d0b056911a89ff8b3cd9ebb50f626518c2f7f6851d37625973"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "assets",
+      "commandID": "elven-asset-builders",
+      "record": {
+        "bytes": 1707,
+        "path": "commands/records/elven-asset-builders.json",
+        "sha256": "3cfe994e3de6ba5c27a486e45136f960e786af74eeb52dae28ca62074b591ff0"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": false,
+      "category": "evidence",
+      "commandID": "evidence-head-binding-prepublication",
+      "record": {
+        "bytes": 1460,
+        "path": "commands/records/evidence-head-binding-prepublication.json",
+        "sha256": "4910178c93ec51954da5fbd6ca6b9be38f2d6f57faa2c5d1956b4b67a8974c7a"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "assets",
+      "commandID": "final-resource-inventory",
+      "record": {
+        "bytes": 1902,
+        "path": "commands/records/final-resource-inventory.json",
+        "sha256": "c061f46c4b802dc5aa47c8a659cf0b96deb64005eb32eee668861116106656a0"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": false,
+      "category": "architecture",
+      "commandID": "forsetti-report-only",
+      "record": {
+        "bytes": 1719,
+        "path": "commands/records/forsetti-report-only.json",
+        "sha256": "e80a243c1dfab74a1135d036d71244b7c4e3da42014e1e056e05cad258e15801"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "source",
+      "commandID": "frozen-source-clean-status",
+      "record": {
+        "bytes": 1197,
+        "path": "commands/records/frozen-source-clean-status.json",
+        "sha256": "faad39e45932bb16309ed89d8a1999ff743570218c76b7b2bb67efc779ad5b09"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "evidence",
+      "commandID": "historical-evidence-immutability",
+      "record": {
+        "bytes": 1838,
+        "path": "commands/records/historical-evidence-immutability.json",
+        "sha256": "aff860cbb7a22c329470a18211acb83444b90bcd2b02b48850fb7b8a0795fca6"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "build",
+      "commandID": "ios-simulator-release-build",
+      "record": {
+        "bytes": 3260,
+        "path": "commands/records/ios-simulator-release-build.json",
+        "sha256": "af6cc1e45e95c0f6596fd68a139db3c12d1831ba550bc822994bc95b17b363b7"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "mutations",
+      "commandID": "legacy-negative-mutations",
+      "record": {
+        "bytes": 2910,
+        "path": "commands/records/legacy-negative-mutations.json",
+        "sha256": "0333c4e9a9e9a802c832cbb3da65322c48830e5dfbcc3c94f645c6811764b922"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "build",
+      "commandID": "macos-release-build",
+      "record": {
+        "bytes": 3522,
+        "path": "commands/records/macos-release-build.json",
+        "sha256": "c0ae2086c85b8d6a377bc23f0dd971c5e0006e7d59ed1181ac8c274f343af5d1"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": false,
+      "category": "assets",
+      "commandID": "moonleaf-asset-builder",
+      "record": {
+        "bytes": 1671,
+        "path": "commands/records/moonleaf-asset-builder.json",
+        "sha256": "903d6459cb863ebe47ff6c0c0a52fddd184cf7f30d926e8cecdf862a1b3242d5"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "assets",
+      "commandID": "moonleaf-received-extractor",
+      "record": {
+        "bytes": 1707,
+        "path": "commands/records/moonleaf-received-extractor.json",
+        "sha256": "6370a4832f8efa23e45529004ee3dfd0f811d70688e2890ad6acc73189aa32d8"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "assets",
+      "commandID": "norse-catalog-extractor",
+      "record": {
+        "bytes": 1442,
+        "path": "commands/records/norse-catalog-extractor.json",
+        "sha256": "2a31dbb46cfb4410df88e6989f49c537a6d4ea4a9e36935d1c31a1dcdd1e3517"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "assets",
+      "commandID": "norse-message-extractor",
+      "record": {
+        "bytes": 1440,
+        "path": "commands/records/norse-message-extractor.json",
+        "sha256": "6d4fdbec37b421804179df4c2825b187eab6329fab328bbd9e014d958130e272"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "assets",
+      "commandID": "norse-provenance",
+      "record": {
+        "bytes": 1385,
+        "path": "commands/records/norse-provenance.json",
+        "sha256": "221d98f7327432f220a4444a7e2932e272782382de3025a24ed75fa57c31fe9e"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "assets",
+      "commandID": "norse-provenance-generation",
+      "record": {
+        "bytes": 1436,
+        "path": "commands/records/norse-provenance-generation.json",
+        "sha256": "d162f4b5ce64823bbc7c7bb29cf624970cf0782cc7554ecc9387569612a39618"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "static-analysis",
+      "commandID": "norse-remediation",
+      "record": {
+        "bytes": 1507,
+        "path": "commands/records/norse-remediation.json",
+        "sha256": "f0143480024f42a2b80f59998409624fea91f736b64f70f47568538a2903269f"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": false,
+      "category": "evidence",
+      "commandID": "package-evidence-validator-prepublication",
+      "record": {
+        "bytes": 1549,
+        "path": "commands/records/package-evidence-validator-prepublication.json",
+        "sha256": "659dded792d2acf4a3711abbb46b1400c9da87fe872da3eb35f5cb6333feaa2c"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "preflight",
+      "commandID": "package-final-reread-integrity",
+      "record": {
+        "bytes": 2049,
+        "path": "commands/records/package-final-reread-integrity.json",
+        "sha256": "3e57cfab414edf0d174debd9c0e1bf70845576ee0b0d63d63099c1f37377bc41"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "preflight",
+      "commandID": "package-preflight",
+      "record": {
+        "bytes": 1200,
+        "path": "commands/records/package-preflight.json",
+        "sha256": "48c4d42b1727b9e003557a7b3e130a75bf3c8eec2450ba9331192ecedcb4dda6"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "assets",
+      "commandID": "production-reference-boundary",
+      "record": {
+        "bytes": 2487,
+        "path": "commands/records/production-reference-boundary.json",
+        "sha256": "4222d6ddf6e50d3aee83eb63dc9f5463fdb943e858dc4f5250425a5a6af404fb"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "tests",
+      "commandID": "python-tests",
+      "record": {
+        "bytes": 1314,
+        "path": "commands/records/python-tests.json",
+        "sha256": "20334a92b2ac044cc7b56e3598fd49b9e60575f441d3639a78c6e5657024310a"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "static-analysis",
+      "commandID": "remediation-source",
+      "record": {
+        "bytes": 1399,
+        "path": "commands/records/remediation-source.json",
+        "sha256": "5313c0a555dff1334926c9acf16d3c5c61afff3d20bc9be0df606c57c2cc9c08"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "source",
+      "commandID": "repository-reconciliation",
+      "record": {
+        "bytes": 1725,
+        "path": "commands/records/repository-reconciliation.json",
+        "sha256": "0bdb381f968878a151a63b80ac2bcec5f3fd827f1083e145204e3df51053dba8"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "architecture",
+      "commandID": "roadmap-alignment",
+      "record": {
+        "bytes": 1148,
+        "path": "commands/records/roadmap-alignment.json",
+        "sha256": "9bec76e2bbbdf2b97447e26fd26099bdb7b15c22eb1e3043482e5d19c405f814"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "build",
+      "commandID": "shipping-products",
+      "record": {
+        "bytes": 2814,
+        "path": "commands/records/shipping-products.json",
+        "sha256": "2fab586218f6e887fe26c18f9163a585289c6fddfce6ef0b1d1bdbb8593b5349"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "source",
+      "commandID": "source-documentation-alignment",
+      "record": {
+        "bytes": 3019,
+        "path": "commands/records/source-documentation-alignment.json",
+        "sha256": "1e1bcd0c2cd8eb0113638fab7998827f71f5a6a0585f5bfb93ab3cf1fb4670e8"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "build",
+      "commandID": "swift-release-build",
+      "record": {
+        "bytes": 2001,
+        "path": "commands/records/swift-release-build.json",
+        "sha256": "42e83a9c65c8ee85f110060f20a2ad7c3503b3250ec880522402b35f722e7a9a"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "tests",
+      "commandID": "swift-tests",
+      "record": {
+        "bytes": 1425,
+        "path": "commands/records/swift-tests.json",
+        "sha256": "d8c4d7d87ae272f5b30262b08fc98ddde1b5c42da4d355fc8f0b534c82806073"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "mutations",
+      "commandID": "v43-negative-mutations",
+      "record": {
+        "bytes": 3470,
+        "path": "commands/records/v43-negative-mutations.json",
+        "sha256": "25ea6bb6adeaa643976c06fa6e4c1ba6904b29e8e6a11448def32adea51f50b3"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "authority",
+      "commandID": "visual-authority",
+      "record": {
+        "bytes": 1378,
+        "path": "commands/records/visual-authority.json",
+        "sha256": "38166a9f8d87a7ccf14d9c9c24af540179cd3946081fea2db8dc82334e223aa1"
+      },
+      "result": "PASS"
+    },
+    {
+      "acceptanceEvidence": true,
+      "category": "assets",
+      "commandID": "wildwood-alpha",
+      "record": {
+        "bytes": 1408,
+        "path": "commands/records/wildwood-alpha.json",
+        "sha256": "ac995ddb4a8608dd32b09a43a7b20b5630cf8d0295e8d22f98624e9b2f833626"
+      },
+      "result": "PASS"
+    }
+  ],
+  "commandsComplete": true,
+  "evidenceType": "command-index",
+  "failures": [],
+  "generatedAt": "2026-08-31T22:39:27.467Z",
+  "passingCommandCount": 34,
+  "publicationState": "PREPUBLICATION",
+  "result": "PASS",
+  "schemaVersion": "1.3",
+  "sourceSHA": "c9f45a81809f1edadc5178fd9abf3f3d983567ef"
+}
