@@ -12,6 +12,11 @@ hardware observation is not required; supported Simulator, hosted, and determini
 coverage is the qualification boundary without reopening the noncontrolling package
 audit.
 
+The machine-readable [qualification evidence](QualificationEvidence.json) binds the
+current results to candidate revision `d1754b250429c17d885401388cb17ec32f1bde59`, records
+the test and product-inspection log hashes, and keeps retained UI evidence, report-only
+architecture findings, and external publication work explicitly separated.
+
 ## Verified facts
 
 - `project.yml`, the generated Xcode project, and Debug and Release build settings for

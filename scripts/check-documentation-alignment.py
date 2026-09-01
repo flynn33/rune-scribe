@@ -434,6 +434,9 @@ require(
 require("Keep Elven Series Phase C blocked" not in roadmap, "roadmap retains superseded Phase C blocker")
 
 qualification_summary = read("docs/verification/release-1.0.40/QualificationSummary.md")
+qualification_evidence = json.loads(
+    read("docs/verification/release-1.0.40/QualificationEvidence.json")
+)
 require(
     "**Status:** Repository-qualified release candidate — not shipped" in qualification_summary,
     "release qualification summary has a stale status",
@@ -453,6 +456,28 @@ require(
     and "## Repository qualification" in qualification_summary
     and "All repository-controlled release gates pass." in qualification_summary,
     "release qualification summary lacks the completed repository gate result",
+)
+require(
+    qualification_evidence.get("release", {}).get("marketingVersion") == marketing
+    and qualification_evidence.get("release", {}).get("build") == build
+    and qualification_evidence.get("qualifiedCandidateRevision")
+    == "d1754b250429c17d885401388cb17ec32f1bde59"
+    and qualification_evidence.get("regressionSuites", {})
+    .get("swiftPackage", {})
+    .get("total")
+    == 1238
+    and qualification_evidence.get("regressionSuites", {})
+    .get("python", {})
+    .get("total")
+    == 255
+    and qualification_evidence.get("releaseProducts", {}).get("inspectionPassed")
+    == 101
+    and qualification_evidence.get("releaseProducts", {}).get("inspectionFailures")
+    == 0
+    and qualification_evidence.get("forsettiP11", {}).get("mode") == "report-only"
+    and qualification_evidence.get("externalDistribution", {}).get("status")
+    == "UNASSESSED",
+    "release qualification evidence is stale or overclaims qualification",
 )
 current_release_documents = {
     "README.md": readme,
