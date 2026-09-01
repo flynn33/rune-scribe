@@ -20,7 +20,7 @@ audit.
 - Core, Progression, and UI compiled descriptors and module manifests are version
   `1.0.40`. Theme-provider and Theme Coordinator manifests retain their independent
   contract version `1.0.0`.
-- The final source passes **1,231/1,231 Swift tests**: **1,094 XCTest cases** and
+- The final source passes **1,235/1,235 Swift tests**: **1,098 XCTest cases** and
   **137 Swift Testing cases**. It also passes **255/255 Python tests**.
 - Architecture, roadmap, documentation, final completeness, and security sweeps pass.
 - Norse validation passes **60 semantic rules** and **25/25 negative mutations**.
@@ -37,9 +37,10 @@ audit.
 - Focused regressions pass for Norse unlock-audio resolution and the four optional
   Codex frame thumbnails.
 - Keychain writes use update-first upserts in the Data Protection Keychain with
-  `whenUnlockedThisDeviceOnly`. On macOS, a legacy item is removed only after the
-  replacement bytes and accessibility class are read back and verified; failed
-  replacement or verification preserves the prior value.
+  `whenUnlockedThisDeviceOnly`. On macOS, legacy migration reads the current classic
+  default keychain without deleting its source, verifies replacement bytes and
+  accessibility, and preserves imported or restored keychain entries. Explicit deletion
+  verifies a protected blocker before removing the current value, preventing remigration.
 - The iOS Release build passes. The arm64-only unsigned macOS Release build passes.
 - Built-product content, resource, and privacy inspection passes **97/101 checks**.
   Exactly four distribution-signing and entitlement checks remain pending because no

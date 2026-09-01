@@ -13,7 +13,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Version](https://img.shields.io/badge/version-1.0.40%20build%2040-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-1231%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-1235%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -305,7 +305,7 @@ the current boundary and dependency rules.
 The previously authorized version 1.0.39 build 39 roadmap-completion baseline remains a
 historical source-complete snapshot that was not shipped. Version 1.0.40 build 40 is the
 repository-qualified release candidate for the Theme Fidelity continuation. Final-source
-evidence passes 1,231/1,231 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
+evidence passes 1,235/1,235 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations, and
 27/27 evidence-hardening tests. The iOS Release build and arm64-only unsigned macOS
 Release build pass; built-product content, resource, and privacy inspection passes 97/101
@@ -387,8 +387,11 @@ nonshipment variances; the former external-framework direction is superseded.
   same key and written to an on-disk file (with complete file protection on iOS).
   Existing Keychain items are updated in place, so a failed replacement cannot erase
   the previous cipher library, PIN, or persisted lockout state. On macOS, an older
-  login-Keychain item is deleted only after an exact Data Protection Keychain copy and
-  its accessibility class have been read back and verified.
+  file-based item may be copied only from the current classic default keychain after the
+  Data Protection replacement and accessibility class are verified. The source item is
+  never deleted, including when an imported or restored keychain has become the default.
+  Explicit deletion records a this-device-only blocker so retained legacy data cannot
+  silently reappear later.
 - **Local sharing surfaces.** Sending a cipher or message hands a link, QR, or file
   to the OS share sheet; Rune Scribe does not operate a message relay. Inbound links and
   scanned QR codes are validated entirely on-device (correct version, length,
@@ -444,7 +447,7 @@ Packages/RuneScribeArchitecture/
 │   ├── RuneScribeGameCenterModule/ Frozen catalog, mapping and outbox policy
 │   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        1231 Swift package tests
+└── Tests/                        1235 Swift package tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -501,7 +504,7 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package passes **1231 package tests** (1094 XCTest cases and
+The local Swift package passes **1235 package tests** (1098 XCTest cases and
 137 Swift Testing cases), supplemented by repository architecture guards, hosted
 macOS/iOS tests, iPhone/iPad UI parity, and an
 isolated macOS parity host. The package suite uses deterministic in-memory adapters and

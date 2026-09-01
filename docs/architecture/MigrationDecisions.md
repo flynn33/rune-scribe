@@ -125,7 +125,7 @@ Core applies a second bounded queue, input-ID and content/path deduplication, pr
 | Area | Preserved anchor |
 |---|---|
 | App identity | bundle `com.runescribe.app`; version `1.0.33` build `33`; macOS 15/iOS 17 |
-| Keychain | service `com.runescribe.keystore`; accounts `symmetricKey`, `cipherLibrary`, `appPin`, `pinThrottle`; `whenUnlockedThisDeviceOnly`; macOS Data Protection Keychain selection; update-first upsert without destructive replacement; verified legacy-to-Data-Protection migration before legacy deletion |
+| Keychain | service `com.runescribe.keystore`; accounts `symmetricKey`, `cipherLibrary`, `appPin`, `pinThrottle`; `whenUnlockedThisDeviceOnly`; macOS Data Protection Keychain selection; update-first upsert without destructive replacement; read-only classic-default-keychain migration source; verified protected blocker prevents remigration after explicit deletion |
 | Cipher storage | schema 1, ISO-8601 JSON, AES-GCM combined representation, active selection, unchanged existing-install loading |
 | Contacts | `RuneScribContacts/contacts.enc`; version-1 deferred-date JSON encrypted with the existing symmetric key; atomic protected writes |
 | Fonts | `RuneScribFonts/<sha256>.ttf`; bundled ID `noto-sans-runic`, version 1, digest `615b6c1166a8c51816dc1536784acbf486547e3bed03dbfdd70910e10066793b` |
