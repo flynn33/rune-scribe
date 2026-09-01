@@ -3,7 +3,7 @@
 **Current product source:** version 1.0.40 (build 40)
 **Publication boundary:** repository-qualified release candidate; not shipped
 
-Final-source qualification passes 1,231 Swift tests, 255 Python tests, architecture,
+Final-source qualification passes 1,235 Swift tests, 255 Python tests, architecture,
 roadmap, documentation, resource, mutation, completeness, and security gates. The iOS
 Release build and arm64-only unsigned macOS Release build pass. Built-product content,
 resource, and privacy inspection passes 97/101 checks; the remaining four require a

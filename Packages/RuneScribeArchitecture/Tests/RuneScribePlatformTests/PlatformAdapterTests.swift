@@ -43,6 +43,12 @@ final class PlatformAdapterTests: XCTestCase {
                     account: RuneScribeKeychain.symmetricKeyAccount,
                     accessibility: .whenUnlockedThisDeviceOnly
                 ),
+                .read(
+                    service: AppleKeychainStore.legacyMigrationBlockerService(
+                        for: RuneScribeKeychain.service
+                    ),
+                    account: RuneScribeKeychain.symmetricKeyAccount
+                ),
                 .readLegacy(
                     service: RuneScribeKeychain.service,
                     account: RuneScribeKeychain.symmetricKeyAccount
@@ -71,6 +77,29 @@ final class PlatformAdapterTests: XCTestCase {
         )
         XCTAssertNil(deletedPayload)
     }
+
+#if os(macOS)
+    func testLegacyKeychainReadUsesOnlyTheProvidedSearchList() throws {
+        let searchList = ["default-keychain-sentinel"]
+        let readQuery = AppleKeychainQueryBuilder.legacyItem(
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.symmetricKeyAccount,
+            searchList: searchList
+        )
+        XCTAssertEqual(
+            readQuery[kSecAttrService as String] as? String,
+            RuneScribeKeychain.service
+        )
+        XCTAssertEqual(
+            readQuery[kSecAttrAccount as String] as? String,
+            RuneScribeKeychain.symmetricKeyAccount
+        )
+        XCTAssertEqual(
+            readQuery[kSecMatchSearchList as String] as? [String],
+            searchList
+        )
+    }
+#endif
 
     func testKeychainExistingValueUsesUpdateWithoutDeleteOrAdd() async throws {
         let location = SecureValueLocation(
@@ -102,9 +131,7 @@ final class PlatformAdapterTests: XCTestCase {
                     account: location.account,
                     accessibility: .whenUnlockedThisDeviceOnly
                 ),
-                .deleteLegacy(service: location.service, account: location.account),
                 .read(service: location.service, account: location.account),
-                .deleteLegacy(service: location.service, account: location.account),
             ]
         )
     }
@@ -150,7 +177,6 @@ final class PlatformAdapterTests: XCTestCase {
                     accessibility: .whenUnlockedThisDeviceOnly
                 ),
                 .read(service: location.service, account: location.account),
-                .deleteLegacy(service: location.service, account: location.account),
             ]
         )
     }
@@ -164,8 +190,10 @@ final class PlatformAdapterTests: XCTestCase {
             account: RuneScribeKeychain.symmetricKeyAccount
         )
         let payload = Data("legacy symmetric key".utf8)
+        let importedBackupPayload = Data("imported backup symmetric key".utf8)
         let operations = RecordingKeychainOperations(
-            initialLegacyValues: [location: payload]
+            initialLegacyValues: [location: payload],
+            initialImportedLegacyValues: [location: importedBackupPayload]
         )
         let store = AppleKeychainStore(operations: operations)
 
@@ -173,17 +201,31 @@ final class PlatformAdapterTests: XCTestCase {
 
         XCTAssertEqual(value, payload)
         XCTAssertEqual(operations.value(service: location.service, account: location.account), payload)
-        XCTAssertNil(
+        XCTAssertEqual(
             operations.value(
                 service: location.service,
                 account: location.account,
                 legacy: true
-            )
+            ),
+            payload
+        )
+        XCTAssertEqual(
+            operations.importedLegacyValue(
+                service: location.service,
+                account: location.account
+            ),
+            importedBackupPayload
         )
         XCTAssertEqual(
             operations.calls,
             [
                 .read(service: location.service, account: location.account),
+                .read(
+                    service: AppleKeychainStore.legacyMigrationBlockerService(
+                        for: location.service
+                    ),
+                    account: location.account
+                ),
                 .readLegacy(service: location.service, account: location.account),
                 .add(
                     data: payload,
@@ -192,7 +234,6 @@ final class PlatformAdapterTests: XCTestCase {
                     accessibility: .whenUnlockedThisDeviceOnly
                 ),
                 .read(service: location.service, account: location.account),
-                .deleteLegacy(service: location.service, account: location.account),
             ]
         )
     }
@@ -215,12 +256,13 @@ final class PlatformAdapterTests: XCTestCase {
             operations.value(service: location.service, account: location.account),
             newPayload
         )
-        XCTAssertNil(
+        XCTAssertEqual(
             operations.value(
                 service: location.service,
                 account: location.account,
                 legacy: true
-            )
+            ),
+            oldPayload
         )
         XCTAssertEqual(
             operations.calls,
@@ -231,6 +273,12 @@ final class PlatformAdapterTests: XCTestCase {
                     account: location.account,
                     accessibility: .whenUnlockedThisDeviceOnly
                 ),
+                .read(
+                    service: AppleKeychainStore.legacyMigrationBlockerService(
+                        for: location.service
+                    ),
+                    account: location.account
+                ),
                 .readLegacy(service: location.service, account: location.account),
                 .add(
                     data: oldPayload,
@@ -239,7 +287,6 @@ final class PlatformAdapterTests: XCTestCase {
                     accessibility: .whenUnlockedThisDeviceOnly
                 ),
                 .read(service: location.service, account: location.account),
-                .deleteLegacy(service: location.service, account: location.account),
                 .update(
                     data: newPayload,
                     service: location.service,
@@ -256,8 +303,10 @@ final class PlatformAdapterTests: XCTestCase {
             account: RuneScribeKeychain.appPINAccount
         )
         let payload = Data("legacy pin verifier".utf8)
+        let importedBackupPayload = Data("imported backup pin verifier".utf8)
         let operations = RecordingKeychainOperations(
             initialLegacyValues: [location: payload],
+            initialImportedLegacyValues: [location: importedBackupPayload],
             omitDataProtectionAccessibility: true
         )
         let store = AppleKeychainStore(operations: operations)
@@ -280,12 +329,36 @@ final class PlatformAdapterTests: XCTestCase {
             ),
             payload
         )
-        XCTAssertFalse(operations.calls.contains(
-            .deleteLegacy(service: location.service, account: location.account)
-        ))
+        XCTAssertEqual(
+            operations.importedLegacyValue(
+                service: location.service,
+                account: location.account
+            ),
+            importedBackupPayload
+        )
+        XCTAssertEqual(
+            operations.calls,
+            [
+                .read(service: location.service, account: location.account),
+                .read(
+                    service: AppleKeychainStore.legacyMigrationBlockerService(
+                        for: location.service
+                    ),
+                    account: location.account
+                ),
+                .readLegacy(service: location.service, account: location.account),
+                .add(
+                    data: payload,
+                    service: location.service,
+                    account: location.account,
+                    accessibility: .whenUnlockedThisDeviceOnly
+                ),
+                .read(service: location.service, account: location.account),
+            ]
+        )
     }
 
-    func testKeychainReadCleansUpLegacyCopyAfterInterruptedMigration() async throws {
+    func testKeychainReadDoesNotSweepLegacyCopyAfterInterruptedMigration() async throws {
         let location = SecureValueLocation(
             service: RuneScribeKeychain.service,
             account: RuneScribeKeychain.pinThrottleAccount
@@ -301,19 +374,237 @@ final class PlatformAdapterTests: XCTestCase {
         let value = try await store.data(service: location.service, account: location.account)
 
         XCTAssertEqual(value, currentPayload)
-        XCTAssertNil(
+        XCTAssertEqual(
             operations.value(
                 service: location.service,
                 account: location.account,
                 legacy: true
-            )
+            ),
+            staleLegacyPayload
         )
         XCTAssertEqual(
             operations.calls,
             [
                 .read(service: location.service, account: location.account),
-                .deleteLegacy(service: location.service, account: location.account),
             ]
+        )
+    }
+
+    func testProtectedKeychainReadsAndUpdatesNeverSweepLegacyKeychains()
+        async throws
+    {
+        let location = SecureValueLocation(
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.pinThrottleAccount
+        )
+        let currentPayload = Data("current protected throttle".utf8)
+        let updatedPayload = Data("updated protected throttle".utf8)
+        let defaultLegacyPayload = Data("default legacy throttle".utf8)
+        let importedLegacyPayload = Data("imported legacy throttle".utf8)
+        let operations = RecordingKeychainOperations(
+            initialValues: [location: currentPayload],
+            initialLegacyValues: [location: defaultLegacyPayload],
+            initialImportedLegacyValues: [location: importedLegacyPayload]
+        )
+        let store = AppleKeychainStore(operations: operations)
+
+        let firstValue = try await store.data(
+            service: location.service,
+            account: location.account
+        )
+        let secondValue = try await store.data(
+            service: location.service,
+            account: location.account
+        )
+        try await store.set(
+            updatedPayload,
+            service: location.service,
+            account: location.account
+        )
+
+        XCTAssertEqual(firstValue, currentPayload)
+        XCTAssertEqual(secondValue, currentPayload)
+        XCTAssertEqual(
+            operations.value(
+                service: location.service,
+                account: location.account,
+                legacy: true
+            ),
+            defaultLegacyPayload
+        )
+        XCTAssertEqual(
+            operations.importedLegacyValue(
+                service: location.service,
+                account: location.account
+            ),
+            importedLegacyPayload
+        )
+        XCTAssertEqual(
+            operations.calls,
+            [
+                .read(service: location.service, account: location.account),
+                .read(service: location.service, account: location.account),
+                .update(
+                    data: updatedPayload,
+                    service: location.service,
+                    account: location.account,
+                    accessibility: .whenUnlockedThisDeviceOnly
+                ),
+            ]
+        )
+    }
+
+    func testExplicitDeleteBlocksLegacyRemigrationAndPreservesBackupItems() async throws {
+        let location = SecureValueLocation(
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.cipherLibraryAccount
+        )
+        let protectedPayload = Data("protected cipher library".utf8)
+        let defaultLegacyPayload = Data("default legacy cipher library".utf8)
+        let importedLegacyPayload = Data("imported backup cipher library".utf8)
+        let replacementPayload = Data("replacement protected cipher library".utf8)
+        let blockerService = AppleKeychainStore.legacyMigrationBlockerService(
+            for: location.service
+        )
+        let operations = RecordingKeychainOperations(
+            initialValues: [location: protectedPayload],
+            initialLegacyValues: [location: defaultLegacyPayload],
+            initialImportedLegacyValues: [location: importedLegacyPayload]
+        )
+        let store = AppleKeychainStore(operations: operations)
+
+        try await store.delete(service: location.service, account: location.account)
+        let valueAfterDelete = try await store.data(
+            service: location.service,
+            account: location.account
+        )
+
+        XCTAssertNil(valueAfterDelete)
+        XCTAssertEqual(
+            operations.value(
+                service: location.service,
+                account: location.account,
+                legacy: true
+            ),
+            defaultLegacyPayload
+        )
+        XCTAssertEqual(
+            operations.importedLegacyValue(
+                service: location.service,
+                account: location.account
+            ),
+            importedLegacyPayload
+        )
+        XCTAssertEqual(
+            operations.value(service: blockerService, account: location.account),
+            AppleKeychainStore.legacyMigrationBlockerData
+        )
+        try await store.set(
+            replacementPayload,
+            service: location.service,
+            account: location.account
+        )
+        let replacementValue = try await store.data(
+            service: location.service,
+            account: location.account
+        )
+        XCTAssertEqual(replacementValue, replacementPayload)
+        XCTAssertEqual(
+            operations.calls,
+            [
+                .update(
+                    data: AppleKeychainStore.legacyMigrationBlockerData,
+                    service: blockerService,
+                    account: location.account,
+                    accessibility: .whenUnlockedThisDeviceOnly
+                ),
+                .add(
+                    data: AppleKeychainStore.legacyMigrationBlockerData,
+                    service: blockerService,
+                    account: location.account,
+                    accessibility: .whenUnlockedThisDeviceOnly
+                ),
+                .read(service: blockerService, account: location.account),
+                .delete(service: location.service, account: location.account),
+                .read(service: location.service, account: location.account),
+                .read(service: blockerService, account: location.account),
+                .update(
+                    data: replacementPayload,
+                    service: location.service,
+                    account: location.account,
+                    accessibility: .whenUnlockedThisDeviceOnly
+                ),
+                .read(service: blockerService, account: location.account),
+                .add(
+                    data: replacementPayload,
+                    service: location.service,
+                    account: location.account,
+                    accessibility: .whenUnlockedThisDeviceOnly
+                ),
+                .read(service: location.service, account: location.account),
+            ]
+        )
+    }
+
+    func testConcurrentDeleteCannotInterleaveWithLegacyMigration() async throws {
+        let location = SecureValueLocation(
+            service: RuneScribeKeychain.service,
+            account: RuneScribeKeychain.symmetricKeyAccount
+        )
+        let legacyPayload = Data("legacy symmetric key".utf8)
+        let operations = BlockingLegacyReadKeychainOperations(
+            initialLegacyValues: [location: legacyPayload]
+        )
+        let readStore = AppleKeychainStore(operations: operations)
+        let deleteStore = AppleKeychainStore(operations: operations)
+
+        let readTask = Task.detached {
+            try await readStore.data(service: location.service, account: location.account)
+        }
+        XCTAssertEqual(
+            operations.legacyReadStarted.wait(timeout: .now() + 1),
+            .success
+        )
+
+        let deleteInvocationStarted = DispatchSemaphore(value: 0)
+        let deleteTask = Task.detached {
+            deleteInvocationStarted.signal()
+            try await deleteStore.delete(
+                service: location.service,
+                account: location.account
+            )
+        }
+        XCTAssertEqual(
+            deleteInvocationStarted.wait(timeout: .now() + 1),
+            .success
+        )
+        XCTAssertEqual(
+            operations.blockerWriteStarted.wait(timeout: .now() + 0.25),
+            .timedOut,
+            "Delete must wait for the complete migration transaction"
+        )
+
+        operations.allowLegacyReadToFinish.signal()
+        let migratedValue = try await readTask.value
+        XCTAssertEqual(migratedValue, legacyPayload)
+        XCTAssertEqual(
+            operations.blockerWriteStarted.wait(timeout: .now() + 1),
+            .success
+        )
+        try await deleteTask.value
+
+        let valueAfterDelete = try await readStore.data(
+            service: location.service,
+            account: location.account
+        )
+        XCTAssertNil(valueAfterDelete)
+        XCTAssertEqual(
+            operations.value(
+                service: location.service,
+                account: location.account,
+                legacy: true
+            ),
+            legacyPayload
         )
     }
 #endif
@@ -1224,7 +1515,6 @@ private enum KeychainCall: Equatable {
     case read(service: String, account: String)
     case delete(service: String, account: String)
     case readLegacy(service: String, account: String)
-    case deleteLegacy(service: String, account: String)
 }
 
 private final class RecordingKeychainOperations: KeychainOperations {
@@ -1232,6 +1522,7 @@ private final class RecordingKeychainOperations: KeychainOperations {
         var calls: [KeychainCall] = []
         var values: [SecureValueLocation: Data]
         var legacyValues: [SecureValueLocation: Data]
+        var importedLegacyValues: [SecureValueLocation: Data]
         let forcedUpdateStatus: OSStatus?
         let forcedAddStatus: OSStatus?
         let forcedDeleteStatus: OSStatus?
@@ -1245,6 +1536,7 @@ private final class RecordingKeychainOperations: KeychainOperations {
     init(
         initialValues: [SecureValueLocation: Data] = [:],
         initialLegacyValues: [SecureValueLocation: Data] = [:],
+        initialImportedLegacyValues: [SecureValueLocation: Data] = [:],
         forcedUpdateStatus: OSStatus? = nil,
         forcedAddStatus: OSStatus? = nil,
         forcedDeleteStatus: OSStatus? = nil,
@@ -1256,6 +1548,7 @@ private final class RecordingKeychainOperations: KeychainOperations {
             initialState: State(
                 values: initialValues,
                 legacyValues: initialLegacyValues,
+                importedLegacyValues: initialImportedLegacyValues,
                 forcedUpdateStatus: forcedUpdateStatus,
                 forcedAddStatus: forcedAddStatus,
                 forcedDeleteStatus: forcedDeleteStatus,
@@ -1274,6 +1567,14 @@ private final class RecordingKeychainOperations: KeychainOperations {
         state.withLock { state in
             let location = SecureValueLocation(service: service, account: account)
             return legacy ? state.legacyValues[location] : state.values[location]
+        }
+    }
+
+    func importedLegacyValue(service: String, account: String) -> Data? {
+        state.withLock { state in
+            state.importedLegacyValues[
+                SecureValueLocation(service: service, account: account)
+            ]
         }
     }
 
@@ -1359,9 +1660,8 @@ private final class RecordingKeychainOperations: KeychainOperations {
     func readLegacy(service: String, account: String) -> KeychainReadResult {
         state.withLock { state in
             state.calls.append(.readLegacy(service: service, account: account))
-            let data = state.legacyValues[
-                SecureValueLocation(service: service, account: account)
-            ]
+            let location = SecureValueLocation(service: service, account: account)
+            let data = state.legacyValues[location]
             return KeychainReadResult(
                 status: data == nil ? errSecItemNotFound : errSecSuccess,
                 data: data,
@@ -1369,17 +1669,74 @@ private final class RecordingKeychainOperations: KeychainOperations {
             )
         }
     }
+}
 
-    func deleteLegacy(service: String, account: String) -> OSStatus {
-        state.withLock { state in
-            state.calls.append(.deleteLegacy(service: service, account: account))
-            let key = SecureValueLocation(service: service, account: account)
-            return state.legacyValues.removeValue(forKey: key) == nil
-                ? errSecItemNotFound
-                : errSecSuccess
+#if os(macOS)
+private final class BlockingLegacyReadKeychainOperations: KeychainOperations,
+    @unchecked Sendable
+{
+    let legacyReadStarted = DispatchSemaphore(value: 0)
+    let allowLegacyReadToFinish = DispatchSemaphore(value: 0)
+    let blockerWriteStarted = DispatchSemaphore(value: 0)
+
+    private let backing: RecordingKeychainOperations
+
+    init(initialLegacyValues: [SecureValueLocation: Data]) {
+        backing = RecordingKeychainOperations(initialLegacyValues: initialLegacyValues)
+    }
+
+    func value(service: String, account: String, legacy: Bool = false) -> Data? {
+        backing.value(service: service, account: account, legacy: legacy)
+    }
+
+    func update(
+        data: Data,
+        service: String,
+        account: String,
+        accessibility: KeychainAccessibility
+    ) -> OSStatus {
+        if service == AppleKeychainStore.legacyMigrationBlockerService(
+            for: RuneScribeKeychain.service
+        ) {
+            blockerWriteStarted.signal()
         }
+        return backing.update(
+            data: data,
+            service: service,
+            account: account,
+            accessibility: accessibility
+        )
+    }
+
+    func add(
+        data: Data,
+        service: String,
+        account: String,
+        accessibility: KeychainAccessibility
+    ) -> OSStatus {
+        backing.add(
+            data: data,
+            service: service,
+            account: account,
+            accessibility: accessibility
+        )
+    }
+
+    func read(service: String, account: String) -> KeychainReadResult {
+        backing.read(service: service, account: account)
+    }
+
+    func delete(service: String, account: String) -> OSStatus {
+        backing.delete(service: service, account: account)
+    }
+
+    func readLegacy(service: String, account: String) -> KeychainReadResult {
+        legacyReadStarted.signal()
+        allowLegacyReadToFinish.wait()
+        return backing.readLegacy(service: service, account: account)
     }
 }
+#endif
 
 @MainActor
 private final class ClipboardFixture {

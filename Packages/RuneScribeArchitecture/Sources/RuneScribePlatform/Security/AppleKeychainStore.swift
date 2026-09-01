@@ -35,6 +35,11 @@ public enum AppleKeychainStoreError: Error, Equatable, LocalizedError, Sendable 
 /// the prior value. New items use the `whenUnlockedThisDeviceOnly` accessibility
 /// class, and updates reassert that same protection.
 public struct AppleKeychainStore: SecureValueStore, Sendable {
+    static let legacyMigrationBlockerData = Data(
+        "RuneScribe.LegacyMigrationBlocked.v1".utf8
+    )
+    private static let transactionLock = KeychainTransactionLock()
+
     private let operations: any KeychainOperations
 
     public init() {
@@ -46,16 +51,21 @@ public struct AppleKeychainStore: SecureValueStore, Sendable {
     }
 
     public func data(service: String, account: String) async throws -> Data? {
+        try Self.transactionLock.perform {
+            try dataTransaction(service: service, account: account)
+        }
+    }
+
+    private func dataTransaction(service: String, account: String) throws -> Data? {
         let result = operations.read(service: service, account: account)
         switch result.status {
         case errSecSuccess:
-            let data = try verifiedDataProtectionValue(result)
-#if os(macOS)
-            try deleteLegacyValueIfPresent(service: service, account: account)
-#endif
-            return data
+            return try verifiedDataProtectionValue(result)
         case errSecItemNotFound:
 #if os(macOS)
+            if try legacyMigrationIsBlocked(service: service, account: account) {
+                return nil
+            }
             return try migrateLegacyValueIfNeeded(service: service, account: account)
 #else
             return nil
@@ -66,6 +76,12 @@ public struct AppleKeychainStore: SecureValueStore, Sendable {
     }
 
     public func set(_ data: Data, service: String, account: String) async throws {
+        try Self.transactionLock.perform {
+            try setTransaction(data, service: service, account: account)
+        }
+    }
+
+    private func setTransaction(_ data: Data, service: String, account: String) throws {
         let accessibility = KeychainAccessibility.whenUnlockedThisDeviceOnly
         let updateStatus = operations.update(
             data: data,
@@ -75,9 +91,6 @@ public struct AppleKeychainStore: SecureValueStore, Sendable {
         )
         switch updateStatus {
         case errSecSuccess:
-#if os(macOS)
-            try deleteLegacyValueIfPresent(service: service, account: account)
-#endif
             return
         case errSecItemNotFound:
             break
@@ -86,7 +99,9 @@ public struct AppleKeychainStore: SecureValueStore, Sendable {
         }
 
 #if os(macOS)
-        if try migrateLegacyValueIfNeeded(service: service, account: account) != nil {
+        if try !legacyMigrationIsBlocked(service: service, account: account),
+           try migrateLegacyValueIfNeeded(service: service, account: account) != nil
+        {
             let migratedUpdateStatus = operations.update(
                 data: data,
                 service: service,
@@ -112,8 +127,14 @@ public struct AppleKeychainStore: SecureValueStore, Sendable {
     }
 
     public func delete(service: String, account: String) async throws {
+        try Self.transactionLock.perform {
+            try deleteTransaction(service: service, account: account)
+        }
+    }
+
+    private func deleteTransaction(service: String, account: String) throws {
 #if os(macOS)
-        try deleteLegacyValueIfPresent(service: service, account: account)
+        try blockLegacyMigration(service: service, account: account)
 #endif
         let status = operations.delete(service: service, account: account)
         guard status == errSecSuccess || status == errSecItemNotFound else {
@@ -132,13 +153,61 @@ public struct AppleKeychainStore: SecureValueStore, Sendable {
     }
 
 #if os(macOS)
-    private func deleteLegacyValueIfPresent(
+    static func legacyMigrationBlockerService(for service: String) -> String {
+        "\(service).legacy-migration-blocker"
+    }
+
+    private func legacyMigrationIsBlocked(
         service: String,
         account: String
-    ) throws {
-        let status = operations.deleteLegacy(service: service, account: account)
-        guard status == errSecSuccess || status == errSecItemNotFound else {
-            throw AppleKeychainStoreError.deleteFailed(status)
+    ) throws -> Bool {
+        let result = operations.read(
+            service: Self.legacyMigrationBlockerService(for: service),
+            account: account
+        )
+        switch result.status {
+        case errSecItemNotFound:
+            return false
+        case errSecSuccess:
+            break
+        default:
+            throw AppleKeychainStoreError.retrieveFailed(result.status)
+        }
+        guard try verifiedDataProtectionValue(result) == Self.legacyMigrationBlockerData else {
+            throw AppleKeychainStoreError.migrationVerificationFailed
+        }
+        return true
+    }
+
+    private func blockLegacyMigration(service: String, account: String) throws {
+        let blockerService = Self.legacyMigrationBlockerService(for: service)
+        let accessibility = KeychainAccessibility.whenUnlockedThisDeviceOnly
+        let updateStatus = operations.update(
+            data: Self.legacyMigrationBlockerData,
+            service: blockerService,
+            account: account,
+            accessibility: accessibility
+        )
+        if updateStatus == errSecItemNotFound {
+            let addStatus = operations.add(
+                data: Self.legacyMigrationBlockerData,
+                service: blockerService,
+                account: account,
+                accessibility: accessibility
+            )
+            guard addStatus == errSecSuccess || addStatus == errSecDuplicateItem else {
+                throw AppleKeychainStoreError.storeFailed(addStatus)
+            }
+        } else if updateStatus != errSecSuccess {
+            throw AppleKeychainStoreError.storeFailed(updateStatus)
+        }
+
+        let verification = operations.read(service: blockerService, account: account)
+        guard verification.status == errSecSuccess,
+              verification.data == Self.legacyMigrationBlockerData,
+              verification.accessibility == accessibility
+        else {
+            throw AppleKeychainStoreError.migrationVerificationFailed
         }
     }
 
@@ -177,13 +246,22 @@ public struct AppleKeychainStore: SecureValueStore, Sendable {
             throw AppleKeychainStoreError.migrationVerificationFailed
         }
 
-        let deleteStatus = operations.deleteLegacy(service: service, account: account)
-        guard deleteStatus == errSecSuccess || deleteStatus == errSecItemNotFound else {
-            throw AppleKeychainStoreError.deleteFailed(deleteStatus)
-        }
         return legacyData
     }
 #endif
+}
+
+/// Serializes each complete read, write, migration, or deletion transaction.
+/// The lock is shared across store instances so a deletion cannot interleave
+/// with a legacy migration for the same Keychain location.
+private final class KeychainTransactionLock: @unchecked Sendable {
+    private let lock = NSLock()
+
+    func perform<Result>(_ operation: () throws -> Result) rethrows -> Result {
+        lock.lock()
+        defer { lock.unlock() }
+        return try operation()
+    }
 }
 
 enum KeychainAccessibility: Equatable, Sendable {
@@ -206,7 +284,6 @@ protocol KeychainOperations: Sendable {
     func read(service: String, account: String) -> KeychainReadResult
     func delete(service: String, account: String) -> OSStatus
     func readLegacy(service: String, account: String) -> KeychainReadResult
-    func deleteLegacy(service: String, account: String) -> OSStatus
 }
 
 struct KeychainReadResult: Equatable, Sendable {
@@ -229,13 +306,22 @@ enum AppleKeychainQueryBuilder {
         return query
     }
 
-    static func legacyItem(service: String, account: String) -> [String: Any] {
+#if os(macOS)
+    static func legacyItem(
+        service: String,
+        account: String,
+        searchList: [Any]
+    ) -> [String: Any] {
+        // Automatic migration reads only the current classic default keychain.
+        // The source item remains there after a verified Data Protection copy.
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
+            kSecMatchSearchList as String: searchList,
         ]
     }
+#endif
 }
 
 private struct SecurityKeychainOperations: KeychainOperations {
@@ -280,9 +366,40 @@ private struct SecurityKeychainOperations: KeychainOperations {
         )
     }
 
+#if os(macOS)
+    // SecKeychainCopyDefault is the only local-SDK API that identifies the
+    // classic default keychain used by pre-Data-Protection writes. Keep this
+    // deprecated compatibility bridge isolated behind the protocol witness.
+    @available(macOS, deprecated: 10.10)
+#endif
     func readLegacy(service: String, account: String) -> KeychainReadResult {
 #if os(macOS)
-        read(query: AppleKeychainQueryBuilder.legacyItem(service: service, account: account))
+        var defaultKeychain: SecKeychain?
+        let defaultStatus = SecKeychainCopyDefault(&defaultKeychain)
+        if defaultStatus == errSecNoDefaultKeychain
+            || defaultStatus == errSecNoSuchKeychain
+            || (defaultStatus == errSecSuccess && defaultKeychain == nil)
+        {
+            return KeychainReadResult(
+                status: errSecItemNotFound,
+                data: nil,
+                accessibility: nil
+            )
+        }
+        guard defaultStatus == errSecSuccess, let defaultKeychain else {
+            return KeychainReadResult(
+                status: defaultStatus,
+                data: nil,
+                accessibility: nil
+            )
+        }
+        return read(
+            query: AppleKeychainQueryBuilder.legacyItem(
+                service: service,
+                account: account,
+                searchList: [defaultKeychain]
+            )
+        )
 #else
         KeychainReadResult(status: errSecItemNotFound, data: nil, accessibility: nil)
 #endif
@@ -322,15 +439,6 @@ private struct SecurityKeychainOperations: KeychainOperations {
             account: account
         )
         return SecItemDelete(query as CFDictionary)
-    }
-
-    func deleteLegacy(service: String, account: String) -> OSStatus {
-#if os(macOS)
-        let query = AppleKeychainQueryBuilder.legacyItem(service: service, account: account)
-        return SecItemDelete(query as CFDictionary)
-#else
-        errSecItemNotFound
-#endif
     }
 
     private func securityValue(for accessibility: KeychainAccessibility) -> CFString {

@@ -11,9 +11,11 @@ analytics, or a developer-operated message service.
 
 Cipher keys, plaintext, full messages, encrypted package bytes, App Lock data, and the
 authoritative local Vault remain on the device. Cipher-library keys use this-device-only
-Data Protection Keychain storage. On macOS, legacy items are removed only after the
-replacement bytes and accessibility class are verified. Optional Contacts access is used
-only to organize ciphers locally;
+Data Protection Keychain storage. On macOS, legacy migration reads only the classic
+default keychain and never deletes its file-based source, including when an imported or
+restored keychain is the current default. The replacement bytes and accessibility class
+are verified, and explicit deletion records a this-device-only blocker that prevents
+legacy remigration. Optional Contacts access is used only to organize ciphers locally;
 contact names, addresses, system identifiers, and relationship identifiers are not sent
 to iCloud or Game Center. On iOS, camera access is used only to scan a QR code; camera
 frames are processed on-device and are not retained or uploaded.

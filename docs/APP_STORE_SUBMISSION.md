@@ -275,7 +275,7 @@ Internal release summary; this is **not a shipment claim**:
 4. Themed typed-package sharing/receiving, static preview, Encounter and provenance state
 5. Local-first private progression synchronization and optional Game Center policy
 6. Core, runtime, providers, Progression, Cloud, Game Center, and UI boundaries guarded
-7. Final-source checks pass: 1,231/1,231 Swift tests, 255/255 Python tests, 60 Norse
+7. Final-source checks pass: 1,235/1,235 Swift tests, 255/255 Python tests, 60 Norse
    semantic rules, 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping
    negative mutations, and 27/27 evidence-hardening tests
 8. The iOS Release and arm64-only unsigned macOS Release builds pass; built-product

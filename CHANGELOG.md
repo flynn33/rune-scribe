@@ -21,8 +21,10 @@ release work and reviewed against the project version before merge. The format f
   coverage that rejects missing or altered declarations.
 - Replace destructive Keychain delete-then-add writes with update-first upserts so a
   failed cipher-library, App Lock, or throttle update preserves the prior protected
-  value, and migrate legacy macOS items only after verifying their exact Data Protection
-  Keychain replacement.
+  value. Legacy macOS migration treats the current classic default keychain as a
+  read-only source, verifies the Data Protection Keychain copy, and never deletes a
+  file-based item. Explicit deletion writes a protected blocker before removing the
+  current value, preventing retained legacy or backup data from being remigrated.
 - Correct the Norse unlock-audio semantic role contract so all four integrity-pinned
   sound cues resolve through the runtime instead of silently falling back.
 - Wire each optional Codex's dedicated frame thumbnail into the descriptor and UI
@@ -30,7 +32,7 @@ release work and reviewed against the project version before merge. The format f
 - Replace the SwiftUI keyboard-toolbar dismissal control with a focus-aware safe-area
   control that remains tappable on iPhone and iPad and avoids the framework's invalid
   frame-dimension runtime fault.
-- Qualify the final source with 1,231/1,231 Swift tests, 255/255 Python tests, 60 Norse
+- Qualify the final source with 1,235/1,235 Swift tests, 255/255 Python tests, 60 Norse
   semantic rules, 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative
   mutations, and 27/27 evidence-hardening tests.
 - Pass the iOS Release build, the arm64-only unsigned macOS Release build, and 97/101

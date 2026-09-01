@@ -38,7 +38,7 @@ effective only where they do not conflict with that authority.
 ## Current result
 
 Version 1.0.40 build 40 carries the source-complete authorized roadmap baseline and the
-Theme Fidelity source remediation. Final-source qualification passes 1,231/1,231 Swift
+Theme Fidelity source remediation. Final-source qualification passes 1,235/1,235 Swift
 tests, 255/255 Python tests, architecture, roadmap, documentation, resource, mutation,
 completeness, and security gates. The iOS Release build and arm64-only unsigned macOS
 Release build pass. Built-product content, resource, and privacy inspection passes 97/101

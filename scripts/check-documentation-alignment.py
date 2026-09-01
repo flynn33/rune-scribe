@@ -297,14 +297,14 @@ require(
     in readme_roadmap,
     "README Wave 6 roadmap scope differs",
 )
-require("tests-1231%20package" in readme, "README package-test badge is stale")
+require("tests-1235%20package" in readme, "README package-test badge is stale")
 require(
-    "**1231 package tests** (1094 XCTest cases and 137 Swift Testing cases)"
+    "**1235 package tests** (1098 XCTest cases and 137 Swift Testing cases)"
     in normalized_readme,
     "README package-test inventory is stale",
 )
 require(
-    "1,231/1,231 Swift tests" in normalized_readme_roadmap
+    "1,235/1,235 Swift tests" in normalized_readme_roadmap
     and "255/255 Python tests" in normalized_readme_roadmap
     and "97/101" in normalized_readme_roadmap
     and "iPad Pro 13-inch (M5) qualification on iOS 26.5 passes 5 tests" in normalized_readme_roadmap
@@ -439,7 +439,7 @@ require(
     "release qualification summary has a stale status",
 )
 require(
-    "**1,231/1,231 Swift tests**" in qualification_summary
+    "**1,235/1,235 Swift tests**" in qualification_summary
     and "**255/255 Python tests**" in qualification_summary
     and "**97/101 checks**" in qualification_summary
     and "passes **7 tests**" in qualification_summary
