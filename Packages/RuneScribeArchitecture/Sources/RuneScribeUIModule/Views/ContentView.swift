@@ -235,8 +235,7 @@ struct ContentView: View {
     private let glyphSize: CGFloat = 20
     private let initialViewportProbeID: String
     private let initialComposeCaptureLength: ThemeCaptureIdentifier.ComposeLength?
-    private let forcesScrollableWorkspaceLayout: Bool
-    private let qualificationViewportWidth: CGFloat?
+    private let onInputTextChange: @MainActor (String) -> Void
 
     init(
         initialInputText: String = "",
@@ -244,13 +243,11 @@ struct ContentView: View {
         initialViewport: ContentViewInitialViewport? = nil,
         initialViewportProbeID: String = "workspace.text-frame",
         initialComposeCaptureLength: ThemeCaptureIdentifier.ComposeLength? = nil,
-        forcesScrollableWorkspaceLayout: Bool = false,
-        qualificationViewportWidth: CGFloat? = nil
+        onInputTextChange: @escaping @MainActor (String) -> Void = { _ in }
     ) {
         self.initialViewportProbeID = initialViewportProbeID
         self.initialComposeCaptureLength = initialComposeCaptureLength
-        self.forcesScrollableWorkspaceLayout = forcesScrollableWorkspaceLayout
-        self.qualificationViewportWidth = qualificationViewportWidth
+        self.onInputTextChange = onInputTextChange
         _inputText = State(initialValue: initialInputText)
         _initialScrollTarget = State(initialValue: initialViewport?.rawValue)
         guard let initialSettledArtifact else { return }
@@ -417,6 +414,9 @@ struct ContentView: View {
         .onChange(of: session.isLocked) { _, isLocked in
             if isLocked { dismissPresentedContentForLock() }
         }
+        .onChange(of: inputText, initial: true) { _, value in
+            onInputTextChange(value)
+        }
         .onChange(of: isWorkspaceRevealBlocked, initial: true) { _, isBlocked in
             session.setRevealBlocker(.workspaceModal, active: isBlocked)
         }
@@ -426,46 +426,36 @@ struct ContentView: View {
         .onChange(of: session.activeCipher?.id) { _, _ in handleEditingContextChange() }
     }
 
-    @ViewBuilder
     private var workspaceBodyContainer: some View {
-        if usesScrollableWorkspaceLayout {
-            GeometryReader { proxy in
-                #if os(iOS)
-                let viewportWidth: CGFloat? = qualificationViewportWidth ?? proxy.size.width
-                #else
-                let viewportWidth = qualificationViewportWidth
-                #endif
-                let maximumCanvasWidth = viewportWidth.map {
-                    let horizontalLimit = $0 - (2 * RuneMetrics.pad) - 20
-                    let verticalLimit = max(
-                        1,
-                        proxy.size.height - Self.workspaceCanvasVerticalInset(
-                            pageCount: resultArtifactComposition?.pages.count
-                        )
-                    )
-                        * CGFloat(ShareArtifactRenderPlan.outputWidth)
-                        / CGFloat(ShareArtifactRenderPlan.outputHeight)
-                    return max(1, min(horizontalLimit, verticalLimit))
-                }
-                ScrollView {
-                    workspaceBody(maximumCanvasWidth: maximumCanvasWidth)
-                        .frame(minHeight: proxy.size.height, alignment: .top)
-                }
-                .scrollPosition(id: $initialScrollTarget, anchor: .bottom)
-                .scrollDismissesKeyboard(.immediately)
-                .scrollBounceBehavior(.basedOnSize)
+        GeometryReader { proxy in
+            let maximumCanvasWidth = Self.workspaceMaximumCanvasWidth(
+                availableSize: proxy.size,
+                pageCount: resultArtifactComposition?.pages.count
+            )
+            ScrollView {
+                workspaceBody(maximumCanvasWidth: maximumCanvasWidth)
+                    .frame(minHeight: proxy.size.height, alignment: .top)
             }
-        } else {
-            workspaceBody(maximumCanvasWidth: nil)
+            .scrollPosition(id: $initialScrollTarget, anchor: .bottom)
+            .scrollDismissesKeyboard(.immediately)
+            .scrollBounceBehavior(.basedOnSize)
         }
     }
 
-    private var usesScrollableWorkspaceLayout: Bool {
-        #if os(iOS)
-        forcesScrollableWorkspaceLayout || dynamicTypeSize.isAccessibilitySize
-        #else
-        forcesScrollableWorkspaceLayout
-        #endif
+    nonisolated static func workspaceMaximumCanvasWidth(
+        availableSize: CGSize,
+        pageCount: Int?
+    ) -> CGFloat {
+        let width = availableSize.width.isFinite ? max(1, availableSize.width) : 1
+        let height = availableSize.height.isFinite ? max(1, availableSize.height) : 1
+        let horizontalLimit = max(1, width - (2 * RuneMetrics.pad) - 20)
+        let verticalLimit = max(
+            1,
+            height - workspaceCanvasVerticalInset(pageCount: pageCount)
+        )
+            * CGFloat(ShareArtifactRenderPlan.outputWidth)
+            / CGFloat(ShareArtifactRenderPlan.outputHeight)
+        return max(1, min(horizontalLimit, verticalLimit))
     }
 
     nonisolated static func workspaceCanvasVerticalInset(pageCount: Int?) -> CGFloat {
@@ -603,6 +593,23 @@ struct ContentView: View {
                 .fill(Color.runeParchment)
 
             GeometryReader { geometry in
+                let protectedInsets = ThemeChromePanelContentGeometry.protectedInsets(
+                    pixelSize: panelBorderPixelSize,
+                    renderedWidth: geometry.size.width,
+                    minimumInsets: EdgeInsets()
+                )
+                let protectedMaximumCanvasWidth = maximumCanvasWidth.map {
+                    max(
+                        1,
+                        min(
+                            $0,
+                            geometry.size.width
+                                - protectedInsets.leading
+                                - protectedInsets.trailing
+                                - 20
+                        )
+                    )
+                }
                 ThemeChromeProtectedContentLayout(
                     panelPixelSize: panelBorderPixelSize,
                     minimumInsets: EdgeInsets(
@@ -671,7 +678,7 @@ struct ContentView: View {
                                 productionMessagePresentation(
                                     composition: resultArtifactComposition,
                                     presentation: presentation,
-                                    maximumCanvasWidth: maximumCanvasWidth
+                                    maximumCanvasWidth: protectedMaximumCanvasWidth
                                 )
                             } else {
                                 ScrollView {
@@ -731,79 +738,13 @@ struct ContentView: View {
         presentation: ActiveThemeVisualPresentation,
         maximumCanvasWidth: CGFloat?
     ) -> some View {
-        if composition.requiredImageResourceIDs.allSatisfy({
-            presentation.image(for: $0) != nil
-        }) {
-            ViewThatFits(in: .horizontal) {
-                CodexComposeWorkspacePanel(
-                    model: CodexComposeWorkspacePanelModel(
-                        composition: composition,
-                        cipherName: session.activeCipher?.label ?? "Cipher",
-                        relicName: presentation.plan.selectedRelic?.displayName
-                            ?? "Relic",
-                        sealName: presentation.plan.selectedSeal?.displayName
-                            ?? "None",
-                        primaryActionTitle: "Preview Message"
-                    ),
-                    image: { requiredProductionImage($0, from: presentation) },
-                    navigate: navigateFromComposePanel,
-                    selectCipher: { showLibrary = true },
-                    selectRelic: { artifactBrowser = .relic },
-                    selectSeal: { artifactBrowser = .seal },
-                    performPrimaryAction: openInscriptionPreview
-                )
-                .frame(minWidth: 560)
-
-                CodexMessagePanel(
-                    model: CodexMessagePanelModel(
-                        format: messagePanelFormat(composition),
-                        composition: composition
-                    ),
-                    image: { requiredProductionImage($0, from: presentation) }
-                )
-            }
-            .padding(10)
-            .frame(maxWidth: maximumCanvasWidth ?? .infinity, maxHeight: .infinity)
-        } else {
-            ThemeArtifactPreview(
-                plan: composition,
-                maximumCanvasWidth: maximumCanvasWidth,
-                image: { presentation.image(for: $0) }
-            )
-            .padding(10)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-    }
-
-    private func navigateFromComposePanel(_ destination: CodexComposeNavigationItem) {
-        switch destination {
-        case .compose:
-            break
-        case .cipher:
-            showLibrary = true
-        case .vault:
-            showVaultProgress = true
-        case .settings:
-            showSettings = true
-        }
-    }
-
-    private func messagePanelFormat(
-        _ composition: ThemeArtifactCompositionPlan
-    ) -> CodexMessagePanelFormat {
-        let hardLineCount = composition.pages.first?.inscription
-            .components(separatedBy: "\n").count ?? 1
-        return hardLineCount > 2 ? .long : .short
-    }
-
-    private func requiredProductionImage(
-        _ resourceID: ThemeResourceID,
-        from presentation: ActiveThemeVisualPresentation
-    ) -> Image {
-        guard let image = presentation.image(for: resourceID) else {
-            preconditionFailure("Missing admitted production image: \(resourceID.rawValue)")
-        }
-        return image
+        ThemeArtifactPreview(
+            plan: composition,
+            maximumCanvasWidth: maximumCanvasWidth,
+            image: { presentation.image(for: $0) }
+        )
+        .padding(10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var composeCaptureIdentifier: String? {
@@ -1083,10 +1024,13 @@ struct ContentView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 0)
-        .background(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous).fill(Color.runeParchment))
-        .overlay {
-            ThemeChromeImage(slot: .tabSelector)
-                .allowsHitTesting(false)
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                    .fill(Color.runeParchment)
+                ThemeChromeImage(slot: .tabSelector)
+                    .allowsHitTesting(false)
+            }
         }
     }
 
@@ -1134,13 +1078,13 @@ struct ContentView: View {
         }
         .padding(.horizontal, 12)
         .frame(minHeight: 44)
-        .background(
-            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                .fill(Color.runeParchment)
-        )
-        .overlay {
-            ThemeChromeImage(slot: .tabSelector)
-                .allowsHitTesting(false)
+        .background {
+            ZStack {
+                RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
+                    .fill(Color.runeParchment)
+                ThemeChromeImage(slot: .tabSelector)
+                    .allowsHitTesting(false)
+            }
         }
         .disabled(actionTask != nil || boxPhase != .editing)
     }

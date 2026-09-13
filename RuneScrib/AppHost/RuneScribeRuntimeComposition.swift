@@ -36,6 +36,7 @@ private enum RuntimeCompositionQualificationError: Error { case invalidLaunch }
         injectedCoreFactory: AnyModuleFactory? = nil,
         qualificationResolution: ThemeFidelityQualificationLaunch.Resolution =
             ThemeFidelityQualificationLaunch.resolve(),
+        processEnvironment: [String: String] = ProcessInfo.processInfo.environment,
         moduleStateStore: @autoclosure () -> (any ModuleStateStore)? = try? AppleSQLiteModuleStateStore(),
         inboundFiles: @autoclosure () -> any InboundFileReader = AppleInboundFileReader(),
         cloudSync: (any CloudSyncTransport)? = nil
@@ -45,11 +46,9 @@ private enum RuntimeCompositionQualificationError: Error { case invalidLaunch }
         case .invalid, .validated:
             platformEnvironment = .isolatedQualification()
         case .notRequested:
-            platformEnvironment = ApplePlatformServiceEnvironment(
-                moduleStateStore: moduleStateStore(),
-                inboundFiles: inboundFiles(),
-                cloudSync: cloudSync
-            )
+            platformEnvironment = .normalRoute(processEnvironment: processEnvironment,
+                moduleStateStore: moduleStateStore(), inboundFiles: inboundFiles(),
+                cloudSync: cloudSync)
         }
         let moduleBundles = RuneScribeProgressionModuleBootstrap.ownerScopedResourceBundles
             .merging(RuneScribeNorseThemeModuleBootstrap.ownerScopedResourceBundles) { _, replacement in replacement }
@@ -221,5 +220,6 @@ private enum RuntimeCompositionQualificationError: Error { case invalidLaunch }
         .iOS
         #endif
     }
+
 }
 private enum RuntimeActivationState { case idle, starting, running, stopping }

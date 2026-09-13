@@ -28,9 +28,9 @@ final class CodexProductionAssembliesTests: XCTestCase {
         ].compactMap { $0 })
         XCTAssertEqual(workspace.requiredImageResourceIDs, expected)
         XCTAssertEqual(message.requiredImageResourceIDs, expected)
-        XCTAssertEqual(message.page, plan.pages[0])
+        XCTAssertEqual(try XCTUnwrap(message.page), plan.pages[0])
         XCTAssertEqual(message.format.title, "Short Message")
-        XCTAssertEqual(message.format.lineCountLabel, "2 Lines")
+        XCTAssertEqual(message.pageStatusLabel, "Page 1 of 1")
     }
 
     func testMessageAndShareModelsFallBackToFirstCompositionPage() throws {
@@ -49,11 +49,11 @@ final class CodexProductionAssembliesTests: XCTestCase {
             pageIndex: -1
         )
 
-        XCTAssertEqual(message.page, plan.pages[0])
-        XCTAssertEqual(share.page, plan.pages[0])
+        XCTAssertEqual(try XCTUnwrap(message.page), plan.pages[0])
+        XCTAssertEqual(try XCTUnwrap(share.page), plan.pages[0])
         XCTAssertEqual(share.requiredImageResourceIDs, message.requiredImageResourceIDs)
         XCTAssertEqual(message.format.title, "Long Message")
-        XCTAssertEqual(message.format.lineCountLabel, "6 Lines")
+        XCTAssertEqual(message.pageStatusLabel, "Page 1 of 1")
     }
 
     func testRelicMessageCanvasUsesTheSharedArtifactRenderer() throws {
@@ -142,6 +142,23 @@ final class CodexProductionAssembliesTests: XCTestCase {
         XCTAssertEqual(CodexMessagePanelFormat.short.topPaddingFraction, 0.036)
         XCTAssertEqual(CodexMessagePanelFormat.long.headingSpacingFraction, 0.004)
         XCTAssertEqual(CodexMessagePanelFormat.long.artworkVerticalOffsetFraction, -0.036)
+    }
+
+    func testCanonicalWorkspaceControlsHavePlatformFloorsAndTruthfulPageStatus() throws {
+        let sourceURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Sources/RuneScribeUIModule/Views/CodexProductionAssemblies.swift")
+        let source = try String(contentsOf: sourceURL, encoding: .utf8)
+
+        XCTAssertTrue(source.contains("minHeight: minimumInteractiveDimension"))
+        XCTAssertTrue(source.contains("max(\n                    minimumInteractiveDimension"))
+        XCTAssertTrue(source.contains("44\n        #else\n        28"))
+        XCTAssertTrue(source.contains("model.pageStatusLabel.uppercased()"))
+        XCTAssertFalse(source.contains("lineCountLabel"))
+        XCTAssertFalse(source.contains("minHeight: 45 * scale"))
+        XCTAssertFalse(source.contains("minHeight: 43 * scale"))
     }
 
     func testWideComposeWorkspaceScaleKeepsControlsInsideResizedViewport() {
@@ -590,8 +607,7 @@ final class CodexProductionAssembliesTests: XCTestCase {
             .appendingPathComponent("Sources/RuneScribeUIModule")
         let bindings: [(file: String, type: String)] = [
             ("Views/CodexCatalogRoot.swift", "CodexArtifactSpecimenCard("),
-            ("Views/ContentView.swift", "CodexComposeWorkspacePanel("),
-            ("Views/ContentView.swift", "CodexMessagePanel("),
+            ("Views/ContentView.swift", "ThemeArtifactPreview("),
             ("Views/SettingsView.swift", "CodexBackgroundTreatmentPanel("),
             ("Views/UnlockRevealView.swift", "CodexMasteryRewardsPanel("),
             ("Views/VaultProgressView.swift", "CodexVaultCardStateStack("),
@@ -609,6 +625,13 @@ final class CodexProductionAssembliesTests: XCTestCase {
             )
             XCTAssertFalse(source.contains("ThemeCanonicalRenderRequest"))
         }
+
+        let content = try String(
+            contentsOf: moduleRoot.appendingPathComponent("Views/ContentView.swift"),
+            encoding: .utf8
+        )
+        XCTAssertFalse(content.contains("CodexComposeWorkspacePanel("))
+        XCTAssertFalse(content.contains("CodexMessagePanel("))
 
         let shareBuilder = try String(
             contentsOf: moduleRoot.appendingPathComponent("Sharing/ShareBuilderView.swift"),

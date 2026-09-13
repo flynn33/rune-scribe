@@ -489,14 +489,72 @@ final class ThemePresentationScreenTests: XCTestCase {
         let primary = ReceivedCipherPresentationStyle.style(for: .primary)
         let shareCard = ReceivedCipherPresentationStyle.style(for: .shareCard)
         XCTAssertEqual(primary.plaintextPointSize, 40)
-        XCTAssertEqual(primary.plaintextMaximumWidth, 560)
-        XCTAssertEqual(primary.plaintextLineLimit, 2)
-        XCTAssertEqual(primary.plaintextVerticalOffset, -52)
         XCTAssertEqual(shareCard.plaintextPointSize, 42)
-        XCTAssertEqual(shareCard.plaintextMaximumWidth, 460)
-        XCTAssertEqual(shareCard.plaintextLineLimit, 2)
-        XCTAssertEqual(shareCard.plaintextVerticalOffset, -82)
         XCTAssertNotEqual(primary, shareCard)
+    }
+
+    func testReceivedMetadataRowsBindCipherNameAndRevealTruthfulFontLabeling() throws {
+        let sourceURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Sources/RuneScribeUIModule/Views/ThemePresentationScreens.swift")
+        let source = try String(contentsOf: sourceURL, encoding: .utf8)
+
+        let receivedRowsStart = try XCTUnwrap(source.range(of: "private var receivedRows"))
+        let receivedRowsEnd = try XCTUnwrap(source.range(
+            of: "private var receivedDetailRows",
+            range: receivedRowsStart.upperBound..<source.endIndex
+        ))
+        let receivedRows = String(
+            source[receivedRowsStart.lowerBound..<receivedRowsEnd.lowerBound]
+        )
+        XCTAssertTrue(receivedRows.contains("value: pending.cipherName"))
+        XCTAssertFalse(receivedRows.contains("value: summary.relicName"))
+        XCTAssertTrue(receivedRows.contains("title: \"Cipher\""))
+        XCTAssertFalse(receivedRows.contains("title: \"Imported Font\""))
+
+        let receivedDetailsStart = receivedRowsEnd
+        let receivedDetailsEnd = try XCTUnwrap(source.range(
+            of: "private var receivedTimestamp",
+            range: receivedDetailsStart.upperBound..<source.endIndex
+        ))
+        let receivedDetails = String(
+            source[receivedDetailsStart.lowerBound..<receivedDetailsEnd.lowerBound]
+        )
+        XCTAssertFalse(receivedDetails.contains("title: \"Imported Font\""))
+        XCTAssertTrue(
+            receivedDetails.contains("title: scriptMetadataTitle")
+        )
+    }
+
+    func testReceivedMetadataPanelsDoNotAdvertiseFalseDisclosureTargets() throws {
+        let sourceURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Sources/RuneScribeUIModule/Views/ThemePresentationScreens.swift")
+        let source = try String(contentsOf: sourceURL, encoding: .utf8)
+
+        let metadataStart = try XCTUnwrap(source.range(of: "private func receivedMetadata"))
+        let actionStart = try XCTUnwrap(source.range(
+            of: "private func shareCardMetadataPanel",
+            range: metadataStart.upperBound..<source.endIndex
+        ))
+        let metadataSection = String(
+            source[metadataStart.lowerBound..<actionStart.lowerBound]
+        )
+        XCTAssertFalse(metadataSection.contains("showsDisclosure: true"))
+
+        let shareCardStart = actionStart
+        let shareCardEnd = try XCTUnwrap(source.range(
+            of: "private func shareCardMetadataIcon",
+            range: shareCardStart.upperBound..<source.endIndex
+        ))
+        let shareCardSection = String(
+            source[shareCardStart.lowerBound..<shareCardEnd.lowerBound]
+        )
+        XCTAssertFalse(shareCardSection.contains("chevron.right"))
     }
 
     func testReceivedTimestampIsDeterministicForInjectedClockAndEnvironment() throws {

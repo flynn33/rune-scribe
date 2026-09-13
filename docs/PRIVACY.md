@@ -1,7 +1,7 @@
 # Rune Scribe Privacy Policy
 
-**Effective date:** August 31, 2026
-**Applies to:** Rune Scribe 1.0.40 (build 40) for iOS and macOS
+**Effective date:** September 13, 2026
+**Applies to:** Rune Scribe 1.0.41 (build 41) for iOS and macOS
 
 Rune Scribe is a local-first encryption and sharing app from Raven Forge Software. It
 does not require a Raven Forge account and does not use advertising, tracking,

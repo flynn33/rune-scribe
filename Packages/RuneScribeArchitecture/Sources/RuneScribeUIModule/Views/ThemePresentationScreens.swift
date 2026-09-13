@@ -184,26 +184,13 @@ struct ReceivedCipherPresentationBinding {
 
 struct ReceivedCipherPresentationStyle: Equatable, Sendable {
     let plaintextPointSize: Double
-    let plaintextMaximumWidth: Double
-    let plaintextLineLimit: Int
-    let plaintextVerticalOffset: Double
 
     static func style(for state: ReceivedCipherPresentationState) -> Self {
         switch state {
         case .primary:
-            Self(
-                plaintextPointSize: 40,
-                plaintextMaximumWidth: 560,
-                plaintextLineLimit: 2,
-                plaintextVerticalOffset: -52
-            )
+            Self(plaintextPointSize: 40)
         case .shareCard:
-            Self(
-                plaintextPointSize: 42,
-                plaintextMaximumWidth: 460,
-                plaintextLineLimit: 2,
-                plaintextVerticalOffset: -82
-            )
+            Self(plaintextPointSize: 42)
         }
     }
 }
@@ -930,7 +917,7 @@ struct ReceivedCipherPresentationView: View {
             ThemePresentationMetadataRow(
                 id: "cipher",
                 title: "Cipher",
-                value: summary.relicName,
+                value: pending.cipherName,
                 systemImage: "hexagon"
             ),
             ThemePresentationMetadataRow(
@@ -941,7 +928,7 @@ struct ReceivedCipherPresentationView: View {
             ),
             ThemePresentationMetadataRow(
                 id: "font",
-                title: "Imported Font",
+                title: scriptMetadataTitle,
                 value: summary.scriptName,
                 systemImage: "character"
             ),
@@ -964,8 +951,8 @@ struct ReceivedCipherPresentationView: View {
             ),
             ThemePresentationDetailRow(
                 id: "font",
-                title: "Imported Font",
-                detail: shareCardScriptName,
+                title: scriptMetadataTitle,
+                detail: summary.scriptName,
                 systemImage: "character"
             ),
         ]
@@ -1020,7 +1007,7 @@ struct ReceivedCipherPresentationView: View {
             ThemePresentationMetadataPanel(
                 rows: receivedRows,
                 metrics: metrics,
-                showsDisclosure: true
+                showsDisclosure: false
             )
         case .shareCard:
             shareCardMetadataPanel(metrics: metrics)
@@ -1059,11 +1046,6 @@ struct ReceivedCipherPresentationView: View {
                     }
 
                     Spacer(minLength: 12 * metrics.scale)
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: metrics.fontSize(21), weight: .medium))
-                        .foregroundStyle(Color.runeSilver)
-                        .accessibilityHidden(true)
                 }
                 .frame(
                     minHeight: metrics.usesAccessibleLayout
@@ -1280,7 +1262,6 @@ struct ReceivedCipherPresentationView: View {
         metrics: ThemePresentationScreenMetrics,
         height: CGFloat
     ) -> some View {
-        let style = ReceivedCipherPresentationStyle.style(for: state)
         return ZStack {
             if let page = plan.pages.first {
                 ThemeArtifactCanvas(
@@ -1292,23 +1273,7 @@ struct ReceivedCipherPresentationView: View {
                     sealScaleOverride: receivedMedallion?.scale,
                     image: image
                 )
-                .frame(maxWidth: .infinity)
-            }
-
-            if !metrics.usesAccessibleLayout {
-                Text(pending.plaintext)
-                    .font(.system(
-                        size: metrics.fontSize(CGFloat(style.plaintextPointSize)),
-                        weight: .regular,
-                        design: .serif
-                    ))
-                    .foregroundStyle(Color.runeTextInverse)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(style.plaintextLineLimit)
-                    .minimumScaleFactor(0.72)
-                    .frame(width: CGFloat(style.plaintextMaximumWidth) * metrics.scale)
-                    .offset(y: CGFloat(style.plaintextVerticalOffset) * metrics.scale)
-                    .accessibilityHidden(true)
+                    .frame(maxWidth: .infinity)
             }
         }
         .frame(height: height)
@@ -1329,32 +1294,31 @@ struct ReceivedCipherPresentationView: View {
 
     @ViewBuilder
     private func accessiblePlaintext(metrics: ThemePresentationScreenMetrics) -> some View {
-        if metrics.usesAccessibleLayout {
-            let style = ReceivedCipherPresentationStyle.style(for: state)
-            Text(pending.plaintext)
-                .font(.system(
-                    size: metrics.fontSize(CGFloat(style.plaintextPointSize)),
-                    weight: .regular,
-                    design: .serif
-                ))
-                .foregroundStyle(Color.runeTextPrimary)
-                .multilineTextAlignment(.leading)
-                .lineLimit(nil)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(max(12, 24 * metrics.scale))
-                .background {
-                    RoundedRectangle(cornerRadius: metrics.cornerRadius, style: .continuous)
-                        .fill(Color.runeNavy.opacity(0.84))
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: metrics.cornerRadius, style: .continuous)
-                        .strokeBorder(Color.runeGold.opacity(0.34), lineWidth: 1)
-                }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel("Decoded message")
-                .accessibilityValue(pending.plaintext)
-        }
+        let style = ReceivedCipherPresentationStyle.style(for: state)
+        Text(pending.plaintext)
+            .font(.system(
+                size: metrics.fontSize(CGFloat(style.plaintextPointSize)),
+                weight: .regular,
+                design: .rounded
+            ))
+            .textSelection(.enabled)
+            .foregroundStyle(Color.runeTextPrimary)
+            .multilineTextAlignment(.leading)
+            .lineLimit(nil)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(max(12, 24 * metrics.scale))
+            .background {
+                RoundedRectangle(cornerRadius: metrics.cornerRadius, style: .continuous)
+                    .fill(Color.runeNavy.opacity(0.84))
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: metrics.cornerRadius, style: .continuous)
+                    .strokeBorder(Color.runeGold.opacity(0.34), lineWidth: 1)
+            }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Decoded message")
+            .accessibilityValue(pending.plaintext)
     }
 
     @ViewBuilder
@@ -1522,9 +1486,7 @@ struct ReceivedCipherPresentationView: View {
         return "Sent earlier"
     }
 
-    private var shareCardScriptName: String {
-        let suffix = " Script"
-        guard summary.scriptName.hasSuffix(suffix) else { return summary.scriptName }
-        return String(summary.scriptName.dropLast(suffix.count))
+    private var scriptMetadataTitle: String {
+        summary.scriptName.hasSuffix(" Script") ? "Script" : "Font"
     }
 }

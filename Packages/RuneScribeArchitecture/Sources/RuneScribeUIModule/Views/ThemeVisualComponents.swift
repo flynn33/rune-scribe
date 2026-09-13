@@ -216,54 +216,57 @@ struct ThemeChromeImage: View {
     let slot: ThemeChromeVisualSlot
 
     var body: some View {
-        if let reference = session.activeThemeVisualPresentation?
-            .chromeImageReference(for: slot) {
-            switch slot {
-            case .cornerOrnament:
-                if let image = reference.image {
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .accessibilityHidden(true)
-                }
-            case .panelBorder, .divider, .primaryButton, .tabSelector:
-                if let pixelSize = reference.integrity.pixelSize,
-                   ThemeChromeNineSliceGeometry.capInsets(
-                       for: slot,
-                       pixelSize: pixelSize
-                   ) != nil {
-                    GeometryReader { proxy in
-                        if let renderPlan = ThemeChromeNineSliceGeometry.renderPlan(
-                            for: slot,
-                            pixelSize: pixelSize,
-                            renderedSize: proxy.size
-                        ), let image = reference.image(
-                            pixelsPerPoint: renderPlan.pixelsPerPoint
-                        ) {
-                            image
-                                .resizable(
-                                    capInsets: renderPlan.capInsets,
-                                    resizingMode: .stretch
-                                )
-                                .frame(
-                                    width: proxy.size.width,
-                                    height: proxy.size.height
-                                )
-                                .clipped()
-                        }
+        Group {
+            if let reference = session.activeThemeVisualPresentation?
+                .chromeImageReference(for: slot) {
+                switch slot {
+                case .cornerOrnament:
+                    if let image = reference.image {
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .accessibilityLabel("Decorative theme artwork")
                     }
-                    .accessibilityHidden(true)
-                } else if let image = reference.image {
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .clipped()
-                        .accessibilityHidden(true)
+                case .panelBorder, .divider, .primaryButton, .tabSelector:
+                    if let pixelSize = reference.integrity.pixelSize,
+                       ThemeChromeNineSliceGeometry.capInsets(
+                           for: slot,
+                           pixelSize: pixelSize
+                       ) != nil {
+                        GeometryReader { proxy in
+                            if let renderPlan = ThemeChromeNineSliceGeometry.renderPlan(
+                                for: slot,
+                                pixelSize: pixelSize,
+                                renderedSize: proxy.size
+                            ), let image = reference.image(
+                                pixelsPerPoint: renderPlan.pixelsPerPoint
+                            ) {
+                                image
+                                    .resizable(
+                                        capInsets: renderPlan.capInsets,
+                                        resizingMode: .stretch
+                                    )
+                                    .frame(
+                                        width: proxy.size.width,
+                                        height: proxy.size.height
+                                    )
+                                    .clipped()
+                                    .accessibilityLabel("Decorative theme artwork")
+                            }
+                        }
+                    } else if let image = reference.image {
+                        image
+                            .resizable()
+                            .scaledToFit()
+                            .clipped()
+                            .accessibilityLabel("Decorative theme artwork")
+                    }
                 }
+            } else {
+                Color.clear
             }
-        } else {
-            Color.clear.accessibilityHidden(true)
         }
+        .accessibilityHidden(true)
     }
 }
 
@@ -1105,17 +1108,44 @@ struct ThemeArtifactPreview: View {
 
                 if plan.pages.count > 1 {
                     HStack {
-                        Button("Previous") { pageCursor.movePrevious() }
+                        Button { pageCursor.movePrevious() } label: {
+                            Text("Previous")
+                                .font(.caption.weight(.semibold))
+                                .lineLimit(1)
+                                .allowsTightening(true)
+                                .minimumScaleFactor(0.75)
+                        }
                             .disabled(pageCursor.index == 0)
+                            .frame(
+                                minWidth: minimumInteractiveDimension,
+                                minHeight: minimumInteractiveDimension
+                            )
+                            .accessibilityLabel("Previous page")
+                            .accessibilityIdentifier("theme.artifact-preview.previous-page")
                         Spacer()
                         Text("Page \(pageCursor.index + 1) of \(plan.pages.count)")
                             .font(.caption.monospacedDigit())
                             .foregroundStyle(Color.runeSilver)
+                            .accessibilityLabel(
+                                "Page \(pageCursor.index + 1) of \(plan.pages.count)"
+                            )
                         Spacer()
-                        Button("Next") {
+                        Button {
                             pageCursor.moveNext(pageCount: plan.pages.count)
+                        } label: {
+                            Text("Next")
+                                .font(.caption.weight(.semibold))
+                                .lineLimit(1)
+                                .allowsTightening(true)
+                                .minimumScaleFactor(0.75)
                         }
                         .disabled(pageCursor.index == plan.pages.count - 1)
+                        .frame(
+                            minWidth: minimumInteractiveDimension,
+                            minHeight: minimumInteractiveDimension
+                        )
+                        .accessibilityLabel("Next page")
+                        .accessibilityIdentifier("theme.artifact-preview.next-page")
                     }
                     .buttonStyle(RuneSecondaryButtonStyle())
                 }
@@ -1135,6 +1165,14 @@ struct ThemeArtifactPreview: View {
 
     private var currentPage: ShareArtifactRenderPage? {
         pageCursor.page(in: plan.pages)
+    }
+
+    private var minimumInteractiveDimension: CGFloat {
+        #if os(iOS)
+        44
+        #else
+        28
+        #endif
     }
 
     private var artifactCanvasIdentifier: String {

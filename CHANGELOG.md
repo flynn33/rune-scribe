@@ -8,6 +8,23 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [Unreleased]
 
+## [1.0.41] - 2026-09-13
+
+- Make the normal compose and result workspace responsive at compact iPhone, iPad,
+  and resizable Mac widths, with one scroll policy and protected theme-chrome insets.
+- Replace the duplicate result-screen message shell with the canonical themed Artifact
+  preview, preserving full rune payloads and truthful multi-page navigation.
+- Keep received plaintext complete, selectable, and reflowable, and remove misleading
+  truncation metadata and inactive disclosure affordances.
+- Enforce App Lock as a real interaction and accessibility boundary so protected editor
+  and Settings content cannot remain reachable behind the lock surface.
+- Add normal-route iPhone, iPad, and macOS application coverage for long messages,
+  paging, rotation/resizing, control dimensions, fresh-install lock behavior, and the
+  five existing Codices without adding product features or replacing approved artwork.
+- Advance the repository candidate to version 1.0.41 build 41. Distribution signing,
+  archive, export, notarization, upload, and shipment remain owner-operated and were not
+  performed.
+
 ## [1.0.40] - 2026-08-31
 
 - Replace the contradictory v4.2 visual-comparison bindings with separate v4.3

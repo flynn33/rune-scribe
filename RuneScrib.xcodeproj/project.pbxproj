@@ -86,6 +86,7 @@
 		B82FD0E550E20EA8EEA02D7F /* RuneScribeThemeGloamthornModule in Frameworks */ = {isa = PBXBuildFile; productRef = 07D4F90FAF61D13576919B92 /* RuneScribeThemeGloamthornModule */; };
 		B98E838AC8959237CB19A737 /* RuneScribeProgressionModule in Frameworks */ = {isa = PBXBuildFile; productRef = 4C674DBE6F68251A40CF79DC /* RuneScribeProgressionModule */; };
 		BACDA3BF9E691F058222B9D8 /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = 55959CF0E79725D49E7E63CF /* RuneScribeThemeWildwoodModule */; };
+		BBDE889FE559FC9B9D193E7A /* RuneScribeMacAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA4DDCBBBBC405F5414582E7 /* RuneScribeMacAppUITests.swift */; };
 		BC5AD914530E38D7488FDEB0 /* DestinationCompatibilityMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9CA154D72FA203A0E62B33 /* DestinationCompatibilityMatrixTests.swift */; };
 		BE33ADBB23CDC9ABFF5B2E0F /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 415BD6C69E96BAF82603E6EB /* RuneScribeTestSupport */; };
 		C0CF74DC37DD18955598A48F /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = B9866BDCD5A898F67A3260A2 /* RuneScribeTestSupport */; };
@@ -146,6 +147,13 @@
 			remoteGlobalIDString = 31B4924C70AF8C14A282AF11;
 			remoteInfo = "RuneScrib-iOS";
 		};
+		AC9D888F639FBD16744DC71B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6F186131C8C4C80632D23A6E;
+			remoteInfo = "RuneScrib-macOS";
+		};
 		CDF9BB784C987E98AA226AE9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
@@ -185,7 +193,9 @@
 		ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribMacParityHostApp.swift; sourceTree = "<group>"; };
 		AF3A31BA4896C83FECD82430 /* Comparison-Authority-v1.3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Comparison-Authority-v1.3.json"; sourceTree = "<group>"; };
 		B6164CCB0C4A4342270DC5CA /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
+		BA4DDCBBBBC405F5414582E7 /* RuneScribeMacAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeMacAppUITests.swift; sourceTree = "<group>"; };
 		BD88036C0FE8E9BFB419B68D /* RuneScribMacParityHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuneScribMacParityHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C20A6D89B252A66318E1C671 /* RuneScribMacAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribMacAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlatformPresentationTests.swift; sourceTree = "<group>"; };
 		C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeRuntimeComposition.swift; sourceTree = "<group>"; };
 		C4EDEF8A8D6DD1D6CEEF3BE5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -346,6 +356,7 @@
 				D8A25D577325F05220F4D89A /* RuneScribArchitectureTests */,
 				D4AB11C27235965DA1BF0E1A /* RuneScribIOSTests */,
 				B03791E99B717082B44F5378 /* RuneScribIOSUITests */,
+				9AF8B44ED4130B0663AAD6AF /* RuneScribMacAppUITests */,
 				5272F0D466DF0BE5C97CFC68 /* RuneScribMacParityHost */,
 				FF0DB0269C9429B0955322F7 /* RuneScribMacParityTests */,
 				EC820C2DB89AA33F3C1A4976 /* RuneScribTests */,
@@ -404,6 +415,14 @@
 				440678049B6FEABABD99B823 /* Resources */,
 			);
 			path = RuneScrib;
+			sourceTree = "<group>";
+		};
+		9AF8B44ED4130B0663AAD6AF /* RuneScribMacAppUITests */ = {
+			isa = PBXGroup;
+			children = (
+				BA4DDCBBBBC405F5414582E7 /* RuneScribeMacAppUITests.swift */,
+			);
+			path = RuneScribMacAppUITests;
 			sourceTree = "<group>";
 		};
 		B03791E99B717082B44F5378 /* RuneScribIOSUITests */ = {
@@ -470,6 +489,7 @@
 				0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */,
 				1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */,
 				4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */,
+				C20A6D89B252A66318E1C671 /* RuneScribMacAppUITests.xctest */,
 				BD88036C0FE8E9BFB419B68D /* RuneScribMacParityHost.app */,
 				4B31D2BF5EC1E6D84B23D71C /* RuneScribMacParityTests.xctest */,
 				FA608DAC88F63B1040378BDD /* RuneScribMacParityUITests.xctest */,
@@ -602,6 +622,24 @@
 			productName = "RuneScrib-iOS";
 			productReference = A9AB41A04A01C3ECB14E8D8B /* RuneScrib.app */;
 			productType = "com.apple.product-type.application";
+		};
+		5F089E85A118D8E15CB4F19D /* RuneScribMacAppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3FDB4F03571496CE8A1378A6 /* Build configuration list for PBXNativeTarget "RuneScribMacAppUITests" */;
+			buildPhases = (
+				6C5985542B0A00942D9D9693 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				48F94EB7B3E7226CA5618066 /* PBXTargetDependency */,
+			);
+			name = RuneScribMacAppUITests;
+			packageProductDependencies = (
+			);
+			productName = RuneScribMacAppUITests;
+			productReference = C20A6D89B252A66318E1C671 /* RuneScribMacAppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		6F186131C8C4C80632D23A6E /* RuneScrib-macOS */ = {
 			isa = PBXNativeTarget;
@@ -778,6 +816,11 @@
 						DevelopmentTeam = 9AQ2C2838M;
 						ProvisioningStyle = Automatic;
 					};
+					5F089E85A118D8E15CB4F19D = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+						TestTargetID = 6F186131C8C4C80632D23A6E;
+					};
 					9DC46FB3B5C4089358C387BB = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Manual;
@@ -818,6 +861,7 @@
 				E1E13F36C6719C0391C636A6 /* RuneScribTests */,
 				D286A58674744CBB19D5476D /* RuneScribIOSTests */,
 				2DD54B0EDB51920A4B33A6A2 /* RuneScribIOSUITests */,
+				5F089E85A118D8E15CB4F19D /* RuneScribMacAppUITests */,
 				B0EAA089C274A9658D6E37A7 /* RuneScribMacParityHost */,
 				C9187941FA930F4FC80F6495 /* RuneScribMacParityTests */,
 				271E332C6AC3B88822FC04DF /* RuneScribMacParityUITests */,
@@ -931,6 +975,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6C5985542B0A00942D9D9693 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BBDE889FE559FC9B9D193E7A /* RuneScribeMacAppUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7354BF7F9D0A09CC1F50EBE5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -991,6 +1043,11 @@
 			isa = PBXTargetDependency;
 			target = 31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */;
 			targetProxy = 2AFCA44169FBCE9C02D119EF /* PBXContainerItemProxy */;
+		};
+		48F94EB7B3E7226CA5618066 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6F186131C8C4C80632D23A6E /* RuneScrib-macOS */;
+			targetProxy = AC9D888F639FBD16744DC71B /* PBXContainerItemProxy */;
 		};
 		779F9DC8A94A20826B95ACE8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1074,7 +1131,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 40;
+				CURRENT_PROJECT_VERSION = 41;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = "";
@@ -1094,7 +1151,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.40;
+				MARKETING_VERSION = 1.0.41;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(RUNESCRIBE_APP_BUNDLE_IDENTIFIER)";
@@ -1338,6 +1395,28 @@
 			};
 			name = Release;
 		};
+		84ACA41F8A56C611703A58F9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-ui-tests";
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = "RuneScrib-macOS";
+			};
+			name = Release;
+		};
 		A533D89F3656A94CD1D465BE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1397,7 +1476,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 40;
+				CURRENT_PROJECT_VERSION = 41;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = "";
@@ -1423,7 +1502,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.40;
+				MARKETING_VERSION = 1.0.41;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1455,6 +1534,28 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-parity-ui-tests";
 				SDKROOT = macosx;
 				TEST_TARGET_NAME = RuneScribMacParityHost;
+			};
+			name = Debug;
+		};
+		DFDCF6D39FCF36176419C124 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.runescribe.app.macos-ui-tests";
+				SDKROOT = macosx;
+				TEST_TARGET_NAME = "RuneScrib-macOS";
 			};
 			name = Debug;
 		};
@@ -1561,6 +1662,15 @@
 			buildConfigurations = (
 				E4FF2E202F317B93D1508BCD /* Debug */,
 				750F4277C32C4B4726512627 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3FDB4F03571496CE8A1378A6 /* Build configuration list for PBXNativeTarget "RuneScribMacAppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DFDCF6D39FCF36176419C124 /* Debug */,
+				84ACA41F8A56C611703A58F9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

@@ -83,21 +83,16 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertTrue(content.contains("Color.clear.ignoresSafeArea()"))
     }
 
-    func testAccessibilityWorkspaceScrollsBelowAStableHeader() throws {
+    func testEveryWorkspaceUsesTheSameGeometryDrivenScrollPolicyBelowAStableHeader() throws {
         let views = viewsDirectory()
         let content = try source("ContentView.swift", in: views)
         let header = try source("RuneTheme.swift", in: views)
 
         XCTAssertTrue(content.contains("private var workspaceBodyContainer"))
-        XCTAssertTrue(content.contains("dynamicTypeSize.isAccessibilitySize"))
         XCTAssertTrue(content.contains("GeometryReader { proxy in"))
-        XCTAssertTrue(
-            content.contains(
-                "let viewportWidth: CGFloat? = qualificationViewportWidth ?? proxy.size.width"
-            )
-        )
-        XCTAssertTrue(content.contains("let maximumCanvasWidth = viewportWidth.map"))
-        XCTAssertTrue(content.contains("ScrollView {\n                    workspaceBody"))
+        XCTAssertTrue(content.contains("workspaceMaximumCanvasWidth("))
+        XCTAssertTrue(content.contains("availableSize: proxy.size"))
+        XCTAssertTrue(content.contains("ScrollView {\n                workspaceBody"))
         XCTAssertTrue(content.contains(".frame(minHeight: proxy.size.height, alignment: .top)"))
         XCTAssertTrue(content.contains(".scrollPosition(id: $initialScrollTarget, anchor: .bottom)"))
         XCTAssertTrue(content.contains(".id(ContentViewInitialViewport.resultActions.rawValue)"))
@@ -108,6 +103,10 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertTrue(content.contains("ThemeChromeProtectedContentLayout("))
         XCTAssertTrue(content.contains("panelPixelSize: panelBorderPixelSize"))
         XCTAssertTrue(content.contains("private var panelBorderPixelSize: ThemePixelSize?"))
+        XCTAssertTrue(content.contains("ThemeChromeImage(slot: .tabSelector)"))
+        XCTAssertFalse(
+            content.contains(".overlay {\n            ThemeChromeImage(slot: .tabSelector)")
+        )
         XCTAssertTrue(
             content.contains(".themeCaptureViewportIdentifier(composeCaptureIdentifier)")
         )
@@ -119,6 +118,8 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertFalse(content.contains("ToolbarItemGroup(placement: .keyboard)"))
         XCTAssertTrue(content.contains("Button(\"Done\") { inputIsFocused = false }"))
         XCTAssertTrue(content.contains(".accessibilityIdentifier(\"workspace.keyboard.done\")"))
+        XCTAssertFalse(content.contains("forcesScrollableWorkspaceLayout"))
+        XCTAssertFalse(content.contains("qualificationViewportWidth"))
         XCTAssertFalse(header.contains("let id = UUID()"))
         XCTAssertTrue(header.contains("var id: String { \"\\(systemImage).\\(help)\" }"))
 
@@ -152,6 +153,65 @@ final class ThemeRootRemediationTests: XCTestCase {
             ),
             318
         )
+
+        XCTAssertEqual(
+            ContentView.workspaceMaximumCanvasWidth(
+                availableSize: CGSize(width: 390, height: 844),
+                pageCount: 1
+            ),
+            322
+        )
+        XCTAssertEqual(
+            ContentView.workspaceMaximumCanvasWidth(
+                availableSize: CGSize(width: 390, height: 200),
+                pageCount: 2
+            ),
+            162.666_667,
+            accuracy: 0.000_001
+        )
+        XCTAssertEqual(
+            ContentView.workspaceMaximumCanvasWidth(
+                availableSize: .zero,
+                pageCount: nil
+            ),
+            1
+        )
+        XCTAssertEqual(
+            ContentView.workspaceMaximumCanvasWidth(
+                availableSize: CGSize(width: CGFloat.infinity, height: CGFloat.nan),
+                pageCount: 2
+            ),
+            1
+        )
+    }
+
+    func testSettledWorkspaceUsesAnArtifactOnlyPreviewAndLockIsolatesBackgroundContent() throws {
+        let views = viewsDirectory()
+        let content = try source("ContentView.swift", in: views)
+        let root = try source("RootView.swift", in: views)
+
+        let presentationStart = try XCTUnwrap(
+            content.range(of: "private func productionMessagePresentation")
+        )
+        let captureStart = try XCTUnwrap(
+            content.range(
+                of: "private var composeCaptureIdentifier",
+                range: presentationStart.upperBound..<content.endIndex
+            )
+        )
+        let presentation = String(
+            content[presentationStart.lowerBound..<captureStart.lowerBound]
+        )
+        XCTAssertTrue(presentation.contains("ThemeArtifactPreview("))
+        XCTAssertFalse(presentation.contains("CodexComposeWorkspacePanel("))
+        XCTAssertFalse(presentation.contains("CodexMessagePanel("))
+
+        XCTAssertTrue(root.contains("if !session.isLocked && !showSplash"))
+        XCTAssertTrue(root.contains("initialInputText: workspaceDraft"))
+        XCTAssertTrue(root.contains("onInputTextChange: { workspaceDraft = $0 }"))
+        XCTAssertTrue(content.contains("onChange(of: inputText, initial: true)"))
+        XCTAssertTrue(root.contains(".accessibilityAddTraits(.isModal)"))
+        XCTAssertFalse(root.contains(".accessibilityHidden(session.isLocked || showSplash)"))
     }
 
     func testPrimaryPresentationsUseSharedSemanticSurfaces() throws {

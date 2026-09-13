@@ -98,6 +98,7 @@ struct RootView: View {
     @State private var didEvaluateColdLaunchSplash = false
     @State private var isEmergencyThemeWarningDismissed = false
     @State private var showsEmergencyThemeWarningDetails = false
+    @State private var workspaceDraft = ""
 
     init(
         session: RuneScribeUISession,
@@ -145,7 +146,12 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            ContentView()
+            if !session.isLocked && !showSplash {
+                ContentView(
+                    initialInputText: workspaceDraft,
+                    onInputTextChange: { workspaceDraft = $0 }
+                )
+            }
 
             if showsEmergencyThemeWarning {
                 VStack(spacing: 0) {
@@ -173,6 +179,7 @@ struct RootView: View {
 
             if session.isLocked {
                 LockView()
+                    .accessibilityAddTraits(.isModal)
                     .transition(.opacity)
                     .zIndex(1)
             }

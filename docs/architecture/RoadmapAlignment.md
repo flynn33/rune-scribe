@@ -4,7 +4,14 @@
 
 ## Authority and scope
 
-**Current application:** version 1.0.40 build 40
+**Current application:** version 1.0.41 build 41
+
+The current UI/Xcode remediation is mapped in the
+[September 2026 amendment](../product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md)
+and qualified in the
+[current report](../verification/ui-xcode-remediation/QualificationSummary.md). The
+locked v1.0 roadmap and earlier evidence remain historical authority for their original
+scope.
 
 The hash-locked [Codex System Specification](../product-roadmap/Rune-Scribe-Codex-System-Spec-v1.0.md)
 and [Current-App Delta and Implementation Roadmap](../product-roadmap/Rune-Scribe-Codex-Current-App-Delta-and-Implementation-Roadmap-v1.0.md)
@@ -37,15 +44,18 @@ effective only where they do not conflict with that authority.
 
 ## Current result
 
-Version 1.0.40 build 40 carries the source-complete authorized roadmap baseline and the
-Theme Fidelity source remediation. Final-source qualification passes 1,238/1,238 Swift
+Version 1.0.41 build 41 carries the source-complete authorized roadmap baseline, Theme
+Fidelity source remediation, and the bounded UI/Xcode repair described by W01-W09.
+Current-source results are recorded in the linked UI/Xcode qualification report. The
+retained version 1.0.40 source qualification passed 1,238/1,238 Swift
 tests, 255/255 Python tests, architecture, roadmap, documentation, resource, mutation,
 named source and mutation gates. The iOS Release build and arm64-only unsigned macOS
 Release build pass. Local ad-hoc built-product content, resource, privacy, signature,
 Hardened Runtime, and entitlement inspection passes 101/101 checks; distribution identity
 and provisioning are explicitly unassessed.
-The candidate is a **repository-qualified release candidate** and is deliberately **not
-shipped**. All repository-controlled release gates pass. The repository now contains:
+Those 1.0.40 results remain historical rather than evidence for the new source. The
+1.0.41 candidate is deliberately **NOT SHIPPED**; its repository-qualification decision
+is made only by the current report. The repository now contains:
 
 - app-owned runtime composition, bounded contracts, capability policy, thin hosts,
   serialized ingress, and permanent dependency guards;
@@ -222,7 +232,7 @@ For the retained roadmap-completion baseline, those gates established:
 - **MANUAL HARDWARE VALIDATION SUPERSEDED**
 - **NOT SHIPPED**
 
-The version 1.0.40 build 40 release candidate adds a separate product acceptance boundary:
+The version 1.0.41 build 41 candidate uses the same product acceptance boundary:
 
 - **FINAL-SOURCE REPOSITORY GATES PASS**
 - **REPOSITORY-QUALIFIED RELEASE CANDIDATE**

@@ -595,8 +595,7 @@ final class ThemeFidelityMatrixTests: XCTestCase {
                     let route = try ThemeFidelityRoute.make(
                         surface: surface,
                         model: model,
-                        session: fixture.session,
-                        qualificationViewportWidth: destination.pointSize.width
+                        session: fixture.session
                     )
                     let contentSeed = ThemeFidelityContentSeed.make(
                         surface: surface,
@@ -1120,10 +1119,7 @@ private enum ThemeFidelityCanonicalProductionRoute {
             let route = try ThemeFidelityRoute.make(
                 surface: surface,
                 model: model,
-                session: session,
-                qualificationViewportWidth: CGFloat(
-                    candidate.requiredOutputDimensions[0]
-                )
+                session: session
             )
             content = route.view
             warmup = route.warmup
@@ -3205,8 +3201,7 @@ private struct ThemeFidelityRoute {
     static func make(
         surface: ThemeFidelitySurface,
         model: ThemeFidelityRenderModel,
-        session: RuneScribeUISession,
-        qualificationViewportWidth: CGFloat? = nil
+        session: RuneScribeUISession
     ) throws -> Self {
         try configureProgression(surface: surface, model: model, session: session)
         let rootID = ThemeFidelityViewport.rootID
@@ -3233,9 +3228,7 @@ private struct ThemeFidelityRoute {
                     presentation: model.presentation
                 ),
                 initialViewportProbeID: "workspace.input.compose-short",
-                initialComposeCaptureLength: .short,
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: qualificationViewportWidth
+                initialComposeCaptureLength: .short
             ))
             let identifiers = [
                 ThemeCaptureIdentifier.screenWorkspace,
@@ -3256,9 +3249,7 @@ private struct ThemeFidelityRoute {
                     presentation: model.presentation
                 ),
                 initialViewportProbeID: "workspace.input.compose-long",
-                initialComposeCaptureLength: .long,
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: qualificationViewportWidth
+                initialComposeCaptureLength: .long
             ))
             let identifiers = [
                 ThemeCaptureIdentifier.screenWorkspace,
@@ -3506,9 +3497,7 @@ private struct ThemeFidelityRoute {
                 initialSettledArtifact: ContentViewSettledArtifactSeed(
                     composition: model.highContrastPlan,
                     presentation: model.presentation
-                ),
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: qualificationViewportWidth
+                )
             ))
             let identifiers = [
                 ThemeCaptureIdentifier.screenWorkspace,
@@ -3523,9 +3512,7 @@ private struct ThemeFidelityRoute {
                 initialSettledArtifact: ContentViewSettledArtifactSeed(
                     composition: model.reduceMotionPlan,
                     presentation: model.presentation
-                ),
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: qualificationViewportWidth
+                )
             ))
             let identifiers = [
                 ThemeCaptureIdentifier.screenWorkspace,
@@ -3542,9 +3529,7 @@ private struct ThemeFidelityRoute {
                     presentation: model.presentation
                 ),
                 initialViewport: .resultActions,
-                initialViewportProbeID: "workspace.input.large-text",
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: qualificationViewportWidth
+                initialViewportProbeID: "workspace.input.large-text"
             )
                 .environment(\.dynamicTypeSize, .accessibility5))
             let identifiers = [

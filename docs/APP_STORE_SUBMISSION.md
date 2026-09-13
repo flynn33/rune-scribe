@@ -3,13 +3,14 @@
 Ready-to-paste material for App Store Connect (iOS App Store and Mac App Store).
 Keep this file in sync when shipping a new marketing version.
 
-**Last prepared for:** 1.0.40 (build 40) — 2026-08-31
+**Last prepared for:** 1.0.41 (build 41) — 2026-09-13
 
-> **Publication boundary:** version 1.0.40 build 40 is a repository-qualified release
-> candidate and is not shipped. Retained prior headless UI results remain regression
-> context rather than current-candidate source-bound evidence. Distribution signing and
-> archive-entitlement inspection require a matching profile and identity; archive,
-> export, notarization, upload, and rollout remain external publication actions.
+> **Publication boundary:** version 1.0.41 build 41 is the current UI/Xcode remediation
+> candidate and is not shipped. Current-source qualification is recorded in
+> [`verification/ui-xcode-remediation/QualificationSummary.md`](verification/ui-xcode-remediation/QualificationSummary.md).
+> Distribution signing and archive-entitlement inspection require a matching profile
+> and identity; archive, export, notarization, upload, and rollout remain external
+> owner-operated publication actions.
 
 ---
 
@@ -17,8 +18,8 @@ Keep this file in sync when shipping a new marketing version.
 
 | Field | Value |
 |--------|--------|
-| **Version** | `1.0.40` |
-| **Build** | `40` |
+| **Version** | `1.0.41` |
+| **Build** | `41` |
 | **Bundle ID** | `com.runescribe.app` |
 | **Display name** | Rune Scribe |
 | **Category** | Lifestyle (`public.app-category.lifestyle`) |
@@ -39,7 +40,7 @@ Sources of truth in the repo:
 
 ```
 • Refreshes all five Codices with production theme resources
-• Improves responsive Codex, Vault, message, and sharing layouts
+• Keeps long themed messages contained with complete, truthful paging
 • Hardens themed sharing, safe receiving, and accessibility treatments
 ```
 
@@ -49,7 +50,10 @@ Sources of truth in the repo:
 This update advances Rune Scribe's five Codices while preserving local encryption and offline use:
 
 • Explore refreshed Norse, Moonleaf, Sunspire, Wildwood, and Gloamthorn presentation resources.
-• Use responsive Codex, Vault, message, and sharing layouts across iPhone, iPad, and Mac.
+• Use responsive, scrollable compose and result layouts across iPhone, iPad, and Mac.
+• Review every page of a long themed message in one canonical Artifact preview; rotation and Mac resizing preserve the selected page.
+• Read complete, selectable received plaintext without false line counts or inactive disclosure controls.
+• Keep editor and Settings content out of reach while App Lock is active.
 • Choose owned Relics, optional Seals and Frames, and Full, Reduced, or Off effects policy in Share Builder.
 • Share ciphers as typed themed .runescribe Artifacts; link, QR, and Export remain explicit fallbacks.
 • Receive themed files safely even when their Codex is locked or unavailable.
@@ -231,7 +235,7 @@ record-creation, or rollout sequence is implied by product release qualification
 
 ### Before upload
 
-- [ ] Version and build match App Store Connect (`1.0.40` / `40` for this packet)
+- [ ] Version and build match App Store Connect (`1.0.41` / `41` for this packet)
 - [x] Core user flows and clean automated tests pass against the final source
 - [x] iOS Simulator and arm64-only unsigned macOS Release builds pass
 - [x] Retained prior iPhone 17 Pro headless UI qualification passes on iOS 26.5
@@ -270,7 +274,7 @@ notarization, upload, and rollout remain external.
 
 ---
 
-## Version 1.0.40 repository-qualified release candidate
+## Version 1.0.41 UI/Xcode remediation candidate
 
 Internal release summary; this is **not a shipment claim**:
 
@@ -280,7 +284,7 @@ Internal release summary; this is **not a shipment claim**:
 4. Themed typed-package sharing/receiving, static preview, Encounter and provenance state
 5. Local-first private progression synchronization and optional Game Center policy
 6. Core, runtime, providers, Progression, Cloud, Game Center, and UI boundaries guarded
-7. Final-source checks pass: 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse
+7. Final-source checks pass: 1,242/1,242 Swift tests, 255/255 Python tests, 60 Norse
    semantic rules, 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping
    negative mutations, and 27/27 evidence-hardening tests
 8. The iOS Release and arm64-only unsigned macOS Release builds pass; local ad-hoc
@@ -291,7 +295,7 @@ Internal release summary; this is **not a shipment claim**:
    passed, 3 phone-specific skipped by design, and 0 failed. These runs are not
    current-candidate source-bound evidence
 10. The superseded v4.3 package audit is retained as noncontrolling verification history
-11. Marketing version **1.0.40**, build **40** is repository-qualified and not shipped;
+11. Marketing version **1.0.41**, build **41** is not shipped;
     distribution signing, archive, export, notarization, upload, and rollout remain external
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)

@@ -36,6 +36,13 @@ Codex falls back to the Norse interactive presentation. A valid sender-rendered 
 preview remains visible. Invalid preview or provenance state is labeled and ignored;
 it cannot block authenticated message decryption or grant content.
 
+Normal compose and result routes use the same responsive, scrollable workspace policy.
+Multi-page themed output uses the canonical Artifact preview and preserves its current
+page across iPhone/iPad rotation and Mac window resizing. iOS paging controls keep a
+44-point minimum interaction region; Mac controls keep a 28-point minimum. App Lock
+hides and disables the underlying editor and Settings content from both interaction and
+the accessibility tree until the PIN is accepted.
+
 Compact `runescribe://` links and cipher QR codes remain the legacy-compatible offline
 invitation rail. Themed cipher files use the typed package rail.
 
@@ -50,9 +57,11 @@ configuration is a separate external-service action when credentials are availab
 does not determine product shippability.
 
 Manual hardware observations are superseded by repository-controlled macOS hosted,
-iPhone Simulator, iPad Simulator, and deterministic evidence. Version 1.0.40 build 40 is
-a repository-qualified release candidate and is not shipped. The iOS Release build and
-arm64-only unsigned macOS Release build pass. Retained prior evidence records the iPhone
+iPhone Simulator, iPad Simulator, and deterministic evidence. Version 1.0.41 build 41 is
+the current UI/Xcode remediation candidate and is not shipped; current source-bound
+results are recorded in the
+[qualification report](verification/ui-xcode-remediation/QualificationSummary.md).
+Version 1.0.40 retained evidence records the iPhone
 17 Pro headless UI run on iOS 26.5 with 7 passed, 1 iPad-only skipped, and 0 failed and
 the iPad Pro 13-inch (M5) run with 5 passed, 3 phone-specific skipped by design, and 0
 failed; those runs are not current-candidate source-bound evidence. Local ad-hoc

@@ -1,5 +1,8 @@
 # Rune Scribe Forsetti Compliance
 
+Current Core, Progression, and UI module version `1.0.41` matches the application
+candidate. This version note does not change the report-only P11 boundary.
+
 > **Superseded architecture assessment:** This document records a historical qualification snapshot. Its architectural conclusions are not current compliance claims. The [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md) governs; measured build, test, parity, and compatibility evidence remains historical evidence.
 
 ## Status and interpretation

@@ -10,10 +10,10 @@ as a string of Unicode runes. Send a friend your cipher — by QR, iMessage, lin
 or file — and they can read it; without it, the runes are just runes.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.0.40%20build%2040-3A7FD5?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.41%20build%2041-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-1238%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-1242%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -306,18 +306,17 @@ the current boundary and dependency rules.
 ## 🗺 Implementation roadmap
 
 The previously authorized version 1.0.39 build 39 roadmap-completion baseline remains a
-historical source-complete snapshot that was not shipped. Version 1.0.40 build 40 is the
-repository-qualified release candidate for the Theme Fidelity continuation. Final-source
-evidence passes 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
-25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations, and
-27/27 evidence-hardening tests. The iOS Release build and arm64-only unsigned macOS
-Release build pass; local ad-hoc built-product content, resource, privacy, signature,
-Hardened Runtime, and entitlement inspection passes 101/101 checks. This verifies the
-repository-controlled product contract but does not assess a distribution identity or
-profile. Named source, mutation, and product guards pass. Retained prior headless iPhone 17 Pro UI
-qualification on iOS 26.5 passes 7 tests, skips 1 iPad-only test, and fails 0. Headless
-iPad Pro 13-inch (M5) qualification on iOS 26.5 passes 5 tests, skips 3 phone-specific
-tests by design, and fails 0. The candidate is **repository-qualified and not shipped**.
+historical source-complete snapshot that was not shipped. Version 1.0.41 build 41 is the
+current UI/Xcode remediation candidate. Its source-bound qualification, device matrix,
+visual evidence, and known limits are recorded in the
+[UI/Xcode remediation qualification](docs/verification/ui-xcode-remediation/QualificationSummary.md).
+Version 1.0.40 build 40 remains a retained historical repository-qualification record:
+that source passed 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
+25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations,
+27/27 evidence-hardening tests, and 101/101 local built-product checks. Those historical
+results are not relabeled as source-bound evidence for 1.0.41. The current candidate is
+**not shipped**; distribution identity, provisioning, archive, export, notarization,
+upload, and rollout remain owner-operated publication work.
 
 | Wave | Scope | Source status |
 |---|---|---|
@@ -451,7 +450,7 @@ Packages/RuneScribeArchitecture/
 │   ├── RuneScribeGameCenterModule/ Frozen catalog, mapping and outbox policy
 │   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        1238 Swift package tests
+└── Tests/                        1242 Swift package tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -469,7 +468,9 @@ truth; regenerate with `xcodegen generate`.
 
 ## 🛠 Building
 
-Requires Xcode 26+ on macOS.
+Open `RuneScrib.xcodeproj` in Xcode 26 or later, then select the
+`RuneScrib-macOS` application scheme for Mac or `RuneScrib-iOS` for an iPhone/iPad
+Simulator. `project.yml` remains the generation source of truth.
 
 ```bash
 # Regenerate the Xcode project from project.yml
@@ -514,7 +515,7 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package passes **1238 package tests** (1101 XCTest cases and
+The local Swift package passes **1242 package tests** (1105 XCTest cases and
 137 Swift Testing cases), supplemented by repository architecture guards, hosted
 macOS/iOS tests, iPhone/iPad UI parity, and an
 isolated macOS parity host. The package suite uses deterministic in-memory adapters and
