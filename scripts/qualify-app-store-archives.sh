@@ -39,8 +39,8 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-for tool in awk codesign ditto file find git mkdir mktemp pkgutil plutil \
-  rg security shasum tee xcodebuild; do
+for tool in awk cmp codesign ditto file find git lipo mkdir mktemp pkgutil plutil \
+  rg ruby security shasum tee xcodebuild; do
   if ! command -v "$tool" >/dev/null 2>&1; then
     echo "ERROR: required tool is unavailable: $tool" >&2
     exit 2
@@ -70,10 +70,8 @@ fi
 project_file="$repository_root/RuneScrib.xcodeproj"
 project_source="$repository_root/project.yml"
 export_options="$repository_root/Config/AppStoreExportOptions.plist"
-product_checker="$repository_root/scripts/check-shipping-products.sh"
 
-for required_path in "$project_file" "$project_source" "$export_options" \
-  "$product_checker"; do
+for required_path in "$project_file" "$project_source" "$export_options"; do
   if [ ! -e "$required_path" ]; then
     echo "ERROR: required repository input is missing: $required_path" >&2
     exit 2
@@ -193,10 +191,6 @@ if [ -z "$ios_app" ] || [ -z "$macos_app" ]; then
   exit 1
 fi
 
-"$product_checker" \
-  --macos-app "$macos_app" \
-  --ios-app "$ios_app" 2>&1 | tee "$output_root/exported-products.log"
-
 codesign --verify --deep --strict --verbose=2 "$ios_app" \
   2>&1 | tee "$output_root/ios-signature-verification.log"
 codesign --verify --deep --strict --verbose=2 "$macos_app" \
@@ -227,20 +221,25 @@ assert_plist_value() {
   local key=$2
   local expected=$3
   local actual
-  actual=$(plutil -extract "$key" raw -o - "$plist" 2>/dev/null || true)
+  local key_path=${key//./\\.}
+  actual=$(plutil -extract "$key_path" raw -o - "$plist" 2>/dev/null || true)
   if [ "$actual" != "$expected" ]; then
     echo "ERROR: $plist has $key=$actual; expected $expected" >&2
     exit 1
   fi
 }
 
-assert_plist_contains() {
+assert_plist_single_value_array() {
   local plist=$1
   local key=$2
   local expected=$3
-  if ! plutil -extract "$key" raw -o - "$plist" 2>/dev/null | \
-      rg -Fxq "$expected"; then
-    echo "ERROR: $plist key $key does not contain $expected" >&2
+  local key_path=${key//./\\.}
+  local count
+  local actual
+  count=$(plutil -extract "$key_path" raw -o - "$plist" 2>/dev/null || true)
+  actual=$(plutil -extract "$key_path.0" raw -o - "$plist" 2>/dev/null || true)
+  if [ "$count" != "1" ] || [ "$actual" != "$expected" ]; then
+    echo "ERROR: $plist key $key is not exactly [$expected]" >&2
     exit 1
   fi
 }
@@ -251,6 +250,33 @@ for info in "$ios_info" "$macos_info"; do
   assert_plist_value "$info" CFBundleVersion "$build_number"
 done
 
+ios_architectures=$(lipo -archs "$ios_app/RuneScrib" 2>/dev/null || true)
+macos_architectures=$(lipo -archs "$macos_app/Contents/MacOS/RuneScrib" 2>/dev/null || true)
+if [ "$ios_architectures" != "arm64" ]; then
+  echo "ERROR: iOS Store export architecture set is $ios_architectures; expected arm64" >&2
+  exit 1
+fi
+if ! printf '%s\n' "$macos_architectures" | \
+    rg -q '^(arm64|x86_64 arm64|arm64 x86_64)$'; then
+  echo "ERROR: macOS Store export architecture set is invalid: $macos_architectures" >&2
+  exit 1
+fi
+
+if find "$ios_app" "$macos_app" -type f \
+    \( -name '*.debug.dylib' -o -name '*Tests*' -o -name '*TestSupport*' \) \
+    -print -quit | rg -q .; then
+  echo "ERROR: a Store export contains a test or debug artifact" >&2
+  exit 1
+fi
+
+ios_privacy="$ios_app/PrivacyInfo.xcprivacy"
+macos_privacy="$macos_app/Contents/Resources/PrivacyInfo.xcprivacy"
+plutil -lint "$ios_privacy" "$macos_privacy" >/dev/null
+if ! cmp -s "$ios_privacy" "$macos_privacy"; then
+  echo "ERROR: exported platform privacy manifests differ" >&2
+  exit 1
+fi
+
 ios_entitlements="$output_root/ios-exported-entitlements.plist"
 macos_entitlements="$output_root/macos-exported-entitlements.plist"
 assert_plist_value "$ios_entitlements" application-identifier \
@@ -260,9 +286,9 @@ assert_plist_value "$ios_entitlements" com.apple.developer.team-identifier \
 assert_plist_value "$ios_entitlements" com.apple.developer.game-center true
 assert_plist_value "$ios_entitlements" com.apple.developer.icloud-container-environment \
   Production
-assert_plist_contains "$ios_entitlements" \
+assert_plist_single_value_array "$ios_entitlements" \
   com.apple.developer.icloud-container-identifiers iCloud.com.runescribe.app
-assert_plist_contains "$ios_entitlements" keychain-access-groups \
+assert_plist_single_value_array "$ios_entitlements" keychain-access-groups \
   "$development_team.$bundle_identifier"
 assert_plist_value "$ios_entitlements" get-task-allow false
 
@@ -273,13 +299,55 @@ assert_plist_value "$macos_entitlements" com.apple.developer.team-identifier \
 assert_plist_value "$macos_entitlements" com.apple.developer.game-center true
 assert_plist_value "$macos_entitlements" com.apple.developer.icloud-container-environment \
   Production
-assert_plist_contains "$macos_entitlements" \
+assert_plist_single_value_array "$macos_entitlements" \
   com.apple.developer.icloud-container-identifiers iCloud.com.runescribe.app
 assert_plist_value "$macos_entitlements" com.apple.security.app-sandbox true
 assert_plist_value "$macos_entitlements" \
   com.apple.security.files.user-selected.read-write true
 assert_plist_value "$macos_entitlements" \
   com.apple.security.personal-information.addressbook true
+
+plutil -convert json -o "$output_root/ios-exported-entitlements.json" \
+  "$ios_entitlements"
+plutil -convert json -o "$output_root/macos-exported-entitlements.json" \
+  "$macos_entitlements"
+ruby -rjson - \
+  "$output_root/ios-exported-entitlements.json" \
+  "$output_root/macos-exported-entitlements.json" <<'RUBY'
+ios = JSON.parse(File.read(ARGV.fetch(0)))
+macos = JSON.parse(File.read(ARGV.fetch(1)))
+ios_allowed = %w[
+  application-identifier
+  beta-reports-active
+  com.apple.developer.game-center
+  com.apple.developer.icloud-container-environment
+  com.apple.developer.icloud-container-identifiers
+  com.apple.developer.icloud-services
+  com.apple.developer.team-identifier
+  com.apple.developer.ubiquity-kvstore-identifier
+  get-task-allow
+  keychain-access-groups
+]
+macos_allowed = %w[
+  com.apple.application-identifier
+  com.apple.developer.game-center
+  com.apple.developer.icloud-container-environment
+  com.apple.developer.icloud-container-identifiers
+  com.apple.developer.icloud-services
+  com.apple.developer.team-identifier
+  com.apple.developer.ubiquity-kvstore-identifier
+  com.apple.security.app-sandbox
+  com.apple.security.files.user-selected.read-write
+  com.apple.security.personal-information.addressbook
+]
+unexpected_ios = ios.keys - ios_allowed
+unexpected_macos = macos.keys - macos_allowed
+abort "unexpected iOS Store entitlements: #{unexpected_ios.sort.join(', ')}" \
+  unless unexpected_ios.empty?
+abort "unexpected macOS Store entitlements: #{unexpected_macos.sort.join(', ')}" \
+  unless unexpected_macos.empty?
+abort "iOS Store export lacks beta reporting" unless ios["beta-reports-active"] == true
+RUBY
 
 assert_plist_value "$output_root/ios-store-profile.plist" Name \
   "iOS Team Store Provisioning Profile: $bundle_identifier"
