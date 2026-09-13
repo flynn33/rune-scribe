@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1.0",
+  "candidate": {"marketingVersion": "1.0.41", "build": "41"},
+  "status": "READY_FOR_OWNER_SHIPMENT",
+  "scope": "source-ui-build-handoff",
+  "sourceCommitC": "735b0e70f0dda5d22fe5e57ce48d7998ba308629",
+  "sourceFingerprintD": "f2a028d520420996a3037099542eecea445afdc422782377aff29a6b0b5b049a",
+  "rawEvidenceRoot": "/Users/jimdaley/Projects/RuneScribe/ui-xcode-run.CwlJbz",
+  "toolchain": {
+    "xcode": "26.6 (17F113)",
+    "swift": "6.3.3",
+    "host": "macOS 26.6.2 arm64",
+    "iphoneSimulator": {"name": "iPhone 17 Pro", "udid": "C22CF07C-A445-4A19-A1B8-63FA719EA815"},
+    "ipadSimulator": {"name": "iPad (A16)", "udid": "10877E30-CCED-43A6-9E39-9AEE1D740DDD"}
+  },
+  "validations": [
+    {"id": "python-regression", "status": "PASS", "counts": {"passed": 255, "failed": 0, "skipped": 0}, "route": "repository", "evidence": "final/regression/python"},
+    {"id": "swift-package-regression", "status": "PASS", "counts": {"xctestPassed": 1105, "swiftTestingPassed": 137, "totalPassed": 1242, "failed": 0, "skipped": 0}, "route": "isolated-package", "evidence": "final/regression/swift-package-isolated"},
+    {"id": "active-guards", "status": "PASS", "counts": {"norseMutationsPassed": 25, "remediationMutationsPassed": 18, "shippingMutationsPassed": 28}, "route": "source-and-artifact-inspection", "evidence": "final/guards"},
+    {"id": "macos-hosted-blocking", "status": "PASS", "counts": {"passed": 26, "failed": 0, "skipped": 0}, "route": "hosted-xcode-tests", "evidence": "final/xcode/macos-hosted-blocking"},
+    {"id": "macos-real-app-smoke", "status": "PASS", "route": "real-shipping-app-debug-binary", "assertions": ["long-message encoding", "page 1 of 4", "next page", "resize persistence", "keyboard navigation", "all five settings codices", "version 1.0.41 (41)"], "evidence": "native visual and accessibility inspection; screenshot: screenshots/norse-compose-long-macos.png"},
+    {"id": "iphone-fresh-install-primary-flow", "status": "PASS", "counts": {"passed": 1, "failed": 0, "skipped": 0}, "route": "normal-production-app-route", "durationSeconds": 589.680, "evidence": "ios-normal-route/iphone-fresh-final-19"},
+    {"id": "iphone-entitled-followup", "status": "PASS", "counts": {"passed": 5, "failed": 0, "skipped": 1}, "skipReason": "one iPad-only scenario", "route": "normal-production-app-route", "evidence": "final/xcode/iphone-production-entitled"},
+    {"id": "ipad-hosted-and-normal-route", "status": "PASS_WITH_DIAGNOSTIC_NOTE", "counts": {"hostedPassed": 29, "uiPassed": 3, "uiSkipped": 1, "productAssertionFailures": 0}, "skipReason": "one phone-only scenario", "diagnostic": "The complete primary flow reached its final rotate-back check before Simulator window geometry settled; all preceding product assertions passed. Standalone inbound persistence passed.", "route": "hosted-and-normal-production-app-route", "evidence": ["final/xcode/ipad-production-blocking", "final/xcode/ipad-inbound-isolated"]},
+    {"id": "theme-matrices", "status": "PASS", "counts": {"iphoneAttachments": 211, "ipadAttachments": 211, "macosAttachments": 422}, "route": "canonical-production-components", "evidence": ["final/xcode/iphone-theme-matrix", "final/xcode/ipad-theme-matrix", "final/xcode/macos-parity"]},
+    {"id": "release-product-qualification", "status": "PASS", "counts": {"passed": 101, "failed": 0}, "route": "fresh-clean-committed-release-products", "products": ["macOS arm64", "iOS Simulator arm64", "iOS Simulator x86_64"], "evidence": ["final/release-qualification", "final/release-products"]},
+    {"id": "iphoneos-device-sdk-release", "status": "PASS", "route": "unsigned-device-sdk-compile", "evidence": "final/xcode/ios-device-release"},
+    {"id": "forsetti-p11", "status": "REPORT_ONLY", "finding": "known FG-006 legacy authority mapping", "evidence": "final/diagnostic-forsetti"}
+  ],
+  "visualEvidence": {
+    "index": "visual-reference-index.json",
+    "screenshots": "screenshots",
+    "rawMacAttachments": "final/xcode/macos-parity-attachments/manifest.json",
+    "rawIPhoneAttachments": "final/xcode/iphone-matrix-attachments/manifest.json",
+    "rawIPadAttachments": "final/xcode/ipad-matrix-attachments/manifest.json"
+  },
+  "distribution": {
+    "status": "NOT_PERFORMED",
+    "ownerOperated": true,
+    "excluded": ["distribution signing", "provisioning", "archive", "export", "notarization", "upload", "submission", "release tag", "shipment"]
+  }
+}
