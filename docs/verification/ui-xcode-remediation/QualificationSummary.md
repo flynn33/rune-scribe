@@ -8,7 +8,7 @@
 
 **Input digest D:** `f2a028d520420996a3037099542eecea445afdc422782377aff29a6b0b5b049a`
 
-**Store qualification source S:** `119fca69b90ac75774468a104abfc00d0186966d`
+**Store qualification source S:** `a1ef420f7a4ef3140aa862543cf63b74e7566c7e`
 
 This is the source-bound qualification entry point for the September 2026 UI and
 Xcode remediation. The candidate uses one responsive production layout on macOS,
@@ -34,7 +34,8 @@ target. Simulator runs used iPhone 17 Pro
 - The clean committed release-product qualification passed all 101 inspections.
   It built fresh macOS arm64 and iOS Simulator arm64/x86_64 Release products and
   inspected versions, architectures, embedded resources, privacy manifests,
-  entitlements, linkage, and the absence of test/reference payloads.
+  entitlements, linkage, and the absence of test/reference payloads. The final rerun
+  was source-bound to Store qualification source S.
 - Fresh iOS and macOS archives exported successfully for App Store Connect. The iOS
   `.ipa` and macOS `.pkg` use Apple distribution signing, matching Store provisioning
   profiles, production CloudKit entitlements, Game Center, version 1.0.41 build 41, and
@@ -105,6 +106,13 @@ Raw commands, logs, result bundles, extracted attachments and candidate manifest
 preserved under `/Users/jimdaley/Projects/RuneScribe/ui-xcode-run.CwlJbz`. The compact
 machine-readable record is `EvidenceIndex.json`. Signed archive/export evidence is
 preserved under
-`/Users/jimdaley/Projects/RuneScribe/AppStoreQualification-1.0.41-20260913`.
+`/Users/jimdaley/Projects/RuneScribe/AppStoreQualification-1.0.41-20260913-r2`.
+The exported package SHA-256 values are
+`7a727e324829f03235be4008c503c4805ddd88d8ad6ba47d8487ed40d340eb43`
+for `RuneScrib.ipa` and
+`c1fd5803b8f55af0dff236701aa8356e48df369c512cb82124f476b09bc1fa81`
+for `RuneScrib.pkg`.
 The repaired iPhone isolation and iPad primary-flow results are under
 `/Users/jimdaley/Projects/RuneScribe/UIIsolationQualification-1.0.41-20260913`.
+The final local Release-product evidence is under
+`/var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/RuneScribe-release-products.ge62Xu`.
